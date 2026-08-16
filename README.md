@@ -49,6 +49,20 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\setup_engine.ps1 -Sour
 The build validates the procedural assets, runs the strict host test through
 WSL/GCC, cross-compiles for SH-2, and produces `game.cue` and `game.iso`.
 
+## Run the playable level
+
+The validated Windows emulator path is Yaba Sanshiro 2 v1.20.37. Download the
+hash-pinned official package and launch the disc image with:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\setup_emulator.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run.ps1
+```
+
+Complete Yaba Sanshiro's first-run setup if prompted, then rerun `run.ps1`.
+The launcher selects the 32 Mbit DRAM cartridge, which is the Saturn's 4 MB
+expansion RAM. Do not select 4 Mbit Backup RAM; that is a save-memory device.
+
 ## Controls
 
 - D-pad: move across and between lanes
@@ -70,12 +84,15 @@ Verified on August 16, 2026:
 - gameplay model passes 12,000 deterministic frames under strict C90 warnings
 - Jo Engine patch applies cleanly to the pinned commit
 - release SH-2 compilation, link, ISO construction, and cue construction pass
+- Yaba Sanshiro 2 v1.20.37 boots the release image with its HLE BIOS path
+- the 32 Mbit DRAM cartridge is detected as 4 MB
+- the playable corridor renders the 192x192 player, four pursuing enemies,
+  background, HUD, transparency, overlap, and live cache counters
 
-The bundled Kronos and Yabause executables both reported that they could not
-initialize on this Windows session, so visible VDP1 color-bank behavior and
-real-time frame pacing remain unverified. The next meaningful gate is a boot in
-a known-good emulator configuration with a 4 MB cartridge, followed by real
-Saturn capture.
+The booted build reported 77% Jo Engine VDP1 usage, 36,864 DMA bytes, and two
+cache swaps in the captured encounter. See [the emulator-native boot capture](docs/boot-proof.bmp).
+Attack/special cache replacement, stress mode, sustained frame pacing, and real
+Saturn behavior remain to be measured.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
 [docs/TEST_PLAN.md](docs/TEST_PLAN.md) for the engineering rationale and next

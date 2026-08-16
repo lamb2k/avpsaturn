@@ -26,8 +26,13 @@ emulator. Confirm:
 - A and C replace the two action slots without a visible partial frame
 - X stress mode increases both DMA byte and swap counters
 
-Status: blocked in the current Windows session because bundled Kronos 2.1.5 and
-Yabause 0.9.14 both reported that they could not initialize.
+Status: baseline render passed in Yaba Sanshiro 2 v1.20.37 on August 16, 2026.
+The release image booted with the 32 Mbit DRAM cartridge and rendered the
+playable corridor, 192x192 player, four pursuing enemies, transparency,
+overlap, background, HUD, and live DMA/cache counters. The captured frame
+reported 77% Jo Engine VDP1 usage, 36,864 DMA bytes, and two cache swaps.
+Attack/special replacement, mirrored-pivot inspection, and X stress-mode
+counters remain open before this gate is complete. See `boot-proof.bmp`.
 
 ## Acceptance gate C: performance capture
 
