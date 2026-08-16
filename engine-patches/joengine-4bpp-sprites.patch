@@ -1,0 +1,157 @@
+diff --git a/jo_engine/jo/sprites.h b/jo_engine/jo/sprites.h
+index 2144af9..27c34c7 100644
+--- a/jo_engine/jo/sprites.h
++++ b/jo_engine/jo/sprites.h
+@@ -101,6 +101,13 @@ int		jo_sprite_add(const jo_img * const img);
+  */
+ int     jo_sprite_add_8bits_image(const jo_img_8bits * const img);
+ 
++/** @brief Add a packed 4 bits sprite
++ *  @param img Pointer to a packed 4 bits image struct. Width must be a multiple of 8.
++ *  @return Sprite Id or -1 if failed
++ *  @warning Palette index 0 is transparent, leaving 15 visible colors.
++ */
++int     jo_sprite_add_4bits_image(const jo_img_4bits * const img);
++
+ /** @brief Replace a sprite
+  *  @param img Pointer to a image struct
+  *  @param sprite_id Sprite ID to replace
+@@ -108,6 +115,9 @@ int     jo_sprite_add_8bits_image(const jo_img_8bits * const img);
+  */
+ int     jo_sprite_replace(const jo_img * const img, const int sprite_id);
+ 
++/** @brief Replace a 4 bits sprite in an existing same-sized slot */
++int     jo_sprite_replace_4bits_image(const jo_img_4bits * const img, const int sprite_id);
++
+ /** @brief Free all sprites from the given sprite_id
+  *  @param sprite_id Sprite ID to replace
+  *  @warning Don't use freed sprites after this call or the game may crash unexpectedly
+@@ -362,9 +372,15 @@ static  __jo_force_inline void	jo_sprite_restore_sprite_scale(void)
+ /** @brief Change palette for every 8 bits sprite displayed after this call
+  *  @param palette_id Palette id from jo_create_palette()
+  */
+ static  __jo_force_inline void	jo_sprite_set_palette(int palette_id)
+ {
+     __jo_sprite_attributes.color_table_index = JO_MULT_BY_256(palette_id);
+ }
++
++/** @brief Select one 16-color subpalette for subsequent 4bpp sprites */
++static  __jo_force_inline void  jo_sprite_set_palette_4bits(const int palette_id, const int subpalette_id)
++{
++    __jo_sprite_attributes.color_table_index = JO_MULT_BY_256(palette_id) + JO_MULT_BY_16(subpalette_id);
++}
+ 
+ /** @brief Display a sprite in 3 dimensional space
+diff --git a/jo_engine/jo/types.h b/jo_engine/jo/types.h
+index 16c4323..66d5d8a 100644
+--- a/jo_engine/jo/types.h
++++ b/jo_engine/jo/types.h
+@@ -238,6 +238,14 @@ typedef struct
+     unsigned char   *data;
+ }					jo_img_8bits;
+ 
++/** @brief Packed 4 bits image struct (two pixels per byte) */
++typedef struct
++{
++    unsigned short  width;
++    unsigned short  height;
++    unsigned char   *data;
++}                   jo_img_4bits;
++
+ /** @brief Raw image struct */
+ typedef struct
+ {
+diff --git a/jo_engine/sprites.c b/jo_engine/sprites.c
+index 87aa2b0..fc13f0b 100644
+--- a/jo_engine/sprites.c
++++ b/jo_engine/sprites.c
+@@ -50,8 +50,10 @@
+ /*
+ ** MACROS
+ */
++# define COLMODE_16         (0)
+ # define COLMODE_256        (4)
+ # define COLMODE_RGB        (5)
++# define JO_COL_16_PACKED   (3)
+ 
+ /*
+ ** GLOBALS
+@@ -246,6 +248,45 @@ int			            jo_sprite_add_8bits_image(const jo_img_8bits * const img)
+     return __internal_jo_sprite_add(img->data, img->width, img->height, COL_256);
+ }
+ 
++int                         jo_sprite_add_4bits_image(const jo_img_4bits * const img)
++{
++#ifdef JO_DEBUG
++    if (img == JO_NULL)
++    {
++        jo_core_error("img is null");
++        return (-1);
++    }
++    if ((img->width & 7) != 0)
++    {
++        jo_core_error("4bpp width must be a multiple of 8");
++        return (-1);
++    }
++#endif
++    return __internal_jo_sprite_add(img->data, img->width, img->height, JO_COL_16_PACKED);
++}
++
++int                         jo_sprite_replace_4bits_image(const jo_img_4bits * const img, const int sprite_id)
++{
++#ifdef JO_DEBUG
++    if (img == JO_NULL)
++    {
++        jo_core_error("img is null");
++        return (sprite_id);
++    }
++    if (sprite_id < 0 || sprite_id > __jo_sprite_id)
++    {
++        jo_core_error("Invalid sprite_id");
++        return (sprite_id);
++    }
++    if (__jo_sprite_pic[sprite_id].color_mode != JO_COL_16_PACKED)
++    {
++        jo_core_error("Sprite slot is not 4bpp");
++        return (sprite_id);
++    }
++#endif
++    return jo_sprite_replace((const jo_img *)img, sprite_id);
++}
++
+ void                        jo_sprite_free_from(const int sprite_id)
+ {
+     jo_texture_definition   *texture;
+@@ -257,7 +298,7 @@ void                        jo_sprite_free_from(const int sprite_id)
+     if (sprite_id > __jo_sprite_id)
+         return ;
+ #ifdef JO_COMPILE_WITH_3D_SUPPORT
+-    for (i = sprite_id; i < __jo_sprite_id; ++i)
++    for (i = sprite_id; i <= __jo_sprite_id; ++i)
+     {
+         if (__jo_sprite_quad[i] != JO_NULL)
+             jo_3d_free_sprite_quad(i);
+@@ -306,6 +347,11 @@ static  __jo_force_inline void __jo_set_sprite_attributes(SPR_ATTR *attr, const
+         attr->atrb |= ((COLMODE_RGB & 7) << 3);
+         JO_ZERO(attr->colno);
+     }
++    else if (__jo_sprite_pic[sprite_id].color_mode == JO_COL_16_PACKED)
++    {
++        attr->atrb |= ((COLMODE_16 & 7) << 3);
++        attr->colno = __jo_sprite_attributes.color_table_index;
++    }
+     else
+     {
+         attr->atrb |= ((COLMODE_256 & 7) << 3);
+@@ -325,6 +371,11 @@ static  __jo_force_inline void __jo_set_sprite_attributes(jo_vdp1_command * cons
+         cmd->pmod |= ((COLMODE_RGB & 7) << 3);
+         JO_ZERO(cmd->colr);
+     }
++    else if (__jo_sprite_pic[sprite_id].color_mode == JO_COL_16_PACKED)
++    {
++        cmd->pmod |= ((COLMODE_16 & 7) << 3);
++        cmd->colr = __jo_sprite_attributes.color_table_index;
++    }
+     else
+     {
+         cmd->pmod |= ((COLMODE_256 & 7) << 3);

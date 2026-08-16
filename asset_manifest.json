@@ -1,0 +1,150 @@
+{
+  "assets": [
+    {
+      "bytes": 131884,
+      "format": "indexed-8bpp-tga",
+      "height": 256,
+      "path": "cd/BG/CORRIDOR.TGA",
+      "sha256": "b9a20443c02074c7cf896f87242845f500be24750aaf89819b9449eee9abacd9",
+      "width": 512
+    },
+    {
+      "bytes": 18432,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 192,
+      "path": "cd/SPR4/E_ATK1.BIN",
+      "sha256": "d44da3a5486efa55a98b63810add745852f9f7a20988344c976074cfc968b4f9",
+      "width": 192
+    },
+    {
+      "bytes": 18432,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 192,
+      "path": "cd/SPR4/E_ATK2.BIN",
+      "sha256": "0f74c1c9e6b1dc892cf585a895a2c406a85e98311baafbf631d05dc1bfa5da2d",
+      "width": 192
+    },
+    {
+      "bytes": 18432,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 192,
+      "path": "cd/SPR4/E_HIT.BIN",
+      "sha256": "8344bdb5b59b1763778eaae35e636572357a2209736b098bd4afac3d447b137d",
+      "width": 192
+    },
+    {
+      "bytes": 18432,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 192,
+      "path": "cd/SPR4/E_IDLE.BIN",
+      "sha256": "315f9ea77c929a11cf0f11a785c5bc412916c478b8ed5068e33c5669d8bbc619",
+      "width": 192
+    },
+    {
+      "bytes": 18432,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 192,
+      "path": "cd/SPR4/E_KO.BIN",
+      "sha256": "afc002083f74c27b8d816a9405759e2afa2b8c7ead0c8a0b8c672efd92987ffe",
+      "width": 192
+    },
+    {
+      "bytes": 18432,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 192,
+      "path": "cd/SPR4/E_WLK1.BIN",
+      "sha256": "f894b65b5f87dc16d3f0be70fb36be0b8e2f77f488b8b72736a0b80d0032793f",
+      "width": 192
+    },
+    {
+      "bytes": 18432,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 192,
+      "path": "cd/SPR4/E_WLK2.BIN",
+      "sha256": "6de3640a2e3932b4b9e5ccc248a544c7a86c5684f4343051360a5de632e5f406",
+      "width": 192
+    },
+    {
+      "bytes": 2048,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 64,
+      "path": "cd/SPR4/HITFX.BIN",
+      "sha256": "e0fb3ed503bdcdb7b9e51b94c42713459f1464def9dcb187c22d33ff3b912255",
+      "width": 64
+    },
+    {
+      "bytes": 18432,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 192,
+      "path": "cd/SPR4/P_ATK1.BIN",
+      "sha256": "e27a28b550d126647eb32d1852cb76d780348fb986c48a9bbd6908b874d04037",
+      "width": 192
+    },
+    {
+      "bytes": 18432,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 192,
+      "path": "cd/SPR4/P_ATK2.BIN",
+      "sha256": "5f9dcd98b0fc287c0378d79d4ac518cdf7728d0c977fd18507bb5380f7d7e433",
+      "width": 192
+    },
+    {
+      "bytes": 18432,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 192,
+      "path": "cd/SPR4/P_HIT.BIN",
+      "sha256": "f6c3331c3f3b09f31b5e335450d244cb1203672eecdfd562b175aa26ee484fb4",
+      "width": 192
+    },
+    {
+      "bytes": 18432,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 192,
+      "path": "cd/SPR4/P_IDLE.BIN",
+      "sha256": "426444d9053037e57533696afb9eb6d594956b15e653eb02fcd809ffb3a1f625",
+      "width": 192
+    },
+    {
+      "bytes": 18432,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 192,
+      "path": "cd/SPR4/P_SPC1.BIN",
+      "sha256": "152d65f20e4a0ee29422f26be826bec4f5932cd2151e281cb2d393842bd732f2",
+      "width": 192
+    },
+    {
+      "bytes": 18432,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 192,
+      "path": "cd/SPR4/P_SPC2.BIN",
+      "sha256": "e5642fcb20162df7eea15b75d0e85e29953be0ca20f6f3ad9032c5fcf435baea",
+      "width": 192
+    },
+    {
+      "bytes": 18432,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 192,
+      "path": "cd/SPR4/P_WLK1.BIN",
+      "sha256": "04ea39d78669ab84882d66613a5fffe12fdf8125ddc912749c9698b11451b01b",
+      "width": 192
+    },
+    {
+      "bytes": 18432,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 192,
+      "path": "cd/SPR4/P_WLK2.BIN",
+      "sha256": "621aee112bf01ff2c20ab121ee45604323ad34d2ec15c8bfd076f6984c241fa2",
+      "width": 192
+    },
+    {
+      "bytes": 512,
+      "format": "packed-4bpp-high-nibble-first",
+      "height": 16,
+      "path": "cd/SPR4/SHADOW.BIN",
+      "sha256": "f3328880b88adfa11ecd7f2d29d15acdcd79a82035933b6bd8dfedc1f2b2ffbb",
+      "width": 64
+    }
+  ],
+  "generator": "tools/generate_assets.py",
+  "license": "Original procedural placeholders generated for this repository"
+}

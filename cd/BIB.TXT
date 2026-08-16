@@ -1,0 +1,1 @@
+Original procedural placeholder art. Jo Engine is an external pinned dependency.
