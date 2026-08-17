@@ -1,6 +1,6 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-17 14:35 EDT
+Updated: 2026-08-17 15:05 EDT
 
 **Direction as of 2026-08-17: functional parity by ROM translation, with an
 instrumented MAME build retained only as a contingency. Stock MAME 0.289 debug
@@ -15,9 +15,9 @@ Read this file before taking any action. The user wants a private, capture-faith
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `prototype/private-capability-test`
-- Implementation checkpoint: `1f15ea5` (`Extract screen-space hitbox
-  brackets`), following `dbc070b` (`Update handoff with watchpoint checkpoint`),
-  `4182edb` (`Trace
+- Implementation checkpoint: `d8a57e1` (`Decode ROM animation script
+  structure`), following `1f15ea5` (`Extract screen-space hitbox brackets`),
+  `dbc070b` (`Update handoff with watchpoint checkpoint`), `4182edb` (`Trace
   actor writers with stock MAME watchpoints`), and `b24a4e0` (Round 1 debug
   overlay evidence) and the
   independently committed plan correction `9417f53`.
@@ -510,6 +510,43 @@ Findings from the `avspu_stage1_boss_12660` state, 240 frames:
 - Sprite-assembly pointers observed: `0x13DEA0`, `0x13DE46`, `0x13DFEC`,
   `0x13E00A`, `0x13E04C`, `0x13E44C`. These target the next table to decode.
 
+### Animation script structure checkpoint
+
+The private decrypted ROM window now decodes 29 distinct boss animation
+programs with `tools/decode_avsp_animation_scripts.py`. The tracked report is
+`data/avsp_animation_scripts.json`; it is structural evidence only and does
+not pass the pixel-exact pose gate.
+
+The updater disassembly from the MAME opcode space establishes the format:
+normal pose records are 16 bytes, with duration at `+0`, flags at `+2`, and an
+assembly pointer at `+4`. After `+0x10`, a negative flags word causes the
+updater to follow the long pointer at the next address, making the apparent
+20-byte transitions four-byte jump records plus a normal record. Bytes `+8`
+and `+9` are consumed as interaction-table selectors by `0x1cf88` and
+`0x1cf94`; they are not yet proven X/Y offsets. `0x88e16` copies all 16 bytes
+into actor scratch, so the remaining tail semantics still need consumer-level
+mapping.
+
+Reproduce the structural decode after regenerating the ignored private MAME
+window:
+
+```powershell
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\decode_avsp_animation_scripts.py
+```
+
+The associated opcode-space dumper is `tools/mame_dump_code_spaces.lua`; raw
+program/opcode dumps remain ignored under `.deps\mame\actorprobe`.
+
+Tracked hashes for this checkpoint:
+
+- `tools/decode_avsp_animation_scripts.py`:
+  `bcc1bf21623c12ff288b46eb7c36f70e9c73f4059fb53990dbeee161154fb075`.
+- `data/avsp_animation_scripts.json`:
+  `8219afee1df47ebca0d88a34720ee79a176d6e68d3d1ba26b9895e022fca3f1b`.
+- `tools/mame_dump_code_spaces.lua`:
+  `1f22a221c87c5ab2bc07eeab0608cc2bb10d980f5a574cd5f73f0a4bf246ccd6`.
+
 ### Next steps for this direction
 
 1. Decode the sprite-assembly table at the `+4` pointers: tile codes, palette
@@ -748,12 +785,15 @@ Tracked watchpoint files and SHA-256:
 - `data/actor_writer_watchpoints.json`:
   `1377dd04392b7aea0283386cb81f00beeb78d9d24ce5c7a9e79555194bb3f0c0`
 
-Next work is to correlate the dominant animation-writer PCs with the ROM
-script records, then pair the extracted brackets with actor/object origins to
-obtain actor-local geometry. The first stock-MAME debugger disassembly helper
-did not produce machine-readable output through the windowed debugger and was
-discarded; it is not evidence. Do not translate AI or replace native runtime
-tables until the pixel-exact pose gate remains passing.
+The dominant animation-writer PCs are now correlated with the ROM updater:
+`0x16536`, `0x165c4` and `0x16644` advance 16-byte records and follow negative-
+flag jump pointers. The first stock-MAME windowed debugger helper was
+discarded, but the opcode-space dump is now machine-readable through
+`tools/mame_dump_code_spaces.lua` and is recorded in the animation-script
+checkpoint above. Next work is to decode the assembly records and pair the
+extracted brackets with actor/object origins to obtain actor-local geometry.
+Do not translate AI or replace native runtime tables until the pixel-exact pose
+gate remains passing.
 
 ## Resume in this order
 
@@ -769,11 +809,11 @@ contingency only.
    player, street aliens, Stalker and Chrysalis. Validate those real boxes
    against, then replace, the inferred boss schedules 21/55/97 and the inferred
    Stalker contact.
-3. Use stock MAME debugger watchpoints on the required actor-state fields to
-   locate animation-script and AI writers. Do not build custom MAME unless
-   stock watchpoints demonstrably fail.
-4. Finish animation-script and sprite-assembly decoding and require a
-   ROM-decoded pose to match a verified capture pixel for pixel.
+3. Use the completed stock-MAME writer evidence to disassemble the remaining
+   state/action PCs and identify AI/RNG consumers. Do not build custom MAME
+   unless stock watchpoints demonstrably fail.
+4. Finish sprite-assembly decoding and require a ROM-decoded pose to match a
+   verified capture pixel for pixel.
 5. Compute the exact Round 1 referenced tile set, translate required 68k AI and
    stage tables to native C/data, and compare functional events.
 6. Only after the pixel gate passes, replace `player_pose_for_frame()` and the
