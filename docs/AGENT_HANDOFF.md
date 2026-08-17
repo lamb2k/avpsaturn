@@ -451,6 +451,79 @@ smoothly, the countdown stays legible to the end, and no VDP2 tearing or
 partial-row artefact appears. Until then, describe it as built and host-tested,
 not as visually confirmed.
 
+## Direction change 2026-08-17: ROM logic translation
+
+The user set a new target: **functional parity, not frame-exact parity**, reached
+by translating game logic out of the ROM rather than inferring it from screen
+captures. Treat the capture-a-clip-and-bind-it method as superseded for new
+work. Existing captured evidence stays valid as a cross-check.
+
+Rationale, and it is now demonstrated rather than assumed:
+
+- The project already reconstructs the full 16 MiB CPS2 graphics region
+  byte-for-byte, so every tile of every animation is already available. Screen
+  capture was only ever re-deriving the *assembly instructions*, which exist in
+  ROM as compact tables.
+- Frame extraction does not scale: each new actor or action needs its own
+  deterministic capture, analyzer, archive, and slice of a 4 MB budget that
+  already closes only through phase overlays. Unobserved actions are simply
+  missing. Table extraction covers every actor and action at once and shrinks
+  with coverage because poses share tiles.
+
+### Animation script tables located
+
+`tools/mame_probe_actor_struct.lua` dumps each tracked actor's struct every
+frame; `tools/mame_dump_rom_window.lua` dumps a 68000 program-ROM window.
+Findings from the `avspu_stage1_boss_12660` state, 240 frames:
+
+- The actor array has a **0xC0 (192-byte) stride**, confirming the spacing of
+  the known actors at `FFA240`, `FFA300`, `FFA3C0`.
+- Of 96 struct words, 34 change during animation.
+- Words `w1c:w1e` form a 32-bit **animation-script pointer into program ROM**,
+  taking 29 distinct values in `0x13CC18..0x13CEC4`. The boss has 29 unique
+  captured poses, which is a strong independent corroboration.
+- Word `w88` takes 224 distinct values over 240 frames and is very likely a
+  per-frame timer or counter.
+- Script records are 16 or 20 bytes. Decoded layout, big-endian:
+  `+0` word duration in frames, `+2` word flags (`0x8000` observed, almost
+  certainly horizontal flip), `+4` long pointer to a sprite assembly, then X and
+  Y offset words.
+- The pointer advances by the record size and then **jumps backwards to
+  `0x13CD0C`**, which is visited twice: the script has an explicit loop, so the
+  format includes control flow, not just a frame list.
+- Sprite-assembly pointers observed: `0x13DEA0`, `0x13DE46`, `0x13DFEC`,
+  `0x13E00A`, `0x13E04C`, `0x13E44C`. These target the next table to decode.
+
+### Next steps for this direction
+
+1. Decode the sprite-assembly table at the `+4` pointers: tile codes, palette
+   bank, per-tile offsets, and size. Cross-check a decoded assembly against an
+   already-captured boss pose; they must match pixel for pixel.
+2. Determine the script opcode/terminator encoding. The 16 vs 20 byte record
+   sizes and the backward jump imply a discriminator field; find it rather than
+   assuming record size from observed deltas.
+3. Map the rest of the 192-byte actor struct: position, health, state, timers,
+   facing. Use the existing captured events with known frames as labels.
+4. Only then attack AI. Find the routines that write the script-pointer field;
+   those are the state machines worth translating.
+5. Keep the deterministic captures as regression oracles: a translated table
+   must reproduce the already-verified clips exactly.
+
+Note on RNG: if AI decisions consume a PRNG, functional parity requires the
+same generator and call order for behaviour to match, even though exact frame
+equality is no longer the target. Identify RNG use before translating AI.
+
+### FPGA cores
+
+The user raised leveraging FPGA cores. They help the rendering half, not the
+logic half, and are worth using for exactly that: an open Verilog CPS core is a
+precise specification of sprite/tilemap priority, masking, and palette
+behaviour, which is what the Saturn VDP1/VDP2 path must reproduce. Game logic
+still lives in the ROM, so cores do not shortcut AI or animation scripts. Their
+second use is as an independent oracle to cross-check MAME where MAME's
+behaviour looks driver-specific, as already happened with the RGB32 frontend
+screen.
+
 ## Resume in this order
 
 1. Verify branch, HEAD, clean status, the release manifest profile, and that no
