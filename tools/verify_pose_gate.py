@@ -49,7 +49,24 @@ SCRIPTS = ROOT / "data" / "avsp_animation_scripts.json"
 BOSS_ARCHIVE_FILES = ("BACT.RLE", "BHIT.RLE", "BKO.RLE")
 CEL_WIDTH = 288
 CEL_HEIGHT = 192
-TRANSPARENT_PEN = 0
+
+# Two different pen spaces meet in this file and confusing them makes the gate
+# unpassable, so both are named explicitly.
+#
+# CPS2: pen 15 is transparent and pen 0 is a real colour. `decode_tile` returns
+# this space, and extract_avspu_stage1 skips pen 15 when rendering.
+# Saturn: the archives shift CPS2 pens 0..14 to 1..15 and reserve 0 for
+# transparency, so the oracle is in this space.
+#
+# Comparison happens in Saturn space; composed CPS2 tiles are converted first.
+CPS2_TRANSPARENT_PEN = 15
+SATURN_TRANSPARENT_PEN = 0
+
+
+def cps2_to_saturn(pens: np.ndarray) -> np.ndarray:
+    """CPS2 pen 15 becomes transparent 0; pens 0..14 shift up to 1..15."""
+    return np.where(pens == CPS2_TRANSPARENT_PEN, SATURN_TRANSPARENT_PEN,
+                    pens + 1).astype(np.uint8)
 
 
 def rle_decode(data: bytes) -> bytes:
@@ -128,13 +145,15 @@ def compose_assembly(assembly: dict, gfx: bytearray) -> np.ndarray:
         # reading; skip rather than fabricate a tile.
         if attributes in (0xFFFF,) or code == 0xFFFF:
             continue
-        tile = np.array(decode_tile(gfx, code, 16).convert("P"), dtype=np.uint8)
+        cps2_tile = np.array(decode_tile(gfx, code, 16).convert("P"),
+                             dtype=np.uint8)
+        tile = cps2_to_saturn(cps2_tile)
         x = origin_x + int(entry["layout_x_signed"])
         y = origin_y + int(entry["layout_y_signed"])
         if x < 0 or y < 0 or x + 16 > CEL_WIDTH or y + 16 > CEL_HEIGHT:
             continue
         region = canvas[y:y + 16, x:x + 16]
-        mask = tile != TRANSPARENT_PEN
+        mask = tile != SATURN_TRANSPARENT_PEN
         region[mask] = tile[mask]
         placed += 1
     if placed == 0:
@@ -143,8 +162,8 @@ def compose_assembly(assembly: dict, gfx: bytearray) -> np.ndarray:
 
 
 def crop_to_content(image: np.ndarray) -> tuple[np.ndarray, tuple[int, int]]:
-    rows = np.flatnonzero((image != TRANSPARENT_PEN).any(axis=1))
-    cols = np.flatnonzero((image != TRANSPARENT_PEN).any(axis=0))
+    rows = np.flatnonzero((image != SATURN_TRANSPARENT_PEN).any(axis=1))
+    cols = np.flatnonzero((image != SATURN_TRANSPARENT_PEN).any(axis=0))
     if rows.size == 0 or cols.size == 0:
         return np.zeros((0, 0), dtype=np.uint8), (0, 0)
     return (image[rows[0]:rows[-1] + 1, cols[0]:cols[-1] + 1],
