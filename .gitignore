@@ -10,5 +10,6 @@ game.map
 game.raw
 stage1_audio.wav
 *.o
+error.log
 __pycache__/
 cd/0.bin

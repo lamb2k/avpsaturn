@@ -1,0 +1,16 @@
+; Exploratory command-file form of stock MAME watchpoints. Named-state loading
+; occurs before the seed is restored in this path, so use
+; mame_watch_actor_writers.lua plus capture_actor_writer_watchpoints.ps1 for
+; the validated post-load run.
+printf "AVP_WP_SCRIPT_START\n"
+logerror "AVP_WP_SCRIPT_START\\n"
+; Load the debug-enabled Round 1 state, trace only actor animation-pointer and
+; state/action writes, and resume after each hit.  The trace is bounded by the
+; two counters so it cannot become an unbounded log flood.
+sl avspu/avspu_stage1_debug_hitboxes
+logerror "AVP_WP_STATE_VALUE=%08X\\n",w@ffa25c
+anim_hits = 0
+state_hits = 0
+wp ffa25c,4,w,{ logerror "AVP_WP_ANIM pc=%08X addr=%08X data=%08X\n",pc,wpaddr,wpdata ; g }
+wp ffa246,2,w,{ logerror "AVP_WP_STATE pc=%08X addr=%08X data=%08X\n",pc,wpaddr,wpdata ; g }
+g

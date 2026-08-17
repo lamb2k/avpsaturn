@@ -45,8 +45,12 @@ memory and ROM addresses, and the gates.
 - The retail ROM still contains Capcom's debug tools, including hitbox and
   stage-collision overlays. Prefer reading real data from them over inferring
   hit windows from health changes.
-- Instrumented MAME is the primary instrument. Build it from source, keep the
-  changes as a tracked patch set, and pin the source revision.
+- Stock MAME 0.289 is the primary observation instrument. The retained debug
+  overlays work with Development hardware mode, active-low fields held before
+  frame 0, and a one-time post-init software-switch injection because the
+  retail ROM removed the DIP-to-RAM copy. Try stock debugger watchpoints before
+  treating a custom MAME build as necessary; keep any fallback patch set
+  tracked and pinned.
 - Functional parity means matching the actor state trajectory, real hitboxes,
   and real animation sequences and durations. It does not mean identical
   framebuffers or RNG streams. If AI consumes a PRNG, record that decision
@@ -63,8 +67,9 @@ private inputs.
 ## Evidence and fidelity
 
 - Prefer ROM tables and the game's own debug overlays as source truth. Use
-  deterministic MAME capture to confirm what those produce, and as the
-  regression oracle for anything already verified.
+  deterministic MAME capture to confirm what those produce, and retain older
+  capture-derived clips as regression oracles rather than extending capture
+  and bind for new actors or actions.
 - Treat verified deterministic MAME capture as source truth for frame timing,
   inputs, objects, palettes, hit events, camera anchors, and QSound timing
   where no ROM-derived equivalent exists yet.

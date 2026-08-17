@@ -92,16 +92,21 @@ Verified in this repository; do not re-derive.
   `0xB1A84` extended entity info; they need `A6` set up and `D0=0` in a task
   context.
 - The entity spawner uses **Player 4** inputs, which stock MAME AvP does not
-  provide. This is the reason Phase 0 exists.
+  provide. Under ROM extraction this is only an optional validation convenience,
+  so it is not a reason to build MAME.
 
-**Known failure, cause identified**
+**Initial failures and the working activation path**
 
 Enabling the overlays by writing the RAM flags does not work: the game
 re-caches them from the physical switches every frame. Driving MAME's real DIP
 ioports (`:DSWA 1-1`, `:DSWB 2-6`, `:DSWB 2-7`) while loading the mid-game state
 `avspu_stage1_boss_12660` also left `0xFF81C7` at zero, because the flags are
 cached during boot initialisation that already ran with debug off inside the
-state. **Cold boot with the switches held from frame 0.**
+state. A cold boot with the switches held from frame 0 is necessary, but not
+sufficient for this retail ROM: its physical-DIP-to-RAM copy routine is absent.
+The verified stock-MAME path injects the retained software-switch bytes once
+after startup RAM clearing, then lets the game's own routine derive the master
+enable. The capture scripts and handoff record the exact frame and values.
 
 ## Phase 0 is NOT on the critical path (revised 2026-08-17)
 
@@ -147,9 +152,10 @@ Changes required, smallest first:
    works and is fast enough for 240-frame windows; add this only if full-level
    per-frame dumps prove too slow.
 
-Try MAME's stock debugger (`-debug`) with watchpoints **before** building, for
-item 2 only. It may supply the write tracing for free. Item 1 cannot be done
-without a custom build.
+Try MAME's stock debugger (`-debug`) with watchpoints before building. The
+custom build is only a fallback if stock watchpoints cannot locate the writers,
+or if a later optional Player-4 validation proves materially cheaper than ROM
+table extraction.
 
 Deliverables: a documented build procedure, a tracked patch set, and a pinned
 MAME source revision recorded beside the existing 0.289 pin.
