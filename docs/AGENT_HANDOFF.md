@@ -1,9 +1,11 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-17 09:20 EDT
+Updated: 2026-08-17 12:05 EDT
 
 **Direction as of 2026-08-17: functional parity by ROM translation, with an
-instrumented MAME build as the primary instrument. The plan of record is
+instrumented MAME build retained only as a contingency. Stock MAME 0.289 debug
+overlays now work, and stock debugger watchpoints must be tried before any
+custom build. The plan of record is
 [PARITY_PLAN.md](PARITY_PLAN.md); read it after this file. This handoff says
 where work stopped, the parity plan says where it is going.**
 
@@ -13,12 +15,12 @@ Read this file before taking any action. The user wants a private, capture-faith
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `prototype/private-capability-test`
-- HEAD: the commit containing this handoff adds the Claude bootstrap pointer
-  and the 2026-08-17 plan review on top of `14493fa` (`Add repository agent
-  instructions`), which follows the deterministic frontend capture/analyzer
-  checkpoint `2e61198`. Run `git rev-parse HEAD` for the immutable hash.
-- Worktree should be clean immediately after the handoff commit. Verify with
-  `git status --short --branch` before resuming.
+- Implementation checkpoint: `b24a4e017eae3894f57cc9b0917ba6109f457154`
+  (`Capture Round 1 debug overlay evidence`), on top of the independently
+  committed plan correction `9417f53a8fdf94a5efee567496bec042a1fce3cd`.
+  The handoff-only commit follows it; run `git rev-parse HEAD` for that hash.
+- Worktree should be clean immediately after the handoff-only commit. Verify
+  with `git status --short --branch` before resuming.
 - Current disc profile: `normal-release`.
 - Current ISO: 5,410,816 bytes, SHA-256
   `30522182d9c577f3d4ddf7be7b7af499597d00ac1bb5e468110e1bf080410f17`. This
@@ -28,11 +30,8 @@ Read this file before taking any action. The user wants a private, capture-faith
 - Current cue SHA-256: `bfc58c7020d90952e93bef7ecba32dea8d4faddf6ce6a90e1054206ee1807b12`.
 - Both values match `build/hardware_release_manifest.txt` at
   `profile=normal-release`.
-- A Yaba Sanshiro instance was launched from this checkout for shutter
-  inspection. Its command line and the generated
-  `%TEMP%\AvPSaturnCapabilityTest\game.yaba.cue` were both verified to
-  reference this exact ISO, so no stale disc state was in play. Close it
-  before the next checkpoint.
+- No MAME process from this checkout remained after the overlay checkpoint.
+  Do not kill an emulator owned by another checkout or concurrent session.
 
 Implementation and documentation files in this checkpoint:
 
@@ -180,14 +179,18 @@ Deterministic source hashes:
   the most colourful frame, never the first; check RLE against raw before
   assuming compression; collapse repeated frames before sizing; and read the
   state machine to find the frame that starts CDDA.
-- The skill now also carries the parity-era method: choosing between screen
-  capture and ROM translation, using the game's own debug tools and the two
-  traps that hide them, building the emulator from source for observation, ROM
-  table extraction, and defining parity before promising it.
+- The skill now carries the corrected parity-era method: preserve the existing
+  Saturn platform pipeline; use ROM translation for systematic animation,
+  stage and AI data; use captures as regression evidence; activate retained
+  debug tools without per-frame forcing; try stock debugger watchpoints first;
+  keep a custom MAME build and entity spawner as contingencies; map actor fields
+  on demand; and compare events for functional parity. It also records the
+  ROM-derived SH-2 interpreter, exact referenced-tile working set, and measured
+  composed-cel versus per-tile VDP1 decision.
 - Skill hashes: `SKILL.md`
-  `fdf94d9d9d8ef9a68c4a232c9b5a6377b39494923a0f999e2a0e59cf80f6e412`;
+  `7adc7092f8c11f49a65c33b0161436cafc51b51f7045a73f48e347af8f7cf2ac`;
   `references/workflow.md`
-  `1051852316678204b9b4e77333b7b4823558b5df698915fe46adee8f42a7bb67`;
+  `ecc81fe344e6a4cc462882b0e24cb8b1575291d79b8185e58e9bc11180f58745`;
   `agents/openai.yaml`
   `038134e6c419dc5654b404dac81317a21900e342e208841f44cd959b837c7e2b`.
 
@@ -591,14 +594,109 @@ second use is as an independent oracle to cross-check MAME where MAME's
 behaviour looks driver-specific, as already happened with the RGB32 frontend
 screen.
 
+## 2026-08-17 stock-MAME overlay checkpoint
+
+The critical-path Phase 1 instrument now works in stock MAME 0.289. The exact
+activation sequence is:
+
+1. Persist `:HW_TYPE` Hardware = Development and the active-low overlay DIP
+   fields before frame 0 in an isolated configuration directory.
+2. Cold boot the retail `avspu` ROM.
+3. At frame 1200, after startup RAM clearing, inject the retained
+   software-switch bytes once: `FF806C |= 01` and `FF806D |= 80` for hitboxes
+   or `40` for collision.
+4. Let the game's own routine at `0x1434` derive master enable `FF81C7=01`; it
+   is active by frame 1230 and remains active without further RAM writes.
+
+Physical DIPs alone are a recorded negative control, not the solution. With
+Development mode and the correct port reads already active, `FF806C`,
+`FF806D`, and `FF81C7` remained zero because the retail ROM removed the copy
+routine. Do not repeat that path. Also note that Start suicides a live player
+when the debug master is active; the deterministic route therefore pulses
+Start only for frontend selection or while health is zero/invalid during a
+continue.
+
+Tracked entry points and SHA-256 hashes:
+
+- `capture_debug_overlays.ps1`:
+  `bd5ae530b322c172c846e2522c048301bb89e7efbe8814b886f533ad9d234ebf`
+- `capture_round1_debug_overlays.ps1`:
+  `be98c94c421ae1f322ec680f6d278614e0550e6a2581b3960a748ad3942ae395`
+- `tools/mame_configure_debug_switches.lua`:
+  `194e3a11167d70004372134982fa29da0cce04a0aaaa7d2a27350d3e2bfbaab4`
+- `tools/mame_probe_debug_overlays.lua`:
+  `c7064f17edf43c04ad3474c0a40132dd63b234ea02198bb2f71c024a9c197a6c`
+- `tools/mame_capture_round1_debug_overlays.lua`:
+  `6f7383ba90b2002e53cb473ca448ff330e4f2c4825223738c8a8b3756f3aed56`
+- `tools/analyze_round1_debug_overlays.py`:
+  `27663db07a5f3686e6efd4b5e2047258d9de8a729e7706aa21649cb640656d74`
+- `data/round1_debug_overlays.json`:
+  `a49c7d01e4bfa050c480b8d5a9dc6a6a2feb69a44ba230f900d2f3fb09a395d5`
+
+Raw ignored evidence:
+
+- Hitboxes: frames 4201..15000 at cadence 1, 10,800 synchronized screenshots
+  and actor-RAM samples, 124,416,000 RAM bytes. SHA-256 of `actor_state.bin`:
+  `3a8a76751e9a5a0f857afeb35cdc2737f40cec8fea1cb2cf05241c908de24a7a`.
+  Visual evidence covers the player, street aliens, Stalker and Chrysalis;
+  frame 15000 is the Round 1 results screen.
+- Stage collision: frames 4201..17791 at cadence 30, 454 synchronized samples,
+  5,230,080 RAM bytes. SHA-256 of `actor_state.bin`:
+  `6731a17d28186f84097ca243915d7911599afcae8548bebd3e74dcc2bc1df1a3`.
+  Frame 17791 is the first post-boss dialogue and stops before Round 2 play.
+- The tracked manifest hashes the key screenshots and validates both datasets.
+  These are **capture-exact debug evidence**, not Saturn assets.
+
+Reproduce or validate from the repository root:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\capture_round1_debug_overlays.ps1 -Mode Hitboxes
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\capture_round1_debug_overlays.ps1 -Mode Collision
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\analyze_round1_debug_overlays.py
+```
+
+Add `-Refresh` to a capture command only when intentionally replacing its raw
+ignored dataset; it also regenerates that mode's cold-boot seed state.
+
+The earlier 15000-frame collision run was structurally valid but ended in the
+live Chrysalis fight. Extending to 18000 proved the route crossed into Round 2;
+the final deterministic boundary was then tightened to 17791. The first full
+hitbox continuation also reached a Continue screen because the route only
+recognized health zero; treating `health >= 80` as the invalid/continue state
+fixed it. These errors are resolved in the committed scripts.
+
+Remaining gate: the boxes are visibly captured but not yet decoded into
+numerical actor-local geometry. Do not claim offsets 21/55/97 are replaced
+until that extraction is complete.
+
 ## Resume in this order
 
 **Superseded for new work by [PARITY_PLAN.md](PARITY_PLAN.md).** The numbered
 list below finishes the frontend slice under the old capture-and-bind method
 and is still correct for that slice. For anything beyond it, start at the
-parity plan's Phase 0 (instrumented MAME) and Phase 1 (enable the game's own
-hitbox and collision overlays), which retire far larger approximations than the
-remaining frontend items.
+parity plan's Phase 1 and ROM-decode path. The custom MAME Phase 0 is a
+contingency only.
+
+1. Re-run `tools/analyze_round1_debug_overlays.py` against the ignored raw
+   evidence and verify the tracked manifest is unchanged.
+2. Decode the displayed hitboxes into numerical actor-local geometry for the
+   player, street aliens, Stalker and Chrysalis. Validate those real boxes
+   against, then replace, the inferred boss schedules 21/55/97 and the inferred
+   Stalker contact.
+3. Use stock MAME debugger watchpoints on the required actor-state fields to
+   locate animation-script and AI writers. Do not build custom MAME unless
+   stock watchpoints demonstrably fail.
+4. Finish animation-script and sprite-assembly decoding and require a
+   ROM-decoded pose to match a verified capture pixel for pixel.
+5. Compute the exact Round 1 referenced tile set, translate required 68k AI and
+   stage tables to native C/data, and compare functional events.
+6. Only after the pixel gate passes, replace `player_pose_for_frame()` and the
+   hand-written `cap_world_step()` behaviour. Measure composed cels versus
+   per-tile VDP1 commands on hardware before choosing.
+
+The older capture-and-bind resume list below is retained only as historical
+context for the frontend slice; it is not the current work queue.
 
 1. Verify branch, HEAD, clean status, the release manifest profile, and that no
    emulator retained a stale cue.
