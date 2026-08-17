@@ -141,7 +141,28 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run.ps1
 RAM expansion. Controls follow the CPS2 panel order: D-pad to move, A for the
 weapon, B for melee attack, and C to jump. Hold left or right and press C to
 dash. Press A+B together for the health-draining emergency attack.
-X toggles the diagnostic HUD. The launcher no longer disables emulator audio.
+X toggles the diagnostic HUD.
+
+Those are Saturn pad buttons, not keyboard keys. `run.ps1` sets the disc and
+cartridge but deliberately does not rewrite the emulator's input configuration,
+so the keyboard layout is whatever Yaba Sanshiro has stored. Note that the
+Saturn face buttons are **not** bound to the A, B, and C keys; the literal `A`
+key is D-pad left. The mapping recorded in
+`%APPDATA%\YabaSanshiro\yabause.ini` on this machine is:
+
+| Saturn input | Key | Saturn input | Key |
+| --- | --- | --- | --- |
+| Up / Down | `W` / `S` | A, weapon | `G` |
+| Left / Right | `A` / `D` | B, melee and character confirm | `H` |
+| Start | `Enter` | C, jump | `J` |
+| L / R triggers | `5` / `6` | X / Y / Z | `T` / `Y` / `U` |
+
+So the cold-boot route is `Enter` at Press Start, then `H` to confirm Predator
+Warrior. If the game appears frozen at Press Start or character select, it is
+waiting for one of those two inputs rather than failing. Verify the current
+bindings by reading the `Input\Port\1\Id\1\Controller\2\Key\N` entries in that
+ini; they are Qt key codes in the order up, right, down, left, R, L, Start, A,
+B, C, X, Y, Z. The launcher no longer disables emulator audio.
 It disables Yaba Sanshiro's persistent config autostart and supplies this
 checkout's AvP disc exactly once with `-a/-i`. For Yaba only, it writes a
 temporary cue with absolute track paths because Yaba 1.20.37 can resolve a
