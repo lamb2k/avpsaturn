@@ -4,6 +4,8 @@ The physical Sega Saturn is the acceptance target. Emulator results are an
 intermediate check only. The current build is native SH-2/SGL code, reads its
 asset pack through the Saturn CD filesystem, renders through VDP1/VDP2, polls
 controller port 1, and requires a detected 32 Mbit (4 MB) DRAM cartridge.
+The runtime registers both 2 MB cartridge banks; failure to access DRAM1 at
+`0x22600000` is a hardware failure, not a reason to drop animation or audio.
 
 ## Build the hardware image
 
@@ -59,6 +61,9 @@ alter console copy protection or supply copyrighted disc data.
    frames later, remains stereo, and neither stops nor ducks the CDDA track.
    Repeated A presses after the heat meter recovers must replay it cleanly
    without channel lock-up or cartridge-read corruption.
+   Press B repeatedly and confirm the melee composite begins three action
+   frames after each accepted attack, retriggers cleanly, and does not silence
+   the weapon cue or CDDA music.
 6. Fight through the five-enemy opening wave and three-enemy reinforcement wave.
    Confirm enemies can simultaneously show unlike walk, attack, hit, and KO
    poses without one actor changing another actor's cel. The proven alien clips

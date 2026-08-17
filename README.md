@@ -132,6 +132,9 @@ authorized homebrew boot path plus compatible 4 MB DRAM support. See
 controller, video, encounter, and soak-test route. Physical-hardware validation
 is still pending.
 
+The runtime registers both 2 MB expansion-DRAM banks, using the full 4 MB
+cartridge capacity rather than sacrificing captured animation or event audio.
+
 ## Verified status
 
 Verified on August 17, 2026:
@@ -189,9 +192,15 @@ Verified on August 17, 2026:
 - the first event-level sound is isolated from QSound voice 12 by paired idle
   and weapon captures: a 0.902449-second, 44.1 kHz stereo cue is stored as
   signed 16-bit big-endian SCSP PCM and starts five action frames after A
+- the same bus-level method isolates the three-start, two-voice melee
+  composite as a 0.820590-second stereo cue and starts it three action frames
+  after B; rapid attacks retrigger its own PCM channel instead of leaking slots
+- the encounter diagnostic reaches the eight-enemy clear with both weapon and
+  melee `SEEN 1` latches set, proving both cues entered SCSP playback channels
+  while the full animation working set remained allocated
 
 Next proof gate: verify the full-width mapping and CD audio on physical Saturn,
-then extend the proven QSound isolation to impacts, melee, enemies, boss, and
+then extend the proven QSound isolation to impacts, enemies, boss, and
 voices while replacing the approximate route gaps with the remaining captured
 rooms, actors, and actions.
 

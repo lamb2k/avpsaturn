@@ -11,6 +11,9 @@ $audioRoot = Join-Path $projectRoot '.deps\mame\audio_events'
 $idleWav = Join-Path $audioRoot 'idle_voice12_event.wav'
 $gunWav = Join-Path $audioRoot 'gun_voice12_event.wav'
 $gunWrites = Join-Path $projectRoot '.deps\mame\player_actions\gun\qsound_writes.tsv'
+$meleeIdleWav = Join-Path $audioRoot 'idle_voices13_14_event.wav'
+$meleeWav = Join-Path $audioRoot 'melee_voices13_14_event.wav'
+$meleeWrites = Join-Path $projectRoot '.deps\mame\player_actions\melee\qsound_writes.tsv'
 
 if (-not (Test-Path -LiteralPath $mame)) {
     & (Join-Path $projectRoot 'setup_reference.ps1')
@@ -28,6 +31,8 @@ foreach ($action in @('idle', 'gun')) {
     New-Item -ItemType Directory -Force -Path (Join-Path $projectRoot `
         ".deps\mame\player_actions\$action") | Out-Null
 }
+New-Item -ItemType Directory -Force -Path (Join-Path $projectRoot `
+    '.deps\mame\player_actions\melee') | Out-Null
 
 if ($Refresh -or -not (Test-Path -LiteralPath $idleWav) -or
     -not (Test-Path -LiteralPath $gunWav) -or
@@ -36,7 +41,7 @@ if ($Refresh -or -not (Test-Path -LiteralPath $idleWav) -or
     try {
         foreach ($action in @('idle', 'gun')) {
             $env:AVSP_ACTION_PROBE = $action
-            $env:AVSP_QSOUND_ISOLATE_VOICE = '12'
+            $env:AVSP_QSOUND_ISOLATE_VOICES = '12'
             $env:AVSP_QSOUND_ISOLATE_END_FRAME = '2582'
             $wavName = "${action}_voice12_event.wav"
             & $mame 'avspu' '-rompath' '.' '-video' 'none' '-sound' 'none' `
@@ -51,13 +56,44 @@ if ($Refresh -or -not (Test-Path -LiteralPath $idleWav) -or
     }
     finally {
         Remove-Item Env:\AVSP_ACTION_PROBE -ErrorAction SilentlyContinue
-        Remove-Item Env:\AVSP_QSOUND_ISOLATE_VOICE -ErrorAction SilentlyContinue
+        Remove-Item Env:\AVSP_QSOUND_ISOLATE_VOICES -ErrorAction SilentlyContinue
         Remove-Item Env:\AVSP_QSOUND_ISOLATE_END_FRAME -ErrorAction SilentlyContinue
         Pop-Location
     }
 }
 else {
     Write-Host 'Reusing deterministic isolated QSound idle and gun captures.'
+}
+
+if ($Refresh -or -not (Test-Path -LiteralPath $meleeIdleWav) -or
+    -not (Test-Path -LiteralPath $meleeWav) -or
+    -not (Test-Path -LiteralPath $meleeWrites)) {
+    Push-Location $projectRoot
+    try {
+        foreach ($action in @('idle', 'melee')) {
+            $env:AVSP_ACTION_PROBE = $action
+            $env:AVSP_QSOUND_ISOLATE_VOICES = '13,14'
+            $env:AVSP_QSOUND_ISOLATE_END_FRAME = '2578'
+            $wavName = "${action}_voices13_14_event.wav"
+            & $mame 'avspu' '-rompath' '.' '-video' 'none' '-sound' 'none' `
+                '-samplerate' '44100' '-wavwrite' ".deps\mame\audio_events\$wavName" `
+                '-nothrottle' '-skip_gameinfo' '-snapshot_directory' '.deps\mame' `
+                '-autoboot_delay' '0' `
+                '-autoboot_script' '.\tools\mame_capture_player_action.lua'
+            if ($LASTEXITCODE -ne 0) {
+                throw "Isolated QSound $action melee capture failed with exit code $LASTEXITCODE."
+            }
+        }
+    }
+    finally {
+        Remove-Item Env:\AVSP_ACTION_PROBE -ErrorAction SilentlyContinue
+        Remove-Item Env:\AVSP_QSOUND_ISOLATE_VOICES -ErrorAction SilentlyContinue
+        Remove-Item Env:\AVSP_QSOUND_ISOLATE_END_FRAME -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+}
+else {
+    Write-Host 'Reusing deterministic isolated QSound idle and melee captures.'
 }
 
 if (-not $PythonPath) {
@@ -82,11 +118,28 @@ if (-not $PythonPath -or -not (Test-Path -LiteralPath $PythonPath)) {
     '--qsound-writes' $gunWrites `
     '--output-pcm' (Join-Path $projectRoot 'build\avsp_cd\AUDIO\GUN.PCM') `
     '--output-header' (Join-Path $projectRoot 'generated\avsp_audio.h') `
+    '--header-prefix' 'AVSP_GUN' `
     '--report' (Join-Path $projectRoot 'data\qsound_gun_capture.json') `
+    '--action' 'predator_warrior_weapon' `
     '--voice' '12' '--action-frame' '2525' '--start-frame' '2530' `
     '--end-frame' '2582'
 if ($LASTEXITCODE -ne 0) {
     throw "QSound event extraction failed with exit code $LASTEXITCODE."
 }
 
-Write-Host 'Prepared capture-exact Predator weapon PCM for Saturn SCSP playback.'
+& $PythonPath (Join-Path $projectRoot 'tools\extract_qsound_event.py') `
+    '--idle-wav' $meleeIdleWav `
+    '--action-wav' $meleeWav `
+    '--qsound-writes' $meleeWrites `
+    '--output-pcm' (Join-Path $projectRoot 'build\avsp_cd\AUDIO\MELEE.PCM') `
+    '--output-header' (Join-Path $projectRoot 'generated\avsp_melee_audio.h') `
+    '--header-prefix' 'AVSP_MELEE' `
+    '--report' (Join-Path $projectRoot 'data\qsound_melee_capture.json') `
+    '--action' 'predator_warrior_melee' '--action-frame' '2525' `
+    '--voice-start' '13:2528' '--voice-start' '13:2531' `
+    '--voice-start' '14:2532' '--end-frame' '2578'
+if ($LASTEXITCODE -ne 0) {
+    throw "QSound melee-event extraction failed with exit code $LASTEXITCODE."
+}
+
+Write-Host 'Prepared capture-exact Predator weapon and melee PCM for Saturn SCSP playback.'

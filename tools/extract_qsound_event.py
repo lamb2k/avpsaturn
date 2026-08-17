@@ -7,6 +7,7 @@ import argparse
 import csv
 import hashlib
 import json
+import re
 import struct
 import wave
 from pathlib import Path
@@ -76,18 +77,44 @@ def main() -> None:
     parser.add_argument("--action-wav", type=Path, required=True)
     parser.add_argument("--qsound-writes", type=Path, required=True)
     parser.add_argument("--output-pcm", type=Path, required=True)
-    parser.add_argument("--output-header", type=Path, required=True)
+    parser.add_argument("--output-header", type=Path)
+    parser.add_argument("--header-prefix")
     parser.add_argument("--report", type=Path, required=True)
-    parser.add_argument("--voice", type=int, required=True)
+    parser.add_argument("--action", required=True)
+    parser.add_argument("--voice", type=int)
     parser.add_argument("--action-frame", type=int, required=True)
-    parser.add_argument("--start-frame", type=int, required=True)
+    parser.add_argument("--start-frame", type=int)
+    parser.add_argument(
+        "--voice-start", action="append", default=[], metavar="VOICE:FRAME"
+    )
     parser.add_argument("--end-frame", type=int, required=True)
     args = parser.parse_args()
 
-    if not 0 <= args.voice < 16:
-        raise ValueError("--voice must be 0..15")
-    if not args.action_frame <= args.start_frame < args.end_frame:
-        raise ValueError("event frame ordering is invalid")
+    if (args.output_header is None) != (args.header_prefix is None):
+        raise ValueError("--output-header and --header-prefix must be supplied together")
+    if args.header_prefix is not None and not re.fullmatch(
+        r"[A-Z][A-Z0-9_]*", args.header_prefix
+    ):
+        raise ValueError("--header-prefix must be an uppercase C identifier")
+
+    voice_starts: list[tuple[int, int]] = []
+    if args.voice is not None or args.start_frame is not None:
+        if args.voice is None or args.start_frame is None:
+            raise ValueError("--voice and --start-frame must be supplied together")
+        voice_starts.append((args.voice, args.start_frame))
+    for value in args.voice_start:
+        try:
+            voice_text, frame_text = value.split(":", 1)
+            voice_starts.append((int(voice_text), int(frame_text)))
+        except ValueError as exc:
+            raise ValueError(f"invalid --voice-start value: {value}") from exc
+    if not voice_starts:
+        raise ValueError("at least one voice start must be declared")
+    for voice, start_frame in voice_starts:
+        if not 0 <= voice < 16:
+            raise ValueError("QSound voices must be 0..15")
+        if not args.action_frame <= start_frame < args.end_frame:
+            raise ValueError("event frame ordering is invalid")
 
     idle_params, idle = read_wave(args.idle_wav)
     action_params, action = read_wave(args.action_wav)
@@ -113,29 +140,41 @@ def main() -> None:
     args.output_pcm.write_bytes(struct.pack(f">{len(event_samples)}h", *event_samples))
 
     writes = read_completed_writes(args.qsound_writes)
-    voice_start = require_voice_start(writes, args.voice, args.start_frame)
-    target_volume_register = (args.voice << 3) + 6
-    if not any(
-        write["frame"] == args.end_frame
-        and write["register"] == target_volume_register
-        and write["value"] == 0
-        for write in writes
-    ):
-        raise ValueError("capture does not stop the target voice at the declared end frame")
+    start_reports = []
+    for voice, start_frame in voice_starts:
+        start_reports.append(
+            {
+                "voice": voice,
+                "start_frame": start_frame,
+                **{
+                    name: f"0x{value:04x}"
+                    for name, value in require_voice_start(
+                        writes, voice, start_frame
+                    ).items()
+                },
+            }
+        )
+    for voice in sorted({voice for voice, _ in voice_starts}):
+        last_start = max(frame for candidate, frame in voice_starts if candidate == voice)
+        target_volume_register = (voice << 3) + 6
+        if not any(
+            last_start <= write["frame"] <= args.end_frame
+            and write["register"] == target_volume_register
+            and write["value"] == 0
+            for write in writes
+        ):
+            raise ValueError(
+                f"capture does not stop QSound voice {voice} by frame {args.end_frame}"
+            )
 
     left = event_samples[0::2]
     right = event_samples[1::2]
     report = {
-        "schema": 1,
+        "schema": 2,
         "source": "deterministic MAME 0.289 QSound HLE differential capture",
-        "action": "predator_warrior_weapon",
+        "action": args.action,
         "action_input_frame": args.action_frame,
-        "qsound": {
-            "voice": args.voice,
-            "start_frame": args.start_frame,
-            "end_frame": args.end_frame,
-            **{name: f"0x{value:04x}" for name, value in voice_start.items()},
-        },
+        "qsound": {"starts": start_reports, "end_frame": args.end_frame},
         "wave": {
             "channels": idle_params.nchannels,
             "sample_bits": idle_params.sampwidth * 8,
@@ -159,18 +198,21 @@ def main() -> None:
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    args.output_header.parent.mkdir(parents=True, exist_ok=True)
-    args.output_header.write_text(
-        "#ifndef GENERATED_AVSP_AUDIO_H\n"
-        "#define GENERATED_AVSP_AUDIO_H\n\n"
-        '#define AVSP_GUN_PCM_FILE "GUN.PCM"\n'
-        '#define AVSP_GUN_PCM_DIRECTORY "AUDIO"\n'
-        f"#define AVSP_GUN_PCM_BYTES {args.output_pcm.stat().st_size}\n"
-        f"#define AVSP_GUN_PCM_SAMPLE_RATE {idle_params.framerate}\n"
-        "#define AVSP_GUN_PCM_CHANNELS 2\n\n"
-        "#endif\n",
-        encoding="ascii",
-    )
+    if args.output_header is not None:
+        prefix = args.header_prefix
+        guard = f"GENERATED_{prefix}_AUDIO_H"
+        args.output_header.parent.mkdir(parents=True, exist_ok=True)
+        args.output_header.write_text(
+            f"#ifndef {guard}\n"
+            f"#define {guard}\n\n"
+            f'#define {prefix}_PCM_FILE "{args.output_pcm.name}"\n'
+            f'#define {prefix}_PCM_DIRECTORY "{args.output_pcm.parent.name}"\n'
+            f"#define {prefix}_PCM_BYTES {args.output_pcm.stat().st_size}\n"
+            f"#define {prefix}_PCM_SAMPLE_RATE {idle_params.framerate}\n"
+            f"#define {prefix}_PCM_CHANNELS 2\n\n"
+            "#endif\n",
+            encoding="ascii",
+        )
     print(
         f"Extracted {report['wave']['duration_seconds']:.6f}s QSound event "
         f"({report['saturn_pcm']['bytes']} bytes, {report['saturn_pcm']['sha256']})"

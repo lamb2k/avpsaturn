@@ -174,6 +174,12 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Saturn PCM ISO verification failed with exit code $LASTEXITCODE."
         }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/AUDIO/MELEE.PCM' '--equals' `
+            (Join-Path $contentRoot 'AUDIO\MELEE.PCM')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn melee PCM ISO verification failed with exit code $LASTEXITCODE."
+        }
 
         # Add the locally rendered QSound reference as a real Saturn CDDA track.
         # It remains an ignored private artifact and is never linked as CPS2 code.
@@ -190,12 +196,15 @@ try {
         $audioFile = Get-Item -LiteralPath $audioTrack
         $eventAudioFile = Get-Item -LiteralPath `
             (Join-Path $contentRoot 'AUDIO\GUN.PCM')
+        $meleeAudioFile = Get-Item -LiteralPath `
+            (Join-Path $contentRoot 'AUDIO\MELEE.PCM')
         $manifestPath = Join-Path $projectRoot 'build\hardware_release_manifest.txt'
         [IO.File]::WriteAllLines($manifestPath, @(
             'target=sega-saturn-ntsc'
             'video=352x224'
             'boot=iso9660-mode1-2048'
             'expansion_ram=32-mbit-required'
+            'expansion_ram_mapping=dram0-0x22400000-0x225fffff,dram1-0x22600000-0x227fffff'
             "profile=$buildProfile"
             "iso_bytes=$($isoFile.Length)"
             "iso_sha256=$((Get-FileHash -LiteralPath $isoFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
@@ -211,6 +220,13 @@ try {
             'event_audio_source_frames=2525-input,2530-audible,2582-stop'
             "event_audio_bytes=$($eventAudioFile.Length)"
             "event_audio_sha256=$((Get-FileHash -LiteralPath $eventAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'event_audio_2=scsp-pcm-capture-exact-predator-melee'
+            'event_audio_2_iso_path=/AUDIO/MELEE.PCM'
+            'event_audio_2_format=signed-16-bit-big-endian-stereo'
+            'event_audio_2_sample_rate=44100'
+            'event_audio_2_source_frames=2525-input,2528-audible,2578-stop'
+            "event_audio_2_bytes=$($meleeAudioFile.Length)"
+            "event_audio_2_sha256=$((Get-FileHash -LiteralPath $meleeAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
         ))
     }
     finally {

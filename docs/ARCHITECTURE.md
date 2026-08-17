@@ -148,7 +148,14 @@ PCM for SGL/SCSP, and the ISO verifier proves `/AUDIO/GUN.PCM` matches the
 capture artifact byte-for-byte. Native playback is bound to action frame 5 so
 the cue keeps the captured input-to-audible delay while CDDA continues.
 
-The production path must repeat this method for impact, melee, enemy, boss,
+The melee action applies the same differential method to QSound voices 13 and
+14. Its source transaction consists of voice 13 starts at frames 2528 and 2531
+and a voice 14 start at frame 2532. The resulting composite is 0.820590 seconds
+and 144,752 bytes of stereo SCSP PCM. Native playback begins at action frame 3;
+rapid attacks stop and retrigger their own previous melee channel, matching the
+source voice-reuse constraint without consuming all six Jo PCM slots.
+
+The production path must repeat this method for impact, enemy, boss,
 and voice events, keep long music on CDDA, and allocate short cues across the
 six bounded Jo/SGL PCM channels.
 
@@ -173,6 +180,8 @@ Exact in the current milestone:
   and exit-state lifecycle
 - isolated Predator weapon QSound voice, processed stereo waveform, source
   timing, Saturn PCM conversion, ISO payload, and native action-frame binding
+- isolated two-voice Predator melee composite with three verified starts,
+  capture-derived action delay, and bounded native channel retriggering
 
 Still approximate or incomplete:
 
@@ -182,7 +191,7 @@ Still approximate or incomplete:
 - complete attract-mode, menu-transition, and character-select animation
 - full animation between the verified route key states
 - remaining HUD states, exact scroll behavior, level triggers, combat, and AI
-- remaining isolated QSound impact, melee, enemy, boss, and voice cues
+- remaining isolated QSound impact, enemy, boss, and voice cues
 - native HUD safe-area placement and arcade-derived camera behavior for CRT
   overscan variability
 
@@ -203,7 +212,10 @@ The executable is linked for the Saturn SH-2 and uses SGL/Jo Engine hardware
 paths for CD files, controller port 1, VDP1 sprites, VDP2 background, and CRAM.
 Startup checks address `0x24ffffff` for the physical 32 Mbit cartridge signature;
 without it, the build reports `4MB RAM CART REQUIRED` and does not enter the
-runtime. The disc is an ISO9660 Mode 1 image with Sega Saturn IP boot data and
+runtime. Jo Engine registers the cartridge's first 2 MiB DRAM bank itself; the
+port also registers the second bank at `0x22600000` so the native allocator can
+use the complete 4 MiB cartridge without reducing sprite or PCM fidelity. The
+disc is an ISO9660 Mode 1 image with Sega Saturn IP boot data and
 NTSC `TV_352x224` initialization. Emulator configuration is not part of the
 executable.
 

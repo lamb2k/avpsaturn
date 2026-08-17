@@ -16,7 +16,16 @@ local gun = in0["P1 Button 1"]
 local attack = in0["P1 Button 2"]
 local jump = in0["P1 Button 3"]
 local action = os.getenv("AVSP_ACTION_PROBE") or ""
-local isolate_qsound_voice = tonumber(os.getenv("AVSP_QSOUND_ISOLATE_VOICE") or "")
+local isolate_qsound_voices = {}
+local isolate_qsound_voice_text = os.getenv("AVSP_QSOUND_ISOLATE_VOICES") or
+    os.getenv("AVSP_QSOUND_ISOLATE_VOICE") or ""
+for token in string.gmatch(isolate_qsound_voice_text, "[^,]+") do
+    local voice = assert(tonumber(token),
+        "AVSP_QSOUND_ISOLATE_VOICES must contain integers")
+    assert(voice >= 0 and voice < 16,
+        "AVSP_QSOUND_ISOLATE_VOICES entries must be 0..15")
+    isolate_qsound_voices[voice] = true
+end
 local isolate_qsound_end_frame = tonumber(
     os.getenv("AVSP_QSOUND_ISOLATE_END_FRAME") or "")
 local allowed_actions = {
@@ -84,9 +93,10 @@ player_action_qsound_tap = audio_program:install_write_tap(
                     pcm_volume_voice = byte >> 3
                 end
                 local is_other_pcm_volume = pcm_volume_voice ~= nil and
-                    pcm_volume_voice ~= isolate_qsound_voice
-                local is_late_target_volume = pcm_volume_voice ==
-                    isolate_qsound_voice and isolate_qsound_end_frame ~= nil and
+                    not isolate_qsound_voices[pcm_volume_voice]
+                local is_late_target_volume = pcm_volume_voice ~= nil and
+                    isolate_qsound_voices[pcm_volume_voice] and
+                    isolate_qsound_end_frame ~= nil and
                     frame >= isolate_qsound_end_frame and qsound_data_latch ~= 0
                 local is_adpcm_volume = byte == 0xcd or byte == 0xd1 or
                     byte == 0xd5
@@ -108,9 +118,7 @@ local function qsound_write(register, value)
 end
 
 local function begin_qsound_voice_isolation()
-    if isolate_qsound_voice == nil then return end
-    assert(isolate_qsound_voice >= 0 and isolate_qsound_voice < 16,
-        "AVSP_QSOUND_ISOLATE_VOICE must be 0..15")
+    if next(isolate_qsound_voices) == nil then return end
     -- Silence every voice before filtering subsequent driver volume writes.
     -- Global QSound pan, echo and filter programming remains untouched.
     for voice = 0, 15 do
@@ -120,8 +128,8 @@ local function begin_qsound_voice_isolation()
         qsound_write(0xcd + (voice << 2), 0)
     end
     qsound_isolation_active = true
-    print(string.format("AVSPU_QSOUND_ISOLATE voice=%d frame=%d",
-        isolate_qsound_voice, frame))
+    print(string.format("AVSPU_QSOUND_ISOLATE voices=%s frame=%d",
+        isolate_qsound_voice_text, frame))
 end
 
 local function write_share_words(path, share)

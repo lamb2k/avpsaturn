@@ -6,6 +6,7 @@
 #include "generated/avsp_enemy_animation.h"
 #include "generated/avsp_frontend_palette.h"
 #include "generated/avsp_hud.h"
+#include "generated/avsp_melee_audio.h"
 #include "generated/avsp_palette.h"
 #include "generated/avsp_player_action_animation.h"
 #include "generated/avsp_sequence_palette.h"
@@ -18,6 +19,8 @@
 #define SNAPSHOT_FIT_WIDTH CAP_VIEW_WIDTH
 #define SNAPSHOT_HEIGHT 224
 #define SNAPSHOT_FIT_BYTES (SNAPSHOT_FIT_WIDTH * SNAPSHOT_HEIGHT)
+#define AVSP_CART_DRAM1_BASE ((unsigned char *)0x22600000)
+#define AVSP_CART_DRAM1_BYTES 0x200000
 #define BOSS_CEL_BYTES ((AVSP_BOSS_CEL_WIDTH * AVSP_BOSS_CEL_HEIGHT) / 2)
 #define BITMAP_SCENE_NONE (-1000)
 #define BITMAP_SCENE_CORRIDOR (-2)
@@ -83,6 +86,7 @@ static jo_img_8bits hud_top_image;
 static jo_img_8bits hud_prompt_image;
 static jo_img_8bits hud_heat_image;
 static jo_sound weapon_sound;
+static jo_sound melee_sound;
 static int player_idle_sprites[2];
 static int player_action_sprites[AVSP_PLAYER_ACTION_LAYERS];
 static int enemy_action_sprites[CAP_MAX_ENEMIES];
@@ -102,6 +106,9 @@ static int stage_music_started;
 static int weapon_audio_played_shots;
 static int weapon_audio_pending_shot;
 static int weapon_audio_channel_observed;
+static int melee_audio_pending;
+static int melee_audio_play_count;
+static int melee_audio_channel_observed;
 static int current_bitmap_scene;
 #ifdef AVSP_VISUAL_TEST
 static int visual_action_index;
@@ -132,23 +139,34 @@ static int load_all_cels(void)
     return 1;
 }
 
-static int load_weapon_audio(void)
+static int load_pcm_audio(jo_sound *sound, const char *filename,
+                          const char *directory, const int expected_bytes,
+                          const int sample_rate)
 {
     int length = 0;
-    weapon_sound.data = jo_fs_read_file_in_dir(
-        AVSP_GUN_PCM_FILE, AVSP_GUN_PCM_DIRECTORY, &length);
-    if (weapon_sound.data == JO_NULL || length != AVSP_GUN_PCM_BYTES)
+    sound->data = jo_fs_read_file_in_dir(filename, directory, &length);
+    if (sound->data == JO_NULL || length != expected_bytes)
     {
-        failed_asset = AVSP_GUN_PCM_FILE;
+        failed_asset = filename;
         return 0;
     }
-    weapon_sound.data_length = length;
-    weapon_sound.mode = JoSoundStereo16Bit;
-    weapon_sound.current_playing_channel = 0;
-    weapon_sound.sample_rate = AVSP_GUN_PCM_SAMPLE_RATE;
-    weapon_sound.volume = JO_MAX_AUDIO_VOLUME;
-    weapon_sound.pan = 0;
+    sound->data_length = length;
+    sound->mode = JoSoundStereo16Bit;
+    sound->current_playing_channel = 0;
+    sound->sample_rate = sample_rate;
+    sound->volume = JO_MAX_AUDIO_VOLUME;
+    sound->pan = 0;
     return 1;
+}
+
+static int load_action_audio(void)
+{
+    return load_pcm_audio(&weapon_sound, AVSP_GUN_PCM_FILE,
+                          AVSP_GUN_PCM_DIRECTORY, AVSP_GUN_PCM_BYTES,
+                          AVSP_GUN_PCM_SAMPLE_RATE) &&
+           load_pcm_audio(&melee_sound, AVSP_MELEE_PCM_FILE,
+                          AVSP_MELEE_PCM_DIRECTORY, AVSP_MELEE_PCM_BYTES,
+                          AVSP_MELEE_PCM_SAMPLE_RATE);
 }
 
 static int load_player_action_sequences(void)
@@ -1067,6 +1085,8 @@ static void frame_callback(void)
     clip_request = cap_world_step(&world, &input);
     if (clip_request == CAP_CLIP_SHOOT)
         weapon_audio_pending_shot = world.shots_fired;
+    if (clip_request == CAP_CLIP_ATTACK)
+        melee_audio_pending = 1;
     /* The CPS2 input is injected at source frame 2525 and QSound voice 12
        becomes audible at frame 2530. Bind the processed SCSP cue to that same
        five-frame action offset, not to the controller edge. */
@@ -1080,6 +1100,22 @@ static void frame_callback(void)
     if (weapon_audio_played_shots > 0 &&
         jo_audio_is_channel_playing(weapon_sound.current_playing_channel))
         weapon_audio_channel_observed = 1;
+    /* The melee composite first differs from idle three frames after input.
+       Retrigger its own prior channel so fast attacks follow the CPS2 voice
+       reuse behavior instead of exhausting all six Jo PCM slots. */
+    if (world.player.action == CAP_ACT_ATTACK &&
+        world.player.action_frame == 3 && melee_audio_pending)
+    {
+        if (melee_audio_play_count > 0 &&
+            jo_audio_is_channel_playing(melee_sound.current_playing_channel))
+            jo_audio_stop_sound(&melee_sound);
+        jo_audio_play_sound(&melee_sound);
+        melee_audio_pending = 0;
+        ++melee_audio_play_count;
+    }
+    if (melee_audio_play_count > 0 &&
+        jo_audio_is_channel_playing(melee_sound.current_playing_channel))
+        melee_audio_channel_observed = 1;
 #ifdef AVSP_VISUAL_TEST
     if (world.player.action == CAP_ACT_WALK)
         world.player.x = JO_TV_WIDTH_2;
@@ -1122,7 +1158,13 @@ static void frame_callback(void)
         }
     }
 #endif
+    if (jo_is_pad1_key_down(JO_KEY_X)) debug_hud_enabled = !debug_hud_enabled;
+    draw_world();
+    draw_arcade_hud();
+    draw_route_overlay();
+    draw_hud();
 #ifdef AVSP_ENCOUNTER_TEST
+    /* Draw test evidence last so captured VDP1 actors cannot obscure it. */
     jo_printf(0, 7, "ENCOUNTER %d KO %d/%d ACTIVE %d EXIT %d LVL %d",
               world.encounter_state, world.enemies_defeated,
               CAP_STAGE1_TOTAL_ENEMIES, active_enemy_count(),
@@ -1132,12 +1174,11 @@ static void frame_callback(void)
               jo_audio_is_channel_playing(
                   weapon_sound.current_playing_channel),
               weapon_audio_channel_observed);
+    jo_printf(0, 9, "PCM MELEE %d CH %d SEEN %d",
+              melee_audio_play_count,
+              jo_audio_is_channel_playing(melee_sound.current_playing_channel),
+              melee_audio_channel_observed);
 #endif
-    if (jo_is_pad1_key_down(JO_KEY_X)) debug_hud_enabled = !debug_hud_enabled;
-    draw_world();
-    draw_arcade_hud();
-    draw_route_overlay();
-    draw_hud();
 #ifdef AVSP_VISUAL_TEST
     jo_printf(0, 5, "VISUAL A%d P%02d/%02d E%d:%03d/%02d",
               world.player.action, world.player.action_frame,
@@ -1162,6 +1203,9 @@ void jo_main(void)
     weapon_audio_played_shots = 0;
     weapon_audio_pending_shot = 0;
     weapon_audio_channel_observed = 0;
+    melee_audio_pending = 0;
+    melee_audio_play_count = 0;
+    melee_audio_channel_observed = 0;
     current_bitmap_scene = BITMAP_SCENE_NONE;
 #ifdef AVSP_VISUAL_TEST
     visual_action_index = 0;
@@ -1176,6 +1220,14 @@ void jo_main(void)
 
     jo_core_init(JO_COLOR_Black);
     cart_available = jo_get_extended_ram_cartridge_type() == CART_32MBits;
+    if (cart_available)
+    {
+        /* Jo Engine registers only DRAM0 for a 32 Mbit cartridge. The Sega
+           expansion-RAM map provides a second 2 MiB data bank at
+           0x22600000-0x227fffff. Register it before loading assets so the
+           runtime can use the cartridge's complete 4 MiB capacity. */
+        jo_add_memory_zone(AVSP_CART_DRAM1_BASE, AVSP_CART_DRAM1_BYTES);
+    }
     set_actor_palette();
     set_frontend_palettes();
     set_hud_palette();
@@ -1190,7 +1242,7 @@ void jo_main(void)
                         load_route_sequences() &&
                         load_background() && load_boss_background() &&
                         load_hud_assets() &&
-                        load_weapon_audio() &&
+                        load_action_audio() &&
                         load_all_cels() && load_player_action_sequences() &&
                         load_enemy_action_sequences() && load_boss_idle() &&
                         create_sprite_working_set();

@@ -1,19 +1,23 @@
 {
-  "schema": 1,
+  "schema": 2,
   "source": "deterministic MAME 0.289 QSound HLE differential capture",
   "action": "predator_warrior_weapon",
   "action_input_frame": 2525,
   "qsound": {
-    "voice": 12,
-    "start_frame": 2530,
-    "end_frame": 2582,
-    "bank": "0x801c",
-    "address": "0x8000",
-    "rate": "0x1000",
-    "phase": "0x8000",
-    "loop_length": "0x000e",
-    "end_address": "0xde3c",
-    "volume": "0x179a"
+    "starts": [
+      {
+        "voice": 12,
+        "start_frame": 2530,
+        "bank": "0x801c",
+        "address": "0x8000",
+        "rate": "0x1000",
+        "phase": "0x8000",
+        "loop_length": "0x000e",
+        "end_address": "0xde3c",
+        "volume": "0x179a"
+      }
+    ],
+    "end_frame": 2582
   },
   "wave": {
     "channels": 2,

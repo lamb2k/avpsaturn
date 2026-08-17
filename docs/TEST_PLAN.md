@@ -76,6 +76,12 @@ Round 2 title surfaces. No data-track reads occur after Stage 1 CDDA begins.
 - In the encounter diagnostic, require `SHOT 1`, `PLAYED 1`, and latched
   `SEEN 1`; this proves the Jo/SGL PCM channel entered its playing state. The
   physical-console listening test remains the final waveform/output gate.
+- Play the capture-exact melee composite on action frame 3 and verify
+  `/AUDIO/MELEE.PCM` is 144,752 bytes with SHA-256
+  `e2f2870251cf28c5cf52d0d074c3b426cc6db5afb4cde2eebf4838ffa296f125`.
+  Repeated B presses must retrigger without exhausting the six PCM slots.
+  The emulator encounter diagnostic currently reaches `KO 8/8` with both
+  weapon and melee `SEEN 1`; physical listening remains pending.
 - Add a comparison capture against the equivalent MAME route.
 
 Status: in progress. A dense 361-sample capture validates the active CPS2 object
