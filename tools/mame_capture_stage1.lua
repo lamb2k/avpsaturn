@@ -9,12 +9,38 @@ local attack = in0["P1 Button 1"]
 local jump = in0["P1 Button 2"]
 local fire = in0["P1 Button 3"]
 local frame = 0
+local active_object_bank = 0
+local object_bank_writes = 0
+local animation_metadata = assert(io.open(
+    ".deps/mame/captures/animation_samples.tsv", "w"))
+animation_metadata:write("frame\tactive_object_bank\tbank_writes\n")
+
+-- CPS2 presents one object-RAM bank while the game fills the other. Track the
+-- write-only bank-select register so every sample names the bank MAME latches
+-- for display rather than asking the extractor to infer it later.
+local main_program = machine.devices[":maincpu"].spaces["program"]
+stage1_objbank_tap = main_program:install_write_tap(
+    0x8040e0, 0x8040e1, "stage1_object_bank",
+    function(offset, data, mask)
+        active_object_bank = data & 1
+        object_bank_writes = object_bank_writes + 1
+    end)
 
 local function write_share_words(path, share)
     local file = assert(io.open(path, "w"))
     file:write("word\tvalue\n")
     for offset = 0, share.size - 2, 2 do
         file:write(string.format("%04x\t%04x\n", offset / 2, share:read_u16(offset)))
+    end
+    file:close()
+end
+
+local function write_palette(path)
+    local palette = machine.palettes[":palette"]
+    local file = assert(io.open(path, "w"))
+    file:write("index\targb\n")
+    for index = 0, palette.entries - 1 do
+        file:write(string.format("%04x\t%08x\n", index, palette:pen_color(index)))
     end
     file:close()
 end
@@ -37,13 +63,12 @@ local function dump_stage_state()
     end
     write_share_words(".deps/mame/captures/gfxram.tsv", machine.memory.shares[":gfxram"])
 
-    local palette = machine.palettes[":palette"]
-    local file = assert(io.open(".deps/mame/captures/palette.tsv", "w"))
-    file:write("index\targb\n")
-    for index = 0, palette.entries - 1 do
-        file:write(string.format("%04x\t%08x\n", index, palette:pen_color(index)))
-    end
-    file:close()
+    write_palette(".deps/mame/captures/palette.tsv")
+
+    local bank_file = assert(io.open(
+        ".deps/mame/captures/active_object_bank.txt", "w"))
+    bank_file:write(string.format("%d\n", active_object_bank + 1))
+    bank_file:close()
 
     -- Keep a byte-for-byte copy of the post-ROM-loader graphics region.  The
     -- extraction tool compares its own ROM interleave against this diagnostic
@@ -64,6 +89,15 @@ local function dump_animation_sample(sample_frame)
         machine.memory.shares[":objram2"])
     write_share_words(string.format(".deps/mame/captures/output_%04d.tsv", sample_frame),
         machine.memory.shares[":output"])
+    local active_share = active_object_bank == 0 and
+        machine.memory.shares[":objram1"] or machine.memory.shares[":objram2"]
+    write_share_words(string.format(
+        ".deps/mame/captures/objram_active_%04d.tsv", sample_frame), active_share)
+    write_palette(string.format(
+        ".deps/mame/captures/palette_%04d.tsv", sample_frame))
+    animation_metadata:write(string.format("%d\t%d\t%d\n",
+        sample_frame, active_object_bank + 1, object_bank_writes))
+    animation_metadata:flush()
 end
 
 stage1_capture_subscription = emu.add_machine_frame_notifier(function()
@@ -101,8 +135,8 @@ stage1_capture_subscription = emu.add_machine_frame_notifier(function()
         print(string.format("AVSPU_CAPTURE frame=%d", frame))
     end
 
-
-    if frame >= 2880 and frame <= 3240 and frame % 60 == 0 then
+    if frame >= 2760 and frame <= 4200 and frame % 4 == 0 then
+        screen:snapshot(string.format("stage1_sample_%04d.png", frame))
         dump_animation_sample(frame)
     end
 
@@ -114,5 +148,8 @@ stage1_capture_subscription = emu.add_machine_frame_notifier(function()
         dump_stage_state()
         machine:save("avspu_stage1")
     end
-    if frame == 4220 then machine:exit() end
+    if frame == 4220 then
+        animation_metadata:close()
+        machine:exit()
+    end
 end)

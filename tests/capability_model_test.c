@@ -19,6 +19,7 @@ static void test_attack_requests_and_damage(void)
     CapClipRequest request;
 
     cap_world_init(&world);
+    world.frame = 1; /* Keep enemy AI from opening on its frame-zero attack. */
     world.enemies[0].x = world.player.x + 40;
     world.enemies[0].lane = world.player.lane;
     memset(&input, 0, sizeof(input));
@@ -26,7 +27,8 @@ static void test_attack_requests_and_damage(void)
     request = cap_world_step(&world, &input);
     assert(request == CAP_CLIP_ATTACK);
     assert(world.player.action == CAP_ACT_ATTACK);
-    step_empty(&world, 8);
+    /* Dense CPS2 samples place the hit window at attack pose four/frame 16. */
+    step_empty(&world, 16);
     assert(world.enemies[0].health == 2);
 
     cap_world_init(&world);
@@ -82,7 +84,8 @@ static void test_long_deterministic_run(void)
         assert(world.player.x >= 24 && world.player.x <= CAP_WORLD_WIDTH - 24);
         assert(world.player.lane >= 148 && world.player.lane <= 198);
         assert(world.player.health >= 0 && world.player.health <= CAP_PLAYER_MAX_HEALTH);
-        assert(world.camera_x >= 0 && world.camera_x <= CAP_WORLD_WIDTH - 320);
+        assert(world.camera_x >= 0 &&
+               world.camera_x <= CAP_WORLD_WIDTH - CAP_VIEW_WIDTH);
         assert(world.player.action >= CAP_ACT_IDLE && world.player.action <= CAP_ACT_KO);
         for (index = 0; index < CAP_MAX_ENEMIES; ++index)
         {

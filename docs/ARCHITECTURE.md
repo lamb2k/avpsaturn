@@ -32,11 +32,14 @@ The current path instead:
 4. emits one 192x192 VDP1 cel per source palette layer
 5. draws all layers at the same pivot and depth
 
-The working set contains seven 192x192 packed 4bpp cels, or 129,024 bytes of
-texture data: two idle Predator layers, three attack Predator layers, and two
-alien cels. Four exact CPS2 palette banks occupy one Saturn 256-color CRAM
-allocation. This fits comfortably in VDP1 texture memory and leaves room for
-commands and a future animation cache.
+The active VDP1 working set contains seven 192x192 packed 4bpp slots, or 129,024
+bytes of texture data: two idle Predator layers, three replaceable attack
+layers, and two alien cels. The first attack sequence contains ten captured
+poses and three layers per pose, totaling 552,960 source bytes in the 4 MB
+cartridge. Each pose replaces only the three 55,296-byte attack slots. Four
+exact CPS2 palette banks occupy one Saturn 256-color CRAM allocation. This
+separates source residency from VDP1 texture residency and leaves room for
+commands and a larger animation cache.
 
 Before gameplay starts, a separate reference mode draws the final visible CPS2
 object/priority result as one 384x224 8bpp VDP1 surface. Its 76 visible source
@@ -55,6 +58,17 @@ that 512x256 reconstruction into a VDP2 256-color bitmap. The arcade HUD is
 currently baked from the captured scroll layer, so its displayed values are
 static and are not yet driven by native gameplay state.
 
+## Display mapping
+
+The arcade active picture is 384x224. The Saturn has no native 384-pixel
+low-resolution mode, so the project force-includes a project-owned video
+configuration selecting SGL's `TV_352x224` for every translation unit. This
+preserves all 224 scanlines and original source-pixel scale while center-cropping
+16 pixels at each horizontal edge. The remaining edge content will be exposed
+through arcade-derived camera motion; fixed HUD elements must be moved inside
+the 352-pixel safe area when the HUD becomes native. No horizontal resampling is
+used in the exact baseline.
+
 ## What is exact and what is not
 
 Exact in the current milestone:
@@ -64,24 +78,26 @@ Exact in the current milestone:
 - selected background/HUD capture reconstruction
 - aligned multi-palette VDP1 assembly
 - active CPS2 object-RAM bank and final visible boot object/priority result
+- Saturn-native 352x224 initialization and original-scale 384-to-352 crop
+- first ten-pose captured Predator attack sequence
 
 Still approximate or incomplete:
 
-- temporal confirmation of the frame-local 54-command actor/prop grouping
+- temporal confirmation of enemy and prop groupings beyond the player sequence
 - enemy variants, palettes, poses, count, and exact object priority
-- animation/state timing and full frame sets
+- remaining player states, enemy animation/state timing, and full frame sets
 - dynamic HUD values, scroll behavior, level triggers, combat, AI, and audio
-- 384-wide CPS2 framing; the Jo Engine target is currently 320x224
+- native HUD safe-area placement and arcade-derived camera behavior for the
+  unavoidable 16-pixel-per-side crop
 
 ## Next implementation sequence
 
-1. Group captured CPS2 commands into complete actors and props.
-2. Emit tight per-actor/per-palette cels, pivots, and priority metadata.
-3. Capture successive gameplay states and build animation manifests.
-4. Replace prototype combat with Stage 1 scripts, collision, spawn, and camera
+1. Extend the captured player timeline into idle, walk, hit, and KO clips.
+2. Group enemy commands temporally and emit enemy animation and priority data.
+3. Replace prototype combat with Stage 1 scripts, collision, spawn, and camera
    data.
-5. Add bounded CD-to-cartridge prefetch and VDP1 cache scheduling.
-6. Port audio, complete the level, and verify on real Saturn hardware.
+4. Add bounded CD-to-cartridge prefetch and VDP1 cache scheduling.
+5. Port audio, complete the level, and verify on real Saturn hardware.
 
 Additional frames should live on disc and in the 4 MB cartridge. Only the
 current and predicted cels should occupy VDP1 VRAM. AI upscaling is a separate

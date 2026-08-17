@@ -22,7 +22,8 @@ if ($LASTEXITCODE -ne 0) {
 $captureRoot = Join-Path $projectRoot '.deps\mame\captures'
 New-Item -ItemType Directory -Force -Path $captureRoot | Out-Null
 $requiredCaptures = @('gfx_region.bin', 'gfxram.tsv', 'palette.tsv', 'objram1.tsv',
-    'objram1_2880.tsv', 'objram2_2940.tsv')
+    'animation_samples.tsv', 'active_object_bank.txt', 'objram_active_2880.tsv',
+    'palette_2880.tsv', 'stage1_sample_2880.png')
 $captureMissing = $false
 foreach ($captureName in $requiredCaptures) {
     if (-not (Test-Path -LiteralPath (Join-Path $captureRoot $captureName))) {
@@ -50,14 +51,20 @@ else {
 }
 
 if (-not $PythonPath) {
-    $bundledPython = Join-Path $env:LOCALAPPDATA 'codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
-    if (Test-Path -LiteralPath $bundledPython) {
-        $PythonPath = $bundledPython
+    $pythonCommand = Get-Command 'py.exe' -ErrorAction SilentlyContinue
+    if ($pythonCommand) {
+        $PythonPath = $pythonCommand.Source
     }
     else {
         $pythonCommand = Get-Command 'python.exe' -ErrorAction SilentlyContinue
         if ($pythonCommand -and $pythonCommand.Source -notlike '*WindowsApps*') {
             $PythonPath = $pythonCommand.Source
+        }
+        else {
+            $bundledPython = Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
+            if (Test-Path -LiteralPath $bundledPython) {
+                $PythonPath = $bundledPython
+            }
         }
     }
 }

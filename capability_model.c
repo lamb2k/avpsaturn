@@ -2,7 +2,8 @@
 
 #define CAP_LANE_MIN 148
 #define CAP_LANE_MAX 198
-#define CAP_ATTACK_ACTIVE_FRAME 8
+#define CAP_ATTACK_ACTIVE_FRAME 16
+#define CAP_ATTACK_TOTAL_FRAMES 40
 #define CAP_SPECIAL_ACTIVE_FRAME 12
 
 static int cap_abs(const int value)
@@ -127,7 +128,8 @@ static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
             cap_resolve_player_hit(world, 58, 1);
         if (player->action == CAP_ACT_SPECIAL && player->action_frame == CAP_SPECIAL_ACTIVE_FRAME)
             cap_resolve_player_hit(world, 82, 2);
-        if ((player->action == CAP_ACT_ATTACK && player->action_frame >= 24) ||
+        if ((player->action == CAP_ACT_ATTACK &&
+             player->action_frame >= CAP_ATTACK_TOTAL_FRAMES) ||
             (player->action == CAP_ACT_SPECIAL && player->action_frame >= 34))
         {
             player->action = CAP_ACT_IDLE;
@@ -227,7 +229,8 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
         if (enemy->action_frame >= 210)
         {
             cap_reset_enemy(enemy, index);
-            enemy->x = cap_clamp(world->camera_x + 360 + index * 34, 400, CAP_WORLD_WIDTH - 24);
+            enemy->x = cap_clamp(world->camera_x + CAP_VIEW_WIDTH + 40 + index * 34,
+                                 400, CAP_WORLD_WIDTH - 24);
         }
         return;
     }
@@ -287,7 +290,8 @@ CapClipRequest cap_world_step(CapWorld *world, const CapInput *input)
     request = cap_update_player(world, input);
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
         cap_update_enemy(world, &world->enemies[index], index);
-    target_camera = cap_clamp(world->player.x - 288, 0, CAP_WORLD_WIDTH - 320);
+    target_camera = cap_clamp(world->player.x - (CAP_VIEW_WIDTH - 32),
+                              0, CAP_WORLD_WIDTH - CAP_VIEW_WIDTH);
     if (world->camera_x < target_camera) world->camera_x += 2;
     if (world->camera_x > target_camera) world->camera_x -= 2;
     ++world->frame;

@@ -2,6 +2,7 @@
 #include <string.h>
 #include "capability_model.h"
 #include "generated/avsp_palette.h"
+#include "generated/avsp_player_animation.h"
 #include "generated/avsp_snapshot_palette.h"
 
 #define CEL_WIDTH 192
@@ -13,15 +14,16 @@
 #define SNAPSHOT_HEIGHT 224
 #define SNAPSHOT_BYTES (SNAPSHOT_WIDTH * SNAPSHOT_HEIGHT)
 
+#if JO_TV_WIDTH != CAP_VIEW_WIDTH || JO_TV_HEIGHT != 224
+#error "The AvP fidelity build requires Saturn TV_352x224"
+#endif
+
 extern jo_color *nbg1_bitmap;
 
 typedef enum
 {
     CEL_PLAYER_IDLE_0 = 0,
     CEL_PLAYER_IDLE_1,
-    CEL_PLAYER_ATTACK_0,
-    CEL_PLAYER_ATTACK_1,
-    CEL_PLAYER_ATTACK_2,
     CEL_ALIEN_A,
     CEL_ALIEN_B,
     CEL_COUNT
@@ -40,9 +42,6 @@ static CelAsset cel_assets[CEL_COUNT] =
 {
     {"PXI0.BIN", CEL_WIDTH, CEL_HEIGHT, CEL_BYTES, {0, 0, JO_NULL}},
     {"PXI1.BIN", CEL_WIDTH, CEL_HEIGHT, CEL_BYTES, {0, 0, JO_NULL}},
-    {"PXA0.BIN", CEL_WIDTH, CEL_HEIGHT, CEL_BYTES, {0, 0, JO_NULL}},
-    {"PXA1.BIN", CEL_WIDTH, CEL_HEIGHT, CEL_BYTES, {0, 0, JO_NULL}},
-    {"PXA2.BIN", CEL_WIDTH, CEL_HEIGHT, CEL_BYTES, {0, 0, JO_NULL}},
     {"EXA0.BIN", CEL_WIDTH, CEL_HEIGHT, CEL_BYTES, {0, 0, JO_NULL}},
     {"EXB0.BIN", CEL_WIDTH, CEL_HEIGHT, CEL_BYTES, {0, 0, JO_NULL}}
 };
@@ -54,10 +53,12 @@ static jo_palette snapshot_palette;
 static jo_img_8bits background_image;
 static jo_img_8bits snapshot_image;
 static unsigned char *background_bitmap;
+static jo_img_4bits player_attack_images[AVSP_PLAYER_ATTACK_POSES][AVSP_PLAYER_ATTACK_LAYERS];
 static int player_idle_sprites[2];
-static int player_attack_sprites[3];
+static int player_attack_sprites[AVSP_PLAYER_ATTACK_LAYERS];
 static int alien_sprites[2];
 static int snapshot_sprite;
+static int current_player_attack_pose;
 static int debug_hud_enabled;
 static const char *failed_asset;
 static int runtime_ready;
@@ -82,6 +83,31 @@ static int load_all_cels(void)
     int index;
     for (index = 0; index < CEL_COUNT; ++index)
         if (!load_cel_asset(&cel_assets[index])) return 0;
+    return 1;
+}
+
+static int load_player_attack_sequence(void)
+{
+    int pose;
+    int layer;
+    int length;
+    for (pose = 0; pose < AVSP_PLAYER_ATTACK_POSES; ++pose)
+    {
+        for (layer = 0; layer < AVSP_PLAYER_ATTACK_LAYERS; ++layer)
+        {
+            jo_img_4bits *image = &player_attack_images[pose][layer];
+            image->width = CEL_WIDTH;
+            image->height = CEL_HEIGHT;
+            length = 0;
+            image->data = (unsigned char *)jo_fs_read_file_in_dir(
+                avsp_player_attack_files[pose][layer], "SPR4", &length);
+            if (image->data == JO_NULL || length != CEL_BYTES)
+            {
+                failed_asset = avsp_player_attack_files[pose][layer];
+                return 0;
+            }
+        }
+    }
     return 1;
 }
 
@@ -202,11 +228,17 @@ static int add_sprite_for_asset(const CelId cel)
 
 static int create_sprite_working_set(void)
 {
+    int layer;
     player_idle_sprites[0] = add_sprite_for_asset(CEL_PLAYER_IDLE_0);
     player_idle_sprites[1] = add_sprite_for_asset(CEL_PLAYER_IDLE_1);
-    player_attack_sprites[0] = add_sprite_for_asset(CEL_PLAYER_ATTACK_0);
-    player_attack_sprites[1] = add_sprite_for_asset(CEL_PLAYER_ATTACK_1);
-    player_attack_sprites[2] = add_sprite_for_asset(CEL_PLAYER_ATTACK_2);
+    for (layer = 0; layer < AVSP_PLAYER_ATTACK_LAYERS; ++layer)
+    {
+        player_attack_sprites[layer] = jo_sprite_add_4bits_image(
+            &player_attack_images[0][layer]);
+        if (player_attack_sprites[layer] < 0)
+            failed_asset = avsp_player_attack_files[0][layer];
+    }
+    current_player_attack_pose = 0;
     alien_sprites[0] = add_sprite_for_asset(CEL_ALIEN_A);
     alien_sprites[1] = add_sprite_for_asset(CEL_ALIEN_B);
     return failed_asset == JO_NULL;
@@ -216,7 +248,8 @@ static void draw_exact_layer(const CapActor *actor, const int screen_x,
                              const int sprite_id, const int palette_bank,
                              const int depth)
 {
-    int screen_y = actor->lane - 120 - CEL_HEIGHT / 2;
+    /* Captured player and enemy pivots sit at pixel 184 in each 192px cel. */
+    int screen_y = actor->lane - 200;
     jo_sprite_set_palette_4bits(actor_palette.id, palette_bank);
     if (actor->facing < 0) jo_sprite_enable_horizontal_flip();
     jo_sprite_draw3D(sprite_id, screen_x, screen_y, depth);
@@ -226,11 +259,21 @@ static void draw_exact_layer(const CapActor *actor, const int screen_x,
 static void draw_player(const CapActor *actor, const int screen_x)
 {
     int depth = 330 - actor->lane;
+    int layer;
     if (actor->action == CAP_ACT_ATTACK || actor->action == CAP_ACT_SPECIAL)
     {
-        draw_exact_layer(actor, screen_x, player_attack_sprites[0], 0, depth);
-        draw_exact_layer(actor, screen_x, player_attack_sprites[1], 1, depth - 1);
-        draw_exact_layer(actor, screen_x, player_attack_sprites[2], 2, depth - 2);
+        int pose = actor->action_frame / 4;
+        if (pose >= AVSP_PLAYER_ATTACK_POSES) pose = AVSP_PLAYER_ATTACK_POSES - 1;
+        if (pose != current_player_attack_pose)
+        {
+            for (layer = 0; layer < AVSP_PLAYER_ATTACK_LAYERS; ++layer)
+                jo_sprite_replace_4bits_image(
+                    &player_attack_images[pose][layer], player_attack_sprites[layer]);
+            current_player_attack_pose = pose;
+        }
+        for (layer = 0; layer < AVSP_PLAYER_ATTACK_LAYERS; ++layer)
+            draw_exact_layer(actor, screen_x, player_attack_sprites[layer],
+                             layer, depth - layer);
     }
     else
     {
@@ -249,8 +292,10 @@ static void draw_alien(const CapActor *actor, const int screen_x)
 static void draw_world(void)
 {
     int index;
-    int player_x = world.player.x - world.camera_x - 160;
-    int background_scroll = (world.camera_x * 192) / (CAP_WORLD_WIDTH - 320);
+    int player_x = world.player.x - world.camera_x - JO_TV_WIDTH_2;
+    int background_scroll =
+        (world.camera_x * (BACKGROUND_WIDTH - JO_TV_WIDTH)) /
+        (CAP_WORLD_WIDTH - JO_TV_WIDTH);
 
     jo_move_background(background_scroll, 8);
     if (!world.encounter_started)
@@ -263,7 +308,7 @@ static void draw_world(void)
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
     {
         CapActor *enemy = &world.enemies[index];
-        int screen_x = enemy->x - world.camera_x - 160;
+        int screen_x = enemy->x - world.camera_x - JO_TV_WIDTH_2;
         if (screen_x < -256 || screen_x > 256) continue;
         draw_alien(enemy, screen_x);
     }
@@ -304,15 +349,27 @@ static void frame_callback(void)
         jo_printf(1, 12, "CAPABILITY TEST FAILED: %s", failed_asset == JO_NULL ? "UNKNOWN" : failed_asset);
         return;
     }
+#ifdef AVSP_VISUAL_TEST
+    if (world.player.action == CAP_ACT_IDLE)
+    {
+        world.player.action = CAP_ACT_ATTACK;
+        world.player.action_frame = 0;
+    }
+#endif
     input = read_input();
     cap_world_step(&world, &input);
     if (jo_is_pad1_key_down(JO_KEY_X)) debug_hud_enabled = !debug_hud_enabled;
     draw_world();
     draw_hud();
+#ifdef AVSP_VISUAL_TEST
+    jo_printf(0, 5, "ATTACK VISUAL TEST FRAME %02d POSE %02d",
+              world.player.action_frame, current_player_attack_pose);
+#endif
 }
 
 void jo_main(void)
 {
+    int index;
     failed_asset = JO_NULL;
     background_bitmap = JO_NULL;
     background_image.data = JO_NULL;
@@ -331,9 +388,19 @@ void jo_main(void)
     else
     {
         runtime_ready = load_background() && load_snapshot_asset() &&
-                        load_all_cels() && create_sprite_working_set();
+                        load_all_cels() && load_player_attack_sequence() &&
+                        create_sprite_working_set();
     }
     cap_world_init(&world);
+#ifdef AVSP_VISUAL_TEST
+    world.encounter_started = 1;
+    world.frame = 1;
+    world.player.x = JO_TV_WIDTH_2;
+    for (index = 0; index < CAP_MAX_ENEMIES; ++index)
+        world.enemies[index].x = 900;
+#else
+    JO_UNUSED_ARG(index);
+#endif
     jo_core_set_screens_order(JO_NBG0_SCREEN, JO_SPRITE_SCREEN, JO_NBG1_SCREEN);
     jo_core_add_callback(frame_callback);
     jo_core_run();

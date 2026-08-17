@@ -19,13 +19,14 @@ Status: passed on August 16, 2026.
 
 Status: passed in Yaba Sanshiro 2 v1.20.37 on August 16, 2026. The 12,000-frame
 test and clean release build passed, and visual inspection confirmed the exact
-working-set pixels at original scale over the reconstructed background/HUD.
+working-set pixels at original scale over the reconstructed background/HUD in
+the Saturn's native 352x224 mode.
 
 ## Gate C: frame-exact presentation reconstruction
 
 - Group all visible CPS2 object commands into actors and props.
 - Match the MAME reference enemy variants, palettes, positions, pivots, and
-  priority at the Saturn's chosen crop.
+  priority at the Saturn's 352x224 center crop.
 - Preserve the active object-RAM bank and reproduce tilemap priority when the
   flattened boot oracle is replaced by independently animated actors.
 - Remove static HUD values from the background and drive them natively.
@@ -36,10 +37,12 @@ Status: in progress. The boot reference mode now draws the final visible CPS2
 object/priority result from one lossless 8bpp VDP1 surface with 76 visible
 colors. Active-bank selection is guarded by a 54-command capture signature, and
 an exhaustive frame-local grouping manifest identifies actors, shadow sprites,
-and props while marking three edge fragments as candidates. Temporal grouping,
-actor-level priority, crop policy, dynamic HUD state, and image-difference
-acceptance remain open. The post-input gameplay scene still reuses two blue
-alien cels and must not be described as frame-exact.
+and props while marking three edge fragments as candidates. The display now
+uses native 352x224, preserving scale and cropping 16 pixels per horizontal
+edge. The crop policy is fixed; native HUD safe-area placement, enemy temporal
+grouping, actor-level priority, and image-difference acceptance remain open.
+The post-input gameplay scene still reuses two blue alien cels and must not be
+described as frame-exact.
 
 ## Gate D: first playable Stage 1 encounter
 
@@ -50,8 +53,12 @@ alien cels and must not be described as frame-exact.
 - Reach the room completion transition deterministically.
 - Add a comparison capture against the equivalent MAME route.
 
-Status: open. The current combat logic is a native placeholder used only to
-exercise movement, overlap, damage, and ordering.
+Status: in progress. A dense 361-sample capture validates the active CPS2 object
+bank and identifies 87 unique player assemblies. The first authentic ten-pose
+Predator attack is cartridge-resident and has been visually verified advancing
+through three replaceable VDP1 palette layers. Remaining player states, enemy
+animation, arcade timing, encounter scripting, and completion transition are
+still open. The current combat rules remain a native placeholder.
 
 ## Gate E: performance and hardware
 

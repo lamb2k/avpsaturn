@@ -112,13 +112,41 @@ def load_words(name: str) -> list[int]:
     return [int(line.split("\t")[1], 16) for line in lines if line]
 
 
-def load_palette() -> list[tuple[int, int, int, int]]:
+def load_palette(name: str = "palette.tsv") -> list[tuple[int, int, int, int]]:
     palette = []
-    lines = (CAPTURE_ROOT / "palette.tsv").read_text(encoding="utf-8").splitlines()[1:]
+    lines = (CAPTURE_ROOT / name).read_text(encoding="utf-8").splitlines()[1:]
     for line in lines:
         argb = int(line.split("\t")[1], 16)
         palette.append(((argb >> 16) & 255, (argb >> 8) & 255, argb & 255, 255))
     return palette
+
+
+@lru_cache(maxsize=1)
+def load_animation_sample_banks() -> dict[int, int]:
+    lines = (CAPTURE_ROOT / "animation_samples.tsv").read_text(
+        encoding="utf-8").splitlines()[1:]
+    samples = {}
+    for line in lines:
+        if not line:
+            continue
+        frame, bank, _ = line.split("\t")
+        samples[int(frame)] = int(bank)
+    return samples
+
+
+def animation_object_filename(frame: int, expected_bank: int) -> str:
+    samples = load_animation_sample_banks()
+    captured_bank = samples.get(frame)
+    if captured_bank is None:
+        raise ValueError(f"frame {frame} is absent from animation_samples.tsv")
+    if captured_bank != expected_bank:
+        raise ValueError(
+            f"frame {frame}: expected active bank {expected_bank}, captured {captured_bank}")
+    return f"objram_active_{frame:04d}.tsv"
+
+
+def animation_palette(frame: int) -> list[tuple[int, int, int, int]]:
+    return load_palette(f"palette_{frame:04d}.tsv")
 
 
 def decode_tile(gfx: bytearray, code: int, size: int, right_half: bool = False) -> Image.Image:
@@ -251,6 +279,36 @@ def render_background(gfx: bytearray, gfxram: list[int], cps_a: list[int],
     return canvas
 
 
+def decode_object_entries(words: list[int]) -> list[dict[str, int]]:
+    raw_entries = []
+    for offset in range(0, len(words) - 3, 4):
+        x, y, code, attribute = words[offset:offset + 4]
+        if y >= 0x8000 or attribute >= 0xFF00:
+            break
+        raw_entries.append(
+            {"offset": offset, "x": x, "y": y, "code": code,
+             "attribute": attribute})
+
+    rendered = []
+    for entry in reversed(raw_entries):
+        raw_x = entry["x"]
+        raw_y = entry["y"]
+        attribute = entry["attribute"]
+        nx = ((attribute >> 8) & 0x0F) + 1 if attribute & 0xFF00 else 1
+        ny = ((attribute >> 12) & 0x0F) + 1 if attribute & 0xFF00 else 1
+        rendered.append({
+            **entry,
+            "tile_code": entry["code"] + ((raw_y & 0x6000) << 3),
+            "screen_x": (raw_x & 0x3FF) - VISIBLE_LEFT,
+            "screen_y": (raw_y & 0x3FF) - VISIBLE_TOP,
+            "width": nx * 16,
+            "height": ny * 16,
+            "colour": attribute & 0x1F,
+            "priority": (raw_x >> 13) & 0x07,
+        })
+    return rendered
+
+
 def decode_objects(gfx: bytearray, words: list[int], palette: list[tuple[int, int, int, int]]) -> tuple[Image.Image, list[dict[str, int]]]:
     plane_offsets = (24, 16, 8, 0)
     x_offsets = tuple(range(8)) + tuple(range(32, 40))
@@ -273,37 +331,18 @@ def decode_objects(gfx: bytearray, words: list[int], palette: list[tuple[int, in
                     pixels[target_x, target_y] = palette[colour * 16 + pen]
         return image
 
-    entries: list[dict[str, int]] = []
-    for offset in range(0, len(words) - 3, 4):
-        x, y, code, attribute = words[offset:offset + 4]
-        if y >= 0x8000 or attribute >= 0xFF00:
-            break
-        entries.append({"offset": offset, "x": x, "y": y, "code": code, "attribute": attribute})
-
     layer = Image.new("RGBA", (VISIBLE_WIDTH, VISIBLE_HEIGHT), (0, 0, 0, 0))
-    rendered: list[dict[str, int]] = []
-    for entry in reversed(entries):
-        raw_x = entry["x"]
-        raw_y = entry["y"]
-        code = entry["code"] + ((raw_y & 0x6000) << 3)
+    rendered = decode_object_entries(words)
+    for entry in rendered:
+        code = entry["tile_code"]
         attribute = entry["attribute"]
-        colour = attribute & 0x1F
+        colour = entry["colour"]
         flip_x = bool(attribute & 0x20)
         flip_y = bool(attribute & 0x40)
-        nx = ((attribute >> 8) & 0x0F) + 1 if attribute & 0xFF00 else 1
-        ny = ((attribute >> 12) & 0x0F) + 1 if attribute & 0xFF00 else 1
-        origin_x = raw_x & 0x3FF
-        origin_y = raw_y & 0x3FF
-        screen_x = origin_x - VISIBLE_LEFT
-        screen_y = origin_y - VISIBLE_TOP
-        rendered.append({
-            **entry,
-            "screen_x": screen_x,
-            "screen_y": screen_y,
-            "width": nx * 16,
-            "height": ny * 16,
-            "colour": colour,
-        })
+        nx = entry["width"] // 16
+        ny = entry["height"] // 16
+        screen_x = entry["screen_x"]
+        screen_y = entry["screen_y"]
 
         for tile_y in range(ny):
             for tile_x in range(nx):
@@ -361,6 +400,136 @@ def verify_stage1_object_capture(entries: list[dict[str, int]]) -> None:
         raise ValueError(
             f"{STAGE1_ACTIVE_OBJECT_RAM}: expected the verified 54-command "
             "Stage 1 active-bank signature")
+
+
+def verify_animation_bank_alignment(gfx: bytearray) -> None:
+    """Prove the tapped active bank matches pixels in representative screenshots."""
+    report = []
+    samples = load_animation_sample_banks()
+    for frame in (2880, 4200):
+        reference = Image.open(
+            CAPTURE_ROOT / f"stage1_sample_{frame:04d}.png").convert("RGBA")
+        reference_pixels = reference.load()
+        palette = animation_palette(frame)
+        scores = {}
+        for bank in (1, 2):
+            filename = (f"objram{bank}.tsv" if frame == 4200 else
+                        f"objram{bank}_{frame:04d}.tsv")
+            layer, _ = decode_objects(gfx, load_words(filename), palette)
+            layer_pixels = layer.load()
+            opaque = 0
+            matches = 0
+            for y in range(layer.height):
+                for x in range(layer.width):
+                    pixel = layer_pixels[x, y]
+                    if pixel[3]:
+                        opaque += 1
+                        if pixel[:3] == reference_pixels[x, y][:3]:
+                            matches += 1
+            scores[bank] = {"matching_pixels": matches, "opaque_pixels": opaque}
+        active_bank = samples.get(frame)
+        if active_bank not in (1, 2):
+            raise ValueError(f"frame {frame}: invalid captured active bank {active_bank}")
+        alternate_bank = 1 if active_bank == 2 else 2
+        if (scores[active_bank]["matching_pixels"] <=
+                scores[alternate_bank]["matching_pixels"]):
+            raise ValueError(
+                f"frame {frame}: tapped bank {active_bank} does not best match the screenshot")
+        report.append({
+            "frame": frame,
+            "active_bank": active_bank,
+            "active_score": scores[active_bank],
+            "alternate_bank": alternate_bank,
+            "alternate_score": scores[alternate_bank],
+        })
+    (OUTPUT_ROOT / "animation_bank_verification.json").write_text(
+        json.dumps({"checks": report}, indent=2) + "\n", encoding="utf-8")
+
+
+def player_animation_commands(entries: list[dict[str, int]]) -> list[dict[str, int]]:
+    """Select the Predator's CPS2 command assembly from a captured frame."""
+    return [
+        entry for entry in entries
+        if ((entry["colour"] == 0 and entry["tile_code"] < 7000 and
+             entry["screen_y"] < 160) or
+            (entry["colour"] == 7 and entry["tile_code"] >= 40000) or
+            entry["colour"] == 15)
+    ]
+
+
+def write_player_animation_timeline() -> None:
+    """Deduplicate the dense active-bank samples into pivoted player poses."""
+    samples = load_animation_sample_banks()
+    expected_frames = list(range(2760, 4201, 4))
+    if sorted(samples) != expected_frames:
+        raise ValueError("animation capture must contain every four-frame sample from 2760 to 4200")
+
+    poses: dict[str, dict[str, object]] = {}
+    timeline = []
+    for frame in expected_frames:
+        entries = decode_object_entries(load_words(f"objram_active_{frame:04d}.tsv"))
+        commands = player_animation_commands(entries)
+        primary_commands = [entry for entry in commands if entry["colour"] == 0]
+        if not primary_commands:
+            raise ValueError(f"frame {frame}: incomplete Predator command assembly")
+        primary = max(primary_commands,
+                      key=lambda entry: entry["width"] * entry["height"])
+        pivot_x = primary["screen_x"] + primary["width"] // 2
+        pivot_y = primary["screen_y"] + primary["height"]
+        normalized = [
+            {
+                "tile_code": entry["tile_code"],
+                "attribute": entry["attribute"],
+                "palette": entry["colour"],
+                "priority": entry["priority"],
+                "x": entry["screen_x"] - pivot_x,
+                "y": entry["screen_y"] - pivot_y,
+                "width": entry["width"],
+                "height": entry["height"],
+            }
+            for entry in sorted(commands, key=lambda item: item["offset"], reverse=True)
+        ]
+        signature = json.dumps(normalized, separators=(",", ":"), sort_keys=True)
+        pose_id = hashlib.sha256(signature.encode("ascii")).hexdigest()[:12]
+        if pose_id not in poses:
+            poses[pose_id] = {
+                "id": pose_id,
+                "first_frame": frame,
+                "frames": [],
+                "palettes": sorted({entry["colour"] for entry in commands}),
+                "commands": normalized,
+            }
+        poses[pose_id]["frames"].append(frame)
+        timeline.append({
+            "frame": frame,
+            "pose": pose_id,
+            "pivot": [pivot_x, pivot_y],
+            "command_offsets": sorted(entry["offset"] for entry in commands),
+        })
+
+    if not 50 <= len(poses) <= 120:
+        raise ValueError(f"unexpected Predator pose count: {len(poses)}")
+    runs = []
+    for sample in timeline:
+        if runs and runs[-1]["pose"] == sample["pose"]:
+            runs[-1]["end_frame"] = sample["frame"]
+            runs[-1]["samples"] += 1
+        else:
+            runs.append({
+                "start_frame": sample["frame"],
+                "end_frame": sample["frame"],
+                "samples": 1,
+                "pose": sample["pose"],
+            })
+    (OUTPUT_ROOT / "player_animation_timeline.json").write_text(
+        json.dumps({
+            "sample_stride_frames": 4,
+            "sample_count": len(timeline),
+            "unique_pose_count": len(poses),
+            "poses": sorted(poses.values(), key=lambda pose: int(pose["first_frame"])),
+            "timeline": timeline,
+            "runs": runs,
+        }, indent=2) + "\n", encoding="utf-8")
 
 
 def write_stage1_object_groups(entries: list[dict[str, int]]) -> None:
@@ -444,7 +613,8 @@ def selected_object_layer(gfx: bytearray, palette: list[tuple[int, int, int, int
     if frame == 4200:
         filename = f"objram{bank}.tsv"
     else:
-        filename = f"objram{bank}_{frame:04d}.tsv"
+        filename = animation_object_filename(frame, bank)
+        palette = animation_palette(frame)
     source = load_words(filename)
     selected: list[int] = []
     for offset in sorted(offsets):
@@ -519,12 +689,28 @@ def pack_4bpp(image: Image.Image) -> bytes:
     return bytes(output)
 
 
+def player_pose_capture(frame: int) -> tuple[int, list[int], tuple[int, int]]:
+    bank = load_animation_sample_banks()[frame]
+    entries = decode_object_entries(load_words(animation_object_filename(frame, bank)))
+    commands = player_animation_commands(entries)
+    primary = max((entry for entry in commands if entry["colour"] == 0),
+                  key=lambda entry: entry["width"] * entry["height"])
+    pivot = (primary["screen_x"] + primary["width"] // 2,
+             primary["screen_y"] + primary["height"])
+    return bank, sorted(entry["offset"] for entry in commands), pivot
+
+
 def exact_object_layers(gfx: bytearray, palette: list[tuple[int, int, int, int]],
                         frame: int, bank: int, offsets: list[int],
-                        shift_x: int = 0) -> tuple[dict[int, Image.Image],
+                        shift_x: int = 0,
+                        pivot: tuple[int, int] | None = None) -> tuple[dict[int, Image.Image],
                                                    dict[int, list[tuple[int, int, int]]]]:
     """Render selected CPS2 commands without scaling or palette quantisation."""
-    filename = f"objram{bank}.tsv" if frame == 4200 else f"objram{bank}_{frame:04d}.tsv"
+    if frame == 4200:
+        filename = f"objram{bank}.tsv"
+    else:
+        filename = animation_object_filename(frame, bank)
+        palette = animation_palette(frame)
     words = load_words(filename)
     commands: list[dict[str, int]] = []
     for offset in offsets:
@@ -544,8 +730,12 @@ def exact_object_layers(gfx: bytearray, palette: list[tuple[int, int, int, int]]
     bottom = max(command["y"] + command["ny"] * 16 for command in commands)
     union_width = right - left
     union_height = bottom - top
-    frame_left = (192 - union_width) // 2
-    frame_top = 184 - union_height
+    if pivot is None:
+        canvas_x = (192 - union_width) // 2 - left
+        canvas_y = 184 - bottom
+    else:
+        canvas_x = 96 - pivot[0]
+        canvas_y = 184 - pivot[1]
 
     colours = sorted({command["colour"] for command in commands})
     layers = {colour: Image.new("P", (192, 192), 0) for colour in colours}
@@ -571,8 +761,8 @@ def exact_object_layers(gfx: bytearray, palette: list[tuple[int, int, int, int]]
                 source_tile = decode_tile(gfx, tile_code, 16)
                 source_pixels = source_tile.load()
                 target_pixels = layers[command["colour"]].load()
-                target_x = frame_left + command["x"] - left + tile_x * 16
-                target_y = frame_top + command["y"] - top + tile_y * 16
+                target_x = canvas_x + command["x"] + tile_x * 16
+                target_y = canvas_y + command["y"] + tile_y * 16
                 for pixel_y in range(16):
                     for pixel_x in range(16):
                         pen = source_pixels[pixel_x, pixel_y]
@@ -652,39 +842,94 @@ static const unsigned char avsp_snapshot_palette[256][3] = {{
             "visible_colours": len(colours)}
 
 
+def write_player_attack_sequence_assets(
+        gfx: bytearray, sprite_dir: Path) -> list[dict[str, object]]:
+    source_frames = list(range(2880, 2917, 4))
+    cps_colours = (0, 7, 15)
+    base_palettes = {
+        colour: [animation_palette(source_frames[0])[colour * 16 + pen][:3]
+                 for pen in range(15)]
+        for colour in cps_colours
+    }
+    files = []
+    manifest = []
+    for pose_index, frame in enumerate(source_frames):
+        bank, offsets, pivot = player_pose_capture(frame)
+        layers, palettes = exact_object_layers(
+            gfx, animation_palette(frame), frame, bank, offsets, pivot=pivot)
+        pose_files = []
+        for layer_index, colour in enumerate(cps_colours):
+            if colour in palettes and palettes[colour] != base_palettes[colour]:
+                raise ValueError(
+                    f"frame {frame}: CPS2 player palette {colour} changed during attack")
+            layer = layers.get(colour, Image.new("P", (192, 192), 0))
+            filename = f"PA{pose_index:02d}{layer_index}.BIN"
+            data = pack_4bpp(layer)
+            (sprite_dir / filename).write_bytes(data)
+            pose_files.append(filename)
+            manifest.append({
+                "path": f"SPR4/{filename}",
+                "bytes": len(data),
+                "sha256": hashlib.sha256(data).hexdigest(),
+                "source_frame": frame,
+                "cps2_palette": colour,
+            })
+        files.append(pose_files)
+
+    file_rows = ",\n".join(
+        "    {" + ", ".join(f'\"{filename}\"' for filename in pose_files) + "}"
+        for pose_files in files)
+    frame_rows = ", ".join(str(frame) for frame in source_frames)
+    header = f"""/* Generated from the dense active-bank CPS2 capture. */
+#ifndef AVSP_PLAYER_ANIMATION_H
+#define AVSP_PLAYER_ANIMATION_H
+#define AVSP_PLAYER_ATTACK_POSES {len(source_frames)}
+#define AVSP_PLAYER_ATTACK_LAYERS {len(cps_colours)}
+static const char avsp_player_attack_files[AVSP_PLAYER_ATTACK_POSES][AVSP_PLAYER_ATTACK_LAYERS][12] = {{
+{file_rows}
+}};
+static const unsigned short avsp_player_attack_source_frames[AVSP_PLAYER_ATTACK_POSES] = {{
+    {frame_rows}
+}};
+#endif
+"""
+    (GENERATED_ROOT / "avsp_player_animation.h").write_text(
+        header, encoding="ascii")
+    return manifest
+
+
 def write_exact_actor_assets(gfx: bytearray,
                              palette: list[tuple[int, int, int, int]],
                              sprite_dir: Path) -> list[dict[str, object]]:
+    idle_bank, idle_offsets, idle_pivot = player_pose_capture(2880)
     groups = {
         "player_idle": exact_object_layers(
-            gfx, palette, 2880, ANIMATION_SAMPLE_ACTIVE_BANK[2880], [72, 76, 80, 84]),
-        "player_attack": exact_object_layers(
-            gfx, palette, 2940, ANIMATION_SAMPLE_ACTIVE_BANK[2940],
-            list(range(72, 117, 4)), shift_x=-150),
+            gfx, palette, 2880, idle_bank, idle_offsets, pivot=idle_pivot),
         "alien_a": exact_object_layers(gfx, palette, 4200, 2, [124, 128]),
         "alien_b": exact_object_layers(gfx, palette, 4200, 2, [144, 148]),
     }
     # Fixed Saturn subpalette slots. Player layers retain CPS2 palettes 0, 7,
     # and 15; the Stage 1 alien retains palette 16.
     cps_colours = (0, 7, 15, 16)
-    all_palettes: dict[int, list[tuple[int, int, int]]] = {}
-    for _, (_, group_palettes) in groups.items():
-        all_palettes.update(group_palettes)
-    write_exact_palette_header([all_palettes[colour] for colour in cps_colours])
+    player_palette = animation_palette(2880)
+    attack_palette = animation_palette(2888)
+    palette_banks = {
+        0: [player_palette[pen][:3] for pen in range(15)],
+        7: [player_palette[7 * 16 + pen][:3] for pen in range(15)],
+        15: [attack_palette[15 * 16 + pen][:3] for pen in range(15)],
+        16: groups["alien_a"][1][16],
+    }
+    write_exact_palette_header([palette_banks[colour] for colour in cps_colours])
 
     file_map = {
         "PXI0.BIN": ("player_idle", 0),
         "PXI1.BIN": ("player_idle", 7),
-        "PXA0.BIN": ("player_attack", 0),
-        "PXA1.BIN": ("player_attack", 7),
-        "PXA2.BIN": ("player_attack", 15),
         "EXA0.BIN": ("alien_a", 16),
         "EXB0.BIN": ("alien_b", 16),
     }
     manifest = []
-    preview = Image.new("RGBA", (384, 576), (20, 20, 20, 255))
-    preview_groups = (("player_idle", 0), ("player_attack", 192),
-                      ("alien_a", 384))
+    preview = Image.new("RGBA", (384, 384), (20, 20, 20, 255))
+    preview_groups = (("player_idle", 0), ("alien_a", 192))
     for group_name, preview_y in preview_groups:
         layers, group_palettes = groups[group_name]
         for colour, layer in layers.items():
@@ -708,6 +953,7 @@ def write_exact_actor_assets(gfx: bytearray,
         manifest.append({"path": f"SPR4/{filename}", "bytes": len(data),
                          "sha256": hashlib.sha256(data).hexdigest(),
                          "cps2_palette": colour})
+    manifest.extend(write_player_attack_sequence_assets(gfx, sprite_dir))
     return manifest
 
 
@@ -817,6 +1063,9 @@ def main() -> None:
     verify_roms()
     gfx = load_gfx_region()
     verify_loaded_gfx_region(gfx)
+    OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
+    verify_animation_bank_alignment(gfx)
+    write_player_animation_timeline()
     palette = load_palette()
     gfxram = load_words("gfxram.tsv")
     cps_a = load_words("cps_a_regs.tsv")
@@ -826,7 +1075,6 @@ def main() -> None:
     layer, entries = decode_objects(gfx, words, palette)
     verify_stage1_object_capture(entries)
     saturn_layer = final_visible_object_surface(background, layer)
-    OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
     background.save(OUTPUT_ROOT / "stage1_background.png")
     composite = background.copy()
     composite.alpha_composite(layer)

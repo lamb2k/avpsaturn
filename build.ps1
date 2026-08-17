@@ -4,6 +4,7 @@ param(
     [string]$PythonPath,
     [switch]$Clean,
     [switch]$Release,
+    [switch]$VisualTest,
     [switch]$SkipHostTests
 )
 
@@ -100,6 +101,9 @@ try {
         $makeArguments = @('-f', 'makefile', "JO_ENGINE_ROOT=$relativeEngine")
         if ($Release) {
             $makeArguments += 'JO_DEBUG=0'
+        }
+        if ($VisualTest) {
+            $makeArguments += 'AVSP_VISUAL_TEST=1'
         }
         $makeArguments += 'game.raw'
         & $make @makeArguments

@@ -3,6 +3,7 @@
 
 #define CAP_MAX_ENEMIES 4
 #define CAP_WORLD_WIDTH 960
+#define CAP_VIEW_WIDTH 352
 #define CAP_PLAYER_MAX_HEALTH 12
 
 typedef enum
