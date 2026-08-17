@@ -40,10 +40,12 @@ alter console copy protection or supply copyrighted disc data.
 2. Confirm the full 224-line picture is stable in 352x224 and the full-width
    mapping shows both horizontal source edges. Record any CRT, scaler, or
    capture-device overscan separately from the digital framebuffer.
-3. Press a direction and confirm the build changes from the static reference to
-   native gameplay.
-4. Verify D-pad lane movement, A attack, B dash, C special, and X diagnostic
-   HUD.
+3. Press Start at the title, then B at Predator Warrior select, and confirm the
+   native route reaches the Round 1 title before gameplay begins.
+4. Verify D-pad lane movement, A weapon, B melee attack, neutral C jump,
+   direction+C dash, any two face buttons emergency attack, and X diagnostic
+   HUD. Confirm that A uses the captured shoulder-cannon animation; the other
+   actions remain timing/model placeholders until their cels are extracted.
 5. Confirm Stage 1 CD audio begins after the first input, remains stereo and
    free of stalls through the room transition, and survives a pause/resume.
 6. Fight through the five-enemy opening wave and three-enemy reinforcement wave.

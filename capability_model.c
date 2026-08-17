@@ -5,7 +5,12 @@
 #define CAP_LANE_MAX 198
 #define CAP_ATTACK_ACTIVE_FRAME 16
 #define CAP_ATTACK_TOTAL_FRAMES 40
+#define CAP_SHOOT_ACTIVE_FRAME 16
+#define CAP_SHOOT_TOTAL_FRAMES 40
 #define CAP_SPECIAL_ACTIVE_FRAME 12
+#define CAP_SPECIAL_TOTAL_FRAMES 34
+#define CAP_JUMP_TOTAL_FRAMES 30
+#define CAP_DASH_TOTAL_FRAMES 30
 #define CAP_ROOM_ONE_RIGHT 336
 #define CAP_ROOM_ONE_EXIT 480
 #define CAP_KO_VISIBLE_FRAMES 45
@@ -102,6 +107,8 @@ static void cap_deactivate_enemy(CapActor *enemy, const int index)
 {
     enemy->x = -256 - index * 32;
     enemy->lane = 178;
+    enemy->height = 0;
+    enemy->motion_x = 0;
     enemy->facing = -1;
     enemy->health = 0;
     enemy->action = CAP_ACT_KO;
@@ -118,6 +125,8 @@ static void cap_spawn_enemy(CapActor *enemy, const int index)
     const CapStage1Spawn *spawn = &cap_stage1_spawns[index];
     enemy->x = spawn->x;
     enemy->lane = spawn->lane;
+    enemy->height = 0;
+    enemy->motion_x = 0;
     enemy->facing = -1;
     enemy->health = 3;
     enemy->action = CAP_ACT_WALK;
@@ -134,6 +143,8 @@ static void cap_spawn_boss(CapWorld *world)
     CapActor *boss = &world->enemies[0];
     boss->x = 276;
     boss->lane = 182;
+    boss->height = 0;
+    boss->motion_x = 0;
     boss->facing = -1;
     boss->health = CAP_BOSS_MAX_HEALTH;
     boss->action = CAP_ACT_WALK;
@@ -154,6 +165,8 @@ static void cap_spawn_boss_add(CapWorld *world)
         if (add->active) continue;
         add->x = 244 + (world->boss_adds_spawned & 1) * 74;
         add->lane = 158 + (world->boss_adds_spawned % 3) * 18;
+        add->height = 0;
+        add->motion_x = 0;
         add->facing = -1;
         add->health = 3;
         add->action = CAP_ACT_WALK;
@@ -188,6 +201,8 @@ void cap_world_init(CapWorld *world)
 
     world->player.x = 300;
     world->player.lane = 178;
+    world->player.height = 0;
+    world->player.motion_x = 0;
     world->player.facing = 1;
     world->player.health = CAP_PLAYER_MAX_HEALTH;
     world->player.action = CAP_ACT_IDLE;
@@ -202,6 +217,9 @@ void cap_world_init(CapWorld *world)
     world->camera_x = 0;
     world->frame = 0;
     world->score = 0;
+    world->weapon_energy = CAP_WEAPON_MAX_ENERGY;
+    world->shots_fired = 0;
+    world->special_health_spent = 0;
     world->player_ko_timer = 0;
     world->encounter_started = 0;
     world->encounter_state = CAP_ENCOUNTER_MAIN_MENU;
@@ -249,12 +267,13 @@ static void cap_damage_enemy(CapWorld *world, CapActor *enemy, const int damage)
     }
 }
 
-static void cap_resolve_player_hit(CapWorld *world, const int range, const int damage)
+static int cap_resolve_player_hit(CapWorld *world, const int range, const int damage)
 {
     CapActor *player = &world->player;
     int index;
+    int hits = 0;
 
-    if (player->hit_latched) return;
+    if (player->hit_latched) return 0;
     player->hit_latched = 1;
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
     {
@@ -265,14 +284,23 @@ static void cap_resolve_player_hit(CapWorld *world, const int range, const int d
         if (cap_abs(enemy->lane - player->lane) > 19) continue;
         if (delta_x * player->facing < 0 || cap_abs(delta_x) > range) continue;
         cap_damage_enemy(world, enemy, damage);
+        ++hits;
     }
+    return hits;
 }
 
 static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
 {
     CapActor *player = &world->player;
-    int speed = input->dash_held ? 4 : 2;
+    int speed = 2;
     int moving = 0;
+    int pressed_buttons = input->shoot_pressed + input->attack_pressed +
+                          input->jump_pressed;
+
+    if (player->action != CAP_ACT_SHOOT &&
+        world->weapon_energy < CAP_WEAPON_MAX_ENERGY &&
+        (world->frame & 1) == 0)
+        ++world->weapon_energy;
 
     if (player->action == CAP_ACT_KO)
     {
@@ -284,6 +312,8 @@ static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
             player->health = CAP_PLAYER_MAX_HEALTH;
             player->action = CAP_ACT_IDLE;
             player->action_frame = 0;
+            player->height = 0;
+            player->motion_x = 0;
             world->player_ko_timer = 0;
         }
         return CAP_CLIP_NONE;
@@ -296,20 +326,49 @@ static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
         {
             player->action = CAP_ACT_IDLE;
             player->action_frame = 0;
+            player->height = 0;
+            player->motion_x = 0;
         }
         return CAP_CLIP_NONE;
     }
 
-    if (player->action == CAP_ACT_ATTACK || player->action == CAP_ACT_SPECIAL)
+    if (player->action == CAP_ACT_JUMP || player->action == CAP_ACT_DASH)
+    {
+        int total = player->action == CAP_ACT_DASH ?
+                    CAP_DASH_TOTAL_FRAMES : CAP_JUMP_TOTAL_FRAMES;
+        ++player->action_frame;
+        player->x += player->motion_x;
+        player->x = cap_clamp(player->x, 24,
+                              world->room_locked ? CAP_ROOM_ONE_RIGHT :
+                                                   CAP_WORLD_WIDTH - 24);
+        player->height = (player->action_frame *
+                          (total - player->action_frame)) / 4;
+        if (player->action_frame >= total)
+        {
+            player->action = CAP_ACT_IDLE;
+            player->action_frame = 0;
+            player->height = 0;
+            player->motion_x = 0;
+        }
+        return CAP_CLIP_NONE;
+    }
+
+    if (player->action == CAP_ACT_ATTACK || player->action == CAP_ACT_SHOOT ||
+        player->action == CAP_ACT_SPECIAL)
     {
         ++player->action_frame;
         if (player->action == CAP_ACT_ATTACK && player->action_frame == CAP_ATTACK_ACTIVE_FRAME)
-            cap_resolve_player_hit(world, 58, 1);
+            (void)cap_resolve_player_hit(world, 58, 1);
+        if (player->action == CAP_ACT_SHOOT && player->action_frame == CAP_SHOOT_ACTIVE_FRAME)
+            (void)cap_resolve_player_hit(world, 220, 1);
         if (player->action == CAP_ACT_SPECIAL && player->action_frame == CAP_SPECIAL_ACTIVE_FRAME)
-            cap_resolve_player_hit(world, 82, 2);
+            (void)cap_resolve_player_hit(world, 82, 2);
         if ((player->action == CAP_ACT_ATTACK &&
              player->action_frame >= CAP_ATTACK_TOTAL_FRAMES) ||
-            (player->action == CAP_ACT_SPECIAL && player->action_frame >= 34))
+            (player->action == CAP_ACT_SHOOT &&
+             player->action_frame >= CAP_SHOOT_TOTAL_FRAMES) ||
+            (player->action == CAP_ACT_SPECIAL &&
+             player->action_frame >= CAP_SPECIAL_TOTAL_FRAMES))
         {
             player->action = CAP_ACT_IDLE;
             player->action_frame = 0;
@@ -318,6 +377,25 @@ static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
         return CAP_CLIP_NONE;
     }
 
+    if (pressed_buttons >= 2)
+    {
+        int health_spent = player->health > 1 ? 1 : 0;
+        player->health -= health_spent;
+        world->special_health_spent += health_spent;
+        player->action = CAP_ACT_SPECIAL;
+        player->action_frame = 0;
+        player->hit_latched = 0;
+        return CAP_CLIP_SPECIAL;
+    }
+    if (input->shoot_pressed && world->weapon_energy >= CAP_WEAPON_SHOT_COST)
+    {
+        world->weapon_energy -= CAP_WEAPON_SHOT_COST;
+        ++world->shots_fired;
+        player->action = CAP_ACT_SHOOT;
+        player->action_frame = 0;
+        player->hit_latched = 0;
+        return CAP_CLIP_SHOOT;
+    }
     if (input->attack_pressed)
     {
         player->action = CAP_ACT_ATTACK;
@@ -325,12 +403,23 @@ static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
         player->hit_latched = 0;
         return CAP_CLIP_ATTACK;
     }
-    if (input->special_pressed)
+    if (input->jump_pressed)
     {
-        player->action = CAP_ACT_SPECIAL;
+        if (input->left || input->right)
+        {
+            player->action = CAP_ACT_DASH;
+            player->facing = input->left ? -1 : 1;
+            player->motion_x = player->facing * 6;
+        }
+        else
+        {
+            player->action = CAP_ACT_JUMP;
+            player->motion_x = 0;
+        }
         player->action_frame = 0;
+        player->height = 0;
         player->hit_latched = 0;
-        return CAP_CLIP_SPECIAL;
+        return player->action == CAP_ACT_DASH ? CAP_CLIP_DASH : CAP_CLIP_JUMP;
     }
 
     if (input->left)
@@ -601,9 +690,9 @@ CapClipRequest cap_world_step(CapWorld *world, const CapInput *input)
         gated_input.right = 0;
         gated_input.up = 0;
         gated_input.down = 0;
+        gated_input.shoot_pressed = 0;
         gated_input.attack_pressed = 0;
-        gated_input.special_pressed = 0;
-        gated_input.dash_held = 0;
+        gated_input.jump_pressed = 0;
         gated_input.start_pressed = 0;
         player_input = &gated_input;
     }

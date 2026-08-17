@@ -6,9 +6,9 @@ local in2 = machine.ioport.ports[":IN2"].fields
 local coin = in2["Coin 1"]
 local start = in2["1 Player Start"]
 local right = in0["P1 Right"]
-local attack = in0["P1 Button 1"]
-local jump = in0["P1 Button 2"]
-local fire = in0["P1 Button 3"]
+local gun = in0["P1 Button 1"]
+local attack = in0["P1 Button 2"]
+local jump = in0["P1 Button 3"]
 local frame = 0
 local base_frame = 4200
 local target_frame = 12660
@@ -67,21 +67,21 @@ stage1_boss_capture_subscription = emu.add_machine_frame_notifier(function()
     frame = frame + 1
     local absolute_frame = base_frame + frame
     if frame == 1 then right:set_value(1) end
-    if frame % 45 == 0 then attack:set_value(1) end
-    if frame % 45 == 7 then attack:clear_value() end
-    if frame % 180 == 0 then jump:set_value(1) end
-    if frame % 180 == 8 then jump:clear_value() end
-    if frame % 240 == 0 then fire:set_value(1) end
-    if frame % 240 == 8 then fire:clear_value() end
+    if frame % 45 == 0 then gun:set_value(1) end
+    if frame % 45 == 7 then gun:clear_value() end
+    if frame % 180 == 0 then attack:set_value(1) end
+    if frame % 180 == 8 then attack:clear_value() end
+    if frame % 240 == 0 then jump:set_value(1) end
+    if frame % 240 == 8 then jump:clear_value() end
     if frame % 600 == 30 then coin:set_value(1) end
     if frame % 600 == 34 then coin:clear_value() end
     if frame % 600 == 90 then start:set_value(1) end
     if frame % 600 == 94 then start:clear_value() end
     if absolute_frame >= target_frame then
         right:clear_value()
+        gun:clear_value()
         attack:clear_value()
         jump:clear_value()
-        fire:clear_value()
         dump_boss_state()
         machine:exit()
     end

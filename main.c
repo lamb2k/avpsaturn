@@ -5,7 +5,7 @@
 #include "generated/avsp_enemy_animation.h"
 #include "generated/avsp_frontend_palette.h"
 #include "generated/avsp_palette.h"
-#include "generated/avsp_player_animation.h"
+#include "generated/avsp_player_shoot_animation.h"
 #include "generated/avsp_sequence_palette.h"
 
 #define CEL_WIDTH 192
@@ -57,15 +57,15 @@ static jo_img_8bits frontend_images[AVSP_FRONTEND_SCENES];
 static unsigned char *sequence_rle[AVSP_SEQUENCE_SCENES];
 static unsigned char *sequence_pixels;
 static unsigned char *background_bitmap;
-static jo_img_4bits player_attack_images[AVSP_PLAYER_ATTACK_POSES][AVSP_PLAYER_ATTACK_LAYERS];
+static jo_img_4bits player_shoot_images[AVSP_PLAYER_SHOOT_POSES][AVSP_PLAYER_SHOOT_LAYERS];
 static jo_img_4bits enemy_walk_images[AVSP_ENEMY_WALK_POSES];
 static jo_img_4bits boss_idle_images[AVSP_BOSS_IDLE_LAYERS];
 static int player_idle_sprites[2];
-static int player_attack_sprites[AVSP_PLAYER_ATTACK_LAYERS];
+static int player_shoot_sprites[AVSP_PLAYER_SHOOT_LAYERS];
 static int enemy_walk_sprite;
 static int boss_idle_sprites[AVSP_BOSS_IDLE_LAYERS];
 static int frontend_sprites[AVSP_FRONTEND_SCENES];
-static int current_player_attack_pose;
+static int current_player_shoot_pose;
 static int current_enemy_walk_pose;
 static int debug_hud_enabled;
 static const char *failed_asset;
@@ -97,24 +97,24 @@ static int load_all_cels(void)
     return 1;
 }
 
-static int load_player_attack_sequence(void)
+static int load_player_shoot_sequence(void)
 {
     int pose;
     int layer;
     int length;
-    for (pose = 0; pose < AVSP_PLAYER_ATTACK_POSES; ++pose)
+    for (pose = 0; pose < AVSP_PLAYER_SHOOT_POSES; ++pose)
     {
-        for (layer = 0; layer < AVSP_PLAYER_ATTACK_LAYERS; ++layer)
+        for (layer = 0; layer < AVSP_PLAYER_SHOOT_LAYERS; ++layer)
         {
-            jo_img_4bits *image = &player_attack_images[pose][layer];
+            jo_img_4bits *image = &player_shoot_images[pose][layer];
             image->width = CEL_WIDTH;
             image->height = CEL_HEIGHT;
             length = 0;
             image->data = (unsigned char *)jo_fs_read_file_in_dir(
-                avsp_player_attack_files[pose][layer], "SPR4", &length);
+                avsp_player_shoot_files[pose][layer], "SPR4", &length);
             if (image->data == JO_NULL || length != CEL_BYTES)
             {
-                failed_asset = avsp_player_attack_files[pose][layer];
+                failed_asset = avsp_player_shoot_files[pose][layer];
                 return 0;
             }
         }
@@ -408,14 +408,14 @@ static int create_sprite_working_set(void)
     int layer;
     player_idle_sprites[0] = add_sprite_for_asset(CEL_PLAYER_IDLE_0);
     player_idle_sprites[1] = add_sprite_for_asset(CEL_PLAYER_IDLE_1);
-    for (layer = 0; layer < AVSP_PLAYER_ATTACK_LAYERS; ++layer)
+    for (layer = 0; layer < AVSP_PLAYER_SHOOT_LAYERS; ++layer)
     {
-        player_attack_sprites[layer] = jo_sprite_add_4bits_image(
-            &player_attack_images[0][layer]);
-        if (player_attack_sprites[layer] < 0)
-            failed_asset = avsp_player_attack_files[0][layer];
+        player_shoot_sprites[layer] = jo_sprite_add_4bits_image(
+            &player_shoot_images[0][layer]);
+        if (player_shoot_sprites[layer] < 0)
+            failed_asset = avsp_player_shoot_files[0][layer];
     }
-    current_player_attack_pose = 0;
+    current_player_shoot_pose = 0;
     enemy_walk_sprite = jo_sprite_add_4bits_image(&enemy_walk_images[0]);
     if (enemy_walk_sprite < 0) failed_asset = avsp_enemy_walk_files[0];
     current_enemy_walk_pose = 0;
@@ -434,7 +434,7 @@ static void draw_exact_layer(const CapActor *actor, const int screen_x,
                              const int depth)
 {
     /* Captured player and enemy pivots sit at pixel 184 in each 192px cel. */
-    int screen_y = actor->lane - 200;
+    int screen_y = actor->lane - 200 - actor->height;
     jo_sprite_set_palette_4bits(actor_palette.id, palette_bank);
     if (actor->facing < 0) jo_sprite_enable_horizontal_flip();
     jo_sprite_draw3D(sprite_id, screen_x, screen_y, depth);
@@ -445,19 +445,19 @@ static void draw_player(const CapActor *actor, const int screen_x)
 {
     int depth = 330 - actor->lane;
     int layer;
-    if (actor->action == CAP_ACT_ATTACK || actor->action == CAP_ACT_SPECIAL)
+    if (actor->action == CAP_ACT_SHOOT)
     {
         int pose = actor->action_frame / 4;
-        if (pose >= AVSP_PLAYER_ATTACK_POSES) pose = AVSP_PLAYER_ATTACK_POSES - 1;
-        if (pose != current_player_attack_pose)
+        if (pose >= AVSP_PLAYER_SHOOT_POSES) pose = AVSP_PLAYER_SHOOT_POSES - 1;
+        if (pose != current_player_shoot_pose)
         {
-            for (layer = 0; layer < AVSP_PLAYER_ATTACK_LAYERS; ++layer)
+            for (layer = 0; layer < AVSP_PLAYER_SHOOT_LAYERS; ++layer)
                 jo_sprite_replace_4bits_image(
-                    &player_attack_images[pose][layer], player_attack_sprites[layer]);
-            current_player_attack_pose = pose;
+                    &player_shoot_images[pose][layer], player_shoot_sprites[layer]);
+            current_player_shoot_pose = pose;
         }
-        for (layer = 0; layer < AVSP_PLAYER_ATTACK_LAYERS; ++layer)
-            draw_exact_layer(actor, screen_x, player_attack_sprites[layer],
+        for (layer = 0; layer < AVSP_PLAYER_SHOOT_LAYERS; ++layer)
+            draw_exact_layer(actor, screen_x, player_shoot_sprites[layer],
                              layer, depth - layer);
     }
     else
@@ -543,9 +543,9 @@ static CapInput read_input(void)
     input.right = jo_is_pad1_key_pressed(JO_KEY_RIGHT);
     input.up = jo_is_pad1_key_pressed(JO_KEY_UP);
     input.down = jo_is_pad1_key_pressed(JO_KEY_DOWN);
-    input.attack_pressed = jo_is_pad1_key_down(JO_KEY_A);
-    input.special_pressed = jo_is_pad1_key_down(JO_KEY_C);
-    input.dash_held = jo_is_pad1_key_pressed(JO_KEY_B);
+    input.shoot_pressed = jo_is_pad1_key_down(JO_KEY_A);
+    input.attack_pressed = jo_is_pad1_key_down(JO_KEY_B);
+    input.jump_pressed = jo_is_pad1_key_down(JO_KEY_C);
     input.start_pressed = jo_is_pad1_key_down(JO_KEY_START);
     return input;
 }
@@ -626,7 +626,7 @@ static void draw_hud(void)
         jo_printf(0, 7, "STALKER %d/%d  WAVE %d/2",
                   world.boss_adds_defeated, world.boss_adds_spawned,
                   world.boss_reinforcement_wave);
-    jo_printf(0, 27, "D-PAD MOVE  A HIT  B DASH  C SPECIAL");
+    jo_printf(0, 27, "D-PAD MOVE  A GUN  B ATTACK  C JUMP/DASH");
 }
 
 static void draw_route_overlay(void)
@@ -647,7 +647,7 @@ static void frame_callback(void)
 #ifdef AVSP_VISUAL_TEST
     if (world.player.action == CAP_ACT_IDLE)
     {
-        world.player.action = CAP_ACT_ATTACK;
+        world.player.action = CAP_ACT_SHOOT;
         world.player.action_frame = 0;
     }
 #endif
@@ -688,7 +688,7 @@ static void frame_callback(void)
     draw_hud();
 #ifdef AVSP_VISUAL_TEST
     jo_printf(0, 5, "VISUAL P%02d/%02d E%02d",
-              world.player.action_frame, current_player_attack_pose,
+              world.player.action_frame, current_player_shoot_pose,
               current_enemy_walk_pose);
 #endif
 }
@@ -722,7 +722,7 @@ void jo_main(void)
         runtime_ready = load_frontend_assets() &&
                         load_route_sequences() &&
                         load_background() && load_boss_background() &&
-                        load_all_cels() && load_player_attack_sequence() &&
+                        load_all_cels() && load_player_shoot_sequence() &&
                         load_enemy_walk_sequence() && load_boss_idle() &&
                         create_sprite_working_set();
     }

@@ -17,11 +17,11 @@ Current milestone:
 - verifies 233 additional 60-frame route samples and 26 hashed visual anchors
   from the cold Press Start screen through the definitive Round 2 title boundary
 - boots into lossless capture-derived Press Start and Predator Warrior select
-  surfaces; Start and A traverse those native states before Round 1 begins
+  surfaces; Start and B traverse those native states before Round 1 begins
 - reuses one VDP1 surface for thirteen cartridge-preloaded, capture-derived
   route states from the Round 1 title through the Round 2 title
 - preserves original sprite scale and exact 15-color CPS2 subpalettes
-- animates the first authentic ten-pose Predator attack from three aligned
+- animates the first authentic ten-pose Predator shoulder-cannon shot from three aligned
   VDP1 palette layers backed by the Saturn 4 MB cartridge
 - animates a temporally tracked ten-pose blue alien sequence through one
   replaceable VDP1 slot over a reconstructed VDP2 stage
@@ -40,7 +40,7 @@ Current milestone:
 
 The normal release now begins at the capture-derived Press Start screen, waits
 for Saturn Start, shows the default Predator Warrior character-select capture,
-and waits for A before entering Round 1. These frontend surfaces preserve their
+and waits for B before entering Round 1. These frontend surfaces preserve their
 source pixels and palettes but are still flattened key states rather than the
 complete arcade attract/menu animation. Thirteen later route states use the
 same lossless horizontal fit and one replaceable VDP1 slot. Their compressed
@@ -107,9 +107,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run.ps1
 ```
 
 `run.ps1` launches Yaba Sanshiro with a 32 Mbit DRAM cartridge, the Saturn 4 MB
-RAM expansion. Controls are D-pad to move, A to attack, B to dash, C for the
-special action, and X to toggle the diagnostic HUD. The launcher no longer
-disables emulator audio.
+RAM expansion. Controls follow the CPS2 panel order: D-pad to move, A for the
+weapon, B for melee attack, and C to jump. Hold left or right and press C to
+dash. Press any two of A/B/C together for the health-draining emergency attack.
+X toggles the diagnostic HUD. The launcher no longer disables emulator audio.
 
 ## Real hardware
 
@@ -131,7 +132,7 @@ Verified on August 16, 2026:
 - 361 four-frame-spaced captures retain the recorded active object bank; an
   independent two-bank render check confirms bank 2 at frames 2880 and 4200
 - the player timeline contains 87 unique assemblies, and its first ten-pose
-  attack sequence runs from cartridge-resident source cels through three VDP1
+  shoulder-cannon sequence runs from cartridge-resident source cels through three VDP1
   texture slots
 - the independently visible right-side blue alien is tracked across frames
   4164-4200 and its ten authentic poses run through one replaceable VDP1 slot

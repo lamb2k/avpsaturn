@@ -12,12 +12,17 @@
 #define CAP_STAGE1_TOTAL_ENEMIES 8
 #define CAP_BOSS_MAX_HEALTH 24
 #define CAP_BOSS_TOTAL_ADDS 5
+#define CAP_WEAPON_MAX_ENERGY 100
+#define CAP_WEAPON_SHOT_COST 25
 
 typedef enum
 {
     CAP_ACT_IDLE = 0,
     CAP_ACT_WALK,
+    CAP_ACT_DASH,
+    CAP_ACT_JUMP,
     CAP_ACT_ATTACK,
+    CAP_ACT_SHOOT,
     CAP_ACT_SPECIAL,
     CAP_ACT_HIT,
     CAP_ACT_KO
@@ -27,6 +32,9 @@ typedef enum
 {
     CAP_CLIP_NONE = 0,
     CAP_CLIP_ATTACK,
+    CAP_CLIP_SHOOT,
+    CAP_CLIP_JUMP,
+    CAP_CLIP_DASH,
     CAP_CLIP_SPECIAL
 } CapClipRequest;
 
@@ -65,9 +73,9 @@ typedef struct
     int right;
     int up;
     int down;
+    int shoot_pressed;
     int attack_pressed;
-    int special_pressed;
-    int dash_held;
+    int jump_pressed;
     int start_pressed;
 } CapInput;
 
@@ -75,6 +83,8 @@ typedef struct
 {
     int x;
     int lane;
+    int height;
+    int motion_x;
     int facing;
     int health;
     CapAction action;
@@ -93,6 +103,9 @@ typedef struct
     int camera_x;
     int frame;
     int score;
+    int weapon_energy;
+    int shots_fired;
+    int special_health_spent;
     int player_ko_timer;
     int encounter_started;
     CapEncounterState encounter_state;

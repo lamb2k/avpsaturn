@@ -5,9 +5,12 @@ local in2 = machine.ioport.ports[":IN2"].fields
 local coin = in2["Coin 1"]
 local start = in2["1 Player Start"]
 local right = in0["P1 Right"]
-local attack = in0["P1 Button 1"]
-local jump = in0["P1 Button 2"]
-local fire = in0["P1 Button 3"]
+-- Capcom control panel order: Button 1 = weapon/gun, Button 2 = attack,
+-- Button 3 = jump/dash. Keep these names exact so captured action labels do
+-- not drift from the original input matrix again.
+local gun = in0["P1 Button 1"]
+local attack = in0["P1 Button 2"]
+local jump = in0["P1 Button 3"]
 local frame = 0
 local active_object_bank = 0
 local object_bank_writes = 0
@@ -113,21 +116,21 @@ stage1_capture_subscription = emu.add_machine_frame_notifier(function()
         if (frame - 1200) % 180 == 33 then start:clear_value() end
     end
 
-    -- Select the default character, then continue using the same input as
-    -- the primary attack during the opening playable section.
+    -- Select the default character, then exercise the gun action during the
+    -- opening playable section.
     if frame >= 1500 and frame < 4200 then
-        if frame % 90 == 0 then attack:set_value(1) end
-        if frame % 90 == 5 then attack:clear_value() end
+        if frame % 90 == 0 then gun:set_value(1) end
+        if frame % 90 == 5 then gun:clear_value() end
     end
 
     if frame == 2600 then right:set_value(1) end
     if frame >= 2600 and frame < 4200 then
-        if frame % 75 == 0 then attack:set_value(1) end
-        if frame % 75 == 6 then attack:clear_value() end
-        if frame % 310 == 0 then jump:set_value(1) end
-        if frame % 310 == 7 then jump:clear_value() end
-        if frame % 430 == 0 then fire:set_value(1) end
-        if frame % 430 == 7 then fire:clear_value() end
+        if frame % 75 == 0 then gun:set_value(1) end
+        if frame % 75 == 6 then gun:clear_value() end
+        if frame % 310 == 0 then attack:set_value(1) end
+        if frame % 310 == 7 then attack:clear_value() end
+        if frame % 430 == 0 then jump:set_value(1) end
+        if frame % 430 == 7 then jump:clear_value() end
     end
 
     if frame % 120 == 0 then
@@ -142,9 +145,9 @@ stage1_capture_subscription = emu.add_machine_frame_notifier(function()
 
     if frame == 4200 then
         right:clear_value()
+        gun:clear_value()
         attack:clear_value()
         jump:clear_value()
-        fire:clear_value()
         dump_stage_state()
         machine:save("avspu_stage1")
     end

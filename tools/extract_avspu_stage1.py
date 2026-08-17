@@ -1188,7 +1188,7 @@ def fit_background_for_saturn(stage: Image.Image) -> Image.Image:
     return canvas
 
 
-def write_player_attack_sequence_assets(
+def write_player_shoot_sequence_assets(
         gfx: bytearray, sprite_dir: Path) -> list[dict[str, object]]:
     source_frames = list(range(2880, 2917, 4))
     cps_colours = (0, 7, 15)
@@ -1207,9 +1207,9 @@ def write_player_attack_sequence_assets(
         for layer_index, colour in enumerate(cps_colours):
             if colour in palettes and palettes[colour] != base_palettes[colour]:
                 raise ValueError(
-                    f"frame {frame}: CPS2 player palette {colour} changed during attack")
+                    f"frame {frame}: CPS2 player palette {colour} changed during gun action")
             layer = layers.get(colour, Image.new("P", (192, 192), 0))
-            filename = f"PA{pose_index:02d}{layer_index}.BIN"
+            filename = f"PS{pose_index:02d}{layer_index}.BIN"
             data = pack_4bpp(layer)
             (sprite_dir / filename).write_bytes(data)
             pose_files.append(filename)
@@ -1227,19 +1227,19 @@ def write_player_attack_sequence_assets(
         for pose_files in files)
     frame_rows = ", ".join(str(frame) for frame in source_frames)
     header = f"""/* Generated from the dense active-bank CPS2 capture. */
-#ifndef AVSP_PLAYER_ANIMATION_H
-#define AVSP_PLAYER_ANIMATION_H
-#define AVSP_PLAYER_ATTACK_POSES {len(source_frames)}
-#define AVSP_PLAYER_ATTACK_LAYERS {len(cps_colours)}
-static const char avsp_player_attack_files[AVSP_PLAYER_ATTACK_POSES][AVSP_PLAYER_ATTACK_LAYERS][12] = {{
+#ifndef AVSP_PLAYER_SHOOT_ANIMATION_H
+#define AVSP_PLAYER_SHOOT_ANIMATION_H
+#define AVSP_PLAYER_SHOOT_POSES {len(source_frames)}
+#define AVSP_PLAYER_SHOOT_LAYERS {len(cps_colours)}
+static const char avsp_player_shoot_files[AVSP_PLAYER_SHOOT_POSES][AVSP_PLAYER_SHOOT_LAYERS][12] = {{
 {file_rows}
 }};
-static const unsigned short avsp_player_attack_source_frames[AVSP_PLAYER_ATTACK_POSES] = {{
+static const unsigned short avsp_player_shoot_source_frames[AVSP_PLAYER_SHOOT_POSES] = {{
     {frame_rows}
 }};
 #endif
 """
-    (GENERATED_ROOT / "avsp_player_animation.h").write_text(
+    (GENERATED_ROOT / "avsp_player_shoot_animation.h").write_text(
         header, encoding="ascii")
     return manifest
 
@@ -1403,7 +1403,7 @@ def write_exact_actor_assets(gfx: bytearray,
         manifest.append({"path": f"SPR4/{filename}", "bytes": len(data),
                          "sha256": hashlib.sha256(data).hexdigest(),
                          "cps2_palette": colour})
-    manifest.extend(write_player_attack_sequence_assets(gfx, sprite_dir))
+    manifest.extend(write_player_shoot_sequence_assets(gfx, sprite_dir))
     manifest.extend(write_enemy_walk_sequence_assets(gfx, sprite_dir))
     manifest.extend(write_boss_idle_assets(gfx, sprite_dir))
     return manifest
@@ -1503,6 +1503,9 @@ def main() -> None:
     gfx = load_gfx_region()
     verify_loaded_gfx_region(gfx)
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
+    legacy_player_header = GENERATED_ROOT / "avsp_player_animation.h"
+    if legacy_player_header.is_file():
+        legacy_player_header.unlink()
     verify_animation_bank_alignment(gfx)
     write_player_animation_timeline()
     write_stage1_encounter_observations()

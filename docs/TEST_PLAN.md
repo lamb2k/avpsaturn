@@ -64,7 +64,7 @@ Round 2 title surfaces. No data-track reads occur after Stage 1 CDDA begins.
 
 Status: in progress. A dense 361-sample capture validates the active CPS2 object
 bank and identifies 87 unique player assemblies. The first authentic ten-pose
-Predator attack is cartridge-resident and has been visually verified advancing
+Predator shoulder-cannon shot is cartridge-resident and has been visually verified advancing
 through three replaceable VDP1 palette layers. A separately tracked blue alien
 now advances through ten authentic single-layer poses from frames 4164-4200. A
 capture-derived native route starts at Press Start and character select,

@@ -72,14 +72,72 @@ static void test_attack_requests_and_damage(void)
 
     cap_world_init(&world);
     start_encounter(&world);
-    world.enemies[0].x = world.player.x + 60;
+    world.frame = 1;
+    world.enemies[0].x = world.player.x + 120;
     world.enemies[0].lane = world.player.lane;
     memset(&input, 0, sizeof(input));
-    input.special_pressed = 1;
+    input.shoot_pressed = 1;
+    request = cap_world_step(&world, &input);
+    assert(request == CAP_CLIP_SHOOT);
+    assert(world.player.action == CAP_ACT_SHOOT);
+    assert(world.weapon_energy == CAP_WEAPON_MAX_ENERGY - CAP_WEAPON_SHOT_COST);
+    assert(world.shots_fired == 1);
+    step_empty(&world, 16);
+    assert(world.enemies[0].health == 2);
+}
+
+static void test_jump_dash_and_two_button_special(void)
+{
+    CapWorld world;
+    CapInput input;
+    CapClipRequest request;
+    int index;
+
+    cap_world_init(&world);
+    start_encounter(&world);
+    memset(&input, 0, sizeof(input));
+    input.jump_pressed = 1;
+    request = cap_world_step(&world, &input);
+    assert(request == CAP_CLIP_JUMP);
+    assert(world.player.action == CAP_ACT_JUMP);
+    step_empty(&world, 15);
+    assert(world.player.height > 0);
+    step_empty(&world, 15);
+    assert(world.player.action == CAP_ACT_IDLE);
+    assert(world.player.height == 0);
+
+    world.player.x = 100;
+    memset(&input, 0, sizeof(input));
+    input.right = 1;
+    input.jump_pressed = 1;
+    request = cap_world_step(&world, &input);
+    assert(request == CAP_CLIP_DASH);
+    assert(world.player.action == CAP_ACT_DASH);
+    assert(world.player.motion_x == 6);
+    step_empty(&world, 30);
+    assert(world.player.x == 280);
+    assert(world.player.height == 0);
+
+    for (index = 2; index < CAP_MAX_ENEMIES; ++index)
+        world.enemies[index].active = 0;
+    world.enemies[0].x = world.player.x + 40;
+    world.enemies[0].lane = world.player.lane;
+    world.enemies[0].health = 3;
+    world.enemies[1].active = 1;
+    world.enemies[1].x = world.player.x + 30;
+    world.enemies[1].lane = world.player.lane;
+    world.enemies[1].health = 3;
+    memset(&input, 0, sizeof(input));
+    input.shoot_pressed = 1;
+    input.attack_pressed = 1;
     request = cap_world_step(&world, &input);
     assert(request == CAP_CLIP_SPECIAL);
+    assert(world.player.action == CAP_ACT_SPECIAL);
     step_empty(&world, 12);
     assert(world.enemies[0].health == 1);
+    assert(world.enemies[1].health == 1);
+    assert(world.player.health == CAP_PLAYER_MAX_HEALTH - 1);
+    assert(world.special_health_spent == 1);
 }
 
 static void test_encounter_waits_for_player_input(void)
@@ -226,7 +284,9 @@ static void test_controller_only_route_completion(void)
         else if (world.encounter_state == CAP_ENCOUNTER_CLEAR)
         {
             input.right = 1;
-            input.dash_held = 1;
+            if (world.player.action == CAP_ACT_IDLE ||
+                world.player.action == CAP_ACT_WALK)
+                input.jump_pressed = 1;
         }
         else if (world.player.action != CAP_ACT_KO &&
                  world.encounter_state != CAP_ENCOUNTER_BOSS_INTRO &&
@@ -260,7 +320,7 @@ static void test_controller_only_route_completion(void)
                 {
                     input.left = delta_x < 0;
                     input.right = delta_x > 0;
-                    input.dash_held = 1;
+                    input.jump_pressed = 1;
                 }
                 else
                 {
@@ -271,7 +331,10 @@ static void test_controller_only_route_completion(void)
                         input.right = delta_x > 0;
                     }
                     else
-                        input.special_pressed = 1;
+                    {
+                        input.shoot_pressed = 1;
+                        input.attack_pressed = 1;
+                    }
                 }
             }
         }
@@ -302,9 +365,10 @@ static void test_long_deterministic_run(void)
         input.left = !input.right;
         input.up = (frame % 240) < 60;
         input.down = (frame % 240) >= 120 && (frame % 240) < 180;
-        input.dash_held = (frame % 90) < 30;
         input.attack_pressed = (frame % 73) == 0;
-        input.special_pressed = (frame % 211) == 0 && !input.attack_pressed;
+        input.shoot_pressed = (frame % 211) == 0 && !input.attack_pressed;
+        input.jump_pressed = (frame % 307) == 0 && !input.attack_pressed &&
+                             !input.shoot_pressed;
         input.start_pressed = frame == 0;
         if (frame == 1) input.attack_pressed = 1;
         (void)cap_world_step(&world, &input);
@@ -312,6 +376,12 @@ static void test_long_deterministic_run(void)
         assert(world.player.x >= 24 && world.player.x <= CAP_WORLD_WIDTH - 24);
         assert(world.player.lane >= 148 && world.player.lane <= 198);
         assert(world.player.health >= 0 && world.player.health <= CAP_PLAYER_MAX_HEALTH);
+        assert(world.player.height >= 0 && world.player.height <= 57);
+        assert(world.player.motion_x >= -6 && world.player.motion_x <= 6);
+        assert(world.weapon_energy >= 0 &&
+               world.weapon_energy <= CAP_WEAPON_MAX_ENERGY);
+        assert(world.shots_fired >= 0);
+        assert(world.special_health_spent >= 0);
         assert(world.camera_x >= 0 &&
                world.camera_x <= CAP_WORLD_WIDTH - CAP_VIEW_WIDTH);
         assert(world.player.action >= CAP_ACT_IDLE && world.player.action <= CAP_ACT_KO);
@@ -392,6 +462,7 @@ static void test_actor_display_mapping(void)
 int main(void)
 {
     test_attack_requests_and_damage();
+    test_jump_dash_and_two_button_special();
     test_encounter_waits_for_player_input();
     test_first_room_waves_and_transition();
     test_controller_only_route_completion();

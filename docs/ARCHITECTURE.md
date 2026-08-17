@@ -35,7 +35,7 @@ The current path instead:
 
 The active actor VDP1 working set contains six 192x192 packed 4bpp slots, or
 110,592 bytes of texture data: two idle Predator layers, three replaceable
-attack layers, and one replaceable alien layer. The first attack sequence
+shoulder-cannon layers, and one replaceable alien layer. The first gun sequence
 contains ten captured poses and three layers per pose, totaling 552,960 source
 bytes in the 4 MB cartridge. The first blue-alien track adds ten single-layer
 poses, or 184,320 source bytes. Each pose update replaces only its corresponding
@@ -57,8 +57,15 @@ oracles, not the final animation architecture or the normal release boot path.
 The normal release instead allocates two 78,848-byte VDP1 frontend surfaces:
 the verified frame-1440 Press Start state and frame-1800 Predator Warrior
 selection state. Their 110 and 115 source colors respectively remain lossless.
-The native controller state machine waits for Start, then A, before beginning
+The native controller state machine waits for Start, then B, before beginning
 the Round 1 title and gameplay route.
+
+The native action interface preserves the three-button CPS2 layout on the
+Saturn face buttons: A is weapon, B is melee attack, and C is jump. A direction
+plus C requests a directional dash, and any two of A/B/C request the emergency
+attack. The captured ten-pose sequence currently bound to A is the Predator's
+shoulder-cannon shot. Melee, jump, dash, and emergency-attack timing exist in
+the gameplay model, but their exact CPS2 cels are not yet extracted.
 
 After confirmation, the menu surface becomes a reusable route-sequence slot.
 Thirteen verified 384x224 capture anchors are horizontally fit to 352x224,
@@ -114,7 +121,7 @@ Exact in the current milestone:
 - aligned multi-palette VDP1 assembly
 - active CPS2 object-RAM bank and final visible boot object/priority result
 - Saturn-native 352x224 initialization with one deterministic full-width fit
-- first ten-pose captured Predator attack sequence
+- first ten-pose captured Predator shoulder-cannon sequence
 - first ten-pose temporally tracked blue-alien sequence
 - first-room 5+3 crowd budget, four alien palette variants, combat lock, clear,
   and exit-state lifecycle
@@ -123,7 +130,7 @@ Still approximate or incomplete:
 
 - temporal confirmation of remaining enemy variants, actions, and prop groups
 - exact enemy pose selection, spawn coordinates/timing, AI, and object priority
-- remaining player states, enemy animation/state timing, and full frame sets
+- exact melee, jump, dash, emergency-attack, and remaining player frame sets
 - complete attract-mode, menu-transition, and character-select animation
 - full animation between the verified route key states
 - dynamic HUD values, exact scroll behavior, level triggers, combat, and AI
