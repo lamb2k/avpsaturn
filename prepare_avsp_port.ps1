@@ -135,6 +135,17 @@ if (-not (Test-Path -LiteralPath $audioCapture) -or
     throw 'The Stage 1 QSound reference WAV is missing or empty.'
 }
 
+$routeArguments = @((Join-Path $projectRoot 'tools\generate_stage1_route.py'))
+$completeRouteMetadata = Join-Path $projectRoot `
+    '.deps\mame\full_stage1_complete\route_samples.tsv'
+if (Test-Path -LiteralPath $completeRouteMetadata) {
+    $routeArguments += '--verify-captures'
+}
+& $PythonPath @routeArguments
+if ($LASTEXITCODE -ne 0) {
+    throw "Stage 1 route-ledger generation failed with exit code $LASTEXITCODE."
+}
+
 & $PythonPath (Join-Path $projectRoot 'tools\extract_avspu_stage1.py')
 if ($LASTEXITCODE -ne 0) {
     throw "CPS2 extraction and Saturn conversion failed with exit code $LASTEXITCODE."

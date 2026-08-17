@@ -66,7 +66,7 @@ try {
     Push-Location $projectRoot
     try {
         if (-not $SkipHostTests) {
-            & '.\test.ps1'
+            & '.\test.ps1' -PythonPath $PythonPath
             if ($LASTEXITCODE -ne 0) {
                 throw "Host tests failed with exit code $LASTEXITCODE."
             }

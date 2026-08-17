@@ -1,7 +1,38 @@
 [CmdletBinding()]
-param()
+param(
+    [string]$PythonPath
+)
 
 $ErrorActionPreference = 'Stop'
+if (-not $PythonPath) {
+    $pythonCommand = Get-Command 'py.exe' -ErrorAction SilentlyContinue
+    if ($pythonCommand) {
+        $PythonPath = $pythonCommand.Source
+    }
+    else {
+        $pythonCommand = Get-Command 'python.exe' -ErrorAction SilentlyContinue
+        if ($pythonCommand -and $pythonCommand.Source -notlike '*WindowsApps*') {
+            $PythonPath = $pythonCommand.Source
+        }
+        else {
+            $bundledPython = Join-Path $env:USERPROFILE `
+                '.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
+            if (Test-Path -LiteralPath $bundledPython) {
+                $PythonPath = $bundledPython
+            }
+        }
+    }
+}
+if (-not $PythonPath -or -not (Test-Path -LiteralPath $PythonPath)) {
+    throw 'Python 3 is required to validate the committed Stage 1 route ledger.'
+}
+
+& $PythonPath (Join-Path $PSScriptRoot 'tools\generate_stage1_route.py') `
+    '--check-only'
+if ($LASTEXITCODE -ne 0) {
+    throw "Stage 1 route-ledger validation failed with exit code $LASTEXITCODE."
+}
+
 $wsl = Get-Command 'wsl.exe' -ErrorAction SilentlyContinue
 if (-not $wsl) {
     throw 'WSL with GCC is required for the strict host-side gameplay-model test.'

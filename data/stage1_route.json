@@ -1,0 +1,278 @@
+{
+  "schema_version": 1,
+  "game": "avspu",
+  "stage": 1,
+  "stage_name": "City of Despair",
+  "capture": {
+    "source_width": 384,
+    "source_height": 224,
+    "opening_root": ".deps/mame/captures",
+    "continuation_root": ".deps/mame/full_stage1_complete",
+    "continuation_first_frame": 4260,
+    "continuation_last_frame": 18180,
+    "continuation_step": 60,
+    "round_1_title_frame": 2040,
+    "round_2_title_frame": 14760,
+    "timing_policy": "ordered evidence only; automated deaths and continues make absolute intervals non-canonical"
+  },
+  "required_runtime_phases": [
+    "round_title",
+    "barricade_intro",
+    "street_combat",
+    "street_scroll",
+    "door_dialogue",
+    "interior_transition",
+    "boss_intro",
+    "boss_combat",
+    "boss_defeat",
+    "stage_clear",
+    "results",
+    "intermission",
+    "complete"
+  ],
+  "capture_incidents": [
+    {
+      "frame": 4860,
+      "kind": "continue",
+      "effect": "exclude surrounding interval from authored stage timing"
+    },
+    {
+      "frame": 9000,
+      "kind": "continue",
+      "effect": "exclude surrounding interval from authored boss timing"
+    },
+    {
+      "frame": 9600,
+      "kind": "continue",
+      "effect": "exclude surrounding interval from authored boss timing"
+    },
+    {
+      "frame": 10200,
+      "kind": "continue",
+      "effect": "exclude surrounding interval from authored boss timing"
+    },
+    {
+      "frame": 11100,
+      "kind": "continue",
+      "effect": "exclude surrounding interval from authored boss timing"
+    }
+  ],
+  "events": [
+    {
+      "id": "round_1_title",
+      "frame": 2040,
+      "runtime_phase": "round_title",
+      "kind": "sequence",
+      "capture": "opening:stage1_2040.png",
+      "sha256": "a1dc1227fb4961d9463bf6d2db631c9ef0645aef62923fce7a39407dbd95179b",
+      "observation": "Round 1 City of Despair title card"
+    },
+    {
+      "id": "barricade_intro",
+      "frame": 2160,
+      "runtime_phase": "barricade_intro",
+      "kind": "sequence",
+      "capture": "opening:stage1_2160.png",
+      "sha256": "d21488c9aa511410e50138b5966daa131c168d0566cc5da3aa0f4f7afadf7f3d",
+      "observation": "Player and marines are held behind the street barricade"
+    },
+    {
+      "id": "withdraw_dialogue",
+      "frame": 2280,
+      "runtime_phase": "barricade_intro",
+      "kind": "dialogue",
+      "capture": "opening:stage1_2280.png",
+      "sha256": "aab1d6b9061e4fe67730f2d9157ff504254fa8c048b96da703632633d5d625a0",
+      "observation": "Marine withdraw dialogue appears before the breach"
+    },
+    {
+      "id": "barricade_breach",
+      "frame": 2400,
+      "runtime_phase": "barricade_intro",
+      "kind": "sequence",
+      "capture": "opening:stage1_2400.png",
+      "sha256": "7750e6f2163b63aef4be9a284dc75a8bb3b53366c68ef54143a05ae1d5d04ea4",
+      "observation": "Barricade explodes and the first GO prompt appears"
+    },
+    {
+      "id": "street_combat_begins",
+      "frame": 2520,
+      "runtime_phase": "street_combat",
+      "kind": "combat",
+      "capture": "opening:stage1_2520.png",
+      "sha256": "792dc2b327dc341922609891e01c2f08fac331ee817ba0405e534dddf0820be0",
+      "observation": "First active street melee after the breach"
+    },
+    {
+      "id": "street_crowd_peak",
+      "frame": 2760,
+      "runtime_phase": "street_combat",
+      "kind": "combat",
+      "capture": "opening:stage1_2760.png",
+      "sha256": "382bbe72768d25daa94400b17d845133d416f6257a0506d4426b0804955ff3f2",
+      "observation": "Dense multi-alien street crowd is active simultaneously"
+    },
+    {
+      "id": "street_scroll_prompt",
+      "frame": 3600,
+      "runtime_phase": "street_scroll",
+      "kind": "scroll",
+      "capture": "opening:stage1_3600.png",
+      "sha256": "6161165902eababccbc63104918840c46dede7b656bc6a4b028a9bd40db368a0",
+      "observation": "GO prompt advances the camera into the next street section"
+    },
+    {
+      "id": "late_street_combat",
+      "frame": 4200,
+      "runtime_phase": "street_scroll",
+      "kind": "combat",
+      "capture": "opening:stage1_4200.png",
+      "sha256": "4f3f2d51576474285fa0c83e1f71e152c04988569f6e41b7901823f330fac7f1",
+      "observation": "Street fighting continues after the first scroll gate"
+    },
+    {
+      "id": "street_exit",
+      "frame": 5280,
+      "runtime_phase": "door_dialogue",
+      "kind": "player_exit",
+      "capture": "continuation:full_stage1_05280.png",
+      "sha256": "d9dbe57b92e4f53a6a8cc553e635c75822680ae2d39d9008ac91d218427cf509",
+      "observation": "Player reaches the right-side doorway at the end of the street"
+    },
+    {
+      "id": "door_dialogue",
+      "frame": 5340,
+      "runtime_phase": "door_dialogue",
+      "kind": "dialogue",
+      "capture": "continuation:full_stage1_05340.png",
+      "sha256": "2e3a02cbf5ebca02b5096e261dc82d4080e4cd80b95bb455f64854a4fee19c7e",
+      "observation": "They didn't follow us in. Why? dialogue appears in the dark doorway"
+    },
+    {
+      "id": "interior_transition",
+      "frame": 5400,
+      "runtime_phase": "interior_transition",
+      "kind": "room_transition",
+      "capture": "continuation:full_stage1_05400.png",
+      "sha256": "361d7dc3d983aa6d5c956335aeb7f22be3861cdcbe411c2503f0ff20d87f65be",
+      "observation": "Player is isolated against black while the industrial room loads"
+    },
+    {
+      "id": "boss_room_entry",
+      "frame": 5460,
+      "runtime_phase": "boss_intro",
+      "kind": "room_transition",
+      "capture": "continuation:full_stage1_05460.png",
+      "sha256": "3dfb8c1316d4dafbed09b3a63353326a45decc547d0f664930536a500f35cbe0",
+      "observation": "Industrial room appears with Chrysalis entering from the right"
+    },
+    {
+      "id": "boss_combat_begins",
+      "frame": 5520,
+      "runtime_phase": "boss_combat",
+      "kind": "boss_combat",
+      "capture": "continuation:full_stage1_05520.png",
+      "sha256": "fa9037992b74aae5d76b258bfb8bec69409cbb83438376642df8edbe402b3ce1",
+      "observation": "Chrysalis boss bar is active with a Stalker add in the arena"
+    },
+    {
+      "id": "boss_stalker_wave_1",
+      "frame": 7200,
+      "runtime_phase": "boss_combat",
+      "kind": "reinforcement",
+      "capture": "continuation:full_stage1_07200.png",
+      "sha256": "e165c4e564da5e760d5347543ff3c65678814bd6bb72aa9e19888ff719d737e7",
+      "observation": "Two Stalker adds are active with Chrysalis"
+    },
+    {
+      "id": "boss_stalker_wave_2",
+      "frame": 10800,
+      "runtime_phase": "boss_combat",
+      "kind": "reinforcement",
+      "capture": "continuation:full_stage1_10800.png",
+      "sha256": "1625a3504721cfb5d6b2ee750184f4a06d586206e93630a90895da6a24b131a9",
+      "observation": "Later Chrysalis phase again contains multiple Stalker adds"
+    },
+    {
+      "id": "boss_defeated",
+      "frame": 13920,
+      "runtime_phase": "boss_defeat",
+      "kind": "boss_defeat",
+      "capture": "continuation:full_stage1_13920.png",
+      "sha256": "7bcbc7f1a0d32019921038a6e8b11f3a701de6f9b4fc33fb1a49320b6d2d7d1a",
+      "observation": "Chrysalis lies defeated and its health bar is empty"
+    },
+    {
+      "id": "boss_death_explosion",
+      "frame": 13980,
+      "runtime_phase": "boss_defeat",
+      "kind": "sequence",
+      "capture": "continuation:full_stage1_13980.png",
+      "sha256": "b6159c0543b22a6ce01c1242857ad92cbd168da02862989e8ab42b26fb57bf8b",
+      "observation": "Boss death explosion plays after the health-zero pose"
+    },
+    {
+      "id": "player_victory",
+      "frame": 14040,
+      "runtime_phase": "boss_defeat",
+      "kind": "sequence",
+      "capture": "continuation:full_stage1_14040.png",
+      "sha256": "3adf66f12cc00df111cfcc04d31303f6edfea83ec76eb48f1448d2d9e8c6c77f",
+      "observation": "Player victory pose follows the boss explosion"
+    },
+    {
+      "id": "stage_clear",
+      "frame": 14160,
+      "runtime_phase": "stage_clear",
+      "kind": "sequence",
+      "capture": "continuation:full_stage1_14160.png",
+      "sha256": "ad5563a5122e0baa12f3ebdd7a6d785dfad50907ee09855a21edb34c2140a5cd",
+      "observation": "Congratulations and Stage Clear overlay appears"
+    },
+    {
+      "id": "results_begin",
+      "frame": 14280,
+      "runtime_phase": "results",
+      "kind": "results",
+      "capture": "continuation:full_stage1_14280.png",
+      "sha256": "e33dd9068019f60af1c664f19501d3085cc119bf110f286f2a10b3f3b5890b53",
+      "observation": "1P results tally begins"
+    },
+    {
+      "id": "results_complete",
+      "frame": 14580,
+      "runtime_phase": "results",
+      "kind": "results",
+      "capture": "continuation:full_stage1_14580.png",
+      "sha256": "383bdf687e456319a4b1f71c8ef4f7cb73225e2c2234a315358db4a2f01a5219",
+      "observation": "Results tally reaches its winner state"
+    },
+    {
+      "id": "results_exit",
+      "frame": 14640,
+      "runtime_phase": "results",
+      "kind": "sequence",
+      "capture": "continuation:full_stage1_14640.png",
+      "sha256": "4b88ebb093b146cef008ec7b1295ef70a0403f8ae9ea1b17a09f85a77561e302",
+      "observation": "Results overlay clears before the intermission art"
+    },
+    {
+      "id": "intermission",
+      "frame": 14700,
+      "runtime_phase": "intermission",
+      "kind": "sequence",
+      "capture": "continuation:full_stage1_14700.png",
+      "sha256": "e119b39d961f5477ba7380a082c07e5530a89af3612f83205b4772fb65c4832d",
+      "observation": "Character intermission art separates Rounds 1 and 2"
+    },
+    {
+      "id": "round_2_boundary",
+      "frame": 14760,
+      "runtime_phase": "complete",
+      "kind": "boundary",
+      "capture": "continuation:full_stage1_14760.png",
+      "sha256": "307e2ca1ebb5a9414bd2f19e4f8b530c0caea0faa6807f0d572b4db6f362106b",
+      "observation": "Round 2 War in the Underpass title proves the complete Round 1 boundary"
+    }
+  ]
+}

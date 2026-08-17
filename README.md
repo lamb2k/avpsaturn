@@ -14,6 +14,8 @@ Current milestone:
 - decodes CPS2 background tilemaps, object commands, palettes, and priority
 - records 361 active-bank samples across the deterministic Stage 1 route and
   reduces the captured Predator assemblies to 87 unique poses
+- verifies 233 additional 60-frame route samples and 24 hashed visual anchors
+  from the Round 1 title through the definitive Round 2 title boundary
 - preserves original sprite scale and exact 15-color CPS2 subpalettes
 - animates the first authentic ten-pose Predator attack from three aligned
   VDP1 palette layers backed by the Saturn 4 MB cartridge
@@ -84,6 +86,13 @@ hardware profile. Keep all three files together and select the cue on a loader.
 Use `prepare_avsp_port.ps1 -RefreshCapture` to deliberately recapture the MAME
 reference.
 
+The committed `data/stage1_route.json` is the copyright-safe route-evidence
+ledger. It records ordered milestones, capture hashes, runtime phases, and the
+automated continues that must not be mistaken for authored timing. Run
+`tools/generate_stage1_route.py --verify-captures` to check every private local
+anchor plus the complete active-object-bank sample series. The generated C
+header is ignored and consumed by the native build.
+
 Jo Engine is pinned to commit `556d081146211b6a1cfa6591d70f9487d406758b`.
 
 ## Run
@@ -127,6 +136,10 @@ Verified on August 16, 2026:
 - exact layered cels retain original scale and CPS2 palette pens
 - the native model passes 12,000 deterministic frames, including the idle boot
   gate and the complete 5+3 opening-room lifecycle
+- the complete private capture contains 233 ordered active-bank samples from
+  frame 4260 through 18180; 24 hashed visual anchors prove the Round 1 title,
+  street, doorway dialogue, industrial transition, Chrysalis plus recurring
+  Stalker waves, boss defeat, results, intermission, and Round 2 boundary
 - a controller-only route test reaches Stage Clear without changing actor
   health, positions, encounter state, or timers outside normal player input
 - the encounter diagnostic visibly reaches five active enemies, eight KOs,
