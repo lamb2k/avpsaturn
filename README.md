@@ -119,7 +119,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run.ps1
 `run.ps1` launches Yaba Sanshiro with a 32 Mbit DRAM cartridge, the Saturn 4 MB
 RAM expansion. Controls follow the CPS2 panel order: D-pad to move, A for the
 weapon, B for melee attack, and C to jump. Hold left or right and press C to
-dash. Press any two of A/B/C together for the health-draining emergency attack.
+dash. Press A+B together for the health-draining emergency attack.
 X toggles the diagnostic HUD. The launcher no longer disables emulator audio.
 
 ## Real hardware

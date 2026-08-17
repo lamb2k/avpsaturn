@@ -302,8 +302,6 @@ static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
     CapActor *player = &world->player;
     int speed = 2;
     int moving = 0;
-    int pressed_buttons = input->shoot_pressed + input->attack_pressed +
-                          input->jump_pressed;
 
     if (world->weapon_energy < CAP_WEAPON_MAX_ENERGY)
     {
@@ -404,7 +402,9 @@ static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
         return CAP_CLIP_NONE;
     }
 
-    if (pressed_buttons >= 2)
+    /* The verified CPS2 emergency-attack capture uses Button 1 + Button 2.
+       Do not turn unrelated Saturn face-button chords into that action. */
+    if (input->shoot_pressed && input->attack_pressed)
     {
         player->action = CAP_ACT_SPECIAL;
         player->action_frame = 0;

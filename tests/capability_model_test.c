@@ -98,7 +98,7 @@ static void test_attack_requests_and_damage(void)
            CAP_WEAPON_MAX_ENERGY - CAP_WEAPON_SHOT_COST + 2);
 }
 
-static void test_jump_dash_and_two_button_special(void)
+static void test_jump_dash_and_captured_special_chord(void)
 {
     CapWorld world;
     CapInput input;
@@ -130,6 +130,26 @@ static void test_jump_dash_and_two_button_special(void)
     assert(world.player.x == 244);
     assert(world.player.height == 0);
 
+    cap_world_init(&world);
+    start_encounter(&world);
+    memset(&input, 0, sizeof(input));
+    input.attack_pressed = 1;
+    input.jump_pressed = 1;
+    request = cap_world_step(&world, &input);
+    assert(request == CAP_CLIP_ATTACK);
+    assert(world.player.action == CAP_ACT_ATTACK);
+
+    cap_world_init(&world);
+    start_encounter(&world);
+    memset(&input, 0, sizeof(input));
+    input.shoot_pressed = 1;
+    input.jump_pressed = 1;
+    request = cap_world_step(&world, &input);
+    assert(request == CAP_CLIP_SHOOT);
+    assert(world.player.action == CAP_ACT_SHOOT);
+
+    cap_world_init(&world);
+    start_encounter(&world);
     for (index = 2; index < CAP_MAX_ENEMIES; ++index)
         world.enemies[index].active = 0;
     world.enemies[0].x = world.player.x + 40;
@@ -608,7 +628,7 @@ static void test_actor_display_mapping(void)
 int main(void)
 {
     test_attack_requests_and_damage();
-    test_jump_dash_and_two_button_special();
+    test_jump_dash_and_captured_special_chord();
     test_capture_exact_enemy_action_timing();
     test_walk_locomotion_counter();
     test_player_hit_and_ko_timing();

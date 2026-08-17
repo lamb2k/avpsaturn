@@ -46,8 +46,9 @@ alter console copy protection or supply copyrighted disc data.
    native route reaches the Round 1 title before gameplay begins.
 4. Verify D-pad lane movement advances the complete 48-frame captured walk
    loop; verify A weapon, B melee attack, neutral C jump,
-   direction+C dash, any two face buttons emergency attack, and X diagnostic
-   HUD. Confirm the top panel, Player 2 prompt, and Over Heat meter stay fixed
+   direction+C dash, A+B emergency attack, and X diagnostic HUD. Confirm B+C
+   remains melee and A+C remains weapon rather than triggering the emergency
+   attack. Confirm the top panel, Player 2 prompt, and Over Heat meter stay fixed
    while the street scrolls; one A press must visibly drain the weapon meter
    and its refill must advance without moving the HUD. Confirm all five
    controlled actions use their captured clips, return

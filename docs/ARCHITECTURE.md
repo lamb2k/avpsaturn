@@ -79,8 +79,10 @@ the Round 1 title and gameplay route.
 
 The native action interface preserves the three-button CPS2 layout on the
 Saturn face buttons: A is weapon, B is melee attack, and C is jump. A direction
-plus C requests a directional dash, and any two of A/B/C request the emergency
-attack. All five controlled actions are bound to their isolated CPS2 clips.
+plus C requests a directional dash, and the captured A+B chord requests the
+emergency attack. Other two-button chords retain their primary action rather
+than triggering an unverified shortcut. All five controlled actions are bound
+to their isolated CPS2 clips.
 Native D-pad locomotion advances the isolated 48-frame CPS2 walk loop; its
 12 four-frame poses and the first 24 repeated frames are capture-verified.
 Automatic player hit and KO states use clips extracted from a natural enemy-
