@@ -1320,7 +1320,7 @@ def write_player_action_sequence_assets(
         raise ValueError(
             "natural player-damage report is missing; run capture_player_damage.ps1")
     damage_report = json.loads(damage_report_path.read_text(encoding="utf-8"))
-    action_names = ("gun", "melee", "jump", "dash", "special")
+    action_names = ("gun", "melee", "jump", "dash", "special", "walk")
     action_reports = {entry["action"]: entry for entry in report["actions"]}
     cps_colours = (0, 7, 15)
     base_palette = load_palette_path(

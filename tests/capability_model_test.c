@@ -140,6 +140,33 @@ static void test_jump_dash_and_two_button_special(void)
     assert(world.special_health_spent == 1);
 }
 
+static void test_walk_locomotion_counter(void)
+{
+    CapWorld world;
+    CapInput input;
+    int index;
+    int start_x;
+
+    cap_world_init(&world);
+    start_encounter(&world);
+    for (index = 0; index < CAP_MAX_ENEMIES; ++index)
+        world.enemies[index].active = 0;
+    world.player.x = 100;
+    start_x = world.player.x;
+    memset(&input, 0, sizeof(input));
+    input.right = 1;
+    for (index = 0; index < 48; ++index)
+        cap_world_step(&world, &input);
+    assert(world.player.action == CAP_ACT_WALK);
+    assert(world.player.locomotion_frame == 48);
+    assert(world.player.x == start_x + 96);
+    step_empty(&world, 1);
+    assert(world.player.action == CAP_ACT_IDLE);
+    cap_world_step(&world, &input);
+    assert(world.player.action == CAP_ACT_WALK);
+    assert(world.player.locomotion_frame == 49);
+}
+
 static void test_player_hit_and_ko_timing(void)
 {
     CapWorld world;
@@ -505,6 +532,7 @@ int main(void)
 {
     test_attack_requests_and_damage();
     test_jump_dash_and_two_button_special();
+    test_walk_locomotion_counter();
     test_player_hit_and_ko_timing();
     test_encounter_waits_for_player_input();
     test_first_room_waves_and_transition();

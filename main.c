@@ -77,6 +77,7 @@ static int stage_music_started;
 static int current_sequence_scene;
 #ifdef AVSP_VISUAL_TEST
 static int visual_action_index;
+static int visual_walk_frames;
 #endif
 
 static int load_cel_asset(CelAsset *asset)
@@ -484,6 +485,7 @@ static int player_clip_for_action(const CapAction action)
     if (action == CAP_ACT_JUMP) return AVSP_PLAYER_CLIP_JUMP;
     if (action == CAP_ACT_DASH) return AVSP_PLAYER_CLIP_DASH;
     if (action == CAP_ACT_SPECIAL) return AVSP_PLAYER_CLIP_SPECIAL;
+    if (action == CAP_ACT_WALK) return AVSP_PLAYER_CLIP_WALK;
     if (action == CAP_ACT_HIT) return AVSP_PLAYER_CLIP_HIT;
     if (action == CAP_ACT_KO) return AVSP_PLAYER_CLIP_KO;
     return -1;
@@ -492,12 +494,13 @@ static int player_clip_for_action(const CapAction action)
 #ifdef AVSP_VISUAL_TEST
 static CapAction visual_action_for_index(const int index)
 {
-    if (index == 0) return CAP_ACT_SHOOT;
-    if (index == 1) return CAP_ACT_ATTACK;
-    if (index == 2) return CAP_ACT_JUMP;
-    if (index == 3) return CAP_ACT_DASH;
-    if (index == 4) return CAP_ACT_SPECIAL;
-    if (index == 5) return CAP_ACT_HIT;
+    if (index == 0) return CAP_ACT_WALK;
+    if (index == 1) return CAP_ACT_SHOOT;
+    if (index == 2) return CAP_ACT_ATTACK;
+    if (index == 3) return CAP_ACT_JUMP;
+    if (index == 4) return CAP_ACT_DASH;
+    if (index == 5) return CAP_ACT_SPECIAL;
+    if (index == 6) return CAP_ACT_HIT;
     return CAP_ACT_KO;
 }
 #endif
@@ -546,12 +549,17 @@ static void draw_player(const CapActor *actor, const int screen_x)
     int clip = player_clip_for_action(actor->action);
     if (clip >= 0)
     {
-        int frame = actor->action_frame;
+        int frame = actor->action == CAP_ACT_WALK ?
+            (actor->locomotion_frame > 0 ? actor->locomotion_frame - 1 : 0) :
+            actor->action_frame;
         int screen_offset_x;
         int screen_offset_y;
-        int pose = player_pose_for_frame(clip, actor->action_frame);
-        if (frame >= avsp_player_action_total_frames[clip])
+        int pose;
+        if (actor->action == CAP_ACT_WALK)
+            frame %= avsp_player_action_total_frames[clip];
+        else if (frame >= avsp_player_action_total_frames[clip])
             frame = avsp_player_action_total_frames[clip] - 1;
+        pose = player_pose_for_frame(clip, frame);
         screen_offset_x = avsp_player_action_frame_x[clip][frame] *
             CAP_VIEW_WIDTH / CAP_CPS2_VIEW_WIDTH;
         if (actor->facing < 0) screen_offset_x = -screen_offset_x;
@@ -762,14 +770,27 @@ static void frame_callback(void)
     {
         world.player.action = visual_action_for_index(visual_action_index);
         world.player.action_frame = 0;
+        if (world.player.action == CAP_ACT_WALK)
+            visual_walk_frames = AVSP_PLAYER_ACTION_MAX_FRAMES * 8;
         visual_action_index = (visual_action_index + 1) % AVSP_PLAYER_ACTION_CLIPS;
     }
 #endif
     input = read_input();
+#ifdef AVSP_VISUAL_TEST
+    if (world.player.action == CAP_ACT_WALK && visual_walk_frames > 0)
+    {
+        input.right = 1;
+        --visual_walk_frames;
+    }
+#endif
 #ifdef AVSP_ENCOUNTER_TEST
     input = encounter_test_input();
 #endif
     cap_world_step(&world, &input);
+#ifdef AVSP_VISUAL_TEST
+    if (world.player.action == CAP_ACT_WALK)
+        world.player.x = JO_TV_WIDTH_2;
+#endif
     if (!activate_route_sequence(sequence_scene_for_world()))
     {
         runtime_ready = 0;
@@ -821,6 +842,7 @@ void jo_main(void)
     current_sequence_scene = -1;
 #ifdef AVSP_VISUAL_TEST
     visual_action_index = 0;
+    visual_walk_frames = 0;
 #endif
     sequence_pixels = JO_NULL;
     for (index = 0; index < AVSP_SEQUENCE_SCENES; ++index)

@@ -13,10 +13,11 @@ ROOT = Path(__file__).resolve().parents[1]
 TOOLS_ROOT = ROOT / "tools"
 CAPTURE_ROOT = ROOT / ".deps" / "mame" / "player_actions"
 OUTPUT_ROOT = ROOT / "build" / "rom_extract"
-ACTIONS = ("idle", "gun", "melee", "jump", "dash", "special")
+ACTIONS = ("idle", "walk", "gun", "melee", "jump", "dash", "special")
 FIRST_FRAME = 2480
 LAST_FRAME = 2608
 INPUT_FRAME = 2525
+WALK_REPEAT_VALIDATION_FRAMES = 24
 
 sys.path.insert(0, str(TOOLS_ROOT))
 import extract_avspu_stage1 as avsp  # noqa: E402
@@ -160,8 +161,33 @@ def main() -> None:
         if action != "idle" and not changed_frames:
             raise ValueError(f"{action}: input did not produce a distinct player pose")
         return_frame = None
+        loop_frame = None
         clip_timeline: list[dict[str, object]] = []
-        if action != "idle":
+        clip_start_frame = INPUT_FRAME
+        if action == "walk":
+            clip_start_frame = changed_frames[0]
+            first_walk_pose = str(timeline_by_frame[clip_start_frame]["pose"])
+            for frame in range(clip_start_frame + 1, LAST_FRAME - 3):
+                if all(str(timeline_by_frame[candidate]["pose"]) == first_walk_pose
+                       for candidate in range(frame, frame + 4)):
+                    loop_frame = frame
+                    break
+            if loop_frame is None:
+                raise ValueError("walk: no complete repeating locomotion cycle")
+            if any(
+                    str(timeline_by_frame[clip_start_frame + offset]["pose"]) !=
+                    str(timeline_by_frame[loop_frame + offset]["pose"])
+                    for offset in range(WALK_REPEAT_VALIDATION_FRAMES)):
+                raise ValueError("walk: repeated cycle prefix no longer matches")
+            clip_timeline = [
+                timeline_by_frame[frame]
+                for frame in range(clip_start_frame, loop_frame)
+            ]
+            walk_runs = pose_runs(clip_timeline)
+            if len(walk_runs) < 2 or any(
+                    int(run["samples"]) != 4 for run in walk_runs):
+                raise ValueError("walk: expected a four-frame CPS2 pose cadence")
+        elif action != "idle":
             baseline_pose = str(timeline_by_frame[INPUT_FRAME]["pose"])
             for frame in range(changed_frames[0] + 1, LAST_FRAME - 1):
                 if all(str(timeline_by_frame[candidate]["pose"]) == baseline_pose
@@ -177,12 +203,13 @@ def main() -> None:
         action_result = {
             "action": action,
             "input_frame": INPUT_FRAME if action != "idle" else None,
+            "clip_start_frame": clip_start_frame if action != "idle" else None,
             "accepted": action == "idle" or bool(changed_frames),
             "first_pose_difference": changed_frames[0] if changed_frames else None,
             "last_pose_difference": changed_frames[-1] if changed_frames else None,
             "return_to_idle_frame": return_frame,
-            "clip_frame_count": (return_frame - INPUT_FRAME
-                                 if return_frame is not None else 0),
+            "loop_frame": loop_frame,
+            "clip_frame_count": len(clip_timeline),
             "clip_runs": pose_runs(clip_timeline),
             "unique_pose_count": len({str(sample["pose"]) for sample in timeline}),
             "maximum_command_count": max(int(sample["command_count"])

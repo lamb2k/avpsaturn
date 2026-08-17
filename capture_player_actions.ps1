@@ -8,7 +8,7 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
 $mame = Join-Path $projectRoot '.deps\mame\mame0289\mame.exe'
 $captureRoot = Join-Path $projectRoot '.deps\mame\player_actions'
-$actions = @('idle', 'gun', 'melee', 'jump', 'dash', 'special')
+$actions = @('idle', 'walk', 'gun', 'melee', 'jump', 'dash', 'special')
 
 if (-not (Test-Path -LiteralPath $mame)) {
     & (Join-Path $projectRoot 'setup_reference.ps1')
@@ -81,4 +81,4 @@ if ($LASTEXITCODE -ne 0) {
     throw "Player-action analysis failed with exit code $LASTEXITCODE."
 }
 
-Write-Host "Captured isolated player actions under $captureRoot."
+Write-Host "Validated isolated player actions under $captureRoot."

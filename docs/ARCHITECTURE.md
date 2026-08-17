@@ -36,13 +36,13 @@ The current path instead:
 The active actor VDP1 working set contains six 192x192 packed 4bpp slots, or
 110,592 bytes of texture data: two idle Predator layers, three replaceable
 player-action layers, and one replaceable alien layer. The isolated player
-captures produce exact 23-frame weapon, 22-frame melee, 42-frame jump, 24-frame
-dash, 81-frame emergency-attack, 25-frame hit, and 96-frame KO clips. Pose
-deduplication reduces them to 91 shared assemblies and 273 palette-layer
-payloads. Count/value RLE compresses their 5,031,936 decoded bytes to one
-375,520-byte indexed cartridge archive, avoiding 273 separate CD seeks at boot.
-The first
-blue-alien track adds ten single-layer poses, or 184,320 source bytes. Each pose
+captures produce an exact 48-frame walk loop, plus 23-frame weapon, 22-frame
+melee, 42-frame jump, 24-frame dash, 81-frame emergency-attack, 25-frame hit,
+and 96-frame KO clips. Pose deduplication reduces them to 103 shared assemblies
+and 309 palette-layer payloads. Count/value RLE compresses their 5,695,488
+decoded bytes to one 417,488-byte indexed cartridge archive, avoiding 309
+separate CD seeks at boot. The first blue-alien track adds ten single-layer
+poses, or 184,320 source bytes. Each pose
 update replaces only its corresponding
 55,296-byte player group or 18,432-byte enemy slot. Four exact CPS2 alien
 variants plus the three player-layer palettes occupy seven 16-color banks in
@@ -69,6 +69,8 @@ The native action interface preserves the three-button CPS2 layout on the
 Saturn face buttons: A is weapon, B is melee attack, and C is jump. A direction
 plus C requests a directional dash, and any two of A/B/C request the emergency
 attack. All five controlled actions are bound to their isolated CPS2 clips.
+Native D-pad locomotion advances the isolated 48-frame CPS2 walk loop; its
+12 four-frame poses and the first 24 repeated frames are capture-verified.
 Automatic player hit and KO states use clips extracted from a natural enemy-
 damage capture, including captured per-frame screen offsets for the KO launch,
 fall, ground bounce, and respawn. Each action capture cold boots through the
@@ -131,8 +133,8 @@ Exact in the current milestone:
 - aligned multi-palette VDP1 assembly
 - active CPS2 object-RAM bank and final visible boot object/priority result
 - Saturn-native 352x224 initialization with one deterministic full-width fit
-- isolated captured Predator weapon, melee, jump, dash, emergency-attack, hit,
-  and KO clips, including the hit/KO screen-space trajectory
+- isolated captured Predator walk, weapon, melee, jump, dash, emergency-attack,
+  hit, and KO clips, including the hit/KO screen-space trajectory
 - first ten-pose temporally tracked blue-alien sequence
 - first-room 5+3 crowd budget, four alien palette variants, combat lock, clear,
   and exit-state lifecycle
@@ -141,7 +143,7 @@ Still approximate or incomplete:
 
 - temporal confirmation of remaining enemy variants, actions, and prop groups
 - exact enemy pose selection, spawn coordinates/timing, AI, and object priority
-- exact player walk and remaining transition frame sets
+- remaining player transition and interaction frame sets
 - complete attract-mode, menu-transition, and character-select animation
 - full animation between the verified route key states
 - dynamic HUD values, exact scroll behavior, level triggers, combat, and AI
@@ -151,7 +153,7 @@ Still approximate or incomplete:
 
 ## Next implementation sequence
 
-1. Extend the captured player timeline into exact walk and remaining transition clips.
+1. Extend the captured player timeline into remaining transition and interaction clips.
 2. Extend the proven blue-alien track into attack, hit, and KO clips and repeat
    the temporal grouping for the remaining enemy palettes.
 3. Replace prototype combat with Stage 1 scripts, collision, spawn, and camera

@@ -18,6 +18,7 @@ local jump = in0["P1 Button 3"]
 local action = os.getenv("AVSP_ACTION_PROBE") or ""
 local allowed_actions = {
     idle = true,
+    walk = true,
     gun = true,
     melee = true,
     jump = true,
@@ -107,6 +108,7 @@ player_action_capture_subscription = emu.add_machine_frame_notifier(function()
     end
 
     if frame == action_frame then
+        if action == "walk" then right:set_value(1) end
         if action == "gun" then gun:set_value(1) end
         if action == "melee" then attack:set_value(1) end
         if action == "jump" then jump:set_value(1) end
@@ -126,7 +128,9 @@ player_action_capture_subscription = emu.add_machine_frame_notifier(function()
         attack:clear_value()
         jump:clear_value()
     end
-    if frame == action_frame + 20 then
+    local direction_release_frame = action == "walk" and
+        action_frame + 64 or action_frame + 20
+    if frame == direction_release_frame then
         left:clear_value()
         right:clear_value()
         up:clear_value()

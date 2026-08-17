@@ -42,7 +42,8 @@ alter console copy protection or supply copyrighted disc data.
    capture-device overscan separately from the digital framebuffer.
 3. Press Start at the title, then B at Predator Warrior select, and confirm the
    native route reaches the Round 1 title before gameplay begins.
-4. Verify D-pad lane movement, A weapon, B melee attack, neutral C jump,
+4. Verify D-pad lane movement advances the complete 48-frame captured walk
+   loop; verify A weapon, B melee attack, neutral C jump,
    direction+C dash, any two face buttons emergency attack, and X diagnostic
    HUD. Confirm all five controlled actions use their captured clips, return
    cleanly to idle, retain all three palette layers, and never show a partially
