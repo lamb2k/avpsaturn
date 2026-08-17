@@ -15,9 +15,19 @@ Read this file before taking any action. The user wants a private, capture-faith
 - Worktree should be clean immediately after the handoff commit. Verify with
   `git status --short --branch` before resuming.
 - Current disc profile: `normal-release`.
-- Current ISO: 5,400,576 bytes, SHA-256 `4296b66ec63276524c588b27a786d596e2d4404c747e57fe513806655f4000f6`.
+- Current ISO: 5,410,816 bytes, SHA-256
+  `30522182d9c577f3d4ddf7be7b7af499597d00ac1bb5e468110e1bf080410f17`. This
+  replaces the pre-shutter 5,400,576-byte image
+  `4296b66ec63276524c588b27a786d596e2d4404c747e57fe513806655f4000f6`; the
+  growth is the shutter code.
 - Current cue SHA-256: `bfc58c7020d90952e93bef7ecba32dea8d4faddf6ce6a90e1054206ee1807b12`.
-- Emulator processes were closed before this checkpoint. Start fresh with `run.ps1` and verify the process command line.
+- Both values match `build/hardware_release_manifest.txt` at
+  `profile=normal-release`.
+- A Yaba Sanshiro instance was launched from this checkout for shutter
+  inspection. Its command line and the generated
+  `%TEMP%\AvPSaturnCapabilityTest\game.yaba.cue` were both verified to
+  reference this exact ISO, so no stale disc state was in play. Close it
+  before the next checkpoint.
 
 Implementation and documentation files in this checkpoint:
 
