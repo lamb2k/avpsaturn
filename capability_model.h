@@ -53,6 +53,7 @@ typedef struct
     int frame;
     int score;
     int player_ko_timer;
+    int encounter_started;
 } CapWorld;
 
 void cap_world_init(CapWorld *world);

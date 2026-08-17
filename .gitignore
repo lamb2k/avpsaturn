@@ -1,4 +1,7 @@
 .deps/
+cfg/
+avspu/
+generated/
 build/
 game.cue
 game.elf

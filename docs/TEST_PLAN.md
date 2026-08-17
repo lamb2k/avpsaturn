@@ -1,67 +1,66 @@
-# Capability Test Plan
+# Capability test plan
 
-## Acceptance gate A: build integrity
+## Gate A: reproducible source decode
 
-- Clean setup checks out the pinned Jo Engine commit.
-- The 4bpp patch applies without rejects.
-- Generated assets match `asset_manifest.json` byte for byte.
-- Strict host gameplay tests run for at least 10,000 deterministic frames.
-- Release SH-2 link, ISO build, and cue build complete without warnings from the
-  project sources.
+- Official MAME reports the local `avspu` set as good.
+- The reconstructed 16 MiB graphics region matches MAME's `:gfx` bytes.
+- The deterministic Stage 1 capture produces the expected state files.
+- No ROM, decoded asset, capture, or disc image is tracked by Git.
 
 Status: passed on August 16, 2026.
 
-## Acceptance gate B: emulator render
+## Gate B: native Saturn build and boot
 
-Configure a 4 MB extended RAM cartridge and boot `game.cue` in a current Saturn
-emulator. Confirm:
+- Strict host gameplay tests pass for at least 10,000 deterministic frames.
+- Release SH-2 compilation, link, ISO, and cue construction succeed.
+- The image boots with a 4 MB cartridge and no asset failure.
+- VDP1 transparency and aligned palette layers render correctly over VDP2.
+- The boot composition remains stable until the first player input.
 
-- no `4MB RAM CART REQUIRED` or asset failure message
-- player palette uses the first 16-color bank
-- all crawler instances use the second bank
-- pixel index zero is transparent around every cel
-- background appears behind actors and HUD appears in front
-- mirrored actors retain the correct pivot and ground contact
-- all four enemies can overlap without corrupting textures
-- A and C replace the two action slots without a visible partial frame
-- X stress mode increases both DMA byte and swap counters
+Status: passed in Yaba Sanshiro 2 v1.20.37 on August 16, 2026. The 12,000-frame
+test and clean release build passed, and visual inspection confirmed the exact
+working-set pixels at original scale over the reconstructed background/HUD.
 
-Status: baseline render passed in Yaba Sanshiro 2 v1.20.37 on August 16, 2026.
-The release image booted with the 32 Mbit DRAM cartridge and rendered the
-playable corridor, 192x192 player, four pursuing enemies, transparency,
-overlap, background, HUD, and live DMA/cache counters. The captured frame
-reported 77% Jo Engine VDP1 usage, 36,864 DMA bytes, and two cache swaps.
-Attack/special replacement, mirrored-pivot inspection, and X stress-mode
-counters remain open before this gate is complete. See `boot-proof.bmp`.
+## Gate C: frame-exact presentation reconstruction
 
-## Acceptance gate C: performance capture
+- Group all visible CPS2 object commands into actors and props.
+- Match the MAME reference enemy variants, palettes, positions, pivots, and
+  priority at the Saturn's chosen crop.
+- Remove static HUD values from the background and drive them natively.
+- Produce an automated image-difference report with separately stated crop and
+  color-quantization tolerances.
 
-Run a fixed 10-minute route with stress mode off and on. Capture:
+Status: open. The current native scene reuses two blue alien cels and therefore
+must not be described as frame-exact.
 
-- missed frames and frame-time distribution
-- maximum Jo Engine VDP1 usage percentage
-- maximum visible VDP1 command count
-- cache replacements and bytes per second
-- CD-to-cartridge load time at room entry
-- any sprite corruption during overlapping attacks
+## Gate D: first playable Stage 1 encounter
 
-Pass target: sustained 60 Hz with no partial cels, no palette-bank corruption,
-and no gameplay stall longer than one frame after room load.
+- Extract and schedule authentic idle, walk, attack, hit, and KO frames.
+- Reproduce camera bounds, lanes, collisions, encounter triggers, and enemy
+  behavior for the first combat room.
+- Support player movement and attacks without partial cels or palette damage.
+- Reach the room completion transition deterministically.
+- Add a comparison capture against the equivalent MAME route.
 
-## Acceptance gate D: real Saturn
+Status: open. The current combat logic is a native placeholder used only to
+exercise movement, overlap, damage, and ordering.
 
-Test on a Saturn with a compatible 4 MB cartridge using an optical disc or
-validated optical-drive emulator. Repeat gate C with video capture. The real
-hardware result is authoritative for bus contention, VDP1 erase/draw timing,
-and cartridge compatibility.
+## Gate E: performance and hardware
 
-## Decision after the test
+Run a fixed ten-minute route in emulator and on a real Saturn. Capture frame
+time, missed frames, maximum VDP1 command/texture use, transfer bytes per
+second, room load time, and overlap corruption. The pass target is sustained
+60 Hz with no partial cels, palette corruption, or post-load gameplay stall
+longer than one frame.
 
-- If gate C and D pass comfortably, expand one player to a 12-16 frame movement
-  and attack set before adding enemy types.
-- If fill rate fails while cache replacement remains stable, reduce transparent
-  canvas area or split actors into tighter VDP1 parts.
-- If transfer timing fails, keep the 192x192 presentation but prefetch complete
-  encounter banks at room boundaries.
-- If VDP1 memory is the limiting factor, reduce resident frames before reducing
-  visible color depth or enemy count.
+Status: open.
+
+## Gate F: full-port candidate and rights review
+
+After the first level is complete, expand the same architecture into a full
+port candidate suitable for an internal development-team evaluation. Before
+the build or its footage is distributed, demonstrated publicly, promoted, or
+released, complete an explicit licensing and rights-holder authorization
+review.
+
+Status: future gate; no public distribution is authorized by this repository.

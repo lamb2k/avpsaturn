@@ -19,7 +19,8 @@ static int cap_clamp(const int value, const int minimum, const int maximum)
 
 static void cap_reset_enemy(CapActor *enemy, const int index)
 {
-    enemy->x = 430 + index * 135;
+    static const int stage_one_x[CAP_MAX_ENEMIES] = {80, 140, 200, 500};
+    enemy->x = stage_one_x[index];
     enemy->lane = 154 + (index % 3) * 18;
     enemy->facing = -1;
     enemy->health = 3;
@@ -33,7 +34,7 @@ void cap_world_init(CapWorld *world)
 {
     int index;
 
-    world->player.x = 120;
+    world->player.x = 300;
     world->player.lane = 178;
     world->player.facing = 1;
     world->player.health = CAP_PLAYER_MAX_HEALTH;
@@ -47,6 +48,7 @@ void cap_world_init(CapWorld *world)
     world->frame = 0;
     world->score = 0;
     world->player_ko_timer = 0;
+    world->encounter_started = 0;
 }
 
 static void cap_damage_enemy(CapWorld *world, CapActor *enemy, const int damage)
@@ -213,6 +215,12 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
     int delta_x;
     int delta_lane;
 
+    if (!world->encounter_started)
+    {
+        enemy->action = CAP_ACT_IDLE;
+        return;
+    }
+
     if (enemy->action == CAP_ACT_KO)
     {
         ++enemy->action_frame;
@@ -273,10 +281,13 @@ CapClipRequest cap_world_step(CapWorld *world, const CapInput *input)
     int index;
     int target_camera;
 
+    if (input->left || input->right || input->up || input->down ||
+        input->attack_pressed || input->special_pressed || input->dash_held)
+        world->encounter_started = 1;
     request = cap_update_player(world, input);
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
         cap_update_enemy(world, &world->enemies[index], index);
-    target_camera = cap_clamp(world->player.x - 160, 0, CAP_WORLD_WIDTH - 320);
+    target_camera = cap_clamp(world->player.x - 288, 0, CAP_WORLD_WIDTH - 320);
     if (world->camera_x < target_camera) world->camera_x += 2;
     if (world->camera_x > target_camera) world->camera_x -= 2;
     ++world->frame;

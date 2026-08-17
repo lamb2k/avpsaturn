@@ -19,7 +19,7 @@ static void test_attack_requests_and_damage(void)
     CapClipRequest request;
 
     cap_world_init(&world);
-    world.enemies[0].x = 160;
+    world.enemies[0].x = world.player.x + 40;
     world.enemies[0].lane = world.player.lane;
     memset(&input, 0, sizeof(input));
     input.attack_pressed = 1;
@@ -30,7 +30,7 @@ static void test_attack_requests_and_damage(void)
     assert(world.enemies[0].health == 2);
 
     cap_world_init(&world);
-    world.enemies[0].x = 180;
+    world.enemies[0].x = world.player.x + 60;
     world.enemies[0].lane = world.player.lane;
     memset(&input, 0, sizeof(input));
     input.special_pressed = 1;
@@ -38,6 +38,25 @@ static void test_attack_requests_and_damage(void)
     assert(request == CAP_CLIP_SPECIAL);
     step_empty(&world, 12);
     assert(world.enemies[0].health == 1);
+}
+
+static void test_encounter_waits_for_player_input(void)
+{
+    CapWorld world;
+    CapInput input;
+    int enemy_x;
+
+    cap_world_init(&world);
+    enemy_x = world.enemies[0].x;
+    step_empty(&world, 1200);
+    assert(world.encounter_started == 0);
+    assert(world.enemies[0].x == enemy_x);
+
+    memset(&input, 0, sizeof(input));
+    input.right = 1;
+    (void)cap_world_step(&world, &input);
+    assert(world.encounter_started == 1);
+    assert(world.enemies[0].x == enemy_x + 1);
 }
 
 static void test_long_deterministic_run(void)
@@ -79,6 +98,7 @@ static void test_long_deterministic_run(void)
 int main(void)
 {
     test_attack_requests_and_damage();
+    test_encounter_waits_for_player_input();
     test_long_deterministic_run();
     puts("Capability model tests passed (12,000 deterministic frames).");
     return 0;

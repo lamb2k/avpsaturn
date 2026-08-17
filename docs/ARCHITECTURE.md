@@ -1,90 +1,80 @@
 # Architecture
 
-## Direction
+## Native conversion direction
 
-The prototype treats the Saturn as a split renderer rather than trying to make
-VDP1 reproduce a complete CPS2 frame by itself:
+This is a native Saturn renderer and gameplay shell, not a CPS2 emulator.
 
 ```text
-CD assets -> 4 MB RAM cartridge -> selected 192x192 cels -> VDP1 VRAM cache
-                                         |
-gameplay/lane state -> depth-sorted instances -> VDP1 sprite command list
+local avspu ROM -> MAME-verified CPS2 decode -> generated CD/cartridge assets
+                                              |
+                               exact 4bpp palette layers -> VDP1 actors
+                               512x256 indexed bitmap  -> VDP2 NBG1
 
-512x256 indexed corridor -------------------------------> VDP2 NBG1
-HUD text ------------------------------------------------> VDP2 NBG0
+Saturn input -> native SH-2 lane/combat model -> actor transforms and ordering
 ```
 
-VDP2 owns the large, reusable background image. VDP1 owns characters, shadows,
-and hit effects. Multiple enemies instance the same resident crawler frames, so
-enemy count costs commands and fill rate but not a duplicate texture allocation
-for every actor.
+MAME is an offline reference oracle. The Saturn executable does not contain a
+68000/Z80 interpreter, CPS2 register emulation, or ROM access. Python reproduces
+the CPS2 ROM interleave and recursive 2 MiB bank unshuffle, then decodes the
+captured video state into Saturn-ready local assets.
 
-## Why 4bpp matters at 192x192
+## Exact sprite path
 
-| Resource | 8bpp | Packed 4bpp | Saving |
-| --- | ---: | ---: | ---: |
-| One 192x192 cel | 36,864 B | 18,432 B | 18,432 B |
-| Eight cache slots | 294,912 B | 147,456 B | 147,456 B |
+CPS2 characters are assemblies of 16x16 4bpp tiles, frequently using more than
+one 16-color subpalette per actor. Flattening an actor into one quantized bitmap
+caused the earlier oversized, approximate result.
 
-Palette index zero is transparent, leaving 15 visible colors per subpalette.
-One 256-color CRAM allocation is divided into sixteen 16-color banks. The test
-uses separate player, crawler, and effect banks.
+The current path instead:
 
-The current VDP1 texture working set is approximately:
+1. reads CPS2 object commands and tile codes
+2. preserves original pixels and scale
+3. maps CPS2 pens 0-14 to Saturn indices 1-15; Saturn index 0 stays transparent
+4. emits one 192x192 VDP1 cel per source palette layer
+5. draws all layers at the same pivot and depth
 
-| Allocation | Bytes |
-| --- | ---: |
-| Four always-resident player cels | 73,728 |
-| Seven always-resident crawler cels | 129,024 |
-| Eight replaceable 192x192 slots | 147,456 |
-| Shadow and hit effect | 2,560 |
-| Total texture data | 352,768 |
+The working set contains seven 192x192 packed 4bpp cels, or 129,024 bytes of
+texture data: two idle Predator layers, three attack Predator layers, and two
+alien cels. Four exact CPS2 palette banks occupy one Saturn 256-color CRAM
+allocation. This fits comfortably in VDP1 texture memory and leaves room for
+commands and a future animation cache.
 
-This leaves useful room inside VDP1's 512 KiB for command tables and engine
-overhead. A 32-slot 192x192 cache would require 589,824 bytes by itself and is
-therefore not a viable Saturn configuration.
+## Background and HUD
 
-## Animation and additional frames
+The converter reconstructs CPS2 scroll layers from captured graphics RAM,
+CPS-A/CPS-B registers, tile graphics, and palettes. The present build quantizes
+that 512x256 reconstruction into a VDP2 256-color bitmap. The arcade HUD is
+currently baked from the captured scroll layer, so its displayed values are
+static and are not yet driven by native gameplay state.
 
-Additional animation frames live on disc and in the 4 MB cartridge, not all in
-VDP1 VRAM. The runtime swaps only the two cels needed by the current player
-action into replaceable slots. The X-button stress mode cycles the remaining
-slots and exposes total copied bytes and swap count on the HUD.
+## What is exact and what is not
 
-The next version should replace the synchronous proof-of-path replacements with
-an explicit queue:
+Exact in the current milestone:
 
-1. Animation state predicts the next clip.
-2. The master SH-2 schedules a bounded transfer request.
-3. SCU DMA copies one or more cels during a safe transfer window.
-4. The cache slot becomes visible only after completion.
-5. Gameplay retains a resident fallback cel if a requested frame is late.
+- CPS2 graphics-region reconstruction
+- selected object pixels, scale, transparency, and palette pens
+- selected background/HUD capture reconstruction
+- aligned multi-palette VDP1 assembly
 
-That is how the team can add more frames without making animation count equal
-to permanent VDP1 residency.
+Still approximate or incomplete:
 
-## AI-upscaled production path
+- actor grouping from all 53 captured object commands
+- enemy variants, palettes, poses, count, and exact object priority
+- animation/state timing and full frame sets
+- dynamic HUD values, scroll behavior, level triggers, combat, AI, and audio
+- 384-wide CPS2 framing; the Jo Engine target is currently 320x224
 
-AI upscaling should happen offline. The runtime format stays intentionally
-simple:
+## Next implementation sequence
 
-1. Extract or author a legally usable source frame.
-2. Upscale to a consistent high-resolution character sheet.
-3. Clean silhouettes and stabilize repeated costume/facial details by hand.
-4. Place each pose on a 192x192 canvas with a fixed ground contact and pivot.
-5. Quantize each character family to a shared 15-visible-color palette.
-6. Pack two pixels per byte, high nibble first.
-7. Validate dimensions, byte count, palette range, and hashes.
+1. Group captured CPS2 commands into complete actors and props.
+2. Emit tight per-actor/per-palette cels and pivot metadata.
+3. Reproduce the MAME reference frame through VDP1 object ordering.
+4. Capture successive gameplay states and build animation manifests.
+5. Replace prototype combat with Stage 1 scripts, collision, spawn, and camera
+   data.
+6. Add bounded CD-to-cartridge prefetch and VDP1 cache scheduling.
+7. Port audio, complete the level, and verify on real Saturn hardware.
 
-Upscaling increases spatial detail; it does not generate credible in-between
-animation by itself. New frames need pose-aware generation or drawing plus
-manual timing, contact, hitbox, and palette cleanup.
-
-## Current limitations
-
-- 320x224 rather than the proposed 352x224 display mode
-- synchronous Jo Engine sprite replacement rather than a measured SCU DMA queue
-- one VDP2 bitmap layer rather than a multi-plane tile/line-scroll stage
-- four enemies and a two-frame action cache, not an arcade-content-complete room
-- procedural silhouettes, not production or AI-upscaled character art
-- no audio path in this capability build
+Additional frames should live on disc and in the 4 MB cartridge. Only the
+current and predicted cels should occupy VDP1 VRAM. AI upscaling is a separate
+offline enhanced-edition asset path; it should not be mixed into the exact
+arcade baseline until the native reconstruction is validated.

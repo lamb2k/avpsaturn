@@ -1,99 +1,87 @@
-# AvP-style Sega Saturn Capability Test
+# Alien vs. Predator Sega Saturn private capability test
 
-This is a private, original-asset engineering slice for testing whether a
-CPS2-scale belt-scroller presentation can be rebuilt around the Sega Saturn's
-strengths. It is not a port of Capcom's game and contains no Alien vs. Predator
-ROM data, art, audio, maps, or source code.
+This repository is a private engineering prototype for testing a native Sega
+Saturn conversion of Capcom's CPS2 Alien vs. Predator. It is not an emulator:
+the build cross-compiles SH-2 code and feeds reconstructed graphics to VDP1 and
+VDP2. It currently proves an authentic-asset presentation slice, not a complete
+Stage 1 port.
 
-The prototype currently provides:
+Current milestone:
 
-- 192x192 packed 4bpp player and enemy animation cels
-- one player and four shared-texture enemies with lane/depth sorting
-- an eight-slot VDP1 animation cache with live replacement counters
-- a 512x256 indexed VDP2 corridor bitmap with camera parallax
-- walk, dash, attack, special, hit, KO, enemy pursuit, and respawn states
-- deterministic procedural placeholders and a hash-locked asset manifest
-- a mandatory 4 MB extended RAM cartridge
-- a 320x224 NTSC presentation target
+- verifies a user-supplied `avspu` ROM set with official MAME 0.289
+- captures a deterministic Stage 1 reference and CPS2 video state
+- reconstructs the captured CPS2 graphics region byte-for-byte
+- decodes CPS2 background tilemaps, object commands, palettes, and priority
+- preserves original sprite scale and exact 15-color CPS2 subpalettes
+- draws the Predator from two or three aligned VDP1 palette layers
+- draws exact alien object pixels through VDP1 over a reconstructed VDP2 stage
+- boots at 320x224 with the Saturn 4 MB expansion RAM cartridge
+- runs a small native lane-combat model; enemies wait for the first input
 
-The 320-wide output is intentional for this first build. Jo Engine's current
-core path is fixed around 320-wide coordinates. A 352x224 mode should be a
-separate engine/display milestone after the 192x192 sprite and cache path is
-stable.
+The boot scene is intentionally stable for visual comparison. It is not yet a
+frame-exact reconstruction: the current native gameplay reuses two extracted
+alien cels and does not yet reproduce the captured enemy variants, full CPS2
+object list, animation state, HUD state, gameplay logic, audio, or level
+progression.
 
-## Repository boundary
+## Repository and content boundary
 
-This directory is its own Git repository. Active development is on
-`prototype/private-capability-test`. The existing Brooklyn Bangout repositories
-are not dependencies and are not modified by this project.
+This directory is its own Git repository on
+`prototype/private-capability-test`. ROMs, captures, decoded graphics, generated
+headers, CD staging files, and disc images are ignored and must never be
+committed.
 
-Jo Engine is pinned to commit `556d081146211b6a1cfa6591d70f9487d406758b`.
-`setup_engine.ps1` creates an ignored checkout under `.deps/joengine` and applies
-the versioned patch in `engine-patches/`.
+Use only a legally obtained ROM set that you are authorized to use. Nothing in
+this repository grants distribution rights to Capcom code or assets. Any work
+beyond a private capability test, including team distribution, public demos,
+promotion, or release, requires an explicit rights-holder and licensing review.
 
 ## Build
 
-From PowerShell in this directory:
+Place the complete USA 940520 MAME set in `avspu/`, then run:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\setup_engine.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\setup_reference.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -Clean -Release
 ```
 
-To use an existing local Jo Engine checkout as the clone source:
+The build validates the ROM set, reuses or creates the deterministic MAME
+capture, regenerates ignored Saturn assets, runs the strict host model tests,
+cross-compiles for SH-2, and produces ignored `game.cue` and `game.iso` files.
+Use `prepare_avsp_port.ps1 -RefreshCapture` to deliberately recapture the MAME
+reference.
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\setup_engine.ps1 -SourceRepo ..\joengine
-```
+Jo Engine is pinned to commit `556d081146211b6a1cfa6591d70f9487d406758b`.
 
-The build validates the procedural assets, runs the strict host test through
-WSL/GCC, cross-compiles for SH-2, and produces `game.cue` and `game.iso`.
-
-## Run the playable level
-
-The validated Windows emulator path is Yaba Sanshiro 2 v1.20.37. Download the
-hash-pinned official package and launch the disc image with:
+## Run
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\setup_emulator.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run.ps1
 ```
 
-Complete Yaba Sanshiro's first-run setup if prompted, then rerun `run.ps1`.
-The launcher selects the 32 Mbit DRAM cartridge, which is the Saturn's 4 MB
-expansion RAM. Do not select 4 Mbit Backup RAM; that is a save-memory device.
+`run.ps1` launches Yaba Sanshiro with a 32 Mbit DRAM cartridge, the Saturn 4 MB
+RAM expansion. Controls are D-pad to move, A to attack, B to dash, C for the
+special action, and X to toggle the diagnostic HUD.
 
-## Controls
-
-- D-pad: move across and between lanes
-- A: attack
-- B: dash while held
-- C: special attack
-- X: toggle repeated cache-replacement stress
-
-The HUD reports player health, score, Jo Engine's VDP1 usage percentage, cache
-slot count, detected cartridge, bytes copied, replacement count, and stress
-state.
-
-## Validation status
+## Verified status
 
 Verified on August 16, 2026:
 
-- deterministic asset regeneration and SHA-256 comparison pass
-- all 15 actor cels are 192x192, 18,432-byte packed 4bpp files
-- gameplay model passes 12,000 deterministic frames under strict C90 warnings
-- Jo Engine patch applies cleanly to the pinned commit
-- release SH-2 compilation, link, ISO construction, and cue construction pass
-- Yaba Sanshiro 2 v1.20.37 boots the release image with its HLE BIOS path
-- the 32 Mbit DRAM cartridge is detected as 4 MB
-- the playable corridor renders the 192x192 player, four pursuing enemies,
-  background, HUD, transparency, overlap, and live cache counters
+- official MAME reports the local `avspu` set as good
+- the Python CPS2 graphics reconstruction matches MAME's 16 MiB `:gfx` region
+- 53 captured CPS2 object commands decode into the reference scene
+- exact layered cels retain original scale and CPS2 palette pens
+- the native model passes 12,000 deterministic frames, including the idle boot
+  gate
+- the release SH-2 build, link, ISO, and cue generation complete successfully
+- Yaba Sanshiro boots the image with the 4 MB cartridge and displays the exact
+  asset working set over the reconstructed Stage 1 background/HUD
 
-The booted build reported 77% Jo Engine VDP1 usage, 36,864 DMA bytes, and two
-cache swaps in the captured encounter. See [the emulator-native boot capture](docs/boot-proof.bmp).
-Attack/special cache replacement, stress mode, sustained frame pacing, and real
-Saturn behavior remain to be measured.
+Next proof gate: replace the cloned alien working set with actor-grouped CPS2
+object reconstruction, then add real animation/state extraction and complete
+the first playable Stage 1 encounter.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
-[docs/TEST_PLAN.md](docs/TEST_PLAN.md) for the engineering rationale and next
-gates.
+[docs/TEST_PLAN.md](docs/TEST_PLAN.md).

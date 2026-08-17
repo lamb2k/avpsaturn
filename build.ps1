@@ -70,9 +70,15 @@ try {
             }
         }
 
-        & $PythonPath '.\tools\generate_assets.py' '--check'
+        & '.\prepare_avsp_port.ps1' -PythonPath $PythonPath
         if ($LASTEXITCODE -ne 0) {
-            throw "Generated asset validation failed with exit code $LASTEXITCODE."
+            throw "AvP Stage 1 asset preparation failed with exit code $LASTEXITCODE."
+        }
+
+        $contentRoot = Join-Path $projectRoot 'build\avsp_cd'
+        foreach ($metadataName in @('ABS.TXT', 'BIB.TXT', 'CPY.TXT')) {
+            Copy-Item -LiteralPath (Join-Path $projectRoot "cd\$metadataName") `
+                -Destination (Join-Path $contentRoot $metadataName) -Force
         }
 
         if ($Clean) {
@@ -80,7 +86,7 @@ try {
             # current 64-bit Windows. Remove only this project's known outputs.
             foreach ($generatedName in @(
                 'main.o', 'capability_model.o', 'game.elf', 'game.raw',
-                'game.iso', 'game.cue', 'game.map', 'cd\0.bin'
+                'game.iso', 'game.cue', 'game.map', 'cd\0.bin', 'build\avsp_cd\0.bin'
             )) {
                 $generatedPath = Join-Path $projectRoot $generatedName
                 if (Test-Path -LiteralPath $generatedPath) {
@@ -101,7 +107,7 @@ try {
             throw "Saturn compilation failed with exit code $LASTEXITCODE."
         }
 
-        & $objcopy '-O' 'binary' 'game.elf' 'cd\0.bin'
+        & $objcopy '-O' 'binary' 'game.elf' (Join-Path $contentRoot '0.bin')
         if ($LASTEXITCODE -ne 0) {
             throw "Could not create the Saturn boot binary (exit code $LASTEXITCODE)."
         }
@@ -120,7 +126,7 @@ try {
             '-biblio', '.\cd\BIB.TXT',
             '-generic-boot', (Join-Path $resolvedEngine 'Compiler\COMMON\IP.BIN'),
             '-full-iso9660-filenames',
-            '-o', 'game.iso', '.\cd'
+            '-o', 'game.iso', $contentRoot
         )
         & $mkisofs @mkisofsArguments
         if ($LASTEXITCODE -ne 0) {
