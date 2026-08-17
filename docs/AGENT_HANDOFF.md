@@ -513,6 +513,64 @@ Note on RNG: if AI decisions consume a PRNG, functional parity requires the
 same generator and call order for behaviour to match, even though exact frame
 equality is no longer the target. Identify RNG use before translating AI.
 
+### External resources found 2026-08-17
+
+Web research turned up three externally documented resources that change how
+much of this work has to be derived from scratch. None of them are ROM data;
+they are documentation and open hardware descriptions.
+
+**1. AvP retains Capcom's own development tools in the retail ROM.** Documented
+by the sudden-desu.net teardown. This is the highest-value find, because two of
+the tools produce exactly the data functional parity needs:
+
+- `0xFF81C7` byte, non-zero, is the master debug enable.
+- `0xFF806C..0xFF806E` cache debug DIP rows 1..3. Relevant bits: row 2 bit 7
+  **display hitboxes**, row 2 bit 6 **display stage collision**, row 1 bit 0
+  entity spawner plus info display, row 1 bit 1 entity monitor, row 1 bit 2
+  player monitor, row 3 bit 2 extended entity info, row 3 bit 1 disable CPU in
+  attract demos.
+- `0xFF81D8` enables the software switch interface, which disables the entity
+  spawner because their inputs conflict.
+- A hidden test menu runs when `0xFF21AA` equals 2 during the standard test
+  menu; nothing in the retail code sets it. It contains a character/pattern
+  viewer with hitbox measurement, scroll-layer viewers with a collision "Hit
+  Mode", a story-text viewer, and per-actor arrangement tools.
+- Three debug routines survive but are disconnected, at disassembly offsets
+  `0xB1998` entity info, `0xB1866` player info, `0xB1A84` extended entity info.
+  They need `A6` set up and `D0=0` inside a task context.
+- The entity spawner is driven by **Player 4** inputs, which standard MAME AvP
+  configuration does not provide.
+
+Why this matters: the port currently infers hit windows indirectly by watching
+health values change across captured frames, which is how the boss contact
+offsets 21/55/97 were derived. The game will draw the real boxes. The same
+applies to stage collision, which is currently approximated.
+
+**Attempt status: not yet working, cause identified.** Writing the RAM flags
+every frame does not work; the game re-caches them from the physical switches
+and overwrites the writes. MAME does expose the switches as real ioport fields
+(`:DSWA 1-1`, `:DSWB 2-6`, `:DSWB 2-7`, `:DSWC` rows), but driving those while
+loading `avspu_stage1_boss_12660` also failed, leaving `0xFF81C7` at zero. The
+likely reason is that the flags are cached during boot initialisation, which
+already ran with debug off inside the save state. Next attempt should cold boot
+with the DIP fields held from frame 0 and drive the existing deterministic input
+route, rather than loading a mid-game state. `tools/mame_probe_debug_overlays.lua`
+holds the current attempt and the documented flag addresses.
+
+**2. Complete CPS2 hardware schematics.** Loic Petit's project publishes
+schematics for the A-board, B-board, E-board and QSound amplifier, plus reverse
+engineering of the custom chips DL-0921 (CPS-B-21), DL-1727, DL-1827, DL-1927
+and DL-2027, with an online viewer. This is authoritative documentation for
+layer assembly, palette copying, raster effects and video timing, which is what
+the Saturn VDP1/VDP2 path has to reproduce.
+
+**3. Open FPGA cores.** Jotego's jtcores/jtcps implement CPS1/1.5/2 in Verilog
+and the repository also carries KiCAD schematics of arcade boards.
+
+Confirmed independently: CPS2 work RAM is `0xFF0000..0xFFFFEF`, which is
+consistent with the actor array at `0xFFA240` and the debug flags above all
+living in the same region.
+
 ### FPGA cores
 
 The user raised leveraging FPGA cores. They help the rendering half, not the
