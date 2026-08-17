@@ -1,0 +1,109 @@
+{
+  "schema": 2,
+  "source": "deterministic MAME 0.289 QSound HLE differential capture",
+  "action": "withdraw_sequence",
+  "action_input_frame": 2160,
+  "qsound": {
+    "starts": [
+      {
+        "voice": 10,
+        "start_frame": 2255,
+        "bank": "0x8023",
+        "address": "0x8000",
+        "rate": "0x0d70",
+        "phase": "0x8000",
+        "loop_length": "0x1d86",
+        "end_address": "0xd83f",
+        "volume": "0x1239"
+      },
+      {
+        "voice": 9,
+        "start_frame": 2262,
+        "bank": "0x8023",
+        "address": "0x8000",
+        "rate": "0x0d70",
+        "phase": "0x8000",
+        "loop_length": "0x1d86",
+        "end_address": "0xd83f",
+        "volume": "0x10de"
+      },
+      {
+        "voice": 10,
+        "start_frame": 2325,
+        "bank": "0x800e",
+        "address": "0x8000",
+        "rate": "0x0800",
+        "phase": "0x8000",
+        "loop_length": "0x000d",
+        "end_address": "0xf175",
+        "volume": "0x0926"
+      },
+      {
+        "voice": 14,
+        "start_frame": 2333,
+        "bank": "0x8021",
+        "address": "0x8000",
+        "rate": "0x1000",
+        "phase": "0x8000",
+        "loop_length": "0x000e",
+        "end_address": "0xd9c0",
+        "volume": "0x1239"
+      },
+      {
+        "voice": 10,
+        "start_frame": 2340,
+        "bank": "0x800e",
+        "address": "0x8000",
+        "rate": "0x0800",
+        "phase": "0x8000",
+        "loop_length": "0x000d",
+        "end_address": "0xf175",
+        "volume": "0x0926"
+      },
+      {
+        "voice": 10,
+        "start_frame": 2356,
+        "bank": "0x800e",
+        "address": "0x8000",
+        "rate": "0x0800",
+        "phase": "0x8000",
+        "loop_length": "0x000d",
+        "end_address": "0xf175",
+        "volume": "0x0926"
+      },
+      {
+        "voice": 10,
+        "start_frame": 2373,
+        "bank": "0x800e",
+        "address": "0x8000",
+        "rate": "0x0800",
+        "phase": "0x8000",
+        "loop_length": "0x000d",
+        "end_address": "0xf175",
+        "volume": "0x0926"
+      }
+    ],
+    "end_frame": 2388
+  },
+  "wave": {
+    "channels": 2,
+    "sample_bits": 16,
+    "sample_rate": 44100,
+    "first_difference_frame": 1667238,
+    "last_difference_frame": 1766414,
+    "event_sample_frames": 99177,
+    "duration_seconds": 2.24891156462585,
+    "left_peak": 12094,
+    "right_peak": 5439,
+    "selection_first_frame": 1645372,
+    "ignored_leading_difference_frames": 0,
+    "selection_idle_sha256": "449b1d1a4f1c96577028f7f03ca6cd6aed034a0a4d7ba9831cf35b5c0c567885",
+    "selection_action_sha256": "68677a29b4a5d0a9c8f1eacdc706e9a3144209ad81f33d3fcb09fb8163a288b6"
+  },
+  "saturn_pcm": {
+    "format": "signed-16-bit-big-endian-stereo",
+    "sample_rate": 44100,
+    "bytes": 396708,
+    "sha256": "f76bb4b4a9e6e3c404bb639c81dfb66dca174497267b0e24bcfd3e74761c58b1"
+  }
+}

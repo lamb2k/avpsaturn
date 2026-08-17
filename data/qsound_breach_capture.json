@@ -1,0 +1,120 @@
+{
+  "schema": 2,
+  "source": "deterministic MAME 0.289 QSound HLE differential capture",
+  "action": "barricade_breach_sequence",
+  "action_input_frame": 2400,
+  "qsound": {
+    "starts": [
+      {
+        "voice": 13,
+        "start_frame": 2419,
+        "bank": "0x8013",
+        "address": "0x6dc0",
+        "rate": "0x1000",
+        "phase": "0x8000",
+        "loop_length": "0x000d",
+        "end_address": "0x7fb4",
+        "volume": "0x1239"
+      },
+      {
+        "voice": 10,
+        "start_frame": 2421,
+        "bank": "0x800e",
+        "address": "0x8000",
+        "rate": "0x0800",
+        "phase": "0x8000",
+        "loop_length": "0x000d",
+        "end_address": "0xf175",
+        "volume": "0x0926"
+      },
+      {
+        "voice": 13,
+        "start_frame": 2428,
+        "bank": "0x8028",
+        "address": "0xd3bb",
+        "rate": "0x1000",
+        "phase": "0x8000",
+        "loop_length": "0x000e",
+        "end_address": "0xffe6",
+        "volume": "0x0fbc"
+      },
+      {
+        "voice": 12,
+        "start_frame": 2429,
+        "bank": "0x8016",
+        "address": "0xe690",
+        "rate": "0x0800",
+        "phase": "0x8000",
+        "loop_length": "0x0014",
+        "end_address": "0xfff1",
+        "volume": "0x14f0"
+      },
+      {
+        "voice": 10,
+        "start_frame": 2437,
+        "bank": "0x800e",
+        "address": "0x8000",
+        "rate": "0x0800",
+        "phase": "0x8000",
+        "loop_length": "0x000d",
+        "end_address": "0xf175",
+        "volume": "0x0926"
+      },
+      {
+        "voice": 14,
+        "start_frame": 2479,
+        "bank": "0x8013",
+        "address": "0x6dc0",
+        "rate": "0x1000",
+        "phase": "0x8000",
+        "loop_length": "0x000d",
+        "end_address": "0x7fb4",
+        "volume": "0x1239"
+      },
+      {
+        "voice": 13,
+        "start_frame": 2489,
+        "bank": "0x8024",
+        "address": "0xd716",
+        "rate": "0x1000",
+        "phase": "0x8000",
+        "loop_length": "0x000e",
+        "end_address": "0xff7d",
+        "volume": "0x0fbc"
+      },
+      {
+        "voice": 12,
+        "start_frame": 2490,
+        "bank": "0x8016",
+        "address": "0xe690",
+        "rate": "0x0800",
+        "phase": "0x8000",
+        "loop_length": "0x0014",
+        "end_address": "0xfff1",
+        "volume": "0x14f0"
+      }
+    ],
+    "end_frame": 2518
+  },
+  "wave": {
+    "channels": 2,
+    "sample_bits": 16,
+    "sample_rate": 44100,
+    "first_difference_frame": 1788094,
+    "last_difference_frame": 1862712,
+    "event_sample_frames": 74619,
+    "duration_seconds": 1.6920408163265306,
+    "left_peak": 8738,
+    "right_peak": 12484,
+    "selection_first_frame": 1766500,
+    "ignored_leading_difference_frames": 0,
+    "selection_idle_sha256": "0aa18d38d7869c8e4bec8b2d4495f7cc55fbcfbc1d87140089b803fe8c4bae29",
+    "selection_action_sha256": "b4a487f7e85fdc4c39c40324b01e89afd7f0ec373b7f17caaedd19a33451bdde"
+  },
+  "saturn_pcm": {
+    "format": "signed-16-bit-big-endian-stereo",
+    "sample_rate": 44100,
+    "bytes": 298476,
+    "sha256": "c2957aaa6e458d38fd336ef856f0eba78e1014c9ba070eb51830cb78b4570b64"
+  }
+}

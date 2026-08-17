@@ -89,6 +89,10 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Stage 1 sequence audio preparation failed with exit code $LASTEXITCODE."
         }
+        & '.\prepare_stage1_opening_audio.ps1' -PythonPath $PythonPath
+        if ($LASTEXITCODE -ne 0) {
+            throw "Stage 1 opening audio preparation failed with exit code $LASTEXITCODE."
+        }
 
         $contentRoot = Join-Path $projectRoot 'build\avsp_cd'
         foreach ($metadataName in @('ABS.TXT', 'BIB.TXT', 'CPY.TXT')) {
@@ -242,6 +246,14 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Saturn interior-transition PCM ISO verification failed with exit code $LASTEXITCODE."
         }
+        foreach ($openingPcm in @('RND1A.PCM', 'RND1B.PCM', 'WITHDRW.PCM', 'BREACH.PCM')) {
+            & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+                'game.iso' "/AUDIO/$openingPcm" '--equals' `
+                (Join-Path $contentRoot "AUDIO\$openingPcm")
+            if ($LASTEXITCODE -ne 0) {
+                throw "Saturn opening PCM ISO verification failed for $openingPcm with exit code $LASTEXITCODE."
+            }
+        }
 
         # Add the locally rendered QSound reference as a real Saturn CDDA track.
         # It remains an ignored private artifact and is never linked as CPS2 code.
@@ -278,6 +290,10 @@ try {
             (Join-Path $contentRoot 'AUDIO\DOOR.PCM')
         $interiorTransitionAudioFile = Get-Item -LiteralPath `
             (Join-Path $contentRoot 'AUDIO\TRANS.PCM')
+        $roundTitleAFile = Get-Item -LiteralPath (Join-Path $contentRoot 'AUDIO\RND1A.PCM')
+        $roundTitleBFile = Get-Item -LiteralPath (Join-Path $contentRoot 'AUDIO\RND1B.PCM')
+        $withdrawAudioFile = Get-Item -LiteralPath (Join-Path $contentRoot 'AUDIO\WITHDRW.PCM')
+        $breachAudioFile = Get-Item -LiteralPath (Join-Path $contentRoot 'AUDIO\BREACH.PCM')
         $manifestPath = Join-Path $projectRoot 'build\hardware_release_manifest.txt'
         [IO.File]::WriteAllLines($manifestPath, @(
             'target=sega-saturn-ntsc'
@@ -370,6 +386,34 @@ try {
             'event_audio_11_source_frames=5400-interior-transition,5438-voice13,5491-stop'
             "event_audio_11_bytes=$($interiorTransitionAudioFile.Length)"
             "event_audio_11_sha256=$((Get-FileHash -LiteralPath $interiorTransitionAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'event_audio_12=scsp-pcm-capture-exact-round-title-lead'
+            'event_audio_12_iso_path=/AUDIO/RND1A.PCM'
+            'event_audio_12_format=signed-16-bit-big-endian-stereo'
+            'event_audio_12_sample_rate=44100'
+            'event_audio_12_source_frames=1800-confirm,2031-voice13,2035-voice14,2070-stop'
+            "event_audio_12_bytes=$($roundTitleAFile.Length)"
+            "event_audio_12_sha256=$((Get-FileHash -LiteralPath $roundTitleAFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'event_audio_13=scsp-pcm-capture-exact-round-title-tail'
+            'event_audio_13_iso_path=/AUDIO/RND1B.PCM'
+            'event_audio_13_format=signed-16-bit-big-endian-stereo'
+            'event_audio_13_sample_rate=44100'
+            'event_audio_13_source_frames=2040-title,2076-voice14,2107-stop'
+            "event_audio_13_bytes=$($roundTitleBFile.Length)"
+            "event_audio_13_sha256=$((Get-FileHash -LiteralPath $roundTitleBFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'event_audio_14=scsp-pcm-capture-exact-withdraw-sequence'
+            'event_audio_14_iso_path=/AUDIO/WITHDRW.PCM'
+            'event_audio_14_format=signed-16-bit-big-endian-stereo'
+            'event_audio_14_sample_rate=44100'
+            'event_audio_14_source_frames=2160-barricade,2255-first-start,2388-stop'
+            "event_audio_14_bytes=$($withdrawAudioFile.Length)"
+            "event_audio_14_sha256=$((Get-FileHash -LiteralPath $withdrawAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'event_audio_15=scsp-pcm-capture-exact-barricade-breach'
+            'event_audio_15_iso_path=/AUDIO/BREACH.PCM'
+            'event_audio_15_format=signed-16-bit-big-endian-stereo'
+            'event_audio_15_sample_rate=44100'
+            'event_audio_15_source_frames=2400-breach,2419-first-start,2518-stop'
+            "event_audio_15_bytes=$($breachAudioFile.Length)"
+            "event_audio_15_sha256=$((Get-FileHash -LiteralPath $breachAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
         ))
     }
     finally {

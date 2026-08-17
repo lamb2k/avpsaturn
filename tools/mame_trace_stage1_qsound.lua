@@ -12,9 +12,11 @@ local gun = in0["P1 Button 1"]
 local attack = in0["P1 Button 2"]
 local jump = in0["P1 Button 3"]
 local frame = 0
-local base_frame = 4200
-local final_frame = tonumber(os.getenv("AVSP_QSOUND_CAPTURE_END_FRAME") or "") or 14780
-local state_loaded = false
+local cold_boot = os.getenv("AVSP_QSOUND_COLD_BOOT") == "1"
+local base_frame = cold_boot and 0 or 4200
+local final_frame = tonumber(os.getenv("AVSP_QSOUND_CAPTURE_END_FRAME") or "") or
+    (cold_boot and 2520 or 14780)
+local state_loaded = cold_boot
 local capture_root = os.getenv("AVSP_QSOUND_CAPTURE_ROOT") or
     ".deps/mame/stage1_qsound"
 local isolate_qsound_voices = {}
@@ -121,7 +123,7 @@ stage1_qsound_post_load_subscription = emu.add_machine_post_load_notifier(functi
     print("AVSPU_STAGE1_QSOUND loaded verified frame-4200 state")
 end)
 
-machine:load("avspu_stage1")
+if not cold_boot then machine:load("avspu_stage1") end
 
 stage1_qsound_capture_subscription = emu.add_machine_frame_notifier(function()
     if not state_loaded then return end
@@ -137,17 +139,30 @@ stage1_qsound_capture_subscription = emu.add_machine_frame_notifier(function()
         end_qsound_voice_isolation(absolute_frame)
     end
 
-    if frame == 1 then right:set_value(1) end
-    if frame % 45 == 0 then gun:set_value(1) end
-    if frame % 45 == 7 then gun:clear_value() end
-    if frame % 180 == 0 then attack:set_value(1) end
-    if frame % 180 == 8 then attack:clear_value() end
-    if frame % 240 == 0 then jump:set_value(1) end
-    if frame % 240 == 8 then jump:clear_value() end
-    if frame % 600 == 30 then coin:set_value(1) end
-    if frame % 600 == 34 then coin:clear_value() end
-    if frame % 600 == 90 then start:set_value(1) end
-    if frame % 600 == 94 then start:clear_value() end
+    if cold_boot then
+        if frame >= 1200 and frame <= 2400 then
+            if (frame - 1200) % 180 == 0 then coin:set_value(1) end
+            if (frame - 1200) % 180 == 3 then coin:clear_value() end
+            if (frame - 1200) % 180 == 30 then start:set_value(1) end
+            if (frame - 1200) % 180 == 33 then start:clear_value() end
+        end
+        if frame >= 1500 and frame <= 1895 then
+            if frame % 90 == 0 then gun:set_value(1) end
+            if frame % 90 == 5 then gun:clear_value() end
+        end
+    else
+        if frame == 1 then right:set_value(1) end
+        if frame % 45 == 0 then gun:set_value(1) end
+        if frame % 45 == 7 then gun:clear_value() end
+        if frame % 180 == 0 then attack:set_value(1) end
+        if frame % 180 == 8 then attack:clear_value() end
+        if frame % 240 == 0 then jump:set_value(1) end
+        if frame % 240 == 8 then jump:clear_value() end
+        if frame % 600 == 30 then coin:set_value(1) end
+        if frame % 600 == 34 then coin:clear_value() end
+        if frame % 600 == 90 then start:set_value(1) end
+        if frame % 600 == 94 then start:clear_value() end
+    end
 
     if absolute_frame >= final_frame then
         left:clear_value()

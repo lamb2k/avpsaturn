@@ -165,6 +165,7 @@ def validate_ledger(ledger: dict, verify_captures: bool) -> None:
     timing = ledger.get("native_timing", {})
     required_timings = (
         "precision_frames",
+        "character_confirm_frames",
         "round_title_frames",
         "barricade_intro_frames",
         "door_dialogue_frames",
@@ -236,6 +237,7 @@ def generate_header(ledger: dict) -> str:
     timing = ledger["native_timing"]
     timing_lines = [
         f"#define AVSP_STAGE1_TIMING_PRECISION_FRAMES {timing['precision_frames']}",
+        f"#define AVSP_STAGE1_CHARACTER_CONFIRM_FRAMES {timing['character_confirm_frames']}",
         f"#define AVSP_STAGE1_ROUND_TITLE_FRAMES {timing['round_title_frames']}",
         f"#define AVSP_STAGE1_BARRICADE_INTRO_FRAMES {timing['barricade_intro_frames']}",
         f"#define AVSP_STAGE1_DOOR_DIALOGUE_FRAMES {timing['door_dialogue_frames']}",

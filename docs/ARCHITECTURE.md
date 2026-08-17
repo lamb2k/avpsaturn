@@ -177,6 +177,22 @@ bytes. They reuse one SCSP channel because the source intervals are disjoint.
 For save-state captures with non-repeatable startup transients, reports hash the
 declared tail-selection windows and final PCM rather than irrelevant preroll.
 
+The cold-boot route preserves the 240-frame interval between Predator Warrior
+confirmation and the Round 1 card. Four paired QSound captures bind the title
+lead at confirmation +231, the title tail at Round-title +36, the withdrawal
+composite at barricade +95, and the breach composite at barricade +259. Their
+byte-exact SCSP payloads are 113,208, 91,124, 396,708, and 298,476 bytes, and
+all four reuse channel 5 because their source windows are disjoint.
+
+Those streams define a deliberate Saturn RAM phase boundary. The enemy RLE
+archive is resident before CDDA begins, but its eight 27,648-byte decode
+surfaces are deferred. At barricade +259, after the withdrawal source window
+has ended, the runtime closes channel 5, releases the 396,708-byte withdrawal
+buffer, and allocates one contiguous 221,184-byte alien decode pool from that
+free block. It decodes and copies eight VDP1 textures before the breach reveals
+wave one. No disc read occurs during the transition, and the breach PCM remains
+resident while combat resources come online.
+
 The production path must repeat this method for remaining dialogue and combat
 effects, keep long music on CDDA, and allocate short cues across the six bounded
 Jo/SGL PCM channels.
@@ -185,8 +201,8 @@ The native channel budget is explicit rather than first-free: weapon uses
 channel 0, melee channel 1, and the mutually exclusive normal/KO contact
 composites share channel 2. The mutually exclusive boss entrance and
 defeat/Stage Clear sequences share channel 3. The sequential doorway and
-interior-transition events share channel 4. Channel 5 remains reserved for
-opening dialogue and additional combat effects. A cue may retrigger only its
+interior-transition events share channel 4. The four sequential opening events
+share channel 5. A cue may retrigger only its
 own channel, preventing action bursts from consuming the remaining pool.
 
 The natural alien-contact route proves the player-damage sound independently:

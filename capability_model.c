@@ -579,9 +579,20 @@ static void cap_begin_encounter(CapWorld *world)
     world->room_locked = 1;
 }
 
+static void cap_confirm_character(CapWorld *world)
+{
+    world->encounter_started = 1;
+    world->encounter_state = CAP_ENCOUNTER_CHARACTER_CONFIRM;
+    world->encounter_timer = 0;
+    world->room_locked = 1;
+}
+
 static void cap_update_encounter(CapWorld *world)
 {
     ++world->encounter_timer;
+    if (world->encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM &&
+        world->encounter_timer >= AVSP_STAGE1_CHARACTER_CONFIRM_FRAMES)
+        cap_begin_encounter(world);
     if (world->encounter_state == CAP_ENCOUNTER_ROUND_TITLE &&
         world->encounter_timer >= AVSP_STAGE1_ROUND_TITLE_FRAMES)
     {
@@ -712,7 +723,7 @@ CapClipRequest cap_world_step(CapWorld *world, const CapInput *input)
     }
     else if (world->encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT &&
              input->attack_pressed)
-        cap_begin_encounter(world);
+        cap_confirm_character(world);
     if (world->encounter_state != CAP_ENCOUNTER_WAVE_ONE &&
         world->encounter_state != CAP_ENCOUNTER_WAVE_TWO &&
         world->encounter_state != CAP_ENCOUNTER_CLEAR &&

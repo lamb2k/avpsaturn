@@ -222,10 +222,18 @@ Verified on August 17, 2026:
 - the combined emulator route reaches Round 2 with `PCM D/T 1/1`,
   `PCM SEQ 1/1`, and both `SEEN 1` latches while the earlier contact and
   weapon proofs remain intact
+- the cold-boot route now holds the source-exact 240 frames after character
+  confirmation and plays four capture-exact Round 1, withdrawal, and breach
+  composites on channel 5; their verified payloads total 899,516 bytes
+- the barricade boundary releases the completed 396,708-byte withdrawal PCM
+  and reuses it for one contiguous 221,184-byte eight-alien decode pool, so the
+  first wave becomes resident without a CD read or reduced animation set
+- the refreshed emulator controller route crosses that RAM overlay and reaches
+  the Round 2 card without an asset failure
 
 Next proof gate: verify the full-width mapping and CD audio on physical Saturn,
-then extend the proven QSound isolation to the opening dialogue and combat
-effects while replacing the approximate route gaps with the remaining captured
+then extend the proven QSound isolation to remaining combat effects while
+replacing the approximate route gaps with the remaining captured
 rooms, actors, and actions.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and

@@ -35,6 +35,7 @@
   ],
   "native_timing": {
     "precision_frames": 60,
+    "character_confirm_frames": 240,
     "round_title_frames": 120,
     "barricade_intro_frames": 360,
     "door_dialogue_frames": 60,

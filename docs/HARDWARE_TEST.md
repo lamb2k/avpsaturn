@@ -43,7 +43,12 @@ alter console copy protection or supply copyrighted disc data.
    mapping shows both horizontal source edges. Record any CRT, scaler, or
    capture-device overscan separately from the digital framebuffer.
 3. Press Start at the title, then B at Predator Warrior select, and confirm the
-   native route reaches the Round 1 title before gameplay begins.
+   native route holds the capture-derived 240-frame confirmation interval and
+   reaches the Round 1 title before gameplay begins. Listen for both Round 1
+   cues, the withdrawal composite, and the breach composite at their visual
+   boundaries; none may clip or stall CDDA. Confirm wave one appears without
+   an asset error when the completed withdrawal buffer becomes enemy-animation
+   RAM.
 4. Verify D-pad lane movement advances the complete 48-frame captured walk
    loop; verify A weapon, B melee attack, neutral C jump,
    direction+C dash, A+B emergency attack, and X diagnostic HUD. Confirm B+C
@@ -85,8 +90,8 @@ alter console copy protection or supply copyrighted disc data.
 7. Confirm eight total KOs unlock the room and moving right reaches the exit
    transition.
 8. Defeat Chrysalis and confirm the native Stage Clear state. With the
-   diagnostic enabled, require `PCM D/T 1/1`, `PCM SEQ 1/1`, and both
-   `SEEN 1` latches before Round 2.
+   diagnostic enabled, require `PCM OPEN 1111`, `PCM D/T 1/1`,
+   `PCM SEQ 1/1`, and all `SEEN 1` latches before Round 2.
 9. Leave the encounter running for ten minutes and watch for partial sprites,
    palette corruption, controller loss, CD stalls, or dropped video sync.
 

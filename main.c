@@ -4,6 +4,7 @@
 #include "generated/avsp_boss_animation.h"
 #include "generated/avsp_boss_clear_audio.h"
 #include "generated/avsp_boss_intro_audio.h"
+#include "generated/avsp_breach_audio.h"
 #include "generated/avsp_audio.h"
 #include "generated/avsp_contact_audio.h"
 #include "generated/avsp_door_dialogue_audio.h"
@@ -15,7 +16,10 @@
 #include "generated/avsp_melee_audio.h"
 #include "generated/avsp_palette.h"
 #include "generated/avsp_player_action_animation.h"
+#include "generated/avsp_round_title_a_audio.h"
+#include "generated/avsp_round_title_b_audio.h"
 #include "generated/avsp_sequence_palette.h"
+#include "generated/avsp_withdraw_audio.h"
 
 #define CEL_WIDTH 192
 #define CEL_HEIGHT 192
@@ -32,6 +36,7 @@
 #define AVSP_PCM_CHANNEL_CONTACT 2
 #define AVSP_PCM_CHANNEL_SEQUENCE 3
 #define AVSP_PCM_CHANNEL_TRANSITION 4
+#define AVSP_PCM_CHANNEL_OPENING 5
 #define BOSS_CEL_BYTES ((AVSP_BOSS_CEL_WIDTH * AVSP_BOSS_CEL_HEIGHT) / 2)
 #define BITMAP_SCENE_NONE (-1000)
 #define BITMAP_SCENE_CORRIDOR (-2)
@@ -90,6 +95,7 @@ static unsigned char *sequence_pixels;
 static unsigned char *background_bitmap;
 static unsigned char *player_action_archive;
 static unsigned char *enemy_action_archive;
+static unsigned char *enemy_action_buffer;
 static jo_img_4bits player_action_images[AVSP_PLAYER_ACTION_LAYERS];
 static jo_img_4bits enemy_action_images[CAP_MAX_ENEMIES];
 static jo_img_4bits boss_idle_images[AVSP_BOSS_IDLE_LAYERS];
@@ -107,6 +113,11 @@ static jo_sound *sequence_channel_sound;
 static jo_sound door_dialogue_sound;
 static jo_sound interior_transition_sound;
 static jo_sound *transition_channel_sound;
+static jo_sound round_title_a_sound;
+static jo_sound round_title_b_sound;
+static jo_sound withdraw_sound;
+static jo_sound breach_sound;
+static jo_sound *opening_channel_sound;
 static int player_idle_sprites[2];
 static int player_action_sprites[AVSP_PLAYER_ACTION_LAYERS];
 static int enemy_action_sprites[CAP_MAX_ENEMIES];
@@ -138,6 +149,12 @@ static int sequence_audio_channel_observed;
 static int door_dialogue_audio_play_count;
 static int interior_transition_audio_play_count;
 static int transition_audio_channel_observed;
+static int round_title_a_audio_play_count;
+static int round_title_b_audio_play_count;
+static int withdraw_audio_play_count;
+static int breach_audio_play_count;
+static int opening_audio_channel_observed;
+static int enemy_runtime_ready;
 static int current_bitmap_scene;
 #ifdef AVSP_VISUAL_TEST
 static int visual_action_index;
@@ -221,7 +238,33 @@ static int load_action_audio(void)
                           AVSP_INTERIOR_TRANSITION_PCM_FILE,
                           AVSP_INTERIOR_TRANSITION_PCM_DIRECTORY,
                           AVSP_INTERIOR_TRANSITION_PCM_BYTES,
-                          AVSP_INTERIOR_TRANSITION_PCM_SAMPLE_RATE);
+                          AVSP_INTERIOR_TRANSITION_PCM_SAMPLE_RATE) &&
+           load_pcm_audio(&round_title_a_sound,
+                          AVSP_ROUND_TITLE_A_PCM_FILE,
+                          AVSP_ROUND_TITLE_A_PCM_DIRECTORY,
+                          AVSP_ROUND_TITLE_A_PCM_BYTES,
+                          AVSP_ROUND_TITLE_A_PCM_SAMPLE_RATE) &&
+           load_pcm_audio(&round_title_b_sound,
+                          AVSP_ROUND_TITLE_B_PCM_FILE,
+                          AVSP_ROUND_TITLE_B_PCM_DIRECTORY,
+                          AVSP_ROUND_TITLE_B_PCM_BYTES,
+                          AVSP_ROUND_TITLE_B_PCM_SAMPLE_RATE) &&
+           load_pcm_audio(&withdraw_sound, AVSP_WITHDRAW_PCM_FILE,
+                          AVSP_WITHDRAW_PCM_DIRECTORY,
+                          AVSP_WITHDRAW_PCM_BYTES,
+                          AVSP_WITHDRAW_PCM_SAMPLE_RATE) &&
+           load_pcm_audio(&breach_sound, AVSP_BREACH_PCM_FILE,
+                          AVSP_BREACH_PCM_DIRECTORY,
+                          AVSP_BREACH_PCM_BYTES,
+                          AVSP_BREACH_PCM_SAMPLE_RATE);
+}
+
+static void release_pcm_data(jo_sound *sound)
+{
+    if (sound->data == JO_NULL) return;
+    jo_free(sound->data);
+    sound->data = JO_NULL;
+    sound->data_length = 0;
 }
 
 /* Jo Engine queues SGL sound commands and flushes before, rather than after,
@@ -308,9 +351,8 @@ static int decode_player_action_pose(const int pose)
     return 1;
 }
 
-static int load_enemy_action_sequences(void)
+static int load_enemy_action_archive(void)
 {
-    int slot;
     int length = 0;
     enemy_action_archive = (unsigned char *)jo_fs_read_file_in_dir(
         AVSP_ENEMY_ARCHIVE_FILE, "SPR4", &length);
@@ -320,17 +362,32 @@ static int load_enemy_action_sequences(void)
         failed_asset = AVSP_ENEMY_ARCHIVE_FILE;
         return 0;
     }
+    return 1;
+}
+
+static int allocate_enemy_action_buffer(void)
+{
+    int slot;
+    const unsigned int total_bytes =
+        CAP_MAX_ENEMIES * AVSP_ENEMY_DECODED_BYTES;
+
+    if (enemy_action_buffer != JO_NULL) return 1;
+    /* One contiguous pool can reuse the completed 396 KiB withdrawal PCM
+       block. Jo's allocator does not split a reused free block, so eight
+       individual allocations would strand most of that phase-overlay RAM. */
+    enemy_action_buffer = (unsigned char *)jo_malloc_with_behaviour(
+        total_bytes, JO_MALLOC_TRY_REUSE_BLOCK);
+    if (enemy_action_buffer == JO_NULL)
+    {
+        failed_asset = "ENEMY ACTION BUFFER";
+        return 0;
+    }
     for (slot = 0; slot < CAP_MAX_ENEMIES; ++slot)
     {
         enemy_action_images[slot].width = AVSP_ENEMY_CEL_WIDTH;
         enemy_action_images[slot].height = AVSP_ENEMY_CEL_HEIGHT;
-        enemy_action_images[slot].data =
-            (unsigned char *)jo_malloc(AVSP_ENEMY_DECODED_BYTES);
-        if (enemy_action_images[slot].data == JO_NULL)
-        {
-            failed_asset = "ENEMY ACTION BUFFER";
-            return 0;
-        }
+        enemy_action_images[slot].data = enemy_action_buffer +
+            slot * AVSP_ENEMY_DECODED_BYTES;
     }
     return 1;
 }
@@ -702,7 +759,6 @@ static int add_sprite_for_asset(const CelId cel)
 static int create_sprite_working_set(void)
 {
     int layer;
-    int slot;
     player_idle_sprites[0] = add_sprite_for_asset(CEL_PLAYER_IDLE_0);
     player_idle_sprites[1] = add_sprite_for_asset(CEL_PLAYER_IDLE_1);
     if (!decode_player_action_pose(0)) return 0;
@@ -714,15 +770,6 @@ static int create_sprite_working_set(void)
             failed_asset = "PLAYER ACTION VDP1";
     }
     current_player_action_pose = 0;
-    for (slot = 0; slot < CAP_MAX_ENEMIES; ++slot)
-    {
-        if (!decode_enemy_action_pose(0, slot)) return 0;
-        enemy_action_sprites[slot] = jo_sprite_add_4bits_image(
-            &enemy_action_images[slot]);
-        if (enemy_action_sprites[slot] < 0)
-            failed_asset = "ENEMY ACTION VDP1";
-        current_enemy_action_poses[slot] = 0;
-    }
     for (layer = 0; layer < AVSP_BOSS_IDLE_LAYERS; ++layer)
     {
         boss_idle_sprites[layer] = jo_sprite_add_4bits_image(
@@ -738,6 +785,28 @@ static int create_sprite_working_set(void)
     displayed_hud_health = -1;
     displayed_hud_energy = -1;
     return failed_asset == JO_NULL;
+}
+
+static int prepare_enemy_runtime(void)
+{
+    int slot;
+
+    if (enemy_runtime_ready) return 1;
+    if (!allocate_enemy_action_buffer()) return 0;
+    for (slot = 0; slot < CAP_MAX_ENEMIES; ++slot)
+    {
+        if (!decode_enemy_action_pose(0, slot)) return 0;
+        enemy_action_sprites[slot] = jo_sprite_add_4bits_image(
+            &enemy_action_images[slot]);
+        if (enemy_action_sprites[slot] < 0)
+        {
+            failed_asset = "ENEMY ACTION VDP1";
+            return 0;
+        }
+        current_enemy_action_poses[slot] = 0;
+    }
+    enemy_runtime_ready = 1;
+    return 1;
 }
 
 static int player_clip_for_action(const CapAction action)
@@ -926,7 +995,8 @@ static void draw_world(void)
         world.camera_x, world.stage_area);
 
     if (world.encounter_state == CAP_ENCOUNTER_MAIN_MENU ||
-        world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT)
+        world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT ||
+        world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM)
     {
         int scene = world.encounter_state == CAP_ENCOUNTER_MAIN_MENU ? 0 : 1;
         if (!activate_frontend_scene(scene)) runtime_ready = 0;
@@ -1000,6 +1070,7 @@ static void draw_arcade_hud(void)
 {
     if (world.encounter_state == CAP_ENCOUNTER_MAIN_MENU ||
         world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT ||
+        world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM ||
         sequence_scene_for_world() >= 0)
         return;
     update_hud_textures();
@@ -1273,6 +1344,82 @@ static void frame_callback(void)
          interior_transition_audio_play_count > 0) &&
         jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_TRANSITION))
         transition_audio_channel_observed = 1;
+    /* Character confirmation occurs at source frame 1800. The first Round 1
+       cue starts 231 frames later, nine frames before the sampled title card;
+       the second starts at title timer 36. The withdraw and breach composites
+       then start at barricade timers 95 and 259. Their source windows never
+       overlap, so all four reuse the final bounded Jo/SGL PCM channel. */
+    if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM &&
+        world.encounter_timer == 231 &&
+        round_title_a_audio_play_count == 0)
+    {
+        play_pcm_committed(&round_title_a_sound, opening_channel_sound,
+                           AVSP_PCM_CHANNEL_OPENING);
+        opening_channel_sound = &round_title_a_sound;
+        ++round_title_a_audio_play_count;
+    }
+    if (world.encounter_state == CAP_ENCOUNTER_ROUND_TITLE &&
+        world.encounter_timer == 36 && round_title_b_audio_play_count == 0)
+    {
+        /* The first title cue has completed. Its main-RAM copy is no longer
+           needed after SGL reports the shared opening channel idle. */
+        if (!jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_OPENING))
+            release_pcm_data(&round_title_a_sound);
+        play_pcm_committed(&round_title_b_sound, opening_channel_sound,
+                           AVSP_PCM_CHANNEL_OPENING);
+        opening_channel_sound = &round_title_b_sound;
+        ++round_title_b_audio_play_count;
+    }
+    if (world.encounter_state == CAP_ENCOUNTER_BARRICADE_INTRO &&
+        world.encounter_timer == 95 && withdraw_audio_play_count == 0)
+    {
+        if (!jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_OPENING))
+        {
+            release_pcm_data(&round_title_a_sound);
+            release_pcm_data(&round_title_b_sound);
+        }
+        play_pcm_committed(&withdraw_sound, opening_channel_sound,
+                           AVSP_PCM_CHANNEL_OPENING);
+        opening_channel_sound = &withdraw_sound;
+        ++withdraw_audio_play_count;
+    }
+    if (world.encounter_state == CAP_ENCOUNTER_BARRICADE_INTRO &&
+        world.encounter_timer == 259 && breach_audio_play_count == 0)
+    {
+        /* The source withdrawal composite ends at barricade timer 228. Free
+           that 396 KiB block and reuse it as the complete eight-slot alien
+           decode pool before the breach reveals the first playable wave. */
+        /* slPCMStat can remain asserted after the finite source buffer has
+           elapsed on Yaba Sanshiro. The capture has already been silent for
+           31 source frames here, so explicitly close and flush the slot before
+           returning its main-RAM buffer to the phase overlay. */
+        if (jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_OPENING))
+        {
+            jo_audio_stop_sound(&withdraw_sound);
+            slSndFlush();
+        }
+        release_pcm_data(&round_title_a_sound);
+        release_pcm_data(&round_title_b_sound);
+        release_pcm_data(&withdraw_sound);
+        if (!prepare_enemy_runtime())
+        {
+            runtime_ready = 0;
+            return;
+        }
+        play_pcm_committed(&breach_sound, opening_channel_sound,
+                           AVSP_PCM_CHANNEL_OPENING);
+        opening_channel_sound = &breach_sound;
+        ++breach_audio_play_count;
+    }
+    if ((round_title_a_audio_play_count > 0 ||
+         round_title_b_audio_play_count > 0 ||
+         withdraw_audio_play_count > 0 || breach_audio_play_count > 0) &&
+        jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_OPENING))
+        opening_audio_channel_observed = 1;
+    if (world.encounter_state == CAP_ENCOUNTER_WAVE_ONE &&
+        breach_sound.data != JO_NULL &&
+        !jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_OPENING))
+        release_pcm_data(&breach_sound);
 #ifdef AVSP_VISUAL_TEST
     if (world.player.action == CAP_ACT_WALK)
         world.player.x = JO_TV_WIDTH_2;
@@ -1322,6 +1469,12 @@ static void frame_callback(void)
     draw_hud();
 #ifdef AVSP_ENCOUNTER_TEST
     /* Draw test evidence last so captured VDP1 actors cannot obscure it. */
+    jo_printf(0, 4, "PCM OPEN %d%d%d%d CH %d SEEN %d",
+              round_title_a_audio_play_count,
+              round_title_b_audio_play_count,
+              withdraw_audio_play_count, breach_audio_play_count,
+              jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_OPENING),
+              opening_audio_channel_observed);
     jo_printf(0, 5, "PCM D/T %d/%d CH %d SEEN %d",
               door_dialogue_audio_play_count,
               interior_transition_audio_play_count,
@@ -1387,6 +1540,14 @@ void jo_main(void)
     interior_transition_audio_play_count = 0;
     transition_audio_channel_observed = 0;
     transition_channel_sound = JO_NULL;
+    round_title_a_audio_play_count = 0;
+    round_title_b_audio_play_count = 0;
+    withdraw_audio_play_count = 0;
+    breach_audio_play_count = 0;
+    opening_audio_channel_observed = 0;
+    opening_channel_sound = JO_NULL;
+    enemy_action_buffer = JO_NULL;
+    enemy_runtime_ready = 0;
     current_bitmap_scene = BITMAP_SCENE_NONE;
 #ifdef AVSP_VISUAL_TEST
     visual_action_index = 0;
@@ -1425,9 +1586,21 @@ void jo_main(void)
                         load_hud_assets() &&
                         load_action_audio() &&
                         load_all_cels() && load_player_action_sequences() &&
-                        load_enemy_action_sequences() && load_boss_idle() &&
+                        load_enemy_action_archive() && load_boss_idle() &&
                         create_sprite_working_set();
     }
+#ifdef AVSP_VISUAL_TEST
+    if (runtime_ready)
+    {
+        /* The visual loop starts directly in combat and never consumes the
+           frontend opening cues, so release their overlay immediately. */
+        release_pcm_data(&round_title_a_sound);
+        release_pcm_data(&round_title_b_sound);
+        release_pcm_data(&withdraw_sound);
+        release_pcm_data(&breach_sound);
+        runtime_ready = prepare_enemy_runtime();
+    }
+#endif
     cap_world_init(&world);
 #ifdef AVSP_VISUAL_TEST
     world.encounter_started = 1;

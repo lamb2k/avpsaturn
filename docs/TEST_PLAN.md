@@ -123,8 +123,21 @@ Round 2 title surfaces. No data-track reads occur after Stage 1 CDDA begins.
   and starts on interior-transition timer 38. Require `PCM D/T 1/1` and
   latched `SEEN 1` after Round 2. The refreshed Yaba Sanshiro route satisfies
   this gate while retaining the boss-sequence and earlier audio latches. Both
-  events share channel 4, leaving channel 5 free. Physical listening remains
+  events share channel 4. Physical listening remains
   pending.
+- Verify the cold-boot opening payloads and their channel-5 bindings:
+  `/AUDIO/RND1A.PCM` is 113,208 bytes with SHA-256
+  `5ae8de3a3a2c77c0764c2189b812b9cf49f8cbae9da32794303ba938096faf79`;
+  `/AUDIO/RND1B.PCM` is 91,124 bytes with SHA-256
+  `b9f0a3d96bd5610f00590a3c0ad1e03a6dcca30f7c2e77fce3a38f1511c80b99`;
+  `/AUDIO/WITHDRW.PCM` is 396,708 bytes with SHA-256
+  `f76bb4b4a9e6e3c404bb639c81dfb66dca174497267b0e24bcfd3e74761c58b1`;
+  and `/AUDIO/BREACH.PCM` is 298,476 bytes with SHA-256
+  `c2957aaa6e458d38fd336ef856f0eba78e1014c9ba070eb51830cb78b4570b64`.
+  Require the 240-frame post-confirmation interval, all four starts, no asset
+  failure at the barricade-to-wave boundary, and successful arrival at Round
+  2. The refreshed Yaba Sanshiro route satisfies the state, allocation, and
+  completion gates; physical listening remains pending.
 - Add a comparison capture against the equivalent MAME route.
 
 Status: in progress. A dense 361-sample capture validates the active CPS2 object
@@ -149,7 +162,7 @@ stand-ins. The mixed-mode image adds a 168.015-second QSound
 route reference as native CD audio track 2. The 12,000-frame host test and the
 automated Yaba Sanshiro diagnostic complete this lifecycle. Remaining player
 transitions, enemy actions, intermediate route detail, exact arcade AI/spawn
-timing, opening dialogue/combat SCSP cues, and comparison capture remain open.
+timing, remaining combat SCSP cues, and comparison capture remain open.
 
 ## Gate E: performance and hardware
 

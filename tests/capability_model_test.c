@@ -38,16 +38,17 @@ static void start_encounter(CapWorld *world)
     memset(&input, 0, sizeof(input));
     input.attack_pressed = 1;
     (void)cap_world_step(world, &input);
-    assert(world->encounter_state == CAP_ENCOUNTER_ROUND_TITLE);
+    assert(world->encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM);
+    assert(world->encounter_started == 1);
     assert(world->room_locked == 1);
     assert(active_enemy_count(world) == 0);
-    for (frame = 0; frame < 600 &&
+    for (frame = 0; frame < 900 &&
          world->encounter_state != CAP_ENCOUNTER_WAVE_ONE; ++frame)
         step_empty(world, 1);
     assert(world->encounter_state == CAP_ENCOUNTER_WAVE_ONE);
     assert(world->room_locked == 1);
     assert(active_enemy_count(world) == 5);
-    assert(frame == 479);
+    assert(frame == 719);
 }
 
 static void test_attack_requests_and_damage(void)
