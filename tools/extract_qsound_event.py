@@ -7,6 +7,7 @@ import argparse
 import csv
 import hashlib
 import json
+import math
 import re
 import struct
 import wave
@@ -88,6 +89,20 @@ def main() -> None:
         "--voice-start", action="append", default=[], metavar="VOICE:FRAME"
     )
     parser.add_argument("--end-frame", type=int, required=True)
+    parser.add_argument(
+        "--capture-end-frame",
+        type=int,
+        help=(
+            "absolute source frame at which the WAV capture stops; when set, "
+            "discard startup differences outside the event's final capture window"
+        ),
+    )
+    parser.add_argument(
+        "--capture-tail-margin-frames",
+        type=int,
+        default=30,
+        help="extra source-frame margin before the first declared voice start",
+    )
     args = parser.parse_args()
 
     if (args.output_header is None) != (args.header_prefix is None):
@@ -115,6 +130,10 @@ def main() -> None:
             raise ValueError("QSound voices must be 0..15")
         if not args.action_frame <= start_frame < args.end_frame:
             raise ValueError("event frame ordering is invalid")
+    if args.capture_tail_margin_frames < 0:
+        raise ValueError("--capture-tail-margin-frames must be non-negative")
+    if args.capture_end_frame is not None and args.capture_end_frame <= args.end_frame:
+        raise ValueError("--capture-end-frame must follow --end-frame")
 
     idle_params, idle = read_wave(args.idle_wav)
     action_params, action = read_wave(args.action_wav)
@@ -124,13 +143,30 @@ def main() -> None:
     difference = tuple(action_sample - idle_sample for idle_sample, action_sample in zip(idle, action))
     if any(sample < -32768 or sample > 32767 for sample in difference):
         raise ValueError("differential capture clips signed 16-bit PCM")
-    active_frames = [
+    all_active_frames = [
         index
         for index in range(idle_params.nframes)
         if difference[index * 2] != 0 or difference[index * 2 + 1] != 0
     ]
-    if not active_frames:
+    if not all_active_frames:
         raise ValueError("differential capture is silent")
+    selection_first_frame = 0
+    if args.capture_end_frame is not None:
+        source_window_frames = (
+            args.capture_end_frame
+            - min(start_frame for _, start_frame in voice_starts)
+            + args.capture_tail_margin_frames
+        )
+        selection_first_frame = max(
+            0,
+            idle_params.nframes
+            - math.ceil(source_window_frames * idle_params.framerate / 60),
+        )
+    active_frames = [
+        frame for frame in all_active_frames if frame >= selection_first_frame
+    ]
+    if not active_frames:
+        raise ValueError("differential capture is silent inside the declared event window")
     first_frame = active_frames[0]
     last_frame = active_frames[-1]
     event_samples = difference[first_frame * 2 : (last_frame + 1) * 2]
@@ -196,6 +232,15 @@ def main() -> None:
             "sha256": sha256(args.output_pcm),
         },
     }
+    if args.capture_end_frame is not None:
+        report["wave"].update(
+            {
+                "selection_first_frame": selection_first_frame,
+                "ignored_leading_difference_frames": sum(
+                    frame < selection_first_frame for frame in all_active_frames
+                ),
+            }
+        )
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     if args.output_header is not None:

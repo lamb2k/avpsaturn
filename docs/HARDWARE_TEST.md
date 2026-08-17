@@ -71,13 +71,18 @@ alter console copy protection or supply copyrighted disc data.
    audibly distinct while the same damage cue follows on frame 3. Both direct
    contact composites must coexist with weapon, melee, and CDDA audio without
    channel loss.
+   At the Chrysalis-room entry, confirm the isolated boss cue starts eight
+   frames after the visual anchor. After defeating Chrysalis, confirm the
+   three-part defeat/Stage Clear sequence begins at +150 frames, remains stereo,
+   and continues cleanly across Stage Clear into the results transition.
 6. Fight through the five-enemy opening wave and three-enemy reinforcement wave.
    Confirm enemies can simultaneously show unlike walk, attack, hit, and KO
    poses without one actor changing another actor's cel. The proven alien clips
    must last 39, 120, 36, and 140 frames respectively, with no KO flicker.
 7. Confirm eight total KOs unlock the room and moving right reaches the exit
    transition.
-8. Defeat Chrysalis and confirm the native Stage Clear state.
+8. Defeat Chrysalis and confirm the native Stage Clear state. With the
+   diagnostic enabled, require `PCM SEQ 1/1` and `SEEN 1` before Round 2.
 9. Leave the encounter running for ten minutes and watch for partial sprites,
    palette corruption, controller loss, CD stalls, or dropped video sync.
 

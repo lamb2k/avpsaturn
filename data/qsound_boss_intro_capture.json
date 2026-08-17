@@ -1,0 +1,43 @@
+{
+  "schema": 2,
+  "source": "deterministic MAME 0.289 QSound HLE differential capture",
+  "action": "chrysalis_boss_intro",
+  "action_input_frame": 5460,
+  "qsound": {
+    "starts": [
+      {
+        "voice": 12,
+        "start_frame": 5468,
+        "bank": "0x8031",
+        "address": "0x0000",
+        "rate": "0x1000",
+        "phase": "0x8000",
+        "loop_length": "0x000e",
+        "end_address": "0x4930",
+        "volume": "0x1ffc"
+      }
+    ],
+    "end_frame": 5509
+  },
+  "wave": {
+    "channels": 2,
+    "sample_bits": 16,
+    "sample_rate": 44100,
+    "first_difference_frame": 1021398,
+    "last_difference_frame": 1055039,
+    "event_sample_frames": 33642,
+    "duration_seconds": 0.7628571428571429,
+    "left_peak": 17954,
+    "right_peak": 11431,
+    "idle_sha256": "fcf7d0fe782cf6d9fa8e48f750fabdc9fd0d0f3fcbcd5c9976222ad7633f4d84",
+    "action_sha256": "a1b843b8227a4d7f9edee2cd30ced28384b7969acda9f2f78a816ab88186610f",
+    "selection_first_frame": 1001385,
+    "ignored_leading_difference_frames": 186
+  },
+  "saturn_pcm": {
+    "format": "signed-16-bit-big-endian-stereo",
+    "sample_rate": 44100,
+    "bytes": 134568,
+    "sha256": "7b804d77853d06a02454c4776c81b705e126a953862535d35585828620bf2b40"
+  }
+}

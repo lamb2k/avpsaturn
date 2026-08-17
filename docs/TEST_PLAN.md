@@ -105,9 +105,17 @@ Round 2 title surfaces. No data-track reads occur after Stage 1 CDDA begins.
   route; production gameplay retains normal enemy attacks. The verified Yaba
   Sanshiro run reaches Round 2 with `CONTACT 10/1 SEEN 1`, `KO 8/8`,
   `ACTIVE 0`, and `LVL 1`.
-- Require the fixed SCSP budget to keep weapon, melee, and the mutually
-  exclusive contact composites on channels 0, 1, and 2 respectively, leaving
-  channels 3 through 5 available for boss and voice cues.
+- Verify `/AUDIO/BOSSIN.PCM` is 134,568 bytes with SHA-256
+  `7b804d77853d06a02454c4776c81b705e126a953862535d35585828620bf2b40`
+  and starts on boss-intro timer 8. Verify `/AUDIO/BOSSCLR.PCM` is 637,084
+  bytes with SHA-256
+  `2b8e5ac3619d40b4760b28f1f0828a911f729d550607c333a27d614a47a485b8`
+  and starts on boss-defeat timer 150. Require `PCM SEQ 1/1` and latched
+  `SEEN 1` after the Round 2 boundary. The refreshed Yaba Sanshiro encounter
+  route now satisfies this diagnostic gate; physical listening remains pending.
+- Require the fixed SCSP budget to keep weapon, melee, contact, and the
+  mutually exclusive boss sequences on channels 0, 1, 2, and 3 respectively,
+  leaving channels 4 and 5 available for dialogue and additional effects.
 - Add a comparison capture against the equivalent MAME route.
 
 Status: in progress. A dense 361-sample capture validates the active CPS2 object
@@ -132,7 +140,7 @@ stand-ins. The mixed-mode image adds a 168.015-second QSound
 route reference as native CD audio track 2. The 12,000-frame host test and the
 automated Yaba Sanshiro diagnostic complete this lifecycle. Remaining player
 transitions, enemy actions, intermediate route detail, exact arcade AI/spawn
-timing, boss/voice SCSP event cues, and comparison capture remain open.
+timing, remaining dialogue/combat SCSP cues, and comparison capture remain open.
 
 ## Gate E: performance and hardware
 

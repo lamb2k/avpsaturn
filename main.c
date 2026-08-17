@@ -2,6 +2,8 @@
 #include <string.h>
 #include "capability_model.h"
 #include "generated/avsp_boss_animation.h"
+#include "generated/avsp_boss_clear_audio.h"
+#include "generated/avsp_boss_intro_audio.h"
 #include "generated/avsp_audio.h"
 #include "generated/avsp_contact_audio.h"
 #include "generated/avsp_enemy_animation.h"
@@ -26,6 +28,7 @@
 #define AVSP_PCM_CHANNEL_WEAPON 0
 #define AVSP_PCM_CHANNEL_MELEE 1
 #define AVSP_PCM_CHANNEL_CONTACT 2
+#define AVSP_PCM_CHANNEL_SEQUENCE 3
 #define BOSS_CEL_BYTES ((AVSP_BOSS_CEL_WIDTH * AVSP_BOSS_CEL_HEIGHT) / 2)
 #define BITMAP_SCENE_NONE (-1000)
 #define BITMAP_SCENE_CORRIDOR (-2)
@@ -95,6 +98,9 @@ static jo_sound melee_sound;
 static jo_sound contact_sound;
 static jo_sound ko_contact_sound;
 static jo_sound *contact_channel_sound;
+static jo_sound boss_intro_sound;
+static jo_sound boss_clear_sound;
+static jo_sound *sequence_channel_sound;
 static int player_idle_sprites[2];
 static int player_action_sprites[AVSP_PLAYER_ACTION_LAYERS];
 static int enemy_action_sprites[CAP_MAX_ENEMIES];
@@ -120,6 +126,9 @@ static int melee_audio_channel_observed;
 static int contact_audio_play_count;
 static int ko_contact_audio_play_count;
 static int contact_audio_channel_observed;
+static int boss_intro_audio_play_count;
+static int boss_clear_audio_play_count;
+static int sequence_audio_channel_observed;
 static int current_bitmap_scene;
 #ifdef AVSP_VISUAL_TEST
 static int visual_action_index;
@@ -185,7 +194,15 @@ static int load_action_audio(void)
            load_pcm_audio(&ko_contact_sound, AVSP_KO_CONTACT_PCM_FILE,
                           AVSP_KO_CONTACT_PCM_DIRECTORY,
                           AVSP_KO_CONTACT_PCM_BYTES,
-                          AVSP_KO_CONTACT_PCM_SAMPLE_RATE);
+                          AVSP_KO_CONTACT_PCM_SAMPLE_RATE) &&
+           load_pcm_audio(&boss_intro_sound, AVSP_BOSS_INTRO_PCM_FILE,
+                          AVSP_BOSS_INTRO_PCM_DIRECTORY,
+                          AVSP_BOSS_INTRO_PCM_BYTES,
+                          AVSP_BOSS_INTRO_PCM_SAMPLE_RATE) &&
+           load_pcm_audio(&boss_clear_sound, AVSP_BOSS_CLEAR_PCM_FILE,
+                          AVSP_BOSS_CLEAR_PCM_DIRECTORY,
+                          AVSP_BOSS_CLEAR_PCM_BYTES,
+                          AVSP_BOSS_CLEAR_PCM_SAMPLE_RATE);
 }
 
 /* Jo Engine queues SGL sound commands and flushes before, rather than after,
@@ -1186,6 +1203,30 @@ static void frame_callback(void)
     if ((contact_audio_play_count > 0 || ko_contact_audio_play_count > 0) &&
         jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_CONTACT))
         contact_audio_channel_observed = 1;
+    /* The boss-room voice starts eight CPS2 frames after the captured room
+       entry. The defeat/Stage Clear composite begins 150 frames after the
+       Chrysalis defeat and deliberately continues across the native
+       BOSS_DEFEAT -> STAGE_CLEAR -> RESULTS boundaries. Both use one SCSP
+       channel because the source events cannot overlap. */
+    if (world.encounter_state == CAP_ENCOUNTER_BOSS_INTRO &&
+        world.encounter_timer == 8 && boss_intro_audio_play_count == 0)
+    {
+        play_pcm_committed(&boss_intro_sound, sequence_channel_sound,
+                           AVSP_PCM_CHANNEL_SEQUENCE);
+        sequence_channel_sound = &boss_intro_sound;
+        ++boss_intro_audio_play_count;
+    }
+    if (world.encounter_state == CAP_ENCOUNTER_BOSS_DEFEAT &&
+        world.encounter_timer == 150 && boss_clear_audio_play_count == 0)
+    {
+        play_pcm_committed(&boss_clear_sound, sequence_channel_sound,
+                           AVSP_PCM_CHANNEL_SEQUENCE);
+        sequence_channel_sound = &boss_clear_sound;
+        ++boss_clear_audio_play_count;
+    }
+    if ((boss_intro_audio_play_count > 0 || boss_clear_audio_play_count > 0) &&
+        jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_SEQUENCE))
+        sequence_audio_channel_observed = 1;
 #ifdef AVSP_VISUAL_TEST
     if (world.player.action == CAP_ACT_WALK)
         world.player.x = JO_TV_WIDTH_2;
@@ -1235,6 +1276,10 @@ static void frame_callback(void)
     draw_hud();
 #ifdef AVSP_ENCOUNTER_TEST
     /* Draw test evidence last so captured VDP1 actors cannot obscure it. */
+    jo_printf(0, 6, "PCM SEQ %d/%d CH %d SEEN %d",
+              boss_intro_audio_play_count, boss_clear_audio_play_count,
+              jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_SEQUENCE),
+              sequence_audio_channel_observed);
     jo_printf(0, 7, "PCM CONTACT %d/%d SEEN %d",
               contact_audio_play_count, ko_contact_audio_play_count,
               contact_audio_channel_observed);
@@ -1283,6 +1328,10 @@ void jo_main(void)
     ko_contact_audio_play_count = 0;
     contact_audio_channel_observed = 0;
     contact_channel_sound = JO_NULL;
+    boss_intro_audio_play_count = 0;
+    boss_clear_audio_play_count = 0;
+    sequence_audio_channel_observed = 0;
+    sequence_channel_sound = JO_NULL;
     current_bitmap_scene = BITMAP_SCENE_NONE;
 #ifdef AVSP_VISUAL_TEST
     visual_action_index = 0;

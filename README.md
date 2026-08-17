@@ -209,10 +209,17 @@ Verified on August 17, 2026:
 - the expanded encounter diagnostic reaches Round 2 with weapon, melee, and
   contact `SEEN 1` latches on fixed PCM channels 0 through 2; its one normal
   and one forced KO proof recover into `KO 8/8`, `ACTIVE 0`, and `LVL 1`
+- deterministic boss-room captures isolate the Chrysalis entrance cue as
+  0.762857 seconds of stereo SCSP PCM and the three-start defeat/Stage Clear
+  sequence as 3.611587 seconds; native playback uses shared channel 3 at the
+  measured +8 and +150 frame offsets
+- the refreshed emulator route reaches Round 2 with `PCM SEQ 1/1` and
+  `SEEN 1`, proving both sequence starts entered SCSP playback without losing
+  the prior weapon, melee, or contact-channel latches
 
 Next proof gate: verify the full-width mapping and CD audio on physical Saturn,
-then extend the proven QSound isolation to boss and voices while replacing the
-approximate route gaps with the remaining captured
+then extend the proven QSound isolation to the remaining dialogue and combat
+effects while replacing the approximate route gaps with the remaining captured
 rooms, actors, and actions.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and

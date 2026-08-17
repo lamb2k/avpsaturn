@@ -157,15 +157,26 @@ and 144,752 bytes of stereo SCSP PCM. Native playback begins at action frame 3;
 rapid attacks stop and retrigger their own previous melee channel, matching the
 source voice-reuse constraint without consuming all six Jo PCM slots.
 
-The production path must repeat this method for boss and voice events, keep
-long music on CDDA, and allocate short cues across the six bounded Jo/SGL PCM
-channels.
+The same bus-level route now covers two Stage 1 sequence events. QSound voice
+12 starts the Chrysalis entrance at source frame 5468, eight frames after the
+captured boss-room entry. Its differential is 0.762857 seconds and 134,568
+bytes. The defeat/Stage Clear composite preserves voice 12 at frames 14070 and
+14190 plus voice 10 at frame 14126 in one 3.611587-second, 637,084-byte stream.
+It starts 150 frames after the frame-13920 boss-defeat anchor and is allowed to
+continue across the native Stage Clear and results boundaries. A capture-tail
+window rejects MAME startup transients before selecting the event, and a
+second refreshed capture must reproduce both PCM hashes before integration.
+
+The production path must repeat this method for remaining dialogue and combat
+effects, keep long music on CDDA, and allocate short cues across the six bounded
+Jo/SGL PCM channels.
 
 The native channel budget is explicit rather than first-free: weapon uses
 channel 0, melee channel 1, and the mutually exclusive normal/KO contact
-composites share channel 2. Channels 3 through 5 remain reserved for boss and
-voice events. A cue may retrigger only its own channel, preventing action
-bursts from consuming the remaining pool.
+composites share channel 2. The mutually exclusive boss entrance and
+defeat/Stage Clear sequences share channel 3. Channels 4 and 5 remain reserved
+for dialogue and additional combat effects. A cue may retrigger only its own
+channel, preventing action bursts from consuming the remaining pool.
 
 The natural alien-contact route proves the player-damage sound independently:
 each of four health losses is followed three frames later by the same QSound
@@ -208,6 +219,9 @@ Exact in the current milestone:
   capture-derived hit-frame binding
 - direct two-voice nonlethal and KO contact composites, including their exact
   internal source timing and bounded shared-channel selection
+- isolated Chrysalis entrance and defeat/Stage Clear sequence composites,
+  source-anchor timing, bounded channel-3 playback, and Round 2 `SEQ 1/1`
+  plus `SEEN 1` runtime evidence
 
 Still approximate or incomplete:
 

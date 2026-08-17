@@ -85,6 +85,10 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Enemy-contact audio preparation failed with exit code $LASTEXITCODE."
         }
+        & '.\prepare_stage1_sequence_audio.ps1' -PythonPath $PythonPath
+        if ($LASTEXITCODE -ne 0) {
+            throw "Stage 1 sequence audio preparation failed with exit code $LASTEXITCODE."
+        }
 
         $contentRoot = Join-Path $projectRoot 'build\avsp_cd'
         foreach ($metadataName in @('ABS.TXT', 'BIB.TXT', 'CPY.TXT')) {
@@ -214,6 +218,18 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Saturn KO-contact-composite PCM ISO verification failed with exit code $LASTEXITCODE."
         }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/AUDIO/BOSSIN.PCM' '--equals' `
+            (Join-Path $contentRoot 'AUDIO\BOSSIN.PCM')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn boss-intro PCM ISO verification failed with exit code $LASTEXITCODE."
+        }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/AUDIO/BOSSCLR.PCM' '--equals' `
+            (Join-Path $contentRoot 'AUDIO\BOSSCLR.PCM')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn boss-clear PCM ISO verification failed with exit code $LASTEXITCODE."
+        }
 
         # Add the locally rendered QSound reference as a real Saturn CDDA track.
         # It remains an ignored private artifact and is never linked as CPS2 code.
@@ -242,6 +258,10 @@ try {
             (Join-Path $contentRoot 'AUDIO\CONTACT.PCM')
         $koContactAudioFile = Get-Item -LiteralPath `
             (Join-Path $contentRoot 'AUDIO\KOCONT.PCM')
+        $bossIntroAudioFile = Get-Item -LiteralPath `
+            (Join-Path $contentRoot 'AUDIO\BOSSIN.PCM')
+        $bossClearAudioFile = Get-Item -LiteralPath `
+            (Join-Path $contentRoot 'AUDIO\BOSSCLR.PCM')
         $manifestPath = Join-Path $projectRoot 'build\hardware_release_manifest.txt'
         [IO.File]::WriteAllLines($manifestPath, @(
             'target=sega-saturn-ntsc'
@@ -306,6 +326,20 @@ try {
             'event_audio_7_source_frames=4433-health-loss,4435-impact,4436-vocal,4464-stop'
             "event_audio_7_bytes=$($koContactAudioFile.Length)"
             "event_audio_7_sha256=$((Get-FileHash -LiteralPath $koContactAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'event_audio_8=scsp-pcm-capture-exact-chrysalis-boss-intro'
+            'event_audio_8_iso_path=/AUDIO/BOSSIN.PCM'
+            'event_audio_8_format=signed-16-bit-big-endian-stereo'
+            'event_audio_8_sample_rate=44100'
+            'event_audio_8_source_frames=5460-boss-room-entry,5468-voice-start,5509-stop'
+            "event_audio_8_bytes=$($bossIntroAudioFile.Length)"
+            "event_audio_8_sha256=$((Get-FileHash -LiteralPath $bossIntroAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'event_audio_9=scsp-pcm-capture-exact-chrysalis-defeat-stage-clear'
+            'event_audio_9_iso_path=/AUDIO/BOSSCLR.PCM'
+            'event_audio_9_format=signed-16-bit-big-endian-stereo'
+            'event_audio_9_sample_rate=44100'
+            'event_audio_9_source_frames=13920-boss-defeated,14070-voice12,14126-voice10,14190-voice12,14269-stop'
+            "event_audio_9_bytes=$($bossClearAudioFile.Length)"
+            "event_audio_9_sha256=$((Get-FileHash -LiteralPath $bossClearAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
         ))
     }
     finally {

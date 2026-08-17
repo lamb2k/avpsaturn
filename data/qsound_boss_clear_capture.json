@@ -1,0 +1,65 @@
+{
+  "schema": 2,
+  "source": "deterministic MAME 0.289 QSound HLE differential capture",
+  "action": "chrysalis_defeat_stage_clear",
+  "action_input_frame": 13920,
+  "qsound": {
+    "starts": [
+      {
+        "voice": 12,
+        "start_frame": 14070,
+        "bank": "0x8000",
+        "address": "0x8000",
+        "rate": "0x0800",
+        "phase": "0x8000",
+        "loop_length": "0x000c",
+        "end_address": "0xfba4",
+        "volume": "0x13e9"
+      },
+      {
+        "voice": 10,
+        "start_frame": 14126,
+        "bank": "0x8015",
+        "address": "0x0000",
+        "rate": "0x1000",
+        "phase": "0x8000",
+        "loop_length": "0x000d",
+        "end_address": "0x6b10",
+        "volume": "0x1973"
+      },
+      {
+        "voice": 12,
+        "start_frame": 14190,
+        "bank": "0x8004",
+        "address": "0x0000",
+        "rate": "0x1000",
+        "phase": "0x8000",
+        "loop_length": "0x0014",
+        "end_address": "0x79db",
+        "volume": "0x1973"
+      }
+    ],
+    "end_frame": 14269
+  },
+  "wave": {
+    "channels": 2,
+    "sample_bits": 16,
+    "sample_rate": 44100,
+    "first_difference_frame": 7944793,
+    "last_difference_frame": 8104063,
+    "event_sample_frames": 159271,
+    "duration_seconds": 3.6115873015873015,
+    "left_peak": 15893,
+    "right_peak": 11315,
+    "idle_sha256": "74bbca4ed0e324ca578bde4ba81fe4c77c9f4a7497662950eb6ce07055184241",
+    "action_sha256": "ecba0611d7c81d8ba42dab50aef69b1154ad974d35d1f50964830e337509b822",
+    "selection_first_frame": 7935495,
+    "ignored_leading_difference_frames": 0
+  },
+  "saturn_pcm": {
+    "format": "signed-16-bit-big-endian-stereo",
+    "sample_rate": 44100,
+    "bytes": 637084,
+    "sha256": "2b8e5ac3619d40b4760b28f1f0828a911f729d550607c333a27d614a47a485b8"
+  }
+}
