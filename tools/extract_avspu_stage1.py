@@ -700,6 +700,42 @@ def player_pose_capture(frame: int) -> tuple[int, list[int], tuple[int, int]]:
     return bank, sorted(entry["offset"] for entry in commands), pivot
 
 
+def contiguous_palette_runs(entries: list[dict[str, int]],
+                            colour: int) -> list[list[dict[str, int]]]:
+    """Split one CPS2 palette into object-list runs without guessing tile art."""
+    runs: list[list[dict[str, int]]] = []
+    for entry in sorted((item for item in entries if item["colour"] == colour),
+                        key=lambda item: item["offset"]):
+        if not runs or entry["offset"] != runs[-1][-1]["offset"] + 4:
+            runs.append([])
+        runs[-1].append(entry)
+    return runs
+
+
+def rightmost_blue_alien_capture(
+        frame: int) -> tuple[int, list[int], tuple[int, int]]:
+    """Select the independently visible right-side blue alien temporal track."""
+    bank = load_animation_sample_banks()[frame]
+    entries = decode_object_entries(load_words(animation_object_filename(frame, bank)))
+    candidates = []
+    for run in contiguous_palette_runs(entries, 16):
+        left = min(entry["screen_x"] for entry in run)
+        top = min(entry["screen_y"] for entry in run)
+        right = max(entry["screen_x"] + entry["width"] for entry in run)
+        bottom = max(entry["screen_y"] + entry["height"] for entry in run)
+        if (left < VISIBLE_WIDTH and right > 0 and top < VISIBLE_HEIGHT + 32 and
+                bottom > 128 and right <= VISIBLE_WIDTH + 64):
+            candidates.append((left, top, right, bottom, run))
+    if not candidates:
+        raise ValueError(f"frame {frame}: no independently visible blue alien run")
+    left, top, right, bottom, commands = max(
+        candidates, key=lambda item: (item[2], item[0]))
+    primary = max(commands, key=lambda entry: entry["width"] * entry["height"])
+    pivot = (primary["screen_x"] + primary["width"] // 2,
+             primary["screen_y"] + primary["height"])
+    return bank, [entry["offset"] for entry in commands], pivot
+
+
 def exact_object_layers(gfx: bytearray, palette: list[tuple[int, int, int, int]],
                         frame: int, bank: int, offsets: list[int],
                         shift_x: int = 0,
@@ -898,6 +934,52 @@ static const unsigned short avsp_player_attack_source_frames[AVSP_PLAYER_ATTACK_
     return manifest
 
 
+def write_enemy_walk_sequence_assets(
+        gfx: bytearray, sprite_dir: Path) -> list[dict[str, object]]:
+    source_frames = list(range(4164, 4201, 4))
+    base_palette = [
+        animation_palette(source_frames[0])[16 * 16 + pen][:3]
+        for pen in range(15)
+    ]
+    files = []
+    manifest = []
+    for pose_index, frame in enumerate(source_frames):
+        bank, offsets, pivot = rightmost_blue_alien_capture(frame)
+        layers, palettes = exact_object_layers(
+            gfx, animation_palette(frame), frame, bank, offsets, pivot=pivot)
+        if 16 not in layers or palettes[16] != base_palette:
+            raise ValueError(f"frame {frame}: blue alien palette 16 changed")
+        filename = f"EA{pose_index:02d}.BIN"
+        data = pack_4bpp(layers[16])
+        (sprite_dir / filename).write_bytes(data)
+        files.append(filename)
+        manifest.append({
+            "path": f"SPR4/{filename}",
+            "bytes": len(data),
+            "sha256": hashlib.sha256(data).hexdigest(),
+            "source_frame": frame,
+            "cps2_palette": 16,
+        })
+
+    file_rows = ",\n".join(f'    "{filename}"' for filename in files)
+    frame_rows = ", ".join(str(frame) for frame in source_frames)
+    header = f"""/* Generated from a temporally tracked CPS2 blue alien. */
+#ifndef AVSP_ENEMY_ANIMATION_H
+#define AVSP_ENEMY_ANIMATION_H
+#define AVSP_ENEMY_WALK_POSES {len(source_frames)}
+static const char avsp_enemy_walk_files[AVSP_ENEMY_WALK_POSES][12] = {{
+{file_rows}
+}};
+static const unsigned short avsp_enemy_walk_source_frames[AVSP_ENEMY_WALK_POSES] = {{
+    {frame_rows}
+}};
+#endif
+"""
+    (GENERATED_ROOT / "avsp_enemy_animation.h").write_text(
+        header, encoding="ascii")
+    return manifest
+
+
 def write_exact_actor_assets(gfx: bytearray,
                              palette: list[tuple[int, int, int, int]],
                              sprite_dir: Path) -> list[dict[str, object]]:
@@ -905,8 +987,6 @@ def write_exact_actor_assets(gfx: bytearray,
     groups = {
         "player_idle": exact_object_layers(
             gfx, palette, 2880, idle_bank, idle_offsets, pivot=idle_pivot),
-        "alien_a": exact_object_layers(gfx, palette, 4200, 2, [124, 128]),
-        "alien_b": exact_object_layers(gfx, palette, 4200, 2, [144, 148]),
     }
     # Fixed Saturn subpalette slots. Player layers retain CPS2 palettes 0, 7,
     # and 15; the Stage 1 alien retains palette 16.
@@ -917,19 +997,18 @@ def write_exact_actor_assets(gfx: bytearray,
         0: [player_palette[pen][:3] for pen in range(15)],
         7: [player_palette[7 * 16 + pen][:3] for pen in range(15)],
         15: [attack_palette[15 * 16 + pen][:3] for pen in range(15)],
-        16: groups["alien_a"][1][16],
+        16: [animation_palette(4164)[16 * 16 + pen][:3]
+             for pen in range(15)],
     }
     write_exact_palette_header([palette_banks[colour] for colour in cps_colours])
 
     file_map = {
         "PXI0.BIN": ("player_idle", 0),
         "PXI1.BIN": ("player_idle", 7),
-        "EXA0.BIN": ("alien_a", 16),
-        "EXB0.BIN": ("alien_b", 16),
     }
     manifest = []
     preview = Image.new("RGBA", (384, 384), (20, 20, 20, 255))
-    preview_groups = (("player_idle", 0), ("alien_a", 192))
+    preview_groups = (("player_idle", 0),)
     for group_name, preview_y in preview_groups:
         layers, group_palettes = groups[group_name]
         for colour, layer in layers.items():
@@ -954,6 +1033,7 @@ def write_exact_actor_assets(gfx: bytearray,
                          "sha256": hashlib.sha256(data).hexdigest(),
                          "cps2_palette": colour})
     manifest.extend(write_player_attack_sequence_assets(gfx, sprite_dir))
+    manifest.extend(write_enemy_walk_sequence_assets(gfx, sprite_dir))
     return manifest
 
 
@@ -989,53 +1069,14 @@ def write_saturn_assets(gfx: bytearray, palette: list[tuple[int, int, int, int]]
     snapshot_dir.mkdir(parents=True, exist_ok=True)
     background_dir.mkdir(parents=True, exist_ok=True)
 
-    player_idle = fit_actor_frame(selected_object_layer(
-        gfx, palette, 2880, ANIMATION_SAMPLE_ACTIVE_BANK[2880], [72, 76, 80, 84]))
-    player_attack = fit_actor_frame(selected_object_layer(
-        gfx, palette, 2940, ANIMATION_SAMPLE_ACTIVE_BANK[2940],
-        list(range(72, 125, 4)), shift_x=-150))
-    alien_a = fit_actor_frame(selected_object_layer(gfx, palette, 4200, 2, [124, 128]))
-    alien_b = fit_actor_frame(selected_object_layer(gfx, palette, 4200, 2, [144, 148]))
-    alien_c = fit_actor_frame(selected_object_layer(gfx, palette, 4200, 2, [160, 164]))
+    # These directories are generated and ignored. Remove only their direct
+    # files so stale approximate assets cannot leak into a clean image pack.
+    for output_dir in (sprite_dir, snapshot_dir, background_dir):
+        for stale_file in output_dir.iterdir():
+            if stale_file.is_file():
+                stale_file.unlink()
 
-    player_sources = [player_idle, player_attack]
-    alien_sources = [alien_a, alien_b, alien_c]
-    player_palette = common_4bpp_palette(player_sources)
-    alien_palette = common_4bpp_palette(alien_sources)
-    write_palette_header(player_palette, alien_palette)
-
-    frames = {
-        "P_IDLE.BIN": (player_idle, player_palette),
-        "P_WLK1.BIN": (player_idle, player_palette),
-        "P_WLK2.BIN": (player_idle, player_palette),
-        "P_ATK1.BIN": (player_attack, player_palette),
-        "P_ATK2.BIN": (player_attack, player_palette),
-        "P_SPC1.BIN": (player_attack, player_palette),
-        "P_SPC2.BIN": (player_attack, player_palette),
-        "P_HIT.BIN": (player_attack, player_palette),
-        "E_IDLE.BIN": (alien_a, alien_palette),
-        "E_WLK1.BIN": (alien_b, alien_palette),
-        "E_WLK2.BIN": (alien_c, alien_palette),
-        "E_ATK1.BIN": (alien_a, alien_palette),
-        "E_ATK2.BIN": (alien_c, alien_palette),
-        "E_HIT.BIN": (alien_b, alien_palette),
-        "E_KO.BIN": (alien_c, alien_palette),
-    }
     manifest: list[dict[str, object]] = []
-    for filename, (source, colours) in frames.items():
-        packed = pack_4bpp(map_to_4bpp(source, colours))
-        target = sprite_dir / filename
-        target.write_bytes(packed)
-        manifest.append({"path": f"SPR4/{filename}", "bytes": len(packed),
-                         "sha256": hashlib.sha256(packed).hexdigest()})
-
-    # Reuse the small original-engine utility sprites; the visible character
-    # and enemy art above comes only from the verified local CPS2 set.
-    for filename in ("SHADOW.BIN", "HITFX.BIN"):
-        data = (ROOT / "cd" / "SPR4" / filename).read_bytes()
-        (sprite_dir / filename).write_bytes(data)
-        manifest.append({"path": f"SPR4/{filename}", "bytes": len(data),
-                         "sha256": hashlib.sha256(data).hexdigest()})
 
     manifest.extend(write_exact_actor_assets(gfx, palette, sprite_dir))
     manifest.append(write_snapshot_asset(object_layer, snapshot_dir))

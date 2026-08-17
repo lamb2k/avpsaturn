@@ -17,7 +17,8 @@ Current milestone:
 - preserves original sprite scale and exact 15-color CPS2 subpalettes
 - animates the first authentic ten-pose Predator attack from three aligned
   VDP1 palette layers backed by the Saturn 4 MB cartridge
-- draws exact alien object pixels through VDP1 over a reconstructed VDP2 stage
+- animates a temporally tracked ten-pose blue alien sequence through one
+  replaceable VDP1 slot over a reconstructed VDP2 stage
 - boots with a lossless 8-bit VDP1 reference surface containing the complete
   final visible CPS2 object/priority result
 - boots in the Saturn's native 352x224 mode with the 4 MB expansion cartridge
@@ -30,8 +31,8 @@ source scale, but the presentation is not yet frame-exact: the 384-wide frame
 is center-cropped to 352, the HUD is static, and the boot oracle is flattened
 rather than actor-driven. On first input, the build switches to native gameplay,
 whose player attack now uses an authentic ten-pose CPS2 sequence. It still
-reuses two alien cels and does not yet reproduce the complete arcade animation
-state, combat, audio, or level progression.
+does not yet bind the extracted enemy poses to the arcade's complete enemy
+state machine, combat, audio, or level progression.
 
 The Saturn has no 384-pixel low-resolution output. The selected 352x224 mode is
 the closest native match: all 224 source lines and original pixel scale are
@@ -91,6 +92,8 @@ Verified on August 16, 2026:
 - the player timeline contains 87 unique assemblies, and its first ten-pose
   attack sequence runs from cartridge-resident source cels through three VDP1
   texture slots
+- the independently visible right-side blue alien is tracked across frames
+  4164-4200 and its ten authentic poses run through one replaceable VDP1 slot
 - an exhaustive frame-local grouping manifest separates verified actors,
   ground-shadow sprites, and props from edge fragments awaiting temporal proof
 - exact layered cels retain original scale and CPS2 palette pens
@@ -103,8 +106,8 @@ Verified on August 16, 2026:
   asset working set, and advances the authentic attack poses over the
   reconstructed Stage 1 background/HUD
 
-Next proof gate: integrate temporally grouped enemy animation with explicit
-priority metadata, then complete the first playable Stage 1 encounter.
+Next proof gate: extract the remaining enemy action clips with explicit
+priority metadata, then bind them to the first playable Stage 1 encounter.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
 [docs/TEST_PLAN.md](docs/TEST_PLAN.md).

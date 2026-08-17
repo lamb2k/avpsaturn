@@ -32,11 +32,13 @@ The current path instead:
 4. emits one 192x192 VDP1 cel per source palette layer
 5. draws all layers at the same pivot and depth
 
-The active VDP1 working set contains seven 192x192 packed 4bpp slots, or 129,024
-bytes of texture data: two idle Predator layers, three replaceable attack
-layers, and two alien cels. The first attack sequence contains ten captured
-poses and three layers per pose, totaling 552,960 source bytes in the 4 MB
-cartridge. Each pose replaces only the three 55,296-byte attack slots. Four
+The active actor VDP1 working set contains six 192x192 packed 4bpp slots, or
+110,592 bytes of texture data: two idle Predator layers, three replaceable
+attack layers, and one replaceable alien layer. The first attack sequence
+contains ten captured poses and three layers per pose, totaling 552,960 source
+bytes in the 4 MB cartridge. The first blue-alien track adds ten single-layer
+poses, or 184,320 source bytes. Each pose update replaces only its corresponding
+55,296-byte player group or 18,432-byte enemy slot. Four
 exact CPS2 palette banks occupy one Saturn 256-color CRAM allocation. This
 separates source residency from VDP1 texture residency and leaves room for
 commands and a larger animation cache.
@@ -80,10 +82,11 @@ Exact in the current milestone:
 - active CPS2 object-RAM bank and final visible boot object/priority result
 - Saturn-native 352x224 initialization and original-scale 384-to-352 crop
 - first ten-pose captured Predator attack sequence
+- first ten-pose temporally tracked blue-alien sequence
 
 Still approximate or incomplete:
 
-- temporal confirmation of enemy and prop groupings beyond the player sequence
+- temporal confirmation of remaining enemy variants, actions, and prop groups
 - enemy variants, palettes, poses, count, and exact object priority
 - remaining player states, enemy animation/state timing, and full frame sets
 - dynamic HUD values, scroll behavior, level triggers, combat, AI, and audio
@@ -93,7 +96,8 @@ Still approximate or incomplete:
 ## Next implementation sequence
 
 1. Extend the captured player timeline into idle, walk, hit, and KO clips.
-2. Group enemy commands temporally and emit enemy animation and priority data.
+2. Extend the proven blue-alien track into attack, hit, and KO clips and repeat
+   the temporal grouping for the remaining enemy palettes.
 3. Replace prototype combat with Stage 1 scripts, collision, spawn, and camera
    data.
 4. Add bounded CD-to-cartridge prefetch and VDP1 cache scheduling.

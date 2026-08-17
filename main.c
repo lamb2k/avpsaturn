@@ -1,6 +1,7 @@
 #include <jo/jo.h>
 #include <string.h>
 #include "capability_model.h"
+#include "generated/avsp_enemy_animation.h"
 #include "generated/avsp_palette.h"
 #include "generated/avsp_player_animation.h"
 #include "generated/avsp_snapshot_palette.h"
@@ -24,8 +25,6 @@ typedef enum
 {
     CEL_PLAYER_IDLE_0 = 0,
     CEL_PLAYER_IDLE_1,
-    CEL_ALIEN_A,
-    CEL_ALIEN_B,
     CEL_COUNT
 } CelId;
 
@@ -41,9 +40,7 @@ typedef struct
 static CelAsset cel_assets[CEL_COUNT] =
 {
     {"PXI0.BIN", CEL_WIDTH, CEL_HEIGHT, CEL_BYTES, {0, 0, JO_NULL}},
-    {"PXI1.BIN", CEL_WIDTH, CEL_HEIGHT, CEL_BYTES, {0, 0, JO_NULL}},
-    {"EXA0.BIN", CEL_WIDTH, CEL_HEIGHT, CEL_BYTES, {0, 0, JO_NULL}},
-    {"EXB0.BIN", CEL_WIDTH, CEL_HEIGHT, CEL_BYTES, {0, 0, JO_NULL}}
+    {"PXI1.BIN", CEL_WIDTH, CEL_HEIGHT, CEL_BYTES, {0, 0, JO_NULL}}
 };
 
 static CapWorld world;
@@ -54,11 +51,13 @@ static jo_img_8bits background_image;
 static jo_img_8bits snapshot_image;
 static unsigned char *background_bitmap;
 static jo_img_4bits player_attack_images[AVSP_PLAYER_ATTACK_POSES][AVSP_PLAYER_ATTACK_LAYERS];
+static jo_img_4bits enemy_walk_images[AVSP_ENEMY_WALK_POSES];
 static int player_idle_sprites[2];
 static int player_attack_sprites[AVSP_PLAYER_ATTACK_LAYERS];
-static int alien_sprites[2];
+static int enemy_walk_sprite;
 static int snapshot_sprite;
 static int current_player_attack_pose;
+static int current_enemy_walk_pose;
 static int debug_hud_enabled;
 static const char *failed_asset;
 static int runtime_ready;
@@ -106,6 +105,27 @@ static int load_player_attack_sequence(void)
                 failed_asset = avsp_player_attack_files[pose][layer];
                 return 0;
             }
+        }
+    }
+    return 1;
+}
+
+static int load_enemy_walk_sequence(void)
+{
+    int pose;
+    int length;
+    for (pose = 0; pose < AVSP_ENEMY_WALK_POSES; ++pose)
+    {
+        jo_img_4bits *image = &enemy_walk_images[pose];
+        image->width = CEL_WIDTH;
+        image->height = CEL_HEIGHT;
+        length = 0;
+        image->data = (unsigned char *)jo_fs_read_file_in_dir(
+            avsp_enemy_walk_files[pose], "SPR4", &length);
+        if (image->data == JO_NULL || length != CEL_BYTES)
+        {
+            failed_asset = avsp_enemy_walk_files[pose];
+            return 0;
         }
     }
     return 1;
@@ -239,8 +259,9 @@ static int create_sprite_working_set(void)
             failed_asset = avsp_player_attack_files[0][layer];
     }
     current_player_attack_pose = 0;
-    alien_sprites[0] = add_sprite_for_asset(CEL_ALIEN_A);
-    alien_sprites[1] = add_sprite_for_asset(CEL_ALIEN_B);
+    enemy_walk_sprite = jo_sprite_add_4bits_image(&enemy_walk_images[0]);
+    if (enemy_walk_sprite < 0) failed_asset = avsp_enemy_walk_files[0];
+    current_enemy_walk_pose = 0;
     return failed_asset == JO_NULL;
 }
 
@@ -284,9 +305,8 @@ static void draw_player(const CapActor *actor, const int screen_x)
 
 static void draw_alien(const CapActor *actor, const int screen_x)
 {
-    int frame = (actor->locomotion_frame / 8) & 1;
     int depth = 330 - actor->lane;
-    draw_exact_layer(actor, screen_x, alien_sprites[frame], 3, depth);
+    draw_exact_layer(actor, screen_x, enemy_walk_sprite, 3, depth);
 }
 
 static void draw_world(void)
@@ -305,6 +325,15 @@ static void draw_world(void)
         return;
     }
     draw_player(&world.player, player_x);
+    {
+        int pose = (world.frame / 4) % AVSP_ENEMY_WALK_POSES;
+        if (pose != current_enemy_walk_pose)
+        {
+            jo_sprite_replace_4bits_image(
+                &enemy_walk_images[pose], enemy_walk_sprite);
+            current_enemy_walk_pose = pose;
+        }
+    }
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
     {
         CapActor *enemy = &world.enemies[index];
@@ -358,12 +387,18 @@ static void frame_callback(void)
 #endif
     input = read_input();
     cap_world_step(&world, &input);
+#ifdef AVSP_VISUAL_TEST
+    world.enemies[0].x = world.player.x + 112;
+    world.enemies[0].lane = world.player.lane;
+    world.enemies[0].action = CAP_ACT_WALK;
+#endif
     if (jo_is_pad1_key_down(JO_KEY_X)) debug_hud_enabled = !debug_hud_enabled;
     draw_world();
     draw_hud();
 #ifdef AVSP_VISUAL_TEST
-    jo_printf(0, 5, "ATTACK VISUAL TEST FRAME %02d POSE %02d",
-              world.player.action_frame, current_player_attack_pose);
+    jo_printf(0, 5, "VISUAL P%02d/%02d E%02d",
+              world.player.action_frame, current_player_attack_pose,
+              current_enemy_walk_pose);
 #endif
 }
 
@@ -389,6 +424,7 @@ void jo_main(void)
     {
         runtime_ready = load_background() && load_snapshot_asset() &&
                         load_all_cels() && load_player_attack_sequence() &&
+                        load_enemy_walk_sequence() &&
                         create_sprite_working_set();
     }
     cap_world_init(&world);
@@ -396,7 +432,9 @@ void jo_main(void)
     world.encounter_started = 1;
     world.frame = 1;
     world.player.x = JO_TV_WIDTH_2;
-    for (index = 0; index < CAP_MAX_ENEMIES; ++index)
+    world.enemies[0].x = world.player.x + 112;
+    world.enemies[0].lane = world.player.lane;
+    for (index = 1; index < CAP_MAX_ENEMIES; ++index)
         world.enemies[index].x = 900;
 #else
     JO_UNUSED_ARG(index);

@@ -41,7 +41,8 @@ and props while marking three edge fragments as candidates. The display now
 uses native 352x224, preserving scale and cropping 16 pixels per horizontal
 edge. The crop policy is fixed; native HUD safe-area placement, enemy temporal
 grouping, actor-level priority, and image-difference acceptance remain open.
-The post-input gameplay scene still reuses two blue alien cels and must not be
+The post-input gameplay scene now uses a tracked ten-pose blue-alien sequence,
+but its poses are not yet bound to arcade enemy states and it must not be
 described as frame-exact.
 
 ## Gate D: first playable Stage 1 encounter
@@ -56,9 +57,11 @@ described as frame-exact.
 Status: in progress. A dense 361-sample capture validates the active CPS2 object
 bank and identifies 87 unique player assemblies. The first authentic ten-pose
 Predator attack is cartridge-resident and has been visually verified advancing
-through three replaceable VDP1 palette layers. Remaining player states, enemy
-animation, arcade timing, encounter scripting, and completion transition are
-still open. The current combat rules remain a native placeholder.
+through three replaceable VDP1 palette layers. A separately tracked blue alien
+now advances through ten authentic single-layer poses from frames 4164-4200.
+Remaining player and enemy actions, arcade timing, encounter scripting, and the
+completion transition are still open. The current combat rules remain a native
+placeholder.
 
 ## Gate E: performance and hardware
 
