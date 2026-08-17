@@ -14,6 +14,10 @@ These instructions apply to the entire repository.
 - Keep the project private. Do not commit, publish, or redistribute ROM data or
   other private source material.
 
+The standing objective and its completion conditions are in `docs/GOAL.md`.
+It is phase-independent: pursue it until every condition holds. `docs/PARITY_PLAN.md`
+holds the route, `docs/GOAL.md` holds the destination.
+
 ## Start every session
 
 1. Use the `port-cps2-to-sega-saturn` skill and read its linked workflow.
