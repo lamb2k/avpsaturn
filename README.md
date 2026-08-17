@@ -77,6 +77,8 @@ Verified on August 16, 2026:
 - official MAME reports the local `avspu` set as good
 - the Python CPS2 graphics reconstruction matches MAME's 16 MiB `:gfx` region
 - 54 captured commands decode from the verified active CPS2 object-RAM bank
+- an exhaustive frame-local grouping manifest separates verified actors,
+  ground-shadow sprites, and props from edge fragments awaiting temporal proof
 - exact layered cels retain original scale and CPS2 palette pens
 - the native model passes 12,000 deterministic frames, including the idle boot
   gate

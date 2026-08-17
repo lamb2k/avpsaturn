@@ -67,7 +67,7 @@ Exact in the current milestone:
 
 Still approximate or incomplete:
 
-- actor grouping from all 54 captured object commands for animated gameplay
+- temporal confirmation of the frame-local 54-command actor/prop grouping
 - enemy variants, palettes, poses, count, and exact object priority
 - animation/state timing and full frame sets
 - dynamic HUD values, scroll behavior, level triggers, combat, AI, and audio

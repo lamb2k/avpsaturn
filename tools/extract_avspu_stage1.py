@@ -22,6 +22,24 @@ VISIBLE_TOP = 16
 VISIBLE_WIDTH = 384
 VISIBLE_HEIGHT = 224
 STAGE1_ACTIVE_OBJECT_RAM = "objram2.tsv"
+STAGE1_OBJECT_GROUPS = (
+    ("capture_padding", "nonvisual", "verified", (0, 4, 8)),
+    ("ground_shadows", "shadow_sprites", "verified",
+     (12, 16, 20, 24, 28, 32, 36, 40, 44, 48)),
+    ("alien_left_edge", "actor", "verified", (52, 56, 60)),
+    ("predator_player", "actor", "verified", (64, 68, 72, 76, 80, 84, 88)),
+    ("purple_alien", "actor", "verified",
+     (92, 96, 100, 104, 108, 132, 136, 140)),
+    ("right_edge_actor_fragment", "actor_candidate", "candidate", (112, 116, 120)),
+    ("blue_alien_middle", "actor", "verified", (124, 128)),
+    ("blue_alien_left", "actor", "verified", (144, 148)),
+    ("floor_fragment", "actor_candidate", "candidate", (152, 156)),
+    ("green_alien_middle", "actor", "verified", (160, 164)),
+    ("barrel", "prop", "verified", (168, 172)),
+    ("blue_alien_right", "actor", "verified", (176, 180)),
+    ("left_edge_prop_fragment", "prop_candidate", "candidate", (184, 188, 192, 196)),
+    ("street_signs", "prop", "verified", (200, 204, 208, 212)),
+)
 
 EXPECTED_SHA1 = {
     "avp.13m": "457ce959aa5db3a003de7dda2b3799b2f1ae279b",
@@ -342,6 +360,64 @@ def verify_stage1_object_capture(entries: list[dict[str, int]]) -> None:
         raise ValueError(
             f"{STAGE1_ACTIVE_OBJECT_RAM}: expected the verified 54-command "
             "Stage 1 active-bank signature")
+
+
+def write_stage1_object_groups(entries: list[dict[str, int]]) -> None:
+    """Emit exhaustive frame-local grouping metadata for animation extraction."""
+    by_offset = {entry["offset"]: entry for entry in entries}
+    grouped_offsets: set[int] = set()
+    groups = []
+    for name, role, confidence, offsets in STAGE1_OBJECT_GROUPS:
+        overlap = grouped_offsets.intersection(offsets)
+        if overlap:
+            raise ValueError(f"duplicate Stage 1 group offsets: {sorted(overlap)}")
+        missing = set(offsets).difference(by_offset)
+        if missing:
+            raise ValueError(f"{name}: missing object offsets {sorted(missing)}")
+        grouped_offsets.update(offsets)
+        commands = [by_offset[offset] for offset in offsets]
+        left = min(command["screen_x"] for command in commands)
+        top = min(command["screen_y"] for command in commands)
+        right = max(command["screen_x"] + command["width"] for command in commands)
+        bottom = max(command["screen_y"] + command["height"] for command in commands)
+        visible_commands = [
+            command for command in commands
+            if (command["screen_x"] < VISIBLE_WIDTH and
+                command["screen_x"] + command["width"] > 0 and
+                command["screen_y"] < VISIBLE_HEIGHT and
+                command["screen_y"] + command["height"] > 0)]
+        if visible_commands:
+            visible_bounds = [
+                max(0, min(command["screen_x"] for command in visible_commands)),
+                max(0, min(command["screen_y"] for command in visible_commands)),
+                min(VISIBLE_WIDTH, max(command["screen_x"] + command["width"]
+                                       for command in visible_commands)),
+                min(VISIBLE_HEIGHT, max(command["screen_y"] + command["height"]
+                                        for command in visible_commands)),
+            ]
+        else:
+            visible_bounds = None
+        groups.append({
+            "name": name,
+            "role": role,
+            "confidence": confidence,
+            "command_offsets": list(offsets),
+            "cps2_palettes": sorted({command["colour"] for command in commands}),
+            "cps2_priorities": sorted({(command["x"] >> 13) & 0x07
+                                        for command in commands}),
+            "source_bounds": [left, top, right, bottom],
+            "visible_bounds": visible_bounds,
+        })
+    ungrouped = set(by_offset).difference(grouped_offsets)
+    if ungrouped:
+        raise ValueError(f"ungrouped Stage 1 object offsets: {sorted(ungrouped)}")
+    (OUTPUT_ROOT / "stage1_object_groups.json").write_text(
+        json.dumps({
+            "capture_frame": 4200,
+            "object_ram": STAGE1_ACTIVE_OBJECT_RAM,
+            "grouping_scope": "frame-local; candidate groups require temporal confirmation",
+            "groups": groups,
+        }, indent=2) + "\n", encoding="utf-8")
 
 
 def make_contact_sheet(layer: Image.Image, entries: list[dict[str, int]]) -> None:
@@ -756,6 +832,7 @@ def main() -> None:
     layer.save(OUTPUT_ROOT / "stage1_objects.png")
     (OUTPUT_ROOT / "stage1_objects.json").write_text(
         json.dumps(entries, indent=2) + "\n", encoding="utf-8")
+    write_stage1_object_groups(entries)
     make_contact_sheet(layer, entries)
     print(f"Decoded {len(entries)} CPS2 object commands to {OUTPUT_ROOT}")
 

@@ -34,8 +34,10 @@ working-set pixels at original scale over the reconstructed background/HUD.
 
 Status: in progress. The boot reference mode now draws the final visible CPS2
 object/priority result from one lossless 8bpp VDP1 surface with 76 visible
-colors. Active-bank selection is guarded by a 54-command capture signature.
-Actor-level priority, crop policy, dynamic HUD state, and image-difference
+colors. Active-bank selection is guarded by a 54-command capture signature, and
+an exhaustive frame-local grouping manifest identifies actors, shadow sprites,
+and props while marking three edge fragments as candidates. Temporal grouping,
+actor-level priority, crop policy, dynamic HUD state, and image-difference
 acceptance remain open. The post-input gameplay scene still reuses two blue
 alien cels and must not be described as frame-exact.
 
