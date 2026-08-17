@@ -38,6 +38,12 @@ alien cels. Four exact CPS2 palette banks occupy one Saturn 256-color CRAM
 allocation. This fits comfortably in VDP1 texture memory and leaves room for
 commands and a future animation cache.
 
+Before gameplay starts, a separate reference mode draws the complete captured
+object pass as one 384x224 8bpp VDP1 surface. Its 78 visible source colors fit
+losslessly inside one 256-color Saturn palette and consume 86,016 bytes. This is
+a comparison oracle, not the final animation architecture. The first player
+input replaces it with the actor working set and native transforms.
+
 ## Background and HUD
 
 The converter reconstructs CPS2 scroll layers from captured graphics RAM,
@@ -54,10 +60,12 @@ Exact in the current milestone:
 - selected object pixels, scale, transparency, and palette pens
 - selected background/HUD capture reconstruction
 - aligned multi-palette VDP1 assembly
+- complete captured non-shadow object layout in the boot reference surface
 
 Still approximate or incomplete:
 
-- actor grouping from all 53 captured object commands
+- Saturn translation of CPS2 hardware shadow-mask commands
+- actor grouping from all 53 captured object commands for animated gameplay
 - enemy variants, palettes, poses, count, and exact object priority
 - animation/state timing and full frame sets
 - dynamic HUD values, scroll behavior, level triggers, combat, AI, and audio
@@ -65,9 +73,9 @@ Still approximate or incomplete:
 
 ## Next implementation sequence
 
-1. Group captured CPS2 commands into complete actors and props.
-2. Emit tight per-actor/per-palette cels and pivot metadata.
-3. Reproduce the MAME reference frame through VDP1 object ordering.
+1. Translate CPS2 shadow-mask commands to an equivalent Saturn render pass.
+2. Group captured CPS2 commands into complete actors and props.
+3. Emit tight per-actor/per-palette cels and pivot metadata.
 4. Capture successive gameplay states and build animation manifests.
 5. Replace prototype combat with Stage 1 scripts, collision, spawn, and camera
    data.

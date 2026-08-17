@@ -15,14 +15,18 @@ Current milestone:
 - preserves original sprite scale and exact 15-color CPS2 subpalettes
 - draws the Predator from two or three aligned VDP1 palette layers
 - draws exact alien object pixels through VDP1 over a reconstructed VDP2 stage
+- boots with a lossless 8-bit VDP1 reference surface containing the complete
+  captured CPS2 object pass, excluding hardware shadow-mask commands
 - boots at 320x224 with the Saturn 4 MB expansion RAM cartridge
 - runs a small native lane-combat model; enemies wait for the first input
 
-The boot scene is intentionally stable for visual comparison. It is not yet a
-frame-exact reconstruction: the current native gameplay reuses two extracted
-alien cels and does not yet reproduce the captured enemy variants, full CPS2
-object list, animation state, HUD state, gameplay logic, audio, or level
-progression.
+The boot scene is intentionally stable for visual comparison. It now reproduces
+the captured object layout and 78 visible object colors at original scale, but
+it is not yet frame-exact: CPS2 hardware shadow masks are omitted instead of
+being translated to a Saturn shadow pass, the 384-wide frame is center-cropped
+to 320, and the HUD is static. On first input, the build switches to native
+gameplay, whose smaller working set still reuses two alien cels and does not yet
+reproduce the arcade animation state, combat, audio, or level progression.
 
 ## Repository and content boundary
 
@@ -75,13 +79,15 @@ Verified on August 16, 2026:
 - exact layered cels retain original scale and CPS2 palette pens
 - the native model passes 12,000 deterministic frames, including the idle boot
   gate
+- the complete captured object pass fits a single 86,016-byte VDP1 8bpp surface
+  with 78 visible colors
 - the release SH-2 build, link, ISO, and cue generation complete successfully
 - Yaba Sanshiro boots the image with the 4 MB cartridge and displays the exact
   asset working set over the reconstructed Stage 1 background/HUD
 
-Next proof gate: replace the cloned alien working set with actor-grouped CPS2
-object reconstruction, then add real animation/state extraction and complete
-the first playable Stage 1 encounter.
+Next proof gate: translate the CPS2 shadow-mask objects, then split the full
+reference surface into actor-grouped animation assets and complete the first
+playable Stage 1 encounter.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
 [docs/TEST_PLAN.md](docs/TEST_PLAN.md).

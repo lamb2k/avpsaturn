@@ -305,6 +305,20 @@ def decode_objects(gfx: bytearray, words: list[int], palette: list[tuple[int, in
     return layer, rendered
 
 
+def without_cps2_shadow_masks(words: list[int]) -> list[int]:
+    """Remove CPS2 shadow-mask objects that Saturn must render separately."""
+    shadow_codes = {7977, 8028, 8059}
+    filtered: list[int] = []
+    for offset in range(0, len(words) - 3, 4):
+        command = words[offset:offset + 4]
+        if command[1] >= 0x8000 or command[3] >= 0xFF00:
+            break
+        if command[2] not in shadow_codes:
+            filtered.extend(command)
+    filtered.extend((0, 0x8000, 0, 0xFF00))
+    return filtered
+
+
 def make_contact_sheet(layer: Image.Image, entries: list[dict[str, int]]) -> None:
     visible = [entry for entry in entries if entry["screen_x"] < VISIBLE_WIDTH and
                entry["screen_x"] + entry["width"] > 0 and entry["screen_y"] < VISIBLE_HEIGHT and
@@ -483,6 +497,49 @@ static const unsigned char avsp_exact_palettes[AVSP_EXACT_PALETTE_BANKS][15][3] 
     (GENERATED_ROOT / "avsp_palette.h").write_text(header, encoding="ascii")
 
 
+def write_snapshot_asset(layer: Image.Image, sprite_dir: Path) -> dict[str, object]:
+    """Write the complete captured CPS2 object pass as a lossless 8bpp cel."""
+    colour_to_index: dict[tuple[int, int, int], int] = {}
+    colours: list[tuple[int, int, int]] = [(0, 0, 0)]
+    data = bytearray(layer.width * layer.height)
+    source = layer.load()
+
+    for y in range(layer.height):
+        for x in range(layer.width):
+            red, green, blue, alpha = source[x, y]
+            if not alpha:
+                continue
+            rgb = (red, green, blue)
+            index = colour_to_index.get(rgb)
+            if index is None:
+                index = len(colours)
+                if index >= 256:
+                    raise ValueError("captured CPS2 object pass exceeds one Saturn 8bpp palette")
+                colour_to_index[rgb] = index
+                colours.append(rgb)
+            data[y * layer.width + x] = index
+
+    padded = colours + [(0, 0, 0)] * (256 - len(colours))
+    rows = ",\n".join(
+        f"    {{{red}, {green}, {blue}}}" for red, green, blue in padded)
+    header = f"""/* Generated locally from the captured CPS2 object pass. */
+#ifndef AVSP_SNAPSHOT_PALETTE_H
+#define AVSP_SNAPSHOT_PALETTE_H
+#define AVSP_SNAPSHOT_PALETTE_COLOURS {len(colours)}
+static const unsigned char avsp_snapshot_palette[256][3] = {{
+{rows}
+}};
+#endif
+"""
+    (GENERATED_ROOT / "avsp_snapshot_palette.h").write_text(header, encoding="ascii")
+
+    target = sprite_dir / "OBJFRM.BIN"
+    target.write_bytes(data)
+    return {"path": "SPR8/OBJFRM.BIN", "bytes": len(data),
+            "sha256": hashlib.sha256(data).hexdigest(),
+            "visible_colours": len(colours) - 1}
+
+
 def write_exact_actor_assets(gfx: bytearray,
                              palette: list[tuple[int, int, int, int]],
                              sprite_dir: Path) -> list[dict[str, object]]:
@@ -563,10 +620,13 @@ static const unsigned char avsp_alien_palette[15][3] = {{
 
 
 def write_saturn_assets(gfx: bytearray, palette: list[tuple[int, int, int, int]],
-                        gfxram: list[int], cps_a: list[int], cps_b: list[int]) -> None:
+                        gfxram: list[int], cps_a: list[int], cps_b: list[int],
+                        object_layer: Image.Image) -> None:
     sprite_dir = SATURN_CD_ROOT / "SPR4"
+    snapshot_dir = SATURN_CD_ROOT / "SPR8"
     background_dir = SATURN_CD_ROOT / "BG"
     sprite_dir.mkdir(parents=True, exist_ok=True)
+    snapshot_dir.mkdir(parents=True, exist_ok=True)
     background_dir.mkdir(parents=True, exist_ok=True)
 
     player_idle = fit_actor_frame(selected_object_layer(
@@ -617,6 +677,7 @@ def write_saturn_assets(gfx: bytearray, palette: list[tuple[int, int, int, int]]
                          "sha256": hashlib.sha256(data).hexdigest()})
 
     manifest.extend(write_exact_actor_assets(gfx, palette, sprite_dir))
+    manifest.append(write_snapshot_asset(object_layer, snapshot_dir))
 
     stage = render_background(gfx, gfxram, cps_a, cps_b, palette,
                               width=512, height=256, include_scroll1=True)
@@ -648,12 +709,14 @@ def main() -> None:
     background = render_background(gfx, gfxram, cps_a, cps_b, palette)
     words = load_words("objram1.tsv")
     layer, entries = decode_objects(gfx, words, palette)
+    saturn_layer, _ = decode_objects(gfx, without_cps2_shadow_masks(words), palette)
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
     background.save(OUTPUT_ROOT / "stage1_background.png")
     composite = background.copy()
     composite.alpha_composite(layer)
     composite.save(OUTPUT_ROOT / "stage1_reconstructed.png")
-    write_saturn_assets(gfx, palette, gfxram, cps_a, cps_b)
+    write_saturn_assets(gfx, palette, gfxram, cps_a, cps_b, saturn_layer)
+    saturn_layer.save(OUTPUT_ROOT / "stage1_saturn_objects.png")
     layer.save(OUTPUT_ROOT / "stage1_objects.png")
     (OUTPUT_ROOT / "stage1_objects.json").write_text(
         json.dumps(entries, indent=2) + "\n", encoding="utf-8")

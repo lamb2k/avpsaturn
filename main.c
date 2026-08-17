@@ -2,12 +2,16 @@
 #include <string.h>
 #include "capability_model.h"
 #include "generated/avsp_palette.h"
+#include "generated/avsp_snapshot_palette.h"
 
 #define CEL_WIDTH 192
 #define CEL_HEIGHT 192
 #define CEL_BYTES ((CEL_WIDTH * CEL_HEIGHT) / 2)
 #define BACKGROUND_WIDTH 512
 #define BACKGROUND_HEIGHT 256
+#define SNAPSHOT_WIDTH 384
+#define SNAPSHOT_HEIGHT 224
+#define SNAPSHOT_BYTES (SNAPSHOT_WIDTH * SNAPSHOT_HEIGHT)
 
 extern jo_color *nbg1_bitmap;
 
@@ -46,11 +50,14 @@ static CelAsset cel_assets[CEL_COUNT] =
 static CapWorld world;
 static jo_palette background_palette;
 static jo_palette actor_palette;
+static jo_palette snapshot_palette;
 static jo_img_8bits background_image;
+static jo_img_8bits snapshot_image;
 static unsigned char *background_bitmap;
 static int player_idle_sprites[2];
 static int player_attack_sprites[3];
 static int alien_sprites[2];
+static int snapshot_sprite;
 static int debug_hud_enabled;
 static const char *failed_asset;
 static int runtime_ready;
@@ -112,6 +119,40 @@ static void set_actor_palette(void)
     colors[95] = JO_COLOR_White;
 
     jo_create_palette_from(&actor_palette, colors, 256);
+}
+
+static void set_snapshot_palette(void)
+{
+    static jo_color colors[256];
+    int index;
+
+    for (index = 0; index < 256; ++index)
+        colors[index] = JO_COLOR_RGB(
+            avsp_snapshot_palette[index][0],
+            avsp_snapshot_palette[index][1],
+            avsp_snapshot_palette[index][2]);
+    jo_create_palette_from(&snapshot_palette, colors, 256);
+}
+
+static int load_snapshot_asset(void)
+{
+    int length = 0;
+    snapshot_image.width = SNAPSHOT_WIDTH;
+    snapshot_image.height = SNAPSHOT_HEIGHT;
+    snapshot_image.data = (unsigned char *)jo_fs_read_file_in_dir(
+        "OBJFRM.BIN", "SPR8", &length);
+    if (snapshot_image.data == JO_NULL || length != SNAPSHOT_BYTES)
+    {
+        failed_asset = "OBJFRM.BIN";
+        return 0;
+    }
+    snapshot_sprite = jo_sprite_add_8bits_image(&snapshot_image);
+    if (snapshot_sprite < 0)
+    {
+        failed_asset = "OBJFRM VDP1";
+        return 0;
+    }
+    return 1;
 }
 
 static int load_background(void)
@@ -210,6 +251,12 @@ static void draw_world(void)
     int background_scroll = (world.camera_x * 192) / (CAP_WORLD_WIDTH - 320);
 
     jo_move_background(background_scroll, 8);
+    if (!world.encounter_started)
+    {
+        jo_sprite_set_palette(snapshot_palette.id);
+        jo_sprite_draw3D(snapshot_sprite, 0, 0, 160);
+        return;
+    }
     draw_player(&world.player, player_x);
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
     {
@@ -267,11 +314,13 @@ void jo_main(void)
     failed_asset = JO_NULL;
     background_bitmap = JO_NULL;
     background_image.data = JO_NULL;
+    snapshot_image.data = JO_NULL;
     debug_hud_enabled = 0;
 
     jo_core_init(JO_COLOR_Black);
     cart_available = jo_get_extended_ram_cartridge_type() == CART_32MBits;
     set_actor_palette();
+    set_snapshot_palette();
     if (!cart_available)
     {
         failed_asset = "4MB RAM CART REQUIRED";
@@ -279,7 +328,8 @@ void jo_main(void)
     }
     else
     {
-        runtime_ready = load_background() && load_all_cels() && create_sprite_working_set();
+        runtime_ready = load_background() && load_snapshot_asset() &&
+                        load_all_cels() && create_sprite_working_set();
     }
     cap_world_init(&world);
     jo_core_set_screens_order(JO_NBG0_SCREEN, JO_SPRITE_SCREEN, JO_NBG1_SCREEN);
