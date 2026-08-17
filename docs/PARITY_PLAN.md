@@ -103,7 +103,31 @@ ioports (`:DSWA 1-1`, `:DSWB 2-6`, `:DSWB 2-7`) while loading the mid-game state
 cached during boot initialisation that already ran with debug off inside the
 state. **Cold boot with the switches held from frame 0.**
 
-## Phase 0: instrumented MAME
+## Phase 0 is NOT on the critical path (revised 2026-08-17)
+
+This phase was written before the debug overlays were working. They now run in
+**stock MAME 0.289**, enabled by setting `:HW_TYPE` Hardware to Development and
+driving the active-low `:DSWA`/`:DSWB` fields from before the first frame, then
+injecting the software-switch bytes once because the retail ROM dropped the
+physical-DIP-to-RAM copy routine. Cold-boot runs hold `enable=01 row2=c0`
+through gameplay.
+
+Both original justifications for a custom build are weaker than they looked:
+
+- **Entity spawner (needs Player 4).** It was valuable under the capture
+  method, where each actor had to be *observed* animating. Under ROM table
+  extraction, animations are read from script tables, so the spawner is a
+  convenience for validation, not a dependency.
+- **Write tracer.** MAME's stock debugger provides watchpoints. Try those
+  first; they are very likely sufficient to find the routines that write the
+  animation-script pointer and the state fields.
+
+**Build MAME from source only if stock watchpoints prove inadequate for
+tracing, or if the spawner becomes the cheapest way to validate a specific
+actor.** Do not treat it as a prerequisite. The phases below remain in their
+original form for that contingency.
+
+## Phase 0 (contingency): instrumented MAME
 
 Everything downstream depends on observing the game precisely, so this is
 first. Build MAME from source per the official guide and carry the changes as a
@@ -167,8 +191,10 @@ Validation, non-negotiable: a ROM-decoded assembly must reproduce an
 already-captured pose **pixel for pixel**. That test converts every existing
 captured clip from source-of-truth into regression oracle.
 
-**2b. Actor struct.** Complete the field map using the Phase 1 monitors as
-ground truth and existing captured events as labels.
+**2b. Actor struct.** Map fields **on demand**, not exhaustively. Only the
+fields the native runtime actually consumes need identifying; mapping all 96
+words for completeness is wasted effort. Use the Phase 1 monitors as ground
+truth and existing captured events as labels.
 
 **2c. Stage data.** Spawn tables, camera bounds, scroll parameters, room
 triggers and transitions for Round 1.
@@ -195,10 +221,14 @@ passing.
 
 ## Phase 4: validation
 
-- **Parity harness.** Run instrumented MAME and the native host model on the
-  same input sequence and diff per-frame actor state. The first divergent frame
-  is the work queue, and it stays the queue until the diff is empty. This is
-  the instrument that makes "parity" a number instead of an opinion.
+- **Parity harness, scoped to functional parity.** Run MAME and the native host
+  model on the same input sequence and compare. Compare **events**, not every
+  field of every frame: state transitions, spawn events, hit events, animation
+  script transitions and their durations. A full per-frame diff of all fields
+  is the instrument for frame-exact parity, which is not the target, and
+  building it first wastes effort on sub-pixel and RNG noise that functional
+  parity explicitly tolerates. Widen to per-frame only where an event-level
+  mismatch needs localising.
 - Keep the existing deterministic captures as regression oracles.
 - Then the existing gates in `docs/TEST_PLAN.md`: host tests, focused profile,
   full route, clean normal release, audible run, physical Saturn.
@@ -212,6 +242,21 @@ build it as early as Phase 2 if it can be afforded.
 
 Do not start Phase 3 before the pixel-exact pose test passes. Reimplementing on
 top of a misread table format is the most expensive available mistake.
+
+## Explicitly out of scope
+
+Cut deliberately, to keep the target reachable:
+
+- **Attract mode.** It is the game playing itself and needs the whole engine
+  plus demo input scripting. The goal is a playable Round 1, not the demo. It
+  becomes nearly free once the engine is done; revisit then, not now.
+- **Exhaustive actor struct mapping.** See 2b.
+- **Frame-exact comparison harness.** See Phase 4.
+- **A custom MAME build**, unless stock watchpoints prove inadequate. See the
+  Phase 0 revision note.
+- **Boot logo and title screens.** They are long static holds, 79 to 255 frames
+  each, per the boot timeline map. They are trivially reproducible whenever
+  wanted and prove nothing about parity; do them last or never.
 
 ## Scope and rights
 
