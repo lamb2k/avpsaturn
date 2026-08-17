@@ -21,6 +21,11 @@ static int active_enemy_count(const CapWorld *world)
     return count;
 }
 
+static int test_abs(const int value)
+{
+    return value < 0 ? -value : value;
+}
+
 static void start_encounter(CapWorld *world)
 {
     CapInput input;
@@ -157,6 +162,83 @@ static void test_first_room_waves_and_transition(void)
     assert(world.encounter_state == CAP_ENCOUNTER_COMPLETE);
 }
 
+static void test_controller_only_route_completion(void)
+{
+    CapWorld world;
+    CapInput input;
+    int frame;
+
+    cap_world_init(&world);
+    for (frame = 0; frame < 90000 && !world.level_completed; ++frame)
+    {
+        CapActor *target = 0;
+        int target_distance = 0;
+        int index;
+
+        memset(&input, 0, sizeof(input));
+        if (!world.encounter_started || world.encounter_state == CAP_ENCOUNTER_CLEAR)
+        {
+            input.right = 1;
+            input.dash_held = 1;
+        }
+        else if (world.player.action != CAP_ACT_KO &&
+                 world.encounter_state != CAP_ENCOUNTER_BOSS_INTRO &&
+                 world.encounter_state != CAP_ENCOUNTER_STAGE_CLEAR)
+        {
+            for (index = 0; index < CAP_MAX_ENEMIES; ++index)
+            {
+                CapActor *enemy = &world.enemies[index];
+                int distance;
+                if (!enemy->active || enemy->action == CAP_ACT_KO) continue;
+                distance = test_abs(enemy->x - world.player.x) +
+                    test_abs(enemy->lane - world.player.lane) * 2;
+                if (target == 0 || distance < target_distance)
+                {
+                    target = enemy;
+                    target_distance = distance;
+                }
+            }
+            if (target != 0 &&
+                (world.player.action == CAP_ACT_IDLE ||
+                 world.player.action == CAP_ACT_WALK))
+            {
+                int delta_x = target->x - world.player.x;
+                int delta_lane = target->lane - world.player.lane;
+                if (test_abs(delta_lane) > 10)
+                {
+                    input.up = delta_lane < 0;
+                    input.down = delta_lane > 0;
+                }
+                else if (test_abs(delta_x) > 54)
+                {
+                    input.left = delta_x < 0;
+                    input.right = delta_x > 0;
+                    input.dash_held = 1;
+                }
+                else
+                {
+                    if ((delta_x < 0 && world.player.facing > 0) ||
+                        (delta_x > 0 && world.player.facing < 0))
+                    {
+                        input.left = delta_x < 0;
+                        input.right = delta_x > 0;
+                    }
+                    else
+                        input.special_pressed = 1;
+                }
+            }
+        }
+        (void)cap_world_step(&world, &input);
+    }
+
+    assert(world.level_completed == 1);
+    assert(world.encounter_state == CAP_ENCOUNTER_COMPLETE);
+    assert(world.enemies_defeated == CAP_STAGE1_TOTAL_ENEMIES);
+    assert(world.boss_defeated == 1);
+    assert(frame < 90000);
+    printf("Controller-only route reached Stage Clear in %d frames.\n", frame);
+}
+
 static void test_long_deterministic_run(void)
 {
     CapWorld world;
@@ -229,6 +311,7 @@ int main(void)
     test_attack_requests_and_damage();
     test_encounter_waits_for_player_input();
     test_first_room_waves_and_transition();
+    test_controller_only_route_completion();
     test_long_deterministic_run();
     test_centered_background_mapping();
     puts("Capability model tests passed (12,000 deterministic frames).");

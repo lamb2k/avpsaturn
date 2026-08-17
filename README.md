@@ -47,7 +47,8 @@ The Saturn has no 384-pixel low-resolution output. The selected 352x224 mode
 keeps all 224 source lines. The default full-width mode fits all 384 horizontal
 source pixels into 352 output pixels, an 8.33% horizontal compression. Press Y
 to compare the pixel-exact alternative, which preserves source scale and crops
-16 pixels from each horizontal edge.
+16 pixels from each horizontal edge. Black bands outside the 352x224 viewport
+in a resizable emulator window are letterboxing and do not remove game pixels.
 
 ## Repository and content boundary
 
@@ -123,6 +124,8 @@ Verified on August 16, 2026:
 - exact layered cels retain original scale and CPS2 palette pens
 - the native model passes 12,000 deterministic frames, including the idle boot
   gate and the complete 5+3 opening-room lifecycle
+- a controller-only route test reaches Stage Clear without changing actor
+  health, positions, encounter state, or timers outside normal player input
 - the encounter diagnostic visibly reaches five active enemies, eight KOs,
   room clear, the Chrysalis room, boss defeat, and Stage Clear in Yaba Sanshiro
 - the native audio module links successfully and the mixed-mode cue exposes a
