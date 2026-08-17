@@ -112,16 +112,15 @@ def compose_assembly(assembly: dict, gfx: bytearray) -> np.ndarray:
 
     Current reading of each entry: the packed long carries a tile code in its
     low word and attributes in its high word, whose low byte is the palette
-    bank. Layout words are signed pixel offsets on a 16-pixel tile grid.
-
-    This is what the gate exists to confirm or refute. Adjust here, never in
-    the comparison.
+    bank.  Budget (not tile_count) is the real entry count.  Layout words are
+    signed pixel offsets on a 16-pixel tile grid.
     """
     canvas = np.zeros((CEL_HEIGHT, CEL_WIDTH), dtype=np.uint8)
     origin_x = CEL_WIDTH // 2
     origin_y = CEL_HEIGHT - 8
     placed = 0
-    for entry in assembly["entries"]:
+    entry_count = assembly.get("budget", assembly.get("tile_count", 4))
+    for entry in assembly["entries"][:entry_count]:
         packed = int(entry["packed_source"], 16)
         code = packed & 0xFFFF
         attributes = (packed >> 16) & 0xFFFF

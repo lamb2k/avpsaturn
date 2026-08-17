@@ -834,6 +834,71 @@ extracted brackets with actor/object origins to obtain actor-local geometry.
 Do not translate AI or replace native runtime tables until the pixel-exact pose
 gate remains passing.
 
+## 2026-08-17 animation-script audit: dedup + flags-word fix
+
+Two confirmed bugs from the current decoded data have been fixed in the decoder:
+
+1. **"29 programs" overcount** — Programs 0x13cc18 and 0x13cc28 are the same
+   animation entered one record apart (and similar snapshots like 0x13ce08 →
+   0x13ce28). The previous walker only followed 4-byte jump records, missing
+   mid-animation snapshots landing on pose records. Fixed `_walker_to_first_pose()`
+   to walk forward 16 bytes per pose, detect negative-flags jump records,
+   follow them, and return the canonical loop target. Now correctly reports:
+   - **29 script pointers from TSV → 6 unique canonical programs → 23 aliases**
+   - Programs 1-2: 8-pose looping idle animations (sequences 0-7)
+   - Programs 3-6: single-pose hold loops (KO/hit frames, flip_x=0x80)
+
+2. **Word at +2 mislabeled as "flags"** — The high byte is
+   `(flip 0x80 | sequence index)` and the low byte is an independent parameter:
+   `0x06` = index 0, param 6; `0x0A` = index 1, param 10; `0x1B` = index 7,
+   param 27; `0x00` = index 0, param 0. Decoded output now uses fields
+   `word_plus2_raw`, `word_plus2_high_byte`, `word_plus2_low_byte`,
+   `flip_x`, `sequence_index`, `param_byte`. The zero-terminator branch still
+   never fires; all 6 programs end as "loop" (expected if AI exits by rewriting
+   the script pointer).
+
+Tools affected: `tools/decode_avsp_animation_scripts.py`
+Data: `data/avsp_animation_scripts.json` SHA-256 changed.
+
+## SPR4 binary oracle analysis notes
+
+- All 17 `cd/SPR4/*.BIN` files are 18432 bytes (0x4800) except
+  `HITFX.BIN` (2048) and `SHADOW.BIN` (512).
+- Player files first non-zero at 0x74D–0x751; enemy files at 0x16AB–0x26EB.
+- File is a grid of 192-byte stride records with header bytes encoding pose/mode:
+  0x0A = idle, 0x66 = hit/special, 0xCC = special, 0x22 = shadow/mask,
+  0xAA = padding/separator.
+- Within each block, run-length encoded tile data uses 0xAA as separator and
+  0x99/0x9D/0xDD/0x66/0x77/0x44/0x55/0x33 as tile color/luma values.
+- The SPR4 format appears to pre-compose tiles from the CPS2 graphics region,
+  providing an oracle for the selector-6 pixel gate.
+
+The SPR4 file format is **not yet decoded into named fields**. The goal is to
+match the selector-6 assembly to the SPR4 pose pixel-for-pixel.
+
+## Session notes: selector-6 tile decoding progress
+
+- The 12 selector-6 assemblies decoded from ROM reference tiles from the
+  16 MiB `gfx_region.bin`. Tile code = `(packed_source >> 16) & 0xFFFF`,
+  palette index = `tile_code & 0xFF` (boss poses use palette 27 = 0x1B).
+- Layout table x/y values are 16-bit with 6-bit fractional part. Shifting
+  by 6 (`>> 6`) gives screen-space coordinates suitable for composition:
+  e.g., 2526 → 39, -4092 → -63, 1284 → 20.
+- Layout y values for some entries exceed 224 (e.g., 17157 → 268), indicating
+  display-space coordinates that may need crop/clip subtraction to match the
+  384×224 Saturn canvas.
+- The boss KO capture at frame 13492 has `object_shift_x=268, object_shift_y=345`
+  and bounds `[344, 448, 552, 544]`. Adding object_shift to the >>6
+  coordinates produces positions within the 384-wide display window.
+- The selector-6 at `0x13dea0` (Program 3, hold loop, dur=1, flip_x=64)
+  references 4 tiles; `0x13de46` (Program 6) references 3 tiles.
+  These are the KO and hit pose handlers respectively.
+- Rendering tiles at layout position `(x>>6, y>>6)` produces non-blank 8×8
+  bitmap frames with correct palette indices.
+- Next step for the pixel gate: subtract screen offset (or apply bounding
+  box crop) and use the palette bank color table to color tiles; compare
+  against the RLE boss KO archive or MAME screenshot at frame 13492.
+
 ## Resume in this order
 
 **Superseded for new work by [PARITY_PLAN.md](PARITY_PLAN.md).** The numbered
@@ -949,6 +1014,44 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -Clean -Rele
 ```
 
 The build scripts locate their bundled Python/MAME/Jo Engine dependencies; do not assume `python` is on PATH. A bundled Python is also available at `C:\Users\lambd\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe`.
+
+## 2026-08-17 session: pixel gate investigation — selector-6 tile decoding blocked
+
+**Layout window base fixed**: The decoder default `offset_window_base=0x1F6000`
+produces wrong layout x/y values. Correct base is `0x1E0000`. Verified by
+reading `offset_full_program.bin`: layout values (-112, -96), (-112, -80),
+(-112, -64), (-112, -48) appear at file offset `0x1DE40 = layout_address
+(0x1FDE40) - 0x1E0000`. Previous decoder output at wrong base
+(`0x1F6000`) gave values like x=2526, y=2782 which are garbage.
+
+**Pixel-exact pose gate BLOCKED on selector-6 → tile code mapping**. The
+packed_source values in the ROM assembly (e.g., `0x161B0008`, `0x181B0004`) do
+not decode to tiles in the 16 MiB `gfx_region.bin` that match the boss KO pose.
+- `decode_tile(gfx, packed >> 16, 8)` decodes non-blank tiles, but they render
+  at positions (-112,-96..-48) which are off-screen in the 384×224 MAME
+  capture frame 13492.
+- Shifting layout values by 6 bits (`>> 6`) gives better positions (e.g.,
+  -96→-1, -80→-1), but still no match to the MAME screenshot (0.3% similarity).
+- MAME object RAM at frame 13492 contains different tile codes than the
+  selector-6 entries. The selector-6 handler at `0xAA00E` transforms packed_source
+  into GPU sprite codes in a way I have not reverse-engineered.
+- The selector-6 assembly entries may be a template; each KO frame may use
+  different tile codes than the static assembly ROM data.
+
+**Known facts about the selector-6 format**:
+- Packed source contains: `packed >> 16` ≅ tile code candidate, `(packed >>
+  16) & 0xFF` ≅ palette index (boss=27=0x1B)
+- Layout table x/y at `0x1E0000+0x1DE40`: all x=-112, y staggered by 16
+  (-96, -80, -64, -48)
+- Selector-6 offset_adjust values (0x8400, 0x8407, 0x8420, 0x8428) are NOT
+  layout table chain links; they are consumed by the CPS2 GPU renderer.
+- MAME object RAM tile codes (0xC3, 0x8178, 0x80FC, 0x97) ≠ selector-6 codes
+  (0xFFE6, 0x161B, 0x181B, 0x171B).
+
+**Next attempt to unblock**: Research CPS2 selector-6 handler `0xAA00E` to
+understand how packed_source is transformed into GPU sprite codes. Alternatively,
+reverse the CPS2 sprite rendering path from GPU command → tile code in
+`gfx_region.bin`. Until this mapping is known, the pixel gate cannot pass.
 
 ## Remaining product-level work
 

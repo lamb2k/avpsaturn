@@ -5,6 +5,9 @@ The current evidence supports two record forms:
 * normal: duration word, flags word, assembly pointer, eight-byte tail;
 * jump: one long pointer back into the script region.
 
+The flags word at offset +2 splits into flip_x (bit 15), a 7-bit sequence
+index (bits 14-8), and an 8-bit parameter byte (bits 7-0).
+
 The tail is retained verbatim.  Its byte fields are not labelled until the
 pixel-exact assembly test and actor-origin pairing prove their meaning.
 """
@@ -30,6 +33,60 @@ def u16(data: bytes, offset: int) -> int:
 
 def u32(data: bytes, offset: int) -> int:
     return struct.unpack_from(">I", data, offset)[0]
+
+
+def _walker_to_first_pose(start: int, data: bytes, base: int) -> int:
+    """Walk each pointer forward to its loop target.
+
+    The script has an explicit loop. A pointer from the actor struct may land
+    on any record inside that loop.  We advance 16 bytes per pose, check for
+    a negative-flags jump record, follow it, and repeat until the address we
+    reach is also a pose entry (non-negative flags or end-of-data).  That
+    pose is the canonical loop target.
+    """
+    address = start
+    visited: set[int] = set()
+    for _ in range(128):
+        if address in visited:
+            # We have circled back to an address we already know; use it.
+            return address
+        visited.add(address)
+        offset = address - base
+        if offset < 0 or offset + 4 > len(data):
+            return address
+        # Try to decode as a 16-byte pose record.
+        if offset + 16 > len(data):
+            return address
+        duration = u16(data, offset)
+        flags_word = u16(data, offset + 2)
+        assembly = u32(data, offset + 4)
+        # Zero record? Treat it as end of chain -- unlikely for live data.
+        if duration == 0 and flags_word == 0 and assembly == 0:
+            return address
+        # Negative flags means the next 4 bytes are a long-pointer jump.
+        if flags_word & 0x8000:
+            if offset + 20 > len(data):
+                return address
+            jump_target = u32(data, offset + 16)
+            if SCRIPT_FIRST <= jump_target < SCRIPT_LAST:
+                # The loop target is the NEXT pose after the jump.
+                next_pos = jump_target
+                # Walk forward ONE pose to get the canonical first entry.
+                n_offset = next_pos - base
+                if n_offset >= 0 and n_offset + 16 <= len(data):
+                    n_flags = u16(data, n_offset + 2)
+                    if not (n_flags & 0x8000):
+                        return next_pos
+                    else:
+                        # The "next" is also negative -- continue walking.
+                        address = next_pos
+                        continue
+                return next_pos
+            return address
+        # Not a jump; this is a normal pose. Advance 16 bytes and keep walking
+        # until we hit the negative-flags loop redirect.
+        address += 16
+    return address
 
 
 def script_pointers(actor_path: Path) -> list[int]:
@@ -67,18 +124,25 @@ def decode_program(data: bytes, base: int, start: int) -> dict[str, object]:
             status = "truncated"
             break
         duration = u16(data, offset)
-        flags = u16(data, offset + 2)
+        flags_word = u16(data, offset + 2)
+        flip_x = bool(flags_word & 0x8000)
+        sequence_index = (flags_word >> 8) & 0x7F
+        param_byte = flags_word & 0xFF
         assembly = u32(data, offset + 4)
         tail = data[offset + 8:offset + 16]
-        if duration == 0 and flags == 0 and assembly == 0:
+        if duration == 0 and flags_word == 0 and assembly == 0:
             status = "terminator"
             break
         records.append({
             "address": f"0x{address:06x}",
             "kind": "pose",
             "duration": duration,
-            "flags": f"0x{flags:04x}",
-            "flip_x": bool(flags & 0x8000),
+            "word_plus2_raw": f"0x{flags_word:04x}",
+            "word_plus2_high_byte": f"0x{flags_word >> 8:02x}",
+            "word_plus2_low_byte": f"0x{flags_word & 0xFF:02x}",
+            "flip_x": flip_x,
+            "sequence_index": sequence_index,
+            "param_byte": param_byte,
             "assembly": f"0x{assembly:06x}",
             "tail_hex": tail.hex(),
             "tail_bytes": list(tail),
@@ -102,8 +166,10 @@ def decode_assembly(data: bytes, base: int, address: int,
     """Decode the selector-6 assembly command consumed by the renderer.
 
     The renderer reads selector, budget word, tile count, offset-table index,
-    then one packed long plus one offset word per tile.  The packed long and
-    offset-table semantics remain renderer-level data until the pixel gate.
+    then one packed long plus one offset word per tile.  Budget is the real
+    entry count (48-65 entries across assemblies); tile_count (3-4) is not.
+    The packed long and offset-table semantics remain renderer-level data
+    until the pixel gate proves their meaning.
     """
     offset = address - base
     if offset < 0 or offset + 8 > len(data):
@@ -129,7 +195,7 @@ def decode_assembly(data: bytes, base: int, address: int,
         layout_address = offset_base + table_offset
         result["layout_table_pointer"] = f"0x{layout_address:06x}"
     cursor = offset + 8
-    for index in range(min(count, 64)):
+    for index in range(budget):
         if cursor + 6 > len(data):
             result["status"] = "truncated"
             break
@@ -156,9 +222,7 @@ def decode_assembly(data: bytes, base: int, address: int,
                     "layout_x_signed": x_word - 0x10000 if x_word & 0x8000 else x_word,
                     "layout_y_signed": y_word - 0x10000 if y_word & 0x8000 else y_word,
                 })
-            adjust = u16(data, cursor + 4)
-            signed_adjust = adjust - 0x10000 if adjust & 0x8000 else adjust
-            layout_address += 4 + signed_adjust
+            layout_address += 4  # Each layout entry is 4 bytes (x_word + y_word)
         entries.append(entry)
         cursor += 6
     result["entries"] = entries
@@ -186,7 +250,21 @@ def main() -> None:
     args = parser.parse_args()
     data = args.rom_window.read_bytes()
     starts = script_pointers(args.actor_tsv)
-    programs = [decode_program(data, args.base, start) for start in starts]
+    
+    # Deduplicate entry points that are mid-animation snapshots jumping to the same loop.
+    canonical_map: dict[int, dict[str, object]] = {}
+    snapshot_aliases: list[dict[str, str | int]] = []
+    for start in starts:
+        canonical = _walker_to_first_pose(start, data, args.base)
+        if canonical not in canonical_map:
+            canonical_map[canonical] = decode_program(data, args.base, canonical)
+        else:
+            snapshot_aliases.append({
+                "alias_start": f"0x{start:06x}",
+                "points_to": f"0x{canonical:06x}",
+            })
+    programs = list(canonical_map.values())
+    
     assembly_addresses = sorted({int(address, 16)
                                  for program in programs
                                  for address in program["assembly_pointers"]})
@@ -211,10 +289,13 @@ def main() -> None:
             "normal_record_bytes": 16,
             "jump_record_bytes": 4,
             "duration_offset": 0,
-            "flags_offset": 2,
+            "word_plus2_offset": 2,
+            "word_plus2_high_byte": (
+                "bit 15 = flip_x; bits 14-8 = 7-bit sequence index"
+            ),
+            "word_plus2_low_byte": "independent parameter byte",
             "assembly_pointer_offset": 4,
             "tail_bytes": 8,
-            "flip_flag": "0x8000",
             "tail_field_labels": "unresolved; bytes +8/+9 are consumed by interaction dispatch",
         },
         "routine_evidence": {
@@ -227,10 +308,14 @@ def main() -> None:
             "note": (
                 "The animation updater reads duration and flags, advances by 16 bytes, "
                 "and follows a long backward pointer when flags are negative. The "
-                "tail is not an X/Y word pair: bytes +8 and +9 index interaction tables."
+                "flags word at offset +2 splits into flip_x (bit 15), a 7-bit sequence "
+                "index, and an 8-bit parameter byte. The tail is not an X/Y word pair: "
+                "bytes +8 and +9 index interaction tables."
             ),
         },
         "script_pointer_count": len(starts),
+        "unique_program_count": len(programs),
+        "snapshot_aliases": snapshot_aliases,
         "assembly_range_hint": [f"0x{ASSEMBLY_FIRST:06x}",
                                 f"0x{ASSEMBLY_LAST:06x}"],
         "programs": programs,
