@@ -1,0 +1,3647 @@
+{
+  "schema": 1,
+  "classification": "missing pixel gate (ROM-derived script structure)",
+  "source": {
+    "rom_window": ".deps/mame/actorprobe/rom_window_13c_13f.bin",
+    "window_base": "0x13c000",
+    "actor_trace": ".deps/mame/actorprobe/actor_ffa3c0.tsv"
+  },
+  "format": {
+    "normal_record_bytes": 16,
+    "jump_record_bytes": 4,
+    "duration_offset": 0,
+    "flags_offset": 2,
+    "assembly_pointer_offset": 4,
+    "tail_bytes": 8,
+    "flip_flag": "0x8000",
+    "tail_field_labels": "unresolved; bytes +8/+9 are consumed by interaction dispatch"
+  },
+  "routine_evidence": {
+    "script_advance": [
+      "0x16536",
+      "0x165c4",
+      "0x16644"
+    ],
+    "script_advance_bytes": 16,
+    "backward_jump_when_flags_negative": true,
+    "tail_byte_8_reader": "0x1cf94",
+    "tail_byte_9_reader": "0x1cf88",
+    "full_record_copy_reader": "0x88e16",
+    "note": "The animation updater reads duration and flags, advances by 16 bytes, and follows a long backward pointer when flags are negative. The tail is not an X/Y word pair: bytes +8 and +9 index interaction tables."
+  },
+  "script_pointer_count": 29,
+  "assembly_range_hint": [
+    "0x13de00",
+    "0x13f000"
+  ],
+  "programs": [
+    {
+      "start": "0x13cc18",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13cc18",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0006",
+          "flip_x": false,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc28",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x010a",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc38",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0216",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc48",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0316",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc58",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0412",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc68",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0518",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc78",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x060c",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc88",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x871b",
+          "flip_x": true,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc98",
+          "kind": "jump",
+          "target": "0x13cc18"
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13cc28",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13cc28",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x010a",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc38",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0216",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc48",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0316",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc58",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0412",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc68",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0518",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc78",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x060c",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc88",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x871b",
+          "flip_x": true,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc98",
+          "kind": "jump",
+          "target": "0x13cc18"
+        },
+        {
+          "address": "0x13cc18",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0006",
+          "flip_x": false,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13cc38",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13cc38",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0216",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc48",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0316",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc58",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0412",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc68",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0518",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc78",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x060c",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc88",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x871b",
+          "flip_x": true,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc98",
+          "kind": "jump",
+          "target": "0x13cc18"
+        },
+        {
+          "address": "0x13cc18",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0006",
+          "flip_x": false,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc28",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x010a",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13cc48",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13cc48",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0316",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc58",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0412",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc68",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0518",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc78",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x060c",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc88",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x871b",
+          "flip_x": true,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc98",
+          "kind": "jump",
+          "target": "0x13cc18"
+        },
+        {
+          "address": "0x13cc18",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0006",
+          "flip_x": false,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc28",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x010a",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc38",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0216",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13cc58",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13cc58",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0412",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc68",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0518",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc78",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x060c",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc88",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x871b",
+          "flip_x": true,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc98",
+          "kind": "jump",
+          "target": "0x13cc18"
+        },
+        {
+          "address": "0x13cc18",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0006",
+          "flip_x": false,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc28",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x010a",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc38",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0216",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc48",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0316",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13cc68",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13cc68",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0518",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc78",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x060c",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc88",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x871b",
+          "flip_x": true,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc98",
+          "kind": "jump",
+          "target": "0x13cc18"
+        },
+        {
+          "address": "0x13cc18",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0006",
+          "flip_x": false,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc28",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x010a",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc38",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0216",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc48",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0316",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc58",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0412",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13cc78",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13cc78",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x060c",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc88",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x871b",
+          "flip_x": true,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc98",
+          "kind": "jump",
+          "target": "0x13cc18"
+        },
+        {
+          "address": "0x13cc18",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0006",
+          "flip_x": false,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc28",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x010a",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc38",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0216",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc48",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0316",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc58",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0412",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc68",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0518",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13cc88",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13cc88",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x871b",
+          "flip_x": true,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc98",
+          "kind": "jump",
+          "target": "0x13cc18"
+        },
+        {
+          "address": "0x13cc18",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0006",
+          "flip_x": false,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc28",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x010a",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc38",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0216",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc48",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0316",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc58",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0412",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc68",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x0518",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cc78",
+          "kind": "pose",
+          "duration": 6,
+          "flags": "0x060c",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13cc9c",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13cc9c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x070a",
+          "flip_x": false,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccac",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0606",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccbc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x051b",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cccc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x040c",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccdc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0318",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccec",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0212",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccfc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0116",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cd0c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x8016",
+          "flip_x": true,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cd1c",
+          "kind": "jump",
+          "target": "0x13cc9c"
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13ccac",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13ccac",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0606",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccbc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x051b",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cccc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x040c",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccdc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0318",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccec",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0212",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccfc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0116",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cd0c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x8016",
+          "flip_x": true,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cd1c",
+          "kind": "jump",
+          "target": "0x13cc9c"
+        },
+        {
+          "address": "0x13cc9c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x070a",
+          "flip_x": false,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13ccbc",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13ccbc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x051b",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cccc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x040c",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccdc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0318",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccec",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0212",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccfc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0116",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cd0c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x8016",
+          "flip_x": true,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cd1c",
+          "kind": "jump",
+          "target": "0x13cc9c"
+        },
+        {
+          "address": "0x13cc9c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x070a",
+          "flip_x": false,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccac",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0606",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13cccc",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13cccc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x040c",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccdc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0318",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccec",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0212",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccfc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0116",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cd0c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x8016",
+          "flip_x": true,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cd1c",
+          "kind": "jump",
+          "target": "0x13cc9c"
+        },
+        {
+          "address": "0x13cc9c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x070a",
+          "flip_x": false,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccac",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0606",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccbc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x051b",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13ccdc",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13ccdc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0318",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccec",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0212",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccfc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0116",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cd0c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x8016",
+          "flip_x": true,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cd1c",
+          "kind": "jump",
+          "target": "0x13cc9c"
+        },
+        {
+          "address": "0x13cc9c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x070a",
+          "flip_x": false,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccac",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0606",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccbc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x051b",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cccc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x040c",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13ccec",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13ccec",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0212",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccfc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0116",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cd0c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x8016",
+          "flip_x": true,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cd1c",
+          "kind": "jump",
+          "target": "0x13cc9c"
+        },
+        {
+          "address": "0x13cc9c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x070a",
+          "flip_x": false,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccac",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0606",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccbc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x051b",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cccc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x040c",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccdc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0318",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13ccfc",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13ccfc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0116",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cd0c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x8016",
+          "flip_x": true,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cd1c",
+          "kind": "jump",
+          "target": "0x13cc9c"
+        },
+        {
+          "address": "0x13cc9c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x070a",
+          "flip_x": false,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccac",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0606",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccbc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x051b",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cccc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x040c",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccdc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0318",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccec",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0212",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13cd0c",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13cd0c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x8016",
+          "flip_x": true,
+          "assembly": "0x13e574",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cd1c",
+          "kind": "jump",
+          "target": "0x13cc9c"
+        },
+        {
+          "address": "0x13cc9c",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x070a",
+          "flip_x": false,
+          "assembly": "0x13e65e",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccac",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0606",
+          "flip_x": false,
+          "assembly": "0x13e63a",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccbc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x051b",
+          "flip_x": false,
+          "assembly": "0x13e616",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cccc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x040c",
+          "flip_x": false,
+          "assembly": "0x13e5f8",
+          "tail_hex": "0200000900000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccdc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0318",
+          "flip_x": false,
+          "assembly": "0x13e5d4",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccec",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0212",
+          "flip_x": false,
+          "assembly": "0x13e5b6",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ccfc",
+          "kind": "pose",
+          "duration": 7,
+          "flags": "0x0116",
+          "flip_x": false,
+          "assembly": "0x13e592",
+          "tail_hex": "0200000800000000",
+          "tail_bytes": [
+            2,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "pose_count": 8,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e574",
+        "0x13e592",
+        "0x13e5b6",
+        "0x13e5d4",
+        "0x13e5f8",
+        "0x13e616",
+        "0x13e63a",
+        "0x13e65e"
+      ]
+    },
+    {
+      "start": "0x13cdf8",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13cdf8",
+          "kind": "pose",
+          "duration": 1,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13de46",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce08",
+          "kind": "pose",
+          "duration": 3,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13e44c",
+          "tail_hex": "0600000900000000",
+          "tail_bytes": [
+            6,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce18",
+          "kind": "pose",
+          "duration": 1,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13dea0",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce28",
+          "kind": "pose",
+          "duration": 1,
+          "flags": "0x8000",
+          "flip_x": true,
+          "assembly": "0x13dea0",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce38",
+          "kind": "jump",
+          "target": "0x13ce28"
+        }
+      ],
+      "pose_count": 4,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13de46",
+        "0x13dea0",
+        "0x13e44c"
+      ]
+    },
+    {
+      "start": "0x13ce08",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13ce08",
+          "kind": "pose",
+          "duration": 3,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13e44c",
+          "tail_hex": "0600000900000000",
+          "tail_bytes": [
+            6,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce18",
+          "kind": "pose",
+          "duration": 1,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13dea0",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce28",
+          "kind": "pose",
+          "duration": 1,
+          "flags": "0x8000",
+          "flip_x": true,
+          "assembly": "0x13dea0",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce38",
+          "kind": "jump",
+          "target": "0x13ce28"
+        }
+      ],
+      "pose_count": 3,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13dea0",
+        "0x13e44c"
+      ]
+    },
+    {
+      "start": "0x13ce18",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13ce18",
+          "kind": "pose",
+          "duration": 1,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13dea0",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce28",
+          "kind": "pose",
+          "duration": 1,
+          "flags": "0x8000",
+          "flip_x": true,
+          "assembly": "0x13dea0",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce38",
+          "kind": "jump",
+          "target": "0x13ce28"
+        }
+      ],
+      "pose_count": 2,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13dea0"
+      ]
+    },
+    {
+      "start": "0x13ce28",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13ce28",
+          "kind": "pose",
+          "duration": 1,
+          "flags": "0x8000",
+          "flip_x": true,
+          "assembly": "0x13dea0",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce38",
+          "kind": "jump",
+          "target": "0x13ce28"
+        }
+      ],
+      "pose_count": 1,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13dea0"
+      ]
+    },
+    {
+      "start": "0x13ce3c",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13ce3c",
+          "kind": "pose",
+          "duration": 5,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13dfec",
+          "tail_hex": "0700000700000000",
+          "tail_bytes": [
+            7,
+            0,
+            0,
+            7,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce4c",
+          "kind": "pose",
+          "duration": 5,
+          "flags": "0x8000",
+          "flip_x": true,
+          "assembly": "0x13e04c",
+          "tail_hex": "0800000600000000",
+          "tail_bytes": [
+            8,
+            0,
+            0,
+            6,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce5c",
+          "kind": "jump",
+          "target": "0x13ce4c"
+        }
+      ],
+      "pose_count": 2,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13dfec",
+        "0x13e04c"
+      ]
+    },
+    {
+      "start": "0x13ce4c",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13ce4c",
+          "kind": "pose",
+          "duration": 5,
+          "flags": "0x8000",
+          "flip_x": true,
+          "assembly": "0x13e04c",
+          "tail_hex": "0800000600000000",
+          "tail_bytes": [
+            8,
+            0,
+            0,
+            6,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce5c",
+          "kind": "jump",
+          "target": "0x13ce4c"
+        }
+      ],
+      "pose_count": 1,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e04c"
+      ]
+    },
+    {
+      "start": "0x13ce60",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13ce60",
+          "kind": "pose",
+          "duration": 5,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13e04c",
+          "tail_hex": "0800000600000000",
+          "tail_bytes": [
+            8,
+            0,
+            0,
+            6,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce70",
+          "kind": "pose",
+          "duration": 10,
+          "flags": "0x8000",
+          "flip_x": true,
+          "assembly": "0x13e00a",
+          "tail_hex": "0700000700000000",
+          "tail_bytes": [
+            7,
+            0,
+            0,
+            7,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce80",
+          "kind": "jump",
+          "target": "0x13ce70"
+        }
+      ],
+      "pose_count": 2,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e00a",
+        "0x13e04c"
+      ]
+    },
+    {
+      "start": "0x13ce70",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13ce70",
+          "kind": "pose",
+          "duration": 10,
+          "flags": "0x8000",
+          "flip_x": true,
+          "assembly": "0x13e00a",
+          "tail_hex": "0700000700000000",
+          "tail_bytes": [
+            7,
+            0,
+            0,
+            7,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce80",
+          "kind": "jump",
+          "target": "0x13ce70"
+        }
+      ],
+      "pose_count": 1,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13e00a"
+      ]
+    },
+    {
+      "start": "0x13ce84",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13ce84",
+          "kind": "pose",
+          "duration": 4,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13dea0",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ce94",
+          "kind": "pose",
+          "duration": 9,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13e44c",
+          "tail_hex": "0600000900000000",
+          "tail_bytes": [
+            6,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cea4",
+          "kind": "pose",
+          "duration": 2,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13dea0",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ceb4",
+          "kind": "pose",
+          "duration": 2,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13de46",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cec4",
+          "kind": "pose",
+          "duration": 3,
+          "flags": "0x8000",
+          "flip_x": true,
+          "assembly": "0x13de46",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ced4",
+          "kind": "jump",
+          "target": "0x13cec4"
+        }
+      ],
+      "pose_count": 5,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13de46",
+        "0x13dea0",
+        "0x13e44c"
+      ]
+    },
+    {
+      "start": "0x13ce94",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13ce94",
+          "kind": "pose",
+          "duration": 9,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13e44c",
+          "tail_hex": "0600000900000000",
+          "tail_bytes": [
+            6,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cea4",
+          "kind": "pose",
+          "duration": 2,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13dea0",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ceb4",
+          "kind": "pose",
+          "duration": 2,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13de46",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cec4",
+          "kind": "pose",
+          "duration": 3,
+          "flags": "0x8000",
+          "flip_x": true,
+          "assembly": "0x13de46",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ced4",
+          "kind": "jump",
+          "target": "0x13cec4"
+        }
+      ],
+      "pose_count": 4,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13de46",
+        "0x13dea0",
+        "0x13e44c"
+      ]
+    },
+    {
+      "start": "0x13cea4",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13cea4",
+          "kind": "pose",
+          "duration": 2,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13dea0",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ceb4",
+          "kind": "pose",
+          "duration": 2,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13de46",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cec4",
+          "kind": "pose",
+          "duration": 3,
+          "flags": "0x8000",
+          "flip_x": true,
+          "assembly": "0x13de46",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ced4",
+          "kind": "jump",
+          "target": "0x13cec4"
+        }
+      ],
+      "pose_count": 3,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13de46",
+        "0x13dea0"
+      ]
+    },
+    {
+      "start": "0x13ceb4",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13ceb4",
+          "kind": "pose",
+          "duration": 2,
+          "flags": "0x0000",
+          "flip_x": false,
+          "assembly": "0x13de46",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13cec4",
+          "kind": "pose",
+          "duration": 3,
+          "flags": "0x8000",
+          "flip_x": true,
+          "assembly": "0x13de46",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ced4",
+          "kind": "jump",
+          "target": "0x13cec4"
+        }
+      ],
+      "pose_count": 2,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13de46"
+      ]
+    },
+    {
+      "start": "0x13cec4",
+      "status": "loop",
+      "records": [
+        {
+          "address": "0x13cec4",
+          "kind": "pose",
+          "duration": 3,
+          "flags": "0x8000",
+          "flip_x": true,
+          "assembly": "0x13de46",
+          "tail_hex": "0100000900000000",
+          "tail_bytes": [
+            1,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "address": "0x13ced4",
+          "kind": "jump",
+          "target": "0x13cec4"
+        }
+      ],
+      "pose_count": 1,
+      "jump_count": 1,
+      "assembly_pointers": [
+        "0x13de46"
+      ]
+    }
+  ],
+  "remaining_gate": "Decode the assembly records and prove one rendered pose pixel for pixel against a captured pose; then label tail fields and actor-local hitboxes."
+}

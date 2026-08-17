@@ -66,13 +66,19 @@ Verified in this repository; do not re-derive.
 - Actor struct words `w1c:w1e` form a 32-bit **animation-script pointer**. For
   the boss it takes 29 distinct values in `0x13CC18..0x13CEC4`, matching the 29
   unique poses recovered by the older capture method.
-- Script records are 16 or 20 bytes. Decoded, big-endian:
-  `+0` word duration in frames, `+2` word flags (`0x8000` observed, almost
-  certainly horizontal flip), `+4` long pointer to a sprite assembly, followed
-  by X and Y offset words.
-- The pointer advances by record size and then **jumps backwards** to
-  `0x13CD0C`, which is visited twice: the format carries control flow, not just
-  a frame list.
+- Script programs use 16-byte pose records plus four-byte long-pointer jump
+  records. Decoded, big-endian, a pose record is `+0` duration, `+2` flags
+  (`0x8000` is the negative/flip branch), `+4` long pointer to a sprite
+  assembly, and an eight-byte tail. The tail is **not** yet an X/Y word pair:
+  code at `0x1cf88`/`0x1cf94` consumes bytes `+9`/`+8` as interaction-table
+  selectors, while `0x88e16` copies the complete 16-byte record into actor
+  scratch. Keep the remaining tail fields unlabeled until the pixel and event
+  gates prove their meaning.
+- The animation updater at `0x16536`, `0x165C4` and `0x16644` advances by
+  `0x10`, then follows the long pointer at the next record when the current
+  flags word is negative. That four-byte jump record is why observed pointer
+  deltas sometimes look like 20 bytes. The script has an explicit loop, so the
+  format includes control flow, not just a frame list.
 - Observed sprite-assembly pointers: `0x13DEA0`, `0x13DE46`, `0x13DFEC`,
   `0x13E00A`, `0x13E04C`, `0x13E44C`.
 - Word `w88` takes 224 distinct values over 240 frames; likely a frame timer.
@@ -191,9 +197,10 @@ and it is cheaper than Phase 2. Do it first.
 ## Phase 2: decode the tables
 
 **2a. Animation scripts.** Extend the located format into a full decoder.
-Resolve the 16 versus 20 byte record discriminator by finding the field that
-selects it rather than inferring size from observed pointer deltas. Identify
-loop, jump and terminator encodings. Then decode the sprite-assembly table at
+The normal/jump discriminator is now grounded in the updater: normal records
+are 16 bytes and a negative flags record is followed by a four-byte pointer
+that redirects the script. Identify loop and terminator encodings, label the
+eight-byte tail from its consumers, then decode the sprite-assembly table at
 the `+4` pointers into tile codes, palette bank and per-tile offsets.
 
 Validation, non-negotiable: a ROM-decoded assembly must reproduce an
