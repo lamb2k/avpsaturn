@@ -77,6 +77,11 @@ try {
             throw "AvP Stage 1 asset preparation failed with exit code $LASTEXITCODE."
         }
 
+        & '.\prepare_qsound_audio.ps1' -PythonPath $PythonPath
+        if ($LASTEXITCODE -ne 0) {
+            throw "QSound event preparation failed with exit code $LASTEXITCODE."
+        }
+
         $contentRoot = Join-Path $projectRoot 'build\avsp_cd'
         foreach ($metadataName in @('ABS.TXT', 'BIB.TXT', 'CPY.TXT')) {
             Copy-Item -LiteralPath (Join-Path $projectRoot "cd\$metadataName") `
@@ -163,6 +168,12 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Could not create game.iso (exit code $LASTEXITCODE)."
         }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/AUDIO/GUN.PCM' '--equals' `
+            (Join-Path $contentRoot 'AUDIO\GUN.PCM')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn PCM ISO verification failed with exit code $LASTEXITCODE."
+        }
 
         # Add the locally rendered QSound reference as a real Saturn CDDA track.
         # It remains an ignored private artifact and is never linked as CPS2 code.
@@ -177,6 +188,8 @@ try {
         $isoFile = Get-Item -LiteralPath (Join-Path $projectRoot 'game.iso')
         $cueFile = Get-Item -LiteralPath (Join-Path $projectRoot 'game.cue')
         $audioFile = Get-Item -LiteralPath $audioTrack
+        $eventAudioFile = Get-Item -LiteralPath `
+            (Join-Path $contentRoot 'AUDIO\GUN.PCM')
         $manifestPath = Join-Path $projectRoot 'build\hardware_release_manifest.txt'
         [IO.File]::WriteAllLines($manifestPath, @(
             'target=sega-saturn-ntsc'
@@ -191,6 +204,13 @@ try {
             'audio=track-2-cdda-qsound-reference-mix'
             "audio_bytes=$($audioFile.Length)"
             "audio_sha256=$((Get-FileHash -LiteralPath $audioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'event_audio=scsp-pcm-capture-exact-predator-weapon'
+            'event_audio_iso_path=/AUDIO/GUN.PCM'
+            'event_audio_format=signed-16-bit-big-endian-stereo'
+            'event_audio_sample_rate=44100'
+            'event_audio_source_frames=2525-input,2530-audible,2582-stop'
+            "event_audio_bytes=$($eventAudioFile.Length)"
+            "event_audio_sha256=$((Get-FileHash -LiteralPath $eventAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
         ))
     }
     finally {

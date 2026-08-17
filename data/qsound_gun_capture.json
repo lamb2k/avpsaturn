@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "source": "deterministic MAME 0.289 QSound HLE differential capture",
+  "action": "predator_warrior_weapon",
+  "action_input_frame": 2525,
+  "qsound": {
+    "voice": 12,
+    "start_frame": 2530,
+    "end_frame": 2582,
+    "bank": "0x801c",
+    "address": "0x8000",
+    "rate": "0x1000",
+    "phase": "0x8000",
+    "loop_length": "0x000e",
+    "end_address": "0xde3c",
+    "volume": "0x179a"
+  },
+  "wave": {
+    "channels": 2,
+    "sample_bits": 16,
+    "sample_rate": 44100,
+    "first_difference_frame": 1871078,
+    "last_difference_frame": 1910875,
+    "event_sample_frames": 39798,
+    "duration_seconds": 0.9024489795918368,
+    "left_peak": 11737,
+    "right_peak": 9318,
+    "idle_sha256": "7ee01386c5f6a80e02e41dc84cc0e56edc47e5134ff55c7ba7b31ef414e3db53",
+    "action_sha256": "d41e464bf9f9a8031bccc87e3b4fa05717de0de9ff6d3878a402faa2f05c90b5"
+  },
+  "saturn_pcm": {
+    "format": "signed-16-bit-big-endian-stereo",
+    "sample_rate": 44100,
+    "bytes": 159192,
+    "sha256": "777c55dd2c1087a6db728ca0f9a22f82516b573815d2d8899092eaf98b225d4e"
+  }
+}

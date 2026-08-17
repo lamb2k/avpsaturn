@@ -30,10 +30,12 @@ try {
         $requiredSample = Join-Path $actionRoot ("{0}_02525.png" -f $action)
         $requiredMetadata = Join-Path $actionRoot 'samples.tsv'
         $requiredHudState = Join-Path $actionRoot 'hud_state.tsv'
+        $requiredQSoundWrites = Join-Path $actionRoot 'qsound_writes.tsv'
         if (-not $Refresh -and
             (Test-Path -LiteralPath $requiredSample) -and
             (Test-Path -LiteralPath $requiredMetadata) -and
-            (Test-Path -LiteralPath $requiredHudState)) {
+            (Test-Path -LiteralPath $requiredHudState) -and
+            (Test-Path -LiteralPath $requiredQSoundWrites)) {
             Write-Host "Reusing isolated $action capture."
             continue
         }

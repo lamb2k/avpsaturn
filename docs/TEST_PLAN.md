@@ -70,6 +70,12 @@ Round 2 title surfaces. No data-track reads occur after Stage 1 CDDA begins.
 - Reach the Chrysalis boss room, Stage Clear, results, intermission, and the
   Round 2 boundary deterministically.
 - Start the Stage 1 CD audio track without disabling SCSP output.
+- Play the capture-exact Predator weapon PCM on action frame 5 while CDDA
+  remains active; verify the ISO copy is 159,192 bytes with SHA-256
+  `777c55dd2c1087a6db728ca0f9a22f82516b573815d2d8899092eaf98b225d4e`.
+- In the encounter diagnostic, require `SHOT 1`, `PLAYED 1`, and latched
+  `SEEN 1`; this proves the Jo/SGL PCM channel entered its playing state. The
+  physical-console listening test remains the final waveform/output gate.
 - Add a comparison capture against the equivalent MAME route.
 
 Status: in progress. A dense 361-sample capture validates the active CPS2 object

@@ -55,6 +55,10 @@ alter console copy protection or supply copyrighted disc data.
    the standing full-health respawn without input corruption.
 5. Confirm Stage 1 CD audio begins after the first input, remains stereo and
    free of stalls through the room transition, and survives a pause/resume.
+   Press A once and confirm the isolated Predator weapon cue starts five action
+   frames later, remains stereo, and neither stops nor ducks the CDDA track.
+   Repeated A presses after the heat meter recovers must replay it cleanly
+   without channel lock-up or cartridge-read corruption.
 6. Fight through the five-enemy opening wave and three-enemy reinforcement wave.
    Confirm enemies can simultaneously show unlike walk, attack, hit, and KO
    poses without one actor changing another actor's cel. The proven alien clips

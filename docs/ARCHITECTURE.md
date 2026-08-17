@@ -135,9 +135,22 @@ stereo 16-bit 44.1 kHz. The build trims save-state preroll and adds that ignored
 WAV as CDDA track 2; gameplay starts it on the first encounter input. No Z80 or
 QSound emulation runs on Saturn. This reference mix proves the end-to-end disc,
 driver, and output route, but it contains the automated capture's mixed music
-and effects. The production path must isolate music stems and event cues, keep
-long music on CDDA, and trigger short attack, impact, enemy, boss, and voice
-cues through bounded SCSP PCM channels.
+and effects.
+
+The first event cue now uses a deterministic bus-level isolation path. A Lua
+tap records the Z80 writes to QSound ports `0xd000..0xd002`; the Predator weapon
+starts PCM voice 12 at source frame 2530 after the frame-2525 input. Paired idle
+and weapon runs mute every other QSound voice while preserving global pan,
+echo, and filter programming. Their sample-by-sample difference is one
+continuous 0.902449-second stereo signal, ending before voice 12 is reused at
+frame 2582. The extractor emits unnormalised signed 16-bit big-endian 44.1 kHz
+PCM for SGL/SCSP, and the ISO verifier proves `/AUDIO/GUN.PCM` matches the
+capture artifact byte-for-byte. Native playback is bound to action frame 5 so
+the cue keeps the captured input-to-audible delay while CDDA continues.
+
+The production path must repeat this method for impact, melee, enemy, boss,
+and voice events, keep long music on CDDA, and allocate short cues across the
+six bounded Jo/SGL PCM channels.
 
 ## What is exact and what is not
 
@@ -158,6 +171,8 @@ Exact in the current milestone:
   actor slot, with independent VDP1 slots for all eight runtime enemies
 - first-room 5+3 crowd budget, four alien palette variants, combat lock, clear,
   and exit-state lifecycle
+- isolated Predator weapon QSound voice, processed stereo waveform, source
+  timing, Saturn PCM conversion, ISO payload, and native action-frame binding
 
 Still approximate or incomplete:
 
@@ -167,7 +182,7 @@ Still approximate or incomplete:
 - complete attract-mode, menu-transition, and character-select animation
 - full animation between the verified route key states
 - remaining HUD states, exact scroll behavior, level triggers, combat, and AI
-- isolated, event-synchronized QSound effects on native SCSP PCM channels
+- remaining isolated QSound impact, melee, enemy, boss, and voice cues
 - native HUD safe-area placement and arcade-derived camera behavior for CRT
   overscan variability
 

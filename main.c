@@ -2,6 +2,7 @@
 #include <string.h>
 #include "capability_model.h"
 #include "generated/avsp_boss_animation.h"
+#include "generated/avsp_audio.h"
 #include "generated/avsp_enemy_animation.h"
 #include "generated/avsp_frontend_palette.h"
 #include "generated/avsp_hud.h"
@@ -81,6 +82,7 @@ static jo_img_4bits boss_idle_images[AVSP_BOSS_IDLE_LAYERS];
 static jo_img_8bits hud_top_image;
 static jo_img_8bits hud_prompt_image;
 static jo_img_8bits hud_heat_image;
+static jo_sound weapon_sound;
 static int player_idle_sprites[2];
 static int player_action_sprites[AVSP_PLAYER_ACTION_LAYERS];
 static int enemy_action_sprites[CAP_MAX_ENEMIES];
@@ -97,6 +99,9 @@ static const char *failed_asset;
 static int runtime_ready;
 static int cart_available;
 static int stage_music_started;
+static int weapon_audio_played_shots;
+static int weapon_audio_pending_shot;
+static int weapon_audio_channel_observed;
 static int current_bitmap_scene;
 #ifdef AVSP_VISUAL_TEST
 static int visual_action_index;
@@ -124,6 +129,25 @@ static int load_all_cels(void)
     int index;
     for (index = 0; index < CEL_COUNT; ++index)
         if (!load_cel_asset(&cel_assets[index])) return 0;
+    return 1;
+}
+
+static int load_weapon_audio(void)
+{
+    int length = 0;
+    weapon_sound.data = jo_fs_read_file_in_dir(
+        AVSP_GUN_PCM_FILE, AVSP_GUN_PCM_DIRECTORY, &length);
+    if (weapon_sound.data == JO_NULL || length != AVSP_GUN_PCM_BYTES)
+    {
+        failed_asset = AVSP_GUN_PCM_FILE;
+        return 0;
+    }
+    weapon_sound.data_length = length;
+    weapon_sound.mode = JoSoundStereo16Bit;
+    weapon_sound.current_playing_channel = 0;
+    weapon_sound.sample_rate = AVSP_GUN_PCM_SAMPLE_RATE;
+    weapon_sound.volume = JO_MAX_AUDIO_VOLUME;
+    weapon_sound.pan = 0;
     return 1;
 }
 
@@ -966,7 +990,12 @@ static CapInput encounter_test_input(void)
             }
             if (world.player.action == CAP_ACT_IDLE ||
                 world.player.action == CAP_ACT_WALK)
-                input.attack_pressed = 1;
+            {
+                if (world.shots_fired == 0)
+                    input.shoot_pressed = 1;
+                else
+                    input.attack_pressed = 1;
+            }
         }
     }
     else if (world.encounter_state == CAP_ENCOUNTER_CLEAR)
@@ -1007,6 +1036,7 @@ static void draw_route_overlay(void)
 static void frame_callback(void)
 {
     CapInput input;
+    CapClipRequest clip_request;
     jo_clear_screen();
     if (!runtime_ready)
     {
@@ -1034,7 +1064,22 @@ static void frame_callback(void)
 #ifdef AVSP_ENCOUNTER_TEST
     input = encounter_test_input();
 #endif
-    cap_world_step(&world, &input);
+    clip_request = cap_world_step(&world, &input);
+    if (clip_request == CAP_CLIP_SHOOT)
+        weapon_audio_pending_shot = world.shots_fired;
+    /* The CPS2 input is injected at source frame 2525 and QSound voice 12
+       becomes audible at frame 2530. Bind the processed SCSP cue to that same
+       five-frame action offset, not to the controller edge. */
+    if (world.player.action == CAP_ACT_SHOOT &&
+        world.player.action_frame == 5 &&
+        weapon_audio_played_shots < weapon_audio_pending_shot)
+    {
+        jo_audio_play_sound(&weapon_sound);
+        weapon_audio_played_shots = weapon_audio_pending_shot;
+    }
+    if (weapon_audio_played_shots > 0 &&
+        jo_audio_is_channel_playing(weapon_sound.current_playing_channel))
+        weapon_audio_channel_observed = 1;
 #ifdef AVSP_VISUAL_TEST
     if (world.player.action == CAP_ACT_WALK)
         world.player.x = JO_TV_WIDTH_2;
@@ -1082,6 +1127,11 @@ static void frame_callback(void)
               world.encounter_state, world.enemies_defeated,
               CAP_STAGE1_TOTAL_ENEMIES, active_enemy_count(),
               world.stage_transitioned, world.level_completed);
+    jo_printf(0, 8, "PCM SHOT %d PLAYED %d CH %d SEEN %d",
+              world.shots_fired, weapon_audio_played_shots,
+              jo_audio_is_channel_playing(
+                  weapon_sound.current_playing_channel),
+              weapon_audio_channel_observed);
 #endif
     if (jo_is_pad1_key_down(JO_KEY_X)) debug_hud_enabled = !debug_hud_enabled;
     draw_world();
@@ -1109,6 +1159,9 @@ void jo_main(void)
     hud_heat_image.data = JO_NULL;
     debug_hud_enabled = 0;
     stage_music_started = 0;
+    weapon_audio_played_shots = 0;
+    weapon_audio_pending_shot = 0;
+    weapon_audio_channel_observed = 0;
     current_bitmap_scene = BITMAP_SCENE_NONE;
 #ifdef AVSP_VISUAL_TEST
     visual_action_index = 0;
@@ -1137,6 +1190,7 @@ void jo_main(void)
                         load_route_sequences() &&
                         load_background() && load_boss_background() &&
                         load_hud_assets() &&
+                        load_weapon_audio() &&
                         load_all_cels() && load_player_action_sequences() &&
                         load_enemy_action_sequences() && load_boss_idle() &&
                         create_sprite_working_set();

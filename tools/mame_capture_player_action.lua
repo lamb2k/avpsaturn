@@ -16,6 +16,9 @@ local gun = in0["P1 Button 1"]
 local attack = in0["P1 Button 2"]
 local jump = in0["P1 Button 3"]
 local action = os.getenv("AVSP_ACTION_PROBE") or ""
+local isolate_qsound_voice = tonumber(os.getenv("AVSP_QSOUND_ISOLATE_VOICE") or "")
+local isolate_qsound_end_frame = tonumber(
+    os.getenv("AVSP_QSOUND_ISOLATE_END_FRAME") or "")
 local allowed_actions = {
     idle = true,
     walk = true,
@@ -33,6 +36,8 @@ local metadata = assert(io.open(capture_root .. "/samples.tsv", "w"))
 metadata:write("frame\taction\tactive_object_bank\tbank_writes\tplayer_health\n")
 local hud_state = assert(io.open(capture_root .. "/hud_state.tsv", "w"))
 hud_state:write("frame\tplayer_health\n")
+local qsound_writes = assert(io.open(capture_root .. "/qsound_writes.tsv", "w"))
+qsound_writes:write("frame\tpc\tport\tbyte\tregister\tvalue\n")
 local frame = 0
 local active_object_bank = 0
 local object_bank_writes = 0
@@ -41,12 +46,83 @@ local capture_first = 2480
 local capture_last = action == "damage" and 3400 or 2608
 
 local main_program = machine.devices[":maincpu"].spaces["program"]
+local audio_cpu = machine.devices[":audiocpu"]
+local audio_program = audio_cpu.spaces["program"]
+local qsound_data_latch = 0
+local qsound_isolation_active = false
 player_action_objbank_tap = main_program:install_write_tap(
     0x8040e0, 0x8040e1, "player_action_object_bank",
     function(offset, data, mask)
         active_object_bank = data & 1
         object_bank_writes = object_bank_writes + 1
     end)
+
+-- CPS2's Z80 writes the QSound word high byte, low byte, then register address
+-- at 0xd000..0xd002. Recording that bus transaction exposes the exact voice
+-- start/end/rate/volume changes without attempting to separate a mixed WAV.
+player_action_qsound_tap = audio_program:install_write_tap(
+    0xd000, 0xd002, "player_action_qsound_bus",
+    function(offset, data, mask)
+        local port = offset & 0xffff
+        local byte = data & 0xff
+        local pc = audio_cpu.state["PC"].value
+        if port == 0xd000 then
+            qsound_data_latch = ((byte << 8) | (qsound_data_latch & 0xff)) & 0xffff
+            qsound_writes:write(string.format(
+                "%d\t%04x\t%04x\t%02x\t\t\n", frame, pc, port, byte))
+        elseif port == 0xd001 then
+            qsound_data_latch = ((qsound_data_latch & 0xff00) | byte) & 0xffff
+            qsound_writes:write(string.format(
+                "%d\t%04x\t%04x\t%02x\t\t\n", frame, pc, port, byte))
+        elseif port == 0xd002 then
+            qsound_writes:write(string.format(
+                "%d\t%04x\t%04x\t%02x\t%02x\t%04x\n",
+                frame, pc, port, byte, byte, qsound_data_latch))
+            if qsound_isolation_active then
+                local pcm_volume_voice = nil
+                if byte <= 0x7f and (byte & 7) == 6 then
+                    pcm_volume_voice = byte >> 3
+                end
+                local is_other_pcm_volume = pcm_volume_voice ~= nil and
+                    pcm_volume_voice ~= isolate_qsound_voice
+                local is_late_target_volume = pcm_volume_voice ==
+                    isolate_qsound_voice and isolate_qsound_end_frame ~= nil and
+                    frame >= isolate_qsound_end_frame and qsound_data_latch ~= 0
+                local is_adpcm_volume = byte == 0xcd or byte == 0xd1 or
+                    byte == 0xd5
+                if is_other_pcm_volume or is_late_target_volume or
+                    is_adpcm_volume then
+                    -- 0x07 is an intentionally unused PCM-register slot.
+                    -- Redirecting only the final address byte preserves the
+                    -- driver's data latch while preventing the volume write.
+                    return 0x07
+                end
+            end
+        end
+    end)
+
+local function qsound_write(register, value)
+    audio_program:write_u8(0xd001, value & 0xff)
+    audio_program:write_u8(0xd000, (value >> 8) & 0xff)
+    audio_program:write_u8(0xd002, register & 0xff)
+end
+
+local function begin_qsound_voice_isolation()
+    if isolate_qsound_voice == nil then return end
+    assert(isolate_qsound_voice >= 0 and isolate_qsound_voice < 16,
+        "AVSP_QSOUND_ISOLATE_VOICE must be 0..15")
+    -- Silence every voice before filtering subsequent driver volume writes.
+    -- Global QSound pan, echo and filter programming remains untouched.
+    for voice = 0, 15 do
+        qsound_write((voice << 3) + 6, 0)
+    end
+    for voice = 0, 2 do
+        qsound_write(0xcd + (voice << 2), 0)
+    end
+    qsound_isolation_active = true
+    print(string.format("AVSPU_QSOUND_ISOLATE voice=%d frame=%d",
+        isolate_qsound_voice, frame))
+end
 
 local function write_share_words(path, share)
     local file = assert(io.open(path, "w"))
@@ -126,6 +202,9 @@ player_action_capture_subscription = emu.add_machine_frame_notifier(function()
         print(string.format("AVSPU_PLAYER_ACTION action=%s frame=%d",
             action, frame))
     end
+    if frame == action_frame - 1 then
+        begin_qsound_voice_isolation()
+    end
     if frame == action_frame + 5 then
         gun:clear_value()
         attack:clear_value()
@@ -154,6 +233,7 @@ player_action_capture_subscription = emu.add_machine_frame_notifier(function()
         start:clear_value()
         metadata:close()
         hud_state:close()
+        qsound_writes:close()
         machine:exit()
     end
 end)

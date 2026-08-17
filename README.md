@@ -186,10 +186,14 @@ Verified on August 17, 2026:
   source edges and all 224 source lines with no framebuffer black bars, and
   displays the asset working set over the reconstructed Stage 1 background;
   the fixed HUD, blinking Player 2 prompt, and live meters render above it
+- the first event-level sound is isolated from QSound voice 12 by paired idle
+  and weapon captures: a 0.902449-second, 44.1 kHz stereo cue is stored as
+  signed 16-bit big-endian SCSP PCM and starts five action frames after A
 
 Next proof gate: verify the full-width mapping and CD audio on physical Saturn,
-then isolate QSound event cues for SCSP PCM playback and replace the approximate
-route gaps with the remaining captured rooms, actors, and actions.
+then extend the proven QSound isolation to impacts, melee, enemies, boss, and
+voices while replacing the approximate route gaps with the remaining captured
+rooms, actors, and actions.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
 [docs/TEST_PLAN.md](docs/TEST_PLAN.md).
