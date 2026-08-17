@@ -15,7 +15,8 @@ Status: passed on August 16, 2026.
 - Release SH-2 compilation, link, ISO, mixed-mode cue, and CDDA construction succeed.
 - The image boots with a 4 MB cartridge and no asset failure.
 - VDP1 transparency and aligned palette layers render correctly over VDP2.
-- The boot composition remains stable until the first player input.
+- The Press Start composition remains stable until Start, then character select
+  remains stable until the confirming A input.
 
 Status: passed in Yaba Sanshiro 2 v1.20.37 on August 16, 2026. The 12,000-frame
 test and clean release build passed, and visual inspection confirmed the exact
@@ -33,9 +34,10 @@ the Saturn's native 352x224 mode.
 - Produce an automated image-difference report with separately stated crop and
   color-quantization tolerances.
 
-Status: in progress. The boot reference mode now draws the final visible CPS2
-object/priority result from one lossless 8bpp VDP1 surface with 76 visible
-colors. Active-bank selection is guarded by a 54-command capture signature, and
+Status: in progress. The converter retains the final visible CPS2
+object/priority result as a lossless offline 8bpp oracle with 76 visible colors.
+The release boot instead traverses lossless Press Start and character-select
+key states. Active-bank selection is guarded by a 54-command capture signature, and
 an exhaustive frame-local grouping manifest identifies actors, shadow sprites,
 and props while marking three edge fragments as candidates. The display now
 uses native 352x224 with a deterministic pre-scaled VDP2 full-width fit and a
@@ -51,7 +53,8 @@ described as frame-exact.
 - Reproduce camera bounds, lanes, collisions, encounter triggers, and enemy
   behavior for the first combat room.
 - Support player movement and attacks without partial cels or palette damage.
-- Reach the Chrysalis boss room and Stage Clear deterministically.
+- Reach the Chrysalis boss room, Stage Clear, results, intermission, and the
+  Round 2 boundary deterministically.
 - Start the Stage 1 CD audio track without disabling SCSP output.
 - Add a comparison capture against the equivalent MAME route.
 
@@ -60,10 +63,12 @@ bank and identifies 87 unique player assemblies. The first authentic ten-pose
 Predator attack is cartridge-resident and has been visually verified advancing
 through three replaceable VDP1 palette layers. A separately tracked blue alien
 now advances through ten authentic single-layer poses from frames 4164-4200. A
-capture-derived native room script displays five initial enemies, adds three
-reinforcements after three defeats, clears after eight defeats, unlocks the
-camera boundary, enters the industrial boss room, spawns captured Chrysalis,
-and reaches Stage Clear. The mixed-mode image adds a 168.015-second QSound
+capture-derived native route starts at Press Start and character select,
+displays five initial enemies, adds three reinforcements after three defeats,
+clears after eight defeats, unlocks the camera boundary, plays the door and
+interior states, enters the industrial room, spawns captured Chrysalis plus
+five Stalkers across the observed recurring waves, and reaches the Round 2
+boundary through Stage Clear, results, and intermission. The mixed-mode image adds a 168.015-second QSound
 route reference as native CD audio track 2. The 12,000-frame host test and the
 automated Yaba Sanshiro diagnostic complete this lifecycle. Remaining player
 and enemy actions, intermediate route detail, exact arcade AI/spawn timing,

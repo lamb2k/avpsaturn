@@ -11,11 +11,14 @@
     "continuation_first_frame": 4260,
     "continuation_last_frame": 18180,
     "continuation_step": 60,
+    "frontend_start_frame": 1440,
     "round_1_title_frame": 2040,
     "round_2_title_frame": 14760,
     "timing_policy": "ordered evidence only; automated deaths and continues make absolute intervals non-canonical"
   },
   "required_runtime_phases": [
+    "main_menu",
+    "character_select",
     "round_title",
     "barricade_intro",
     "street_combat",
@@ -30,6 +33,18 @@
     "intermission",
     "complete"
   ],
+  "native_timing": {
+    "precision_frames": 60,
+    "round_title_frames": 120,
+    "barricade_intro_frames": 360,
+    "door_dialogue_frames": 60,
+    "interior_transition_frames": 60,
+    "boss_intro_frames": 60,
+    "boss_defeat_frames": 240,
+    "stage_clear_frames": 120,
+    "results_frames": 360,
+    "intermission_frames": 60
+  },
   "capture_incidents": [
     {
       "frame": 4860,
@@ -58,6 +73,24 @@
     }
   ],
   "events": [
+    {
+      "id": "main_menu",
+      "frame": 1440,
+      "runtime_phase": "main_menu",
+      "kind": "menu",
+      "capture": "opening:stage1_1440.png",
+      "sha256": "d0c58566308740551cacbfa5be5e0eef585226068423cbf8f4c827dd04aacdf8",
+      "observation": "Cold attract traversal reaches the stable Press Start screen"
+    },
+    {
+      "id": "character_select",
+      "frame": 1800,
+      "runtime_phase": "character_select",
+      "kind": "selection",
+      "capture": "opening:stage1_1800.png",
+      "sha256": "76afb83b2170f045eb316af57cf7a39576a970884482111cc1d063e99aeb2abf",
+      "observation": "Default Predator Warrior selection is visible before Round 1"
+    },
     {
       "id": "round_1_title",
       "frame": 2040,

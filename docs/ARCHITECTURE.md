@@ -47,15 +47,18 @@ rather than eight duplicate texture allocations. This separates source
 residency from VDP1 texture residency and leaves room for commands and a larger
 animation cache.
 
-Before gameplay starts, a separate reference mode draws the final visible CPS2
-object/priority result as one 352x224 8bpp VDP1 surface. Its 76 visible source
-colors fit losslessly inside one 256-color Saturn palette and consume 78,848
-bytes; only the horizontal coordinates are resampled from 384 to 352. The
-converter also retains an ignored 86,016-byte 384x224 source oracle. It derives
-both from the MAME reference after removing the reconstructed background, so
-tilemap-priority occlusion is already resolved. This is a flattened comparison
-oracle, not the final animation architecture. The first player input replaces
-it with the actor working set and native transforms.
+The converter retains the final visible CPS2 object/priority result as an
+offline 352x224 8bpp comparison surface. Its 76 visible source colors fit
+losslessly inside one 256-color palette and consume 78,848 bytes; only the
+horizontal coordinates are resampled from 384 to 352. An ignored 86,016-byte
+384x224 source oracle is retained as well. These are flattened comparison
+oracles, not the final animation architecture or the normal release boot path.
+
+The normal release instead allocates two 78,848-byte VDP1 frontend surfaces:
+the verified frame-1440 Press Start state and frame-1800 Predator Warrior
+selection state. Their 110 and 115 source colors respectively remain lossless.
+The native controller state machine waits for Start, then A, before beginning
+the Round 1 title and gameplay route.
 
 ## Background and HUD
 
@@ -97,6 +100,7 @@ Exact in the current milestone:
 - CPS2 graphics-region reconstruction
 - selected object pixels, scale, transparency, and palette pens
 - selected background/HUD capture reconstruction
+- lossless Press Start and Predator Warrior selection key states
 - aligned multi-palette VDP1 assembly
 - active CPS2 object-RAM bank and final visible boot object/priority result
 - Saturn-native 352x224 initialization with one deterministic full-width fit
@@ -110,6 +114,7 @@ Still approximate or incomplete:
 - temporal confirmation of remaining enemy variants, actions, and prop groups
 - exact enemy pose selection, spawn coordinates/timing, AI, and object priority
 - remaining player states, enemy animation/state timing, and full frame sets
+- complete attract-mode, menu-transition, and character-select animation
 - dynamic HUD values, exact scroll behavior, level triggers, combat, and AI
 - isolated, event-synchronized QSound effects on native SCSP PCM channels
 - native HUD safe-area placement and arcade-derived camera behavior for CRT

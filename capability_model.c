@@ -1,4 +1,5 @@
 #include "capability_model.h"
+#include "generated/avsp_stage1_route.h"
 
 #define CAP_LANE_MIN 148
 #define CAP_LANE_MAX 198
@@ -9,8 +10,6 @@
 #define CAP_ROOM_ONE_EXIT 480
 #define CAP_KO_VISIBLE_FRAMES 45
 #define CAP_CLEAR_HOLD_FRAMES 60
-#define CAP_BOSS_INTRO_FRAMES 90
-#define CAP_STAGE_CLEAR_FRAMES 180
 
 typedef struct
 {
@@ -84,6 +83,21 @@ int cap_actor_screen_x(int world_x, int camera_x, int full_width_fit)
     return (centered * CAP_VIEW_WIDTH) / CAP_CPS2_VIEW_WIDTH;
 }
 
+int cap_stage1_route_event_count(void)
+{
+    return AVSP_STAGE1_ROUTE_EVENT_COUNT;
+}
+
+int cap_stage1_source_start_frame(void)
+{
+    return avsp_stage1_route_events[0].source_frame;
+}
+
+int cap_stage1_source_end_frame(void)
+{
+    return avsp_stage1_route_events[AVSP_STAGE1_ROUTE_EVENT_COUNT - 1].source_frame;
+}
+
 static void cap_deactivate_enemy(CapActor *enemy, const int index)
 {
     enemy->x = -256 - index * 32;
@@ -131,6 +145,36 @@ static void cap_spawn_boss(CapWorld *world)
     boss->kind = CAP_ACTOR_BOSS;
 }
 
+static void cap_spawn_boss_add(CapWorld *world)
+{
+    int index;
+    for (index = 1; index < CAP_MAX_ENEMIES; ++index)
+    {
+        CapActor *add = &world->enemies[index];
+        if (add->active) continue;
+        add->x = 244 + (world->boss_adds_spawned & 1) * 74;
+        add->lane = 158 + (world->boss_adds_spawned % 3) * 18;
+        add->facing = -1;
+        add->health = 3;
+        add->action = CAP_ACT_WALK;
+        add->action_frame = 0;
+        add->locomotion_frame = world->boss_adds_spawned * 7;
+        add->hit_latched = 0;
+        add->active = 1;
+        add->variant = 0;
+        add->kind = CAP_ACTOR_STALKER;
+        ++world->boss_adds_spawned;
+        return;
+    }
+}
+
+static void cap_spawn_boss_adds(CapWorld *world, const int count)
+{
+    int spawned;
+    for (spawned = 0; spawned < count; ++spawned)
+        cap_spawn_boss_add(world);
+}
+
 static void cap_spawn_range(CapWorld *world, const int first, const int count)
 {
     int index;
@@ -160,13 +204,16 @@ void cap_world_init(CapWorld *world)
     world->score = 0;
     world->player_ko_timer = 0;
     world->encounter_started = 0;
-    world->encounter_state = CAP_ENCOUNTER_APPROACH;
+    world->encounter_state = CAP_ENCOUNTER_MAIN_MENU;
     world->encounter_timer = 0;
     world->enemies_defeated = 0;
     world->room_locked = 0;
     world->stage_transitioned = 0;
     world->stage_area = 0;
     world->boss_defeated = 0;
+    world->boss_adds_spawned = 0;
+    world->boss_adds_defeated = 0;
+    world->boss_reinforcement_wave = 0;
     world->level_completed = 0;
 }
 
@@ -183,6 +230,11 @@ static void cap_damage_enemy(CapWorld *world, CapActor *enemy, const int damage)
         {
             world->score += 1000;
             world->boss_defeated = 1;
+        }
+        else if (enemy->kind == CAP_ACTOR_STALKER)
+        {
+            world->score += 100;
+            ++world->boss_adds_defeated;
         }
         else
         {
@@ -401,15 +453,27 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
 static void cap_begin_encounter(CapWorld *world)
 {
     world->encounter_started = 1;
-    world->encounter_state = CAP_ENCOUNTER_WAVE_ONE;
+    world->encounter_state = CAP_ENCOUNTER_ROUND_TITLE;
     world->encounter_timer = 0;
     world->room_locked = 1;
-    cap_spawn_range(world, 0, 5);
 }
 
 static void cap_update_encounter(CapWorld *world)
 {
     ++world->encounter_timer;
+    if (world->encounter_state == CAP_ENCOUNTER_ROUND_TITLE &&
+        world->encounter_timer >= AVSP_STAGE1_ROUND_TITLE_FRAMES)
+    {
+        world->encounter_state = CAP_ENCOUNTER_BARRICADE_INTRO;
+        world->encounter_timer = 0;
+    }
+    if (world->encounter_state == CAP_ENCOUNTER_BARRICADE_INTRO &&
+        world->encounter_timer >= AVSP_STAGE1_BARRICADE_INTRO_FRAMES)
+    {
+        cap_spawn_range(world, 0, 5);
+        world->encounter_state = CAP_ENCOUNTER_WAVE_ONE;
+        world->encounter_timer = 0;
+    }
     if (world->encounter_state == CAP_ENCOUNTER_WAVE_ONE &&
         world->enemies_defeated >= 3)
     {
@@ -432,29 +496,72 @@ static void cap_update_encounter(CapWorld *world)
         int index;
         for (index = 0; index < CAP_MAX_ENEMIES; ++index)
             cap_deactivate_enemy(&world->enemies[index], index);
-        world->encounter_state = CAP_ENCOUNTER_BOSS_INTRO;
+        world->encounter_state = CAP_ENCOUNTER_DOOR_DIALOGUE;
         world->stage_transitioned = 1;
-        world->stage_area = 1;
         world->room_locked = 1;
         world->player.x = 88;
         world->player.lane = 178;
         world->camera_x = 0;
         world->encounter_timer = 0;
     }
-    if (world->encounter_state == CAP_ENCOUNTER_BOSS_INTRO &&
-        world->encounter_timer >= CAP_BOSS_INTRO_FRAMES)
+    if (world->encounter_state == CAP_ENCOUNTER_DOOR_DIALOGUE &&
+        world->encounter_timer >= AVSP_STAGE1_DOOR_DIALOGUE_FRAMES)
     {
+        world->encounter_state = CAP_ENCOUNTER_INTERIOR_TRANSITION;
+        world->encounter_timer = 0;
+    }
+    if (world->encounter_state == CAP_ENCOUNTER_INTERIOR_TRANSITION &&
+        world->encounter_timer >= AVSP_STAGE1_INTERIOR_TRANSITION_FRAMES)
+    {
+        world->stage_area = 1;
         cap_spawn_boss(world);
+        world->encounter_state = CAP_ENCOUNTER_BOSS_INTRO;
+        world->encounter_timer = 0;
+    }
+    if (world->encounter_state == CAP_ENCOUNTER_BOSS_INTRO &&
+        world->encounter_timer >= AVSP_STAGE1_BOSS_INTRO_FRAMES)
+    {
+        cap_spawn_boss_adds(world, 1);
         world->encounter_state = CAP_ENCOUNTER_BOSS;
         world->encounter_timer = 0;
     }
+    if (world->encounter_state == CAP_ENCOUNTER_BOSS && !world->boss_defeated &&
+        world->enemies[0].health <= 16 && world->boss_reinforcement_wave < 1)
+    {
+        cap_spawn_boss_adds(world, 2);
+        world->boss_reinforcement_wave = 1;
+    }
+    if (world->encounter_state == CAP_ENCOUNTER_BOSS && !world->boss_defeated &&
+        world->enemies[0].health <= 8 && world->boss_reinforcement_wave < 2)
+    {
+        cap_spawn_boss_adds(world, 2);
+        world->boss_reinforcement_wave = 2;
+    }
     if (world->encounter_state == CAP_ENCOUNTER_BOSS && world->boss_defeated)
+    {
+        world->encounter_state = CAP_ENCOUNTER_BOSS_DEFEAT;
+        world->encounter_timer = 0;
+    }
+    if (world->encounter_state == CAP_ENCOUNTER_BOSS_DEFEAT &&
+        world->encounter_timer >= AVSP_STAGE1_BOSS_DEFEAT_FRAMES)
     {
         world->encounter_state = CAP_ENCOUNTER_STAGE_CLEAR;
         world->encounter_timer = 0;
     }
     if (world->encounter_state == CAP_ENCOUNTER_STAGE_CLEAR &&
-        world->encounter_timer >= CAP_STAGE_CLEAR_FRAMES)
+        world->encounter_timer >= AVSP_STAGE1_STAGE_CLEAR_FRAMES)
+    {
+        world->encounter_state = CAP_ENCOUNTER_RESULTS;
+        world->encounter_timer = 0;
+    }
+    if (world->encounter_state == CAP_ENCOUNTER_RESULTS &&
+        world->encounter_timer >= AVSP_STAGE1_RESULTS_FRAMES)
+    {
+        world->encounter_state = CAP_ENCOUNTER_INTERMISSION;
+        world->encounter_timer = 0;
+    }
+    if (world->encounter_state == CAP_ENCOUNTER_INTERMISSION &&
+        world->encounter_timer >= AVSP_STAGE1_INTERMISSION_FRAMES)
     {
         world->encounter_state = CAP_ENCOUNTER_COMPLETE;
         world->level_completed = 1;
@@ -466,14 +573,35 @@ static void cap_update_encounter(CapWorld *world)
 CapClipRequest cap_world_step(CapWorld *world, const CapInput *input)
 {
     CapClipRequest request;
+    CapInput gated_input;
+    const CapInput *player_input = input;
     int index;
     int target_camera;
 
-    if (!world->encounter_started &&
-        (input->left || input->right || input->up || input->down ||
-         input->attack_pressed || input->special_pressed || input->dash_held))
+    if (world->encounter_state == CAP_ENCOUNTER_MAIN_MENU && input->start_pressed)
+    {
+        world->encounter_state = CAP_ENCOUNTER_CHARACTER_SELECT;
+        world->encounter_timer = 0;
+    }
+    else if (world->encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT &&
+             input->attack_pressed)
         cap_begin_encounter(world);
-    request = cap_update_player(world, input);
+    if (world->encounter_state != CAP_ENCOUNTER_WAVE_ONE &&
+        world->encounter_state != CAP_ENCOUNTER_WAVE_TWO &&
+        world->encounter_state != CAP_ENCOUNTER_CLEAR &&
+        world->encounter_state != CAP_ENCOUNTER_BOSS)
+    {
+        gated_input.left = 0;
+        gated_input.right = 0;
+        gated_input.up = 0;
+        gated_input.down = 0;
+        gated_input.attack_pressed = 0;
+        gated_input.special_pressed = 0;
+        gated_input.dash_held = 0;
+        gated_input.start_pressed = 0;
+        player_input = &gated_input;
+    }
+    request = cap_update_player(world, player_input);
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
         cap_update_enemy(world, &world->enemies[index], index);
     if (world->encounter_started)

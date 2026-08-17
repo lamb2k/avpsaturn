@@ -145,8 +145,11 @@ def validate_ledger(ledger: dict, verify_captures: bool) -> None:
         fail("route event frames must be unique and strictly increasing")
     if seen_phases != phases:
         fail(f"runtime phase order mismatch: expected {phases}, observed {seen_phases}")
-    if events[0]["id"] != "round_1_title" or frames[0] != capture["round_1_title_frame"]:
-        fail("route must begin at the verified Round 1 title anchor")
+    if events[0]["id"] != "main_menu" or frames[0] != capture["frontend_start_frame"]:
+        fail("route must begin at the verified cold-traversal main menu anchor")
+    round_title = next((event for event in events if event["id"] == "round_1_title"), None)
+    if round_title is None or round_title["frame"] != capture["round_1_title_frame"]:
+        fail("route must retain the verified Round 1 title anchor")
     if events[-1]["id"] != "round_2_boundary" or frames[-1] != capture["round_2_title_frame"]:
         fail("route must end at the verified Round 2 title boundary")
     if reinforcement_count < 2:
@@ -158,6 +161,29 @@ def validate_ledger(ledger: dict, verify_captures: bool) -> None:
         fail("capture incidents must be ordered by frame")
     if not all(incident.get("kind") == "continue" for incident in incidents):
         fail("only route-distorting continue incidents belong in capture_incidents")
+
+    timing = ledger.get("native_timing", {})
+    required_timings = (
+        "precision_frames",
+        "round_title_frames",
+        "barricade_intro_frames",
+        "door_dialogue_frames",
+        "interior_transition_frames",
+        "boss_intro_frames",
+        "boss_defeat_frames",
+        "stage_clear_frames",
+        "results_frames",
+        "intermission_frames",
+    )
+    for name in required_timings:
+        value = timing.get(name)
+        if not isinstance(value, int) or value <= 0:
+            fail(f"native_timing.{name} must be a positive integer")
+    if timing["precision_frames"] != capture["continuation_step"]:
+        fail("native timing precision must match the complete-route sample step")
+    for name in required_timings[1:]:
+        if timing[name] % timing["precision_frames"] != 0:
+            fail(f"native_timing.{name} exceeds the evidence precision")
 
     if verify_captures:
         validate_route_samples(ledger)
@@ -200,12 +226,27 @@ def generate_header(ledger: dict) -> str:
         "} AvspStage1RouteEvent;",
         "",
         f"#define AVSP_STAGE1_ROUTE_EVENT_COUNT {len(ledger['events'])}",
-        f"#define AVSP_STAGE1_SOURCE_START_FRAME {ledger['capture']['round_1_title_frame']}",
+        f"#define AVSP_STAGE1_SOURCE_START_FRAME {ledger['capture']['frontend_start_frame']}",
         f"#define AVSP_STAGE1_SOURCE_END_FRAME {ledger['capture']['round_2_title_frame']}",
         "",
         "static const AvspStage1RouteEvent avsp_stage1_route_events[AVSP_STAGE1_ROUTE_EVENT_COUNT] =",
         "{",
     ])
+    timing = ledger["native_timing"]
+    timing_lines = [
+        f"#define AVSP_STAGE1_TIMING_PRECISION_FRAMES {timing['precision_frames']}",
+        f"#define AVSP_STAGE1_ROUND_TITLE_FRAMES {timing['round_title_frames']}",
+        f"#define AVSP_STAGE1_BARRICADE_INTRO_FRAMES {timing['barricade_intro_frames']}",
+        f"#define AVSP_STAGE1_DOOR_DIALOGUE_FRAMES {timing['door_dialogue_frames']}",
+        f"#define AVSP_STAGE1_INTERIOR_TRANSITION_FRAMES {timing['interior_transition_frames']}",
+        f"#define AVSP_STAGE1_BOSS_INTRO_FRAMES {timing['boss_intro_frames']}",
+        f"#define AVSP_STAGE1_BOSS_DEFEAT_FRAMES {timing['boss_defeat_frames']}",
+        f"#define AVSP_STAGE1_STAGE_CLEAR_FRAMES {timing['stage_clear_frames']}",
+        f"#define AVSP_STAGE1_RESULTS_FRAMES {timing['results_frames']}",
+        f"#define AVSP_STAGE1_INTERMISSION_FRAMES {timing['intermission_frames']}",
+        "",
+    ]
+    lines[lines.index("static const AvspStage1RouteEvent avsp_stage1_route_events[AVSP_STAGE1_ROUTE_EVENT_COUNT] ="):lines.index("static const AvspStage1RouteEvent avsp_stage1_route_events[AVSP_STAGE1_ROUTE_EVENT_COUNT] =")] = timing_lines
     for index, event in enumerate(ledger["events"]):
         suffix = "," if index + 1 < len(ledger["events"]) else ""
         lines.append(

@@ -3,9 +3,9 @@
 #include "capability_model.h"
 #include "generated/avsp_boss_animation.h"
 #include "generated/avsp_enemy_animation.h"
+#include "generated/avsp_frontend_palette.h"
 #include "generated/avsp_palette.h"
 #include "generated/avsp_player_animation.h"
-#include "generated/avsp_snapshot_palette.h"
 
 #define CEL_WIDTH 192
 #define CEL_HEIGHT 192
@@ -49,10 +49,10 @@ static CapWorld world;
 static jo_palette background_palette;
 static jo_palette boss_background_palette;
 static jo_palette actor_palette;
-static jo_palette snapshot_palette;
+static jo_palette frontend_palettes[AVSP_FRONTEND_SCENES];
 static jo_img_8bits background_image;
 static jo_img_8bits boss_background_image;
-static jo_img_8bits snapshot_fit_image;
+static jo_img_8bits frontend_images[AVSP_FRONTEND_SCENES];
 static unsigned char *background_bitmap;
 static jo_img_4bits player_attack_images[AVSP_PLAYER_ATTACK_POSES][AVSP_PLAYER_ATTACK_LAYERS];
 static jo_img_4bits enemy_walk_images[AVSP_ENEMY_WALK_POSES];
@@ -61,7 +61,7 @@ static int player_idle_sprites[2];
 static int player_attack_sprites[AVSP_PLAYER_ATTACK_LAYERS];
 static int enemy_walk_sprite;
 static int boss_idle_sprites[AVSP_BOSS_IDLE_LAYERS];
-static int snapshot_fit_sprite;
+static int frontend_sprites[AVSP_FRONTEND_SCENES];
 static int current_player_attack_pose;
 static int current_enemy_walk_pose;
 static int debug_hud_enabled;
@@ -181,36 +181,48 @@ static void set_actor_palette(void)
     jo_create_palette_from(&actor_palette, colors, 256);
 }
 
-static void set_snapshot_palette(void)
+static void set_frontend_palettes(void)
 {
     static jo_color colors[256];
+    int scene;
     int index;
 
-    for (index = 0; index < 256; ++index)
-        colors[index] = JO_COLOR_RGB(
-            avsp_snapshot_palette[index][0],
-            avsp_snapshot_palette[index][1],
-            avsp_snapshot_palette[index][2]);
-    jo_create_palette_from(&snapshot_palette, colors, 256);
+    for (scene = 0; scene < AVSP_FRONTEND_SCENES; ++scene)
+    {
+        for (index = 0; index < 256; ++index)
+            colors[index] = JO_COLOR_RGB(
+                avsp_frontend_palettes[scene][index][0],
+                avsp_frontend_palettes[scene][index][1],
+                avsp_frontend_palettes[scene][index][2]);
+        jo_create_palette_from(&frontend_palettes[scene], colors, 256);
+    }
 }
 
-static int load_snapshot_asset(void)
+static int load_frontend_assets(void)
 {
-    int length = 0;
-    snapshot_fit_image.width = SNAPSHOT_FIT_WIDTH;
-    snapshot_fit_image.height = SNAPSHOT_HEIGHT;
-    snapshot_fit_image.data = (unsigned char *)jo_fs_read_file_in_dir(
-        "OBJFIT.BIN", "SPR8", &length);
-    if (snapshot_fit_image.data == JO_NULL || length != SNAPSHOT_FIT_BYTES)
+    int scene;
+    int length;
+    for (scene = 0; scene < AVSP_FRONTEND_SCENES; ++scene)
     {
-        failed_asset = "OBJFIT.BIN";
-        return 0;
-    }
-    snapshot_fit_sprite = jo_sprite_add_8bits_image(&snapshot_fit_image);
-    if (snapshot_fit_sprite < 0)
-    {
-        failed_asset = "OBJFIT VDP1";
-        return 0;
+        jo_img_8bits *image = &frontend_images[scene];
+        image->width = SNAPSHOT_FIT_WIDTH;
+        image->height = SNAPSHOT_HEIGHT;
+        length = 0;
+        image->data = (unsigned char *)jo_fs_read_file_in_dir(
+            avsp_frontend_files[scene], "SPR8", &length);
+        if (image->data == JO_NULL || length != SNAPSHOT_FIT_BYTES)
+        {
+            failed_asset = avsp_frontend_files[scene];
+            return 0;
+        }
+        frontend_sprites[scene] = jo_sprite_add_8bits_image(image);
+        if (frontend_sprites[scene] < 0)
+        {
+            failed_asset = "FRONTEND VDP1";
+            return 0;
+        }
+        jo_free(image->data);
+        image->data = JO_NULL;
     }
     return 1;
 }
@@ -378,19 +390,21 @@ static void draw_world(void)
     int background_scroll = cap_background_fit_scroll_x(
         world.camera_x, world.stage_area);
 
+    if (world.encounter_state == CAP_ENCOUNTER_MAIN_MENU ||
+        world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT)
+    {
+        int scene = world.encounter_state == CAP_ENCOUNTER_MAIN_MENU ? 0 : 1;
+        jo_sprite_restore_sprite_scale();
+        jo_sprite_set_palette(frontend_palettes[scene].id);
+        jo_sprite_draw3D(frontend_sprites[scene], 0, 0, 160);
+        return;
+    }
     if (world.stage_area == 1) activate_boss_background();
     /* The source capture is already exactly 224 lines high.  A non-zero Y
        scroll silently discards arcade scanlines and is therefore a crop. */
     jo_move_background(background_scroll, 0);
     jo_sprite_change_sprite_scale_xy(
         (float)CAP_VIEW_WIDTH / (float)CAP_CPS2_VIEW_WIDTH, 1.0f);
-    if (!world.encounter_started)
-    {
-        jo_sprite_set_palette(snapshot_palette.id);
-        jo_sprite_restore_sprite_scale();
-        jo_sprite_draw3D(snapshot_fit_sprite, 0, 0, 160);
-        return;
-    }
     draw_player(&world.player, player_x);
     {
         int pose = (world.frame / 4) % AVSP_ENEMY_WALK_POSES;
@@ -425,6 +439,7 @@ static CapInput read_input(void)
     input.attack_pressed = jo_is_pad1_key_down(JO_KEY_A);
     input.special_pressed = jo_is_pad1_key_down(JO_KEY_C);
     input.dash_held = jo_is_pad1_key_pressed(JO_KEY_B);
+    input.start_pressed = jo_is_pad1_key_down(JO_KEY_START);
     return input;
 }
 
@@ -443,9 +458,14 @@ static CapInput encounter_test_input(void)
     CapInput input;
     int index;
     memset(&input, 0, sizeof(input));
-    if (!world.encounter_started)
+    if (world.encounter_state == CAP_ENCOUNTER_MAIN_MENU)
     {
-        input.right = 1;
+        if (world.frame >= 120) input.start_pressed = 1;
+        return input;
+    }
+    if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT)
+    {
+        if (world.frame >= 240) input.attack_pressed = 1;
         return input;
     }
     world.player.health = CAP_PLAYER_MAX_HEALTH;
@@ -494,13 +514,58 @@ static void draw_hud(void)
               world.encounter_state, world.room_locked, world.stage_transitioned);
     if (world.encounter_state == CAP_ENCOUNTER_BOSS && world.enemies[0].active)
         jo_printf(0, 6, "CHRYSALIS HP %02d/%02d", world.enemies[0].health,
-                  CAP_BOSS_MAX_HEALTH);
+                   CAP_BOSS_MAX_HEALTH);
+    if (world.stage_area == 1)
+        jo_printf(0, 7, "STALKER %d/%d  WAVE %d/2",
+                  world.boss_adds_defeated, world.boss_adds_spawned,
+                  world.boss_reinforcement_wave);
     jo_printf(0, 27, "D-PAD MOVE  A HIT  B DASH  C SPECIAL");
+}
+
+static void draw_route_overlay(void)
+{
+    if (world.encounter_state == CAP_ENCOUNTER_ROUND_TITLE)
+    {
+        jo_printf(15, 11, "ROUND 1");
+        jo_printf(11, 13, "CITY OF DESPAIR");
+    }
+    else if (world.encounter_state == CAP_ENCOUNTER_BARRICADE_INTRO)
+    {
+        if (world.encounter_timer >= 120 && world.encounter_timer < 240)
+            jo_printf(5, 4, "THERE'S TOO MANY OF THEM! WITHDRAW.");
+        else if (world.encounter_timer >= 240)
+            jo_printf(35, 12, "GO >>>");
+    }
+    else if (world.encounter_state == CAP_ENCOUNTER_CLEAR)
+        jo_printf(35, 12, "GO >>>");
+    else if (world.encounter_state == CAP_ENCOUNTER_DOOR_DIALOGUE)
+        jo_printf(4, 4, "THEY DIDN'T FOLLOW US IN. WHY?");
+    else if (world.encounter_state == CAP_ENCOUNTER_BOSS_DEFEAT)
+        jo_printf(10, 12, "CHRYSALIS DESTROYED");
+    else if (world.encounter_state == CAP_ENCOUNTER_STAGE_CLEAR)
+    {
+        jo_printf(12, 10, "CONGRATULATIONS!");
+        jo_printf(13, 12, "STAGE CLEAR!");
+    }
+    else if (world.encounter_state == CAP_ENCOUNTER_RESULTS)
+    {
+        jo_printf(16, 9, "1P RESULTS");
+        jo_printf(13, 12, "ENEMY %05d", world.score);
+        jo_printf(13, 14, "TOTAL %05d", world.score);
+    }
+    else if (world.encounter_state == CAP_ENCOUNTER_INTERMISSION)
+        jo_printf(10, 12, "PREPARE FOR ROUND 2");
+    else if (world.encounter_state == CAP_ENCOUNTER_COMPLETE)
+    {
+        jo_printf(15, 11, "ROUND 2");
+        jo_printf(9, 13, "WAR IN THE UNDERPASS");
+    }
 }
 
 static void frame_callback(void)
 {
     CapInput input;
+    jo_clear_screen();
     if (!runtime_ready)
     {
         jo_printf(1, 12, "CAPABILITY TEST FAILED: %s", failed_asset == JO_NULL ? "UNKNOWN" : failed_asset);
@@ -541,8 +606,7 @@ static void frame_callback(void)
 #endif
     if (jo_is_pad1_key_down(JO_KEY_X)) debug_hud_enabled = !debug_hud_enabled;
     draw_world();
-    if (world.encounter_state == CAP_ENCOUNTER_STAGE_CLEAR || world.level_completed)
-        jo_printf(12, 12, "STAGE CLEAR");
+    draw_route_overlay();
     draw_hud();
 #ifdef AVSP_VISUAL_TEST
     jo_printf(0, 5, "VISUAL P%02d/%02d E%02d",
@@ -558,7 +622,6 @@ void jo_main(void)
     background_bitmap = JO_NULL;
     background_image.data = JO_NULL;
     boss_background_image.data = JO_NULL;
-    snapshot_fit_image.data = JO_NULL;
     debug_hud_enabled = 0;
     boss_background_active = 0;
     stage_music_started = 0;
@@ -566,7 +629,7 @@ void jo_main(void)
     jo_core_init(JO_COLOR_Black);
     cart_available = jo_get_extended_ram_cartridge_type() == CART_32MBits;
     set_actor_palette();
-    set_snapshot_palette();
+    set_frontend_palettes();
     if (!cart_available)
     {
         failed_asset = "4MB RAM CART REQUIRED";
@@ -574,8 +637,8 @@ void jo_main(void)
     }
     else
     {
-        runtime_ready = load_background() && load_boss_background() &&
-                        load_snapshot_asset() &&
+        runtime_ready = load_frontend_assets() &&
+                        load_background() && load_boss_background() &&
                         load_all_cels() && load_player_attack_sequence() &&
                         load_enemy_walk_sequence() && load_boss_idle() &&
                         create_sprite_working_set();
@@ -583,6 +646,8 @@ void jo_main(void)
     cap_world_init(&world);
 #ifdef AVSP_VISUAL_TEST
     world.encounter_started = 1;
+    world.encounter_state = CAP_ENCOUNTER_WAVE_ONE;
+    world.room_locked = 1;
     world.frame = 1;
     world.player.x = JO_TV_WIDTH_2;
     world.enemies[0].x = world.player.x + 112;

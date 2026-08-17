@@ -27,8 +27,7 @@ if (-not $PythonPath -or -not (Test-Path -LiteralPath $PythonPath)) {
     throw 'Python 3 is required to validate the committed Stage 1 route ledger.'
 }
 
-& $PythonPath (Join-Path $PSScriptRoot 'tools\generate_stage1_route.py') `
-    '--check-only'
+& $PythonPath (Join-Path $PSScriptRoot 'tools\generate_stage1_route.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Stage 1 route-ledger validation failed with exit code $LASTEXITCODE."
 }

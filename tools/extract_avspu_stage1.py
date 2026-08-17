@@ -983,6 +983,78 @@ static const unsigned char avsp_snapshot_palette[256][3] = {{
     ]
 
 
+def write_frontend_assets(sprite_dir: Path) -> list[dict[str, object]]:
+    """Emit lossless full-fit menu and character-select capture surfaces."""
+    scenes = (("MENUFIT.BIN", 1440), ("CHARFIT.BIN", 1800))
+    palettes: list[list[tuple[int, int, int]]] = []
+    manifest: list[dict[str, object]] = []
+
+    for filename, frame in scenes:
+        source_path = CAPTURE_ROOT / f"stage1_{frame:04d}.png"
+        image = Image.open(source_path).convert("RGB")
+        if image.size != (VISIBLE_WIDTH, VISIBLE_HEIGHT):
+            raise ValueError(f"frontend frame {frame} must be 384x224")
+
+        colours: list[tuple[int, int, int]] = []
+        colour_to_index: dict[tuple[int, int, int], int] = {}
+        source_data = bytearray(VISIBLE_WIDTH * VISIBLE_HEIGHT)
+        for y in range(VISIBLE_HEIGHT):
+            for x in range(VISIBLE_WIDTH):
+                rgb = image.getpixel((x, y))
+                index = colour_to_index.get(rgb)
+                if index is None:
+                    index = len(colours) + 1
+                    if index >= 256:
+                        raise ValueError(
+                            f"frontend frame {frame} exceeds one Saturn 8bpp palette")
+                    colour_to_index[rgb] = index
+                    colours.append(rgb)
+                source_data[y * VISIBLE_WIDTH + x] = index
+
+        fit_data = bytearray(SATURN_VIEW_WIDTH * VISIBLE_HEIGHT)
+        for y in range(VISIBLE_HEIGHT):
+            for x in range(SATURN_VIEW_WIDTH):
+                source_x = (
+                    x * (VISIBLE_WIDTH - 1) + (SATURN_VIEW_WIDTH - 1) // 2
+                ) // (SATURN_VIEW_WIDTH - 1)
+                fit_data[y * SATURN_VIEW_WIDTH + x] = (
+                    source_data[y * VISIBLE_WIDTH + source_x])
+
+        target = sprite_dir / filename
+        target.write_bytes(fit_data)
+        palettes.append(colours + [(0, 0, 0)] * (256 - len(colours)))
+        manifest.append({
+            "path": f"SPR8/{filename}",
+            "bytes": len(fit_data),
+            "sha256": hashlib.sha256(fit_data).hexdigest(),
+            "source_frame": frame,
+            "visible_colours": len(colours),
+            "display": "lossless-full-width-fit",
+        })
+
+    palette_scenes = []
+    for palette in palettes:
+        rows = ",\n".join(
+            f"        {{{red}, {green}, {blue}}}" for red, green, blue in palette)
+        palette_scenes.append("    {\n" + rows + "\n    }")
+    filenames = ", ".join(f'"{filename}"' for filename, _ in scenes)
+    header = f"""/* Generated from the cold-boot CPS2 frontend capture. */
+#ifndef AVSP_FRONTEND_PALETTE_H
+#define AVSP_FRONTEND_PALETTE_H
+#define AVSP_FRONTEND_SCENES {len(scenes)}
+static const char avsp_frontend_files[AVSP_FRONTEND_SCENES][12] = {{
+    {filenames}
+}};
+static const unsigned char avsp_frontend_palettes[AVSP_FRONTEND_SCENES][256][3] = {{
+{",\n".join(palette_scenes)}
+}};
+#endif
+"""
+    (GENERATED_ROOT / "avsp_frontend_palette.h").write_text(
+        header, encoding="ascii")
+    return manifest
+
+
 def fit_background_for_saturn(stage: Image.Image) -> Image.Image:
     """Pre-scale a CPS2 background so VDP2 can display it at reliable 1:1."""
     expected_width = round(stage.width * SATURN_VIEW_WIDTH / VISIBLE_WIDTH)
@@ -1259,6 +1331,7 @@ def write_saturn_assets(gfx: bytearray, palette: list[tuple[int, int, int, int]]
     manifest: list[dict[str, object]] = []
 
     manifest.extend(write_exact_actor_assets(gfx, palette, sprite_dir))
+    manifest.extend(write_frontend_assets(snapshot_dir))
     manifest.extend(write_snapshot_asset(object_layer, snapshot_dir))
 
     stage = render_background(gfx, gfxram, cps_a, cps_b, palette,

@@ -14,8 +14,10 @@ Current milestone:
 - decodes CPS2 background tilemaps, object commands, palettes, and priority
 - records 361 active-bank samples across the deterministic Stage 1 route and
   reduces the captured Predator assemblies to 87 unique poses
-- verifies 233 additional 60-frame route samples and 24 hashed visual anchors
-  from the Round 1 title through the definitive Round 2 title boundary
+- verifies 233 additional 60-frame route samples and 26 hashed visual anchors
+  from the cold Press Start screen through the definitive Round 2 title boundary
+- boots into lossless capture-derived Press Start and Predator Warrior select
+  surfaces; Start and A traverse those native states before Round 1 begins
 - preserves original sprite scale and exact 15-color CPS2 subpalettes
 - animates the first authentic ten-pose Predator attack from three aligned
   VDP1 palette layers backed by the Saturn 4 MB cartridge
@@ -27,24 +29,21 @@ Current milestone:
   capture-derived Chrysalis assembly, and reaches a native Stage Clear state
 - draws the eight bounded enemy actors from one shared VDP1 cel slot with four
   exact CPS2 alien palettes
-- boots with a palette-preserving 352x224 VDP1 reference surface containing
-  the complete horizontally fitted CPS2 object/priority result
+- retains a palette-preserving 352x224 offline reference surface containing the
+  complete horizontally fitted CPS2 object/priority result
 - boots in the Saturn's native 352x224 mode with the 4 MB expansion cartridge
 - builds a mixed-mode disc with the verified Stage 1 QSound route rendered as
   native Saturn CD audio track 2
 - runs a small native lane-combat model; enemies wait for the first input
 
-The boot scene is intentionally stable for visual comparison. It uses the
-active CPS2 object-RAM bank and reconstructs the final visible object result
-after CPS2 tilemap-priority masking. The converter retains the 384x224 source
-oracle offline and builds a 352x224 Saturn display asset from it. The
-presentation is not yet frame-exact: the HUD is static
-and the boot oracle is flattened
-rather than actor-driven. On first input, the build switches to native gameplay,
-whose player attack now uses an authentic ten-pose CPS2 sequence. It still does
-not yet bind the extracted enemy poses to the arcade's complete enemy state
-machine, exact spawn timing, isolated event sound effects, or every intermediate
-Stage 1 room and action.
+The normal release now begins at the capture-derived Press Start screen, waits
+for Saturn Start, shows the default Predator Warrior character-select capture,
+and waits for A before entering Round 1. These frontend surfaces preserve their
+source pixels and palettes but are still flattened key states rather than the
+complete arcade attract/menu animation. The converter retains the 384x224
+object/priority oracle offline. Gameplay still does not bind every extracted
+enemy pose to the arcade state machine, exact AI/spawn timing, isolated event
+sound effects, or every intermediate Stage 1 action.
 
 The Saturn has no 384-pixel low-resolution output. The selected 352x224 mode
 keeps all 224 source lines. The runtime fits all 384 horizontal source pixels
@@ -137,13 +136,15 @@ Verified on August 16, 2026:
 - the native model passes 12,000 deterministic frames, including the idle boot
   gate and the complete 5+3 opening-room lifecycle
 - the complete private capture contains 233 ordered active-bank samples from
-  frame 4260 through 18180; 24 hashed visual anchors prove the Round 1 title,
-  street, doorway dialogue, industrial transition, Chrysalis plus recurring
-  Stalker waves, boss defeat, results, intermission, and Round 2 boundary
-- a controller-only route test reaches Stage Clear without changing actor
+  frame 4260 through 18180; 26 hashed visual anchors prove Press Start,
+  Predator Warrior selection, the Round 1 title, street, doorway dialogue,
+  industrial transition, Chrysalis plus recurring Stalker waves, boss defeat,
+  results, intermission, and the Round 2 boundary
+- a controller-only route test reaches the Round 2 boundary without changing actor
   health, positions, encounter state, or timers outside normal player input
-- the encounter diagnostic visibly reaches five active enemies, eight KOs,
-  room clear, the Chrysalis room, boss defeat, and Stage Clear in Yaba Sanshiro
+- the encounter diagnostic visibly reaches five active enemies, eight street
+  KOs, room clear, the Chrysalis room with two recurring Stalker waves, boss
+  defeat, Stage Clear, results, intermission, and Round 2 in Yaba Sanshiro
 - the native audio module links successfully and the mixed-mode cue exposes a
   168.015-second stereo 16-bit 44.1 kHz Stage 1 QSound reference as CD track 2
 - the final visible object/priority result fits a single 78,848-byte 352x224

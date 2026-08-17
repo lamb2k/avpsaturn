@@ -29,12 +29,25 @@ static int test_abs(const int value)
 static void start_encounter(CapWorld *world)
 {
     CapInput input;
+    int frame;
     memset(&input, 0, sizeof(input));
-    input.right = 1;
+    input.start_pressed = 1;
     (void)cap_world_step(world, &input);
+    assert(world->encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT);
+    assert(world->encounter_started == 0);
+    memset(&input, 0, sizeof(input));
+    input.attack_pressed = 1;
+    (void)cap_world_step(world, &input);
+    assert(world->encounter_state == CAP_ENCOUNTER_ROUND_TITLE);
+    assert(world->room_locked == 1);
+    assert(active_enemy_count(world) == 0);
+    for (frame = 0; frame < 600 &&
+         world->encounter_state != CAP_ENCOUNTER_WAVE_ONE; ++frame)
+        step_empty(world, 1);
     assert(world->encounter_state == CAP_ENCOUNTER_WAVE_ONE);
     assert(world->room_locked == 1);
     assert(active_enemy_count(world) == 5);
+    assert(frame == 479);
 }
 
 static void test_attack_requests_and_damage(void)
@@ -78,7 +91,7 @@ static void test_encounter_waits_for_player_input(void)
     enemy_x = world.enemies[0].x;
     step_empty(&world, 1200);
     assert(world.encounter_started == 0);
-    assert(world.encounter_state == CAP_ENCOUNTER_APPROACH);
+    assert(world.encounter_state == CAP_ENCOUNTER_MAIN_MENU);
     assert(active_enemy_count(&world) == 0);
     assert(world.enemies[0].x == enemy_x);
 
@@ -139,14 +152,36 @@ static void test_first_room_waves_and_transition(void)
     for (index = 0; index < 120 && !world.stage_transitioned; ++index)
         (void)cap_world_step(&world, &input);
     assert(world.stage_transitioned == 1);
-    assert(world.stage_area == 1);
-    assert(world.encounter_state == CAP_ENCOUNTER_BOSS_INTRO);
+    assert(world.stage_area == 0);
+    assert(world.encounter_state == CAP_ENCOUNTER_DOOR_DIALOGUE);
 
-    step_empty(&world, 90);
-    assert(world.encounter_state == CAP_ENCOUNTER_BOSS);
+    step_empty(&world, 60);
+    assert(world.encounter_state == CAP_ENCOUNTER_INTERIOR_TRANSITION);
+    step_empty(&world, 60);
+    assert(world.encounter_state == CAP_ENCOUNTER_BOSS_INTRO);
+    assert(world.stage_area == 1);
     assert(active_enemy_count(&world) == 1);
     assert(world.enemies[0].kind == CAP_ACTOR_BOSS);
+    step_empty(&world, 60);
+    assert(world.encounter_state == CAP_ENCOUNTER_BOSS);
+    assert(active_enemy_count(&world) == 2);
+    assert(world.enemies[0].kind == CAP_ACTOR_BOSS);
     assert(world.enemies[0].health == CAP_BOSS_MAX_HEALTH);
+    assert(world.enemies[1].kind == CAP_ACTOR_STALKER);
+    assert(world.boss_adds_spawned == 1);
+
+    world.enemies[0].health = 16;
+    step_empty(&world, 1);
+    assert(world.boss_reinforcement_wave == 1);
+    assert(world.boss_adds_spawned == 3);
+    assert(active_enemy_count(&world) == 4);
+    for (index = 1; index < CAP_MAX_ENEMIES; ++index)
+        world.enemies[index].active = 0;
+    world.enemies[0].health = 8;
+    step_empty(&world, 1);
+    assert(world.boss_reinforcement_wave == 2);
+    assert(world.boss_adds_spawned == CAP_BOSS_TOTAL_ADDS);
+    assert(active_enemy_count(&world) == 3);
 
     world.enemies[0].x = world.player.x + 40;
     world.enemies[0].lane = world.player.lane;
@@ -156,8 +191,14 @@ static void test_first_room_waves_and_transition(void)
     (void)cap_world_step(&world, &input);
     step_empty(&world, 16);
     assert(world.boss_defeated == 1);
+    assert(world.encounter_state == CAP_ENCOUNTER_BOSS_DEFEAT);
+    step_empty(&world, 240);
     assert(world.encounter_state == CAP_ENCOUNTER_STAGE_CLEAR);
-    step_empty(&world, 180);
+    step_empty(&world, 120);
+    assert(world.encounter_state == CAP_ENCOUNTER_RESULTS);
+    step_empty(&world, 360);
+    assert(world.encounter_state == CAP_ENCOUNTER_INTERMISSION);
+    step_empty(&world, 60);
     assert(world.level_completed == 1);
     assert(world.encounter_state == CAP_ENCOUNTER_COMPLETE);
 }
@@ -176,7 +217,11 @@ static void test_controller_only_route_completion(void)
         int index;
 
         memset(&input, 0, sizeof(input));
-        if (!world.encounter_started || world.encounter_state == CAP_ENCOUNTER_CLEAR)
+        if (world.encounter_state == CAP_ENCOUNTER_MAIN_MENU)
+            input.start_pressed = 1;
+        else if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT)
+            input.attack_pressed = 1;
+        else if (world.encounter_state == CAP_ENCOUNTER_CLEAR)
         {
             input.right = 1;
             input.dash_held = 1;
@@ -235,8 +280,9 @@ static void test_controller_only_route_completion(void)
     assert(world.encounter_state == CAP_ENCOUNTER_COMPLETE);
     assert(world.enemies_defeated == CAP_STAGE1_TOTAL_ENEMIES);
     assert(world.boss_defeated == 1);
+    assert(world.boss_adds_spawned == CAP_BOSS_TOTAL_ADDS);
     assert(frame < 90000);
-    printf("Controller-only route reached Stage Clear in %d frames.\n", frame);
+    printf("Controller-only route reached Round 2 boundary in %d frames.\n", frame);
 }
 
 static void test_long_deterministic_run(void)
@@ -257,6 +303,8 @@ static void test_long_deterministic_run(void)
         input.dash_held = (frame % 90) < 30;
         input.attack_pressed = (frame % 73) == 0;
         input.special_pressed = (frame % 211) == 0 && !input.attack_pressed;
+        input.start_pressed = frame == 0;
+        if (frame == 1) input.attack_pressed = 1;
         (void)cap_world_step(&world, &input);
 
         assert(world.player.x >= 24 && world.player.x <= CAP_WORLD_WIDTH - 24);
@@ -265,11 +313,17 @@ static void test_long_deterministic_run(void)
         assert(world.camera_x >= 0 &&
                world.camera_x <= CAP_WORLD_WIDTH - CAP_VIEW_WIDTH);
         assert(world.player.action >= CAP_ACT_IDLE && world.player.action <= CAP_ACT_KO);
-        assert(world.encounter_state >= CAP_ENCOUNTER_APPROACH);
+        assert(world.encounter_state >= CAP_ENCOUNTER_MAIN_MENU);
         assert(world.encounter_state <= CAP_ENCOUNTER_COMPLETE);
         assert(world.stage_area == 0 || world.stage_area == 1);
         assert(world.boss_defeated == 0 || world.boss_defeated == 1);
         assert(world.level_completed == 0 || world.level_completed == 1);
+        assert(world.boss_adds_spawned >= 0 &&
+               world.boss_adds_spawned <= CAP_BOSS_TOTAL_ADDS);
+        assert(world.boss_adds_defeated >= 0 &&
+               world.boss_adds_defeated <= CAP_BOSS_TOTAL_ADDS);
+        assert(world.boss_reinforcement_wave >= 0 &&
+               world.boss_reinforcement_wave <= 2);
         assert(world.enemies_defeated >= 0 &&
                world.enemies_defeated <= CAP_STAGE1_TOTAL_ENEMIES);
         for (index = 0; index < CAP_MAX_ENEMIES; ++index)
@@ -288,6 +342,13 @@ static void test_long_deterministic_run(void)
         }
     }
     assert(world.frame == 12000);
+}
+
+static void test_capture_backed_route_boundary(void)
+{
+    assert(cap_stage1_route_event_count() == 26);
+    assert(cap_stage1_source_start_frame() == 1440);
+    assert(cap_stage1_source_end_frame() == 14760);
 }
 
 static void test_centered_background_mapping(void)
@@ -333,6 +394,7 @@ int main(void)
     test_first_room_waves_and_transition();
     test_controller_only_route_completion();
     test_long_deterministic_run();
+    test_capture_backed_route_boundary();
     test_centered_background_mapping();
     test_actor_display_mapping();
     puts("Capability model tests passed (12,000 deterministic frames).");
