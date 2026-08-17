@@ -21,6 +21,7 @@ VISIBLE_LEFT = 64
 VISIBLE_TOP = 16
 VISIBLE_WIDTH = 384
 VISIBLE_HEIGHT = 224
+STAGE1_ACTIVE_OBJECT_RAM = "objram2.tsv"
 
 EXPECTED_SHA1 = {
     "avp.13m": "457ce959aa5db3a003de7dda2b3799b2f1ae279b",
@@ -305,18 +306,42 @@ def decode_objects(gfx: bytearray, words: list[int], palette: list[tuple[int, in
     return layer, rendered
 
 
-def without_cps2_shadow_masks(words: list[int]) -> list[int]:
-    """Remove CPS2 shadow-mask objects that Saturn must render separately."""
-    shadow_codes = {7977, 8028, 8059}
-    filtered: list[int] = []
-    for offset in range(0, len(words) - 3, 4):
-        command = words[offset:offset + 4]
-        if command[1] >= 0x8000 or command[3] >= 0xFF00:
-            break
-        if command[2] not in shadow_codes:
-            filtered.extend(command)
-    filtered.extend((0, 0x8000, 0, 0xFF00))
-    return filtered
+def final_visible_object_surface(background: Image.Image,
+                                 object_layer: Image.Image) -> Image.Image:
+    """Recover the final CPS2 object/priority result from the MAME reference."""
+    reference = Image.open(CAPTURE_ROOT / "stage1_4200.png").convert("RGBA")
+    if reference.size != background.size or reference.size != object_layer.size:
+        raise ValueError("MAME reference, background, and object dimensions differ")
+    result = Image.new("RGBA", reference.size, (0, 0, 0, 0))
+    reference_pixels = reference.load()
+    background_pixels = background.load()
+    object_pixels = object_layer.load()
+    result_pixels = result.load()
+    for y in range(reference.height):
+        for x in range(reference.width):
+            if (object_pixels[x, y][3] and
+                    reference_pixels[x, y][:3] != background_pixels[x, y][:3]):
+                result_pixels[x, y] = reference_pixels[x, y]
+    return result
+
+
+def verify_stage1_object_capture(entries: list[dict[str, int]]) -> None:
+    """Reject a stale capture or the inactive CPS2 object-RAM bank."""
+    expected = {
+        (68, 320, 82, 773, 0),       # Predator body, partly outside the crop
+        (124, 87, 142, 20288, 16),   # left blue alien upper assembly
+        (128, 105, 152, 17973, 16),  # left blue alien lower assembly
+        (140, 136, 104, 18016, 17),  # purple alien main assembly
+    }
+    actual = {
+        (entry["offset"], entry["screen_x"], entry["screen_y"],
+         entry["code"], entry["colour"])
+        for entry in entries
+    }
+    if len(entries) != 54 or not expected.issubset(actual):
+        raise ValueError(
+            f"{STAGE1_ACTIVE_OBJECT_RAM}: expected the verified 54-command "
+            "Stage 1 active-bank signature")
 
 
 def make_contact_sheet(layer: Image.Image, entries: list[dict[str, int]]) -> None:
@@ -373,14 +398,22 @@ def fit_actor_frame(source: Image.Image, max_width: int = 176,
 
 
 def common_4bpp_palette(images: list[Image.Image]) -> list[tuple[int, int, int]]:
-    opaque = [pixel[:3] for image in images for pixel in image.getdata() if pixel[3] >= 128]
+    opaque = []
+    for image in images:
+        pixels = image.load()
+        opaque.extend(
+            pixels[x, y][:3]
+            for y in range(image.height)
+            for x in range(image.width)
+            if pixels[x, y][3] >= 128)
     if not opaque:
         raise ValueError("cannot build a palette from empty actor frames")
     sample = Image.new("RGB", (len(opaque), 1))
     sample.putdata(opaque)
     quantized = sample.quantize(colors=15, method=Image.Quantize.MEDIANCUT)
     raw_palette = quantized.getpalette()
-    colour_count = max(quantized.getdata()) + 1
+    histogram = quantized.histogram()
+    colour_count = max(index for index, count in enumerate(histogram) if count) + 1
     return [tuple(raw_palette[index * 3:index * 3 + 3]) for index in range(colour_count)]
 
 
@@ -499,8 +532,10 @@ static const unsigned char avsp_exact_palettes[AVSP_EXACT_PALETTE_BANKS][15][3] 
 
 def write_snapshot_asset(layer: Image.Image, sprite_dir: Path) -> dict[str, object]:
     """Write the complete captured CPS2 object pass as a lossless 8bpp cel."""
+    # Jo stores palette array entry 0 at CRAM bank + 1. Pixel index 0 remains
+    # transparent, so visible pixel index N uses colours[N - 1].
     colour_to_index: dict[tuple[int, int, int], int] = {}
-    colours: list[tuple[int, int, int]] = [(0, 0, 0)]
+    colours: list[tuple[int, int, int]] = []
     data = bytearray(layer.width * layer.height)
     source = layer.load()
 
@@ -512,7 +547,7 @@ def write_snapshot_asset(layer: Image.Image, sprite_dir: Path) -> dict[str, obje
             rgb = (red, green, blue)
             index = colour_to_index.get(rgb)
             if index is None:
-                index = len(colours)
+                index = len(colours) + 1
                 if index >= 256:
                     raise ValueError("captured CPS2 object pass exceeds one Saturn 8bpp palette")
                 colour_to_index[rgb] = index
@@ -537,7 +572,7 @@ static const unsigned char avsp_snapshot_palette[256][3] = {{
     target.write_bytes(data)
     return {"path": "SPR8/OBJFRM.BIN", "bytes": len(data),
             "sha256": hashlib.sha256(data).hexdigest(),
-            "visible_colours": len(colours) - 1}
+            "visible_colours": len(colours)}
 
 
 def write_exact_actor_assets(gfx: bytearray,
@@ -547,8 +582,8 @@ def write_exact_actor_assets(gfx: bytearray,
         "player_idle": exact_object_layers(gfx, palette, 2880, 1, [76, 80, 84, 88]),
         "player_attack": exact_object_layers(
             gfx, palette, 2940, 2, list(range(72, 117, 4)), shift_x=-150),
-        "alien_a": exact_object_layers(gfx, palette, 4200, 1, [120, 124]),
-        "alien_b": exact_object_layers(gfx, palette, 4200, 1, [140, 144]),
+        "alien_a": exact_object_layers(gfx, palette, 4200, 2, [124, 128]),
+        "alien_b": exact_object_layers(gfx, palette, 4200, 2, [144, 148]),
     }
     # Fixed Saturn subpalette slots. Player layers retain CPS2 palettes 0, 7,
     # and 15; the Stage 1 alien retains palette 16.
@@ -633,9 +668,9 @@ def write_saturn_assets(gfx: bytearray, palette: list[tuple[int, int, int, int]]
         gfx, palette, 2880, 1, [76, 80, 84, 88]))
     player_attack = fit_actor_frame(selected_object_layer(
         gfx, palette, 2940, 2, list(range(72, 125, 4)), shift_x=-150))
-    alien_a = fit_actor_frame(selected_object_layer(gfx, palette, 4200, 1, [120, 124]))
-    alien_b = fit_actor_frame(selected_object_layer(gfx, palette, 4200, 1, [140, 144]))
-    alien_c = fit_actor_frame(selected_object_layer(gfx, palette, 4200, 1, [156, 160]))
+    alien_a = fit_actor_frame(selected_object_layer(gfx, palette, 4200, 2, [124, 128]))
+    alien_b = fit_actor_frame(selected_object_layer(gfx, palette, 4200, 2, [144, 148]))
+    alien_c = fit_actor_frame(selected_object_layer(gfx, palette, 4200, 2, [160, 164]))
 
     player_sources = [player_idle, player_attack]
     alien_sources = [alien_a, alien_b, alien_c]
@@ -707,16 +742,17 @@ def main() -> None:
     cps_a = load_words("cps_a_regs.tsv")
     cps_b = load_words("cps_b_regs.tsv")
     background = render_background(gfx, gfxram, cps_a, cps_b, palette)
-    words = load_words("objram1.tsv")
+    words = load_words(STAGE1_ACTIVE_OBJECT_RAM)
     layer, entries = decode_objects(gfx, words, palette)
-    saturn_layer, _ = decode_objects(gfx, without_cps2_shadow_masks(words), palette)
+    verify_stage1_object_capture(entries)
+    saturn_layer = final_visible_object_surface(background, layer)
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
     background.save(OUTPUT_ROOT / "stage1_background.png")
     composite = background.copy()
     composite.alpha_composite(layer)
     composite.save(OUTPUT_ROOT / "stage1_reconstructed.png")
     write_saturn_assets(gfx, palette, gfxram, cps_a, cps_b, saturn_layer)
-    saturn_layer.save(OUTPUT_ROOT / "stage1_saturn_objects.png")
+    saturn_layer.save(OUTPUT_ROOT / "stage1_saturn_visible_objects.png")
     layer.save(OUTPUT_ROOT / "stage1_objects.png")
     (OUTPUT_ROOT / "stage1_objects.json").write_text(
         json.dumps(entries, indent=2) + "\n", encoding="utf-8")

@@ -38,11 +38,14 @@ alien cels. Four exact CPS2 palette banks occupy one Saturn 256-color CRAM
 allocation. This fits comfortably in VDP1 texture memory and leaves room for
 commands and a future animation cache.
 
-Before gameplay starts, a separate reference mode draws the complete captured
-object pass as one 384x224 8bpp VDP1 surface. Its 78 visible source colors fit
-losslessly inside one 256-color Saturn palette and consume 86,016 bytes. This is
-a comparison oracle, not the final animation architecture. The first player
-input replaces it with the actor working set and native transforms.
+Before gameplay starts, a separate reference mode draws the final visible CPS2
+object/priority result as one 384x224 8bpp VDP1 surface. Its 76 visible source
+colors fit losslessly inside one 256-color Saturn palette and consume 86,016
+bytes. The converter derives this surface from the MAME reference after removing
+the reconstructed background, so tilemap-priority occlusion is already resolved.
+This is a flattened comparison oracle, not the final animation architecture.
+The first player input replaces it with the actor working set and native
+transforms.
 
 ## Background and HUD
 
@@ -60,12 +63,11 @@ Exact in the current milestone:
 - selected object pixels, scale, transparency, and palette pens
 - selected background/HUD capture reconstruction
 - aligned multi-palette VDP1 assembly
-- complete captured non-shadow object layout in the boot reference surface
+- active CPS2 object-RAM bank and final visible boot object/priority result
 
 Still approximate or incomplete:
 
-- Saturn translation of CPS2 hardware shadow-mask commands
-- actor grouping from all 53 captured object commands for animated gameplay
+- actor grouping from all 54 captured object commands for animated gameplay
 - enemy variants, palettes, poses, count, and exact object priority
 - animation/state timing and full frame sets
 - dynamic HUD values, scroll behavior, level triggers, combat, AI, and audio
@@ -73,14 +75,13 @@ Still approximate or incomplete:
 
 ## Next implementation sequence
 
-1. Translate CPS2 shadow-mask commands to an equivalent Saturn render pass.
-2. Group captured CPS2 commands into complete actors and props.
-3. Emit tight per-actor/per-palette cels and pivot metadata.
-4. Capture successive gameplay states and build animation manifests.
-5. Replace prototype combat with Stage 1 scripts, collision, spawn, and camera
+1. Group captured CPS2 commands into complete actors and props.
+2. Emit tight per-actor/per-palette cels, pivots, and priority metadata.
+3. Capture successive gameplay states and build animation manifests.
+4. Replace prototype combat with Stage 1 scripts, collision, spawn, and camera
    data.
-6. Add bounded CD-to-cartridge prefetch and VDP1 cache scheduling.
-7. Port audio, complete the level, and verify on real Saturn hardware.
+5. Add bounded CD-to-cartridge prefetch and VDP1 cache scheduling.
+6. Port audio, complete the level, and verify on real Saturn hardware.
 
 Additional frames should live on disc and in the 4 MB cartridge. Only the
 current and predicted cels should occupy VDP1 VRAM. AI upscaling is a separate

@@ -26,17 +26,18 @@ working-set pixels at original scale over the reconstructed background/HUD.
 - Group all visible CPS2 object commands into actors and props.
 - Match the MAME reference enemy variants, palettes, positions, pivots, and
   priority at the Saturn's chosen crop.
-- Translate CPS2 hardware shadow masks instead of drawing or dropping their
-  palette pixels.
+- Preserve the active object-RAM bank and reproduce tilemap priority when the
+  flattened boot oracle is replaced by independently animated actors.
 - Remove static HUD values from the background and drive them natively.
 - Produce an automated image-difference report with separately stated crop and
   color-quantization tolerances.
 
-Status: in progress. The boot reference mode now draws all captured non-shadow
-objects from one lossless 8bpp VDP1 surface with 78 visible colors. Shadow-mask
-translation, crop policy, dynamic HUD state, and image-difference acceptance
-remain open. The post-input gameplay scene still reuses two blue alien cels and
-must not be described as frame-exact.
+Status: in progress. The boot reference mode now draws the final visible CPS2
+object/priority result from one lossless 8bpp VDP1 surface with 76 visible
+colors. Active-bank selection is guarded by a 54-command capture signature.
+Actor-level priority, crop policy, dynamic HUD state, and image-difference
+acceptance remain open. The post-input gameplay scene still reuses two blue
+alien cels and must not be described as frame-exact.
 
 ## Gate D: first playable Stage 1 encounter
 

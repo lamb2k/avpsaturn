@@ -16,17 +16,18 @@ Current milestone:
 - draws the Predator from two or three aligned VDP1 palette layers
 - draws exact alien object pixels through VDP1 over a reconstructed VDP2 stage
 - boots with a lossless 8-bit VDP1 reference surface containing the complete
-  captured CPS2 object pass, excluding hardware shadow-mask commands
+  final visible CPS2 object/priority result
 - boots at 320x224 with the Saturn 4 MB expansion RAM cartridge
 - runs a small native lane-combat model; enemies wait for the first input
 
-The boot scene is intentionally stable for visual comparison. It now reproduces
-the captured object layout and 78 visible object colors at original scale, but
-it is not yet frame-exact: CPS2 hardware shadow masks are omitted instead of
-being translated to a Saturn shadow pass, the 384-wide frame is center-cropped
-to 320, and the HUD is static. On first input, the build switches to native
-gameplay, whose smaller working set still reuses two alien cels and does not yet
-reproduce the arcade animation state, combat, audio, or level progression.
+The boot scene is intentionally stable for visual comparison. It uses the
+active CPS2 object-RAM bank and reconstructs the final visible object result
+after CPS2 tilemap-priority masking. The comparison surface is lossless at its
+source scale, but the presentation is not yet frame-exact: the 384-wide frame
+is center-cropped to 320, the HUD is static, and the boot oracle is flattened
+rather than actor-driven. On first input, the build switches to native gameplay,
+whose smaller working set still reuses two alien cels and does not yet reproduce
+the arcade animation state, combat, audio, or level progression.
 
 ## Repository and content boundary
 
@@ -75,19 +76,19 @@ Verified on August 16, 2026:
 
 - official MAME reports the local `avspu` set as good
 - the Python CPS2 graphics reconstruction matches MAME's 16 MiB `:gfx` region
-- 53 captured CPS2 object commands decode into the reference scene
+- 54 captured commands decode from the verified active CPS2 object-RAM bank
 - exact layered cels retain original scale and CPS2 palette pens
 - the native model passes 12,000 deterministic frames, including the idle boot
   gate
-- the complete captured object pass fits a single 86,016-byte VDP1 8bpp surface
-  with 78 visible colors
+- the final visible object/priority result fits a single 86,016-byte VDP1 8bpp
+  surface with 76 visible colors
 - the release SH-2 build, link, ISO, and cue generation complete successfully
 - Yaba Sanshiro boots the image with the 4 MB cartridge and displays the exact
   asset working set over the reconstructed Stage 1 background/HUD
 
-Next proof gate: translate the CPS2 shadow-mask objects, then split the full
-reference surface into actor-grouped animation assets and complete the first
-playable Stage 1 encounter.
+Next proof gate: split the full reference surface into actor-grouped animation
+assets with explicit priority metadata, then complete the first playable Stage
+1 encounter.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
 [docs/TEST_PLAN.md](docs/TEST_PLAN.md).

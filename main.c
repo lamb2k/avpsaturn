@@ -95,28 +95,30 @@ static void set_actor_palette(void)
     for (bank = 0; bank < AVSP_EXACT_PALETTE_BANKS; ++bank)
     {
         for (index = 0; index < 15; ++index)
-            colors[bank * 16 + index + 1] = JO_COLOR_RGB(
+            /* Jo's palette allocation starts at CRAM base + 1. Sprite pen 1
+               therefore reads array entry 0, not array entry 1. */
+            colors[bank * 16 + index] = JO_COLOR_RGB(
                 avsp_exact_palettes[bank][index][0],
                 avsp_exact_palettes[bank][index][1],
                 avsp_exact_palettes[bank][index][2]);
     }
 
     /* Utility effect bank five remains separate from the exact CPS2 banks. */
-    colors[81] = JO_COLOR_RGB(16, 18, 21);
-    colors[82] = JO_COLOR_RGB(48, 50, 55);
-    colors[83] = JO_COLOR_RGB(91, 94, 99);
-    colors[84] = JO_COLOR_RGB(171, 177, 181);
-    colors[85] = JO_COLOR_RGB(247, 245, 218);
-    colors[86] = JO_COLOR_RGB(255, 213, 65);
-    colors[87] = JO_COLOR_RGB(255, 145, 45);
-    colors[88] = JO_COLOR_RGB(249, 71, 49);
-    colors[89] = JO_COLOR_RGB(176, 34, 41);
-    colors[90] = JO_COLOR_RGB(79, 31, 40);
-    colors[91] = JO_COLOR_RGB(53, 103, 130);
-    colors[92] = JO_COLOR_RGB(68, 164, 178);
-    colors[93] = JO_COLOR_RGB(132, 220, 190);
-    colors[94] = JO_COLOR_RGB(212, 255, 217);
-    colors[95] = JO_COLOR_White;
+    colors[80] = JO_COLOR_RGB(16, 18, 21);
+    colors[81] = JO_COLOR_RGB(48, 50, 55);
+    colors[82] = JO_COLOR_RGB(91, 94, 99);
+    colors[83] = JO_COLOR_RGB(171, 177, 181);
+    colors[84] = JO_COLOR_RGB(247, 245, 218);
+    colors[85] = JO_COLOR_RGB(255, 213, 65);
+    colors[86] = JO_COLOR_RGB(255, 145, 45);
+    colors[87] = JO_COLOR_RGB(249, 71, 49);
+    colors[88] = JO_COLOR_RGB(176, 34, 41);
+    colors[89] = JO_COLOR_RGB(79, 31, 40);
+    colors[90] = JO_COLOR_RGB(53, 103, 130);
+    colors[91] = JO_COLOR_RGB(68, 164, 178);
+    colors[92] = JO_COLOR_RGB(132, 220, 190);
+    colors[93] = JO_COLOR_RGB(212, 255, 217);
+    colors[94] = JO_COLOR_White;
 
     jo_create_palette_from(&actor_palette, colors, 256);
 }
