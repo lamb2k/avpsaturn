@@ -140,6 +140,48 @@ static void test_jump_dash_and_two_button_special(void)
     assert(world.special_health_spent == 1);
 }
 
+static void test_player_hit_and_ko_timing(void)
+{
+    CapWorld world;
+    int index;
+
+    cap_world_init(&world);
+    start_encounter(&world);
+    for (index = 1; index < CAP_MAX_ENEMIES; ++index)
+        world.enemies[index].active = 0;
+    world.enemies[0].x = world.player.x;
+    world.enemies[0].lane = world.player.lane;
+    world.enemies[0].action = CAP_ACT_ATTACK;
+    world.enemies[0].action_frame = 11;
+    world.enemies[0].hit_latched = 0;
+    step_empty(&world, 1);
+    assert(world.player.action == CAP_ACT_HIT);
+    assert(world.player.action_frame == 0);
+    step_empty(&world, 24);
+    assert(world.player.action == CAP_ACT_HIT);
+    assert(world.player.action_frame == 24);
+    step_empty(&world, 1);
+    assert(world.player.action == CAP_ACT_IDLE);
+
+    world.player.health = 1;
+    world.enemies[0].active = 1;
+    world.enemies[0].x = world.player.x;
+    world.enemies[0].lane = world.player.lane;
+    world.enemies[0].action = CAP_ACT_ATTACK;
+    world.enemies[0].action_frame = 11;
+    world.enemies[0].hit_latched = 0;
+    step_empty(&world, 1);
+    assert(world.player.action == CAP_ACT_KO);
+    assert(world.player.action_frame == 0);
+    world.enemies[0].active = 0;
+    step_empty(&world, 95);
+    assert(world.player.action == CAP_ACT_KO);
+    assert(world.player.action_frame == 95);
+    step_empty(&world, 1);
+    assert(world.player.action == CAP_ACT_IDLE);
+    assert(world.player.health == CAP_PLAYER_MAX_HEALTH);
+}
+
 static void test_encounter_waits_for_player_input(void)
 {
     CapWorld world;
@@ -463,6 +505,7 @@ int main(void)
 {
     test_attack_requests_and_damage();
     test_jump_dash_and_two_button_special();
+    test_player_hit_and_ko_timing();
     test_encounter_waits_for_player_input();
     test_first_room_waves_and_transition();
     test_controller_only_route_completion();

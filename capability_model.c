@@ -11,6 +11,8 @@
 #define CAP_SPECIAL_TOTAL_FRAMES 81
 #define CAP_JUMP_TOTAL_FRAMES 42
 #define CAP_DASH_TOTAL_FRAMES 24
+#define CAP_HIT_TOTAL_FRAMES 25
+#define CAP_PLAYER_KO_TOTAL_FRAMES 96
 #define CAP_ROOM_ONE_RIGHT 336
 #define CAP_ROOM_ONE_EXIT 480
 #define CAP_KO_VISIBLE_FRAMES 45
@@ -305,7 +307,8 @@ static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
     if (player->action == CAP_ACT_KO)
     {
         ++world->player_ko_timer;
-        if (world->player_ko_timer >= 120)
+        player->action_frame = world->player_ko_timer;
+        if (world->player_ko_timer >= CAP_PLAYER_KO_TOTAL_FRAMES)
         {
             player->x = world->camera_x + 96;
             player->lane = 178;
@@ -322,7 +325,7 @@ static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
     if (player->action == CAP_ACT_HIT)
     {
         ++player->action_frame;
-        if (player->action_frame >= 16)
+        if (player->action_frame >= CAP_HIT_TOTAL_FRAMES)
         {
             player->action = CAP_ACT_IDLE;
             player->action_frame = 0;

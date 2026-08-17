@@ -60,7 +60,7 @@ def player_sample(action: str, frame: int, bank: int) -> dict[str, object]:
     screenshot_path = action_root / f"{action}_{frame:05d}.png"
     palette_path = action_root / f"palette_{frame:05d}.tsv"
     entries = avsp.decode_object_entries(load_words(object_path))
-    commands = avsp.player_animation_commands(entries)
+    commands = avsp.isolated_player_animation_commands(entries)
     primary_commands = [entry for entry in commands if entry["colour"] == 0]
     if not primary_commands:
         raise ValueError(f"{action} frame {frame}: missing Predator primary layer")

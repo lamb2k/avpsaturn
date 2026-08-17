@@ -21,9 +21,9 @@ Current milestone:
 - reuses one VDP1 surface for thirteen cartridge-preloaded, capture-derived
   route states from the Round 1 title through the Round 2 title
 - preserves original sprite scale and exact 15-color CPS2 subpalettes
-- captures isolated Predator weapon, melee, jump, dash, and emergency-attack
-  timelines from identical pre-input CPS2 state, reduces them to 39 exact poses,
-  and animates all five actions through three aligned VDP1 palette layers
+- captures isolated Predator weapon, melee, jump, dash, emergency-attack, hit,
+  and KO timelines from verified CPS2 state, reduces the seven clips to 91 exact
+  poses, and animates them through three aligned VDP1 palette layers
 - animates a temporally tracked ten-pose blue alien sequence through one
   replaceable VDP1 slot over a reconstructed VDP2 stage
 - runs a capture-derived first-room lifecycle with five opening enemies, three
@@ -132,11 +132,14 @@ Verified on August 17, 2026:
 - 54 captured commands decode from the verified active CPS2 object-RAM bank
 - 361 four-frame-spaced captures retain the recorded active object bank; an
   independent two-bank render check confirms bank 2 at frames 2880 and 4200
-- isolated cold-boot captures prove identical pre-input RAM and palette state
-  for weapon, melee, jump, dash, and emergency attack; their exact 23-, 22-,
-  42-, 24-, and 81-frame clips reduce to 39 shared poses
-- 117 palette-layer payloads compress from 2,156,544 decoded bytes to one
-  173,004-byte indexed cartridge archive and stream through three reusable VDP1 texture slots
+- seven isolated cold-boot captures, including idle and the natural damage
+  route, verify their required common pre-input object-RAM and palette state;
+  the damage route is additionally screenshot-identical to idle through frame
+  2608. Weapon, melee, jump, dash, emergency attack, hit, and KO use exact 23-,
+  22-, 42-, 24-, 81-, 25-, and 96-frame source clips
+- the seven clips reduce to 91 shared poses; 273 palette-layer payloads compress
+  from 5,031,936 decoded bytes to one 375,520-byte indexed cartridge archive
+  and stream through three reusable VDP1 texture slots
 - the independently visible right-side blue alien is tracked across frames
   4164-4200 and its ten authentic poses run through one replaceable VDP1 slot
 - an exhaustive frame-local grouping manifest separates verified actors,
@@ -162,8 +165,10 @@ Verified on August 17, 2026:
   VDP1 8bpp display surface with 76 visible colors; the ignored converter
   output also retains the 86,016-byte 384x224 source oracle
 - the release SH-2 build, link, ISO, and cue generation complete successfully
-- the five-action visual diagnostic boots from one indexed player archive and
-  visibly cycles every exact clip through the three-layer VDP1 working set
+- the seven-clip visual diagnostic boots from one indexed player archive and
+  visibly cycles all five controlled actions plus the automatic hit and KO
+  clips through the three-layer VDP1 working set; captured per-frame offsets
+  preserve the KO launch, fall, ground bounce, and respawn trajectory
 - Yaba Sanshiro boots in 352x224 with the 4 MB cartridge, shows both horizontal
   source edges and all 224 source lines with no framebuffer black bars, and
   displays the asset working set over the reconstructed Stage 1 background/HUD

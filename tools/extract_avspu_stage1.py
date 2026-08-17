@@ -471,8 +471,38 @@ def verify_animation_bank_alignment(gfx: bytearray) -> None:
         json.dumps({"checks": report}, indent=2) + "\n", encoding="utf-8")
 
 
+def contiguous_palette_runs(entries: list[dict[str, int]],
+                            colour: int) -> list[list[dict[str, int]]]:
+    """Split one CPS2 palette into object-list runs without guessing tile art."""
+    runs: list[list[dict[str, int]]] = []
+    for entry in sorted((item for item in entries if item["colour"] == colour),
+                        key=lambda item: item["offset"]):
+        if not runs or entry["offset"] != runs[-1][-1]["offset"] + 4:
+            runs.append([])
+        runs[-1].append(entry)
+    return runs
+
+
+def command_bounds(commands: list[dict[str, int]]) -> tuple[int, int, int, int]:
+    return (
+        min(entry["screen_x"] for entry in commands),
+        min(entry["screen_y"] for entry in commands),
+        max(entry["screen_x"] + entry["width"] for entry in commands),
+        max(entry["screen_y"] + entry["height"] for entry in commands),
+    )
+
+
+def bounds_overlap(first: tuple[int, int, int, int],
+                   second: tuple[int, int, int, int], margin: int = 0) -> bool:
+    return not (
+        first[2] + margin <= second[0] or
+        second[2] + margin <= first[0] or
+        first[3] + margin <= second[1] or
+        second[3] + margin <= first[1])
+
+
 def player_animation_commands(entries: list[dict[str, int]]) -> list[dict[str, int]]:
-    """Select the Predator's CPS2 command assembly from a captured frame."""
+    """Select the established Predator assembly used by the dense route ledger."""
     return [
         entry for entry in entries
         if ((entry["colour"] == 0 and entry["tile_code"] < 7000 and
@@ -480,6 +510,38 @@ def player_animation_commands(entries: list[dict[str, int]]) -> list[dict[str, i
             (entry["colour"] == 7 and entry["tile_code"] >= 40000) or
             entry["colour"] == 15)
     ]
+
+
+def isolated_player_animation_commands(
+        entries: list[dict[str, int]]) -> list[dict[str, int]]:
+    """Select one contiguous Predator assembly without absorbing nearby actors."""
+    primary_candidates = []
+    for run in contiguous_palette_runs(entries, 0):
+        left, top, right, bottom = command_bounds(run)
+        if (any(0 < entry["tile_code"] < 7000 for entry in run) and
+                right - left <= 192 and bottom - top <= 192 and
+                left < VISIBLE_WIDTH + 64 and right > -64 and
+                top < VISIBLE_HEIGHT + 32 and bottom > 24):
+            primary_candidates.append(run)
+    if not primary_candidates:
+        return []
+    primary = max(
+        primary_candidates,
+        key=lambda run: (sum(entry["width"] * entry["height"] for entry in run),
+                         -abs((command_bounds(run)[0] +
+                               command_bounds(run)[2]) // 2 - VISIBLE_WIDTH // 2)))
+    primary_bounds = command_bounds(primary)
+    primary_last_offset = max(entry["offset"] for entry in primary)
+    commands = list(primary)
+    for run in contiguous_palette_runs(entries, 7):
+        first_offset = min(entry["offset"] for entry in run)
+        if ((primary_last_offset < first_offset <= primary_last_offset + 20) or
+                bounds_overlap(primary_bounds, command_bounds(run), margin=24)):
+            commands.extend(run)
+    for run in contiguous_palette_runs(entries, 15):
+        if bounds_overlap(primary_bounds, command_bounds(run), margin=96):
+            commands.extend(run)
+    return sorted(commands, key=lambda entry: entry["offset"])
 
 
 def write_player_animation_timeline() -> None:
@@ -815,24 +877,12 @@ def isolated_player_pose_capture(
     lines = object_path.read_text(encoding="utf-8").splitlines()[1:]
     words = [int(line.split("\t")[1], 16) for line in lines if line]
     entries = decode_object_entries(words)
-    commands = player_animation_commands(entries)
+    commands = isolated_player_animation_commands(entries)
     primary = max((entry for entry in commands if entry["colour"] == 0),
                   key=lambda entry: entry["width"] * entry["height"])
     pivot = (primary["screen_x"] + primary["width"] // 2,
              primary["screen_y"] + primary["height"])
     return bank, sorted(entry["offset"] for entry in commands), pivot, object_path
-
-
-def contiguous_palette_runs(entries: list[dict[str, int]],
-                            colour: int) -> list[list[dict[str, int]]]:
-    """Split one CPS2 palette into object-list runs without guessing tile art."""
-    runs: list[list[dict[str, int]]] = []
-    for entry in sorted((item for item in entries if item["colour"] == colour),
-                        key=lambda item: item["offset"]):
-        if not runs or entry["offset"] != runs[-1][-1]["offset"] + 4:
-            runs.append([])
-        runs[-1].append(entry)
-    return runs
 
 
 def rightmost_blue_alien_capture(
@@ -1265,6 +1315,11 @@ def write_player_action_sequence_assets(
         raise ValueError(
             "isolated player-action report is missing; run capture_player_actions.ps1")
     report = json.loads(report_path.read_text(encoding="utf-8"))
+    damage_report_path = OUTPUT_ROOT / "player_damage_probe.json"
+    if not damage_report_path.is_file():
+        raise ValueError(
+            "natural player-damage report is missing; run capture_player_damage.ps1")
+    damage_report = json.loads(damage_report_path.read_text(encoding="utf-8"))
     action_names = ("gun", "melee", "jump", "dash", "special")
     action_reports = {entry["action"]: entry for entry in report["actions"]}
     cps_colours = (0, 7, 15)
@@ -1276,7 +1331,7 @@ def write_player_action_sequence_assets(
     }
 
     pose_sources: dict[str, tuple[str, int]] = {}
-    clip_runs: list[list[dict[str, object]]] = []
+    clip_specs: list[dict[str, object]] = []
     for action in action_names:
         action_report = action_reports[action]
         if not action_report["accepted"] or action_report["clip_frame_count"] <= 0:
@@ -1285,10 +1340,38 @@ def write_player_action_sequence_assets(
         if sum(int(run["samples"]) for run in runs) != int(
                 action_report["clip_frame_count"]):
             raise ValueError(f"{action}: clip run durations do not cover the clip")
-        clip_runs.append(runs)
+        total_frames = int(action_report["clip_frame_count"])
+        clip_specs.append({
+            "name": action,
+            "source_action": action,
+            "runs": runs,
+            "total_frames": total_frames,
+            "frame_offsets": [[0, 0] for _ in range(total_frames)],
+        })
         for run in runs:
             pose_sources.setdefault(str(run["pose"]),
                                     (action, int(run["start_frame"])))
+
+    damage_clips = {entry["name"]: entry for entry in damage_report["clips"]}
+    for clip_name in ("hit", "ko"):
+        damage_clip = damage_clips[clip_name]
+        runs = damage_clip["runs"]
+        total_frames = int(damage_clip["frame_count"])
+        frame_offsets = damage_clip["frame_offsets"]
+        if sum(int(run["samples"]) for run in runs) != total_frames:
+            raise ValueError(f"{clip_name}: damage runs do not cover the clip")
+        if len(frame_offsets) != total_frames:
+            raise ValueError(f"{clip_name}: damage offsets do not cover the clip")
+        clip_specs.append({
+            "name": clip_name,
+            "source_action": "damage",
+            "runs": runs,
+            "total_frames": total_frames,
+            "frame_offsets": frame_offsets,
+        })
+        for run in runs:
+            pose_sources.setdefault(str(run["pose"]),
+                                    ("damage", int(run["start_frame"])))
 
     pose_ids = list(pose_sources)
     if len(pose_ids) >= 256:
@@ -1338,36 +1421,47 @@ def write_player_action_sequence_assets(
         "encoding": "indexed-rle8-count-value",
     })
 
-    max_steps = max(len(runs) for runs in clip_runs)
+    max_steps = max(len(clip["runs"]) for clip in clip_specs)
+    max_frames = max(int(clip["total_frames"]) for clip in clip_specs)
     offset_rows = ",\n".join(
         "    {" + ", ".join(str(offset) for offset in pose_offsets) + "}"
         for pose_offsets in archive_offsets)
     length_rows = ",\n".join(
         "    {" + ", ".join(str(length) for length in lengths) + "}"
         for lengths in compressed_lengths)
-    count_rows = ", ".join(str(len(runs)) for runs in clip_runs)
-    total_rows = ", ".join(
-        str(sum(int(run["samples"]) for run in runs)) for runs in clip_runs)
+    count_rows = ", ".join(str(len(clip["runs"])) for clip in clip_specs)
+    total_rows = ", ".join(str(clip["total_frames"]) for clip in clip_specs)
     pose_rows = []
     duration_rows = []
-    for runs in clip_runs:
+    frame_x_rows = []
+    frame_y_rows = []
+    for clip in clip_specs:
+        runs = clip["runs"]
         pose_values = [pose_indices[str(run["pose"])] for run in runs]
         duration_values = [int(run["samples"]) for run in runs]
         pose_values.extend([0] * (max_steps - len(pose_values)))
         duration_values.extend([0] * (max_steps - len(duration_values)))
         pose_rows.append("    {" + ", ".join(map(str, pose_values)) + "}")
         duration_rows.append("    {" + ", ".join(map(str, duration_values)) + "}")
+        frame_offsets = clip["frame_offsets"]
+        x_values = [int(offset[0]) for offset in frame_offsets]
+        y_values = [int(offset[1]) for offset in frame_offsets]
+        x_values.extend([0] * (max_frames - len(x_values)))
+        y_values.extend([0] * (max_frames - len(y_values)))
+        frame_x_rows.append("    {" + ", ".join(map(str, x_values)) + "}")
+        frame_y_rows.append("    {" + ", ".join(map(str, y_values)) + "}")
     frame_rows = ", ".join(str(frame) for frame in source_frames)
     action_constants = "\n".join(
-        f"#define AVSP_PLAYER_CLIP_{action.upper()} {index}"
-        for index, action in enumerate(action_names))
+        f"#define AVSP_PLAYER_CLIP_{str(clip['name']).upper()} {index}"
+        for index, clip in enumerate(clip_specs))
     header = f"""/* Generated from deterministic isolated CPS2 player actions. */
 #ifndef AVSP_PLAYER_ACTION_ANIMATION_H
 #define AVSP_PLAYER_ACTION_ANIMATION_H
-#define AVSP_PLAYER_ACTION_CLIPS {len(action_names)}
+#define AVSP_PLAYER_ACTION_CLIPS {len(clip_specs)}
 #define AVSP_PLAYER_ACTION_LAYERS {len(cps_colours)}
 #define AVSP_PLAYER_ACTION_POSES {len(pose_ids)}
 #define AVSP_PLAYER_ACTION_MAX_STEPS {max_steps}
+#define AVSP_PLAYER_ACTION_MAX_FRAMES {max_frames}
 #define AVSP_PLAYER_ACTION_DECODED_BYTES {(192 * 192) // 2}
 #define AVSP_PLAYER_ACTION_ARCHIVE_FILE "{archive_filename}"
 #define AVSP_PLAYER_ACTION_ARCHIVE_BYTES {len(archive)}
@@ -1389,6 +1483,12 @@ static const unsigned char avsp_player_action_step_poses[AVSP_PLAYER_ACTION_CLIP
 }};
 static const unsigned char avsp_player_action_step_durations[AVSP_PLAYER_ACTION_CLIPS][AVSP_PLAYER_ACTION_MAX_STEPS] = {{
 {",\n".join(duration_rows)}
+}};
+static const signed short avsp_player_action_frame_x[AVSP_PLAYER_ACTION_CLIPS][AVSP_PLAYER_ACTION_MAX_FRAMES] = {{
+{",\n".join(frame_x_rows)}
+}};
+static const signed short avsp_player_action_frame_y[AVSP_PLAYER_ACTION_CLIPS][AVSP_PLAYER_ACTION_MAX_FRAMES] = {{
+{",\n".join(frame_y_rows)}
 }};
 static const unsigned short avsp_player_action_source_frames[AVSP_PLAYER_ACTION_POSES] = {{
     {frame_rows}

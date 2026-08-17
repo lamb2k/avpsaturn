@@ -484,6 +484,8 @@ static int player_clip_for_action(const CapAction action)
     if (action == CAP_ACT_JUMP) return AVSP_PLAYER_CLIP_JUMP;
     if (action == CAP_ACT_DASH) return AVSP_PLAYER_CLIP_DASH;
     if (action == CAP_ACT_SPECIAL) return AVSP_PLAYER_CLIP_SPECIAL;
+    if (action == CAP_ACT_HIT) return AVSP_PLAYER_CLIP_HIT;
+    if (action == CAP_ACT_KO) return AVSP_PLAYER_CLIP_KO;
     return -1;
 }
 
@@ -494,7 +496,9 @@ static CapAction visual_action_for_index(const int index)
     if (index == 1) return CAP_ACT_ATTACK;
     if (index == 2) return CAP_ACT_JUMP;
     if (index == 3) return CAP_ACT_DASH;
-    return CAP_ACT_SPECIAL;
+    if (index == 4) return CAP_ACT_SPECIAL;
+    if (index == 5) return CAP_ACT_HIT;
+    return CAP_ACT_KO;
 }
 #endif
 
@@ -513,16 +517,26 @@ static int player_pose_for_frame(const int clip, const int action_frame)
         [avsp_player_action_step_counts[clip] - 1];
 }
 
+static void draw_exact_layer_offset(const CapActor *actor, const int screen_x,
+                                    const int screen_offset_x,
+                                    const int screen_offset_y,
+                                    const int sprite_id, const int palette_bank,
+                                    const int depth)
+{
+    /* Captured player and enemy pivots sit at pixel 184 in each 192px cel. */
+    int screen_y = actor->lane - 200 - actor->height + screen_offset_y;
+    jo_sprite_set_palette_4bits(actor_palette.id, palette_bank);
+    if (actor->facing < 0) jo_sprite_enable_horizontal_flip();
+    jo_sprite_draw3D(sprite_id, screen_x + screen_offset_x, screen_y, depth);
+    if (actor->facing < 0) jo_sprite_disable_horizontal_flip();
+}
+
 static void draw_exact_layer(const CapActor *actor, const int screen_x,
                              const int sprite_id, const int palette_bank,
                              const int depth)
 {
-    /* Captured player and enemy pivots sit at pixel 184 in each 192px cel. */
-    int screen_y = actor->lane - 200 - actor->height;
-    jo_sprite_set_palette_4bits(actor_palette.id, palette_bank);
-    if (actor->facing < 0) jo_sprite_enable_horizontal_flip();
-    jo_sprite_draw3D(sprite_id, screen_x, screen_y, depth);
-    if (actor->facing < 0) jo_sprite_disable_horizontal_flip();
+    draw_exact_layer_offset(actor, screen_x, 0, 0,
+                            sprite_id, palette_bank, depth);
 }
 
 static void draw_player(const CapActor *actor, const int screen_x)
@@ -532,7 +546,16 @@ static void draw_player(const CapActor *actor, const int screen_x)
     int clip = player_clip_for_action(actor->action);
     if (clip >= 0)
     {
+        int frame = actor->action_frame;
+        int screen_offset_x;
+        int screen_offset_y;
         int pose = player_pose_for_frame(clip, actor->action_frame);
+        if (frame >= avsp_player_action_total_frames[clip])
+            frame = avsp_player_action_total_frames[clip] - 1;
+        screen_offset_x = avsp_player_action_frame_x[clip][frame] *
+            CAP_VIEW_WIDTH / CAP_CPS2_VIEW_WIDTH;
+        if (actor->facing < 0) screen_offset_x = -screen_offset_x;
+        screen_offset_y = avsp_player_action_frame_y[clip][frame];
         if (pose != current_player_action_pose)
         {
             if (!decode_player_action_pose(pose))
@@ -546,8 +569,9 @@ static void draw_player(const CapActor *actor, const int screen_x)
             current_player_action_pose = pose;
         }
         for (layer = 0; layer < AVSP_PLAYER_ACTION_LAYERS; ++layer)
-            draw_exact_layer(actor, screen_x, player_action_sprites[layer],
-                             layer, depth - layer);
+            draw_exact_layer_offset(
+                actor, screen_x, screen_offset_x, screen_offset_y,
+                player_action_sprites[layer], layer, depth - layer);
     }
     else
     {

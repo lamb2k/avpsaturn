@@ -62,6 +62,18 @@ if ($LASTEXITCODE -ne 0) {
     throw "Isolated player-action capture failed with exit code $LASTEXITCODE."
 }
 
+$playerDamageArguments = @{}
+if ($RefreshCapture) {
+    $playerDamageArguments['Refresh'] = $true
+}
+if ($PythonPath) {
+    $playerDamageArguments['PythonPath'] = $PythonPath
+}
+& (Join-Path $projectRoot 'capture_player_damage.ps1') @playerDamageArguments
+if ($LASTEXITCODE -ne 0) {
+    throw "Natural player-damage capture failed with exit code $LASTEXITCODE."
+}
+
 $bossCaptures = @('boss_gfxram.tsv', 'boss_cps_a_regs.tsv',
     'boss_cps_b_regs.tsv', 'boss_palette.tsv', 'boss_objram1.tsv',
     'boss_objram2.tsv', 'boss_active_object_bank.txt')

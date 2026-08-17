@@ -23,6 +23,7 @@ local allowed_actions = {
     jump = true,
     dash = true,
     special = true,
+    damage = true,
 }
 assert(allowed_actions[action], "invalid AVSP_ACTION_PROBE: " .. action)
 
@@ -34,7 +35,7 @@ local active_object_bank = 0
 local object_bank_writes = 0
 local action_frame = 2525
 local capture_first = 2480
-local capture_last = 2608
+local capture_last = action == "damage" and 3400 or 2608
 
 local main_program = machine.devices[":maincpu"].spaces["program"]
 player_action_objbank_tap = main_program:install_write_tap(
