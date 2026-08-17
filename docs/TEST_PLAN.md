@@ -72,8 +72,15 @@ Round 2 title surfaces. No data-track reads occur after Stage 1 CDDA begins.
 - Validate the Chrysalis actor at `FF A3C0`, preserve its exact frame-12660 idle,
   and extract the 44-frame leap, 106-frame walk, and uninterrupted 189-frame
   attack/recovery clips into an indexed archive. Require contacts at offsets
-  21/55/97 for 10/10/16 health and changing walk/attack poses in Yaba Sanshiro
-  with no `BOSS ACTION BUFFER`, RLE, index, or VDP1 failure before Round 2.
+  21/55/97 for 10/10/16 health. Also require the natural frame-13491 melee
+  impact to reduce boss health from 38 to 35 and drive the exact 40-frame hit
+  clip from frames 13492-13531. Verify the original `/SPR4/BACT.RLE` remains
+  119,868 bytes with SHA-256
+  `a7efabb6894204475a6aacde4945c6cc4751b150d7d9007349566c86b78220f8`
+  and `/SPR4/BHIT.RLE` is 5,900 bytes with SHA-256
+  `c4f6db6ce3ec9d3505a543bc8340b9bee949bde297c53dc2f386a10ffe501ebb`.
+  Require changing walk/attack/hit poses in Yaba Sanshiro with no `BOSS
+  ACTION BUFFER`, RLE, index, or VDP1 failure before Round 2.
 - Validate the native Stalker slots at `FF A240` and `FF A300` as actor ID 0,
   palette 17, and 24 source health. Require the 57-frame walk, 17-frame attack,
   12-health natural contact evidence, and 157-frame KO interval to build into
@@ -174,13 +181,17 @@ states now use lossless capture-derived key surfaces instead of Jo-font
 stand-ins. The mixed-mode image adds a 168.015-second QSound
 route reference as native CD audio track 2. The 12,000-frame host test and the
 automated Yaba Sanshiro diagnostic complete this lifecycle. A separate dense
-900-frame boss capture reduces exact idle/leap/walk/attack visuals to 20 poses;
-the emulator route renders changing Chrysalis attack poses and still reaches
-Round 2 after deferring the decoded boss buffer to its gameplay phase. The same
+900-frame boss capture reduces exact idle/leap/walk/attack/hit visuals to 21
+poses. Its natural melee event proves a three-health impact followed by the
+40-frame hit reaction. A focused Yaba Sanshiro image visibly renders the new
+hunched hit pose from `/SPR4/BHIT.RLE`; the complete encounter diagnostic then
+reaches Round 2 with all audio latches retained. The emulator route renders
+changing Chrysalis attack poses after deferring the decoded boss buffer to its
+gameplay phase. The same
 route now renders the distinct purple Stalker archive beside Chrysalis and
 completes through Round 2 after loading it from the retired title-screen RAM
 block before CDDA starts. Remaining
-player transitions, other enemy archetypes, Chrysalis hit/KO effects and exact
+player transitions, other enemy archetypes, Chrysalis KO effects and exact
 AI timing, a natural nonlethal Stalker-hit clip, intermediate route detail,
 combat SCSP cues, and comparison capture
 remain open.

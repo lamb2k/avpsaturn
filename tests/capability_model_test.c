@@ -269,6 +269,14 @@ static void test_capture_exact_boss_attack_timing(void)
     assert(boss->action_frame == 188);
     step_empty(&world, 1);
     assert(boss->action == CAP_ACT_IDLE);
+
+    boss->action = CAP_ACT_HIT;
+    boss->action_frame = 0;
+    step_empty(&world, 39);
+    assert(boss->action == CAP_ACT_HIT);
+    assert(boss->action_frame == 39);
+    step_empty(&world, 1);
+    assert(boss->action == CAP_ACT_IDLE);
 }
 
 static void test_capture_exact_stalker_timing(void)

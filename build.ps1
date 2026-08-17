@@ -6,6 +6,7 @@ param(
     [switch]$Release,
     [switch]$VisualTest,
     [switch]$EncounterTest,
+    [switch]$BossHitTest,
     [switch]$SkipHostTests
 )
 
@@ -100,7 +101,8 @@ try {
                 -Destination (Join-Path $contentRoot $metadataName) -Force
         }
 
-        $buildProfile = if ($EncounterTest) { 'encounter-test' }
+        $buildProfile = if ($BossHitTest) { 'boss-hit-test' }
+            elseif ($EncounterTest) { 'encounter-test' }
             elseif ($VisualTest) { 'visual-test' }
             else { 'normal-release' }
         $optimizationProfile = if ($Release) { 'release' } else { 'debug' }
@@ -148,6 +150,9 @@ try {
         if ($EncounterTest) {
             $makeArguments += 'AVSP_ENCOUNTER_TEST=1'
         }
+        if ($BossHitTest) {
+            $makeArguments += 'AVSP_BOSS_HIT_TEST=1'
+        }
         $makeArguments += 'game.raw'
         & $make @makeArguments
         if ($LASTEXITCODE -ne 0) {
@@ -179,6 +184,18 @@ try {
         & $mkisofs @mkisofsArguments
         if ($LASTEXITCODE -ne 0) {
             throw "Could not create game.iso (exit code $LASTEXITCODE)."
+        }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/SPR4/BACT.RLE' '--equals' `
+            (Join-Path $contentRoot 'SPR4\BACT.RLE')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn Chrysalis archive ISO verification failed with exit code $LASTEXITCODE."
+        }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/SPR4/BHIT.RLE' '--equals' `
+            (Join-Path $contentRoot 'SPR4\BHIT.RLE')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn Chrysalis hit archive ISO verification failed with exit code $LASTEXITCODE."
         }
         & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
             'game.iso' '/SPR4/SACT.RLE' '--equals' `
@@ -302,6 +319,10 @@ try {
         $breachAudioFile = Get-Item -LiteralPath (Join-Path $contentRoot 'AUDIO\BREACH.PCM')
         $stalkerArchiveFile = Get-Item -LiteralPath `
             (Join-Path $contentRoot 'SPR4\SACT.RLE')
+        $bossArchiveFile = Get-Item -LiteralPath `
+            (Join-Path $contentRoot 'SPR4\BACT.RLE')
+        $bossHitArchiveFile = Get-Item -LiteralPath `
+            (Join-Path $contentRoot 'SPR4\BHIT.RLE')
         $manifestPath = Join-Path $projectRoot 'build\hardware_release_manifest.txt'
         [IO.File]::WriteAllLines($manifestPath, @(
             'target=sega-saturn-ntsc'
@@ -309,6 +330,14 @@ try {
             'boot=iso9660-mode1-2048'
             'expansion_ram=32-mbit-required'
             'expansion_ram_mapping=dram0-0x22400000-0x225fffff,dram1-0x22600000-0x227fffff'
+            'boss_archive_iso_path=/SPR4/BACT.RLE'
+            'boss_archive_load_phase=cold-boot'
+            "boss_archive_bytes=$($bossArchiveFile.Length)"
+            "boss_archive_sha256=$((Get-FileHash -LiteralPath $bossArchiveFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'boss_hit_archive_iso_path=/SPR4/BHIT.RLE'
+            'boss_hit_archive_load_phase=retired-character-select-before-cdda'
+            "boss_hit_archive_bytes=$($bossHitArchiveFile.Length)"
+            "boss_hit_archive_sha256=$((Get-FileHash -LiteralPath $bossHitArchiveFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
             'stalker_archive_iso_path=/SPR4/SACT.RLE'
             'stalker_archive_phase_overlay=retired-title-surface-before-cdda'
             "stalker_archive_bytes=$($stalkerArchiveFile.Length)"

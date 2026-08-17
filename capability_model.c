@@ -34,6 +34,7 @@
 #define CAP_BOSS_ATTACK_TRIGGER_REACH 108
 #define CAP_BOSS_ATTACK_REACH 122
 #define CAP_BOSS_APPROACH_SPEED 2
+#define CAP_BOSS_HIT_TOTAL_FRAMES 40
 #define CAP_CLEAR_HOLD_FRAMES 60
 
 typedef struct
@@ -540,7 +541,10 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
     if (enemy->action == CAP_ACT_HIT)
     {
         ++enemy->action_frame;
-        if (enemy->action_frame >= CAP_ENEMY_HIT_TOTAL_FRAMES)
+        if (enemy->action_frame >=
+                (enemy->kind == CAP_ACTOR_BOSS ?
+                    CAP_BOSS_HIT_TOTAL_FRAMES :
+                    CAP_ENEMY_HIT_TOTAL_FRAMES))
         {
             enemy->action = CAP_ACT_IDLE;
             enemy->action_frame = 0;

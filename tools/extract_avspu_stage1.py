@@ -1936,7 +1936,7 @@ static const unsigned short avsp_stalker_source_frames[AVSP_STALKER_ACTION_POSES
 
 def write_boss_action_sequence_assets(
         gfx: bytearray, sprite_dir: Path) -> list[dict[str, object]]:
-    """Emit verified Chrysalis idle, leap, walk, and attack animation data."""
+    """Emit verified Chrysalis idle, leap, walk, attack, and hit data."""
     report_path = ROOT / "data" / "boss_action_capture.json"
     if not report_path.is_file():
         raise ValueError(
@@ -1948,13 +1948,16 @@ def write_boss_action_sequence_assets(
         raise ValueError("boss-action report does not describe palette 27")
 
     archive = bytearray()
+    hit_archive = bytearray()
     archive_offsets: list[int] = []
     archive_lengths: list[int] = []
+    archive_ids: list[int] = []
     source_frames: list[int] = []
     pose_by_digest: dict[str, int] = {}
     clip_specs: list[dict[str, object]] = []
 
-    def intern_pose(decoded: bytes, source_frame: int) -> int:
+    def intern_pose(decoded: bytes, source_frame: int,
+                    supplemental: bool = False) -> int:
         digest = hashlib.sha256(decoded).hexdigest()
         pose = pose_by_digest.get(digest)
         if pose is not None:
@@ -1965,10 +1968,12 @@ def write_boss_action_sequence_assets(
         if rle_decode_bytes(encoded) != decoded:
             raise ValueError(
                 f"boss frame {source_frame}: action RLE round trip failed")
-        archive_offsets.append(len(archive))
+        target_archive = hit_archive if supplemental else archive
+        archive_ids.append(1 if supplemental else 0)
+        archive_offsets.append(len(target_archive))
         archive_lengths.append(len(encoded))
         source_frames.append(source_frame)
-        archive.extend(encoded)
+        target_archive.extend(encoded)
         return pose
 
     # Keep the prior independently verified frame as an explicit idle clip.
@@ -1987,12 +1992,14 @@ def write_boss_action_sequence_assets(
         "name": "idle", "frames": 1, "runs": [(idle_pose, 1)]})
 
     action_root = ROOT / ".deps" / "mame" / "boss_actions"
-    expected_names = ("leap", "walk", "attack")
+    expected_names = ("leap", "walk", "attack", "hit")
     report_clips = report.get("clips", [])
     if tuple(str(clip.get("name")) for clip in report_clips) != expected_names:
-        raise ValueError("boss-action report clip order is not leap/walk/attack")
+        raise ValueError(
+            "boss-action report clip order is not leap/walk/attack/hit")
     for clip in report_clips:
         frame_poses: list[int] = []
+        supplemental = str(clip["name"]) == "hit"
         for sample in clip["timeline"]:
             frame = int(sample["frame"])
             bank = int(sample["active_object_bank"])
@@ -2011,7 +2018,8 @@ def write_boss_action_sequence_assets(
             if 27 not in layers:
                 raise ValueError(
                     f"boss frame {frame}: palette-27 assembly is missing")
-            frame_poses.append(intern_pose(pack_4bpp(layers[27]), frame))
+            frame_poses.append(intern_pose(
+                pack_4bpp(layers[27]), frame, supplemental))
         if len(frame_poses) != int(clip["frame_count"]):
             raise ValueError(f"{clip['name']}: timeline does not cover clip")
         runs: list[tuple[int, int]] = []
@@ -2031,7 +2039,12 @@ def write_boss_action_sequence_assets(
     if any(length > 0xFFFF for length in archive_lengths):
         raise ValueError("one boss RLE pose exceeds the 16-bit archive index")
     archive_filename = "BACT.RLE"
+    hit_archive_filename = "BHIT.RLE"
     (sprite_dir / archive_filename).write_bytes(archive)
+    (sprite_dir / hit_archive_filename).write_bytes(hit_archive)
+    if sum(archive_ids) != 1:
+        raise ValueError(
+            "boss hit supplement must contain exactly one new pose")
     max_steps = max(len(clip["runs"]) for clip in clip_specs)
     pose_rows = []
     duration_rows = []
@@ -2058,10 +2071,15 @@ def write_boss_action_sequence_assets(
 #define AVSP_BOSS_DECODED_BYTES {(288 * 192) // 2}
 #define AVSP_BOSS_ARCHIVE_FILE "{archive_filename}"
 #define AVSP_BOSS_ARCHIVE_BYTES {len(archive)}
+#define AVSP_BOSS_HIT_ARCHIVE_FILE "{hit_archive_filename}"
+#define AVSP_BOSS_HIT_ARCHIVE_BYTES {len(hit_archive)}
 #define AVSP_BOSS_PALETTE_BANK 7
 {action_constants}
 static const unsigned int avsp_boss_rle_offsets[AVSP_BOSS_ACTION_POSES] = {{
     {", ".join(map(str, archive_offsets))}
+}};
+static const unsigned char avsp_boss_rle_archives[AVSP_BOSS_ACTION_POSES] = {{
+    {", ".join(map(str, archive_ids))}
 }};
 static const unsigned short avsp_boss_rle_bytes[AVSP_BOSS_ACTION_POSES] = {{
     {", ".join(map(str, archive_lengths))}
@@ -2088,11 +2106,20 @@ static const unsigned short avsp_boss_source_frames[AVSP_BOSS_ACTION_POSES] = {{
     return [{
         "path": f"SPR4/{archive_filename}",
         "bytes": len(archive),
-        "decoded_bytes": len(pose_by_digest) * (288 * 192) // 2,
+        "decoded_bytes": archive_ids.count(0) * (288 * 192) // 2,
         "sha256": hashlib.sha256(archive).hexdigest(),
-        "components": len(pose_by_digest),
+        "components": archive_ids.count(0),
         "encoding": "indexed-rle8-count-value",
-        "source_clips": [str(clip["name"]) for clip in clip_specs],
+        "source_clips": [str(clip["name"]) for clip in clip_specs
+                         if str(clip["name"]) != "hit"],
+    }, {
+        "path": f"SPR4/{hit_archive_filename}",
+        "bytes": len(hit_archive),
+        "decoded_bytes": archive_ids.count(1) * (288 * 192) // 2,
+        "sha256": hashlib.sha256(hit_archive).hexdigest(),
+        "components": archive_ids.count(1),
+        "encoding": "indexed-rle8-count-value",
+        "source_clips": ["hit"],
     }]
 
 

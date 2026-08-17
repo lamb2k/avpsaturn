@@ -1,4 +1,4 @@
-"""Validate capture-exact Chrysalis movement and attack timelines.
+"""Validate capture-exact Chrysalis movement, attack, and hit timelines.
 
 The boss occupies the native actor slot at FF A3C0. Palette 27 uniquely owns
 the ordinary Chrysalis assembly in this capture, so each source frame can be
@@ -28,6 +28,10 @@ CLIPS = (
     ("leap", 12661, 12704),
     ("walk", 12885, 12990),
     ("attack", 12992, 13180),
+    # A normal melee strike removes three health at frame 13491.  The boss
+    # enters its dedicated reaction animation on the following frame and
+    # returns to an attack state at 13532, giving a clean 40-frame hit clip.
+    ("hit", 13492, 13531),
 )
 
 
@@ -229,6 +233,19 @@ def main() -> int:
     if attack_contacts != expected_contacts:
         raise ValueError(
             f"clean Chrysalis attack contacts changed: {attack_contacts}")
+    hit_first = CLIPS[3][1]
+    hit_last = CLIPS[3][2]
+    before_hit = actor_state(hit_first - 2)
+    impact = actor_state(hit_first - 1)
+    hit_start = actor_state(hit_first)
+    hit_end = actor_state(hit_last)
+    after_hit = actor_state(hit_last + 1)
+    if (before_hit["health"], impact["health"], hit_start["health"]) != (
+            38, 35, 35):
+        raise ValueError("natural Chrysalis hit health transition changed")
+    if (hit_start["action"], hit_end["action"], after_hit["action"]) != (
+            2, 516, 3584):
+        raise ValueError("natural Chrysalis hit action boundary changed")
     initial = actor_state(FIRST_FRAME)
     report = {
         "schema": 1,
@@ -252,6 +269,15 @@ def main() -> int:
                                 for contact in attack_contacts],
             "contact_damage": [contact["damage"]
                                for contact in attack_contacts],
+        },
+        "hit_contract": {
+            "impact_frame": hit_first - 1,
+            "first_frame": hit_first,
+            "last_frame": hit_last,
+            "total_frames": hit_last - hit_first + 1,
+            "health_before": before_hit["health"],
+            "health_after": hit_start["health"],
+            "damage": before_hit["health"] - hit_start["health"],
         },
         "clips": clips,
     }

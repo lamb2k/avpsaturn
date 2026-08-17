@@ -39,8 +39,9 @@ Current milestone:
   reinforcements, a locked combat boundary, clear hold, and exit transition
 - transitions into a reconstructed industrial boss room and animates Chrysalis
   from an exact idle plus captured 44-frame leap, 106-frame walk, and complete
-  189-frame attack/recovery clips; 20 deduplicated 288x192 poses stream through
-  one VDP1 slot
+  189-frame attack/recovery clips; a natural three-health hit adds its exact
+  40-frame reaction, and 21 deduplicated 288x192 poses stream through one VDP1
+  slot
 - identifies the two boss-room Stalkers at `FF A240` and `FF A300`, preserves
   their distinct CPS2 palette-17 artwork, and binds a 57-frame walk, 17-frame
   attack, two-frame visible impact onset, and 157-frame KO interval to native
@@ -61,15 +62,19 @@ source pixels and palettes but are still flattened key states rather than the
 complete arcade attract/menu animation. Thirteen later route states use the
 same lossless horizontal fit and the shared VDP2 bitmap. Their compressed
 sources are loaded before CDDA starts, so state changes do not seek away from
-the audio track. The converter retains the 384x224 object/priority oracle
+the audio track. The title and character-select source blocks are retired in
+sequence to load the Stalker and Chrysalis action archives without expanding
+the cold-boot working set. The converter retains the 384x224 object/priority oracle
 offline. The proven alien walk/attack/hit/KO clips are state-bound. Chrysalis
 walk and attack are bound to native states. The attack now uses its captured
 189-frame preparation/contact/recovery schedule and source contact offsets
-21/55/97 with 10/10/16 health damage. Boss-room adds now render their captured
-purple Stalker species rather than the street-alien substitute and use their
-observed 17-frame attack plus 12-health contact. The Stalker nonlethal-hit
+21/55/97 with 10/10/16 health damage. A normal melee strike captured at source
+frame 13491 drives the boss's exact 40-frame nonlethal hit reaction instead of
+falling back to idle art. Boss-room adds now render their captured purple
+Stalker species rather than the street-alien substitute and use their observed
+17-frame attack plus 12-health contact. The Stalker nonlethal-hit
 timeline remains represented by the exact visible KO onset until a natural
-nonlethal capture is obtained. Unclassified Chrysalis hit/KO states retain the
+nonlethal capture is obtained. The unclassified Chrysalis KO state retains the
 exact idle assembly. Exact AI/spawn timing for every
 archetype, remaining boss action/voice sounds, and every intermediate Stage 1
 action remain incomplete.
@@ -135,12 +140,17 @@ RAM expansion. Controls follow the CPS2 panel order: D-pad to move, A for the
 weapon, B for melee attack, and C to jump. Hold left or right and press C to
 dash. Press A+B together for the health-draining emergency attack.
 X toggles the diagnostic HUD. The launcher no longer disables emulator audio.
+It disables Yaba Sanshiro's persistent config autostart and supplies this
+checkout's AvP disc exactly once with `-a/-i`. For Yaba only, it writes a
+temporary cue with absolute track paths because Yaba 1.20.37 can resolve a
+relative `FILE` entry against stale process state; the portable hardware cue
+beside the ISO remains unchanged.
 
 ## Real hardware
 
 Real Sega Saturn hardware is the acceptance target. Build the normal release
-profile with `build.ps1 -Clean -Release`; diagnostic `-VisualTest` and
-`-EncounterTest` images are not release candidates. The console needs an
+profile with `build.ps1 -Clean -Release`; diagnostic `-VisualTest`,
+`-EncounterTest`, and `-BossHitTest` images are not release candidates. The console needs an
 authorized homebrew boot path plus compatible 4 MB DRAM support. See
 [docs/HARDWARE_TEST.md](docs/HARDWARE_TEST.md) for the exact cold-boot,
 controller, video, encounter, and soak-test route. Physical-hardware validation
@@ -187,6 +197,9 @@ Verified on August 17, 2026:
 - the encounter diagnostic visibly reaches five active enemies, eight street
   KOs, room clear, the Chrysalis room with two recurring Stalker waves, boss
   defeat, Stage Clear, results, intermission, and Round 2 in Yaba Sanshiro
+- a focused `-BossHitTest` image repeatedly renders the 40-frame natural
+  Chrysalis hit state, including supplemental pose 20, and the full encounter
+  diagnostic subsequently reaches Round 2 with the same split archive loaded
 - the same diagnostic visibly traverses the capture-derived character-select,
   results, and Round 2 surfaces from the preloaded route cache
 - the native audio module links successfully and the mixed-mode cue exposes a

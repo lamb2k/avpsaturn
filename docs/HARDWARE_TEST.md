@@ -9,8 +9,8 @@ The runtime registers both 2 MB cartridge banks; failure to access DRAM1 at
 
 ## Build the hardware image
 
-Use the normal release profile. Do not put `-VisualTest` or `-EncounterTest`
-on the hardware candidate:
+Use the normal release profile. Do not put `-VisualTest`, `-EncounterTest`, or
+`-BossHitTest` on the hardware candidate:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -Clean -Release
@@ -96,6 +96,12 @@ alter console copy protection or supply copyrighted disc data.
    changes through the complete 189-frame attack/recovery sequence, with three
    contacts at offsets 21/55/97, without clipping, partial cels, palette
    corruption, or a `BOSS ACTION` allocation/decode failure.
+   Land a nonlethal melee strike and confirm the complete 40-frame captured hit
+   reaction plays before Chrysalis returns to AI control. The ISO must retain
+   `/SPR4/BACT.RLE` at 119,868 bytes and add `/SPR4/BHIT.RLE` at 5,900 bytes;
+   their SHA-256 values are
+   `a7efabb6894204475a6aacde4945c6cc4751b150d7d9007349566c86b78220f8`
+   and `c4f6db6ce3ec9d3505a543bc8340b9bee949bde297c53dc2f386a10ffe501ebb`.
    Confirm every boss-room add uses the distinct purple Stalker artwork and
    57-frame walk rather than a street-alien cel. Observe at least one 17-frame
    Stalker attack and one complete 157-frame KO with no `SACT.RLE`, Stalker

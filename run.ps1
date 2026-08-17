@@ -44,6 +44,7 @@ if (-not $EmulatorPath -or -not (Test-Path -LiteralPath $EmulatorPath)) {
 }
 
 $emulatorName = [IO.Path]::GetFileNameWithoutExtension($EmulatorPath).ToLowerInvariant()
+$launchImage = $cue
 if ($emulatorName -eq 'kronos') {
     $settingsPath = Join-Path $env:LOCALAPPDATA 'kronos\kronos.ini'
     if (Test-Path -LiteralPath $settingsPath) {
@@ -70,6 +71,34 @@ if ($emulatorName -eq 'kronos') {
     }
 }
 elseif ($emulatorName -eq 'yabasanshiro') {
+    # Yaba Sanshiro resolves relative FILE entries in a cue against stale
+    # process state on this Windows build. Give its parser an emulator-only
+    # cue whose track paths are absolute while retaining the portable cue next
+    # to the ISO for discs and optical-drive emulators.
+    $stageAudio = Join-Path $PSScriptRoot 'stage1_audio.wav'
+    if (-not (Test-Path -LiteralPath $stageAudio)) {
+        throw 'stage1_audio.wav is missing. Run .\build.ps1 first.'
+    }
+    $yabaCueRoot = Join-Path ([IO.Path]::GetTempPath()) `
+        'AvPSaturnCapabilityTest'
+    if (-not (Test-Path -LiteralPath $yabaCueRoot)) {
+        New-Item -ItemType Directory -Path $yabaCueRoot | Out-Null
+    }
+    $launchImage = Join-Path $yabaCueRoot 'game.yaba.cue'
+    $resolvedIso = (Resolve-Path -LiteralPath $iso).Path
+    $resolvedAudio = (Resolve-Path -LiteralPath $stageAudio).Path
+    $yabaCueLines = @(
+        ('FILE "{0}" BINARY' -f $resolvedIso),
+        '  TRACK 01 MODE1/2048',
+        '    INDEX 01 00:00:00',
+        '    POSTGAP 00:02:00',
+        ('FILE "{0}" WAVE' -f $resolvedAudio),
+        '  TRACK 02 AUDIO',
+        '    PREGAP 00:02:00',
+        '    INDEX 01 00:00:00'
+    )
+    Set-Content -LiteralPath $launchImage -Value $yabaCueLines -Encoding ASCII
+
     $settingsPath = Join-Path $env:APPDATA 'YabaSanshiro\yabause.ini'
     if (-not (Test-Path -LiteralPath $settingsPath)) {
         throw 'Run Yaba Sanshiro once to complete its first-run setup, then rerun this launcher.'
@@ -77,10 +106,12 @@ elseif ($emulatorName -eq 'yabasanshiro') {
     $settings = Get-Content -LiteralPath $settingsPath -Raw
     $yabaValues = [ordered]@{
         'General\CdRom' = '1'
-        'General\CdRomISO' = $cue.Replace('\', '/')
+        'General\CdRomISO' = $launchImage.Replace('\', '/')
         # Yaba Sanshiro cartridge type 7 is 32 Mbit DRAM, or 4 MB.
         'Cartridge\Type' = '7'
-        'autostart' = 'true'
+        # Keep the persistent config from starting a remembered image. The
+        # exact cue for this checkout is supplied once on the command line.
+        'autostart' = 'false'
     }
     foreach ($entry in $yabaValues.GetEnumerator()) {
         $pattern = '(?m)^' + [regex]::Escape($entry.Key) + '=.*$'
@@ -116,11 +147,12 @@ elseif ($emulatorName -eq 'yabause') {
     }
     Set-Content -LiteralPath $settingsPath -Value $settings -NoNewline
 }
-$quotedCue = '"' + $cue + '"'
+$quotedLaunchImage = '"' + $launchImage + '"'
 $arguments = switch -Regex ($emulatorName) {
-    '^kronos$' { @('-i', $quotedCue); break }
-    '^yabasanshiro$' { @('-nb', '-a', '-i', $quotedCue); break }
-    '^yabause$' { @('-a', '-i', $quotedCue); break }
-    default { @($quotedCue) }
+    '^kronos$' { @('-i', $quotedLaunchImage); break }
+    # Config autostart is disabled above, so this is the single launch path.
+    '^yabasanshiro$' { @('-nb', '-a', '-i', $quotedLaunchImage); break }
+    '^yabause$' { @('-a', '-i', $quotedLaunchImage); break }
+    default { @($quotedLaunchImage) }
 }
 Start-Process -FilePath $EmulatorPath -ArgumentList $arguments -WorkingDirectory $PSScriptRoot

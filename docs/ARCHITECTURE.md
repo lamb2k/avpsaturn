@@ -55,21 +55,24 @@ were moved off VDP1 to keep the texture working set at roughly 77% of the Jo
 Engine VDP1 user area, leaving command-table and texture headroom.
 
 A dense 900-frame replay tracks the native Chrysalis actor at `FF A3C0` and
-extracts exact 44-frame leap, 106-frame walk, and 189-frame uninterrupted
-attack/recovery timelines. Together with the independently verified frame-12660
-idle assembly, 20 unique 288x192 poses compress from 552,960 decoded bytes to a
-119,868-byte indexed RLE
-archive. Only one 27,648-byte pose is decoded at a time. Its main-RAM buffer and
+extracts exact 44-frame leap, 106-frame walk, 189-frame uninterrupted
+attack/recovery, and 40-frame nonlethal-hit timelines. The hit follows a natural
+three-health melee impact at source frame 13491 and runs from 13492 through
+13531. Together with the independently verified frame-12660 idle assembly, 21
+unique 288x192 poses compress from 580,608 decoded bytes into the original
+119,868-byte, 20-pose base archive plus a 5,900-byte one-pose hit supplement.
+Only one 27,648-byte pose is decoded at a time. Its main-RAM buffer and
 VDP1 texture are created on first boss draw, after the opening PCM phase has
 ended; allocating it at cold boot exhausts the bounded startup heap in Yaba
 Sanshiro. Walk loops at its captured duration. The replay restores player health
 after each sampled frame, exposing three uninterrupted attack contacts at source
 offsets 21, 55, and 97 for 10, 10, and 16 health units. The native boss attack
 uses that same 189-frame visual/contact schedule, a 108-pixel fitted trigger
-reach, a 122-pixel fitted contact reach, and two-pixel approach movement. Leap
-is preserved in the archive but not yet attached to an inferred native
-transition, and unclassified hit/KO palette-effect frames deliberately fall
-back to the exact idle pose.
+reach, a 122-pixel fitted contact reach, and two-pixel approach movement. The
+native boss hit state now lasts the same 40 frames and selects the captured hit
+clip. Leap is preserved in the archive but not yet attached to an inferred
+native transition, while the unclassified KO and palette-effect frames
+deliberately fall back to the exact idle pose.
 
 Two dense boss-room tracks identify the native Stalkers at `FF A240` and
 `FF A300` as actor ID 0 with 24 source health and CPS2 palette 17. Correcting
@@ -106,9 +109,12 @@ The native controller state machine waits for Start, then B, before beginning
 the Round 1 title and gameplay route.
 Start permanently retires the title surface. Before CDDA begins, the runtime
 frees that 78,848-byte block and loads the 64,118-byte Stalker archive into the
-same phase-overlay space. The character-select surface remains resident for
-confirmation. This keeps the cold-boot allocation equal to the previously
-verified build and avoids seeking the data track while music is playing.
+same phase-overlay space. The character-select surface remains resident until
+B confirms the already-copied image; that second 78,848-byte block is then
+freed and the 5,900-byte Chrysalis hit supplement is loaded before the first
+CDDA start. The original 119,868-byte boss archive remains in the proven
+cold-boot working set. Phase-loading only the new data preserves that startup
+allocation and avoids seeking the data track while music is playing.
 
 The native action interface preserves the three-button CPS2 layout on the
 Saturn face buttons: A is weapon, B is melee attack, and C is jump. A direction
@@ -269,9 +275,9 @@ Exact in the current milestone:
   hit, and KO clips, including the hit/KO screen-space trajectory
 - exact state-bound walk, attack, hit, and KO clips for one validated alien
   actor slot, with independent VDP1 slots for all eight runtime enemies
-- exact Chrysalis idle and captured leap, walk, and uninterrupted 189-frame
-  attack/recovery sprite timelines; native walk/attack and three-contact state
-  binding plus late boss-phase working-set allocation
+- exact Chrysalis idle and captured leap, walk, uninterrupted 189-frame
+  attack/recovery, and natural 40-frame hit sprite timelines; native
+  walk/attack/hit state binding plus late boss-phase working-set allocation
 - distinct capture-derived Stalker walk, attack, visible impact onset, and KO
   timelines; shared alien VDP1 slots, palette bank 4, and pre-CDDA title-RAM
   overlay loading
@@ -301,7 +307,7 @@ Still approximate or incomplete:
 - full animation between the verified route key states
 - remaining HUD states, exact scroll behavior, level triggers, combat, and AI
 - remaining isolated QSound boss-action and voice cues
-- exact Chrysalis attack-selection AI plus hit, KO, and palette-effect visuals
+- exact Chrysalis attack-selection AI plus KO and palette-effect visuals
 - natural nonlethal Stalker hit timing and additional Stalker action variants
 - native HUD safe-area placement and arcade-derived camera behavior for CRT
   overscan variability
