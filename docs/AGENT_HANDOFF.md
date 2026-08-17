@@ -1,6 +1,6 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-17 15:05 EDT
+Updated: 2026-08-17 15:20 EDT
 
 **Direction as of 2026-08-17: functional parity by ROM translation, with an
 instrumented MAME build retained only as a contingency. Stock MAME 0.289 debug
@@ -15,8 +15,9 @@ Read this file before taking any action. The user wants a private, capture-faith
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `prototype/private-capability-test`
-- Implementation checkpoint: `d8a57e1` (`Decode ROM animation script
-  structure`), following `1f15ea5` (`Extract screen-space hitbox brackets`),
+- Implementation checkpoint: `e978e7c` (`Pair debug hitboxes with actor
+  pivots`), following `d8a57e1` (`Decode ROM animation script structure`),
+  `1f15ea5` (`Extract screen-space hitbox brackets`),
   `dbc070b` (`Update handoff with watchpoint checkpoint`), `4182edb` (`Trace
   actor writers with stock MAME watchpoints`), and `b24a4e0` (Round 1 debug
   overlay evidence) and the
@@ -709,6 +710,31 @@ fixed it. These errors are resolved in the committed scripts.
 Remaining gate: the boxes are visibly captured but not yet decoded into
 numerical actor-local geometry. Do not claim offsets 21/55/97 are replaced
 until that extraction is complete.
+
+## 2026-08-17 actor-labeled hitbox geometry checkpoint
+
+`tools/analyze_hitbox_geometry.py` pairs four clear white debug boxes with the
+white pivot markers and records the corresponding actor-state context in
+`data/round1_hitbox_geometry.json`. This is **capture-exact overlay geometry**:
+Stalker and player at frame 13700, plus Chrysalis and player at frame 14400.
+The pivot-relative candidates are now explicit, for example Stalker
+`[-16,-81,41,-4]` and the player `[-17,-80,28,-1]` at frame 13700. They are
+not yet the native collision tables; all Round 1 poses and actor types still
+need validation before replacing 21/55/97 and the Stalker contact schedule.
+
+Reproduce it with:
+
+```powershell
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\analyze_hitbox_geometry.py
+```
+
+Tracked hashes:
+
+- `tools/analyze_hitbox_geometry.py`:
+  `29bf26d2ca60685fbc910eecd8c7b890c354ecd96ad842e894f6bd33b6540de4`.
+- `data/round1_hitbox_geometry.json`:
+  `5cb1fb504d8a02b502518a2d0789eedd0cca9780104451366fc1017f215e8d8a`.
 
 ## 2026-08-17 screen-space bracket extraction checkpoint
 
