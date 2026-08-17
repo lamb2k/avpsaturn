@@ -2,6 +2,11 @@
 
 Updated: 2026-08-17 09:20 EDT
 
+**Direction as of 2026-08-17: functional parity by ROM translation, with an
+instrumented MAME build as the primary instrument. The plan of record is
+[PARITY_PLAN.md](PARITY_PLAN.md); read it after this file. This handoff says
+where work stopped, the parity plan says where it is going.**
+
 Read this file before taking any action. The user wants a private, capture-faithful, native Sega Saturn port of CPS2 Alien vs Predator, beginning at the main menu and continuing through the complete first level into Round 2. Do not reframe success as an emulator, approximate demo, host-only simulation, or focused animation viewer.
 
 ## Repository state
@@ -175,10 +180,14 @@ Deterministic source hashes:
   the most colourful frame, never the first; check RLE against raw before
   assuming compression; collapse repeated frames before sizing; and read the
   state machine to find the frame that starts CDDA.
+- The skill now also carries the parity-era method: choosing between screen
+  capture and ROM translation, using the game's own debug tools and the two
+  traps that hide them, building the emulator from source for observation, ROM
+  table extraction, and defining parity before promising it.
 - Skill hashes: `SKILL.md`
-  `f900e9feae55a807dd82fabc0f0792ae0d126c98e36fb5fcb8fc84845ccd97ee`;
+  `fdf94d9d9d8ef9a68c4a232c9b5a6377b39494923a0f999e2a0e59cf80f6e412`;
   `references/workflow.md`
-  `5a6cba7ae33112861b14a10c89087d78f4af7d40ba1c22d4f1e681b67f09cc59`;
+  `1051852316678204b9b4e77333b7b4823558b5df698915fe46adee8f42a7bb67`;
   `agents/openai.yaml`
   `038134e6c419dc5654b404dac81317a21900e342e208841f44cd959b837c7e2b`.
 
@@ -583,6 +592,13 @@ behaviour looks driver-specific, as already happened with the RGB32 frontend
 screen.
 
 ## Resume in this order
+
+**Superseded for new work by [PARITY_PLAN.md](PARITY_PLAN.md).** The numbered
+list below finishes the frontend slice under the old capture-and-bind method
+and is still correct for that slice. For anything beyond it, start at the
+parity plan's Phase 0 (instrumented MAME) and Phase 1 (enable the game's own
+hitbox and collision overlays), which retire far larger approximations than the
+remaining frontend items.
 
 1. Verify branch, HEAD, clean status, the release manifest profile, and that no
    emulator retained a stale cue.

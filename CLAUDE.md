@@ -4,7 +4,9 @@ Read `AGENTS.md` in this directory now. It is the canonical instruction file
 for every agent harness working in this repository; this file only adds the
 Claude Code specifics and must stay minimal so the two never diverge. Then
 read `docs/AGENT_HANDOFF.md` completely before acting; it is the
-authoritative restart checkpoint.
+authoritative restart checkpoint. Then read `docs/PARITY_PLAN.md`, which is
+the current direction and phase order: functional parity by translating game
+logic out of the ROM, using an instrumented MAME build.
 
 Claude Code specifics:
 

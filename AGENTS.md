@@ -22,10 +22,38 @@ These instructions apply to the entire repository.
 3. Read `docs/AGENT_HANDOFF.md` completely. It is the authoritative volatile
    checkpoint for hashes, active profile, dirty files, failures, processes, and
    ordered next work.
-4. Verify important handoff claims against the current worktree before relying
+4. Read `docs/PARITY_PLAN.md`. It is the current direction and phase order.
+   The handoff says where work stopped; the parity plan says where it is going.
+5. Verify important handoff claims against the current worktree before relying
    on them.
-5. Stay on `prototype/private-capability-test` unless the user explicitly asks
+6. Stay on `prototype/private-capability-test` unless the user explicitly asks
    for another branch.
+
+## Current direction: functional parity by ROM translation
+
+As of 2026-08-17 the target is a **functionally parity-accurate** Round 1, and
+the method is **translating game logic and data out of the ROM**, not inferring
+it from screen captures. `docs/PARITY_PLAN.md` holds the phases, the established
+memory and ROM addresses, and the gates.
+
+- Do not extend the capture-a-clip-and-bind-it method for new actors or
+  actions. It cannot represent unobserved behaviour, does not scale, and cannot
+  reach AI. Existing captured clips remain valid as **regression oracles**.
+- The graphics are already solved: the 16 MiB CPS2 graphics region is
+  reconstructed byte-for-byte. What is missing is assembly instructions, which
+  live in ROM tables that are already located.
+- The retail ROM still contains Capcom's debug tools, including hitbox and
+  stage-collision overlays. Prefer reading real data from them over inferring
+  hit windows from health changes.
+- Instrumented MAME is the primary instrument. Build it from source, keep the
+  changes as a tracked patch set, and pin the source revision.
+- Functional parity means matching the actor state trajectory, real hitboxes,
+  and real animation sequences and durations. It does not mean identical
+  framebuffers or RNG streams. If AI consumes a PRNG, record that decision
+  explicitly before translating it.
+- Do not begin native reimplementation before a ROM-decoded sprite assembly
+  reproduces an already-captured pose pixel for pixel. Building on a misread
+  table format is the most expensive available mistake.
 
 The repository has independent Git history even if its checkout is nested in a
 larger workspace. Relocation is organizational only; never move or delete the
@@ -34,8 +62,12 @@ private inputs.
 
 ## Evidence and fidelity
 
+- Prefer ROM tables and the game's own debug overlays as source truth. Use
+  deterministic MAME capture to confirm what those produce, and as the
+  regression oracle for anything already verified.
 - Treat verified deterministic MAME capture as source truth for frame timing,
-  inputs, objects, palettes, hit events, camera anchors, and QSound timing.
+  inputs, objects, palettes, hit events, camera anchors, and QSound timing
+  where no ROM-derived equivalent exists yet.
 - Preserve the evidence chain:
   `ROM audit -> deterministic capture -> validating analyzer -> generated asset
   -> native state binding -> ISO member hash -> emulator -> physical Saturn`.
