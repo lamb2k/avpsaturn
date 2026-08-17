@@ -1,6 +1,6 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-17 14:20 EDT
+Updated: 2026-08-17 14:35 EDT
 
 **Direction as of 2026-08-17: functional parity by ROM translation, with an
 instrumented MAME build retained only as a contingency. Stock MAME 0.289 debug
@@ -15,8 +15,11 @@ Read this file before taking any action. The user wants a private, capture-faith
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `prototype/private-capability-test`
-- Implementation checkpoint: `4182edb` (`Trace actor writers with stock MAME
-  watchpoints`), following `b24a4e0` (Round 1 debug overlay evidence) and the
+- Implementation checkpoint: `1f15ea5` (`Extract screen-space hitbox
+  brackets`), following `dbc070b` (`Update handoff with watchpoint checkpoint`),
+  `4182edb` (`Trace
+  actor writers with stock MAME watchpoints`), and `b24a4e0` (Round 1 debug
+  overlay evidence) and the
   independently committed plan correction `9417f53`.
 - The handoff-only commit follows the implementation checkpoint; run
   `git rev-parse HEAD` for the immutable current hash.
@@ -670,6 +673,41 @@ Remaining gate: the boxes are visibly captured but not yet decoded into
 numerical actor-local geometry. Do not claim offsets 21/55/97 are replaced
 until that extraction is complete.
 
+## 2026-08-17 screen-space bracket extraction checkpoint
+
+`tools/analyze_hitbox_brackets.py` now deterministically recognizes the live
+white corner-bracket geometry in selected hitbox screenshots. It handles both
+the corner-run form and the complete top/bottom-edge form used by different
+poses. `data/round1_hitbox_brackets.json` records the selected Round 1 frames
+and their screen-space rectangles. The result is **capture-exact screen-space
+evidence**, not actor-local collision data: HUD/text false positives still
+require actor pairing, and no 21/55/97 offset has been replaced.
+
+Validation command:
+
+```powershell
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\analyze_hitbox_brackets.py `
+    .deps\mame\round1_debug_hitboxes\overlay_04201.png `
+    .deps\mame\round1_debug_hitboxes\overlay_04300.png `
+    .deps\mame\round1_debug_hitboxes\overlay_06000.png `
+    .deps\mame\round1_debug_hitboxes\overlay_07000.png `
+    .deps\mame\round1_debug_hitboxes\overlay_11000.png `
+    .deps\mame\round1_debug_hitboxes\overlay_13000.png `
+    .deps\mame\round1_debug_hitboxes\overlay_13700.png `
+    .deps\mame\round1_debug_hitboxes\overlay_14000.png `
+    .deps\mame\round1_debug_hitboxes\overlay_14400.png `
+    -o .\data\round1_hitbox_brackets.json
+```
+
+Tracked hashes:
+
+- `tools/analyze_hitbox_brackets.py`:
+  `a692e99163f23643dd83f6d977792269dddecb4cecbdc0c94a6a76215dda539c`.
+- `data/round1_hitbox_brackets.json`: `c3654c7649abeddabcc16c4f767632f8e04aa53e30d38009b0401352227347f9`.
+
+The first hash above is the canonical SHA-256.
+
 ## 2026-08-17 stock-MAME writer watchpoint checkpoint
 
 Stock MAME's debugger watchpoint API is sufficient for the next phase. The
@@ -710,10 +748,12 @@ Tracked watchpoint files and SHA-256:
 - `data/actor_writer_watchpoints.json`:
   `1377dd04392b7aea0283386cb81f00beeb78d9d24ce5c7a9e79555194bb3f0c0`
 
-Next work is to disassemble the dominant animation writers and correlate their
-call sites with the ROM script records, then decode the white corner-bracket
-hitbox rectangles into actor-local geometry. Do not translate AI or replace
-native runtime tables until the pixel-exact pose gate remains passing.
+Next work is to correlate the dominant animation-writer PCs with the ROM
+script records, then pair the extracted brackets with actor/object origins to
+obtain actor-local geometry. The first stock-MAME debugger disassembly helper
+did not produce machine-readable output through the windowed debugger and was
+discarded; it is not evidence. Do not translate AI or replace native runtime
+tables until the pixel-exact pose gate remains passing.
 
 ## Resume in this order
 
