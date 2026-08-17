@@ -63,9 +63,12 @@ Round 2 title surfaces. No data-track reads occur after Stage 1 CDDA begins.
 - Add a comparison capture against the equivalent MAME route.
 
 Status: in progress. A dense 361-sample capture validates the active CPS2 object
-bank and identifies 87 unique player assemblies. The first authentic ten-pose
-Predator shoulder-cannon shot is cartridge-resident and has been visually verified advancing
-through three replaceable VDP1 palette layers. A separately tracked blue alien
+bank and identifies 87 unique player assemblies. Six isolated cold-boot action
+captures share an identical pre-input RAM and palette baseline. The weapon,
+melee, jump, dash, and emergency attack now use exact 23-, 22-, 42-, 24-, and
+81-frame clips, reduced to 39 shared poses and three replaceable VDP1 palette
+layers. A Yaba Sanshiro visual diagnostic has cycled all five native actions
+from one indexed archive without partial cels or palette-layer loss. A separately tracked blue alien
 now advances through ten authentic single-layer poses from frames 4164-4200. A
 capture-derived native route starts at Press Start and character select,
 displays five initial enemies, adds three reinforcements after three defeats,
@@ -76,8 +79,8 @@ boundary through Stage Clear, results exit, and intermission. Thirteen route
 states now use lossless capture-derived key surfaces instead of Jo-font
 stand-ins. The mixed-mode image adds a 168.015-second QSound
 route reference as native CD audio track 2. The 12,000-frame host test and the
-automated Yaba Sanshiro diagnostic complete this lifecycle. Remaining player
-and enemy actions, intermediate route detail, exact arcade AI/spawn timing,
+automated Yaba Sanshiro diagnostic complete this lifecycle. Player walk, hit,
+and KO plus remaining enemy actions, intermediate route detail, exact arcade AI/spawn timing,
 isolated SCSP event cues, and comparison capture remain open.
 
 ## Gate E: performance and hardware

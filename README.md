@@ -21,8 +21,9 @@ Current milestone:
 - reuses one VDP1 surface for thirteen cartridge-preloaded, capture-derived
   route states from the Round 1 title through the Round 2 title
 - preserves original sprite scale and exact 15-color CPS2 subpalettes
-- animates the first authentic ten-pose Predator shoulder-cannon shot from three aligned
-  VDP1 palette layers backed by the Saturn 4 MB cartridge
+- captures isolated Predator weapon, melee, jump, dash, and emergency-attack
+  timelines from identical pre-input CPS2 state, reduces them to 39 exact poses,
+  and animates all five actions through three aligned VDP1 palette layers
 - animates a temporally tracked ten-pose blue alien sequence through one
   replaceable VDP1 slot over a reconstructed VDP2 stage
 - runs a capture-derived first-room lifecycle with five opening enemies, three
@@ -124,16 +125,18 @@ is still pending.
 
 ## Verified status
 
-Verified on August 16, 2026:
+Verified on August 17, 2026:
 
 - official MAME reports the local `avspu` set as good
 - the Python CPS2 graphics reconstruction matches MAME's 16 MiB `:gfx` region
 - 54 captured commands decode from the verified active CPS2 object-RAM bank
 - 361 four-frame-spaced captures retain the recorded active object bank; an
   independent two-bank render check confirms bank 2 at frames 2880 and 4200
-- the player timeline contains 87 unique assemblies, and its first ten-pose
-  shoulder-cannon sequence runs from cartridge-resident source cels through three VDP1
-  texture slots
+- isolated cold-boot captures prove identical pre-input RAM and palette state
+  for weapon, melee, jump, dash, and emergency attack; their exact 23-, 22-,
+  42-, 24-, and 81-frame clips reduce to 39 shared poses
+- 117 palette-layer payloads compress from 2,156,544 decoded bytes to one
+  173,004-byte indexed cartridge archive and stream through three reusable VDP1 texture slots
 - the independently visible right-side blue alien is tracked across frames
   4164-4200 and its ten authentic poses run through one replaceable VDP1 slot
 - an exhaustive frame-local grouping manifest separates verified actors,
@@ -159,6 +162,8 @@ Verified on August 16, 2026:
   VDP1 8bpp display surface with 76 visible colors; the ignored converter
   output also retains the 86,016-byte 384x224 source oracle
 - the release SH-2 build, link, ISO, and cue generation complete successfully
+- the five-action visual diagnostic boots from one indexed player archive and
+  visibly cycles every exact clip through the three-layer VDP1 working set
 - Yaba Sanshiro boots in 352x224 with the 4 MB cartridge, shows both horizontal
   source edges and all 224 source lines with no framebuffer black bars, and
   displays the asset working set over the reconstructed Stage 1 background/HUD

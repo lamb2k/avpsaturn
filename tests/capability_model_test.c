@@ -100,9 +100,9 @@ static void test_jump_dash_and_two_button_special(void)
     request = cap_world_step(&world, &input);
     assert(request == CAP_CLIP_JUMP);
     assert(world.player.action == CAP_ACT_JUMP);
-    step_empty(&world, 15);
+    step_empty(&world, 21);
     assert(world.player.height > 0);
-    step_empty(&world, 15);
+    step_empty(&world, 21);
     assert(world.player.action == CAP_ACT_IDLE);
     assert(world.player.height == 0);
 
@@ -114,8 +114,8 @@ static void test_jump_dash_and_two_button_special(void)
     assert(request == CAP_CLIP_DASH);
     assert(world.player.action == CAP_ACT_DASH);
     assert(world.player.motion_x == 6);
-    step_empty(&world, 30);
-    assert(world.player.x == 280);
+    step_empty(&world, 24);
+    assert(world.player.x == 244);
     assert(world.player.height == 0);
 
     for (index = 2; index < CAP_MAX_ENEMIES; ++index)
@@ -376,7 +376,7 @@ static void test_long_deterministic_run(void)
         assert(world.player.x >= 24 && world.player.x <= CAP_WORLD_WIDTH - 24);
         assert(world.player.lane >= 148 && world.player.lane <= 198);
         assert(world.player.health >= 0 && world.player.health <= CAP_PLAYER_MAX_HEALTH);
-        assert(world.player.height >= 0 && world.player.height <= 57);
+        assert(world.player.height >= 0 && world.player.height <= 111);
         assert(world.player.motion_x >= -6 && world.player.motion_x <= 6);
         assert(world.weapon_energy >= 0 &&
                world.weapon_energy <= CAP_WEAPON_MAX_ENERGY);

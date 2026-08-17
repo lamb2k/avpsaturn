@@ -50,6 +50,18 @@ else {
     Write-Host 'Reusing the existing verified deterministic Stage 1 capture.'
 }
 
+$playerActionArguments = @{}
+if ($RefreshCapture) {
+    $playerActionArguments['Refresh'] = $true
+}
+if ($PythonPath) {
+    $playerActionArguments['PythonPath'] = $PythonPath
+}
+& (Join-Path $projectRoot 'capture_player_actions.ps1') @playerActionArguments
+if ($LASTEXITCODE -ne 0) {
+    throw "Isolated player-action capture failed with exit code $LASTEXITCODE."
+}
+
 $bossCaptures = @('boss_gfxram.tsv', 'boss_cps_a_regs.tsv',
     'boss_cps_b_regs.tsv', 'boss_palette.tsv', 'boss_objram1.tsv',
     'boss_objram2.tsv', 'boss_active_object_bank.txt')

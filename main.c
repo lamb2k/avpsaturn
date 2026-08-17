@@ -5,7 +5,7 @@
 #include "generated/avsp_enemy_animation.h"
 #include "generated/avsp_frontend_palette.h"
 #include "generated/avsp_palette.h"
-#include "generated/avsp_player_shoot_animation.h"
+#include "generated/avsp_player_action_animation.h"
 #include "generated/avsp_sequence_palette.h"
 
 #define CEL_WIDTH 192
@@ -57,15 +57,16 @@ static jo_img_8bits frontend_images[AVSP_FRONTEND_SCENES];
 static unsigned char *sequence_rle[AVSP_SEQUENCE_SCENES];
 static unsigned char *sequence_pixels;
 static unsigned char *background_bitmap;
-static jo_img_4bits player_shoot_images[AVSP_PLAYER_SHOOT_POSES][AVSP_PLAYER_SHOOT_LAYERS];
+static unsigned char *player_action_archive;
+static jo_img_4bits player_action_images[AVSP_PLAYER_ACTION_LAYERS];
 static jo_img_4bits enemy_walk_images[AVSP_ENEMY_WALK_POSES];
 static jo_img_4bits boss_idle_images[AVSP_BOSS_IDLE_LAYERS];
 static int player_idle_sprites[2];
-static int player_shoot_sprites[AVSP_PLAYER_SHOOT_LAYERS];
+static int player_action_sprites[AVSP_PLAYER_ACTION_LAYERS];
 static int enemy_walk_sprite;
 static int boss_idle_sprites[AVSP_BOSS_IDLE_LAYERS];
 static int frontend_sprites[AVSP_FRONTEND_SCENES];
-static int current_player_shoot_pose;
+static int current_player_action_pose;
 static int current_enemy_walk_pose;
 static int debug_hud_enabled;
 static const char *failed_asset;
@@ -74,6 +75,9 @@ static int cart_available;
 static int boss_background_active;
 static int stage_music_started;
 static int current_sequence_scene;
+#ifdef AVSP_VISUAL_TEST
+static int visual_action_index;
+#endif
 
 static int load_cel_asset(CelAsset *asset)
 {
@@ -97,26 +101,69 @@ static int load_all_cels(void)
     return 1;
 }
 
-static int load_player_shoot_sequence(void)
+static int load_player_action_sequences(void)
 {
-    int pose;
     int layer;
-    int length;
-    for (pose = 0; pose < AVSP_PLAYER_SHOOT_POSES; ++pose)
+    int length = 0;
+    player_action_archive = (unsigned char *)jo_fs_read_file_in_dir(
+        AVSP_PLAYER_ACTION_ARCHIVE_FILE, "SPR4", &length);
+    if (player_action_archive == JO_NULL ||
+        length != AVSP_PLAYER_ACTION_ARCHIVE_BYTES)
     {
-        for (layer = 0; layer < AVSP_PLAYER_SHOOT_LAYERS; ++layer)
+        failed_asset = AVSP_PLAYER_ACTION_ARCHIVE_FILE;
+        return 0;
+    }
+    for (layer = 0; layer < AVSP_PLAYER_ACTION_LAYERS; ++layer)
+    {
+        player_action_images[layer].width = CEL_WIDTH;
+        player_action_images[layer].height = CEL_HEIGHT;
+        player_action_images[layer].data =
+            (unsigned char *)jo_malloc(AVSP_PLAYER_ACTION_DECODED_BYTES);
+        if (player_action_images[layer].data == JO_NULL)
         {
-            jo_img_4bits *image = &player_shoot_images[pose][layer];
-            image->width = CEL_WIDTH;
-            image->height = CEL_HEIGHT;
-            length = 0;
-            image->data = (unsigned char *)jo_fs_read_file_in_dir(
-                avsp_player_shoot_files[pose][layer], "SPR4", &length);
-            if (image->data == JO_NULL || length != CEL_BYTES)
+            failed_asset = "PLAYER ACTION BUFFER";
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static int decode_player_action_pose(const int pose)
+{
+    int layer;
+    for (layer = 0; layer < AVSP_PLAYER_ACTION_LAYERS; ++layer)
+    {
+        unsigned int source = 0;
+        unsigned int target = 0;
+        const unsigned int source_offset =
+            avsp_player_action_rle_offsets[pose][layer];
+        const unsigned int source_length =
+            avsp_player_action_rle_bytes[pose][layer];
+        const unsigned char *source_data;
+        unsigned char *output = player_action_images[layer].data;
+        if (source_offset + source_length > AVSP_PLAYER_ACTION_ARCHIVE_BYTES)
+        {
+            failed_asset = "PLAYER ACTION INDEX";
+            return 0;
+        }
+        source_data = player_action_archive + source_offset;
+        while (source + 1 < source_length)
+        {
+            unsigned int count = source_data[source++];
+            unsigned char value = source_data[source++];
+            if (count == 0 || target + count > AVSP_PLAYER_ACTION_DECODED_BYTES)
             {
-                failed_asset = avsp_player_shoot_files[pose][layer];
+                failed_asset = "PLAYER ACTION RLE";
                 return 0;
             }
+            memset(output + target, value, count);
+            target += count;
+        }
+        if (source != source_length ||
+            target != AVSP_PLAYER_ACTION_DECODED_BYTES)
+        {
+            failed_asset = "PLAYER ACTION SIZE";
+            return 0;
         }
     }
     return 1;
@@ -408,14 +455,15 @@ static int create_sprite_working_set(void)
     int layer;
     player_idle_sprites[0] = add_sprite_for_asset(CEL_PLAYER_IDLE_0);
     player_idle_sprites[1] = add_sprite_for_asset(CEL_PLAYER_IDLE_1);
-    for (layer = 0; layer < AVSP_PLAYER_SHOOT_LAYERS; ++layer)
+    if (!decode_player_action_pose(0)) return 0;
+    for (layer = 0; layer < AVSP_PLAYER_ACTION_LAYERS; ++layer)
     {
-        player_shoot_sprites[layer] = jo_sprite_add_4bits_image(
-            &player_shoot_images[0][layer]);
-        if (player_shoot_sprites[layer] < 0)
-            failed_asset = avsp_player_shoot_files[0][layer];
+        player_action_sprites[layer] = jo_sprite_add_4bits_image(
+            &player_action_images[layer]);
+        if (player_action_sprites[layer] < 0)
+            failed_asset = "PLAYER ACTION VDP1";
     }
-    current_player_shoot_pose = 0;
+    current_player_action_pose = 0;
     enemy_walk_sprite = jo_sprite_add_4bits_image(&enemy_walk_images[0]);
     if (enemy_walk_sprite < 0) failed_asset = avsp_enemy_walk_files[0];
     current_enemy_walk_pose = 0;
@@ -427,6 +475,42 @@ static int create_sprite_working_set(void)
             failed_asset = avsp_boss_idle_files[layer];
     }
     return failed_asset == JO_NULL;
+}
+
+static int player_clip_for_action(const CapAction action)
+{
+    if (action == CAP_ACT_SHOOT) return AVSP_PLAYER_CLIP_GUN;
+    if (action == CAP_ACT_ATTACK) return AVSP_PLAYER_CLIP_MELEE;
+    if (action == CAP_ACT_JUMP) return AVSP_PLAYER_CLIP_JUMP;
+    if (action == CAP_ACT_DASH) return AVSP_PLAYER_CLIP_DASH;
+    if (action == CAP_ACT_SPECIAL) return AVSP_PLAYER_CLIP_SPECIAL;
+    return -1;
+}
+
+#ifdef AVSP_VISUAL_TEST
+static CapAction visual_action_for_index(const int index)
+{
+    if (index == 0) return CAP_ACT_SHOOT;
+    if (index == 1) return CAP_ACT_ATTACK;
+    if (index == 2) return CAP_ACT_JUMP;
+    if (index == 3) return CAP_ACT_DASH;
+    return CAP_ACT_SPECIAL;
+}
+#endif
+
+static int player_pose_for_frame(const int clip, const int action_frame)
+{
+    int step;
+    int remaining = action_frame;
+    for (step = 0; step < avsp_player_action_step_counts[clip]; ++step)
+    {
+        int duration = avsp_player_action_step_durations[clip][step];
+        if (remaining < duration)
+            return avsp_player_action_step_poses[clip][step];
+        remaining -= duration;
+    }
+    return avsp_player_action_step_poses[clip]
+        [avsp_player_action_step_counts[clip] - 1];
 }
 
 static void draw_exact_layer(const CapActor *actor, const int screen_x,
@@ -445,19 +529,24 @@ static void draw_player(const CapActor *actor, const int screen_x)
 {
     int depth = 330 - actor->lane;
     int layer;
-    if (actor->action == CAP_ACT_SHOOT)
+    int clip = player_clip_for_action(actor->action);
+    if (clip >= 0)
     {
-        int pose = actor->action_frame / 4;
-        if (pose >= AVSP_PLAYER_SHOOT_POSES) pose = AVSP_PLAYER_SHOOT_POSES - 1;
-        if (pose != current_player_shoot_pose)
+        int pose = player_pose_for_frame(clip, actor->action_frame);
+        if (pose != current_player_action_pose)
         {
-            for (layer = 0; layer < AVSP_PLAYER_SHOOT_LAYERS; ++layer)
+            if (!decode_player_action_pose(pose))
+            {
+                runtime_ready = 0;
+                return;
+            }
+            for (layer = 0; layer < AVSP_PLAYER_ACTION_LAYERS; ++layer)
                 jo_sprite_replace_4bits_image(
-                    &player_shoot_images[pose][layer], player_shoot_sprites[layer]);
-            current_player_shoot_pose = pose;
+                    &player_action_images[layer], player_action_sprites[layer]);
+            current_player_action_pose = pose;
         }
-        for (layer = 0; layer < AVSP_PLAYER_SHOOT_LAYERS; ++layer)
-            draw_exact_layer(actor, screen_x, player_shoot_sprites[layer],
+        for (layer = 0; layer < AVSP_PLAYER_ACTION_LAYERS; ++layer)
+            draw_exact_layer(actor, screen_x, player_action_sprites[layer],
                              layer, depth - layer);
     }
     else
@@ -647,8 +736,9 @@ static void frame_callback(void)
 #ifdef AVSP_VISUAL_TEST
     if (world.player.action == CAP_ACT_IDLE)
     {
-        world.player.action = CAP_ACT_SHOOT;
+        world.player.action = visual_action_for_index(visual_action_index);
         world.player.action_frame = 0;
+        visual_action_index = (visual_action_index + 1) % AVSP_PLAYER_ACTION_CLIPS;
     }
 #endif
     input = read_input();
@@ -687,8 +777,9 @@ static void frame_callback(void)
     draw_route_overlay();
     draw_hud();
 #ifdef AVSP_VISUAL_TEST
-    jo_printf(0, 5, "VISUAL P%02d/%02d E%02d",
-              world.player.action_frame, current_player_shoot_pose,
+    jo_printf(0, 5, "VISUAL A%d P%02d/%02d E%02d",
+              world.player.action, world.player.action_frame,
+              current_player_action_pose,
               current_enemy_walk_pose);
 #endif
 }
@@ -704,6 +795,9 @@ void jo_main(void)
     boss_background_active = 0;
     stage_music_started = 0;
     current_sequence_scene = -1;
+#ifdef AVSP_VISUAL_TEST
+    visual_action_index = 0;
+#endif
     sequence_pixels = JO_NULL;
     for (index = 0; index < AVSP_SEQUENCE_SCENES; ++index)
         sequence_rle[index] = JO_NULL;
@@ -722,7 +816,7 @@ void jo_main(void)
         runtime_ready = load_frontend_assets() &&
                         load_route_sequences() &&
                         load_background() && load_boss_background() &&
-                        load_all_cels() && load_player_shoot_sequence() &&
+                        load_all_cels() && load_player_action_sequences() &&
                         load_enemy_walk_sequence() && load_boss_idle() &&
                         create_sprite_working_set();
     }

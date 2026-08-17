@@ -14,6 +14,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parents[1]
 ROM_ROOT = ROOT / "avspu"
 CAPTURE_ROOT = ROOT / ".deps" / "mame" / "captures"
+PLAYER_ACTION_ROOT = ROOT / ".deps" / "mame" / "player_actions"
 OUTPUT_ROOT = ROOT / "build" / "rom_extract"
 SATURN_CD_ROOT = ROOT / "build" / "avsp_cd"
 GENERATED_ROOT = ROOT / "generated"
@@ -132,6 +133,16 @@ def load_palette(name: str = "palette.tsv") -> list[tuple[int, int, int, int]]:
     for line in lines:
         argb = int(line.split("\t")[1], 16)
         palette.append(((argb >> 16) & 255, (argb >> 8) & 255, argb & 255, 255))
+    return palette
+
+
+def load_palette_path(path: Path) -> list[tuple[int, int, int, int]]:
+    palette = []
+    lines = path.read_text(encoding="utf-8").splitlines()[1:]
+    for line in lines:
+        argb = int(line.split("\t")[1], 16)
+        palette.append(((argb >> 16) & 255, (argb >> 8) & 255,
+                        argb & 255, 255))
     return palette
 
 
@@ -780,6 +791,38 @@ def player_pose_capture(frame: int) -> tuple[int, list[int], tuple[int, int]]:
     return bank, sorted(entry["offset"] for entry in commands), pivot
 
 
+@lru_cache(maxsize=None)
+def load_player_action_sample_banks(action: str) -> dict[int, int]:
+    metadata = PLAYER_ACTION_ROOT / action / "samples.tsv"
+    samples = {}
+    for line in metadata.read_text(encoding="utf-8").splitlines()[1:]:
+        if not line:
+            continue
+        frame, recorded_action, bank, _ = line.split("\t")
+        if recorded_action != action:
+            raise ValueError(
+                f"{action}: action metadata contains {recorded_action!r}")
+        samples[int(frame)] = int(bank)
+    return samples
+
+
+def isolated_player_pose_capture(
+        action: str, frame: int) -> tuple[int, list[int], tuple[int, int], Path]:
+    bank = load_player_action_sample_banks(action).get(frame)
+    if bank not in (1, 2):
+        raise ValueError(f"{action} frame {frame}: missing active object bank")
+    object_path = PLAYER_ACTION_ROOT / action / f"objram_active_{frame:05d}.tsv"
+    lines = object_path.read_text(encoding="utf-8").splitlines()[1:]
+    words = [int(line.split("\t")[1], 16) for line in lines if line]
+    entries = decode_object_entries(words)
+    commands = player_animation_commands(entries)
+    primary = max((entry for entry in commands if entry["colour"] == 0),
+                  key=lambda entry: entry["width"] * entry["height"])
+    pivot = (primary["screen_x"] + primary["width"] // 2,
+             primary["screen_y"] + primary["height"])
+    return bank, sorted(entry["offset"] for entry in commands), pivot, object_path
+
+
 def contiguous_palette_runs(entries: list[dict[str, int]],
                             colour: int) -> list[list[dict[str, int]]]:
     """Split one CPS2 palette into object-list runs without guessing tile art."""
@@ -1188,58 +1231,171 @@ def fit_background_for_saturn(stage: Image.Image) -> Image.Image:
     return canvas
 
 
-def write_player_shoot_sequence_assets(
+def rle_encode_bytes(data: bytes) -> bytes:
+    encoded = bytearray()
+    run_value = data[0]
+    run_length = 0
+    for value in data:
+        if value == run_value and run_length < 255:
+            run_length += 1
+        else:
+            encoded.extend((run_length, run_value))
+            run_value = value
+            run_length = 1
+    encoded.extend((run_length, run_value))
+    return bytes(encoded)
+
+
+def rle_decode_bytes(data: bytes) -> bytes:
+    if len(data) % 2:
+        raise ValueError("count/value RLE payload has an odd byte count")
+    decoded = bytearray()
+    for offset in range(0, len(data), 2):
+        count = data[offset]
+        if count == 0:
+            raise ValueError("count/value RLE payload contains a zero-length run")
+        decoded.extend(bytes((data[offset + 1],)) * count)
+    return bytes(decoded)
+
+
+def write_player_action_sequence_assets(
         gfx: bytearray, sprite_dir: Path) -> list[dict[str, object]]:
-    source_frames = list(range(2880, 2917, 4))
+    report_path = OUTPUT_ROOT / "player_action_probe.json"
+    if not report_path.is_file():
+        raise ValueError(
+            "isolated player-action report is missing; run capture_player_actions.ps1")
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    action_names = ("gun", "melee", "jump", "dash", "special")
+    action_reports = {entry["action"]: entry for entry in report["actions"]}
     cps_colours = (0, 7, 15)
+    base_palette = load_palette_path(
+        PLAYER_ACTION_ROOT / "idle" / "palette_02525.tsv")
     base_palettes = {
-        colour: [animation_palette(source_frames[0])[colour * 16 + pen][:3]
-                 for pen in range(15)]
+        colour: [base_palette[colour * 16 + pen][:3] for pen in range(15)]
         for colour in cps_colours
     }
-    files = []
-    manifest = []
-    for pose_index, frame in enumerate(source_frames):
-        bank, offsets, pivot = player_pose_capture(frame)
+
+    pose_sources: dict[str, tuple[str, int]] = {}
+    clip_runs: list[list[dict[str, object]]] = []
+    for action in action_names:
+        action_report = action_reports[action]
+        if not action_report["accepted"] or action_report["clip_frame_count"] <= 0:
+            raise ValueError(f"{action}: isolated input was not accepted")
+        runs = action_report["clip_runs"]
+        if sum(int(run["samples"]) for run in runs) != int(
+                action_report["clip_frame_count"]):
+            raise ValueError(f"{action}: clip run durations do not cover the clip")
+        clip_runs.append(runs)
+        for run in runs:
+            pose_sources.setdefault(str(run["pose"]),
+                                    (action, int(run["start_frame"])))
+
+    pose_ids = list(pose_sources)
+    if len(pose_ids) >= 256:
+        raise ValueError("isolated player actions exceed 8-bit pose indices")
+    pose_indices = {pose_id: index for index, pose_id in enumerate(pose_ids)}
+    archive = bytearray()
+    archive_offsets: list[list[int]] = []
+    compressed_lengths: list[list[int]] = []
+    source_frames: list[int] = []
+    manifest: list[dict[str, object]] = []
+    for pose_index, pose_id in enumerate(pose_ids):
+        action, frame = pose_sources[pose_id]
+        bank, offsets, pivot, object_path = isolated_player_pose_capture(
+            action, frame)
+        palette = load_palette_path(
+            PLAYER_ACTION_ROOT / action / f"palette_{frame:05d}.tsv")
         layers, palettes = exact_object_layers(
-            gfx, animation_palette(frame), frame, bank, offsets, pivot=pivot)
-        pose_files = []
+            gfx, palette, frame, bank, offsets, pivot=pivot,
+            source_filename=str(object_path))
+        pose_offsets = []
+        pose_lengths = []
         for layer_index, colour in enumerate(cps_colours):
             if colour in palettes and palettes[colour] != base_palettes[colour]:
                 raise ValueError(
-                    f"frame {frame}: CPS2 player palette {colour} changed during gun action")
+                    f"{action} frame {frame}: CPS2 player palette {colour} changed")
             layer = layers.get(colour, Image.new("P", (192, 192), 0))
-            filename = f"PS{pose_index:02d}{layer_index}.BIN"
-            data = pack_4bpp(layer)
-            (sprite_dir / filename).write_bytes(data)
-            pose_files.append(filename)
-            manifest.append({
-                "path": f"SPR4/{filename}",
-                "bytes": len(data),
-                "sha256": hashlib.sha256(data).hexdigest(),
-                "source_frame": frame,
-                "cps2_palette": colour,
-            })
-        files.append(pose_files)
+            decoded = pack_4bpp(layer)
+            encoded = rle_encode_bytes(decoded)
+            if rle_decode_bytes(encoded) != decoded:
+                raise ValueError(
+                    f"{action} frame {frame}: player action RLE round trip failed")
+            pose_offsets.append(len(archive))
+            archive.extend(encoded)
+            pose_lengths.append(len(encoded))
+        archive_offsets.append(pose_offsets)
+        compressed_lengths.append(pose_lengths)
+        source_frames.append(frame)
 
-    file_rows = ",\n".join(
-        "    {" + ", ".join(f'\"{filename}\"' for filename in pose_files) + "}"
-        for pose_files in files)
+    archive_filename = "PACT.RLE"
+    (sprite_dir / archive_filename).write_bytes(archive)
+    manifest.append({
+        "path": f"SPR4/{archive_filename}",
+        "bytes": len(archive),
+        "decoded_bytes": len(pose_ids) * len(cps_colours) * (192 * 192) // 2,
+        "sha256": hashlib.sha256(archive).hexdigest(),
+        "components": len(pose_ids) * len(cps_colours),
+        "encoding": "indexed-rle8-count-value",
+    })
+
+    max_steps = max(len(runs) for runs in clip_runs)
+    offset_rows = ",\n".join(
+        "    {" + ", ".join(str(offset) for offset in pose_offsets) + "}"
+        for pose_offsets in archive_offsets)
+    length_rows = ",\n".join(
+        "    {" + ", ".join(str(length) for length in lengths) + "}"
+        for lengths in compressed_lengths)
+    count_rows = ", ".join(str(len(runs)) for runs in clip_runs)
+    total_rows = ", ".join(
+        str(sum(int(run["samples"]) for run in runs)) for runs in clip_runs)
+    pose_rows = []
+    duration_rows = []
+    for runs in clip_runs:
+        pose_values = [pose_indices[str(run["pose"])] for run in runs]
+        duration_values = [int(run["samples"]) for run in runs]
+        pose_values.extend([0] * (max_steps - len(pose_values)))
+        duration_values.extend([0] * (max_steps - len(duration_values)))
+        pose_rows.append("    {" + ", ".join(map(str, pose_values)) + "}")
+        duration_rows.append("    {" + ", ".join(map(str, duration_values)) + "}")
     frame_rows = ", ".join(str(frame) for frame in source_frames)
-    header = f"""/* Generated from the dense active-bank CPS2 capture. */
-#ifndef AVSP_PLAYER_SHOOT_ANIMATION_H
-#define AVSP_PLAYER_SHOOT_ANIMATION_H
-#define AVSP_PLAYER_SHOOT_POSES {len(source_frames)}
-#define AVSP_PLAYER_SHOOT_LAYERS {len(cps_colours)}
-static const char avsp_player_shoot_files[AVSP_PLAYER_SHOOT_POSES][AVSP_PLAYER_SHOOT_LAYERS][12] = {{
-{file_rows}
+    action_constants = "\n".join(
+        f"#define AVSP_PLAYER_CLIP_{action.upper()} {index}"
+        for index, action in enumerate(action_names))
+    header = f"""/* Generated from deterministic isolated CPS2 player actions. */
+#ifndef AVSP_PLAYER_ACTION_ANIMATION_H
+#define AVSP_PLAYER_ACTION_ANIMATION_H
+#define AVSP_PLAYER_ACTION_CLIPS {len(action_names)}
+#define AVSP_PLAYER_ACTION_LAYERS {len(cps_colours)}
+#define AVSP_PLAYER_ACTION_POSES {len(pose_ids)}
+#define AVSP_PLAYER_ACTION_MAX_STEPS {max_steps}
+#define AVSP_PLAYER_ACTION_DECODED_BYTES {(192 * 192) // 2}
+#define AVSP_PLAYER_ACTION_ARCHIVE_FILE "{archive_filename}"
+#define AVSP_PLAYER_ACTION_ARCHIVE_BYTES {len(archive)}
+{action_constants}
+static const unsigned int avsp_player_action_rle_offsets[AVSP_PLAYER_ACTION_POSES][AVSP_PLAYER_ACTION_LAYERS] = {{
+{offset_rows}
 }};
-static const unsigned short avsp_player_shoot_source_frames[AVSP_PLAYER_SHOOT_POSES] = {{
+static const unsigned short avsp_player_action_rle_bytes[AVSP_PLAYER_ACTION_POSES][AVSP_PLAYER_ACTION_LAYERS] = {{
+{length_rows}
+}};
+static const unsigned char avsp_player_action_step_counts[AVSP_PLAYER_ACTION_CLIPS] = {{
+    {count_rows}
+}};
+static const unsigned char avsp_player_action_total_frames[AVSP_PLAYER_ACTION_CLIPS] = {{
+    {total_rows}
+}};
+static const unsigned char avsp_player_action_step_poses[AVSP_PLAYER_ACTION_CLIPS][AVSP_PLAYER_ACTION_MAX_STEPS] = {{
+{",\n".join(pose_rows)}
+}};
+static const unsigned char avsp_player_action_step_durations[AVSP_PLAYER_ACTION_CLIPS][AVSP_PLAYER_ACTION_MAX_STEPS] = {{
+{",\n".join(duration_rows)}
+}};
+static const unsigned short avsp_player_action_source_frames[AVSP_PLAYER_ACTION_POSES] = {{
     {frame_rows}
 }};
 #endif
 """
-    (GENERATED_ROOT / "avsp_player_shoot_animation.h").write_text(
+    (GENERATED_ROOT / "avsp_player_action_animation.h").write_text(
         header, encoding="ascii")
     return manifest
 
@@ -1340,17 +1496,20 @@ static const unsigned char avsp_boss_idle_palette_banks[AVSP_BOSS_IDLE_LAYERS] =
 def write_exact_actor_assets(gfx: bytearray,
                              palette: list[tuple[int, int, int, int]],
                              sprite_dir: Path) -> list[dict[str, object]]:
-    idle_bank, idle_offsets, idle_pivot = player_pose_capture(2880)
+    idle_bank, idle_offsets, idle_pivot, idle_object_path = (
+        isolated_player_pose_capture("idle", 2525))
+    isolated_idle_palette = load_palette_path(
+        PLAYER_ACTION_ROOT / "idle" / "palette_02525.tsv")
     groups = {
         "player_idle": exact_object_layers(
-            gfx, palette, 2880, idle_bank, idle_offsets, pivot=idle_pivot),
+            gfx, isolated_idle_palette, 2525, idle_bank, idle_offsets,
+            pivot=idle_pivot, source_filename=str(idle_object_path)),
     }
     # Fixed Saturn subpalette slots. Player layers retain CPS2 palettes 0, 7,
     # and 15; the four Stage 1 alien variants retain palettes 16-19, and the
     # Chrysalis-room boss adds CPS2 palette 27.
     cps_colours = (0, 7, 15, 16, 17, 18, 19, 27)
-    player_palette = animation_palette(2880)
-    attack_palette = animation_palette(2888)
+    player_palette = isolated_idle_palette
     enemy_palette = animation_palette(2760)
     enemy_palette_anchors = (3000, 3240, 3480, 3720, 3960, 4200)
     for frame in enemy_palette_anchors:
@@ -1363,7 +1522,7 @@ def write_exact_actor_assets(gfx: bytearray,
     palette_banks = {
         0: [player_palette[pen][:3] for pen in range(15)],
         7: [player_palette[7 * 16 + pen][:3] for pen in range(15)],
-        15: [attack_palette[15 * 16 + pen][:3] for pen in range(15)],
+        15: [player_palette[15 * 16 + pen][:3] for pen in range(15)],
     }
     for colour in (16, 17, 18, 19):
         palette_banks[colour] = [
@@ -1403,7 +1562,7 @@ def write_exact_actor_assets(gfx: bytearray,
         manifest.append({"path": f"SPR4/{filename}", "bytes": len(data),
                          "sha256": hashlib.sha256(data).hexdigest(),
                          "cps2_palette": colour})
-    manifest.extend(write_player_shoot_sequence_assets(gfx, sprite_dir))
+    manifest.extend(write_player_action_sequence_assets(gfx, sprite_dir))
     manifest.extend(write_enemy_walk_sequence_assets(gfx, sprite_dir))
     manifest.extend(write_boss_idle_assets(gfx, sprite_dir))
     return manifest
@@ -1503,9 +1662,11 @@ def main() -> None:
     gfx = load_gfx_region()
     verify_loaded_gfx_region(gfx)
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
-    legacy_player_header = GENERATED_ROOT / "avsp_player_animation.h"
-    if legacy_player_header.is_file():
-        legacy_player_header.unlink()
+    for legacy_player_header in (
+            GENERATED_ROOT / "avsp_player_animation.h",
+            GENERATED_ROOT / "avsp_player_shoot_animation.h"):
+        if legacy_player_header.is_file():
+            legacy_player_header.unlink()
     verify_animation_bank_alignment(gfx)
     write_player_animation_timeline()
     write_stage1_encounter_observations()
