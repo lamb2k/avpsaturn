@@ -64,12 +64,24 @@ int cap_background_scroll_x(int camera_x, int stage_area)
 int cap_background_fit_scroll_x(int camera_x, int stage_area)
 {
     const int maximum_camera = CAP_WORLD_WIDTH - CAP_VIEW_WIDTH;
-    const int fitted_source_width = CAP_CPS2_VIEW_WIDTH;
-    const int maximum_scroll = CAP_BACKGROUND_WIDTH - fitted_source_width;
+    const int maximum_scroll = CAP_FITTED_BACKGROUND_WIDTH - CAP_VIEW_WIDTH;
 
     if (stage_area != 0) return 0;
     camera_x = cap_clamp(camera_x, 0, maximum_camera);
     return (camera_x * maximum_scroll) / maximum_camera;
+}
+
+int cap_actor_screen_x(int world_x, int camera_x, int full_width_fit)
+{
+    int centered = world_x - camera_x - CAP_CPS2_VIEW_WIDTH / 2;
+
+    /* Actor coordinates are authored in the CPS2's 384-pixel picture.  Exact
+       mode exposes the centered 352-pixel subset, while full-fit applies the
+       same 352/384 transform as the actor cel widths and VDP2 background. */
+    if (!full_width_fit) return centered;
+    if (centered < 0)
+        return -((-centered * CAP_VIEW_WIDTH) / CAP_CPS2_VIEW_WIDTH);
+    return (centered * CAP_VIEW_WIDTH) / CAP_CPS2_VIEW_WIDTH;
 }
 
 static void cap_deactivate_enemy(CapActor *enemy, const int index)

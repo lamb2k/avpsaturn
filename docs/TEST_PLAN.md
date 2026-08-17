@@ -26,7 +26,7 @@ the Saturn's native 352x224 mode.
 
 - Group all visible CPS2 object commands into actors and props.
 - Match the MAME reference enemy variants, palettes, positions, pivots, and
-  priority in both Saturn 352x224 display mappings.
+  priority in the Saturn 352x224 full-width mapping.
 - Preserve the active object-RAM bank and reproduce tilemap priority when the
   flattened boot oracle is replaced by independently animated actors.
 - Remove static HUD values from the background and drive them natively.
@@ -38,8 +38,8 @@ object/priority result from one lossless 8bpp VDP1 surface with 76 visible
 colors. Active-bank selection is guarded by a 54-command capture signature, and
 an exhaustive frame-local grouping manifest identifies actors, shadow sprites,
 and props while marking three edge fragments as candidates. The display now
-uses native 352x224 with a default full-width fit and a Y-toggle pixel-exact
-16-pixel-per-side crop. Native HUD replacement, enemy temporal
+uses native 352x224 with a deterministic pre-scaled VDP2 full-width fit and a
+matching VDP1 actor transform. Native HUD replacement, enemy temporal
 grouping, actor-level priority, and image-difference acceptance remain open.
 The post-input gameplay scene now uses a tracked ten-pose blue-alien sequence,
 but its poses are not yet bound to arcade enemy states and it must not be

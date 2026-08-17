@@ -25,8 +25,8 @@ Current milestone:
   capture-derived Chrysalis assembly, and reaches a native Stage Clear state
 - draws the eight bounded enemy actors from one shared VDP1 cel slot with four
   exact CPS2 alien palettes
-- boots with a lossless 8-bit VDP1 reference surface containing the complete
-  final visible CPS2 object/priority result
+- boots with a palette-preserving 352x224 VDP1 reference surface containing
+  the complete horizontally fitted CPS2 object/priority result
 - boots in the Saturn's native 352x224 mode with the 4 MB expansion cartridge
 - builds a mixed-mode disc with the verified Stage 1 QSound route rendered as
   native Saturn CD audio track 2
@@ -34,8 +34,9 @@ Current milestone:
 
 The boot scene is intentionally stable for visual comparison. It uses the
 active CPS2 object-RAM bank and reconstructs the final visible object result
-after CPS2 tilemap-priority masking. The comparison surface is lossless at its
-source scale, but the presentation is not yet frame-exact: the HUD is static
+after CPS2 tilemap-priority masking. The converter retains the 384x224 source
+oracle offline and builds a 352x224 Saturn display asset from it. The
+presentation is not yet frame-exact: the HUD is static
 and the boot oracle is flattened
 rather than actor-driven. On first input, the build switches to native gameplay,
 whose player attack now uses an authentic ten-pose CPS2 sequence. It still does
@@ -44,11 +45,13 @@ machine, exact spawn timing, isolated event sound effects, or every intermediate
 Stage 1 room and action.
 
 The Saturn has no 384-pixel low-resolution output. The selected 352x224 mode
-keeps all 224 source lines. The default full-width mode fits all 384 horizontal
-source pixels into 352 output pixels, an 8.33% horizontal compression. Press Y
-to compare the pixel-exact alternative, which preserves source scale and crops
-16 pixels from each horizontal edge. Black bands outside the 352x224 viewport
-in a resizable emulator window are letterboxing and do not remove game pixels.
+keeps all 224 source lines. The runtime fits all 384 horizontal source pixels
+into 352 output pixels, an 8.33% horizontal compression. Backgrounds are
+pre-scaled into a 469-pixel content region inside the 512-pixel VDP2 bitmap and
+displayed at 1:1; this avoids an emulator-dependent VDP2 reduction path. Black
+bands outside the 352x224 viewport in a resizable emulator window are
+letterboxing and do not remove game pixels. Physical display overscan remains
+a separate hardware acceptance test.
 
 ## Repository and content boundary
 
@@ -92,8 +95,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run.ps1
 
 `run.ps1` launches Yaba Sanshiro with a 32 Mbit DRAM cartridge, the Saturn 4 MB
 RAM expansion. Controls are D-pad to move, A to attack, B to dash, C for the
-special action, X to toggle the diagnostic HUD, and Y to toggle full-width fit
-versus exact center crop. The launcher no longer disables emulator audio.
+special action, and X to toggle the diagnostic HUD. The launcher no longer
+disables emulator audio.
 
 ## Real hardware
 
@@ -130,12 +133,13 @@ Verified on August 16, 2026:
   room clear, the Chrysalis room, boss defeat, and Stage Clear in Yaba Sanshiro
 - the native audio module links successfully and the mixed-mode cue exposes a
   168.015-second stereo 16-bit 44.1 kHz Stage 1 QSound reference as CD track 2
-- the final visible object/priority result fits a single 86,016-byte VDP1 8bpp
-  surface with 76 visible colors
+- the final visible object/priority result fits a single 78,848-byte 352x224
+  VDP1 8bpp display surface with 76 visible colors; the ignored converter
+  output also retains the 86,016-byte 384x224 source oracle
 - the release SH-2 build, link, ISO, and cue generation complete successfully
-- Yaba Sanshiro boots in 352x224 with the 4 MB cartridge, displays the exact
-  asset working set, and advances the authentic attack poses over the
-  reconstructed Stage 1 background/HUD
+- Yaba Sanshiro boots in 352x224 with the 4 MB cartridge, shows both horizontal
+  source edges and all 224 source lines with no framebuffer black bars, and
+  displays the asset working set over the reconstructed Stage 1 background/HUD
 
 Next proof gate: verify the full-width mapping and CD audio on physical Saturn,
 then isolate QSound event cues for SCSP PCM playback and replace the approximate

@@ -21,6 +21,8 @@ VISIBLE_LEFT = 64
 VISIBLE_TOP = 16
 VISIBLE_WIDTH = 384
 VISIBLE_HEIGHT = 224
+SATURN_VIEW_WIDTH = 352
+SATURN_FITTED_BACKGROUND_WIDTH = 469
 STAGE1_ACTIVE_OBJECT_RAM = "objram2.tsv"
 ANIMATION_SAMPLE_ACTIVE_BANK = {2880: 2, 2940: 2}
 STAGE1_ENCOUNTER_ANCHORS = (2760, 3000, 3240, 3480, 3600, 3720,
@@ -917,8 +919,8 @@ static const unsigned char avsp_exact_palettes[AVSP_EXACT_PALETTE_BANKS][15][3] 
     (GENERATED_ROOT / "avsp_palette.h").write_text(header, encoding="ascii")
 
 
-def write_snapshot_asset(layer: Image.Image, sprite_dir: Path) -> dict[str, object]:
-    """Write the complete captured CPS2 object pass as a lossless 8bpp cel."""
+def write_snapshot_asset(layer: Image.Image, sprite_dir: Path) -> list[dict[str, object]]:
+    """Write exact-crop and Saturn full-fit versions of the CPS2 object pass."""
     # Jo stores palette array entry 0 at CRAM bank + 1. Pixel index 0 remains
     # transparent, so visible pixel index N uses colours[N - 1].
     colour_to_index: dict[tuple[int, int, int], int] = {}
@@ -957,9 +959,41 @@ static const unsigned char avsp_snapshot_palette[256][3] = {{
 
     target = sprite_dir / "OBJFRM.BIN"
     target.write_bytes(data)
-    return {"path": "SPR8/OBJFRM.BIN", "bytes": len(data),
-            "sha256": hashlib.sha256(data).hexdigest(),
-            "visible_colours": len(colours)}
+    fit_width = SATURN_VIEW_WIDTH
+    if layer.width != VISIBLE_WIDTH or layer.height != VISIBLE_HEIGHT:
+        raise ValueError("captured CPS2 object pass must be 384x224")
+    fit_data = bytearray(fit_width * layer.height)
+    for y in range(layer.height):
+        for x in range(fit_width):
+            # Align both endpoints so a full-fit sprite cannot discard the
+            # CPS2 field's final source column through integer truncation.
+            source_x = (
+                x * (layer.width - 1) + (fit_width - 1) // 2
+            ) // (fit_width - 1)
+            fit_data[y * fit_width + x] = data[y * layer.width + source_x]
+    fit_target = sprite_dir / "OBJFIT.BIN"
+    fit_target.write_bytes(fit_data)
+    return [
+        {"path": "SPR8/OBJFRM.BIN", "bytes": len(data),
+         "sha256": hashlib.sha256(data).hexdigest(),
+         "visible_colours": len(colours), "display": "source-oracle"},
+        {"path": "SPR8/OBJFIT.BIN", "bytes": len(fit_data),
+         "sha256": hashlib.sha256(fit_data).hexdigest(),
+         "visible_colours": len(colours), "display": "full-width-fit"},
+    ]
+
+
+def fit_background_for_saturn(stage: Image.Image) -> Image.Image:
+    """Pre-scale a CPS2 background so VDP2 can display it at reliable 1:1."""
+    expected_width = round(stage.width * SATURN_VIEW_WIDTH / VISIBLE_WIDTH)
+    if expected_width != SATURN_FITTED_BACKGROUND_WIDTH:
+        raise ValueError(
+            f"unexpected fitted background width {expected_width}")
+    fitted = stage.convert("RGB").resize(
+        (expected_width, stage.height), Image.Resampling.NEAREST)
+    canvas = Image.new("RGB", stage.size, (0, 0, 0))
+    canvas.paste(fitted, (0, 0))
+    return canvas
 
 
 def write_player_attack_sequence_assets(
@@ -1225,24 +1259,30 @@ def write_saturn_assets(gfx: bytearray, palette: list[tuple[int, int, int, int]]
     manifest: list[dict[str, object]] = []
 
     manifest.extend(write_exact_actor_assets(gfx, palette, sprite_dir))
-    manifest.append(write_snapshot_asset(object_layer, snapshot_dir))
+    manifest.extend(write_snapshot_asset(object_layer, snapshot_dir))
 
     stage = render_background(gfx, gfxram, cps_a, cps_b, palette,
                               width=512, height=256, include_scroll1=True)
+    stage.save(OUTPUT_ROOT / "stage1_saturn_source_background.png")
+    stage = fit_background_for_saturn(stage)
     stage.save(OUTPUT_ROOT / "stage1_saturn_background.png")
-    stage = stage.convert("RGB").quantize(colors=256, method=Image.Quantize.MAXCOVERAGE)
+    stage = stage.quantize(colors=256, method=Image.Quantize.MAXCOVERAGE)
     background_target = background_dir / "CORRIDOR.TGA"
     stage.save(background_target, format="TGA", compression=None)
     background_data = background_target.read_bytes()
     manifest.append({"path": "BG/CORRIDOR.TGA", "bytes": len(background_data),
-                     "sha256": hashlib.sha256(background_data).hexdigest()})
+                     "sha256": hashlib.sha256(background_data).hexdigest(),
+                     "content_width": SATURN_FITTED_BACKGROUND_WIDTH,
+                     "display": "full-width-fit-at-1:1"})
 
     boss_stage = render_background(
         gfx, load_words("boss_gfxram.tsv"), load_words("boss_cps_a_regs.tsv"),
         load_words("boss_cps_b_regs.tsv"), load_palette("boss_palette.tsv"),
         width=512, height=256, include_scroll1=True)
+    boss_stage.save(OUTPUT_ROOT / "stage1_boss_source_background.png")
+    boss_stage = fit_background_for_saturn(boss_stage)
     boss_stage.save(OUTPUT_ROOT / "stage1_boss_background.png")
-    boss_stage = boss_stage.convert("RGB").quantize(
+    boss_stage = boss_stage.quantize(
         colors=256, method=Image.Quantize.MAXCOVERAGE)
     boss_background_target = background_dir / "BOSSROOM.TGA"
     boss_stage.save(boss_background_target, format="TGA", compression=None)
@@ -1251,6 +1291,8 @@ def write_saturn_assets(gfx: bytearray, palette: list[tuple[int, int, int, int]]
         "path": "BG/BOSSROOM.TGA", "bytes": len(boss_background_data),
         "sha256": hashlib.sha256(boss_background_data).hexdigest(),
         "source_frame": 12660,
+        "content_width": SATURN_FITTED_BACKGROUND_WIDTH,
+        "display": "full-width-fit-at-1:1",
     })
 
     manifest_path = OUTPUT_ROOT / "saturn_asset_manifest.json"

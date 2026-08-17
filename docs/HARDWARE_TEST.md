@@ -37,13 +37,13 @@ alter console copy protection or supply copyrighted disc data.
 ## Acceptance route
 
 1. Cold boot and confirm the reference scene appears without an asset error.
-2. Confirm the full 224-line picture is stable in 352x224. Default full-width
-   mode must show both horizontal edges; Y must toggle to the exact 16-pixel-
-   per-side center crop without changing vertical scale.
+2. Confirm the full 224-line picture is stable in 352x224 and the full-width
+   mapping shows both horizontal source edges. Record any CRT, scaler, or
+   capture-device overscan separately from the digital framebuffer.
 3. Press a direction and confirm the build changes from the static reference to
    native gameplay.
-4. Verify D-pad lane movement, A attack, B dash, C special, X diagnostic HUD,
-   and Y display-mode toggle.
+4. Verify D-pad lane movement, A attack, B dash, C special, and X diagnostic
+   HUD.
 5. Confirm Stage 1 CD audio begins after the first input, remains stereo and
    free of stalls through the room transition, and survives a pause/resume.
 6. Fight through the five-enemy opening wave and three-enemy reinforcement wave.

@@ -300,10 +300,30 @@ static void test_centered_background_mapping(void)
     assert(cap_background_scroll_x(0, 1) == 16);
     assert(cap_background_scroll_x(5000, 1) == 16);
     assert(cap_background_fit_scroll_x(0, 0) == 0);
-    assert(cap_background_fit_scroll_x(CAP_WORLD_WIDTH - CAP_VIEW_WIDTH, 0) == 128);
+    assert(CAP_FITTED_BACKGROUND_WIDTH == 469);
+    assert(cap_background_fit_scroll_x(CAP_WORLD_WIDTH - CAP_VIEW_WIDTH, 0) == 117);
     assert(cap_background_fit_scroll_x(-100, 0) == 0);
-    assert(cap_background_fit_scroll_x(5000, 0) == 128);
+    assert(cap_background_fit_scroll_x(5000, 0) == 117);
     assert(cap_background_fit_scroll_x(5000, 1) == 0);
+}
+
+static void test_actor_display_mapping(void)
+{
+    /* Full-fit maps the complete 384-pixel CPS2 field to Saturn 352x224. */
+    assert(cap_actor_screen_x(0, 0, 1) == -176);
+    assert(cap_actor_screen_x(192, 0, 1) == 0);
+    assert(cap_actor_screen_x(384, 0, 1) == 176);
+    assert(cap_actor_screen_x(300, 0, 1) == 99);
+
+    /* Exact mode centers the source and therefore crops 16 pixels per side. */
+    assert(cap_actor_screen_x(0, 0, 0) == -192);
+    assert(cap_actor_screen_x(16, 0, 0) == -176);
+    assert(cap_actor_screen_x(192, 0, 0) == 0);
+    assert(cap_actor_screen_x(368, 0, 0) == 176);
+    assert(cap_actor_screen_x(300, 0, 0) == 108);
+
+    assert(cap_actor_screen_x(300, 108, 1) == 0);
+    assert(cap_actor_screen_x(300, 108, 0) == 0);
 }
 
 int main(void)
@@ -314,6 +334,7 @@ int main(void)
     test_controller_only_route_completion();
     test_long_deterministic_run();
     test_centered_background_mapping();
+    test_actor_display_mapping();
     puts("Capability model tests passed (12,000 deterministic frames).");
     return 0;
 }

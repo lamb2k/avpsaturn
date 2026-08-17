@@ -12,9 +12,9 @@
 #define CEL_BYTES ((CEL_WIDTH * CEL_HEIGHT) / 2)
 #define BACKGROUND_WIDTH CAP_BACKGROUND_WIDTH
 #define BACKGROUND_HEIGHT 256
-#define SNAPSHOT_WIDTH 384
+#define SNAPSHOT_FIT_WIDTH CAP_VIEW_WIDTH
 #define SNAPSHOT_HEIGHT 224
-#define SNAPSHOT_BYTES (SNAPSHOT_WIDTH * SNAPSHOT_HEIGHT)
+#define SNAPSHOT_FIT_BYTES (SNAPSHOT_FIT_WIDTH * SNAPSHOT_HEIGHT)
 #define BOSS_CEL_BYTES ((AVSP_BOSS_CEL_WIDTH * AVSP_BOSS_CEL_HEIGHT) / 2)
 
 #if JO_TV_WIDTH != CAP_VIEW_WIDTH || JO_TV_HEIGHT != 224
@@ -52,7 +52,7 @@ static jo_palette actor_palette;
 static jo_palette snapshot_palette;
 static jo_img_8bits background_image;
 static jo_img_8bits boss_background_image;
-static jo_img_8bits snapshot_image;
+static jo_img_8bits snapshot_fit_image;
 static unsigned char *background_bitmap;
 static jo_img_4bits player_attack_images[AVSP_PLAYER_ATTACK_POSES][AVSP_PLAYER_ATTACK_LAYERS];
 static jo_img_4bits enemy_walk_images[AVSP_ENEMY_WALK_POSES];
@@ -61,7 +61,7 @@ static int player_idle_sprites[2];
 static int player_attack_sprites[AVSP_PLAYER_ATTACK_LAYERS];
 static int enemy_walk_sprite;
 static int boss_idle_sprites[AVSP_BOSS_IDLE_LAYERS];
-static int snapshot_sprite;
+static int snapshot_fit_sprite;
 static int current_player_attack_pose;
 static int current_enemy_walk_pose;
 static int debug_hud_enabled;
@@ -70,7 +70,6 @@ static int runtime_ready;
 static int cart_available;
 static int boss_background_active;
 static int stage_music_started;
-static int full_width_fit;
 
 static int load_cel_asset(CelAsset *asset)
 {
@@ -198,19 +197,19 @@ static void set_snapshot_palette(void)
 static int load_snapshot_asset(void)
 {
     int length = 0;
-    snapshot_image.width = SNAPSHOT_WIDTH;
-    snapshot_image.height = SNAPSHOT_HEIGHT;
-    snapshot_image.data = (unsigned char *)jo_fs_read_file_in_dir(
-        "OBJFRM.BIN", "SPR8", &length);
-    if (snapshot_image.data == JO_NULL || length != SNAPSHOT_BYTES)
+    snapshot_fit_image.width = SNAPSHOT_FIT_WIDTH;
+    snapshot_fit_image.height = SNAPSHOT_HEIGHT;
+    snapshot_fit_image.data = (unsigned char *)jo_fs_read_file_in_dir(
+        "OBJFIT.BIN", "SPR8", &length);
+    if (snapshot_fit_image.data == JO_NULL || length != SNAPSHOT_FIT_BYTES)
     {
-        failed_asset = "OBJFRM.BIN";
+        failed_asset = "OBJFIT.BIN";
         return 0;
     }
-    snapshot_sprite = jo_sprite_add_8bits_image(&snapshot_image);
-    if (snapshot_sprite < 0)
+    snapshot_fit_sprite = jo_sprite_add_8bits_image(&snapshot_fit_image);
+    if (snapshot_fit_sprite < 0)
     {
-        failed_asset = "OBJFRM VDP1";
+        failed_asset = "OBJFIT VDP1";
         return 0;
     }
     return 1;
@@ -246,10 +245,10 @@ static int load_background(void)
         return 0;
     }
     slBitMapNbg1(COL_TYPE_256, BM_512x256, background_bitmap);
-    /* Full-width mode reduces the 384-pixel CPS2 picture to 352 pixels.
-       NBG1 must explicitly allow ratios below 1.0; otherwise some hardware
-       and emulators clamp the requested reciprocal zoom to the 1:1 range. */
-    slZoomModeNbg1(ZOOM_HALF);
+    /* The generated background is already horizontally fitted to Saturn's
+       352-pixel field.  Keep VDP2 at 1:1 so emulator and hardware paths use
+       the same deterministic coordinate mapping. */
+    slZoomModeNbg1(ZOOM_1);
     slBMPaletteNbg1((unsigned short)background_palette.id);
     jo_dma_copy(background_image.data, background_bitmap, BACKGROUND_WIDTH * BACKGROUND_HEIGHT);
     jo_set_displayed_screens(JO_NBG0_SCREEN | JO_NBG1_SCREEN);
@@ -375,23 +374,21 @@ static void draw_boss(const CapActor *actor, const int screen_x)
 static void draw_world(void)
 {
     int index;
-    int player_x = world.player.x - world.camera_x - JO_TV_WIDTH_2;
-    int background_scroll = full_width_fit ?
-        cap_background_fit_scroll_x(world.camera_x, world.stage_area) :
-        cap_background_scroll_x(world.camera_x, world.stage_area);
+    int player_x = cap_actor_screen_x(world.player.x, world.camera_x, 1);
+    int background_scroll = cap_background_fit_scroll_x(
+        world.camera_x, world.stage_area);
 
     if (world.stage_area == 1) activate_boss_background();
-    jo_zoom_background2(full_width_fit ?
-        ((float)CAP_CPS2_VIEW_WIDTH / (float)CAP_VIEW_WIDTH) : 1.0f, 1.0f);
-    jo_move_background(background_scroll, 8);
-    if (full_width_fit)
-        jo_sprite_change_sprite_scale_xy(
-            (float)CAP_VIEW_WIDTH / (float)CAP_CPS2_VIEW_WIDTH, 1.0f);
+    /* The source capture is already exactly 224 lines high.  A non-zero Y
+       scroll silently discards arcade scanlines and is therefore a crop. */
+    jo_move_background(background_scroll, 0);
+    jo_sprite_change_sprite_scale_xy(
+        (float)CAP_VIEW_WIDTH / (float)CAP_CPS2_VIEW_WIDTH, 1.0f);
     if (!world.encounter_started)
     {
         jo_sprite_set_palette(snapshot_palette.id);
-        jo_sprite_draw3D(snapshot_sprite, 0, 0, 160);
-        if (full_width_fit) jo_sprite_restore_sprite_scale();
+        jo_sprite_restore_sprite_scale();
+        jo_sprite_draw3D(snapshot_fit_sprite, 0, 0, 160);
         return;
     }
     draw_player(&world.player, player_x);
@@ -407,7 +404,7 @@ static void draw_world(void)
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
     {
         CapActor *enemy = &world.enemies[index];
-        int screen_x = enemy->x - world.camera_x - JO_TV_WIDTH_2;
+        int screen_x = cap_actor_screen_x(enemy->x, world.camera_x, 1);
         if (!enemy->active) continue;
         if (screen_x < -256 || screen_x > 256) continue;
         if (enemy->kind == CAP_ACTOR_BOSS)
@@ -415,7 +412,7 @@ static void draw_world(void)
         else
             draw_alien(enemy, screen_x);
     }
-    if (full_width_fit) jo_sprite_restore_sprite_scale();
+    jo_sprite_restore_sprite_scale();
 }
 
 static CapInput read_input(void)
@@ -492,7 +489,7 @@ static void draw_hud(void)
               cart_available ? "4MB" : "FAIL");
     jo_printf(0, 3, "VDP1 %02d%% EXACT CPS2 PALETTE LAYERS",
               jo_sprite_usage_percent());
-    jo_printf(0, 4, "VIEW %s  X HUD  Y VIEW", full_width_fit ? "FULL FIT" : "EXACT CROP");
+    jo_printf(0, 4, "VIEW FULL FIT  X HUD");
     jo_printf(0, 5, "ROOM %d  LOCK %d  EXIT %d",
               world.encounter_state, world.room_locked, world.stage_transitioned);
     if (world.encounter_state == CAP_ENCOUNTER_BOSS && world.enemies[0].active)
@@ -543,7 +540,6 @@ static void frame_callback(void)
               world.stage_transitioned, world.level_completed);
 #endif
     if (jo_is_pad1_key_down(JO_KEY_X)) debug_hud_enabled = !debug_hud_enabled;
-    if (jo_is_pad1_key_down(JO_KEY_Y)) full_width_fit = !full_width_fit;
     draw_world();
     if (world.encounter_state == CAP_ENCOUNTER_STAGE_CLEAR || world.level_completed)
         jo_printf(12, 12, "STAGE CLEAR");
@@ -562,11 +558,10 @@ void jo_main(void)
     background_bitmap = JO_NULL;
     background_image.data = JO_NULL;
     boss_background_image.data = JO_NULL;
-    snapshot_image.data = JO_NULL;
+    snapshot_fit_image.data = JO_NULL;
     debug_hud_enabled = 0;
     boss_background_active = 0;
     stage_music_started = 0;
-    full_width_fit = 1;
 
     jo_core_init(JO_COLOR_Black);
     cart_available = jo_get_extended_ram_cartridge_type() == CART_32MBits;

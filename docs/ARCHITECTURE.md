@@ -48,19 +48,21 @@ residency from VDP1 texture residency and leaves room for commands and a larger
 animation cache.
 
 Before gameplay starts, a separate reference mode draws the final visible CPS2
-object/priority result as one 384x224 8bpp VDP1 surface. Its 76 visible source
-colors fit losslessly inside one 256-color Saturn palette and consume 86,016
-bytes. The converter derives this surface from the MAME reference after removing
-the reconstructed background, so tilemap-priority occlusion is already resolved.
-This is a flattened comparison oracle, not the final animation architecture.
-The first player input replaces it with the actor working set and native
-transforms.
+object/priority result as one 352x224 8bpp VDP1 surface. Its 76 visible source
+colors fit losslessly inside one 256-color Saturn palette and consume 78,848
+bytes; only the horizontal coordinates are resampled from 384 to 352. The
+converter also retains an ignored 86,016-byte 384x224 source oracle. It derives
+both from the MAME reference after removing the reconstructed background, so
+tilemap-priority occlusion is already resolved. This is a flattened comparison
+oracle, not the final animation architecture. The first player input replaces
+it with the actor working set and native transforms.
 
 ## Background and HUD
 
 The converter reconstructs CPS2 scroll layers from captured graphics RAM,
-CPS-A/CPS-B registers, tile graphics, and palettes. The present build quantizes
-that 512x256 reconstruction into a VDP2 256-color bitmap. The arcade HUD is
+CPS-A/CPS-B registers, tile graphics, and palettes. It horizontally fits the
+512x256 reconstruction into a 469-pixel content region inside a 512x256 VDP2
+256-color bitmap. The arcade HUD is
 currently baked from the captured scroll layer, so its displayed values are
 static and are not yet driven by native gameplay state.
 
@@ -69,12 +71,12 @@ static and are not yet driven by native gameplay state.
 The arcade active picture is 384x224. The Saturn has no native 384-pixel
 low-resolution mode, so the project force-includes a project-owned video
 configuration selecting SGL's `TV_352x224` for every translation unit. All 224
-scanlines are preserved. The runtime defaults to full-width fit: VDP2 samples
-the 384-pixel source picture across 352 output pixels and VDP1 uses the matching
-0.9167 horizontal scale. This avoids losing HUD and playfield edges at the cost
-of 8.33% horizontal compression. NBG1 explicitly uses SGL's `ZOOM_HALF`
-reduction range so the reciprocal 384/352 ratio is honored. Y toggles the exact baseline, which uses no
-horizontal resampling and center-crops 16 source pixels per side.
+scanlines are preserved. The runtime uses one full-width mapping: the converter
+pre-scales VDP2 content by 352/384, VDP2 displays it at a deterministic 1:1,
+and VDP1 uses the matching 0.9167 horizontal scale for actors. This avoids
+losing HUD and playfield edges at the cost of 8.33% horizontal compression.
+Pre-scaling replaced the earlier runtime NBG1 reduction experiment because its
+SGL/emulator register path could silently fall back to a 1:1 crop.
 
 ## Sound mapping
 
@@ -97,7 +99,7 @@ Exact in the current milestone:
 - selected background/HUD capture reconstruction
 - aligned multi-palette VDP1 assembly
 - active CPS2 object-RAM bank and final visible boot object/priority result
-- Saturn-native 352x224 initialization with full-width fit and exact-crop modes
+- Saturn-native 352x224 initialization with one deterministic full-width fit
 - first ten-pose captured Predator attack sequence
 - first ten-pose temporally tracked blue-alien sequence
 - first-room 5+3 crowd budget, four alien palette variants, combat lock, clear,
@@ -110,8 +112,8 @@ Still approximate or incomplete:
 - remaining player states, enemy animation/state timing, and full frame sets
 - dynamic HUD values, exact scroll behavior, level triggers, combat, and AI
 - isolated, event-synchronized QSound effects on native SCSP PCM channels
-- native HUD safe-area placement and arcade-derived camera behavior for the
-  unavoidable 16-pixel-per-side crop
+- native HUD safe-area placement and arcade-derived camera behavior for CRT
+  overscan variability
 
 ## Next implementation sequence
 

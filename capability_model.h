@@ -6,6 +6,7 @@
 #define CAP_VIEW_WIDTH 352
 #define CAP_CPS2_VIEW_WIDTH 384
 #define CAP_BACKGROUND_WIDTH 512
+#define CAP_FITTED_BACKGROUND_WIDTH 469
 #define CAP_CENTER_CROP_X ((CAP_CPS2_VIEW_WIDTH - CAP_VIEW_WIDTH) / 2)
 #define CAP_PLAYER_MAX_HEALTH 12
 #define CAP_STAGE1_TOTAL_ENEMIES 8
@@ -96,5 +97,6 @@ void cap_world_init(CapWorld *world);
 CapClipRequest cap_world_step(CapWorld *world, const CapInput *input);
 int cap_background_scroll_x(int camera_x, int stage_area);
 int cap_background_fit_scroll_x(int camera_x, int stage_area);
+int cap_actor_screen_x(int world_x, int camera_x, int full_width_fit);
 
 #endif
