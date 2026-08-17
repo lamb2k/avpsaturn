@@ -1,6 +1,6 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-17 15:20 EDT
+Updated: 2026-08-17 15:35 EDT
 
 **Direction as of 2026-08-17: functional parity by ROM translation, with an
 instrumented MAME build retained only as a contingency. Stock MAME 0.289 debug
@@ -15,8 +15,9 @@ Read this file before taking any action. The user wants a private, capture-faith
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `prototype/private-capability-test`
-- Implementation checkpoint: `e978e7c` (`Pair debug hitboxes with actor
-  pivots`), following `d8a57e1` (`Decode ROM animation script structure`),
+- Implementation checkpoint: `c32d663` (`Decode selector six sprite
+  assemblies`), following `e978e7c` (`Pair debug hitboxes with actor pivots`),
+  `d8a57e1` (`Decode ROM animation script structure`),
   `1f15ea5` (`Extract screen-space hitbox brackets`),
   `dbc070b` (`Update handoff with watchpoint checkpoint`), `4182edb` (`Trace
   actor writers with stock MAME watchpoints`), and `b24a4e0` (Round 1 debug
@@ -516,7 +517,9 @@ Findings from the `avspu_stage1_boss_12660` state, 240 frames:
 The private decrypted ROM window now decodes 29 distinct boss animation
 programs with `tools/decode_avsp_animation_scripts.py`. The tracked report is
 `data/avsp_animation_scripts.json`; it is structural evidence only and does
-not pass the pixel-exact pose gate.
+not pass the pixel-exact pose gate. The renderer's selector-6 assembly command
+is also structurally decoded: budget, tile count, offset-table index, and
+packed-long/offset-word entries for 14 blocks.
 
 The updater disassembly from the MAME opcode space establishes the format:
 normal pose records are 16 bytes, with duration at `+0`, flags at `+2`, and an
@@ -542,9 +545,9 @@ program/opcode dumps remain ignored under `.deps\mame\actorprobe`.
 Tracked hashes for this checkpoint:
 
 - `tools/decode_avsp_animation_scripts.py`:
-  `bcc1bf21623c12ff288b46eb7c36f70e9c73f4059fb53990dbeee161154fb075`.
+  `a8b4932e32cb115e53e284b82738eb22d4ebfb48645c85034535ef6c06b95c15`.
 - `data/avsp_animation_scripts.json`:
-  `8219afee1df47ebca0d88a34720ee79a176d6e68d3d1ba26b9895e022fca3f1b`.
+  `8cb39bd4220a92ab9fcf05cace0323ecfb14bf443a30bdeceeebf4b6ede943cb`.
 - `tools/mame_dump_code_spaces.lua`:
   `1f22a221c87c5ab2bc07eeab0608cc2bb10d980f5a574cd5f73f0a4bf246ccd6`.
 
