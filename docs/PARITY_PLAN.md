@@ -286,6 +286,42 @@ events.
 Do not start Phase 3 before the pixel-exact pose test passes. Reimplementing on
 top of a misread table format is the most expensive available mistake.
 
+## The pose gate is implemented and currently RED
+
+`tools/verify_pose_gate.py` is the gate. Run it before claiming any progress on
+assembly decoding:
+
+```
+python tools\verify_pose_gate.py --assembly 0x13dea0
+```
+
+It decodes a verified pose from `/SPR4/*.RLE` via the index tables in
+`generated/avsp_boss_animation.h`, composes the ROM assembly, crops both to
+their own content bounding boxes, and requires **zero** differing pixels.
+
+Two rules in it exist because the first ad-hoc attempt got them wrong, and
+either mistake can produce a false pass:
+
+- **The oracle is a decoded archive pose, never a screenshot.** A full-screen
+  capture holds background, HUD and other actors, so one assembly can never
+  match it.
+- **Pass means zero differing pixels**, with no colour tolerance. A percentage
+  over a whole canvas is dominated by shared empty space, so an empty
+  composition scores well against a mostly-empty oracle.
+
+Status at 2026-08-17: **RED, and the failure is informative.** The oracle side
+is proven correct: pose 0 decodes to a 205x103 Chrysalis sprite, confirming the
+RLE decode, archive indexing, 4bpp unpacking and crop are all sound. The
+composition side produces only a 16x64 single-tile column, because every
+decoded layout entry shares `layout_x = -112` while y steps by 16. A 205x103
+sprite needs roughly ninety 16x16 tiles, not four stacked vertically.
+
+That points at one of three things, and the next work should decide which:
+a single pose is assembled from several assemblies; the declared tile count is
+short and the record continues past what is currently decoded; or the layout
+table is being read down a single column. Adjust `compose_assembly()` as the
+interpretation improves and never relax the comparison.
+
 ## Explicitly out of scope
 
 Cut deliberately, to keep the target reachable:
