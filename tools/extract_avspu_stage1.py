@@ -22,6 +22,7 @@ VISIBLE_TOP = 16
 VISIBLE_WIDTH = 384
 VISIBLE_HEIGHT = 224
 STAGE1_ACTIVE_OBJECT_RAM = "objram2.tsv"
+ANIMATION_SAMPLE_ACTIVE_BANK = {2880: 2, 2940: 2}
 STAGE1_OBJECT_GROUPS = (
     ("capture_padding", "nonvisual", "verified", (0, 4, 8)),
     ("ground_shadows", "shadow_sprites", "verified",
@@ -655,9 +656,11 @@ def write_exact_actor_assets(gfx: bytearray,
                              palette: list[tuple[int, int, int, int]],
                              sprite_dir: Path) -> list[dict[str, object]]:
     groups = {
-        "player_idle": exact_object_layers(gfx, palette, 2880, 1, [76, 80, 84, 88]),
+        "player_idle": exact_object_layers(
+            gfx, palette, 2880, ANIMATION_SAMPLE_ACTIVE_BANK[2880], [72, 76, 80, 84]),
         "player_attack": exact_object_layers(
-            gfx, palette, 2940, 2, list(range(72, 117, 4)), shift_x=-150),
+            gfx, palette, 2940, ANIMATION_SAMPLE_ACTIVE_BANK[2940],
+            list(range(72, 117, 4)), shift_x=-150),
         "alien_a": exact_object_layers(gfx, palette, 4200, 2, [124, 128]),
         "alien_b": exact_object_layers(gfx, palette, 4200, 2, [144, 148]),
     }
@@ -741,9 +744,10 @@ def write_saturn_assets(gfx: bytearray, palette: list[tuple[int, int, int, int]]
     background_dir.mkdir(parents=True, exist_ok=True)
 
     player_idle = fit_actor_frame(selected_object_layer(
-        gfx, palette, 2880, 1, [76, 80, 84, 88]))
+        gfx, palette, 2880, ANIMATION_SAMPLE_ACTIVE_BANK[2880], [72, 76, 80, 84]))
     player_attack = fit_actor_frame(selected_object_layer(
-        gfx, palette, 2940, 2, list(range(72, 125, 4)), shift_x=-150))
+        gfx, palette, 2940, ANIMATION_SAMPLE_ACTIVE_BANK[2940],
+        list(range(72, 125, 4)), shift_x=-150))
     alien_a = fit_actor_frame(selected_object_layer(gfx, palette, 4200, 2, [124, 128]))
     alien_b = fit_actor_frame(selected_object_layer(gfx, palette, 4200, 2, [144, 148]))
     alien_c = fit_actor_frame(selected_object_layer(gfx, palette, 4200, 2, [160, 164]))
