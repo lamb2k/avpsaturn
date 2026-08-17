@@ -1,6 +1,8 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-17 13:16 EDT
+Updated: 2026-08-17 18:45 EDT
+
+**Latest findings on the pixel-exact pose gate**: Budget=62 entries from layout pointer 0x1FDE40 produce 11×6 tiles (176×96 pixels). The BACT.RLE oracle pose 0 requires 13×7 tiles (205×103 pixels). The gap is caused by 62 entries only covering column positions 0-10 (x=-112 to +48) and 6 y-values (y=-96 to -16), while the oracle needs columns 0-12 (+13) and 7 y-values including y=-112. The layout grid at 0x1DE40 has a cyclic structure of 16×7 grid positions with a 98-entry cycle. Entry 90 has x=-128, entry 97 has y=-112 — both outside the budget=62 range. Budget values in the ROM assembly fields may control something other than layout entry count, or the selector-6 offset_adjust values modify layout coordinates during rendering. The gate remains RED.
 
 **Direction as of 2026-08-17: functional parity by ROM translation, with an
 instrumented MAME build retained only as a contingency. Stock MAME 0.289 debug
@@ -15,8 +17,8 @@ Read this file before taking any action. The user wants a private, capture-faith
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `prototype/private-capability-test`
-- Implementation checkpoint: `5b1958b` (`Follow selector six layout tables`),
-  following `c32d663` (`Decode selector six sprite assemblies`),
+- Implementation checkpoint: `a788147` (`Pose gate: use budget for entry count (62 vs 4), document layout grid structure and shape mismatch`),
+  following `9afebf5` (`Implement frame-comparison pose gate with oracle verification`).
   `e978e7c` (`Pair debug hitboxes with actor pivots`),
   `d8a57e1` (`Decode ROM animation script structure`),
   `1f15ea5` (`Extract screen-space hitbox brackets`),
@@ -557,7 +559,7 @@ Tracked hashes for this checkpoint:
 - `tools/decode_avsp_animation_scripts.py`:
   `2a7247ab30d1a239f4d325883075ae798ff25c0ebd2211a8c1b97d2f99702a2d`.
 - `data/avsp_animation_scripts.json`:
-  `8b8011b5f9f63d18fd76e618f08dcd1995db46e9472b0eca24c21b5404fbe6f7`.
+  `B61F89B68E147521BBFA2934A0F9A21932C0D2C05F8977D8500BEAA8BC9551DA`.
 - `tools/mame_dump_code_spaces.lua`:
   `1f22a221c87c5ab2bc07eeab0608cc2bb10d980f5a574cd5f73f0a4bf246ccd6`.
 
