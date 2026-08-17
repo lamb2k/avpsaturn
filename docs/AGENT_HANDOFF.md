@@ -1,6 +1,6 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-17 15:35 EDT
+Updated: 2026-08-17 13:16 EDT
 
 **Direction as of 2026-08-17: functional parity by ROM translation, with an
 instrumented MAME build retained only as a contingency. Stock MAME 0.289 debug
@@ -15,8 +15,9 @@ Read this file before taking any action. The user wants a private, capture-faith
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `prototype/private-capability-test`
-- Implementation checkpoint: `c32d663` (`Decode selector six sprite
-  assemblies`), following `e978e7c` (`Pair debug hitboxes with actor pivots`),
+- Implementation checkpoint: `5b1958b` (`Follow selector six layout tables`),
+  following `c32d663` (`Decode selector six sprite assemblies`),
+  `e978e7c` (`Pair debug hitboxes with actor pivots`),
   `d8a57e1` (`Decode ROM animation script structure`),
   `1f15ea5` (`Extract screen-space hitbox brackets`),
   `dbc070b` (`Update handoff with watchpoint checkpoint`), `4182edb` (`Trace
@@ -519,7 +520,11 @@ programs with `tools/decode_avsp_animation_scripts.py`. The tracked report is
 `data/avsp_animation_scripts.json`; it is structural evidence only and does
 not pass the pixel-exact pose gate. The renderer's selector-6 assembly command
 is also structurally decoded: budget, tile count, offset-table index, and
-packed-long/offset-word entries for 14 blocks.
+packed-long/offset-word entries for 14 blocks. The selector-six handler at
+`0xAA00E` reads the offset-table pointer from `0x1FD1C8`, consumes two layout
+words per tile, applies the signed per-entry adjustment, and emits a CPS
+object-command pair. The packed-source and layout-word meanings still need a
+rendered-pose comparison.
 
 The updater disassembly from the MAME opcode space establishes the format:
 normal pose records are 16 bytes, with duration at `+0`, flags at `+2`, and an
@@ -539,15 +544,20 @@ window:
     .\tools\decode_avsp_animation_scripts.py
 ```
 
+The decoder expects the 0x13c000..0x13f000 script window, the 0x1fd1c8 table
+window, and the 0x1e0000..0x200000 layout window. Regenerate those ignored
+windows with `tools/mame_dump_code_spaces.lua` by setting `AVSP_ROM_FIRST`,
+`AVSP_ROM_LAST`, `AVSP_ROM_OUT_PROGRAM`, and `AVSP_ROM_OUT_OPCODES`.
+
 The associated opcode-space dumper is `tools/mame_dump_code_spaces.lua`; raw
 program/opcode dumps remain ignored under `.deps\mame\actorprobe`.
 
 Tracked hashes for this checkpoint:
 
 - `tools/decode_avsp_animation_scripts.py`:
-  `a8b4932e32cb115e53e284b82738eb22d4ebfb48645c85034535ef6c06b95c15`.
+  `2a7247ab30d1a239f4d325883075ae798ff25c0ebd2211a8c1b97d2f99702a2d`.
 - `data/avsp_animation_scripts.json`:
-  `8cb39bd4220a92ab9fcf05cace0323ecfb14bf443a30bdeceeebf4b6ede943cb`.
+  `8b8011b5f9f63d18fd76e618f08dcd1995db46e9472b0eca24c21b5404fbe6f7`.
 - `tools/mame_dump_code_spaces.lua`:
   `1f22a221c87c5ab2bc07eeab0608cc2bb10d980f5a574cd5f73f0a4bf246ccd6`.
 
