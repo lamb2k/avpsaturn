@@ -277,6 +277,20 @@ static void test_capture_exact_boss_attack_timing(void)
     assert(boss->action_frame == 39);
     step_empty(&world, 1);
     assert(boss->action == CAP_ACT_IDLE);
+
+    boss->action = CAP_ACT_KO;
+    boss->action_frame = 0;
+    boss->active = 1;
+    step_empty(&world, 427);
+    assert(boss->active == 1);
+    assert(boss->action == CAP_ACT_KO);
+    assert(boss->action_frame == 427);
+    step_empty(&world, 1);
+    assert(boss->active == 1); /* Hold the settled corpse for 60 frames. */
+    step_empty(&world, 59);
+    assert(boss->active == 1);
+    step_empty(&world, 1);
+    assert(boss->active == 0);
 }
 
 static void test_capture_exact_stalker_timing(void)
@@ -504,6 +518,12 @@ static void test_first_room_waves_and_transition(void)
     (void)cap_world_step(&world, &input);
     step_empty(&world, 16);
     assert(world.boss_defeated == 1);
+    assert(world.encounter_state == CAP_ENCOUNTER_BOSS);
+    assert(world.enemies[0].action == CAP_ACT_KO);
+    step_empty(&world, 426);
+    assert(world.encounter_state == CAP_ENCOUNTER_BOSS);
+    assert(world.enemies[0].action_frame == 427);
+    step_empty(&world, 1);
     assert(world.encounter_state == CAP_ENCOUNTER_BOSS_DEFEAT);
     step_empty(&world, 240);
     assert(world.encounter_state == CAP_ENCOUNTER_STAGE_CLEAR);

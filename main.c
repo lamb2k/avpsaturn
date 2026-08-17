@@ -32,6 +32,10 @@
 #define SNAPSHOT_FIT_BYTES (SNAPSHOT_FIT_WIDTH * SNAPSHOT_HEIGHT)
 #define AVSP_CART_DRAM1_BASE ((unsigned char *)0x22600000)
 #define AVSP_CART_DRAM1_BYTES 0x200000
+#define AVSP_BOSS_KO_ARCHIVE_OFFSET \
+    ((AVSP_BOSS_HIT_ARCHIVE_BYTES + 1 + 3) & ~3)
+#define AVSP_BOSS_SUPPLEMENT_ARCHIVE_BYTES \
+    (AVSP_BOSS_KO_ARCHIVE_OFFSET + AVSP_BOSS_KO_ARCHIVE_BYTES + 1)
 #define AVSP_PCM_CHANNEL_WEAPON 0
 #define AVSP_PCM_CHANNEL_MELEE 1
 #define AVSP_PCM_CHANNEL_CONTACT 2
@@ -104,7 +108,9 @@ static unsigned char *enemy_action_archive;
 static unsigned char *stalker_action_archive;
 static unsigned char *enemy_action_buffer;
 static unsigned char *boss_action_archive;
+static unsigned char *boss_supplement_archive_block;
 static unsigned char *boss_hit_action_archive;
+static unsigned char *boss_ko_action_archive;
 static jo_img_4bits player_action_images[AVSP_PLAYER_ACTION_LAYERS];
 static jo_img_4bits enemy_action_images[CAP_MAX_ENEMIES];
 static jo_img_4bits boss_action_image;
@@ -500,18 +506,56 @@ static int load_boss_action_archive(void)
     return 1;
 }
 
-static int load_boss_hit_action_archive(void)
+static int load_boss_supplement_archives(void)
 {
-    int length = 0;
-    boss_hit_action_archive = (unsigned char *)jo_fs_read_file_in_dir(
-        AVSP_BOSS_HIT_ARCHIVE_FILE, "SPR4", &length);
-    if (boss_hit_action_archive == JO_NULL ||
-        length != AVSP_BOSS_HIT_ARCHIVE_BYTES)
+    int hit_length = 0;
+    int ko_length = 0;
+    int valid = 1;
+
+    if (boss_hit_action_archive != JO_NULL &&
+        boss_ko_action_archive != JO_NULL)
+        return 1;
+
+    /* Jo's reuse allocator deliberately does not split a freed block. Loading
+       BHIT as its own 5,900-byte allocation therefore consumes the complete
+       retired 78,848-byte character-select block and leaves no reusable tail
+       for BKO. Allocate both supplements once, then read each file into its
+       fixed subrange. Keep both destinations four-byte aligned for the Saturn
+       CD loader. The +1 bytes are required because jo_fs_read_file_ptr writes
+       a trailing zero after every file. */
+    boss_supplement_archive_block =
+        (unsigned char *)jo_malloc_with_behaviour(
+            AVSP_BOSS_SUPPLEMENT_ARCHIVE_BYTES,
+            JO_MALLOC_TRY_REUSE_BLOCK);
+    if (boss_supplement_archive_block == JO_NULL)
     {
-        failed_asset = AVSP_BOSS_HIT_ARCHIVE_FILE;
+        failed_asset = "BOSS SUPPLEMENT BUFFER";
         return 0;
     }
-    return 1;
+
+    boss_hit_action_archive = boss_supplement_archive_block;
+    boss_ko_action_archive = boss_supplement_archive_block +
+        AVSP_BOSS_KO_ARCHIVE_OFFSET;
+    jo_fs_cd("SPR4");
+    if (jo_fs_read_file_ptr(AVSP_BOSS_HIT_ARCHIVE_FILE,
+                            boss_hit_action_archive,
+                            &hit_length) == JO_NULL ||
+        hit_length != AVSP_BOSS_HIT_ARCHIVE_BYTES)
+    {
+        failed_asset = AVSP_BOSS_HIT_ARCHIVE_FILE;
+        valid = 0;
+    }
+    if (valid &&
+        (jo_fs_read_file_ptr(AVSP_BOSS_KO_ARCHIVE_FILE,
+                             boss_ko_action_archive,
+                             &ko_length) == JO_NULL ||
+         ko_length != AVSP_BOSS_KO_ARCHIVE_BYTES))
+    {
+        failed_asset = AVSP_BOSS_KO_ARCHIVE_FILE;
+        valid = 0;
+    }
+    jo_fs_cd(JO_PARENT_DIR);
+    return valid;
 }
 
 static int decode_boss_action_pose(const int pose)
@@ -520,13 +564,30 @@ static int decode_boss_action_pose(const int pose)
     unsigned int target = 0;
     const unsigned int source_offset = avsp_boss_rle_offsets[pose];
     const unsigned int source_length = avsp_boss_rle_bytes[pose];
-    const int supplemental = avsp_boss_rle_archives[pose] != 0;
-    const unsigned int archive_bytes = supplemental ?
-        AVSP_BOSS_HIT_ARCHIVE_BYTES : AVSP_BOSS_ARCHIVE_BYTES;
-    const unsigned char *archive_data = supplemental ?
-        boss_hit_action_archive : boss_action_archive;
+    unsigned int archive_bytes;
+    const unsigned char *archive_data;
     const unsigned char *source_data;
     unsigned char *output = boss_action_image.data;
+    if (avsp_boss_rle_archives[pose] == 0)
+    {
+        archive_bytes = AVSP_BOSS_ARCHIVE_BYTES;
+        archive_data = boss_action_archive;
+    }
+    else if (avsp_boss_rle_archives[pose] == 1)
+    {
+        archive_bytes = AVSP_BOSS_HIT_ARCHIVE_BYTES;
+        archive_data = boss_hit_action_archive;
+    }
+    else if (avsp_boss_rle_archives[pose] == 2)
+    {
+        archive_bytes = AVSP_BOSS_KO_ARCHIVE_BYTES;
+        archive_data = boss_ko_action_archive;
+    }
+    else
+    {
+        failed_asset = "BOSS ACTION ARCHIVE";
+        return 0;
+    }
     if (archive_data == JO_NULL ||
         source_offset + source_length > archive_bytes)
     {
@@ -730,7 +791,8 @@ static int sequence_scene_for_world(void)
     if (world.encounter_state == CAP_ENCOUNTER_INTERIOR_TRANSITION)
         return AVSP_SEQUENCE_INTERIOR_TRANSITION;
     if (world.encounter_state == CAP_ENCOUNTER_BOSS_DEFEAT)
-        return AVSP_SEQUENCE_BOSS_DEATH_EXPLOSION;
+        return world.encounter_timer < 60 ? -1 :
+            AVSP_SEQUENCE_BOSS_DEATH_EXPLOSION;
     if (world.encounter_state == CAP_ENCOUNTER_STAGE_CLEAR)
         return AVSP_SEQUENCE_STAGE_CLEAR;
     if (world.encounter_state == CAP_ENCOUNTER_RESULTS)
@@ -923,13 +985,13 @@ static int prepare_boss_runtime(void)
 {
     if (boss_runtime_ready) return 1;
     /* Normal play keeps the base archive resident from cold boot and loads
-       the one-pose hit supplement from retired character-select RAM before
-       CDDA starts. Keep guarded lazy paths for visual-test profiles that
-       bypass the frontend state machine. */
+       the hit/KO supplements from retired character-select RAM before CDDA.
+       Keep guarded lazy paths for diagnostics that bypass the frontend. */
     if (boss_action_archive == JO_NULL && !load_boss_action_archive())
         return 0;
-    if (boss_hit_action_archive == JO_NULL &&
-        !load_boss_hit_action_archive())
+    if ((boss_hit_action_archive == JO_NULL ||
+         boss_ko_action_archive == JO_NULL) &&
+        !load_boss_supplement_archives())
         return 0;
     boss_action_image.width = AVSP_BOSS_CEL_WIDTH;
     boss_action_image.height = AVSP_BOSS_CEL_HEIGHT;
@@ -1051,6 +1113,7 @@ static int boss_clip_for_action(const CapAction action)
 {
     if (action == CAP_ACT_ATTACK) return AVSP_BOSS_CLIP_ATTACK;
     if (action == CAP_ACT_HIT) return AVSP_BOSS_CLIP_HIT;
+    if (action == CAP_ACT_KO) return AVSP_BOSS_CLIP_KO;
     if (action == CAP_ACT_WALK) return AVSP_BOSS_CLIP_WALK;
     return AVSP_BOSS_CLIP_IDLE;
 }
@@ -1184,6 +1247,8 @@ static void draw_boss(const CapActor *actor, const int screen_x)
     int frame = clip == AVSP_BOSS_CLIP_WALK ?
         actor->locomotion_frame : actor->action_frame;
     int pose;
+    int screen_offset_x;
+    int screen_offset_y;
     /* Boss graphics enter the working set only after the opening PCM overlay
        has ended. This avoids reserving a second large decoded actor cel during
        the cold-boot menu and first-wave allocation phase. */
@@ -1196,6 +1261,9 @@ static void draw_boss(const CapActor *actor, const int screen_x)
         frame %= avsp_boss_total_frames[clip];
     else if (frame >= avsp_boss_total_frames[clip])
         frame = avsp_boss_total_frames[clip] - 1;
+    screen_offset_x = avsp_boss_frame_x[clip][frame] *
+        CAP_VIEW_WIDTH / CAP_CPS2_VIEW_WIDTH;
+    screen_offset_y = avsp_boss_frame_y[clip][frame];
     pose = boss_pose_for_frame(clip, frame);
     if (pose != current_boss_action_pose)
     {
@@ -1208,8 +1276,8 @@ static void draw_boss(const CapActor *actor, const int screen_x)
             &boss_action_image, boss_action_sprite);
         current_boss_action_pose = pose;
     }
-    draw_exact_layer(actor, screen_x, boss_action_sprite,
-                     AVSP_BOSS_PALETTE_BANK, depth);
+    draw_exact_layer_offset(actor, screen_x, screen_offset_x, screen_offset_y,
+                            boss_action_sprite, AVSP_BOSS_PALETTE_BANK, depth);
 }
 
 static void draw_world(void)
@@ -1490,6 +1558,35 @@ static void frame_callback(void)
         world.enemies[0].hit_latched = 0;
     }
 #endif
+#ifdef AVSP_BOSS_KO_TEST
+    /* Replay the complete lethal reaction and grounded-corpse hold on a
+       timing-insensitive ten-second loop. After the complete 428-frame source
+       motion, keep the last captured corpse frame visible for inspection;
+       production builds retain the measured 60-frame hold. */
+    if ((world.frame % 600) == 1)
+    {
+        CapActor *boss = &world.enemies[0];
+        boss->x = 240;
+        boss->lane = world.player.lane;
+        boss->height = 0;
+        boss->health = 0;
+        boss->action = CAP_ACT_KO;
+        boss->action_frame = 0;
+        boss->hit_latched = 0;
+        boss->active = 1;
+        boss->kind = CAP_ACTOR_BOSS;
+    }
+    else if ((world.frame % 600) >=
+                 avsp_boss_total_frames[AVSP_BOSS_CLIP_KO] &&
+             (world.frame % 600) < 599)
+    {
+        CapActor *boss = &world.enemies[0];
+        boss->action = CAP_ACT_KO;
+        boss->action_frame =
+            avsp_boss_total_frames[AVSP_BOSS_CLIP_KO] - 2;
+        boss->active = 1;
+    }
+#endif
     clip_request = cap_world_step(&world, &input);
     /* Start permanently leaves the title scene. Reuse its 78,848-byte RAM
        block for the 64,118-byte Stalker archive before character confirmation
@@ -1507,14 +1604,15 @@ static void frame_callback(void)
     }
     /* Character confirmation keeps the already-copied selection pixels in
        VDP2, so its 78,848-byte source block is no longer needed. Reuse that
-       phase space for the one-pose Chrysalis hit supplement before the CDDA
+       phase space for the Chrysalis hit and KO supplements before the CDDA
        start below. This avoids a data-track seek during Stage 1 music and
-       keeps the expanded hit data out of the exact cold-boot allocation. */
+       keeps the expanded action data out of the cold-boot allocation. */
     if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM &&
-        boss_hit_action_archive == JO_NULL)
+        (boss_hit_action_archive == JO_NULL ||
+         boss_ko_action_archive == JO_NULL))
     {
         release_frontend_scene(1);
-        if (!load_boss_hit_action_archive())
+        if (!load_boss_supplement_archives())
         {
             runtime_ready = 0;
             return;
@@ -1792,6 +1890,11 @@ static void frame_callback(void)
               world.enemies[0].action, world.enemies[0].action_frame,
               current_boss_action_pose, world.enemies[0].health);
 #endif
+#ifdef AVSP_BOSS_KO_TEST
+    jo_printf(0, 20, "BOSS KO A%d F%03d P%02d LIVE %d",
+              world.enemies[0].action, world.enemies[0].action_frame,
+              current_boss_action_pose, world.enemies[0].active);
+#endif
 }
 
 void jo_main(void)
@@ -1834,7 +1937,9 @@ void jo_main(void)
     enemy_runtime_ready = 0;
     boss_action_image.data = JO_NULL;
     boss_action_archive = JO_NULL;
+    boss_supplement_archive_block = JO_NULL;
     boss_hit_action_archive = JO_NULL;
+    boss_ko_action_archive = JO_NULL;
     boss_runtime_ready = 0;
     current_bitmap_scene = BITMAP_SCENE_NONE;
 #ifdef AVSP_VISUAL_TEST
@@ -1890,26 +1995,29 @@ void jo_main(void)
         runtime_ready = prepare_enemy_runtime();
     }
 #endif
-#ifdef AVSP_BOSS_HIT_TEST
+#if defined(AVSP_BOSS_HIT_TEST) || defined(AVSP_BOSS_KO_TEST)
     if (runtime_ready)
     {
-        /* This focused diagnostic bypasses the frontend and proves the split
-           hit archive plus its VDP1 replacement immediately after boot. */
+        /* Focused boss diagnostics bypass the frontend and prove both
+           supplemental archives plus VDP1 replacement immediately. */
         release_frontend_scene(0);
         release_frontend_scene(1);
         release_pcm_data(&round_title_a_sound);
         release_pcm_data(&round_title_b_sound);
         release_pcm_data(&withdraw_sound);
         release_pcm_data(&breach_sound);
-        runtime_ready = load_boss_hit_action_archive();
+        runtime_ready = load_boss_supplement_archives();
     }
 #endif
     cap_world_init(&world);
-#ifdef AVSP_BOSS_HIT_TEST
+#if defined(AVSP_BOSS_HIT_TEST) || defined(AVSP_BOSS_KO_TEST)
     world.encounter_started = 1;
     world.encounter_state = CAP_ENCOUNTER_BOSS;
     world.room_locked = 1;
     world.stage_area = 1;
+#ifdef AVSP_BOSS_KO_TEST
+    world.boss_reinforcement_wave = 2;
+#endif
     world.frame = 1;
     world.player.x = 170;
     world.player.lane = 182;
@@ -1919,8 +2027,14 @@ void jo_main(void)
     world.enemies[0].lane = world.player.lane;
     world.enemies[0].height = 0;
     world.enemies[0].facing = -1;
-    world.enemies[0].health = 21;
+    world.enemies[0].health =
+#ifdef AVSP_BOSS_KO_TEST
+        0;
+    world.enemies[0].action = CAP_ACT_KO;
+#else
+        21;
     world.enemies[0].action = CAP_ACT_HIT;
+#endif
     world.enemies[0].action_frame = 0;
     world.enemies[0].active = 1;
     world.enemies[0].kind = CAP_ACTOR_BOSS;

@@ -7,6 +7,7 @@ param(
     [switch]$VisualTest,
     [switch]$EncounterTest,
     [switch]$BossHitTest,
+    [switch]$BossKoTest,
     [switch]$SkipHostTests
 )
 
@@ -101,7 +102,8 @@ try {
                 -Destination (Join-Path $contentRoot $metadataName) -Force
         }
 
-        $buildProfile = if ($BossHitTest) { 'boss-hit-test' }
+        $buildProfile = if ($BossKoTest) { 'boss-ko-test' }
+            elseif ($BossHitTest) { 'boss-hit-test' }
             elseif ($EncounterTest) { 'encounter-test' }
             elseif ($VisualTest) { 'visual-test' }
             else { 'normal-release' }
@@ -153,6 +155,9 @@ try {
         if ($BossHitTest) {
             $makeArguments += 'AVSP_BOSS_HIT_TEST=1'
         }
+        if ($BossKoTest) {
+            $makeArguments += 'AVSP_BOSS_KO_TEST=1'
+        }
         $makeArguments += 'game.raw'
         & $make @makeArguments
         if ($LASTEXITCODE -ne 0) {
@@ -196,6 +201,12 @@ try {
             (Join-Path $contentRoot 'SPR4\BHIT.RLE')
         if ($LASTEXITCODE -ne 0) {
             throw "Saturn Chrysalis hit archive ISO verification failed with exit code $LASTEXITCODE."
+        }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/SPR4/BKO.RLE' '--equals' `
+            (Join-Path $contentRoot 'SPR4\BKO.RLE')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn Chrysalis KO archive ISO verification failed with exit code $LASTEXITCODE."
         }
         & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
             'game.iso' '/SPR4/SACT.RLE' '--equals' `
@@ -323,6 +334,8 @@ try {
             (Join-Path $contentRoot 'SPR4\BACT.RLE')
         $bossHitArchiveFile = Get-Item -LiteralPath `
             (Join-Path $contentRoot 'SPR4\BHIT.RLE')
+        $bossKoArchiveFile = Get-Item -LiteralPath `
+            (Join-Path $contentRoot 'SPR4\BKO.RLE')
         $manifestPath = Join-Path $projectRoot 'build\hardware_release_manifest.txt'
         [IO.File]::WriteAllLines($manifestPath, @(
             'target=sega-saturn-ntsc'
@@ -338,6 +351,10 @@ try {
             'boss_hit_archive_load_phase=retired-character-select-before-cdda'
             "boss_hit_archive_bytes=$($bossHitArchiveFile.Length)"
             "boss_hit_archive_sha256=$((Get-FileHash -LiteralPath $bossHitArchiveFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'boss_ko_archive_iso_path=/SPR4/BKO.RLE'
+            'boss_ko_archive_load_phase=retired-character-select-before-cdda'
+            "boss_ko_archive_bytes=$($bossKoArchiveFile.Length)"
+            "boss_ko_archive_sha256=$((Get-FileHash -LiteralPath $bossKoArchiveFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
             'stalker_archive_iso_path=/SPR4/SACT.RLE'
             'stalker_archive_phase_overlay=retired-title-surface-before-cdda'
             "stalker_archive_bytes=$($stalkerArchiveFile.Length)"

@@ -925,6 +925,7 @@ def rightmost_blue_alien_capture(
 def exact_object_layers(gfx: bytearray, palette: list[tuple[int, int, int, int]],
                         frame: int, bank: int, offsets: list[int],
                         shift_x: int = 0,
+                        shift_y: int = 0,
                         pivot: tuple[int, int] | None = None,
                         source_filename: str | None = None,
                         canvas_size: tuple[int, int] = (192, 192)) -> tuple[dict[int, Image.Image],
@@ -942,6 +943,7 @@ def exact_object_layers(gfx: bytearray, palette: list[tuple[int, int, int, int]]
     for offset in offsets:
         x, y, code, attribute = words[offset:offset + 4]
         x = (x & ~0x3FF) | (((x & 0x3FF) + shift_x) & 0x3FF)
+        y = (y & ~0x3FF) | (((y & 0x3FF) + shift_y) & 0x3FF)
         nx = ((attribute >> 8) & 0x0F) + 1 if attribute & 0xFF00 else 1
         ny = ((attribute >> 12) & 0x0F) + 1 if attribute & 0xFF00 else 1
         commands.append({"offset": offset, "x": (x & 0x3FF) - VISIBLE_LEFT,
@@ -1949,6 +1951,7 @@ def write_boss_action_sequence_assets(
 
     archive = bytearray()
     hit_archive = bytearray()
+    ko_archive = bytearray()
     archive_offsets: list[int] = []
     archive_lengths: list[int] = []
     archive_ids: list[int] = []
@@ -1957,7 +1960,7 @@ def write_boss_action_sequence_assets(
     clip_specs: list[dict[str, object]] = []
 
     def intern_pose(decoded: bytes, source_frame: int,
-                    supplemental: bool = False) -> int:
+                    archive_id: int = 0) -> int:
         digest = hashlib.sha256(decoded).hexdigest()
         pose = pose_by_digest.get(digest)
         if pose is not None:
@@ -1968,8 +1971,11 @@ def write_boss_action_sequence_assets(
         if rle_decode_bytes(encoded) != decoded:
             raise ValueError(
                 f"boss frame {source_frame}: action RLE round trip failed")
-        target_archive = hit_archive if supplemental else archive
-        archive_ids.append(1 if supplemental else 0)
+        target_archives = (archive, hit_archive, ko_archive)
+        if archive_id < 0 or archive_id >= len(target_archives):
+            raise ValueError(f"boss frame {source_frame}: invalid archive id")
+        target_archive = target_archives[archive_id]
+        archive_ids.append(archive_id)
         archive_offsets.append(len(target_archive))
         archive_lengths.append(len(encoded))
         source_frames.append(source_frame)
@@ -1989,7 +1995,8 @@ def write_boss_action_sequence_assets(
         raise ValueError("boss idle capture is missing CPS2 palette 27")
     idle_pose = intern_pose(pack_4bpp(idle_layers[27]), 12660)
     clip_specs.append({
-        "name": "idle", "frames": 1, "runs": [(idle_pose, 1)]})
+        "name": "idle", "frames": 1, "runs": [(idle_pose, 1)],
+        "frame_offsets": [[0, 0]]})
 
     action_root = ROOT / ".deps" / "mame" / "boss_actions"
     expected_names = ("leap", "walk", "attack", "hit")
@@ -1999,7 +2006,7 @@ def write_boss_action_sequence_assets(
             "boss-action report clip order is not leap/walk/attack/hit")
     for clip in report_clips:
         frame_poses: list[int] = []
-        supplemental = str(clip["name"]) == "hit"
+        archive_id = 1 if str(clip["name"]) == "hit" else 0
         for sample in clip["timeline"]:
             frame = int(sample["frame"])
             bank = int(sample["active_object_bank"])
@@ -2019,7 +2026,7 @@ def write_boss_action_sequence_assets(
                 raise ValueError(
                     f"boss frame {frame}: palette-27 assembly is missing")
             frame_poses.append(intern_pose(
-                pack_4bpp(layers[27]), frame, supplemental))
+                pack_4bpp(layers[27]), frame, archive_id))
         if len(frame_poses) != int(clip["frame_count"]):
             raise ValueError(f"{clip['name']}: timeline does not cover clip")
         runs: list[tuple[int, int]] = []
@@ -2032,7 +2039,54 @@ def write_boss_action_sequence_assets(
             "name": str(clip["name"]),
             "frames": len(frame_poses),
             "runs": runs,
+            "frame_offsets": [[0, 0] for _ in frame_poses],
         })
+
+    ko_report_path = ROOT / "data" / "boss_ko_capture.json"
+    if not ko_report_path.is_file():
+        raise ValueError(
+            "boss KO report is missing; run capture_boss_ko.ps1")
+    ko_report = json.loads(ko_report_path.read_text(encoding="utf-8"))
+    ko_clip = ko_report.get("ko", {})
+    if str(ko_clip.get("name")) != "ko":
+        raise ValueError("boss KO report does not contain the KO clip")
+    ko_root = ROOT / ".deps" / "mame" / "boss_ko"
+    frame_poses = []
+    for sample in ko_clip["timeline"]:
+        frame = int(sample["frame"])
+        bank = int(sample["active_object_bank"])
+        object_path = ko_root / f"objram_active_{frame:05d}.tsv"
+        palette_path = ko_root / f"palette_{frame:05d}.tsv"
+        layers, _ = exact_object_layers(
+            gfx, load_palette_path(palette_path), frame, bank,
+            [int(offset) for offset in sample["object_offsets"]],
+            shift_x=int(sample["object_shift_x"]),
+            shift_y=int(sample["object_shift_y"]),
+            pivot=(int(sample["pivot_x"]),
+                   int(sample["pivot_bottom"])),
+            source_filename=str(object_path), canvas_size=(288, 192))
+        if 27 not in layers:
+            raise ValueError(
+                f"boss KO frame {frame}: palette-27 assembly is missing")
+        frame_poses.append(intern_pose(pack_4bpp(layers[27]), frame, 2))
+    if len(frame_poses) != int(ko_clip["frame_count"]):
+        raise ValueError("boss KO timeline does not cover the clip")
+    runs = []
+    for pose in frame_poses:
+        if runs and runs[-1][0] == pose:
+            runs[-1] = (pose, runs[-1][1] + 1)
+        else:
+            runs.append((pose, 1))
+    clip_specs.append({
+        "name": "ko",
+        "frames": len(frame_poses),
+        "runs": runs,
+        "frame_offsets": [
+            [int(sample["screen_offset_x"]),
+             int(sample["screen_offset_y"])]
+            for sample in ko_clip["timeline"]
+        ],
+    })
 
     if len(pose_by_digest) >= 256:
         raise ValueError("boss actions exceed 8-bit pose indices")
@@ -2040,14 +2094,20 @@ def write_boss_action_sequence_assets(
         raise ValueError("one boss RLE pose exceeds the 16-bit archive index")
     archive_filename = "BACT.RLE"
     hit_archive_filename = "BHIT.RLE"
+    ko_archive_filename = "BKO.RLE"
     (sprite_dir / archive_filename).write_bytes(archive)
     (sprite_dir / hit_archive_filename).write_bytes(hit_archive)
-    if sum(archive_ids) != 1:
-        raise ValueError(
-            "boss hit supplement must contain exactly one new pose")
+    (sprite_dir / ko_archive_filename).write_bytes(ko_archive)
+    if archive_ids.count(1) != 1:
+        raise ValueError("boss hit supplement must contain exactly one new pose")
+    if archive_ids.count(2) == 0:
+        raise ValueError("boss KO supplement did not add any new poses")
     max_steps = max(len(clip["runs"]) for clip in clip_specs)
+    max_frames = max(int(clip["frames"]) for clip in clip_specs)
     pose_rows = []
     duration_rows = []
+    frame_x_rows = []
+    frame_y_rows = []
     for clip in clip_specs:
         runs = clip["runs"]
         poses = [pose for pose, _ in runs]
@@ -2056,6 +2116,13 @@ def write_boss_action_sequence_assets(
         durations.extend([0] * (max_steps - len(durations)))
         pose_rows.append("    {" + ", ".join(map(str, poses)) + "}")
         duration_rows.append("    {" + ", ".join(map(str, durations)) + "}")
+        frame_offsets = clip["frame_offsets"]
+        x_values = [int(offset[0]) for offset in frame_offsets]
+        y_values = [int(offset[1]) for offset in frame_offsets]
+        x_values.extend([0] * (max_frames - len(x_values)))
+        y_values.extend([0] * (max_frames - len(y_values)))
+        frame_x_rows.append("    {" + ", ".join(map(str, x_values)) + "}")
+        frame_y_rows.append("    {" + ", ".join(map(str, y_values)) + "}")
 
     action_constants = "\n".join(
         f"#define AVSP_BOSS_CLIP_{str(clip['name']).upper()} {index}"
@@ -2066,6 +2133,7 @@ def write_boss_action_sequence_assets(
 #define AVSP_BOSS_ACTION_CLIPS {len(clip_specs)}
 #define AVSP_BOSS_ACTION_POSES {len(pose_by_digest)}
 #define AVSP_BOSS_ACTION_MAX_STEPS {max_steps}
+#define AVSP_BOSS_ACTION_MAX_FRAMES {max_frames}
 #define AVSP_BOSS_CEL_WIDTH 288
 #define AVSP_BOSS_CEL_HEIGHT 192
 #define AVSP_BOSS_DECODED_BYTES {(288 * 192) // 2}
@@ -2073,6 +2141,8 @@ def write_boss_action_sequence_assets(
 #define AVSP_BOSS_ARCHIVE_BYTES {len(archive)}
 #define AVSP_BOSS_HIT_ARCHIVE_FILE "{hit_archive_filename}"
 #define AVSP_BOSS_HIT_ARCHIVE_BYTES {len(hit_archive)}
+#define AVSP_BOSS_KO_ARCHIVE_FILE "{ko_archive_filename}"
+#define AVSP_BOSS_KO_ARCHIVE_BYTES {len(ko_archive)}
 #define AVSP_BOSS_PALETTE_BANK 7
 {action_constants}
 static const unsigned int avsp_boss_rle_offsets[AVSP_BOSS_ACTION_POSES] = {{
@@ -2087,7 +2157,7 @@ static const unsigned short avsp_boss_rle_bytes[AVSP_BOSS_ACTION_POSES] = {{
 static const unsigned char avsp_boss_step_counts[AVSP_BOSS_ACTION_CLIPS] = {{
     {", ".join(str(len(clip['runs'])) for clip in clip_specs)}
 }};
-static const unsigned char avsp_boss_total_frames[AVSP_BOSS_ACTION_CLIPS] = {{
+static const unsigned short avsp_boss_total_frames[AVSP_BOSS_ACTION_CLIPS] = {{
     {", ".join(str(clip['frames']) for clip in clip_specs)}
 }};
 static const unsigned char avsp_boss_step_poses[AVSP_BOSS_ACTION_CLIPS][AVSP_BOSS_ACTION_MAX_STEPS] = {{
@@ -2095,6 +2165,12 @@ static const unsigned char avsp_boss_step_poses[AVSP_BOSS_ACTION_CLIPS][AVSP_BOS
 }};
 static const unsigned char avsp_boss_step_durations[AVSP_BOSS_ACTION_CLIPS][AVSP_BOSS_ACTION_MAX_STEPS] = {{
 {",\n".join(duration_rows)}
+}};
+static const signed short avsp_boss_frame_x[AVSP_BOSS_ACTION_CLIPS][AVSP_BOSS_ACTION_MAX_FRAMES] = {{
+{",\n".join(frame_x_rows)}
+}};
+static const signed short avsp_boss_frame_y[AVSP_BOSS_ACTION_CLIPS][AVSP_BOSS_ACTION_MAX_FRAMES] = {{
+{",\n".join(frame_y_rows)}
 }};
 static const unsigned short avsp_boss_source_frames[AVSP_BOSS_ACTION_POSES] = {{
     {", ".join(map(str, source_frames))}
@@ -2120,6 +2196,14 @@ static const unsigned short avsp_boss_source_frames[AVSP_BOSS_ACTION_POSES] = {{
         "components": archive_ids.count(1),
         "encoding": "indexed-rle8-count-value",
         "source_clips": ["hit"],
+    }, {
+        "path": f"SPR4/{ko_archive_filename}",
+        "bytes": len(ko_archive),
+        "decoded_bytes": archive_ids.count(2) * (288 * 192) // 2,
+        "sha256": hashlib.sha256(ko_archive).hexdigest(),
+        "components": archive_ids.count(2),
+        "encoding": "indexed-rle8-count-value",
+        "source_clips": ["ko"],
     }]
 
 

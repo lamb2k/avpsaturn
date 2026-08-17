@@ -35,6 +35,8 @@
 #define CAP_BOSS_ATTACK_REACH 122
 #define CAP_BOSS_APPROACH_SPEED 2
 #define CAP_BOSS_HIT_TOTAL_FRAMES 40
+#define CAP_BOSS_KO_CLIP_FRAMES 428
+#define CAP_BOSS_KO_VISIBLE_FRAMES (CAP_BOSS_KO_CLIP_FRAMES + 60)
 #define CAP_CLEAR_HOLD_FRAMES 60
 
 typedef struct
@@ -532,9 +534,11 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
     {
         ++enemy->action_frame;
         if (enemy->action_frame >=
-                (enemy->kind == CAP_ACTOR_STALKER ?
-                    CAP_STALKER_KO_VISIBLE_FRAMES :
-                    CAP_ENEMY_KO_VISIBLE_FRAMES))
+                (enemy->kind == CAP_ACTOR_BOSS ?
+                    CAP_BOSS_KO_VISIBLE_FRAMES :
+                    (enemy->kind == CAP_ACTOR_STALKER ?
+                        CAP_STALKER_KO_VISIBLE_FRAMES :
+                        CAP_ENEMY_KO_VISIBLE_FRAMES)))
             cap_deactivate_enemy(enemy, index);
         return;
     }
@@ -740,7 +744,9 @@ static void cap_update_encounter(CapWorld *world)
         cap_spawn_boss_adds(world, 2);
         world->boss_reinforcement_wave = 2;
     }
-    if (world->encounter_state == CAP_ENCOUNTER_BOSS && world->boss_defeated)
+    if (world->encounter_state == CAP_ENCOUNTER_BOSS && world->boss_defeated &&
+        world->enemies[0].action == CAP_ACT_KO &&
+        world->enemies[0].action_frame >= CAP_BOSS_KO_CLIP_FRAMES)
     {
         world->encounter_state = CAP_ENCOUNTER_BOSS_DEFEAT;
         world->encounter_timer = 0;

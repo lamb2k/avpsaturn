@@ -9,8 +9,8 @@ The runtime registers both 2 MB cartridge banks; failure to access DRAM1 at
 
 ## Build the hardware image
 
-Use the normal release profile. Do not put `-VisualTest`, `-EncounterTest`, or
-`-BossHitTest` on the hardware candidate:
+Use the normal release profile. Do not put `-VisualTest`, `-EncounterTest`,
+`-BossHitTest`, or `-BossKoTest` on the hardware candidate:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -Clean -Release
@@ -102,6 +102,13 @@ alter console copy protection or supply copyrighted disc data.
    their SHA-256 values are
    `a7efabb6894204475a6aacde4945c6cc4751b150d7d9007349566c86b78220f8`
    and `c4f6db6ce3ec9d3505a543bc8340b9bee949bde297c53dc2f386a10ffe501ebb`.
+   Deliver the lethal strike and confirm the complete 428-frame captured KO:
+   launch, changing airborne tumble, landing, and 60-frame grounded-corpse
+   hold before the explosion surface. The ISO must also retain
+   `/SPR4/BKO.RLE` at 43,232 bytes with SHA-256
+   `9ad615f5e61615142d5be3b91a10fd16e9519ff304d204da704f9fe6e609f78a`.
+   No `BOSS SUPPLEMENT BUFFER`, `BKO.RLE`, or `BOSS ACTION RLE` failure is
+   permitted; the combined supplement must be loaded before CDDA begins.
    Confirm every boss-room add uses the distinct purple Stalker artwork and
    57-frame walk rather than a street-alien cel. Observe at least one 17-frame
    Stalker attack and one complete 157-frame KO with no `SACT.RLE`, Stalker

@@ -132,6 +132,11 @@ if ($LASTEXITCODE -ne 0) {
     throw "Dense Chrysalis-action capture failed with exit code $LASTEXITCODE."
 }
 
+& (Join-Path $projectRoot 'capture_boss_ko.ps1') @bossActionArguments
+if ($LASTEXITCODE -ne 0) {
+    throw "Natural Chrysalis KO capture failed with exit code $LASTEXITCODE."
+}
+
 & (Join-Path $projectRoot 'capture_stalker_actions.ps1') @bossActionArguments
 if ($LASTEXITCODE -ne 0) {
     throw "Dense Stage 1 Stalker-action capture failed with exit code $LASTEXITCODE."

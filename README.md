@@ -40,8 +40,9 @@ Current milestone:
 - transitions into a reconstructed industrial boss room and animates Chrysalis
   from an exact idle plus captured 44-frame leap, 106-frame walk, and complete
   189-frame attack/recovery clips; a natural three-health hit adds its exact
-  40-frame reaction, and 21 deduplicated 288x192 poses stream through one VDP1
-  slot
+  40-frame reaction, while a deterministic lethal replay adds the complete
+  428-frame launch, tumble, and grounded KO trajectory; 29 deduplicated
+  288x192 poses stream through one VDP1 slot
 - identifies the two boss-room Stalkers at `FF A240` and `FF A300`, preserves
   their distinct CPS2 palette-17 artwork, and binds a 57-frame walk, 17-frame
   attack, two-frame visible impact onset, and 157-frame KO interval to native
@@ -74,8 +75,9 @@ falling back to idle art. Boss-room adds now render their captured purple
 Stalker species rather than the street-alien substitute and use their observed
 17-frame attack plus 12-health contact. The Stalker nonlethal-hit
 timeline remains represented by the exact visible KO onset until a natural
-nonlethal capture is obtained. The unclassified Chrysalis KO state retains the
-exact idle assembly. Exact AI/spawn timing for every
+nonlethal capture is obtained. A separate lethal frame-13491 replay drives
+Chrysalis through the exact 428-frame source interval 13492-13919, including
+its capture-derived screen trajectory and grounded corpse. Exact AI/spawn timing for every
 archetype, remaining boss action/voice sounds, and every intermediate Stage 1
 action remain incomplete.
 
@@ -200,6 +202,14 @@ Verified on August 17, 2026:
 - a focused `-BossHitTest` image repeatedly renders the 40-frame natural
   Chrysalis hit state, including supplemental pose 20, and the full encounter
   diagnostic subsequently reaches Round 2 with the same split archive loaded
+- a focused `-BossKoTest` image renders the capture-derived 428-frame
+  Chrysalis launch/tumble/corpse sequence; the complete encounter diagnostic
+  then renders the same KO and reaches Round 2 without an allocation, RLE,
+  index, palette, or VDP1 failure
+- the 5,900-byte hit and 43,232-byte KO supplements share one aligned
+  pre-CDDA allocation inside the retired character-select block; this avoids
+  Jo Engine's unsplit-free-block trap and keeps both CD-load destinations
+  four-byte aligned
 - the same diagnostic visibly traverses the capture-derived character-select,
   results, and Round 2 surfaces from the preloaded route cache
 - the native audio module links successfully and the mixed-mode cue exposes a
@@ -258,8 +268,8 @@ Verified on August 17, 2026:
 - the refreshed emulator controller route crosses that RAM overlay and reaches
   the Round 2 card without an asset failure
 
-Next proof gate: verify the full-width mapping and CD audio on physical Saturn,
-then extend the proven QSound isolation to remaining combat effects while
+Next proof gate: verify the full-width mapping, complete KO, and CD audio on
+physical Saturn, then extend the proven QSound isolation to remaining combat effects while
 replacing the approximate route gaps with the remaining captured
 rooms, actors, and actions.
 
