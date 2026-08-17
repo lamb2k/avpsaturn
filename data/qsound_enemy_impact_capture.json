@@ -1,0 +1,41 @@
+{
+  "schema": 2,
+  "source": "deterministic MAME 0.289 QSound HLE differential capture",
+  "action": "alien_contact_impact",
+  "action_input_frame": 4243,
+  "qsound": {
+    "starts": [
+      {
+        "voice": 13,
+        "start_frame": 4245,
+        "bank": "0x8024",
+        "address": "0xd716",
+        "rate": "0x1000",
+        "phase": "0x8000",
+        "loop_length": "0x000e",
+        "end_address": "0xff7d",
+        "volume": "0x0fbc"
+      }
+    ],
+    "end_frame": 4268
+  },
+  "wave": {
+    "channels": 2,
+    "sample_bits": 16,
+    "sample_rate": 44100,
+    "first_difference_frame": 3139305,
+    "last_difference_frame": 3156320,
+    "event_sample_frames": 17016,
+    "duration_seconds": 0.3858503401360544,
+    "left_peak": 4277,
+    "right_peak": 7757,
+    "idle_sha256": "3021ee06d35f1671ddc8fb0061903f76d42a45509f03431a0116897b3dbf4023",
+    "action_sha256": "e57b270833410c8a0de7440e94c7b0868306554e1e82018872e8b13dae08c12c"
+  },
+  "saturn_pcm": {
+    "format": "signed-16-bit-big-endian-stereo",
+    "sample_rate": 44100,
+    "bytes": 68064,
+    "sha256": "c1c576c3cd7ad260f1255b167f6fbb69ca31badb6cad8bc52ea0e4bd4b00bb88"
+  }
+}

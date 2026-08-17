@@ -65,8 +65,12 @@ alter console copy protection or supply copyrighted disc data.
    Press B repeatedly and confirm the melee composite begins three action
    frames after each accepted attack, retriggers cleanly, and does not silence
    the weapon cue or CDDA music.
-   Let an alien connect and confirm the player-damage cue begins three frames
-   after health loss and coexists with enemy, weapon, melee, and CDDA audio.
+   Let an alien connect and confirm the normal impact begins two frames after
+   health loss and the player-damage cue begins three frames after health loss.
+   Let the final contact KO the player and confirm its two-frame impact is
+   audibly distinct while the same damage cue follows on frame 3. Both direct
+   contact composites must coexist with weapon, melee, and CDDA audio without
+   channel loss.
 6. Fight through the five-enemy opening wave and three-enemy reinforcement wave.
    Confirm enemies can simultaneously show unlike walk, attack, hit, and KO
    poses without one actor changing another actor's cel. The proven alien clips

@@ -86,11 +86,28 @@ Round 2 title surfaces. No data-track reads occur after Stage 1 CDDA begins.
   `8016:e690` on voice 12 three frames later. Verify `/AUDIO/HIT.PCM` is
   88,016 bytes with SHA-256
   `85ac8562bf83b87e1ffd858f5775271d4e4165105074e01fe008e34cae059ba6`,
-  then require the encounter diagnostic hit `SEEN 1` latch. The current
-  emulator route reaches the boss with 15 hit plays and `SEEN 1`.
-- Require the fixed SCSP budget to keep weapon, melee, and player damage on
-  channels 0, 1, and 2 respectively, leaving channels 3 through 5 available
-  for the remaining enemy, boss, and voice cues.
+  as independent evidence for the shared vocal component.
+- Require the three nonlethal contacts to use the common two-frame impact and
+  the final contact to use its distinct two-frame KO impact. Verify
+  `/AUDIO/IMPACT.PCM` is 68,064 bytes with SHA-256
+  `c1c576c3cd7ad260f1255b167f6fbb69ca31badb6cad8bc52ea0e4bd4b00bb88`
+  and `/AUDIO/KOIMP.PCM` is 79,280 bytes with SHA-256
+  `421e344948349beb64e3a86fa9bd9ed1677c74320959cb7e64935b2a962b2560`.
+  Treat these as component evidence, not separate runtime starts.
+- Verify the direct normal-contact composite `/AUDIO/CONTACT.PCM` is 90,768
+  bytes with SHA-256
+  `fe554dad2073d662f6f45fb85a081bccff00874dbb04ad32cdc66fba8e24b9e2`
+  and the KO composite `/AUDIO/KOCONT.PCM` is 87,260 bytes with SHA-256
+  `d06eca83fc1bfea94671cfc4ec18f66de2358d26edf54e7478cf544261cbec60`.
+  Require nonzero normal/KO counts and contact `SEEN 1` in the encounter
+  diagnostic. After those latches are proven, the diagnostic suppresses later
+  enemy windups so its forced KO cannot hit-lock the automated completion
+  route; production gameplay retains normal enemy attacks. The verified Yaba
+  Sanshiro run reaches Round 2 with `CONTACT 10/1 SEEN 1`, `KO 8/8`,
+  `ACTIVE 0`, and `LVL 1`.
+- Require the fixed SCSP budget to keep weapon, melee, and the mutually
+  exclusive contact composites on channels 0, 1, and 2 respectively, leaving
+  channels 3 through 5 available for boss and voice cues.
 - Add a comparison capture against the equivalent MAME route.
 
 Status: in progress. A dense 361-sample capture validates the active CPS2 object
@@ -114,8 +131,8 @@ states now use lossless capture-derived key surfaces instead of Jo-font
 stand-ins. The mixed-mode image adds a 168.015-second QSound
 route reference as native CD audio track 2. The 12,000-frame host test and the
 automated Yaba Sanshiro diagnostic complete this lifecycle. Remaining player
-transitions, enemy actions, intermediate route detail, exact arcade AI/spawn timing,
-isolated SCSP event cues, and comparison capture remain open.
+transitions, enemy actions, intermediate route detail, exact arcade AI/spawn
+timing, boss/voice SCSP event cues, and comparison capture remain open.
 
 ## Gate E: performance and hardware
 

@@ -57,8 +57,8 @@ same lossless horizontal fit and the shared VDP2 bitmap. Their compressed
 sources are loaded before CDDA starts, so state changes do not seek away from
 the audio track. The converter retains the 384x224 object/priority oracle
 offline. The proven alien walk/attack/hit/KO clips are state-bound; exact
-AI/spawn timing for every archetype, isolated event sound effects, and every
-intermediate Stage 1 action remain incomplete.
+AI/spawn timing for every archetype, remaining boss/voice event sounds, and
+every intermediate Stage 1 action remain incomplete.
 
 The Saturn has no 384-pixel low-resolution output. The selected 352x224 mode
 keeps all 224 source lines. The runtime fits all 384 horizontal source pixels
@@ -200,13 +200,19 @@ Verified on August 17, 2026:
   while the full animation working set remained allocated
 - all four natural player-health losses repeat the same QSound voice-12 start
   three frames later; paired mute-all/voice-12 captures isolate the resulting
-  0.498957-second damage cue and bind it to native hit frame 3
-- the expanded encounter diagnostic reaches the boss with weapon, melee, and
-  player-damage `SEEN 1` latches on fixed PCM channels 0, 1, and 2
+  0.498957-second damage component as independent source evidence
+- paired mute-all captures isolate a 0.385850-second common nonlethal contact
+  impact and a distinct 0.449433-second final-KO impact
+- direct two-voice captures produce 0.514558-second normal and 0.494671-second
+  KO contact composites; each preserves impact at +2 and the vocal at +3 in
+  one stream on fixed PCM channel 2
+- the expanded encounter diagnostic reaches Round 2 with weapon, melee, and
+  contact `SEEN 1` latches on fixed PCM channels 0 through 2; its one normal
+  and one forced KO proof recover into `KO 8/8`, `ACTIVE 0`, and `LVL 1`
 
 Next proof gate: verify the full-width mapping and CD audio on physical Saturn,
-then extend the proven QSound isolation to enemy impacts, boss, and
-voices while replacing the approximate route gaps with the remaining captured
+then extend the proven QSound isolation to boss and voices while replacing the
+approximate route gaps with the remaining captured
 rooms, actors, and actions.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and

@@ -157,19 +157,29 @@ and 144,752 bytes of stereo SCSP PCM. Native playback begins at action frame 3;
 rapid attacks stop and retrigger their own previous melee channel, matching the
 source voice-reuse constraint without consuming all six Jo PCM slots.
 
-The production path must repeat this method for enemy impacts, boss, and voice
-events, keep long music on CDDA, and allocate short cues across the
-six bounded Jo/SGL PCM channels.
+The production path must repeat this method for boss and voice events, keep
+long music on CDDA, and allocate short cues across the six bounded Jo/SGL PCM
+channels.
 
 The native channel budget is explicit rather than first-free: weapon uses
-channel 0, melee channel 1, and player damage channel 2. Channels 3 through 5
-remain reserved for enemy, boss, and voice events. A cue may retrigger only its
-own channel, preventing action bursts from consuming the remaining pool.
+channel 0, melee channel 1, and the mutually exclusive normal/KO contact
+composites share channel 2. Channels 3 through 5 remain reserved for boss and
+voice events. A cue may retrigger only its own channel, preventing action
+bursts from consuming the remaining pool.
 
 The natural alien-contact route proves the player-damage sound independently:
 each of four health losses is followed three frames later by the same QSound
 voice-12 sample start. A paired mute-all/voice-12 capture isolates 0.498957
-seconds (88,016 bytes) of stereo SCSP PCM, bound to native hit frame 3.
+seconds (88,016 bytes) of stereo SCSP PCM as independently verified evidence.
+The first three nonlethal contacts also start the same impact sample two frames
+after health loss, alternating QSound voices 13 and 14. The final contact starts
+a distinct KO impact on voice 14 at the same two-frame delay. Paired mute-all
+captures isolate the 0.385850-second normal impact and 0.449433-second KO
+impact as independently verified evidence. Two additional direct differential
+captures retain impact plus voice 12 in the same QSound mix: a 0.514558-second
+normal-contact composite and a 0.494671-second KO-contact composite. Starting
+the selected composite on native frame 2 reproduces its internal +2/+3 timing
+with one SCSP command and safely retriggers the shared contact channel.
 
 ## What is exact and what is not
 
@@ -196,6 +206,8 @@ Exact in the current milestone:
   capture-derived action delay, and bounded native channel retriggering
 - repeated natural player-damage voice transaction, isolated waveform, and
   capture-derived hit-frame binding
+- direct two-voice nonlethal and KO contact composites, including their exact
+  internal source timing and bounded shared-channel selection
 
 Still approximate or incomplete:
 
@@ -205,7 +217,7 @@ Still approximate or incomplete:
 - complete attract-mode, menu-transition, and character-select animation
 - full animation between the verified route key states
 - remaining HUD states, exact scroll behavior, level triggers, combat, and AI
-- remaining isolated QSound enemy-impact, boss, and voice cues
+- remaining isolated QSound boss and voice cues
 - native HUD safe-area placement and arcade-derived camera behavior for CRT
   overscan variability
 

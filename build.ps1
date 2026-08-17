@@ -190,6 +190,30 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Saturn hit PCM ISO verification failed with exit code $LASTEXITCODE."
         }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/AUDIO/IMPACT.PCM' '--equals' `
+            (Join-Path $contentRoot 'AUDIO\IMPACT.PCM')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn impact PCM ISO verification failed with exit code $LASTEXITCODE."
+        }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/AUDIO/KOIMP.PCM' '--equals' `
+            (Join-Path $contentRoot 'AUDIO\KOIMP.PCM')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn KO-impact PCM ISO verification failed with exit code $LASTEXITCODE."
+        }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/AUDIO/CONTACT.PCM' '--equals' `
+            (Join-Path $contentRoot 'AUDIO\CONTACT.PCM')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn contact-composite PCM ISO verification failed with exit code $LASTEXITCODE."
+        }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/AUDIO/KOCONT.PCM' '--equals' `
+            (Join-Path $contentRoot 'AUDIO\KOCONT.PCM')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn KO-contact-composite PCM ISO verification failed with exit code $LASTEXITCODE."
+        }
 
         # Add the locally rendered QSound reference as a real Saturn CDDA track.
         # It remains an ignored private artifact and is never linked as CPS2 code.
@@ -210,6 +234,14 @@ try {
             (Join-Path $contentRoot 'AUDIO\MELEE.PCM')
         $hitAudioFile = Get-Item -LiteralPath `
             (Join-Path $contentRoot 'AUDIO\HIT.PCM')
+        $impactAudioFile = Get-Item -LiteralPath `
+            (Join-Path $contentRoot 'AUDIO\IMPACT.PCM')
+        $koImpactAudioFile = Get-Item -LiteralPath `
+            (Join-Path $contentRoot 'AUDIO\KOIMP.PCM')
+        $contactAudioFile = Get-Item -LiteralPath `
+            (Join-Path $contentRoot 'AUDIO\CONTACT.PCM')
+        $koContactAudioFile = Get-Item -LiteralPath `
+            (Join-Path $contentRoot 'AUDIO\KOCONT.PCM')
         $manifestPath = Join-Path $projectRoot 'build\hardware_release_manifest.txt'
         [IO.File]::WriteAllLines($manifestPath, @(
             'target=sega-saturn-ntsc'
@@ -246,6 +278,34 @@ try {
             'event_audio_3_source_frames=4243-health-loss,4246-audible,4274-stop'
             "event_audio_3_bytes=$($hitAudioFile.Length)"
             "event_audio_3_sha256=$((Get-FileHash -LiteralPath $hitAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'event_audio_4=scsp-pcm-capture-exact-alien-contact-impact'
+            'event_audio_4_iso_path=/AUDIO/IMPACT.PCM'
+            'event_audio_4_format=signed-16-bit-big-endian-stereo'
+            'event_audio_4_sample_rate=44100'
+            'event_audio_4_source_frames=4243-health-loss,4245-audible,4268-stop'
+            "event_audio_4_bytes=$($impactAudioFile.Length)"
+            "event_audio_4_sha256=$((Get-FileHash -LiteralPath $impactAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'event_audio_5=scsp-pcm-capture-exact-alien-contact-ko-impact'
+            'event_audio_5_iso_path=/AUDIO/KOIMP.PCM'
+            'event_audio_5_format=signed-16-bit-big-endian-stereo'
+            'event_audio_5_sample_rate=44100'
+            'event_audio_5_source_frames=4433-health-loss,4435-audible,4461-stop'
+            "event_audio_5_bytes=$($koImpactAudioFile.Length)"
+            "event_audio_5_sha256=$((Get-FileHash -LiteralPath $koImpactAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'event_audio_6=scsp-pcm-runtime-alien-contact-composite'
+            'event_audio_6_iso_path=/AUDIO/CONTACT.PCM'
+            'event_audio_6_format=signed-16-bit-big-endian-stereo'
+            'event_audio_6_sample_rate=44100'
+            'event_audio_6_source_frames=4243-health-loss,4245-impact,4246-vocal,4274-stop'
+            "event_audio_6_bytes=$($contactAudioFile.Length)"
+            "event_audio_6_sha256=$((Get-FileHash -LiteralPath $contactAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'event_audio_7=scsp-pcm-runtime-alien-ko-contact-composite'
+            'event_audio_7_iso_path=/AUDIO/KOCONT.PCM'
+            'event_audio_7_format=signed-16-bit-big-endian-stereo'
+            'event_audio_7_sample_rate=44100'
+            'event_audio_7_source_frames=4433-health-loss,4435-impact,4436-vocal,4464-stop'
+            "event_audio_7_bytes=$($koContactAudioFile.Length)"
+            "event_audio_7_sha256=$((Get-FileHash -LiteralPath $koContactAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
         ))
     }
     finally {

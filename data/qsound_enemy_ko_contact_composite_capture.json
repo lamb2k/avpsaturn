@@ -1,0 +1,52 @@
+{
+  "schema": 2,
+  "source": "deterministic MAME 0.289 QSound HLE differential capture",
+  "action": "alien_ko_contact_composite",
+  "action_input_frame": 4433,
+  "qsound": {
+    "starts": [
+      {
+        "voice": 14,
+        "start_frame": 4435,
+        "bank": "0x8028",
+        "address": "0xd3bb",
+        "rate": "0x1000",
+        "phase": "0x8000",
+        "loop_length": "0x000e",
+        "end_address": "0xffe6",
+        "volume": "0x0fbc"
+      },
+      {
+        "voice": 12,
+        "start_frame": 4436,
+        "bank": "0x8016",
+        "address": "0xe690",
+        "rate": "0x0800",
+        "phase": "0x8000",
+        "loop_length": "0x0014",
+        "end_address": "0xfff1",
+        "volume": "0x14f0"
+      }
+    ],
+    "end_frame": 4464
+  },
+  "wave": {
+    "channels": 2,
+    "sample_bits": 16,
+    "sample_rate": 44100,
+    "first_difference_frame": 3279809,
+    "last_difference_frame": 3301623,
+    "event_sample_frames": 21815,
+    "duration_seconds": 0.49467120181405894,
+    "left_peak": 7920,
+    "right_peak": 13244,
+    "idle_sha256": "b2fc311a86dc29c1ea184c197ae9756bd64631b4dbb3b4032f4393822057d296",
+    "action_sha256": "c0c5543af67a6aa6b6ac5de065ddcf92f44547efa12e40d314095ca466214de6"
+  },
+  "saturn_pcm": {
+    "format": "signed-16-bit-big-endian-stereo",
+    "sample_rate": 44100,
+    "bytes": 87260,
+    "sha256": "d06eca83fc1bfea94671cfc4ec18f66de2358d26edf54e7478cf544261cbec60"
+  }
+}
