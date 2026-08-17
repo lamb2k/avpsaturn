@@ -3643,5 +3643,420 @@
       ]
     }
   ],
-  "remaining_gate": "Decode the assembly records and prove one rendered pose pixel for pixel against a captured pose; then label tail fields and actor-local hitboxes."
+  "assemblies": [
+    {
+      "address": "0x13de46",
+      "selector": 6,
+      "format": "selector,budget,count,offset-index,(packed-long,offset-word)*",
+      "status": "decoded_structure",
+      "budget": 62,
+      "tile_count": 3,
+      "offset_table_index": 126,
+      "entries": [
+        {
+          "index": 0,
+          "packed_source": "0xffe6fff4",
+          "offset_adjust": "0x8297"
+        },
+        {
+          "index": 1,
+          "packed_source": "0x271b0008",
+          "offset_adjust": "0x8340"
+        },
+        {
+          "index": 2,
+          "packed_source": "0x2b1b0100",
+          "offset_adjust": "0x82ce"
+        }
+      ],
+      "trailing_word": "0x011b"
+    },
+    {
+      "address": "0x13dea0",
+      "selector": 6,
+      "format": "selector,budget,count,offset-index,(packed-long,offset-word)*",
+      "status": "decoded_structure",
+      "budget": 62,
+      "tile_count": 4,
+      "offset_table_index": 126,
+      "entries": [
+        {
+          "index": 0,
+          "packed_source": "0xffe6fff4",
+          "offset_adjust": "0x8400"
+        },
+        {
+          "index": 1,
+          "packed_source": "0x161b0004",
+          "offset_adjust": "0x8407"
+        },
+        {
+          "index": 2,
+          "packed_source": "0x181b0004",
+          "offset_adjust": "0x8420"
+        },
+        {
+          "index": 3,
+          "packed_source": "0x171b0094",
+          "offset_adjust": "0x8428"
+        }
+      ],
+      "trailing_word": "0x161b"
+    },
+    {
+      "address": "0x13dfec",
+      "selector": 6,
+      "format": "selector,budget,count,offset-index,(packed-long,offset-word)*",
+      "status": "decoded_structure",
+      "budget": 57,
+      "tile_count": 3,
+      "offset_table_index": 175,
+      "entries": [
+        {
+          "index": 0,
+          "packed_source": "0xffe00003",
+          "offset_adjust": "0x8570"
+        },
+        {
+          "index": 1,
+          "packed_source": "0x261b0008",
+          "offset_adjust": "0x8557"
+        },
+        {
+          "index": 2,
+          "packed_source": "0x181b0074",
+          "offset_adjust": "0x8577"
+        }
+      ],
+      "trailing_word": "0x181b"
+    },
+    {
+      "address": "0x13e00a",
+      "selector": 6,
+      "format": "selector,budget,count,offset-index,(packed-long,offset-word)*",
+      "status": "decoded_structure",
+      "budget": 62,
+      "tile_count": 4,
+      "offset_table_index": 177,
+      "entries": [
+        {
+          "index": 0,
+          "packed_source": "0xffe00003",
+          "offset_adjust": "0x8508"
+        },
+        {
+          "index": 1,
+          "packed_source": "0x271b0010",
+          "offset_adjust": "0x8538"
+        },
+        {
+          "index": 2,
+          "packed_source": "0x141b0064",
+          "offset_adjust": "0x8552"
+        },
+        {
+          "index": 3,
+          "packed_source": "0x141b0058",
+          "offset_adjust": "0x8522"
+        }
+      ],
+      "trailing_word": "0x251b"
+    },
+    {
+      "address": "0x13e04c",
+      "selector": 6,
+      "format": "selector,budget,count,offset-index,(packed-long,offset-word)*",
+      "status": "decoded_structure",
+      "budget": 48,
+      "tile_count": 3,
+      "offset_table_index": 121,
+      "entries": [
+        {
+          "index": 0,
+          "packed_source": "0xffcc0017",
+          "offset_adjust": "0xd900"
+        },
+        {
+          "index": 1,
+          "packed_source": "0x421b0040",
+          "offset_adjust": "0xd85d"
+        },
+        {
+          "index": 2,
+          "packed_source": "0x421b0050",
+          "offset_adjust": "0xd8e6"
+        }
+      ],
+      "trailing_word": "0x181b"
+    },
+    {
+      "address": "0x13e44c",
+      "selector": 6,
+      "format": "selector,budget,count,offset-index,(packed-long,offset-word)*",
+      "status": "decoded_structure",
+      "budget": 48,
+      "tile_count": 3,
+      "offset_table_index": 121,
+      "entries": [
+        {
+          "index": 0,
+          "packed_source": "0xffc2ffe7",
+          "offset_adjust": "0xd900"
+        },
+        {
+          "index": 1,
+          "packed_source": "0x421b0040",
+          "offset_adjust": "0xd85d"
+        },
+        {
+          "index": 2,
+          "packed_source": "0x421b0050",
+          "offset_adjust": "0xd8e6"
+        }
+      ],
+      "trailing_word": "0x181b"
+    },
+    {
+      "address": "0x13e574",
+      "selector": 6,
+      "format": "selector,budget,count,offset-index,(packed-long,offset-word)*",
+      "status": "decoded_structure",
+      "budget": 58,
+      "tile_count": 3,
+      "offset_table_index": 126,
+      "entries": [
+        {
+          "index": 0,
+          "packed_source": "0xffe6fffb",
+          "offset_adjust": "0xdc06"
+        },
+        {
+          "index": 1,
+          "packed_source": "0x161b0004",
+          "offset_adjust": "0xdc26"
+        },
+        {
+          "index": 2,
+          "packed_source": "0x181b001c",
+          "offset_adjust": "0xdc60"
+        }
+      ],
+      "trailing_word": "0x1c1b"
+    },
+    {
+      "address": "0x13e592",
+      "selector": 6,
+      "format": "selector,budget,count,offset-index,(packed-long,offset-word)*",
+      "status": "decoded_structure",
+      "budget": 55,
+      "tile_count": 4,
+      "offset_table_index": 126,
+      "entries": [
+        {
+          "index": 0,
+          "packed_source": "0xffeafffe",
+          "offset_adjust": "0xdc46"
+        },
+        {
+          "index": 1,
+          "packed_source": "0x161b0004",
+          "offset_adjust": "0xdc80"
+        },
+        {
+          "index": 2,
+          "packed_source": "0x271b0050",
+          "offset_adjust": "0xdca8"
+        },
+        {
+          "index": 3,
+          "packed_source": "0x041b006c",
+          "offset_adjust": "0xdc88"
+        }
+      ],
+      "trailing_word": "0x151b"
+    },
+    {
+      "address": "0x13e5b6",
+      "selector": 6,
+      "format": "selector,budget,count,offset-index,(packed-long,offset-word)*",
+      "status": "decoded_structure",
+      "budget": 60,
+      "tile_count": 3,
+      "offset_table_index": 120,
+      "entries": [
+        {
+          "index": 0,
+          "packed_source": "0xffd50000",
+          "offset_adjust": "0xdcb0"
+        },
+        {
+          "index": 1,
+          "packed_source": "0x161b0004",
+          "offset_adjust": "0xdcb7"
+        },
+        {
+          "index": 2,
+          "packed_source": "0x181b001c",
+          "offset_adjust": "0xdcd0"
+        }
+      ],
+      "trailing_word": "0x1d1b"
+    },
+    {
+      "address": "0x13e5d4",
+      "selector": 6,
+      "format": "selector,budget,count,offset-index,(packed-long,offset-word)*",
+      "status": "decoded_structure",
+      "budget": 56,
+      "tile_count": 4,
+      "offset_table_index": 126,
+      "entries": [
+        {
+          "index": 0,
+          "packed_source": "0xffe5fffe",
+          "offset_adjust": "0xdd00"
+        },
+        {
+          "index": 1,
+          "packed_source": "0x161b0004",
+          "offset_adjust": "0xdd20"
+        },
+        {
+          "index": 2,
+          "packed_source": "0x281b0050",
+          "offset_adjust": "0xdcf0"
+        },
+        {
+          "index": 3,
+          "packed_source": "0x041b0088",
+          "offset_adjust": "0xdd07"
+        }
+      ],
+      "trailing_word": "0x141b"
+    },
+    {
+      "address": "0x13e5f8",
+      "selector": 6,
+      "format": "selector,budget,count,offset-index,(packed-long,offset-word)*",
+      "status": "decoded_structure",
+      "budget": 62,
+      "tile_count": 3,
+      "offset_table_index": 126,
+      "entries": [
+        {
+          "index": 0,
+          "packed_source": "0xffe5fffb",
+          "offset_adjust": "0xdd29"
+        },
+        {
+          "index": 1,
+          "packed_source": "0x561b00ac",
+          "offset_adjust": "0xdd50"
+        },
+        {
+          "index": 2,
+          "packed_source": "0x321b004c",
+          "offset_adjust": "0xdd0c"
+        }
+      ],
+      "trailing_word": "0x131b"
+    },
+    {
+      "address": "0x13e616",
+      "selector": 6,
+      "format": "selector,budget,count,offset-index,(packed-long,offset-word)*",
+      "status": "decoded_structure",
+      "budget": 65,
+      "tile_count": 4,
+      "offset_table_index": 169,
+      "entries": [
+        {
+          "index": 0,
+          "packed_source": "0xffd5fffb",
+          "offset_adjust": "0xdd56"
+        },
+        {
+          "index": 1,
+          "packed_source": "0x421b004c",
+          "offset_adjust": "0xde70"
+        },
+        {
+          "index": 2,
+          "packed_source": "0x631b0078",
+          "offset_adjust": "0xdd53"
+        },
+        {
+          "index": 3,
+          "packed_source": "0x321b0058",
+          "offset_adjust": "0xdd90"
+        }
+      ],
+      "trailing_word": "0x141b"
+    },
+    {
+      "address": "0x13e63a",
+      "selector": 6,
+      "format": "selector,budget,count,offset-index,(packed-long,offset-word)*",
+      "status": "decoded_structure",
+      "budget": 58,
+      "tile_count": 4,
+      "offset_table_index": 168,
+      "entries": [
+        {
+          "index": 0,
+          "packed_source": "0xffd5fffb",
+          "offset_adjust": "0xdd89"
+        },
+        {
+          "index": 1,
+          "packed_source": "0x261b0008",
+          "offset_adjust": "0xddb0"
+        },
+        {
+          "index": 2,
+          "packed_source": "0x191b003c",
+          "offset_adjust": "0xddba"
+        },
+        {
+          "index": 3,
+          "packed_source": "0x141b00a4",
+          "offset_adjust": "0xdcf5"
+        }
+      ],
+      "trailing_word": "0x061b"
+    },
+    {
+      "address": "0x13e65e",
+      "selector": 6,
+      "format": "selector,budget,count,offset-index,(packed-long,offset-word)*",
+      "status": "decoded_structure",
+      "budget": 56,
+      "tile_count": 4,
+      "offset_table_index": 176,
+      "entries": [
+        {
+          "index": 0,
+          "packed_source": "0xffe5fffb",
+          "offset_adjust": "0xde04"
+        },
+        {
+          "index": 1,
+          "packed_source": "0x421b004c",
+          "offset_adjust": "0xde00"
+        },
+        {
+          "index": 2,
+          "packed_source": "0x631b0078",
+          "offset_adjust": "0xdc4d"
+        },
+        {
+          "index": 3,
+          "packed_source": "0x311b003c",
+          "offset_adjust": "0xdbfb"
+        }
+      ],
+      "trailing_word": "0x041b"
+    }
+  ],
+  "remaining_gate": "Map packed assembly source words and offset-table entries to CPS object commands, then prove one rendered pose pixel for pixel against a captured pose; label tail fields and actor-local hitboxes."
 }

@@ -94,6 +94,45 @@ def decode_program(data: bytes, base: int, start: int) -> dict[str, object]:
                                           if r["kind"] == "pose"})}
 
 
+def decode_assembly(data: bytes, base: int, address: int) -> dict[str, object]:
+    """Decode the selector-6 assembly command consumed by the renderer.
+
+    The renderer reads selector, budget word, tile count, offset-table index,
+    then one packed long plus one offset word per tile.  The packed long and
+    offset-table semantics remain renderer-level data until the pixel gate.
+    """
+    offset = address - base
+    if offset < 0 or offset + 8 > len(data):
+        return {"address": f"0x{address:06x}", "status": "out_of_window"}
+    selector = u16(data, offset)
+    result: dict[str, object] = {
+        "address": f"0x{address:06x}",
+        "selector": selector,
+        "format": "selector,budget,count,offset-index,(packed-long,offset-word)*",
+    }
+    if selector != 6:
+        result["status"] = "unmapped_selector"
+        return result
+    budget = u16(data, offset + 2)
+    count = u16(data, offset + 4)
+    offset_index = u16(data, offset + 6)
+    result.update({"status": "decoded_structure", "budget": budget,
+                   "tile_count": count, "offset_table_index": offset_index})
+    entries = []
+    cursor = offset + 8
+    for index in range(min(count, 64)):
+        if cursor + 6 > len(data):
+            result["status"] = "truncated"
+            break
+        entries.append({"index": index, "packed_source": f"0x{u32(data, cursor):08x}",
+                        "offset_adjust": f"0x{u16(data, cursor + 4):04x}"})
+        cursor += 6
+    result["entries"] = entries
+    result["trailing_word"] = (f"0x{u16(data, cursor):04x}"
+                                if cursor + 2 <= len(data) else None)
+    return result
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--rom-window", type=Path,
@@ -108,6 +147,11 @@ def main() -> None:
     data = args.rom_window.read_bytes()
     starts = script_pointers(args.actor_tsv)
     programs = [decode_program(data, args.base, start) for start in starts]
+    assembly_addresses = sorted({int(address, 16)
+                                 for program in programs
+                                 for address in program["assembly_pointers"]})
+    assemblies = [decode_assembly(data, args.base, address)
+                  for address in assembly_addresses]
     result = {
         "schema": 1,
         "classification": "missing pixel gate (ROM-derived script structure)",
@@ -143,9 +187,11 @@ def main() -> None:
         "assembly_range_hint": [f"0x{ASSEMBLY_FIRST:06x}",
                                 f"0x{ASSEMBLY_LAST:06x}"],
         "programs": programs,
+        "assemblies": assemblies,
         "remaining_gate": (
-            "Decode the assembly records and prove one rendered pose pixel for "
-            "pixel against a captured pose; then label tail fields and actor-local hitboxes."
+            "Map packed assembly source words and offset-table entries to CPS object "
+            "commands, then prove one rendered pose pixel for pixel against a captured "
+            "pose; label tail fields and actor-local hitboxes."
         ),
     }
     args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="ascii")

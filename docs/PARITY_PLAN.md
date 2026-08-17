@@ -81,6 +81,12 @@ Verified in this repository; do not re-derive.
   format includes control flow, not just a frame list.
 - Observed sprite-assembly pointers: `0x13DEA0`, `0x13DE46`, `0x13DFEC`,
   `0x13E00A`, `0x13E04C`, `0x13E44C`.
+- The renderer at `0xA9CB6` dispatches on the first assembly word. The
+  observed Round 1 assemblies use selector `6`, followed by a budget word, a
+  tile count, an offset-table index, and one packed long plus one offset word
+  per tile. Fourteen such assembly blocks are structurally decoded; the
+  packed-source and offset-table semantics still require a rendered-pose
+  comparison.
 - Word `w88` takes 224 distinct values over 240 frames; likely a frame timer.
 
 **The retail ROM still contains Capcom's development tools**
