@@ -22,6 +22,9 @@
     "content_bottom_row": 223,
     "fitted_start_source_frame": 1885,
     "start_frame_ambiguity_source_frames": 1,
+    "last_held_sample": 1884,
+    "held_samples_before_wipe": 1,
+    "moving_samples": 11,
     "fully_closed_by_source_frame": 1908,
     "closes_at_fractional_frame": 1907.875,
     "top_residuals": [

@@ -50,6 +50,9 @@ New tracked source/evidence files:
 - `data/frontend_segments.json`
 - `tools/analyze_frontend_geometry.py`
 - `data/frontend_geometry.json`
+- `capture_frontend_wipe.ps1`
+- `tools/mame_capture_frontend_wipe.lua`
+- `data/frontend_geometry_cadence1.json`
 
 `git diff --check` passes; only existing LF-to-CRLF warnings are emitted.
 
@@ -88,6 +91,10 @@ runtime yet, and it must not be described as a finished exact frontend.
   `.deps\mame\frontend`: 1,264 files and 170,685,151 bytes at this checkpoint.
   Regenerate them with `capture_frontend.ps1 -Refresh`; do not add ROMs or raw
   captures to Git.
+- A second ignored raw capture exists at `.deps\mame\frontend_wipe`: 130 files
+  and about 17 MB, frames 1870..1912 at cadence 1. Regenerate it with
+  `capture_frontend_wipe.ps1 -Refresh`. It is a separate directory so the
+  cadence-2 capture above is never cleared.
 - Tracked report `data/frontend_capture.json` SHA-256 is
   `eefdf8c0d9be6da796e9b61c52d8e89f7a4890d6380978b97543781037175f3f`.
 - Full independent-palette RLE would be 15,528,546 bytes and is rejected.
@@ -123,9 +130,15 @@ Deterministic source hashes:
 - `data/frontend_segments.json`:
   `67ff4e52bfa53751567ea9adf1e3b7d9c6be1cea81ce0d220575a343265b072b`
 - `tools/analyze_frontend_geometry.py`:
-  `7ef2e9215cdfc36ff85844e0a0c5a8a77cee0339a21f0edcfa915c17b5f0a4dc`
+  `358197875022ea85a17e8d0969de9b34f2151f4ef321870b9f1d507ada36604e`
 - `data/frontend_geometry.json`:
-  `cae477e120062dcb412960a0dcc67da1476136dc614ddf9d029eb44dc98ed7b1`
+  `98af6e62dea6e3e11192a683601e84a2640333c4323bde9323528707d19375d3`
+- `capture_frontend_wipe.ps1`:
+  `1b9d27997d38e629f76d9a8f3448706da7d7938ae5750def77e07c7ef069ca29`
+- `tools/mame_capture_frontend_wipe.lua`:
+  `2ac0391ee05d337ff20ca36839ec538a64d3dfabcb56ffd9834269aea06aa242`
+- `data/frontend_geometry_cadence1.json`:
+  `9a98eb7ad39321b797311ea474ef4fc8bbd01167d101d05ce28fc897a62f694e`
 
 ## Process and restart state
 
@@ -334,8 +347,41 @@ Validated over the 13 sampled frames 1884..1908:
 - The visible band closes **linearly and symmetrically**: 4 rows per source
   frame per edge about a fixed centre at row 131.5, from content rows 40..223
   to fully black. All 11 fitted top residuals are 0.
-- Fitted start is source frame 1885, determined only to +/-1 source frame
-  because the capture cadence is 2.
+- Fitted start is source frame 1885. Cadence 2 determined this only to +/-1
+  source frame, so it was confirmed by an independent cadence-1 capture; see
+  the confirmation below.
+
+### Cadence-1 confirmation
+
+`capture_frontend_wipe.ps1` and `tools/mame_capture_frontend_wipe.lua` capture
+frames 1870..1912 at cadence 1 into `.deps\mame\frontend_wipe` (130 files,
+about 17 MB, ignored). The lua input schedule is byte-identical to
+`tools/mame_capture_frontend.lua`, so the route matches; the script refuses to
+clear `.deps\mame\frontend`, so the cadence-2 capture backing the other
+reports cannot be destroyed. The report is
+`data/frontend_geometry_cadence1.json`.
+
+Both captures agree on every model parameter, from different cadences,
+directories, and static reference frames:
+
+| parameter | cadence 2 | cadence 1 |
+| --- | --- | --- |
+| rows per source frame per edge | 4 | 4 |
+| centre row | 131.5 | 131.5 |
+| content rows | 40..223 | 40..223 |
+| start source frame | 1885 (+/-1) | **1885 (+/-0)** |
+
+The cadence-1 run fits 22 moving samples with zero residuals and observes the
+last held sample at 1885 itself, so the start frame is now pinned rather than
+extrapolated. Resume step 4 is satisfied for the wipe.
+
+The first cadence-1 run failed usefully: `top edge is not linear: steps
+[0 x14, 4 x22]`. The window legitimately contains a held prefix, and the
+fitter had assumed the whole window was moving. It now locates the static
+prefix, fits only the moving samples, and cross-checks the extrapolated start
+against the last held sample, requiring `0 <= start - last_held < cadence`.
+That check is what makes the cadence-2 and cadence-1 results comparable
+instead of coincidentally similar.
 
 Consequences:
 
@@ -388,11 +434,11 @@ of them are in `data/frontend_segments.json`.
    row DMAs per source frame (four rows at each edge) of `BACKGROUND_WIDTH`
    bytes. It uses no cartridge RAM and is outside the phase-overlay budget.
    Implement it that way rather than extending any surface lifetime.
-4. Recapture character confirm at cadence 1 and re-run
-   `tools/analyze_frontend_geometry.py`. It must still validate with zero
-   residuals and must pin the start frame that cadence 2 leaves ambiguous
-   (fitted 1885, +/-1). A frame the shutter cannot reproduce is evidence the
-   model is wrong, not a reason to restore a stored-frame fallback.
+4. DONE for the wipe: the cadence-1 capture pinned the start frame at 1885
+   and reproduced every other parameter. If the wipe model is changed, re-run
+   both captures and require agreement again. A frame the shutter cannot
+   reproduce is evidence the model is wrong, not a reason to restore a
+   stored-frame fallback.
 5. Characterize the two remaining confirm elements the same way: the
    1800..1852 selected-panel blink and the 1954..2034 title-text and
    `PRESS START` schedules. Extract the 110x37 nine-colour title text as one
@@ -427,6 +473,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\capture_frontend.ps1
 # Reproduce the frontend segmentation result (needs the raw capture present):
 & "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
     .\tools\analyze_frontend_segments.py --report
+
+# Capture the wipe at cadence 1 and confirm the shutter model independently.
+# This never touches .deps\mame\frontend:
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\capture_frontend_wipe.ps1
 
 # Validate the character-confirm shutter model and its geometry report:
 & "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
