@@ -405,6 +405,42 @@ and single-CRAM-entry steps) and the exact appearance schedule of the title
 text and `PRESS START` blinks between 1954 and 2034. Per-step boxes for all
 of them are in `data/frontend_segments.json`.
 
+## Shutter integrated 2026-08-17
+
+The confirm shutter is now in the runtime, not only in analysis.
+
+- `capability_model.h` declares `CAP_CONFIRM_SHUTTER_START_TIMER` 85,
+  `CAP_CONFIRM_SHUTTER_ROWS_PER_FRAME` 4, and content rows 40..223.
+  `cap_confirm_shutter_band()` in `capability_model.c` returns the band for a
+  confirm timer and 0 once closed. Confirm timer 0 is source frame 1800, so
+  timer 85 is source frame 1885; the model's existing 240-frame confirm hold
+  already aligns Round title to source 2040.
+- `tests/capability_model_test.c` adds `test_capture_exact_confirm_shutter()`,
+  which asserts the model against all 43 sampled bands from the cadence-1
+  capture, plus centre invariance and closed-stays-closed. That table is
+  evidence: if an implementation change breaks it, fix the implementation.
+- `main.c` adds `apply_confirm_shutter()`, called from `draw_world()` during
+  CHARACTER_CONFIRM. It blacks only the rows newly hidden since the previous
+  frame, four at each edge, straight into the VDP2 bitmap. No stored frames,
+  no source surface, no change to the load or CDDA schedule.
+
+Verified so far:
+
+- Host tests pass, including the new shutter test and the existing
+  12,000-frame soak; the controller-only route still reaches Round 2 in 4,485
+  frames.
+- `build.ps1` normal-release and `build.ps1 -EncounterTest` both compile,
+  link, and build ISOs with every required member verified by size and
+  SHA-256. No new compiler warnings.
+- The working disc was rebuilt as `profile=normal-release` after the
+  diagnostic build, so `game.iso`/`game.cue` are not a diagnostic image.
+
+NOT yet verified: nobody has watched the shutter run in an emulator. The next
+action for this change is a Yaba Sanshiro boot to confirm the band closes
+smoothly, the countdown stays legible to the end, and no VDP2 tearing or
+partial-row artefact appears. Until then, describe it as built and host-tested,
+not as visually confirmed.
+
 ## Resume in this order
 
 1. Verify branch, HEAD, clean status, the release manifest profile, and that no
