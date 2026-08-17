@@ -1,0 +1,121 @@
+{
+  "source": {
+    "romset": "avspu",
+    "mame_version": "0.289",
+    "cadence": 2,
+    "capture_root": ".deps/mame/frontend",
+    "static_frame": 1852,
+    "wipe_first_frame": 1884,
+    "wipe_last_frame": 1908
+  },
+  "verified": {
+    "row_shutter_not_squeeze": true,
+    "band_rows_identical_to_static_frame": true,
+    "outside_band_fully_black": true,
+    "stored_frame_bytes_required": 0
+  },
+  "shutter_model": {
+    "rows_per_source_frame_per_edge": 4,
+    "rows_per_sample_per_edge": 8,
+    "centre_row": 131.5,
+    "content_top_row": 40,
+    "content_bottom_row": 223,
+    "fitted_start_source_frame": 1885,
+    "start_frame_ambiguity_source_frames": 1,
+    "fully_closed_by_source_frame": 1908,
+    "closes_at_fractional_frame": 1907.875,
+    "top_residuals": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "observations": [
+    {
+      "frame": 1884,
+      "top": 40,
+      "bottom": 223,
+      "height": 184
+    },
+    {
+      "frame": 1886,
+      "top": 44,
+      "bottom": 219,
+      "height": 176
+    },
+    {
+      "frame": 1888,
+      "top": 52,
+      "bottom": 211,
+      "height": 160
+    },
+    {
+      "frame": 1890,
+      "top": 60,
+      "bottom": 203,
+      "height": 144
+    },
+    {
+      "frame": 1892,
+      "top": 68,
+      "bottom": 195,
+      "height": 128
+    },
+    {
+      "frame": 1894,
+      "top": 76,
+      "bottom": 187,
+      "height": 112
+    },
+    {
+      "frame": 1896,
+      "top": 84,
+      "bottom": 179,
+      "height": 96
+    },
+    {
+      "frame": 1898,
+      "top": 92,
+      "bottom": 171,
+      "height": 80
+    },
+    {
+      "frame": 1900,
+      "top": 100,
+      "bottom": 163,
+      "height": 64
+    },
+    {
+      "frame": 1902,
+      "top": 108,
+      "bottom": 155,
+      "height": 48
+    },
+    {
+      "frame": 1904,
+      "top": 116,
+      "bottom": 147,
+      "height": 32
+    },
+    {
+      "frame": 1906,
+      "top": 124,
+      "bottom": 139,
+      "height": 16
+    },
+    {
+      "frame": 1908,
+      "top": null,
+      "bottom": null,
+      "height": 0
+    }
+  ]
+}

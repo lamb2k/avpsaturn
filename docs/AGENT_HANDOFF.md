@@ -48,6 +48,8 @@ New tracked source/evidence files:
 - `tools/mame_capture_frontend.lua`
 - `tools/analyze_frontend_segments.py`
 - `data/frontend_segments.json`
+- `tools/analyze_frontend_geometry.py`
+- `data/frontend_geometry.json`
 
 `git diff --check` passes; only existing LF-to-CRLF warnings are emitted.
 
@@ -120,6 +122,10 @@ Deterministic source hashes:
   `01e99fd85e6c05eba6f437b4f0aeb89d3aad090fa4f915602ccd3e0c61bc3f8b`
 - `data/frontend_segments.json`:
   `67ff4e52bfa53751567ea9adf1e3b7d9c6be1cea81ce0d220575a343265b072b`
+- `tools/analyze_frontend_geometry.py`:
+  `7ef2e9215cdfc36ff85844e0a0c5a8a77cee0339a21f0edcfa915c17b5f0a4dc`
+- `data/frontend_geometry.json`:
+  `cae477e120062dcb412960a0dcc67da1476136dc614ddf9d029eb44dc98ed7b1`
 
 ## Process and restart state
 
@@ -310,6 +316,51 @@ moves from megabytes of pixels to a small geometry/timing table, but the
 capture-exactness burden moves with it: the native transform must be proven
 against a cadence-1 capture frame by frame, not asserted.
 
+## Character-confirm wipe solved 2026-08-17
+
+`tools/analyze_frontend_geometry.py` (new) recovers the confirm transition as
+native geometry and validates it against the raw capture. It writes
+`data/frontend_geometry.json`. The run raises rather than reporting a weak
+result if either claim below fails, and a negative test confirms it: feeding
+it the wrong static frame raises `frame 1884 is not the static frame inside
+rows 40..223`.
+
+Validated over the 13 sampled frames 1884..1908:
+
+- The wipe is a **row shutter, not a vertical squeeze**. Every row of every
+  wipe frame is byte-identical to static frame 1852 or entirely black, with
+  no resampled or partially matching rows. This was visible in the capture as
+  the countdown digits keeping their exact size while the panels vanish.
+- The visible band closes **linearly and symmetrically**: 4 rows per source
+  frame per edge about a fixed centre at row 131.5, from content rows 40..223
+  to fully black. All 11 fitted top residuals are 0.
+- Fitted start is source frame 1885, determined only to +/-1 source frame
+  because the capture cadence is 2.
+
+Consequences:
+
+- The confirm wipe needs **0 bytes of stored animation**. The Saturn clips the
+  already-resident 78,848-byte character-select surface to a row band, which
+  VDP2 window registers or a clipped bitmap copy reproduce exactly. Note the
+  surface is currently released at CHARACTER_CONFIRM entry (`main.c:1610`) to
+  fund the boss supplements; the wipe needs it to survive until the band
+  closes, so that release must move later or the supplements must be funded
+  elsewhere. Resolve this before writing runtime code.
+- The Round 1 title text is 110x37 at (132,90) with 9 colours: 4,070 bytes
+  raw, about 2,035 bytes as one 4bpp VDP1 cel. That is the only genuinely new
+  frontend asset.
+- The blinking `PRESS START` element at (242,2), 103x29, is already
+  implemented as a fixed VDP1 overlay.
+
+Total new payload for the whole frontend animation is therefore on the order
+of 2 KB, against roughly 1 MB for the stored-frame path that was rejected.
+
+Not yet characterized in the confirm window: the 1800..1852 selected-panel
+blink (regions 32x27 at (42,61) and 86x52 at (15,54), alternating structural
+and single-CRAM-entry steps) and the exact appearance schedule of the title
+text and `PRESS START` blinks between 1954 and 2034. Per-step boxes for all
+of them are in `data/frontend_segments.json`.
+
 ## Resume in this order
 
 1. Verify branch, HEAD, clean status, the release manifest profile, and that no
@@ -319,27 +370,33 @@ against a cadence-1 capture frame by frame, not asserted.
    is optional organization work, not a technical requirement. If relocating,
    preserve `.git` plus the ignored private ROM, dependency, emulator, audio,
    and capture inputs; verify the old checkout before removing anything.
-3. Do not resume the stored-frame codec search; the segmentation result above
-   closed it. Extract the character-confirm panel-wipe **geometry** instead:
-   for each source frame, the visible source rectangle and destination
-   rectangle of each of the four selection panels, plus the countdown digit
-   state. Add it as a new deterministic analyzer beside
-   `tools/analyze_frontend_segments.py`, validated against the capture the
-   same way (report expected counts and a tracked hash). Do not use the
-   ambiguous reverse-pen experiment as source truth.
-4. Recapture character confirm at cadence 1 and confirm the geometry table
-   reproduces every source frame. A frame the transform cannot reproduce is
-   evidence the model is wrong, not a candidate for a stored-frame fallback.
-5. Bind the wipe to native VDP1 scaled sprites or VDP2 line-scroll/window
-   registers driven by that table, keeping the resident selection surface as
-   the only pixel source. Then compose the Round 1 title from the existing
-   native scene plus a text overlay and reveal schedule. Integrate
+3. Resolve the surface-lifetime conflict before any runtime code: the wipe
+   needs the character-select surface resident until the band closes, but
+   `main.c:1610` releases it at CHARACTER_CONFIRM entry to fund the
+   49,137-byte boss supplements, and that same frame starts CDDA so the
+   supplements cannot simply load later. Options are to fund the supplements
+   from the block-0 tail plus another source, to delay the CDDA start to the
+   band-closed frame, or to copy the surface into the VDP2 bitmap once and
+   shutter the bitmap. Decide with measurements, not preference.
+4. Recapture character confirm at cadence 1 and re-run
+   `tools/analyze_frontend_geometry.py`. It must still validate with zero
+   residuals and must pin the start frame that cadence 2 leaves ambiguous
+   (fitted 1885, +/-1). A frame the shutter cannot reproduce is evidence the
+   model is wrong, not a reason to restore a stored-frame fallback.
+5. Characterize the two remaining confirm elements the same way: the
+   1800..1852 selected-panel blink and the 1954..2034 title-text and
+   `PRESS START` schedules. Extract the 110x37 nine-colour title text as one
+   4bpp VDP1 cel.
+6. Bind the shutter to VDP2 window registers or a clipped bitmap copy driven
+   by the fitted model, keeping the resident selection surface as the only
+   pixel source. Then compose the Round 1 title from the existing native
+   scene plus that text cel and a reveal schedule. Integrate
    menu -> character confirm -> Round 1 and run host, focused, full-route,
    then clean normal-release gates.
-6. Verify the complete first level audibly in a captured real-time run.
-7. Run the normal release on physical NTSC Saturn hardware with a digital pad
+7. Verify the complete first level audibly in a captured real-time run.
+8. Run the normal release on physical NTSC Saturn hardware with a digital pad
    and 32 Mbit RAM cartridge; verify crop/black bars, audio, KO, and Round 2.
-8. Forward-test the reusable skill and assemble the full-port team evidence
+9. Forward-test the reusable skill and assemble the full-port team evidence
    package only after the faithful hardware slice passes.
 
 ## Reproduction commands
@@ -359,6 +416,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\capture_frontend.ps1
 # Reproduce the frontend segmentation result (needs the raw capture present):
 & "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
     .\tools\analyze_frontend_segments.py --report
+
+# Validate the character-confirm shutter model and its geometry report:
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\analyze_frontend_geometry.py --report
 
 # Measure an ad-hoc window without touching the tracked report:
 & "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
