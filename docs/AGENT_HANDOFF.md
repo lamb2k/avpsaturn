@@ -341,11 +341,9 @@ Consequences:
 
 - The confirm wipe needs **0 bytes of stored animation**. The Saturn clips the
   already-resident 78,848-byte character-select surface to a row band, which
-  VDP2 window registers or a clipped bitmap copy reproduce exactly. Note the
-  surface is currently released at CHARACTER_CONFIRM entry (`main.c:1610`) to
-  fund the boss supplements; the wipe needs it to survive until the band
-  closes, so that release must move later or the supplements must be funded
-  elsewhere. Resolve this before writing runtime code.
+  a progressive blackout of the VDP2 bitmap reproduces exactly. The existing
+  release of that surface at CHARACTER_CONFIRM entry (`main.c:1610`) does not
+  conflict with it; resume step 3 records the verified reasoning.
 - The Round 1 title text is 110x37 at (132,90) with 9 colours: 4,070 bytes
   raw, about 2,035 bytes as one 4bpp VDP1 cel. That is the only genuinely new
   frontend asset.
@@ -370,14 +368,26 @@ of them are in `data/frontend_segments.json`.
    is optional organization work, not a technical requirement. If relocating,
    preserve `.git` plus the ignored private ROM, dependency, emulator, audio,
    and capture inputs; verify the old checkout before removing anything.
-3. Resolve the surface-lifetime conflict before any runtime code: the wipe
-   needs the character-select surface resident until the band closes, but
-   `main.c:1610` releases it at CHARACTER_CONFIRM entry to fund the
-   49,137-byte boss supplements, and that same frame starts CDDA so the
-   supplements cannot simply load later. Options are to fund the supplements
-   from the block-0 tail plus another source, to delay the CDDA start to the
-   band-closed frame, or to copy the surface into the VDP2 bitmap once and
-   shutter the bitmap. Decide with measurements, not preference.
+3. RESOLVED, no change needed to the existing load schedule. The wipe does not
+   need the character-select source block at all, so nothing conflicts with
+   releasing it at CHARACTER_CONFIRM entry. Verified in `main.c`:
+   - `activate_frontend_scene()` copies the surface into the VDP2 bitmap once
+     and early-returns while the scene is unchanged (`main.c:737-752`), so
+     the bitmap already holds the image after the confirm-entry frame.
+   - `copy_snapshot_to_background()` is row-aligned at
+     `background_bitmap + y * BACKGROUND_WIDTH` (`main.c:723-735`), so hiding
+     one row is exactly the `jo_dma_copy(empty_row, target,
+     BACKGROUND_WIDTH)` that function already performs.
+   - `sequence_scene_for_world()` has no CHARACTER_CONFIRM case
+     (`main.c:779`), so it returns -1 and `activate_route_sequence()`
+     early-returns without touching the bitmap during the whole wipe
+     (`main.c:817`). Nothing else rewrites the bitmap until ROUND_TITLE
+     selects `AVSP_SEQUENCE_ROUND_1_TITLE`, which repaints it wholesale.
+   The shutter is therefore a destructive progressive blackout of the VDP2
+   bitmap, which is safe because the band only ever shrinks. Cost is eight
+   row DMAs per source frame (four rows at each edge) of `BACKGROUND_WIDTH`
+   bytes. It uses no cartridge RAM and is outside the phase-overlay budget.
+   Implement it that way rather than extending any surface lifetime.
 4. Recapture character confirm at cadence 1 and re-run
    `tools/analyze_frontend_geometry.py`. It must still validate with zero
    residuals and must pin the start frame that cadence 2 leaves ambiguous
@@ -387,10 +397,11 @@ of them are in `data/frontend_segments.json`.
    1800..1852 selected-panel blink and the 1954..2034 title-text and
    `PRESS START` schedules. Extract the 110x37 nine-colour title text as one
    4bpp VDP1 cel.
-6. Bind the shutter to VDP2 window registers or a clipped bitmap copy driven
-   by the fitted model, keeping the resident selection surface as the only
-   pixel source. Then compose the Round 1 title from the existing native
-   scene plus that text cel and a reveal schedule. Integrate
+6. Implement the shutter as the progressive VDP2 bitmap blackout described in
+   step 3, driven by the fitted model, and add a host-model test that walks
+   the band schedule deterministically. Then compose the Round 1 title from
+   the existing native scene plus that text cel and a reveal schedule.
+   Integrate
    menu -> character confirm -> Round 1 and run host, focused, full-route,
    then clean normal-release gates.
 7. Verify the complete first level audibly in a captured real-time run.
