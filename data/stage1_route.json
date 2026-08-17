@@ -43,6 +43,7 @@
     "boss_defeat_frames": 240,
     "stage_clear_frames": 120,
     "results_frames": 360,
+    "results_exit_frames": 60,
     "intermission_frames": 60
   },
   "capture_incidents": [

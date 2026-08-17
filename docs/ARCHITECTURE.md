@@ -60,6 +60,14 @@ selection state. Their 110 and 115 source colors respectively remain lossless.
 The native controller state machine waits for Start, then A, before beginning
 the Round 1 title and gameplay route.
 
+After confirmation, the menu surface becomes a reusable route-sequence slot.
+Thirteen verified 384x224 capture anchors are horizontally fit to 352x224,
+palette-indexed without color loss, and count/value RLE encoded. Their
+compressed data is loaded through Jo Engine's cartridge-backed allocator before
+track 2 begins. State changes decode into one 78,848-byte work buffer, replace
+the existing VDP1 texture, and update the same 256-color CRAM bank. This avoids
+additional VDP1 residency and data-track seeks during CDDA playback.
+
 ## Background and HUD
 
 The converter reconstructs CPS2 scroll layers from captured graphics RAM,
@@ -101,6 +109,8 @@ Exact in the current milestone:
 - selected object pixels, scale, transparency, and palette pens
 - selected background/HUD capture reconstruction
 - lossless Press Start and Predator Warrior selection key states
+- lossless key states for the Round 1/barricade sequence, doorway/interior
+  transition, boss defeat, Stage Clear, results, intermission, and Round 2 title
 - aligned multi-palette VDP1 assembly
 - active CPS2 object-RAM bank and final visible boot object/priority result
 - Saturn-native 352x224 initialization with one deterministic full-width fit
@@ -115,6 +125,7 @@ Still approximate or incomplete:
 - exact enemy pose selection, spawn coordinates/timing, AI, and object priority
 - remaining player states, enemy animation/state timing, and full frame sets
 - complete attract-mode, menu-transition, and character-select animation
+- full animation between the verified route key states
 - dynamic HUD values, exact scroll behavior, level triggers, combat, and AI
 - isolated, event-synchronized QSound effects on native SCSP PCM channels
 - native HUD safe-area placement and arcade-derived camera behavior for CRT

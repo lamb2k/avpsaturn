@@ -197,6 +197,8 @@ static void test_first_room_waves_and_transition(void)
     step_empty(&world, 120);
     assert(world.encounter_state == CAP_ENCOUNTER_RESULTS);
     step_empty(&world, 360);
+    assert(world.encounter_state == CAP_ENCOUNTER_RESULTS_EXIT);
+    step_empty(&world, 60);
     assert(world.encounter_state == CAP_ENCOUNTER_INTERMISSION);
     step_empty(&world, 60);
     assert(world.level_completed == 1);

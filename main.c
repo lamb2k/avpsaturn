@@ -6,6 +6,7 @@
 #include "generated/avsp_frontend_palette.h"
 #include "generated/avsp_palette.h"
 #include "generated/avsp_player_animation.h"
+#include "generated/avsp_sequence_palette.h"
 
 #define CEL_WIDTH 192
 #define CEL_HEIGHT 192
@@ -53,6 +54,8 @@ static jo_palette frontend_palettes[AVSP_FRONTEND_SCENES];
 static jo_img_8bits background_image;
 static jo_img_8bits boss_background_image;
 static jo_img_8bits frontend_images[AVSP_FRONTEND_SCENES];
+static unsigned char *sequence_rle[AVSP_SEQUENCE_SCENES];
+static unsigned char *sequence_pixels;
 static unsigned char *background_bitmap;
 static jo_img_4bits player_attack_images[AVSP_PLAYER_ATTACK_POSES][AVSP_PLAYER_ATTACK_LAYERS];
 static jo_img_4bits enemy_walk_images[AVSP_ENEMY_WALK_POSES];
@@ -70,6 +73,7 @@ static int runtime_ready;
 static int cart_available;
 static int boss_background_active;
 static int stage_music_started;
+static int current_sequence_scene;
 
 static int load_cel_asset(CelAsset *asset)
 {
@@ -224,6 +228,102 @@ static int load_frontend_assets(void)
         jo_free(image->data);
         image->data = JO_NULL;
     }
+    return 1;
+}
+
+static int load_route_sequences(void)
+{
+    int scene;
+    int length;
+    sequence_pixels = (unsigned char *)jo_malloc(SNAPSHOT_FIT_BYTES);
+    if (sequence_pixels == JO_NULL)
+    {
+        failed_asset = "SEQUENCE BUFFER";
+        return 0;
+    }
+    for (scene = 0; scene < AVSP_SEQUENCE_SCENES; ++scene)
+    {
+        length = 0;
+        sequence_rle[scene] = (unsigned char *)jo_fs_read_file_in_dir(
+            avsp_sequence_files[scene], "SPR8", &length);
+        if (sequence_rle[scene] == JO_NULL ||
+            length != (int)avsp_sequence_rle_bytes[scene])
+        {
+            failed_asset = avsp_sequence_files[scene];
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static int sequence_scene_for_world(void)
+{
+    if (world.encounter_state == CAP_ENCOUNTER_ROUND_TITLE)
+        return AVSP_SEQUENCE_ROUND_1_TITLE;
+    if (world.encounter_state == CAP_ENCOUNTER_BARRICADE_INTRO)
+    {
+        if (world.encounter_timer < 120) return AVSP_SEQUENCE_BARRICADE_INTRO;
+        if (world.encounter_timer < 240) return AVSP_SEQUENCE_WITHDRAW_DIALOGUE;
+        return AVSP_SEQUENCE_BARRICADE_BREACH;
+    }
+    if (world.encounter_state == CAP_ENCOUNTER_DOOR_DIALOGUE)
+        return AVSP_SEQUENCE_DOOR_DIALOGUE;
+    if (world.encounter_state == CAP_ENCOUNTER_INTERIOR_TRANSITION)
+        return AVSP_SEQUENCE_INTERIOR_TRANSITION;
+    if (world.encounter_state == CAP_ENCOUNTER_BOSS_DEFEAT)
+        return AVSP_SEQUENCE_BOSS_DEATH_EXPLOSION;
+    if (world.encounter_state == CAP_ENCOUNTER_STAGE_CLEAR)
+        return AVSP_SEQUENCE_STAGE_CLEAR;
+    if (world.encounter_state == CAP_ENCOUNTER_RESULTS)
+        return world.encounter_timer < 300 ? AVSP_SEQUENCE_RESULTS_BEGIN :
+                                             AVSP_SEQUENCE_RESULTS_COMPLETE;
+    if (world.encounter_state == CAP_ENCOUNTER_RESULTS_EXIT)
+        return AVSP_SEQUENCE_RESULTS_EXIT;
+    if (world.encounter_state == CAP_ENCOUNTER_INTERMISSION)
+        return AVSP_SEQUENCE_INTERMISSION;
+    if (world.encounter_state == CAP_ENCOUNTER_COMPLETE)
+        return AVSP_SEQUENCE_ROUND_2_BOUNDARY;
+    return -1;
+}
+
+static int activate_route_sequence(const int scene)
+{
+    static jo_color colors[256];
+    jo_img replacement;
+    unsigned int source = 0;
+    unsigned int target = 0;
+    int index;
+
+    if (scene < 0 || scene == current_sequence_scene) return 1;
+    while (source + 1 < avsp_sequence_rle_bytes[scene])
+    {
+        unsigned int count = sequence_rle[scene][source++];
+        unsigned char value = sequence_rle[scene][source++];
+        if (count == 0 || target + count > SNAPSHOT_FIT_BYTES)
+        {
+            failed_asset = "SEQUENCE RLE";
+            return 0;
+        }
+        memset(sequence_pixels + target, value, count);
+        target += count;
+    }
+    if (source != avsp_sequence_rle_bytes[scene] ||
+        target != SNAPSHOT_FIT_BYTES)
+    {
+        failed_asset = "SEQUENCE SIZE";
+        return 0;
+    }
+    for (index = 0; index < 256; ++index)
+        colors[index] = JO_COLOR_RGB(
+            avsp_sequence_palettes[scene][index][0],
+            avsp_sequence_palettes[scene][index][1],
+            avsp_sequence_palettes[scene][index][2]);
+    jo_palette_to_cram(colors, frontend_palettes[0].data, 256);
+    replacement.width = SNAPSHOT_FIT_WIDTH;
+    replacement.height = SNAPSHOT_HEIGHT;
+    replacement.data = (jo_color *)sequence_pixels;
+    jo_sprite_replace(&replacement, frontend_sprites[0]);
+    current_sequence_scene = scene;
     return 1;
 }
 
@@ -399,6 +499,13 @@ static void draw_world(void)
         jo_sprite_draw3D(frontend_sprites[scene], 0, 0, 160);
         return;
     }
+    if (sequence_scene_for_world() >= 0)
+    {
+        jo_sprite_restore_sprite_scale();
+        jo_sprite_set_palette(frontend_palettes[0].id);
+        jo_sprite_draw3D(frontend_sprites[0], 0, 0, 160);
+        return;
+    }
     if (world.stage_area == 1) activate_boss_background();
     /* The source capture is already exactly 224 lines high.  A non-zero Y
        scroll silently discards arcade scanlines and is therefore a crop. */
@@ -524,42 +631,8 @@ static void draw_hud(void)
 
 static void draw_route_overlay(void)
 {
-    if (world.encounter_state == CAP_ENCOUNTER_ROUND_TITLE)
-    {
-        jo_printf(15, 11, "ROUND 1");
-        jo_printf(11, 13, "CITY OF DESPAIR");
-    }
-    else if (world.encounter_state == CAP_ENCOUNTER_BARRICADE_INTRO)
-    {
-        if (world.encounter_timer >= 120 && world.encounter_timer < 240)
-            jo_printf(5, 4, "THERE'S TOO MANY OF THEM! WITHDRAW.");
-        else if (world.encounter_timer >= 240)
-            jo_printf(35, 12, "GO >>>");
-    }
-    else if (world.encounter_state == CAP_ENCOUNTER_CLEAR)
+    if (world.encounter_state == CAP_ENCOUNTER_CLEAR)
         jo_printf(35, 12, "GO >>>");
-    else if (world.encounter_state == CAP_ENCOUNTER_DOOR_DIALOGUE)
-        jo_printf(4, 4, "THEY DIDN'T FOLLOW US IN. WHY?");
-    else if (world.encounter_state == CAP_ENCOUNTER_BOSS_DEFEAT)
-        jo_printf(10, 12, "CHRYSALIS DESTROYED");
-    else if (world.encounter_state == CAP_ENCOUNTER_STAGE_CLEAR)
-    {
-        jo_printf(12, 10, "CONGRATULATIONS!");
-        jo_printf(13, 12, "STAGE CLEAR!");
-    }
-    else if (world.encounter_state == CAP_ENCOUNTER_RESULTS)
-    {
-        jo_printf(16, 9, "1P RESULTS");
-        jo_printf(13, 12, "ENEMY %05d", world.score);
-        jo_printf(13, 14, "TOTAL %05d", world.score);
-    }
-    else if (world.encounter_state == CAP_ENCOUNTER_INTERMISSION)
-        jo_printf(10, 12, "PREPARE FOR ROUND 2");
-    else if (world.encounter_state == CAP_ENCOUNTER_COMPLETE)
-    {
-        jo_printf(15, 11, "ROUND 2");
-        jo_printf(9, 13, "WAR IN THE UNDERPASS");
-    }
 }
 
 static void frame_callback(void)
@@ -583,6 +656,11 @@ static void frame_callback(void)
     input = encounter_test_input();
 #endif
     cap_world_step(&world, &input);
+    if (!activate_route_sequence(sequence_scene_for_world()))
+    {
+        runtime_ready = 0;
+        return;
+    }
     if (world.encounter_started && !stage_music_started)
     {
         /* Track 2 is an ignored, locally captured QSound reference mix. The
@@ -625,6 +703,10 @@ void jo_main(void)
     debug_hud_enabled = 0;
     boss_background_active = 0;
     stage_music_started = 0;
+    current_sequence_scene = -1;
+    sequence_pixels = JO_NULL;
+    for (index = 0; index < AVSP_SEQUENCE_SCENES; ++index)
+        sequence_rle[index] = JO_NULL;
 
     jo_core_init(JO_COLOR_Black);
     cart_available = jo_get_extended_ram_cartridge_type() == CART_32MBits;
@@ -638,6 +720,7 @@ void jo_main(void)
     else
     {
         runtime_ready = load_frontend_assets() &&
+                        load_route_sequences() &&
                         load_background() && load_boss_background() &&
                         load_all_cels() && load_player_attack_sequence() &&
                         load_enemy_walk_sequence() && load_boss_idle() &&

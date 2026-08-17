@@ -1055,6 +1055,126 @@ static const unsigned char avsp_frontend_palettes[AVSP_FRONTEND_SCENES][256][3] 
     return manifest
 
 
+def write_route_sequence_assets(sprite_dir: Path) -> list[dict[str, object]]:
+    """Emit capture-exact key states for one replaceable VDP1 sequence slot."""
+    scene_events = (
+        ("R1TITLE.RLE", "round_1_title"),
+        ("BARRIN.RLE", "barricade_intro"),
+        ("WITHDRAW.RLE", "withdraw_dialogue"),
+        ("BREACH.RLE", "barricade_breach"),
+        ("DOORDLG.RLE", "door_dialogue"),
+        ("INTERIOR.RLE", "interior_transition"),
+        ("BOSSEND.RLE", "boss_death_explosion"),
+        ("STCLEAR.RLE", "stage_clear"),
+        ("RESULT1.RLE", "results_begin"),
+        ("RESULT2.RLE", "results_complete"),
+        ("RESEXIT.RLE", "results_exit"),
+        ("INTERMS.RLE", "intermission"),
+        ("R2TITLE.RLE", "round_2_boundary"),
+    )
+    ledger = json.loads((ROOT / "data" / "stage1_route.json").read_text(
+        encoding="utf-8"))
+    events = {event["id"]: event for event in ledger["events"]}
+    capture_roots = {
+        "opening": ROOT / ledger["capture"]["opening_root"],
+        "continuation": ROOT / ledger["capture"]["continuation_root"],
+    }
+    palettes: list[list[tuple[int, int, int]]] = []
+    byte_lengths: list[int] = []
+    source_frames: list[int] = []
+    manifest: list[dict[str, object]] = []
+
+    for filename, event_id in scene_events:
+        event = events[event_id]
+        namespace, source_name = event["capture"].split(":", 1)
+        source_path = capture_roots[namespace] / source_name
+        image = Image.open(source_path).convert("RGB")
+        if image.size != (VISIBLE_WIDTH, VISIBLE_HEIGHT):
+            raise ValueError(f"route scene {event_id} must be 384x224")
+
+        colours: list[tuple[int, int, int]] = []
+        colour_to_index: dict[tuple[int, int, int], int] = {}
+        fit_data = bytearray(SATURN_VIEW_WIDTH * VISIBLE_HEIGHT)
+        for y in range(VISIBLE_HEIGHT):
+            for x in range(SATURN_VIEW_WIDTH):
+                source_x = (
+                    x * (VISIBLE_WIDTH - 1) + (SATURN_VIEW_WIDTH - 1) // 2
+                ) // (SATURN_VIEW_WIDTH - 1)
+                rgb = image.getpixel((source_x, y))
+                index = colour_to_index.get(rgb)
+                if index is None:
+                    index = len(colours) + 1
+                    if index >= 256:
+                        raise ValueError(
+                            f"route scene {event_id} exceeds one Saturn 8bpp palette")
+                    colour_to_index[rgb] = index
+                    colours.append(rgb)
+                fit_data[y * SATURN_VIEW_WIDTH + x] = index
+
+        encoded = bytearray()
+        run_value = fit_data[0]
+        run_length = 0
+        for value in fit_data:
+            if value == run_value and run_length < 255:
+                run_length += 1
+            else:
+                encoded.extend((run_length, run_value))
+                run_value = value
+                run_length = 1
+        encoded.extend((run_length, run_value))
+
+        target = sprite_dir / filename
+        target.write_bytes(encoded)
+        palettes.append(colours + [(0, 0, 0)] * (256 - len(colours)))
+        byte_lengths.append(len(encoded))
+        source_frames.append(event["frame"])
+        manifest.append({
+            "path": f"SPR8/{filename}",
+            "bytes": len(encoded),
+            "decoded_bytes": len(fit_data),
+            "sha256": hashlib.sha256(encoded).hexdigest(),
+            "source_frame": event["frame"],
+            "route_event": event_id,
+            "visible_colours": len(colours),
+            "encoding": "rle8-count-value",
+            "display": "lossless-full-width-fit",
+        })
+
+    palette_scenes = []
+    for palette in palettes:
+        rows = ",\n".join(
+            f"        {{{red}, {green}, {blue}}}" for red, green, blue in palette)
+        palette_scenes.append("    {\n" + rows + "\n    }")
+    filenames = ", ".join(f'"{filename}"' for filename, _ in scene_events)
+    lengths = ", ".join(str(length) for length in byte_lengths)
+    frames = ", ".join(str(frame) for frame in source_frames)
+    scene_constants = "\n".join(
+        f"#define AVSP_SEQUENCE_{event_id.upper()} {index}"
+        for index, (_, event_id) in enumerate(scene_events))
+    header = f"""/* Generated from verified CPS2 Stage 1 route anchors. */
+#ifndef AVSP_SEQUENCE_PALETTE_H
+#define AVSP_SEQUENCE_PALETTE_H
+#define AVSP_SEQUENCE_SCENES {len(scene_events)}
+{scene_constants}
+static const char avsp_sequence_files[AVSP_SEQUENCE_SCENES][13] = {{
+    {filenames}
+}};
+static const unsigned int avsp_sequence_rle_bytes[AVSP_SEQUENCE_SCENES] = {{
+    {lengths}
+}};
+static const unsigned int avsp_sequence_source_frames[AVSP_SEQUENCE_SCENES] = {{
+    {frames}
+}};
+static const unsigned char avsp_sequence_palettes[AVSP_SEQUENCE_SCENES][256][3] = {{
+{",\n".join(palette_scenes)}
+}};
+#endif
+"""
+    (GENERATED_ROOT / "avsp_sequence_palette.h").write_text(
+        header, encoding="ascii")
+    return manifest
+
+
 def fit_background_for_saturn(stage: Image.Image) -> Image.Image:
     """Pre-scale a CPS2 background so VDP2 can display it at reliable 1:1."""
     expected_width = round(stage.width * SATURN_VIEW_WIDTH / VISIBLE_WIDTH)
@@ -1332,6 +1452,7 @@ def write_saturn_assets(gfx: bytearray, palette: list[tuple[int, int, int, int]]
 
     manifest.extend(write_exact_actor_assets(gfx, palette, sprite_dir))
     manifest.extend(write_frontend_assets(snapshot_dir))
+    manifest.extend(write_route_sequence_assets(snapshot_dir))
     manifest.extend(write_snapshot_asset(object_layer, snapshot_dir))
 
     stage = render_background(gfx, gfxram, cps_a, cps_b, palette,

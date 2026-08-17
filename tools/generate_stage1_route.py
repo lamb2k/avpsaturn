@@ -173,6 +173,7 @@ def validate_ledger(ledger: dict, verify_captures: bool) -> None:
         "boss_defeat_frames",
         "stage_clear_frames",
         "results_frames",
+        "results_exit_frames",
         "intermission_frames",
     )
     for name in required_timings:
@@ -243,6 +244,7 @@ def generate_header(ledger: dict) -> str:
         f"#define AVSP_STAGE1_BOSS_DEFEAT_FRAMES {timing['boss_defeat_frames']}",
         f"#define AVSP_STAGE1_STAGE_CLEAR_FRAMES {timing['stage_clear_frames']}",
         f"#define AVSP_STAGE1_RESULTS_FRAMES {timing['results_frames']}",
+        f"#define AVSP_STAGE1_RESULTS_EXIT_FRAMES {timing['results_exit_frames']}",
         f"#define AVSP_STAGE1_INTERMISSION_FRAMES {timing['intermission_frames']}",
         "",
     ]

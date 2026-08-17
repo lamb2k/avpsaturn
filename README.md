@@ -18,6 +18,8 @@ Current milestone:
   from the cold Press Start screen through the definitive Round 2 title boundary
 - boots into lossless capture-derived Press Start and Predator Warrior select
   surfaces; Start and A traverse those native states before Round 1 begins
+- reuses one VDP1 surface for thirteen cartridge-preloaded, capture-derived
+  route states from the Round 1 title through the Round 2 title
 - preserves original sprite scale and exact 15-color CPS2 subpalettes
 - animates the first authentic ten-pose Predator attack from three aligned
   VDP1 palette layers backed by the Saturn 4 MB cartridge
@@ -40,8 +42,11 @@ The normal release now begins at the capture-derived Press Start screen, waits
 for Saturn Start, shows the default Predator Warrior character-select capture,
 and waits for A before entering Round 1. These frontend surfaces preserve their
 source pixels and palettes but are still flattened key states rather than the
-complete arcade attract/menu animation. The converter retains the 384x224
-object/priority oracle offline. Gameplay still does not bind every extracted
+complete arcade attract/menu animation. Thirteen later route states use the
+same lossless horizontal fit and one replaceable VDP1 slot. Their compressed
+sources are loaded before CDDA starts, so state changes do not seek away from
+the audio track. The converter retains the 384x224 object/priority oracle
+offline. Gameplay still does not bind every extracted
 enemy pose to the arcade state machine, exact AI/spawn timing, isolated event
 sound effects, or every intermediate Stage 1 action.
 
@@ -145,6 +150,8 @@ Verified on August 16, 2026:
 - the encounter diagnostic visibly reaches five active enemies, eight street
   KOs, room clear, the Chrysalis room with two recurring Stalker waves, boss
   defeat, Stage Clear, results, intermission, and Round 2 in Yaba Sanshiro
+- the same diagnostic visibly traverses the capture-derived character-select,
+  results, and Round 2 surfaces from the preloaded route cache
 - the native audio module links successfully and the mixed-mode cue exposes a
   168.015-second stereo 16-bit 44.1 kHz Stage 1 QSound reference as CD track 2
 - the final visible object/priority result fits a single 78,848-byte 352x224

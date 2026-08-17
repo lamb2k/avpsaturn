@@ -47,6 +47,10 @@ The post-input gameplay scene now uses a tracked ten-pose blue-alien sequence,
 but its poses are not yet bound to arcade enemy states and it must not be
 described as frame-exact.
 
+The automated encounter build also traversed the cartridge-preloaded route
+cache and visibly reached the capture-derived character-select, results, and
+Round 2 title surfaces. No data-track reads occur after Stage 1 CDDA begins.
+
 ## Gate D: first playable Stage 1 encounter
 
 - Extract and schedule authentic idle, walk, attack, hit, and KO frames.
@@ -68,7 +72,9 @@ displays five initial enemies, adds three reinforcements after three defeats,
 clears after eight defeats, unlocks the camera boundary, plays the door and
 interior states, enters the industrial room, spawns captured Chrysalis plus
 five Stalkers across the observed recurring waves, and reaches the Round 2
-boundary through Stage Clear, results, and intermission. The mixed-mode image adds a 168.015-second QSound
+boundary through Stage Clear, results exit, and intermission. Thirteen route
+states now use lossless capture-derived key surfaces instead of Jo-font
+stand-ins. The mixed-mode image adds a 168.015-second QSound
 route reference as native CD audio track 2. The 12,000-frame host test and the
 automated Yaba Sanshiro diagnostic complete this lifecycle. Remaining player
 and enemy actions, intermediate route detail, exact arcade AI/spawn timing,

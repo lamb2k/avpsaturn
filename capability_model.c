@@ -557,6 +557,12 @@ static void cap_update_encounter(CapWorld *world)
     if (world->encounter_state == CAP_ENCOUNTER_RESULTS &&
         world->encounter_timer >= AVSP_STAGE1_RESULTS_FRAMES)
     {
+        world->encounter_state = CAP_ENCOUNTER_RESULTS_EXIT;
+        world->encounter_timer = 0;
+    }
+    if (world->encounter_state == CAP_ENCOUNTER_RESULTS_EXIT &&
+        world->encounter_timer >= AVSP_STAGE1_RESULTS_EXIT_FRAMES)
+    {
         world->encounter_state = CAP_ENCOUNTER_INTERMISSION;
         world->encounter_timer = 0;
     }
