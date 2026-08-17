@@ -96,6 +96,10 @@ alter console copy protection or supply copyrighted disc data.
    changes through the complete 189-frame attack/recovery sequence, with three
    contacts at offsets 21/55/97, without clipping, partial cels, palette
    corruption, or a `BOSS ACTION` allocation/decode failure.
+   Confirm every boss-room add uses the distinct purple Stalker artwork and
+   57-frame walk rather than a street-alien cel. Observe at least one 17-frame
+   Stalker attack and one complete 157-frame KO with no `SACT.RLE`, Stalker
+   RLE/index, palette-bank, or VDP1 replacement failure.
 9. Leave the encounter running for ten minutes and watch for partial sprites,
    palette corruption, controller loss, CD stalls, or dropped video sync.
 

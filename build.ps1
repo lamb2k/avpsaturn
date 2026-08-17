@@ -181,6 +181,12 @@ try {
             throw "Could not create game.iso (exit code $LASTEXITCODE)."
         }
         & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/SPR4/SACT.RLE' '--equals' `
+            (Join-Path $contentRoot 'SPR4\SACT.RLE')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn Stalker archive ISO verification failed with exit code $LASTEXITCODE."
+        }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
             'game.iso' '/AUDIO/GUN.PCM' '--equals' `
             (Join-Path $contentRoot 'AUDIO\GUN.PCM')
         if ($LASTEXITCODE -ne 0) {
@@ -294,6 +300,8 @@ try {
         $roundTitleBFile = Get-Item -LiteralPath (Join-Path $contentRoot 'AUDIO\RND1B.PCM')
         $withdrawAudioFile = Get-Item -LiteralPath (Join-Path $contentRoot 'AUDIO\WITHDRW.PCM')
         $breachAudioFile = Get-Item -LiteralPath (Join-Path $contentRoot 'AUDIO\BREACH.PCM')
+        $stalkerArchiveFile = Get-Item -LiteralPath `
+            (Join-Path $contentRoot 'SPR4\SACT.RLE')
         $manifestPath = Join-Path $projectRoot 'build\hardware_release_manifest.txt'
         [IO.File]::WriteAllLines($manifestPath, @(
             'target=sega-saturn-ntsc'
@@ -301,6 +309,10 @@ try {
             'boot=iso9660-mode1-2048'
             'expansion_ram=32-mbit-required'
             'expansion_ram_mapping=dram0-0x22400000-0x225fffff,dram1-0x22600000-0x227fffff'
+            'stalker_archive_iso_path=/SPR4/SACT.RLE'
+            'stalker_archive_phase_overlay=retired-title-surface-before-cdda'
+            "stalker_archive_bytes=$($stalkerArchiveFile.Length)"
+            "stalker_archive_sha256=$((Get-FileHash -LiteralPath $stalkerArchiveFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
             "profile=$buildProfile"
             "iso_bytes=$($isoFile.Length)"
             "iso_sha256=$((Get-FileHash -LiteralPath $isoFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"

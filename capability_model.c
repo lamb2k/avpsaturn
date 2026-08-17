@@ -22,6 +22,9 @@
 #define CAP_ENEMY_HIT_TOTAL_FRAMES 36
 #define CAP_ENEMY_KO_VISIBLE_FRAMES 140
 #define CAP_ENEMY_APPROACH_SPEED 3
+#define CAP_STALKER_ATTACK_TOTAL_FRAMES 17
+#define CAP_STALKER_CONTACT_DAMAGE 12
+#define CAP_STALKER_KO_VISIBLE_FRAMES 157
 #define CAP_BOSS_ATTACK_TOTAL_FRAMES 189
 #define CAP_BOSS_ATTACK_CONTACT_ONE 21
 #define CAP_BOSS_ATTACK_CONTACT_TWO 55
@@ -527,7 +530,10 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
     if (enemy->action == CAP_ACT_KO)
     {
         ++enemy->action_frame;
-        if (enemy->action_frame >= CAP_ENEMY_KO_VISIBLE_FRAMES)
+        if (enemy->action_frame >=
+                (enemy->kind == CAP_ACTOR_STALKER ?
+                    CAP_STALKER_KO_VISIBLE_FRAMES :
+                    CAP_ENEMY_KO_VISIBLE_FRAMES))
             cap_deactivate_enemy(enemy, index);
         return;
     }
@@ -559,6 +565,15 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
                     CAP_BOSS_ATTACK_REACH);
             }
             if (enemy->action_frame >= CAP_BOSS_ATTACK_TOTAL_FRAMES)
+            {
+                enemy->action = CAP_ACT_IDLE;
+                enemy->action_frame = 0;
+                enemy->hit_latched = 0;
+            }
+        }
+        else if (enemy->kind == CAP_ACTOR_STALKER)
+        {
+            if (enemy->action_frame >= CAP_STALKER_ATTACK_TOTAL_FRAMES)
             {
                 enemy->action = CAP_ACT_IDLE;
                 enemy->action_frame = 0;
@@ -599,13 +614,22 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
         enemy->action = CAP_ACT_ATTACK;
         enemy->action_frame = 0;
         enemy->hit_latched = 0;
+        /* The natural frame-6530 trace changes to Stalker action 5632 and
+           removes 12 health in the same sample, so contact belongs to visual
+           offset zero rather than the following update. */
+        if (enemy->kind == CAP_ACTOR_STALKER)
+            cap_enemy_attack_player(world, enemy,
+                                    CAP_STALKER_CONTACT_DAMAGE,
+                                    CAP_ENEMY_ATTACK_REACH);
         return;
     }
     if (cap_abs(delta_x) > 34)
     {
         int approach_speed = enemy->kind == CAP_ACTOR_BOSS ?
                              CAP_BOSS_APPROACH_SPEED :
-                             CAP_ENEMY_APPROACH_SPEED;
+                             enemy->kind == CAP_ACTOR_STALKER ?
+                                1 + ((world->frame + index) & 1) :
+                                CAP_ENEMY_APPROACH_SPEED;
         enemy->x += delta_x < 0 ? -approach_speed : approach_speed;
     }
     if (cap_abs(delta_lane) > 8)

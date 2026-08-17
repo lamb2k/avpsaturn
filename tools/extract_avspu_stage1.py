@@ -16,6 +16,7 @@ ROM_ROOT = ROOT / "avspu"
 CAPTURE_ROOT = ROOT / ".deps" / "mame" / "captures"
 PLAYER_ACTION_ROOT = ROOT / ".deps" / "mame" / "player_actions"
 ENEMY_ACTION_ROOT = ROOT / ".deps" / "mame" / "enemy_actions"
+STALKER_ACTION_ROOT = ROOT / ".deps" / "mame" / "stalker_actions"
 OUTPUT_ROOT = ROOT / "build" / "rom_extract"
 SATURN_CD_ROOT = ROOT / "build" / "avsp_cd"
 GENERATED_ROOT = ROOT / "generated"
@@ -1785,6 +1786,154 @@ static const unsigned char avsp_enemy_source_omissions[AVSP_ENEMY_ACTION_CLIPS] 
     }]
 
 
+def write_stalker_action_sequence_assets(
+        gfx: bytearray, sprite_dir: Path) -> list[dict[str, object]]:
+    """Emit the distinct Stage 1 Stalker walk, attack, impact, and KO cels."""
+    report_path = ROOT / "data" / "stalker_action_capture.json"
+    if not report_path.is_file():
+        raise ValueError(
+            "Stalker-action report is missing; run capture_stalker_actions.ps1")
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    if report.get("schema") != 1 or int(report["actor"]["cps2_palette"]) != 17:
+        raise ValueError("unsupported Stalker-action report")
+
+    archive = bytearray()
+    archive_offsets: list[int] = []
+    archive_lengths: list[int] = []
+    source_frames: list[int] = []
+    pose_by_digest: dict[str, int] = {}
+    clip_specs: list[dict[str, object]] = []
+    decoded_blank = bytes((288 * 192) // 2)
+
+    def intern_pose(decoded: bytes, source_frame: int) -> int:
+        digest = hashlib.sha256(decoded).hexdigest()
+        prior = pose_by_digest.get(digest)
+        if prior is not None:
+            return prior
+        pose = len(pose_by_digest)
+        pose_by_digest[digest] = pose
+        encoded = rle_encode_bytes(decoded)
+        if rle_decode_bytes(encoded) != decoded:
+            raise ValueError(
+                f"Stalker frame {source_frame}: action RLE round trip failed")
+        archive_offsets.append(len(archive))
+        archive_lengths.append(len(encoded))
+        source_frames.append(source_frame)
+        archive.extend(encoded)
+        return pose
+
+    expected_names = ("walk", "attack", "hit", "ko")
+    clips = report.get("clips", [])
+    if tuple(str(clip.get("name")) for clip in clips) != expected_names:
+        raise ValueError("Stalker clip order is not walk/attack/hit/ko")
+    for clip in clips:
+        frame_poses: list[int] = []
+        for sample in clip["timeline"]:
+            frame = int(sample["frame"])
+            if not sample["source_visible"]:
+                # The CPS2 deliberately hides the KO actor under its impact
+                # effect. Preserve that transparent interval instead of
+                # splicing in a nearby live Stalker.
+                frame_poses.append(intern_pose(decoded_blank, frame))
+                continue
+            bank = int(sample["active_object_bank"])
+            object_path = STALKER_ACTION_ROOT / f"objram_active_{frame:05d}.tsv"
+            palette_path = STALKER_ACTION_ROOT / f"palette_{frame:05d}.tsv"
+            layers, _ = exact_object_layers(
+                gfx, load_palette_path(palette_path), frame, bank,
+                [int(offset) for offset in sample["object_offsets"]],
+                pivot=(int(sample["actor_screen_x"]),
+                       int(sample["actor_screen_bottom"])),
+                source_filename=str(object_path), canvas_size=(288, 192))
+            if 17 not in layers:
+                raise ValueError(
+                    f"Stalker frame {frame}: palette-17 assembly is missing")
+            frame_poses.append(intern_pose(pack_4bpp(layers[17]), frame))
+        if len(frame_poses) != int(clip["frame_count"]):
+            raise ValueError(f"Stalker {clip['name']}: incomplete timeline")
+        runs: list[tuple[int, int]] = []
+        for pose in frame_poses:
+            if runs and runs[-1][0] == pose:
+                runs[-1] = (pose, runs[-1][1] + 1)
+            else:
+                runs.append((pose, 1))
+        clip_specs.append({
+            "name": str(clip["name"]),
+            "frames": len(frame_poses),
+            "runs": runs,
+            "source_omitted_frames": int(clip["source_omitted_frames"]),
+        })
+
+    if len(pose_by_digest) >= 256:
+        raise ValueError("Stalker actions exceed 8-bit pose indices")
+    if any(length > 0xFFFF for length in archive_lengths):
+        raise ValueError("one Stalker RLE pose exceeds the 16-bit archive index")
+    archive_filename = "SACT.RLE"
+    (sprite_dir / archive_filename).write_bytes(archive)
+    max_steps = max(len(clip["runs"]) for clip in clip_specs)
+    pose_rows = []
+    duration_rows = []
+    for clip in clip_specs:
+        poses = [pose for pose, _ in clip["runs"]]
+        durations = [duration for _, duration in clip["runs"]]
+        poses.extend([0] * (max_steps - len(poses)))
+        durations.extend([0] * (max_steps - len(durations)))
+        pose_rows.append("    {" + ", ".join(map(str, poses)) + "}")
+        duration_rows.append("    {" + ", ".join(map(str, durations)) + "}")
+    action_constants = "\n".join(
+        f"#define AVSP_STALKER_CLIP_{str(clip['name']).upper()} {index}"
+        for index, clip in enumerate(clip_specs))
+    header = f"""/* Generated from validated native CPS2 Stage 1 Stalker clips. */
+#ifndef AVSP_STALKER_ANIMATION_H
+#define AVSP_STALKER_ANIMATION_H
+#define AVSP_STALKER_ACTION_CLIPS {len(clip_specs)}
+#define AVSP_STALKER_ACTION_POSES {len(pose_by_digest)}
+#define AVSP_STALKER_ACTION_MAX_STEPS {max_steps}
+#define AVSP_STALKER_CEL_WIDTH 288
+#define AVSP_STALKER_CEL_HEIGHT 192
+#define AVSP_STALKER_DECODED_BYTES {(288 * 192) // 2}
+#define AVSP_STALKER_ARCHIVE_FILE "{archive_filename}"
+#define AVSP_STALKER_ARCHIVE_BYTES {len(archive)}
+#define AVSP_STALKER_PALETTE_BANK 4
+{action_constants}
+static const unsigned int avsp_stalker_rle_offsets[AVSP_STALKER_ACTION_POSES] = {{
+    {", ".join(map(str, archive_offsets))}
+}};
+static const unsigned short avsp_stalker_rle_bytes[AVSP_STALKER_ACTION_POSES] = {{
+    {", ".join(map(str, archive_lengths))}
+}};
+static const unsigned char avsp_stalker_step_counts[AVSP_STALKER_ACTION_CLIPS] = {{
+    {", ".join(str(len(clip['runs'])) for clip in clip_specs)}
+}};
+static const unsigned char avsp_stalker_total_frames[AVSP_STALKER_ACTION_CLIPS] = {{
+    {", ".join(str(clip['frames']) for clip in clip_specs)}
+}};
+static const unsigned char avsp_stalker_step_poses[AVSP_STALKER_ACTION_CLIPS][AVSP_STALKER_ACTION_MAX_STEPS] = {{
+{",\n".join(pose_rows)}
+}};
+static const unsigned char avsp_stalker_step_durations[AVSP_STALKER_ACTION_CLIPS][AVSP_STALKER_ACTION_MAX_STEPS] = {{
+{",\n".join(duration_rows)}
+}};
+static const unsigned short avsp_stalker_source_frames[AVSP_STALKER_ACTION_POSES] = {{
+    {", ".join(map(str, source_frames))}
+}};
+#endif
+"""
+    (GENERATED_ROOT / "avsp_stalker_animation.h").write_text(
+        header, encoding="ascii")
+    return [{
+        "path": f"SPR4/{archive_filename}",
+        "bytes": len(archive),
+        "decoded_bytes": len(pose_by_digest) * (288 * 192) // 2,
+        "sha256": hashlib.sha256(archive).hexdigest(),
+        "components": len(pose_by_digest),
+        "encoding": "indexed-rle8-count-value",
+        "source_clips": [str(clip["name"]) for clip in clip_specs],
+        "transparent_source_frames": sum(
+            int(clip["source_omitted_frames"]) for clip in clip_specs),
+    }]
+
+
 def write_boss_action_sequence_assets(
         gfx: bytearray, sprite_dir: Path) -> list[dict[str, object]]:
     """Emit verified Chrysalis idle, leap, walk, and attack animation data."""
@@ -2018,6 +2167,7 @@ def write_exact_actor_assets(gfx: bytearray,
                          "cps2_palette": colour})
     manifest.extend(write_player_action_sequence_assets(gfx, sprite_dir))
     manifest.extend(write_enemy_action_sequence_assets(gfx, sprite_dir))
+    manifest.extend(write_stalker_action_sequence_assets(gfx, sprite_dir))
     manifest.extend(write_boss_action_sequence_assets(gfx, sprite_dir))
     return manifest
 

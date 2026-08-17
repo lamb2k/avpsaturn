@@ -71,6 +71,16 @@ is preserved in the archive but not yet attached to an inferred native
 transition, and unclassified hit/KO palette-effect frames deliberately fall
 back to the exact idle pose.
 
+Two dense boss-room tracks identify the native Stalkers at `FF A240` and
+`FF A300` as actor ID 0 with 24 source health and CPS2 palette 17. Correcting
+the room's 64-pixel object-space origin isolates a 57-frame walk loop, a
+17-frame attack, the two visible frames at KO onset, and a 157-frame KO
+interval. Thirty-seven distinct 288x192 poses compress to 64,118 bytes. The
+native attack repeats the captured 17-frame duration and the observed frame-
+6530 contact removes 12 health. The exact KO interval replaces the former
+street-alien substitute; a natural nonlethal Stalker hit remains an explicit
+capture gap.
+
 An independent unfrozen-health replay preserves the same verified frame-4080,
 4164, and 4200 object/palette anchors. It records native player-health changes
 on attack offsets 48 and 119, both on the same captured contact pose, and a
@@ -86,13 +96,19 @@ horizontal coordinates are resampled from 384 to 352. An ignored 86,016-byte
 384x224 source oracle is retained as well. These are flattened comparison
 oracles, not the final animation architecture or the normal release boot path.
 
-The normal release retains two 78,848-byte frontend surfaces in cartridge RAM:
+The normal release initially retains two 78,848-byte frontend surfaces in
+cartridge RAM:
 the verified frame-1440 Press Start state and frame-1800 Predator Warrior
 selection state. Their 110 and 115 source colors respectively remain lossless.
 They and the later route stills are copied into the shared 512x256 VDP2 bitmap,
 so full-screen states consume no VDP1 texture slots.
 The native controller state machine waits for Start, then B, before beginning
 the Round 1 title and gameplay route.
+Start permanently retires the title surface. Before CDDA begins, the runtime
+frees that 78,848-byte block and loads the 64,118-byte Stalker archive into the
+same phase-overlay space. The character-select surface remains resident for
+confirmation. This keeps the cold-boot allocation equal to the previously
+verified build and avoids seeking the data track while music is playing.
 
 The native action interface preserves the three-button CPS2 layout on the
 Saturn face buttons: A is weapon, B is melee attack, and C is jump. A direction
@@ -256,6 +272,9 @@ Exact in the current milestone:
 - exact Chrysalis idle and captured leap, walk, and uninterrupted 189-frame
   attack/recovery sprite timelines; native walk/attack and three-contact state
   binding plus late boss-phase working-set allocation
+- distinct capture-derived Stalker walk, attack, visible impact onset, and KO
+  timelines; shared alien VDP1 slots, palette bank 4, and pre-CDDA title-RAM
+  overlay loading
 - first-room 5+3 crowd budget, four alien palette variants, combat lock, clear,
   and exit-state lifecycle
 - isolated Predator weapon QSound voice, processed stereo waveform, source
@@ -283,6 +302,7 @@ Still approximate or incomplete:
 - remaining HUD states, exact scroll behavior, level triggers, combat, and AI
 - remaining isolated QSound boss-action and voice cues
 - exact Chrysalis attack-selection AI plus hit, KO, and palette-effect visuals
+- natural nonlethal Stalker hit timing and additional Stalker action variants
 - native HUD safe-area placement and arcade-derived camera behavior for CRT
   overscan variability
 

@@ -19,6 +19,7 @@
 #include "generated/avsp_round_title_a_audio.h"
 #include "generated/avsp_round_title_b_audio.h"
 #include "generated/avsp_sequence_palette.h"
+#include "generated/avsp_stalker_animation.h"
 #include "generated/avsp_withdraw_audio.h"
 
 #define CEL_WIDTH 192
@@ -52,6 +53,11 @@
 
 #if JO_TV_WIDTH != CAP_VIEW_WIDTH || JO_TV_HEIGHT != 224
 #error "The AvP fidelity build requires Saturn TV_352x224"
+#endif
+#if AVSP_STALKER_DECODED_BYTES != AVSP_ENEMY_DECODED_BYTES || \
+    AVSP_STALKER_CEL_WIDTH != AVSP_ENEMY_CEL_WIDTH || \
+    AVSP_STALKER_CEL_HEIGHT != AVSP_ENEMY_CEL_HEIGHT
+#error "Stalker clips must reuse the existing alien VDP1 slot pool"
 #endif
 #if AVSP_VDP1_TEXTURE_BYTES > AVSP_VDP1_TEXTURE_BUDGET
 #error "The AvP actor working set exceeds Saturn VDP1 texture VRAM"
@@ -95,6 +101,7 @@ static unsigned char *sequence_pixels;
 static unsigned char *background_bitmap;
 static unsigned char *player_action_archive;
 static unsigned char *enemy_action_archive;
+static unsigned char *stalker_action_archive;
 static unsigned char *enemy_action_buffer;
 static unsigned char *boss_action_archive;
 static jo_img_4bits player_action_images[AVSP_PLAYER_ACTION_LAYERS];
@@ -130,6 +137,7 @@ static int displayed_hud_health;
 static int displayed_hud_energy;
 static int current_player_action_pose;
 static int current_enemy_action_poses[CAP_MAX_ENEMIES];
+static CapActorKind current_enemy_action_kinds[CAP_MAX_ENEMIES];
 static int current_boss_action_pose;
 static int debug_hud_enabled;
 static const char *failed_asset;
@@ -429,6 +437,54 @@ static int decode_enemy_action_pose(const int pose, const int slot)
     return 1;
 }
 
+static int load_stalker_action_archive(void)
+{
+    int length = 0;
+    stalker_action_archive = (unsigned char *)jo_fs_read_file_in_dir(
+        AVSP_STALKER_ARCHIVE_FILE, "SPR4", &length);
+    if (stalker_action_archive == JO_NULL ||
+        length != AVSP_STALKER_ARCHIVE_BYTES)
+    {
+        failed_asset = AVSP_STALKER_ARCHIVE_FILE;
+        return 0;
+    }
+    return 1;
+}
+
+static int decode_stalker_action_pose(const int pose, const int slot)
+{
+    unsigned int source = 0;
+    unsigned int target = 0;
+    const unsigned int source_offset = avsp_stalker_rle_offsets[pose];
+    const unsigned int source_length = avsp_stalker_rle_bytes[pose];
+    const unsigned char *source_data;
+    unsigned char *output = enemy_action_images[slot].data;
+    if (source_offset + source_length > AVSP_STALKER_ARCHIVE_BYTES)
+    {
+        failed_asset = "STALKER ACTION INDEX";
+        return 0;
+    }
+    source_data = stalker_action_archive + source_offset;
+    while (source + 1 < source_length)
+    {
+        unsigned int count = source_data[source++];
+        unsigned char value = source_data[source++];
+        if (count == 0 || target + count > AVSP_STALKER_DECODED_BYTES)
+        {
+            failed_asset = "STALKER ACTION RLE";
+            return 0;
+        }
+        memset(output + target, value, count);
+        target += count;
+    }
+    if (source != source_length || target != AVSP_STALKER_DECODED_BYTES)
+    {
+        failed_asset = "STALKER ACTION SIZE";
+        return 0;
+    }
+    return 1;
+}
+
 static int load_boss_action_archive(void)
 {
     int length = 0;
@@ -571,6 +627,15 @@ static int load_frontend_assets(void)
         }
     }
     return 1;
+}
+
+static void release_frontend_scene(const int scene)
+{
+    if (scene < 0 || scene >= AVSP_FRONTEND_SCENES ||
+        frontend_images[scene].data == JO_NULL)
+        return;
+    jo_free(frontend_images[scene].data);
+    frontend_images[scene].data = JO_NULL;
 }
 
 static void copy_snapshot_to_background(const unsigned char *source)
@@ -827,6 +892,7 @@ static int prepare_enemy_runtime(void)
             return 0;
         }
         current_enemy_action_poses[slot] = 0;
+        current_enemy_action_kinds[slot] = CAP_ACTOR_ALIEN;
     }
     enemy_runtime_ready = 1;
     return 1;
@@ -928,6 +994,29 @@ static int enemy_pose_for_frame(const int clip, const int action_frame)
     return avsp_enemy_step_poses[clip][avsp_enemy_step_counts[clip] - 1];
 }
 
+static int stalker_clip_for_action(const CapAction action)
+{
+    if (action == CAP_ACT_ATTACK) return AVSP_STALKER_CLIP_ATTACK;
+    if (action == CAP_ACT_HIT) return AVSP_STALKER_CLIP_HIT;
+    if (action == CAP_ACT_KO) return AVSP_STALKER_CLIP_KO;
+    return AVSP_STALKER_CLIP_WALK;
+}
+
+static int stalker_pose_for_frame(const int clip, const int action_frame)
+{
+    int step;
+    int remaining = action_frame;
+    for (step = 0; step < avsp_stalker_step_counts[clip]; ++step)
+    {
+        int duration = avsp_stalker_step_durations[clip][step];
+        if (remaining < duration)
+            return avsp_stalker_step_poses[clip][step];
+        remaining -= duration;
+    }
+    return avsp_stalker_step_poses[clip]
+        [avsp_stalker_step_counts[clip] - 1];
+}
+
 static int boss_clip_for_action(const CapAction action)
 {
     if (action == CAP_ACT_ATTACK) return AVSP_BOSS_CLIP_ATTACK;
@@ -1020,20 +1109,29 @@ static void draw_player(const CapActor *actor, const int screen_x)
 static void draw_alien(const CapActor *actor, const int screen_x,
                        const int slot)
 {
+    int is_stalker = actor->kind == CAP_ACTOR_STALKER;
     int depth = 330 - actor->lane;
-    int clip = enemy_clip_for_action(actor->action);
+    int clip = is_stalker ? stalker_clip_for_action(actor->action) :
+                            enemy_clip_for_action(actor->action);
     int frame = (actor->action == CAP_ACT_WALK ||
                  actor->action == CAP_ACT_IDLE) ?
         actor->locomotion_frame : actor->action_frame;
+    int total_frames = is_stalker ? avsp_stalker_total_frames[clip] :
+                                    avsp_enemy_total_frames[clip];
     int pose;
-    if (clip == AVSP_ENEMY_CLIP_WALK)
-        frame %= avsp_enemy_total_frames[clip];
-    else if (frame >= avsp_enemy_total_frames[clip])
-        frame = avsp_enemy_total_frames[clip] - 1;
-    pose = enemy_pose_for_frame(clip, frame);
-    if (pose != current_enemy_action_poses[slot])
+    if ((is_stalker && clip == AVSP_STALKER_CLIP_WALK) ||
+        (!is_stalker && clip == AVSP_ENEMY_CLIP_WALK))
+        frame %= total_frames;
+    else if (frame >= total_frames)
+        frame = total_frames - 1;
+    pose = is_stalker ? stalker_pose_for_frame(clip, frame) :
+                        enemy_pose_for_frame(clip, frame);
+    if (pose != current_enemy_action_poses[slot] ||
+        current_enemy_action_kinds[slot] != actor->kind)
     {
-        if (!decode_enemy_action_pose(pose, slot))
+        int decoded = is_stalker ? decode_stalker_action_pose(pose, slot) :
+                                   decode_enemy_action_pose(pose, slot);
+        if (!decoded)
         {
             runtime_ready = 0;
             return;
@@ -1041,9 +1139,11 @@ static void draw_alien(const CapActor *actor, const int screen_x,
         jo_sprite_replace_4bits_image(
             &enemy_action_images[slot], enemy_action_sprites[slot]);
         current_enemy_action_poses[slot] = pose;
+        current_enemy_action_kinds[slot] = actor->kind;
     }
     draw_exact_layer(actor, screen_x, enemy_action_sprites[slot],
-                     3 + actor->variant, depth);
+                     is_stalker ? AVSP_STALKER_PALETTE_BANK :
+                                  3 + actor->variant, depth);
 }
 
 static void draw_boss(const CapActor *actor, const int screen_x)
@@ -1335,6 +1435,20 @@ static void frame_callback(void)
     input = encounter_test_input();
 #endif
     clip_request = cap_world_step(&world, &input);
+    /* Start permanently leaves the title scene. Reuse its 78,848-byte RAM
+       block for the 64,118-byte Stalker archive before character confirmation
+       starts CDDA. This keeps the cold-boot working set unchanged and avoids
+       any data-disc seek while Stage 1 music is playing. */
+    if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT &&
+        stalker_action_archive == JO_NULL)
+    {
+        release_frontend_scene(0);
+        if (!load_stalker_action_archive())
+        {
+            runtime_ready = 0;
+            return;
+        }
+    }
     if (clip_request == CAP_CLIP_SHOOT)
         weapon_audio_pending_shot = world.shots_fired;
     if (clip_request == CAP_CLIP_ATTACK)

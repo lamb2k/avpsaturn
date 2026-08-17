@@ -74,6 +74,14 @@ Round 2 title surfaces. No data-track reads occur after Stage 1 CDDA begins.
   attack/recovery clips into an indexed archive. Require contacts at offsets
   21/55/97 for 10/10/16 health and changing walk/attack poses in Yaba Sanshiro
   with no `BOSS ACTION BUFFER`, RLE, index, or VDP1 failure before Round 2.
+- Validate the native Stalker slots at `FF A240` and `FF A300` as actor ID 0,
+  palette 17, and 24 source health. Require the 57-frame walk, 17-frame attack,
+  12-health natural contact evidence, and 157-frame KO interval to build into
+  `/SPR4/SACT.RLE` at exactly 64,118 bytes. Start must release the obsolete
+  78,848-byte title surface and load that archive before character confirmation
+  starts CDDA. In Yaba Sanshiro, require distinct purple Stalkers beside
+  Chrysalis and successful arrival at Round 2 with no archive, RLE, index,
+  palette, VDP1, or late-KO failure.
 - Start the Stage 1 CD audio track without disabling SCSP output.
 - Play the capture-exact Predator weapon PCM on action frame 5 while CDDA
   remains active; verify the ISO copy is 159,192 bytes with SHA-256
@@ -168,9 +176,13 @@ route reference as native CD audio track 2. The 12,000-frame host test and the
 automated Yaba Sanshiro diagnostic complete this lifecycle. A separate dense
 900-frame boss capture reduces exact idle/leap/walk/attack visuals to 20 poses;
 the emulator route renders changing Chrysalis attack poses and still reaches
-Round 2 after deferring the decoded boss buffer to its gameplay phase. Remaining
+Round 2 after deferring the decoded boss buffer to its gameplay phase. The same
+route now renders the distinct purple Stalker archive beside Chrysalis and
+completes through Round 2 after loading it from the retired title-screen RAM
+block before CDDA starts. Remaining
 player transitions, other enemy archetypes, Chrysalis hit/KO effects and exact
-AI timing, intermediate route detail, combat SCSP cues, and comparison capture
+AI timing, a natural nonlethal Stalker-hit clip, intermediate route detail,
+combat SCSP cues, and comparison capture
 remain open.
 
 ## Gate E: performance and hardware

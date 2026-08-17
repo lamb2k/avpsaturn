@@ -41,6 +41,10 @@ Current milestone:
   from an exact idle plus captured 44-frame leap, 106-frame walk, and complete
   189-frame attack/recovery clips; 20 deduplicated 288x192 poses stream through
   one VDP1 slot
+- identifies the two boss-room Stalkers at `FF A240` and `FF A300`, preserves
+  their distinct CPS2 palette-17 artwork, and binds a 57-frame walk, 17-frame
+  attack, two-frame visible impact onset, and 157-frame KO interval to native
+  Stalker states; 37 poses compress to a 64,118-byte indexed archive
 - gives all eight bounded enemy actors independent 288x192 VDP1 cel slots with
   four exact CPS2 alien palettes, so unlike actions cannot overwrite each other
 - retains a palette-preserving 352x224 offline reference surface containing the
@@ -61,7 +65,11 @@ the audio track. The converter retains the 384x224 object/priority oracle
 offline. The proven alien walk/attack/hit/KO clips are state-bound. Chrysalis
 walk and attack are bound to native states. The attack now uses its captured
 189-frame preparation/contact/recovery schedule and source contact offsets
-21/55/97 with 10/10/16 health damage. Unclassified hit/KO states retain the
+21/55/97 with 10/10/16 health damage. Boss-room adds now render their captured
+purple Stalker species rather than the street-alien substitute and use their
+observed 17-frame attack plus 12-health contact. The Stalker nonlethal-hit
+timeline remains represented by the exact visible KO onset until a natural
+nonlethal capture is obtained. Unclassified Chrysalis hit/KO states retain the
 exact idle assembly. Exact AI/spawn timing for every
 archetype, remaining boss action/voice sounds, and every intermediate Stage 1
 action remain incomplete.

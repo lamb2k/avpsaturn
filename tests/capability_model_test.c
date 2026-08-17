@@ -271,6 +271,53 @@ static void test_capture_exact_boss_attack_timing(void)
     assert(boss->action == CAP_ACT_IDLE);
 }
 
+static void test_capture_exact_stalker_timing(void)
+{
+    CapWorld world;
+    CapActor *stalker;
+    int index;
+
+    cap_world_init(&world);
+    start_encounter(&world);
+    for (index = 1; index < CAP_MAX_ENEMIES; ++index)
+        world.enemies[index].active = 0;
+    stalker = &world.enemies[0];
+    stalker->kind = CAP_ACTOR_STALKER;
+    stalker->active = 1;
+    stalker->lane = world.player.lane;
+
+    stalker->x = world.player.x + 145;
+    stalker->action = CAP_ACT_IDLE;
+    world.frame = 1;
+    step_empty(&world, 2);
+    assert(stalker->x == world.player.x + 142);
+
+    stalker->x = world.player.x + 20;
+    stalker->action = CAP_ACT_IDLE;
+    stalker->action_frame = 0;
+    stalker->hit_latched = 0;
+    world.frame = 0;
+    world.player.health = CAP_PLAYER_MAX_HEALTH;
+    step_empty(&world, 1);
+    assert(world.player.health == CAP_PLAYER_MAX_HEALTH - 12);
+    assert(stalker->action == CAP_ACT_ATTACK);
+    assert(stalker->action_frame == 0);
+    step_empty(&world, 16);
+    assert(stalker->action == CAP_ACT_ATTACK);
+    assert(stalker->action_frame == 16);
+    step_empty(&world, 1);
+    assert(stalker->action == CAP_ACT_IDLE);
+
+    stalker->active = 1;
+    stalker->action = CAP_ACT_KO;
+    stalker->action_frame = 0;
+    step_empty(&world, 156);
+    assert(stalker->active == 1);
+    assert(stalker->action_frame == 156);
+    step_empty(&world, 1);
+    assert(stalker->active == 0);
+}
+
 static void test_walk_locomotion_counter(void)
 {
     CapWorld world;
@@ -667,6 +714,7 @@ int main(void)
     test_jump_dash_and_captured_special_chord();
     test_capture_exact_enemy_action_timing();
     test_capture_exact_boss_attack_timing();
+    test_capture_exact_stalker_timing();
     test_walk_locomotion_counter();
     test_player_hit_and_ko_timing();
     test_encounter_waits_for_player_input();
