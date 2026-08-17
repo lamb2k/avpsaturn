@@ -94,7 +94,11 @@ def decode_program(data: bytes, base: int, start: int) -> dict[str, object]:
                                           if r["kind"] == "pose"})}
 
 
-def decode_assembly(data: bytes, base: int, address: int) -> dict[str, object]:
+def decode_assembly(data: bytes, base: int, address: int,
+                    offset_data: bytes | None = None,
+                    layout_data: bytes | None = None,
+                    offset_base: int = 0x1FD1C8,
+                    offset_window_base: int = 0x1F6000) -> dict[str, object]:
     """Decode the selector-6 assembly command consumed by the renderer.
 
     The renderer reads selector, budget word, tile count, offset-table index,
@@ -119,13 +123,43 @@ def decode_assembly(data: bytes, base: int, address: int) -> dict[str, object]:
     result.update({"status": "decoded_structure", "budget": budget,
                    "tile_count": count, "offset_table_index": offset_index})
     entries = []
+    layout_address: int | None = None
+    if offset_data is not None and offset_index * 2 + 2 <= len(offset_data):
+        table_offset = u16(offset_data, offset_index * 2)
+        layout_address = offset_base + table_offset
+        result["layout_table_pointer"] = f"0x{layout_address:06x}"
     cursor = offset + 8
     for index in range(min(count, 64)):
         if cursor + 6 > len(data):
             result["status"] = "truncated"
             break
-        entries.append({"index": index, "packed_source": f"0x{u32(data, cursor):08x}",
-                        "offset_adjust": f"0x{u16(data, cursor + 4):04x}"})
+        entry: dict[str, object] = {
+            "index": index,
+            "packed_source": f"0x{u32(data, cursor):08x}",
+            "offset_adjust": f"0x{u16(data, cursor + 4):04x}",
+        }
+        if layout_address is not None:
+            layout_offset = layout_address - offset_window_base
+            source = layout_data
+            source_offset = layout_offset
+            if (source is None or source_offset < 0 or
+                    source_offset + 4 > len(source)) and offset_data is not None:
+                source = offset_data
+                source_offset = layout_address - offset_base
+            if source is not None and 0 <= source_offset + 4 <= len(source):
+                x_word = u16(source, source_offset)
+                y_word = u16(source, source_offset + 2)
+                entry.update({
+                    "layout_address": f"0x{layout_address:06x}",
+                    "layout_x_word": f"0x{x_word:04x}",
+                    "layout_y_word": f"0x{y_word:04x}",
+                    "layout_x_signed": x_word - 0x10000 if x_word & 0x8000 else x_word,
+                    "layout_y_signed": y_word - 0x10000 if y_word & 0x8000 else y_word,
+                })
+            adjust = u16(data, cursor + 4)
+            signed_adjust = adjust - 0x10000 if adjust & 0x8000 else adjust
+            layout_address += 4 + signed_adjust
+        entries.append(entry)
         cursor += 6
     result["entries"] = entries
     result["trailing_word"] = (f"0x{u16(data, cursor):04x}"
@@ -139,6 +173,12 @@ def main() -> None:
                         default=Path(".deps/mame/actorprobe/rom_window_13c_13f.bin"))
     parser.add_argument("--actor-tsv", type=Path,
                         default=Path(".deps/mame/actorprobe/actor_ffa3c0.tsv"))
+    parser.add_argument("--offset-table", type=Path,
+                        default=Path(".deps/mame/actorprobe/offset_program.bin"))
+    parser.add_argument("--layout-window", type=Path,
+                        default=Path(".deps/mame/actorprobe/offset_full_program.bin"))
+    parser.add_argument("--offset-window-base", type=lambda value: int(value, 0),
+                        default=0x1E0000)
     parser.add_argument("-o", "--output", type=Path,
                         default=Path("data/avsp_animation_scripts.json"))
     parser.add_argument("--base", type=lambda value: int(value, 0),
@@ -150,7 +190,10 @@ def main() -> None:
     assembly_addresses = sorted({int(address, 16)
                                  for program in programs
                                  for address in program["assembly_pointers"]})
-    assemblies = [decode_assembly(data, args.base, address)
+    offset_data = args.offset_table.read_bytes() if args.offset_table.exists() else None
+    layout_data = args.layout_window.read_bytes() if args.layout_window.exists() else None
+    assemblies = [decode_assembly(data, args.base, address, offset_data, layout_data,
+                                   offset_window_base=args.offset_window_base)
                   for address in assembly_addresses]
     result = {
         "schema": 1,
@@ -159,6 +202,10 @@ def main() -> None:
             "rom_window": args.rom_window.as_posix(),
             "window_base": f"0x{args.base:06x}",
             "actor_trace": args.actor_tsv.as_posix(),
+            "offset_table": args.offset_table.as_posix(),
+            "layout_window": args.layout_window.as_posix(),
+            "offset_table_base": "0x1fd1c8",
+            "offset_window_base": f"0x{args.offset_window_base:06x}",
         },
         "format": {
             "normal_record_bytes": 16,

@@ -84,9 +84,11 @@ Verified in this repository; do not re-derive.
 - The renderer at `0xA9CB6` dispatches on the first assembly word. The
   observed Round 1 assemblies use selector `6`, followed by a budget word, a
   tile count, an offset-table index, and one packed long plus one offset word
-  per tile. Fourteen such assembly blocks are structurally decoded; the
-  packed-source and offset-table semantics still require a rendered-pose
-  comparison.
+  per tile. Fourteen such assembly blocks are structurally decoded. The
+  selector-six handler at `0xAA00E` reads the offset-table pointer from
+  `0x1FD1C8`, consumes two layout words per tile, applies the signed
+  per-entry adjustment, and emits a CPS object-command pair. The packed-source
+  and layout-word meanings still require a rendered-pose comparison.
 - Word `w88` takes 224 distinct values over 240 frames; likely a frame timer.
 
 **The retail ROM still contains Capcom's development tools**
@@ -207,7 +209,9 @@ The normal/jump discriminator is now grounded in the updater: normal records
 are 16 bytes and a negative flags record is followed by a four-byte pointer
 that redirects the script. Identify loop and terminator encodings, label the
 eight-byte tail from its consumers, then decode the sprite-assembly table at
-the `+4` pointers into tile codes, palette bank and per-tile offsets.
+the `+4` pointers into tile codes, palette bank and per-tile offsets. The
+current decoder also follows the selector-six offset-table chain; it remains a
+structural result until the rendered-pose comparison.
 
 Validation, non-negotiable: a ROM-decoded assembly must reproduce an
 already-captured pose **pixel for pixel**. That test converts every existing

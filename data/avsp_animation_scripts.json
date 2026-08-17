@@ -4,7 +4,11 @@
   "source": {
     "rom_window": ".deps/mame/actorprobe/rom_window_13c_13f.bin",
     "window_base": "0x13c000",
-    "actor_trace": ".deps/mame/actorprobe/actor_ffa3c0.tsv"
+    "actor_trace": ".deps/mame/actorprobe/actor_ffa3c0.tsv",
+    "offset_table": ".deps/mame/actorprobe/offset_program.bin",
+    "layout_window": ".deps/mame/actorprobe/offset_full_program.bin",
+    "offset_table_base": "0x1fd1c8",
+    "offset_window_base": "0x1e0000"
   },
   "format": {
     "normal_record_bytes": 16,
@@ -3652,21 +3656,37 @@
       "budget": 62,
       "tile_count": 3,
       "offset_table_index": 126,
+      "layout_table_pointer": "0x1fde40",
       "entries": [
         {
           "index": 0,
           "packed_source": "0xffe6fff4",
-          "offset_adjust": "0x8297"
+          "offset_adjust": "0x8297",
+          "layout_address": "0x1fde40",
+          "layout_x_word": "0xff90",
+          "layout_y_word": "0xffa0",
+          "layout_x_signed": -112,
+          "layout_y_signed": -96
         },
         {
           "index": 1,
           "packed_source": "0x271b0008",
-          "offset_adjust": "0x8340"
+          "offset_adjust": "0x8340",
+          "layout_address": "0x1f60db",
+          "layout_x_word": "0x4603",
+          "layout_y_word": "0x6700",
+          "layout_x_signed": 17923,
+          "layout_y_signed": 26368
         },
         {
           "index": 2,
           "packed_source": "0x2b1b0100",
-          "offset_adjust": "0x82ce"
+          "offset_adjust": "0x82ce",
+          "layout_address": "0x1ee41f",
+          "layout_x_word": "0x1001",
+          "layout_y_word": "0x1102",
+          "layout_x_signed": 4097,
+          "layout_y_signed": 4354
         }
       ],
       "trailing_word": "0x011b"
@@ -3679,26 +3699,47 @@
       "budget": 62,
       "tile_count": 4,
       "offset_table_index": 126,
+      "layout_table_pointer": "0x1fde40",
       "entries": [
         {
           "index": 0,
           "packed_source": "0xffe6fff4",
-          "offset_adjust": "0x8400"
+          "offset_adjust": "0x8400",
+          "layout_address": "0x1fde40",
+          "layout_x_word": "0xff90",
+          "layout_y_word": "0xffa0",
+          "layout_x_signed": -112,
+          "layout_y_signed": -96
         },
         {
           "index": 1,
           "packed_source": "0x161b0004",
-          "offset_adjust": "0x8407"
+          "offset_adjust": "0x8407",
+          "layout_address": "0x1f6244",
+          "layout_x_word": "0x09de",
+          "layout_y_word": "0x0ade",
+          "layout_x_signed": 2526,
+          "layout_y_signed": 2782
         },
         {
           "index": 2,
           "packed_source": "0x181b0004",
-          "offset_adjust": "0x8420"
+          "offset_adjust": "0x8420",
+          "layout_address": "0x1ee64f",
+          "layout_x_word": "0xf004",
+          "layout_y_word": "0x4305",
+          "layout_x_signed": -4092,
+          "layout_y_signed": 17157
         },
         {
           "index": 3,
           "packed_source": "0x171b0094",
-          "offset_adjust": "0x8428"
+          "offset_adjust": "0x8428",
+          "layout_address": "0x1e6a73",
+          "layout_x_word": "0x0504",
+          "layout_y_word": "0xa500",
+          "layout_x_signed": 1284,
+          "layout_y_signed": -23296
         }
       ],
       "trailing_word": "0x161b"
@@ -3711,21 +3752,37 @@
       "budget": 57,
       "tile_count": 3,
       "offset_table_index": 175,
+      "layout_table_pointer": "0x1fdfc4",
       "entries": [
         {
           "index": 0,
           "packed_source": "0xffe00003",
-          "offset_adjust": "0x8570"
+          "offset_adjust": "0x8570",
+          "layout_address": "0x1fdfc4",
+          "layout_x_word": "0xff90",
+          "layout_y_word": "0xff90",
+          "layout_x_signed": -112,
+          "layout_y_signed": -112
         },
         {
           "index": 1,
           "packed_source": "0x261b0008",
-          "offset_adjust": "0x8557"
+          "offset_adjust": "0x8557",
+          "layout_address": "0x1f6538",
+          "layout_x_word": "0x0aca",
+          "layout_y_word": "0x0675",
+          "layout_x_signed": 2762,
+          "layout_y_signed": 1653
         },
         {
           "index": 2,
           "packed_source": "0x181b0074",
-          "offset_adjust": "0x8577"
+          "offset_adjust": "0x8577",
+          "layout_address": "0x1eea93",
+          "layout_x_word": "0x4206",
+          "layout_y_word": "0x5304",
+          "layout_x_signed": 16902,
+          "layout_y_signed": 21252
         }
       ],
       "trailing_word": "0x181b"
@@ -3738,26 +3795,47 @@
       "budget": 62,
       "tile_count": 4,
       "offset_table_index": 177,
+      "layout_table_pointer": "0x1fdfcc",
       "entries": [
         {
           "index": 0,
           "packed_source": "0xffe00003",
-          "offset_adjust": "0x8508"
+          "offset_adjust": "0x8508",
+          "layout_address": "0x1fdfcc",
+          "layout_x_word": "0xff90",
+          "layout_y_word": "0xffb0",
+          "layout_x_signed": -112,
+          "layout_y_signed": -80
         },
         {
           "index": 1,
           "packed_source": "0x271b0010",
-          "offset_adjust": "0x8538"
+          "offset_adjust": "0x8538",
+          "layout_address": "0x1f64d8",
+          "layout_x_word": "0x0ddd",
+          "layout_y_word": "0x0eee",
+          "layout_x_signed": 3549,
+          "layout_y_signed": 3822
         },
         {
           "index": 2,
           "packed_source": "0x141b0064",
-          "offset_adjust": "0x8552"
+          "offset_adjust": "0x8552",
+          "layout_address": "0x1eea14",
+          "layout_x_word": "0x0cb8",
+          "layout_y_word": "0x0985",
+          "layout_x_signed": 3256,
+          "layout_y_signed": 2437
         },
         {
           "index": 3,
           "packed_source": "0x141b0058",
-          "offset_adjust": "0x8522"
+          "offset_adjust": "0x8522",
+          "layout_address": "0x1e6f6a",
+          "layout_x_word": "0x0010",
+          "layout_y_word": "0x00c3",
+          "layout_x_signed": 16,
+          "layout_y_signed": 195
         }
       ],
       "trailing_word": "0x251b"
@@ -3770,21 +3848,37 @@
       "budget": 48,
       "tile_count": 3,
       "offset_table_index": 121,
+      "layout_table_pointer": "0x1fde2c",
       "entries": [
         {
           "index": 0,
           "packed_source": "0xffcc0017",
-          "offset_adjust": "0xd900"
+          "offset_adjust": "0xd900",
+          "layout_address": "0x1fde2c",
+          "layout_x_word": "0xff80",
+          "layout_y_word": "0xffb0",
+          "layout_x_signed": -128,
+          "layout_y_signed": -80
         },
         {
           "index": 1,
           "packed_source": "0x421b0040",
-          "offset_adjust": "0xd85d"
+          "offset_adjust": "0xd85d",
+          "layout_address": "0x1fb730",
+          "layout_x_word": "0x0061",
+          "layout_y_word": "0xfef2",
+          "layout_x_signed": 97,
+          "layout_y_signed": -270
         },
         {
           "index": 2,
           "packed_source": "0x421b0050",
-          "offset_adjust": "0xd8e6"
+          "offset_adjust": "0xd8e6",
+          "layout_address": "0x1f8f91",
+          "layout_x_word": "0x93f9",
+          "layout_y_word": "0x4af0",
+          "layout_x_signed": -27655,
+          "layout_y_signed": 19184
         }
       ],
       "trailing_word": "0x181b"
@@ -3797,21 +3891,37 @@
       "budget": 48,
       "tile_count": 3,
       "offset_table_index": 121,
+      "layout_table_pointer": "0x1fde2c",
       "entries": [
         {
           "index": 0,
           "packed_source": "0xffc2ffe7",
-          "offset_adjust": "0xd900"
+          "offset_adjust": "0xd900",
+          "layout_address": "0x1fde2c",
+          "layout_x_word": "0xff80",
+          "layout_y_word": "0xffb0",
+          "layout_x_signed": -128,
+          "layout_y_signed": -80
         },
         {
           "index": 1,
           "packed_source": "0x421b0040",
-          "offset_adjust": "0xd85d"
+          "offset_adjust": "0xd85d",
+          "layout_address": "0x1fb730",
+          "layout_x_word": "0x0061",
+          "layout_y_word": "0xfef2",
+          "layout_x_signed": 97,
+          "layout_y_signed": -270
         },
         {
           "index": 2,
           "packed_source": "0x421b0050",
-          "offset_adjust": "0xd8e6"
+          "offset_adjust": "0xd8e6",
+          "layout_address": "0x1f8f91",
+          "layout_x_word": "0x93f9",
+          "layout_y_word": "0x4af0",
+          "layout_x_signed": -27655,
+          "layout_y_signed": 19184
         }
       ],
       "trailing_word": "0x181b"
@@ -3824,21 +3934,37 @@
       "budget": 58,
       "tile_count": 3,
       "offset_table_index": 126,
+      "layout_table_pointer": "0x1fde40",
       "entries": [
         {
           "index": 0,
           "packed_source": "0xffe6fffb",
-          "offset_adjust": "0xdc06"
+          "offset_adjust": "0xdc06",
+          "layout_address": "0x1fde40",
+          "layout_x_word": "0xff90",
+          "layout_y_word": "0xffa0",
+          "layout_x_signed": -112,
+          "layout_y_signed": -96
         },
         {
           "index": 1,
           "packed_source": "0x161b0004",
-          "offset_adjust": "0xdc26"
+          "offset_adjust": "0xdc26",
+          "layout_address": "0x1fba4a",
+          "layout_x_word": "0xfb86",
+          "layout_y_word": "0xfed8",
+          "layout_x_signed": -1146,
+          "layout_y_signed": -296
         },
         {
           "index": 2,
           "packed_source": "0x181b001c",
-          "offset_adjust": "0xdc60"
+          "offset_adjust": "0xdc60",
+          "layout_address": "0x1f9674",
+          "layout_x_word": "0x1250",
+          "layout_y_word": "0xf24b",
+          "layout_x_signed": 4688,
+          "layout_y_signed": -3509
         }
       ],
       "trailing_word": "0x1c1b"
@@ -3851,26 +3977,47 @@
       "budget": 55,
       "tile_count": 4,
       "offset_table_index": 126,
+      "layout_table_pointer": "0x1fde40",
       "entries": [
         {
           "index": 0,
           "packed_source": "0xffeafffe",
-          "offset_adjust": "0xdc46"
+          "offset_adjust": "0xdc46",
+          "layout_address": "0x1fde40",
+          "layout_x_word": "0xff90",
+          "layout_y_word": "0xffa0",
+          "layout_x_signed": -112,
+          "layout_y_signed": -96
         },
         {
           "index": 1,
           "packed_source": "0x161b0004",
-          "offset_adjust": "0xdc80"
+          "offset_adjust": "0xdc80",
+          "layout_address": "0x1fba8a",
+          "layout_x_word": "0x00e4",
+          "layout_y_word": "0xfc2e",
+          "layout_x_signed": 228,
+          "layout_y_signed": -978
         },
         {
           "index": 2,
           "packed_source": "0x271b0050",
-          "offset_adjust": "0xdca8"
+          "offset_adjust": "0xdca8",
+          "layout_address": "0x1f970e",
+          "layout_x_word": "0xf1e1",
+          "layout_y_word": "0xe7f9",
+          "layout_x_signed": -3615,
+          "layout_y_signed": -6151
         },
         {
           "index": 3,
           "packed_source": "0x041b006c",
-          "offset_adjust": "0xdc88"
+          "offset_adjust": "0xdc88",
+          "layout_address": "0x1f73ba",
+          "layout_x_word": "0x0edd",
+          "layout_y_word": "0x0fee",
+          "layout_x_signed": 3805,
+          "layout_y_signed": 4078
         }
       ],
       "trailing_word": "0x151b"
@@ -3883,21 +4030,37 @@
       "budget": 60,
       "tile_count": 3,
       "offset_table_index": 120,
+      "layout_table_pointer": "0x1fde28",
       "entries": [
         {
           "index": 0,
           "packed_source": "0xffd50000",
-          "offset_adjust": "0xdcb0"
+          "offset_adjust": "0xdcb0",
+          "layout_address": "0x1fde28",
+          "layout_x_word": "0xff80",
+          "layout_y_word": "0xffa0",
+          "layout_x_signed": -128,
+          "layout_y_signed": -96
         },
         {
           "index": 1,
           "packed_source": "0x161b0004",
-          "offset_adjust": "0xdcb7"
+          "offset_adjust": "0xdcb7",
+          "layout_address": "0x1fbadc",
+          "layout_x_word": "0x032b",
+          "layout_y_word": "0x046a",
+          "layout_x_signed": 811,
+          "layout_y_signed": 1130
         },
         {
           "index": 2,
           "packed_source": "0x181b001c",
-          "offset_adjust": "0xdcd0"
+          "offset_adjust": "0xdcd0",
+          "layout_address": "0x1f9797",
+          "layout_x_word": "0x4adf",
+          "layout_y_word": "0xb4f9",
+          "layout_x_signed": 19167,
+          "layout_y_signed": -19207
         }
       ],
       "trailing_word": "0x1d1b"
@@ -3910,26 +4073,47 @@
       "budget": 56,
       "tile_count": 4,
       "offset_table_index": 126,
+      "layout_table_pointer": "0x1fde40",
       "entries": [
         {
           "index": 0,
           "packed_source": "0xffe5fffe",
-          "offset_adjust": "0xdd00"
+          "offset_adjust": "0xdd00",
+          "layout_address": "0x1fde40",
+          "layout_x_word": "0xff90",
+          "layout_y_word": "0xffa0",
+          "layout_x_signed": -112,
+          "layout_y_signed": -96
         },
         {
           "index": 1,
           "packed_source": "0x161b0004",
-          "offset_adjust": "0xdd20"
+          "offset_adjust": "0xdd20",
+          "layout_address": "0x1fbb44",
+          "layout_x_word": "0xff83",
+          "layout_y_word": "0xfa51",
+          "layout_x_signed": -125,
+          "layout_y_signed": -1455
         },
         {
           "index": 2,
           "packed_source": "0x281b0050",
-          "offset_adjust": "0xdcf0"
+          "offset_adjust": "0xdcf0",
+          "layout_address": "0x1f9868",
+          "layout_x_word": "0x2225",
+          "layout_y_word": "0xf8f0",
+          "layout_x_signed": 8741,
+          "layout_y_signed": -1808
         },
         {
           "index": 3,
           "packed_source": "0x041b0088",
-          "offset_adjust": "0xdd07"
+          "offset_adjust": "0xdd07",
+          "layout_address": "0x1f755c",
+          "layout_x_word": "0x0669",
+          "layout_y_word": "0x003a",
+          "layout_x_signed": 1641,
+          "layout_y_signed": 58
         }
       ],
       "trailing_word": "0x141b"
@@ -3942,21 +4126,37 @@
       "budget": 62,
       "tile_count": 3,
       "offset_table_index": 126,
+      "layout_table_pointer": "0x1fde40",
       "entries": [
         {
           "index": 0,
           "packed_source": "0xffe5fffb",
-          "offset_adjust": "0xdd29"
+          "offset_adjust": "0xdd29",
+          "layout_address": "0x1fde40",
+          "layout_x_word": "0xff90",
+          "layout_y_word": "0xffa0",
+          "layout_x_signed": -112,
+          "layout_y_signed": -96
         },
         {
           "index": 1,
           "packed_source": "0x561b00ac",
-          "offset_adjust": "0xdd50"
+          "offset_adjust": "0xdd50",
+          "layout_address": "0x1fbb6d",
+          "layout_x_word": "0x99fd",
+          "layout_y_word": "0x50fb",
+          "layout_x_signed": -26115,
+          "layout_y_signed": 20731
         },
         {
           "index": 2,
           "packed_source": "0x321b004c",
-          "offset_adjust": "0xdd0c"
+          "offset_adjust": "0xdd0c",
+          "layout_address": "0x1f98c1",
+          "layout_x_word": "0x0013",
+          "layout_y_word": "0x0007",
+          "layout_x_signed": 19,
+          "layout_y_signed": 7
         }
       ],
       "trailing_word": "0x131b"
@@ -3969,26 +4169,47 @@
       "budget": 65,
       "tile_count": 4,
       "offset_table_index": 169,
+      "layout_table_pointer": "0x1fdfac",
       "entries": [
         {
           "index": 0,
           "packed_source": "0xffd5fffb",
-          "offset_adjust": "0xdd56"
+          "offset_adjust": "0xdd56",
+          "layout_address": "0x1fdfac",
+          "layout_x_word": "0xff80",
+          "layout_y_word": "0xffa0",
+          "layout_x_signed": -128,
+          "layout_y_signed": -96
         },
         {
           "index": 1,
           "packed_source": "0x421b004c",
-          "offset_adjust": "0xde70"
+          "offset_adjust": "0xde70",
+          "layout_address": "0x1fbd06",
+          "layout_x_word": "0xff38",
+          "layout_y_word": "0x06dc",
+          "layout_x_signed": -200,
+          "layout_y_signed": 1756
         },
         {
           "index": 2,
           "packed_source": "0x631b0078",
-          "offset_adjust": "0xdd53"
+          "offset_adjust": "0xdd53",
+          "layout_address": "0x1f9b7a",
+          "layout_x_word": "0xec29",
+          "layout_y_word": "0x0860",
+          "layout_x_signed": -5079,
+          "layout_y_signed": 2144
         },
         {
           "index": 3,
           "packed_source": "0x321b0058",
-          "offset_adjust": "0xdd90"
+          "offset_adjust": "0xdd90",
+          "layout_address": "0x1f78d1",
+          "layout_x_word": "0x2304",
+          "layout_y_word": "0x4602",
+          "layout_x_signed": 8964,
+          "layout_y_signed": 17922
         }
       ],
       "trailing_word": "0x141b"
@@ -4001,26 +4222,47 @@
       "budget": 58,
       "tile_count": 4,
       "offset_table_index": 168,
+      "layout_table_pointer": "0x1fdfa8",
       "entries": [
         {
           "index": 0,
           "packed_source": "0xffd5fffb",
-          "offset_adjust": "0xdd89"
+          "offset_adjust": "0xdd89",
+          "layout_address": "0x1fdfa8",
+          "layout_x_word": "0xff80",
+          "layout_y_word": "0xff90",
+          "layout_x_signed": -128,
+          "layout_y_signed": -112
         },
         {
           "index": 1,
           "packed_source": "0x261b0008",
-          "offset_adjust": "0xddb0"
+          "offset_adjust": "0xddb0",
+          "layout_address": "0x1fbd35",
+          "layout_x_word": "0x07f8",
+          "layout_y_word": "0x5b01",
+          "layout_x_signed": 2040,
+          "layout_y_signed": 23297
         },
         {
           "index": 2,
           "packed_source": "0x191b003c",
-          "offset_adjust": "0xddba"
+          "offset_adjust": "0xddba",
+          "layout_address": "0x1f9ae9",
+          "layout_x_word": "0xc2f7",
+          "layout_y_word": "0xfc22",
+          "layout_x_signed": -15625,
+          "layout_y_signed": -990
         },
         {
           "index": 3,
           "packed_source": "0x141b00a4",
-          "offset_adjust": "0xdcf5"
+          "offset_adjust": "0xdcf5",
+          "layout_address": "0x1f78a7",
+          "layout_x_word": "0x2302",
+          "layout_y_word": "0x2302",
+          "layout_x_signed": 8962,
+          "layout_y_signed": 8962
         }
       ],
       "trailing_word": "0x061b"
@@ -4033,26 +4275,47 @@
       "budget": 56,
       "tile_count": 4,
       "offset_table_index": 176,
+      "layout_table_pointer": "0x1fdfc8",
       "entries": [
         {
           "index": 0,
           "packed_source": "0xffe5fffb",
-          "offset_adjust": "0xde04"
+          "offset_adjust": "0xde04",
+          "layout_address": "0x1fdfc8",
+          "layout_x_word": "0xff90",
+          "layout_y_word": "0xffa0",
+          "layout_x_signed": -112,
+          "layout_y_signed": -96
         },
         {
           "index": 1,
           "packed_source": "0x421b004c",
-          "offset_adjust": "0xde00"
+          "offset_adjust": "0xde00",
+          "layout_address": "0x1fbdd0",
+          "layout_x_word": "0x030e",
+          "layout_y_word": "0x0870",
+          "layout_x_signed": 782,
+          "layout_y_signed": 2160
         },
         {
           "index": 2,
           "packed_source": "0x631b0078",
-          "offset_adjust": "0xdc4d"
+          "offset_adjust": "0xdc4d",
+          "layout_address": "0x1f9bd4",
+          "layout_x_word": "0x248e",
+          "layout_y_word": "0x0c35",
+          "layout_x_signed": 9358,
+          "layout_y_signed": 3125
         },
         {
           "index": 3,
           "packed_source": "0x311b003c",
-          "offset_adjust": "0xdbfb"
+          "offset_adjust": "0xdbfb",
+          "layout_address": "0x1f7825",
+          "layout_x_word": "0xaa08",
+          "layout_y_word": "0x7506",
+          "layout_x_signed": -22008,
+          "layout_y_signed": 29958
         }
       ],
       "trailing_word": "0x041b"
