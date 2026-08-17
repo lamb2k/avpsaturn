@@ -37,8 +37,9 @@ Current milestone:
   six health units at completion
 - runs a capture-derived first-room lifecycle with five opening enemies, three
   reinforcements, a locked combat boundary, clear hold, and exit transition
-- transitions into a reconstructed industrial boss room, spawns an exact
-  capture-derived Chrysalis assembly, and reaches a native Stage Clear state
+- transitions into a reconstructed industrial boss room and animates Chrysalis
+  from an exact idle plus captured 44-frame leap, 106-frame walk, and 93-frame
+  attack clips; 18 deduplicated 288x192 poses stream through one VDP1 slot
 - gives all eight bounded enemy actors independent 288x192 VDP1 cel slots with
   four exact CPS2 alien palettes, so unlike actions cannot overwrite each other
 - retains a palette-preserving 352x224 offline reference surface containing the
@@ -56,9 +57,12 @@ complete arcade attract/menu animation. Thirteen later route states use the
 same lossless horizontal fit and the shared VDP2 bitmap. Their compressed
 sources are loaded before CDDA starts, so state changes do not seek away from
 the audio track. The converter retains the 384x224 object/priority oracle
-offline. The proven alien walk/attack/hit/KO clips are state-bound; exact
-AI/spawn timing for every archetype, remaining boss/voice event sounds, and
-every intermediate Stage 1 action remain incomplete.
+offline. The proven alien walk/attack/hit/KO clips are state-bound. Chrysalis
+walk and attack are bound to native states; the current 120-frame attack model
+holds the captured attack's final pose after source frame 93, and unclassified
+hit/KO states retain the exact idle assembly. Exact AI/spawn timing for every
+archetype, remaining boss action/voice sounds, and every intermediate Stage 1
+action remain incomplete.
 
 The Saturn has no 384-pixel low-resolution output. The selected 352x224 mode
 keeps all 224 source lines. The runtime fits all 384 horizontal source pixels

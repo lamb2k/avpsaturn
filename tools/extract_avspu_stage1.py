@@ -1785,51 +1785,166 @@ static const unsigned char avsp_enemy_source_omissions[AVSP_ENEMY_ACTION_CLIPS] 
     }]
 
 
-def write_boss_idle_assets(gfx: bytearray,
-                           sprite_dir: Path) -> list[dict[str, object]]:
-    """Emit the complete multi-palette Chrysalis-room boss assembly."""
-    bank = int((CAPTURE_ROOT / "boss_active_object_bank.txt").read_text(
+def write_boss_action_sequence_assets(
+        gfx: bytearray, sprite_dir: Path) -> list[dict[str, object]]:
+    """Emit verified Chrysalis idle, leap, walk, and attack animation data."""
+    report_path = ROOT / "data" / "boss_action_capture.json"
+    if not report_path.is_file():
+        raise ValueError(
+            "boss-action report is missing; run capture_boss_actions.ps1")
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    if report.get("schema") != 1:
+        raise ValueError("unsupported boss-action report schema")
+    if int(report["actor"]["cps2_palette"]) != 27:
+        raise ValueError("boss-action report does not describe palette 27")
+
+    archive = bytearray()
+    archive_offsets: list[int] = []
+    archive_lengths: list[int] = []
+    source_frames: list[int] = []
+    pose_by_digest: dict[str, int] = {}
+    clip_specs: list[dict[str, object]] = []
+
+    def intern_pose(decoded: bytes, source_frame: int) -> int:
+        digest = hashlib.sha256(decoded).hexdigest()
+        pose = pose_by_digest.get(digest)
+        if pose is not None:
+            return pose
+        pose = len(pose_by_digest)
+        pose_by_digest[digest] = pose
+        encoded = rle_encode_bytes(decoded)
+        if rle_decode_bytes(encoded) != decoded:
+            raise ValueError(
+                f"boss frame {source_frame}: action RLE round trip failed")
+        archive_offsets.append(len(archive))
+        archive_lengths.append(len(encoded))
+        source_frames.append(source_frame)
+        archive.extend(encoded)
+        return pose
+
+    # Keep the prior independently verified frame as an explicit idle clip.
+    # A 288-pixel canvas recentres the same assembly without scaling or loss.
+    idle_bank = int((CAPTURE_ROOT / "boss_active_object_bank.txt").read_text(
         encoding="ascii").strip())
-    offsets = [36, 40, 44]
-    palette = load_palette("boss_palette.tsv")
-    layers, palettes = exact_object_layers(
-        gfx, palette, 12660, bank, offsets, pivot=(74, 211),
-        source_filename=f"boss_objram{bank}.tsv", canvas_size=(256, 192))
-    cps_colours = (27,)
-    files = []
-    manifest = []
-    for layer_index, colour in enumerate(cps_colours):
-        layer = layers.get(colour)
-        if layer is None:
-            raise ValueError(f"boss capture is missing CPS2 palette {colour}")
-        filename = f"BI{layer_index}.BIN"
-        data = pack_4bpp(layer)
-        (sprite_dir / filename).write_bytes(data)
-        files.append(filename)
-        manifest.append({
-            "path": f"SPR4/{filename}",
-            "bytes": len(data),
-            "sha256": hashlib.sha256(data).hexdigest(),
-            "source_frame": 12660,
-            "cps2_palette": colour,
+    idle_layers, _ = exact_object_layers(
+        gfx, load_palette("boss_palette.tsv"), 12660, idle_bank,
+        [36, 40, 44], pivot=(74, 211),
+        source_filename=f"boss_objram{idle_bank}.tsv",
+        canvas_size=(288, 192))
+    if 27 not in idle_layers:
+        raise ValueError("boss idle capture is missing CPS2 palette 27")
+    idle_pose = intern_pose(pack_4bpp(idle_layers[27]), 12660)
+    clip_specs.append({
+        "name": "idle", "frames": 1, "runs": [(idle_pose, 1)]})
+
+    action_root = ROOT / ".deps" / "mame" / "boss_actions"
+    expected_names = ("leap", "walk", "attack")
+    report_clips = report.get("clips", [])
+    if tuple(str(clip.get("name")) for clip in report_clips) != expected_names:
+        raise ValueError("boss-action report clip order is not leap/walk/attack")
+    for clip in report_clips:
+        frame_poses: list[int] = []
+        for sample in clip["timeline"]:
+            frame = int(sample["frame"])
+            bank = int(sample["active_object_bank"])
+            if bank not in (1, 2):
+                raise ValueError(
+                    f"boss frame {frame}: missing active object bank")
+            object_path = action_root / f"objram_active_{frame:05d}.tsv"
+            palette_path = action_root / f"palette_{frame:05d}.tsv"
+            layers, _ = exact_object_layers(
+                gfx, load_palette_path(palette_path), frame, bank,
+                [int(offset) for offset in sample["object_offsets"]],
+                shift_x=int(sample["object_shift_x"]),
+                pivot=(int(sample["pivot_x"]),
+                       int(sample["pivot_bottom"])),
+                source_filename=str(object_path), canvas_size=(288, 192))
+            if 27 not in layers:
+                raise ValueError(
+                    f"boss frame {frame}: palette-27 assembly is missing")
+            frame_poses.append(intern_pose(pack_4bpp(layers[27]), frame))
+        if len(frame_poses) != int(clip["frame_count"]):
+            raise ValueError(f"{clip['name']}: timeline does not cover clip")
+        runs: list[tuple[int, int]] = []
+        for pose in frame_poses:
+            if runs and runs[-1][0] == pose:
+                runs[-1] = (pose, runs[-1][1] + 1)
+            else:
+                runs.append((pose, 1))
+        clip_specs.append({
+            "name": str(clip["name"]),
+            "frames": len(frame_poses),
+            "runs": runs,
         })
-    header = f"""/* Generated from the Stage 1 Chrysalis-room CPS2 capture. */
+
+    if len(pose_by_digest) >= 256:
+        raise ValueError("boss actions exceed 8-bit pose indices")
+    if any(length > 0xFFFF for length in archive_lengths):
+        raise ValueError("one boss RLE pose exceeds the 16-bit archive index")
+    archive_filename = "BACT.RLE"
+    (sprite_dir / archive_filename).write_bytes(archive)
+    max_steps = max(len(clip["runs"]) for clip in clip_specs)
+    pose_rows = []
+    duration_rows = []
+    for clip in clip_specs:
+        runs = clip["runs"]
+        poses = [pose for pose, _ in runs]
+        durations = [duration for _, duration in runs]
+        poses.extend([0] * (max_steps - len(poses)))
+        durations.extend([0] * (max_steps - len(durations)))
+        pose_rows.append("    {" + ", ".join(map(str, poses)) + "}")
+        duration_rows.append("    {" + ", ".join(map(str, durations)) + "}")
+
+    action_constants = "\n".join(
+        f"#define AVSP_BOSS_CLIP_{str(clip['name']).upper()} {index}"
+        for index, clip in enumerate(clip_specs))
+    header = f"""/* Generated from validated native CPS2 Chrysalis actor clips. */
 #ifndef AVSP_BOSS_ANIMATION_H
 #define AVSP_BOSS_ANIMATION_H
-#define AVSP_BOSS_IDLE_LAYERS {len(files)}
-#define AVSP_BOSS_CEL_WIDTH 256
+#define AVSP_BOSS_ACTION_CLIPS {len(clip_specs)}
+#define AVSP_BOSS_ACTION_POSES {len(pose_by_digest)}
+#define AVSP_BOSS_ACTION_MAX_STEPS {max_steps}
+#define AVSP_BOSS_CEL_WIDTH 288
 #define AVSP_BOSS_CEL_HEIGHT 192
-static const char avsp_boss_idle_files[AVSP_BOSS_IDLE_LAYERS][12] = {{
-    {", ".join(f'\"{filename}\"' for filename in files)}
+#define AVSP_BOSS_DECODED_BYTES {(288 * 192) // 2}
+#define AVSP_BOSS_ARCHIVE_FILE "{archive_filename}"
+#define AVSP_BOSS_ARCHIVE_BYTES {len(archive)}
+#define AVSP_BOSS_PALETTE_BANK 7
+{action_constants}
+static const unsigned int avsp_boss_rle_offsets[AVSP_BOSS_ACTION_POSES] = {{
+    {", ".join(map(str, archive_offsets))}
 }};
-static const unsigned char avsp_boss_idle_palette_banks[AVSP_BOSS_IDLE_LAYERS] = {{
-    7
+static const unsigned short avsp_boss_rle_bytes[AVSP_BOSS_ACTION_POSES] = {{
+    {", ".join(map(str, archive_lengths))}
+}};
+static const unsigned char avsp_boss_step_counts[AVSP_BOSS_ACTION_CLIPS] = {{
+    {", ".join(str(len(clip['runs'])) for clip in clip_specs)}
+}};
+static const unsigned char avsp_boss_total_frames[AVSP_BOSS_ACTION_CLIPS] = {{
+    {", ".join(str(clip['frames']) for clip in clip_specs)}
+}};
+static const unsigned char avsp_boss_step_poses[AVSP_BOSS_ACTION_CLIPS][AVSP_BOSS_ACTION_MAX_STEPS] = {{
+{",\n".join(pose_rows)}
+}};
+static const unsigned char avsp_boss_step_durations[AVSP_BOSS_ACTION_CLIPS][AVSP_BOSS_ACTION_MAX_STEPS] = {{
+{",\n".join(duration_rows)}
+}};
+static const unsigned short avsp_boss_source_frames[AVSP_BOSS_ACTION_POSES] = {{
+    {", ".join(map(str, source_frames))}
 }};
 #endif
 """
     (GENERATED_ROOT / "avsp_boss_animation.h").write_text(
         header, encoding="ascii")
-    return manifest
+    return [{
+        "path": f"SPR4/{archive_filename}",
+        "bytes": len(archive),
+        "decoded_bytes": len(pose_by_digest) * (288 * 192) // 2,
+        "sha256": hashlib.sha256(archive).hexdigest(),
+        "components": len(pose_by_digest),
+        "encoding": "indexed-rle8-count-value",
+        "source_clips": [str(clip["name"]) for clip in clip_specs],
+    }]
 
 
 def write_exact_actor_assets(gfx: bytearray,
@@ -1903,7 +2018,7 @@ def write_exact_actor_assets(gfx: bytearray,
                          "cps2_palette": colour})
     manifest.extend(write_player_action_sequence_assets(gfx, sprite_dir))
     manifest.extend(write_enemy_action_sequence_assets(gfx, sprite_dir))
-    manifest.extend(write_boss_idle_assets(gfx, sprite_dir))
+    manifest.extend(write_boss_action_sequence_assets(gfx, sprite_dir))
     return manifest
 
 

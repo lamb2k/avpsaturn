@@ -1,0 +1,6911 @@
+{
+  "schema": 1,
+  "source": "deterministic avspu frame-12660 Chrysalis save state",
+  "capture_first_frame": 12661,
+  "capture_last_frame": 13560,
+  "capture_frames": 900,
+  "actor": {
+    "actor_address": "0xffa3c0",
+    "actor_id": 6,
+    "initial_health": 38,
+    "maximum_health_field": 248,
+    "cps2_palette": 27
+  },
+  "clips": [
+    {
+      "name": "leap",
+      "first_frame": 12661,
+      "last_frame": 12704,
+      "frame_count": 44,
+      "unique_object_poses": 5,
+      "pose_runs": [
+        {
+          "pose": 0,
+          "frames": 3
+        },
+        {
+          "pose": 1,
+          "frames": 17
+        },
+        {
+          "pose": 2,
+          "frames": 7
+        },
+        {
+          "pose": 3,
+          "frames": 4
+        },
+        {
+          "pose": 1,
+          "frames": 9
+        },
+        {
+          "pose": 3,
+          "frames": 2
+        },
+        {
+          "pose": 4,
+          "frames": 2
+        }
+      ],
+      "palette_sha256": "bfc4f40a357cac96ea011d0be5458cec0df95768f11af3b077f2ab0ea8b6d0bc",
+      "timeline": [
+        {
+          "frame": 12661,
+          "pose": 0,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 374,
+          "pivot_x": 448,
+          "pivot_bottom": 210,
+          "bounds": [
+            344,
+            90,
+            552,
+            202
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52796,
+          "actor_x": 1122,
+          "actor_y": 252,
+          "actor_z": 229,
+          "health": 38
+        },
+        {
+          "frame": 12662,
+          "pose": 0,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 374,
+          "pivot_x": 448,
+          "pivot_bottom": 201,
+          "bounds": [
+            344,
+            81,
+            552,
+            193
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52796,
+          "actor_x": 1122,
+          "actor_y": 260,
+          "actor_z": 231,
+          "health": 38
+        },
+        {
+          "frame": 12663,
+          "pose": 0,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 374,
+          "pivot_x": 448,
+          "pivot_bottom": 193,
+          "bounds": [
+            344,
+            73,
+            552,
+            185
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52812,
+          "actor_x": 1122,
+          "actor_y": 268,
+          "actor_z": 232,
+          "health": 38
+        },
+        {
+          "frame": 12664,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 165,
+          "bounds": [
+            328,
+            61,
+            568,
+            157
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52812,
+          "actor_x": 1122,
+          "actor_y": 275,
+          "actor_z": 234,
+          "health": 38
+        },
+        {
+          "frame": 12665,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 158,
+          "bounds": [
+            328,
+            54,
+            568,
+            150
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52812,
+          "actor_x": 1122,
+          "actor_y": 281,
+          "actor_z": 236,
+          "health": 38
+        },
+        {
+          "frame": 12666,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 152,
+          "bounds": [
+            328,
+            48,
+            568,
+            144
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52812,
+          "actor_x": 1122,
+          "actor_y": 287,
+          "actor_z": 238,
+          "health": 38
+        },
+        {
+          "frame": 12667,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 146,
+          "bounds": [
+            328,
+            42,
+            568,
+            138
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52812,
+          "actor_x": 1122,
+          "actor_y": 293,
+          "actor_z": 239,
+          "health": 38
+        },
+        {
+          "frame": 12668,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 140,
+          "bounds": [
+            328,
+            36,
+            568,
+            132
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52812,
+          "actor_x": 1122,
+          "actor_y": 297,
+          "actor_z": 241,
+          "health": 38
+        },
+        {
+          "frame": 12669,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            28,
+            32,
+            36
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 136,
+          "bounds": [
+            328,
+            32,
+            568,
+            128
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52812,
+          "actor_x": 1122,
+          "actor_y": 301,
+          "actor_z": 243,
+          "health": 38
+        },
+        {
+          "frame": 12670,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 132,
+          "bounds": [
+            328,
+            28,
+            568,
+            124
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52812,
+          "actor_x": 1122,
+          "actor_y": 305,
+          "actor_z": 245,
+          "health": 38
+        },
+        {
+          "frame": 12671,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 128,
+          "bounds": [
+            328,
+            24,
+            568,
+            120
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52812,
+          "actor_x": 1122,
+          "actor_y": 308,
+          "actor_z": 246,
+          "health": 38
+        },
+        {
+          "frame": 12672,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 125,
+          "bounds": [
+            328,
+            21,
+            568,
+            117
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52812,
+          "actor_x": 1122,
+          "actor_y": 310,
+          "actor_z": 248,
+          "health": 38
+        },
+        {
+          "frame": 12673,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 123,
+          "bounds": [
+            328,
+            19,
+            568,
+            115
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52812,
+          "actor_x": 1122,
+          "actor_y": 312,
+          "actor_z": 250,
+          "health": 38
+        },
+        {
+          "frame": 12674,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 121,
+          "bounds": [
+            328,
+            17,
+            568,
+            113
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52812,
+          "actor_x": 1122,
+          "actor_y": 313,
+          "actor_z": 252,
+          "health": 38
+        },
+        {
+          "frame": 12675,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 120,
+          "bounds": [
+            328,
+            16,
+            568,
+            112
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52832,
+          "actor_x": 1122,
+          "actor_y": 313,
+          "actor_z": 253,
+          "health": 38
+        },
+        {
+          "frame": 12676,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 120,
+          "bounds": [
+            328,
+            16,
+            568,
+            112
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52832,
+          "actor_x": 1122,
+          "actor_y": 313,
+          "actor_z": 255,
+          "health": 38
+        },
+        {
+          "frame": 12677,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 120,
+          "bounds": [
+            328,
+            16,
+            568,
+            112
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52832,
+          "actor_x": 1122,
+          "actor_y": 312,
+          "actor_z": 257,
+          "health": 38
+        },
+        {
+          "frame": 12678,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 121,
+          "bounds": [
+            328,
+            17,
+            568,
+            113
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52832,
+          "actor_x": 1122,
+          "actor_y": 311,
+          "actor_z": 259,
+          "health": 38
+        },
+        {
+          "frame": 12679,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 122,
+          "bounds": [
+            328,
+            18,
+            568,
+            114
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52832,
+          "actor_x": 1122,
+          "actor_y": 309,
+          "actor_z": 260,
+          "health": 38
+        },
+        {
+          "frame": 12680,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 394,
+          "pivot_x": 448,
+          "pivot_bottom": 124,
+          "bounds": [
+            328,
+            20,
+            568,
+            116
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52848,
+          "actor_x": 1122,
+          "actor_y": 307,
+          "actor_z": 262,
+          "health": 38
+        },
+        {
+          "frame": 12681,
+          "pose": 2,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 382,
+          "pivot_x": 448,
+          "pivot_bottom": 146,
+          "bounds": [
+            336,
+            26,
+            560,
+            138
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52848,
+          "actor_x": 1122,
+          "actor_y": 304,
+          "actor_z": 264,
+          "health": 38
+        },
+        {
+          "frame": 12682,
+          "pose": 2,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 382,
+          "pivot_x": 448,
+          "pivot_bottom": 149,
+          "bounds": [
+            336,
+            29,
+            560,
+            141
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52848,
+          "actor_x": 1122,
+          "actor_y": 300,
+          "actor_z": 266,
+          "health": 38
+        },
+        {
+          "frame": 12683,
+          "pose": 2,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 382,
+          "pivot_x": 448,
+          "pivot_bottom": 153,
+          "bounds": [
+            336,
+            33,
+            560,
+            145
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52848,
+          "actor_x": 1122,
+          "actor_y": 296,
+          "actor_z": 267,
+          "health": 38
+        },
+        {
+          "frame": 12684,
+          "pose": 2,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 382,
+          "pivot_x": 448,
+          "pivot_bottom": 157,
+          "bounds": [
+            336,
+            37,
+            560,
+            149
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52848,
+          "actor_x": 1122,
+          "actor_y": 291,
+          "actor_z": 269,
+          "health": 38
+        },
+        {
+          "frame": 12685,
+          "pose": 2,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 382,
+          "pivot_x": 448,
+          "pivot_bottom": 162,
+          "bounds": [
+            336,
+            42,
+            560,
+            154
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52848,
+          "actor_x": 1122,
+          "actor_y": 285,
+          "actor_z": 271,
+          "health": 38
+        },
+        {
+          "frame": 12686,
+          "pose": 2,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 382,
+          "pivot_x": 448,
+          "pivot_bottom": 168,
+          "bounds": [
+            336,
+            48,
+            560,
+            160
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52848,
+          "actor_x": 1122,
+          "actor_y": 279,
+          "actor_z": 273,
+          "health": 38
+        },
+        {
+          "frame": 12687,
+          "pose": 2,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 382,
+          "pivot_x": 448,
+          "pivot_bottom": 174,
+          "bounds": [
+            336,
+            54,
+            560,
+            166
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52868,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12688,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 376,
+          "pivot_x": 448,
+          "pivot_bottom": 194,
+          "bounds": [
+            336,
+            90,
+            560,
+            186
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52868,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12689,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 376,
+          "pivot_x": 448,
+          "pivot_bottom": 198,
+          "bounds": [
+            336,
+            94,
+            560,
+            190
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52868,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12690,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 376,
+          "pivot_x": 448,
+          "pivot_bottom": 194,
+          "bounds": [
+            336,
+            90,
+            560,
+            186
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52868,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12691,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 376,
+          "pivot_x": 448,
+          "pivot_bottom": 194,
+          "bounds": [
+            336,
+            90,
+            560,
+            186
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52884,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12692,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 404,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52884,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12693,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 404,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52884,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12694,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 404,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52884,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12695,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 404,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52884,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12696,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 404,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52884,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12697,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 404,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52884,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12698,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 404,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52884,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12699,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 404,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52884,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12700,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 404,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52900,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12701,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 376,
+          "pivot_x": 448,
+          "pivot_bottom": 194,
+          "bounds": [
+            336,
+            90,
+            560,
+            186
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52900,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12702,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 376,
+          "pivot_x": 448,
+          "pivot_bottom": 194,
+          "bounds": [
+            336,
+            90,
+            560,
+            186
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52916,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12703,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 368,
+          "pivot_x": 448,
+          "pivot_bottom": 194,
+          "bounds": [
+            344,
+            90,
+            552,
+            186
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52916,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        },
+        {
+          "frame": 12704,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 368,
+          "pivot_x": 448,
+          "pivot_bottom": 194,
+          "bounds": [
+            344,
+            90,
+            552,
+            186
+          ],
+          "actor_action": 3586,
+          "actor_state": 1,
+          "actor_substate": 6913,
+          "actor_animation": 52932,
+          "actor_x": 1122,
+          "actor_y": 274,
+          "actor_z": 274,
+          "health": 38
+        }
+      ]
+    },
+    {
+      "name": "walk",
+      "first_frame": 12885,
+      "last_frame": 12990,
+      "frame_count": 106,
+      "unique_object_poses": 8,
+      "pose_runs": [
+        {
+          "pose": 0,
+          "frames": 1
+        },
+        {
+          "pose": 1,
+          "frames": 7
+        },
+        {
+          "pose": 0,
+          "frames": 7
+        },
+        {
+          "pose": 2,
+          "frames": 7
+        },
+        {
+          "pose": 3,
+          "frames": 7
+        },
+        {
+          "pose": 4,
+          "frames": 7
+        },
+        {
+          "pose": 5,
+          "frames": 7
+        },
+        {
+          "pose": 6,
+          "frames": 7
+        },
+        {
+          "pose": 7,
+          "frames": 7
+        },
+        {
+          "pose": 1,
+          "frames": 7
+        },
+        {
+          "pose": 0,
+          "frames": 7
+        },
+        {
+          "pose": 2,
+          "frames": 7
+        },
+        {
+          "pose": 3,
+          "frames": 7
+        },
+        {
+          "pose": 4,
+          "frames": 7
+        },
+        {
+          "pose": 5,
+          "frames": 7
+        },
+        {
+          "pose": 6,
+          "frames": 7
+        }
+      ],
+      "palette_sha256": "bfc4f40a357cac96ea011d0be5458cec0df95768f11af3b077f2ab0ea8b6d0bc",
+      "timeline": [
+        {
+          "frame": 12885,
+          "pose": 0,
+          "active_object_bank": 1,
+          "object_offsets": [
+            40,
+            44,
+            48,
+            52
+          ],
+          "object_shift_x": 489,
+          "pivot_x": 448,
+          "pivot_bottom": 220,
+          "bounds": [
+            336,
+            116,
+            560,
+            212
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52248,
+          "actor_x": 1011,
+          "actor_y": 239,
+          "actor_z": 239,
+          "health": 38
+        },
+        {
+          "frame": 12886,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 487,
+          "pivot_x": 448,
+          "pivot_bottom": 222,
+          "bounds": [
+            336,
+            118,
+            560,
+            214
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52248,
+          "actor_x": 1011,
+          "actor_y": 239,
+          "actor_z": 239,
+          "health": 38
+        },
+        {
+          "frame": 12887,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 487,
+          "pivot_x": 448,
+          "pivot_bottom": 222,
+          "bounds": [
+            336,
+            118,
+            560,
+            214
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52248,
+          "actor_x": 1011,
+          "actor_y": 239,
+          "actor_z": 239,
+          "health": 38
+        },
+        {
+          "frame": 12888,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 487,
+          "pivot_x": 448,
+          "pivot_bottom": 222,
+          "bounds": [
+            336,
+            118,
+            560,
+            214
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52248,
+          "actor_x": 1011,
+          "actor_y": 239,
+          "actor_z": 239,
+          "health": 38
+        },
+        {
+          "frame": 12889,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 487,
+          "pivot_x": 448,
+          "pivot_bottom": 222,
+          "bounds": [
+            336,
+            118,
+            560,
+            214
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52248,
+          "actor_x": 1011,
+          "actor_y": 239,
+          "actor_z": 239,
+          "health": 38
+        },
+        {
+          "frame": 12890,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 487,
+          "pivot_x": 448,
+          "pivot_bottom": 222,
+          "bounds": [
+            336,
+            118,
+            560,
+            214
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52248,
+          "actor_x": 1011,
+          "actor_y": 239,
+          "actor_z": 239,
+          "health": 38
+        },
+        {
+          "frame": 12891,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 487,
+          "pivot_x": 448,
+          "pivot_bottom": 222,
+          "bounds": [
+            336,
+            118,
+            560,
+            214
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52248,
+          "actor_x": 1011,
+          "actor_y": 239,
+          "actor_z": 239,
+          "health": 38
+        },
+        {
+          "frame": 12892,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 487,
+          "pivot_x": 448,
+          "pivot_bottom": 222,
+          "bounds": [
+            336,
+            118,
+            560,
+            214
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52264,
+          "actor_x": 1021,
+          "actor_y": 240,
+          "actor_z": 240,
+          "health": 38
+        },
+        {
+          "frame": 12893,
+          "pose": 0,
+          "active_object_bank": 1,
+          "object_offsets": [
+            40,
+            44,
+            48,
+            52
+          ],
+          "object_shift_x": 473,
+          "pivot_x": 448,
+          "pivot_bottom": 218,
+          "bounds": [
+            336,
+            114,
+            560,
+            210
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52264,
+          "actor_x": 1021,
+          "actor_y": 240,
+          "actor_z": 240,
+          "health": 38
+        },
+        {
+          "frame": 12894,
+          "pose": 0,
+          "active_object_bank": 2,
+          "object_offsets": [
+            40,
+            44,
+            48,
+            52
+          ],
+          "object_shift_x": 473,
+          "pivot_x": 448,
+          "pivot_bottom": 218,
+          "bounds": [
+            336,
+            114,
+            560,
+            210
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52264,
+          "actor_x": 1021,
+          "actor_y": 240,
+          "actor_z": 240,
+          "health": 38
+        },
+        {
+          "frame": 12895,
+          "pose": 0,
+          "active_object_bank": 1,
+          "object_offsets": [
+            40,
+            44,
+            48,
+            52
+          ],
+          "object_shift_x": 473,
+          "pivot_x": 448,
+          "pivot_bottom": 218,
+          "bounds": [
+            336,
+            114,
+            560,
+            210
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52264,
+          "actor_x": 1021,
+          "actor_y": 240,
+          "actor_z": 240,
+          "health": 38
+        },
+        {
+          "frame": 12896,
+          "pose": 0,
+          "active_object_bank": 2,
+          "object_offsets": [
+            40,
+            44,
+            48,
+            52
+          ],
+          "object_shift_x": 473,
+          "pivot_x": 448,
+          "pivot_bottom": 218,
+          "bounds": [
+            336,
+            114,
+            560,
+            210
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52264,
+          "actor_x": 1021,
+          "actor_y": 240,
+          "actor_z": 240,
+          "health": 38
+        },
+        {
+          "frame": 12897,
+          "pose": 0,
+          "active_object_bank": 1,
+          "object_offsets": [
+            40,
+            44,
+            48,
+            52
+          ],
+          "object_shift_x": 473,
+          "pivot_x": 448,
+          "pivot_bottom": 218,
+          "bounds": [
+            336,
+            114,
+            560,
+            210
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52264,
+          "actor_x": 1021,
+          "actor_y": 240,
+          "actor_z": 240,
+          "health": 38
+        },
+        {
+          "frame": 12898,
+          "pose": 0,
+          "active_object_bank": 2,
+          "object_offsets": [
+            40,
+            44,
+            48,
+            52
+          ],
+          "object_shift_x": 473,
+          "pivot_x": 448,
+          "pivot_bottom": 218,
+          "bounds": [
+            336,
+            114,
+            560,
+            210
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52264,
+          "actor_x": 1021,
+          "actor_y": 240,
+          "actor_z": 240,
+          "health": 38
+        },
+        {
+          "frame": 12899,
+          "pose": 0,
+          "active_object_bank": 1,
+          "object_offsets": [
+            40,
+            44,
+            48,
+            52
+          ],
+          "object_shift_x": 473,
+          "pivot_x": 448,
+          "pivot_bottom": 218,
+          "bounds": [
+            336,
+            114,
+            560,
+            210
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52280,
+          "actor_x": 1042,
+          "actor_y": 242,
+          "actor_z": 242,
+          "health": 38
+        },
+        {
+          "frame": 12900,
+          "pose": 2,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 465,
+          "pivot_x": 448,
+          "pivot_bottom": 214,
+          "bounds": [
+            328,
+            110,
+            568,
+            206
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52280,
+          "actor_x": 1042,
+          "actor_y": 242,
+          "actor_z": 242,
+          "health": 38
+        },
+        {
+          "frame": 12901,
+          "pose": 2,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 465,
+          "pivot_x": 448,
+          "pivot_bottom": 214,
+          "bounds": [
+            328,
+            110,
+            568,
+            206
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52280,
+          "actor_x": 1042,
+          "actor_y": 242,
+          "actor_z": 242,
+          "health": 38
+        },
+        {
+          "frame": 12902,
+          "pose": 2,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 465,
+          "pivot_x": 448,
+          "pivot_bottom": 214,
+          "bounds": [
+            328,
+            110,
+            568,
+            206
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52280,
+          "actor_x": 1042,
+          "actor_y": 242,
+          "actor_z": 242,
+          "health": 38
+        },
+        {
+          "frame": 12903,
+          "pose": 2,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 465,
+          "pivot_x": 448,
+          "pivot_bottom": 214,
+          "bounds": [
+            328,
+            110,
+            568,
+            206
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52280,
+          "actor_x": 1042,
+          "actor_y": 242,
+          "actor_z": 242,
+          "health": 38
+        },
+        {
+          "frame": 12904,
+          "pose": 2,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 465,
+          "pivot_x": 448,
+          "pivot_bottom": 214,
+          "bounds": [
+            328,
+            110,
+            568,
+            206
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52280,
+          "actor_x": 1042,
+          "actor_y": 242,
+          "actor_z": 242,
+          "health": 38
+        },
+        {
+          "frame": 12905,
+          "pose": 2,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 465,
+          "pivot_x": 448,
+          "pivot_bottom": 214,
+          "bounds": [
+            328,
+            110,
+            568,
+            206
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52280,
+          "actor_x": 1042,
+          "actor_y": 242,
+          "actor_z": 242,
+          "health": 38
+        },
+        {
+          "frame": 12906,
+          "pose": 2,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 465,
+          "pivot_x": 448,
+          "pivot_bottom": 214,
+          "bounds": [
+            328,
+            110,
+            568,
+            206
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52296,
+          "actor_x": 1064,
+          "actor_y": 242,
+          "actor_z": 242,
+          "health": 38
+        },
+        {
+          "frame": 12907,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 435,
+          "pivot_x": 448,
+          "pivot_bottom": 216,
+          "bounds": [
+            336,
+            112,
+            560,
+            208
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52296,
+          "actor_x": 1064,
+          "actor_y": 242,
+          "actor_z": 242,
+          "health": 38
+        },
+        {
+          "frame": 12908,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 435,
+          "pivot_x": 448,
+          "pivot_bottom": 216,
+          "bounds": [
+            336,
+            112,
+            560,
+            208
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52296,
+          "actor_x": 1064,
+          "actor_y": 242,
+          "actor_z": 242,
+          "health": 38
+        },
+        {
+          "frame": 12909,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 435,
+          "pivot_x": 448,
+          "pivot_bottom": 216,
+          "bounds": [
+            336,
+            112,
+            560,
+            208
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52296,
+          "actor_x": 1064,
+          "actor_y": 242,
+          "actor_z": 242,
+          "health": 38
+        },
+        {
+          "frame": 12910,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 435,
+          "pivot_x": 448,
+          "pivot_bottom": 216,
+          "bounds": [
+            336,
+            112,
+            560,
+            208
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52296,
+          "actor_x": 1064,
+          "actor_y": 242,
+          "actor_z": 242,
+          "health": 38
+        },
+        {
+          "frame": 12911,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 435,
+          "pivot_x": 448,
+          "pivot_bottom": 216,
+          "bounds": [
+            336,
+            112,
+            560,
+            208
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52296,
+          "actor_x": 1064,
+          "actor_y": 242,
+          "actor_z": 242,
+          "health": 38
+        },
+        {
+          "frame": 12912,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 435,
+          "pivot_x": 448,
+          "pivot_bottom": 216,
+          "bounds": [
+            336,
+            112,
+            560,
+            208
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52296,
+          "actor_x": 1064,
+          "actor_y": 242,
+          "actor_z": 242,
+          "health": 38
+        },
+        {
+          "frame": 12913,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 435,
+          "pivot_x": 448,
+          "pivot_bottom": 216,
+          "bounds": [
+            336,
+            112,
+            560,
+            208
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52312,
+          "actor_x": 1082,
+          "actor_y": 244,
+          "actor_z": 244,
+          "health": 38
+        },
+        {
+          "frame": 12914,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 417,
+          "pivot_x": 448,
+          "pivot_bottom": 217,
+          "bounds": [
+            336,
+            113,
+            560,
+            209
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52312,
+          "actor_x": 1082,
+          "actor_y": 244,
+          "actor_z": 244,
+          "health": 38
+        },
+        {
+          "frame": 12915,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 417,
+          "pivot_x": 448,
+          "pivot_bottom": 217,
+          "bounds": [
+            336,
+            113,
+            560,
+            209
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52312,
+          "actor_x": 1082,
+          "actor_y": 244,
+          "actor_z": 244,
+          "health": 38
+        },
+        {
+          "frame": 12916,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 417,
+          "pivot_x": 448,
+          "pivot_bottom": 217,
+          "bounds": [
+            336,
+            113,
+            560,
+            209
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52312,
+          "actor_x": 1082,
+          "actor_y": 244,
+          "actor_z": 244,
+          "health": 38
+        },
+        {
+          "frame": 12917,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 417,
+          "pivot_x": 448,
+          "pivot_bottom": 217,
+          "bounds": [
+            336,
+            113,
+            560,
+            209
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52312,
+          "actor_x": 1082,
+          "actor_y": 244,
+          "actor_z": 244,
+          "health": 38
+        },
+        {
+          "frame": 12918,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 417,
+          "pivot_x": 448,
+          "pivot_bottom": 217,
+          "bounds": [
+            336,
+            113,
+            560,
+            209
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52312,
+          "actor_x": 1082,
+          "actor_y": 244,
+          "actor_z": 244,
+          "health": 38
+        },
+        {
+          "frame": 12919,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 417,
+          "pivot_x": 448,
+          "pivot_bottom": 217,
+          "bounds": [
+            336,
+            113,
+            560,
+            209
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52312,
+          "actor_x": 1082,
+          "actor_y": 244,
+          "actor_z": 244,
+          "health": 38
+        },
+        {
+          "frame": 12920,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 417,
+          "pivot_x": 448,
+          "pivot_bottom": 217,
+          "bounds": [
+            336,
+            113,
+            560,
+            209
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52328,
+          "actor_x": 1106,
+          "actor_y": 246,
+          "actor_z": 246,
+          "health": 38
+        },
+        {
+          "frame": 12921,
+          "pose": 5,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 401,
+          "pivot_x": 448,
+          "pivot_bottom": 215,
+          "bounds": [
+            328,
+            95,
+            568,
+            207
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52328,
+          "actor_x": 1106,
+          "actor_y": 246,
+          "actor_z": 246,
+          "health": 38
+        },
+        {
+          "frame": 12922,
+          "pose": 5,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 401,
+          "pivot_x": 448,
+          "pivot_bottom": 215,
+          "bounds": [
+            328,
+            95,
+            568,
+            207
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52328,
+          "actor_x": 1106,
+          "actor_y": 246,
+          "actor_z": 246,
+          "health": 38
+        },
+        {
+          "frame": 12923,
+          "pose": 5,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 401,
+          "pivot_x": 448,
+          "pivot_bottom": 215,
+          "bounds": [
+            328,
+            95,
+            568,
+            207
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52328,
+          "actor_x": 1106,
+          "actor_y": 246,
+          "actor_z": 246,
+          "health": 38
+        },
+        {
+          "frame": 12924,
+          "pose": 5,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 401,
+          "pivot_x": 448,
+          "pivot_bottom": 215,
+          "bounds": [
+            328,
+            95,
+            568,
+            207
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52328,
+          "actor_x": 1106,
+          "actor_y": 246,
+          "actor_z": 246,
+          "health": 38
+        },
+        {
+          "frame": 12925,
+          "pose": 5,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 401,
+          "pivot_x": 448,
+          "pivot_bottom": 215,
+          "bounds": [
+            328,
+            95,
+            568,
+            207
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52328,
+          "actor_x": 1106,
+          "actor_y": 246,
+          "actor_z": 246,
+          "health": 38
+        },
+        {
+          "frame": 12926,
+          "pose": 5,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 401,
+          "pivot_x": 448,
+          "pivot_bottom": 215,
+          "bounds": [
+            328,
+            95,
+            568,
+            207
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52328,
+          "actor_x": 1106,
+          "actor_y": 246,
+          "actor_z": 246,
+          "health": 38
+        },
+        {
+          "frame": 12927,
+          "pose": 5,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 401,
+          "pivot_x": 448,
+          "pivot_bottom": 215,
+          "bounds": [
+            328,
+            95,
+            568,
+            207
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52344,
+          "actor_x": 1118,
+          "actor_y": 246,
+          "actor_z": 246,
+          "health": 38
+        },
+        {
+          "frame": 12928,
+          "pose": 6,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 389,
+          "pivot_x": 448,
+          "pivot_bottom": 215,
+          "bounds": [
+            328,
+            95,
+            568,
+            207
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52344,
+          "actor_x": 1118,
+          "actor_y": 246,
+          "actor_z": 246,
+          "health": 38
+        },
+        {
+          "frame": 12929,
+          "pose": 6,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 389,
+          "pivot_x": 448,
+          "pivot_bottom": 215,
+          "bounds": [
+            328,
+            95,
+            568,
+            207
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52344,
+          "actor_x": 1118,
+          "actor_y": 246,
+          "actor_z": 246,
+          "health": 38
+        },
+        {
+          "frame": 12930,
+          "pose": 6,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 389,
+          "pivot_x": 448,
+          "pivot_bottom": 215,
+          "bounds": [
+            328,
+            95,
+            568,
+            207
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52344,
+          "actor_x": 1118,
+          "actor_y": 246,
+          "actor_z": 246,
+          "health": 38
+        },
+        {
+          "frame": 12931,
+          "pose": 6,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 389,
+          "pivot_x": 448,
+          "pivot_bottom": 215,
+          "bounds": [
+            328,
+            95,
+            568,
+            207
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52344,
+          "actor_x": 1118,
+          "actor_y": 246,
+          "actor_z": 246,
+          "health": 38
+        },
+        {
+          "frame": 12932,
+          "pose": 6,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 389,
+          "pivot_x": 448,
+          "pivot_bottom": 215,
+          "bounds": [
+            328,
+            95,
+            568,
+            207
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52344,
+          "actor_x": 1118,
+          "actor_y": 246,
+          "actor_z": 246,
+          "health": 38
+        },
+        {
+          "frame": 12933,
+          "pose": 6,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 389,
+          "pivot_x": 448,
+          "pivot_bottom": 215,
+          "bounds": [
+            328,
+            95,
+            568,
+            207
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52344,
+          "actor_x": 1118,
+          "actor_y": 246,
+          "actor_z": 246,
+          "health": 38
+        },
+        {
+          "frame": 12934,
+          "pose": 6,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 389,
+          "pivot_x": 448,
+          "pivot_bottom": 215,
+          "bounds": [
+            328,
+            95,
+            568,
+            207
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52360,
+          "actor_x": 1144,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12935,
+          "pose": 7,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 355,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            92,
+            560,
+            204
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52360,
+          "actor_x": 1144,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12936,
+          "pose": 7,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 355,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            92,
+            560,
+            204
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52360,
+          "actor_x": 1144,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12937,
+          "pose": 7,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 355,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            92,
+            560,
+            204
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52360,
+          "actor_x": 1144,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12938,
+          "pose": 7,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 355,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            92,
+            560,
+            204
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52360,
+          "actor_x": 1144,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12939,
+          "pose": 7,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 355,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            92,
+            560,
+            204
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52360,
+          "actor_x": 1144,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12940,
+          "pose": 7,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 355,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            92,
+            560,
+            204
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52360,
+          "actor_x": 1144,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12941,
+          "pose": 7,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 355,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            92,
+            560,
+            204
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52248,
+          "actor_x": 1150,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12942,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 348,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            108,
+            560,
+            204
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52248,
+          "actor_x": 1150,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12943,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 348,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            108,
+            560,
+            204
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52248,
+          "actor_x": 1150,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12944,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 348,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            108,
+            560,
+            204
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52248,
+          "actor_x": 1150,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12945,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 348,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            108,
+            560,
+            204
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52248,
+          "actor_x": 1150,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12946,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 348,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            108,
+            560,
+            204
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52248,
+          "actor_x": 1150,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12947,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 348,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            108,
+            560,
+            204
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52248,
+          "actor_x": 1150,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12948,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 348,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            108,
+            560,
+            204
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52264,
+          "actor_x": 1160,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12949,
+          "pose": 0,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 334,
+          "pivot_x": 448,
+          "pivot_bottom": 209,
+          "bounds": [
+            336,
+            105,
+            560,
+            201
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52264,
+          "actor_x": 1160,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12950,
+          "pose": 0,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 334,
+          "pivot_x": 448,
+          "pivot_bottom": 209,
+          "bounds": [
+            336,
+            105,
+            560,
+            201
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52264,
+          "actor_x": 1160,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12951,
+          "pose": 0,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 334,
+          "pivot_x": 448,
+          "pivot_bottom": 209,
+          "bounds": [
+            336,
+            105,
+            560,
+            201
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52264,
+          "actor_x": 1160,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12952,
+          "pose": 0,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 334,
+          "pivot_x": 448,
+          "pivot_bottom": 209,
+          "bounds": [
+            336,
+            105,
+            560,
+            201
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52264,
+          "actor_x": 1160,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12953,
+          "pose": 0,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 334,
+          "pivot_x": 448,
+          "pivot_bottom": 209,
+          "bounds": [
+            336,
+            105,
+            560,
+            201
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52264,
+          "actor_x": 1160,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12954,
+          "pose": 0,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 334,
+          "pivot_x": 448,
+          "pivot_bottom": 209,
+          "bounds": [
+            336,
+            105,
+            560,
+            201
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52264,
+          "actor_x": 1160,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12955,
+          "pose": 0,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 334,
+          "pivot_x": 448,
+          "pivot_bottom": 209,
+          "bounds": [
+            336,
+            105,
+            560,
+            201
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52280,
+          "actor_x": 1182,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12956,
+          "pose": 2,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 325,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52280,
+          "actor_x": 1182,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12957,
+          "pose": 2,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 325,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52280,
+          "actor_x": 1182,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12958,
+          "pose": 2,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 325,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52280,
+          "actor_x": 1182,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12959,
+          "pose": 2,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 325,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52280,
+          "actor_x": 1182,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12960,
+          "pose": 2,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 325,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52280,
+          "actor_x": 1182,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12961,
+          "pose": 2,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 325,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52280,
+          "actor_x": 1182,
+          "actor_y": 249,
+          "actor_z": 249,
+          "health": 38
+        },
+        {
+          "frame": 12962,
+          "pose": 2,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 325,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            103,
+            568,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52296,
+          "actor_x": 1204,
+          "actor_y": 251,
+          "actor_z": 251,
+          "health": 38
+        },
+        {
+          "frame": 12963,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 295,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            336,
+            103,
+            560,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52296,
+          "actor_x": 1204,
+          "actor_y": 251,
+          "actor_z": 251,
+          "health": 38
+        },
+        {
+          "frame": 12964,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 295,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            336,
+            103,
+            560,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52296,
+          "actor_x": 1204,
+          "actor_y": 251,
+          "actor_z": 251,
+          "health": 38
+        },
+        {
+          "frame": 12965,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 295,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            336,
+            103,
+            560,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52296,
+          "actor_x": 1204,
+          "actor_y": 251,
+          "actor_z": 251,
+          "health": 38
+        },
+        {
+          "frame": 12966,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 295,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            336,
+            103,
+            560,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52296,
+          "actor_x": 1204,
+          "actor_y": 251,
+          "actor_z": 251,
+          "health": 38
+        },
+        {
+          "frame": 12967,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 295,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            336,
+            103,
+            560,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52296,
+          "actor_x": 1204,
+          "actor_y": 251,
+          "actor_z": 251,
+          "health": 38
+        },
+        {
+          "frame": 12968,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 295,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            336,
+            103,
+            560,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52296,
+          "actor_x": 1204,
+          "actor_y": 251,
+          "actor_z": 251,
+          "health": 38
+        },
+        {
+          "frame": 12969,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 295,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            336,
+            103,
+            560,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52312,
+          "actor_x": 1221,
+          "actor_y": 253,
+          "actor_z": 253,
+          "health": 38
+        },
+        {
+          "frame": 12970,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 278,
+          "pivot_x": 448,
+          "pivot_bottom": 208,
+          "bounds": [
+            336,
+            104,
+            560,
+            200
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52312,
+          "actor_x": 1221,
+          "actor_y": 253,
+          "actor_z": 253,
+          "health": 38
+        },
+        {
+          "frame": 12971,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            32,
+            36,
+            40
+          ],
+          "object_shift_x": 278,
+          "pivot_x": 448,
+          "pivot_bottom": 208,
+          "bounds": [
+            336,
+            104,
+            560,
+            200
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52312,
+          "actor_x": 1221,
+          "actor_y": 253,
+          "actor_z": 253,
+          "health": 38
+        },
+        {
+          "frame": 12972,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 278,
+          "pivot_x": 448,
+          "pivot_bottom": 208,
+          "bounds": [
+            336,
+            104,
+            560,
+            200
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52312,
+          "actor_x": 1221,
+          "actor_y": 253,
+          "actor_z": 253,
+          "health": 38
+        },
+        {
+          "frame": 12973,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 278,
+          "pivot_x": 448,
+          "pivot_bottom": 208,
+          "bounds": [
+            336,
+            104,
+            560,
+            200
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52312,
+          "actor_x": 1221,
+          "actor_y": 253,
+          "actor_z": 253,
+          "health": 38
+        },
+        {
+          "frame": 12974,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 278,
+          "pivot_x": 448,
+          "pivot_bottom": 208,
+          "bounds": [
+            336,
+            104,
+            560,
+            200
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52312,
+          "actor_x": 1221,
+          "actor_y": 253,
+          "actor_z": 253,
+          "health": 38
+        },
+        {
+          "frame": 12975,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 278,
+          "pivot_x": 448,
+          "pivot_bottom": 208,
+          "bounds": [
+            336,
+            104,
+            560,
+            200
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52312,
+          "actor_x": 1221,
+          "actor_y": 253,
+          "actor_z": 253,
+          "health": 38
+        },
+        {
+          "frame": 12976,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44
+          ],
+          "object_shift_x": 278,
+          "pivot_x": 448,
+          "pivot_bottom": 208,
+          "bounds": [
+            336,
+            104,
+            560,
+            200
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52328,
+          "actor_x": 1245,
+          "actor_y": 253,
+          "actor_z": 253,
+          "health": 38
+        },
+        {
+          "frame": 12977,
+          "pose": 5,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 262,
+          "pivot_x": 448,
+          "pivot_bottom": 208,
+          "bounds": [
+            328,
+            88,
+            568,
+            200
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52328,
+          "actor_x": 1245,
+          "actor_y": 253,
+          "actor_z": 253,
+          "health": 38
+        },
+        {
+          "frame": 12978,
+          "pose": 5,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 262,
+          "pivot_x": 448,
+          "pivot_bottom": 208,
+          "bounds": [
+            328,
+            88,
+            568,
+            200
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52328,
+          "actor_x": 1245,
+          "actor_y": 253,
+          "actor_z": 253,
+          "health": 38
+        },
+        {
+          "frame": 12979,
+          "pose": 5,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 262,
+          "pivot_x": 448,
+          "pivot_bottom": 208,
+          "bounds": [
+            328,
+            88,
+            568,
+            200
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52328,
+          "actor_x": 1245,
+          "actor_y": 253,
+          "actor_z": 253,
+          "health": 38
+        },
+        {
+          "frame": 12980,
+          "pose": 5,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 262,
+          "pivot_x": 448,
+          "pivot_bottom": 208,
+          "bounds": [
+            328,
+            88,
+            568,
+            200
+          ],
+          "actor_action": 1024,
+          "actor_state": 2049,
+          "actor_substate": 6913,
+          "actor_animation": 52328,
+          "actor_x": 1245,
+          "actor_y": 253,
+          "actor_z": 253,
+          "health": 38
+        },
+        {
+          "frame": 12981,
+          "pose": 5,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 262,
+          "pivot_x": 448,
+          "pivot_bottom": 208,
+          "bounds": [
+            328,
+            88,
+            568,
+            200
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52328,
+          "actor_x": 1245,
+          "actor_y": 253,
+          "actor_z": 253,
+          "health": 38
+        },
+        {
+          "frame": 12982,
+          "pose": 5,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 262,
+          "pivot_x": 448,
+          "pivot_bottom": 208,
+          "bounds": [
+            328,
+            88,
+            568,
+            200
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52328,
+          "actor_x": 1245,
+          "actor_y": 253,
+          "actor_z": 253,
+          "health": 38
+        },
+        {
+          "frame": 12983,
+          "pose": 5,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 262,
+          "pivot_x": 448,
+          "pivot_bottom": 208,
+          "bounds": [
+            328,
+            88,
+            568,
+            200
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52344,
+          "actor_x": 1257,
+          "actor_y": 254,
+          "actor_z": 254,
+          "health": 38
+        },
+        {
+          "frame": 12984,
+          "pose": 6,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 250,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            87,
+            568,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52344,
+          "actor_x": 1257,
+          "actor_y": 254,
+          "actor_z": 254,
+          "health": 38
+        },
+        {
+          "frame": 12985,
+          "pose": 6,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 250,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            87,
+            568,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52344,
+          "actor_x": 1257,
+          "actor_y": 254,
+          "actor_z": 254,
+          "health": 38
+        },
+        {
+          "frame": 12986,
+          "pose": 6,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 250,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            87,
+            568,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52344,
+          "actor_x": 1257,
+          "actor_y": 254,
+          "actor_z": 254,
+          "health": 38
+        },
+        {
+          "frame": 12987,
+          "pose": 6,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 250,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            87,
+            568,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52344,
+          "actor_x": 1257,
+          "actor_y": 254,
+          "actor_z": 254,
+          "health": 38
+        },
+        {
+          "frame": 12988,
+          "pose": 6,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 250,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            87,
+            568,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1793,
+          "actor_substate": 6913,
+          "actor_animation": 52344,
+          "actor_x": 1257,
+          "actor_y": 254,
+          "actor_z": 254,
+          "health": 38
+        },
+        {
+          "frame": 12989,
+          "pose": 6,
+          "active_object_bank": 1,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 250,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            87,
+            568,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1537,
+          "actor_substate": 6913,
+          "actor_animation": 52344,
+          "actor_x": 1257,
+          "actor_y": 254,
+          "actor_z": 254,
+          "health": 38
+        },
+        {
+          "frame": 12990,
+          "pose": 6,
+          "active_object_bank": 2,
+          "object_offsets": [
+            36,
+            40,
+            44,
+            48
+          ],
+          "object_shift_x": 250,
+          "pivot_x": 448,
+          "pivot_bottom": 207,
+          "bounds": [
+            328,
+            87,
+            568,
+            199
+          ],
+          "actor_action": 1024,
+          "actor_state": 1537,
+          "actor_substate": 6913,
+          "actor_animation": 52360,
+          "actor_x": 1282,
+          "actor_y": 259,
+          "actor_z": 259,
+          "health": 38
+        }
+      ]
+    },
+    {
+      "name": "attack",
+      "first_frame": 12992,
+      "last_frame": 13084,
+      "frame_count": 93,
+      "unique_object_poses": 8,
+      "pose_runs": [
+        {
+          "pose": 0,
+          "frames": 1
+        },
+        {
+          "pose": 1,
+          "frames": 7
+        },
+        {
+          "pose": 0,
+          "frames": 7
+        },
+        {
+          "pose": 2,
+          "frames": 2
+        },
+        {
+          "pose": 3,
+          "frames": 5
+        },
+        {
+          "pose": 4,
+          "frames": 15
+        },
+        {
+          "pose": 5,
+          "frames": 3
+        },
+        {
+          "pose": 3,
+          "frames": 16
+        },
+        {
+          "pose": 4,
+          "frames": 15
+        },
+        {
+          "pose": 5,
+          "frames": 3
+        },
+        {
+          "pose": 3,
+          "frames": 13
+        },
+        {
+          "pose": 6,
+          "frames": 3
+        },
+        {
+          "pose": 7,
+          "frames": 3
+        }
+      ],
+      "palette_sha256": "bfc4f40a357cac96ea011d0be5458cec0df95768f11af3b077f2ab0ea8b6d0bc",
+      "timeline": [
+        {
+          "frame": 12992,
+          "pose": 0,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 217,
+          "pivot_x": 448,
+          "pivot_bottom": 202,
+          "bounds": [
+            336,
+            82,
+            560,
+            194
+          ],
+          "actor_action": 1024,
+          "actor_state": 5889,
+          "actor_substate": 6913,
+          "actor_animation": 52492,
+          "actor_x": 1260,
+          "actor_y": 257,
+          "actor_z": 257,
+          "health": 38
+        },
+        {
+          "frame": 12993,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 238,
+          "pivot_x": 448,
+          "pivot_bottom": 204,
+          "bounds": [
+            336,
+            100,
+            560,
+            196
+          ],
+          "actor_action": 1024,
+          "actor_state": 5889,
+          "actor_substate": 6913,
+          "actor_animation": 52492,
+          "actor_x": 1260,
+          "actor_y": 257,
+          "actor_z": 257,
+          "health": 38
+        },
+        {
+          "frame": 12994,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 238,
+          "pivot_x": 448,
+          "pivot_bottom": 204,
+          "bounds": [
+            336,
+            100,
+            560,
+            196
+          ],
+          "actor_action": 1024,
+          "actor_state": 5889,
+          "actor_substate": 6913,
+          "actor_animation": 52492,
+          "actor_x": 1260,
+          "actor_y": 257,
+          "actor_z": 257,
+          "health": 38
+        },
+        {
+          "frame": 12995,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 238,
+          "pivot_x": 448,
+          "pivot_bottom": 204,
+          "bounds": [
+            336,
+            100,
+            560,
+            196
+          ],
+          "actor_action": 1024,
+          "actor_state": 5889,
+          "actor_substate": 6913,
+          "actor_animation": 52492,
+          "actor_x": 1260,
+          "actor_y": 257,
+          "actor_z": 257,
+          "health": 38
+        },
+        {
+          "frame": 12996,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 238,
+          "pivot_x": 448,
+          "pivot_bottom": 204,
+          "bounds": [
+            336,
+            100,
+            560,
+            196
+          ],
+          "actor_action": 1024,
+          "actor_state": 5889,
+          "actor_substate": 6913,
+          "actor_animation": 52492,
+          "actor_x": 1260,
+          "actor_y": 257,
+          "actor_z": 257,
+          "health": 38
+        },
+        {
+          "frame": 12997,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 238,
+          "pivot_x": 448,
+          "pivot_bottom": 204,
+          "bounds": [
+            336,
+            100,
+            560,
+            196
+          ],
+          "actor_action": 1024,
+          "actor_state": 5889,
+          "actor_substate": 6913,
+          "actor_animation": 52492,
+          "actor_x": 1260,
+          "actor_y": 257,
+          "actor_z": 257,
+          "health": 38
+        },
+        {
+          "frame": 12998,
+          "pose": 1,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 238,
+          "pivot_x": 448,
+          "pivot_bottom": 204,
+          "bounds": [
+            336,
+            100,
+            560,
+            196
+          ],
+          "actor_action": 1024,
+          "actor_state": 5889,
+          "actor_substate": 6913,
+          "actor_animation": 52492,
+          "actor_x": 1260,
+          "actor_y": 257,
+          "actor_z": 257,
+          "health": 38
+        },
+        {
+          "frame": 12999,
+          "pose": 1,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 238,
+          "pivot_x": 448,
+          "pivot_bottom": 204,
+          "bounds": [
+            336,
+            100,
+            560,
+            196
+          ],
+          "actor_action": 1024,
+          "actor_state": 5889,
+          "actor_substate": 6913,
+          "actor_animation": 52380,
+          "actor_x": 1251,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13000,
+          "pose": 0,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 248,
+          "pivot_x": 448,
+          "pivot_bottom": 205,
+          "bounds": [
+            336,
+            85,
+            560,
+            197
+          ],
+          "actor_action": 1024,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 52380,
+          "actor_x": 1251,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13001,
+          "pose": 0,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 248,
+          "pivot_x": 448,
+          "pivot_bottom": 205,
+          "bounds": [
+            336,
+            85,
+            560,
+            197
+          ],
+          "actor_action": 1024,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 52380,
+          "actor_x": 1251,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13002,
+          "pose": 0,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 248,
+          "pivot_x": 448,
+          "pivot_bottom": 205,
+          "bounds": [
+            336,
+            85,
+            560,
+            197
+          ],
+          "actor_action": 1024,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 52380,
+          "actor_x": 1251,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13003,
+          "pose": 0,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 248,
+          "pivot_x": 448,
+          "pivot_bottom": 205,
+          "bounds": [
+            336,
+            85,
+            560,
+            197
+          ],
+          "actor_action": 1024,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 52380,
+          "actor_x": 1251,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13004,
+          "pose": 0,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 248,
+          "pivot_x": 448,
+          "pivot_bottom": 205,
+          "bounds": [
+            336,
+            85,
+            560,
+            197
+          ],
+          "actor_action": 1024,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 52380,
+          "actor_x": 1251,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13005,
+          "pose": 0,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 248,
+          "pivot_x": 448,
+          "pivot_bottom": 205,
+          "bounds": [
+            336,
+            85,
+            560,
+            197
+          ],
+          "actor_action": 1024,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 52380,
+          "actor_x": 1251,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13006,
+          "pose": 0,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 248,
+          "pivot_x": 448,
+          "pivot_bottom": 205,
+          "bounds": [
+            336,
+            85,
+            560,
+            197
+          ],
+          "actor_action": 1024,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 52396,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13007,
+          "pose": 2,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 262,
+          "pivot_x": 448,
+          "pivot_bottom": 205,
+          "bounds": [
+            328,
+            85,
+            568,
+            197
+          ],
+          "actor_action": 3072,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 52396,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13008,
+          "pose": 2,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 262,
+          "pivot_x": 448,
+          "pivot_bottom": 205,
+          "bounds": [
+            328,
+            85,
+            568,
+            197
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53480,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13009,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53480,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13010,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53480,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13011,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53480,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13012,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53480,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13013,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13014,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13015,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13016,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13017,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13018,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13019,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13020,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13021,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13022,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13023,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13024,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53512,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13025,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53512,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13026,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53512,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13027,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53512,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13028,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53528,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13029,
+          "pose": 5,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            92,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53528,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13030,
+          "pose": 5,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            92,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53528,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13031,
+          "pose": 5,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            92,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13032,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13033,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13034,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13035,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13036,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13037,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13038,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13039,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13040,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13041,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13042,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53480,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13043,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53480,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13044,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53480,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13045,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53480,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13046,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53480,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13047,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13048,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13049,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13050,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13051,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13052,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13053,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13054,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13055,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13056,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13057,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53496,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13058,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53512,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13059,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53512,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13060,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53512,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13061,
+          "pose": 4,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53512,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13062,
+          "pose": 4,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 245,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            312,
+            108,
+            584,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53528,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13063,
+          "pose": 5,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            92,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53528,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13064,
+          "pose": 5,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            92,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53528,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13065,
+          "pose": 5,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            92,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13066,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13067,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13068,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13069,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13070,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13071,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13072,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13073,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13074,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13075,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13076,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3076,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13077,
+          "pose": 3,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 53544,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13078,
+          "pose": 3,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 261,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            344,
+            108,
+            552,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 54012,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13079,
+          "pose": 6,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 253,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            108,
+            560,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 54012,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13080,
+          "pose": 6,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 253,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            108,
+            560,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 54012,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13081,
+          "pose": 6,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28,
+            32
+          ],
+          "object_shift_x": 253,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            336,
+            108,
+            560,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 54028,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13082,
+          "pose": 7,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 237,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            368,
+            108,
+            528,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 54028,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13083,
+          "pose": 7,
+          "active_object_bank": 1,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 237,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            368,
+            108,
+            528,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 54028,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        },
+        {
+          "frame": 13084,
+          "pose": 7,
+          "active_object_bank": 2,
+          "object_offsets": [
+            20,
+            24,
+            28
+          ],
+          "object_shift_x": 237,
+          "pivot_x": 448,
+          "pivot_bottom": 212,
+          "bounds": [
+            368,
+            108,
+            528,
+            204
+          ],
+          "actor_action": 3074,
+          "actor_state": 6145,
+          "actor_substate": 6913,
+          "actor_animation": 54028,
+          "actor_x": 1245,
+          "actor_y": 256,
+          "actor_z": 256,
+          "health": 38
+        }
+      ]
+    }
+  ]
+}

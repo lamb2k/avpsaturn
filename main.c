@@ -37,7 +37,6 @@
 #define AVSP_PCM_CHANNEL_SEQUENCE 3
 #define AVSP_PCM_CHANNEL_TRANSITION 4
 #define AVSP_PCM_CHANNEL_OPENING 5
-#define BOSS_CEL_BYTES ((AVSP_BOSS_CEL_WIDTH * AVSP_BOSS_CEL_HEIGHT) / 2)
 #define BITMAP_SCENE_NONE (-1000)
 #define BITMAP_SCENE_CORRIDOR (-2)
 #define BITMAP_SCENE_BOSS (-3)
@@ -47,7 +46,8 @@
 #define AVSP_VDP1_TEXTURE_BYTES \
     (2 * CEL_BYTES + \
      AVSP_PLAYER_ACTION_LAYERS * AVSP_PLAYER_ACTION_DECODED_BYTES + \
-     CAP_MAX_ENEMIES * AVSP_ENEMY_DECODED_BYTES + BOSS_CEL_BYTES + \
+     CAP_MAX_ENEMIES * AVSP_ENEMY_DECODED_BYTES + \
+     AVSP_BOSS_DECODED_BYTES + \
      AVSP_HUD_TEXTURE_BYTES)
 
 #if JO_TV_WIDTH != CAP_VIEW_WIDTH || JO_TV_HEIGHT != 224
@@ -96,9 +96,10 @@ static unsigned char *background_bitmap;
 static unsigned char *player_action_archive;
 static unsigned char *enemy_action_archive;
 static unsigned char *enemy_action_buffer;
+static unsigned char *boss_action_archive;
 static jo_img_4bits player_action_images[AVSP_PLAYER_ACTION_LAYERS];
 static jo_img_4bits enemy_action_images[CAP_MAX_ENEMIES];
-static jo_img_4bits boss_idle_images[AVSP_BOSS_IDLE_LAYERS];
+static jo_img_4bits boss_action_image;
 static jo_img_8bits hud_top_image;
 static jo_img_8bits hud_prompt_image;
 static jo_img_8bits hud_heat_image;
@@ -121,7 +122,7 @@ static jo_sound *opening_channel_sound;
 static int player_idle_sprites[2];
 static int player_action_sprites[AVSP_PLAYER_ACTION_LAYERS];
 static int enemy_action_sprites[CAP_MAX_ENEMIES];
-static int boss_idle_sprites[AVSP_BOSS_IDLE_LAYERS];
+static int boss_action_sprite;
 static int hud_top_sprite;
 static int hud_prompt_sprite;
 static int hud_heat_sprite;
@@ -129,6 +130,7 @@ static int displayed_hud_health;
 static int displayed_hud_energy;
 static int current_player_action_pose;
 static int current_enemy_action_poses[CAP_MAX_ENEMIES];
+static int current_boss_action_pose;
 static int debug_hud_enabled;
 static const char *failed_asset;
 static int runtime_ready;
@@ -155,6 +157,7 @@ static int withdraw_audio_play_count;
 static int breach_audio_play_count;
 static int opening_audio_channel_observed;
 static int enemy_runtime_ready;
+static int boss_runtime_ready;
 static int current_bitmap_scene;
 #ifdef AVSP_VISUAL_TEST
 static int visual_action_index;
@@ -426,23 +429,50 @@ static int decode_enemy_action_pose(const int pose, const int slot)
     return 1;
 }
 
-static int load_boss_idle(void)
+static int load_boss_action_archive(void)
 {
-    int layer;
-    int length;
-    for (layer = 0; layer < AVSP_BOSS_IDLE_LAYERS; ++layer)
+    int length = 0;
+    boss_action_archive = (unsigned char *)jo_fs_read_file_in_dir(
+        AVSP_BOSS_ARCHIVE_FILE, "SPR4", &length);
+    if (boss_action_archive == JO_NULL ||
+        length != AVSP_BOSS_ARCHIVE_BYTES)
     {
-        jo_img_4bits *image = &boss_idle_images[layer];
-        image->width = AVSP_BOSS_CEL_WIDTH;
-        image->height = AVSP_BOSS_CEL_HEIGHT;
-        length = 0;
-        image->data = (unsigned char *)jo_fs_read_file_in_dir(
-            avsp_boss_idle_files[layer], "SPR4", &length);
-        if (image->data == JO_NULL || length != BOSS_CEL_BYTES)
+        failed_asset = AVSP_BOSS_ARCHIVE_FILE;
+        return 0;
+    }
+    return 1;
+}
+
+static int decode_boss_action_pose(const int pose)
+{
+    unsigned int source = 0;
+    unsigned int target = 0;
+    const unsigned int source_offset = avsp_boss_rle_offsets[pose];
+    const unsigned int source_length = avsp_boss_rle_bytes[pose];
+    const unsigned char *source_data;
+    unsigned char *output = boss_action_image.data;
+    if (source_offset + source_length > AVSP_BOSS_ARCHIVE_BYTES)
+    {
+        failed_asset = "BOSS ACTION INDEX";
+        return 0;
+    }
+    source_data = boss_action_archive + source_offset;
+    while (source + 1 < source_length)
+    {
+        unsigned int count = source_data[source++];
+        unsigned char value = source_data[source++];
+        if (count == 0 || target + count > AVSP_BOSS_DECODED_BYTES)
         {
-            failed_asset = avsp_boss_idle_files[layer];
+            failed_asset = "BOSS ACTION RLE";
             return 0;
         }
+        memset(output + target, value, count);
+        target += count;
+    }
+    if (source != source_length || target != AVSP_BOSS_DECODED_BYTES)
+    {
+        failed_asset = "BOSS ACTION SIZE";
+        return 0;
     }
     return 1;
 }
@@ -770,13 +800,6 @@ static int create_sprite_working_set(void)
             failed_asset = "PLAYER ACTION VDP1";
     }
     current_player_action_pose = 0;
-    for (layer = 0; layer < AVSP_BOSS_IDLE_LAYERS; ++layer)
-    {
-        boss_idle_sprites[layer] = jo_sprite_add_4bits_image(
-            &boss_idle_images[layer]);
-        if (boss_idle_sprites[layer] < 0)
-            failed_asset = avsp_boss_idle_files[layer];
-    }
     hud_top_sprite = jo_sprite_add_8bits_image(&hud_top_image);
     hud_prompt_sprite = jo_sprite_add_8bits_image(&hud_prompt_image);
     hud_heat_sprite = jo_sprite_add_8bits_image(&hud_heat_image);
@@ -806,6 +829,30 @@ static int prepare_enemy_runtime(void)
         current_enemy_action_poses[slot] = 0;
     }
     enemy_runtime_ready = 1;
+    return 1;
+}
+
+static int prepare_boss_runtime(void)
+{
+    if (boss_runtime_ready) return 1;
+    boss_action_image.width = AVSP_BOSS_CEL_WIDTH;
+    boss_action_image.height = AVSP_BOSS_CEL_HEIGHT;
+    boss_action_image.data = (unsigned char *)jo_malloc_with_behaviour(
+        AVSP_BOSS_DECODED_BYTES, JO_MALLOC_TRY_REUSE_BLOCK);
+    if (boss_action_image.data == JO_NULL)
+    {
+        failed_asset = "BOSS ACTION BUFFER";
+        return 0;
+    }
+    if (!decode_boss_action_pose(0)) return 0;
+    boss_action_sprite = jo_sprite_add_4bits_image(&boss_action_image);
+    if (boss_action_sprite < 0)
+    {
+        failed_asset = "BOSS ACTION VDP1";
+        return 0;
+    }
+    current_boss_action_pose = 0;
+    boss_runtime_ready = 1;
     return 1;
 }
 
@@ -879,6 +926,27 @@ static int enemy_pose_for_frame(const int clip, const int action_frame)
         remaining -= duration;
     }
     return avsp_enemy_step_poses[clip][avsp_enemy_step_counts[clip] - 1];
+}
+
+static int boss_clip_for_action(const CapAction action)
+{
+    if (action == CAP_ACT_ATTACK) return AVSP_BOSS_CLIP_ATTACK;
+    if (action == CAP_ACT_WALK) return AVSP_BOSS_CLIP_WALK;
+    return AVSP_BOSS_CLIP_IDLE;
+}
+
+static int boss_pose_for_frame(const int clip, const int action_frame)
+{
+    int step;
+    int remaining = action_frame;
+    for (step = 0; step < avsp_boss_step_counts[clip]; ++step)
+    {
+        int duration = avsp_boss_step_durations[clip][step];
+        if (remaining < duration)
+            return avsp_boss_step_poses[clip][step];
+        remaining -= duration;
+    }
+    return avsp_boss_step_poses[clip][avsp_boss_step_counts[clip] - 1];
 }
 
 static void draw_exact_layer_offset(const CapActor *actor, const int screen_x,
@@ -981,10 +1049,36 @@ static void draw_alien(const CapActor *actor, const int screen_x,
 static void draw_boss(const CapActor *actor, const int screen_x)
 {
     int depth = 330 - actor->lane;
-    int layer;
-    for (layer = 0; layer < AVSP_BOSS_IDLE_LAYERS; ++layer)
-        draw_exact_layer(actor, screen_x, boss_idle_sprites[layer],
-                         avsp_boss_idle_palette_banks[layer], depth - layer);
+    int clip = boss_clip_for_action(actor->action);
+    int frame = clip == AVSP_BOSS_CLIP_WALK ?
+        actor->locomotion_frame : actor->action_frame;
+    int pose;
+    /* Boss graphics enter the working set only after the opening PCM overlay
+       has ended. This avoids reserving a second large decoded actor cel during
+       the cold-boot menu and first-wave allocation phase. */
+    if (!prepare_boss_runtime())
+    {
+        runtime_ready = 0;
+        return;
+    }
+    if (clip == AVSP_BOSS_CLIP_WALK)
+        frame %= avsp_boss_total_frames[clip];
+    else if (frame >= avsp_boss_total_frames[clip])
+        frame = avsp_boss_total_frames[clip] - 1;
+    pose = boss_pose_for_frame(clip, frame);
+    if (pose != current_boss_action_pose)
+    {
+        if (!decode_boss_action_pose(pose))
+        {
+            runtime_ready = 0;
+            return;
+        }
+        jo_sprite_replace_4bits_image(
+            &boss_action_image, boss_action_sprite);
+        current_boss_action_pose = pose;
+    }
+    draw_exact_layer(actor, screen_x, boss_action_sprite,
+                     AVSP_BOSS_PALETTE_BANK, depth);
 }
 
 static void draw_world(void)
@@ -1548,6 +1642,8 @@ void jo_main(void)
     opening_channel_sound = JO_NULL;
     enemy_action_buffer = JO_NULL;
     enemy_runtime_ready = 0;
+    boss_action_image.data = JO_NULL;
+    boss_runtime_ready = 0;
     current_bitmap_scene = BITMAP_SCENE_NONE;
 #ifdef AVSP_VISUAL_TEST
     visual_action_index = 0;
@@ -1586,7 +1682,8 @@ void jo_main(void)
                         load_hud_assets() &&
                         load_action_audio() &&
                         load_all_cels() && load_player_action_sequences() &&
-                        load_enemy_action_archive() && load_boss_idle() &&
+                        load_enemy_action_archive() &&
+                        load_boss_action_archive() &&
                         create_sprite_working_set();
     }
 #ifdef AVSP_VISUAL_TEST

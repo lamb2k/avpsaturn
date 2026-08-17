@@ -92,6 +92,9 @@ alter console copy protection or supply copyrighted disc data.
 8. Defeat Chrysalis and confirm the native Stage Clear state. With the
    diagnostic enabled, require `PCM OPEN 1111`, `PCM D/T 1/1`,
    `PCM SEQ 1/1`, and all `SEEN 1` latches before Round 2.
+   Before the defeat, confirm Chrysalis cycles the 106-frame captured walk and
+   changes through the 93-frame attack poses without clipping, partial cels,
+   palette corruption, or a `BOSS ACTION` allocation/decode failure.
 9. Leave the encounter running for ten minutes and watch for partial sprites,
    palette corruption, controller loss, CD stalls, or dropped video sync.
 

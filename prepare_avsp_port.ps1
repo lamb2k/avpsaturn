@@ -120,6 +120,18 @@ else {
     Write-Host 'Reusing the existing verified Stage 1 Chrysalis-room capture.'
 }
 
+$bossActionArguments = @{}
+if ($RefreshCapture) {
+    $bossActionArguments['Refresh'] = $true
+}
+if ($PythonPath) {
+    $bossActionArguments['PythonPath'] = $PythonPath
+}
+& (Join-Path $projectRoot 'capture_boss_actions.ps1') @bossActionArguments
+if ($LASTEXITCODE -ne 0) {
+    throw "Dense Chrysalis-action capture failed with exit code $LASTEXITCODE."
+}
+
 $audioCapture = Join-Path $captureRoot 'stage1_route_reference.wav'
 $audioRawCapture = Join-Path $captureRoot 'stage1_route_reference_untrimmed.wav'
 $audioNeedsTrim = $false
