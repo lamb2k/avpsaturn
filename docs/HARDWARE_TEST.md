@@ -14,7 +14,7 @@ on the hardware candidate:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -Clean -Release
 ```
 
-Keep `game.cue` and `game.iso` together. Select `game.cue` when the loader asks
+Keep `game.cue`, `game.iso`, and `stage1_audio.wav` together. Select `game.cue` when the loader asks
 for a disc descriptor. `build/hardware_release_manifest.txt` records the image
 hash, build profile, video mode, disc format, and cartridge requirement. ROMs,
 generated assets, images, and the manifest remain ignored private artifacts.
@@ -31,21 +31,26 @@ alter console copy protection or supply copyrighted disc data.
   240p-family timing
 - digital Saturn controller in port 1
 - working 32 Mbit DRAM expansion cartridge
-- `game.cue` plus `game.iso` from the same normal-release build
+- `game.cue`, `game.iso`, and `stage1_audio.wav` from the same normal-release build
 - cold boot, not an in-game reset from another title
 
 ## Acceptance route
 
 1. Cold boot and confirm the reference scene appears without an asset error.
-2. Confirm the full 224-line picture is stable in 352x224; the intended crop is
-   16 arcade pixels at each horizontal edge, with no vertical crop or scaling.
+2. Confirm the full 224-line picture is stable in 352x224. Default full-width
+   mode must show both horizontal edges; Y must toggle to the exact 16-pixel-
+   per-side center crop without changing vertical scale.
 3. Press a direction and confirm the build changes from the static reference to
    native gameplay.
-4. Verify D-pad lane movement, A attack, B dash, C special, and X diagnostic HUD.
-5. Fight through the five-enemy opening wave and three-enemy reinforcement wave.
-6. Confirm eight total KOs unlock the room and moving right reaches the exit
+4. Verify D-pad lane movement, A attack, B dash, C special, X diagnostic HUD,
+   and Y display-mode toggle.
+5. Confirm Stage 1 CD audio begins after the first input, remains stereo and
+   free of stalls through the room transition, and survives a pause/resume.
+6. Fight through the five-enemy opening wave and three-enemy reinforcement wave.
+7. Confirm eight total KOs unlock the room and moving right reaches the exit
    transition.
-7. Leave the encounter running for ten minutes and watch for partial sprites,
+8. Defeat Chrysalis and confirm the native Stage Clear state.
+9. Leave the encounter running for ten minutes and watch for partial sprites,
    palette corruption, controller loss, CD stalls, or dropped video sync.
 
 Record console model/region, boot device, cartridge, display path, result, and

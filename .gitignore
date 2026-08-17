@@ -8,6 +8,7 @@ game.elf
 game.iso
 game.map
 game.raw
+stage1_audio.wav
 *.o
 __pycache__/
 cd/0.bin

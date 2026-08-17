@@ -9,6 +9,8 @@
 #define CAP_ROOM_ONE_EXIT 480
 #define CAP_KO_VISIBLE_FRAMES 45
 #define CAP_CLEAR_HOLD_FRAMES 60
+#define CAP_BOSS_INTRO_FRAMES 90
+#define CAP_STAGE_CLEAR_FRAMES 180
 
 typedef struct
 {
@@ -43,6 +45,33 @@ static int cap_clamp(const int value, const int minimum, const int maximum)
     return value;
 }
 
+int cap_background_scroll_x(int camera_x, int stage_area)
+{
+    const int maximum_camera = CAP_WORLD_WIDTH - CAP_VIEW_WIDTH;
+    const int maximum_scroll = CAP_BACKGROUND_WIDTH - CAP_VIEW_WIDTH;
+    const int scrollable_after_crop = maximum_scroll - CAP_CENTER_CROP_X;
+
+    /* Each captured CPS2 room begins with a 384-pixel active picture inside a
+       512-pixel Saturn bitmap. Start 16 pixels into that picture so 352-wide
+       output crops both arcade edges evenly. The street then consumes the
+       remaining bitmap width as the native camera advances. */
+    if (stage_area != 0) return CAP_CENTER_CROP_X;
+    camera_x = cap_clamp(camera_x, 0, maximum_camera);
+    return CAP_CENTER_CROP_X +
+        (camera_x * scrollable_after_crop) / maximum_camera;
+}
+
+int cap_background_fit_scroll_x(int camera_x, int stage_area)
+{
+    const int maximum_camera = CAP_WORLD_WIDTH - CAP_VIEW_WIDTH;
+    const int fitted_source_width = CAP_CPS2_VIEW_WIDTH;
+    const int maximum_scroll = CAP_BACKGROUND_WIDTH - fitted_source_width;
+
+    if (stage_area != 0) return 0;
+    camera_x = cap_clamp(camera_x, 0, maximum_camera);
+    return (camera_x * maximum_scroll) / maximum_camera;
+}
+
 static void cap_deactivate_enemy(CapActor *enemy, const int index)
 {
     enemy->x = -256 - index * 32;
@@ -55,6 +84,7 @@ static void cap_deactivate_enemy(CapActor *enemy, const int index)
     enemy->hit_latched = 0;
     enemy->active = 0;
     enemy->variant = 0;
+    enemy->kind = CAP_ACTOR_ALIEN;
 }
 
 static void cap_spawn_enemy(CapActor *enemy, const int index)
@@ -70,6 +100,23 @@ static void cap_spawn_enemy(CapActor *enemy, const int index)
     enemy->hit_latched = 0;
     enemy->active = 1;
     enemy->variant = spawn->variant;
+    enemy->kind = CAP_ACTOR_ALIEN;
+}
+
+static void cap_spawn_boss(CapWorld *world)
+{
+    CapActor *boss = &world->enemies[0];
+    boss->x = 276;
+    boss->lane = 182;
+    boss->facing = -1;
+    boss->health = CAP_BOSS_MAX_HEALTH;
+    boss->action = CAP_ACT_WALK;
+    boss->action_frame = 0;
+    boss->locomotion_frame = 0;
+    boss->hit_latched = 0;
+    boss->active = 1;
+    boss->variant = 0;
+    boss->kind = CAP_ACTOR_BOSS;
 }
 
 static void cap_spawn_range(CapWorld *world, const int first, const int count)
@@ -93,6 +140,7 @@ void cap_world_init(CapWorld *world)
     world->player.hit_latched = 0;
     world->player.active = 1;
     world->player.variant = 0;
+    world->player.kind = CAP_ACTOR_PLAYER;
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
         cap_deactivate_enemy(&world->enemies[index], index);
     world->camera_x = 0;
@@ -105,6 +153,9 @@ void cap_world_init(CapWorld *world)
     world->enemies_defeated = 0;
     world->room_locked = 0;
     world->stage_transitioned = 0;
+    world->stage_area = 0;
+    world->boss_defeated = 0;
+    world->level_completed = 0;
 }
 
 static void cap_damage_enemy(CapWorld *world, CapActor *enemy, const int damage)
@@ -116,8 +167,16 @@ static void cap_damage_enemy(CapWorld *world, CapActor *enemy, const int damage)
     {
         enemy->health = 0;
         enemy->action = CAP_ACT_KO;
-        world->score += 100;
-        ++world->enemies_defeated;
+        if (enemy->kind == CAP_ACTOR_BOSS)
+        {
+            world->score += 1000;
+            world->boss_defeated = 1;
+        }
+        else
+        {
+            world->score += 100;
+            ++world->enemies_defeated;
+        }
     }
     else
     {
@@ -358,8 +417,36 @@ static void cap_update_encounter(CapWorld *world)
     if (world->encounter_state == CAP_ENCOUNTER_CLEAR &&
         !world->room_locked && world->player.x >= CAP_ROOM_ONE_EXIT)
     {
-        world->encounter_state = CAP_ENCOUNTER_COMPLETE;
+        int index;
+        for (index = 0; index < CAP_MAX_ENEMIES; ++index)
+            cap_deactivate_enemy(&world->enemies[index], index);
+        world->encounter_state = CAP_ENCOUNTER_BOSS_INTRO;
         world->stage_transitioned = 1;
+        world->stage_area = 1;
+        world->room_locked = 1;
+        world->player.x = 88;
+        world->player.lane = 178;
+        world->camera_x = 0;
+        world->encounter_timer = 0;
+    }
+    if (world->encounter_state == CAP_ENCOUNTER_BOSS_INTRO &&
+        world->encounter_timer >= CAP_BOSS_INTRO_FRAMES)
+    {
+        cap_spawn_boss(world);
+        world->encounter_state = CAP_ENCOUNTER_BOSS;
+        world->encounter_timer = 0;
+    }
+    if (world->encounter_state == CAP_ENCOUNTER_BOSS && world->boss_defeated)
+    {
+        world->encounter_state = CAP_ENCOUNTER_STAGE_CLEAR;
+        world->encounter_timer = 0;
+    }
+    if (world->encounter_state == CAP_ENCOUNTER_STAGE_CLEAR &&
+        world->encounter_timer >= CAP_STAGE_CLEAR_FRAMES)
+    {
+        world->encounter_state = CAP_ENCOUNTER_COMPLETE;
+        world->level_completed = 1;
+        world->room_locked = 0;
         world->encounter_timer = 0;
     }
 }
@@ -379,7 +466,7 @@ CapClipRequest cap_world_step(CapWorld *world, const CapInput *input)
         cap_update_enemy(world, &world->enemies[index], index);
     if (world->encounter_started)
         cap_update_encounter(world);
-    target_camera = world->room_locked ? 0 :
+    target_camera = (world->room_locked || world->stage_area == 1) ? 0 :
         cap_clamp(world->player.x - (CAP_VIEW_WIDTH - 32),
                   0, CAP_WORLD_WIDTH - CAP_VIEW_WIDTH);
     if (world->camera_x < target_camera) world->camera_x += 2;

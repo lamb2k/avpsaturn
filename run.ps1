@@ -77,7 +77,7 @@ elseif ($emulatorName -eq 'yabasanshiro') {
     $settings = Get-Content -LiteralPath $settingsPath -Raw
     $yabaValues = [ordered]@{
         'General\CdRom' = '1'
-        'General\CdRomISO' = $iso.Replace('\', '/')
+        'General\CdRomISO' = $cue.Replace('\', '/')
         # Yaba Sanshiro cartridge type 7 is 32 Mbit DRAM, or 4 MB.
         'Cartridge\Type' = '7'
         'autostart' = 'true'
@@ -119,7 +119,7 @@ elseif ($emulatorName -eq 'yabause') {
 $quotedCue = '"' + $cue + '"'
 $arguments = switch -Regex ($emulatorName) {
     '^kronos$' { @('-i', $quotedCue); break }
-    '^yabasanshiro$' { @('-nb', '-ns', '-a', '-i', $quotedCue); break }
+    '^yabasanshiro$' { @('-nb', '-a', '-i', $quotedCue); break }
     '^yabause$' { @('-a', '-i', $quotedCue); break }
     default { @($quotedCue) }
 }

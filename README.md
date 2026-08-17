@@ -3,8 +3,8 @@
 This repository is a private engineering prototype for testing a native Sega
 Saturn conversion of Capcom's CPS2 Alien vs. Predator. It is not an emulator:
 the build cross-compiles SH-2 code and feeds reconstructed graphics to VDP1 and
-VDP2. It currently proves an authentic-asset presentation slice, not a complete
-Stage 1 port.
+VDP2. It currently proves an authentic-asset Stage 1 route slice, not a content-
+complete or frame-exact port.
 
 Current milestone:
 
@@ -21,27 +21,33 @@ Current milestone:
   replaceable VDP1 slot over a reconstructed VDP2 stage
 - runs a capture-derived first-room lifecycle with five opening enemies, three
   reinforcements, a locked combat boundary, clear hold, and exit transition
+- transitions into a reconstructed industrial boss room, spawns an exact
+  capture-derived Chrysalis assembly, and reaches a native Stage Clear state
 - draws the eight bounded enemy actors from one shared VDP1 cel slot with four
   exact CPS2 alien palettes
 - boots with a lossless 8-bit VDP1 reference surface containing the complete
   final visible CPS2 object/priority result
 - boots in the Saturn's native 352x224 mode with the 4 MB expansion cartridge
+- builds a mixed-mode disc with the verified Stage 1 QSound route rendered as
+  native Saturn CD audio track 2
 - runs a small native lane-combat model; enemies wait for the first input
 
 The boot scene is intentionally stable for visual comparison. It uses the
 active CPS2 object-RAM bank and reconstructs the final visible object result
 after CPS2 tilemap-priority masking. The comparison surface is lossless at its
-source scale, but the presentation is not yet frame-exact: the 384-wide frame
-is center-cropped to 352, the HUD is static, and the boot oracle is flattened
+source scale, but the presentation is not yet frame-exact: the HUD is static
+and the boot oracle is flattened
 rather than actor-driven. On first input, the build switches to native gameplay,
 whose player attack now uses an authentic ten-pose CPS2 sequence. It still does
 not yet bind the extracted enemy poses to the arcade's complete enemy state
-machine, exact spawn timing, audio, or the remainder of Stage 1.
+machine, exact spawn timing, isolated event sound effects, or every intermediate
+Stage 1 room and action.
 
-The Saturn has no 384-pixel low-resolution output. The selected 352x224 mode is
-the closest native match: all 224 source lines and original pixel scale are
-preserved, with 16 source pixels cropped from each horizontal edge. The port
-does not squeeze or resample the arcade artwork.
+The Saturn has no 384-pixel low-resolution output. The selected 352x224 mode
+keeps all 224 source lines. The default full-width mode fits all 384 horizontal
+source pixels into 352 output pixels, an 8.33% horizontal compression. Press Y
+to compare the pixel-exact alternative, which preserves source scale and crops
+16 pixels from each horizontal edge.
 
 ## Repository and content boundary
 
@@ -67,9 +73,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -Clean -Rele
 
 The build validates the ROM set, reuses or creates the deterministic MAME
 capture, regenerates ignored Saturn assets, runs the strict host model tests,
-cross-compiles for SH-2, and produces ignored `game.cue` and `game.iso` files.
+cross-compiles for SH-2, and produces ignored `game.cue`, `game.iso`, and
+`stage1_audio.wav` files.
 It also writes `build/hardware_release_manifest.txt` with the image hashes and
-hardware profile. Keep the cue and ISO together and select the cue on a loader.
+hardware profile. Keep all three files together and select the cue on a loader.
 Use `prepare_avsp_port.ps1 -RefreshCapture` to deliberately recapture the MAME
 reference.
 
@@ -84,7 +91,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run.ps1
 
 `run.ps1` launches Yaba Sanshiro with a 32 Mbit DRAM cartridge, the Saturn 4 MB
 RAM expansion. Controls are D-pad to move, A to attack, B to dash, C for the
-special action, and X to toggle the diagnostic HUD.
+special action, X to toggle the diagnostic HUD, and Y to toggle full-width fit
+versus exact center crop. The launcher no longer disables emulator audio.
 
 ## Real hardware
 
@@ -116,7 +124,9 @@ Verified on August 16, 2026:
 - the native model passes 12,000 deterministic frames, including the idle boot
   gate and the complete 5+3 opening-room lifecycle
 - the encounter diagnostic visibly reaches five active enemies, eight KOs,
-  room clear, and the exit transition in Yaba Sanshiro
+  room clear, the Chrysalis room, boss defeat, and Stage Clear in Yaba Sanshiro
+- the native audio module links successfully and the mixed-mode cue exposes a
+  168.015-second stereo 16-bit 44.1 kHz Stage 1 QSound reference as CD track 2
 - the final visible object/priority result fits a single 86,016-byte VDP1 8bpp
   surface with 76 visible colors
 - the release SH-2 build, link, ISO, and cue generation complete successfully
@@ -124,9 +134,9 @@ Verified on August 16, 2026:
   asset working set, and advances the authentic attack poses over the
   reconstructed Stage 1 background/HUD
 
-Next proof gate: boot the normal image on a physical Saturn, then extract and
-bind the remaining enemy action clips while extending the route beyond the
-first combat room.
+Next proof gate: verify the full-width mapping and CD audio on physical Saturn,
+then isolate QSound event cues for SCSP PCM playback and replace the approximate
+route gaps with the remaining captured rooms, actors, and actions.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
 [docs/TEST_PLAN.md](docs/TEST_PLAN.md).

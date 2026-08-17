@@ -88,7 +88,8 @@ try {
             # current 64-bit Windows. Remove only this project's known outputs.
             foreach ($generatedName in @(
                 'main.o', 'capability_model.o', 'game.elf', 'game.raw',
-                'game.iso', 'game.cue', 'game.map', 'cd\0.bin', 'build\avsp_cd\0.bin'
+                'game.iso', 'game.cue', 'game.map', 'stage1_audio.wav',
+                'cd\0.bin', 'build\avsp_cd\0.bin'
             )) {
                 $generatedPath = Join-Path $projectRoot $generatedName
                 if (Test-Path -LiteralPath $generatedPath) {
@@ -141,6 +142,11 @@ try {
             throw "Could not create game.iso (exit code $LASTEXITCODE)."
         }
 
+        # Add the locally rendered QSound reference as a real Saturn CDDA track.
+        # It remains an ignored private artifact and is never linked as CPS2 code.
+        $audioSource = Join-Path $projectRoot '.deps\mame\captures\stage1_route_reference.wav'
+        $audioTrack = Join-Path $projectRoot 'stage1_audio.wav'
+        Copy-Item -LiteralPath $audioSource -Destination $audioTrack -Force
         & $cueMaker
         if ($LASTEXITCODE -ne 0) {
             throw "Could not create game.cue (exit code $LASTEXITCODE)."
@@ -148,6 +154,7 @@ try {
 
         $isoFile = Get-Item -LiteralPath (Join-Path $projectRoot 'game.iso')
         $cueFile = Get-Item -LiteralPath (Join-Path $projectRoot 'game.cue')
+        $audioFile = Get-Item -LiteralPath $audioTrack
         $manifestPath = Join-Path $projectRoot 'build\hardware_release_manifest.txt'
         $buildProfile = if ($EncounterTest) { 'encounter-test' }
             elseif ($VisualTest) { 'visual-test' }
@@ -162,6 +169,9 @@ try {
             "iso_sha256=$((Get-FileHash -LiteralPath $isoFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
             "cue_bytes=$($cueFile.Length)"
             "cue_sha256=$((Get-FileHash -LiteralPath $cueFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'audio=track-2-cdda-qsound-reference-mix'
+            "audio_bytes=$($audioFile.Length)"
+            "audio_sha256=$((Get-FileHash -LiteralPath $audioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
         ))
     }
     finally {
@@ -172,5 +182,5 @@ finally {
     $env:PATH = $previousPath
 }
 
-Write-Host "Built $projectRoot\game.cue and game.iso"
+Write-Host "Built $projectRoot\game.cue, game.iso, and stage1_audio.wav"
 Write-Host "Hardware manifest: $projectRoot\build\hardware_release_manifest.txt"

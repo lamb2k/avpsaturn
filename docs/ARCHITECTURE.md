@@ -9,6 +9,7 @@ local avspu ROM -> MAME-verified CPS2 decode -> generated CD/cartridge assets
                                               |
                                exact 4bpp palette layers -> VDP1 actors
                                512x256 indexed bitmap  -> VDP2 NBG1
+                               QSound reference mix   -> Saturn CDDA track 2
 
 Saturn input -> native SH-2 lane/combat model -> actor transforms and ordering
 ```
@@ -67,12 +68,24 @@ static and are not yet driven by native gameplay state.
 
 The arcade active picture is 384x224. The Saturn has no native 384-pixel
 low-resolution mode, so the project force-includes a project-owned video
-configuration selecting SGL's `TV_352x224` for every translation unit. This
-preserves all 224 scanlines and original source-pixel scale while center-cropping
-16 pixels at each horizontal edge. The remaining edge content will be exposed
-through arcade-derived camera motion; fixed HUD elements must be moved inside
-the 352-pixel safe area when the HUD becomes native. No horizontal resampling is
-used in the exact baseline.
+configuration selecting SGL's `TV_352x224` for every translation unit. All 224
+scanlines are preserved. The runtime defaults to full-width fit: VDP2 samples
+the 384-pixel source picture across 352 output pixels and VDP1 uses the matching
+0.9167 horizontal scale. This avoids losing HUD and playfield edges at the cost
+of 8.33% horizontal compression. Y toggles the exact baseline, which uses no
+horizontal resampling and center-crops 16 source pixels per side.
+
+## Sound mapping
+
+The Saturn executable initializes SGL's native SCSP/CD audio driver. For the
+current private proof, MAME renders the verified QSound Stage 1 route offline at
+stereo 16-bit 44.1 kHz. The build trims save-state preroll and adds that ignored
+WAV as CDDA track 2; gameplay starts it on the first encounter input. No Z80 or
+QSound emulation runs on Saturn. This reference mix proves the end-to-end disc,
+driver, and output route, but it contains the automated capture's mixed music
+and effects. The production path must isolate music stems and event cues, keep
+long music on CDDA, and trigger short attack, impact, enemy, boss, and voice
+cues through bounded SCSP PCM channels.
 
 ## What is exact and what is not
 
@@ -83,7 +96,7 @@ Exact in the current milestone:
 - selected background/HUD capture reconstruction
 - aligned multi-palette VDP1 assembly
 - active CPS2 object-RAM bank and final visible boot object/priority result
-- Saturn-native 352x224 initialization and original-scale 384-to-352 crop
+- Saturn-native 352x224 initialization with full-width fit and exact-crop modes
 - first ten-pose captured Predator attack sequence
 - first ten-pose temporally tracked blue-alien sequence
 - first-room 5+3 crowd budget, four alien palette variants, combat lock, clear,
@@ -94,7 +107,8 @@ Still approximate or incomplete:
 - temporal confirmation of remaining enemy variants, actions, and prop groups
 - exact enemy pose selection, spawn coordinates/timing, AI, and object priority
 - remaining player states, enemy animation/state timing, and full frame sets
-- dynamic HUD values, scroll behavior, level triggers, combat, AI, and audio
+- dynamic HUD values, exact scroll behavior, level triggers, combat, and AI
+- isolated, event-synchronized QSound effects on native SCSP PCM channels
 - native HUD safe-area placement and arcade-derived camera behavior for the
   unavoidable 16-pixel-per-side crop
 
@@ -106,7 +120,8 @@ Still approximate or incomplete:
 3. Replace prototype combat with Stage 1 scripts, collision, spawn, and camera
    data.
 4. Add bounded CD-to-cartridge prefetch and VDP1 cache scheduling.
-5. Port audio, complete the level, and verify on real Saturn hardware.
+5. Replace the CDDA reference mix with isolated music/SFX assets and verify the
+   complete level on real Saturn hardware.
 
 ## Hardware boundary
 

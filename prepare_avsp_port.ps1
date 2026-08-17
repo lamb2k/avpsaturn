@@ -50,6 +50,57 @@ else {
     Write-Host 'Reusing the existing verified deterministic Stage 1 capture.'
 }
 
+$bossCaptures = @('boss_gfxram.tsv', 'boss_cps_a_regs.tsv',
+    'boss_cps_b_regs.tsv', 'boss_palette.tsv', 'boss_objram1.tsv',
+    'boss_objram2.tsv', 'boss_active_object_bank.txt')
+$bossCaptureMissing = $false
+foreach ($captureName in $bossCaptures) {
+    if (-not (Test-Path -LiteralPath (Join-Path $captureRoot $captureName))) {
+        $bossCaptureMissing = $true
+        break
+    }
+}
+if ($RefreshCapture -or $bossCaptureMissing) {
+    Push-Location $projectRoot
+    try {
+        & $mame 'avspu' '-rompath' '.' '-video' 'none' '-sound' 'none' '-nothrottle' `
+            '-skip_gameinfo' '-snapshot_directory' '.deps\mame\captures' `
+            '-state_directory' '.deps\mame\captures' '-autoboot_delay' '0' `
+            '-autoboot_script' '.\tools\mame_capture_stage1_boss.lua'
+        if ($LASTEXITCODE -ne 0) {
+            throw "Deterministic Stage 1 boss capture failed with exit code $LASTEXITCODE."
+        }
+    }
+    finally {
+        Pop-Location
+    }
+}
+else {
+    Write-Host 'Reusing the existing verified Stage 1 Chrysalis-room capture.'
+}
+
+$audioCapture = Join-Path $captureRoot 'stage1_route_reference.wav'
+$audioRawCapture = Join-Path $captureRoot 'stage1_route_reference_untrimmed.wav'
+$audioNeedsTrim = $false
+if ($RefreshCapture -or -not (Test-Path -LiteralPath $audioCapture)) {
+    Push-Location $projectRoot
+    try {
+        & $mame 'avspu' '-rompath' '.' '-video' 'none' '-sound' 'none' `
+            '-samplerate' '44100' '-wavwrite' '.deps\mame\captures\stage1_route_reference_untrimmed.wav' `
+            '-nothrottle' '-skip_gameinfo' '-state_directory' '.deps\mame\captures' `
+            '-autoboot_delay' '0' '-autoboot_script' '.\tools\mame_capture_stage1_audio.lua'
+        if ($LASTEXITCODE -ne 0) {
+            throw "Stage 1 QSound reference capture failed with exit code $LASTEXITCODE."
+        }
+        $audioNeedsTrim = $true
+    }
+    finally {
+        Pop-Location
+    }
+}
+else {
+    Write-Host 'Reusing the existing verified Stage 1 QSound reference mix.'
+}
 if (-not $PythonPath) {
     $pythonCommand = Get-Command 'py.exe' -ErrorAction SilentlyContinue
     if ($pythonCommand) {
@@ -70,6 +121,18 @@ if (-not $PythonPath) {
 }
 if (-not $PythonPath -or -not (Test-Path -LiteralPath $PythonPath)) {
     throw 'Python 3 with Pillow is required. Pass its executable with -PythonPath.'
+}
+
+if ($audioNeedsTrim) {
+    & $PythonPath (Join-Path $projectRoot 'tools\trim_stage1_audio.py') `
+        $audioRawCapture $audioCapture
+    if ($LASTEXITCODE -ne 0) {
+        throw "Stage 1 QSound WAV trim failed with exit code $LASTEXITCODE."
+    }
+}
+if (-not (Test-Path -LiteralPath $audioCapture) -or
+    (Get-Item -LiteralPath $audioCapture).Length -le 44) {
+    throw 'The Stage 1 QSound reference WAV is missing or empty.'
 }
 
 & $PythonPath (Join-Path $projectRoot 'tools\extract_avspu_stage1.py')

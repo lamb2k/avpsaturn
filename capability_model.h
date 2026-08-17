@@ -4,8 +4,12 @@
 #define CAP_MAX_ENEMIES 8
 #define CAP_WORLD_WIDTH 960
 #define CAP_VIEW_WIDTH 352
+#define CAP_CPS2_VIEW_WIDTH 384
+#define CAP_BACKGROUND_WIDTH 512
+#define CAP_CENTER_CROP_X ((CAP_CPS2_VIEW_WIDTH - CAP_VIEW_WIDTH) / 2)
 #define CAP_PLAYER_MAX_HEALTH 12
 #define CAP_STAGE1_TOTAL_ENEMIES 8
+#define CAP_BOSS_MAX_HEALTH 24
 
 typedef enum
 {
@@ -26,10 +30,20 @@ typedef enum
 
 typedef enum
 {
+    CAP_ACTOR_PLAYER = 0,
+    CAP_ACTOR_ALIEN,
+    CAP_ACTOR_BOSS
+} CapActorKind;
+
+typedef enum
+{
     CAP_ENCOUNTER_APPROACH = 0,
     CAP_ENCOUNTER_WAVE_ONE,
     CAP_ENCOUNTER_WAVE_TWO,
     CAP_ENCOUNTER_CLEAR,
+    CAP_ENCOUNTER_BOSS_INTRO,
+    CAP_ENCOUNTER_BOSS,
+    CAP_ENCOUNTER_STAGE_CLEAR,
     CAP_ENCOUNTER_COMPLETE
 } CapEncounterState;
 
@@ -56,6 +70,7 @@ typedef struct
     int hit_latched;
     int active;
     int variant;
+    CapActorKind kind;
 } CapActor;
 
 typedef struct
@@ -72,9 +87,14 @@ typedef struct
     int enemies_defeated;
     int room_locked;
     int stage_transitioned;
+    int stage_area;
+    int boss_defeated;
+    int level_completed;
 } CapWorld;
 
 void cap_world_init(CapWorld *world);
 CapClipRequest cap_world_step(CapWorld *world, const CapInput *input);
+int cap_background_scroll_x(int camera_x, int stage_area);
+int cap_background_fit_scroll_x(int camera_x, int stage_area);
 
 #endif

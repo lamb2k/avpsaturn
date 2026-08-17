@@ -155,3 +155,15 @@ index 87aa2b0..fc13f0b 100644
      else
      {
          cmd->pmod |= ((COLMODE_256 & 7) << 3);
+diff --git a/jo_engine/audio.c b/jo_engine/audio.c
+--- a/jo_engine/audio.c
++++ b/jo_engine/audio.c
+@@ -131,7 +131,7 @@ bool                jo_audio_is_channel_playing(const unsigned char channel)
+ 
+     // Evita qualquer dependência de comportamento inesperado de slPCMStat
+-    const unsigned char status = slPCMStat(channel);
++    const unsigned char status = slPCMStat(&__jo_internal_pcm[(int)channel]);
+ 
+     // Retorna se o bit 0 está setado
+     return (status & 0x01u) != 0;
+ }

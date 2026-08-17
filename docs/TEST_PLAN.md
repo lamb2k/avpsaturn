@@ -12,7 +12,7 @@ Status: passed on August 16, 2026.
 ## Gate B: native Saturn build and boot
 
 - Strict host gameplay tests pass for at least 10,000 deterministic frames.
-- Release SH-2 compilation, link, ISO, and cue construction succeed.
+- Release SH-2 compilation, link, ISO, mixed-mode cue, and CDDA construction succeed.
 - The image boots with a 4 MB cartridge and no asset failure.
 - VDP1 transparency and aligned palette layers render correctly over VDP2.
 - The boot composition remains stable until the first player input.
@@ -26,7 +26,7 @@ the Saturn's native 352x224 mode.
 
 - Group all visible CPS2 object commands into actors and props.
 - Match the MAME reference enemy variants, palettes, positions, pivots, and
-  priority at the Saturn's 352x224 center crop.
+  priority in both Saturn 352x224 display mappings.
 - Preserve the active object-RAM bank and reproduce tilemap priority when the
   flattened boot oracle is replaced by independently animated actors.
 - Remove static HUD values from the background and drive them natively.
@@ -38,8 +38,8 @@ object/priority result from one lossless 8bpp VDP1 surface with 76 visible
 colors. Active-bank selection is guarded by a 54-command capture signature, and
 an exhaustive frame-local grouping manifest identifies actors, shadow sprites,
 and props while marking three edge fragments as candidates. The display now
-uses native 352x224, preserving scale and cropping 16 pixels per horizontal
-edge. The crop policy is fixed; native HUD safe-area placement, enemy temporal
+uses native 352x224 with a default full-width fit and a Y-toggle pixel-exact
+16-pixel-per-side crop. Native HUD replacement, enemy temporal
 grouping, actor-level priority, and image-difference acceptance remain open.
 The post-input gameplay scene now uses a tracked ten-pose blue-alien sequence,
 but its poses are not yet bound to arcade enemy states and it must not be
@@ -51,7 +51,8 @@ described as frame-exact.
 - Reproduce camera bounds, lanes, collisions, encounter triggers, and enemy
   behavior for the first combat room.
 - Support player movement and attacks without partial cels or palette damage.
-- Reach the room completion transition deterministically.
+- Reach the Chrysalis boss room and Stage Clear deterministically.
+- Start the Stage 1 CD audio track without disabling SCSP output.
 - Add a comparison capture against the equivalent MAME route.
 
 Status: in progress. A dense 361-sample capture validates the active CPS2 object
@@ -61,10 +62,12 @@ through three replaceable VDP1 palette layers. A separately tracked blue alien
 now advances through ten authentic single-layer poses from frames 4164-4200. A
 capture-derived native room script displays five initial enemies, adds three
 reinforcements after three defeats, clears after eight defeats, unlocks the
-camera boundary, and reaches an exit transition. The 12,000-frame host test and
-the automated Yaba Sanshiro diagnostic both complete this lifecycle. Remaining
-player/enemy actions, exact arcade AI and spawn timing, comparison capture, and
-the rest of Stage 1 remain open.
+camera boundary, enters the industrial boss room, spawns captured Chrysalis,
+and reaches Stage Clear. The mixed-mode image adds a 168.015-second QSound
+route reference as native CD audio track 2. The 12,000-frame host test and the
+automated Yaba Sanshiro diagnostic complete this lifecycle. Remaining player
+and enemy actions, intermediate route detail, exact arcade AI/spawn timing,
+isolated SCSP event cues, and comparison capture remain open.
 
 ## Gate E: performance and hardware
 

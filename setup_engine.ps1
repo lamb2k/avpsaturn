@@ -47,13 +47,13 @@ if ($patchAlreadyApplied) {
 else {
     & git -C $engineRoot apply --check $patchPath
     if ($LASTEXITCODE -ne 0) {
-        throw "The 4bpp patch does not apply cleanly to pinned Jo Engine."
+        throw "The project engine patch does not apply cleanly to pinned Jo Engine."
     }
     & git -C $engineRoot apply $patchPath
     if ($LASTEXITCODE -ne 0) {
-        throw "Could not apply the 4bpp Jo Engine patch."
+        throw "Could not apply the project Jo Engine patch."
     }
-    Write-Host "Applied the private 4bpp sprite patch."
+    Write-Host "Applied the private 4bpp sprite and audio-status patch."
 }
 
 Write-Host "Jo Engine $pinnedCommit is ready at $engineRoot"

@@ -817,10 +817,14 @@ def rightmost_blue_alien_capture(
 def exact_object_layers(gfx: bytearray, palette: list[tuple[int, int, int, int]],
                         frame: int, bank: int, offsets: list[int],
                         shift_x: int = 0,
-                        pivot: tuple[int, int] | None = None) -> tuple[dict[int, Image.Image],
+                        pivot: tuple[int, int] | None = None,
+                        source_filename: str | None = None,
+                        canvas_size: tuple[int, int] = (192, 192)) -> tuple[dict[int, Image.Image],
                                                    dict[int, list[tuple[int, int, int]]]]:
     """Render selected CPS2 commands without scaling or palette quantisation."""
-    if frame == 4200:
+    if source_filename is not None:
+        filename = source_filename
+    elif frame == 4200:
         filename = f"objram{bank}.tsv"
     else:
         filename = animation_object_filename(frame, bank)
@@ -844,15 +848,16 @@ def exact_object_layers(gfx: bytearray, palette: list[tuple[int, int, int, int]]
     bottom = max(command["y"] + command["ny"] * 16 for command in commands)
     union_width = right - left
     union_height = bottom - top
+    canvas_width, canvas_height = canvas_size
     if pivot is None:
-        canvas_x = (192 - union_width) // 2 - left
-        canvas_y = 184 - bottom
+        canvas_x = (canvas_width - union_width) // 2 - left
+        canvas_y = canvas_height - 8 - bottom
     else:
-        canvas_x = 96 - pivot[0]
-        canvas_y = 184 - pivot[1]
+        canvas_x = canvas_width // 2 - pivot[0]
+        canvas_y = canvas_height - 8 - pivot[1]
 
     colours = sorted({command["colour"] for command in commands})
-    layers = {colour: Image.new("P", (192, 192), 0) for colour in colours}
+    layers = {colour: Image.new("P", canvas_size, 0) for colour in colours}
     palettes = {
         colour: [palette[colour * 16 + pen][:3] for pen in range(15)]
         for colour in colours
@@ -884,7 +889,8 @@ def exact_object_layers(gfx: bytearray, palette: list[tuple[int, int, int, int]]
                             continue
                         destination_x = target_x + (15 - pixel_x if flip_x else pixel_x)
                         destination_y = target_y + (15 - pixel_y if flip_y else pixel_y)
-                        if 0 <= destination_x < 192 and 0 <= destination_y < 192:
+                        if (0 <= destination_x < canvas_width and
+                                0 <= destination_y < canvas_height):
                             target_pixels[destination_x, destination_y] = pen + 1
     return layers, palettes
 
@@ -1058,6 +1064,53 @@ static const unsigned short avsp_enemy_walk_source_frames[AVSP_ENEMY_WALK_POSES]
     return manifest
 
 
+def write_boss_idle_assets(gfx: bytearray,
+                           sprite_dir: Path) -> list[dict[str, object]]:
+    """Emit the complete multi-palette Chrysalis-room boss assembly."""
+    bank = int((CAPTURE_ROOT / "boss_active_object_bank.txt").read_text(
+        encoding="ascii").strip())
+    offsets = [36, 40, 44]
+    palette = load_palette("boss_palette.tsv")
+    layers, palettes = exact_object_layers(
+        gfx, palette, 12660, bank, offsets, pivot=(74, 211),
+        source_filename=f"boss_objram{bank}.tsv", canvas_size=(256, 192))
+    cps_colours = (27,)
+    files = []
+    manifest = []
+    for layer_index, colour in enumerate(cps_colours):
+        layer = layers.get(colour)
+        if layer is None:
+            raise ValueError(f"boss capture is missing CPS2 palette {colour}")
+        filename = f"BI{layer_index}.BIN"
+        data = pack_4bpp(layer)
+        (sprite_dir / filename).write_bytes(data)
+        files.append(filename)
+        manifest.append({
+            "path": f"SPR4/{filename}",
+            "bytes": len(data),
+            "sha256": hashlib.sha256(data).hexdigest(),
+            "source_frame": 12660,
+            "cps2_palette": colour,
+        })
+    header = f"""/* Generated from the Stage 1 Chrysalis-room CPS2 capture. */
+#ifndef AVSP_BOSS_ANIMATION_H
+#define AVSP_BOSS_ANIMATION_H
+#define AVSP_BOSS_IDLE_LAYERS {len(files)}
+#define AVSP_BOSS_CEL_WIDTH 256
+#define AVSP_BOSS_CEL_HEIGHT 192
+static const char avsp_boss_idle_files[AVSP_BOSS_IDLE_LAYERS][12] = {{
+    {", ".join(f'\"{filename}\"' for filename in files)}
+}};
+static const unsigned char avsp_boss_idle_palette_banks[AVSP_BOSS_IDLE_LAYERS] = {{
+    7
+}};
+#endif
+"""
+    (GENERATED_ROOT / "avsp_boss_animation.h").write_text(
+        header, encoding="ascii")
+    return manifest
+
+
 def write_exact_actor_assets(gfx: bytearray,
                              palette: list[tuple[int, int, int, int]],
                              sprite_dir: Path) -> list[dict[str, object]]:
@@ -1067,8 +1120,9 @@ def write_exact_actor_assets(gfx: bytearray,
             gfx, palette, 2880, idle_bank, idle_offsets, pivot=idle_pivot),
     }
     # Fixed Saturn subpalette slots. Player layers retain CPS2 palettes 0, 7,
-    # and 15; the four Stage 1 alien variants retain palettes 16-19.
-    cps_colours = (0, 7, 15, 16, 17, 18, 19)
+    # and 15; the four Stage 1 alien variants retain palettes 16-19, and the
+    # Chrysalis-room boss adds CPS2 palette 27.
+    cps_colours = (0, 7, 15, 16, 17, 18, 19, 27)
     player_palette = animation_palette(2880)
     attack_palette = animation_palette(2888)
     enemy_palette = animation_palette(2760)
@@ -1088,6 +1142,9 @@ def write_exact_actor_assets(gfx: bytearray,
     for colour in (16, 17, 18, 19):
         palette_banks[colour] = [
             enemy_palette[colour * 16 + pen][:3] for pen in range(15)]
+    boss_palette = load_palette("boss_palette.tsv")
+    palette_banks[27] = [
+        boss_palette[27 * 16 + pen][:3] for pen in range(15)]
     write_exact_palette_header([palette_banks[colour] for colour in cps_colours])
 
     file_map = {
@@ -1122,6 +1179,7 @@ def write_exact_actor_assets(gfx: bytearray,
                          "cps2_palette": colour})
     manifest.extend(write_player_attack_sequence_assets(gfx, sprite_dir))
     manifest.extend(write_enemy_walk_sequence_assets(gfx, sprite_dir))
+    manifest.extend(write_boss_idle_assets(gfx, sprite_dir))
     return manifest
 
 
@@ -1178,6 +1236,22 @@ def write_saturn_assets(gfx: bytearray, palette: list[tuple[int, int, int, int]]
     background_data = background_target.read_bytes()
     manifest.append({"path": "BG/CORRIDOR.TGA", "bytes": len(background_data),
                      "sha256": hashlib.sha256(background_data).hexdigest()})
+
+    boss_stage = render_background(
+        gfx, load_words("boss_gfxram.tsv"), load_words("boss_cps_a_regs.tsv"),
+        load_words("boss_cps_b_regs.tsv"), load_palette("boss_palette.tsv"),
+        width=512, height=256, include_scroll1=True)
+    boss_stage.save(OUTPUT_ROOT / "stage1_boss_background.png")
+    boss_stage = boss_stage.convert("RGB").quantize(
+        colors=256, method=Image.Quantize.MAXCOVERAGE)
+    boss_background_target = background_dir / "BOSSROOM.TGA"
+    boss_stage.save(boss_background_target, format="TGA", compression=None)
+    boss_background_data = boss_background_target.read_bytes()
+    manifest.append({
+        "path": "BG/BOSSROOM.TGA", "bytes": len(boss_background_data),
+        "sha256": hashlib.sha256(boss_background_data).hexdigest(),
+        "source_frame": 12660,
+    })
 
     manifest_path = OUTPUT_ROOT / "saturn_asset_manifest.json"
     manifest_path.write_text(json.dumps({
