@@ -1,0 +1,7089 @@
+{
+  "schema": 1,
+  "source": "user-supplied avspu ROM set captured with MAME 0.289",
+  "capture_scope": [
+    4080,
+    6200
+  ],
+  "probe": {
+    "enemy_state_modified": false,
+    "player_health_only_frozen": true,
+    "player_health_address": "0xff83c1",
+    "note": "The P1 health freeze prevents Continue transitions; all enemy state remains native."
+  },
+  "route_prefix_checks": [
+    {
+      "frame": 4080,
+      "kind": "object_ram",
+      "sha256": "4e7132b543fffb07932c2028b877e1110a382284c31969d57177024dea792828"
+    },
+    {
+      "frame": 4080,
+      "kind": "palette",
+      "sha256": "fd2b1a848a59ad457c54b51f25f34f830e1929de7d60c523a1d7717a687dfc8a"
+    },
+    {
+      "frame": 4164,
+      "kind": "object_ram",
+      "sha256": "53ae66954f2ee2d307d793215c8c912b4ab0750111ec608f851ac386362ea9bc"
+    },
+    {
+      "frame": 4164,
+      "kind": "palette",
+      "sha256": "296a307c2c02c682bbcfda8a1ad9d307cd74ba03913e8ddd0638419894b563dc"
+    },
+    {
+      "frame": 4200,
+      "kind": "object_ram",
+      "sha256": "68b1d7248720d464535a9fee10ce824f864ba899f1f9fe1c0bb326499f3747a0"
+    },
+    {
+      "frame": 4200,
+      "kind": "palette",
+      "sha256": "fd2b1a848a59ad457c54b51f25f34f830e1929de7d60c523a1d7717a687dfc8a"
+    }
+  ],
+  "actor": {
+    "actor_address": "0xffa000",
+    "actor_id": 31,
+    "health_word_offset": "0x40",
+    "latched_health_word_offset": "0x42",
+    "maximum_health_word_offset": "0x44",
+    "health_events": [
+      {
+        "frame": 5190,
+        "from": 87,
+        "to": 63
+      },
+      {
+        "frame": 5236,
+        "from": 63,
+        "to": 39
+      },
+      {
+        "frame": 5283,
+        "from": 39,
+        "to": 8
+      },
+      {
+        "frame": 5329,
+        "from": 8,
+        "to": -1
+      },
+      {
+        "frame": 5471,
+        "from": -1,
+        "to": 87
+      },
+      {
+        "frame": 6153,
+        "from": 87,
+        "to": 0
+      }
+    ],
+    "confirmed_ko_visible_start": 5330,
+    "confirmed_ko_visible_end": 5469,
+    "confirmed_ko_frame_count": 140,
+    "disappears_at_frame": 5470
+  },
+  "clips": [
+    {
+      "name": "walk",
+      "start_frame": 4214,
+      "end_frame": 4252,
+      "frame_count": 39,
+      "unique_poses": 19,
+      "source_omitted_frames": 0,
+      "canvas": [
+        288,
+        192
+      ],
+      "selector": "palette17_actor",
+      "timeline": [
+        {
+          "frame": 4214,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            84,
+            88,
+            92,
+            96
+          ],
+          "source_bounds": [
+            163,
+            107,
+            305,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 237,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60420,
+          "health": 87
+        },
+        {
+          "frame": 4215,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            84,
+            88,
+            92,
+            96
+          ],
+          "source_bounds": [
+            163,
+            107,
+            305,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 237,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60420,
+          "health": 87
+        },
+        {
+          "frame": 4216,
+          "pose": 1,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            84,
+            88,
+            92
+          ],
+          "source_bounds": [
+            153,
+            107,
+            313,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 244,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60436,
+          "health": 87
+        },
+        {
+          "frame": 4217,
+          "pose": 1,
+          "cps2_palette": 17,
+          "object_offsets": [
+            76,
+            80,
+            84,
+            88
+          ],
+          "source_bounds": [
+            153,
+            107,
+            313,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 244,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60436,
+          "health": 87
+        },
+        {
+          "frame": 4218,
+          "pose": 1,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            84,
+            88,
+            92
+          ],
+          "source_bounds": [
+            153,
+            107,
+            313,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 244,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60436,
+          "health": 87
+        },
+        {
+          "frame": 4219,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            76,
+            80,
+            84,
+            88,
+            92
+          ],
+          "source_bounds": [
+            177,
+            107,
+            321,
+            190
+          ],
+          "source_visible": true,
+          "actor_screen_x": 252,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60452,
+          "health": 87
+        },
+        {
+          "frame": 4220,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84,
+            88,
+            92,
+            96,
+            100
+          ],
+          "source_bounds": [
+            177,
+            107,
+            321,
+            190
+          ],
+          "source_visible": true,
+          "actor_screen_x": 252,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60452,
+          "health": 87
+        },
+        {
+          "frame": 4221,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            84,
+            88,
+            92,
+            96
+          ],
+          "source_bounds": [
+            177,
+            107,
+            321,
+            190
+          ],
+          "source_visible": true,
+          "actor_screen_x": 259,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60468,
+          "health": 87
+        },
+        {
+          "frame": 4222,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84,
+            88,
+            92,
+            96,
+            100
+          ],
+          "source_bounds": [
+            181,
+            107,
+            329,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 259,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60468,
+          "health": 87
+        },
+        {
+          "frame": 4223,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            88,
+            92,
+            96,
+            100,
+            104
+          ],
+          "source_bounds": [
+            181,
+            107,
+            329,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 259,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60468,
+          "health": 87
+        },
+        {
+          "frame": 4224,
+          "pose": 5,
+          "cps2_palette": 17,
+          "object_offsets": [
+            92,
+            96,
+            100,
+            104,
+            108
+          ],
+          "source_bounds": [
+            181,
+            107,
+            329,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 267,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60484,
+          "health": 87
+        },
+        {
+          "frame": 4225,
+          "pose": 6,
+          "cps2_palette": 17,
+          "object_offsets": [
+            88,
+            92,
+            96,
+            100,
+            104
+          ],
+          "source_bounds": [
+            194,
+            107,
+            335,
+            189
+          ],
+          "source_visible": true,
+          "actor_screen_x": 267,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60484,
+          "health": 87
+        },
+        {
+          "frame": 4226,
+          "pose": 7,
+          "cps2_palette": 17,
+          "object_offsets": [
+            92,
+            96,
+            100,
+            104,
+            108
+          ],
+          "source_bounds": [
+            194,
+            107,
+            335,
+            189
+          ],
+          "source_visible": true,
+          "actor_screen_x": 274,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60500,
+          "health": 87
+        },
+        {
+          "frame": 4227,
+          "pose": 7,
+          "cps2_palette": 17,
+          "object_offsets": [
+            88,
+            92,
+            96,
+            100,
+            104
+          ],
+          "source_bounds": [
+            194,
+            107,
+            335,
+            189
+          ],
+          "source_visible": true,
+          "actor_screen_x": 274,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60500,
+          "health": 87
+        },
+        {
+          "frame": 4228,
+          "pose": 8,
+          "cps2_palette": 17,
+          "object_offsets": [
+            92,
+            96,
+            100,
+            104
+          ],
+          "source_bounds": [
+            183,
+            107,
+            343,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 274,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60500,
+          "health": 87
+        },
+        {
+          "frame": 4229,
+          "pose": 9,
+          "cps2_palette": 17,
+          "object_offsets": [
+            88,
+            92,
+            96,
+            100
+          ],
+          "source_bounds": [
+            183,
+            107,
+            343,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 281,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60516,
+          "health": 87
+        },
+        {
+          "frame": 4230,
+          "pose": 9,
+          "cps2_palette": 17,
+          "object_offsets": [
+            92,
+            96,
+            100,
+            104
+          ],
+          "source_bounds": [
+            183,
+            107,
+            343,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 281,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60516,
+          "health": 87
+        },
+        {
+          "frame": 4231,
+          "pose": 10,
+          "cps2_palette": 17,
+          "object_offsets": [
+            88,
+            92,
+            96,
+            100,
+            104
+          ],
+          "source_bounds": [
+            211,
+            107,
+            353,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 289,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60532,
+          "health": 87
+        },
+        {
+          "frame": 4232,
+          "pose": 10,
+          "cps2_palette": 17,
+          "object_offsets": [
+            92,
+            96,
+            100,
+            104,
+            108
+          ],
+          "source_bounds": [
+            211,
+            107,
+            353,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 289,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60532,
+          "health": 87
+        },
+        {
+          "frame": 4233,
+          "pose": 10,
+          "cps2_palette": 17,
+          "object_offsets": [
+            88,
+            92,
+            96,
+            100,
+            104
+          ],
+          "source_bounds": [
+            211,
+            107,
+            353,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 289,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60532,
+          "health": 87
+        },
+        {
+          "frame": 4234,
+          "pose": 11,
+          "cps2_palette": 17,
+          "object_offsets": [
+            92,
+            96
+          ],
+          "source_bounds": [
+            217,
+            107,
+            361,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 296,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60420,
+          "health": 87
+        },
+        {
+          "frame": 4235,
+          "pose": 11,
+          "cps2_palette": 17,
+          "object_offsets": [
+            96,
+            100
+          ],
+          "source_bounds": [
+            217,
+            107,
+            361,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 296,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60420,
+          "health": 87
+        },
+        {
+          "frame": 4236,
+          "pose": 12,
+          "cps2_palette": 17,
+          "object_offsets": [
+            100,
+            104
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 303,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60436,
+          "health": 87
+        },
+        {
+          "frame": 4237,
+          "pose": 12,
+          "cps2_palette": 17,
+          "object_offsets": [
+            96,
+            100
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 303,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60436,
+          "health": 87
+        },
+        {
+          "frame": 4238,
+          "pose": 12,
+          "cps2_palette": 17,
+          "object_offsets": [
+            100,
+            104
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 303,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60436,
+          "health": 87
+        },
+        {
+          "frame": 4239,
+          "pose": 13,
+          "cps2_palette": 17,
+          "object_offsets": [
+            96,
+            100
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 311,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60452,
+          "health": 87
+        },
+        {
+          "frame": 4240,
+          "pose": 13,
+          "cps2_palette": 17,
+          "object_offsets": [
+            96,
+            100
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 311,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60452,
+          "health": 87
+        },
+        {
+          "frame": 4241,
+          "pose": 14,
+          "cps2_palette": 17,
+          "object_offsets": [
+            92,
+            96
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 318,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60468,
+          "health": 87
+        },
+        {
+          "frame": 4242,
+          "pose": 14,
+          "cps2_palette": 17,
+          "object_offsets": [
+            92,
+            96
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 318,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60468,
+          "health": 87
+        },
+        {
+          "frame": 4243,
+          "pose": 14,
+          "cps2_palette": 17,
+          "object_offsets": [
+            88,
+            92
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 318,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60468,
+          "health": 87
+        },
+        {
+          "frame": 4244,
+          "pose": 15,
+          "cps2_palette": 17,
+          "object_offsets": [
+            92,
+            96,
+            100,
+            104,
+            108
+          ],
+          "source_bounds": [
+            207,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 326,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60484,
+          "health": 87
+        },
+        {
+          "frame": 4245,
+          "pose": 15,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            84,
+            88,
+            92,
+            96
+          ],
+          "source_bounds": [
+            207,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 326,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60484,
+          "health": 87
+        },
+        {
+          "frame": 4246,
+          "pose": 16,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84,
+            88,
+            92,
+            96,
+            100
+          ],
+          "source_bounds": [
+            207,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 333,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60500,
+          "health": 87
+        },
+        {
+          "frame": 4247,
+          "pose": 16,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            84,
+            88,
+            92,
+            96
+          ],
+          "source_bounds": [
+            207,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 333,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60500,
+          "health": 87
+        },
+        {
+          "frame": 4248,
+          "pose": 16,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84,
+            88,
+            92,
+            96,
+            100
+          ],
+          "source_bounds": [
+            207,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 333,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60500,
+          "health": 87
+        },
+        {
+          "frame": 4249,
+          "pose": 17,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            84,
+            88,
+            92,
+            96
+          ],
+          "source_bounds": [
+            207,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 340,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60516,
+          "health": 87
+        },
+        {
+          "frame": 4250,
+          "pose": 17,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84,
+            88,
+            92,
+            96,
+            100
+          ],
+          "source_bounds": [
+            207,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 340,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60516,
+          "health": 87
+        },
+        {
+          "frame": 4251,
+          "pose": 18,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            88,
+            92,
+            96
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60532,
+          "health": 87
+        },
+        {
+          "frame": 4252,
+          "pose": 18,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84,
+            92,
+            96,
+            100
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 5632,
+          "animation": 60532,
+          "health": 87
+        }
+      ]
+    },
+    {
+      "name": "attack",
+      "start_frame": 4253,
+      "end_frame": 4372,
+      "frame_count": 120,
+      "unique_poses": 12,
+      "source_omitted_frames": 0,
+      "canvas": [
+        288,
+        192
+      ],
+      "selector": "palette17_actor",
+      "timeline": [
+        {
+          "frame": 4253,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            88,
+            92,
+            96
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4254,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84,
+            92,
+            96,
+            100
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4255,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            88,
+            92,
+            96
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4256,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84,
+            92,
+            96,
+            100
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4257,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            88,
+            92,
+            96
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4258,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84,
+            92,
+            96,
+            100
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4259,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            88,
+            92,
+            96
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4260,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84,
+            92,
+            96,
+            100
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4261,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            88,
+            92,
+            96
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4262,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84,
+            92,
+            96,
+            100
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4263,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            88,
+            92,
+            96
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4264,
+          "pose": 1,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84,
+            88,
+            96
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4265,
+          "pose": 1,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            84,
+            92
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4266,
+          "pose": 1,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84,
+            88,
+            96
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4267,
+          "pose": 1,
+          "cps2_palette": 17,
+          "object_offsets": [
+            76,
+            80,
+            88
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4268,
+          "pose": 1,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            84,
+            92
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4269,
+          "pose": 1,
+          "cps2_palette": 17,
+          "object_offsets": [
+            76,
+            80,
+            88
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4270,
+          "pose": 1,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            84,
+            92
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4271,
+          "pose": 1,
+          "cps2_palette": 17,
+          "object_offsets": [
+            76,
+            80,
+            88
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4272,
+          "pose": 1,
+          "cps2_palette": 17,
+          "object_offsets": [
+            80,
+            84,
+            92
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4273,
+          "pose": 1,
+          "cps2_palette": 17,
+          "object_offsets": [
+            76,
+            80,
+            88
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4274,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            88
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4275,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4276,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            88
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4277,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4278,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4279,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4280,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            84
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4281,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            96
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4282,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            96
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4283,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            96
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4284,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            96
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4285,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            96
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4286,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            96
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4287,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            96
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4288,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            96
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4289,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4290,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            100,
+            108,
+            112
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4291,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            100,
+            108,
+            112
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4292,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            100,
+            108,
+            112
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4293,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            100,
+            108,
+            112
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4294,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            100,
+            104
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4295,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            100,
+            104
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4296,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            100,
+            104
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4297,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            100,
+            104
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4298,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            100,
+            104
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4299,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108,
+            112
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4300,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108,
+            112
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4301,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            116
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4302,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4303,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4304,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108,
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4305,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108,
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4306,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4307,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108,
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4308,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108,
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4309,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108,
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4310,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108,
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4311,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108,
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4312,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4313,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4314,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4315,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4316,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4317,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4318,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108,
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4319,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            116,
+            124,
+            128,
+            132
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4320,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            116,
+            124,
+            128,
+            132
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4321,
+          "pose": 0,
+          "cps2_palette": 17,
+          "object_offsets": [
+            120,
+            128,
+            132,
+            136
+          ],
+          "source_bounds": [
+            267,
+            91,
+            379,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4322,
+          "pose": 1,
+          "cps2_palette": 17,
+          "object_offsets": [
+            120,
+            124,
+            132
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4323,
+          "pose": 1,
+          "cps2_palette": 17,
+          "object_offsets": [
+            120,
+            124,
+            132
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4324,
+          "pose": 5,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            108,
+            116,
+            148
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4325,
+          "pose": 5,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            108,
+            116,
+            148
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4326,
+          "pose": 5,
+          "cps2_palette": 17,
+          "object_offsets": [
+            100,
+            104,
+            112,
+            144
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4327,
+          "pose": 6,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            116,
+            124,
+            164
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4328,
+          "pose": 6,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            116,
+            124,
+            164
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4329,
+          "pose": 6,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            116,
+            124,
+            164
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4330,
+          "pose": 7,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108,
+            112,
+            120,
+            148
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4331,
+          "pose": 7,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108,
+            112,
+            120,
+            148
+          ],
+          "source_bounds": [
+            219,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4332,
+          "pose": 8,
+          "cps2_palette": 17,
+          "object_offsets": [
+            116,
+            144
+          ],
+          "source_bounds": [
+            238,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4333,
+          "pose": 9,
+          "cps2_palette": 17,
+          "object_offsets": [
+            120,
+            160
+          ],
+          "source_bounds": [
+            246,
+            91,
+            345,
+            188
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4334,
+          "pose": 9,
+          "cps2_palette": 17,
+          "object_offsets": [
+            120,
+            160
+          ],
+          "source_bounds": [
+            246,
+            91,
+            345,
+            188
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4335,
+          "pose": 9,
+          "cps2_palette": 17,
+          "object_offsets": [
+            120,
+            160
+          ],
+          "source_bounds": [
+            246,
+            91,
+            345,
+            188
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4336,
+          "pose": 10,
+          "cps2_palette": 17,
+          "object_offsets": [
+            120,
+            156
+          ],
+          "source_bounds": [
+            253,
+            91,
+            345,
+            189
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4337,
+          "pose": 10,
+          "cps2_palette": 17,
+          "object_offsets": [
+            120,
+            156
+          ],
+          "source_bounds": [
+            253,
+            91,
+            345,
+            189
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4338,
+          "pose": 10,
+          "cps2_palette": 17,
+          "object_offsets": [
+            120,
+            156
+          ],
+          "source_bounds": [
+            253,
+            91,
+            345,
+            189
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4339,
+          "pose": 11,
+          "cps2_palette": 17,
+          "object_offsets": [
+            120,
+            168
+          ],
+          "source_bounds": [
+            260,
+            91,
+            345,
+            191
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4340,
+          "pose": 11,
+          "cps2_palette": 17,
+          "object_offsets": [
+            120,
+            168
+          ],
+          "source_bounds": [
+            260,
+            91,
+            345,
+            191
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4341,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            120
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4342,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            116
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4343,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            116
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4344,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            116
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4345,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            120
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4346,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            120
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4347,
+          "pose": 2,
+          "cps2_palette": 17,
+          "object_offsets": [
+            120
+          ],
+          "source_bounds": [
+            265,
+            91,
+            345,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4348,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            100,
+            108,
+            112
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4349,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            100,
+            108,
+            112
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4350,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            100,
+            108,
+            112
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4351,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            120,
+            124
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59660,
+          "health": 87
+        },
+        {
+          "frame": 4352,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            120,
+            124
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4353,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            120,
+            124
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4354,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108,
+            116,
+            120
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4355,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108,
+            116,
+            120
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4356,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            108,
+            116,
+            120
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4357,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            120,
+            124
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4358,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            112,
+            120,
+            124
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4359,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            112,
+            116
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4360,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            112,
+            116
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59676,
+          "health": 87
+        },
+        {
+          "frame": 4361,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            112,
+            116
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4362,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            112,
+            116
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4363,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            112,
+            116
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4364,
+          "pose": 3,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            112,
+            116
+          ],
+          "source_bounds": [
+            253,
+            91,
+            347,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4365,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            108
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4366,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            108
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4367,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            108
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4368,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            108
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4369,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            108
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59628,
+          "health": 87
+        },
+        {
+          "frame": 4370,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            108
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4371,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            108
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        },
+        {
+          "frame": 4372,
+          "pose": 4,
+          "cps2_palette": 17,
+          "object_offsets": [
+            104,
+            108
+          ],
+          "source_bounds": [
+            234,
+            91,
+            346,
+            187
+          ],
+          "source_visible": true,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 6144,
+          "animation": 59644,
+          "health": 87
+        }
+      ]
+    },
+    {
+      "name": "hit",
+      "start_frame": 5191,
+      "end_frame": 5226,
+      "frame_count": 36,
+      "unique_poses": 6,
+      "source_omitted_frames": 24,
+      "canvas": [
+        288,
+        192
+      ],
+      "selector": "nearest_actor",
+      "timeline": [
+        {
+          "frame": 5191,
+          "pose": 0,
+          "cps2_palette": 19,
+          "object_offsets": [
+            160,
+            164,
+            168
+          ],
+          "source_bounds": [
+            312,
+            94,
+            455,
+            190
+          ],
+          "source_visible": true,
+          "actor_screen_x": 360,
+          "actor_screen_bottom": 186,
+          "action": 2,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5192,
+          "pose": 1,
+          "cps2_palette": 19,
+          "object_offsets": [
+            156,
+            160,
+            164
+          ],
+          "source_bounds": [
+            312,
+            94,
+            455,
+            190
+          ],
+          "source_visible": true,
+          "actor_screen_x": 358,
+          "actor_screen_bottom": 186,
+          "action": 2,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5193,
+          "pose": 2,
+          "cps2_palette": 19,
+          "object_offsets": [
+            156,
+            160,
+            164
+          ],
+          "source_bounds": [
+            322,
+            94,
+            418,
+            190
+          ],
+          "source_visible": true,
+          "actor_screen_x": 360,
+          "actor_screen_bottom": 186,
+          "action": 2,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5194,
+          "pose": 3,
+          "cps2_palette": 19,
+          "object_offsets": [
+            152,
+            156,
+            160
+          ],
+          "source_bounds": [
+            322,
+            94,
+            418,
+            190
+          ],
+          "source_visible": true,
+          "actor_screen_x": 358,
+          "actor_screen_bottom": 186,
+          "action": 2,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5195,
+          "pose": 3,
+          "cps2_palette": 19,
+          "object_offsets": [
+            152,
+            156,
+            160
+          ],
+          "source_bounds": [
+            322,
+            94,
+            418,
+            190
+          ],
+          "source_visible": true,
+          "actor_screen_x": 358,
+          "actor_screen_bottom": 186,
+          "action": 2,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5196,
+          "pose": 3,
+          "cps2_palette": 19,
+          "object_offsets": [
+            148,
+            152,
+            156
+          ],
+          "source_bounds": [
+            322,
+            94,
+            418,
+            190
+          ],
+          "source_visible": true,
+          "actor_screen_x": 358,
+          "actor_screen_bottom": 186,
+          "action": 2,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5197,
+          "pose": 3,
+          "cps2_palette": 19,
+          "object_offsets": [
+            156,
+            160,
+            164
+          ],
+          "source_bounds": [
+            322,
+            94,
+            418,
+            190
+          ],
+          "source_visible": true,
+          "actor_screen_x": 358,
+          "actor_screen_bottom": 186,
+          "action": 2,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5198,
+          "pose": 3,
+          "cps2_palette": 19,
+          "object_offsets": [
+            152,
+            156,
+            160
+          ],
+          "source_bounds": [
+            322,
+            94,
+            418,
+            190
+          ],
+          "source_visible": true,
+          "actor_screen_x": 358,
+          "actor_screen_bottom": 186,
+          "action": 2,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5199,
+          "pose": 3,
+          "cps2_palette": 19,
+          "object_offsets": [
+            152,
+            156,
+            160
+          ],
+          "source_bounds": [
+            322,
+            94,
+            418,
+            190
+          ],
+          "source_visible": true,
+          "actor_screen_x": 358,
+          "actor_screen_bottom": 186,
+          "action": 2,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5200,
+          "pose": 3,
+          "cps2_palette": 19,
+          "object_offsets": [
+            152,
+            156,
+            160
+          ],
+          "source_bounds": [
+            322,
+            94,
+            418,
+            190
+          ],
+          "source_visible": true,
+          "actor_screen_x": 358,
+          "actor_screen_bottom": 186,
+          "action": 512,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5201,
+          "pose": 3,
+          "cps2_palette": 19,
+          "object_offsets": [
+            144,
+            148,
+            152
+          ],
+          "source_bounds": [
+            322,
+            94,
+            418,
+            190
+          ],
+          "source_visible": true,
+          "actor_screen_x": 358,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5202,
+          "pose": 4,
+          "cps2_palette": 19,
+          "object_offsets": [
+            144,
+            148,
+            152
+          ],
+          "source_bounds": [
+            319,
+            86,
+            415,
+            182
+          ],
+          "source_visible": true,
+          "actor_screen_x": 355,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5203,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 352,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5204,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 350,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5205,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 348,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5206,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 345,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5207,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 343,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5208,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 341,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5209,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 339,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5210,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 338,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5211,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 336,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5212,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 334,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5213,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 333,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5214,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 332,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5215,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 331,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5216,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 330,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5217,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 329,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5218,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 328,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5219,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 327,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5220,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 327,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5221,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 327,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5222,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 326,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5223,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 326,
+          "actor_screen_bottom": 186,
+          "action": 514,
+          "animation": 56656,
+          "health": 63
+        },
+        {
+          "frame": 5224,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 326,
+          "actor_screen_bottom": 186,
+          "action": 516,
+          "animation": 54008,
+          "health": 63
+        },
+        {
+          "frame": 5225,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 326,
+          "actor_screen_bottom": 186,
+          "action": 516,
+          "animation": 54008,
+          "health": 63
+        },
+        {
+          "frame": 5226,
+          "pose": 5,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 326,
+          "actor_screen_bottom": 186,
+          "action": 516,
+          "animation": 54008,
+          "health": 63
+        }
+      ]
+    },
+    {
+      "name": "ko",
+      "start_frame": 5330,
+      "end_frame": 5469,
+      "frame_count": 140,
+      "unique_poses": 8,
+      "source_omitted_frames": 19,
+      "canvas": [
+        288,
+        192
+      ],
+      "selector": "nearest_actor",
+      "timeline": [
+        {
+          "frame": 5330,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            104,
+            108,
+            112,
+            116
+          ],
+          "source_bounds": [
+            237,
+            90,
+            350,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 287,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57876,
+          "health": -1
+        },
+        {
+          "frame": 5331,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            237,
+            90,
+            350,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 287,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57876,
+          "health": -1
+        },
+        {
+          "frame": 5332,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            124,
+            128,
+            132,
+            136
+          ],
+          "source_bounds": [
+            237,
+            90,
+            350,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 287,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57876,
+          "health": -1
+        },
+        {
+          "frame": 5333,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            124,
+            128,
+            132,
+            136
+          ],
+          "source_bounds": [
+            237,
+            90,
+            350,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 287,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57876,
+          "health": -1
+        },
+        {
+          "frame": 5334,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            120,
+            124,
+            128,
+            132
+          ],
+          "source_bounds": [
+            237,
+            90,
+            350,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 287,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57876,
+          "health": -1
+        },
+        {
+          "frame": 5335,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            120,
+            124,
+            128,
+            132
+          ],
+          "source_bounds": [
+            237,
+            90,
+            350,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 287,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57876,
+          "health": -1
+        },
+        {
+          "frame": 5336,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            120,
+            124,
+            128,
+            132
+          ],
+          "source_bounds": [
+            237,
+            90,
+            350,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 287,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57876,
+          "health": -1
+        },
+        {
+          "frame": 5337,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            237,
+            90,
+            350,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 287,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57876,
+          "health": -1
+        },
+        {
+          "frame": 5338,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            237,
+            90,
+            350,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 287,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57876,
+          "health": -1
+        },
+        {
+          "frame": 5339,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            237,
+            90,
+            350,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 287,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57876,
+          "health": -1
+        },
+        {
+          "frame": 5340,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            237,
+            90,
+            350,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 287,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57876,
+          "health": -1
+        },
+        {
+          "frame": 5341,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            237,
+            90,
+            350,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 287,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57876,
+          "health": -1
+        },
+        {
+          "frame": 5342,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            237,
+            90,
+            350,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 287,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57876,
+          "health": -1
+        },
+        {
+          "frame": 5343,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            234,
+            82,
+            347,
+            178
+          ],
+          "source_visible": true,
+          "actor_screen_x": 284,
+          "actor_screen_bottom": 178,
+          "action": 512,
+          "animation": 57892,
+          "health": -1
+        },
+        {
+          "frame": 5344,
+          "pose": 1,
+          "cps2_palette": 16,
+          "object_offsets": [
+            124,
+            128,
+            132,
+            136
+          ],
+          "source_bounds": [
+            231,
+            75,
+            344,
+            171
+          ],
+          "source_visible": true,
+          "actor_screen_x": 281,
+          "actor_screen_bottom": 170,
+          "action": 512,
+          "animation": 57892,
+          "health": -1
+        },
+        {
+          "frame": 5345,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            124,
+            128,
+            132,
+            136
+          ],
+          "source_bounds": [
+            228,
+            67,
+            341,
+            163
+          ],
+          "source_visible": true,
+          "actor_screen_x": 278,
+          "actor_screen_bottom": 163,
+          "action": 512,
+          "animation": 57908,
+          "health": -1
+        },
+        {
+          "frame": 5346,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            124,
+            128,
+            132,
+            136
+          ],
+          "source_bounds": [
+            225,
+            60,
+            338,
+            156
+          ],
+          "source_visible": true,
+          "actor_screen_x": 275,
+          "actor_screen_bottom": 156,
+          "action": 512,
+          "animation": 57908,
+          "health": -1
+        },
+        {
+          "frame": 5347,
+          "pose": 1,
+          "cps2_palette": 16,
+          "object_offsets": [
+            124,
+            128,
+            132,
+            136
+          ],
+          "source_bounds": [
+            222,
+            54,
+            335,
+            150
+          ],
+          "source_visible": true,
+          "actor_screen_x": 272,
+          "actor_screen_bottom": 149,
+          "action": 512,
+          "animation": 57908,
+          "health": -1
+        },
+        {
+          "frame": 5348,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            124,
+            128,
+            132,
+            136
+          ],
+          "source_bounds": [
+            219,
+            47,
+            332,
+            143
+          ],
+          "source_visible": true,
+          "actor_screen_x": 269,
+          "actor_screen_bottom": 143,
+          "action": 512,
+          "animation": 57908,
+          "health": -1
+        },
+        {
+          "frame": 5349,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            124,
+            128,
+            132,
+            136
+          ],
+          "source_bounds": [
+            216,
+            41,
+            329,
+            137
+          ],
+          "source_visible": true,
+          "actor_screen_x": 266,
+          "actor_screen_bottom": 137,
+          "action": 512,
+          "animation": 57908,
+          "health": -1
+        },
+        {
+          "frame": 5350,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            124,
+            128,
+            132,
+            136
+          ],
+          "source_bounds": [
+            213,
+            35,
+            326,
+            131
+          ],
+          "source_visible": true,
+          "actor_screen_x": 263,
+          "actor_screen_bottom": 131,
+          "action": 512,
+          "animation": 57924,
+          "health": -1
+        },
+        {
+          "frame": 5351,
+          "pose": 1,
+          "cps2_palette": 16,
+          "object_offsets": [
+            120,
+            124,
+            128,
+            132
+          ],
+          "source_bounds": [
+            210,
+            30,
+            323,
+            126
+          ],
+          "source_visible": true,
+          "actor_screen_x": 260,
+          "actor_screen_bottom": 125,
+          "action": 512,
+          "animation": 57924,
+          "health": -1
+        },
+        {
+          "frame": 5352,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            120,
+            124,
+            128,
+            132
+          ],
+          "source_bounds": [
+            207,
+            24,
+            320,
+            120
+          ],
+          "source_visible": true,
+          "actor_screen_x": 257,
+          "actor_screen_bottom": 120,
+          "action": 512,
+          "animation": 57924,
+          "health": -1
+        },
+        {
+          "frame": 5353,
+          "pose": 1,
+          "cps2_palette": 16,
+          "object_offsets": [
+            120,
+            124,
+            128,
+            132
+          ],
+          "source_bounds": [
+            204,
+            20,
+            317,
+            116
+          ],
+          "source_visible": true,
+          "actor_screen_x": 254,
+          "actor_screen_bottom": 115,
+          "action": 512,
+          "animation": 57924,
+          "health": -1
+        },
+        {
+          "frame": 5354,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            124,
+            128,
+            132,
+            136
+          ],
+          "source_bounds": [
+            201,
+            15,
+            314,
+            111
+          ],
+          "source_visible": true,
+          "actor_screen_x": 251,
+          "actor_screen_bottom": 111,
+          "action": 512,
+          "animation": 57924,
+          "health": -1
+        },
+        {
+          "frame": 5355,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            124,
+            128,
+            132,
+            136
+          ],
+          "source_bounds": [
+            198,
+            11,
+            311,
+            107
+          ],
+          "source_visible": true,
+          "actor_screen_x": 248,
+          "actor_screen_bottom": 107,
+          "action": 512,
+          "animation": 57924,
+          "health": -1
+        },
+        {
+          "frame": 5356,
+          "pose": 0,
+          "cps2_palette": 16,
+          "object_offsets": [
+            124,
+            128,
+            132,
+            136
+          ],
+          "source_bounds": [
+            195,
+            7,
+            308,
+            103
+          ],
+          "source_visible": true,
+          "actor_screen_x": 245,
+          "actor_screen_bottom": 103,
+          "action": 512,
+          "animation": 57924,
+          "health": -1
+        },
+        {
+          "frame": 5357,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            128,
+            132,
+            136
+          ],
+          "source_bounds": [
+            203,
+            51,
+            350,
+            100
+          ],
+          "source_visible": true,
+          "actor_screen_x": 242,
+          "actor_screen_bottom": 99,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5358,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            200,
+            48,
+            347,
+            97
+          ],
+          "source_visible": true,
+          "actor_screen_x": 239,
+          "actor_screen_bottom": 96,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5359,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            197,
+            45,
+            344,
+            94
+          ],
+          "source_visible": true,
+          "actor_screen_x": 236,
+          "actor_screen_bottom": 93,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5360,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            194,
+            42,
+            341,
+            91
+          ],
+          "source_visible": true,
+          "actor_screen_x": 233,
+          "actor_screen_bottom": 90,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5361,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            191,
+            40,
+            338,
+            89
+          ],
+          "source_visible": true,
+          "actor_screen_x": 230,
+          "actor_screen_bottom": 88,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5362,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            188,
+            38,
+            335,
+            87
+          ],
+          "source_visible": true,
+          "actor_screen_x": 227,
+          "actor_screen_bottom": 86,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5363,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            185,
+            36,
+            332,
+            85
+          ],
+          "source_visible": true,
+          "actor_screen_x": 224,
+          "actor_screen_bottom": 84,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5364,
+          "pose": 3,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            182,
+            35,
+            329,
+            84
+          ],
+          "source_visible": true,
+          "actor_screen_x": 221,
+          "actor_screen_bottom": 82,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5365,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            179,
+            33,
+            326,
+            82
+          ],
+          "source_visible": true,
+          "actor_screen_x": 218,
+          "actor_screen_bottom": 81,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5366,
+          "pose": 3,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            176,
+            33,
+            323,
+            82
+          ],
+          "source_visible": true,
+          "actor_screen_x": 215,
+          "actor_screen_bottom": 80,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5367,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            173,
+            32,
+            320,
+            81
+          ],
+          "source_visible": true,
+          "actor_screen_x": 212,
+          "actor_screen_bottom": 80,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5368,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            170,
+            32,
+            317,
+            81
+          ],
+          "source_visible": true,
+          "actor_screen_x": 209,
+          "actor_screen_bottom": 80,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5369,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            167,
+            32,
+            314,
+            81
+          ],
+          "source_visible": true,
+          "actor_screen_x": 206,
+          "actor_screen_bottom": 80,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5370,
+          "pose": 3,
+          "cps2_palette": 16,
+          "object_offsets": [
+            124,
+            128,
+            132
+          ],
+          "source_bounds": [
+            164,
+            33,
+            311,
+            82
+          ],
+          "source_visible": true,
+          "actor_screen_x": 203,
+          "actor_screen_bottom": 80,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5371,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            161,
+            33,
+            308,
+            82
+          ],
+          "source_visible": true,
+          "actor_screen_x": 200,
+          "actor_screen_bottom": 81,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5372,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            124,
+            128,
+            132
+          ],
+          "source_bounds": [
+            158,
+            34,
+            305,
+            83
+          ],
+          "source_visible": true,
+          "actor_screen_x": 197,
+          "actor_screen_bottom": 82,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5373,
+          "pose": 3,
+          "cps2_palette": 16,
+          "object_offsets": [
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            155,
+            36,
+            302,
+            85
+          ],
+          "source_visible": true,
+          "actor_screen_x": 194,
+          "actor_screen_bottom": 83,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5374,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            152,
+            37,
+            299,
+            86
+          ],
+          "source_visible": true,
+          "actor_screen_x": 191,
+          "actor_screen_bottom": 85,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5375,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            108,
+            112,
+            116
+          ],
+          "source_bounds": [
+            149,
+            39,
+            296,
+            88
+          ],
+          "source_visible": true,
+          "actor_screen_x": 188,
+          "actor_screen_bottom": 87,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5376,
+          "pose": 3,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            146,
+            42,
+            293,
+            91
+          ],
+          "source_visible": true,
+          "actor_screen_x": 185,
+          "actor_screen_bottom": 89,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5377,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            143,
+            44,
+            290,
+            93
+          ],
+          "source_visible": true,
+          "actor_screen_x": 182,
+          "actor_screen_bottom": 92,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5378,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            140,
+            47,
+            287,
+            96
+          ],
+          "source_visible": true,
+          "actor_screen_x": 179,
+          "actor_screen_bottom": 95,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5379,
+          "pose": 3,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            137,
+            51,
+            284,
+            100
+          ],
+          "source_visible": true,
+          "actor_screen_x": 176,
+          "actor_screen_bottom": 98,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5380,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            108,
+            112,
+            116
+          ],
+          "source_bounds": [
+            134,
+            54,
+            281,
+            103
+          ],
+          "source_visible": true,
+          "actor_screen_x": 173,
+          "actor_screen_bottom": 102,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5381,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            104,
+            108,
+            112
+          ],
+          "source_bounds": [
+            131,
+            58,
+            278,
+            107
+          ],
+          "source_visible": true,
+          "actor_screen_x": 170,
+          "actor_screen_bottom": 106,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5382,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            104,
+            108,
+            112
+          ],
+          "source_bounds": [
+            128,
+            62,
+            275,
+            111
+          ],
+          "source_visible": true,
+          "actor_screen_x": 167,
+          "actor_screen_bottom": 110,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5383,
+          "pose": 3,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            125,
+            67,
+            272,
+            116
+          ],
+          "source_visible": true,
+          "actor_screen_x": 164,
+          "actor_screen_bottom": 114,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5384,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            122,
+            71,
+            269,
+            120
+          ],
+          "source_visible": true,
+          "actor_screen_x": 161,
+          "actor_screen_bottom": 119,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5385,
+          "pose": 3,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            119,
+            77,
+            266,
+            126
+          ],
+          "source_visible": true,
+          "actor_screen_x": 158,
+          "actor_screen_bottom": 124,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5386,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            116,
+            82,
+            263,
+            131
+          ],
+          "source_visible": true,
+          "actor_screen_x": 155,
+          "actor_screen_bottom": 130,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5387,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            108,
+            112,
+            116
+          ],
+          "source_bounds": [
+            113,
+            88,
+            260,
+            137
+          ],
+          "source_visible": true,
+          "actor_screen_x": 152,
+          "actor_screen_bottom": 136,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5388,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            110,
+            94,
+            257,
+            143
+          ],
+          "source_visible": true,
+          "actor_screen_x": 149,
+          "actor_screen_bottom": 142,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5389,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            107,
+            100,
+            254,
+            149
+          ],
+          "source_visible": true,
+          "actor_screen_x": 146,
+          "actor_screen_bottom": 148,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5390,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            104,
+            107,
+            251,
+            156
+          ],
+          "source_visible": true,
+          "actor_screen_x": 143,
+          "actor_screen_bottom": 155,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5391,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            101,
+            114,
+            248,
+            163
+          ],
+          "source_visible": true,
+          "actor_screen_x": 140,
+          "actor_screen_bottom": 162,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5392,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            98,
+            121,
+            245,
+            170
+          ],
+          "source_visible": true,
+          "actor_screen_x": 137,
+          "actor_screen_bottom": 169,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5393,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            95,
+            129,
+            242,
+            178
+          ],
+          "source_visible": true,
+          "actor_screen_x": 134,
+          "actor_screen_bottom": 177,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5394,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            92,
+            137,
+            239,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 131,
+          "actor_screen_bottom": 185,
+          "action": 512,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5395,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112
+          ],
+          "source_bounds": [
+            85,
+            154,
+            213,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 128,
+          "actor_screen_bottom": 186,
+          "action": 1024,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5396,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112
+          ],
+          "source_bounds": [
+            85,
+            154,
+            213,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 128,
+          "actor_screen_bottom": 186,
+          "action": 1024,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5397,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            104
+          ],
+          "source_bounds": [
+            85,
+            154,
+            213,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 128,
+          "actor_screen_bottom": 186,
+          "action": 1024,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5398,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            104,
+            108,
+            112
+          ],
+          "source_bounds": [
+            87,
+            134,
+            234,
+            183
+          ],
+          "source_visible": true,
+          "actor_screen_x": 126,
+          "actor_screen_bottom": 182,
+          "action": 1536,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5399,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            108,
+            112,
+            116
+          ],
+          "source_bounds": [
+            85,
+            131,
+            232,
+            180
+          ],
+          "source_visible": true,
+          "actor_screen_x": 124,
+          "actor_screen_bottom": 179,
+          "action": 1536,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5400,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            120,
+            124,
+            128
+          ],
+          "source_bounds": [
+            83,
+            128,
+            230,
+            177
+          ],
+          "source_visible": true,
+          "actor_screen_x": 122,
+          "actor_screen_bottom": 176,
+          "action": 1536,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5401,
+          "pose": 3,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            81,
+            127,
+            228,
+            176
+          ],
+          "source_visible": true,
+          "actor_screen_x": 120,
+          "actor_screen_bottom": 174,
+          "action": 1536,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5402,
+          "pose": 3,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            79,
+            126,
+            226,
+            175
+          ],
+          "source_visible": true,
+          "actor_screen_x": 118,
+          "actor_screen_bottom": 173,
+          "action": 1536,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5403,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            77,
+            125,
+            224,
+            174
+          ],
+          "source_visible": true,
+          "actor_screen_x": 116,
+          "actor_screen_bottom": 173,
+          "action": 1536,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5404,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            75,
+            126,
+            222,
+            175
+          ],
+          "source_visible": true,
+          "actor_screen_x": 114,
+          "actor_screen_bottom": 174,
+          "action": 1536,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5405,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            73,
+            127,
+            220,
+            176
+          ],
+          "source_visible": true,
+          "actor_screen_x": 112,
+          "actor_screen_bottom": 175,
+          "action": 1536,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5406,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            116,
+            120,
+            124
+          ],
+          "source_bounds": [
+            71,
+            129,
+            218,
+            178
+          ],
+          "source_visible": true,
+          "actor_screen_x": 110,
+          "actor_screen_bottom": 177,
+          "action": 1536,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5407,
+          "pose": 2,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112,
+            116,
+            120
+          ],
+          "source_bounds": [
+            69,
+            132,
+            216,
+            181
+          ],
+          "source_visible": true,
+          "actor_screen_x": 108,
+          "actor_screen_bottom": 180,
+          "action": 1536,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5408,
+          "pose": 5,
+          "cps2_palette": 18,
+          "object_offsets": [
+            136,
+            140
+          ],
+          "source_bounds": [
+            57,
+            154,
+            185,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 106,
+          "actor_screen_bottom": 183,
+          "action": 1536,
+          "animation": 57940,
+          "health": -1
+        },
+        {
+          "frame": 5409,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            112
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5410,
+          "pose": 6,
+          "cps2_palette": 18,
+          "object_offsets": [
+            104,
+            108
+          ],
+          "source_bounds": [
+            57,
+            154,
+            185,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5411,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            88
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5412,
+          "pose": 6,
+          "cps2_palette": 18,
+          "object_offsets": [
+            88,
+            92
+          ],
+          "source_bounds": [
+            57,
+            154,
+            185,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5413,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            88
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5414,
+          "pose": 6,
+          "cps2_palette": 18,
+          "object_offsets": [
+            88,
+            92
+          ],
+          "source_bounds": [
+            57,
+            154,
+            185,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5415,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            88
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5416,
+          "pose": 6,
+          "cps2_palette": 18,
+          "object_offsets": [
+            88,
+            92
+          ],
+          "source_bounds": [
+            57,
+            154,
+            185,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5417,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            88
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5418,
+          "pose": 6,
+          "cps2_palette": 18,
+          "object_offsets": [
+            84,
+            88
+          ],
+          "source_bounds": [
+            57,
+            154,
+            185,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5419,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            80
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5420,
+          "pose": 6,
+          "cps2_palette": 18,
+          "object_offsets": [
+            80,
+            84
+          ],
+          "source_bounds": [
+            57,
+            154,
+            185,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5421,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            80
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5422,
+          "pose": 6,
+          "cps2_palette": 18,
+          "object_offsets": [
+            80,
+            84
+          ],
+          "source_bounds": [
+            57,
+            154,
+            185,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5423,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            80
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5424,
+          "pose": 6,
+          "cps2_palette": 18,
+          "object_offsets": [
+            80,
+            84
+          ],
+          "source_bounds": [
+            57,
+            154,
+            185,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5425,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            80
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5426,
+          "pose": 6,
+          "cps2_palette": 18,
+          "object_offsets": [
+            80,
+            84
+          ],
+          "source_bounds": [
+            57,
+            154,
+            185,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5427,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            80
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5428,
+          "pose": 6,
+          "cps2_palette": 18,
+          "object_offsets": [
+            80,
+            84
+          ],
+          "source_bounds": [
+            57,
+            154,
+            185,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5429,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            80
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5430,
+          "pose": 6,
+          "cps2_palette": 18,
+          "object_offsets": [
+            80,
+            84
+          ],
+          "source_bounds": [
+            57,
+            154,
+            185,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5431,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            88
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5432,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5433,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            92
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5434,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5435,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            92
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5436,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5437,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            88
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5438,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5439,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            84
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5440,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5441,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            84
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5442,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5443,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            84
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5444,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5445,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            80
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5446,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5447,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            80
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5448,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5449,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            80
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5450,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5451,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            80
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5452,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5453,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            80
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5454,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5455,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            80
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5456,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5457,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            80
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5458,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5459,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            76
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5460,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5461,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            84
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5462,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5463,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            84
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5464,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5465,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            76
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5466,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5467,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            76
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5468,
+          "pose": 7,
+          "cps2_palette": null,
+          "object_offsets": [],
+          "source_bounds": null,
+          "source_visible": false,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        },
+        {
+          "frame": 5469,
+          "pose": 4,
+          "cps2_palette": 16,
+          "object_offsets": [
+            76
+          ],
+          "source_bounds": [
+            61,
+            154,
+            189,
+            186
+          ],
+          "source_visible": true,
+          "actor_screen_x": 104,
+          "actor_screen_bottom": 186,
+          "action": 0,
+          "animation": 57960,
+          "health": -1
+        }
+      ]
+    }
+  ]
+}

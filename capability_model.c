@@ -15,7 +15,9 @@
 #define CAP_PLAYER_KO_TOTAL_FRAMES 96
 #define CAP_ROOM_ONE_RIGHT 336
 #define CAP_ROOM_ONE_EXIT 480
-#define CAP_KO_VISIBLE_FRAMES 45
+#define CAP_ENEMY_ATTACK_TOTAL_FRAMES 120
+#define CAP_ENEMY_HIT_TOTAL_FRAMES 36
+#define CAP_ENEMY_KO_VISIBLE_FRAMES 140
 #define CAP_CLEAR_HOLD_FRAMES 60
 
 typedef struct
@@ -494,14 +496,14 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
     if (enemy->action == CAP_ACT_KO)
     {
         ++enemy->action_frame;
-        if (enemy->action_frame >= CAP_KO_VISIBLE_FRAMES)
+        if (enemy->action_frame >= CAP_ENEMY_KO_VISIBLE_FRAMES)
             cap_deactivate_enemy(enemy, index);
         return;
     }
     if (enemy->action == CAP_ACT_HIT)
     {
         ++enemy->action_frame;
-        if (enemy->action_frame >= 14)
+        if (enemy->action_frame >= CAP_ENEMY_HIT_TOTAL_FRAMES)
         {
             enemy->action = CAP_ACT_IDLE;
             enemy->action_frame = 0;
@@ -513,7 +515,7 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
         ++enemy->action_frame;
         if (enemy->action_frame == 12)
             cap_enemy_attack_player(world, enemy);
-        if (enemy->action_frame >= 30)
+        if (enemy->action_frame >= CAP_ENEMY_ATTACK_TOTAL_FRAMES)
         {
             enemy->action = CAP_ACT_IDLE;
             enemy->action_frame = 0;

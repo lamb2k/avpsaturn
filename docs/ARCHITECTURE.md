@@ -33,24 +33,25 @@ The current path instead:
 4. emits one 192x192 VDP1 cel per source palette layer
 5. draws all layers at the same pivot and depth
 
-The active actor VDP1 working set contains six 192x192 packed 4bpp slots, or
-110,592 bytes of texture data: two idle Predator layers, three replaceable
-player-action layers, and one replaceable alien layer. The isolated player
+The active actor VDP1 working set contains two 192x192 idle Predator layers,
+three replaceable 192x192 player-action layers, eight independent 288x192
+alien layers, and one 256x192 boss layer: 337,920 bytes of texture data. The
+isolated player
 captures produce an exact 48-frame walk loop, plus 23-frame weapon, 22-frame
 melee, 42-frame jump, 24-frame dash, 81-frame emergency-attack, 25-frame hit,
 and 96-frame KO clips. Pose deduplication reduces them to 103 shared assemblies
 and 309 palette-layer payloads. Count/value RLE compresses their 5,695,488
 decoded bytes to one 417,488-byte indexed cartridge archive, avoiding 309
-separate CD seeks at boot. The first blue-alien track adds ten single-layer
-poses, or 184,320 source bytes. Each pose
-update replaces only its corresponding
-55,296-byte player group or 18,432-byte enemy slot. Four exact CPS2 alien
-variants plus the three player-layer palettes occupy seven 16-color banks in
-one Saturn 256-color CRAM allocation. Eight bounded enemy actors reuse the same
-current alien VDP1 texture, so the crowd adds draw commands and transforms
-rather than eight duplicate texture allocations. This separates source
-residency from VDP1 texture residency and leaves room for commands and a larger
-animation cache.
+separate CD seeks at boot. The validated alien actor adds exact 39-frame walk,
+120-frame attack, 36-frame hit, and 140-frame KO schedules. Forty-two shared
+poses occupy 1,161,216 decoded bytes and compress to a 131,552-byte indexed RLE
+archive. Source-omitted CPS2 flicker frames retain the last valid pose without
+changing clip timing. Each actor owns one 27,648-byte VDP1 slot, so eight
+enemies can display unlike animation frames concurrently. Four exact alien
+variants, three player-layer palettes, and the boss palette occupy eight
+16-color banks in one Saturn 256-color CRAM allocation. Menus and route stills
+were moved off VDP1 to keep the texture working set at roughly 74% of the Jo
+Engine VDP1 user area, leaving command-table and texture headroom.
 
 The converter retains the final visible CPS2 object/priority result as an
 offline 352x224 8bpp comparison surface. Its 76 visible source colors fit
@@ -59,9 +60,11 @@ horizontal coordinates are resampled from 384 to 352. An ignored 86,016-byte
 384x224 source oracle is retained as well. These are flattened comparison
 oracles, not the final animation architecture or the normal release boot path.
 
-The normal release instead allocates two 78,848-byte VDP1 frontend surfaces:
+The normal release retains two 78,848-byte frontend surfaces in cartridge RAM:
 the verified frame-1440 Press Start state and frame-1800 Predator Warrior
 selection state. Their 110 and 115 source colors respectively remain lossless.
+They and the later route stills are copied into the shared 512x256 VDP2 bitmap,
+so full-screen states consume no VDP1 texture slots.
 The native controller state machine waits for Start, then B, before beginning
 the Round 1 title and gameplay route.
 
@@ -135,14 +138,15 @@ Exact in the current milestone:
 - Saturn-native 352x224 initialization with one deterministic full-width fit
 - isolated captured Predator walk, weapon, melee, jump, dash, emergency-attack,
   hit, and KO clips, including the hit/KO screen-space trajectory
-- first ten-pose temporally tracked blue-alien sequence
+- exact state-bound walk, attack, hit, and KO clips for one validated alien
+  actor slot, with independent VDP1 slots for all eight runtime enemies
 - first-room 5+3 crowd budget, four alien palette variants, combat lock, clear,
   and exit-state lifecycle
 
 Still approximate or incomplete:
 
-- temporal confirmation of remaining enemy variants, actions, and prop groups
-- exact enemy pose selection, spawn coordinates/timing, AI, and object priority
+- temporal confirmation of remaining enemy archetypes, variants, and prop groups
+- exact spawn coordinates/timing, attack hit windows, AI, and object priority
 - remaining player transition and interaction frame sets
 - complete attract-mode, menu-transition, and character-select animation
 - full animation between the verified route key states
@@ -154,8 +158,8 @@ Still approximate or incomplete:
 ## Next implementation sequence
 
 1. Extend the captured player timeline into remaining transition and interaction clips.
-2. Extend the proven blue-alien track into attack, hit, and KO clips and repeat
-   the temporal grouping for the remaining enemy palettes.
+2. Repeat the proven state-slot capture for the remaining enemy archetypes and
+   validate attack hit windows against player-health transitions.
 3. Replace prototype combat with Stage 1 scripts, collision, spawn, and camera
    data.
 4. Add bounded CD-to-cartridge prefetch and VDP1 cache scheduling.

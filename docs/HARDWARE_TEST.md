@@ -53,6 +53,9 @@ alter console copy protection or supply copyrighted disc data.
 5. Confirm Stage 1 CD audio begins after the first input, remains stereo and
    free of stalls through the room transition, and survives a pause/resume.
 6. Fight through the five-enemy opening wave and three-enemy reinforcement wave.
+   Confirm enemies can simultaneously show unlike walk, attack, hit, and KO
+   poses without one actor changing another actor's cel. The proven alien clips
+   must last 39, 120, 36, and 140 frames respectively, with no KO flicker.
 7. Confirm eight total KOs unlock the room and moving right reaches the exit
    transition.
 8. Defeat Chrysalis and confirm the native Stage Clear state.

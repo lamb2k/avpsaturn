@@ -17,9 +17,22 @@
 #define SNAPSHOT_HEIGHT 224
 #define SNAPSHOT_FIT_BYTES (SNAPSHOT_FIT_WIDTH * SNAPSHOT_HEIGHT)
 #define BOSS_CEL_BYTES ((AVSP_BOSS_CEL_WIDTH * AVSP_BOSS_CEL_HEIGHT) / 2)
+#define BITMAP_SCENE_NONE (-1000)
+#define BITMAP_SCENE_CORRIDOR (-2)
+#define BITMAP_SCENE_BOSS (-3)
+#define BITMAP_SCENE_FRONTEND_BASE 100
+#define BITMAP_SCENE_ROUTE_BASE 200
+#define AVSP_VDP1_TEXTURE_BUDGET 458488
+#define AVSP_VDP1_TEXTURE_BYTES \
+    (2 * CEL_BYTES + \
+     AVSP_PLAYER_ACTION_LAYERS * AVSP_PLAYER_ACTION_DECODED_BYTES + \
+     CAP_MAX_ENEMIES * AVSP_ENEMY_DECODED_BYTES + BOSS_CEL_BYTES)
 
 #if JO_TV_WIDTH != CAP_VIEW_WIDTH || JO_TV_HEIGHT != 224
 #error "The AvP fidelity build requires Saturn TV_352x224"
+#endif
+#if AVSP_VDP1_TEXTURE_BYTES > AVSP_VDP1_TEXTURE_BUDGET
+#error "The AvP actor working set exceeds Saturn VDP1 texture VRAM"
 #endif
 
 extern jo_color *nbg1_bitmap;
@@ -58,26 +71,27 @@ static unsigned char *sequence_rle[AVSP_SEQUENCE_SCENES];
 static unsigned char *sequence_pixels;
 static unsigned char *background_bitmap;
 static unsigned char *player_action_archive;
+static unsigned char *enemy_action_archive;
 static jo_img_4bits player_action_images[AVSP_PLAYER_ACTION_LAYERS];
-static jo_img_4bits enemy_walk_images[AVSP_ENEMY_WALK_POSES];
+static jo_img_4bits enemy_action_images[CAP_MAX_ENEMIES];
 static jo_img_4bits boss_idle_images[AVSP_BOSS_IDLE_LAYERS];
 static int player_idle_sprites[2];
 static int player_action_sprites[AVSP_PLAYER_ACTION_LAYERS];
-static int enemy_walk_sprite;
+static int enemy_action_sprites[CAP_MAX_ENEMIES];
 static int boss_idle_sprites[AVSP_BOSS_IDLE_LAYERS];
-static int frontend_sprites[AVSP_FRONTEND_SCENES];
 static int current_player_action_pose;
-static int current_enemy_walk_pose;
+static int current_enemy_action_poses[CAP_MAX_ENEMIES];
 static int debug_hud_enabled;
 static const char *failed_asset;
 static int runtime_ready;
 static int cart_available;
-static int boss_background_active;
 static int stage_music_started;
-static int current_sequence_scene;
+static int current_bitmap_scene;
 #ifdef AVSP_VISUAL_TEST
 static int visual_action_index;
 static int visual_walk_frames;
+static int visual_enemy_action_index;
+static int visual_enemy_frame;
 #endif
 
 static int load_cel_asset(CelAsset *asset)
@@ -170,23 +184,63 @@ static int decode_player_action_pose(const int pose)
     return 1;
 }
 
-static int load_enemy_walk_sequence(void)
+static int load_enemy_action_sequences(void)
 {
-    int pose;
-    int length;
-    for (pose = 0; pose < AVSP_ENEMY_WALK_POSES; ++pose)
+    int slot;
+    int length = 0;
+    enemy_action_archive = (unsigned char *)jo_fs_read_file_in_dir(
+        AVSP_ENEMY_ARCHIVE_FILE, "SPR4", &length);
+    if (enemy_action_archive == JO_NULL ||
+        length != AVSP_ENEMY_ARCHIVE_BYTES)
     {
-        jo_img_4bits *image = &enemy_walk_images[pose];
-        image->width = CEL_WIDTH;
-        image->height = CEL_HEIGHT;
-        length = 0;
-        image->data = (unsigned char *)jo_fs_read_file_in_dir(
-            avsp_enemy_walk_files[pose], "SPR4", &length);
-        if (image->data == JO_NULL || length != CEL_BYTES)
+        failed_asset = AVSP_ENEMY_ARCHIVE_FILE;
+        return 0;
+    }
+    for (slot = 0; slot < CAP_MAX_ENEMIES; ++slot)
+    {
+        enemy_action_images[slot].width = AVSP_ENEMY_CEL_WIDTH;
+        enemy_action_images[slot].height = AVSP_ENEMY_CEL_HEIGHT;
+        enemy_action_images[slot].data =
+            (unsigned char *)jo_malloc(AVSP_ENEMY_DECODED_BYTES);
+        if (enemy_action_images[slot].data == JO_NULL)
         {
-            failed_asset = avsp_enemy_walk_files[pose];
+            failed_asset = "ENEMY ACTION BUFFER";
             return 0;
         }
+    }
+    return 1;
+}
+
+static int decode_enemy_action_pose(const int pose, const int slot)
+{
+    unsigned int source = 0;
+    unsigned int target = 0;
+    const unsigned int source_offset = avsp_enemy_rle_offsets[pose];
+    const unsigned int source_length = avsp_enemy_rle_bytes[pose];
+    const unsigned char *source_data;
+    unsigned char *output = enemy_action_images[slot].data;
+    if (source_offset + source_length > AVSP_ENEMY_ARCHIVE_BYTES)
+    {
+        failed_asset = "ENEMY ACTION INDEX";
+        return 0;
+    }
+    source_data = enemy_action_archive + source_offset;
+    while (source + 1 < source_length)
+    {
+        unsigned int count = source_data[source++];
+        unsigned char value = source_data[source++];
+        if (count == 0 || target + count > AVSP_ENEMY_DECODED_BYTES)
+        {
+            failed_asset = "ENEMY ACTION RLE";
+            return 0;
+        }
+        memset(output + target, value, count);
+        target += count;
+    }
+    if (source != source_length || target != AVSP_ENEMY_DECODED_BYTES)
+    {
+        failed_asset = "ENEMY ACTION SIZE";
+        return 0;
     }
     return 1;
 }
@@ -267,15 +321,38 @@ static int load_frontend_assets(void)
             failed_asset = avsp_frontend_files[scene];
             return 0;
         }
-        frontend_sprites[scene] = jo_sprite_add_8bits_image(image);
-        if (frontend_sprites[scene] < 0)
-        {
-            failed_asset = "FRONTEND VDP1";
-            return 0;
-        }
-        jo_free(image->data);
-        image->data = JO_NULL;
     }
+    return 1;
+}
+
+static void copy_snapshot_to_background(const unsigned char *source)
+{
+    static unsigned char empty_row[BACKGROUND_WIDTH];
+    int y;
+    for (y = 0; y < BACKGROUND_HEIGHT; ++y)
+    {
+        unsigned char *target = background_bitmap + y * BACKGROUND_WIDTH;
+        jo_dma_copy(empty_row, target, BACKGROUND_WIDTH);
+        if (y < SNAPSHOT_HEIGHT)
+            jo_dma_copy((void *)(source + y * SNAPSHOT_FIT_WIDTH), target,
+                        SNAPSHOT_FIT_WIDTH);
+    }
+}
+
+static int activate_frontend_scene(const int scene)
+{
+    int bitmap_scene = BITMAP_SCENE_FRONTEND_BASE + scene;
+    if (current_bitmap_scene == bitmap_scene) return 1;
+    if (scene < 0 || scene >= AVSP_FRONTEND_SCENES ||
+        frontend_images[scene].data == JO_NULL)
+    {
+        failed_asset = "FRONTEND SCENE";
+        return 0;
+    }
+    copy_snapshot_to_background(frontend_images[scene].data);
+    slBMPaletteNbg1((unsigned short)frontend_palettes[scene].id);
+    jo_move_background(0, 0);
+    current_bitmap_scene = bitmap_scene;
     return 1;
 }
 
@@ -337,12 +414,12 @@ static int sequence_scene_for_world(void)
 static int activate_route_sequence(const int scene)
 {
     static jo_color colors[256];
-    jo_img replacement;
     unsigned int source = 0;
     unsigned int target = 0;
     int index;
 
-    if (scene < 0 || scene == current_sequence_scene) return 1;
+    if (scene < 0 || current_bitmap_scene == BITMAP_SCENE_ROUTE_BASE + scene)
+        return 1;
     while (source + 1 < avsp_sequence_rle_bytes[scene])
     {
         unsigned int count = sequence_rle[scene][source++];
@@ -367,11 +444,10 @@ static int activate_route_sequence(const int scene)
             avsp_sequence_palettes[scene][index][1],
             avsp_sequence_palettes[scene][index][2]);
     jo_palette_to_cram(colors, frontend_palettes[0].data, 256);
-    replacement.width = SNAPSHOT_FIT_WIDTH;
-    replacement.height = SNAPSHOT_HEIGHT;
-    replacement.data = (jo_color *)sequence_pixels;
-    jo_sprite_replace(&replacement, frontend_sprites[0]);
-    current_sequence_scene = scene;
+    copy_snapshot_to_background(sequence_pixels);
+    slBMPaletteNbg1((unsigned short)frontend_palettes[0].id);
+    jo_move_background(0, 0);
+    current_bitmap_scene = BITMAP_SCENE_ROUTE_BASE + scene;
     return 1;
 }
 
@@ -411,6 +487,7 @@ static int load_background(void)
     slZoomModeNbg1(ZOOM_1);
     slBMPaletteNbg1((unsigned short)background_palette.id);
     jo_dma_copy(background_image.data, background_bitmap, BACKGROUND_WIDTH * BACKGROUND_HEIGHT);
+    current_bitmap_scene = BITMAP_SCENE_CORRIDOR;
     jo_set_displayed_screens(JO_NBG0_SCREEN | JO_NBG1_SCREEN);
     return 1;
 }
@@ -435,13 +512,23 @@ static int load_boss_background(void)
     return 1;
 }
 
-static void activate_boss_background(void)
+static void activate_gameplay_background(const int stage_area)
 {
-    if (boss_background_active) return;
-    jo_dma_copy(boss_background_image.data, background_bitmap,
-                BACKGROUND_WIDTH * BACKGROUND_HEIGHT);
-    slBMPaletteNbg1((unsigned short)boss_background_palette.id);
-    boss_background_active = 1;
+    int requested = stage_area == 1 ? BITMAP_SCENE_BOSS : BITMAP_SCENE_CORRIDOR;
+    if (current_bitmap_scene == requested) return;
+    if (stage_area == 1)
+    {
+        jo_dma_copy(boss_background_image.data, background_bitmap,
+                    BACKGROUND_WIDTH * BACKGROUND_HEIGHT);
+        slBMPaletteNbg1((unsigned short)boss_background_palette.id);
+    }
+    else
+    {
+        jo_dma_copy(background_image.data, background_bitmap,
+                    BACKGROUND_WIDTH * BACKGROUND_HEIGHT);
+        slBMPaletteNbg1((unsigned short)background_palette.id);
+    }
+    current_bitmap_scene = requested;
 }
 
 static int add_sprite_for_asset(const CelId cel)
@@ -454,6 +541,7 @@ static int add_sprite_for_asset(const CelId cel)
 static int create_sprite_working_set(void)
 {
     int layer;
+    int slot;
     player_idle_sprites[0] = add_sprite_for_asset(CEL_PLAYER_IDLE_0);
     player_idle_sprites[1] = add_sprite_for_asset(CEL_PLAYER_IDLE_1);
     if (!decode_player_action_pose(0)) return 0;
@@ -465,9 +553,15 @@ static int create_sprite_working_set(void)
             failed_asset = "PLAYER ACTION VDP1";
     }
     current_player_action_pose = 0;
-    enemy_walk_sprite = jo_sprite_add_4bits_image(&enemy_walk_images[0]);
-    if (enemy_walk_sprite < 0) failed_asset = avsp_enemy_walk_files[0];
-    current_enemy_walk_pose = 0;
+    for (slot = 0; slot < CAP_MAX_ENEMIES; ++slot)
+    {
+        if (!decode_enemy_action_pose(0, slot)) return 0;
+        enemy_action_sprites[slot] = jo_sprite_add_4bits_image(
+            &enemy_action_images[slot]);
+        if (enemy_action_sprites[slot] < 0)
+            failed_asset = "ENEMY ACTION VDP1";
+        current_enemy_action_poses[slot] = 0;
+    }
     for (layer = 0; layer < AVSP_BOSS_IDLE_LAYERS; ++layer)
     {
         boss_idle_sprites[layer] = jo_sprite_add_4bits_image(
@@ -503,6 +597,14 @@ static CapAction visual_action_for_index(const int index)
     if (index == 6) return CAP_ACT_HIT;
     return CAP_ACT_KO;
 }
+
+static CapAction visual_enemy_action_for_index(const int index)
+{
+    if (index == 1) return CAP_ACT_ATTACK;
+    if (index == 2) return CAP_ACT_HIT;
+    if (index == 3) return CAP_ACT_KO;
+    return CAP_ACT_WALK;
+}
 #endif
 
 static int player_pose_for_frame(const int clip, const int action_frame)
@@ -518,6 +620,28 @@ static int player_pose_for_frame(const int clip, const int action_frame)
     }
     return avsp_player_action_step_poses[clip]
         [avsp_player_action_step_counts[clip] - 1];
+}
+
+static int enemy_clip_for_action(const CapAction action)
+{
+    if (action == CAP_ACT_ATTACK) return AVSP_ENEMY_CLIP_ATTACK;
+    if (action == CAP_ACT_HIT) return AVSP_ENEMY_CLIP_HIT;
+    if (action == CAP_ACT_KO) return AVSP_ENEMY_CLIP_KO;
+    return AVSP_ENEMY_CLIP_WALK;
+}
+
+static int enemy_pose_for_frame(const int clip, const int action_frame)
+{
+    int step;
+    int remaining = action_frame;
+    for (step = 0; step < avsp_enemy_step_counts[clip]; ++step)
+    {
+        int duration = avsp_enemy_step_durations[clip][step];
+        if (remaining < duration)
+            return avsp_enemy_step_poses[clip][step];
+        remaining -= duration;
+    }
+    return avsp_enemy_step_poses[clip][avsp_enemy_step_counts[clip] - 1];
 }
 
 static void draw_exact_layer_offset(const CapActor *actor, const int screen_x,
@@ -588,10 +712,32 @@ static void draw_player(const CapActor *actor, const int screen_x)
     }
 }
 
-static void draw_alien(const CapActor *actor, const int screen_x)
+static void draw_alien(const CapActor *actor, const int screen_x,
+                       const int slot)
 {
     int depth = 330 - actor->lane;
-    draw_exact_layer(actor, screen_x, enemy_walk_sprite,
+    int clip = enemy_clip_for_action(actor->action);
+    int frame = (actor->action == CAP_ACT_WALK ||
+                 actor->action == CAP_ACT_IDLE) ?
+        actor->locomotion_frame : actor->action_frame;
+    int pose;
+    if (clip == AVSP_ENEMY_CLIP_WALK)
+        frame %= avsp_enemy_total_frames[clip];
+    else if (frame >= avsp_enemy_total_frames[clip])
+        frame = avsp_enemy_total_frames[clip] - 1;
+    pose = enemy_pose_for_frame(clip, frame);
+    if (pose != current_enemy_action_poses[slot])
+    {
+        if (!decode_enemy_action_pose(pose, slot))
+        {
+            runtime_ready = 0;
+            return;
+        }
+        jo_sprite_replace_4bits_image(
+            &enemy_action_images[slot], enemy_action_sprites[slot]);
+        current_enemy_action_poses[slot] = pose;
+    }
+    draw_exact_layer(actor, screen_x, enemy_action_sprites[slot],
                      3 + actor->variant, depth);
 }
 
@@ -615,34 +761,18 @@ static void draw_world(void)
         world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT)
     {
         int scene = world.encounter_state == CAP_ENCOUNTER_MAIN_MENU ? 0 : 1;
-        jo_sprite_restore_sprite_scale();
-        jo_sprite_set_palette(frontend_palettes[scene].id);
-        jo_sprite_draw3D(frontend_sprites[scene], 0, 0, 160);
+        if (!activate_frontend_scene(scene)) runtime_ready = 0;
         return;
     }
     if (sequence_scene_for_world() >= 0)
-    {
-        jo_sprite_restore_sprite_scale();
-        jo_sprite_set_palette(frontend_palettes[0].id);
-        jo_sprite_draw3D(frontend_sprites[0], 0, 0, 160);
         return;
-    }
-    if (world.stage_area == 1) activate_boss_background();
+    activate_gameplay_background(world.stage_area);
     /* The source capture is already exactly 224 lines high.  A non-zero Y
        scroll silently discards arcade scanlines and is therefore a crop. */
     jo_move_background(background_scroll, 0);
     jo_sprite_change_sprite_scale_xy(
         (float)CAP_VIEW_WIDTH / (float)CAP_CPS2_VIEW_WIDTH, 1.0f);
     draw_player(&world.player, player_x);
-    {
-        int pose = (world.frame / 4) % AVSP_ENEMY_WALK_POSES;
-        if (pose != current_enemy_walk_pose)
-        {
-            jo_sprite_replace_4bits_image(
-                &enemy_walk_images[pose], enemy_walk_sprite);
-            current_enemy_walk_pose = pose;
-        }
-    }
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
     {
         CapActor *enemy = &world.enemies[index];
@@ -652,7 +782,7 @@ static void draw_world(void)
         if (enemy->kind == CAP_ACTOR_BOSS)
             draw_boss(enemy, screen_x);
         else
-            draw_alien(enemy, screen_x);
+            draw_alien(enemy, screen_x, index);
     }
     jo_sprite_restore_sprite_scale();
 }
@@ -806,10 +936,28 @@ static void frame_callback(void)
         stage_music_started = 1;
     }
 #ifdef AVSP_VISUAL_TEST
-    world.enemies[0].x = world.player.x + 112;
-    world.enemies[0].lane = world.player.lane;
-    world.enemies[0].action = CAP_ACT_WALK;
-    world.enemies[0].active = 1;
+    {
+        int clip = visual_enemy_action_index;
+        int total = avsp_enemy_total_frames[clip];
+        CapActor *enemy = &world.enemies[0];
+        enemy->x = world.player.x + 112;
+        enemy->lane = world.player.lane;
+        enemy->action = visual_enemy_action_for_index(visual_enemy_action_index);
+        enemy->active = 1;
+        enemy->kind = CAP_ACTOR_ALIEN;
+        enemy->facing = -1;
+        if (enemy->action == CAP_ACT_WALK)
+            enemy->locomotion_frame = visual_enemy_frame;
+        else
+            enemy->action_frame = visual_enemy_frame;
+        ++visual_enemy_frame;
+        if (visual_enemy_frame >= total)
+        {
+            visual_enemy_frame = 0;
+            visual_enemy_action_index =
+                (visual_enemy_action_index + 1) % AVSP_ENEMY_ACTION_CLIPS;
+        }
+    }
 #endif
 #ifdef AVSP_ENCOUNTER_TEST
     jo_printf(0, 7, "ENCOUNTER %d KO %d/%d ACTIVE %d EXIT %d LVL %d",
@@ -822,10 +970,11 @@ static void frame_callback(void)
     draw_route_overlay();
     draw_hud();
 #ifdef AVSP_VISUAL_TEST
-    jo_printf(0, 5, "VISUAL A%d P%02d/%02d E%02d",
+    jo_printf(0, 5, "VISUAL A%d P%02d/%02d E%d:%03d/%02d",
               world.player.action, world.player.action_frame,
               current_player_action_pose,
-              current_enemy_walk_pose);
+              visual_enemy_action_index, visual_enemy_frame,
+              current_enemy_action_poses[0]);
 #endif
 }
 
@@ -837,12 +986,14 @@ void jo_main(void)
     background_image.data = JO_NULL;
     boss_background_image.data = JO_NULL;
     debug_hud_enabled = 0;
-    boss_background_active = 0;
     stage_music_started = 0;
-    current_sequence_scene = -1;
+    current_bitmap_scene = BITMAP_SCENE_NONE;
 #ifdef AVSP_VISUAL_TEST
     visual_action_index = 0;
     visual_walk_frames = 0;
+    visual_enemy_action_index = 0;
+    visual_enemy_frame = 0;
+    debug_hud_enabled = 1;
 #endif
     sequence_pixels = JO_NULL;
     for (index = 0; index < AVSP_SEQUENCE_SCENES; ++index)
@@ -863,7 +1014,7 @@ void jo_main(void)
                         load_route_sequences() &&
                         load_background() && load_boss_background() &&
                         load_all_cels() && load_player_action_sequences() &&
-                        load_enemy_walk_sequence() && load_boss_idle() &&
+                        load_enemy_action_sequences() && load_boss_idle() &&
                         create_sprite_working_set();
     }
     cap_world_init(&world);

@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ROM_ROOT = ROOT / "avspu"
 CAPTURE_ROOT = ROOT / ".deps" / "mame" / "captures"
 PLAYER_ACTION_ROOT = ROOT / ".deps" / "mame" / "player_actions"
+ENEMY_ACTION_ROOT = ROOT / ".deps" / "mame" / "enemy_actions"
 OUTPUT_ROOT = ROOT / "build" / "rom_extract"
 SATURN_CD_ROOT = ROOT / "build" / "avsp_cd"
 GENERATED_ROOT = ROOT / "generated"
@@ -1500,50 +1501,164 @@ static const unsigned short avsp_player_action_source_frames[AVSP_PLAYER_ACTION_
     return manifest
 
 
-def write_enemy_walk_sequence_assets(
+def write_enemy_action_sequence_assets(
         gfx: bytearray, sprite_dir: Path) -> list[dict[str, object]]:
-    source_frames = list(range(4164, 4201, 4))
-    base_palette = [
-        animation_palette(source_frames[0])[16 * 16 + pen][:3]
-        for pen in range(15)
-    ]
-    files = []
-    manifest = []
-    for pose_index, frame in enumerate(source_frames):
-        bank, offsets, pivot = rightmost_blue_alien_capture(frame)
-        layers, palettes = exact_object_layers(
-            gfx, animation_palette(frame), frame, bank, offsets, pivot=pivot)
-        if 16 not in layers or palettes[16] != base_palette:
-            raise ValueError(f"frame {frame}: blue alien palette 16 changed")
-        filename = f"EA{pose_index:02d}.BIN"
-        data = pack_4bpp(layers[16])
-        (sprite_dir / filename).write_bytes(data)
-        files.append(filename)
-        manifest.append({
-            "path": f"SPR4/{filename}",
-            "bytes": len(data),
-            "sha256": hashlib.sha256(data).hexdigest(),
-            "source_frame": frame,
-            "cps2_palette": 16,
+    """Emit exact walk/attack/hit/KO cels for the validated CPS2 actor slot.
+
+    The CPS2 object list can deliberately omit a hit or corpse cel in crowded
+    frames.  Those frames retain the preceding source pose: animation timing
+    remains exact while the Saturn enhanced build avoids source-list flicker.
+    """
+    report_path = ROOT / "data" / "enemy_action_capture.json"
+    if not report_path.is_file():
+        raise ValueError(
+            "enemy-action report is missing; run capture_enemy_actions.ps1")
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    if report.get("schema") != 1:
+        raise ValueError("unsupported enemy-action report schema")
+
+    sample_banks: dict[int, int] = {}
+    for line in (ENEMY_ACTION_ROOT / "samples.tsv").read_text(
+            encoding="utf-8").splitlines()[1:]:
+        if not line:
+            continue
+        frame_text, bank_text, _, _ = line.split("\t")
+        sample_banks[int(frame_text)] = int(bank_text)
+
+    archive = bytearray()
+    archive_offsets: list[int] = []
+    archive_lengths: list[int] = []
+    source_frames: list[int] = []
+    pose_by_digest: dict[str, int] = {}
+    clip_specs: list[dict[str, object]] = []
+
+    for clip in report["clips"]:
+        frame_poses: list[int] = []
+        prior_pose: int | None = None
+        for sample in clip["timeline"]:
+            frame = int(sample["frame"])
+            if not sample["source_visible"]:
+                if prior_pose is None:
+                    raise ValueError(
+                        f"{clip['name']} frame {frame}: omitted before first pose")
+                frame_poses.append(prior_pose)
+                continue
+            colour = int(sample["cps2_palette"])
+            bank = sample_banks.get(frame)
+            if bank not in (1, 2):
+                raise ValueError(f"enemy frame {frame}: missing active object bank")
+            object_path = ENEMY_ACTION_ROOT / f"objram_active_{frame:05d}.tsv"
+            palette = load_palette_path(
+                ENEMY_ACTION_ROOT / f"palette_{frame:05d}.tsv")
+            layers, _ = exact_object_layers(
+                gfx, palette, frame, bank,
+                [int(offset) for offset in sample["object_offsets"]],
+                pivot=(int(sample["actor_screen_x"]),
+                       int(sample["actor_screen_bottom"])),
+                source_filename=str(object_path), canvas_size=(288, 192))
+            decoded = pack_4bpp(layers[colour])
+            digest = hashlib.sha256(decoded).hexdigest()
+            pose = pose_by_digest.get(digest)
+            if pose is None:
+                pose = len(pose_by_digest)
+                pose_by_digest[digest] = pose
+                encoded = rle_encode_bytes(decoded)
+                if rle_decode_bytes(encoded) != decoded:
+                    raise ValueError(
+                        f"enemy frame {frame}: action RLE round trip failed")
+                archive_offsets.append(len(archive))
+                archive_lengths.append(len(encoded))
+                source_frames.append(frame)
+                archive.extend(encoded)
+            prior_pose = pose
+            frame_poses.append(pose)
+
+        if len(frame_poses) != int(clip["frame_count"]):
+            raise ValueError(f"{clip['name']}: timeline does not cover clip")
+        runs: list[tuple[int, int]] = []
+        for pose in frame_poses:
+            if runs and runs[-1][0] == pose:
+                runs[-1] = (pose, runs[-1][1] + 1)
+            else:
+                runs.append((pose, 1))
+        clip_specs.append({
+            "name": str(clip["name"]),
+            "frames": len(frame_poses),
+            "runs": runs,
+            "source_omitted_frames": int(clip["source_omitted_frames"]),
         })
 
-    file_rows = ",\n".join(f'    "{filename}"' for filename in files)
-    frame_rows = ", ".join(str(frame) for frame in source_frames)
-    header = f"""/* Generated from a temporally tracked CPS2 blue alien. */
+    if len(pose_by_digest) >= 256:
+        raise ValueError("enemy actions exceed 8-bit pose indices")
+    if any(length > 0xFFFF for length in archive_lengths):
+        raise ValueError("one enemy RLE pose exceeds the 16-bit archive index")
+    archive_filename = "EACT.RLE"
+    (sprite_dir / archive_filename).write_bytes(archive)
+    max_steps = max(len(clip["runs"]) for clip in clip_specs)
+    pose_rows = []
+    duration_rows = []
+    for clip in clip_specs:
+        runs = clip["runs"]
+        poses = [pose for pose, _ in runs]
+        durations = [duration for _, duration in runs]
+        poses.extend([0] * (max_steps - len(poses)))
+        durations.extend([0] * (max_steps - len(durations)))
+        pose_rows.append("    {" + ", ".join(map(str, poses)) + "}")
+        duration_rows.append("    {" + ", ".join(map(str, durations)) + "}")
+
+    action_constants = "\n".join(
+        f"#define AVSP_ENEMY_CLIP_{str(clip['name']).upper()} {index}"
+        for index, clip in enumerate(clip_specs))
+    header = f"""/* Generated from the validated native CPS2 alien actor slot. */
 #ifndef AVSP_ENEMY_ANIMATION_H
 #define AVSP_ENEMY_ANIMATION_H
-#define AVSP_ENEMY_WALK_POSES {len(source_frames)}
-static const char avsp_enemy_walk_files[AVSP_ENEMY_WALK_POSES][12] = {{
-{file_rows}
+#define AVSP_ENEMY_ACTION_CLIPS {len(clip_specs)}
+#define AVSP_ENEMY_ACTION_POSES {len(pose_by_digest)}
+#define AVSP_ENEMY_ACTION_MAX_STEPS {max_steps}
+#define AVSP_ENEMY_CEL_WIDTH 288
+#define AVSP_ENEMY_CEL_HEIGHT 192
+#define AVSP_ENEMY_DECODED_BYTES {(288 * 192) // 2}
+#define AVSP_ENEMY_ARCHIVE_FILE "{archive_filename}"
+#define AVSP_ENEMY_ARCHIVE_BYTES {len(archive)}
+{action_constants}
+static const unsigned int avsp_enemy_rle_offsets[AVSP_ENEMY_ACTION_POSES] = {{
+    {", ".join(map(str, archive_offsets))}
 }};
-static const unsigned short avsp_enemy_walk_source_frames[AVSP_ENEMY_WALK_POSES] = {{
-    {frame_rows}
+static const unsigned short avsp_enemy_rle_bytes[AVSP_ENEMY_ACTION_POSES] = {{
+    {", ".join(map(str, archive_lengths))}
+}};
+static const unsigned char avsp_enemy_step_counts[AVSP_ENEMY_ACTION_CLIPS] = {{
+    {", ".join(str(len(clip['runs'])) for clip in clip_specs)}
+}};
+static const unsigned char avsp_enemy_total_frames[AVSP_ENEMY_ACTION_CLIPS] = {{
+    {", ".join(str(clip['frames']) for clip in clip_specs)}
+}};
+static const unsigned char avsp_enemy_step_poses[AVSP_ENEMY_ACTION_CLIPS][AVSP_ENEMY_ACTION_MAX_STEPS] = {{
+{",\n".join(pose_rows)}
+}};
+static const unsigned char avsp_enemy_step_durations[AVSP_ENEMY_ACTION_CLIPS][AVSP_ENEMY_ACTION_MAX_STEPS] = {{
+{",\n".join(duration_rows)}
+}};
+static const unsigned short avsp_enemy_source_frames[AVSP_ENEMY_ACTION_POSES] = {{
+    {", ".join(map(str, source_frames))}
+}};
+static const unsigned char avsp_enemy_source_omissions[AVSP_ENEMY_ACTION_CLIPS] = {{
+    {", ".join(str(clip['source_omitted_frames']) for clip in clip_specs)}
 }};
 #endif
 """
     (GENERATED_ROOT / "avsp_enemy_animation.h").write_text(
         header, encoding="ascii")
-    return manifest
+    return [{
+        "path": f"SPR4/{archive_filename}",
+        "bytes": len(archive),
+        "decoded_bytes": len(pose_by_digest) * (288 * 192) // 2,
+        "sha256": hashlib.sha256(archive).hexdigest(),
+        "components": len(pose_by_digest),
+        "encoding": "indexed-rle8-count-value",
+        "source_omitted_frames_held": sum(
+            int(clip["source_omitted_frames"]) for clip in clip_specs),
+    }]
 
 
 def write_boss_idle_assets(gfx: bytearray,
@@ -1663,7 +1778,7 @@ def write_exact_actor_assets(gfx: bytearray,
                          "sha256": hashlib.sha256(data).hexdigest(),
                          "cps2_palette": colour})
     manifest.extend(write_player_action_sequence_assets(gfx, sprite_dir))
-    manifest.extend(write_enemy_walk_sequence_assets(gfx, sprite_dir))
+    manifest.extend(write_enemy_action_sequence_assets(gfx, sprite_dir))
     manifest.extend(write_boss_idle_assets(gfx, sprite_dir))
     return manifest
 

@@ -18,20 +18,21 @@ Current milestone:
   from the cold Press Start screen through the definitive Round 2 title boundary
 - boots into lossless capture-derived Press Start and Predator Warrior select
   surfaces; Start and B traverse those native states before Round 1 begins
-- reuses one VDP1 surface for thirteen cartridge-preloaded, capture-derived
-  route states from the Round 1 title through the Round 2 title
+- copies thirteen cartridge-preloaded, capture-derived route states into the
+  shared VDP2 bitmap from the Round 1 title through the Round 2 title
 - preserves original sprite scale and exact 15-color CPS2 subpalettes
 - captures isolated Predator walk, weapon, melee, jump, dash, emergency-attack,
   hit, and KO timelines from verified CPS2 state, reduces the eight clips to
   103 exact poses, and animates them through three aligned VDP1 palette layers
-- animates a temporally tracked ten-pose blue alien sequence through one
-  replaceable VDP1 slot over a reconstructed VDP2 stage
+- validates one native CPS2 alien actor slot through exact 39-frame walk,
+  120-frame attack, 36-frame hit, and 140-frame KO timelines; 42 deduplicated
+  288x192 poses are bound to the corresponding Saturn-native actor states
 - runs a capture-derived first-room lifecycle with five opening enemies, three
   reinforcements, a locked combat boundary, clear hold, and exit transition
 - transitions into a reconstructed industrial boss room, spawns an exact
   capture-derived Chrysalis assembly, and reaches a native Stage Clear state
-- draws the eight bounded enemy actors from one shared VDP1 cel slot with four
-  exact CPS2 alien palettes
+- gives all eight bounded enemy actors independent 288x192 VDP1 cel slots with
+  four exact CPS2 alien palettes, so unlike actions cannot overwrite each other
 - retains a palette-preserving 352x224 offline reference surface containing the
   complete horizontally fitted CPS2 object/priority result
 - boots in the Saturn's native 352x224 mode with the 4 MB expansion cartridge
@@ -44,12 +45,12 @@ for Saturn Start, shows the default Predator Warrior character-select capture,
 and waits for B before entering Round 1. These frontend surfaces preserve their
 source pixels and palettes but are still flattened key states rather than the
 complete arcade attract/menu animation. Thirteen later route states use the
-same lossless horizontal fit and one replaceable VDP1 slot. Their compressed
+same lossless horizontal fit and the shared VDP2 bitmap. Their compressed
 sources are loaded before CDDA starts, so state changes do not seek away from
 the audio track. The converter retains the 384x224 object/priority oracle
-offline. Gameplay still does not bind every extracted
-enemy pose to the arcade state machine, exact AI/spawn timing, isolated event
-sound effects, or every intermediate Stage 1 action.
+offline. The proven alien walk/attack/hit/KO clips are state-bound; exact
+AI/spawn timing for every archetype, isolated event sound effects, and every
+intermediate Stage 1 action remain incomplete.
 
 The Saturn has no 384-pixel low-resolution output. The selected 352x224 mode
 keeps all 224 source lines. The runtime fits all 384 horizontal source pixels

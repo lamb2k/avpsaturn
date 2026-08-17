@@ -140,6 +140,51 @@ static void test_jump_dash_and_two_button_special(void)
     assert(world.special_health_spent == 1);
 }
 
+static void test_capture_exact_enemy_action_timing(void)
+{
+    CapWorld world;
+    CapActor *enemy;
+    int index;
+
+    cap_world_init(&world);
+    start_encounter(&world);
+    for (index = 1; index < CAP_MAX_ENEMIES; ++index)
+        world.enemies[index].active = 0;
+    enemy = &world.enemies[0];
+    enemy->x = world.player.x + 20;
+    enemy->lane = world.player.lane;
+
+    enemy->action = CAP_ACT_HIT;
+    enemy->action_frame = 0;
+    step_empty(&world, 35);
+    assert(enemy->action == CAP_ACT_HIT);
+    assert(enemy->action_frame == 35);
+    step_empty(&world, 1);
+    assert(enemy->action == CAP_ACT_IDLE);
+
+    enemy->action = CAP_ACT_ATTACK;
+    enemy->action_frame = 0;
+    world.player.health = CAP_PLAYER_MAX_HEALTH;
+    step_empty(&world, 11);
+    assert(world.player.health == CAP_PLAYER_MAX_HEALTH);
+    step_empty(&world, 1);
+    assert(world.player.health == CAP_PLAYER_MAX_HEALTH - 1);
+    step_empty(&world, 107);
+    assert(enemy->action == CAP_ACT_ATTACK);
+    assert(enemy->action_frame == 119);
+    step_empty(&world, 1);
+    assert(enemy->action == CAP_ACT_IDLE);
+
+    enemy->active = 1;
+    enemy->action = CAP_ACT_KO;
+    enemy->action_frame = 0;
+    step_empty(&world, 139);
+    assert(enemy->active == 1);
+    assert(enemy->action_frame == 139);
+    step_empty(&world, 1);
+    assert(enemy->active == 0);
+}
+
 static void test_walk_locomotion_counter(void)
 {
     CapWorld world;
@@ -532,6 +577,7 @@ int main(void)
 {
     test_attack_requests_and_damage();
     test_jump_dash_and_two_button_special();
+    test_capture_exact_enemy_action_timing();
     test_walk_locomotion_counter();
     test_player_hit_and_ko_timing();
     test_encounter_waits_for_player_input();

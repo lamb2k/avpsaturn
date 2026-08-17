@@ -41,11 +41,11 @@ key states. Active-bank selection is guarded by a 54-command capture signature, 
 an exhaustive frame-local grouping manifest identifies actors, shadow sprites,
 and props while marking three edge fragments as candidates. The display now
 uses native 352x224 with a deterministic pre-scaled VDP2 full-width fit and a
-matching VDP1 actor transform. Native HUD replacement, enemy temporal
-grouping, actor-level priority, and image-difference acceptance remain open.
-The post-input gameplay scene now uses a tracked ten-pose blue-alien sequence,
-but its poses are not yet bound to arcade enemy states and it must not be
-described as frame-exact.
+matching VDP1 actor transform. Native HUD replacement, remaining enemy
+archetypes, actor-level priority, and image-difference acceptance remain open.
+The post-input gameplay scene now binds the validated alien actor's exact
+39-frame walk, 120-frame attack, 36-frame hit, and 140-frame KO schedules to
+independent Saturn actor slots.
 
 The automated encounter build also traversed the cartridge-preloaded route
 cache and visibly reached the capture-derived character-select, results, and
@@ -53,7 +53,7 @@ Round 2 title surfaces. No data-track reads occur after Stage 1 CDDA begins.
 
 ## Gate D: first playable Stage 1 encounter
 
-- Extract and schedule authentic idle, walk, attack, hit, and KO frames.
+- Repeat the proven walk/attack/hit/KO extraction for remaining enemy archetypes.
 - Reproduce camera bounds, lanes, collisions, encounter triggers, and enemy
   behavior for the first combat room.
 - Support player movement and attacks without partial cels or palette damage.
