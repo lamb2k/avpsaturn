@@ -1,6 +1,6 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-17 09:07 EDT
+Updated: 2026-08-17 09:20 EDT
 
 Read this file before taking any action. The user wants a private, capture-faithful, native Sega Saturn port of CPS2 Alien vs Predator, beginning at the main menu and continuing through the complete first level into Round 2. Do not reframe success as an emulator, approximate demo, host-only simulation, or focused animation viewer.
 
@@ -8,9 +8,10 @@ Read this file before taking any action. The user wants a private, capture-faith
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `prototype/private-capability-test`
-- HEAD: the commit containing this handoff adds root agent instructions on top
-  of `2e61198` (`Checkpoint deterministic frontend capture`). Run `git rev-parse
-  HEAD` for the immutable hash.
+- HEAD: the commit containing this handoff adds the Claude bootstrap pointer
+  and the 2026-08-17 plan review on top of `14493fa` (`Add repository agent
+  instructions`), which follows the deterministic frontend capture/analyzer
+  checkpoint `2e61198`. Run `git rev-parse HEAD` for the immutable hash.
 - Worktree should be clean immediately after the handoff commit. Verify with
   `git status --short --branch` before resuming.
 - Current disc profile: `normal-release`.
@@ -33,6 +34,7 @@ Implementation and documentation files in this checkpoint:
 - `docs/HARDWARE_TEST.md`
 - `docs/TEST_PLAN.md`
 - `docs/AGENT_HANDOFF.md`
+- `CLAUDE.md`
 
 New tracked source/evidence files:
 
@@ -46,6 +48,26 @@ New tracked source/evidence files:
 - `tools/mame_capture_frontend.lua`
 
 `git diff --check` passes; only existing LF-to-CRLF warnings are emitted.
+
+## Agent bootstrap files
+
+- `AGENTS.md` (added in `14493fa`) is the canonical, harness-neutral
+  repository instruction file. `CLAUDE.md` is a thin tracked pointer for
+  Claude Code sessions, which auto-load `CLAUDE.md`; keep `AGENTS.md`
+  canonical and `CLAUDE.md` minimal so they cannot diverge.
+- Agent sessions may start in the parent workspace
+  `C:\Game Dev\BrooklynBangoutX`, a separate non-Git project workspace for the
+  unrelated Brooklyn Bang Out game. An untracked `CLAUDE.md` there maps the
+  workspace and routes agents into this repository; recreate it from this
+  section if it is lost.
+- The reusable skill is canonical at
+  `C:\Users\lambd\.codex\skills\port-cps2-to-sega-saturn` and reaches Claude
+  Code through the machine-local directory junction
+  `C:\Users\lambd\.claude\skills\port-cps2-to-sega-saturn` (recreate with
+  `New-Item -ItemType Junction` after a profile reset; it is tracked
+  nowhere).
+- Where `AGENTS.md` says `apply_patch`, Claude Code sessions use their
+  Edit/Write tools with the same preserve-unrelated-work discipline.
 
 ## Active frontend-fidelity checkpoint
 
@@ -104,12 +126,13 @@ Deterministic source hashes:
   relative snapshot path. It is not used. It may be removed later only after
   resolving and checking that exact absolute path.
 - The reusable skill at
-  `C:\Users\lambd\.codex\skills\port-cps2-to-sega-saturn` passes
-  `quick_validate.py`. It now records RGB32 frontend-capture limits,
-  cadence-1 release gating, full-screen crop checks, and whole-block allocator
-  alignment rules.
+  `C:\Users\lambd\.codex\skills\port-cps2-to-sega-saturn` records RGB32
+  frontend-capture limits, cadence-1 release gating, full-screen crop checks,
+  and whole-block allocator alignment rules. Its start step now names
+  `AGENTS.md` as canonical with `CLAUDE.md` as the Claude Code pointer; that
+  one-line prose edit is the only 2026-08-17 09:20 skill change.
 - Skill hashes: `SKILL.md`
-  `fe130edc4e68b905ab930362d907f90ddfcd494964f4dcea9a87e2e9ae1a48fc`;
+  `f900e9feae55a807dd82fabc0f0792ae0d126c98e36fb5fcb8fc84845ccd97ee`;
   `references/workflow.md`
   `6472d8c4c466addee790ee16acdfba4e201c066b97316252f118aaf2dfe580e0`;
   `agents/openai.yaml`
@@ -163,6 +186,62 @@ WAR IN THE UNDERPASS` card without an allocation, archive, RLE, palette, or
 VDP1 error. Host tests still reach Round 2 in 4,485 frames and the 12,000-frame
 deterministic soak passes.
 
+## Plan review 2026-08-17
+
+An independent feasibility pass checked the frontend plan against the tracked
+report, `main.c`, and `docs/ARCHITECTURE.md`. The architecture holds; these
+findings bound the remaining design:
+
+- Representability is guaranteed. No captured frame exceeds 174 colours
+  (report `maximum_colours_in_one_frame`), so every frontend frame fits one
+  256-colour VDP2 palette. The 915-colour Round 1 union only forbids one
+  whole-window stable palette, not per-segment palettes.
+- CPS2 pen identity is not required for the frontend. The VDP2 route-still
+  path is output-lossless: any consistent per-segment index assignment that
+  reproduces exact final RGB is exact. The RGB32 capture limitation blocks
+  pen-native claims only; do not spend more effort reversing pens here.
+- Palette fades should be detected as colour bijections between adjacent
+  unique frames: the index image stays constant and only CRAM entries change,
+  so a fade step costs a palette update instead of a pixel delta. The
+  analyzer cannot measure this yet.
+- Residency deadlines from `main.c`: the title block is retired and the
+  Stalker archive loads at CHARACTER_SELECT entry (`main.c:1595`); the
+  character-select block is retired and the 49,137-byte supplement
+  allocation loads at CHARACTER_CONFIRM entry (`main.c:1610`); CDDA track 2
+  starts only at the first `world.encounter_started` frame (`main.c:1809`),
+  after the Round 1 title. Every frontend animation therefore plays before
+  CDDA, and data-track reads stay legal through the whole frontend.
+- The two 78,848-byte blocks can be time-shared inside that window: play the
+  41,758-byte start transition from the retired title block, free it, then
+  stage confirm and Round 1 segments across one or both blocks. SACT and the
+  supplements only need to be resident before `encounter_started`, so their
+  load anchors may move later inside the pre-CDDA window. Whole-block reuse
+  still applies: one allocation per block lifetime, four-byte-aligned
+  subranges inside combined allocations.
+- If cadence-1 payloads exceed the 157,696 bytes of both blocks, fall back to
+  sequential pre-CDDA streaming: play the resident segment from one block
+  while the next loads into the other. A 78,848-byte load costs roughly 16 to
+  20 frames of CD time against a 240-frame confirm hold and 121-frame title
+  window, so slack is ample; schedule loads on hold frames to avoid visible
+  hitches.
+- Cadence-2 sizes are lower bounds for characterization only. The 31 unique
+  confirm frames came from 120 samples; cadence 1 can at most double unique
+  frames and will raise delta totals. Measure at cadence 1 before fixing the
+  block layout.
+- CRAM fade updates must land in vblank. The scene path already rewrites the
+  shared 256-colour bank per state change; reuse it and verify per-frame
+  update size against the vblank budget on hardware, not only Yaba Sanshiro.
+- Memory arithmetic from documented payloads: player archive 417,488, alien
+  archive 131,552, boss base 119,868, Stalker archive 64,118, supplements
+  49,137, resident event PCM 2,095,772, withdrawal 396,708 until its
+  barricade release into the 221,184-byte decode pool, plus thirteen route
+  stills, two 78,848-byte frontend surfaces, and the 78,848-byte decode
+  buffer, against 4 MiB cartridge plus work RAM. The budget closes only
+  because of phase overlays. New frontend animation payloads are compatible
+  if they live in the retired-block/overlay regime; never move them into the
+  cold-boot working set, which already exhausted the bounded startup heap
+  once in Yaba Sanshiro.
+
 ## Resume in this order
 
 1. Verify branch, HEAD, clean status, the release manifest profile, and that no
@@ -172,12 +251,20 @@ deterministic soak passes.
    is optional organization work, not a technical requirement. If relocating,
    preserve `.git` plus the ignored private ROM, dependency, emulator, audio,
    and capture inputs; verify the old checkout before removing anything.
-3. Inspect character-confirm frames 1800, 1840, 1880, 1920, 1960, 2000, and
-   2038, then measure smaller subsegments to isolate static layers and palette
-   fades. Do not use the ambiguous reverse-pen experiment as source truth.
-4. Choose a lossless representation that fits the two 78,848-byte retired
-   frontend blocks without colliding with the Stalker and combined boss
-   supplements. Reconsider load timing before CDDA if needed.
+3. Extend `tools/analyze_frontend.py` first: parameterize the hardcoded
+   `windows` tuple for subsegment ranges and add adjacent-unique-frame colour
+   bijection (fade) detection, then inspect character-confirm frames 1800,
+   1840, 1880, 1920, 1960, 2000, and 2038 and Round 1 title subsegments.
+   Regenerating the report with new windows legitimately changes
+   `data/frontend_capture.json`; re-record its SHA-256 here. Do not use the
+   ambiguous reverse-pen experiment as source truth.
+4. Choose the lossless representation per the 2026-08-17 plan review:
+   per-segment index spaces, CRAM-delta fades, coalesced pixel deltas for
+   structural changes. Fit payloads into the two 78,848-byte retired frontend
+   blocks by time-sharing them inside the pre-CDDA window, moving the Stalker
+   and boss-supplement load anchors later if they collide, or fall back to
+   sequential pre-CDDA segment streaming. Keep whole-block allocation and
+   four-byte alignment rules.
 5. Recapture the accepted frontend segments at cadence 1, generate archives
    deterministically, integrate menu -> character confirm -> Round 1, and run
    host, focused, full-route, then clean normal-release gates.
