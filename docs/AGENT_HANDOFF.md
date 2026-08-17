@@ -1,6 +1,6 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-17 12:05 EDT
+Updated: 2026-08-17 14:20 EDT
 
 **Direction as of 2026-08-17: functional parity by ROM translation, with an
 instrumented MAME build retained only as a contingency. Stock MAME 0.289 debug
@@ -15,10 +15,11 @@ Read this file before taking any action. The user wants a private, capture-faith
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `prototype/private-capability-test`
-- Implementation checkpoint: `b24a4e017eae3894f57cc9b0917ba6109f457154`
-  (`Capture Round 1 debug overlay evidence`), on top of the independently
-  committed plan correction `9417f53a8fdf94a5efee567496bec042a1fce3cd`.
-  The handoff-only commit follows it; run `git rev-parse HEAD` for that hash.
+- Implementation checkpoint: `4182edb` (`Trace actor writers with stock MAME
+  watchpoints`), following `b24a4e0` (Round 1 debug overlay evidence) and the
+  independently committed plan correction `9417f53`.
+- The handoff-only commit follows the implementation checkpoint; run
+  `git rev-parse HEAD` for the immutable current hash.
 - Worktree should be clean immediately after the handoff-only commit. Verify
   with `git status --short --branch` before resuming.
 - Current disc profile: `normal-release`.
@@ -558,16 +559,15 @@ health values change across captured frames, which is how the boss contact
 offsets 21/55/97 were derived. The game will draw the real boxes. The same
 applies to stage collision, which is currently approximated.
 
-**Attempt status: not yet working, cause identified.** Writing the RAM flags
-every frame does not work; the game re-caches them from the physical switches
-and overwrites the writes. MAME does expose the switches as real ioport fields
-(`:DSWA 1-1`, `:DSWB 2-6`, `:DSWB 2-7`, `:DSWC` rows), but driving those while
-loading `avspu_stage1_boss_12660` also failed, leaving `0xFF81C7` at zero. The
-likely reason is that the flags are cached during boot initialisation, which
-already ran with debug off inside the save state. Next attempt should cold boot
-with the DIP fields held from frame 0 and drive the existing deterministic input
-route, rather than loading a mid-game state. `tools/mame_probe_debug_overlays.lua`
-holds the current attempt and the documented flag addresses.
+**Initial failures are resolved.** Writing the RAM flags every frame does not
+work, and loading `avspu_stage1_boss_12660` with the DIPs does not rerun boot
+initialisation. Cold boot with Development hardware and the active-low fields
+held from frame 0 still leaves the retail ROM's cache bytes clear because its
+physical-DIP-to-RAM copy routine was removed. The verified path injects
+`FF806C |= 01` plus the requested `FF806D` row-2 bit once at frame 1200, after
+startup RAM clearing. The game's own `0x1434` routine then sets `FF81C7=01` by
+frame 1230 and retains it. `tools/mame_probe_debug_overlays.lua` and the
+Round 1 capture scripts implement and validate this path.
 
 **2. Complete CPS2 hardware schematics.** Loic Petit's project publishes
 schematics for the A-board, B-board, E-board and QSound amplifier, plus reverse
@@ -669,6 +669,51 @@ fixed it. These errors are resolved in the committed scripts.
 Remaining gate: the boxes are visibly captured but not yet decoded into
 numerical actor-local geometry. Do not claim offsets 21/55/97 are replaced
 until that extraction is complete.
+
+## 2026-08-17 stock-MAME writer watchpoint checkpoint
+
+Stock MAME's debugger watchpoint API is sufficient for the next phase. The
+reproducible command is:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\capture_actor_writer_watchpoints.ps1 -Frames 600
+```
+
+It loads `avspu_stage1_debug_hitboxes` at frame 4200, installs write
+watchpoints over every 0xC0 actor slot's animation pointer (`w1c:w1e`), action
+(`w06`) and state (`w0c`) fields through `maincpu.debug:wpset`, then runs 600
+frames. MAME emits the raw writer lines to ignored `error.log`; the tracked
+analyzer produces `data/actor_writer_watchpoints.json`.
+
+Verified result: 2,132 events (1,632 animation-pointer, 210 action, 290 state).
+The dominant animation writers are PCs `0x1652A`, `0x16550`, `0x165DE` and
+`0x1665E`; state/action writers include `0x40E14`, `0x607E8`, `0x607F8`,
+`0x608D4`, `0x6093C`, `0x60EDE`, `0x60F22`, `0x41BE2`, `0x41BEE`,
+`0x6104E` and `0x61058`. These are discovery evidence, not translated code.
+
+The first API attempt passed the string `"program"` as the debugger address
+space and crashed stock MAME with an access violation inside
+`device_debug::wpset`. Passing the actual `maincpu` program-space object fixes
+it; the working script contains that correction. No custom MAME build was
+needed.
+
+Tracked watchpoint files and SHA-256:
+
+- `capture_actor_writer_watchpoints.ps1`:
+  `82d1cc3ce5d2671c83108a47ef38929a6f7fd8f65814f6cc1dd1ad2047f679a8`
+- `tools/mame_watch_actor_writers.lua`:
+  `15a81685a959c4c777963996f66e91da93fe896de9961b3412a8fe8c54b2de5c`
+- `tools/mame_watch_actor_writers.txt`:
+  `5017ec12909136dc1485bd65916c1539ccb4317ecc1e0c30efe61fe0b12fc85d`
+- `tools/analyze_watchpoint_log.py`:
+  `892eb4108abe9c66343bedd8e9d35d75937bd63d73f9df84045d71130b1d2758`
+- `data/actor_writer_watchpoints.json`:
+  `1377dd04392b7aea0283386cb81f00beeb78d9d24ce5c7a9e79555194bb3f0c0`
+
+Next work is to disassemble the dominant animation writers and correlate their
+call sites with the ROM script records, then decode the white corner-bracket
+hitbox rectangles into actor-local geometry. Do not translate AI or replace
+native runtime tables until the pixel-exact pose gate remains passing.
 
 ## Resume in this order
 
