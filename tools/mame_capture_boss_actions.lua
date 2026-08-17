@@ -13,7 +13,7 @@ local jump = in0["P1 Button 3"]
 
 local capture_root = ".deps/mame/boss_actions"
 local metadata = assert(io.open(capture_root .. "/samples.tsv", "w"))
-metadata:write("frame\tactive_object_bank\tbank_writes\tprobe_phase\n")
+metadata:write("frame\tactive_object_bank\tbank_writes\tprobe_phase\tplayer_health\n")
 local frame = 0
 local base_frame = 12660
 local capture_last = 900
@@ -67,12 +67,12 @@ local function clear_inputs()
 end
 
 local function probe_phase()
-    if frame <= 360 then return "natural" end
-    if frame <= 720 then return "weapon" end
+    if frame <= 650 then return "natural" end
+    if frame <= 780 then return "weapon" end
     return "melee"
 end
 
-local function dump_sample(sample_frame)
+local function dump_sample(sample_frame, player_health)
     local active_share = active_object_bank == 0 and
         machine.memory.shares[":objram1"] or machine.memory.shares[":objram2"]
     write_share_words(string.format(capture_root ..
@@ -88,8 +88,9 @@ local function dump_sample(sample_frame)
     if sample_frame % 10 == 0 then
         screen:snapshot(string.format("boss_%05d.png", sample_frame))
     end
-    metadata:write(string.format("%d\t%d\t%d\t%s\n", sample_frame,
-        active_object_bank + 1, object_bank_writes, probe_phase()))
+    metadata:write(string.format("%d\t%d\t%d\t%s\t%d\n", sample_frame,
+        active_object_bank + 1, object_bank_writes, probe_phase(),
+        player_health))
     metadata:flush()
 end
 
@@ -105,22 +106,25 @@ boss_action_capture_subscription = emu.add_machine_frame_notifier(function()
     if not state_loaded then return end
     frame = frame + 1
 
-    -- Hold only player health at full so natural boss movement and attacks can
-    -- continue without a Continue transition resetting the observation.
-    main_program:write_u8(0xff83c1, 0x65)
-
-    if frame > 360 and frame <= 720 then
-        local phase = (frame - 361) % 45
+    -- Leave the first 650 frames neutral so the attack beginning at source
+    -- frame 12992 can finish without an injected player hit truncating it.
+    if frame > 650 and frame <= 780 then
+        local phase = (frame - 651) % 45
         if phase == 0 then gun:set_value(1) end
         if phase == 6 then gun:clear_value() end
     end
-    if frame > 720 then
-        local phase = (frame - 721) % 45
+    if frame > 780 then
+        local phase = (frame - 781) % 45
         if phase == 0 then attack:set_value(1) end
         if phase == 6 then attack:clear_value() end
     end
 
-    dump_sample(base_frame + frame)
+    -- Record health after the emulated frame, then restore it for the next
+    -- frame. This exposes exact Chrysalis contact timing without allowing a
+    -- Continue transition to reset the observation window.
+    local player_health = main_program:read_u8(0xff83c1)
+    dump_sample(base_frame + frame, player_health)
+    main_program:write_u8(0xff83c1, 0x65)
     if frame >= capture_last then
         clear_inputs()
         metadata:close()

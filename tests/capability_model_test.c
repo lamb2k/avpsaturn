@@ -236,6 +236,41 @@ static void test_capture_exact_enemy_action_timing(void)
     assert(enemy->active == 0);
 }
 
+static void test_capture_exact_boss_attack_timing(void)
+{
+    CapWorld world;
+    CapActor *boss;
+    int index;
+
+    cap_world_init(&world);
+    start_encounter(&world);
+    for (index = 1; index < CAP_MAX_ENEMIES; ++index)
+        world.enemies[index].active = 0;
+    boss = &world.enemies[0];
+    boss->kind = CAP_ACTOR_BOSS;
+    boss->active = 1;
+    boss->x = world.player.x + 100;
+    boss->lane = world.player.lane;
+    boss->action = CAP_ACT_ATTACK;
+    boss->action_frame = 0;
+    boss->hit_latched = 0;
+    world.player.health = CAP_PLAYER_MAX_HEALTH;
+
+    step_empty(&world, 20);
+    assert(world.player.health == CAP_PLAYER_MAX_HEALTH);
+    step_empty(&world, 1);
+    assert(world.player.health == CAP_PLAYER_MAX_HEALTH - 10);
+    step_empty(&world, 34);
+    assert(world.player.health == CAP_PLAYER_MAX_HEALTH - 20);
+    step_empty(&world, 42);
+    assert(world.player.health == CAP_PLAYER_MAX_HEALTH - 36);
+    step_empty(&world, 91);
+    assert(boss->action == CAP_ACT_ATTACK);
+    assert(boss->action_frame == 188);
+    step_empty(&world, 1);
+    assert(boss->action == CAP_ACT_IDLE);
+}
+
 static void test_walk_locomotion_counter(void)
 {
     CapWorld world;
@@ -631,6 +666,7 @@ int main(void)
     test_attack_requests_and_damage();
     test_jump_dash_and_captured_special_chord();
     test_capture_exact_enemy_action_timing();
+    test_capture_exact_boss_attack_timing();
     test_walk_locomotion_counter();
     test_player_hit_and_ko_timing();
     test_encounter_waits_for_player_input();

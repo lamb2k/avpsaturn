@@ -22,6 +22,15 @@
 #define CAP_ENEMY_HIT_TOTAL_FRAMES 36
 #define CAP_ENEMY_KO_VISIBLE_FRAMES 140
 #define CAP_ENEMY_APPROACH_SPEED 3
+#define CAP_BOSS_ATTACK_TOTAL_FRAMES 189
+#define CAP_BOSS_ATTACK_CONTACT_ONE 21
+#define CAP_BOSS_ATTACK_CONTACT_TWO 55
+#define CAP_BOSS_ATTACK_CONTACT_THREE 97
+#define CAP_BOSS_CONTACT_DAMAGE_ONE 10
+#define CAP_BOSS_CONTACT_DAMAGE_THREE 16
+#define CAP_BOSS_ATTACK_TRIGGER_REACH 108
+#define CAP_BOSS_ATTACK_REACH 122
+#define CAP_BOSS_APPROACH_SPEED 2
 #define CAP_CLEAR_HOLD_FRAMES 60
 
 typedef struct
@@ -484,15 +493,16 @@ static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
     return CAP_CLIP_NONE;
 }
 
-static void cap_enemy_attack_player(CapWorld *world, CapActor *enemy)
+static void cap_enemy_attack_player(CapWorld *world, CapActor *enemy,
+                                    const int damage, const int reach)
 {
     CapActor *player = &world->player;
     if (enemy->hit_latched || player->action == CAP_ACT_KO) return;
     enemy->hit_latched = 1;
-    if (cap_abs(enemy->x - player->x) > CAP_ENEMY_ATTACK_REACH ||
+    if (cap_abs(enemy->x - player->x) > reach ||
         cap_abs(enemy->lane - player->lane) > 18)
         return;
-    player->health -= CAP_ENEMY_CONTACT_DAMAGE;
+    player->health -= damage;
     player->action_frame = 0;
     if (player->health <= 0)
     {
@@ -534,18 +544,44 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
     if (enemy->action == CAP_ACT_ATTACK)
     {
         ++enemy->action_frame;
-        if (enemy->action_frame == CAP_ENEMY_ATTACK_CONTACT_ONE ||
-            enemy->action_frame == CAP_ENEMY_ATTACK_CONTACT_TWO)
+        if (enemy->kind == CAP_ACTOR_BOSS)
         {
-            if (enemy->action_frame == CAP_ENEMY_ATTACK_CONTACT_TWO)
+            if (enemy->action_frame == CAP_BOSS_ATTACK_CONTACT_ONE ||
+                enemy->action_frame == CAP_BOSS_ATTACK_CONTACT_TWO ||
+                enemy->action_frame == CAP_BOSS_ATTACK_CONTACT_THREE)
+            {
                 enemy->hit_latched = 0;
-            cap_enemy_attack_player(world, enemy);
+                cap_enemy_attack_player(
+                    world, enemy,
+                    enemy->action_frame == CAP_BOSS_ATTACK_CONTACT_THREE ?
+                        CAP_BOSS_CONTACT_DAMAGE_THREE :
+                        CAP_BOSS_CONTACT_DAMAGE_ONE,
+                    CAP_BOSS_ATTACK_REACH);
+            }
+            if (enemy->action_frame >= CAP_BOSS_ATTACK_TOTAL_FRAMES)
+            {
+                enemy->action = CAP_ACT_IDLE;
+                enemy->action_frame = 0;
+                enemy->hit_latched = 0;
+            }
         }
-        if (enemy->action_frame >= CAP_ENEMY_ATTACK_TOTAL_FRAMES)
+        else
         {
-            enemy->action = CAP_ACT_IDLE;
-            enemy->action_frame = 0;
-            enemy->hit_latched = 0;
+            if (enemy->action_frame == CAP_ENEMY_ATTACK_CONTACT_ONE ||
+                enemy->action_frame == CAP_ENEMY_ATTACK_CONTACT_TWO)
+            {
+                if (enemy->action_frame == CAP_ENEMY_ATTACK_CONTACT_TWO)
+                    enemy->hit_latched = 0;
+                cap_enemy_attack_player(world, enemy,
+                                        CAP_ENEMY_CONTACT_DAMAGE,
+                                        CAP_ENEMY_ATTACK_REACH);
+            }
+            if (enemy->action_frame >= CAP_ENEMY_ATTACK_TOTAL_FRAMES)
+            {
+                enemy->action = CAP_ACT_IDLE;
+                enemy->action_frame = 0;
+                enemy->hit_latched = 0;
+            }
         }
         return;
     }
@@ -554,7 +590,10 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
     delta_x = player->x - enemy->x;
     delta_lane = player->lane - enemy->lane;
     enemy->facing = delta_x < 0 ? -1 : 1;
-    if (cap_abs(delta_x) <= 48 && cap_abs(delta_lane) <= 16 &&
+    if (cap_abs(delta_x) <=
+            (enemy->kind == CAP_ACTOR_BOSS ?
+                CAP_BOSS_ATTACK_TRIGGER_REACH : 48) &&
+        cap_abs(delta_lane) <= 16 &&
         ((world->frame + index * 19) % 78) == 0)
     {
         enemy->action = CAP_ACT_ATTACK;
@@ -563,8 +602,12 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
         return;
     }
     if (cap_abs(delta_x) > 34)
-        enemy->x += delta_x < 0 ? -CAP_ENEMY_APPROACH_SPEED :
-                                 CAP_ENEMY_APPROACH_SPEED;
+    {
+        int approach_speed = enemy->kind == CAP_ACTOR_BOSS ?
+                             CAP_BOSS_APPROACH_SPEED :
+                             CAP_ENEMY_APPROACH_SPEED;
+        enemy->x += delta_x < 0 ? -approach_speed : approach_speed;
+    }
     if (cap_abs(delta_lane) > 8)
         enemy->lane += delta_lane < 0 ? -1 : 1;
     enemy->action = CAP_ACT_WALK;

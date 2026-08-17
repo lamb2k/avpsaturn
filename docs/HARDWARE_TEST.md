@@ -93,8 +93,9 @@ alter console copy protection or supply copyrighted disc data.
    diagnostic enabled, require `PCM OPEN 1111`, `PCM D/T 1/1`,
    `PCM SEQ 1/1`, and all `SEEN 1` latches before Round 2.
    Before the defeat, confirm Chrysalis cycles the 106-frame captured walk and
-   changes through the 93-frame attack poses without clipping, partial cels,
-   palette corruption, or a `BOSS ACTION` allocation/decode failure.
+   changes through the complete 189-frame attack/recovery sequence, with three
+   contacts at offsets 21/55/97, without clipping, partial cels, palette
+   corruption, or a `BOSS ACTION` allocation/decode failure.
 9. Leave the encounter running for ten minutes and watch for partial sprites,
    palette corruption, controller loss, CD stalls, or dropped video sync.
 

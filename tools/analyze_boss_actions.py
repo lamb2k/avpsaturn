@@ -27,7 +27,7 @@ BOSS_PALETTE = 27
 CLIPS = (
     ("leap", 12661, 12704),
     ("walk", 12885, 12990),
-    ("attack", 12992, 13084),
+    ("attack", 12992, 13180),
 )
 
 
@@ -66,28 +66,35 @@ def actor_state(frame: int) -> dict[str, int]:
     }
 
 
-def sample_banks() -> dict[int, int]:
+def sample_metadata() -> tuple[dict[int, int], list[dict[str, int]]]:
     result: dict[int, int] = {}
+    contacts: list[dict[str, int]] = []
     lines = (CAPTURE_ROOT / "samples.tsv").read_text(
         encoding="utf-8").splitlines()
     if not lines or lines[0] != (
-            "frame\tactive_object_bank\tbank_writes\tprobe_phase"):
+            "frame\tactive_object_bank\tbank_writes\tprobe_phase\tplayer_health"):
         raise ValueError("boss sample metadata header is invalid")
     previous_writes = -1
     for line in lines[1:]:
         if not line:
             continue
-        frame_text, bank_text, writes_text, _ = line.split("\t")
+        frame_text, bank_text, writes_text, _, health_text = line.split("\t")
         frame = int(frame_text)
         bank = int(bank_text)
         writes = int(writes_text)
         if bank not in (1, 2) or writes < previous_writes:
             raise ValueError(f"frame {frame}: invalid object-bank metadata")
         result[frame] = bank
+        health = int(health_text)
+        # The save state begins with 65 health. It is restored after this first
+        # sample; subsequent deviations from 101 are natural boss contacts.
+        if frame > FIRST_FRAME and health != 101:
+            contacts.append({"frame": frame, "health": health,
+                             "damage": 101 - health})
         previous_writes = writes
     if sorted(result) != list(range(FIRST_FRAME, LAST_FRAME + 1)):
         raise ValueError("boss sample ledger is not a contiguous 900-frame run")
-    return result
+    return result, contacts
 
 
 def shifted_boss_commands(frame: int) -> tuple[list[dict[str, int]], int]:
@@ -207,9 +214,21 @@ def analyze_clip(name: str, first: int, last: int,
 
 
 def main() -> int:
-    banks = sample_banks()
+    banks, contacts = sample_metadata()
     clips = [analyze_clip(name, first, last, banks)
              for name, first, last in CLIPS]
+    attack_first = CLIPS[2][1]
+    attack_last = CLIPS[2][2]
+    attack_contacts = [contact for contact in contacts
+                       if attack_first <= contact["frame"] <= attack_last]
+    expected_contacts = [
+        {"frame": 13013, "health": 91, "damage": 10},
+        {"frame": 13047, "health": 91, "damage": 10},
+        {"frame": 13089, "health": 85, "damage": 16},
+    ]
+    if attack_contacts != expected_contacts:
+        raise ValueError(
+            f"clean Chrysalis attack contacts changed: {attack_contacts}")
     initial = actor_state(FIRST_FRAME)
     report = {
         "schema": 1,
@@ -223,6 +242,16 @@ def main() -> int:
             "initial_health": initial["health"],
             "maximum_health_field": initial["maximum_health_field"],
             "cps2_palette": BOSS_PALETTE,
+        },
+        "player_contacts": contacts,
+        "attack_contract": {
+            "first_frame": attack_first,
+            "last_frame": attack_last,
+            "total_frames": attack_last - attack_first + 1,
+            "contact_offsets": [contact["frame"] - attack_first
+                                for contact in attack_contacts],
+            "contact_damage": [contact["damage"]
+                               for contact in attack_contacts],
         },
         "clips": clips,
     }

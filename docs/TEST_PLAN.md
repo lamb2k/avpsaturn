@@ -70,9 +70,10 @@ Round 2 title surfaces. No data-track reads occur after Stage 1 CDDA begins.
 - Reach the Chrysalis boss room, Stage Clear, results, intermission, and the
   Round 2 boundary deterministically.
 - Validate the Chrysalis actor at `FF A3C0`, preserve its exact frame-12660 idle,
-  and extract the 44-frame leap, 106-frame walk, and 93-frame attack clips into
-  an indexed archive. Require changing walk/attack poses in Yaba Sanshiro with
-  no `BOSS ACTION BUFFER`, RLE, index, or VDP1 failure before Round 2.
+  and extract the 44-frame leap, 106-frame walk, and uninterrupted 189-frame
+  attack/recovery clips into an indexed archive. Require contacts at offsets
+  21/55/97 for 10/10/16 health and changing walk/attack poses in Yaba Sanshiro
+  with no `BOSS ACTION BUFFER`, RLE, index, or VDP1 failure before Round 2.
 - Start the Stage 1 CD audio track without disabling SCSP output.
 - Play the capture-exact Predator weapon PCM on action frame 5 while CDDA
   remains active; verify the ISO copy is 159,192 bytes with SHA-256
@@ -165,7 +166,7 @@ states now use lossless capture-derived key surfaces instead of Jo-font
 stand-ins. The mixed-mode image adds a 168.015-second QSound
 route reference as native CD audio track 2. The 12,000-frame host test and the
 automated Yaba Sanshiro diagnostic complete this lifecycle. A separate dense
-900-frame boss capture reduces exact idle/leap/walk/attack visuals to 18 poses;
+900-frame boss capture reduces exact idle/leap/walk/attack visuals to 20 poses;
 the emulator route renders changing Chrysalis attack poses and still reaches
 Round 2 after deferring the decoded boss buffer to its gameplay phase. Remaining
 player transitions, other enemy archetypes, Chrysalis hit/KO effects and exact

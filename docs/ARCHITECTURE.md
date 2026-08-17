@@ -55,17 +55,21 @@ were moved off VDP1 to keep the texture working set at roughly 77% of the Jo
 Engine VDP1 user area, leaving command-table and texture headroom.
 
 A dense 900-frame replay tracks the native Chrysalis actor at `FF A3C0` and
-extracts exact 44-frame leap, 106-frame walk, and 93-frame attack timelines.
-Together with the independently verified frame-12660 idle assembly, 18 unique
-288x192 poses compress from 497,664 decoded bytes to a 109,674-byte indexed RLE
+extracts exact 44-frame leap, 106-frame walk, and 189-frame uninterrupted
+attack/recovery timelines. Together with the independently verified frame-12660
+idle assembly, 20 unique 288x192 poses compress from 552,960 decoded bytes to a
+119,868-byte indexed RLE
 archive. Only one 27,648-byte pose is decoded at a time. Its main-RAM buffer and
 VDP1 texture are created on first boss draw, after the opening PCM phase has
 ended; allocating it at cold boot exhausts the bounded startup heap in Yaba
-Sanshiro. Walk loops at its captured duration. The current native boss attack
-lasts 120 frames, so it holds the source clip's final pose for the remaining 27
-frames. Leap is preserved in the archive but not yet attached to an inferred
-native transition, and unclassified hit/KO palette-effect frames deliberately
-fall back to the exact idle pose.
+Sanshiro. Walk loops at its captured duration. The replay restores player health
+after each sampled frame, exposing three uninterrupted attack contacts at source
+offsets 21, 55, and 97 for 10, 10, and 16 health units. The native boss attack
+uses that same 189-frame visual/contact schedule, a 108-pixel fitted trigger
+reach, a 122-pixel fitted contact reach, and two-pixel approach movement. Leap
+is preserved in the archive but not yet attached to an inferred native
+transition, and unclassified hit/KO palette-effect frames deliberately fall
+back to the exact idle pose.
 
 An independent unfrozen-health replay preserves the same verified frame-4080,
 4164, and 4200 object/palette anchors. It records native player-health changes
@@ -249,8 +253,9 @@ Exact in the current milestone:
   hit, and KO clips, including the hit/KO screen-space trajectory
 - exact state-bound walk, attack, hit, and KO clips for one validated alien
   actor slot, with independent VDP1 slots for all eight runtime enemies
-- exact Chrysalis idle and captured leap, walk, and attack sprite timelines;
-  native walk/attack state binding and late boss-phase working-set allocation
+- exact Chrysalis idle and captured leap, walk, and uninterrupted 189-frame
+  attack/recovery sprite timelines; native walk/attack and three-contact state
+  binding plus late boss-phase working-set allocation
 - first-room 5+3 crowd budget, four alien palette variants, combat lock, clear,
   and exit-state lifecycle
 - isolated Predator weapon QSound voice, processed stereo waveform, source
@@ -277,7 +282,7 @@ Still approximate or incomplete:
 - full animation between the verified route key states
 - remaining HUD states, exact scroll behavior, level triggers, combat, and AI
 - remaining isolated QSound boss-action and voice cues
-- exact Chrysalis AI/attack schedule plus hit, KO, and palette-effect visuals
+- exact Chrysalis attack-selection AI plus hit, KO, and palette-effect visuals
 - native HUD safe-area placement and arcade-derived camera behavior for CRT
   overscan variability
 
