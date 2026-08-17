@@ -1,6 +1,6 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-17 09:03 EDT
+Updated: 2026-08-17 09:07 EDT
 
 Read this file before taking any action. The user wants a private, capture-faithful, native Sega Saturn port of CPS2 Alien vs Predator, beginning at the main menu and continuing through the complete first level into Round 2. Do not reframe success as an emulator, approximate demo, host-only simulation, or focused animation viewer.
 
@@ -8,9 +8,9 @@ Read this file before taking any action. The user wants a private, capture-faith
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `prototype/private-capability-test`
-- HEAD: the commit containing this handoff adds the deterministic frontend
-  capture/analyzer checkpoint on top of `8b8f160` (`Add capture-exact
-  Chrysalis KO sequence`). Run `git rev-parse HEAD` for the immutable hash.
+- HEAD: the commit containing this handoff adds root agent instructions on top
+  of `2e61198` (`Checkpoint deterministic frontend capture`). Run `git rev-parse
+  HEAD` for the immutable hash.
 - Worktree should be clean immediately after the handoff commit. Verify with
   `git status --short --branch` before resuming.
 - Current disc profile: `normal-release`.
@@ -20,6 +20,7 @@ Read this file before taking any action. The user wants a private, capture-faith
 
 Implementation and documentation files in this checkpoint:
 
+- `AGENTS.md`
 - `build.ps1`
 - `capability_model.c`
 - `main.c`
