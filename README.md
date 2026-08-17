@@ -216,9 +216,15 @@ Verified on August 17, 2026:
 - the refreshed emulator route reaches Round 2 with `PCM SEQ 1/1` and
   `SEEN 1`, proving both sequence starts entered SCSP playback without losing
   the prior weapon, melee, or contact-channel latches
+- paired doorway captures isolate a 0.930136-second voice-4 event at +44 and a
+  0.993515-second voice-13 interior-transition event at +38; both reuse fixed
+  PCM channel 4 because their verified source intervals do not overlap
+- the combined emulator route reaches Round 2 with `PCM D/T 1/1`,
+  `PCM SEQ 1/1`, and both `SEEN 1` latches while the earlier contact and
+  weapon proofs remain intact
 
 Next proof gate: verify the full-width mapping and CD audio on physical Saturn,
-then extend the proven QSound isolation to the remaining dialogue and combat
+then extend the proven QSound isolation to the opening dialogue and combat
 effects while replacing the approximate route gaps with the remaining captured
 rooms, actors, and actions.
 

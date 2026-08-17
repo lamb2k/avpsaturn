@@ -22,6 +22,15 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def sha256_samples(samples: tuple[int, ...]) -> str:
+    digest = hashlib.sha256()
+    chunk_samples = 262144
+    for offset in range(0, len(samples), chunk_samples):
+        chunk = samples[offset : offset + chunk_samples]
+        digest.update(struct.pack(f"<{len(chunk)}h", *chunk))
+    return digest.hexdigest()
+
+
 def read_wave(path: Path) -> tuple[wave._wave_params, tuple[int, ...]]:
     with wave.open(str(path), "rb") as source:
         params = source.getparams()
@@ -222,8 +231,6 @@ def main() -> None:
             / idle_params.framerate,
             "left_peak": max(abs(sample) for sample in left),
             "right_peak": max(abs(sample) for sample in right),
-            "idle_sha256": sha256(args.idle_wav),
-            "action_sha256": sha256(args.action_wav),
         },
         "saturn_pcm": {
             "format": "signed-16-bit-big-endian-stereo",
@@ -239,6 +246,19 @@ def main() -> None:
                 "ignored_leading_difference_frames": sum(
                     frame < selection_first_frame for frame in all_active_frames
                 ),
+                "selection_idle_sha256": sha256_samples(
+                    idle[selection_first_frame * 2 :]
+                ),
+                "selection_action_sha256": sha256_samples(
+                    action[selection_first_frame * 2 :]
+                ),
+            }
+        )
+    else:
+        report["wave"].update(
+            {
+                "idle_sha256": sha256(args.idle_wav),
+                "action_sha256": sha256(args.action_wav),
             }
         )
     args.report.parent.mkdir(parents=True, exist_ok=True)

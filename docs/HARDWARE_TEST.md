@@ -75,6 +75,9 @@ alter console copy protection or supply copyrighted disc data.
    frames after the visual anchor. After defeating Chrysalis, confirm the
    three-part defeat/Stage Clear sequence begins at +150 frames, remains stereo,
    and continues cleanly across Stage Clear into the results transition.
+   At the street doorway, confirm the isolated voice-4 cue starts at +44. In
+   the following interior transition, confirm the voice-13 cue starts at +38
+   without clipping, replaying the previous cue, or interrupting boss channel 3.
 6. Fight through the five-enemy opening wave and three-enemy reinforcement wave.
    Confirm enemies can simultaneously show unlike walk, attack, hit, and KO
    poses without one actor changing another actor's cel. The proven alien clips
@@ -82,7 +85,8 @@ alter console copy protection or supply copyrighted disc data.
 7. Confirm eight total KOs unlock the room and moving right reaches the exit
    transition.
 8. Defeat Chrysalis and confirm the native Stage Clear state. With the
-   diagnostic enabled, require `PCM SEQ 1/1` and `SEEN 1` before Round 2.
+   diagnostic enabled, require `PCM D/T 1/1`, `PCM SEQ 1/1`, and both
+   `SEEN 1` latches before Round 2.
 9. Leave the encounter running for ten minutes and watch for partial sprites,
    palette corruption, controller loss, CD stalls, or dropped video sync.
 

@@ -51,10 +51,10 @@
     "duration_seconds": 3.6115873015873015,
     "left_peak": 15893,
     "right_peak": 11315,
-    "idle_sha256": "74bbca4ed0e324ca578bde4ba81fe4c77c9f4a7497662950eb6ce07055184241",
-    "action_sha256": "ecba0611d7c81d8ba42dab50aef69b1154ad974d35d1f50964830e337509b822",
     "selection_first_frame": 7935495,
-    "ignored_leading_difference_frames": 0
+    "ignored_leading_difference_frames": 173,
+    "selection_idle_sha256": "7d819ef87b2bc6a1c1493f4808a98c2f37177e19984c5c53223a12dd2b32a688",
+    "selection_action_sha256": "4e6b24ebd948bb99fb34a50ae6de140c11984e948b90bb2318ec508ac190c447"
   },
   "saturn_pcm": {
     "format": "signed-16-bit-big-endian-stereo",

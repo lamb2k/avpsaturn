@@ -6,10 +6,12 @@
 #include "generated/avsp_boss_intro_audio.h"
 #include "generated/avsp_audio.h"
 #include "generated/avsp_contact_audio.h"
+#include "generated/avsp_door_dialogue_audio.h"
 #include "generated/avsp_enemy_animation.h"
 #include "generated/avsp_frontend_palette.h"
 #include "generated/avsp_hud.h"
 #include "generated/avsp_ko_contact_audio.h"
+#include "generated/avsp_interior_transition_audio.h"
 #include "generated/avsp_melee_audio.h"
 #include "generated/avsp_palette.h"
 #include "generated/avsp_player_action_animation.h"
@@ -29,6 +31,7 @@
 #define AVSP_PCM_CHANNEL_MELEE 1
 #define AVSP_PCM_CHANNEL_CONTACT 2
 #define AVSP_PCM_CHANNEL_SEQUENCE 3
+#define AVSP_PCM_CHANNEL_TRANSITION 4
 #define BOSS_CEL_BYTES ((AVSP_BOSS_CEL_WIDTH * AVSP_BOSS_CEL_HEIGHT) / 2)
 #define BITMAP_SCENE_NONE (-1000)
 #define BITMAP_SCENE_CORRIDOR (-2)
@@ -101,6 +104,9 @@ static jo_sound *contact_channel_sound;
 static jo_sound boss_intro_sound;
 static jo_sound boss_clear_sound;
 static jo_sound *sequence_channel_sound;
+static jo_sound door_dialogue_sound;
+static jo_sound interior_transition_sound;
+static jo_sound *transition_channel_sound;
 static int player_idle_sprites[2];
 static int player_action_sprites[AVSP_PLAYER_ACTION_LAYERS];
 static int enemy_action_sprites[CAP_MAX_ENEMIES];
@@ -129,6 +135,9 @@ static int contact_audio_channel_observed;
 static int boss_intro_audio_play_count;
 static int boss_clear_audio_play_count;
 static int sequence_audio_channel_observed;
+static int door_dialogue_audio_play_count;
+static int interior_transition_audio_play_count;
+static int transition_audio_channel_observed;
 static int current_bitmap_scene;
 #ifdef AVSP_VISUAL_TEST
 static int visual_action_index;
@@ -202,7 +211,17 @@ static int load_action_audio(void)
            load_pcm_audio(&boss_clear_sound, AVSP_BOSS_CLEAR_PCM_FILE,
                           AVSP_BOSS_CLEAR_PCM_DIRECTORY,
                           AVSP_BOSS_CLEAR_PCM_BYTES,
-                          AVSP_BOSS_CLEAR_PCM_SAMPLE_RATE);
+                          AVSP_BOSS_CLEAR_PCM_SAMPLE_RATE) &&
+           load_pcm_audio(&door_dialogue_sound,
+                          AVSP_DOOR_DIALOGUE_PCM_FILE,
+                          AVSP_DOOR_DIALOGUE_PCM_DIRECTORY,
+                          AVSP_DOOR_DIALOGUE_PCM_BYTES,
+                          AVSP_DOOR_DIALOGUE_PCM_SAMPLE_RATE) &&
+           load_pcm_audio(&interior_transition_sound,
+                          AVSP_INTERIOR_TRANSITION_PCM_FILE,
+                          AVSP_INTERIOR_TRANSITION_PCM_DIRECTORY,
+                          AVSP_INTERIOR_TRANSITION_PCM_BYTES,
+                          AVSP_INTERIOR_TRANSITION_PCM_SAMPLE_RATE);
 }
 
 /* Jo Engine queues SGL sound commands and flushes before, rather than after,
@@ -1227,6 +1246,33 @@ static void frame_callback(void)
     if ((boss_intro_audio_play_count > 0 || boss_clear_audio_play_count > 0) &&
         jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_SEQUENCE))
         sequence_audio_channel_observed = 1;
+    /* The doorway voice and following transition effect are source-sequential,
+       so one bounded SCSP channel reproduces both without consuming the final
+       available slot. Their native state timers are aligned to source frames
+       5384 (+44 from the doorway anchor) and 5438 (+38 from the interior
+       transition anchor). */
+    if (world.encounter_state == CAP_ENCOUNTER_DOOR_DIALOGUE &&
+        world.encounter_timer == 44 && door_dialogue_audio_play_count == 0)
+    {
+        play_pcm_committed(&door_dialogue_sound, transition_channel_sound,
+                           AVSP_PCM_CHANNEL_TRANSITION);
+        transition_channel_sound = &door_dialogue_sound;
+        ++door_dialogue_audio_play_count;
+    }
+    if (world.encounter_state == CAP_ENCOUNTER_INTERIOR_TRANSITION &&
+        world.encounter_timer == 38 &&
+        interior_transition_audio_play_count == 0)
+    {
+        play_pcm_committed(&interior_transition_sound,
+                           transition_channel_sound,
+                           AVSP_PCM_CHANNEL_TRANSITION);
+        transition_channel_sound = &interior_transition_sound;
+        ++interior_transition_audio_play_count;
+    }
+    if ((door_dialogue_audio_play_count > 0 ||
+         interior_transition_audio_play_count > 0) &&
+        jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_TRANSITION))
+        transition_audio_channel_observed = 1;
 #ifdef AVSP_VISUAL_TEST
     if (world.player.action == CAP_ACT_WALK)
         world.player.x = JO_TV_WIDTH_2;
@@ -1276,6 +1322,11 @@ static void frame_callback(void)
     draw_hud();
 #ifdef AVSP_ENCOUNTER_TEST
     /* Draw test evidence last so captured VDP1 actors cannot obscure it. */
+    jo_printf(0, 5, "PCM D/T %d/%d CH %d SEEN %d",
+              door_dialogue_audio_play_count,
+              interior_transition_audio_play_count,
+              jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_TRANSITION),
+              transition_audio_channel_observed);
     jo_printf(0, 6, "PCM SEQ %d/%d CH %d SEEN %d",
               boss_intro_audio_play_count, boss_clear_audio_play_count,
               jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_SEQUENCE),
@@ -1332,6 +1383,10 @@ void jo_main(void)
     boss_clear_audio_play_count = 0;
     sequence_audio_channel_observed = 0;
     sequence_channel_sound = JO_NULL;
+    door_dialogue_audio_play_count = 0;
+    interior_transition_audio_play_count = 0;
+    transition_audio_channel_observed = 0;
+    transition_channel_sound = JO_NULL;
     current_bitmap_scene = BITMAP_SCENE_NONE;
 #ifdef AVSP_VISUAL_TEST
     visual_action_index = 0;

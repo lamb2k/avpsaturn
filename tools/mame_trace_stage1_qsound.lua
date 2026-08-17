@@ -20,6 +20,7 @@ local capture_root = os.getenv("AVSP_QSOUND_CAPTURE_ROOT") or
 local isolate_qsound_voices = {}
 local isolate_qsound_voice_text = os.getenv("AVSP_QSOUND_ISOLATE_VOICES") or ""
 local qsound_isolation_enabled = isolate_qsound_voice_text ~= ""
+local qsound_force_stop = os.getenv("AVSP_QSOUND_FORCE_STOP") == "1"
 if isolate_qsound_voice_text ~= "none" then
     for token in string.gmatch(isolate_qsound_voice_text, "[^,]+") do
         local voice = assert(tonumber(token),
@@ -103,6 +104,17 @@ local function begin_qsound_voice_isolation(absolute_frame)
         isolate_qsound_voice_text, absolute_frame))
 end
 
+local function end_qsound_voice_isolation(absolute_frame)
+    if not qsound_isolation_enabled then return end
+    for voice = 0, 15 do
+        if isolate_qsound_voices[voice] then
+            qsound_write((voice << 3) + 6, 0)
+        end
+    end
+    print(string.format("AVSPU_STAGE1_QSOUND_STOP voices=%s frame=%d",
+        isolate_qsound_voice_text, absolute_frame))
+end
+
 stage1_qsound_post_load_subscription = emu.add_machine_post_load_notifier(function()
     frame = 0
     state_loaded = true
@@ -119,6 +131,10 @@ stage1_qsound_capture_subscription = emu.add_machine_frame_notifier(function()
     if qsound_isolation_enabled and
         absolute_frame == isolate_qsound_start_frame then
         begin_qsound_voice_isolation(absolute_frame)
+    end
+    if qsound_isolation_enabled and qsound_force_stop and
+        absolute_frame == isolate_qsound_end_frame then
+        end_qsound_voice_isolation(absolute_frame)
     end
 
     if frame == 1 then right:set_value(1) end

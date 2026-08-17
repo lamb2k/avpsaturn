@@ -18,6 +18,10 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $captures = @(
+    @{ Name = 'door_dialogue_muted'; Voices = 'none'; Start = 5383; End = 5434; Stop = 5436; ForceStop = $true; Wav = 'door_dialogue_muted.wav' },
+    @{ Name = 'door_dialogue_voice4'; Voices = '4'; Start = 5383; End = 5434; Stop = 5436; ForceStop = $true; Wav = 'door_dialogue_voice4.wav' },
+    @{ Name = 'interior_transition_muted'; Voices = 'none'; Start = 5437; End = 5491; Stop = 5493; Wav = 'interior_transition_muted.wav' },
+    @{ Name = 'interior_transition_voice13'; Voices = '13'; Start = 5437; End = 5491; Stop = 5493; Wav = 'interior_transition_voice13.wav' },
     @{ Name = 'boss_intro_muted'; Voices = 'none'; Start = 5467; End = 5509; Stop = 5511; Wav = 'boss_intro_muted.wav' },
     @{ Name = 'boss_intro_voice12'; Voices = '12'; Start = 5467; End = 5509; Stop = 5511; Wav = 'boss_intro_voice12.wav' },
     @{ Name = 'boss_clear_muted'; Voices = 'none'; Start = 14069; End = 14269; Stop = 14271; Wav = 'boss_clear_muted.wav' },
@@ -44,6 +48,12 @@ if ($needsCapture) {
             $env:AVSP_QSOUND_ISOLATE_VOICES = $capture.Voices
             $env:AVSP_QSOUND_ISOLATE_START_FRAME = [string]$capture.Start
             $env:AVSP_QSOUND_ISOLATE_END_FRAME = [string]$capture.End
+            if ($capture.ForceStop) {
+                $env:AVSP_QSOUND_FORCE_STOP = '1'
+            }
+            else {
+                Remove-Item Env:\AVSP_QSOUND_FORCE_STOP -ErrorAction SilentlyContinue
+            }
             & $mame 'avspu' '-rompath' '.' '-video' 'none' '-sound' 'none' `
                 '-samplerate' '44100' `
                 '-wavwrite' ".deps\mame\stage1_audio_events\$($capture.Wav)" `
@@ -62,6 +72,7 @@ if ($needsCapture) {
         Remove-Item Env:\AVSP_QSOUND_ISOLATE_VOICES -ErrorAction SilentlyContinue
         Remove-Item Env:\AVSP_QSOUND_ISOLATE_START_FRAME -ErrorAction SilentlyContinue
         Remove-Item Env:\AVSP_QSOUND_ISOLATE_END_FRAME -ErrorAction SilentlyContinue
+        Remove-Item Env:\AVSP_QSOUND_FORCE_STOP -ErrorAction SilentlyContinue
         Pop-Location
     }
 }
@@ -94,6 +105,36 @@ if (-not $PythonPath -or -not (Test-Path -LiteralPath $PythonPath)) {
 
 $extractor = Join-Path $projectRoot 'tools\extract_qsound_event.py'
 & $PythonPath $extractor `
+    '--idle-wav' (Join-Path $captureRoot 'door_dialogue_muted.wav') `
+    '--action-wav' (Join-Path $captureRoot 'door_dialogue_voice4.wav') `
+    '--qsound-writes' (Join-Path $captureRoot 'door_dialogue_voice4\qsound_writes.tsv') `
+    '--output-pcm' (Join-Path $projectRoot 'build\avsp_cd\AUDIO\DOOR.PCM') `
+    '--output-header' (Join-Path $projectRoot 'generated\avsp_door_dialogue_audio.h') `
+    '--header-prefix' 'AVSP_DOOR_DIALOGUE' `
+    '--report' (Join-Path $projectRoot 'data\qsound_door_dialogue_capture.json') `
+    '--action' 'door_dialogue_voice' '--action-frame' '5340' `
+    '--voice' '4' '--start-frame' '5384' '--end-frame' '5434' `
+    '--capture-end-frame' '5436'
+if ($LASTEXITCODE -ne 0) {
+    throw "QSound door-dialogue extraction failed with exit code $LASTEXITCODE."
+}
+
+& $PythonPath $extractor `
+    '--idle-wav' (Join-Path $captureRoot 'interior_transition_muted.wav') `
+    '--action-wav' (Join-Path $captureRoot 'interior_transition_voice13.wav') `
+    '--qsound-writes' (Join-Path $captureRoot 'interior_transition_voice13\qsound_writes.tsv') `
+    '--output-pcm' (Join-Path $projectRoot 'build\avsp_cd\AUDIO\TRANS.PCM') `
+    '--output-header' (Join-Path $projectRoot 'generated\avsp_interior_transition_audio.h') `
+    '--header-prefix' 'AVSP_INTERIOR_TRANSITION' `
+    '--report' (Join-Path $projectRoot 'data\qsound_interior_transition_capture.json') `
+    '--action' 'interior_transition_effect' '--action-frame' '5400' `
+    '--voice' '13' '--start-frame' '5438' '--end-frame' '5491' `
+    '--capture-end-frame' '5493'
+if ($LASTEXITCODE -ne 0) {
+    throw "QSound interior-transition extraction failed with exit code $LASTEXITCODE."
+}
+
+& $PythonPath $extractor `
     '--idle-wav' (Join-Path $captureRoot 'boss_intro_muted.wav') `
     '--action-wav' (Join-Path $captureRoot 'boss_intro_voice12.wav') `
     '--qsound-writes' (Join-Path $captureRoot 'boss_intro_voice12\qsound_writes.tsv') `
@@ -124,4 +165,4 @@ if ($LASTEXITCODE -ne 0) {
     throw "QSound boss-clear extraction failed with exit code $LASTEXITCODE."
 }
 
-Write-Host 'Prepared capture-exact boss-intro and boss-clear PCM for Saturn SCSP playback.'
+Write-Host 'Prepared capture-exact doorway, transition, boss-intro, and boss-clear PCM for Saturn SCSP playback.'

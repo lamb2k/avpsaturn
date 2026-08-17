@@ -167,6 +167,16 @@ continue across the native Stage Clear and results boundaries. A capture-tail
 window rejects MAME startup transients before selecting the event, and a
 second refreshed capture must reproduce both PCM hashes before integration.
 
+The doorway route adds two more bounded events. Voice 4 starts at source frame
+5384, 44 frames after the captured dialogue anchor, and is replaced at frame
+5434. A forced stop at that exact replacement boundary isolates 0.930136
+seconds and 164,076 bytes without retaining the new voice-4 sample. Voice 13
+then starts at frame 5438, 38 frames after the interior-transition anchor, and
+stops naturally at frame 5491; its capture is 0.993515 seconds and 175,256
+bytes. They reuse one SCSP channel because the source intervals are disjoint.
+For save-state captures with non-repeatable startup transients, reports hash the
+declared tail-selection windows and final PCM rather than irrelevant preroll.
+
 The production path must repeat this method for remaining dialogue and combat
 effects, keep long music on CDDA, and allocate short cues across the six bounded
 Jo/SGL PCM channels.
@@ -174,9 +184,10 @@ Jo/SGL PCM channels.
 The native channel budget is explicit rather than first-free: weapon uses
 channel 0, melee channel 1, and the mutually exclusive normal/KO contact
 composites share channel 2. The mutually exclusive boss entrance and
-defeat/Stage Clear sequences share channel 3. Channels 4 and 5 remain reserved
-for dialogue and additional combat effects. A cue may retrigger only its own
-channel, preventing action bursts from consuming the remaining pool.
+defeat/Stage Clear sequences share channel 3. The sequential doorway and
+interior-transition events share channel 4. Channel 5 remains reserved for
+opening dialogue and additional combat effects. A cue may retrigger only its
+own channel, preventing action bursts from consuming the remaining pool.
 
 The natural alien-contact route proves the player-damage sound independently:
 each of four health losses is followed three frames later by the same QSound
@@ -222,6 +233,9 @@ Exact in the current milestone:
 - isolated Chrysalis entrance and defeat/Stage Clear sequence composites,
   source-anchor timing, bounded channel-3 playback, and Round 2 `SEQ 1/1`
   plus `SEEN 1` runtime evidence
+- isolated doorway and interior-transition events with exact source replacement
+  and stop boundaries, bounded channel-4 playback, and Round 2 `D/T 1/1` plus
+  `SEEN 1` runtime evidence
 
 Still approximate or incomplete:
 

@@ -230,6 +230,18 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Saturn boss-clear PCM ISO verification failed with exit code $LASTEXITCODE."
         }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/AUDIO/DOOR.PCM' '--equals' `
+            (Join-Path $contentRoot 'AUDIO\DOOR.PCM')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn door-dialogue PCM ISO verification failed with exit code $LASTEXITCODE."
+        }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/AUDIO/TRANS.PCM' '--equals' `
+            (Join-Path $contentRoot 'AUDIO\TRANS.PCM')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn interior-transition PCM ISO verification failed with exit code $LASTEXITCODE."
+        }
 
         # Add the locally rendered QSound reference as a real Saturn CDDA track.
         # It remains an ignored private artifact and is never linked as CPS2 code.
@@ -262,6 +274,10 @@ try {
             (Join-Path $contentRoot 'AUDIO\BOSSIN.PCM')
         $bossClearAudioFile = Get-Item -LiteralPath `
             (Join-Path $contentRoot 'AUDIO\BOSSCLR.PCM')
+        $doorDialogueAudioFile = Get-Item -LiteralPath `
+            (Join-Path $contentRoot 'AUDIO\DOOR.PCM')
+        $interiorTransitionAudioFile = Get-Item -LiteralPath `
+            (Join-Path $contentRoot 'AUDIO\TRANS.PCM')
         $manifestPath = Join-Path $projectRoot 'build\hardware_release_manifest.txt'
         [IO.File]::WriteAllLines($manifestPath, @(
             'target=sega-saturn-ntsc'
@@ -340,6 +356,20 @@ try {
             'event_audio_9_source_frames=13920-boss-defeated,14070-voice12,14126-voice10,14190-voice12,14269-stop'
             "event_audio_9_bytes=$($bossClearAudioFile.Length)"
             "event_audio_9_sha256=$((Get-FileHash -LiteralPath $bossClearAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'event_audio_10=scsp-pcm-capture-exact-door-dialogue'
+            'event_audio_10_iso_path=/AUDIO/DOOR.PCM'
+            'event_audio_10_format=signed-16-bit-big-endian-stereo'
+            'event_audio_10_sample_rate=44100'
+            'event_audio_10_source_frames=5340-door-dialogue,5384-voice4,5434-replaced'
+            "event_audio_10_bytes=$($doorDialogueAudioFile.Length)"
+            "event_audio_10_sha256=$((Get-FileHash -LiteralPath $doorDialogueAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'event_audio_11=scsp-pcm-capture-exact-interior-transition'
+            'event_audio_11_iso_path=/AUDIO/TRANS.PCM'
+            'event_audio_11_format=signed-16-bit-big-endian-stereo'
+            'event_audio_11_sample_rate=44100'
+            'event_audio_11_source_frames=5400-interior-transition,5438-voice13,5491-stop'
+            "event_audio_11_bytes=$($interiorTransitionAudioFile.Length)"
+            "event_audio_11_sha256=$((Get-FileHash -LiteralPath $interiorTransitionAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
         ))
     }
     finally {
