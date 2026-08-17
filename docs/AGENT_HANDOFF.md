@@ -139,12 +139,17 @@ Deterministic source hashes:
   `C:\Users\lambd\.codex\skills\port-cps2-to-sega-saturn` records RGB32
   frontend-capture limits, cadence-1 release gating, full-screen crop checks,
   and whole-block allocator alignment rules. Its start step now names
-  `AGENTS.md` as canonical with `CLAUDE.md` as the Claude Code pointer; that
-  one-line prose edit is the only 2026-08-17 09:20 skill change.
+  `AGENTS.md` as canonical with `CLAUDE.md` as the Claude Code pointer.
+  `references/workflow.md` additionally records the generalizable lessons from
+  the segmentation result: inspect frames before designing a codec because a
+  window may be a native composition rather than video; detect fades against
+  the most colourful frame, never the first; check RLE against raw before
+  assuming compression; collapse repeated frames before sizing; and read the
+  state machine to find the frame that starts CDDA.
 - Skill hashes: `SKILL.md`
   `f900e9feae55a807dd82fabc0f0792ae0d126c98e36fb5fcb8fc84845ccd97ee`;
   `references/workflow.md`
-  `6472d8c4c466addee790ee16acdfba4e201c066b97316252f118aaf2dfe580e0`;
+  `5a6cba7ae33112861b14a10c89087d78f4af7d40ba1c22d4f1e681b67f09cc59`;
   `agents/openai.yaml`
   `038134e6c419dc5654b404dac81317a21900e342e208841f44cd959b837c7e2b`.
 
