@@ -126,6 +126,25 @@ int cap_stage1_source_end_frame(void)
     return avsp_stage1_route_events[AVSP_STAGE1_ROUTE_EVENT_COUNT - 1].source_frame;
 }
 
+int cap_confirm_shutter_band(const int confirm_timer, int *top_row,
+                             int *bottom_row)
+{
+    int closed;
+    int top = CAP_CONFIRM_CONTENT_TOP_ROW;
+    int bottom = CAP_CONFIRM_CONTENT_BOTTOM_ROW;
+    if (confirm_timer > CAP_CONFIRM_SHUTTER_START_TIMER)
+    {
+        const int moved = (confirm_timer - CAP_CONFIRM_SHUTTER_START_TIMER) *
+            CAP_CONFIRM_SHUTTER_ROWS_PER_FRAME;
+        top += moved;
+        bottom -= moved;
+    }
+    closed = top > bottom;
+    if (top_row != 0) *top_row = top;
+    if (bottom_row != 0) *bottom_row = bottom;
+    return closed ? 0 : 1;
+}
+
 static void cap_deactivate_enemy(CapActor *enemy, const int index)
 {
     enemy->x = -256 - index * 32;

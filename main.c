@@ -1280,6 +1280,41 @@ static void draw_boss(const CapActor *actor, const int screen_x)
                             boss_action_sprite, AVSP_BOSS_PALETTE_BANK, depth);
 }
 
+/* The captured character-confirm transition is a row shutter over the held
+   selection image, not an animation: every visible row is byte-identical to
+   the held frame and everything else is black. The selection pixels are
+   already in the VDP2 bitmap, so the shutter is a progressive blackout of
+   that bitmap and needs no stored frames and no source surface. Blacking is
+   safe because the band only ever shrinks; only the rows newly hidden since
+   the previous frame are written. See docs/AGENT_HANDOFF.md and
+   data/frontend_geometry_cadence1.json. */
+static void apply_confirm_shutter(void)
+{
+    static unsigned char empty_row[BACKGROUND_WIDTH];
+    int top = 0;
+    int bottom = 0;
+    int previous_top = 0;
+    int previous_bottom = 0;
+    int row;
+
+    if (world.encounter_timer <= CAP_CONFIRM_SHUTTER_START_TIMER) return;
+    (void)cap_confirm_shutter_band(world.encounter_timer, &top, &bottom);
+    (void)cap_confirm_shutter_band(world.encounter_timer - 1, &previous_top,
+                                   &previous_bottom);
+    if (previous_top > previous_bottom) return;
+    if (top > bottom)
+    {
+        top = previous_bottom + 1;
+        bottom = previous_bottom;
+    }
+    for (row = previous_top; row < top; ++row)
+        jo_dma_copy(empty_row, background_bitmap + row * BACKGROUND_WIDTH,
+                    BACKGROUND_WIDTH);
+    for (row = bottom + 1; row <= previous_bottom; ++row)
+        jo_dma_copy(empty_row, background_bitmap + row * BACKGROUND_WIDTH,
+                    BACKGROUND_WIDTH);
+}
+
 static void draw_world(void)
 {
     int index;
@@ -1293,6 +1328,8 @@ static void draw_world(void)
     {
         int scene = world.encounter_state == CAP_ENCOUNTER_MAIN_MENU ? 0 : 1;
         if (!activate_frontend_scene(scene)) runtime_ready = 0;
+        if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM)
+            apply_confirm_shutter();
         return;
     }
     if (sequence_scene_for_world() >= 0)

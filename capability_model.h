@@ -127,8 +127,20 @@ typedef struct
     int level_completed;
 } CapWorld;
 
+/* Character-confirm shutter, measured from the deterministic CPS2 capture and
+   recorded in data/frontend_geometry.json. Confirm timer 0 is source frame
+   1800, so the shutter starts at timer 85 (source frame 1885) and closes four
+   rows per frame at each edge about the fixed centre between rows 131 and 132.
+   The band always exposes the held character-select image, so the runtime
+   needs no stored animation. Cadence-1 capture pinned every value. */
+#define CAP_CONFIRM_SHUTTER_START_TIMER 85
+#define CAP_CONFIRM_SHUTTER_ROWS_PER_FRAME 4
+#define CAP_CONFIRM_CONTENT_TOP_ROW 40
+#define CAP_CONFIRM_CONTENT_BOTTOM_ROW 223
+
 void cap_world_init(CapWorld *world);
 CapClipRequest cap_world_step(CapWorld *world, const CapInput *input);
+int cap_confirm_shutter_band(int confirm_timer, int *top_row, int *bottom_row);
 int cap_background_scroll_x(int camera_x, int stage_area);
 int cap_background_fit_scroll_x(int camera_x, int stage_area);
 int cap_actor_screen_x(int world_x, int camera_x, int full_width_fit);

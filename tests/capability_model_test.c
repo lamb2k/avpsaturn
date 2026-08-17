@@ -736,6 +736,67 @@ static void test_actor_display_mapping(void)
     assert(cap_actor_screen_x(300, 108, 0) == 0);
 }
 
+static void test_capture_exact_confirm_shutter(void)
+{
+    /* Every row of this table is the visible band measured from the cadence-1
+       capture in data/frontend_geometry_cadence1.json, converted to confirm
+       timer by subtracting source frame 1800. A band of -1 means the shutter
+       has closed and the screen is black. The model must reproduce the
+       capture, so this table is evidence and must not be relaxed to match a
+       changed implementation. */
+    static const int expected[][3] = {
+        {  70,  40, 223 }, {  71,  40, 223 }, {  72,  40, 223 },
+        {  73,  40, 223 }, {  74,  40, 223 }, {  75,  40, 223 },
+        {  76,  40, 223 }, {  77,  40, 223 }, {  78,  40, 223 },
+        {  79,  40, 223 }, {  80,  40, 223 }, {  81,  40, 223 },
+        {  82,  40, 223 }, {  83,  40, 223 }, {  84,  40, 223 },
+        {  85,  40, 223 }, {  86,  44, 219 }, {  87,  48, 215 },
+        {  88,  52, 211 }, {  89,  56, 207 }, {  90,  60, 203 },
+        {  91,  64, 199 }, {  92,  68, 195 }, {  93,  72, 191 },
+        {  94,  76, 187 }, {  95,  80, 183 }, {  96,  84, 179 },
+        {  97,  88, 175 }, {  98,  92, 171 }, {  99,  96, 167 },
+        { 100, 100, 163 }, { 101, 104, 159 }, { 102, 108, 155 },
+        { 103, 112, 151 }, { 104, 116, 147 }, { 105, 120, 143 },
+        { 106, 124, 139 }, { 107, 128, 135 }, { 108,  -1,  -1 },
+        { 109,  -1,  -1 }, { 110,  -1,  -1 }, { 111,  -1,  -1 },
+        { 112,  -1,  -1 },
+    };
+    const int count = (int)(sizeof(expected) / sizeof(expected[0]));
+    int index;
+    int top;
+    int bottom;
+
+    for (index = 0; index < count; ++index)
+    {
+        const int timer = expected[index][0];
+        const int visible = cap_confirm_shutter_band(timer, &top, &bottom);
+        if (expected[index][1] < 0)
+        {
+            assert(visible == 0);
+            continue;
+        }
+        assert(visible == 1);
+        assert(top == expected[index][1]);
+        assert(bottom == expected[index][2]);
+    }
+
+    /* The band is held from confirm entry until the measured start frame. */
+    assert(cap_confirm_shutter_band(0, &top, &bottom) == 1);
+    assert(top == CAP_CONFIRM_CONTENT_TOP_ROW);
+    assert(bottom == CAP_CONFIRM_CONTENT_BOTTOM_ROW);
+
+    /* Once closed it stays closed for the rest of the 240-frame hold. */
+    assert(cap_confirm_shutter_band(239, &top, &bottom) == 0);
+
+    /* The centre never moves while the band is open. */
+    for (index = CAP_CONFIRM_SHUTTER_START_TIMER; index < 108; ++index)
+    {
+        assert(cap_confirm_shutter_band(index, &top, &bottom) == 1);
+        assert(top + bottom == CAP_CONFIRM_CONTENT_TOP_ROW +
+                               CAP_CONFIRM_CONTENT_BOTTOM_ROW);
+    }
+}
+
 int main(void)
 {
     test_attack_requests_and_damage();
@@ -752,6 +813,7 @@ int main(void)
     test_capture_backed_route_boundary();
     test_centered_background_mapping();
     test_actor_display_mapping();
+    test_capture_exact_confirm_shutter();
     puts("Capability model tests passed (12,000 deterministic frames).");
     return 0;
 }
