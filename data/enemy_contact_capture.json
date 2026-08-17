@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "source": "user-supplied avspu ROM set captured with MAME 0.289",
+  "probe": {
+    "player_state_modified": false,
+    "enemy_state_modified": false,
+    "capture_scope": [
+      4080,
+      4500
+    ]
+  },
+  "route_prefix_checks": [
+    {
+      "frame": 4080,
+      "kind": "object_ram",
+      "sha256": "4e7132b543fffb07932c2028b877e1110a382284c31969d57177024dea792828"
+    },
+    {
+      "frame": 4080,
+      "kind": "palette",
+      "sha256": "fd2b1a848a59ad457c54b51f25f34f830e1929de7d60c523a1d7717a687dfc8a"
+    },
+    {
+      "frame": 4164,
+      "kind": "object_ram",
+      "sha256": "53ae66954f2ee2d307d793215c8c912b4ab0750111ec608f851ac386362ea9bc"
+    },
+    {
+      "frame": 4164,
+      "kind": "palette",
+      "sha256": "296a307c2c02c682bbcfda8a1ad9d307cd74ba03913e8ddd0638419894b563dc"
+    },
+    {
+      "frame": 4200,
+      "kind": "object_ram",
+      "sha256": "68b1d7248720d464535a9fee10ce824f864ba899f1f9fe1c0bb326499f3747a0"
+    },
+    {
+      "frame": 4200,
+      "kind": "palette",
+      "sha256": "fd2b1a848a59ad457c54b51f25f34f830e1929de7d60c523a1d7717a687dfc8a"
+    }
+  ],
+  "player_health_events": [
+    {
+      "frame": 4243,
+      "from": 30,
+      "to": 22,
+      "tracked_enemy_action": 5632,
+      "tracked_enemy_animation": 60468,
+      "tracked_enemy_x_delta": -80,
+      "tracked_enemy_floor_delta": 0
+    },
+    {
+      "frame": 4301,
+      "from": 22,
+      "to": 14,
+      "tracked_enemy_action": 6144,
+      "tracked_enemy_animation": 59644,
+      "tracked_enemy_x_delta": -63,
+      "tracked_enemy_floor_delta": 0
+    },
+    {
+      "frame": 4372,
+      "from": 14,
+      "to": 6,
+      "tracked_enemy_action": 6144,
+      "tracked_enemy_animation": 59644,
+      "tracked_enemy_x_delta": -68,
+      "tracked_enemy_floor_delta": 0
+    },
+    {
+      "frame": 4433,
+      "from": 6,
+      "to": 0,
+      "tracked_enemy_action": 5632,
+      "tracked_enemy_animation": 59292,
+      "tracked_enemy_x_delta": 109,
+      "tracked_enemy_floor_delta": 0
+    }
+  ],
+  "tracked_attack": {
+    "start_frame": 4253,
+    "end_frame": 4372,
+    "frame_count": 120,
+    "contact_frames": [
+      4301,
+      4372
+    ],
+    "contact_action_offsets": [
+      48,
+      119
+    ],
+    "contact_pose": 4,
+    "contact_animation": 59644,
+    "damage_per_contact_native_health_units": 8,
+    "maximum_observed_contact_distance_x": 68,
+    "contact_floor_deltas": [
+      0,
+      0
+    ],
+    "rival_action_at_contacts": [
+      5632,
+      6144
+    ],
+    "rival_attack_phase_at_contacts": [
+      null,
+      32
+    ],
+    "attribution_note": "At the first health write the rival is not attacking. At the second it is only 32 frames into its attack, while the tracked actor is on its repeated contact pose at offset 119."
+  },
+  "tracked_walk": {
+    "start_frame": 4214,
+    "end_frame": 4252,
+    "frame_intervals": 38,
+    "source_x_displacement": 111,
+    "source_x_pixels_per_frame_numerator": 111,
+    "source_x_pixels_per_frame_denominator": 38
+  }
+}

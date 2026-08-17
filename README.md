@@ -27,6 +27,8 @@ Current milestone:
 - validates one native CPS2 alien actor slot through exact 39-frame walk,
   120-frame attack, 36-frame hit, and 140-frame KO timelines; 42 deduplicated
   288x192 poses are bound to the corresponding Saturn-native actor states
+- validates an unfrozen natural-contact replay: the tracked alien strikes at
+  attack offsets 48 and 119 and approaches at 111/38 CPS2 pixels per frame
 - runs a capture-derived first-room lifecycle with five opening enemies, three
   reinforcements, a locked combat boundary, clear hold, and exit transition
 - transitions into a reconstructed industrial boss room, spawns an exact

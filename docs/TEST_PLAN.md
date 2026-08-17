@@ -46,6 +46,9 @@ archetypes, actor-level priority, and image-difference acceptance remain open.
 The post-input gameplay scene now binds the validated alien actor's exact
 39-frame walk, 120-frame attack, 36-frame hit, and 140-frame KO schedules to
 independent Saturn actor slots.
+An unfrozen natural-contact replay additionally validates contact offsets 48
+and 119, maximum observed X reach of 68 source pixels, and 111 pixels of
+approach displacement over 38 frame intervals.
 
 The automated encounter build also traversed the cartridge-preloaded route
 cache and visibly reached the capture-derived character-select, results, and

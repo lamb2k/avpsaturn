@@ -53,6 +53,13 @@ variants, three player-layer palettes, and the boss palette occupy eight
 were moved off VDP1 to keep the texture working set at roughly 74% of the Jo
 Engine VDP1 user area, leaving command-table and texture headroom.
 
+An independent unfrozen-health replay preserves the same verified frame-4080,
+4164, and 4200 object/palette anchors. It records native player-health changes
+on attack offsets 48 and 119, both on the same captured contact pose, and a
+111-pixel approach over 38 frame intervals. The native model therefore uses
+two contact checks, 68 source pixels of observed reach, and a three-source-pixel
+approach step instead of the earlier guessed frame-12 contact and one-pixel step.
+
 The converter retains the final visible CPS2 object/priority result as an
 offline 352x224 8bpp comparison surface. Its 76 visible source colors fit
 losslessly inside one 256-color palette and consume 78,848 bytes; only the

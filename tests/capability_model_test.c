@@ -154,6 +154,12 @@ static void test_capture_exact_enemy_action_timing(void)
     enemy->x = world.player.x + 20;
     enemy->lane = world.player.lane;
 
+    enemy->x = world.player.x + 145;
+    world.frame = 1;
+    step_empty(&world, 1);
+    assert(enemy->x == world.player.x + 142);
+    enemy->x = world.player.x + 20;
+
     enemy->action = CAP_ACT_HIT;
     enemy->action_frame = 0;
     step_empty(&world, 35);
@@ -165,12 +171,16 @@ static void test_capture_exact_enemy_action_timing(void)
     enemy->action = CAP_ACT_ATTACK;
     enemy->action_frame = 0;
     world.player.health = CAP_PLAYER_MAX_HEALTH;
-    step_empty(&world, 11);
+    step_empty(&world, 47);
     assert(world.player.health == CAP_PLAYER_MAX_HEALTH);
     step_empty(&world, 1);
     assert(world.player.health == CAP_PLAYER_MAX_HEALTH - 1);
-    step_empty(&world, 107);
+    step_empty(&world, 70);
+    assert(world.player.health == CAP_PLAYER_MAX_HEALTH - 1);
     assert(enemy->action == CAP_ACT_ATTACK);
+    assert(enemy->action_frame == 118);
+    step_empty(&world, 1);
+    assert(world.player.health == CAP_PLAYER_MAX_HEALTH - 2);
     assert(enemy->action_frame == 119);
     step_empty(&world, 1);
     assert(enemy->action == CAP_ACT_IDLE);
@@ -224,7 +234,7 @@ static void test_player_hit_and_ko_timing(void)
     world.enemies[0].x = world.player.x;
     world.enemies[0].lane = world.player.lane;
     world.enemies[0].action = CAP_ACT_ATTACK;
-    world.enemies[0].action_frame = 11;
+    world.enemies[0].action_frame = 47;
     world.enemies[0].hit_latched = 0;
     step_empty(&world, 1);
     assert(world.player.action == CAP_ACT_HIT);
@@ -240,7 +250,7 @@ static void test_player_hit_and_ko_timing(void)
     world.enemies[0].x = world.player.x;
     world.enemies[0].lane = world.player.lane;
     world.enemies[0].action = CAP_ACT_ATTACK;
-    world.enemies[0].action_frame = 11;
+    world.enemies[0].action_frame = 47;
     world.enemies[0].hit_latched = 0;
     step_empty(&world, 1);
     assert(world.player.action == CAP_ACT_KO);
