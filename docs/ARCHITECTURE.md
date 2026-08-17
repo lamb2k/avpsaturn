@@ -72,7 +72,8 @@ configuration selecting SGL's `TV_352x224` for every translation unit. All 224
 scanlines are preserved. The runtime defaults to full-width fit: VDP2 samples
 the 384-pixel source picture across 352 output pixels and VDP1 uses the matching
 0.9167 horizontal scale. This avoids losing HUD and playfield edges at the cost
-of 8.33% horizontal compression. Y toggles the exact baseline, which uses no
+of 8.33% horizontal compression. NBG1 explicitly uses SGL's `ZOOM_HALF`
+reduction range so the reciprocal 384/352 ratio is honored. Y toggles the exact baseline, which uses no
 horizontal resampling and center-crops 16 source pixels per side.
 
 ## Sound mapping

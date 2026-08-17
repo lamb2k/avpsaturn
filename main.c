@@ -246,6 +246,10 @@ static int load_background(void)
         return 0;
     }
     slBitMapNbg1(COL_TYPE_256, BM_512x256, background_bitmap);
+    /* Full-width mode reduces the 384-pixel CPS2 picture to 352 pixels.
+       NBG1 must explicitly allow ratios below 1.0; otherwise some hardware
+       and emulators clamp the requested reciprocal zoom to the 1:1 range. */
+    slZoomModeNbg1(ZOOM_HALF);
     slBMPaletteNbg1((unsigned short)background_palette.id);
     jo_dma_copy(background_image.data, background_bitmap, BACKGROUND_WIDTH * BACKGROUND_HEIGHT);
     jo_set_displayed_screens(JO_NBG0_SCREEN | JO_NBG1_SCREEN);

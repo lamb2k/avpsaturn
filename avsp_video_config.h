@@ -4,7 +4,8 @@
 /*
  * CPS2 Alien vs. Predator renders a 384x224 active picture.  The Saturn has
  * no 384-pixel low-resolution mode; 352x224 is its closest native mode and
- * preserves the arcade's 224 scanlines without scaling either axis.  Jo
+ * preserves the arcade's 224 scanlines. Full-width presentation reduces the
+ * horizontal axis only, while exact mode retains the 1:1 center crop. Jo
  * Engine normally selects 320x240 for NTSC, so this header is force-included
  * for the game and every engine translation unit.
  */
