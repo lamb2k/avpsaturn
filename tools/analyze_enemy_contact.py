@@ -6,6 +6,8 @@ import hashlib
 import json
 from pathlib import Path
 
+from PIL import Image
+
 
 ROOT = Path(__file__).resolve().parents[1]
 CAPTURE_ROOT = ROOT / ".deps" / "mame" / "enemy_contact"
@@ -46,6 +48,30 @@ def verify_route_prefix() -> list[dict[str, object]]:
             checks.append({"frame": frame, "kind": kind,
                            "sha256": sha256(new_path)})
     return checks
+
+
+def verify_hud_health() -> dict[str, object]:
+    samples = ((4200, 30, 37), (4245, 22, 25), (4303, 14, 13),
+               (4374, 6, 1), (4435, 0, 0))
+    measured = []
+    for frame, health, expected_width in samples:
+        path = CAPTURE_ROOT / f"hud_{frame:05d}.png"
+        image = Image.open(path).convert("RGB")
+        width = sum(image.getpixel((x, 18)) == (255, 255, 0)
+                    for x in range(24, 168))
+        if width != expected_width:
+            raise ValueError(
+                f"frame {frame}: expected HUD health width {expected_width}, "
+                f"found {width}")
+        measured.append({"frame": frame, "native_health": health,
+                         "yellow_pixels": width})
+    return {
+        "source_inner_range": [24, 167],
+        "source_rows": [18, 21],
+        "fill_rgb": [255, 255, 0],
+        "empty_rgb": [255, 0, 0],
+        "samples": measured,
+    }
 
 
 def main() -> None:
@@ -158,6 +184,7 @@ def main() -> None:
             "source_x_pixels_per_frame_numerator": walk_delta,
             "source_x_pixels_per_frame_denominator": 38,
         },
+        "hud_health_meter": verify_hud_health(),
     }
     OUTPUT_PATH.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print("Validated natural alien contacts at attack offsets 48 and 119; "

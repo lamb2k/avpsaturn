@@ -9,6 +9,7 @@ $projectRoot = $PSScriptRoot
 $mame = Join-Path $projectRoot '.deps\mame\mame0289\mame.exe'
 $captureRoot = Join-Path $projectRoot '.deps\mame\enemy_contact'
 $requiredTimeline = Join-Path $captureRoot 'timeline.tsv'
+$requiredHudCapture = Join-Path $captureRoot 'hud_04433.png'
 
 if (-not (Test-Path -LiteralPath $mame)) {
     & (Join-Path $projectRoot 'setup_reference.ps1')
@@ -18,7 +19,8 @@ if ($LASTEXITCODE -ne 0) {
     throw "The avspu ROM audit failed with exit code $LASTEXITCODE."
 }
 
-if (-not $Refresh -and (Test-Path -LiteralPath $requiredTimeline)) {
+if (-not $Refresh -and (Test-Path -LiteralPath $requiredTimeline) -and
+    (Test-Path -LiteralPath $requiredHudCapture)) {
     Write-Host 'Reusing the natural enemy-contact capture.'
 }
 else {
@@ -39,7 +41,8 @@ else {
     Push-Location $projectRoot
     try {
         & $mame 'avspu' '-rompath' '.' '-video' 'none' '-sound' 'none' `
-            '-nothrottle' '-skip_gameinfo' '-autoboot_delay' '0' `
+            '-nothrottle' '-skip_gameinfo' '-snapshot_directory' '.deps\mame' `
+            '-autoboot_delay' '0' `
             '-autoboot_script' '.\tools\mame_capture_enemy_contact.lua'
         if ($LASTEXITCODE -ne 0) {
             throw "Enemy-contact capture failed with exit code $LASTEXITCODE."

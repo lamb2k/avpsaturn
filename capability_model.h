@@ -8,12 +8,16 @@
 #define CAP_BACKGROUND_WIDTH 512
 #define CAP_FITTED_BACKGROUND_WIDTH 469
 #define CAP_CENTER_CROP_X ((CAP_CPS2_VIEW_WIDTH - CAP_VIEW_WIDTH) / 2)
-#define CAP_PLAYER_MAX_HEALTH 12
+#define CAP_PLAYER_MAX_HEALTH 101
+#define CAP_ENEMY_CONTACT_DAMAGE 8
+#define CAP_SPECIAL_HEALTH_COST 6
 #define CAP_STAGE1_TOTAL_ENEMIES 8
 #define CAP_BOSS_MAX_HEALTH 24
 #define CAP_BOSS_TOTAL_ADDS 5
-#define CAP_WEAPON_MAX_ENERGY 100
-#define CAP_WEAPON_SHOT_COST 25
+#define CAP_WEAPON_MAX_ENERGY 64
+#define CAP_WEAPON_SHOT_COST 40
+#define CAP_WEAPON_RECHARGE_DELAY_FRAMES 14
+#define CAP_WEAPON_RECHARGE_CADENCE_FRAMES 3
 
 typedef enum
 {
@@ -104,6 +108,7 @@ typedef struct
     int frame;
     int score;
     int weapon_energy;
+    int weapon_recharge_timer;
     int shots_fired;
     int special_health_spent;
     int player_ko_timer;

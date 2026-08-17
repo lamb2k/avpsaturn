@@ -25,6 +25,14 @@ VISIBLE_WIDTH = 384
 VISIBLE_HEIGHT = 224
 SATURN_VIEW_WIDTH = 352
 SATURN_FITTED_BACKGROUND_WIDTH = 469
+HUD_TOP_WIDTH = 176
+HUD_TOP_HEIGHT = 40
+HUD_PROMPT_X = 240
+HUD_PROMPT_WIDTH = 104
+HUD_PROMPT_HEIGHT = 32
+HUD_HEAT_WIDTH = 120
+HUD_HEAT_Y = 208
+HUD_HEAT_HEIGHT = 16
 STAGE1_ACTIVE_OBJECT_RAM = "objram2.tsv"
 ANIMATION_SAMPLE_ACTIVE_BANK = {2880: 2, 2940: 2}
 STAGE1_ENCOUNTER_ANCHORS = (2760, 3000, 3240, 3480, 3600, 3720,
@@ -861,7 +869,10 @@ def load_player_action_sample_banks(action: str) -> dict[int, int]:
     for line in metadata.read_text(encoding="utf-8").splitlines()[1:]:
         if not line:
             continue
-        frame, recorded_action, bank, _ = line.split("\t")
+        fields = line.split("\t")
+        if len(fields) not in (4, 5):
+            raise ValueError(f"{action}: unexpected action metadata row")
+        frame, recorded_action, bank = fields[:3]
         if recorded_action != action:
             raise ValueError(
                 f"{action}: action metadata contains {recorded_action!r}")
@@ -1280,6 +1291,119 @@ def fit_background_for_saturn(stage: Image.Image) -> Image.Image:
     canvas = Image.new("RGB", stage.size, (0, 0, 0))
     canvas.paste(fitted, (0, 0))
     return canvas
+
+
+def write_hud_assets(full_stage: Image.Image, stage_without_scroll1: Image.Image,
+                     sprite_dir: Path) -> list[dict[str, object]]:
+    """Split the screen-fixed CPS2 HUD from the scrolling street surface."""
+    full = full_stage.convert("RGB").crop(
+        (0, 0, VISIBLE_WIDTH, VISIBLE_HEIGHT)).resize(
+            (SATURN_VIEW_WIDTH, VISIBLE_HEIGHT), Image.Resampling.NEAREST)
+    clean = stage_without_scroll1.convert("RGB").crop(
+        (0, 0, VISIBLE_WIDTH, VISIBLE_HEIGHT)).resize(
+            (SATURN_VIEW_WIDTH, VISIBLE_HEIGHT), Image.Resampling.NEAREST)
+
+    top = Image.new("RGBA", (HUD_TOP_WIDTH, HUD_TOP_HEIGHT), (0, 0, 0, 0))
+    for y in range(HUD_TOP_HEIGHT):
+        opaque_width = HUD_TOP_WIDTH if y < 23 else 128
+        for x in range(opaque_width):
+            top.putpixel((x, y), (*full.getpixel((x, y)), 255))
+
+    prompt = Image.new(
+        "RGBA", (HUD_PROMPT_WIDTH, HUD_PROMPT_HEIGHT), (0, 0, 0, 0))
+    for y in range(HUD_PROMPT_HEIGHT):
+        for x in range(HUD_PROMPT_WIDTH):
+            screen_x = HUD_PROMPT_X + x
+            pixel = full.getpixel((screen_x, y))
+            if pixel != clean.getpixel((screen_x, y)):
+                prompt.putpixel((x, y), (*pixel, 255))
+
+    heat = Image.new(
+        "RGBA", (HUD_HEAT_WIDTH, HUD_HEAT_HEIGHT), (0, 0, 0, 0))
+    for y in range(HUD_HEAT_HEIGHT):
+        for x in range(HUD_HEAT_WIDTH):
+            screen_y = HUD_HEAT_Y + y
+            pixel = full.getpixel((x, screen_y))
+            if pixel != clean.getpixel((x, screen_y)):
+                heat.putpixel((x, y), (*pixel, 255))
+
+    required_colours = ((255, 255, 0), (255, 0, 0),
+                        (187, 255, 119), (136, 136, 136))
+    colours: list[tuple[int, int, int]] = list(required_colours)
+    colour_to_index = {colour: index + 1
+                       for index, colour in enumerate(colours)}
+    for image in (top, prompt, heat):
+        for red, green, blue, alpha in image.getdata():
+            if alpha == 0:
+                continue
+            rgb = (red, green, blue)
+            if rgb not in colour_to_index:
+                colour_to_index[rgb] = len(colours) + 1
+                colours.append(rgb)
+    if len(colours) >= 256:
+        raise ValueError("CPS2 HUD exceeds one Saturn 8bpp palette")
+
+    def indexed_data(image: Image.Image) -> bytes:
+        data = bytearray(image.width * image.height)
+        for index, (red, green, blue, alpha) in enumerate(image.getdata()):
+            if alpha:
+                data[index] = colour_to_index[(red, green, blue)]
+        return bytes(data)
+
+    assets = (
+        ("HUDTOP.BIN", top),
+        ("HUDP2.BIN", prompt),
+        ("HUDHEAT.BIN", heat),
+    )
+    manifest: list[dict[str, object]] = []
+    for filename, image in assets:
+        image.save(OUTPUT_ROOT / f"{Path(filename).stem.lower()}.png")
+        data = indexed_data(image)
+        target = sprite_dir / filename
+        target.write_bytes(data)
+        manifest.append({
+            "path": f"SPR8/{filename}",
+            "bytes": len(data),
+            "sha256": hashlib.sha256(data).hexdigest(),
+            "source_frame": 4200,
+            "display": "capture-exact-fixed-hud-overlay",
+        })
+
+    palette = [(0, 0, 0)] + colours
+    palette.extend([(0, 0, 0)] * (256 - len(palette)))
+    palette_rows = ",\n".join(
+        f"    {{{red}, {green}, {blue}}}" for red, green, blue in palette)
+    header = f"""/* Generated from the capture-verified CPS2 fixed HUD. */
+#ifndef AVSP_HUD_H
+#define AVSP_HUD_H
+#define AVSP_HUD_TOP_WIDTH {HUD_TOP_WIDTH}
+#define AVSP_HUD_TOP_HEIGHT {HUD_TOP_HEIGHT}
+#define AVSP_HUD_PROMPT_X {HUD_PROMPT_X}
+#define AVSP_HUD_PROMPT_WIDTH {HUD_PROMPT_WIDTH}
+#define AVSP_HUD_PROMPT_HEIGHT {HUD_PROMPT_HEIGHT}
+#define AVSP_HUD_HEAT_WIDTH {HUD_HEAT_WIDTH}
+#define AVSP_HUD_HEAT_Y {HUD_HEAT_Y}
+#define AVSP_HUD_HEAT_HEIGHT {HUD_HEAT_HEIGHT}
+#define AVSP_HUD_HEALTH_X 22
+#define AVSP_HUD_HEALTH_Y 18
+#define AVSP_HUD_HEALTH_WIDTH 132
+#define AVSP_HUD_HEALTH_HEIGHT 4
+#define AVSP_HUD_HEAT_BAR_X 44
+#define AVSP_HUD_HEAT_BAR_Y 10
+#define AVSP_HUD_HEAT_BAR_WIDTH 59
+#define AVSP_HUD_HEAT_BAR_HEIGHT 4
+#define AVSP_HUD_YELLOW_INDEX {colour_to_index[(255, 255, 0)]}
+#define AVSP_HUD_RED_INDEX {colour_to_index[(255, 0, 0)]}
+#define AVSP_HUD_ENERGY_INDEX {colour_to_index[(187, 255, 119)]}
+#define AVSP_HUD_EMPTY_INDEX {colour_to_index[(136, 136, 136)]}
+#define AVSP_HUD_TEXTURE_BYTES {sum(image.width * image.height for _, image in assets)}
+static const unsigned char avsp_hud_palette[256][3] = {{
+{palette_rows}
+}};
+#endif
+"""
+    (GENERATED_ROOT / "avsp_hud.h").write_text(header, encoding="ascii")
+    return manifest
 
 
 def rle_encode_bytes(data: bytes) -> bytes:
@@ -1832,7 +1956,13 @@ def write_saturn_assets(gfx: bytearray, palette: list[tuple[int, int, int, int]]
     stage = render_background(gfx, gfxram, cps_a, cps_b, palette,
                               width=512, height=256, include_scroll1=True)
     stage.save(OUTPUT_ROOT / "stage1_saturn_source_background.png")
-    stage = fit_background_for_saturn(stage)
+    stage_without_scroll1 = render_background(
+        gfx, gfxram, cps_a, cps_b, palette,
+        width=512, height=256, include_scroll1=False)
+    stage_without_scroll1.save(
+        OUTPUT_ROOT / "stage1_saturn_source_without_scroll1.png")
+    manifest.extend(write_hud_assets(stage, stage_without_scroll1, snapshot_dir))
+    stage = fit_background_for_saturn(stage_without_scroll1)
     stage.save(OUTPUT_ROOT / "stage1_saturn_background.png")
     stage = stage.quantize(colors=256, method=Image.Quantize.MAXCOVERAGE)
     background_target = background_dir / "CORRIDOR.TGA"
@@ -1846,7 +1976,7 @@ def write_saturn_assets(gfx: bytearray, palette: list[tuple[int, int, int, int]]
     boss_stage = render_background(
         gfx, load_words("boss_gfxram.tsv"), load_words("boss_cps_a_regs.tsv"),
         load_words("boss_cps_b_regs.tsv"), load_palette("boss_palette.tsv"),
-        width=512, height=256, include_scroll1=True)
+        width=512, height=256, include_scroll1=False)
     boss_stage.save(OUTPUT_ROOT / "stage1_boss_source_background.png")
     boss_stage = fit_background_for_saturn(boss_stage)
     boss_stage.save(OUTPUT_ROOT / "stage1_boss_background.png")

@@ -83,6 +83,27 @@ try {
                 -Destination (Join-Path $contentRoot $metadataName) -Force
         }
 
+        $buildProfile = if ($EncounterTest) { 'encounter-test' }
+            elseif ($VisualTest) { 'visual-test' }
+            else { 'normal-release' }
+        $optimizationProfile = if ($Release) { 'release' } else { 'debug' }
+        $compileProfile = "$optimizationProfile-$buildProfile"
+        $profileStamp = Join-Path $projectRoot 'build\last_compile_profile.txt'
+        $previousProfile = if (Test-Path -LiteralPath $profileStamp) {
+            (Get-Content -LiteralPath $profileStamp -Raw).Trim()
+        }
+        else { '' }
+        if ($previousProfile -ne $compileProfile) {
+            foreach ($objectName in @('main.o', 'capability_model.o')) {
+                $objectPath = Join-Path $projectRoot $objectName
+                if (Test-Path -LiteralPath $objectPath) {
+                    Remove-Item -LiteralPath $objectPath -Force
+                }
+            }
+            Get-ChildItem -LiteralPath (Join-Path $resolvedEngine 'jo_engine') `
+                -Filter '*.o' -File | Remove-Item -Force
+        }
+
         if ($Clean) {
             # Jo Engine's bundled Cygwin rm.exe can fail to reserve its heap on
             # current 64-bit Windows. Remove only this project's known outputs.
@@ -115,6 +136,7 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Saturn compilation failed with exit code $LASTEXITCODE."
         }
+        [IO.File]::WriteAllText($profileStamp, $compileProfile)
 
         & $objcopy '-O' 'binary' 'game.elf' (Join-Path $contentRoot '0.bin')
         if ($LASTEXITCODE -ne 0) {
@@ -156,9 +178,6 @@ try {
         $cueFile = Get-Item -LiteralPath (Join-Path $projectRoot 'game.cue')
         $audioFile = Get-Item -LiteralPath $audioTrack
         $manifestPath = Join-Path $projectRoot 'build\hardware_release_manifest.txt'
-        $buildProfile = if ($EncounterTest) { 'encounter-test' }
-            elseif ($VisualTest) { 'visual-test' }
-            else { 'normal-release' }
         [IO.File]::WriteAllLines($manifestPath, @(
             'target=sega-saturn-ntsc'
             'video=352x224'

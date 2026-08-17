@@ -8,11 +8,14 @@ import json
 import sys
 from pathlib import Path
 
+from PIL import Image
+
 
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS_ROOT = ROOT / "tools"
 CAPTURE_ROOT = ROOT / ".deps" / "mame" / "player_actions"
 OUTPUT_ROOT = ROOT / "build" / "rom_extract"
+HUD_OUTPUT_PATH = ROOT / "data" / "player_hud_capture.json"
 ACTIONS = ("idle", "walk", "gun", "melee", "jump", "dash", "special")
 FIRST_FRAME = 2480
 LAST_FRAME = 2608
@@ -35,17 +38,20 @@ def load_words(path: Path) -> list[int]:
 def load_samples(action: str) -> dict[int, int]:
     path = CAPTURE_ROOT / action / "samples.tsv"
     lines = path.read_text(encoding="utf-8").splitlines()
-    if lines[0] != "frame\taction\tactive_object_bank\tbank_writes":
+    if lines[0] != (
+            "frame\taction\tactive_object_bank\tbank_writes\tplayer_health"):
         raise ValueError(f"{action}: unexpected sample metadata header")
     samples: dict[int, int] = {}
     for line in lines[1:]:
         if not line:
             continue
-        frame, recorded_action, bank, _ = line.split("\t")
+        frame, recorded_action, bank, _, health = line.split("\t")
         if recorded_action != action:
             raise ValueError(
                 f"{action}: metadata contains action {recorded_action!r}")
         samples[int(frame)] = int(bank)
+        if not 0 <= int(health) <= 0xFFFF:
+            raise ValueError(f"{action}: invalid player health")
     expected = list(range(FIRST_FRAME, LAST_FRAME + 1))
     if sorted(samples) != expected:
         raise ValueError(
@@ -53,6 +59,60 @@ def load_samples(action: str) -> dict[int, int]:
     if any(bank not in (1, 2) for bank in samples.values()):
         raise ValueError(f"{action}: invalid active object bank")
     return samples
+
+
+def verify_hud_state() -> dict[str, object]:
+    def health_events_for(action: str) -> list[list[int]]:
+        rows = []
+        for line in (CAPTURE_ROOT / action / "hud_state.tsv").read_text(
+                encoding="utf-8").splitlines()[1:]:
+            if line:
+                frame, health = line.split("\t")
+                rows.append((int(frame), int(health)))
+        events = []
+        prior = rows[0][1]
+        for frame, health in rows[1:]:
+            if health != prior:
+                events.append([frame, prior, health])
+                prior = health
+        return events
+
+    health_events = health_events_for("gun")
+    if health_events != [[2072, 0, 101], [2426, 101, 91],
+                         [2487, 91, 81]]:
+        raise ValueError(f"unexpected isolated-route health events: {health_events}")
+
+    def gauge_width(frame: int) -> int:
+        image = Image.open(CAPTURE_ROOT / "gun" /
+                           f"gun_{frame:05d}.png").convert("RGB")
+        return sum(image.getpixel((x, 218)) == (187, 255, 119)
+                   for x in range(48, 112))
+
+    if gauge_width(2520) != 64 or gauge_width(2528) != 24:
+        raise ValueError("isolated gun did not consume 40 of 64 HUD pixels")
+    recharge = [[frame, gauge_width(frame)]
+                for frame in range(2540, 2607, 3)]
+    if [width for _, width in recharge] != list(range(25, 48)):
+        raise ValueError("weapon HUD did not recharge one pixel every 3 frames")
+    special_events = health_events_for("special")
+    if special_events[-1] != [2606, 81, 75]:
+        raise ValueError(
+            f"unexpected emergency-attack health cost: {special_events[-1]}")
+    return {
+        "maximum_observed_player_health": 101,
+        "health_events": health_events,
+        "weapon_meter_source_range": [48, 111],
+        "weapon_meter_source_rows": [218, 221],
+        "weapon_meter_capacity": 64,
+        "isolated_shot_frame": 2525,
+        "meter_drop_visible_frame": 2528,
+        "meter_after_shot": 24,
+        "meter_cost": 40,
+        "recharge_samples": recharge,
+        "recharge_cadence_frames": 3,
+        "emergency_attack_health_event": special_events[-1],
+        "emergency_attack_health_cost": 6,
+    }
 
 
 def player_sample(action: str, frame: int, bank: int) -> dict[str, object]:
@@ -225,6 +285,19 @@ def main() -> None:
         results.append(action_result)
 
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
+    hud_state = verify_hud_state()
+    HUD_OUTPUT_PATH.write_text(json.dumps({
+        "schema": 1,
+        "source": "user-supplied avspu ROM set captured with MAME 0.289",
+        "character": "Predator Warrior",
+        "probe": {
+            "cold_boot_state_traversal": True,
+            "isolated_action": "gun",
+            "player_memory_patched": False,
+            "enemy_memory_patched": False,
+        },
+        **hud_state,
+    }, indent=2) + "\n", encoding="utf-8")
     report_path = OUTPUT_ROOT / "player_action_probe.json"
     report_path.write_text(json.dumps({
         "source_set": "avspu",
@@ -236,6 +309,7 @@ def main() -> None:
         "pre_input_baseline_frame": baseline_frame,
         "pre_input_object_ram_sha256": next(iter(baseline_object_hashes.values())),
         "pre_input_palette_sha256": next(iter(baseline_palette_hashes.values())),
+        "hud_state": hud_state,
         "actions": results,
     }, indent=2) + "\n", encoding="utf-8")
 
@@ -246,6 +320,7 @@ def main() -> None:
             f"difference={result['first_pose_difference']}-"
             f"{result['last_pose_difference']}")
     print(f"Wrote {report_path}")
+    print(f"Wrote {HUD_OUTPUT_PATH}")
 
 
 if __name__ == "__main__":

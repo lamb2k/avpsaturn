@@ -29,6 +29,12 @@ Current milestone:
   288x192 poses are bound to the corresponding Saturn-native actor states
 - validates an unfrozen natural-contact replay: the tracked alien strikes at
   attack offsets 48 and 119 and approaches at 111/38 CPS2 pixels per frame
+- separates the arcade HUD from the scrolling CPS2 street, keeps it fixed in
+  VDP1, and drives health and Over Heat interiors from native Saturn state
+- validates 101 observed Predator Warrior health units, eight-unit tracked
+  alien damage, and a 64-unit weapon meter with a 40-unit shot cost and
+  one-unit recharge every three frames; the 81-frame emergency attack costs
+  six health units at completion
 - runs a capture-derived first-room lifecycle with five opening enemies, three
   reinforcements, a locked combat boundary, clear hold, and exit transition
 - transitions into a reconstructed industrial boss room, spawns an exact
@@ -150,6 +156,10 @@ Verified on August 17, 2026:
 - exact layered cels retain original scale and CPS2 palette pens
 - the native model passes 12,000 deterministic frames, including the idle boot
   gate and the complete 5+3 opening-room lifecycle
+- the isolated HUD probe proves a maximum observed player-health value of 101;
+  the natural alien probe proves eight native damage units per contact
+- the isolated gun probe drops the 64-pixel weapon meter from 64 to 24 and then
+  restores one pixel every three frames; the native model uses the same values
 - the complete private capture contains 233 ordered active-bank samples from
   frame 4260 through 18180; 26 hashed visual anchors prove Press Start,
   Predator Warrior selection, the Round 1 title, street, doorway dialogue,
@@ -174,7 +184,8 @@ Verified on August 17, 2026:
   preserve the KO launch, fall, ground bounce, and respawn trajectory
 - Yaba Sanshiro boots in 352x224 with the 4 MB cartridge, shows both horizontal
   source edges and all 224 source lines with no framebuffer black bars, and
-  displays the asset working set over the reconstructed Stage 1 background/HUD
+  displays the asset working set over the reconstructed Stage 1 background;
+  the fixed HUD, blinking Player 2 prompt, and live meters render above it
 
 Next proof gate: verify the full-width mapping and CD audio on physical Saturn,
 then isolate QSound event cues for SCSP PCM playback and replace the approximate

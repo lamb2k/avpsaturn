@@ -305,10 +305,17 @@ static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
     int pressed_buttons = input->shoot_pressed + input->attack_pressed +
                           input->jump_pressed;
 
-    if (player->action != CAP_ACT_SHOOT &&
-        world->weapon_energy < CAP_WEAPON_MAX_ENERGY &&
-        (world->frame & 1) == 0)
-        ++world->weapon_energy;
+    if (world->weapon_energy < CAP_WEAPON_MAX_ENERGY)
+    {
+        if (world->weapon_recharge_timer > 0)
+            --world->weapon_recharge_timer;
+        else
+        {
+            ++world->weapon_energy;
+            world->weapon_recharge_timer =
+                CAP_WEAPON_RECHARGE_CADENCE_FRAMES - 1;
+        }
+    }
 
     if (player->action == CAP_ACT_KO)
     {
@@ -379,6 +386,17 @@ static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
             (player->action == CAP_ACT_SPECIAL &&
              player->action_frame >= CAP_SPECIAL_TOTAL_FRAMES))
         {
+            if (player->action == CAP_ACT_SPECIAL)
+            {
+                int health_spent = player->health - 1;
+                if (health_spent > CAP_SPECIAL_HEALTH_COST)
+                    health_spent = CAP_SPECIAL_HEALTH_COST;
+                if (health_spent > 0)
+                {
+                    player->health -= health_spent;
+                    world->special_health_spent += health_spent;
+                }
+            }
             player->action = CAP_ACT_IDLE;
             player->action_frame = 0;
             player->hit_latched = 0;
@@ -388,9 +406,6 @@ static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
 
     if (pressed_buttons >= 2)
     {
-        int health_spent = player->health > 1 ? 1 : 0;
-        player->health -= health_spent;
-        world->special_health_spent += health_spent;
         player->action = CAP_ACT_SPECIAL;
         player->action_frame = 0;
         player->hit_latched = 0;
@@ -399,6 +414,7 @@ static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
     if (input->shoot_pressed && world->weapon_energy >= CAP_WEAPON_SHOT_COST)
     {
         world->weapon_energy -= CAP_WEAPON_SHOT_COST;
+        world->weapon_recharge_timer = CAP_WEAPON_RECHARGE_DELAY_FRAMES;
         ++world->shots_fired;
         player->action = CAP_ACT_SHOOT;
         player->action_frame = 0;
@@ -476,7 +492,7 @@ static void cap_enemy_attack_player(CapWorld *world, CapActor *enemy)
     if (cap_abs(enemy->x - player->x) > CAP_ENEMY_ATTACK_REACH ||
         cap_abs(enemy->lane - player->lane) > 18)
         return;
-    --player->health;
+    player->health -= CAP_ENEMY_CONTACT_DAMAGE;
     player->action_frame = 0;
     if (player->health <= 0)
     {

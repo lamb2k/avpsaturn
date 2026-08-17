@@ -16,7 +16,7 @@ Status: passed on August 16, 2026.
 - The image boots with a 4 MB cartridge and no asset failure.
 - VDP1 transparency and aligned palette layers render correctly over VDP2.
 - The Press Start composition remains stable until Start, then character select
-  remains stable until the confirming A input.
+  remains stable until the confirming B input.
 
 Status: passed in Yaba Sanshiro 2 v1.20.37 on August 16, 2026. The 12,000-frame
 test and clean release build passed, and visual inspection confirmed the exact
@@ -41,14 +41,21 @@ key states. Active-bank selection is guarded by a 54-command capture signature, 
 an exhaustive frame-local grouping manifest identifies actors, shadow sprites,
 and props while marking three edge fragments as candidates. The display now
 uses native 352x224 with a deterministic pre-scaled VDP2 full-width fit and a
-matching VDP1 actor transform. Native HUD replacement, remaining enemy
-archetypes, actor-level priority, and image-difference acceptance remain open.
+  matching VDP1 actor transform. The captured HUD is now split into fixed VDP1
+  overlays with live native health and weapon interiors; it no longer scrolls
+  with the VDP2 street. Remaining HUD states, enemy archetypes, actor-level
+  priority, and image-difference acceptance remain open.
 The post-input gameplay scene now binds the validated alien actor's exact
 39-frame walk, 120-frame attack, 36-frame hit, and 140-frame KO schedules to
 independent Saturn actor slots.
 An unfrozen natural-contact replay additionally validates contact offsets 48
 and 119, maximum observed X reach of 68 source pixels, and 111 pixels of
 approach displacement over 38 frame intervals.
+The HUD probe additionally verifies a maximum observed Predator Warrior health
+value of 101, a 64-pixel weapon meter, a 40-pixel isolated-shot cost, and
+one-pixel recharge every three frames. Its emergency-attack route also records
+a six-unit health cost at the frame-81 action boundary. The latest Yaba diagnostic showed the
+fixed HUD, full-width street, actors, and blinking Player 2 prompt together.
 
 The automated encounter build also traversed the cartridge-preloaded route
 cache and visibly reached the capture-derived character-select, results, and

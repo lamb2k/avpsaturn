@@ -45,7 +45,10 @@ alter console copy protection or supply copyrighted disc data.
 4. Verify D-pad lane movement advances the complete 48-frame captured walk
    loop; verify A weapon, B melee attack, neutral C jump,
    direction+C dash, any two face buttons emergency attack, and X diagnostic
-   HUD. Confirm all five controlled actions use their captured clips, return
+   HUD. Confirm the top panel, Player 2 prompt, and Over Heat meter stay fixed
+   while the street scrolls; one A press must visibly drain the weapon meter
+   and its refill must advance without moving the HUD. Confirm all five
+   controlled actions use their captured clips, return
    cleanly to idle, retain all three palette layers, and never show a partially
    replaced cel. Allow an enemy to land a normal hit and then a KO; confirm the
    exact 25-frame hit reaction and 96-frame launch/fall/bounce sequence play to

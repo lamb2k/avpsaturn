@@ -116,5 +116,52 @@
     "source_x_displacement": 111,
     "source_x_pixels_per_frame_numerator": 111,
     "source_x_pixels_per_frame_denominator": 38
+  },
+  "hud_health_meter": {
+    "source_inner_range": [
+      24,
+      167
+    ],
+    "source_rows": [
+      18,
+      21
+    ],
+    "fill_rgb": [
+      255,
+      255,
+      0
+    ],
+    "empty_rgb": [
+      255,
+      0,
+      0
+    ],
+    "samples": [
+      {
+        "frame": 4200,
+        "native_health": 30,
+        "yellow_pixels": 37
+      },
+      {
+        "frame": 4245,
+        "native_health": 22,
+        "yellow_pixels": 25
+      },
+      {
+        "frame": 4303,
+        "native_health": 14,
+        "yellow_pixels": 13
+      },
+      {
+        "frame": 4374,
+        "native_health": 6,
+        "yellow_pixels": 1
+      },
+      {
+        "frame": 4435,
+        "native_health": 0,
+        "yellow_pixels": 0
+      }
+    ]
   }
 }

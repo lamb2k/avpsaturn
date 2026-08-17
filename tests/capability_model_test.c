@@ -81,9 +81,21 @@ static void test_attack_requests_and_damage(void)
     assert(request == CAP_CLIP_SHOOT);
     assert(world.player.action == CAP_ACT_SHOOT);
     assert(world.weapon_energy == CAP_WEAPON_MAX_ENERGY - CAP_WEAPON_SHOT_COST);
+    assert(world.weapon_recharge_timer == CAP_WEAPON_RECHARGE_DELAY_FRAMES);
     assert(world.shots_fired == 1);
-    step_empty(&world, 16);
+    step_empty(&world, 14);
+    assert(world.weapon_energy == CAP_WEAPON_MAX_ENERGY - CAP_WEAPON_SHOT_COST);
+    assert(world.weapon_recharge_timer == 0);
+    step_empty(&world, 1);
+    assert(world.weapon_energy ==
+           CAP_WEAPON_MAX_ENERGY - CAP_WEAPON_SHOT_COST + 1);
+    assert(world.weapon_recharge_timer ==
+           CAP_WEAPON_RECHARGE_CADENCE_FRAMES - 1);
+    step_empty(&world, 1);
     assert(world.enemies[0].health == 2);
+    step_empty(&world, 2);
+    assert(world.weapon_energy ==
+           CAP_WEAPON_MAX_ENERGY - CAP_WEAPON_SHOT_COST + 2);
 }
 
 static void test_jump_dash_and_two_button_special(void)
@@ -136,8 +148,13 @@ static void test_jump_dash_and_two_button_special(void)
     step_empty(&world, 12);
     assert(world.enemies[0].health == 1);
     assert(world.enemies[1].health == 1);
-    assert(world.player.health == CAP_PLAYER_MAX_HEALTH - 1);
-    assert(world.special_health_spent == 1);
+    assert(world.player.health == CAP_PLAYER_MAX_HEALTH);
+    world.enemies[0].active = 0;
+    world.enemies[1].active = 0;
+    step_empty(&world, 69);
+    assert(world.player.health ==
+           CAP_PLAYER_MAX_HEALTH - CAP_SPECIAL_HEALTH_COST);
+    assert(world.special_health_spent == CAP_SPECIAL_HEALTH_COST);
 }
 
 static void test_capture_exact_enemy_action_timing(void)
@@ -174,13 +191,16 @@ static void test_capture_exact_enemy_action_timing(void)
     step_empty(&world, 47);
     assert(world.player.health == CAP_PLAYER_MAX_HEALTH);
     step_empty(&world, 1);
-    assert(world.player.health == CAP_PLAYER_MAX_HEALTH - 1);
+    assert(world.player.health ==
+           CAP_PLAYER_MAX_HEALTH - CAP_ENEMY_CONTACT_DAMAGE);
     step_empty(&world, 70);
-    assert(world.player.health == CAP_PLAYER_MAX_HEALTH - 1);
+    assert(world.player.health ==
+           CAP_PLAYER_MAX_HEALTH - CAP_ENEMY_CONTACT_DAMAGE);
     assert(enemy->action == CAP_ACT_ATTACK);
     assert(enemy->action_frame == 118);
     step_empty(&world, 1);
-    assert(world.player.health == CAP_PLAYER_MAX_HEALTH - 2);
+    assert(world.player.health ==
+           CAP_PLAYER_MAX_HEALTH - 2 * CAP_ENEMY_CONTACT_DAMAGE);
     assert(enemy->action_frame == 119);
     step_empty(&world, 1);
     assert(enemy->action == CAP_ACT_IDLE);
@@ -504,6 +524,8 @@ static void test_long_deterministic_run(void)
         assert(world.player.motion_x >= -6 && world.player.motion_x <= 6);
         assert(world.weapon_energy >= 0 &&
                world.weapon_energy <= CAP_WEAPON_MAX_ENERGY);
+        assert(world.weapon_recharge_timer >= 0 &&
+               world.weapon_recharge_timer <= CAP_WEAPON_RECHARGE_DELAY_FRAMES);
         assert(world.shots_fired >= 0);
         assert(world.special_health_spent >= 0);
         assert(world.camera_x >= 0 &&

@@ -29,9 +29,11 @@ try {
         $actionRoot = Join-Path $captureRoot $action
         $requiredSample = Join-Path $actionRoot ("{0}_02525.png" -f $action)
         $requiredMetadata = Join-Path $actionRoot 'samples.tsv'
+        $requiredHudState = Join-Path $actionRoot 'hud_state.tsv'
         if (-not $Refresh -and
             (Test-Path -LiteralPath $requiredSample) -and
-            (Test-Path -LiteralPath $requiredMetadata)) {
+            (Test-Path -LiteralPath $requiredMetadata) -and
+            (Test-Path -LiteralPath $requiredHudState)) {
             Write-Host "Reusing isolated $action capture."
             continue
         }

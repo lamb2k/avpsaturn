@@ -35,7 +35,8 @@ The current path instead:
 
 The active actor VDP1 working set contains two 192x192 idle Predator layers,
 three replaceable 192x192 player-action layers, eight independent 288x192
-alien layers, and one 256x192 boss layer: 337,920 bytes of texture data. The
+alien layers, one 256x192 boss layer, and three screen-fixed 8bpp HUD overlays:
+350,208 bytes of texture data. The
 isolated player
 captures produce an exact 48-frame walk loop, plus 23-frame weapon, 22-frame
 melee, 42-frame jump, 24-frame dash, 81-frame emergency-attack, 25-frame hit,
@@ -50,7 +51,7 @@ changing clip timing. Each actor owns one 27,648-byte VDP1 slot, so eight
 enemies can display unlike animation frames concurrently. Four exact alien
 variants, three player-layer palettes, and the boss palette occupy eight
 16-color banks in one Saturn 256-color CRAM allocation. Menus and route stills
-were moved off VDP1 to keep the texture working set at roughly 74% of the Jo
+were moved off VDP1 to keep the texture working set at roughly 76% of the Jo
 Engine VDP1 user area, leaving command-table and texture headroom.
 
 An independent unfrozen-health replay preserves the same verified frame-4080,
@@ -59,6 +60,7 @@ on attack offsets 48 and 119, both on the same captured contact pose, and a
 111-pixel approach over 38 frame intervals. The native model therefore uses
 two contact checks, 68 source pixels of observed reach, and a three-source-pixel
 approach step instead of the earlier guessed frame-12 contact and one-pixel step.
+Each validated contact removes eight native health units.
 
 The converter retains the final visible CPS2 object/priority result as an
 offline 352x224 8bpp comparison surface. Its 76 visible source colors fit
@@ -100,11 +102,18 @@ additional VDP1 residency and data-track seeks during CDDA playback.
 ## Background and HUD
 
 The converter reconstructs CPS2 scroll layers from captured graphics RAM,
-CPS-A/CPS-B registers, tile graphics, and palettes. It horizontally fits the
-512x256 reconstruction into a 469-pixel content region inside a 512x256 VDP2
-256-color bitmap. The arcade HUD is
-currently baked from the captured scroll layer, so its displayed values are
-static and are not yet driven by native gameplay state.
+CPS-A/CPS-B registers, tile graphics, and palettes. It removes the screen-fixed
+Scroll 1 HUD from the street and boss surfaces before horizontally fitting the
+remaining 512x256 reconstruction into a 469-pixel content region inside a
+512x256 VDP2 bitmap. Three capture-derived 8bpp VDP1 overlays restore the
+Predator status panel, the blinking Player 2 Press Start prompt, and the Over
+Heat meter at fixed Saturn screen coordinates. The health and weapon interiors
+are rewritten only when native state changes, so they remain fixed while VDP2
+scrolls. The cold-boot probe observes Predator Warrior health reaching 101.
+The isolated gun probe proves a 64-pixel weapon meter, a 40-pixel shot cost,
+and one-pixel recharge every three frames. The isolated emergency attack
+applies its six-unit health cost on its frame-81 completion. Those values now
+drive the model.
 
 ## Display mapping
 
@@ -157,7 +166,7 @@ Still approximate or incomplete:
 - remaining player transition and interaction frame sets
 - complete attract-mode, menu-transition, and character-select animation
 - full animation between the verified route key states
-- dynamic HUD values, exact scroll behavior, level triggers, combat, and AI
+- remaining HUD states, exact scroll behavior, level triggers, combat, and AI
 - isolated, event-synchronized QSound effects on native SCSP PCM channels
 - native HUD safe-area placement and arcade-derived camera behavior for CRT
   overscan variability

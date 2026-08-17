@@ -2,6 +2,7 @@
 -- without freezing player health.  This isolates the native contact frame and
 -- does not modify player or enemy state.
 local machine = manager.machine
+local screen = machine.screens[":screen"]
 local in0 = machine.ioport.ports[":IN0"].fields
 local in2 = machine.ioport.ports[":IN2"].fields
 local coin = in2["Coin 1"]
@@ -93,6 +94,10 @@ enemy_contact_capture_subscription = emu.add_machine_frame_notifier(function()
     if frame == 4200 then clear_gameplay_inputs() end
     if frame == 4201 then left:set_value(1) end
     if frame == 4210 then left:clear_value() end
+
+    if frame >= 4200 and frame <= 4450 then
+        screen:snapshot(string.format("enemy_contact/hud_%05d.png", frame))
+    end
 
     if frame == 4080 or frame == 4164 or frame == 4200 then
         dump_anchor(frame)

@@ -30,7 +30,9 @@ assert(allowed_actions[action], "invalid AVSP_ACTION_PROBE: " .. action)
 
 local capture_root = ".deps/mame/player_actions/" .. action
 local metadata = assert(io.open(capture_root .. "/samples.tsv", "w"))
-metadata:write("frame\taction\tactive_object_bank\tbank_writes\n")
+metadata:write("frame\taction\tactive_object_bank\tbank_writes\tplayer_health\n")
+local hud_state = assert(io.open(capture_root .. "/hud_state.tsv", "w"))
+hud_state:write("frame\tplayer_health\n")
 local frame = 0
 local active_object_bank = 0
 local object_bank_writes = 0
@@ -86,8 +88,9 @@ local function dump_sample(sample_frame)
         "/palette_%05d.tsv", sample_frame))
     screen:snapshot(string.format("player_actions/%s/%s_%05d.png",
         action, action, sample_frame))
-    metadata:write(string.format("%d\t%s\t%d\t%d\n", sample_frame,
-        action, active_object_bank + 1, object_bank_writes))
+    metadata:write(string.format("%d\t%s\t%d\t%d\t%d\n", sample_frame,
+        action, active_object_bank + 1, object_bank_writes,
+        main_program:read_u16(0xff83c0)))
     metadata:flush()
 end
 
@@ -140,12 +143,17 @@ player_action_capture_subscription = emu.add_machine_frame_notifier(function()
     if frame >= capture_first and frame <= capture_last then
         dump_sample(frame)
     end
+    if frame >= 1800 and frame <= capture_last then
+        hud_state:write(string.format("%d\t%d\n", frame,
+            main_program:read_u16(0xff83c0)))
+    end
 
     if frame == capture_last + 1 then
         clear_gameplay_inputs()
         coin:clear_value()
         start:clear_value()
         metadata:close()
+        hud_state:close()
         machine:exit()
     end
 end)

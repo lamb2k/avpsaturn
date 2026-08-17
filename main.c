@@ -4,6 +4,7 @@
 #include "generated/avsp_boss_animation.h"
 #include "generated/avsp_enemy_animation.h"
 #include "generated/avsp_frontend_palette.h"
+#include "generated/avsp_hud.h"
 #include "generated/avsp_palette.h"
 #include "generated/avsp_player_action_animation.h"
 #include "generated/avsp_sequence_palette.h"
@@ -26,7 +27,8 @@
 #define AVSP_VDP1_TEXTURE_BYTES \
     (2 * CEL_BYTES + \
      AVSP_PLAYER_ACTION_LAYERS * AVSP_PLAYER_ACTION_DECODED_BYTES + \
-     CAP_MAX_ENEMIES * AVSP_ENEMY_DECODED_BYTES + BOSS_CEL_BYTES)
+     CAP_MAX_ENEMIES * AVSP_ENEMY_DECODED_BYTES + BOSS_CEL_BYTES + \
+     AVSP_HUD_TEXTURE_BYTES)
 
 #if JO_TV_WIDTH != CAP_VIEW_WIDTH || JO_TV_HEIGHT != 224
 #error "The AvP fidelity build requires Saturn TV_352x224"
@@ -63,6 +65,7 @@ static CapWorld world;
 static jo_palette background_palette;
 static jo_palette boss_background_palette;
 static jo_palette actor_palette;
+static jo_palette hud_palette;
 static jo_palette frontend_palettes[AVSP_FRONTEND_SCENES];
 static jo_img_8bits background_image;
 static jo_img_8bits boss_background_image;
@@ -75,10 +78,18 @@ static unsigned char *enemy_action_archive;
 static jo_img_4bits player_action_images[AVSP_PLAYER_ACTION_LAYERS];
 static jo_img_4bits enemy_action_images[CAP_MAX_ENEMIES];
 static jo_img_4bits boss_idle_images[AVSP_BOSS_IDLE_LAYERS];
+static jo_img_8bits hud_top_image;
+static jo_img_8bits hud_prompt_image;
+static jo_img_8bits hud_heat_image;
 static int player_idle_sprites[2];
 static int player_action_sprites[AVSP_PLAYER_ACTION_LAYERS];
 static int enemy_action_sprites[CAP_MAX_ENEMIES];
 static int boss_idle_sprites[AVSP_BOSS_IDLE_LAYERS];
+static int hud_top_sprite;
+static int hud_prompt_sprite;
+static int hud_heat_sprite;
+static int displayed_hud_health;
+static int displayed_hud_energy;
 static int current_player_action_pose;
 static int current_enemy_action_poses[CAP_MAX_ENEMIES];
 static int debug_hud_enabled;
@@ -302,6 +313,43 @@ static void set_frontend_palettes(void)
                 avsp_frontend_palettes[scene][index][2]);
         jo_create_palette_from(&frontend_palettes[scene], colors, 256);
     }
+}
+
+static void set_hud_palette(void)
+{
+    static jo_color colors[256];
+    int index;
+    for (index = 0; index < 256; ++index)
+        colors[index] = JO_COLOR_RGB(
+            avsp_hud_palette[index][0], avsp_hud_palette[index][1],
+            avsp_hud_palette[index][2]);
+    jo_create_palette_from(&hud_palette, colors, 256);
+}
+
+static int load_hud_image(jo_img_8bits *image, const char *filename,
+                          const int width, const int height)
+{
+    int length = 0;
+    image->width = width;
+    image->height = height;
+    image->data = (unsigned char *)jo_fs_read_file_in_dir(
+        filename, "SPR8", &length);
+    if (image->data == JO_NULL || length != width * height)
+    {
+        failed_asset = filename;
+        return 0;
+    }
+    return 1;
+}
+
+static int load_hud_assets(void)
+{
+    return load_hud_image(&hud_top_image, "HUDTOP.BIN",
+                          AVSP_HUD_TOP_WIDTH, AVSP_HUD_TOP_HEIGHT) &&
+           load_hud_image(&hud_prompt_image, "HUDP2.BIN",
+                          AVSP_HUD_PROMPT_WIDTH, AVSP_HUD_PROMPT_HEIGHT) &&
+           load_hud_image(&hud_heat_image, "HUDHEAT.BIN",
+                          AVSP_HUD_HEAT_WIDTH, AVSP_HUD_HEAT_HEIGHT);
 }
 
 static int load_frontend_assets(void)
@@ -569,6 +617,13 @@ static int create_sprite_working_set(void)
         if (boss_idle_sprites[layer] < 0)
             failed_asset = avsp_boss_idle_files[layer];
     }
+    hud_top_sprite = jo_sprite_add_8bits_image(&hud_top_image);
+    hud_prompt_sprite = jo_sprite_add_8bits_image(&hud_prompt_image);
+    hud_heat_sprite = jo_sprite_add_8bits_image(&hud_heat_image);
+    if (hud_top_sprite < 0 || hud_prompt_sprite < 0 || hud_heat_sprite < 0)
+        failed_asset = "HUD VDP1";
+    displayed_hud_health = -1;
+    displayed_hud_energy = -1;
     return failed_asset == JO_NULL;
 }
 
@@ -787,6 +842,69 @@ static void draw_world(void)
     jo_sprite_restore_sprite_scale();
 }
 
+static void update_hud_textures(void)
+{
+    int x;
+    int y;
+    if (displayed_hud_health != world.player.health &&
+        !(displayed_hud_health >= 0 &&
+          (world.player.action == CAP_ACT_HIT ||
+           world.player.action == CAP_ACT_KO) &&
+          world.player.action_frame < 2))
+    {
+        int source_fill = (world.player.health * 5) / 4;
+        int fill = (source_fill * CAP_VIEW_WIDTH + CAP_CPS2_VIEW_WIDTH - 1) /
+                   CAP_CPS2_VIEW_WIDTH;
+        if (fill > AVSP_HUD_HEALTH_WIDTH) fill = AVSP_HUD_HEALTH_WIDTH;
+        for (y = 0; y < AVSP_HUD_HEALTH_HEIGHT; ++y)
+            for (x = 0; x < AVSP_HUD_HEALTH_WIDTH; ++x)
+                hud_top_image.data[
+                    (AVSP_HUD_HEALTH_Y + y) * AVSP_HUD_TOP_WIDTH +
+                    AVSP_HUD_HEALTH_X + x] =
+                        x < fill ? AVSP_HUD_YELLOW_INDEX : AVSP_HUD_RED_INDEX;
+        jo_sprite_replace((const jo_img *)&hud_top_image, hud_top_sprite);
+        displayed_hud_health = world.player.health;
+    }
+    if (displayed_hud_energy != world.weapon_energy &&
+        !(displayed_hud_energy >= 0 &&
+          world.player.action == CAP_ACT_SHOOT &&
+          world.player.action_frame < 3))
+    {
+        int fill = (world.weapon_energy * AVSP_HUD_HEAT_BAR_WIDTH +
+                    CAP_WEAPON_MAX_ENERGY - 1) / CAP_WEAPON_MAX_ENERGY;
+        for (y = 0; y < AVSP_HUD_HEAT_BAR_HEIGHT; ++y)
+            for (x = 0; x < AVSP_HUD_HEAT_BAR_WIDTH; ++x)
+                hud_heat_image.data[
+                    (AVSP_HUD_HEAT_BAR_Y + y) * AVSP_HUD_HEAT_WIDTH +
+                    AVSP_HUD_HEAT_BAR_X + x] =
+                        x < fill ? AVSP_HUD_ENERGY_INDEX : AVSP_HUD_EMPTY_INDEX;
+        jo_sprite_replace((const jo_img *)&hud_heat_image, hud_heat_sprite);
+        displayed_hud_energy = world.weapon_energy;
+    }
+}
+
+static void draw_arcade_hud(void)
+{
+    if (world.encounter_state == CAP_ENCOUNTER_MAIN_MENU ||
+        world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT ||
+        sequence_scene_for_world() >= 0)
+        return;
+    update_hud_textures();
+    jo_sprite_set_palette(hud_palette.id);
+    jo_sprite_draw3D(hud_top_sprite,
+                     -JO_TV_WIDTH_2 + AVSP_HUD_TOP_WIDTH / 2,
+                     -JO_TV_HEIGHT_2 + AVSP_HUD_TOP_HEIGHT / 2, 100);
+    if ((world.frame & 63) < 32)
+        jo_sprite_draw3D(hud_prompt_sprite,
+                         -JO_TV_WIDTH_2 + AVSP_HUD_PROMPT_X +
+                             AVSP_HUD_PROMPT_WIDTH / 2,
+                         -JO_TV_HEIGHT_2 + AVSP_HUD_PROMPT_HEIGHT / 2, 100);
+    jo_sprite_draw3D(hud_heat_sprite,
+                     -JO_TV_WIDTH_2 + AVSP_HUD_HEAT_WIDTH / 2,
+                     -JO_TV_HEIGHT_2 + AVSP_HUD_HEAT_Y +
+                         AVSP_HUD_HEAT_HEIGHT / 2, 100);
+}
+
 static CapInput read_input(void)
 {
     CapInput input;
@@ -967,6 +1085,7 @@ static void frame_callback(void)
 #endif
     if (jo_is_pad1_key_down(JO_KEY_X)) debug_hud_enabled = !debug_hud_enabled;
     draw_world();
+    draw_arcade_hud();
     draw_route_overlay();
     draw_hud();
 #ifdef AVSP_VISUAL_TEST
@@ -985,6 +1104,9 @@ void jo_main(void)
     background_bitmap = JO_NULL;
     background_image.data = JO_NULL;
     boss_background_image.data = JO_NULL;
+    hud_top_image.data = JO_NULL;
+    hud_prompt_image.data = JO_NULL;
+    hud_heat_image.data = JO_NULL;
     debug_hud_enabled = 0;
     stage_music_started = 0;
     current_bitmap_scene = BITMAP_SCENE_NONE;
@@ -1003,6 +1125,7 @@ void jo_main(void)
     cart_available = jo_get_extended_ram_cartridge_type() == CART_32MBits;
     set_actor_palette();
     set_frontend_palettes();
+    set_hud_palette();
     if (!cart_available)
     {
         failed_asset = "4MB RAM CART REQUIRED";
@@ -1013,6 +1136,7 @@ void jo_main(void)
         runtime_ready = load_frontend_assets() &&
                         load_route_sequences() &&
                         load_background() && load_boss_background() &&
+                        load_hud_assets() &&
                         load_all_cels() && load_player_action_sequences() &&
                         load_enemy_action_sequences() && load_boss_idle() &&
                         create_sprite_working_set();
