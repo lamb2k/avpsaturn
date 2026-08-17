@@ -38,10 +38,13 @@ attack layers, and one replaceable alien layer. The first attack sequence
 contains ten captured poses and three layers per pose, totaling 552,960 source
 bytes in the 4 MB cartridge. The first blue-alien track adds ten single-layer
 poses, or 184,320 source bytes. Each pose update replaces only its corresponding
-55,296-byte player group or 18,432-byte enemy slot. Four
-exact CPS2 palette banks occupy one Saturn 256-color CRAM allocation. This
-separates source residency from VDP1 texture residency and leaves room for
-commands and a larger animation cache.
+55,296-byte player group or 18,432-byte enemy slot. Four exact CPS2 alien
+variants plus the three player-layer palettes occupy seven 16-color banks in
+one Saturn 256-color CRAM allocation. Eight bounded enemy actors reuse the same
+current alien VDP1 texture, so the crowd adds draw commands and transforms
+rather than eight duplicate texture allocations. This separates source
+residency from VDP1 texture residency and leaves room for commands and a larger
+animation cache.
 
 Before gameplay starts, a separate reference mode draws the final visible CPS2
 object/priority result as one 384x224 8bpp VDP1 surface. Its 76 visible source
@@ -83,11 +86,13 @@ Exact in the current milestone:
 - Saturn-native 352x224 initialization and original-scale 384-to-352 crop
 - first ten-pose captured Predator attack sequence
 - first ten-pose temporally tracked blue-alien sequence
+- first-room 5+3 crowd budget, four alien palette variants, combat lock, clear,
+  and exit-state lifecycle
 
 Still approximate or incomplete:
 
 - temporal confirmation of remaining enemy variants, actions, and prop groups
-- enemy variants, palettes, poses, count, and exact object priority
+- exact enemy pose selection, spawn coordinates/timing, AI, and object priority
 - remaining player states, enemy animation/state timing, and full frame sets
 - dynamic HUD values, scroll behavior, level triggers, combat, AI, and audio
 - native HUD safe-area placement and arcade-derived camera behavior for the
@@ -102,6 +107,21 @@ Still approximate or incomplete:
    data.
 4. Add bounded CD-to-cartridge prefetch and VDP1 cache scheduling.
 5. Port audio, complete the level, and verify on real Saturn hardware.
+
+## Hardware boundary
+
+The executable is linked for the Saturn SH-2 and uses SGL/Jo Engine hardware
+paths for CD files, controller port 1, VDP1 sprites, VDP2 background, and CRAM.
+Startup checks address `0x24ffffff` for the physical 32 Mbit cartridge signature;
+without it, the build reports `4MB RAM CART REQUIRED` and does not enter the
+runtime. The disc is an ISO9660 Mode 1 image with Sega Saturn IP boot data and
+NTSC `TV_352x224` initialization. Emulator configuration is not part of the
+executable.
+
+`build/hardware_release_manifest.txt` fingerprints the cue and ISO that must be
+kept together. These structural checks establish a hardware-oriented image, but
+only the cold-boot and soak route in `HARDWARE_TEST.md` can close the physical
+hardware gate.
 
 Additional frames should live on disc and in the 4 MB cartridge. Only the
 current and predicted cels should occupy VDP1 VRAM. AI upscaling is a separate

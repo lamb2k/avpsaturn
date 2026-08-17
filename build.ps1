@@ -5,6 +5,7 @@ param(
     [switch]$Clean,
     [switch]$Release,
     [switch]$VisualTest,
+    [switch]$EncounterTest,
     [switch]$SkipHostTests
 )
 
@@ -105,6 +106,9 @@ try {
         if ($VisualTest) {
             $makeArguments += 'AVSP_VISUAL_TEST=1'
         }
+        if ($EncounterTest) {
+            $makeArguments += 'AVSP_ENCOUNTER_TEST=1'
+        }
         $makeArguments += 'game.raw'
         & $make @makeArguments
         if ($LASTEXITCODE -ne 0) {
@@ -141,6 +145,24 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Could not create game.cue (exit code $LASTEXITCODE)."
         }
+
+        $isoFile = Get-Item -LiteralPath (Join-Path $projectRoot 'game.iso')
+        $cueFile = Get-Item -LiteralPath (Join-Path $projectRoot 'game.cue')
+        $manifestPath = Join-Path $projectRoot 'build\hardware_release_manifest.txt'
+        $buildProfile = if ($EncounterTest) { 'encounter-test' }
+            elseif ($VisualTest) { 'visual-test' }
+            else { 'normal-release' }
+        [IO.File]::WriteAllLines($manifestPath, @(
+            'target=sega-saturn-ntsc'
+            'video=352x224'
+            'boot=iso9660-mode1-2048'
+            'expansion_ram=32-mbit-required'
+            "profile=$buildProfile"
+            "iso_bytes=$($isoFile.Length)"
+            "iso_sha256=$((Get-FileHash -LiteralPath $isoFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            "cue_bytes=$($cueFile.Length)"
+            "cue_sha256=$((Get-FileHash -LiteralPath $cueFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+        ))
     }
     finally {
         Pop-Location
@@ -151,3 +173,4 @@ finally {
 }
 
 Write-Host "Built $projectRoot\game.cue and game.iso"
+Write-Host "Hardware manifest: $projectRoot\build\hardware_release_manifest.txt"

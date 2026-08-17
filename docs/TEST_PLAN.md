@@ -58,20 +58,26 @@ Status: in progress. A dense 361-sample capture validates the active CPS2 object
 bank and identifies 87 unique player assemblies. The first authentic ten-pose
 Predator attack is cartridge-resident and has been visually verified advancing
 through three replaceable VDP1 palette layers. A separately tracked blue alien
-now advances through ten authentic single-layer poses from frames 4164-4200.
-Remaining player and enemy actions, arcade timing, encounter scripting, and the
-completion transition are still open. The current combat rules remain a native
-placeholder.
+now advances through ten authentic single-layer poses from frames 4164-4200. A
+capture-derived native room script displays five initial enemies, adds three
+reinforcements after three defeats, clears after eight defeats, unlocks the
+camera boundary, and reaches an exit transition. The 12,000-frame host test and
+the automated Yaba Sanshiro diagnostic both complete this lifecycle. Remaining
+player/enemy actions, exact arcade AI and spawn timing, comparison capture, and
+the rest of Stage 1 remain open.
 
 ## Gate E: performance and hardware
 
-Run a fixed ten-minute route in emulator and on a real Saturn. Capture frame
-time, missed frames, maximum VDP1 command/texture use, transfer bytes per
-second, room load time, and overlap corruption. The pass target is sustained
-60 Hz with no partial cels, palette corruption, or post-load gameplay stall
+Run the route in `docs/HARDWARE_TEST.md` on a real NTSC Saturn with a digital
+controller and detected 32 Mbit DRAM cartridge. Record console/region, boot
+device, cartridge, display path, cold-boot result, controls, encounter result,
+and a fixed ten-minute soak. Capture frame time, missed frames, maximum VDP1
+command/texture use, transfer bytes per second, room load time, and overlap
+corruption. The pass target is sustained 60 Hz with no partial cels, palette
+corruption, controller loss, video-sync loss, or post-load gameplay stall
 longer than one frame.
 
-Status: open.
+Status: emulator precursor passed; physical-Saturn validation is open.
 
 ## Gate F: full-port candidate and rights review
 

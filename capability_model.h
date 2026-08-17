@@ -1,10 +1,11 @@
 #ifndef CAPABILITY_MODEL_H
 #define CAPABILITY_MODEL_H
 
-#define CAP_MAX_ENEMIES 4
+#define CAP_MAX_ENEMIES 8
 #define CAP_WORLD_WIDTH 960
 #define CAP_VIEW_WIDTH 352
 #define CAP_PLAYER_MAX_HEALTH 12
+#define CAP_STAGE1_TOTAL_ENEMIES 8
 
 typedef enum
 {
@@ -22,6 +23,15 @@ typedef enum
     CAP_CLIP_ATTACK,
     CAP_CLIP_SPECIAL
 } CapClipRequest;
+
+typedef enum
+{
+    CAP_ENCOUNTER_APPROACH = 0,
+    CAP_ENCOUNTER_WAVE_ONE,
+    CAP_ENCOUNTER_WAVE_TWO,
+    CAP_ENCOUNTER_CLEAR,
+    CAP_ENCOUNTER_COMPLETE
+} CapEncounterState;
 
 typedef struct
 {
@@ -44,6 +54,8 @@ typedef struct
     int action_frame;
     int locomotion_frame;
     int hit_latched;
+    int active;
+    int variant;
 } CapActor;
 
 typedef struct
@@ -55,6 +67,11 @@ typedef struct
     int score;
     int player_ko_timer;
     int encounter_started;
+    CapEncounterState encounter_state;
+    int encounter_timer;
+    int enemies_defeated;
+    int room_locked;
+    int stage_transitioned;
 } CapWorld;
 
 void cap_world_init(CapWorld *world);

@@ -18,6 +18,9 @@ CCFLAGS += -include avsp_video_config.h
 ifneq ($(AVSP_VISUAL_TEST),)
 CCFLAGS += -DAVSP_VISUAL_TEST=1
 endif
+ifneq ($(AVSP_ENCOUNTER_TEST),)
+CCFLAGS += -DAVSP_ENCOUNTER_TEST=1
+endif
 JO_DEBUG ?= 1
 JO_NTSC = 1
 JO_COMPILE_USING_SGL = 1

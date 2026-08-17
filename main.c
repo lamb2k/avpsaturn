@@ -149,23 +149,6 @@ static void set_actor_palette(void)
                 avsp_exact_palettes[bank][index][2]);
     }
 
-    /* Utility effect bank five remains separate from the exact CPS2 banks. */
-    colors[80] = JO_COLOR_RGB(16, 18, 21);
-    colors[81] = JO_COLOR_RGB(48, 50, 55);
-    colors[82] = JO_COLOR_RGB(91, 94, 99);
-    colors[83] = JO_COLOR_RGB(171, 177, 181);
-    colors[84] = JO_COLOR_RGB(247, 245, 218);
-    colors[85] = JO_COLOR_RGB(255, 213, 65);
-    colors[86] = JO_COLOR_RGB(255, 145, 45);
-    colors[87] = JO_COLOR_RGB(249, 71, 49);
-    colors[88] = JO_COLOR_RGB(176, 34, 41);
-    colors[89] = JO_COLOR_RGB(79, 31, 40);
-    colors[90] = JO_COLOR_RGB(53, 103, 130);
-    colors[91] = JO_COLOR_RGB(68, 164, 178);
-    colors[92] = JO_COLOR_RGB(132, 220, 190);
-    colors[93] = JO_COLOR_RGB(212, 255, 217);
-    colors[94] = JO_COLOR_White;
-
     jo_create_palette_from(&actor_palette, colors, 256);
 }
 
@@ -306,7 +289,8 @@ static void draw_player(const CapActor *actor, const int screen_x)
 static void draw_alien(const CapActor *actor, const int screen_x)
 {
     int depth = 330 - actor->lane;
-    draw_exact_layer(actor, screen_x, enemy_walk_sprite, 3, depth);
+    draw_exact_layer(actor, screen_x, enemy_walk_sprite,
+                     3 + actor->variant, depth);
 }
 
 static void draw_world(void)
@@ -338,6 +322,7 @@ static void draw_world(void)
     {
         CapActor *enemy = &world.enemies[index];
         int screen_x = enemy->x - world.camera_x - JO_TV_WIDTH_2;
+        if (!enemy->active) continue;
         if (screen_x < -256 || screen_x > 256) continue;
         draw_alien(enemy, screen_x);
     }
@@ -356,17 +341,67 @@ static CapInput read_input(void)
     return input;
 }
 
+#ifdef AVSP_ENCOUNTER_TEST
+static int active_enemy_count(void)
+{
+    int count = 0;
+    int index;
+    for (index = 0; index < CAP_MAX_ENEMIES; ++index)
+        if (world.enemies[index].active) ++count;
+    return count;
+}
+
+static CapInput encounter_test_input(void)
+{
+    CapInput input;
+    int index;
+    memset(&input, 0, sizeof(input));
+    if (!world.encounter_started)
+    {
+        input.right = 1;
+        return input;
+    }
+    world.player.health = CAP_PLAYER_MAX_HEALTH;
+    if (world.encounter_state == CAP_ENCOUNTER_WAVE_ONE ||
+        world.encounter_state == CAP_ENCOUNTER_WAVE_TWO)
+    {
+        /* Keep the five-enemy opening wave visible long enough to inspect
+           after a real BIOS/CD boot before the automated clear begins. */
+        if (world.frame >= 600)
+        {
+            for (index = 0; index < CAP_MAX_ENEMIES; ++index)
+            {
+                CapActor *enemy = &world.enemies[index];
+                if (!enemy->active || enemy->action == CAP_ACT_KO) continue;
+                enemy->x = world.player.x + 34 + (index & 1) * 8;
+                enemy->lane = world.player.lane;
+                enemy->health = 1;
+            }
+            if (world.player.action == CAP_ACT_IDLE ||
+                world.player.action == CAP_ACT_WALK)
+                input.attack_pressed = 1;
+        }
+    }
+    else if (world.encounter_state == CAP_ENCOUNTER_CLEAR)
+        input.right = 1;
+    return input;
+}
+#endif
+
 static void draw_hud(void)
 {
     if (!debug_hud_enabled) return;
     jo_printf(0, 0, "AVP CPS2 -> SATURN NATIVE SLICE");
     jo_printf(0, 1, "ROUND 1 CITY OF DESPAIR  HP %02d", world.player.health);
-    jo_printf(0, 2, "SCORE %05d  ENEMIES %d  CART %s",
-              world.score, CAP_MAX_ENEMIES, cart_available ? "4MB" : "FAIL");
+    jo_printf(0, 2, "SCORE %05d  KO %d/%d  CART %s",
+              world.score, world.enemies_defeated, CAP_STAGE1_TOTAL_ENEMIES,
+              cart_available ? "4MB" : "FAIL");
     jo_printf(0, 3, "VDP1 %02d%% EXACT CPS2 PALETTE LAYERS",
               jo_sprite_usage_percent());
     jo_printf(0, 4, "CART %s  ORIGINAL SCALE  X HIDES HUD",
               cart_available ? "4MB" : "FAIL");
+    jo_printf(0, 5, "ROOM %d  LOCK %d  EXIT %d",
+              world.encounter_state, world.room_locked, world.stage_transitioned);
     jo_printf(0, 27, "D-PAD MOVE  A HIT  B DASH  C SPECIAL");
 }
 
@@ -386,11 +421,21 @@ static void frame_callback(void)
     }
 #endif
     input = read_input();
+#ifdef AVSP_ENCOUNTER_TEST
+    input = encounter_test_input();
+#endif
     cap_world_step(&world, &input);
 #ifdef AVSP_VISUAL_TEST
     world.enemies[0].x = world.player.x + 112;
     world.enemies[0].lane = world.player.lane;
     world.enemies[0].action = CAP_ACT_WALK;
+    world.enemies[0].active = 1;
+#endif
+#ifdef AVSP_ENCOUNTER_TEST
+    jo_printf(0, 6, "ENCOUNTER %d KO %d/%d ACTIVE %d EXIT %d",
+              world.encounter_state, world.enemies_defeated,
+              CAP_STAGE1_TOTAL_ENEMIES, active_enemy_count(),
+              world.stage_transitioned);
 #endif
     if (jo_is_pad1_key_down(JO_KEY_X)) debug_hud_enabled = !debug_hud_enabled;
     draw_world();

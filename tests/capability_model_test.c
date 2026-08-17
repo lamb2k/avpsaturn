@@ -12,6 +12,26 @@ static void step_empty(CapWorld *world, const int count)
         (void)cap_world_step(world, &input);
 }
 
+static int active_enemy_count(const CapWorld *world)
+{
+    int count = 0;
+    int index;
+    for (index = 0; index < CAP_MAX_ENEMIES; ++index)
+        if (world->enemies[index].active) ++count;
+    return count;
+}
+
+static void start_encounter(CapWorld *world)
+{
+    CapInput input;
+    memset(&input, 0, sizeof(input));
+    input.right = 1;
+    (void)cap_world_step(world, &input);
+    assert(world->encounter_state == CAP_ENCOUNTER_WAVE_ONE);
+    assert(world->room_locked == 1);
+    assert(active_enemy_count(world) == 5);
+}
+
 static void test_attack_requests_and_damage(void)
 {
     CapWorld world;
@@ -19,6 +39,7 @@ static void test_attack_requests_and_damage(void)
     CapClipRequest request;
 
     cap_world_init(&world);
+    start_encounter(&world);
     world.frame = 1; /* Keep enemy AI from opening on its frame-zero attack. */
     world.enemies[0].x = world.player.x + 40;
     world.enemies[0].lane = world.player.lane;
@@ -32,6 +53,7 @@ static void test_attack_requests_and_damage(void)
     assert(world.enemies[0].health == 2);
 
     cap_world_init(&world);
+    start_encounter(&world);
     world.enemies[0].x = world.player.x + 60;
     world.enemies[0].lane = world.player.lane;
     memset(&input, 0, sizeof(input));
@@ -45,20 +67,74 @@ static void test_attack_requests_and_damage(void)
 static void test_encounter_waits_for_player_input(void)
 {
     CapWorld world;
-    CapInput input;
     int enemy_x;
 
     cap_world_init(&world);
     enemy_x = world.enemies[0].x;
     step_empty(&world, 1200);
     assert(world.encounter_started == 0);
+    assert(world.encounter_state == CAP_ENCOUNTER_APPROACH);
+    assert(active_enemy_count(&world) == 0);
     assert(world.enemies[0].x == enemy_x);
 
+    start_encounter(&world);
+    assert(world.encounter_started == 1);
+    assert(world.encounter_state == CAP_ENCOUNTER_WAVE_ONE);
+}
+
+static void test_first_room_waves_and_transition(void)
+{
+    CapWorld world;
+    CapInput input;
+    int index;
+
+    cap_world_init(&world);
+    start_encounter(&world);
+    world.frame = 1;
+    for (index = 0; index < 3; ++index)
+    {
+        world.enemies[index].x = world.player.x + 40;
+        world.enemies[index].lane = world.player.lane;
+        world.enemies[index].health = 1;
+    }
+    for (index = 3; index < 5; ++index)
+        world.enemies[index].x = 24;
+
+    memset(&input, 0, sizeof(input));
+    input.attack_pressed = 1;
+    (void)cap_world_step(&world, &input);
+    step_empty(&world, 16);
+    assert(world.enemies_defeated == 3);
+    assert(world.encounter_state == CAP_ENCOUNTER_WAVE_TWO);
+    assert(active_enemy_count(&world) == 8);
+
+    step_empty(&world, 24);
+    for (index = 0; index < CAP_MAX_ENEMIES; ++index)
+    {
+        if (!world.enemies[index].active ||
+            world.enemies[index].action == CAP_ACT_KO) continue;
+        world.enemies[index].x = world.player.x + 40;
+        world.enemies[index].lane = world.player.lane;
+        world.enemies[index].health = 1;
+    }
+    /* Avoid an enemy attack residue during this 16-frame hit-window proof. */
+    world.frame = 24;
+    memset(&input, 0, sizeof(input));
+    input.attack_pressed = 1;
+    (void)cap_world_step(&world, &input);
+    step_empty(&world, 16);
+    assert(world.enemies_defeated == CAP_STAGE1_TOTAL_ENEMIES);
+    assert(world.encounter_state == CAP_ENCOUNTER_CLEAR);
+    assert(world.room_locked == 1);
+
+    step_empty(&world, 60);
+    assert(world.room_locked == 0);
     memset(&input, 0, sizeof(input));
     input.right = 1;
-    (void)cap_world_step(&world, &input);
-    assert(world.encounter_started == 1);
-    assert(world.enemies[0].x == enemy_x + 1);
+    for (index = 0; index < 120 && !world.stage_transitioned; ++index)
+        (void)cap_world_step(&world, &input);
+    assert(world.stage_transitioned == 1);
+    assert(world.encounter_state == CAP_ENCOUNTER_COMPLETE);
 }
 
 static void test_long_deterministic_run(void)
@@ -87,12 +163,18 @@ static void test_long_deterministic_run(void)
         assert(world.camera_x >= 0 &&
                world.camera_x <= CAP_WORLD_WIDTH - CAP_VIEW_WIDTH);
         assert(world.player.action >= CAP_ACT_IDLE && world.player.action <= CAP_ACT_KO);
+        assert(world.encounter_state >= CAP_ENCOUNTER_APPROACH);
+        assert(world.encounter_state <= CAP_ENCOUNTER_COMPLETE);
+        assert(world.enemies_defeated >= 0 &&
+               world.enemies_defeated <= CAP_STAGE1_TOTAL_ENEMIES);
         for (index = 0; index < CAP_MAX_ENEMIES; ++index)
         {
             assert(world.enemies[index].lane >= 148 && world.enemies[index].lane <= 198);
             assert(world.enemies[index].health >= 0 && world.enemies[index].health <= 3);
             assert(world.enemies[index].action >= CAP_ACT_IDLE);
             assert(world.enemies[index].action <= CAP_ACT_KO);
+            assert(world.enemies[index].active == 0 || world.enemies[index].active == 1);
+            assert(world.enemies[index].variant >= 0 && world.enemies[index].variant <= 3);
         }
     }
     assert(world.frame == 12000);
@@ -102,6 +184,7 @@ int main(void)
 {
     test_attack_requests_and_damage();
     test_encounter_waits_for_player_input();
+    test_first_room_waves_and_transition();
     test_long_deterministic_run();
     puts("Capability model tests passed (12,000 deterministic frames).");
     return 0;

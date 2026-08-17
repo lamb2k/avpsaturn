@@ -5,6 +5,31 @@
 #define CAP_ATTACK_ACTIVE_FRAME 16
 #define CAP_ATTACK_TOTAL_FRAMES 40
 #define CAP_SPECIAL_ACTIVE_FRAME 12
+#define CAP_ROOM_ONE_RIGHT 336
+#define CAP_ROOM_ONE_EXIT 480
+#define CAP_KO_VISIBLE_FRAMES 45
+#define CAP_CLEAR_HOLD_FRAMES 60
+
+typedef struct
+{
+    int x;
+    int lane;
+    int variant;
+} CapStage1Spawn;
+
+/* Capture-derived opening-room composition. Wave one reflects the crowded
+   2760-3240 interval; wave two adds the palette mix seen by frame 3480. */
+static const CapStage1Spawn cap_stage1_spawns[CAP_STAGE1_TOTAL_ENEMIES] =
+{
+    {36, 174, 1},
+    {92, 190, 2},
+    {154, 158, 1},
+    {224, 196, 0},
+    {348, 180, 1},
+    {18, 164, 3},
+    {286, 154, 0},
+    {366, 198, 2}
+};
 
 static int cap_abs(const int value)
 {
@@ -18,17 +43,40 @@ static int cap_clamp(const int value, const int minimum, const int maximum)
     return value;
 }
 
-static void cap_reset_enemy(CapActor *enemy, const int index)
+static void cap_deactivate_enemy(CapActor *enemy, const int index)
 {
-    static const int stage_one_x[CAP_MAX_ENEMIES] = {80, 140, 200, 500};
-    enemy->x = stage_one_x[index];
-    enemy->lane = 154 + (index % 3) * 18;
+    enemy->x = -256 - index * 32;
+    enemy->lane = 178;
     enemy->facing = -1;
-    enemy->health = 3;
-    enemy->action = CAP_ACT_IDLE;
+    enemy->health = 0;
+    enemy->action = CAP_ACT_KO;
     enemy->action_frame = 0;
     enemy->locomotion_frame = index * 7;
     enemy->hit_latched = 0;
+    enemy->active = 0;
+    enemy->variant = 0;
+}
+
+static void cap_spawn_enemy(CapActor *enemy, const int index)
+{
+    const CapStage1Spawn *spawn = &cap_stage1_spawns[index];
+    enemy->x = spawn->x;
+    enemy->lane = spawn->lane;
+    enemy->facing = -1;
+    enemy->health = 3;
+    enemy->action = CAP_ACT_WALK;
+    enemy->action_frame = 0;
+    enemy->locomotion_frame = index * 7;
+    enemy->hit_latched = 0;
+    enemy->active = 1;
+    enemy->variant = spawn->variant;
+}
+
+static void cap_spawn_range(CapWorld *world, const int first, const int count)
+{
+    int index;
+    for (index = first; index < first + count; ++index)
+        cap_spawn_enemy(&world->enemies[index], index);
 }
 
 void cap_world_init(CapWorld *world)
@@ -43,13 +91,20 @@ void cap_world_init(CapWorld *world)
     world->player.action_frame = 0;
     world->player.locomotion_frame = 0;
     world->player.hit_latched = 0;
+    world->player.active = 1;
+    world->player.variant = 0;
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
-        cap_reset_enemy(&world->enemies[index], index);
+        cap_deactivate_enemy(&world->enemies[index], index);
     world->camera_x = 0;
     world->frame = 0;
     world->score = 0;
     world->player_ko_timer = 0;
     world->encounter_started = 0;
+    world->encounter_state = CAP_ENCOUNTER_APPROACH;
+    world->encounter_timer = 0;
+    world->enemies_defeated = 0;
+    world->room_locked = 0;
+    world->stage_transitioned = 0;
 }
 
 static void cap_damage_enemy(CapWorld *world, CapActor *enemy, const int damage)
@@ -62,6 +117,7 @@ static void cap_damage_enemy(CapWorld *world, CapActor *enemy, const int damage)
         enemy->health = 0;
         enemy->action = CAP_ACT_KO;
         world->score += 100;
+        ++world->enemies_defeated;
     }
     else
     {
@@ -81,7 +137,7 @@ static void cap_resolve_player_hit(CapWorld *world, const int range, const int d
     {
         CapActor *enemy = &world->enemies[index];
         int delta_x;
-        if (enemy->action == CAP_ACT_KO) continue;
+        if (!enemy->active || enemy->action == CAP_ACT_KO) continue;
         delta_x = enemy->x - player->x;
         if (cap_abs(enemy->lane - player->lane) > 19) continue;
         if (delta_x * player->facing < 0 || cap_abs(delta_x) > range) continue;
@@ -176,7 +232,8 @@ static CapClipRequest cap_update_player(CapWorld *world, const CapInput *input)
         player->lane += speed;
         moving = 1;
     }
-    player->x = cap_clamp(player->x, 24, CAP_WORLD_WIDTH - 24);
+    player->x = cap_clamp(player->x, 24,
+                          world->room_locked ? CAP_ROOM_ONE_RIGHT : CAP_WORLD_WIDTH - 24);
     player->lane = cap_clamp(player->lane, CAP_LANE_MIN, CAP_LANE_MAX);
     if (moving)
     {
@@ -217,21 +274,13 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
     int delta_x;
     int delta_lane;
 
-    if (!world->encounter_started)
-    {
-        enemy->action = CAP_ACT_IDLE;
-        return;
-    }
+    if (!enemy->active) return;
 
     if (enemy->action == CAP_ACT_KO)
     {
         ++enemy->action_frame;
-        if (enemy->action_frame >= 210)
-        {
-            cap_reset_enemy(enemy, index);
-            enemy->x = cap_clamp(world->camera_x + CAP_VIEW_WIDTH + 40 + index * 34,
-                                 400, CAP_WORLD_WIDTH - 24);
-        }
+        if (enemy->action_frame >= CAP_KO_VISIBLE_FRAMES)
+            cap_deactivate_enemy(enemy, index);
         return;
     }
     if (enemy->action == CAP_ACT_HIT)
@@ -278,20 +327,61 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
     ++enemy->locomotion_frame;
 }
 
+static void cap_begin_encounter(CapWorld *world)
+{
+    world->encounter_started = 1;
+    world->encounter_state = CAP_ENCOUNTER_WAVE_ONE;
+    world->encounter_timer = 0;
+    world->room_locked = 1;
+    cap_spawn_range(world, 0, 5);
+}
+
+static void cap_update_encounter(CapWorld *world)
+{
+    ++world->encounter_timer;
+    if (world->encounter_state == CAP_ENCOUNTER_WAVE_ONE &&
+        world->enemies_defeated >= 3)
+    {
+        cap_spawn_range(world, 5, 3);
+        world->encounter_state = CAP_ENCOUNTER_WAVE_TWO;
+        world->encounter_timer = 0;
+    }
+    if (world->encounter_state == CAP_ENCOUNTER_WAVE_TWO &&
+        world->enemies_defeated >= CAP_STAGE1_TOTAL_ENEMIES)
+    {
+        world->encounter_state = CAP_ENCOUNTER_CLEAR;
+        world->encounter_timer = 0;
+    }
+    if (world->encounter_state == CAP_ENCOUNTER_CLEAR &&
+        world->encounter_timer >= CAP_CLEAR_HOLD_FRAMES)
+        world->room_locked = 0;
+    if (world->encounter_state == CAP_ENCOUNTER_CLEAR &&
+        !world->room_locked && world->player.x >= CAP_ROOM_ONE_EXIT)
+    {
+        world->encounter_state = CAP_ENCOUNTER_COMPLETE;
+        world->stage_transitioned = 1;
+        world->encounter_timer = 0;
+    }
+}
+
 CapClipRequest cap_world_step(CapWorld *world, const CapInput *input)
 {
     CapClipRequest request;
     int index;
     int target_camera;
 
-    if (input->left || input->right || input->up || input->down ||
-        input->attack_pressed || input->special_pressed || input->dash_held)
-        world->encounter_started = 1;
+    if (!world->encounter_started &&
+        (input->left || input->right || input->up || input->down ||
+         input->attack_pressed || input->special_pressed || input->dash_held))
+        cap_begin_encounter(world);
     request = cap_update_player(world, input);
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
         cap_update_enemy(world, &world->enemies[index], index);
-    target_camera = cap_clamp(world->player.x - (CAP_VIEW_WIDTH - 32),
-                              0, CAP_WORLD_WIDTH - CAP_VIEW_WIDTH);
+    if (world->encounter_started)
+        cap_update_encounter(world);
+    target_camera = world->room_locked ? 0 :
+        cap_clamp(world->player.x - (CAP_VIEW_WIDTH - 32),
+                  0, CAP_WORLD_WIDTH - CAP_VIEW_WIDTH);
     if (world->camera_x < target_camera) world->camera_x += 2;
     if (world->camera_x > target_camera) world->camera_x -= 2;
     ++world->frame;

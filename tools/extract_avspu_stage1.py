@@ -23,6 +23,18 @@ VISIBLE_WIDTH = 384
 VISIBLE_HEIGHT = 224
 STAGE1_ACTIVE_OBJECT_RAM = "objram2.tsv"
 ANIMATION_SAMPLE_ACTIVE_BANK = {2880: 2, 2940: 2}
+STAGE1_ENCOUNTER_ANCHORS = (2760, 3000, 3240, 3480, 3600, 3720,
+                            3840, 3960, 4080, 4200)
+STAGE1_SATURN_SPAWNS = (
+    (36, 174, 1, 2760),
+    (92, 190, 2, 2760),
+    (154, 158, 1, 2760),
+    (224, 196, 0, 2760),
+    (348, 180, 1, 3000),
+    (18, 164, 3, 3480),
+    (286, 154, 0, 3480),
+    (366, 198, 2, 3480),
+)
 STAGE1_OBJECT_GROUPS = (
     ("capture_padding", "nonvisual", "verified", (0, 4, 8)),
     ("ground_shadows", "shadow_sprites", "verified",
@@ -532,6 +544,72 @@ def write_player_animation_timeline() -> None:
         }, indent=2) + "\n", encoding="utf-8")
 
 
+def write_stage1_encounter_observations() -> None:
+    """Record reproducible evidence behind the native first-room wave script."""
+    anchors = []
+    for frame in STAGE1_ENCOUNTER_ANCHORS:
+        object_path = CAPTURE_ROOT / f"objram_active_{frame:04d}.tsv"
+        screenshot_path = CAPTURE_ROOT / f"stage1_sample_{frame:04d}.png"
+        entries = decode_object_entries(load_words(object_path.name))
+        palette_runs = []
+        for colour in (16, 17, 18, 19):
+            for run in contiguous_palette_runs(entries, colour):
+                visible = [
+                    entry for entry in run
+                    if (entry["screen_x"] < VISIBLE_WIDTH and
+                        entry["screen_x"] + entry["width"] > 0 and
+                        entry["screen_y"] < VISIBLE_HEIGHT and
+                        entry["screen_y"] + entry["height"] > 96)
+                ]
+                if not visible:
+                    continue
+                palette_runs.append({
+                    "cps2_palette": colour,
+                    "command_offsets": [entry["offset"] for entry in visible],
+                    "visible_bounds": [
+                        max(0, min(entry["screen_x"] for entry in visible)),
+                        max(0, min(entry["screen_y"] for entry in visible)),
+                        min(VISIBLE_WIDTH, max(
+                            entry["screen_x"] + entry["width"] for entry in visible)),
+                        min(VISIBLE_HEIGHT, max(
+                            entry["screen_y"] + entry["height"] for entry in visible)),
+                    ],
+                })
+        anchors.append({
+            "frame": frame,
+            "active_object_bank": load_animation_sample_banks()[frame],
+            "object_ram_sha256": hashlib.sha256(object_path.read_bytes()).hexdigest(),
+            "screenshot_sha256": hashlib.sha256(screenshot_path.read_bytes()).hexdigest(),
+            "visible_enemy_palette_runs": palette_runs,
+        })
+
+    spawns = [
+        {"slot": slot, "x": x, "lane": lane, "variant": variant,
+         "cps2_palette": 16 + variant, "source_anchor": source_frame,
+         "wave": 1 if slot < 5 else 2}
+        for slot, (x, lane, variant, source_frame)
+        in enumerate(STAGE1_SATURN_SPAWNS)
+    ]
+    (OUTPUT_ROOT / "stage1_encounter_observations.json").write_text(
+        json.dumps({
+            "capture_window": [2760, 4200],
+            "sample_stride_frames": 4,
+            "method": "active-bank object-list palette runs at hashed screenshot anchors",
+            "saturn_wave_script": {
+                "room_width": 384,
+                "wave_one_slots": 5,
+                "wave_two_slots": 3,
+                "reinforcement_after_defeats": 3,
+                "total_enemies": len(spawns),
+                "spawns": spawns,
+            },
+            "anchors": anchors,
+            "scope_note": (
+                "Spawn composition and palette variants are capture-derived; "
+                "arcade AI and exact spawn timing remain to be mapped."),
+        }, indent=2) + "\n", encoding="utf-8")
+
+
 def write_stage1_object_groups(entries: list[dict[str, int]]) -> None:
     """Emit exhaustive frame-local grouping metadata for animation extraction."""
     by_offset = {entry["offset"]: entry for entry in entries}
@@ -989,17 +1067,27 @@ def write_exact_actor_assets(gfx: bytearray,
             gfx, palette, 2880, idle_bank, idle_offsets, pivot=idle_pivot),
     }
     # Fixed Saturn subpalette slots. Player layers retain CPS2 palettes 0, 7,
-    # and 15; the Stage 1 alien retains palette 16.
-    cps_colours = (0, 7, 15, 16)
+    # and 15; the four Stage 1 alien variants retain palettes 16-19.
+    cps_colours = (0, 7, 15, 16, 17, 18, 19)
     player_palette = animation_palette(2880)
     attack_palette = animation_palette(2888)
+    enemy_palette = animation_palette(2760)
+    enemy_palette_anchors = (3000, 3240, 3480, 3720, 3960, 4200)
+    for frame in enemy_palette_anchors:
+        candidate = animation_palette(frame)
+        for colour in (16, 17, 18, 19):
+            if ([candidate[colour * 16 + pen][:3] for pen in range(15)] !=
+                    [enemy_palette[colour * 16 + pen][:3] for pen in range(15)]):
+                raise ValueError(
+                    f"frame {frame}: Stage 1 enemy palette {colour} changed")
     palette_banks = {
         0: [player_palette[pen][:3] for pen in range(15)],
         7: [player_palette[7 * 16 + pen][:3] for pen in range(15)],
         15: [attack_palette[15 * 16 + pen][:3] for pen in range(15)],
-        16: [animation_palette(4164)[16 * 16 + pen][:3]
-             for pen in range(15)],
     }
+    for colour in (16, 17, 18, 19):
+        palette_banks[colour] = [
+            enemy_palette[colour * 16 + pen][:3] for pen in range(15)]
     write_exact_palette_header([palette_banks[colour] for colour in cps_colours])
 
     file_map = {
@@ -1107,6 +1195,7 @@ def main() -> None:
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
     verify_animation_bank_alignment(gfx)
     write_player_animation_timeline()
+    write_stage1_encounter_observations()
     palette = load_palette()
     gfxram = load_words("gfxram.tsv")
     cps_a = load_words("cps_a_regs.tsv")
