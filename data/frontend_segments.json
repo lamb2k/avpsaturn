@@ -1,0 +1,1429 @@
+{
+  "source": {
+    "romset": "avspu",
+    "mame_version": "0.289",
+    "cadence": 2,
+    "width": 352,
+    "height": 224,
+    "note": "cadence 2 sizes are lower bounds; recapture at cadence 1 before fixing the shipped layout"
+  },
+  "frontend_block_bytes": 78848,
+  "segment_budget_bytes": 78848,
+  "windows": [
+    {
+      "name": "start_transition",
+      "first_frame": 1770,
+      "last_frame": 1798,
+      "sample_count": 15,
+      "unique_frames": 15,
+      "distinct_images": 9,
+      "fitted_colour_union": 116,
+      "single_stable_palette_possible": true,
+      "base_frame_bytes": 35338,
+      "base_frame_rle_bytes": 35338,
+      "base_frame_raw_bytes": 79196,
+      "base_frame_exceeds_block": false,
+      "motion_box": {
+        "x": 42,
+        "y": 2,
+        "width": 303,
+        "height": 141,
+        "screen_fraction": 0.5418,
+        "max_changed_pixels_in_one_step": 1666
+      },
+      "reference_frame_model": {
+        "reference_frame": 1770,
+        "reference_colours": 116,
+        "reference_frame_bytes": 35338,
+        "palette_only_frames": 1,
+        "structural_frames": 13,
+        "covered_fraction": 0.1333,
+        "bytes_if_fully_covered": 35340
+      },
+      "palette_only_steps": 0,
+      "structural_steps": 14,
+      "palette_only_bytes": 0,
+      "structural_bytes": 6764,
+      "unique_transition_total_bytes": 42102,
+      "fits_one_block": true,
+      "fits_two_blocks": true,
+      "segment_budget_bytes": 78848,
+      "segments_required": 1,
+      "segmentation_feasible": true,
+      "segments": [
+        {
+          "first_frame": 1770,
+          "last_frame": 1798,
+          "bytes": 42102,
+          "colours": 116,
+          "over_budget": false
+        }
+      ],
+      "steps": [
+        {
+          "frame": 1772,
+          "kind": "structural",
+          "bytes": 324,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 169
+          }
+        },
+        {
+          "frame": 1774,
+          "kind": "structural",
+          "bytes": 326,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 174
+          }
+        },
+        {
+          "frame": 1776,
+          "kind": "structural",
+          "bytes": 321,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 167
+          }
+        },
+        {
+          "frame": 1778,
+          "kind": "structural",
+          "bytes": 2200,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 2,
+            "width": 303,
+            "height": 86,
+            "changed_pixels": 1666
+          }
+        },
+        {
+          "frame": 1780,
+          "kind": "structural",
+          "bytes": 326,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 174
+          }
+        },
+        {
+          "frame": 1782,
+          "kind": "structural",
+          "bytes": 321,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 167
+          }
+        },
+        {
+          "frame": 1784,
+          "kind": "structural",
+          "bytes": 678,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 148,
+            "height": 82,
+            "changed_pixels": 364
+          }
+        },
+        {
+          "frame": 1786,
+          "kind": "structural",
+          "bytes": 326,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 174
+          }
+        },
+        {
+          "frame": 1788,
+          "kind": "structural",
+          "bytes": 321,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 167
+          }
+        },
+        {
+          "frame": 1790,
+          "kind": "structural",
+          "bytes": 324,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 169
+          }
+        },
+        {
+          "frame": 1792,
+          "kind": "structural",
+          "bytes": 326,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 174
+          }
+        },
+        {
+          "frame": 1794,
+          "kind": "structural",
+          "bytes": 321,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 167
+          }
+        },
+        {
+          "frame": 1796,
+          "kind": "structural",
+          "bytes": 324,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 169
+          }
+        },
+        {
+          "frame": 1798,
+          "kind": "structural",
+          "bytes": 326,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 174
+          }
+        }
+      ]
+    },
+    {
+      "name": "character_confirm",
+      "first_frame": 1800,
+      "last_frame": 2038,
+      "sample_count": 120,
+      "unique_frames": 47,
+      "distinct_images": 31,
+      "fitted_colour_union": 188,
+      "single_stable_palette_possible": true,
+      "base_frame_bytes": 33903,
+      "base_frame_rle_bytes": 33903,
+      "base_frame_raw_bytes": 79193,
+      "base_frame_exceeds_block": false,
+      "motion_box": {
+        "x": 0,
+        "y": 2,
+        "width": 345,
+        "height": 222,
+        "screen_fraction": 0.9714,
+        "max_changed_pixels_in_one_step": 5160
+      },
+      "reference_frame_model": {
+        "reference_frame": 1800,
+        "reference_colours": 115,
+        "reference_frame_bytes": 33903,
+        "palette_only_frames": 4,
+        "structural_frames": 42,
+        "covered_fraction": 0.1064,
+        "bytes_if_fully_covered": 34375
+      },
+      "palette_only_steps": 19,
+      "structural_steps": 27,
+      "palette_only_bytes": 426,
+      "structural_bytes": 69633,
+      "unique_transition_total_bytes": 103962,
+      "fits_one_block": false,
+      "fits_two_blocks": true,
+      "segment_budget_bytes": 78848,
+      "segments_required": 2,
+      "segmentation_feasible": true,
+      "segments": [
+        {
+          "first_frame": 1800,
+          "last_frame": 1898,
+          "bytes": 75115,
+          "colours": 116,
+          "over_budget": false
+        },
+        {
+          "first_frame": 1900,
+          "last_frame": 2034,
+          "bytes": 34692,
+          "colours": 148,
+          "over_budget": false
+        }
+      ],
+      "steps": [
+        {
+          "frame": 1802,
+          "kind": "structural",
+          "bytes": 324,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 169
+          }
+        },
+        {
+          "frame": 1804,
+          "kind": "structural",
+          "bytes": 1928,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 15,
+            "y": 54,
+            "width": 86,
+            "height": 52,
+            "changed_pixels": 1399
+          }
+        },
+        {
+          "frame": 1806,
+          "kind": "structural",
+          "bytes": 610,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 400
+          }
+        },
+        {
+          "frame": 1808,
+          "kind": "palette",
+          "bytes": 6,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 15,
+            "y": 54,
+            "width": 86,
+            "height": 52,
+            "changed_pixels": 1225
+          }
+        },
+        {
+          "frame": 1810,
+          "kind": "structural",
+          "bytes": 610,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 400
+          }
+        },
+        {
+          "frame": 1812,
+          "kind": "structural",
+          "bytes": 1920,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 15,
+            "y": 54,
+            "width": 86,
+            "height": 52,
+            "changed_pixels": 1392
+          }
+        },
+        {
+          "frame": 1814,
+          "kind": "structural",
+          "bytes": 610,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 400
+          }
+        },
+        {
+          "frame": 1816,
+          "kind": "palette",
+          "bytes": 6,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 15,
+            "y": 54,
+            "width": 86,
+            "height": 52,
+            "changed_pixels": 1225
+          }
+        },
+        {
+          "frame": 1818,
+          "kind": "structural",
+          "bytes": 610,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 400
+          }
+        },
+        {
+          "frame": 1820,
+          "kind": "structural",
+          "bytes": 1923,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 15,
+            "y": 54,
+            "width": 86,
+            "height": 52,
+            "changed_pixels": 1394
+          }
+        },
+        {
+          "frame": 1822,
+          "kind": "structural",
+          "bytes": 610,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 400
+          }
+        },
+        {
+          "frame": 1824,
+          "kind": "palette",
+          "bytes": 6,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 15,
+            "y": 54,
+            "width": 86,
+            "height": 52,
+            "changed_pixels": 1225
+          }
+        },
+        {
+          "frame": 1826,
+          "kind": "structural",
+          "bytes": 610,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 400
+          }
+        },
+        {
+          "frame": 1828,
+          "kind": "structural",
+          "bytes": 1925,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 15,
+            "y": 54,
+            "width": 86,
+            "height": 52,
+            "changed_pixels": 1399
+          }
+        },
+        {
+          "frame": 1830,
+          "kind": "structural",
+          "bytes": 610,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 42,
+            "y": 61,
+            "width": 32,
+            "height": 27,
+            "changed_pixels": 400
+          }
+        },
+        {
+          "frame": 1832,
+          "kind": "palette",
+          "bytes": 6,
+          "held_samples": 2,
+          "changed_box": {
+            "x": 15,
+            "y": 54,
+            "width": 86,
+            "height": 52,
+            "changed_pixels": 1225
+          }
+        },
+        {
+          "frame": 1836,
+          "kind": "palette",
+          "bytes": 6,
+          "held_samples": 2,
+          "changed_box": {
+            "x": 15,
+            "y": 54,
+            "width": 86,
+            "height": 52,
+            "changed_pixels": 1225
+          }
+        },
+        {
+          "frame": 1840,
+          "kind": "palette",
+          "bytes": 6,
+          "held_samples": 2,
+          "changed_box": {
+            "x": 15,
+            "y": 54,
+            "width": 86,
+            "height": 52,
+            "changed_pixels": 1225
+          }
+        },
+        {
+          "frame": 1844,
+          "kind": "palette",
+          "bytes": 6,
+          "held_samples": 2,
+          "changed_box": {
+            "x": 15,
+            "y": 54,
+            "width": 86,
+            "height": 52,
+            "changed_pixels": 1225
+          }
+        },
+        {
+          "frame": 1848,
+          "kind": "palette",
+          "bytes": 6,
+          "held_samples": 2,
+          "changed_box": {
+            "x": 15,
+            "y": 54,
+            "width": 86,
+            "height": 52,
+            "changed_pixels": 1225
+          }
+        },
+        {
+          "frame": 1852,
+          "kind": "palette",
+          "bytes": 6,
+          "held_samples": 17,
+          "changed_box": {
+            "x": 15,
+            "y": 54,
+            "width": 86,
+            "height": 52,
+            "changed_pixels": 1225
+          }
+        },
+        {
+          "frame": 1886,
+          "kind": "structural",
+          "bytes": 901,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 40,
+            "width": 293,
+            "height": 184,
+            "changed_pixels": 613
+          }
+        },
+        {
+          "frame": 1888,
+          "kind": "structural",
+          "bytes": 3391,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 44,
+            "width": 345,
+            "height": 176,
+            "changed_pixels": 3011
+          }
+        },
+        {
+          "frame": 1890,
+          "kind": "structural",
+          "bytes": 4978,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 52,
+            "width": 345,
+            "height": 160,
+            "changed_pixels": 4685
+          }
+        },
+        {
+          "frame": 1892,
+          "kind": "structural",
+          "bytes": 5254,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 60,
+            "width": 345,
+            "height": 144,
+            "changed_pixels": 4790
+          }
+        },
+        {
+          "frame": 1894,
+          "kind": "structural",
+          "bytes": 4531,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 68,
+            "width": 345,
+            "height": 128,
+            "changed_pixels": 4086
+          }
+        },
+        {
+          "frame": 1896,
+          "kind": "structural",
+          "bytes": 5282,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 76,
+            "width": 345,
+            "height": 112,
+            "changed_pixels": 4782
+          }
+        },
+        {
+          "frame": 1898,
+          "kind": "structural",
+          "bytes": 4531,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 84,
+            "width": 345,
+            "height": 96,
+            "changed_pixels": 4086
+          }
+        },
+        {
+          "frame": 1900,
+          "kind": "structural",
+          "bytes": 5254,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 92,
+            "width": 345,
+            "height": 80,
+            "changed_pixels": 4790
+          }
+        },
+        {
+          "frame": 1902,
+          "kind": "structural",
+          "bytes": 4978,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 100,
+            "width": 345,
+            "height": 64,
+            "changed_pixels": 4686
+          }
+        },
+        {
+          "frame": 1904,
+          "kind": "structural",
+          "bytes": 5354,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 108,
+            "width": 345,
+            "height": 48,
+            "changed_pixels": 5160
+          }
+        },
+        {
+          "frame": 1906,
+          "kind": "structural",
+          "bytes": 5282,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 116,
+            "width": 345,
+            "height": 32,
+            "changed_pixels": 5035
+          }
+        },
+        {
+          "frame": 1908,
+          "kind": "palette",
+          "bytes": 66,
+          "held_samples": 23,
+          "changed_box": {
+            "x": 0,
+            "y": 124,
+            "width": 345,
+            "height": 16,
+            "changed_pixels": 2668
+          }
+        },
+        {
+          "frame": 1954,
+          "kind": "structural",
+          "bytes": 1902,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 242,
+            "y": 2,
+            "width": 103,
+            "height": 29,
+            "changed_pixels": 1497
+          }
+        },
+        {
+          "frame": 1956,
+          "kind": "palette",
+          "bytes": 34,
+          "held_samples": 2,
+          "changed_box": {
+            "x": 242,
+            "y": 2,
+            "width": 103,
+            "height": 29,
+            "changed_pixels": 1497
+          }
+        },
+        {
+          "frame": 1960,
+          "kind": "palette",
+          "bytes": 34,
+          "held_samples": 6,
+          "changed_box": {
+            "x": 242,
+            "y": 2,
+            "width": 103,
+            "height": 29,
+            "changed_pixels": 1497
+          }
+        },
+        {
+          "frame": 1972,
+          "kind": "structural",
+          "bytes": 1928,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 132,
+            "y": 90,
+            "width": 110,
+            "height": 37,
+            "changed_pixels": 1219
+          }
+        },
+        {
+          "frame": 1974,
+          "kind": "palette",
+          "bytes": 34,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 132,
+            "y": 90,
+            "width": 110,
+            "height": 37,
+            "changed_pixels": 1219
+          }
+        },
+        {
+          "frame": 1976,
+          "kind": "palette",
+          "bytes": 34,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 132,
+            "y": 90,
+            "width": 110,
+            "height": 37,
+            "changed_pixels": 1219
+          }
+        },
+        {
+          "frame": 1978,
+          "kind": "palette",
+          "bytes": 34,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 132,
+            "y": 90,
+            "width": 110,
+            "height": 37,
+            "changed_pixels": 1219
+          }
+        },
+        {
+          "frame": 1980,
+          "kind": "palette",
+          "bytes": 34,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 132,
+            "y": 90,
+            "width": 110,
+            "height": 37,
+            "changed_pixels": 1219
+          }
+        },
+        {
+          "frame": 1982,
+          "kind": "palette",
+          "bytes": 34,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 132,
+            "y": 90,
+            "width": 110,
+            "height": 37,
+            "changed_pixels": 1219
+          }
+        },
+        {
+          "frame": 1984,
+          "kind": "palette",
+          "bytes": 34,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 132,
+            "y": 90,
+            "width": 110,
+            "height": 37,
+            "changed_pixels": 1219
+          }
+        },
+        {
+          "frame": 1986,
+          "kind": "palette",
+          "bytes": 34,
+          "held_samples": 8,
+          "changed_box": {
+            "x": 132,
+            "y": 90,
+            "width": 110,
+            "height": 37,
+            "changed_pixels": 1219
+          }
+        },
+        {
+          "frame": 2002,
+          "kind": "structural",
+          "bytes": 1899,
+          "held_samples": 16,
+          "changed_box": {
+            "x": 242,
+            "y": 2,
+            "width": 103,
+            "height": 29,
+            "changed_pixels": 1497
+          }
+        },
+        {
+          "frame": 2034,
+          "kind": "structural",
+          "bytes": 1878,
+          "held_samples": 3,
+          "changed_box": {
+            "x": 242,
+            "y": 2,
+            "width": 103,
+            "height": 29,
+            "changed_pixels": 1497
+          }
+        }
+      ]
+    },
+    {
+      "name": "round_1_title",
+      "first_frame": 2040,
+      "last_frame": 2160,
+      "sample_count": 61,
+      "unique_frames": 26,
+      "distinct_images": 26,
+      "fitted_colour_union": 915,
+      "single_stable_palette_possible": false,
+      "base_frame_bytes": 2591,
+      "base_frame_rle_bytes": 2591,
+      "base_frame_raw_bytes": 78875,
+      "base_frame_exceeds_block": false,
+      "motion_box": {
+        "x": 0,
+        "y": 0,
+        "width": 352,
+        "height": 224,
+        "screen_fraction": 1.0,
+        "max_changed_pixels_in_one_step": 66055
+      },
+      "reference_frame_model": {
+        "reference_frame": 2086,
+        "reference_colours": 174,
+        "reference_frame_bytes": 79370,
+        "palette_only_frames": 3,
+        "structural_frames": 22,
+        "covered_fraction": 0.1538,
+        "bytes_if_fully_covered": 80972
+      },
+      "palette_only_steps": 1,
+      "structural_steps": 24,
+      "palette_only_bytes": 534,
+      "structural_bytes": 503848,
+      "unique_transition_total_bytes": 506973,
+      "fits_one_block": false,
+      "fits_two_blocks": false,
+      "segment_budget_bytes": 78848,
+      "segments_required": 22,
+      "segmentation_feasible": false,
+      "segments": [
+        {
+          "first_frame": 2040,
+          "last_frame": 2076,
+          "bytes": 78362,
+          "colours": 148,
+          "over_budget": false
+        },
+        {
+          "first_frame": 2078,
+          "last_frame": 2078,
+          "bytes": 79364,
+          "colours": 172,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2080,
+          "last_frame": 2080,
+          "bytes": 79367,
+          "colours": 173,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2082,
+          "last_frame": 2082,
+          "bytes": 79367,
+          "colours": 173,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2084,
+          "last_frame": 2084,
+          "bytes": 79367,
+          "colours": 173,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2086,
+          "last_frame": 2086,
+          "bytes": 79370,
+          "colours": 174,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2088,
+          "last_frame": 2088,
+          "bytes": 79331,
+          "colours": 161,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2090,
+          "last_frame": 2090,
+          "bytes": 79331,
+          "colours": 161,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2092,
+          "last_frame": 2092,
+          "bytes": 79328,
+          "colours": 160,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2098,
+          "last_frame": 2098,
+          "bytes": 79310,
+          "colours": 154,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2102,
+          "last_frame": 2102,
+          "bytes": 79313,
+          "colours": 155,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2106,
+          "last_frame": 2106,
+          "bytes": 79313,
+          "colours": 155,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2110,
+          "last_frame": 2110,
+          "bytes": 79310,
+          "colours": 154,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2114,
+          "last_frame": 2114,
+          "bytes": 79310,
+          "colours": 154,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2120,
+          "last_frame": 2120,
+          "bytes": 79313,
+          "colours": 155,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2122,
+          "last_frame": 2122,
+          "bytes": 79313,
+          "colours": 155,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2128,
+          "last_frame": 2128,
+          "bytes": 79310,
+          "colours": 154,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2130,
+          "last_frame": 2130,
+          "bytes": 79322,
+          "colours": 158,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2138,
+          "last_frame": 2138,
+          "bytes": 79325,
+          "colours": 159,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2146,
+          "last_frame": 2146,
+          "bytes": 79322,
+          "colours": 158,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2154,
+          "last_frame": 2154,
+          "bytes": 79322,
+          "colours": 158,
+          "over_budget": true
+        },
+        {
+          "first_frame": 2156,
+          "last_frame": 2156,
+          "bytes": 79325,
+          "colours": 159,
+          "over_budget": true
+        }
+      ],
+      "steps": [
+        {
+          "frame": 2066,
+          "kind": "structural",
+          "bytes": 1899,
+          "held_samples": 3,
+          "changed_box": {
+            "x": 242,
+            "y": 2,
+            "width": 103,
+            "height": 29,
+            "changed_pixels": 1497
+          }
+        },
+        {
+          "frame": 2072,
+          "kind": "structural",
+          "bytes": 2318,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 4,
+            "y": 0,
+            "width": 157,
+            "height": 24,
+            "changed_pixels": 1900
+          }
+        },
+        {
+          "frame": 2074,
+          "kind": "structural",
+          "bytes": 756,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 15,
+            "y": 216,
+            "width": 92,
+            "height": 8,
+            "changed_pixels": 683
+          }
+        },
+        {
+          "frame": 2076,
+          "kind": "structural",
+          "bytes": 70798,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 0,
+            "width": 352,
+            "height": 224,
+            "changed_pixels": 66013
+          }
+        },
+        {
+          "frame": 2078,
+          "kind": "structural",
+          "bytes": 70887,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 0,
+            "width": 352,
+            "height": 224,
+            "changed_pixels": 66055
+          }
+        },
+        {
+          "frame": 2080,
+          "kind": "structural",
+          "bytes": 70890,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 0,
+            "width": 352,
+            "height": 224,
+            "changed_pixels": 66055
+          }
+        },
+        {
+          "frame": 2082,
+          "kind": "structural",
+          "bytes": 70881,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 0,
+            "width": 352,
+            "height": 224,
+            "changed_pixels": 66055
+          }
+        },
+        {
+          "frame": 2084,
+          "kind": "structural",
+          "bytes": 70884,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 0,
+            "width": 352,
+            "height": 224,
+            "changed_pixels": 66055
+          }
+        },
+        {
+          "frame": 2086,
+          "kind": "structural",
+          "bytes": 70893,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 0,
+            "width": 352,
+            "height": 224,
+            "changed_pixels": 66055
+          }
+        },
+        {
+          "frame": 2088,
+          "kind": "palette",
+          "bytes": 534,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 0,
+            "width": 352,
+            "height": 224,
+            "changed_pixels": 66055
+          }
+        },
+        {
+          "frame": 2090,
+          "kind": "structural",
+          "bytes": 444,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 269,
+            "y": 179,
+            "width": 11,
+            "height": 7,
+            "changed_pixels": 55
+          }
+        },
+        {
+          "frame": 2092,
+          "kind": "structural",
+          "bytes": 8972,
+          "held_samples": 3,
+          "changed_box": {
+            "x": 0,
+            "y": 94,
+            "width": 146,
+            "height": 130,
+            "changed_pixels": 6893
+          }
+        },
+        {
+          "frame": 2098,
+          "kind": "structural",
+          "bytes": 2069,
+          "held_samples": 2,
+          "changed_box": {
+            "x": 242,
+            "y": 2,
+            "width": 103,
+            "height": 184,
+            "changed_pixels": 1617
+          }
+        },
+        {
+          "frame": 2102,
+          "kind": "structural",
+          "bytes": 8972,
+          "held_samples": 2,
+          "changed_box": {
+            "x": 0,
+            "y": 94,
+            "width": 146,
+            "height": 130,
+            "changed_pixels": 6893
+          }
+        },
+        {
+          "frame": 2106,
+          "kind": "structural",
+          "bytes": 207,
+          "held_samples": 2,
+          "changed_box": {
+            "x": 267,
+            "y": 179,
+            "width": 61,
+            "height": 8,
+            "changed_pixels": 121
+          }
+        },
+        {
+          "frame": 2110,
+          "kind": "structural",
+          "bytes": 7534,
+          "held_samples": 2,
+          "changed_box": {
+            "x": 0,
+            "y": 91,
+            "width": 147,
+            "height": 125,
+            "changed_pixels": 5421
+          }
+        },
+        {
+          "frame": 2114,
+          "kind": "structural",
+          "bytes": 104,
+          "held_samples": 3,
+          "changed_box": {
+            "x": 267,
+            "y": 179,
+            "width": 14,
+            "height": 8,
+            "changed_pixels": 50
+          }
+        },
+        {
+          "frame": 2120,
+          "kind": "structural",
+          "bytes": 7534,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 91,
+            "width": 147,
+            "height": 125,
+            "changed_pixels": 5421
+          }
+        },
+        {
+          "frame": 2122,
+          "kind": "structural",
+          "bytes": 193,
+          "held_samples": 3,
+          "changed_box": {
+            "x": 269,
+            "y": 179,
+            "width": 59,
+            "height": 7,
+            "changed_pixels": 121
+          }
+        },
+        {
+          "frame": 2128,
+          "kind": "structural",
+          "bytes": 8972,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 0,
+            "y": 94,
+            "width": 146,
+            "height": 130,
+            "changed_pixels": 6893
+          }
+        },
+        {
+          "frame": 2130,
+          "kind": "structural",
+          "bytes": 3988,
+          "held_samples": 4,
+          "changed_box": {
+            "x": 132,
+            "y": 2,
+            "width": 213,
+            "height": 185,
+            "changed_pixels": 2835
+          }
+        },
+        {
+          "frame": 2138,
+          "kind": "structural",
+          "bytes": 9162,
+          "held_samples": 4,
+          "changed_box": {
+            "x": 0,
+            "y": 94,
+            "width": 328,
+            "height": 130,
+            "changed_pixels": 6996
+          }
+        },
+        {
+          "frame": 2146,
+          "kind": "structural",
+          "bytes": 7737,
+          "held_samples": 4,
+          "changed_box": {
+            "x": 0,
+            "y": 91,
+            "width": 329,
+            "height": 125,
+            "changed_pixels": 5554
+          }
+        },
+        {
+          "frame": 2154,
+          "kind": "structural",
+          "bytes": 220,
+          "held_samples": 1,
+          "changed_box": {
+            "x": 267,
+            "y": 179,
+            "width": 62,
+            "height": 8,
+            "changed_pixels": 151
+          }
+        },
+        {
+          "frame": 2156,
+          "kind": "structural",
+          "bytes": 7534,
+          "held_samples": 3,
+          "changed_box": {
+            "x": 0,
+            "y": 91,
+            "width": 147,
+            "height": 125,
+            "changed_pixels": 5421
+          }
+        }
+      ]
+    }
+  ]
+}

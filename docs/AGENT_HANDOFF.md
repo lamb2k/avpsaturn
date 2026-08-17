@@ -46,6 +46,8 @@ New tracked source/evidence files:
 - `data/frontend_capture.json`
 - `tools/analyze_frontend.py`
 - `tools/mame_capture_frontend.lua`
+- `tools/analyze_frontend_segments.py`
+- `data/frontend_segments.json`
 
 `git diff --check` passes; only existing LF-to-CRLF warnings are emitted.
 
@@ -97,6 +99,10 @@ runtime yet, and it must not be described as a finished exact frontend.
   reverse pen identity ambiguous.
 - Round 1 title, frames 2040..2160, has a 915-color union and still needs
   segmentation into stable layers, palette fades, and changed regions.
+- SUPERSEDED for both windows by "Frontend segmentation result 2026-08-17"
+  below. These two sizing bullets remain as the record of what the cadence-2
+  storage experiment measured, but stored frames are no longer the intended
+  representation for either window. Read that section before acting on them.
 - MAME's CPS2 final screen bitmap is RGB32 here. The captured
   `pixels_####.bin` files are 384x224x4 final colors, not native stable palette
   indices.
@@ -110,6 +116,10 @@ Deterministic source hashes:
 - `capture_frontend.ps1`: `ad12c2a33c4d5838cdebc0d60ae16b4a1fd003454bd4305334de2b85eb5cb1c6`
 - `tools/mame_capture_frontend.lua`: `59c8c6c53e9f3bc994fad9d6b55ebe3f78097390b1b6208c2b0c74155f951568`
 - `tools/analyze_frontend.py`: `e7cf211482ae9c4521fc9a31c4d89e05efc4d3f3b5c4eb8f379dcd1b07bc3ddf`
+- `tools/analyze_frontend_segments.py`:
+  `01e99fd85e6c05eba6f437b4f0aeb89d3aad090fa4f915602ccd3e0c61bc3f8b`
+- `data/frontend_segments.json`:
+  `67ff4e52bfa53751567ea9adf1e3b7d9c6be1cea81ce0d220575a343265b072b`
 
 ## Process and restart state
 
@@ -200,34 +210,24 @@ findings bound the remaining design:
   path is output-lossless: any consistent per-segment index assignment that
   reproduces exact final RGB is exact. The RGB32 capture limitation blocks
   pen-native claims only; do not spend more effort reversing pens here.
-- Palette fades should be detected as colour bijections between adjacent
-  unique frames: the index image stays constant and only CRAM entries change,
-  so a fade step costs a palette update instead of a pixel delta. The
-  analyzer cannot measure this yet.
-- Residency deadlines from `main.c`: the title block is retired and the
-  Stalker archive loads at CHARACTER_SELECT entry (`main.c:1595`); the
-  character-select block is retired and the 49,137-byte supplement
-  allocation loads at CHARACTER_CONFIRM entry (`main.c:1610`); CDDA track 2
-  starts only at the first `world.encounter_started` frame (`main.c:1809`),
-  after the Round 1 title. Every frontend animation therefore plays before
-  CDDA, and data-track reads stay legal through the whole frontend.
-- The two 78,848-byte blocks can be time-shared inside that window: play the
-  41,758-byte start transition from the retired title block, free it, then
-  stage confirm and Round 1 segments across one or both blocks. SACT and the
-  supplements only need to be resident before `encounter_started`, so their
-  load anchors may move later inside the pre-CDDA window. Whole-block reuse
-  still applies: one allocation per block lifetime, four-byte-aligned
-  subranges inside combined allocations.
-- If cadence-1 payloads exceed the 157,696 bytes of both blocks, fall back to
-  sequential pre-CDDA streaming: play the resident segment from one block
-  while the next loads into the other. A 78,848-byte load costs roughly 16 to
-  20 frames of CD time against a 240-frame confirm hold and 121-frame title
-  window, so slack is ample; schedule loads on hold frames to avoid visible
-  hitches.
-- Cadence-2 sizes are lower bounds for characterization only. The 31 unique
-  confirm frames came from 120 samples; cadence 1 can at most double unique
-  frames and will raise delta totals. Measure at cadence 1 before fixing the
-  block layout.
+- CORRECTION to an earlier claim in this section: CDDA does **not** start
+  after the Round 1 title. `cap_confirm_character()` sets
+  `world->encounter_started = 1` at character confirmation
+  (`capability_model.c:659`), and `main.c:1809` starts track 2 on that flag.
+  Ordering inside the confirm-entry frame is: release scene 1, load the
+  49,137-byte supplements (`main.c:1610`), then start CDDA (`main.c:1809`).
+  The confirm-entry frame therefore carries the **last legal data-track
+  read**. Both the character-confirm animation and the Round 1 title play
+  while CDDA is active, so pre-CDDA streaming is not available to them and
+  every payload they need must already be resident.
+- Both retired 78,848-byte blocks are already committed: block 0 holds the
+  64,118-byte Stalker archive from CHARACTER_SELECT (`main.c:1595`), block 1
+  holds the 49,137-byte boss supplements from CHARACTER_CONFIRM
+  (`main.c:1610`). Whole-block reuse strands the 14,730- and 29,711-byte
+  tails. There is no free frontend block; treat "fit it in the retired
+  blocks" as unavailable unless those archives are deliberately rescheduled.
+- Cadence-2 sizes are lower bounds for characterization only. Measure at
+  cadence 1 before fixing any layout.
 - CRAM fade updates must land in vblank. The scene path already rewrites the
   shared 256-colour bank per state change; reuse it and verify per-frame
   update size against the vblank budget on hardware, not only Yaba Sanshiro.
@@ -242,6 +242,69 @@ findings bound the remaining design:
   cold-boot working set, which already exhausted the bounded startup heap
   once in Yaba Sanshiro.
 
+## Frontend segmentation result 2026-08-17
+
+`tools/analyze_frontend_segments.py` (new) measures unique-frame transitions,
+separates palette-only steps from structural steps, reports changed-pixel
+bounding boxes, and greedily splits each window against a byte budget. It
+writes `data/frontend_segments.json`. `tools/analyze_frontend.py` was
+deliberately left untouched so its tracked report hash stays the checkpoint
+anchor; the repository already uses one analyzer per investigation.
+
+Verification of the new tool: its numpy RLE and coalesced-delta primitives
+reproduce `analyze_frontend.py` byte-for-byte on `start_transition`
+(strict 42,145 and coalesced 41,758, matching the tracked report). Do not
+change those primitives without repeating that comparison.
+`data/frontend_capture.json` still hashes `eefdf8c0...`, unchanged.
+
+Measured at cadence 2, fitted to 352x224:
+
+- `start_transition` 1770..1798: 15 runs over 9 distinct images, 116-colour
+  union, 42,102 bytes, one segment. Fits one block. Unchanged conclusion.
+- `character_confirm` 1800..2038: 47 runs over **31 distinct images**, so
+  frames repeat non-consecutively and a distinct-image cache beats
+  re-encoding every run. 188-colour union, 19 palette-only steps, 27
+  structural steps, 103,962 bytes total, splitting into 75,115 + 34,692.
+- `round_1_title` 2040..2160: 26 runs over 26 distinct images, 915-colour
+  union, 506,973 bytes, peak 66,055 changed pixels in one step (84% of the
+  screen). **Storage is infeasible**: a busy mid-window frame costs
+  78,848 raw + ~465 palette bytes, so one frame alone exceeds one
+  78,848-byte block, and its count/value RLE *expands* to ~84,500 bytes.
+  Cadence 1 roughly doubles this to about 1 MB.
+- The fade hypothesis was tested and **falsified**. Fades from black cannot be
+  a function of a dark base frame, so the test was repeated against the most
+  colourful frame in each window. That reference covers only 3/25 Round 1
+  frames and 4/46 confirm frames. Neither window is a global CRAM fade; do
+  not re-propose one.
+
+Inspecting the frames explains why storage is the wrong representation:
+
+- Frame 1800 is the four-panel character-select grid with the countdown.
+  Frame 1900 shows those panels collapsing into horizontal bands. Frame 2038
+  is black. The window is a **geometric panel wipe of an image that is
+  already resident** in the 78,848-byte character-select surface.
+- Frame 2040 is `ROUND 1 / CITY OF DESPAIR` text on black. Frame 2086 is the
+  **live gameplay scene** (street, barricade, HUD, Predator, aliens) with the
+  title text over it. Frame 2160 is the same scene with the text gone. The
+  915-colour union is the street scene, not title art.
+
+Architectural conclusion: neither window should ship as stored frames. Both
+are native compositions of assets the runtime already holds.
+
+- Character confirm is a VDP1 scaled-sprite or VDP2 line-scroll/window
+  transform of the resident selection surface. Payload is a per-frame
+  source/destination rectangle table, on the order of hundreds of bytes.
+- Round 1 title is the existing native scene (reconstructed VDP2 street,
+  VDP1 HUD overlays, actor archives) plus a small text overlay and a reveal.
+  The runtime already renders all of it; only the text overlay and the
+  reveal schedule are new.
+
+This removes the RAM blocker rather than working around it, and it is the
+only path consistent with "native SH-2 code, not stored video". The cost
+moves from megabytes of pixels to a small geometry/timing table, but the
+capture-exactness burden moves with it: the native transform must be proven
+against a cadence-1 capture frame by frame, not asserted.
+
 ## Resume in this order
 
 1. Verify branch, HEAD, clean status, the release manifest profile, and that no
@@ -251,23 +314,23 @@ findings bound the remaining design:
    is optional organization work, not a technical requirement. If relocating,
    preserve `.git` plus the ignored private ROM, dependency, emulator, audio,
    and capture inputs; verify the old checkout before removing anything.
-3. Extend `tools/analyze_frontend.py` first: parameterize the hardcoded
-   `windows` tuple for subsegment ranges and add adjacent-unique-frame colour
-   bijection (fade) detection, then inspect character-confirm frames 1800,
-   1840, 1880, 1920, 1960, 2000, and 2038 and Round 1 title subsegments.
-   Regenerating the report with new windows legitimately changes
-   `data/frontend_capture.json`; re-record its SHA-256 here. Do not use the
+3. Do not resume the stored-frame codec search; the segmentation result above
+   closed it. Extract the character-confirm panel-wipe **geometry** instead:
+   for each source frame, the visible source rectangle and destination
+   rectangle of each of the four selection panels, plus the countdown digit
+   state. Add it as a new deterministic analyzer beside
+   `tools/analyze_frontend_segments.py`, validated against the capture the
+   same way (report expected counts and a tracked hash). Do not use the
    ambiguous reverse-pen experiment as source truth.
-4. Choose the lossless representation per the 2026-08-17 plan review:
-   per-segment index spaces, CRAM-delta fades, coalesced pixel deltas for
-   structural changes. Fit payloads into the two 78,848-byte retired frontend
-   blocks by time-sharing them inside the pre-CDDA window, moving the Stalker
-   and boss-supplement load anchors later if they collide, or fall back to
-   sequential pre-CDDA segment streaming. Keep whole-block allocation and
-   four-byte alignment rules.
-5. Recapture the accepted frontend segments at cadence 1, generate archives
-   deterministically, integrate menu -> character confirm -> Round 1, and run
-   host, focused, full-route, then clean normal-release gates.
+4. Recapture character confirm at cadence 1 and confirm the geometry table
+   reproduces every source frame. A frame the transform cannot reproduce is
+   evidence the model is wrong, not a candidate for a stored-frame fallback.
+5. Bind the wipe to native VDP1 scaled sprites or VDP2 line-scroll/window
+   registers driven by that table, keeping the resident selection surface as
+   the only pixel source. Then compose the Round 1 title from the existing
+   native scene plus a text overlay and reveal schedule. Integrate
+   menu -> character confirm -> Round 1 and run host, focused, full-route,
+   then clean normal-release gates.
 6. Verify the complete first level audibly in a captured real-time run.
 7. Run the normal release on physical NTSC Saturn hardware with a digital pad
    and 32 Mbit RAM cartridge; verify crop/black bars, audio, KO, and Round 2.
@@ -287,6 +350,14 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run.ps1
 
 # Reuse the raw frontend capture and reproduce the tracked report:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\capture_frontend.ps1
+
+# Reproduce the frontend segmentation result (needs the raw capture present):
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\analyze_frontend_segments.py --report
+
+# Measure an ad-hoc window without touching the tracked report:
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\analyze_frontend_segments.py --window probe:1800:1900
 
 # Regenerate the ignored raw frontend capture from verified MAME/ROM inputs:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\capture_frontend.ps1 -Refresh
