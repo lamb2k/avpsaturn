@@ -81,6 +81,10 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "QSound event preparation failed with exit code $LASTEXITCODE."
         }
+        & '.\prepare_enemy_contact_audio.ps1' -PythonPath $PythonPath
+        if ($LASTEXITCODE -ne 0) {
+            throw "Enemy-contact audio preparation failed with exit code $LASTEXITCODE."
+        }
 
         $contentRoot = Join-Path $projectRoot 'build\avsp_cd'
         foreach ($metadataName in @('ABS.TXT', 'BIB.TXT', 'CPY.TXT')) {
@@ -180,6 +184,12 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Saturn melee PCM ISO verification failed with exit code $LASTEXITCODE."
         }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/AUDIO/HIT.PCM' '--equals' `
+            (Join-Path $contentRoot 'AUDIO\HIT.PCM')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn hit PCM ISO verification failed with exit code $LASTEXITCODE."
+        }
 
         # Add the locally rendered QSound reference as a real Saturn CDDA track.
         # It remains an ignored private artifact and is never linked as CPS2 code.
@@ -198,6 +208,8 @@ try {
             (Join-Path $contentRoot 'AUDIO\GUN.PCM')
         $meleeAudioFile = Get-Item -LiteralPath `
             (Join-Path $contentRoot 'AUDIO\MELEE.PCM')
+        $hitAudioFile = Get-Item -LiteralPath `
+            (Join-Path $contentRoot 'AUDIO\HIT.PCM')
         $manifestPath = Join-Path $projectRoot 'build\hardware_release_manifest.txt'
         [IO.File]::WriteAllLines($manifestPath, @(
             'target=sega-saturn-ntsc'
@@ -227,6 +239,13 @@ try {
             'event_audio_2_source_frames=2525-input,2528-audible,2578-stop'
             "event_audio_2_bytes=$($meleeAudioFile.Length)"
             "event_audio_2_sha256=$((Get-FileHash -LiteralPath $meleeAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+            'event_audio_3=scsp-pcm-capture-exact-predator-damage'
+            'event_audio_3_iso_path=/AUDIO/HIT.PCM'
+            'event_audio_3_format=signed-16-bit-big-endian-stereo'
+            'event_audio_3_sample_rate=44100'
+            'event_audio_3_source_frames=4243-health-loss,4246-audible,4274-stop'
+            "event_audio_3_bytes=$($hitAudioFile.Length)"
+            "event_audio_3_sha256=$((Get-FileHash -LiteralPath $hitAudioFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
         ))
     }
     finally {

@@ -5,6 +5,7 @@
 #include "generated/avsp_audio.h"
 #include "generated/avsp_enemy_animation.h"
 #include "generated/avsp_frontend_palette.h"
+#include "generated/avsp_hit_audio.h"
 #include "generated/avsp_hud.h"
 #include "generated/avsp_melee_audio.h"
 #include "generated/avsp_palette.h"
@@ -21,6 +22,9 @@
 #define SNAPSHOT_FIT_BYTES (SNAPSHOT_FIT_WIDTH * SNAPSHOT_HEIGHT)
 #define AVSP_CART_DRAM1_BASE ((unsigned char *)0x22600000)
 #define AVSP_CART_DRAM1_BYTES 0x200000
+#define AVSP_PCM_CHANNEL_WEAPON 0
+#define AVSP_PCM_CHANNEL_MELEE 1
+#define AVSP_PCM_CHANNEL_HIT 2
 #define BOSS_CEL_BYTES ((AVSP_BOSS_CEL_WIDTH * AVSP_BOSS_CEL_HEIGHT) / 2)
 #define BITMAP_SCENE_NONE (-1000)
 #define BITMAP_SCENE_CORRIDOR (-2)
@@ -87,6 +91,7 @@ static jo_img_8bits hud_prompt_image;
 static jo_img_8bits hud_heat_image;
 static jo_sound weapon_sound;
 static jo_sound melee_sound;
+static jo_sound hit_sound;
 static int player_idle_sprites[2];
 static int player_action_sprites[AVSP_PLAYER_ACTION_LAYERS];
 static int enemy_action_sprites[CAP_MAX_ENEMIES];
@@ -109,6 +114,8 @@ static int weapon_audio_channel_observed;
 static int melee_audio_pending;
 static int melee_audio_play_count;
 static int melee_audio_channel_observed;
+static int hit_audio_play_count;
+static int hit_audio_channel_observed;
 static int current_bitmap_scene;
 #ifdef AVSP_VISUAL_TEST
 static int visual_action_index;
@@ -166,7 +173,10 @@ static int load_action_audio(void)
                           AVSP_GUN_PCM_SAMPLE_RATE) &&
            load_pcm_audio(&melee_sound, AVSP_MELEE_PCM_FILE,
                           AVSP_MELEE_PCM_DIRECTORY, AVSP_MELEE_PCM_BYTES,
-                          AVSP_MELEE_PCM_SAMPLE_RATE);
+                          AVSP_MELEE_PCM_SAMPLE_RATE) &&
+           load_pcm_audio(&hit_sound, AVSP_HIT_PCM_FILE,
+                          AVSP_HIT_PCM_DIRECTORY, AVSP_HIT_PCM_BYTES,
+                          AVSP_HIT_PCM_SAMPLE_RATE);
 }
 
 static int load_player_action_sequences(void)
@@ -1094,7 +1104,10 @@ static void frame_callback(void)
         world.player.action_frame == 5 &&
         weapon_audio_played_shots < weapon_audio_pending_shot)
     {
-        jo_audio_play_sound(&weapon_sound);
+        if (jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_WEAPON))
+            jo_audio_stop_sound(&weapon_sound);
+        jo_audio_play_sound_on_channel(&weapon_sound,
+                                       AVSP_PCM_CHANNEL_WEAPON);
         weapon_audio_played_shots = weapon_audio_pending_shot;
     }
     if (weapon_audio_played_shots > 0 &&
@@ -1107,15 +1120,28 @@ static void frame_callback(void)
         world.player.action_frame == 3 && melee_audio_pending)
     {
         if (melee_audio_play_count > 0 &&
-            jo_audio_is_channel_playing(melee_sound.current_playing_channel))
+            jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_MELEE))
             jo_audio_stop_sound(&melee_sound);
-        jo_audio_play_sound(&melee_sound);
+        jo_audio_play_sound_on_channel(&melee_sound, AVSP_PCM_CHANNEL_MELEE);
         melee_audio_pending = 0;
         ++melee_audio_play_count;
     }
     if (melee_audio_play_count > 0 &&
         jo_audio_is_channel_playing(melee_sound.current_playing_channel))
         melee_audio_channel_observed = 1;
+    /* All four natural player-health losses start the same QSound voice 12
+       sample three source frames later. Bind that verified delay to HIT. */
+    if (world.player.action == CAP_ACT_HIT && world.player.action_frame == 3)
+    {
+        if (hit_audio_play_count > 0 &&
+            jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_HIT))
+            jo_audio_stop_sound(&hit_sound);
+        jo_audio_play_sound_on_channel(&hit_sound, AVSP_PCM_CHANNEL_HIT);
+        ++hit_audio_play_count;
+    }
+    if (hit_audio_play_count > 0 &&
+        jo_audio_is_channel_playing(hit_sound.current_playing_channel))
+        hit_audio_channel_observed = 1;
 #ifdef AVSP_VISUAL_TEST
     if (world.player.action == CAP_ACT_WALK)
         world.player.x = JO_TV_WIDTH_2;
@@ -1165,10 +1191,10 @@ static void frame_callback(void)
     draw_hud();
 #ifdef AVSP_ENCOUNTER_TEST
     /* Draw test evidence last so captured VDP1 actors cannot obscure it. */
-    jo_printf(0, 7, "ENCOUNTER %d KO %d/%d ACTIVE %d EXIT %d LVL %d",
-              world.encounter_state, world.enemies_defeated,
-              CAP_STAGE1_TOTAL_ENEMIES, active_enemy_count(),
-              world.stage_transitioned, world.level_completed);
+    jo_printf(0, 7, "PCM HIT %d CH %d SEEN %d",
+              hit_audio_play_count,
+              jo_audio_is_channel_playing(hit_sound.current_playing_channel),
+              hit_audio_channel_observed);
     jo_printf(0, 8, "PCM SHOT %d PLAYED %d CH %d SEEN %d",
               world.shots_fired, weapon_audio_played_shots,
               jo_audio_is_channel_playing(
@@ -1178,6 +1204,10 @@ static void frame_callback(void)
               melee_audio_play_count,
               jo_audio_is_channel_playing(melee_sound.current_playing_channel),
               melee_audio_channel_observed);
+    jo_printf(0, 10, "ENCOUNTER %d KO %d/%d ACTIVE %d EXIT %d LVL %d",
+              world.encounter_state, world.enemies_defeated,
+              CAP_STAGE1_TOTAL_ENEMIES, active_enemy_count(),
+              world.stage_transitioned, world.level_completed);
 #endif
 #ifdef AVSP_VISUAL_TEST
     jo_printf(0, 5, "VISUAL A%d P%02d/%02d E%d:%03d/%02d",
@@ -1206,6 +1236,8 @@ void jo_main(void)
     melee_audio_pending = 0;
     melee_audio_play_count = 0;
     melee_audio_channel_observed = 0;
+    hit_audio_play_count = 0;
+    hit_audio_channel_observed = 0;
     current_bitmap_scene = BITMAP_SCENE_NONE;
 #ifdef AVSP_VISUAL_TEST
     visual_action_index = 0;

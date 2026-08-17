@@ -198,9 +198,14 @@ Verified on August 17, 2026:
 - the encounter diagnostic reaches the eight-enemy clear with both weapon and
   melee `SEEN 1` latches set, proving both cues entered SCSP playback channels
   while the full animation working set remained allocated
+- all four natural player-health losses repeat the same QSound voice-12 start
+  three frames later; paired mute-all/voice-12 captures isolate the resulting
+  0.498957-second damage cue and bind it to native hit frame 3
+- the expanded encounter diagnostic reaches the boss with weapon, melee, and
+  player-damage `SEEN 1` latches on fixed PCM channels 0, 1, and 2
 
 Next proof gate: verify the full-width mapping and CD audio on physical Saturn,
-then extend the proven QSound isolation to impacts, enemies, boss, and
+then extend the proven QSound isolation to enemy impacts, boss, and
 voices while replacing the approximate route gaps with the remaining captured
 rooms, actors, and actions.
 

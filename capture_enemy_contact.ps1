@@ -10,6 +10,8 @@ $mame = Join-Path $projectRoot '.deps\mame\mame0289\mame.exe'
 $captureRoot = Join-Path $projectRoot '.deps\mame\enemy_contact'
 $requiredTimeline = Join-Path $captureRoot 'timeline.tsv'
 $requiredHudCapture = Join-Path $captureRoot 'hud_04433.png'
+$requiredQSoundWrites = Join-Path $captureRoot 'qsound_writes.tsv'
+$requiredMix = Join-Path $captureRoot 'mix.wav'
 
 if (-not (Test-Path -LiteralPath $mame)) {
     & (Join-Path $projectRoot 'setup_reference.ps1')
@@ -20,7 +22,9 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 if (-not $Refresh -and (Test-Path -LiteralPath $requiredTimeline) -and
-    (Test-Path -LiteralPath $requiredHudCapture)) {
+    (Test-Path -LiteralPath $requiredHudCapture) -and
+    (Test-Path -LiteralPath $requiredQSoundWrites) -and
+    (Test-Path -LiteralPath $requiredMix)) {
     Write-Host 'Reusing the natural enemy-contact capture.'
 }
 else {
@@ -41,6 +45,7 @@ else {
     Push-Location $projectRoot
     try {
         & $mame 'avspu' '-rompath' '.' '-video' 'none' '-sound' 'none' `
+            '-samplerate' '44100' '-wavwrite' '.deps\mame\enemy_contact\mix.wav' `
             '-nothrottle' '-skip_gameinfo' '-snapshot_directory' '.deps\mame' `
             '-autoboot_delay' '0' `
             '-autoboot_script' '.\tools\mame_capture_enemy_contact.lua'

@@ -157,9 +157,19 @@ and 144,752 bytes of stereo SCSP PCM. Native playback begins at action frame 3;
 rapid attacks stop and retrigger their own previous melee channel, matching the
 source voice-reuse constraint without consuming all six Jo PCM slots.
 
-The production path must repeat this method for impact, enemy, boss,
-and voice events, keep long music on CDDA, and allocate short cues across the
+The production path must repeat this method for enemy impacts, boss, and voice
+events, keep long music on CDDA, and allocate short cues across the
 six bounded Jo/SGL PCM channels.
+
+The native channel budget is explicit rather than first-free: weapon uses
+channel 0, melee channel 1, and player damage channel 2. Channels 3 through 5
+remain reserved for enemy, boss, and voice events. A cue may retrigger only its
+own channel, preventing action bursts from consuming the remaining pool.
+
+The natural alien-contact route proves the player-damage sound independently:
+each of four health losses is followed three frames later by the same QSound
+voice-12 sample start. A paired mute-all/voice-12 capture isolates 0.498957
+seconds (88,016 bytes) of stereo SCSP PCM, bound to native hit frame 3.
 
 ## What is exact and what is not
 
@@ -184,6 +194,8 @@ Exact in the current milestone:
   timing, Saturn PCM conversion, ISO payload, and native action-frame binding
 - isolated two-voice Predator melee composite with three verified starts,
   capture-derived action delay, and bounded native channel retriggering
+- repeated natural player-damage voice transaction, isolated waveform, and
+  capture-derived hit-frame binding
 
 Still approximate or incomplete:
 
@@ -193,7 +205,7 @@ Still approximate or incomplete:
 - complete attract-mode, menu-transition, and character-select animation
 - full animation between the verified route key states
 - remaining HUD states, exact scroll behavior, level triggers, combat, and AI
-- remaining isolated QSound impact, enemy, boss, and voice cues
+- remaining isolated QSound enemy-impact, boss, and voice cues
 - native HUD safe-area placement and arcade-derived camera behavior for CRT
   overscan variability
 

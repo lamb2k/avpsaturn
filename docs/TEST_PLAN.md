@@ -82,6 +82,15 @@ Round 2 title surfaces. No data-track reads occur after Stage 1 CDDA begins.
   Repeated B presses must retrigger without exhausting the six PCM slots.
   The emulator encounter diagnostic currently reaches `KO 8/8` with both
   weapon and melee `SEEN 1`; physical listening remains pending.
+- Require all four natural player-health events to repeat QSound sample
+  `8016:e690` on voice 12 three frames later. Verify `/AUDIO/HIT.PCM` is
+  88,016 bytes with SHA-256
+  `85ac8562bf83b87e1ffd858f5775271d4e4165105074e01fe008e34cae059ba6`,
+  then require the encounter diagnostic hit `SEEN 1` latch. The current
+  emulator route reaches the boss with 15 hit plays and `SEEN 1`.
+- Require the fixed SCSP budget to keep weapon, melee, and player damage on
+  channels 0, 1, and 2 respectively, leaving channels 3 through 5 available
+  for the remaining enemy, boss, and voice cues.
 - Add a comparison capture against the equivalent MAME route.
 
 Status: in progress. A dense 361-sample capture validates the active CPS2 object
