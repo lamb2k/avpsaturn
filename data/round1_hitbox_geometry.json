@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "classification": "capture-exact overlay geometry; native collision replacement missing",
+  "purpose": "White debug boxes paired with their white pivot markers and actor-state context.",
+  "observations": [
+    {
+      "frame": 13700,
+      "actor": "stalker",
+      "actor_address": "0xffb500",
+      "image": ".deps/mame/round1_debug_hitboxes/overlay_13700.png",
+      "screen_box": {
+        "x0": 216,
+        "y0": 103,
+        "x1": 273,
+        "y1": 180,
+        "width": 58,
+        "height": 78
+      },
+      "screen_pivot_marker": {
+        "x": 232,
+        "y": 184
+      },
+      "pivot_relative_candidate": {
+        "left": -16,
+        "top": -81,
+        "right": 41,
+        "bottom": -4
+      },
+      "actor_state_context": {
+        "w10": 894,
+        "w14": 234,
+        "w18": 234,
+        "script_pointer": "0x06d418",
+        "health_word": 0
+      }
+    },
+    {
+      "frame": 13700,
+      "actor": "player",
+      "actor_address": "0xffa240",
+      "image": ".deps/mame/round1_debug_hitboxes/overlay_13700.png",
+      "screen_box": {
+        "x0": 335,
+        "y0": 112,
+        "x1": 380,
+        "y1": 191,
+        "width": 46,
+        "height": 80
+      },
+      "screen_pivot_marker": {
+        "x": 352,
+        "y": 192
+      },
+      "pivot_relative_candidate": {
+        "left": -17,
+        "top": -80,
+        "right": 28,
+        "bottom": -1
+      },
+      "actor_state_context": {
+        "w10": 1257,
+        "w14": 264,
+        "w18": 264,
+        "script_pointer": "0x12d668",
+        "health_word": 48
+      }
+    },
+    {
+      "frame": 14400,
+      "actor": "chrysalis",
+      "actor_address": "0xffa3c0",
+      "image": ".deps/mame/round1_debug_hitboxes/overlay_14400.png",
+      "screen_box": {
+        "x0": 176,
+        "y0": 184,
+        "x1": 271,
+        "y1": 199,
+        "width": 96,
+        "height": 16
+      },
+      "screen_pivot_marker": {
+        "x": 224,
+        "y": 192
+      },
+      "pivot_relative_candidate": {
+        "left": -48,
+        "top": -8,
+        "right": 47,
+        "bottom": 7
+      },
+      "actor_state_context": {
+        "w10": 1110,
+        "w14": 297,
+        "w18": 297,
+        "script_pointer": "0x13dc88",
+        "health_word": 248
+      }
+    },
+    {
+      "frame": 14400,
+      "actor": "player",
+      "actor_address": "0xffa240",
+      "image": ".deps/mame/round1_debug_hitboxes/overlay_14400.png",
+      "screen_box": {
+        "x0": 331,
+        "y0": 101,
+        "x1": 370,
+        "y1": 192,
+        "width": 40,
+        "height": 92
+      },
+      "screen_pivot_marker": {
+        "x": 352,
+        "y": 192
+      },
+      "pivot_relative_candidate": {
+        "left": -21,
+        "top": -91,
+        "right": 18,
+        "bottom": 0
+      },
+      "actor_state_context": {
+        "w10": 1141,
+        "w14": 264,
+        "w18": 264,
+        "script_pointer": "0x12e268",
+        "health_word": 48
+      }
+    }
+  ],
+  "remaining_gate": "Validate pivot-relative candidates across all Round 1 poses and actor types, then replace inferred 21/55/97 and Stalker contact data in native collision code."
+}
