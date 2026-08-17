@@ -158,8 +158,10 @@ Gate: the instrumented build boots `avspu`, exposes P4, and emits a write trace.
 
 ## Phase 1: turn on the game's own tools
 
-Cold boot with debug DIPs held from frame 0, driving the existing deterministic
-input route rather than a save state.
+Cold boot in Development hardware mode with the active-low debug DIPs held from
+frame 0, inject the software-switch bytes once after initialisation because the
+retail ROM removed the DIP-to-RAM copy, and then drive the existing
+deterministic input route. Do not rewrite the switch bytes every frame.
 
 1. Capture **hitboxes** across Round 1 for the player, street aliens, Stalkers
    and Chrysalis.
@@ -167,11 +169,12 @@ input route rather than a save state.
 3. Capture the **entity and player info monitors**; these display struct fields
    with meaning attached, which labels the 192-byte struct far faster than
    diffing values.
-4. Use the **entity spawner** to summon each Round 1 actor in isolation and
-   record its full animation set, instead of waiting for natural spawns.
+4. Optionally use the **entity spawner** to validate a specific actor in
+   isolation. It is not the animation source and is not a dependency: extract
+   complete animation sets from ROM script tables.
 
 Deliverables: hitbox and collision datasets per actor and per room, plus a
-labelled actor struct map.
+map of only the actor fields consumed by the native runtime.
 
 Gate: every Round 1 actor has real hitboxes recorded, replacing the inferred
 contact offsets currently used for the boss (21/55/97) and Stalkers.
@@ -199,9 +202,10 @@ truth and existing captured events as labels.
 **2c. Stage data.** Spawn tables, camera bounds, scroll parameters, room
 triggers and transitions for Round 1.
 
-**2d. AI.** From the Phase 0 write traces, find the routines that write the
-script pointer and state fields, disassemble them, and translate to C. Record
-RNG use explicitly the moment it appears.
+**2d. AI.** Use stock MAME debugger watchpoints first to find the routines that
+write the script pointer and required state fields, disassemble them, and
+translate them to C. Record RNG use explicitly the moment it appears. Use the
+custom-build tracer only if stock watchpoints prove inadequate.
 
 Gate for the phase: Round 1's animation, collision, spawn and AI data all exist
 as extracted tables plus translated routines, with the pixel-exact pose test
@@ -209,15 +213,27 @@ passing.
 
 ## Phase 3: native reimplementation
 
+- Preserve the working Saturn platform infrastructure: SH-2 build and ISO/cue
+  pipeline, VDP1/VDP2 setup, 352x224 full-width mapping, palette allocation,
+  HUD, camera, CDDA/SCSP paths and cartridge-allocation discipline. This is a
+  replacement of gameplay and animation data sources, not a platform rewrite.
 - Build a tile pipeline feeding VDP1 from the already-reconstructed graphics
-  region, replacing the pose archives. Expect a large memory win: poses share
-  tiles, while the current archives store each pose whole.
-- Implement the script interpreter on SH-2: duration, flip, assembly pointer,
-  offsets, loops and jumps.
-- Replace the hand-written combat model with the translated AI routines.
-- Drive collision from the real hitboxes.
+  region, replacing the pose archives. Ship only the unique tile working set
+  referenced by Round 1 scripts, not the 16 MiB reconstructed source region.
+- Replace `player_pose_for_frame()` and the generated action tables with a
+  small SH-2 script interpreter: duration, bit-15 flip, assembly pointer, X/Y
+  offsets, advance, backward jumps and termination.
+- Convert sprite assemblies into either load-time composed cels or per-tile
+  VDP1 commands. Keep both options open until 60 Hz hardware measurements show
+  the RAM, CPU and command-table tradeoff.
+- Translate the 68k routines that write actor state into C functions over the
+  native actor struct, replacing the hand-written enemy logic in
+  `cap_world_step()`.
+- Convert real hitboxes into native collision tables and stage tables into
+  spawn, camera, scroll, room-trigger and transition data.
 - Re-check the cartridge budget. Phase overlays may become unnecessary once
-  poses collapse into shared tiles; do not assume either way, measure.
+  poses collapse into shared tiles. The memory win and removal of phase
+  overlays are predictions until real tile reuse is measured.
 
 ## Phase 4: validation
 
@@ -230,15 +246,19 @@ passing.
   parity explicitly tolerates. Widen to per-frame only where an event-level
   mismatch needs localising.
 - Keep the existing deterministic captures as regression oracles.
+- Keep the verified native route (eight street KOs, Chrysalis, then Round 2 in
+  4,485 model frames) and the 12,000-frame soak as regression tests for the
+  translated behaviour.
 - Then the existing gates in `docs/TEST_PLAN.md`: host tests, focused profile,
   full route, clean normal release, audible run, physical Saturn.
 
 ## Ordering and rationale
 
-Phase 0 then 1 first, because they are cheap and they retire the largest
-approximations. Phase 2 is the bulk of the work. Phase 3 is mechanical once the
-tables exist. Phase 4 runs continuously from the moment the harness exists;
-build it as early as Phase 2 if it can be afforded.
+Phase 1 is first because it is working in stock MAME and retires the largest
+collision approximations cheaply. Phase 2 is the bulk of the work. Phase 0 is
+only a contingency if stock watchpoints are inadequate. Phase 3 follows once
+the decoder is proven. Phase 4 runs continuously from the first extracted
+events.
 
 Do not start Phase 3 before the pixel-exact pose test passes. Reimplementing on
 top of a misread table format is the most expensive available mistake.

@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "purpose": "Private regression evidence for ROM-driven functional parity; raw captures are ignored and are not Saturn assets.",
+  "visual_review": {
+    "hitboxes": [
+      "player",
+      "street aliens",
+      "Stalker",
+      "Chrysalis"
+    ],
+    "collision": [
+      "street rooms",
+      "Chrysalis room",
+      "post-boss boundary"
+    ]
+  },
+  "modes": {
+    "hitboxes": {
+      "classification": "capture-exact debug evidence",
+      "debug_row2_mask": "80",
+      "seed_active_from_frame": 1230,
+      "round1_first_frame": 4201,
+      "round1_last_frame": 15000,
+      "cadence": 1,
+      "samples": 10800,
+      "actor_state_bytes": 124416000,
+      "actor_state_sha256": "3a8a76751e9a5a0f857afeb35cdc2737f40cec8fea1cb2cf05241c908de24a7a",
+      "evidence": {
+        "street_aliens_and_player": {
+          "raw_path": ".deps/mame/debugoverlay_hitboxes/coldboot_03000.png",
+          "bytes": 30997,
+          "sha256": "f11787c967c17b768b4bc21327a4fd61ba30b8511a5a334241931eda5f4b2f32"
+        },
+        "stalker_and_chrysalis": {
+          "raw_path": ".deps/mame/round1_debug_hitboxes/overlay_13700.png",
+          "bytes": 23845,
+          "sha256": "a33df1f2c069e3b7796713f7321a220b1ed3f1ca9ba1003df3fdb37a7ad73667"
+        },
+        "chrysalis_fight": {
+          "raw_path": ".deps/mame/round1_debug_hitboxes/overlay_14400.png",
+          "bytes": 22226,
+          "sha256": "afb3004acafe2cc5f189661259904ef11a6b5d487745003da44d83763aa17405"
+        },
+        "round1_results": {
+          "raw_path": ".deps/mame/round1_debug_hitboxes/overlay_15000.png",
+          "bytes": 22366,
+          "sha256": "8a1d47142988b47260d92f45fee439f7325d70e8dcf723e30bb78479f502035f"
+        }
+      }
+    },
+    "collision": {
+      "classification": "capture-exact debug evidence",
+      "debug_row2_mask": "40",
+      "seed_active_from_frame": 1230,
+      "round1_first_frame": 4201,
+      "round1_last_frame": 17791,
+      "cadence": 30,
+      "samples": 454,
+      "actor_state_bytes": 5230080,
+      "actor_state_sha256": "6731a17d28186f84097ca243915d7911599afcae8548bebd3e74dcc2bc1df1a3",
+      "evidence": {
+        "first_street_room": {
+          "raw_path": ".deps/mame/debugoverlay_collision/coldboot_03000.png",
+          "bytes": 22790,
+          "sha256": "5713252f00887e6a55a5fa6017be9fa71cf0cd61cff7d4885233bc51583d38e2"
+        },
+        "chrysalis_fight": {
+          "raw_path": ".deps/mame/round1_debug_collision/overlay_17491.png",
+          "bytes": 23404,
+          "sha256": "d79f6f5b45ab92b1cb05acbbbc153a180d9848d9e31bfe93c3e32481ac91e4d6"
+        },
+        "post_boss_dialogue": {
+          "raw_path": ".deps/mame/round1_debug_collision/overlay_17791.png",
+          "bytes": 18630,
+          "sha256": "e8560325f966d46018ceddd1cf059080ffd49058fa4d66877e32ee0de04f49cc"
+        }
+      }
+    }
+  },
+  "remaining_gate": "Decode the displayed boxes into numerical actor-local geometry and replace the inferred contact schedules 21/55/97."
+}
