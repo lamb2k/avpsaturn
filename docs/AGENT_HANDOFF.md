@@ -1,7 +1,7 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-18 EDT (Phase 2 static-translator coverage: the 28-assembly boss
-pose set proven pixel-exact and position-scoped; Phase 1 stabilization checkpoint committed)
+Updated: 2026-08-18 EDT (master-plan intercept: full object-emission chain
+verified, street-alien five-slot gate next, applicable MSHvSF probes integrated)
 
 **Goal audit: 0/7 final conditions closed.** The condition-by-condition index
 is now at [PARITY_PLAN.md#goal-progress-index](PARITY_PLAN.md#goal-progress-index).
@@ -9,6 +9,86 @@ The current capture-derived native route remains a useful regression baseline,
 but it does not satisfy the ROM-derived animation, collision, AI or stage-table
 requirements in `GOAL.md`. Do not describe the project as functionally parity
 complete or hardware-ready.
+
+## Current resume point: master plan intercept
+
+The plan of record is now
+[`PARITY_PLAN.md#master-execution-plan-2026-08-18`](PARITY_PLAN.md#master-execution-plan-2026-08-18).
+Its order supersedes every older resume list in this handoff.
+
+**Resume with one focused proof, not another broad disassembly pass.** The
+static chain has been checked against
+`.deps/mame/actorprobe/disasm_full.txt`:
+
+```text
+0xA99DC list builder (A1=0x708000; header, emitters, trailer)
+  -> per-group emitters 0xAA886..0xAA8EA
+  -> 0xA9B48 common actor loop
+  -> 0xA9B80 actor-type jump table
+  -> per-type handler
+  -> Family 1 body emitter 0xAA4A4..0xAA598
+     or Family 2 effect emitter 0xAA644..0xAA7F8
+```
+
+That proves where and how the CPS2 object list is built. It does **not** yet
+prove the street alien's exact group/type path, Family-1 variant, per-part
+source layout, or the actor `+0x1c/+0x50` relationship to
+`0x12FE06..0x12FEEE`. The frame-4253 five-slot gate is still red.
+
+### Immediate trace and gate
+
+1. Start from the verified frame-4200 state under stock MAME 0.289 `-debug`.
+2. Install 20 write watchpoints for object-buffer word indices 80..99,
+   addresses `0x7080A0..0x7080C6` inclusive. This stays under the empirical
+   34-watchpoint ceiling.
+3. Run through frame 4253 and record `(frame, pc, address, width, data)` plus
+   the live source/actor context needed to identify `A0`, `A4=0xFFA000`, and
+   `A6`. If the debugger action cannot print every address register, combine
+   the writer PCs with the synchronized actor/work-RAM dump and static jump
+   table; do not widen into another address sweep.
+4. Resolve the street alien's group-list entry, type byte at actor `+0x08`,
+   `type>>1` jump-table target, Family-1 sibling, and `A0` source long/deltas.
+5. Produce a deterministic analyzer that regenerates all four words at slot
+   indices 80/84/88/92/96, not only the codes. The exact entries are
+   `[814f,009e,4df8,0131]`, `[810f,00ae,4ef0,0531]`,
+   `[815b,007b,4b04,2531]`, `[814b,00ab,4a88,1431]`, and
+   `[816b,006b,4958,0131]`; ordering, bank, and frame relation also remain part
+   of the gate.
+6. Run the same derivation on one different-facing or different-palette frame.
+   It must derive that frame's values and must fail if frame-4253 constants are
+   hard-coded.
+
+Only after both frames pass may the selector-12/street-alien decoder be
+promoted or committed. A writer PC sequence without source-data derivation is
+discovery evidence, not the gate.
+
+### Port interpretation correction
+
+Do **not** recreate the raw CPS2 `0x708000` buffer on Saturn as an end in
+itself. Its four-word records, 10-bit coordinate packing, flags, and bank flip
+are the CPS2 renderer contract. They are the extraction oracle used to prove
+the ROM/source decoder. Normalize them to semantic object fields—position,
+tile/code identity, palette, dimensions, flip, priority, order, and
+lifetime—then emit the equivalent native VDP1/VDP2 representation. The Saturn
+side must reproduce behavior and presentation, not the arcade machine's memory
+encoding.
+
+### Marvel research applied to AvP
+
+The isolated MSHvSF research lane is preserved at
+`codex/mshvsf-reference-lane` checkpoint `43e88ac`; it is not merged into this
+branch. Its immediate contribution is evidence discipline: every mapping must
+name source address/data/function, destination sink, test, falsification,
+confidence, and uncertainty. The earlier invalid comparison of the
+`0x0169da` video-RAM tilemap writer against object RAM is the concrete reason
+to enforce that rule.
+
+At Saturn-integration time, add the MSHvSF-derived AvP probes for cartridge and
+work-RAM lifetimes, VDP1 command/VRAM pressure, VDP2 and SCSP usage, DMA/CD
+access, media ownership, and a semantic normal-hit event fixture. MSHvSF
+Hadouken, fighter timing, addresses, package sizes, module formats, and
+untraced hardware ownership are not AvP facts and do not block the five-slot
+gate.
 
 **Position audit: scoped PASS; full pixel-exact coverage OPEN.**
 `tools/verify_position_gate.py` compares the previous frame's actor world
@@ -137,12 +217,22 @@ Read this file before taking any action. The user wants a private, capture-faith
 ## Repository state
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
-- Branch: `prototype/private-capability-test`
+- Current documentation/planning branch: `codex/avp-master-plan`, created from
+  AvP checkpoint `5327c3a`. Run `git rev-parse HEAD` for the current planning
+  commit after this handoff is committed.
+- AvP production baseline remains `prototype/private-capability-test` at
+  `5327c3a`; this planning branch does not rewrite its history.
+- MSHvSF research remains isolated on `codex/mshvsf-reference-lane` at
+  `43e88ac`. Do not merge that branch into AvP; promote only an AvP-specific
+  probe/result through a deliberate AvP commit.
 - Phase 1 (stabilization) checkpoint: `c1de5f5` (`Stabilize Chrysalis
-  ROM-composition slice (Phase 1 checkpoint)`), the current HEAD. It commits the
+  ROM-composition slice (Phase 1 checkpoint)`). It commits the
   ROM-composition runtime change plus the promoted generators, C90 pose-record
   interpreter and host test, self-contained pose gate, reference interpreter, and
-  work-RAM play-sequence trace. Run `git rev-parse HEAD` for the hash.
+  work-RAM play-sequence trace. It is an ancestor, not the current HEAD.
+- Street-alien extraction checkpoint: `5327c3a` (`Record street-alien
+  record/assembly extraction checkpoint (Phase 2a)`), the AvP baseline from
+  which this planning branch was created.
 - Goal-audit checkpoint: `068ff6b` (`Audit goal progress and harden validation
   gates`), following position-gate implementation `483f088` and handoff command
   update `020aa5b`.
@@ -728,6 +818,9 @@ The opcode dumper itself remains:
 
 ### Street-alien extraction checkpoint (Phase 2a, second actor)
 
+Checkpoint commit: `5327c3a` (the clean extraction boundary; confirm with
+`git rev-parse HEAD`). Documented 2026-08-18.
+
 This generalises the ROM animation-record walker and the assembly-discovery
 path — it reuses `tools/decode_avsp_animation_scripts.py` against a second
 actor. It does **not** yet exercise the planned ahead-of-time 68000 code
@@ -786,11 +879,268 @@ the record path generalises. Findings from read-only scans of the existing
   re-capture before its programs can be walked. The **stalkers**
   (`0xFFA240`/`0xFFA300`) already have the full dump set and follow the same path.
 
-Next for the street-alien: disassemble the assembly renderer to establish the
-selector-12 field semantics (do not guess from the raw prefix), then build
-per-pose ROM oracles and gate the 28 assemblies the same way as the boss.
-Condition 1 stays OPEN until a second actor's ROM-decoded assembly reproduces a
-captured pose pixel-for-pixel; nothing here weakens that.
+Next for the street-alien, and disassembly progress. Two corrections to the
+earlier note, then the current evidence boundary.
+
+**Correction 1 — the object is a 4-word CPS2 object descriptor, not a 2-word
+pair.** The proven extractor (`tools/extract_avspu_stage1.py`,
+`decode_object_entries`) reads each object as four consecutive 16-bit words
+`[x, y, code, attribute]`: `screen_x = (x & 0x3FF) - VISIBLE_LEFT`,
+`screen_y = (y & 0x3FF) - VISIBLE_TOP` with `VISIBLE_LEFT=64`,
+`VISIBLE_TOP=16`; priority = `(x >> 13) & 7`; `tile_code = code +
+((y & 0x6000) << 3)`; `attribute` bits 0-4 = colour, bits 8-11 = X-tiles-1,
+bits 12-15 = Y-tiles-1, bit 5 = flip-x, bit 6 = flip-y. `STAGE1_OBJECT_GROUPS`
+confirms actors occupy 4-word object slots. The earlier "each entry is a
+(tile-code, position) word pair, code + 0x1000" reading is wrong.
+
+**Correction 2 — these are three tilemap/video-RAM handlers, and `0x016b3c` is a valid third one.** `0x0169da`, `0x016a88` and `0x016b3c` all write **two-word tilemap cells** into CPS2 **graphics/video RAM** (`0x900000–0x92FFFF`); they do **not** write four-word CPS2 **object-RAM** sprites (object RAM is at `0x700000–0x701FFF` and `0x708000–0x709FFF`). `0x0169da` is the 64-cell variant (destination base `0x904000`, `andi #$3f`, setup `jsr $b2672`; reached by `jsr $169da.l` from `0x086dcc` and `0x086e00`); `0x016a88` is the 32-cell variant (destination base `0x908000`, `andi #$1f`, setup `jsr $b2bc2`; reached by `jmp $16a88.l` from `0x073f52` and `0x095f88`); `0x016b3c` is a valid third related handler. All read the assembly pointer from record+4. The `+0x1000` operation is proven **only** for this tilemap-writing path. The selector dispatch is **not** a
+`cmpi.w` cascade (0 sites for #6/#12 in the whole 2MB); it is a per-selector
+actor-list mechanism (0x16924–0x169ca push the actor onto per-type stacks at
+`($6eXX,A5)`) plus a jump table (0x169cc).
+
+**Established this session (read-only):**
+- Selector 12 is the *dominant* street-alien selector: scanning every frame's
+  current assembly gives `{12: 1770, 6: 202, 2: 101}`. The walk clip is
+  selector-6; attack/hit/KO are largely selector-12.
+- The animation-script pointer is a full 32-bit value at actor `+0x1C/+0x1E`;
+  the JSON `animation` field is its low word (`w1e`) — the 335/335 match above
+  is on that low word. The current record is read at the exact script pointer
+  (it already lands on a record; no 16-byte re-alignment), and its `+4` is the
+  current assembly pointer.
+- The selector-12 assembly is **not** a flat `[sel, budget, count, ...]` list.
+  Assembly `0x12F5DE` (frame 4253, an attack pose) is a repeating 15-word block:
+  `[0x000c, 0x0002, 0x0009, 0x2210, 0x002a, 0xffb9, 0x0006, 0x463d, 0x0002,
+  0x0018, 0x2710, 0x0024, 0xfffa, 0xfffe, 0x4605]`.
+- The selector-12 assembly words are **not** the final object fields (for frame
+  4253 the alien tiles carry codes `0x4600`/`0x4bf0`/`0x47bd`, attributes
+  `0x5431`/`0x0131`/`0x1231`; none appears verbatim in the assembly). The
+  transform is a **self-contained stream rewrite in the handler**, NOT the
+  boss's offset-table (`0x1FD1C8`) / layout-window path.
+
+**PROVEN tilemap handler + entry reads (from the disassembly, `disasm_full.txt`
+basepc 0):** `0x0169da` is a tilemap/video-RAM writer (destination base
+`0x904000`, `jsr $b2672`); `0x016a88` is the 32-cell sibling (base `0x908000`,
+`jsr $b2bc2`); `0x016b3c` is a valid third related handler. The algorithm below
+is **proven tilemap behavior** — it emits two-word cells into video RAM, NOT
+four-word CPS2 object-RAM sprites, so it is the wrong sink for a sprite pose
+cross-check. Dispatch (0x016924–0x0169ca) routes by the actor-type byte `(A6)`,
+pushing the actor onto per-type lists at `($6eXX,A5)`; the assembly selector
+(word 0) is read and discarded, not a dispatch key at this level. The handler
+reads the assembly pointer from `record+4` (`016a1a`) and then:
+
+```
+016a1e: move.w (A1)+, D6     ; assembly[0] = selector (read, discarded)
+016a20: move.w (A1)+, D6     ; assembly[1] = OUTER loop count (tilemap rows)
+016a22: move.w (A1)+, D5     ; assembly[2] = INNER loop count (cells/row)
+016a28: move.w D5, D0
+; per entry (inner loop, 016a2a..016a58):
+016a2a: move.w (A1)+, D1     ; P = next assembly word
+016a2c: bmi    $16a80        ;   P < 0  -> blank-slot path
+016a2e: addi.w #$1000, D1    ;   P >= 0 -> P += 0x1000  (tile code, absolute)
+016a32: move.w D1,  (A0)+    ;   emit (P + 0x1000)
+016a34: move.w (A1)+,(A0)+   ;   emit Q (verbatim)
+016a36: ... andi #$3f / bank-rollover ... dbra D0
+016a7a: dbra D6              ; outer loop: tilemap destination advances to the
+                             ;   next row (video-RAM addressing, +0x40)
+; blank-cell path (016a80):
+016a80: move.w (A1)+, D1     ;   discard one assembly word
+016a82: lea    ($4,A0), A0   ;   skip 4 bytes = 2 tilemap words (one empty cell)
+016a86: bra    $16a36
+```
+
+So each entry is a **2-word group (P, Q)** written to the video-RAM tilemap:
+`P >= 0` → the tilemap receives `(P+0x1000)` then `Q` (a two-word cell);
+`P < 0` → one assembly word is consumed and A0 advances four bytes (two
+tilemap words = one skipped cell). Header = `[selector, outer_count,
+inner_count]`; the data cursor starts at assembly word 3. This is the exact
+word→**tilemap-cell** mapping; it is read from the disassembly, not inferred,
+and it is **proven tilemap behavior only** — it does not describe CPS2
+object-RAM sprite emission.
+
+**Frame-4253 object comparison — INVALID as a selector-12 sprite-decoder gate
+(wrong sink).** I emulated the `0x0169da` tilemap algorithm above and compared
+its output to the captured `objram_active_04253.tsv`. That comparison is **not a
+valid sprite-decoder gate**: `0x0169da` writes two-word cells into **video RAM**
+(destination base `0x904000`), whereas the captured street-alien objects live in
+**CPS2 object RAM** (`0x700000–0x701FFF` / `0x708000–0x709FFF`). Comparing a
+tilemap writer's output to object RAM tests the **wrong renderer**, so the
+earlier "RED" result proves nothing about the sprite path. The `+0x1000`
+transform is proven **only** for the tilemap path and must not be applied to
+object-RAM fields.
+
+**Unproven lead (sprite path — keep, do not bake in):** the captured frame-4253
+object codes (slots `[80,88,92,96]` = `0x4df8 0x4b04 0x4a88 0x4958`, plus slot
+21 `0x4ef0`) appear **verbatim** — not in `+0x1000` form — in the ROM at
+`0x12FE06–0x12FEEE` in a `[code, attr_template, delta]` 3-word structure, in
+slot order 20–24: `0x4df8 0x0110 0x0000 | 0x4ef0 0x0510 0x0000 | 0x4b04 0x2510
+0x0038 | 0x4a88 0x1410 0x0004 | 0x4958 0x0110 0x0000`. The attr high bytes
+(`01 05 25 14 01`) match the captured attrs (`0x0131 0x0531 0x2531 0x1431
+0x0131`); the attr low byte is `0x10` in ROM vs `0x31` captured. This is a
+**strong lead for the actual sprite path**, but its format and pointer
+relationship are **unproven** and must not be baked into the das decoder.
+
+**Correct next investigation (replaces the `0x0169da`→objram reconciliation):**
+locate the real 68000 routine that writes frame 4253's street-alien entries into
+**CPS2 object RAM**, using stock MAME watchpoints on the object-RAM word
+addresses for slots 80/84/88/92/96 (both `0x700000` and `0x708000` banks, until
+the active write bank is proven); associate every captured X, Y, code and
+attribute word with a real writer PC; trace that writer back to its
+actor/state dispatcher, the per-part source pointers, and the animation
+record/assembly that selects them; and find the pointer relationship to
+`0x12FE06–0x12FEEE`. **No selector-12 decoder is promoted, extended or
+committed** until all five captured object slots (`80/84/88/92/96`) reproduce
+exactly (slot indices, order, four words each, bank, frame relationship) through
+the *correct object-RAM* sink. A documentation-only checkpoint is acceptable for
+restart safety, but no selector decoder. Condition 1 stays OPEN.
+
+**Object-RAM location hunt — session findings (still OPEN, do not treat as
+resolved):** the `0x700000`/`0x708000` object-RAM bases quoted above are **not
+confirmed** by empirical write-watchpoint probing (MAME 0.289, state loaded at
+frame 4200, `debug:wpset` write watchpoints on word 82 = code, run to ~frame
+4254):
+- **Object-bank select register = `0x8040e0`** (word, bit 0 = bank). It
+  **alternates every frame**: 4250→1, 4251→0, 4252→1, **4253→0 (`:objram1`
+  active)**, 4254→1. Frame 4253 displays from bank 0; the writer may target the
+  *other* (back) bank — do not assume active == write bank.
+- **68000 work RAM = `0xFF8000–0xFFFFFF`** (actors at `0xFFA000`, confirmed).
+  All CPS-A registers (`cps_a_regs_*`) point at **video-RAM** bases
+  (`0x9000xx`), never object RAM.
+- **`0x708000+0xA4` (word 82) is the only object-RAM-ish write found near
+  `0x708000`**: it fires every frame with a **constant `data=0x00000020`**,
+  writer **PC `0x000AA760`**. **Now identified** (see the proven emitter
+  below): it is one part's attr low word from the per-actor sprite emitter
+  (`move.w #$20, D2; bsr $aa740` at `0xAA7F0`). It is **not** the street-alien
+  body (which carries code `0x4df8`, x `0x814f`) — that body is emitted by a
+  different variant of the same routine family.
+- **`0x700000+0xA4` never fires** in the window, and the street-alien code
+  `0x4df8` appears at **no** probed base: `0x000000–0x01FFFF` (0x1000 step) and
+  `0x700000–0x712000` (0x2000 step). The true object-RAM CPU window for
+  `:objram1` is **not yet identified**.
+- **MAME 0.289 Lua API limits (empirical):** without `-debug`, `cpu.get_reg("PC")`
+  ERRs and `machine.devices[":maincpu"].debug` is **nil**. Under `-debug`,
+  `debug:wpset(program,"w",addr,size,nil,action)` works and the `action` string
+  exposes `wpaddr`/`wpdata`/`pc`; but `debug:execute()` / `debugger:execute()`
+  **do not exist** (no `meminfo`/`memmap` via execute), `-listmem` is **not
+  supported** in this build, and `machine.memory.shares` exposes **no CPU
+  address range** (iterate `regions`/`shares` with `pairs`). `autoboot_command`
+  **hangs**; a from-boot run is slow/unreliable here. State-load + **≤34**
+  `wpset` watchpoints is the reliable method; a 128-watchpoint sweep **stalls**
+  in load/install.
+
+**PROVEN object-RAM sprite emitter (this session, from
+`.deps/mame/actorprobe/disasm_full.txt`, basepc 0).** The CPS2 object-RAM
+sprite table is written by a **per-actor, per-part routine at `0xAA644–0xAA7F8`**
+which calls a **4-word entry-writer subroutine at `0xAA740–0xAA75E`**. The
+writer emits exactly one 4-word object slot per call:
+```
+0aa740: subi.w #$8, D0            ; D0 -= 8
+0aa744: subi.w #$8, D1            ; D1 -= 8
+0aa748: andi.w #$3ff, D0
+0aa74c: or.w   ($2e,A6), D0       ; X |= context flags
+0aa750: move.w D0, (A1)+          ; word 0 = ((D0-8)&0x3ff)|($2e,A6)
+0aa752: andi.w #$3ff, D1
+0aa756: ori.w  #$0, D1
+0aa75a: move.w D1, (A1)+          ; word 1 = (D1-8)&0x3ff
+0aa75c: move.l D2, (A1)+          ; words 2,3 = D2 (32-bit code/attr)
+0aa75e: rts
+```
+Per slot: **word0 = X+flags, word1 = Y, words2-3 = D2** (D2 high word = code,
+low word = attr). **`A1` is the object-RAM write pointer** (the routine
+observed writing to `0x708000`).
+**Per-part source reader (drives the writer).** Register map: `A4` = actor
+work-RAM slot (street alien = `0xFFA000`); `A2` = `($1c,A4)` = the
+**animation/assembly pointer** (matches the prior "actor +0x1C" finding); `A0` =
+`($50,A4)` + per-part offset = source-data pointer; `A5` = work-RAM base with
+the actor's X at `(-$64f2,A5)` and Y at `(-$64f4,A5)`; `A6` = context with
+`($8,A6)` = a type (compared to `#$14`) and `($2e,A6)` = flags OR'd into word0.
+The reader computes `X = baseX + signedByte(source)`, `Y = baseY -
+signedByte(source)`, seeds the code/attr long `D2` with `#$100000`/`#$200000`/
+`#$310000` depending on actor type `($8,A4)`/`($8,A6)`, then `bsr $aa740` per
+part (up to 4 parts/actor). The base X/Y at `(-$64f2,A5)`/`(-$64f4,A5)` is
+itself set (`0xAA5C4–0xAA616`) from `($10,A4)`/`($14,A4)` minus `($278,A5)`/
+`($27c,A5)` plus constants, sign flipped by `($f,A4)` flag bits.
+**TWO emitter families** both advance `(A1)+` (the object-RAM write pointer),
+so the per-frame object table is a series of 4-word entries emitted by
+whichever family the per-actor dispatcher selects:
+- **Family 1 (`0xAA4A4–0xAA598`) = the code-carrying body emitter.** It writes
+  `move.l D3,(A1)+; move.l D2,(A1)+` (two longs = `[X, Y, code, attr]`), where
+  **`D2` is a source long loaded via `move.l (A0)+, D2`** — so the **tile
+  CODE (e.g. `0x4df8`) is the HIGH word of the source data**, and the attr
+  (low word) is the source low word modified by `andi.b #$e0; add.b ($e,A4);
+  eor.b D1(type)`. D3 = `[X<<16 | Y]` (X = `(-$64f4,A5)`-based, OR'd with
+  `($2e,A6)`; Y from source). **This is the variant that carries the
+  `0x4958–0x4ef0` codes (the street-alien body).** Several sibling variants
+  (0xAA4A4 / 0xAA4F0 / 0xAA51E / 0xAA55C) differ in how the code/attr low byte
+  is derived (mirroring / palette / type XOR).
+- **Family 2 (`0xAA644–0xAA7F8`) = the effect/glow emitter** (the `bsr $aa740`
+  writer above), D2 seeded by `#$100000`/`#$200000`/`#$310000` (the `0x20`
+  part observed at `0x708000+0xA4`).
+**Dispatcher + full pipeline (this session).** The per-frame object table is
+built by the routine at **`0xA99DC`**: it sets **`A1 = 0x708000`** (`movea.l
+#$708000, A1`), writes an 8-word **header** (`move.l #$20000100,(A1)+; move.l
+#$0,(A1)+` ×2), then calls the per-actor emitters **`bsr $aa9a2 / $aa840 /
+$aa886 / $aa8ae / $aa8d6 / $aa9fc / $aa8ea / $aa8c2 / $aa89a / $aa8fe`** (each
+loads its actor's `A4`/`A5`/`A6` and emits 4-word entries to `(A1)+`, advancing
+the pointer), writes a 4-word **trailer** (`move.l #$80008000,(A1)+` ×2 = the
+CPS2 end-of-list marker), and returns to the main loop (`jmp $1388`). So
+**`0x708000` is the object-RAM write buffer**; the street-alien's five slots
+(oracle words 80,84,88,92,96) are emitted by one of those per-actor `bsr`
+targets (family-1 variant), positioned after the header + preceding actors.
+The per-actor routines in the `0xAA840–0xAA9FC` range are the callers that set
+up `A4`/`A5`/`A6` and branch into the family-1/family-2 writers above. The
+per-type emitters **`0xAA886 / 0xAA89A / 0xAA8AE / 0xAA8C2 / 0xAA8D6 / 0xAA8EA`**
+each read a per-type actor count from `($6e82/$6e87/$6e88/$6e8a/$6e8b/$6e91,
+A5)`, load a base pointer from `($6e5c/$6e66/$6e68/$6e6c/$6e6e/$6e7a, A5)`, and
+jump to the **common per-actor loop at `0xA9B48`** (which sets up `A4`/`A5`/
+`A6` per actor and reaches the family-1/family-2 writers). **`A5` is the main
+work-RAM game-state base**; the actors sit at `A5 + offset` (e.g. `($380,A5)`,
+`($480,A5)`, `($6a80,A5)`), so the street alien's `A4` is `A5 + <its slot
+offset>`. `0xAA840` is an actor-list **sort** (by `($18,A3)`), and `0xAA910`
+initializes the per-type pointer/count fields.
+**Third-level dispatch (this session, `0xA9B48` internal).** The common loop is
+itself a **per-actor-type jump table**: `movea.w (A3)+, A6` (load the actor),
+`move.b ($8,A6), D0; lsr.w #1, D0` (index = actor **type `($8,A6)` >> 1**),
+`move.w ($24,PC,D0.w), D0` then `jsr ($20,PC,D0.w)` — a **jump table at
+`0xA9B80`** with target `0xA9B80 + table[type>>1]`. So each actor is dispatched
+to a **per-type handler** (e.g. `0xA9B90`/`0xA9BA0`, `0xA9CB4`, `0xA9C5C`; the
+`0xA9CB6` handler begins `movea.l ($1c,A4), A0`), which then drives the
+family-1/family-2 emitters. The full chain is therefore:
+`0xA99DC` (dispatcher, `A1=0x708000`) → per-group emitters `0xAA886–0xAA8EA` →
+common loop `0xA9B48` → **per-type jump table `0xA9B80`** → per-type handler →
+family-1 (`0xAA4A4–0xAA598`) / family-2 (`0xAA644–0xAA7F8`) writers. Which of
+the six per-group emitters owns the street alien (actor slot `0xFFA000`), and
+which per-type handler its type selects, are not yet determined — both depend on
+the street alien's type/count fields at frame 4253 (a runtime value).
+**Still to resolve (do NOT treat the street-alien reproduction as done):**
+(1) **RESOLVED — `A1` (object-RAM write base) = `0x708000`, set at the
+dispatcher `0xA99DC`** (`movea.l #$708000, A1`); the table is header +
+per-actor entries + `0x80008000` trailer. (2) the exact per-part source layout
+(the `(A0)`-relative fields for the family-1 `[code, attr]` long and the X/Y
+deltas) and the `($50,A4)`/`($1c,A4)` → `0x12FE06–0x12FEEE` link, and which of
+the ten per-actor `bsr` targets emits the street alien (actor slot `0xFFA000`);
+(3) reproducing the five frame-4253 slots exactly (family selection, order,
+base X/Y, deltas, code high word, attr low word, palette/type XOR, the `(-$8,·)`
+offsets, the `& 0x3ff` + `($2e,A6)` flags, and the preceding-actor entries that
+position the street alien at words 80-99).
+**Concrete next step (resume here):** (a) **[DONE]** dispatcher + `A1` base
+found (`0xA99DC`, `A1=0x708000`); (b) **identify which of the ten per-actor
+`bsr` targets (`$aa9a2/$aa840/$aa886/$aa8ae/$aa8d6/$aa9fc/$aa8ea/$aa8c2/
+$aa89a/$aa8fe`) emits the street alien** (actor slot `0xFFA000`): read that
+routine's `A4`/`A5`/`A6` setup and which family-1 variant it reaches; (c) map
+the per-part source layout (`(A0)`-relative fields for the `[code, attr]` long
++ X/Y deltas) and the `($50,A4)`/`($1c,A4)` → `0x12FE06–0x12FEEE` link;
+(d) a focused wpset (≤34, state-load frame 4200) on `0x708000` words 80-99 to
+capture the actual frame-4253 write sequence (the five street-alien slots) with
+their writer PCs, then match each captured slot to its family-1 variant + source
+long; (e) reproduce the five slots exactly (the gate).
+The `0x12FE06–0x12FEEE` lead and the "do not promote selector-12 until all five
+slots reproduce exactly" gate stand as above.
+
+**Repository state:** the unrelated untracked directory `Marvel Super Heroes vs.
+Street Fighter/` is present in the working tree; it is not part of this project
+and is left untouched. All untracked one-off diagnostics
+(`tools/diag_sel12_*.py`, `tools/probe_*.py`, `tools/diag_*.py`, etc.) are
+preserved. The Phase 2a extraction checkpoint commit is `5327c3a`.
 
 ### Next steps for this direction
 

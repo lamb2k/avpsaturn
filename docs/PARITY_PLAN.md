@@ -34,6 +34,94 @@ The volatile evidence, exact commands, hashes, current HEAD and immediate work
 queue stay in [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md); this table is the concise
 goal index.
 
+## Master execution plan (2026-08-18)
+
+This is the current order of work. It supersedes older resume lists in the
+handoff and refines the broad phases below. The active object-emission trace is
+finished first because its call chain is already localized; after that narrow
+gate, work returns to the real-hitbox priority before broadening animation,
+stage, and AI coverage.
+
+| Order | Milestone | Required work | Exit gate | Goal conditions advanced |
+|---|---|---|---|---|
+| 0 | Preserve the intercept boundary | Commit the documentation-only master plan on an AvP branch; keep the MSHvSF research checkpoint isolated | AvP baseline, Marvel checkpoint, dirty files, and exact resume command are recorded without merging either history | All, by preserving provenance |
+| 1 | Close the street-alien five-slot emission gate | Trace object-buffer word indices 80–99 at frame 4253; identify the street alien's group list, actor type, jump-table target, Family-1 variant, `A0` source, `A4=0xFFA000`, and `A6` context; map actor `+0x1c/+0x50` to the source longs | A deterministic analyzer regenerates all five four-word slots at indices 80/84/88/92/96, including X, Y, code, attribute, order, bank, and frame relation; it also passes one different-facing or different-palette negative-control frame | 1 and 5 |
+| 2 | Replace inferred collision | Decode actor-local hitbox/attack-box records for every required player, street-alien, Stalker, and Chrysalis pose by joining the debug overlays, pivots, interaction selectors, and writer/table evidence | Native collision consumes ROM-derived boxes; inferred Chrysalis 21/55/97 and Stalker schedules are removed; controlled hit and whiff fixtures pass | 2 and 5 |
+| 3 | Complete Round 1 animation extraction | Promote the street-alien decoder only after milestone 1; gate all 28 street-alien assemblies, then Stalkers and player; add the player's missing work-RAM/register capture; link the proven script interpreter for boss pose selection | Every required actor/action has ROM-derived script, assembly, tile, position, and duration coverage; capture archives remain regression oracles, not runtime animation sources | 1, 5, and 6 |
+| 4 | Recover Round 1 stage data | Locate and decode spawn records, camera bounds, scroll parameters, room triggers, barricade/door transitions, boss-room entry, and Round 2 handoff | The deterministic route consumes extracted tables rather than authored lifecycle constants and reaches the same ordered room/event anchors | 4, 5, and 6 |
+| 5 | Translate required enemy logic | Follow stock-MAME writer PCs from action/state fields into complete labeled 68000 paths; map only consumed actor fields; identify PRNG generator and call order before translating | Street alien, Stalker, and Chrysalis decisions used by Round 1 run through translated routines and pass controlled branch/negative-control fixtures | 3, 5, and 6 |
+| 6 | Integrate and budget the Saturn runtime | Preserve the existing Saturn platform pipeline; integrate proven tables/routines actor by actor; measure referenced-tile working set, cartridge/work-RAM lifetimes, VDP1 commands/VRAM, VDP2, SCSP, DMA, and CD access before changing overlays or renderer strategy | Focused and full-route builds both fit measured budgets; no CD-data read occurs during CDDA without a passing hardware measurement; normal release is restored after every diagnostic | 1–6 |
+| 7 | Validate and release-candidate test | Compare MAME and native semantic events on identical input; retain pixel/position oracles; run host, soak, focused, full-route, clean release, audible route, then physical hardware | Conditions 1–6 are independently green, followed by sustained 60 Hz and ten-minute physical NTSC Saturn proof with digital pad and 32 Mbit cartridge | 5–7 |
+
+### Immediate milestone 1 evidence contract
+
+The CPS2 chain is already established through static disassembly:
+
+```text
+0xA99DC list builder (A1=0x708000)
+  -> per-group emitters
+  -> 0xA9B48 common actor loop
+  -> 0xA9B80 actor-type jump table
+  -> per-type handler
+  -> Family 1 body or Family 2 effect emitter
+```
+
+The remaining trace must use stock MAME 0.289, the frame-4200 state, and no
+more than 34 debugger write watchpoints. Watch the 20 words at
+`0x708000 + 0xA0..0xC6` through frame 4253 and record `(frame, pc, address,
+width, data)` plus the register/source context needed to attribute each write.
+The five four-word oracle entries are
+`[814f,009e,4df8,0131]`, `[810f,00ae,4ef0,0531]`,
+`[815b,007b,4b04,2531]`, `[814b,00ab,4a88,1431]`, and
+`[816b,006b,4958,0131]`. Codes and attributes alone are insufficient: the gate
+requires all 20 words and their list positions.
+
+Do not promote a selector-12 decoder from the watchpoint PC sequence alone.
+The decoder must derive the output from ROM/actor source data, then reproduce
+the oracle. The second-frame negative control must fail if the frame-4253
+values are hard-coded.
+
+### CPS2-to-Saturn representation boundary
+
+The Saturn runtime does **not** need to copy the CPS2 `0x708000` buffer, raw
+four-word descriptor, 10-bit packing, or bank flip. Those are the source
+machine's renderer contract and a high-value extraction oracle. Normalize each
+proven entry into semantic fields—screen position, tile/code identity, palette,
+size, flip, priority, order, and lifetime—then let native SH-2 code emit the
+equivalent VDP1/VDP2 representation. Reproducing the CPS2 encoding literally
+would confuse source evidence with the Saturn implementation.
+
+### Applicable MSHvSF research findings
+
+The isolated research lane remains `codex/mshvsf-reference-lane` at checkpoint
+`43e88ac`. It is a method/evidence source, not an implementation dependency.
+
+Apply now:
+
+- require an explicit source address/data/function, output sink, test,
+  falsification, confidence, and uncertainty for the street-alien mapping;
+- keep gameplay/animation semantics separate from CPS2 and Saturn machine
+  representation—the wrong-sink `0x0169da` tilemap comparison is the concrete
+  AvP example of why this matters;
+- use deterministic semantic anchors and negative controls before promoting a
+  decoder or reusable pattern.
+
+Apply at milestones 6–7:
+
+- add per-resource AvP high-water and lifetime measurements for work RAM,
+  both 4 MB cartridge banks, VDP1 VRAM/commands, VDP2 VRAM, SCSP RAM, DMA, and
+  CD access;
+- build a media/runtime ownership table and one normal-hit event fixture that
+  separates input, movement, collision, damage, reaction, and recovery;
+- record every accepted Saturn difference in the classification ledger with a
+  falsification test instead of treating an official-port compromise as
+  automatic permission for AvP.
+
+Do not import MSHvSF gameplay timing, addresses, package sizes, module formats,
+or inferred hardware ownership. The MSHvSF Hadouken path, dynamic Saturn
+ownership trace, and second-title validation remain useful research-lane work,
+but none blocks AvP milestone 1.
+
 ## Why the method changes
 
 The project reached a playable Round 1 by capturing finished frames off the
@@ -319,11 +407,14 @@ coverage passing and no tolerance silently treated as exact.
 
 ## Ordering and rationale
 
-Phase 1 is first because it is working in stock MAME and retires the largest
-collision approximations cheaply. Phase 2 is the bulk of the work. Phase 0 is
-only a contingency if stock watchpoints are inadequate. Phase 3 follows once
-the decoder is proven. Phase 4 runs continuously from the first extracted
-events.
+Follow the dated master execution plan above. Finish its narrow street-alien
+five-slot gate first so the currently localized writer investigation is not
+discarded mid-proof, then return immediately to real hitboxes because they
+retire the largest collision approximations cheaply. The broad Phase 2 work is
+still the bulk of the project. Phase 0 remains only a contingency if stock
+watchpoints are inadequate. Phase 3 follows per actor only after that actor's
+decoder and position gates are proven. Phase 4 runs continuously from the first
+extracted events.
 
 Do not start Phase 3 for an actor until its required pose/position coverage is
 proven. The format gate is green for the current 12 boss assemblies, but that
