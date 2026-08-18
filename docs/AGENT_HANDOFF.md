@@ -1,6 +1,6 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-17 22:30 EDT
+Updated: 2026-08-17 22:45 EDT
 
 **Goal audit: 0/7 final conditions closed.** The condition-by-condition index
 is now at [PARITY_PLAN.md#goal-progress-index](PARITY_PLAN.md#goal-progress-index).
@@ -95,10 +95,10 @@ Read this file before taking any action. The user wants a private, capture-faith
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `prototype/private-capability-test`
-- Position-gate implementation checkpoint: `483f088` (`Add per-part position
-  gate: exact from world(f-1) + ROM layout`), followed by handoff command update
-  `020aa5b`. The current audit refresh will supersede this paragraph's HEAD;
-  run `git rev-parse HEAD` for the immutable final hash.
+- Goal-audit checkpoint: `068ff6b` (`Audit goal progress and harden validation
+  gates`), following position-gate implementation `483f088` and handoff command
+  update `020aa5b`. This handoff-only update follows the audit checkpoint; run
+  `git rev-parse HEAD` for its immutable final hash.
 - Pre-existing untracked scratch file: `check_tail.py`. It is not part of the
   checkpoint and was preserved rather than deleted or committed.
 - Current disc profile: `normal-release`, but
