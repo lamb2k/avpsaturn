@@ -68,7 +68,11 @@ def sha256(path: Path) -> str:
 
 
 def decode_x(w: int) -> dict:
-    return {"priority": (w >> 13) & 7, "width_tiles": ((w >> 8) & 0xF) + 1, "xpos": w & 0x0FFF}
+    # Per MAME 0.289 cps2_render_sprites, the X word carries only priority and
+    # position. Block width/height live in the ATTR word (bits 8-11 and 12-15);
+    # an earlier revision of this file read width from the X word, which was
+    # wrong and is corrected here.
+    return {"priority": (w >> 13) & 7, "xpos": w & 0x0FFF}
 
 
 def decode_y(w: int) -> dict:
@@ -76,7 +80,13 @@ def decode_y(w: int) -> dict:
 
 
 def decode_attr(w: int) -> dict:
-    return {"palette": "0x%02x" % (w & 0x1F), "flip_x": (w >> 5) & 1, "flip_y": (w >> 6) & 1}
+    return {
+        "palette": "0x%02x" % (w & 0x1F),
+        "flip_x": (w >> 5) & 1,
+        "flip_y": (w >> 6) & 1,
+        "block_width_tiles": ((w & 0x0F00) >> 8) + 1,
+        "block_height_tiles": ((w & 0xF000) >> 12) + 1,
+    }
 
 
 def find_alien_slot_start(ob: bytes):
@@ -97,7 +107,7 @@ def decode_slots(ob: bytes, start: int) -> list:
         X, Y, code, attr = be16(ob, o), be16(ob, o + 2), be16(ob, o + 4), be16(ob, o + 6)
         slots.append({
             "X": "%04x" % X, "Y": "%04x" % Y, "code": "%04x" % code, "attr": "%04x" % attr,
-            "priority": decode_x(X)["priority"], "width_tiles": decode_x(X)["width_tiles"],
+            "priority": decode_x(X)["priority"],
             "xpos": decode_x(X)["xpos"], "ypos": decode_y(Y)["ypos"],
             **decode_attr(attr),
         })

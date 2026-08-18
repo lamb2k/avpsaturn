@@ -109,12 +109,13 @@
      "code": "4efe",
      "attr": "0131",
      "priority": 4,
-     "width_tiles": 2,
      "xpos": 275,
      "ypos": 153,
      "palette": "0x11",
      "flip_x": 1,
-     "flip_y": 0
+     "flip_y": 0,
+     "block_width_tiles": 2,
+     "block_height_tiles": 1
     },
     {
      "X": "80e3",
@@ -122,12 +123,13 @@
      "code": "4ef6",
      "attr": "0431",
      "priority": 4,
-     "width_tiles": 1,
      "xpos": 227,
      "ypos": 169,
      "palette": "0x11",
      "flip_x": 1,
-     "flip_y": 0
+     "flip_y": 0,
+     "block_width_tiles": 5,
+     "block_height_tiles": 1
     },
     {
      "X": "80f3",
@@ -135,12 +137,13 @@
      "code": "4fc8",
      "attr": "0131",
      "priority": 4,
-     "width_tiles": 1,
      "xpos": 243,
      "ypos": 185,
      "palette": "0x11",
      "flip_x": 1,
-     "flip_y": 0
+     "flip_y": 0,
+     "block_width_tiles": 2,
+     "block_height_tiles": 1
     },
     {
      "X": "8121",
@@ -148,12 +151,13 @@
      "code": "473a",
      "attr": "2431",
      "priority": 4,
-     "width_tiles": 2,
      "xpos": 289,
      "ypos": 123,
      "palette": "0x11",
      "flip_x": 1,
-     "flip_y": 0
+     "flip_y": 0,
+     "block_width_tiles": 5,
+     "block_height_tiles": 3
     },
     {
      "X": "8111",
@@ -161,12 +165,13 @@
      "code": "479c",
      "attr": "1331",
      "priority": 4,
-     "width_tiles": 2,
      "xpos": 273,
      "ypos": 171,
      "palette": "0x11",
      "flip_x": 1,
-     "flip_y": 0
+     "flip_y": 0,
+     "block_width_tiles": 4,
+     "block_height_tiles": 2
     }
    ],
    "oracle_match": "20/20",
@@ -230,12 +235,13 @@
      "code": "4df8",
      "attr": "0131",
      "priority": 4,
-     "width_tiles": 2,
      "xpos": 335,
      "ypos": 158,
      "palette": "0x11",
      "flip_x": 1,
-     "flip_y": 0
+     "flip_y": 0,
+     "block_width_tiles": 2,
+     "block_height_tiles": 1
     },
     {
      "X": "810f",
@@ -243,12 +249,13 @@
      "code": "4ef0",
      "attr": "0531",
      "priority": 4,
-     "width_tiles": 2,
      "xpos": 271,
      "ypos": 174,
      "palette": "0x11",
      "flip_x": 1,
-     "flip_y": 0
+     "flip_y": 0,
+     "block_width_tiles": 6,
+     "block_height_tiles": 1
     },
     {
      "X": "815b",
@@ -256,12 +263,13 @@
      "code": "4b04",
      "attr": "2531",
      "priority": 4,
-     "width_tiles": 2,
      "xpos": 347,
      "ypos": 123,
      "palette": "0x11",
      "flip_x": 1,
-     "flip_y": 0
+     "flip_y": 0,
+     "block_width_tiles": 6,
+     "block_height_tiles": 3
     },
     {
      "X": "814b",
@@ -269,12 +277,13 @@
      "code": "4a88",
      "attr": "1431",
      "priority": 4,
-     "width_tiles": 2,
      "xpos": 331,
      "ypos": 171,
      "palette": "0x11",
      "flip_x": 1,
-     "flip_y": 0
+     "flip_y": 0,
+     "block_width_tiles": 5,
+     "block_height_tiles": 2
     },
     {
      "X": "816b",
@@ -282,12 +291,13 @@
      "code": "4958",
      "attr": "0131",
      "priority": 4,
-     "width_tiles": 2,
      "xpos": 363,
      "ypos": 107,
      "palette": "0x11",
      "flip_x": 1,
-     "flip_y": 0
+     "flip_y": 0,
+     "block_width_tiles": 2,
+     "block_height_tiles": 1
     }
    ],
    "oracle_match": "20/20",
@@ -335,8 +345,8 @@
  },
  "watchpoints": {
   "log_files_scanned": [
-   "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\.deps\\mame\\object_emission\\mame_stderr.log",
    "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\error.log",
+   "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\.deps\\mame\\object_emission\\mame_stderr.log",
    "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\.deps\\mame\\object_emission\\mame_console.log"
   ],
   "obj_event_count": 27744,

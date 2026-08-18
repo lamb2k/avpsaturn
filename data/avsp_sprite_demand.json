@@ -1,0 +1,144 @@
+{
+ "classification": "AvP per-frame CPS2 sprite demand - counts only, no graphics data",
+ "combined": {
+  "frames": 5302,
+  "mean_distinct_palettes": 6.51,
+  "mean_distinct_tile_codes": 251.92,
+  "mean_objects": 40.67,
+  "mean_tiles_16x16": 346.31,
+  "peak_distinct_palettes": {
+   "at_source_frame": 4923,
+   "value": 13
+  },
+  "peak_distinct_tile_codes": {
+   "at_source_frame": 4159,
+   "value": 547
+  },
+  "peak_largest_object_tiles": {
+   "at_source_frame": 4157,
+   "value": 55
+  },
+  "peak_objects": {
+   "at_source_frame": 5800,
+   "value": 86
+  },
+  "peak_tiles_16x16": {
+   "at_source_frame": 5776,
+   "value": 909
+  },
+  "source_frame_first": 4080,
+  "source_frame_last": 13560
+ },
+ "field_layout_evidence": "DECODED",
+ "field_layout_source": "MAME 0.289 cps2_render_sprites / find_last_sprite",
+ "routes": [
+  {
+   "capture_root": ".deps/mame/enemy_actions",
+   "evidence": "MEASURED",
+   "label": "street wave (4080-6200)",
+   "summary": {
+    "frames": 2121,
+    "mean_distinct_palettes": 9.29,
+    "mean_distinct_tile_codes": 372.21,
+    "mean_objects": 59.04,
+    "mean_tiles_16x16": 564.17,
+    "peak_distinct_palettes": {
+     "at_source_frame": 4923,
+     "value": 13
+    },
+    "peak_distinct_tile_codes": {
+     "at_source_frame": 4159,
+     "value": 547
+    },
+    "peak_largest_object_tiles": {
+     "at_source_frame": 4157,
+     "value": 55
+    },
+    "peak_objects": {
+     "at_source_frame": 5800,
+     "value": 86
+    },
+    "peak_tiles_16x16": {
+     "at_source_frame": 5776,
+     "value": 909
+    },
+    "source_frame_first": 4080,
+    "source_frame_last": 6200
+   }
+  },
+  {
+   "capture_root": ".deps/mame/stalker_actions",
+   "evidence": "MEASURED",
+   "label": "stalkers (5520-7800)",
+   "summary": {
+    "frames": 2281,
+    "mean_distinct_palettes": 4.4,
+    "mean_distinct_tile_codes": 196.48,
+    "mean_objects": 33.68,
+    "mean_tiles_16x16": 236.88,
+    "peak_distinct_palettes": {
+     "at_source_frame": 5522,
+     "value": 6
+    },
+    "peak_distinct_tile_codes": {
+     "at_source_frame": 5553,
+     "value": 385
+    },
+    "peak_largest_object_tiles": {
+     "at_source_frame": 5527,
+     "value": 55
+    },
+    "peak_objects": {
+     "at_source_frame": 5520,
+     "value": 50
+    },
+    "peak_tiles_16x16": {
+     "at_source_frame": 5549,
+     "value": 431
+    },
+    "source_frame_first": 5520,
+    "source_frame_last": 7800
+   }
+  },
+  {
+   "capture_root": ".deps/mame/boss_actions",
+   "evidence": "MEASURED",
+   "label": "chrysalis boss (12661-13560)",
+   "summary": {
+    "frames": 900,
+    "mean_distinct_palettes": 5.33,
+    "mean_distinct_tile_codes": 108.95,
+    "mean_objects": 15.13,
+    "mean_tiles_16x16": 110.23,
+    "peak_distinct_palettes": {
+     "at_source_frame": 12689,
+     "value": 7
+    },
+    "peak_distinct_tile_codes": {
+     "at_source_frame": 13228,
+     "value": 163
+    },
+    "peak_largest_object_tiles": {
+     "at_source_frame": 12727,
+     "value": 42
+    },
+    "peak_objects": {
+     "at_source_frame": 13234,
+     "value": 22
+    },
+    "peak_tiles_16x16": {
+     "at_source_frame": 13228,
+     "value": 164
+    },
+    "source_frame_first": 12661,
+    "source_frame_last": 13560
+   }
+  }
+ ],
+ "schema": 1,
+ "what_this_does_not_claim": [
+  "no Saturn VDP1 or colour-RAM budget is asserted here; this is the demand side only",
+  "tile codes are counted, never emitted; no graphics data is in this report",
+  "a per-tile pipeline still needs its own Saturn-side command-build and fill-rate measurement"
+ ]
+}

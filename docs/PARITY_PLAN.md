@@ -154,6 +154,83 @@ go green, so progress is visible before the whole gate closes.
 isolation while phase A or B is open. Evidence that has no runtime consumer is
 not progress toward the gate, however well falsified it is.
 
+### How game logic gets translated (method for phase D, constrains phase B)
+
+The goal forbids shipping a 68000 interpreter, and hand-authored approximations
+are the problem the project is trying to leave behind. The method is **static
+translation, routine by routine, validated differentially**:
+
+1. **Mirror the actor layout first (phase B).** Translated routines read and
+   write the game's actor fields. If the native actor struct mirrors the ROM's
+   `0xC0` record — the fields already mapped: `+0x08` type, `+0x0F` facing,
+   `+0x10/+0x14/+0x18` world x/y/z, `+0x1C` animation record, `+0x2C/+0x2D` hit
+   value and source, `+0x50` collision table set, `+0x67` attacker id, `+0x68`
+   per-attacker latch, `+0x70` suppress, `+0xD1` latch index — then translation
+   is near-mechanical. If it does not, every routine needs a hand-written field
+   shim, and the shims become the new inferred layer. **This is a phase-B design
+   constraint, decided now rather than discovered in phase D.**
+2. **Both machines are big-endian.** 68000 and SH-2 share byte order, which
+   removes an entire class of translation bugs; word and long reads of the same
+   structures port directly.
+3. **Translate per routine, not per program.** Disassemble the routine (capstone
+   is already vendored under `.deps/capstone`), build its control-flow graph,
+   enumerate computed-jump targets from the ROM jump tables rather than guessing,
+   and emit C. Model the 68000 condition codes explicitly **only where a flag is
+   consumed across instructions** — carrying a full CCR everywhere produces
+   unreadable, slow code.
+4. **Identify the PRNG generator and its call order before translating any AI.**
+   Enemy decisions depend on it; a correct routine fed a different random stream
+   diverges immediately and looks like a translation bug.
+5. **Validate differentially, the same way collision was falsified.** Put stock
+   MAME watchpoints on the routine's entry and on every field it writes, record
+   thousands of real calls as (input actor state + RNG state) -> (every write),
+   then require the translated C to reproduce every write for every recorded
+   call. A routine is accepted only when its recorded-call replay is exact, with
+   a negative control that fails when an input is perturbed.
+
+This keeps translated behaviour honest without an emulator, and it produces
+maintainable C rather than an opaque transliteration. It is also why phase B's
+struct decision cannot be deferred.
+
+### Phase A demand measurement (2026-08-18, MEASURED)
+
+AvP and the official Capcom Saturn reference title run on **the same arcade
+hardware**, so the source primitive is identical and only the volume differs.
+That makes the demand half of the phase-A question answerable from AvP's own
+captures, with no Saturn code: the CPS2 active object list *is* the tile list.
+
+`tools/measure_avsp_sprite_demand.py` over **5,302 captured frames** (street
+wave, Stalkers, Chrysalis boss), decoding fields exactly as MAME 0.289
+`cps2_render_sprites` does:
+
+| Measure | Peak | Mean |
+|---|---|---|
+| objects per frame | 86 | 40.7 |
+| **16x16 tiles per frame** | **909** | 346.3 |
+| **distinct 16-colour palettes live per frame** | **13** | 6.5 |
+| distinct tile codes per frame | 547 | 251.9 |
+| largest single object | 55 tiles | — |
+
+Two consequences:
+
+- **Colour RAM is not the constraint.** The risk that killed a per-tile pipeline
+  was colour-RAM pressure. AvP needs at most **13** live 16-colour banks in a
+  frame. Saturn CRAM holds 2,048 entries in 5:5:5 mode 1 — 128 such banks. AvP
+  asks for roughly a tenth of that, and its worst measured frame still fits the
+  64-bank mode 0 layout many times over. The current eight-bank allocation was
+  sized for precomposed per-palette cels and is the thing that is actually tight.
+- **The open question is now VDP1 throughput, not representation.** 909 commands
+  at peak is roughly 3x the reference port's measured 296-334 reachable commands
+  per anchor, which is the expected difference between a scrolling beat-'em-up
+  with a large cast and a two-character fighter. 909 x 256 px = ~233k pixels per
+  frame of sprite fill. That must be measured on the Saturn side — command
+  build cost on SH-2, VDP1 command-table read overhead, and fill rate at 60 Hz —
+  before phase A can conclude.
+
+**Status: phase A is half-answered.** The demand side is `MEASURED`; the Saturn
+throughput side is `UNRESOLVED`, and its probe is a VDP1 command-count and
+frame-time measurement on the existing native build at the same route anchors.
+
 **There is no Saturn Alien vs Predator to measure against. That is the project.**
 Capcom never shipped one; this port is the first. So no phase above may be
 gated on "matching the Saturn version", and no agent should go looking for an

@@ -54,6 +54,43 @@ in `capability_model.c`), which gives ROM assemblies no consumer.
 **Standing rule:** do not decode another ROM table in isolation while phase A or
 B is open. Milestone 2 is the demonstration — correct, falsified, and inert.
 
+## Phase A: AvP sprite demand measured (2026-08-18)
+
+AvP and the reference title run on **the same CPS2 arcade hardware**, so the
+source primitive is identical and only volume differs. The demand half of the
+renderer question was therefore answerable offline, from AvP's own captured
+object lists, with no Saturn code and no renderer prototype.
+
+`tools/measure_avsp_sprite_demand.py` -> `data/avsp_sprite_demand.json`
+(deterministic, counts only, no graphics data), over **5,302 captured frames**
+across the street wave, Stalkers and the Chrysalis boss, decoding fields exactly
+as MAME 0.289 `cps2_render_sprites` / `find_last_sprite` do:
+
+| Measure | Peak | Mean |
+|---|---|---|
+| objects per frame | 86 (frame 5800) | 40.7 |
+| **16x16 tiles per frame** | **909** (frame 5776) | 346.3 |
+| **live 16-colour palettes per frame** | **13** (frame 4923) | 6.5 |
+| distinct tile codes per frame | 547 (frame 4159) | 251.9 |
+| largest single object | 55 tiles (frame 4157) | — |
+
+- **Colour RAM is not the constraint.** 13 live banks at worst; Saturn CRAM
+  holds 128 sixteen-colour banks in 5:5:5 mode 1. The risk that could have
+  killed a per-tile pipeline is measured and comfortable. The current eight-bank
+  allocation, sized for precomposed per-palette cels, is the tight thing.
+- **The remaining question is VDP1 throughput** (`UNRESOLVED`): 909 commands and
+  ~233k sprite fill pixels per peak frame. Probe: measure command build cost on
+  SH-2, VDP1 command-table read overhead and fill at 60 Hz on the existing
+  native build at the same route anchors.
+
+**Correction to milestone 1's report.** `decode_x` in
+`tools/analyze_street_alien_object_emission.py` read block width from the X word.
+Per MAME, block width/height are ATTR bits 8-11 and 12-15; the X word carries
+only priority and position. The decoder and `data/street_alien_object_emission.json`
+are corrected, now also reporting `block_width_tiles` / `block_height_tiles`.
+The emission gate is unaffected and still passes 20/20 on both frames — it
+compares raw words, not decoded fields.
+
 ## Official Saturn reference-port findings (research lane, 2026-08-18)
 
 **There is no Saturn Alien vs Predator.** Capcom never shipped one; this port is
