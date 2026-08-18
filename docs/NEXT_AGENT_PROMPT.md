@@ -23,7 +23,7 @@ collision rewiring (S4), not AI (S5), not stage work.
 2. `AGENTS.md` and `CLAUDE.md`.
 3. `docs/GOAL.md`.
 4. `docs/AGENT_HANDOFF.md` — "S2 animation walk", "S1 actor spine",
-   "Phase A: AvP sprite demand measured".
+   "Sprite demand measured".
 5. `docs/PARITY_PLAN.md` — the slice table, the slice-V design retained for
    S2/S3, and "How game logic gets translated".
 6. `docs/TEST_PLAN.md` and `docs/HARDWARE_TEST.md`.
@@ -89,8 +89,8 @@ Three parts, in this order:
 
 1. **Object list matches.** For the street-alien actor over the street-fight
    window, the object entries the runtime produces match MAME's captured active
-   object list for the same source frame. This is the oracle slice V could not
-   use and this step can: 5,302 captured frames under `.deps/mame/enemy_actions`,
+   object list for the same source frame. This is the oracle a replay harness
+   could not use and this step can: 5,302 captured frames under `.deps/mame/enemy_actions`,
    `.deps/mame/stalker_actions` and `.deps/mame/boss_actions`. Report matched
    frames and the first mismatch.
 2. **The alien animates from ROM data on Saturn**, with its `/SPR4` pose archive
@@ -115,7 +115,8 @@ ROM-driven in this step, the *decision to start it* is not yet.
 - Do not rewire collision to `avsp_collision.c` yet — that is S4, and it needs
   the selectors this step makes live.
 - Do not touch the boss, Stalkers or the player in this step; one street alien.
-- Do not decode further ROM tables. The standing rule from milestone 2 holds.
+- Do not decode further ROM tables beyond the emitter inputs named above.
+  Milestone 2 is why: it produced correct, falsified, unusable records.
 - Never commit ROM bytes, tile data, raw screenshots, RAM dumps or disc members.
   `generated/avsp_anim_records.h` is git-ignored for exactly this reason.
 - Restore `normal-release` after any diagnostic build.

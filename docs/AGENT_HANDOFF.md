@@ -17,6 +17,12 @@ after measurement showed the shipped build already draws more VDP1 sprite fill
 than the candidate pipeline needs. **Milestone 2 (collision records) executed,
 not closed**; **milestone 1 (street-alien emission) closed**.
 
+**Naming.** Two vocabularies only: **Capability Gate 1** conditions (and the
+nine full-game conditions) for acceptance, and slice steps **S1-S6** with
+their **checks** for work. Milestones, phases A-E, slice V and the legacy
+phases 0-4 are retired names kept only in the historical sections below; the
+map is at the top of `docs/PARITY_PLAN.md`.
+
 Two standing facts. **No Saturn AvP exists to compare against — this port is the
 first**, so MAME's CPS2 `avspu` is always the fidelity oracle. **"Gate" means
 Capability Gate 1 only**; a step's own criteria are checks, and a green check is
@@ -242,7 +248,7 @@ animation record instead of a capture.
 or directly, under WSL gcc with `-std=c90 -pedantic -Wall -Wextra -Werror`:
 `gcc ... avsp_actor.c avsp_collision.c tests/avsp_actor_test.c -o build/avsp_actor_test && ./build/avsp_actor_test`
 
-## Phase A: AvP sprite demand measured (2026-08-18)
+## Sprite demand measured (2026-08-18)
 
 AvP and the reference title run on **the same CPS2 arcade hardware**, so the
 source primitive is identical and only volume differs. The demand half of the

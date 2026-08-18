@@ -9,6 +9,34 @@ remaining game. Passing Gate 1 is not full-game completion.
 This document supersedes the capture-and-bind method for new work. Read it with
 `AGENTS.md` and `docs/AGENT_HANDOFF.md`.
 
+## Naming (read this before any other section)
+
+This project has exactly **two** vocabularies. Everything else in this document
+is history.
+
+**Acceptance — what "done" means.** `Capability Gate 1` is the seven-condition
+contract, its members written as "Gate 1 condition 3". The full-game goal is nine
+conditions, written as "full-game condition 6". **Only these may be called
+gates or conditions**, and only they move the 0/7 and 0/9 counts.
+
+**Work — what is being built.** The plan of record is the vertical slice, steps
+**S1 to S6**. A step's own pass criteria are **checks**: "S1 check 2", "check C".
+A step can pass every check it has without moving Capability Gate 1, because a
+step proves a mechanism and a condition requires all of Round 1.
+
+**Retired names.** Earlier orderings are kept only in the historical records
+below, under the names they were executed with. Do not plan new work with them.
+
+| Retired name | What it was | Where it went |
+|---|---|---|
+| Milestones 1-7 | the pre-2026-08-18 execution order | milestone 1 closed, milestone 2 executed-not-closed; the rest replaced by S1-S6 |
+| Phases A-E | the first 2026-08-18 re-sequence, superseded the same day | A deferred into S2; B/C became S1-S3; D became S5; E became S6 |
+| Slice V | a standalone VDP1 proof | deferred, folded into S2/S3 |
+| Phases 0-4 ("technical phases") | the original 2026-08-17 framing | superseded; retained for technical detail only |
+
+If a section below uses a retired name, it is a record of work already done.
+Forward-looking instructions use S-steps only.
+
 ## Full-game goal-progress index
 
 Audited 2026-08-18 against the full-game destination in
@@ -61,7 +89,7 @@ deliberately unchanged**: the records are indexed by the live ROM
 animation-record pointer at actor `+0x1C`, which the runtime does not yet carry
 (pose selection is still capture-derived), so consuming them today would require
 hand-mapped per-pose constants — the exact substitution this milestone forbids.
-That linkage is **phase B** under the re-sequenced order below — this milestone
+That linkage is **S1/S2** under the slice order below — this milestone
 is the reason the order changed. Gate 1 condition 2 stays **OPEN**; Gate 1 stays
 **0/7**. See the handoff's "Capability Gate 1 — collision records (milestone 2,
 2026-08-18)" section for the routine addresses, SHA-256 evidence and exact
@@ -221,21 +249,20 @@ so that widening becomes mechanical. Gate 1 stays 0/7 until Round 1 itself
 passes its seven acceptance conditions, and the full-game goal stays 0/9.
 
 Post-slice, the earlier phase lettering still describes the widening work:
-stage-table extraction and full-cast AI (old phase D) and the full budget,
-validation and hardware-candidate pass (old phase E). Old phase A is deferred
-into S2 and old phase B/C are S1-S3.
+see the naming map at the top of this document for how the retired phase
+letters map onto the S-steps.
 
 **Rule carried out of milestone 2:** do not decode another ROM table in
-isolation while phase A or B is open. Evidence that has no runtime consumer is
+isolation while S1 or S2 is open. Evidence that has no runtime consumer is
 not progress toward Capability Gate 1, however well falsified it is.
 
-### How game logic gets translated (method for S5, constrains S1/S2)
+### How game logic gets translated (method for S5, constrains S1)
 
 The goal forbids shipping a 68000 interpreter, and hand-authored approximations
 are the problem the project is trying to leave behind. The method is **static
 translation, routine by routine, validated differentially**:
 
-1. **Mirror the actor layout first (phase B).** Translated routines read and
+1. **Mirror the actor layout first (S1).** Translated routines read and
    write the game's actor fields. If the native actor struct mirrors the ROM's
    `0xC0` record — the fields already mapped: `+0x08` type, `+0x0F` facing,
    `+0x10/+0x14/+0x18` world x/y/z, `+0x1C` animation record, `+0x2C/+0x2D` hit
@@ -243,7 +270,7 @@ translation, routine by routine, validated differentially**:
    per-attacker latch, `+0x70` suppress, `+0xD1` latch index — then translation
    is near-mechanical. If it does not, every routine needs a hand-written field
    shim, and the shims become the new inferred layer. **This is a phase-B design
-   constraint, decided now rather than discovered in phase D.**
+   constraint, decided now rather than discovered in S5.**
 2. **Both machines are big-endian.** 68000 and SH-2 share byte order, which
    removes an entire class of translation bugs; word and long reads of the same
    structures port directly.
@@ -264,7 +291,7 @@ translation, routine by routine, validated differentially**:
    a negative control that fails when an input is perturbed.
 
 This keeps translated behaviour honest without an emulator, and it produces
-maintainable C rather than an opaque transliteration. It is also why phase B's
+maintainable C rather than an opaque transliteration. It is also why S1's
 struct decision cannot be deferred.
 
 ### Sprite demand measurement (2026-08-18, MEASURED)
@@ -326,7 +353,7 @@ Two consequences:
   command count. Per-object at 86 commands is below the reference title's
   measured 296-334, which is encouraging but is not an AvP measurement.
 
-**Status: phase A is half-answered.** The demand side is `MEASURED`; the Saturn
+**Status: the renderer question is half-answered.** The demand side is `MEASURED`; the Saturn
 throughput side is `UNRESOLVED`. Its probe is slice V below, which emits
 **per-object** commands with per-tile retained as the fallback, and measures real
 frame time at the 909-tile / 86-object peak frame (source frame 5776).
@@ -374,7 +401,7 @@ The renderer's producer and consumer are separable, so the consumer can be built
 and measured now, with no actor spine, no collision and no AI.
 
 - **Producer (harness only, never shipped):** replay captured CPS2 object lists
-  frame by frame. Phase B swaps this for the ROM-driven actor spine; the consumer
+  frame by frame. S2 swaps this for the ROM-driven actor spine; the consumer
   does not change.
 - **Consumer (real, permanent):** one VDP1 normal-sprite command per CPS2 object,
   `nx*16 x ny*16`, 16-colour bank mode, flip in `CMDCTRL`, jump-next linked, list
@@ -392,7 +419,7 @@ counts either way.
 
 Note what check (1) is **not**. When the producer replays MAME's own object list,
 comparing the emitted list back to that list is close to vacuous. The
-5,302-frame object-list oracle is **phase B's** gate, where the ROM-driven
+5,302-frame object-list oracle is **S2's** check, where the ROM-driven
 producer must generate the list itself. Slice V's real result is the hardware
 frame time, and emulator frame time is indicative only - gate (2) binds on
 physical Saturn per `docs/HARDWARE_TEST.md`, or an FPGA core as a closer proxy

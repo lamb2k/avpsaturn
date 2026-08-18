@@ -79,6 +79,15 @@ private inputs.
 
 ## Terminology
 
+Two vocabularies, and only two. Everything else is a retired name kept for
+history; the map is at the top of `docs/PARITY_PLAN.md`.
+
+- **Acceptance:** `Capability Gate 1` and its seven conditions, plus the nine
+  full-game conditions. Only these move the 0/7 and 0/9 counts.
+- **Work:** slice steps **S1-S6**, each with its own **checks**.
+- Do not plan new work as a "milestone", a "phase", or a "slice"; those name
+  earlier orderings that were superseded on 2026-08-18.
+
 - **"Gate" means Capability Gate 1**, the seven-condition acceptance contract in
   `docs/PARITY_PLAN.md`, and nothing else. Never call anything else a gate - not
   a pose comparison, a format check, a coverage run, a step's exit criteria, or
