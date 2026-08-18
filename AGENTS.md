@@ -1,13 +1,16 @@
-# AvP Saturn Capability Agent Instructions
+# AvP Saturn Port Agent Instructions
 
 These instructions apply to the entire repository.
 
 ## Mission
 
-- Build a private, capture-faithful, native Sega Saturn port capability test of
-  CPS2 Alien vs Predator.
-- The required route begins at the main menu, preserves state through character
-  selection, and plays through the complete first level into Round 2.
+- Build a private, capture-faithful, native Sega Saturn port of the complete US
+  `avspu` revision of CPS2 Alien vs Predator.
+- Round 1 from the frontend through the Round 2 title is Capability Gate 1. It
+  proves the reusable engine and extraction method; it is not project
+  completion.
+- Complete and validate the entire single-player game before the final
+  original-player-count multiplayer and physical-hardware gates.
 - Keep gameplay native SH-2 code. Do not replace the goal with a CPS2 emulator,
   approximate demo, video player, host-only simulation, or focused animation
   viewer.
@@ -30,15 +33,21 @@ holds the route, `docs/GOAL.md` holds the destination.
    The handoff says where work stopped; the parity plan says where it is going.
 5. Verify important handoff claims against the current worktree before relying
    on them.
-6. Stay on `prototype/private-capability-test` unless the user explicitly asks
-   for another branch.
+6. Stay on the current task branch. `prototype/private-capability-test` is the
+   production baseline, while `codex/avp-master-plan` is the current isolated
+   planning/discovery branch. Do not switch, merge or cherry-pick between AvP
+   and Marvel lanes unless the user explicitly authorizes that operation.
+7. When present, read `docs/NEXT_AGENT_PROMPT.md`; it contains only the first
+   executable body and never supersedes `GOAL.md`, `PARITY_PLAN.md` or the
+   handoff.
 
 ## Current direction: functional parity by ROM translation
 
-As of 2026-08-17 the target is a **functionally parity-accurate** Round 1, and
-the method is **translating game logic and data out of the ROM**, not inferring
-it from screen captures. `docs/PARITY_PLAN.md` holds the phases, the established
-memory and ROM addresses, and the gates.
+The target is a **functionally parity-accurate complete game**. Round 1 is the
+active Capability Gate 1, and the method is **translating game logic and data
+out of the ROM**, not inferring it from screen captures. `docs/PARITY_PLAN.md`
+holds the Gate 1 phases, full-game continuation, established memory/ROM
+addresses and evidence gates.
 
 - Do not extend the capture-a-clip-and-bind-it method for new actors or
   actions. It cannot represent unobserved behaviour, does not scale, and cannot
@@ -78,8 +87,9 @@ private inputs.
   inputs, objects, palettes, hit events, camera anchors, and QSound timing
   where no ROM-derived equivalent exists yet.
 - Preserve the evidence chain:
-  `ROM audit -> deterministic capture -> validating analyzer -> generated asset
-  -> native state binding -> ISO member hash -> emulator -> physical Saturn`.
+  `ROM audit -> ROM table/routine extraction plus deterministic MAME evidence
+  -> validating analyzer -> round-specific semantic data and translated C ->
+  native SH-2 integration -> ISO member hash -> emulator -> physical Saturn`.
 - Generate derived data through repository scripts. Do not hand-edit generated
   headers or archives.
 - Label results honestly as capture-exact, native-but-approximate, or missing.
@@ -109,10 +119,14 @@ For a changed slice, run the narrowest applicable checks, then broaden them:
 1. Deterministic analyzer or converter validation.
 2. Host capability tests and deterministic soak.
 3. Focused Saturn profile and ISO-member byte/hash verification.
-4. Full `-EncounterTest` route through the Round 2 boundary.
+4. Full `-EncounterTest` Gate 1 route through the Round 2 boundary.
 5. Clean `normal-release` build and boot from the title/menu using the exact cue.
 6. Real-time audible route validation.
-7. Physical Saturn validation.
+7. Gate 1 physical Saturn validation.
+8. After Gate 1, cumulative title-to-current-endpoint tests for every added
+   round, followed by all-character complete single-player routes.
+9. Original-player-count multiplayer stress and complete-route validation.
+10. Final clean-release physical Saturn validation for the complete game.
 
 Inspect the emulator process command line because Yaba Sanshiro can retain stale
 disc state. A focused or host pass never substitutes for full-route or hardware

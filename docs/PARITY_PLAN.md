@@ -1,26 +1,48 @@
-# Near arcade-perfect Round 1: parity plan
+# Full-game native Alien vs Predator parity plan
 
-Target: a Sega Saturn build of Alien vs Predator Round 1, "City of Despair",
-that is **functionally parity-accurate** with the CPS2 original. Enemies behave
-correctly, animations play their real sequences at their real durations,
-collisions use the real boxes, and the level plays as the arcade plays. This is
-not bit-exact frame parity; see "What parity means here".
+Target: a private native Sega Saturn port of the complete US `avspu` arcade
+game at **functional parity**. Round 1, "City of Despair", through the Round 2
+title is Capability Gate 1: it proves the reusable extraction, semantic-runtime,
+Saturn-rendering, audio and validation approach before expansion across the
+remaining game. Passing Gate 1 is not full-game completion.
 
 This document supersedes the capture-and-bind method for new work. Read it with
 `AGENTS.md` and `docs/AGENT_HANDOFF.md`.
 
-## Goal-progress index
+## Full-game goal-progress index
+
+Audited 2026-08-18 against the full-game destination in
+[`GOAL.md`](GOAL.md). A Round 1 or single-actor proof may advance a condition,
+but cannot close a global condition.
+
+**Overall: 0 of 9 full-game conditions are closed.**
+
+| # | Full-game condition | Status | Current evidence and remaining gate |
+|---|---|---|---|
+| 1 | Complete content and flow | **OPEN — Gate 1 baseline only** | The current native route covers the frontend and Round 1 through the Round 2 title. Remaining rounds, characters, items, progression, attract flow, endings and credits are not integrated. |
+| 2 | ROM-derived animation and presentation | **OPEN — Chrysalis composition slice proven** | One boss composition slice and limited decoders are proven. Complete actor/effect coverage, ROM-driven selection and all-game integration remain open. |
+| 3 | Game-derived collision | **OPEN — Round 1 evidence captured** | Debug overlays and selected candidates exist; native collision still consumes inferred schedules and no game-wide collision dataset is integrated. |
+| 4 | Translated behavior | **OPEN** | Writer PCs are located, but required player/enemy/boss/object routines and PRNG behavior are not translated across the game. |
+| 5 | Extracted stage and game systems | **OPEN** | Round 1 lifecycle is still authored from captures; complete stage, camera, trigger, scoring, HUD and progression tables are not consumed. |
+| 6 | Complete native audio | **OPEN — Round 1 subset proven** | Selected Round 1 CDDA/PCM events are captured and integrated. Complete music, voice, event ownership and transition coverage remain open. |
+| 7 | All-character single-player validation | **OPEN** | No selectable character has a complete native full-game route through final boss, ending and credits. |
+| 8 | Original multiplayer validation | **OPEN** | Full-game joins, HUD/score ownership, camera, spawn, collision and load behavior at the arcade revision's player count are not implemented or validated. |
+| 9 | Final physical-hardware release | **OPEN** | Emulator precursors exist. No full-game single-player or multiplayer route has passed on physical NTSC Saturn hardware. |
+
+## Capability Gate 1 progress index
 
 Audited 2026-08-17 against every completion condition in
-[`GOAL.md`](GOAL.md). Status describes the **required final implementation**,
-not how much useful groundwork exists. No percentage is used because a green
-host model cannot substitute for a missing ROM-derived runtime or physical
-hardware proof.
+the former Round 1 charter. These seven technical conditions are retained as
+the acceptance contract for Gate 1. Status describes the required Gate 1
+implementation, not how much useful groundwork exists. No percentage is used
+because a green host model cannot substitute for missing ROM-derived runtime
+or physical-hardware proof.
 
-**Overall: 0 of 7 final conditions are closed.** The existing capture-derived
-native route is a valuable regression baseline, not the goal implementation.
+**Gate 1: 0 of 7 conditions are closed.** The existing capture-derived native
+route is a valuable regression baseline, not the Gate 1 implementation and not
+the full-game destination.
 
-| # | Goal condition | Status | Current evidence and remaining gate |
+| # | Gate 1 condition | Status | Current evidence and remaining gate |
 |---|---|---|---|
 | 1 | Animation from ROM scripts at runtime | **OPEN — Chrysalis tile-composition slice proven** | For the Chrysalis boss the runtime now composes all 29 of its poses from ROM-referenced 4bpp tiles (`compose_boss_rom_pose` in `main.c`, `generated/avsp_boss_rom.h`), and the boss's `BACT`/`BHIT`/`BKO` pose archives are no longer loaded for animation (they remain on disc only as host-test regression oracles). This is a composition slice, not full ROM animation: pose *selection* still uses the capture-derived per-frame clip/step tables (`boss_pose_for_frame`, `generated/avsp_boss_animation.h`), and the ROM selector-6 / control-word script interpreter is decoded host-side only, not yet linked into the runtime. The 29-pose / 28-assembly composition gate passes 28/28 with 0 differing pixels, the focused KO/HIT builds and the full controller route through Round 2 all render on Yaba Sanshiro without an asset error, and a clean normal release boots to title. **Remaining:** link the ROM script interpreter for pose selection, and decode the player/street-aliens/Stalker programs to route them through the same tile-composition path (retiring their `/SPR4/*.RLE` archives), before this condition is closed. |
 | 2 | Collision from the game's hitboxes | **OPEN — evidence captured** | Stock-MAME hitbox overlays and selected actor-relative candidates are tracked. Native collision still uses scalar range/lane checks and inferred Chrysalis 21/55/97 and Stalker contact schedules. Decode the game's box records, validate all required poses, and replace those checks. |
@@ -32,20 +54,21 @@ native route is a valuable regression baseline, not the goal implementation.
 
 The volatile evidence, exact commands, hashes, current HEAD and immediate work
 queue stay in [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md); this table is the concise
-goal index.
+Gate 1 index.
 
 ## Master execution plan (2026-08-18)
 
-This is the current order of work. It supersedes older resume lists in the
-handoff and refines the broad phases below. The active object-emission trace is
-finished first because its call chain is already localized; after that narrow
-gate, work returns to the real-hitbox priority before broadening animation,
-stage, and AI coverage.
+This is the current Capability Gate 1 order of work. It supersedes older resume
+lists in the handoff and refines the broad phases below. The active object-
+emission trace is finished first because its call chain is already localized;
+after that narrow gate, work returns to the real-hitbox priority before
+broadening animation, stage and AI coverage. The first body assigned to the
+next agent is milestone 1 only.
 
-| Order | Milestone | Required work | Exit gate | Goal conditions advanced |
+| Order | Milestone | Required work | Exit gate | Gate 1 conditions advanced |
 |---|---|---|---|---|
 | 0 | Preserve the intercept boundary | Commit the documentation-only master plan on an AvP branch; keep the MSHvSF research checkpoint isolated | AvP baseline, Marvel checkpoint, dirty files, and exact resume command are recorded without merging either history | All, by preserving provenance |
-| 1 | Close the street-alien five-slot emission gate | Trace object-buffer word indices 80–99 at frame 4253; identify the street alien's group list, actor type, jump-table target, Family-1 variant, `A0` source, `A4=0xFFA000`, and `A6` context; map actor `+0x1c/+0x50` to the source longs | A deterministic analyzer regenerates all five four-word slots at indices 80/84/88/92/96, including X, Y, code, attribute, order, bank, and frame relation; it also passes one different-facing or different-palette negative-control frame | 1 and 5 |
+| 1 | Close the street-alien five-slot emission gate | Trace object-buffer word indices 80–99 at frames 4214 and 4253; identify the street alien's group list, actor type, jump-table target, Family-1 variant, `A0` source, `A4=0xFFA000`, and `A6` context; map actor `+0x1c/+0x50` to the source longs | A deterministic analyzer regenerates all five four-word slots at indices 80/84/88/92/96 for both frames, including X, Y, code, attribute, order, bank and frame relation; frame 4214 is the different-pose anti-hardcoding control | 1 and 5 |
 | 2 | Replace inferred collision | Decode actor-local hitbox/attack-box records for every required player, street-alien, Stalker, and Chrysalis pose by joining the debug overlays, pivots, interaction selectors, and writer/table evidence | Native collision consumes ROM-derived boxes; inferred Chrysalis 21/55/97 and Stalker schedules are removed; controlled hit and whiff fixtures pass | 2 and 5 |
 | 3 | Complete Round 1 animation extraction | Promote the street-alien decoder only after milestone 1; gate all 28 street-alien assemblies, then Stalkers and player; add the player's missing work-RAM/register capture; link the proven script interpreter for boss pose selection | Every required actor/action has ROM-derived script, assembly, tile, position, and duration coverage; capture archives remain regression oracles, not runtime animation sources | 1, 5, and 6 |
 | 4 | Recover Round 1 stage data | Locate and decode spawn records, camera bounds, scroll parameters, room triggers, barricade/door transitions, boss-room entry, and Round 2 handoff | The deterministic route consumes extracted tables rather than authored lifecycle constants and reaches the same ordered room/event anchors | 4, 5, and 6 |
@@ -53,7 +76,24 @@ stage, and AI coverage.
 | 6 | Integrate and budget the Saturn runtime | Preserve the existing Saturn platform pipeline; integrate proven tables/routines actor by actor; measure referenced-tile working set, cartridge/work-RAM lifetimes, VDP1 commands/VRAM, VDP2, SCSP, DMA, and CD access before changing overlays or renderer strategy | Focused and full-route builds both fit measured budgets; no CD-data read occurs during CDDA without a passing hardware measurement; normal release is restored after every diagnostic | 1–6 |
 | 7 | Validate and release-candidate test | Compare MAME and native semantic events on identical input; retain pixel/position oracles; run host, soak, focused, full-route, clean release, audible route, then physical hardware | Conditions 1–6 are independently green, followed by sustained 60 Hz and ten-minute physical NTSC Saturn proof with digital pad and 32 Mbit cartridge | 5–7 |
 
+### Full-game continuation after Capability Gate 1
+
+Gate 1 establishes reusable systems; it does not authorize stage-specific
+hardcoding as the expansion method. Continue in this order:
+
+| Program phase | Required work | Exit gate |
+|---|---|---|
+| A. Whole-game inventory and generalization | Inventory all animation programs, actors, hitboxes, stages, routines, items, weapons and audio events in `avspu`; generalize the proven extractors and semantic interfaces beyond Round 1 | Every remaining content family has an owner, source range, extractor/translator path, validation oracle and Saturn budget class |
+| B. Remaining-round integration | Integrate each remaining round in arcade order using extracted tables and translated routines; run the cumulative title-to-current-endpoint route after every round | Every round passes animation, collision, behavior, stage, audio, transition and resource-lifetime gates without route-specific runtime fallbacks |
+| C. Complete single-player | Complete the full route with every selectable character, including items, continues, final boss, ending and credits | All-character deterministic MAME/native event comparisons have no unexplained divergence and the clean normal release completes every route |
+| D. Original multiplayer | Add the arcade revision's simultaneous-player capability after single-player is green; implement joins, HUD/score ownership, camera, spawns, collision, items and transitions | A maximum-player complete route passes deterministic, stress, emulator and physical-controller tests |
+| E. Final hardware candidate | Measure peak CPU, VDP1/VDP2, RAM, cartridge, SCSP, DMA and CD/CDDA behavior across the complete game; restore a clean release | Required single-player and multiplayer routes pass at sustained 60 Hz on physical NTSC Saturn with digital pads, multitap and 32 Mbit cartridge |
+
 ### Immediate milestone 1 evidence contract
+
+The ready-to-invoke, implementation-level contract is
+[`NEXT_AGENT_PROMPT.md`](NEXT_AGENT_PROMPT.md). It contains only this first
+execution body and does not authorize later milestones.
 
 The CPS2 chain is already established through static disassembly:
 
@@ -66,20 +106,30 @@ The CPS2 chain is already established through static disassembly:
   -> Family 1 body or Family 2 effect emitter
 ```
 
-The remaining trace must use stock MAME 0.289, the frame-4200 state, and no
-more than 34 debugger write watchpoints. Watch the 20 words at
-`0x708000 + 0xA0..0xC6` through frame 4253 and record `(frame, pc, address,
-width, data)` plus the register/source context needed to attribute each write.
-The five four-word oracle entries are
+The remaining trace must use stock MAME 0.289, the frame-4200 state and no more
+than 34 debugger write watchpoints. Watch exactly the 20 logical writer words
+at `0x708000 + 0xA0..0xC6`; `0xA99DC` is statically proven to initialize
+`A1=0x708000`, so do not add simultaneous `0x700000` watchpoints. Capture bank-
+select register `0x8040E0` once per frame to prove the write-buffer/display-bank
+relationship. In one bounded run, prove the source-frame mapping for frames
+4214 and 4253 from synchronized actor/work-RAM evidence, then record
+`(frame, pc, address, width, data)` plus the register/source context needed to
+attribute each write.
+
+The frame-4214 different-pose control entries are
+`[8113,0099,4efe,0131]`, `[80e3,00a9,4ef6,0431]`,
+`[80f3,00b9,4fc8,0131]`, `[8121,007b,473a,2431]`, and
+`[8111,00ab,479c,1331]`. The frame-4253 target entries are
 `[814f,009e,4df8,0131]`, `[810f,00ae,4ef0,0531]`,
 `[815b,007b,4b04,2531]`, `[814b,00ab,4a88,1431]`, and
 `[816b,006b,4958,0131]`. Codes and attributes alone are insufficient: the gate
-requires all 20 words and their list positions.
+requires all 20 words, list positions, frame mappings and bank relationships
+for both frames.
 
 Do not promote a selector-12 decoder from the watchpoint PC sequence alone.
-The decoder must derive the output from ROM/actor source data, then reproduce
-the oracle. The second-frame negative control must fail if the frame-4253
-values are hard-coded.
+The decoder must derive the output from ROM/actor source data before consulting
+the validation fixture, then reproduce both oracles. Frame 4214 must expose any
+hard-coded frame-4253 values.
 
 ### CPS2-to-Saturn representation boundary
 
@@ -104,12 +154,14 @@ with two governed lanes:
 
 | Lane | Branch ownership | Purpose | Scheduling rule |
 |---|---|---|---|
-| AvP production discovery | Continue from `codex/avp-master-plan` (master-plan root `e37ab9f`) until its changes are deliberately promoted to `prototype/private-capability-test` | Decode and implement AvP Round 1 | Always owns the critical path; current milestone 1 remains first |
+| AvP production discovery | Continue from `codex/avp-master-plan` (master-plan root `e37ab9f`) until its changes are deliberately promoted to `prototype/private-capability-test` | Build the complete AvP port, with Round 1 as Capability Gate 1 | Always owns the critical path; current milestone 1 remains first |
 | MSHvSF official-port reference | `codex/mshvsf-reference-lane` (`43e88ac`) | Answer a named Saturn architecture or historical-fidelity question | Run only when it informs an upcoming AvP decision, or while AvP is independently blocked; open-ended fighter archaeology is not an AvP task |
 
-The Marvel lane may create evidence, analyzers, templates, and candidate
+The Marvel lane may create evidence, analyzers, templates and candidate
 patterns. It may not directly change AvP runtime code, close an AvP goal
-condition, or establish an AvP hardware budget.
+condition or establish an AvP hardware budget. These activation rules repeat
+at equivalent design forks in later rounds; open-ended Marvel archaeology never
+becomes a prerequisite for full-game content extraction.
 
 #### When Marvel research should be activated
 
@@ -243,8 +295,9 @@ Functional parity, defined so it can be tested:
 
 - Given the same initial state and the same input sequence, the native build
   reproduces the arcade's **actor state trajectory**: position, animation
-  script position, health, timers, and state transitions, within a stated
-  tolerance, for the whole level.
+  script position, health, timers and state transitions, within a stated
+  tolerance, for the complete game. Gate 1 applies the same standard to Round
+  1 through the Round 2 title.
 - Collisions use the game's real hitboxes, not inferred windows.
 - Animations play the ROM's real frame sequences and durations.
 
@@ -334,6 +387,12 @@ sufficient for this retail ROM: its physical-DIP-to-RAM copy routine is absent.
 The verified stock-MAME path injects the retained software-switch bytes once
 after startup RAM clearing, then lets the game's own routine derive the master
 enable. The capture scripts and handoff record the exact frame and values.
+
+## Capability Gate 1 technical phases
+
+The numbered phases below are the detailed engineering decomposition for Gate
+1. Once they pass, continue with the full-game program phases above; do not
+treat the Round 1-specific nouns in these sections as the final scope.
 
 ## Phase 0 is NOT on the critical path (revised 2026-08-17)
 
@@ -553,20 +612,24 @@ Neither gate is an event-level parity harness. Goal condition 5 remains open
 until full required animation coverage and the MAME-vs-native event comparison
 both pass.
 
-## Explicitly out of scope
+## Deferred full-game content and explicit exclusions
 
-Cut deliberately, to keep the target reachable:
+Attract mode, complete title/menu transitions, remaining rounds, endings,
+credits and multiplayer are **deferred until Gate 1 proves the reusable
+engine**, but they are required by the full-game goal and are not out of scope.
 
-- **Attract mode.** It is the game playing itself and needs the whole engine
-  plus demo input scripting. The goal is a playable Round 1, not the demo. It
-  becomes nearly free once the engine is done; revisit then, not now.
-- **Exhaustive actor struct mapping.** See 2b.
-- **Frame-exact comparison harness.** See Phase 4.
+The following remain deliberately excluded or conditional:
+
+- **Exhaustive actor struct mapping.** Map only fields consumed by the native
+  runtime; see 2b.
+- **Frame-exact comparison harness.** Functional parity uses semantic-event
+  comparison and widens only around mismatches; see Phase 4.
 - **A custom MAME build**, unless stock watchpoints prove inadequate. See the
   Phase 0 revision note.
-- **Boot logo and title screens.** They are long static holds, 79 to 255 frames
-  each, per the boot timeline map. They are trivially reproducible whenever
-  wanted and prove nothing about parity; do them last or never.
+- **Other regional revisions as shipped targets.** `avspu` is canonical;
+  another revision is comparative evidence unless the user expands scope.
+- **Public distribution or promotion** without explicit rights-holder and
+  licensing authorization.
 
 ## Scope and rights
 

@@ -1,25 +1,28 @@
-# Alien vs. Predator Sega Saturn private capability test
+# Alien vs. Predator native Sega Saturn port
 
-This repository is a private engineering prototype for testing a native Sega
-Saturn conversion of Capcom's CPS2 Alien vs. Predator. It is not an emulator:
-the build cross-compiles SH-2 code and feeds reconstructed graphics to VDP1 and
-VDP2. It currently proves an authentic-asset Stage 1 route slice, not a content-
-complete or frame-exact port.
+This repository is private engineering work toward a native Sega Saturn port of
+the complete US `avspu` revision of Capcom's CPS2 Alien vs. Predator. It is not
+an emulator: the build cross-compiles SH-2 code and feeds reconstructed
+graphics to VDP1 and VDP2. It currently proves an authentic-asset Stage 1 route
+slice, Capability Gate 1, not a content-complete or frame-exact port.
 
 Canonical project status:
 
-- [`docs/GOAL.md`](docs/GOAL.md) defines the seven non-negotiable completion
-  conditions.
-- [`docs/PARITY_PLAN.md`](docs/PARITY_PLAN.md#goal-progress-index) contains the
-  condition-by-condition goal index and ROM-translation route.
+- [`docs/GOAL.md`](docs/GOAL.md) defines the full-game destination and nine
+  non-negotiable completion conditions.
+- [`docs/PARITY_PLAN.md`](docs/PARITY_PLAN.md#full-game-goal-progress-index)
+  contains the full-game and Capability Gate 1 indexes plus the ROM-translation
+  route.
 - [`docs/AGENT_HANDOFF.md`](docs/AGENT_HANDOFF.md) contains volatile hashes,
   commands, current blockers and immediate next work.
+- [`docs/NEXT_AGENT_PROMPT.md`](docs/NEXT_AGENT_PROMPT.md) contains the first
+  executable body for the next agent; it does not redefine project scope.
 
 The native route described below is the capture-derived regression baseline.
 It is not yet the ROM-derived functional-parity implementation required by the
 goal.
 
-Current milestone:
+Current Capability Gate 1 baseline:
 
 - verifies a user-supplied `avspu` ROM set with official MAME 0.289
 - captures a deterministic Stage 1 reference and CPS2 video state
@@ -184,8 +187,10 @@ beside the ISO remains unchanged.
 
 ## Real hardware
 
-Real Sega Saturn hardware is the acceptance target. Build the normal release
-profile with `build.ps1 -Clean -Release`; diagnostic `-VisualTest`,
+Real Sega Saturn hardware is the final acceptance target. The current hardware
+procedure is the Gate 1 precursor; full-game completion later requires all-
+character single-player and original-player-count multiplayer routes. Build the
+normal release profile with `build.ps1 -Clean -Release`; diagnostic `-VisualTest`,
 `-EncounterTest`, and `-BossHitTest` images are not release candidates. The console needs an
 authorized homebrew boot path plus compatible 4 MB DRAM support. See
 [docs/HARDWARE_TEST.md](docs/HARDWARE_TEST.md) for the exact cold-boot,

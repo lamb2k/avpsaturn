@@ -1,5 +1,10 @@
 # Architecture
 
+This document describes the proven Capability Gate 1 architecture and current
+legacy regression baseline. The destination is the complete game defined in
+`GOAL.md`; every remaining round must generalize these semantic extraction and
+native Saturn interfaces rather than add route-specific capture bindings.
+
 ## Native conversion direction
 
 This is a native Saturn renderer and gameplay shell, not a CPS2 emulator.

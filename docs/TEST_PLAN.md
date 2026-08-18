@@ -1,9 +1,10 @@
-# Capability test plan
+# Capability Gate 1 and full-game test plan
 
-Gates C and D retain the capture-derived route as regression evidence. They do
-not replace the seven completion conditions in `GOAL.md`; current goal status
-is indexed in `PARITY_PLAN.md`. New actor, collision, stage and AI work follows
-the ROM-translation route rather than extending capture-and-bind.
+Gates A–E validate Capability Gate 1, Round 1 through the Round 2 title. Gates C
+and D retain the capture-derived route as regression evidence. None closes a
+full-game condition by itself; the nine global conditions are in `GOAL.md` and
+status is indexed in `PARITY_PLAN.md`. New actor, collision, stage and AI work
+follows the ROM-translation route rather than extending capture-and-bind.
 
 ## Gate A: reproducible source decode
 
@@ -28,7 +29,7 @@ test and clean release build passed, and visual inspection confirmed the exact
 working-set pixels at original scale over the reconstructed background/HUD in
 the Saturn's native 352x224 mode.
 
-## Gate C: frame-exact presentation reconstruction
+## Gate C: capture-exact presentation regression
 
 - Group all visible CPS2 object commands into actors and props.
 - Match the MAME reference enemy variants, palettes, positions, pivots, and
@@ -210,7 +211,7 @@ natural nonlethal Stalker-hit clip, intermediate route detail,
 combat SCSP cues, and comparison capture
 remain open.
 
-## Gate E: performance and hardware
+## Gate E: Capability Gate 1 performance and hardware
 
 Run the route in `docs/HARDWARE_TEST.md` on a real NTSC Saturn with a digital
 controller and detected 32 Mbit DRAM cartridge. Record console/region, boot
@@ -221,14 +222,55 @@ corruption. The pass target is sustained 60 Hz with no partial cels, palette
 corruption, controller loss, video-sync loss, or post-load gameplay stall
 longer than one frame.
 
-Status: emulator precursor passed; physical-Saturn validation is open.
+Status: emulator precursor passed; Gate 1 physical-Saturn validation is open.
+Passing this route does not close the final full-game hardware condition.
 
-## Gate F: full-port candidate and rights review
+## Gate F: full-game extraction and cumulative integration
 
-After the first level is complete, expand the same architecture into a full
-port candidate suitable for an internal development-team evaluation. Before
-the build or its footage is distributed, demonstrated publicly, promoted, or
-released, complete an explicit licensing and rights-holder authorization
-review.
+- Inventory every remaining actor, animation program, hitbox family, routine,
+  stage table, item, weapon and audio event in `avspu`.
+- Give every content family a source range, extractor/translator, semantic
+  output, validation oracle and Saturn budget class.
+- Integrate remaining rounds in arcade order using generalized systems, then
+  rerun the cumulative title-to-current-endpoint route after every round.
+- Reject stage-specific runtime constants, capture-bound animation and focused
+  profiles as substitutes for cumulative validation.
 
-Status: future gate; no public distribution is authorized by this repository.
+Status: future after Capability Gate 1; full-game inventory is open.
+
+## Gate G: complete single-player
+
+- Complete the game with every selectable character, including weapons/items,
+  continues, final boss, ending and credits.
+- Compare MAME/native semantic events for each route and explain every accepted
+  platform difference.
+- Run host, soak, focused, cumulative, audible and clean normal-release gates
+  for every character.
+
+Status: open; no character has a complete native full-game route.
+
+## Gate H: original multiplayer capability
+
+- Support the arcade revision's original simultaneous-player count after the
+  complete single-player game is green.
+- Validate joins/continues, HUD and score ownership, camera, spawns, collision,
+  items, transitions and deterministic actor ordering.
+- Complete a maximum-player route while measuring worst-case CPU, VDP1/VDP2,
+  work RAM, cartridge RAM, SCSP, DMA and CD/CDDA pressure.
+
+Status: open.
+
+## Gate I: final physical release candidate and rights review
+
+- Build a clean `normal-release` image and verify every ISO member by byte
+  count and SHA-256.
+- Complete the required single-player and multiplayer routes on physical NTSC
+  Saturn hardware with digital pads, required multitap and 32 Mbit cartridge
+  at sustained 60 Hz.
+- Require complete audio, safe CD/CDDA behavior and no partial cels, palette
+  corruption, controller loss, allocation failure or asset failure.
+- Before the build or footage is distributed, demonstrated publicly, promoted
+  or released, complete an explicit licensing and rights-holder authorization
+  review.
+
+Status: open; no public distribution is authorized by this repository.

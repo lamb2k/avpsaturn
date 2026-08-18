@@ -6,9 +6,12 @@ asset pack through the Saturn CD filesystem, renders through VDP1/VDP2, polls
 controller port 1, and requires a detected 32 Mbit (4 MB) DRAM cartridge.
 The runtime registers both 2 MB cartridge banks; failure to access DRAM1 at
 `0x22600000` is a hardware failure, not a reason to drop animation or audio.
-This procedure validates the current capture-derived regression route. The
-physical goal condition closes only after the ROM-derived gameplay replacement
-also passes this route at sustained 60 Hz.
+This procedure validates the current Capability Gate 1 capture-derived
+regression route. The Gate 1 hardware condition closes only after the ROM-
+derived gameplay replacement also passes this route at sustained 60 Hz. Final
+full-game hardware completion additionally requires every selectable
+character's complete single-player route and an original-player-count route
+with digital pads and the required multitap; see `TEST_PLAN.md` Gates G–I.
 
 ## Build the hardware image
 
@@ -121,6 +124,7 @@ alter console copy protection or supply copyrighted disc data.
 9. Leave the encounter running for ten minutes and watch for partial sprites,
    palette corruption, controller loss, CD stalls, or dropped video sync.
 
-Record console model/region, boot device, cartridge, display path, result, and
-any visible failure. The hardware gate remains open until this route passes on
-a physical Saturn; an emulator screenshot cannot close it.
+Record console model/region, boot device, cartridge, display path, result and
+any visible failure. The Capability Gate 1 hardware gate remains open until
+this route passes on a physical Saturn; an emulator screenshot cannot close it.
+Passing this route does not close the final full-game hardware condition.

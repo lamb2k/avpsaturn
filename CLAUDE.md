@@ -5,8 +5,10 @@ for every agent harness working in this repository; this file only adds the
 Claude Code specifics and must stay minimal so the two never diverge. Then
 read `docs/AGENT_HANDOFF.md` completely before acting; it is the
 authoritative restart checkpoint. Then read `docs/PARITY_PLAN.md`, which is
-the current direction and phase order: functional parity by translating game
-logic out of the ROM, using an instrumented MAME build.
+the current direction and phase order: full-game functional parity by
+translating game logic out of the ROM, with Round 1 as Capability Gate 1 and
+stock MAME 0.289 as the primary observation instrument. Finally read
+`docs/NEXT_AGENT_PROMPT.md` when present for the first executable body only.
 
 Claude Code specifics:
 

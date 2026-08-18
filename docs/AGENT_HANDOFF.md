@@ -1,20 +1,29 @@
-# Agent handoff: AvP Saturn capability test
+# Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-18 EDT (master-plan intercept: full object-emission chain
-verified, street-alien five-slot gate next, applicable MSHvSF probes integrated)
+Updated: 2026-08-18 EDT (full-game destination synchronized; Round 1 retained
+as Capability Gate 1; street-alien five-slot proof is the next execution body;
+applicable MSHvSF probes remain isolated and integrated by decision point)
 
-**Goal audit: 0/7 final conditions closed.** The condition-by-condition index
-is now at [PARITY_PLAN.md#goal-progress-index](PARITY_PLAN.md#goal-progress-index).
-The current capture-derived native route remains a useful regression baseline,
-but it does not satisfy the ROM-derived animation, collision, AI or stage-table
-requirements in `GOAL.md`. Do not describe the project as functionally parity
-complete or hardware-ready.
+**Full-game goal audit: 0/9 conditions closed. Capability Gate 1: 0/7
+conditions closed.** The indexes are at
+[PARITY_PLAN.md#full-game-goal-progress-index](PARITY_PLAN.md#full-game-goal-progress-index)
+and
+[PARITY_PLAN.md#capability-gate-1-progress-index](PARITY_PLAN.md#capability-gate-1-progress-index).
+The current capture-derived Round 1 route remains a useful regression baseline,
+but it does not satisfy Gate 1's ROM-derived animation, collision, AI or stage-
+table requirements and cannot close a full-game condition. Do not describe the
+project as functionally parity complete or hardware-ready.
 
 ## Current resume point: master plan intercept
 
 The plan of record is now
 [`PARITY_PLAN.md#master-execution-plan-2026-08-18`](PARITY_PLAN.md#master-execution-plan-2026-08-18).
 Its order supersedes every older resume list in this handoff.
+
+The ready-to-invoke first body is
+[`NEXT_AGENT_PROMPT.md`](NEXT_AGENT_PROMPT.md). It is deliberately limited to
+the street-alien emission proof and does not authorize later Gate 1 work,
+Marvel research or full-game content expansion.
 
 **Resume with one focused proof, not another broad disassembly pass.** The
 static chain has been checked against
@@ -33,30 +42,46 @@ static chain has been checked against
 That proves where and how the CPS2 object list is built. It does **not** yet
 prove the street alien's exact group/type path, Family-1 variant, per-part
 source layout, or the actor `+0x1c/+0x50` relationship to
-`0x12FE06..0x12FEEE`. The frame-4253 five-slot gate is still red.
+`0x12FE06..0x12FEEE`. The frame-4214/4253 two-frame five-slot gate is still red.
 
 ### Immediate trace and gate
 
 1. Start from the verified frame-4200 state under stock MAME 0.289 `-debug`.
-2. Install 20 write watchpoints for object-buffer word indices 80..99,
-   addresses `0x7080A0..0x7080C6` inclusive. This stays under the empirical
-   34-watchpoint ceiling.
-3. Run through frame 4253 and record `(frame, pc, address, width, data)` plus
-   the live source/actor context needed to identify `A0`, `A4=0xFFA000`, and
-   `A6`. If the debugger action cannot print every address register, combine
-   the writer PCs with the synchronized actor/work-RAM dump and static jump
-   table; do not widen into another address sweep.
+2. Install exactly 20 write watchpoints for logical object-buffer word indices
+   80..99, addresses `0x7080A0..0x7080C6` inclusive. `0xA99DC` is proven to
+   initialize `A1=0x708000`; do not add simultaneous `0x700000` watchpoints.
+   This stays under the empirical 34-watchpoint ceiling.
+3. In one bounded run, capture bank-select register `0x8040E0` per frame and
+   prove the source-frame mapping for frames 4214 and 4253 from synchronized
+   actor/work-RAM evidence. Record `(frame, pc, address, width, data)` plus the
+   live source/actor context needed to identify `A0`, `A4=0xFFA000`, and `A6`.
+   If the debugger action cannot print every address register, combine writer
+   PCs with synchronized RAM and the static jump table; do not widen into
+   another address sweep.
 4. Resolve the street alien's group-list entry, type byte at actor `+0x08`,
    `type>>1` jump-table target, Family-1 sibling, and `A0` source long/deltas.
 5. Produce a deterministic analyzer that regenerates all four words at slot
-   indices 80/84/88/92/96, not only the codes. The exact entries are
+   indices 80/84/88/92/96 for both frames, not only the codes. Frame 4214 is
+   the different-pose anti-hardcoding control:
+   `[8113,0099,4efe,0131]`, `[80e3,00a9,4ef6,0431]`,
+   `[80f3,00b9,4fc8,0131]`, `[8121,007b,473a,2431]`, and
+   `[8111,00ab,479c,1331]`. Frame 4253 is the target:
    `[814f,009e,4df8,0131]`, `[810f,00ae,4ef0,0531]`,
    `[815b,007b,4b04,2531]`, `[814b,00ab,4a88,1431]`, and
    `[816b,006b,4958,0131]`; ordering, bank, and frame relation also remain part
    of the gate.
-6. Run the same derivation on one different-facing or different-palette frame.
-   It must derive that frame's values and must fail if frame-4253 constants are
-   hard-coded.
+6. The derivation must read new capture/RAM evidence before consulting the
+   validation fixture. It must fail if frame-4253 constants are hard-coded.
+
+The execution body must add
+`capture_street_alien_object_emission.ps1`,
+`tools/mame_watch_street_alien_object_emission.lua`,
+`tools/analyze_street_alien_object_emission.py`,
+`data/street_alien_object_emission_oracles.json` and
+`data/street_alien_object_emission.json`, with raw evidence ignored under
+`.deps/mame/object_emission/`. The wrapper/watcher/analyzer accept scenario
+parameters so the proof can be reused for another AvP actor; street-alien
+defaults are permitted, output-specific derivation constants are not.
 
 Only after both frames pass may the selector-12/street-alien decoder be
 promoted or committed. A writer PC sequence without source-data derivation is
@@ -97,15 +122,16 @@ research backlog.
 
 Use Marvel at these points:
 
-1. **Not now:** finish the AvP frame-4253 five-slot source-decoder gate. Marvel
-   cannot identify AvP's 68000 group/type handler.
+1. **Not now:** finish the AvP frame-4214/4253 five-slot source-decoder gate.
+   Marvel cannot identify AvP's 68000 group/type handler.
 2. **After AvP's referenced tile set is measured, before choosing its actor
    renderer:** trace Marvel work RAM, both cartridge banks, VDP1 command tables,
    and VDP1 VRAM at the existing idle/normal/hit anchors. Use the result to
    compare AvP's precomposed-cel and per-part-command prototypes.
 3. **When AvP stage package/load ownership is known:** trace Marvel VDP2,
    file reads, DMA, and CDDA across character/stage transition. Use it to shape
-   AvP load windows, then prove them on AvP's scrolling Round 1 route.
+   AvP load windows, then prove them first on the scrolling Round 1 Gate 1
+   route and later on cumulative full-game transitions.
 4. **When AvP audio ownership is being finalized:** trace one Marvel effect,
    voice, and music transition through SCSP/CDDA and CD access.
 5. **Before final Saturn budgeting:** capture a Marvel tag/super stress route.
@@ -249,14 +275,23 @@ custom build. The plan of record is
 [PARITY_PLAN.md](PARITY_PLAN.md); read it after this file. This handoff says
 where work stopped, the parity plan says where it is going.**
 
-Read this file before taking any action. The user wants a private, capture-faithful, native Sega Saturn port of CPS2 Alien vs Predator, beginning at the main menu and continuing through the complete first level into Round 2. Do not reframe success as an emulator, approximate demo, host-only simulation, or focused animation viewer.
+Read this file before taking any action. The user wants a private, capture-
+faithful, native Sega Saturn port of the complete US `avspu` game. Round 1 from
+the frontend through the Round 2 title is Capability Gate 1, not the final
+destination. Complete single-player precedes mandatory original-player-count
+multiplayer validation. Do not reframe success as an emulator, approximate
+demo, host-only simulation or focused animation viewer.
 
 ## Repository state
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Current documentation/planning branch: `codex/avp-master-plan`, created from
-  AvP checkpoint `5327c3a`. Run `git rev-parse HEAD` for the current planning
-  commit after this handoff is committed.
+  AvP checkpoint `5327c3a`; `d9e40fd` is the parent of the full-game scope-
+  synchronization checkpoint. Run `git rev-parse HEAD` for the current commit.
+- `docs/GOAL.md`, `docs/PARITY_PLAN.md`, this handoff, repository bootstrap,
+  test/hardware documents and `docs/NEXT_AGENT_PROMPT.md` now share one
+  hierarchy: complete `avspu` is the destination, Round 1 is Capability Gate 1,
+  and the street-alien emission proof is the next-agent execution body.
 - AvP production baseline remains `prototype/private-capability-test` at
   `5327c3a`; this planning branch does not rewrite its history.
 - MSHvSF research remains isolated on `codex/mshvsf-reference-lane` at
@@ -1016,25 +1051,17 @@ slot order 20–24: `0x4df8 0x0110 0x0000 | 0x4ef0 0x0510 0x0000 | 0x4b04 0x2510
 **strong lead for the actual sprite path**, but its format and pointer
 relationship are **unproven** and must not be baked into the das decoder.
 
-**Correct next investigation (replaces the `0x0169da`→objram reconciliation):**
-locate the real 68000 routine that writes frame 4253's street-alien entries into
-**CPS2 object RAM**, using stock MAME watchpoints on the object-RAM word
-addresses for slots 80/84/88/92/96 (both `0x700000` and `0x708000` banks, until
-the active write bank is proven); associate every captured X, Y, code and
-attribute word with a real writer PC; trace that writer back to its
-actor/state dispatcher, the per-part source pointers, and the animation
-record/assembly that selects them; and find the pointer relationship to
-`0x12FE06–0x12FEEE`. **No selector-12 decoder is promoted, extended or
-committed** until all five captured object slots (`80/84/88/92/96`) reproduce
-exactly (slot indices, order, four words each, bank, frame relationship) through
-the *correct object-RAM* sink. A documentation-only checkpoint is acceptable for
-restart safety, but no selector decoder. Condition 1 stays OPEN.
+**Historical next investigation — SUPERSEDED by the proven dispatcher/emitter
+below.** At this point the correct direction was to locate the real 68000
+object-RAM writer instead of comparing `0x0169da` tilemap output. The session
+initially proposed probing both `0x700000` and `0x708000`; the later static
+chain proved `0xA99DC` sets `A1=0x708000`. The current contract therefore uses
+only 20 logical watchpoints at `0x7080A0..0x7080C6` and records `0x8040E0` as
+bank metadata. The source-data gate and prohibition on promoting selector 12
+remain current.
 
-**Object-RAM location hunt — session findings (still OPEN, do not treat as
-resolved):** the `0x700000`/`0x708000` object-RAM bases quoted above are **not
-confirmed** by empirical write-watchpoint probing (MAME 0.289, state loaded at
-frame 4200, `debug:wpset` write watchpoints on word 82 = code, run to ~frame
-4254):
+**Historical object-RAM location hunt — superseded by the proven emitter
+below:** empirical probing before the dispatcher was found recorded:
 - **Object-bank select register = `0x8040e0`** (word, bit 0 = bank). It
   **alternates every frame**: 4250→1, 4251→0, 4252→1, **4253→0 (`:objram1`
   active)**, 4254→1. Frame 4253 displays from bank 0; the writer may target the
@@ -1049,10 +1076,10 @@ frame 4200, `debug:wpset` write watchpoints on word 82 = code, run to ~frame
   (`move.w #$20, D2; bsr $aa740` at `0xAA7F0`). It is **not** the street-alien
   body (which carries code `0x4df8`, x `0x814f`) — that body is emitted by a
   different variant of the same routine family.
-- **`0x700000+0xA4` never fires** in the window, and the street-alien code
+- **`0x700000+0xA4` never fired** in the window, and the street-alien code
   `0x4df8` appears at **no** probed base: `0x000000–0x01FFFF` (0x1000 step) and
-  `0x700000–0x712000` (0x2000 step). The true object-RAM CPU window for
-  `:objram1` is **not yet identified**.
+  `0x700000–0x712000` (0x2000 step). The CPU writer window was not identified
+  by that sweep; the later dispatcher proof below resolves it as `0x708000`.
 - **MAME 0.289 Lua API limits (empirical):** without `-debug`, `cpu.get_reg("PC")`
   ERRs and `machine.devices[":maincpu"].debug` is **nil**. Under `-debug`,
   `debug:wpset(program,"w",addr,size,nil,action)` works and the `action` string
@@ -1167,9 +1194,9 @@ routine's `A4`/`A5`/`A6` setup and which family-1 variant it reaches; (c) map
 the per-part source layout (`(A0)`-relative fields for the `[code, attr]` long
 + X/Y deltas) and the `($50,A4)`/`($1c,A4)` → `0x12FE06–0x12FEEE` link;
 (d) a focused wpset (≤34, state-load frame 4200) on `0x708000` words 80-99 to
-capture the actual frame-4253 write sequence (the five street-alien slots) with
-their writer PCs, then match each captured slot to its family-1 variant + source
-long; (e) reproduce the five slots exactly (the gate).
+capture frames 4214 and 4253 with writer PCs while recording `0x8040E0`, then
+match each slot to its family-1 variant and source long; (e) reproduce both
+five-slot lists exactly (the gate).
 The `0x12FE06–0x12FEEE` lead and the "do not promote selector-12 until all five
 slots reproduce exactly" gate stand as above.
 
@@ -1582,7 +1609,8 @@ context for the frontend slice; it is not the current work queue.
    Integrate
    menu -> character confirm -> Round 1 and run host, focused, full-route,
    then clean normal-release gates.
-7. Verify the complete first level audibly in a captured real-time run.
+7. Verify the complete Gate 1 first-level route audibly in a captured real-time
+   run.
 8. Run the normal release on physical NTSC Saturn hardware with a digital pad
    and 32 Mbit RAM cartridge; verify crop/black bars, audio, KO, and Round 2.
 9. Forward-test the reusable skill and assemble the full-port team evidence
@@ -1650,21 +1678,28 @@ and the event-level parity harness; see the goal-progress index.
 
 ## Remaining product-level work
 
-- Close all seven conditions in the goal-progress index. In particular, replace
-  capture-bound animation and hand-authored collision/AI/stage logic with
-  ROM-derived tables and translated routines before treating the route as the
-  goal implementation.
-- Verify the complete first level audibly in a captured real-time emulator run;
-  visual full-route completion is proven, while this pass did not independently
-  record every intermediate sound cue.
-- Run the documented route on physical NTSC Saturn hardware with a digital controller and 32 Mbit RAM cartridge.
-- Continue remaining fidelity gaps after the KO slice: exact Chrysalis action-selection AI, palette/explosion/victory details, remaining nonlethal Stalker reaction fidelity, and any route/intermediate details still listed in `docs/TEST_PLAN.md`.
-- Once a faithful full slice passes, forward-test and refine the private skill at `C:\Users\lambd\.codex\skills\port-cps2-to-sega-saturn`.
-- Assemble the full-port evidence package for the development team before proposing anything beyond private use.
+- Close all seven Capability Gate 1 conditions, starting with the street-alien
+  object-emission proof. Replace capture-bound animation and hand-authored
+  collision/AI/stage logic with ROM-derived tables and translated routines.
+- Verify the complete Gate 1 route audibly and on physical NTSC Saturn hardware
+  with a digital controller and 32 Mbit cartridge. This closes only Gate 1.
+- Inventory and generalize extraction/runtime interfaces for every remaining
+  actor, stage, item, weapon, routine and audio event, then integrate remaining
+  rounds in arcade order with a cumulative route after each addition.
+- Complete every selectable character's single-player route through final boss,
+  ending and credits before adding the arcade revision's original simultaneous-
+  player capability.
+- Complete maximum-player stress and full-route validation with the required
+  multitap, then run the final physical-hardware release gates.
+- Keep the full-game goal at 0/9 until every global condition in `GOAL.md`
+  closes; no Round 1 or single-actor proof may close one by itself.
+- Forward-test and refine the private skill after Gate 1, then assemble the
+  full-port evidence package before proposing anything beyond private use.
 
 ## 2026-08-18 Chrysalis ROM-composition vertical slice
 
-Goal condition 1 stays OPEN overall, but its **Chrysalis boss** now has a
+Capability Gate 1 animation condition 1 and full-game animation condition 2
+stay OPEN, but the **Chrysalis boss** now has a
 proven *tile-composition* vertical slice: the runtime composes all 29 of the
 boss's poses (all 6 actions) from ROM-referenced 4bpp tiles in the real Saturn
 build, with no `/SPR4/*.RLE` boss archive in the animation path. Two caveats
