@@ -211,6 +211,31 @@ wave, Stalkers, Chrysalis boss), decoding fields exactly as MAME 0.289
 | distinct tile codes per frame | 547 | 251.9 |
 | largest single object | 55 tiles | — |
 
+**Object block-size distribution (the finding that splits the hypothesis).**
+Across 215,646 captured objects: **83.6% are blocked sprites**, averaging
+**8.51 tiles each**; only 16.4% are 1x1. Peak frames hold 86 objects / 909
+tiles. So the rendering granularity choice is worth roughly **10x**:
+
+| Granularity | Commands at peak | Note |
+|---|---|---|
+| one command per 16x16 tile | **909** | the shape measured on the reference title |
+| **one command per CPS2 object** | **86** | one source object entry -> one VDP1 normal sprite of `nx*16 x ny*16` |
+
+Per-object is also the *more* faithful mapping: the CPS2 object entry is the
+hardware's own unit, and a blocked sprite is one entry. VDP1 normal sprites
+reach 504x255 and AvP's largest object is 55 tiles, so every AvP object fits one
+command. The cost is that a block must be contiguous in VDP1 VRAM as an
+`nx*16`-wide texture, which needs a per-block texture cache rather than a raw
+tile upload.
+
+**This is why the reference title's granularity is not copied.** Its measured
+"every drawn command is a 16x16 normal sprite" is most likely a consequence of a
+two-character fighter's object list being dominated by 1x1 entries, not a
+deliberate expansion — but that is `UNRESOLVED` and does not matter, because AvP
+follows AvP's object list. The *representation* half of the reference finding
+(16-colour bank mode, flip in `CMDCTRL`, jump-next linked list, source order as
+draw order) transfers directly; the *granularity* half does not.
+
 Two consequences:
 
 - **Colour RAM is not the constraint.** The risk that killed a per-tile pipeline
@@ -219,17 +244,38 @@ Two consequences:
   asks for roughly a tenth of that, and its worst measured frame still fits the
   64-bank mode 0 layout many times over. The current eight-bank allocation was
   sized for precomposed per-palette cels and is the thing that is actually tight.
-- **The open question is now VDP1 throughput, not representation.** 909 commands
-  at peak is roughly 3x the reference port's measured 296-334 reachable commands
-  per anchor, which is the expected difference between a scrolling beat-'em-up
-  with a large cast and a two-character fighter. 909 x 256 px = ~233k pixels per
-  frame of sprite fill. That must be measured on the Saturn side — command
-  build cost on SH-2, VDP1 command-table read overhead, and fill rate at 60 Hz —
-  before phase A can conclude.
+- **The open question is throughput at a granularity we choose, not
+  representation.** Sprite fill is the same either way — ~233k pixels at peak,
+  since the same pixels are drawn — but command count differs 10x (86 versus
+  909), and command-table reads plus per-command SH-2 build cost scale with
+  command count. Per-object at 86 commands is below the reference title's
+  measured 296-334, which is encouraging but is not an AvP measurement.
 
 **Status: phase A is half-answered.** The demand side is `MEASURED`; the Saturn
-throughput side is `UNRESOLVED`, and its probe is a VDP1 command-count and
-frame-time measurement on the existing native build at the same route anchors.
+throughput side is `UNRESOLVED`. Its probe is slice V below, which emits
+**per-object** commands with per-tile retained as the fallback, and measures real
+frame time at the 909-tile / 86-object peak frame (source frame 5776).
+
+### Slice V — the VDP1 shape proof (runs before the actor spine)
+
+The renderer's producer and consumer are separable, so the consumer can be built
+and measured now, with no actor spine, no collision and no AI.
+
+- **Producer (harness only, never shipped):** replay captured CPS2 object lists
+  frame by frame. Phase B swaps this for the ROM-driven actor spine; the consumer
+  does not change.
+- **Consumer (real, permanent):** one VDP1 normal-sprite command per CPS2 object,
+  `nx*16 x ny*16`, 16-colour bank mode, flip in `CMDCTRL`, jump-next linked, list
+  order preserved as draw order.
+- **Textures:** per-block cache built from ROM tiles, cartridge-resident, with the
+  per-frame delta DMA'd in (measured: 5.7 KB mean, 15.2 KB p95, 29.5 KB peak).
+- **Palettes:** the <=13 live 16-colour banks into VDP2 CRAM.
+
+Gates: (1) offline, the emitted command list matches MAME's captured active
+object list frame for frame, against the 5,302-frame oracle; (2) on Saturn, the
+peak frame holds 60 Hz with measured frame time; (3) the peak texture delta
+lands inside vblank. If (2) fails at per-object, fall back to per-tile and
+re-measure before redesigning anything upstream.
 
 **There is no Saturn Alien vs Predator to measure against. That is the project.**
 Capcom never shipped one; this port is the first. So no phase above may be

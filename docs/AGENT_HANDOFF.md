@@ -78,10 +78,19 @@ as MAME 0.289 `cps2_render_sprites` / `find_last_sprite` do:
   holds 128 sixteen-colour banks in 5:5:5 mode 1. The risk that could have
   killed a per-tile pipeline is measured and comfortable. The current eight-bank
   allocation, sized for precomposed per-palette cels, is the tight thing.
-- **The remaining question is VDP1 throughput** (`UNRESOLVED`): 909 commands and
-  ~233k sprite fill pixels per peak frame. Probe: measure command build cost on
-  SH-2, VDP1 command-table read overhead and fill at 60 Hz on the existing
-  native build at the same route anchors.
+- **AvP's object list is not shaped like the reference title's.** Across 215,646
+  captured objects, **83.6% are blocked sprites averaging 8.51 tiles**; only
+  16.4% are 1x1. So granularity is worth ~10x: one command per 16x16 tile costs
+  **909** commands at peak, one command per CPS2 object costs **86**. Per-object
+  is also the more faithful mapping - the object entry is the hardware's unit,
+  and every AvP object fits one VDP1 normal sprite (largest is 55 tiles; VDP1
+  reaches 504x255). The reference title's per-tile shape is therefore **not
+  copied**; its representation half (16-colour bank mode, flip in `CMDCTRL`,
+  jump-next linked list, source order as draw order) transfers directly.
+- **The remaining question is VDP1 throughput at the chosen granularity**
+  (`UNRESOLVED`). Fill is the same either way (~233k pixels at peak, same pixels
+  drawn); command count is not. Probe: slice V emits per-object commands, keeps
+  per-tile as the fallback, and measures real frame time at the peak frame 5776.
 
 **Correction to milestone 1's report.** `decode_x` in
 `tools/analyze_street_alien_object_emission.py` read block width from the X word.
