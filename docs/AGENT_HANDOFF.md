@@ -90,6 +90,43 @@ Hadouken, fighter timing, addresses, package sizes, module formats, and
 untraced hardware ownership are not AvP facts and do not block the five-slot
 gate.
 
+**Activation rule for the next agent:** every Marvel task must finish the
+sentence, “This will decide whether AvP should ___.” If it cannot name a
+near-term Saturn design decision and an AvP validation probe, leave it on the
+research backlog.
+
+Use Marvel at these points:
+
+1. **Not now:** finish the AvP frame-4253 five-slot source-decoder gate. Marvel
+   cannot identify AvP's 68000 group/type handler.
+2. **After AvP's referenced tile set is measured, before choosing its actor
+   renderer:** trace Marvel work RAM, both cartridge banks, VDP1 command tables,
+   and VDP1 VRAM at the existing idle/normal/hit anchors. Use the result to
+   compare AvP's precomposed-cel and per-part-command prototypes.
+3. **When AvP stage package/load ownership is known:** trace Marvel VDP2,
+   file reads, DMA, and CDDA across character/stage transition. Use it to shape
+   AvP load windows, then prove them on AvP's scrolling Round 1 route.
+4. **When AvP audio ownership is being finalized:** trace one Marvel effect,
+   voice, and music transition through SCSP/CDDA and CD access.
+5. **Before final Saturn budgeting:** capture a Marvel tag/super stress route.
+   It is more useful for peak VDP1, RAM, CPU, and DMA pressure than Hadouken.
+6. **Only when AvP reaches projectile/effect design:** add the Marvel Hadouken
+   path for projectile allocation, lifetime, collision, effect commands, and
+   audio routing. It is not a first-pass prerequisite.
+
+The complete trigger/transfer table and promotion rules are in
+`PARITY_PLAN.md` under “Applicable MSHvSF research findings.” Marvel evidence
+becomes an AvP implementation decision only after an AvP-specific probe passes.
+
+**Repository guardrail:** AvP work stays on `codex/avp-master-plan` (or a new
+branch descended from its accepted checkpoint); Marvel work stays on
+`codex/mshvsf-reference-lane`. Do not merge the branches or bulk cherry-pick
+the Marvel evidence package. Before switching or staging, inspect branch/HEAD/
+status and stage explicit paths only. If both lanes run concurrently, use a
+separate worktree or task rather than alternating a dirty checkout. Preserve
+the untracked ROM directory, `nvram/`, `snap/`, and one-off diagnostics; never
+add, reset, clean, or delete them as part of lane management.
+
 **Position audit: scoped PASS; full pixel-exact coverage OPEN.**
 `tools/verify_position_gate.py` compares the previous frame's actor world
 coordinates plus ROM assembly origin/layout words against captured object RAM.

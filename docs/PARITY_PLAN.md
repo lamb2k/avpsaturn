@@ -96,6 +96,97 @@ would confuse source evidence with the Saturn implementation.
 The isolated research lane remains `codex/mshvsf-reference-lane` at checkpoint
 `43e88ac`. It is a method/evidence source, not an implementation dependency.
 
+#### One discovery program, two Git lanes
+
+Marvel research is folded into the **AvP discovery plan**, but its branch is
+not folded into the AvP implementation history. Treat the work as one program
+with two governed lanes:
+
+| Lane | Branch ownership | Purpose | Scheduling rule |
+|---|---|---|---|
+| AvP production discovery | Continue from `codex/avp-master-plan` (master-plan root `e37ab9f`) until its changes are deliberately promoted to `prototype/private-capability-test` | Decode and implement AvP Round 1 | Always owns the critical path; current milestone 1 remains first |
+| MSHvSF official-port reference | `codex/mshvsf-reference-lane` (`43e88ac`) | Answer a named Saturn architecture or historical-fidelity question | Run only when it informs an upcoming AvP decision, or while AvP is independently blocked; open-ended fighter archaeology is not an AvP task |
+
+The Marvel lane may create evidence, analyzers, templates, and candidate
+patterns. It may not directly change AvP runtime code, close an AvP goal
+condition, or establish an AvP hardware budget.
+
+#### When Marvel research should be activated
+
+Marvel is most valuable at a **Saturn design fork**, not during every CPS2
+decode. Activate it only when the result can choose or reject an AvP target-side
+design within the next milestone.
+
+| AvP point | Saturn decision Marvel can inform | Required Marvel investigation | How AvP uses the result |
+|---|---|---|---|
+| Milestone 1: current five-slot CPS2 writer gate | None yet | Do not pause for additional Marvel work | Finish the AvP source decoder; Marvel cannot identify AvP's 68000 group/type handler or source layout |
+| Milestone 2: collision | Whether gameplay collision state is kept separate from presentation objects in the official Saturn port | Only investigate when Saturn actor/collision RAM fields and writer paths can be traced around a controlled hit and whiff | Use it as a candidate architecture pattern; AvP still consumes its own ROM-derived boxes and proves its own hit/whiff behavior |
+| Milestone 3: animation extraction, after AvP has a measured referenced-tile set | Precomposed cels versus per-part VDP1 commands; palette/flip/order representation; what stays resident in expansion RAM | Capture Marvel VDP1 command tables, VDP1 VRAM, work RAM, and cartridge RAM at idle, normal startup/active/recovery, hit reaction, and character transition anchors | Compare the official port's measured command/VRAM/residency tradeoff with both AvP renderer prototypes; choose only after AvP measurements agree |
+| Milestone 4: stage reconstruction, after AvP stage ownership is known | VDP2 layer division, background package boundaries, phase loading, and whether CD reads overlap music | Trace Marvel VDP2 registers/VRAM, file reads, DMA, and CDDA commands across stage entry and a stage/mode transition | Design AvP's background ownership and load windows, then validate against AvP's longer scrolling Round 1 route |
+| Milestone 5: AI translation | Little direct value; fighter AI/object logic is not AvP enemy logic | Do not use Marvel as a shortcut for AvP AI or PRNG recovery | Translate AvP's own 68000 paths and RNG call order |
+| Milestone 6: Saturn integration and budgeting | 4 MB cartridge layout/lifetimes, internal-RAM roles, master/slave SH-2 division, DMA/CD scheduling, SCSP/CDDA split | Add deterministic state dumps and access traces at boot, character load, normal hit, tag/super stress, audio event, and transition anchors | Turn measured official-port behavior into candidate constraints, then fill the AvP high-water/lifetime ledger with AvP measurements |
+| Milestone 7: validation and release | Which differences are necessary platform adaptations versus avoidable reductions; what stress scene exposes the real limit | Complete Marvel gameplay/animation/audio/performance difference records and a tag/super worst-case run; validate any proposed general pattern on a second official port before calling it a Capcom standard | Classify AvP deviations honestly; an official compromise is precedent, not automatic permission |
+
+The next useful Marvel package is therefore **not Hadouken by default**. The
+normal-hit route already supplies the behavioral anchors needed to instrument
+actor state, VDP1, memory residency, and damage/reaction. Add Hadouken only
+when AvP reaches a projectile/effect decision requiring projectile allocation,
+collision lifetime, VDP1 effect pressure, or audio-event routing. For worst-case
+Saturn capacity, a tag/super scene is more informative than Hadouken.
+
+Marvel research priority for AvP is:
+
+1. deterministic dumps of work RAM, both cartridge banks, VDP1/VDP2, and SH-2
+   state at the existing normal-hit anchors;
+2. CD read, DMA, CDDA, and SCSP ownership across character load and one audio
+   event;
+3. VDP1 command/VRAM and CPU pressure during a tag/super stress route;
+4. Hadouken/projectile mapping only when the AvP projectile/effect design needs
+   that evidence;
+5. second-title confirmation before promoting a Marvel-specific observation to
+   a general Capcom Saturn rule.
+
+#### Promotion procedure
+
+A Marvel result enters AvP only through this sequence:
+
+```text
+Marvel claim and evidence
+  -> falsification and confidence recorded on the Marvel branch
+  -> explicit AvP question and probe added to this plan
+  -> probe executed with AvP inputs on an AvP branch
+  -> copyright-safe AvP result committed as a small AvP-specific change
+```
+
+Do not merge `codex/mshvsf-reference-lane` into an AvP branch and do not
+cherry-pick its broad research-package commits. If a reusable tool is needed,
+copy or reimplement only the minimal generic portion in a dedicated AvP commit,
+record its Marvel source checkpoint, and validate it against AvP data. Never
+transfer ROMs, extracted members, raw captures, generated copyrighted assets,
+fighter constants, or unverified architecture assumptions.
+
+#### Repository safety for lane changes
+
+Before any branch switch, staging operation, or commit:
+
+1. Run `git status --short --branch`, `git branch --show-current`, and
+   `git rev-parse HEAD`.
+2. Do not switch lanes with uncommitted tracked work unless that work has been
+   identified, preserved, and intentionally carried. Never reset, delete,
+   clean, or stash unknown user files merely to make the tree look clean.
+3. Stage explicit paths only. The untracked `Marvel Super Heroes vs. Street
+   Fighter/`, `nvram/`, `snap/`, `check_tail.py`, and one-off `tools/diag_*`,
+   `tools/probe_*`, and screenshot helpers are not bulk-add targets.
+4. A commit must belong to exactly one lane. Its message and handoff entry must
+   state the lane, source checkpoint, evidence produced, and remaining gate.
+5. For truly concurrent work, use a separate worktree or task for the Marvel
+   lane; do not alternate branches in a dirty checkout. Private inputs remain
+   private and must not be duplicated into Git to make a worktree convenient.
+
+Every status update must distinguish: **proven on Marvel**, **validated on
+AvP**, **candidate transfer**, and **unresolved**. Only “validated on AvP” may
+change the AvP implementation or goal-progress table.
+
 Apply now:
 
 - require an explicit source address/data/function, output sink, test,
