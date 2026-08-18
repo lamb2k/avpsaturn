@@ -137,9 +137,15 @@ probe without weakening AvP route parity.
 
 ## Current pilot result
 
-The CPS-2 slice and Saturn package/boot are reproducible. The first paired
-gameplay comparison is still gated by deterministic Saturn controller input.
-Accordingly, gameplay rows remain `UNRESOLVED`; the only current high-confidence
-cross-platform lesson is the research method itself: immutable inputs,
-deterministic routes, synchronized evidence, explicit uncertainty, and
-falsification before reuse.
+The CPS-2 slice, Saturn package/boot, and Saturn controller route are
+reproducible. Yaba Sanshiro's native play-record path now drives both controller
+ports from a fixed backup state. Two cold replays produced byte-identical hashes
+for all 25 anchors through Ryu idle, walk, jump, normal collision, visible
+health response, Spider-Man hit reaction, and recovery.
+
+That closes the deterministic-input exercise but not the full pilot slice.
+Hadouken command acceptance and projectile lifecycle are intentionally deferred
+to a second pass, and exact mechanics stay `UNRESOLVED` until RAM/state traces
+produce paired measurements. The high-confidence reusable lesson remains the
+method: immutable inputs, deterministic routes, synchronized evidence, explicit
+uncertainty, and falsification before reuse.

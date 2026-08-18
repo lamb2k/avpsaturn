@@ -17,53 +17,53 @@
     {
       "id": "route-ryu-neutral-target",
       "semantic_concept": "Deterministic Ryu route with a neutral human-controlled target",
-      "claim": "The CPS-2 route reaches Ryu and Ken versus Spider-Man and Captain America with P2 neutral; the matching Saturn route is not captured.",
+      "claim": "Both deterministic routes reach Ryu and Ken versus Spider-Man and Captain America with P2 neutral after setup.",
       "cps2_evidence": ["data/mshvsf_cps2_vertical_slice.json", "frame 1610 idle anchor SHA-256 eeadf29e80b4ec4a63d3b8a3bc3664f1a51ef57f7954c1105468822b0446a795"],
-      "saturn_evidence": ["Official port boots through title and attract gameplay, but deterministic player input is not established."],
-      "relationship": "UNRESOLVED",
+      "saturn_evidence": ["data/mshvsf_saturn_first_pass.json", "frame 3540 idle anchor SHA-256 71644a1bad1bf5e864b61296bc1c30392814b72912e9aa09e037a8a9d2649898", "two cold replays produced 25 identical screenshot hashes"],
+      "relationship": "EQUIVALENT",
       "test": "Cold boot both versions and replay a documented input route to the same teams, positions, and neutral target.",
       "falsification": "The Saturn route cannot reach the same controllable setup or produces a different team or target state.",
       "confidence": "HIGH",
-      "uncertainty": "Saturn gameplay route and input timing are missing.",
+      "uncertainty": "Equivalent controllable setup is proven; internal setup logic and cross-platform timing are not.",
       "avp_lesson": "Use a neutral second player for collision tests so AI decisions do not contaminate deterministic evidence."
     },
     {
       "id": "input-and-movement",
       "semantic_concept": "Idle, forward walk, and jump response",
-      "claim": "The CPS-2 action order and visual anchors are deterministic; Saturn timing and mechanics are unmeasured.",
+      "claim": "Idle, forward walk, and jump are deterministic on both versions; paired timing and trajectory measurements remain unresolved.",
       "cps2_evidence": ["idle frame 1610", "walk frame 1650", "jump frame 1720", "recorded input_events in data/mshvsf_cps2_vertical_slice.json"],
-      "saturn_evidence": [],
+      "saturn_evidence": ["idle frame 3540", "walk input frame 3600 and visual frame 3620", "jump input frame 3690 and visual frame 3720", "data/mshvsf_saturn_first_pass.json"],
       "relationship": "UNRESOLVED",
       "test": "Replay identical direction edges and compare input-to-state latency, displacement, jump apex, and recovery separately from rendered animation frames.",
       "falsification": "Any measured timing or trajectory differs outside the declared tolerance.",
       "confidence": "HIGH",
-      "uncertainty": "CPS-2 actor addresses and all Saturn measurements remain unmapped.",
+      "uncertainty": "Actor addresses, input-to-state latency, displacement, and trajectory measurements remain unmapped.",
       "avp_lesson": "Keep gameplay timing and presentation-frame count as separate acceptance dimensions."
     },
     {
       "id": "standing-light-punch",
       "semantic_concept": "Standing light punch",
-      "claim": "A deterministic CPS-2 normal-attack visual anchor exists; its state, collision, damage, and Saturn counterpart are not decoded.",
+      "claim": "Both versions have deterministic normal-attack anchors; the Saturn normal visibly collides, changes the health HUD, and causes Spider-Man's hit reaction, but internal fields and exact paired mechanics are not decoded.",
       "cps2_evidence": ["input frames 1780-1784", "active visual frame 1788 SHA-256 1024053d01e9b0648375567629e2aaade174eec3f4e946799b82c4a30ee0a1fa"],
-      "saturn_evidence": [],
+      "saturn_evidence": ["X input frame 3820", "active visual frame 3828 SHA-256 f4b8233c74f37d6e4ce2b00739c72f61e0186a03e86c40a105e1cd8032d46e8c", "FIRST ATTACK, HUD response, and hit reaction frame 3840 SHA-256 f9a08b2bd1e86f79743cbd19f3d8ead7e0a69c74f7cd11e5220090a3d735c6a1"],
       "relationship": "UNRESOLVED",
       "test": "Measure startup, active, recovery, collision geometry, damage, hitstop, and audio onset on both systems.",
       "falsification": "A paired measurement differs and cannot be explained by a documented presentation-only adaptation.",
       "confidence": "HIGH",
-      "uncertainty": "The CPS-2 active frame is visual, not yet a proven collision-active state.",
+      "uncertainty": "Exact startup, active, recovery, collision geometry, damage, and hitstop are not yet paired.",
       "avp_lesson": "Do not infer hitboxes or damage from a visually active pose."
     },
     {
       "id": "hadouken-projectile",
       "semantic_concept": "Hadouken command, spawn, travel, collision, damage, and hit reaction",
-      "claim": "The complete CPS-2 visual sequence is captured; internal fields and the Saturn sequence are unresolved.",
+      "claim": "The complete CPS-2 visual sequence is captured; the Saturn Hadouken and projectile lifecycle are deliberately deferred after the deterministic normal-hit first pass.",
       "cps2_evidence": ["command completion frame 1860", "projectile-visible frame 1875 SHA-256 9ed9c34528302cd70729cdb565e406854a0672b664a639700946f855d8302512", "collision and reaction frame 1890 SHA-256 4a84edc1a418f11e6bdf411c8c1f27abdfd425d966144640839523e24dacb9d9"],
-      "saturn_evidence": [],
+      "saturn_evidence": ["Explicitly deferred in data/mshvsf_saturn_first_pass.json"],
       "relationship": "UNRESOLVED",
       "test": "Compare command acceptance, spawn delay, projectile velocity, collision frame, damage delta, hitstop, reaction state, and recovery.",
       "falsification": "The Saturn event order or a measured mechanical value differs outside the declared tolerance.",
       "confidence": "HIGH",
-      "uncertainty": "Health, collision, projectile, and actor structures are not identified on either side of the pair.",
+      "uncertainty": "Saturn command acceptance, projectile spawn, travel, ownership, collision, damage, and recovery are not captured.",
       "avp_lesson": "A projectile test is a compact probe of input parsing, entity creation, collision, damage, reactions, rendering, and sound."
     },
     {
@@ -93,5 +93,5 @@
       "avp_lesson": "Separate source-media defects from runtime fidelity by using disposable loader overlays."
     }
   ],
-  "promotion_rule": "No UNRESOLVED gameplay record may be reclassified until the Saturn route has deterministic input, paired measurements, and a falsification replay."
+  "promotion_rule": "A semantic setup may be classified from deterministic paired observations, but exact gameplay mechanics remain UNRESOLVED until paired measurements and a falsification replay exist."
 }

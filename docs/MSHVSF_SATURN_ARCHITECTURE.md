@@ -21,13 +21,26 @@ The source cue points at a missing `.iso` filename. The launcher corrects only
 that reference in a temporary cue, selects a 32 Mbit cartridge, and reaches the
 licensed legal screen, title, and attract gameplay in Yaba Sanshiro 2 v1.20.37.
 
+## Verified deterministic runtime path
+
+Yaba Sanshiro's native play recorder restores a fixed compressed backup image
+and applies exact Port 1 and Port 2 controller bytes at recorded frames. The
+verified route cold-boots, selects Versus, chooses Ryu/Ken versus Spider-Man/
+Captain America, leaves P2 neutral, and captures Ryu idle, walk, jump, normal
+collision, visible health response, hit reaction, and recovery. Two cold runs
+produced the same hashes for all 25 screenshot anchors.
+
+This proves repeatable external behavior, not internal hardware ownership. The
+canonical report is `data/mshvsf_saturn_first_pass.json`; RAM, VDP, SCSP, CD,
+and DMA responsibilities remain open until traced.
+
 ## Responsibility and budget map
 
 | Resource | Verified evidence | Current responsibility | Next proof |
 |---|---|---|---|
 | SH-2 CPUs | Saturn executable members and successful boot | `UNRESOLVED` | Trace boot, loader, game loop, and interrupt ownership |
-| VDP1 | Attract gameplay renders sprites | `UNRESOLVED` | Capture command tables around the Ryu slice |
-| VDP2 | Attract gameplay renders backgrounds | `UNRESOLVED` | Capture register state and layer maps around the same frames |
+| VDP1 | Deterministic gameplay visibly renders foreground objects; hardware ownership is not traced | `UNRESOLVED` | Capture command tables around the Ryu slice |
+| VDP2 | Deterministic gameplay visibly renders a stage background; hardware ownership is not traced | `UNRESOLVED` | Capture register state and layer maps around the same frames |
 | Work RAM | Runtime boots | `UNRESOLVED` | Differential dumps for actor, projectile, collision, and health state |
 | 32 Mbit expansion RAM | Successful emulator configuration | Requirement and allocation `UNRESOLVED` | Compare no-cart, smaller-cart, and 4 MB traces |
 | SCSP | Runtime emits audio | Voice and sample responsibility `UNRESOLVED` | Trace slot writes and RAM transfers per isolated event |

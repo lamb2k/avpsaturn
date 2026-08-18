@@ -1,0 +1,160 @@
+{
+  "title": "Marvel Super Heroes vs. Street Fighter Saturn Ryu first pass",
+  "purpose": "Official-port research lane augmenting the AvP Saturn conversion",
+  "source": {
+    "emulator": "Yaba Sanshiro 2 v1.20.37",
+    "disc_product": "T-1238G V1.000 19980903",
+    "cartridge": "32 Mbit (4 MB) DRAM",
+    "temporary_cue_sha256": "5319d8063444e1a5f8c2949bbca6735627f28df86ac85aca9020a68e5d830305",
+    "route": "Two-player Ryu/Ken vs Spider-Man/Captain America; P2 remains neutral after setup"
+  },
+  "scope": {
+    "included": [
+      "cold boot and deterministic menu route",
+      "idle",
+      "forward walk",
+      "jump",
+      "standing normal attack",
+      "collision",
+      "visible health response",
+      "Spider-Man hit reaction",
+      "recovery"
+    ],
+    "deferred": [
+      "Hadouken command acceptance and projectile lifecycle",
+      "exact damage and collision-state fields",
+      "Saturn RAM, VDP, SCSP, CD, and DMA traces"
+    ]
+  },
+  "input_edges": [
+    {
+      "frame": 3600,
+      "action": "P1 right press"
+    },
+    {
+      "frame": 3645,
+      "action": "P1 right release"
+    },
+    {
+      "frame": 3690,
+      "action": "P1 up press"
+    },
+    {
+      "frame": 3698,
+      "action": "P1 up release"
+    },
+    {
+      "frame": 3820,
+      "action": "P1 X press"
+    },
+    {
+      "frame": 3828,
+      "action": "P1 X release"
+    }
+  ],
+  "replay": {
+    "cold_replay_count": 2,
+    "controller_state_count": 40,
+    "screenshot_anchor_count": 25,
+    "record_sha256": "e751d4f79a7a94d3474f5fc9a2685e7484d0beeef91d871a903857b62dd7480b",
+    "all_anchor_hashes_identical": true,
+    "mismatch_count": 0
+  },
+  "backup_bin_gz_sha256": "04d82164aaff5eebc8ca0d1b74f83677c9f9fc43729db41581cf7f004028d954",
+  "semantic_anchors": {
+    "idle": {
+      "frame": 3540,
+      "png_sha256": "71644a1bad1bf5e864b61296bc1c30392814b72912e9aa09e037a8a9d2649898",
+      "size": [
+        800,
+        509
+      ],
+      "changed_pixels_vs_previous_anchor": null
+    },
+    "walk": {
+      "frame": 3620,
+      "png_sha256": "4d3d8b72185adac469f41980fada1613d8b20a27acd01efc459252ab0884bc76",
+      "size": [
+        800,
+        509
+      ],
+      "changed_pixels_vs_previous_anchor": 255772
+    },
+    "jump": {
+      "frame": 3720,
+      "png_sha256": "b78c101685e2635d73d5627a4d85ba9521fc17b0fc35eb62ef2a650d01f97c50",
+      "size": [
+        800,
+        509
+      ],
+      "changed_pixels_vs_previous_anchor": 292254
+    },
+    "normal_input": {
+      "frame": 3820,
+      "png_sha256": "24dd959a720a87ef47e8ab0b10211358317ad4a0d8cbda5378927ae266d10675",
+      "size": [
+        800,
+        509
+      ],
+      "changed_pixels_vs_previous_anchor": 286215
+    },
+    "normal_attack_active": {
+      "frame": 3828,
+      "png_sha256": "f4b8233c74f37d6e4ce2b00739c72f61e0186a03e86c40a105e1cd8032d46e8c",
+      "size": [
+        800,
+        509
+      ],
+      "changed_pixels_vs_previous_anchor": 26864
+    },
+    "collision_damage_hit_reaction": {
+      "frame": 3840,
+      "png_sha256": "f9a08b2bd1e86f79743cbd19f3d8ead7e0a69c74f7cd11e5220090a3d735c6a1",
+      "size": [
+        800,
+        509
+      ],
+      "changed_pixels_vs_previous_anchor": 223544
+    },
+    "recovery": {
+      "frame": 3900,
+      "png_sha256": "740c2e925991f11161bd6d8bc258bae601d0676d6eaa5e58bd9ebde94c1656d7",
+      "size": [
+        800,
+        509
+      ],
+      "changed_pixels_vs_previous_anchor": 258236
+    }
+  },
+  "claims": [
+    {
+      "claim": "The official Saturn port reaches a controllable Ryu/Ken versus Spider-Man/Captain America match with P2 neutral after setup.",
+      "evidence": [
+        "recorded two-port controller states",
+        "idle frame 3540",
+        "two cold replays with 25 identical screenshot hashes"
+      ],
+      "test": "Cold boot with the same disc, cartridge, backup state, and replay record.",
+      "falsification": "A replay reaches different teams, accepts a P2 gameplay input, or changes any screenshot hash.",
+      "confidence": "HIGH"
+    },
+    {
+      "claim": "The deterministic first pass contains idle, forward walk, jump, standing normal, collision, a visible HUD health response, Spider-Man hit reaction, and recovery in that order.",
+      "evidence": [
+        "input edges at frames 3600-3828",
+        "anchor screenshots at frames 3540, 3620, 3720, 3828, 3840, and 3900",
+        "FIRST ATTACK and Spider-Man reaction visible at frame 3840"
+      ],
+      "test": "Replay the controller record and require the same event order and anchor hashes.",
+      "falsification": "The normal whiffs, P2 moves before impact, the HUD does not respond, or an anchor hash changes.",
+      "confidence": "HIGH"
+    }
+  ],
+  "remaining_uncertainty": [
+    "The exact Saturn health value, damage amount, collision boxes, hitstop, and actor structures are not mapped.",
+    "The first pass deliberately defers Hadouken command acceptance and projectile spawn, travel, ownership, collision, and recovery.",
+    "Saturn audio-event routing is not captured.",
+    "Visual equivalence does not establish identical CPS-2 and Saturn mechanics or timing."
+  ],
+  "rights_boundary": "Replay records, raw screenshots, backup data, and disc media remain ignored private inputs; this tracked report contains hashes and derived observations only."
+}

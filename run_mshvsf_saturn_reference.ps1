@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$EmulatorPath,
+    [string]$PlayRecordDirectory,
     [switch]$NoLaunch
 )
 
@@ -73,7 +74,13 @@ if ($NoLaunch) {
 }
 
 $quotedCue = '"' + $launchCue + '"'
+$arguments = @('-nb', '-a', '-i', $quotedCue)
+if ($PlayRecordDirectory) {
+    $resolvedPlayRecord = (Resolve-Path -LiteralPath $PlayRecordDirectory).Path
+    $arguments += @('-p', ('"' + $resolvedPlayRecord + '"'))
+    Write-Host "Deterministic play record: $resolvedPlayRecord"
+}
 $process = Start-Process -FilePath $EmulatorPath `
-    -ArgumentList @('-nb', '-a', '-i', $quotedCue) `
+    -ArgumentList $arguments `
     -WorkingDirectory $projectRoot -PassThru
 Write-Host "Started Yaba Sanshiro PID $($process.Id)."
