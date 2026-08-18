@@ -14,11 +14,14 @@ complete or hardware-ready.
 `tools/verify_position_gate.py` compares the previous frame's actor world
 coordinates plus ROM assembly origin/layout words against captured object RAM.
 Current scope: 408 geometry frames, 408 matched and 0 unmatched; 1,443 tested
-parts split into **1,372 directly exact pairs, 63 known sibling-origin residuals,
-8 observed x=0/y=-4 settling residuals, and 0 other residuals**. Phase 2 extended
-the JSON from 12 to 28 assemblies, so every one of the 408 frames now resolves to
-a decoded assembly; the residual classes above are unchanged. (The earlier
-801/793 counts were from the 12-assembly scope and are superseded.)
+parts split into **1,435 directly exact pairs, 0 sibling-origin residuals,
+8 observed x=0/y=-4 settling residuals, and 0 other residuals** (X is now
+1,443/1,443 exact). Phase 2 extended the JSON from 12 to 28 assemblies, so every
+one of the 408 frames now resolves to a decoded assembly; the shared-code-set
+sibling ambiguity is additionally resolved by the actor-slot record pointer at
+frame f−1 (see below), which drives the 63 former sibling-delta parts to exact.
+(The earlier 801/793 and 1,372/63 counts are from earlier scopes and are
+superseded.)
 
 Model (world coordinates are 16.16 fixed point at actor slot 0x23D0/0x23D4,
 world Y is up, objects render one frame behind, from f−1):
@@ -43,10 +46,20 @@ world Y is up, objects render one frame behind, from f−1):
 The earlier +48/−10 residual pair is **not a magic offset**: it is the origin
 delta between two assemblies that share a code set. Assembly 3 has an
 airborne table at 0x13e04c (origin −52, +23) and an at-rest table at 0x13e44c
-(origin −62, −25); picking the wrong one shifts X by −10 and Y by +48. The gate
-decodes every assembly the actor-slot record pointer selects (frames f and f−1)
-and builds the set of origin deltas a shared code set can produce, so such a
-residual is passed only when it is in that set.
+(origin −62, −25); picking the wrong one shifts X by −10 and Y by +48. Their
+per-code layout words are identical, so the only difference is the origin.
+
+The gate now resolves this by **selecting the origin with the actor-slot record
+pointer at frame f−1** — the same one-frame source the world coordinates use.
+The record at f−1 points at the table actually being rendered, and when its
+code set equals the captured frame's code set the gate adopts that table's
+origin (layout words unchanged). A one-off diagnostic confirmed this drives
+**63/63** former sibling-delta parts to (0, 0); using the pointer at frame f
+only reaches 54/63 because the record sometimes advances one entry before the
+visual pose changes (sub-frame timing), so the f−1 source is the correct one.
+As a safety net the gate still decodes every pointer-reachable table and keeps
+an explained origin-delta set: any residual not driven to zero is passed only
+if it is in that set, never as a general tolerance.
 
 The 8 settling parts (frames 12689 and 13165, uniform −4 Y, X-exact) occur after
 a recent vertical world move; the pure `wy(f−1)` model is 4px off. The exact
@@ -55,18 +68,15 @@ that recent-world-Y-change context, rather than allowing a general ±4 tolerance
 
 Run `python tools\verify_position_gate.py` for the scoped audit. Add `--verbose`
 to list settling frames and unexpected residuals. Run with `--require-exact`
-for the goal-strength gate; it currently exits nonzero because coverage and
-direct exactness are incomplete.
+for the goal-strength gate; it currently exits nonzero only because 8 settling
+parts are not directly exact (coverage itself is complete: 408/408 matched).
 
 Remaining before this gate is exhaustive:
-* 71 tested parts are not directly exact: 63 sibling-origin-delta parts and 8
-  settling parts (both explicitly classified, 0 unexplained). Full pixel-exact
-  coverage needs the shared-code-set ambiguity resolved and the −4 settling
-  derived or bounded; it is NOT a coverage gap — all 408 frames now match.
-* The record pointer sometimes advances one record before the visual pose
-  changes (sub-frame timing); by_codes matching avoids this but cannot
-  disambiguate shared code sets, which is why the gate uses the pointer only to
-  build the explained-delta set.
+* 8 tested parts are not directly exact, all the observed x=0/y=−4 settling
+  parts (0 unexplained, 0 sibling-delta). The shared-code-set ambiguity is
+  resolved by the f−1 record pointer, so full pixel-exact coverage now needs
+  only the −4 settling derived or bounded; it is NOT a coverage gap — all 408
+  frames match.
 * Derive (or formally bound) the −4 vertical settling.
 
 **Pose format gate: PASS for 28/28 decoded boss assemblies (29 oracle poses).**
@@ -153,11 +163,11 @@ Read this file before taking any action. The user wants a private, capture-faith
   - `tools/verify_pose_gate.py`:
     `e697888bb58ab01ca00b654fb3a81b48e975376bcf7bdcead22f62bad5bd5679`
   - `tools/verify_position_gate.py`:
-    `e807521f518ac92accf4a955d57e3d3de77fa85aef027a92e47ab45d7858c6ca`
-  (`decode_avsp_animation_scripts.py` was re-run and `avsp_animation_scripts.json`
-  regenerated for the Phase 2 28-assembly coverage extension, so those two are
-  the current file hashes; the two gate hashes above are unchanged from the
-  goal-audit checkpoint because the gate criteria were not modified.)
+    `fca0e96dd7d69d7952be72a106b99456693731dfec2fc17dac7a1b3b2857373c`
+  (`verify_position_gate.py` gained the f−1 record-pointer sibling-origin
+  disambiguation this checkpoint, so its hash changed; `verify_pose_gate.py`
+  is unchanged. `decode_avsp_animation_scripts.py` and `avsp_animation_scripts.json`
+  are the Phase 2 28-assembly hashes and are unchanged this checkpoint.)
 - Goal-audit verification:
   - `test.ps1`: PASS; controller-only model reached Round 2 in 4,485 frames and
     the 12,000-frame deterministic soak passed.
@@ -165,10 +175,10 @@ Read this file before taking any action. The user wants a private, capture-faith
     checked by the build matched its expected size/SHA-256.
   - `tools/verify_pose_gate.py`: PASS, 28/28 assemblies (29 oracle poses),
     zero differing pixels, in both default and self-contained modes.
-  - `tools/verify_position_gate.py`: scoped PASS (1,372 exact pairs, 63
-    sibling, 8 settling, 0 other; 408/408 frames matched, 0 unmatched);
-    `--require-exact` exits 1 as expected while 71 tested parts remain
-    non-exact (all classified, none unexplained).
+  - `tools/verify_position_gate.py`: scoped PASS (1,435 exact pairs, 0
+    sibling, 8 settling, 0 other; 408/408 frames matched, 0 unmatched;
+    X 1,443/1,443 exact); `--require-exact` exits 1 as expected while 8
+    settling parts remain non-exact (all classified, none unexplained).
 - No MAME process from this checkout remained after the overlay checkpoint.
   Do not kill an emulator owned by another checkout or concurrent session.
 
@@ -696,11 +706,13 @@ The opcode dumper itself remains:
 ### Next steps for this direction
 
 1. [Done] All 408 geometry frames now match a decoded assembly in the 28-assembly
-   JSON (was 162 unmatched at the 12-assembly scope). Remaining here: resolve the
-   record-pointer timing / shared-code-set selection so the 63 sibling-delta parts
-   become directly exact.
+   JSON (was 162 unmatched at the 12-assembly scope). The record-pointer timing /
+   shared-code-set selection is also resolved: the actor-slot record pointer at
+   frame f−1 selects the true sibling table and drives all 63 sibling-delta parts
+   to exact (sibling-delta now 0).
 2. Derive the transient `x=0/y=-4` position path instead of relying on the
-   narrow observed-settling classification; make `--require-exact` pass.
+   narrow observed-settling classification; this is the last non-exact class
+   (8 parts), and resolving it makes `--require-exact` pass.
 3. Decode actor-local hitbox records for all required player/alien/Stalker/
    Chrysalis poses and replace inferred range/contact schedules.
 4. Locate and extract Round 1 spawn, camera, scroll and trigger tables.

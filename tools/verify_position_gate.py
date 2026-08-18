@@ -33,13 +33,16 @@ the pose gate uses). Two cases are handled honestly:
   counted as unmatched (their assemblies are not yet in the JSON). They do not
   silently pass full-coverage validation.
 * Where two assemblies share a code set (the airborne vs at-rest forms of
-  assembly 3, and a sibling of assembly 1), the code-set match cannot tell
-  them apart. Such a frame keeps a residual equal to the origin delta between
-  the picked table and the true table. The gate DECODES every assembly the
-  animation records point at (from the actor-slot record pointer, frames f and
-  f-1) and builds the set of origin-delta residuals that such an ambiguity can
-  produce. A frame with a nonzero residual PASSES only if that residual is in
-  this explained set; anything else is a genuine model failure.
+  assembly 3, and a sibling of assembly 1), the code-set match alone cannot
+  tell them apart; their per-code layout words are identical and only the
+  origin differs. The gate selects the correct origin with the actor-slot
+  record pointer at frame f-1 (the same one-frame source the world
+  coordinates use): when that pointer's table has the captured code set, its
+  origin is adopted, which drives the formerly ambiguous frame to exact.
+  As a safety net the gate still DECODES every pointer-reachable table and
+  builds the set of origin-delta residuals a shared code set can produce; any
+  residual not driven to zero PASSES only if it is in that explained set,
+  never as a general tolerance.
 
 Eight parts in two frames have one other observed residual: (x=0, y=-4), after
 a recent world-Y change. The exact source of that transient settling offset is
@@ -197,7 +200,7 @@ def run(verbose: bool = False, require_exact: bool = False) -> int:
     for frame in sorted(geometry):
         if frame - 1 not in world:
             continue
-        wx, wy, _ptr = world[frame - 1]
+        wx, wy, ptr_prev = world[frame - 1]
         spec = geometry[frame]
         entries = avsp.decode_object_entries(
             gate.read_words(Path(spec["path"])))
@@ -206,7 +209,8 @@ def run(verbose: bool = False, require_exact: bool = False) -> int:
         if not parts:
             continue
         total_frames += 1
-        idx = by_codes.get(frozenset(p["code"] for p in parts))
+        codeset = frozenset(p["code"] for p in parts)
+        idx = by_codes.get(codeset)
         if idx is None:
             unmatched_frames += 1
             continue
@@ -216,6 +220,22 @@ def run(verbose: bool = False, require_exact: bool = False) -> int:
         oy = assembly["origin_y"]
         entry_by_code = {int(e["code"], 16): e
                          for e in assembly["entries"][:assembly.get("count", 0)]}
+        # Shared-code-set disambiguation. The code-set match above is
+        # last-wins, so where two ROM assemblies share a code set (the at-rest
+        # and airborne siblings) it may pick the wrong origin. The residual on
+        # such a frame is then exactly the origin delta between the picked and
+        # true tables (their per-code layouts are identical). The actor-slot
+        # record pointer at frame f-1 -- the same one-frame source the world
+        # coordinates use -- selects the true table. If that table has this
+        # frame's code set, use its origin; the layout words are unchanged
+        # because the observed delta was a pure origin offset.
+        selected = assembly_for_record(rom, offset_data, ptr_prev)
+        if selected is not None:
+            sel_codes = frozenset(int(e["code"], 16)
+                                  for e in selected["entries"][:selected.get("count", 0)])
+            if sel_codes == codeset:
+                ox = selected["origin_x"]
+                oy = selected["origin_y"]
         for part in parts:
             entry = entry_by_code.get(part["code"])
             if entry is None:
