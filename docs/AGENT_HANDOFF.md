@@ -384,6 +384,78 @@ and ruled out here.
 
 **Capability Gate 1 stays 0/7; the full-game goal stays 0/9.**
 
+### The "2-hidden-entries" mystery is resolved, the attr transform is fixed, and the pose-to-header chain is derived (2026-08-18, later same day)
+
+Body A/B of `docs/NEXT_AGENT_PROMPT.md` made four further findings, all live-verified
+against the route-matched `replay4200`/`enemy_actions` capture (never mixed with
+`collision_probe`), before consulting the oracle only for final comparison:
+
+**1. No entries are skipped.** What earlier sessions read as "2 hidden/skipped
+part-table entries between observed object-buffer writes 2 and 3" is actually the
+boundary between **two independently-dispatched groups**: a wide write-tap over
+the whole object buffer (`0x708000`, length `0x2000`) plus a loop-top breakpoint
+at `0x0AA1DC` (the confirmed `move.l (A0)+,D2` instruction) showed a clean 1:1
+correspondence between loop iterations and object-buffer writes, with zero
+unaccounted iterations, across both oracle frames (4214, 4253). `MEASURED` via
+`tools/mame_trace_emitter_full.lua` (untracked one-off, kept per convention).
+
+**2. The group header format is proven exactly.** Each group has its own 3-word
+header (`+0x00` budget u16, `+0x02` count u16 — the *exact* raw iteration count,
+not count-1 — `+0x04` selector u16, resolved through the `0x1FD1C8` table via
+`selector*2` to give the per-group A2/dx-dy-table base) followed by one 4-byte
+long consumed by `bsr $0AA59A` (the origin routine) before the first part.
+Verified exactly for 4 independent group instances (2 groups x 2 oracle frames).
+
+**3. Origin is per-GROUP, not per-actor-frame.** `bsr $0AA59A` runs once per
+group and can produce a different `(origin_x, origin_y)` for a later group in the
+same actor-frame (frame 4214: group1=(259,201), group2=(321,203); frame 4253:
+group1=(319,190), group2=(379,203)), captured via a fourth instrument watching the
+origin scratch write at `(A5-0x64F4)`.
+
+**4. The attr word needs a byte transform before use.** The raw ROM attr is a
+template, not the stored value: the real code applies
+`andi.b #0xE0,D2` (mask low byte to bits 5-7) then `add.b (0xE,A4),D2` (add the
+actor's palette byte) then `eor.b D1,D2` (XOR the facing-derived flip mask),
+*before* using the result both as the output attr and (via `move.w D2,D4`) for
+width. With this applied, `tools/decode_avsp_object_stream.py` reproduces
+**all 10 object entries across both oracle frames exactly** (code, attr, x, y —
+zero oracle values used as calculation inputs, only for comparison).
+`palette_byte`/`flip_byte` are still caller-supplied per-actor live-trace inputs
+(`0x11`/`0x20` for this street-alien instance), not yet derived from a general
+actor-record read.
+
+**5. The pose-to-group-header chain is derivable from ROM alone (n=2, not yet
+generalized).** The actor's `+0x1C` field (already established by the S2
+animation-walk validation as the live animation-record/pose pointer) led to a
+pose record whose `assembly` field (per `avsp_anim_script.h`, pose `+4`) plus
+`4` gives the first group's header address exactly, in both oracle cases
+(`0x12F72A+4=0x12F72E`; `0x12FEBC+4=0x12FEC0`). The second group's header is
+the first group's header plus `12 + count*6` bytes (its own 6-byte header +
+4-byte bsr-consumed long + `count` 6-byte parts + a constant 2-byte gap whose
+bytes were `0x0006` in both instances) — also exact in both cases (30 bytes and
+24 bytes respectively). **Not yet resolved:** the 4 bytes immediately before the
+first group's header are a *fixed* constant pair (`0x000c, 0x0006`) identical in
+both poses, so they do not encode "how many groups to dispatch" — Body A's live
+trace independently established exactly 2 dispatch calls for this actor, but
+nothing ROM-side yet proves that count generalizes to other poses/actors. A
+plausible-looking third header exists at the same stride past group2 in both
+cases but is not actually called per the live trace, so it is either an unused
+table continuation or belongs to a different pose — do not assume an N-group
+loop from this alone.
+
+**Still blocking a ROM-only (no-live-trace) decoder, in priority order:** the two
+camera-anchor constants inside `bsr $0AA59A` at `(A5-0x27C)`/`(A5-0x278)` (not
+yet read live — needed to compute origin from actor world position without a
+live capture), confirming the per-actor-type dispatch count generalizes beyond
+this one actor/pose pair, and deriving `palette_byte`/`flip_byte` from the actor
+record rather than supplying them by hand. The declared-eligible-subset run
+against the full 5,302-frame oracle (`data/avsp_sprite_demand.json`) required by
+`NEXT_AGENT_PROMPT.md` Body B item 6 has **not** been done yet — only the 2
+hand-verified frames (10 entries) are proven exact so far.
+
+Committed: `tools/decode_avsp_object_stream.py` (attr-transform fix) and
+`data/avsp_object_stream.json` at `b6f5a4e`.
+
 ## Status across S1-S6 (2026-08-18, end of session)
 
 | Step | Status |
