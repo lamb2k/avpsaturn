@@ -42,6 +42,30 @@ or physical-hardware proof.
 route is a valuable regression baseline, not the Gate 1 implementation and not
 the full-game destination.
 
+**2026-08-18 street-alien emission (milestone 1) — CLOSED.** The wrapper /
+20-word watchpoints / analyzer are scenario-parameterized (no logic tied to
+actor `0xFFA000`, base `0x7080A0`, frame 4253, or the five slots). **Both gated
+frames reproduce 20/20** from a fresh deterministic run: the alien is located
+independently (first run of five `0x4xxx` codes), and on the active/display
+bank it occupies exactly the word indices this milestone's exit gate names
+(80/84/88/92/96) at both frames. Writer attribution from the watchpoint bursts:
+X|Y at PC `0x000AA214`, code|attr at PC `0x000AA216`, emitting actor
+`A4 = A6 = 0xFF9DC0`, with a **different ROM part-table family per frame**
+(`0x12F73C…` at 4214 vs `0x12FECE…` at 4253) — the anti-hardcoding property the
+control frame exists to prove. The run is checked against the oracle's own route
+capture (`.deps/mame/enemy_actions`): 1 differing work-RAM byte per frame
+(a sub-pixel fraction low byte at `0xFF8392`), and the whole 8 KB active object
+bank at 4253 byte-identical. The earlier failure this session was an instrument
+defect — an off-by-one source-frame label plus an unreplayed post-anchor route
+tail (P1 Left 4201–4210, `0xFF83C1 = 0x65` held from 4200) — not a fixture
+defect; the fixture's declared state was corrected to its true origin with every
+oracle value left byte-identical. **Gate 1 stays 0/7 conditions closed**;
+milestone 1 advances conditions 1 and 5 without closing either. One open
+metadata defect is recorded in the handoff: the fixture's `actor_base`
+`0xFFA000` is not on the `0x180` actor grid and is not the emitting actor. See
+the handoff's "Capability Gate 1 — street-alien emission (2026-08-18 execution)"
+section for SHA-256 evidence and the exact reproduction command.
+
 | # | Gate 1 condition | Status | Current evidence and remaining gate |
 |---|---|---|---|
 | 1 | Animation from ROM scripts at runtime | **OPEN — Chrysalis tile-composition slice proven** | For the Chrysalis boss the runtime now composes all 29 of its poses from ROM-referenced 4bpp tiles (`compose_boss_rom_pose` in `main.c`, `generated/avsp_boss_rom.h`), and the boss's `BACT`/`BHIT`/`BKO` pose archives are no longer loaded for animation (they remain on disc only as host-test regression oracles). This is a composition slice, not full ROM animation: pose *selection* still uses the capture-derived per-frame clip/step tables (`boss_pose_for_frame`, `generated/avsp_boss_animation.h`), and the ROM selector-6 / control-word script interpreter is decoded host-side only, not yet linked into the runtime. The 29-pose / 28-assembly composition gate passes 28/28 with 0 differing pixels, the focused KO/HIT builds and the full controller route through Round 2 all render on Yaba Sanshiro without an asset error, and a clean normal release boots to title. **Remaining:** link the ROM script interpreter for pose selection, and decode the player/street-aliens/Stalker programs to route them through the same tile-composition path (retiring their `/SPR4/*.RLE` archives), before this condition is closed. |
@@ -62,8 +86,8 @@ This is the current Capability Gate 1 order of work. It supersedes older resume
 lists in the handoff and refines the broad phases below. The active object-
 emission trace is finished first because its call chain is already localized;
 after that narrow gate, work returns to the real-hitbox priority before
-broadening animation, stage and AI coverage. The first body assigned to the
-next agent is milestone 1 only.
+broadening animation, stage and AI coverage. **Milestone 1 is closed
+(2026-08-18); the first body assigned to the next agent is milestone 2 only.**
 
 | Order | Milestone | Required work | Exit gate | Gate 1 conditions advanced |
 |---|---|---|---|---|

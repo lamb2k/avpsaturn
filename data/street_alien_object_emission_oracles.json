@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "classification": "oracle fixture - expected street-alien five-slot CPS2 object emission",
+  "provenance": "Independent visible-object capture of the Stage 1 street alien, cross-checked against the ROM dispatch chain. Values are the 20 object words for the alien's five slots at the two gated source frames, read from the ACTIVE/display object share. Hex values are stored as strings for readability; parse with base auto-detect.",
+  "provenance_correction_2026_08_18": "The scenario formerly declared state 'avspu_stage1_debug_hitboxes' at source frame 4200. That was wrong and unreproducible: the debug-master state leaves the street alien idle. The values were re-traced to their true source, the cold-boot route in tools/mame_capture_enemy_actions.lua sampled into .deps/mame/enemy_actions/objram_active_04214.tsv and objram_active_04253.tsv. Only this metadata changed; every slot word and actor signature below is byte-identical to the original fixture and is now reproduced 20/20 from a fresh run.",
+  "scenario": {
+    "mame": "0.289",
+    "driver": "avspu",
+    "route": "tools/mame_capture_enemy_actions.lua (cold boot; anchor route through source frame 4200, then P1 Left down at 4201 and released at 4210, with 0xFF83C1 held at 0x65 from 4200 on)",
+    "route_capture_root": ".deps/mame/enemy_actions",
+    "sampled_surface": "active/display object share (objram1 when the 0x8040E0 bank bit is 0, else objram2)",
+    "state": null,
+    "anchor_source_frame": 4200,
+    "object_list_base": "0x7080A0",
+    "word_count": 20,
+    "slot_word_stride": 4,
+    "slot_count": 5,
+    "bank_select_register": "0x8040E0",
+    "actor_base": "0xFFA000",
+    "actor_type": 12,
+    "actor_facing": 1
+  },
+  "actor_signatures": {
+    "4214": {
+      "plus08_type": 12,
+      "plus0f_facing": 1,
+      "plus1c_anim": "0x0012EC04",
+      "plus50": "0x00130AC8",
+      "selector_at_A0": 6
+    },
+    "4253": {
+      "plus08_type": 12,
+      "plus0f_facing": 1,
+      "plus1c_anim": "0x0012E8EC",
+      "plus50": "0x00130AC8",
+      "selector_at_A0": 12
+    }
+  },
+  "frames": {
+    "4214": {
+      "note": "anti-hardcoding control frame; exercises selector 6 -> 0x000A9D8C path",
+      "slots": [
+        ["0x8113", "0x0099", "0x4efe", "0x0131"],
+        ["0x80e3", "0x00a9", "0x4ef6", "0x0431"],
+        ["0x80f3", "0x00b9", "0x4fc8", "0x0131"],
+        ["0x8121", "0x007b", "0x473a", "0x2431"],
+        ["0x8111", "0x00ab", "0x479c", "0x1331"]
+      ]
+    },
+    "4253": {
+      "note": "target frame; exercises selector 12 -> 0x000A9CF6 -> 0x000A9DF0 -> variant 0x000A9F92",
+      "slots": [
+        ["0x814f", "0x009e", "0x4df8", "0x0131"],
+        ["0x810f", "0x00ae", "0x4ef0", "0x0531"],
+        ["0x815b", "0x007b", "0x4b04", "0x2531"],
+        ["0x814b", "0x00ab", "0x4a88", "0x1431"],
+        ["0x816b", "0x006b", "0x4958", "0x0131"]
+      ]
+    }
+  }
+}

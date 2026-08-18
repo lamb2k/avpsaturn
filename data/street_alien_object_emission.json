@@ -1,0 +1,357 @@
+{
+ "scenario": {
+  "mame": "0.289",
+  "driver": "avspu",
+  "state": "avspu_stage1_replay4200",
+  "state_is_from_run": true,
+  "oracle_declared_state": null,
+  "state_frame": 4200,
+  "frame_a": 4214,
+  "frame_b": 4253,
+  "actor_base": "FFA000",
+  "object_list_base": "7080A0",
+  "first_word": 0,
+  "word_count": 20,
+  "bank_select_register": "8040E0",
+  "configured_watch_start": "0x7080a0"
+ },
+ "raw_evidence": {
+  "workram_04213.bin": {
+   "sha256": "29b6fe390ae3d8c0826f43f27dd28a1fe412cce09eb6361bdbc274b84cc3f11a",
+   "bytes": 32768
+  },
+  "objbuf_04213.bin": {
+   "sha256": "07b7c7e9febd9ff6f803ac775dc8a5530a7fe4bff46f0e2c8e4d96b76c1deca3",
+   "bytes": 8192
+  },
+  "objact_04213.bin": {
+   "sha256": "cb92190a1ec6947f60856d13e4025846b1022bd5d1f5283f7475e2529628db2f",
+   "bytes": 8192
+  },
+  "workram_04214.bin": {
+   "sha256": "e38a6f090bc5390232e5778ea110b147d46f09b0c62857c968c14ab8a386d40c",
+   "bytes": 32768
+  },
+  "objbuf_04214.bin": {
+   "sha256": "2d0a506190e316c4a9fe3a61ce96ddee96fc4900880fea6341173acdee7b51b0",
+   "bytes": 8192
+  },
+  "objact_04214.bin": {
+   "sha256": "2d0a506190e316c4a9fe3a61ce96ddee96fc4900880fea6341173acdee7b51b0",
+   "bytes": 8192
+  },
+  "workram_04215.bin": {
+   "sha256": "b796cb032ed0b0b201fe18ca2df9a14b751e253efb2a4b08369a2cb81e948d03",
+   "bytes": 32768
+  },
+  "objbuf_04215.bin": {
+   "sha256": "f529fee95ce72bdff27c835295e4831ffdef2b59530e792e2d4dd3dd52c81b75",
+   "bytes": 8192
+  },
+  "objact_04215.bin": {
+   "sha256": "2d0a506190e316c4a9fe3a61ce96ddee96fc4900880fea6341173acdee7b51b0",
+   "bytes": 8192
+  },
+  "workram_04252.bin": {
+   "sha256": "8006f5e839fec628a8a249166720934675fa2d4e69782eeb241c951e8a850ea2",
+   "bytes": 32768
+  },
+  "objbuf_04252.bin": {
+   "sha256": "57102b601a4970765aaae6690bdb5609f56f4ffae03a8a0d3668cc975bc95969",
+   "bytes": 8192
+  },
+  "objact_04252.bin": {
+   "sha256": "57102b601a4970765aaae6690bdb5609f56f4ffae03a8a0d3668cc975bc95969",
+   "bytes": 8192
+  },
+  "workram_04253.bin": {
+   "sha256": "a643a5f3c5505edb1b1460a7209c8e2dde9782ffa83c04a94485e809718b2f04",
+   "bytes": 32768
+  },
+  "objbuf_04253.bin": {
+   "sha256": "b8f18151d881c519259e51c95a57cb2912f30e3c3c26fc8bb978fb5561e76327",
+   "bytes": 8192
+  },
+  "objact_04253.bin": {
+   "sha256": "57102b601a4970765aaae6690bdb5609f56f4ffae03a8a0d3668cc975bc95969",
+   "bytes": 8192
+  },
+  "workram_04254.bin": {
+   "sha256": "6da742748ec3803a17b62341ecc3a1971dbf71fb0bb21bc6fe812c2636c5f430",
+   "bytes": 32768
+  },
+  "objbuf_04254.bin": {
+   "sha256": "a6252d4c8cbf8fd9fe285d94936cef84fdde5b1b2553c6980b137bb4a7ec4c11",
+   "bytes": 8192
+  },
+  "objact_04254.bin": {
+   "sha256": "a6252d4c8cbf8fd9fe285d94936cef84fdde5b1b2553c6980b137bb4a7ec4c11",
+   "bytes": 8192
+  }
+ },
+ "frames": {
+  "4214": {
+   "mapped_source_frame": 4214,
+   "actor_state": {
+    "type": 12,
+    "facing": 1,
+    "worldX": 1181,
+    "worldY": 297,
+    "anim_eof": "0x0012ec04",
+    "plus50": "0x00130ac8"
+   },
+   "alien_slot_addr": "0x7080a0",
+   "alien_slot_offset_in_objbuf": "0x00a0",
+   "slots": [
+    {
+     "X": "8113",
+     "Y": "0099",
+     "code": "4efe",
+     "attr": "0131",
+     "priority": 4,
+     "width_tiles": 2,
+     "xpos": 275,
+     "ypos": 153,
+     "palette": "0x11",
+     "flip_x": 1,
+     "flip_y": 0
+    },
+    {
+     "X": "80e3",
+     "Y": "00a9",
+     "code": "4ef6",
+     "attr": "0431",
+     "priority": 4,
+     "width_tiles": 1,
+     "xpos": 227,
+     "ypos": 169,
+     "palette": "0x11",
+     "flip_x": 1,
+     "flip_y": 0
+    },
+    {
+     "X": "80f3",
+     "Y": "00b9",
+     "code": "4fc8",
+     "attr": "0131",
+     "priority": 4,
+     "width_tiles": 1,
+     "xpos": 243,
+     "ypos": 185,
+     "palette": "0x11",
+     "flip_x": 1,
+     "flip_y": 0
+    },
+    {
+     "X": "8121",
+     "Y": "007b",
+     "code": "473a",
+     "attr": "2431",
+     "priority": 4,
+     "width_tiles": 2,
+     "xpos": 289,
+     "ypos": 123,
+     "palette": "0x11",
+     "flip_x": 1,
+     "flip_y": 0
+    },
+    {
+     "X": "8111",
+     "Y": "00ab",
+     "code": "479c",
+     "attr": "1331",
+     "priority": 4,
+     "width_tiles": 2,
+     "xpos": 273,
+     "ypos": 171,
+     "palette": "0x11",
+     "flip_x": 1,
+     "flip_y": 0
+    }
+   ],
+   "oracle_match": "20/20",
+   "pass": true,
+   "pose_constancy": {
+    "same_as_prev_frame": true,
+    "same_as_next_frame": false
+   },
+   "active_bank": {
+    "located": true,
+    "alien_slot_addr": "0x7080a0",
+    "first_word_index": 80,
+    "slot_word_indices": [
+     80,
+     84,
+     88,
+     92,
+     96
+    ],
+    "oracle_match": "20/20"
+   },
+   "writer_attribution": {
+    "matched_watchpoint_burst": true,
+    "attributed_words": "20/20",
+    "attributed_note": null,
+    "writer_pcs": [
+     "000AA214",
+     "000AA216"
+    ],
+    "part_table_pointers_a0": [
+     "0012F73C",
+     "0012F742",
+     "0012F748",
+     "0012F75A",
+     "0012F760"
+    ],
+    "emitting_actor_a4": [
+     "FFFF9DC0"
+    ],
+    "emitting_actor_a6": [
+     "FFFF9DC0"
+    ]
+   }
+  },
+  "4253": {
+   "mapped_source_frame": 4253,
+   "actor_state": {
+    "type": 12,
+    "facing": 1,
+    "worldX": 1292,
+    "worldY": 274,
+    "anim_eof": "0x0012e8ec",
+    "plus50": "0x00130ac8"
+   },
+   "alien_slot_addr": "0x7080a8",
+   "alien_slot_offset_in_objbuf": "0x00a8",
+   "slots": [
+    {
+     "X": "814f",
+     "Y": "009e",
+     "code": "4df8",
+     "attr": "0131",
+     "priority": 4,
+     "width_tiles": 2,
+     "xpos": 335,
+     "ypos": 158,
+     "palette": "0x11",
+     "flip_x": 1,
+     "flip_y": 0
+    },
+    {
+     "X": "810f",
+     "Y": "00ae",
+     "code": "4ef0",
+     "attr": "0531",
+     "priority": 4,
+     "width_tiles": 2,
+     "xpos": 271,
+     "ypos": 174,
+     "palette": "0x11",
+     "flip_x": 1,
+     "flip_y": 0
+    },
+    {
+     "X": "815b",
+     "Y": "007b",
+     "code": "4b04",
+     "attr": "2531",
+     "priority": 4,
+     "width_tiles": 2,
+     "xpos": 347,
+     "ypos": 123,
+     "palette": "0x11",
+     "flip_x": 1,
+     "flip_y": 0
+    },
+    {
+     "X": "814b",
+     "Y": "00ab",
+     "code": "4a88",
+     "attr": "1431",
+     "priority": 4,
+     "width_tiles": 2,
+     "xpos": 331,
+     "ypos": 171,
+     "palette": "0x11",
+     "flip_x": 1,
+     "flip_y": 0
+    },
+    {
+     "X": "816b",
+     "Y": "006b",
+     "code": "4958",
+     "attr": "0131",
+     "priority": 4,
+     "width_tiles": 2,
+     "xpos": 363,
+     "ypos": 107,
+     "palette": "0x11",
+     "flip_x": 1,
+     "flip_y": 0
+    }
+   ],
+   "oracle_match": "20/20",
+   "pass": true,
+   "pose_constancy": {
+    "same_as_prev_frame": true,
+    "same_as_next_frame": true
+   },
+   "active_bank": {
+    "located": true,
+    "alien_slot_addr": "0x7080a0",
+    "first_word_index": 80,
+    "slot_word_indices": [
+     80,
+     84,
+     88,
+     92,
+     96
+    ],
+    "oracle_match": "20/20"
+   },
+   "writer_attribution": {
+    "matched_watchpoint_burst": true,
+    "attributed_words": "16/20",
+    "attributed_note": "the remaining words were written above the watchpoint window (watchpoints cover a fixed address range, the alien's slot run is run-dependent); they are still decoded from the raw object dump",
+    "writer_pcs": [
+     "000AA214",
+     "000AA216"
+    ],
+    "part_table_pointers_a0": [
+     "0012FECE",
+     "0012FED4",
+     "0012FEE6",
+     "0012FEEC"
+    ],
+    "emitting_actor_a4": [
+     "FFFF9DC0"
+    ],
+    "emitting_actor_a6": [
+     "FFFF9DC0"
+    ]
+   }
+  }
+ },
+ "watchpoints": {
+  "log_files_scanned": [
+   "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\.deps\\mame\\object_emission\\mame_stderr.log",
+   "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\error.log",
+   "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\.deps\\mame\\object_emission\\mame_console.log"
+  ],
+  "obj_event_count": 23120,
+  "bank_event_count": 1156,
+  "writer_pc_obj_sample": [
+   "000A9D88",
+   "000A9D8A",
+   "000A9D8C",
+   "000AA0BA",
+   "000AA0BC",
+   "000AA0F6",
+   "000AA0F8",
+   "000AA1D0"
+  ],
+  "note": null
+ },
+ "gate_pass": true,
+ "gate_failing_frames": []
+}

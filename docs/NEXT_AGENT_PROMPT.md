@@ -1,5 +1,17 @@
 # Next agent prompt: Capability Gate 1, body 1
 
+> **STATUS 2026-08-18: this body is COMPLETE. Do not re-execute it.** Both gated
+> frames (4214 and 4253) reproduce 20/20 from a fresh deterministic run; the
+> exit gate in `docs/PARITY_PLAN.md` milestone 1 is met. The next executable
+> body is **milestone 2 (replace inferred collision)**. Two corrections to the
+> assignment text below, kept for the record: the state named here
+> (`avspu_stage1_debug_hitboxes`) is **not** the oracle's route — the oracle came
+> from the cold-boot route in `tools/mame_capture_enemy_actions.lua`, replayed
+> from the `avspu_stage1_replay4200` anchor plus its post-anchor tail; and the
+> actor base named here (`0xFFA000`) is **not** an actor base — type-12 actors
+> sit on a `0x180` grid and the emitting actor is `0xFF9DC0`. See the handoff
+> section "Capability Gate 1 — street-alien emission (2026-08-18 execution)".
+
 Continue the native Alien vs Predator Saturn port using the
 `port-cps2-to-sega-saturn` skill.
 

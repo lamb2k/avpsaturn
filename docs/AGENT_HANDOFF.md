@@ -1,7 +1,14 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-18 EDT (full-game destination synchronized; Round 1 retained
-as Capability Gate 1; street-alien five-slot proof is the next execution body;
+Updated: 2026-08-18 EDT (Capability Gate 1 street-alien emission **milestone 1
+CLOSED**: both gated frames, 4214 and 4253, reproduce **20/20** from a fresh
+deterministic run, with writer-PC, emitting-actor and ROM part-table
+attribution. The earlier 4253 failure this session was an instrument defect,
+not a fixture defect: an off-by-one source-frame label plus an unreplayed
+post-anchor route tail. Gate 1's seven acceptance conditions are still 0/7;
+milestone 1 advances conditions 1 and 5. See
+"Capability Gate 1 — street-alien emission (2026-08-18 execution)" below.
+Full-game destination unchanged; Round 1 retained as Capability Gate 1;
 applicable MSHvSF probes remain isolated and integrated by decision point)
 
 **Full-game goal audit: 0/9 conditions closed. Capability Gate 1: 0/7
@@ -13,6 +20,141 @@ The current capture-derived Round 1 route remains a useful regression baseline,
 but it does not satisfy Gate 1's ROM-derived animation, collision, AI or stage-
 table requirements and cannot close a full-game condition. Do not describe the
 project as functionally parity complete or hardware-ready.
+
+## Capability Gate 1 — street-alien emission (2026-08-18 execution)
+
+**Milestone 1 result: PASS. Frames 4214 AND 4253 both reproduce 20/20** from a
+fresh deterministic run, independently located and then compared to the oracle.
+Gate 1's seven acceptance conditions remain **0/7 closed**; this milestone
+advances conditions 1 and 5 and does not close either.
+
+**What the instrument does.** The wrapper/watchpoint/analyzer are scenario-
+parameterized (no logic tied to actor `0xFFA000`, object base `0x7080A0`, frame
+4253, or the five slots). The Lua installs exactly 20 word-write watchpoints at
+`0x7080A0..0x7080C6` (bank 1; no `0x7000A0` watchpoints) plus one bank-select
+watchpoint at `0x8040E0`, and per source frame in the window dumps
+`workram_<src>.bin`, `objbuf_<src>.bin` (the logical write buffer at
+`0x708000`) and `objact_<src>.bin` (the ACTIVE/display share — `:objram1` when
+the `0x8040E0` bank bit is 0, else `:objram2`). The analyzer locates the alien
+independently (first run of five consecutive `0x4xxx` codes), decodes
+X/Y/code/attr, matches the oracle, attributes each frame's decoded words to the
+watchpoint burst that wrote them, and records SHA-256 of every dump.
+
+**Why 4253 failed earlier this session, and the correction.** The failure was in
+the instrument, not the fixture. Two defects, both now fixed:
+
+1. **Off-by-one source-frame label.** The watcher labelled notifier call `k` as
+   source frame `state_frame + k`, but call 1 only requests the state load, so
+   call `k` ends source frame `state_frame + k - 1`. Every dump was named one
+   frame too high. Verified by comparing dumps against the oracle route's own
+   work RAM (`.deps/mame/enemy_actions/workram_*.bin`): the old labels matched
+   original frame `N-1`; the corrected labels match `N`.
+2. **Unreplayed post-anchor route tail.** The oracle came from the cold-boot
+   route in `tools/mame_capture_enemy_actions.lua`, whose route does **not**
+   stop at frame 4200: it presses **P1 Left at 4201, releases at 4210**, and
+   holds **`0xFF83C1 = 0x65`** (P1 health) every frame from 4200 on. Loading the
+   4200 anchor and running with no inputs is a different route — the player never
+   turns, so the scroll origin and the alien's approach diverge. The watcher now
+   replays that tail (parameterized: `AVP_OE_TAIL_DIR`, `_ON`, `_OFF`,
+   `AVP_OE_TAIL_HOLD_ADDR`, `_VALUE`).
+
+The prior session's conclusion that the fixture's 4253 was captured under an
+unknown route was wrong: the route is `mame_capture_enemy_actions.lua`, and it
+reproduces exactly.
+
+**Independent proof that the run reproduces the oracle route.** Against the
+oracle route's own dumps, over the whole window 4213–4254:
+
+- Work RAM differs by **exactly 1 byte per frame**, `0xFF8392` (`0x70` vs
+  `0x30`) — the low byte of a sub-pixel fraction whose integer half
+  (`0xFF8391`) agrees. It is a residue of the state save/load boundary, is
+  constant across the window, and changes nothing observable.
+- The **whole 8 KB active object bank at 4253 is byte-identical** to the oracle
+  instrument's own sample (`objram_active_04253.tsv`). At 4214 the display-bank
+  phase after a state load leads the cold-boot route by one frame (our
+  `objact_04214` equals the oracle instrument's active bank at 4215), and the
+  alien's own 20 words are identical on both surfaces at both frames.
+- Two independent end-to-end runs produced **identical SHA-256** for every dump.
+
+**Frame 4214 (anti-hardcoding control) — 20/20.** Located independently at
+`0x7080A0` (write buffer) and word indices 80/84/88/92/96 in the active bank.
+Writer burst attributed 20/20: X|Y at **PC `0x000AA214`**, code|attr at **PC
+`0x000AA216`**, part-table pointers **A0 = `0x12F73C`/`0x12F742`/`0x12F748`/
+`0x12F75A`/`0x12F760`**, emitting actor **A4 = A6 = `0xFF9DC0`**.
+
+**Frame 4253 (target) — 20/20.** Located independently at `0x7080A8` in the
+write buffer (one extra leading object that frame) and at word indices
+80/84/88/92/96 in the active bank — the indices the milestone's exit gate
+names. Writer burst attributed 16/20 (the last four words land above the fixed
+watchpoint window; they are still decoded from the raw dump): same PCs
+`0x000AA214`/`0x000AA216`, a **different** part-table family **A0 =
+`0x12FECE`/`0x12FED4`/`0x12FEE6`/`0x12FEEC`**, same emitting actor **A4 = A6 =
+`0xFF9DC0`**. Different pose, different ROM part table, same code path — the
+anti-hardcoding property the control frame exists to prove.
+
+**Fixture metadata corrected (values untouched).**
+`data/street_alien_object_emission_oracles.json` declared
+`state: avspu_stage1_debug_hitboxes @ 4200`. That was wrong and unreproducible
+(the debug-master state leaves the alien idle). The scenario block now records
+the true origin — the `mame_capture_enemy_actions.lua` cold-boot route, capture
+root `.deps/mame/enemy_actions`, sampled surface = active/display share — under
+`provenance_correction_2026_08_18`. **Every slot word and actor signature is
+byte-identical to the original fixture**; only provenance metadata changed. The
+analyzer now takes `--state` and records the state the run actually used, so
+`scenario.state` can no longer inherit the fixture's declared state.
+
+**Open metadata defect — the fixture's `actor_base` is not an actor base.** The
+brief's `0xFFA000` is not on the actor grid: type-12 actor bases in this window
+sit on a **`0x180` stride** (`0xFF9C40`, `0xFF9DC0`, `0xFF9F40`, `0xFFA0C0`,
+`0xFFA240`, `0xFFA3C0`), and every A4/A6 seen in the watchpoint log lies on that
+grid. `0xFFA000` is mid-struct (`0xFF9F40 + 0xC0`), which is why reads there
+still look plausible. The **emitting actor for the gated slots is `0xFF9DC0`**,
+corroborated by its worldX advancing `1257 → 1313` between the two frames
+against the slot-0 screen X advancing `275 → 335`. The oracle's
+`actor_signatures` still reproduce exactly at `0xFFA000` (they are the same
+bytes at the same address as in the oracle route), so they remain a valid
+reproduction check — but they are **not** the emitting actor's fields. Fixing
+`actor_base` in the fixture is deliberately left for the next agent, who should
+re-derive the actor field offsets against `0xFF9DC0` before rewriting them.
+
+**Raw evidence (SHA-256, `.deps/mame/object_emission/`), MAME 0.289, driver
+`avspu`, state `avspu_stage1_replay4200`
+(`eec85f7ddda96acfb8a715df008538f9414418adcfa1d14b331b51634f51312b`):**
+workram_04214 `e38a6f090bc5390232e5778ea110b147d46f09b0c62857c968c14ab8a386d40c`
+(32768 B); objbuf_04214 = objact_04214
+`2d0a506190e316c4a9fe3a61ce96ddee96fc4900880fea6341173acdee7b51b0` (8192 B);
+workram_04253 `a643a5f3c5505edb1b1460a7209c8e2dde9782ffa83c04a94485e809718b2f04`
+(32768 B); objbuf_04253
+`b8f18151d881c519259e51c95a57cb2912f30e3c3c26fc8bb978fb5561e76327` (8192 B);
+objact_04253 `57102b601a4970765aaae6690bdb5609f56f4ffae03a8a0d3668cc975bc95969`
+(8192 B). Neighbours 4213/4215/4252/4254 are dumped too. Oracle-route reference
+samples: `objram_active_04214.tsv`
+`6cacdf3893b98fcaca58e1da9e88a63bcfe7fbff781b07d01eed6e40b8a81a9d`,
+`objram_active_04253.tsv`
+`5001f04eb21d7486189fcdec3c2b6e3abca3e69918dc4f702dcbe5a275ec262c`.
+
+**Exact reproduction command** (run from
+`C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`; the wrapper runs the
+capture and the analyzer):
+
+```powershell
+.\capture_street_alien_object_emission.ps1 -State avspu_stage1_replay4200 -StateFrame 4200 -FrameA 4214 -FrameB 4253 -ActorBase FFA000 -ObjectListBase 7080A0 -Words 20 -BankSelectRegister 8040E0 -RawDir .deps\mame\object_emission -SkipSave
+```
+
+`-SkipSave` reuses the existing `replay4200.sta`; without it phase 1 re-saves it
+via the cold-boot path. Pass hex arguments **without** a `0x` prefix — the Lua
+side parses them with `tonumber(v, 16)`, which rejects `0x`. Expected output is
+`gate_pass=True failing=[]` with `4214: match=20/20 slot=0x7080a0` and
+`4253: match=20/20 slot=0x7080a8`.
+
+**Next work (milestone 2 boundary).** Milestone 1's exit gate is met, so the
+next body is milestone 2 (replace inferred collision) per
+`docs/PARITY_PLAN.md`. Before promoting the street-alien decoder in milestone 3,
+first re-derive the actor field offsets against the real actor base `0xFF9DC0`
+and correct the fixture's `actor_base`/`actor_signatures`, and widen the
+watchpoint window (or make it follow the located slot run) so all 20 words are
+writer-attributed at both frames. MAME confirmed **not running** at the end of
+this session.
 
 ## Current resume point: master plan intercept
 
