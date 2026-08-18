@@ -83,3 +83,11 @@ $walkCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror 
 if ($LASTEXITCODE -ne 0) {
     throw "Animation-walk test failed with exit code $LASTEXITCODE."
 }
+
+# The confirmed object-word emitter formula, checked against ROM-derived
+# dx/dy for the parts where the part-table walk is fully understood.
+$emitCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_emit.c tests/avsp_emit_test.c -o build/avsp_emit_test && ./build/avsp_emit_test"
+& $wsl.Source sh '-lc' $emitCommand
+if ($LASTEXITCODE -ne 0) {
+    throw "Object-word emitter test failed with exit code $LASTEXITCODE."
+}

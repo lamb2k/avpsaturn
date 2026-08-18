@@ -31,7 +31,7 @@ JO_DEBUG ?= 1
 JO_NTSC = 1
 JO_COMPILE_USING_SGL = 1
 
-SRCS = main.c capability_model.c avsp_actor.c avsp_anim_script.c
+SRCS = main.c capability_model.c avsp_actor.c avsp_anim_script.c avsp_emit.c
 
 JO_ENGINE_ROOT ?= .deps/joengine
 JO_ENGINE_SRC_DIR = $(JO_ENGINE_ROOT)/jo_engine
