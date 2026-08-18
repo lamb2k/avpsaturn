@@ -256,7 +256,44 @@ throughput side is `UNRESOLVED`. Its probe is slice V below, which emits
 **per-object** commands with per-tile retained as the fallback, and measures real
 frame time at the 909-tile / 86-object peak frame (source frame 5776).
 
-### Slice V — the VDP1 shape proof (runs before the actor spine)
+### Slice V — DEFERRED, folded into S2/S3 (decided 2026-08-18)
+
+Slice V was going to run first, as a throwaway replay harness, to de-risk VDP1
+throughput before the actor spine was designed. It was **deferred** on review,
+because the risk it was buying down is already largely refuted by evidence in
+hand:
+
+- **The shipped build already sustains more VDP1 sprite fill than the candidate
+  pipeline needs.** `main.c` draws 192x192 cels (36,864 px each) for the player
+  layers plus up to `CAP_MAX_ENEMIES` enemy slots plus a 288x192 boss - on the
+  order of 400k px of sprite fill per frame - and it reaches the Round 2 title
+  on Saturn. A per-object pipeline draws ~233k px at its peak frame. **Fewer.**
+- **Command count is not the risk it looked like.** Today's build issues on the
+  order of ten sprite commands per frame; per-object peaks at 86. The shipped
+  reference port issues 296-334 reachable commands per anchor. 86 is not where
+  this breaks.
+- **Every other budget has ~10x headroom:** 13 live palettes against 128 CRAM
+  banks, 29.5 KB peak texture delta against a vblank DMA window.
+- **The spine is not coupled to the answer.** An earlier framing overstated
+  this. Whatever the spine produces is *a CPS2 object list*; whether the renderer
+  consumes that list per-object or per-tile is a local decision downstream of it.
+  Building the spine first therefore risks nothing.
+
+The decisive practical point: as a standalone slice, V needs a replay harness
+that is thrown away. Run the same work inside **S2**, where the runtime can
+*produce* an object list instead of replaying one, and the harness becomes the
+real path - and the 5,302-frame object-list oracle becomes meaningful, because
+the producer is finally real.
+
+**What is retained from the slice-V design**, for whoever does S2/S3: one VDP1
+normal-sprite command per CPS2 object (`nx*16 x ny*16`, 16-colour bank mode,
+flip in `CMDCTRL`, jump-next linked, source order as draw order), a per-block
+texture cache with cartridge residency and per-frame delta DMA, per-tile
+retained as the fallback, and the coverage gate that every object shape and flag
+combination in the 215,646 captured objects maps to a legal command. Frame time
+still binds on physical Saturn, not an emulator.
+
+### Slice V design detail (retained for S2/S3)
 
 The renderer's producer and consumer are separable, so the consumer can be built
 and measured now, with no actor spine, no collision and no AI.

@@ -1,4 +1,4 @@
-# Next agent prompt: slice V — the VDP1 shape proof
+# Next agent prompt: S1 — the actor spine
 
 Continue the private native Alien vs Predator Saturn port using the
 `port-cps2-to-sega-saturn` skill.
@@ -11,20 +11,18 @@ C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest
 
 Expected branch: `codex/avp-master-plan`.
 
-**This prompt authorizes slice V only.** Not the actor spine, not collision
-integration, not AI, not stage work.
+**This prompt authorizes S1 only.** Not the renderer, not AI, not stage work,
+and no change to shipped runtime behaviour.
 
 ## Read and verify first
 
 1. The skill's `SKILL.md` and `references/workflow.md`.
 2. `AGENTS.md` and `CLAUDE.md`.
 3. `docs/GOAL.md`.
-4. `docs/AGENT_HANDOFF.md` — "Phase A: AvP sprite demand measured", "Plan
-   re-sequenced around the actor spine", "Official Saturn reference-port
-   findings".
-5. `docs/PARITY_PLAN.md` — the phase table, the demand measurement, and
-   "Slice V — the VDP1 shape proof".
-6. `docs/TEST_PLAN.md` and `docs/HARDWARE_TEST.md`.
+4. `docs/AGENT_HANDOFF.md` — "Capability Gate 1 — collision records", "Phase A:
+   AvP sprite demand measured", "Plan re-sequenced around the actor spine".
+5. `docs/PARITY_PLAN.md` — the phase table and "How game logic gets translated".
+6. `docs/TEST_PLAN.md`.
 
 Record branch, HEAD, recent commits and `git status`. Preserve every existing
 untracked/private ROM, MAME state, raw capture, `nvram/`, `snap/`,
@@ -33,117 +31,103 @@ Stage explicit paths only. Never `git add -A`, `git add .`, reset, clean or a
 broad stash. Do not switch, merge or cherry-pick the Marvel lane; do not edit
 the separate MSHvSF worktree.
 
-## Why this slice exists
+## Why this is first
 
-Everything downstream — the actor spine, ROM-driven animation, collision
-integration, AI translation — assumes AvP can render its own worst frame from
-its own object list, natively, at 60 Hz. If that is false the runtime's shape
-changes, and it is much cheaper to learn now than after the actor model is
-built around it.
+Four separate pieces of work are blocked behind one missing abstraction: the
+native runtime has no actor that carries its ROM animation-record pointer.
+Collision records are decoded and falsified but unusable. Animation scripts are
+decoded and `avsp_anim_script.c` is written and host-tested but **not in the
+Saturn build** (`SRCS = main.c capability_model.c`). Stage triggers and AI read
+actor fields through the same record.
 
-Already measured and not to be re-derived (`data/avsp_sprite_demand.json`,
-5,302 captured frames):
-
-- peak 86 objects / **909 16x16 tiles** per frame (peak frame **5776**);
-- **83.6% of objects are blocked sprites**, mean 8.51 tiles, largest 55 tiles;
-- **13 live 16-colour palettes** at peak, against 128 CRAM banks available;
-- texture: 68 KB peak per frame, ~309 KB one-second working set, 665 KB for the
-  whole street-wave window;
-- per-frame new tiles: 5.7 KB mean, 15.2 KB p95, **29.5 KB peak**.
+The renderer question was considered for this slot and deferred. Every measured
+budget has an order of magnitude of headroom, the shipped build already sustains
+more VDP1 sprite fill than a per-object pipeline would need, and the spine's
+output is "a CPS2 object list" whichever granularity the renderer later
+consumes. See the deferral note in `PARITY_PLAN.md`.
 
 ## Sole objective
 
-Prove, by measurement on real hardware, that AvP's peak frame renders at 60 Hz
-as **one VDP1 normal-sprite command per CPS2 object**.
+A native actor record that mirrors the game's own `0xC0` actor layout, proven
+field-for-field against captured work RAM, and enough C to make the already
+decoded collision data live.
 
-- **Producer for this slice is a replay harness, never shipped:** feed the
-  captured CPS2 object lists for a window containing frame 5776. Phase B
-  replaces the producer with the ROM-driven actor spine; the consumer built here
-  does not change.
-- **Consumer is real and permanent:** one VDP1 normal sprite per object,
-  `nx*16 x ny*16`, 16-colour bank mode, flip in `CMDCTRL`, jump-next linked,
-  source list order preserved as draw order.
-- **Textures:** a per-block cache (a blocked object needs its tiles contiguous as
-  an `nx*16`-wide texture), cartridge-resident, with the per-frame delta DMA'd.
-- **Palettes:** the live 16-colour banks into VDP2 CRAM.
+### Layout
 
-## Honest scoping of the offline work
+Mirror the ROM record for the fields the game's own code consumes. These are
+already proven and must not be re-derived:
 
-An earlier framing claimed the 5,302-frame object-list oracle gates this slice.
-It does not, and do not build the slice around that idea: when the producer is a
-replay of MAME's own object list, comparing the emitted list back to it is close
-to vacuous. That oracle belongs to **phase B**, where the ROM-driven producer
-must generate the list itself.
+| Offset | Field |
+|---|---|
+| `+0x00` | state |
+| `+0x08` | type |
+| `+0x0F` | facing |
+| `+0x10` / `+0x14` / `+0x18` | world x / y / z |
+| `+0x1C` | animation-record pointer |
+| `+0x2C` / `+0x2D` | hit value / hit source |
+| `+0x50` | collision table-set pointer |
+| `+0x67` | attacker id |
+| `+0x68..0x6F` | per-attacker hit latch |
+| `+0x70` | suppress |
+| `+0xD1` | latch index |
 
-The meaningful offline gate here is narrower: **coverage**. Every object shape
-and flag combination that appears in the captures must map to a legal VDP1
-command. That is worth testing across all 215,646 captured objects because an
-unhandled block shape, size limit, palette-bank range or flip combination would
-otherwise surface as a rendering bug much later.
+Actor slots sit on a `0xC0` grid anchored at the player slot `0xFF8380`. Do not
+label fields beyond what collision, animation and the differential-replay method
+actually consume — an exhaustive labelling of all 96 words is explicitly not
+wanted.
 
-Keep the offline work to what is needed to boot. The value of this slice is the
-hardware number.
-
-## Deliverables
-
-- `tools/build_avsp_block_textures.py` — from the private ROM tiles plus the
-  window's captured object lists, emit the per-block texture set and a **tracked
-  manifest** carrying counts, sizes and hashes only. Never commit tile data.
-- `tools/test_avsp_object_to_vdp1.py` — the coverage gate above, over every
-  captured object; report any shape/flag that has no legal mapping.
-- a focused Saturn build that replays the window and emits per-object commands;
-- a frame-time measurement at the peak frame, recorded with its method.
-
-Every asserted field carries an evidence label (`MEASURED`, `DECODED`,
-`INFERRED` with its falsifier, `ADAPTED` with its reason, `UNRESOLVED` with its
-probe). Generated reports must be deterministic — run twice, identical hash.
+Prefer a tracked, evidence-labelled field map plus a generated header over a
+hand-written struct, so the layout is auditable and regenerable.
 
 ## Gates
 
-1. **Coverage:** every captured object maps to a legal VDP1 command; unhandled
-   cases are enumerated, not silently skipped.
-2. **Frame time at peak:** the peak frame (86 objects / 909 tiles) holds 60 Hz.
-   Record measured frame time, not a pass/fail impression.
-3. **DMA:** the 29.5 KB peak texture delta completes inside vblank.
+1. **Field-for-field equality.** Load captured work-RAM frames into the native
+   record and read back every field above, for every live actor, across the two
+   collision-probe windows (`.deps/mame/collision_probe`, 4201–5500, and
+   `.deps/mame/collision_probe_boss`, 13000–14600 — 2,900 frames). Any mismatch
+   fails; report counts, not a sample.
 
-**Emulator frame time is indicative only.** Yaba Sanshiro will not tell you
-truthfully whether VDP1 holds 60 Hz. Gate 2 is binding only on physical NTSC
-Saturn per `docs/HARDWARE_TEST.md`, or on an FPGA core as a closer proxy that is
-still not the hardware gate. Say which instrument produced each number.
+2. **The decoded collision data becomes live C.** Port the overlap predicate and
+   its guards from `tools/verify_avsp_collision.py` into C consuming this record
+   and `data/avsp_collision.json`, then re-run the same falsification over the
+   same captures. The C result must reproduce the Python result **exactly**:
+   21,908 non-overlapping active pairs producing no hit, 44 of 56 latch events
+   explained, the same 12 residuals. A different number is a defect in the port,
+   not a new finding.
 
-If gate 2 fails at per-object, **fall back to one command per 16x16 tile and
-re-measure** before changing anything upstream. Both granularities draw the same
-~233k pixels; only command count and per-command SH-2 build cost differ. Report
-both numbers either way — that comparison is the durable result of this slice.
+Gate 2 is the point of S1. It converts milestone 2's correct-but-inert evidence
+into working C with an exact oracle, and it is the first time this project's
+decoded data does anything.
 
 ## Boundaries
 
-- The replay harness is a test instrument. Do not let it become a rendering path,
-  and do not present a replayed frame as ROM-driven rendering.
-- Do not modify `capability_model.c` or the existing cel path yet; slice V runs
-  beside them.
-- Do not start the actor spine, collision integration, AI or stage work.
-- Do not decode further ROM tables — the standing rule from milestone 2.
+- **Host-only.** No change to `main.c`, no Saturn build change, no ISO, no
+  emulator run. Nothing in the shipped runtime's behaviour changes in S1.
+- Add the new record and collision code **alongside** `capability_model.c`. Do
+  not rewire the existing inferred collision path yet; that is S4, after the
+  animation record is live and can supply the selectors.
+- Do not link `avsp_anim_script.c` into the Saturn build yet — that is S2.
+- Do not decode further ROM tables. The standing rule from milestone 2 holds.
 - Never commit ROM bytes, tile data, raw screenshots, RAM dumps or disc members.
-- Restore `normal-release` after any diagnostic build.
 
 ## Acceptance
 
-Slice V passes when gates 1 and 3 pass and gate 2 has a measured frame time from
-a named instrument, with the per-object and per-tile command counts both
-reported. A passing slice does **not** close any Gate 1 condition: Gate 1 stays
-0/7 and the full-game goal stays 0/9, because nothing here is ROM-driven yet.
+S1 passes when both gates pass with reported counts. It closes **no** Gate 1
+condition: Gate 1 stays 0/7 and the full-game goal stays 0/9, because nothing
+ROM-driven has reached the runtime yet. Say so plainly in the handoff.
 
 ## Handoff discipline
 
-Update `docs/AGENT_HANDOFF.md` and `docs/PARITY_PLAN.md` with the measurement and
+Update `docs/AGENT_HANDOFF.md` and `docs/PARITY_PLAN.md` with the result and
 honest status; record branch, HEAD, dirty files, raw paths, hashes and exact
 commands; stop MAME and emulator processes or record their ownership; stage
-explicit files only; commit one coherent checkpoint if the gates pass.
+explicit files only; commit one coherent checkpoint if both gates pass.
 
-## What comes after (do not start it here)
+## What comes next (do not start it here)
 
-S1 actor spine — mirror the ROM's `0xC0` actor record in a native struct, gated
-by loading captured work-RAM frames and reading back identical fields. It is
-independent of this slice and unblocks both collision and AI, so it may run in
-parallel in a separate body if you have a second agent.
+S2 — link `avsp_anim_script.c` into the Saturn build and drive pose selection
+from the record pointer at `+0x1C` instead of the capture-derived clip tables.
+Its gate is the strong one: the native walk must reproduce MAME's exact
+per-frame animation-record-pointer sequence across the 2,121-frame street fight.
+S2 is also where the renderer work resumes, because that is the first point at
+which the runtime can *produce* an object list rather than replay one.
