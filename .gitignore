@@ -1,6 +1,9 @@
 .deps/
 cfg/
 avspu/
+Marvel Super Heroes vs. Street Fighter/
+nvram/
+snap/
 generated/
 build/
 game.cue
