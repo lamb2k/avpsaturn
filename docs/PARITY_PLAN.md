@@ -98,8 +98,11 @@ Verified in this repository; do not re-derive.
   and an independent low parameter byte. The tail is **not** an X/Y word pair:
   code at `0x1cf88`/`0x1cf94` consumes bytes `+9`/`+8` as interaction-table
   selectors, while `0x88e16` copies the complete 16-byte record into actor
-  scratch. Keep the remaining tail fields unlabeled until their consumers are
-  proven.
+  scratch. Bytes `+8`/`+9` are therefore labelled per-record in the report as
+  interaction-table selectors (`tail_byte_8_selector` /
+  `tail_byte_9_selector`); the remaining tail bytes `+10..+15` are kept
+  explicitly unlabeled (`tail_bytes_10_15_unlabeled`) until their consumers are
+  proven, with the raw tail retained.
 - The animation updater at `0x16536`, `0x165C4` and `0x16644` advances by
   `0x10`, then follows the long pointer at the next record when the current
   flags word is negative. That four-byte jump record is why observed pointer
@@ -240,9 +243,12 @@ coverage. The normal/jump discriminator is grounded in the updater: normal
 records are 16 bytes and a negative control word is followed by a four-byte
 pointer that redirects the script. The 28 decoded boss pose assemblies (all 29
 poses; the 162 previously-unmatched frames now all match a decoded assembly)
-pass the rendered-pose comparison. Next: extract every required player/enemy
-program, resolve record-selection timing, and label the remaining eight-byte tail
-fields from their consumers.
+pass the rendered-pose comparison. Record-selection timing is resolved (the
+shared-code-set sibling origin is picked by the actor-slot record pointer at
+frame f−1) and the proven tail selectors (bytes +8/+9, readers 0x1cf94/0x1cf88)
+are labelled per-record, with +10..+15 kept explicitly unlabeled. Next: extract
+every required player/enemy program and label the still-unproven tail bytes from
+their consumers.
 
 Validation, non-negotiable: every required ROM-decoded assembly must reproduce
 an already-captured pose **pixel for pixel**, with ROM-derived position and
@@ -279,7 +285,9 @@ coverage passing and no tolerance silently treated as exact.
 - Replace `player_pose_for_frame()` and the generated action tables with a
   small SH-2 script interpreter for the proven fields: duration, bit-15 flip,
   sequence index, parameter byte, assembly pointer, advance, backward jumps
-  and termination. Add tail semantics only after their consumers prove them.
+  and termination. The proven interaction-selector tail bytes (+8/+9) may be
+  included; the unproven +10..+15 are added only after their consumers prove
+  them.
 - Convert sprite assemblies into either load-time composed cels or per-tile
   VDP1 commands. Keep both options open until 60 Hz hardware measurements show
   the RAM, CPU and command-table tradeoff.

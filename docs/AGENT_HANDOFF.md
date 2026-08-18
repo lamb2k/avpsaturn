@@ -172,17 +172,20 @@ Read this file before taking any action. The user wants a private, capture-faith
   `profile=normal-release`.
 - Goal-audit tool/report SHA-256 values:
   - `tools/decode_avsp_animation_scripts.py`:
-    `33e730edd45b0c49eb57062ee4934d45cdd10b756cde1f41181576f4fbdbb644`
+    `0119260b02eae113e9bf19a141a99b33d4a0526bdf3fd7604c48a526915db9d7`
   - `data/avsp_animation_scripts.json`:
-    `2e4e272e55d8d0e573bcc176579e509afc9877c5cc7b3f139cab201a1ff9396f`
+    `7d63775a983e0fc7489a3017bdd3947933e2fb2e51df4eed306c7ee4ea071ef6`
   - `tools/verify_pose_gate.py`:
     `e697888bb58ab01ca00b654fb3a81b48e975376bcf7bdcead22f62bad5bd5679`
   - `tools/verify_position_gate.py`:
     `ce5d074fd7a8f3bb3f617ae71ac15d4122984feb40cd10af126d87bb5c3310fb`
-  (`verify_position_gate.py` gained the f−1 record-pointer sibling-origin
-  disambiguation this checkpoint, so its hash changed; `verify_pose_gate.py`
-  is unchanged. `decode_avsp_animation_scripts.py` and `avsp_animation_scripts.json`
-  are the Phase 2 28-assembly hashes and are unchanged this checkpoint.)
+  (`decode_avsp_animation_scripts.py` and `avsp_animation_scripts.json`
+  changed this checkpoint: the record tail bytes +8/+9 are now labelled
+  per-record as interaction-table selectors (readers 0x1cf94/0x1cf88) and
+  +10..+15 are kept explicitly unlabeled; the raw tail is retained and the
+  28-assembly set is unchanged. `verify_pose_gate.py` and
+  `verify_position_gate.py` are unchanged; the pose gate still reports 28/28
+  and the position gate 1,435/0/8/0 with X 1,443/1,443.)
 - Goal-audit verification:
   - `test.ps1`: PASS; controller-only model reached Round 2 in 4,485 frames and
     the 12,000-frame deterministic soak passed.
@@ -666,7 +669,8 @@ Findings from the `avspu_stage1_boss_12660` state, 240 frames:
   jump pointer. Big-endian fields proven so far: `+0` duration; `+2` control
   word (bit-15 flip, seven-bit sequence index, low parameter byte); `+4`
   assembly pointer; eight-byte tail. Bytes `+8/+9` are interaction selectors,
-  not X/Y offsets; the remaining tail is unlabeled.
+  not X/Y offsets; they are labelled per-record in the report and the
+  remaining tail (`+10..+15`) is kept explicitly unlabeled.
 - The pointer advances by the record size and then **jumps backwards to
   `0x13CD0C`**, which is visited twice: the script has an explicit loop, so the
   format includes control flow, not just a frame list.
@@ -693,7 +697,11 @@ updater to follow the long pointer at the next address, making the apparent
 and `+9` are consumed as interaction-table selectors by `0x1cf88` and
 `0x1cf94`; they are not yet proven X/Y offsets. `0x88e16` copies all 16 bytes
 into actor scratch, so the remaining tail semantics still need consumer-level
-mapping.
+mapping. The decoder now writes those two selector bytes per record as
+`tail_byte_8_selector` / `tail_byte_9_selector` and keeps `+10..+15` in
+`tail_bytes_10_15_unlabeled` (raw `tail_hex` / `tail_bytes` are retained). In
+the boss data byte `+9` is 0 for every pose and byte `+8` ranges over
+{1, 2, 7, 8}; `+10/+11` hold a 16-bit word (6..9) with four zero bytes after.
 
 Reproduce the structural decode after regenerating the ignored private MAME
 window:
@@ -725,16 +733,20 @@ The opcode dumper itself remains:
    shared-code-set selection is also resolved: the actor-slot record pointer at
    frame f−1 selects the true sibling table and drives all 63 sibling-delta parts
    to exact (sibling-delta now 0).
-2. [Bounded] The `x=0/y=-4` settling (8 parts) is the only non-zero residual
+2. [Done] The 16-byte record tail is labelled per-record in the report: bytes
+   `+8`/`+9` are interaction-table selectors (readers `0x1cf94` / `0x1cf88`;
+   `0x88e16` copies all 16 bytes to scratch) and bytes `+10..+15` are kept
+   explicitly unlabeled pending a proven consumer (raw tail retained).
+3. [Bounded] The `x=0/y=-4` settling (8 parts) is the only non-zero residual
    in scope and is formally bounded (see above); it is a whole-pose one-step
    settle trail. Derive it by disassembling the object-Y-from-world-Y writer;
    resolving it makes `--require-exact` pass.
-3. Decode actor-local hitbox records for all required player/alien/Stalker/
+4. Decode actor-local hitbox records for all required player/alien/Stalker/
    Chrysalis poses and replace inferred range/contact schedules.
-4. Locate and extract Round 1 spawn, camera, scroll and trigger tables.
-5. Disassemble one complete labeled AI writer path, map only the actor fields it
+5. Locate and extract Round 1 spawn, camera, scroll and trigger tables.
+6. Disassemble one complete labeled AI writer path, map only the actor fields it
    consumes, and identify/record PRNG use before translation.
-6. Extend ROM animation extraction to every required Round 1 actor, then build
+7. Extend ROM animation extraction to every required Round 1 actor, then build
    the SH-2 interpreter and retain captures only as regression oracles.
 
 Note on RNG: if AI decisions consume a PRNG, functional parity requires the

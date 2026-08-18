@@ -8,8 +8,11 @@ The current evidence supports two record forms:
 The flags word at offset +2 splits into flip_x (bit 15), a 7-bit sequence
 index (bits 14-8), and an 8-bit parameter byte (bits 7-0).
 
-The tail is retained verbatim.  Its byte fields are not labelled until the
-pixel-exact assembly test and actor-origin pairing prove their meaning.
+The tail is retained verbatim.  Bytes +8 and +9 are labelled as
+interaction-table selectors: their readers (0x1cf94 for +8, 0x1cf88 for +9)
+are established from the updater disassembly, and 0x88e16 copies all 16 bytes
+to actor scratch.  The remaining six tail bytes have no proven consumer and
+are kept explicitly unlabeled.
 """
 
 from __future__ import annotations
@@ -146,6 +149,13 @@ def decode_program(data: bytes, base: int, start: int) -> dict[str, object]:
             "assembly": f"0x{assembly:06x}",
             "tail_hex": tail.hex(),
             "tail_bytes": list(tail),
+            # Labeled tail fields (proven consumers; see routine_evidence).
+            # Byte +8 is an interaction-table selector read by 0x1cf94 and
+            # byte +9 one read by 0x1cf88. The remaining six bytes have no
+            # proven consumer, so they are kept explicitly unlabeled.
+            "tail_byte_8_selector": tail[0],
+            "tail_byte_9_selector": tail[1],
+            "tail_bytes_10_15_unlabeled": tail[2:8].hex(),
         })
         address += 16
     else:
@@ -452,7 +462,11 @@ def main() -> None:
             "word_plus2_low_byte": "independent parameter byte",
             "assembly_pointer_offset": 4,
             "tail_bytes": 8,
-            "tail_field_labels": "unresolved; bytes +8/+9 are consumed by interaction dispatch",
+            "tail_field_labels": (
+                "byte +8 = interaction-table selector (reader 0x1cf94); "
+                "byte +9 = interaction-table selector (reader 0x1cf88); "
+                "bytes +10..+15 have no proven consumer and remain unlabeled"
+            ),
         },
         "routine_evidence": {
             "script_advance": ["0x16536", "0x165c4", "0x16644"],
@@ -482,11 +496,15 @@ def main() -> None:
         "remaining_gate": (
             "Boss: all 28 pose assemblies are in the pose/position gate; the 5 "
             "no-oracle trace assemblies (mid-attack transients + at-rest "
-            "sibling) are decoded but not pixel-verifiable. Next: extract the "
-            "player, street-aliens and Stalker programs, resolve record-"
-            "selection timing and the transient position settling "
-            "observation, and label the unresolved tail fields and actor-"
-            "local hitboxes."
+            "sibling) are decoded but not pixel-verifiable. Record bytes "
+            "+8/+9 are labelled interaction selectors (readers 0x1cf94/"
+            "0x1cf88); bytes +10..+15 remain unlabeled pending a proven "
+            "consumer. The shared-code-set sibling origin is resolved by the "
+            "f-1 record pointer, and the (0,-4) position settle trail is "
+            "formally bounded (exact object-Y writer not yet disassembled). "
+            "Next: extract the player, street-aliens and Stalker programs, "
+            "and label the remaining tail fields and actor-local hitboxes "
+            "once their consumers are proven."
         ),
     }
     args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="ascii")

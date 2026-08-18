@@ -21,7 +21,7 @@
     "word_plus2_low_byte": "independent parameter byte",
     "assembly_pointer_offset": 4,
     "tail_bytes": 8,
-    "tail_field_labels": "unresolved; bytes +8/+9 are consumed by interaction dispatch"
+    "tail_field_labels": "byte +8 = interaction-table selector (reader 0x1cf94); byte +9 = interaction-table selector (reader 0x1cf88); bytes +10..+15 have no proven consumer and remain unlabeled"
   },
   "routine_evidence": {
     "script_advance": [
@@ -171,7 +171,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000900000000"
         },
         {
           "address": "0x13cc28",
@@ -194,7 +197,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000800000000"
         },
         {
           "address": "0x13cc38",
@@ -217,7 +223,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000800000000"
         },
         {
           "address": "0x13cc48",
@@ -240,7 +249,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000800000000"
         },
         {
           "address": "0x13cc58",
@@ -263,7 +275,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000900000000"
         },
         {
           "address": "0x13cc68",
@@ -286,7 +301,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000800000000"
         },
         {
           "address": "0x13cc78",
@@ -309,7 +327,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000800000000"
         },
         {
           "address": "0x13cc88",
@@ -332,7 +353,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000800000000"
         },
         {
           "address": "0x13cc98",
@@ -378,7 +402,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000800000000"
         },
         {
           "address": "0x13ccac",
@@ -401,7 +428,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000800000000"
         },
         {
           "address": "0x13ccbc",
@@ -424,7 +454,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000800000000"
         },
         {
           "address": "0x13cccc",
@@ -447,7 +480,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000900000000"
         },
         {
           "address": "0x13ccdc",
@@ -470,7 +506,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000800000000"
         },
         {
           "address": "0x13ccec",
@@ -493,7 +532,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000800000000"
         },
         {
           "address": "0x13ccfc",
@@ -516,7 +558,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000800000000"
         },
         {
           "address": "0x13cd0c",
@@ -539,7 +584,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 2,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000900000000"
         },
         {
           "address": "0x13cd1c",
@@ -585,7 +633,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 1,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000900000000"
         },
         {
           "address": "0x13ce38",
@@ -624,7 +675,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 8,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000600000000"
         },
         {
           "address": "0x13ce5c",
@@ -663,7 +717,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 7,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000700000000"
         },
         {
           "address": "0x13ce80",
@@ -702,7 +759,10 @@
             0,
             0,
             0
-          ]
+          ],
+          "tail_byte_8_selector": 1,
+          "tail_byte_9_selector": 0,
+          "tail_bytes_10_15_unlabeled": "000900000000"
         },
         {
           "address": "0x13ced4",
@@ -2191,5 +2251,5 @@
       "trailing_word": "0x0006"
     }
   ],
-  "remaining_gate": "Boss: all 28 pose assemblies are in the pose/position gate; the 5 no-oracle trace assemblies (mid-attack transients + at-rest sibling) are decoded but not pixel-verifiable. Next: extract the player, street-aliens and Stalker programs, resolve record-selection timing and the transient position settling observation, and label the unresolved tail fields and actor-local hitboxes."
+  "remaining_gate": "Boss: all 28 pose assemblies are in the pose/position gate; the 5 no-oracle trace assemblies (mid-attack transients + at-rest sibling) are decoded but not pixel-verifiable. Record bytes +8/+9 are labelled interaction selectors (readers 0x1cf94/0x1cf88); bytes +10..+15 remain unlabeled pending a proven consumer. The shared-code-set sibling origin is resolved by the f-1 record pointer, and the (0,-4) position settle trail is formally bounded (exact object-Y writer not yet disassembled). Next: extract the player, street-aliens and Stalker programs, and label the remaining tail fields and actor-local hitboxes once their consumers are proven."
 }
