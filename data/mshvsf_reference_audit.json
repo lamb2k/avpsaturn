@@ -245,10 +245,10 @@
   },
   "rights_boundary": "Private research only; no ROM data or generated disc content is committed.",
   "mame_verifyroms": {
-    "source_rom_path": "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\Marvel Super Heroes vs. Street Fighter\\Mame",
+    "source_rom_path": "<reference-root>/Mame",
     "layout": "temporary hard-link set/shared-ROM overlay",
     "command": [
-      "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\.deps\\mame\\mame0289\\mame.exe",
+      "<mame-executable>",
       "-rompath",
       "<temporary-mame-rompath>",
       "-verifyroms",

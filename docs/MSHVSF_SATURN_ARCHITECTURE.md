@@ -45,16 +45,37 @@ required next trace for every resource are tracked in
 `data/mshvsf_saturn_asset_topology.json`; they are storage evidence only and are
 not treated as decompressed or simultaneously resident bytes.
 
+## Measured normal-hit memory window
+
+Stock Yaba Sanshiro v1.20.37 exposes a localhost MCP debug server. The
+deterministic Ryu replay was paused at exact frames 3540 (idle), 3828
+(normal-active), 3840 (impact), and 3900 (recovery), and every mapped work,
+cartridge, video, color, and sound region was dumped and hashed. Raw bytes stay
+ignored; `data/mshvsf_saturn_runtime_memory.json` is the tracked analysis.
+
+| Transition | High work RAM | Low work RAM | Sound RAM | VDP1 VRAM | Cartridge DRAM | VDP2 VRAM |
+|---|---:|---:|---:|---:|---:|---:|
+| Idle to normal-active | 15,186 bytes / 42 pages | 948 / 8 | 16,124 / 5 | 43,889 / 21 | 0 / 0 | 0 / 0 |
+| Normal-active to impact | 10,295 / 39 | 92 / 2 | 16,193 / 5 | 5,443 / 5 | 0 / 0 | 0 / 0 |
+| Impact to recovery | 11,182 / 39 | 72 / 3 | 16,168 / 5 | 2,996 / 5 | 0 / 0 | 0 / 0 |
+
+The cartridge contains 3,549,571 nonzero bytes across 909 4 KiB pages and is
+byte-identical throughout this combat window. VDP2 VRAM is likewise stable,
+while the sequential VDP1 list changes from 296 commands at idle to 334 at
+normal-active, 308 at impact, and 307 at recovery. These are strong residency
+and renderer-activity leads, but nonzero bytes are not an allocator high-water
+mark and a sequential scan is not complete VDP1 jump/call traversal.
+
 ## Responsibility and budget map
 
 | Resource | Verified evidence | Current responsibility | Next proof |
 |---|---|---|---|
 | SH-2 CPUs | Saturn executable members and successful boot | `UNRESOLVED` | Trace boot, loader, game loop, and interrupt ownership |
-| VDP1 | Deterministic gameplay visibly renders foreground objects; hardware ownership is not traced | `UNRESOLVED` | Capture command tables around the Ryu slice |
-| VDP2 | Deterministic gameplay visibly renders a stage background; hardware ownership is not traced | `UNRESOLVED` | Capture register state and layer maps around the same frames |
-| Work RAM | Runtime boots | `UNRESOLVED` | Differential dumps for actor, projectile, collision, and health state |
-| 32 Mbit expansion RAM | Successful emulator configuration | Requirement and allocation `UNRESOLVED` | Compare no-cart, smaller-cart, and 4 MB traces |
-| SCSP | Runtime emits audio | Voice and sample responsibility `UNRESOLVED` | Trace slot writes and RAM transfers per isolated event |
+| VDP1 | Exact-frame dumps show 296/334/308/307 sequential commands and localized combat changes | Foreground submission confirmed; list ownership `UNRESOLVED` | Traverse command jumps/calls and map textures to package residency |
+| VDP2 | VRAM and registers are byte-stable across the four gameplay anchors | Stable stage residency for this window; layer ownership `UNRESOLVED` | Decode layer enables, maps, and transition-time loads |
+| Work RAM | Differential dumps localize normal-hit changes to 39-42 high-RAM pages and 2-8 low-RAM pages | Gameplay state is active in both regions; structures `UNRESOLVED` | Join changed ranges to SH-2 writers, health, actors, and collision |
+| 32 Mbit expansion RAM | 3,549,571 nonzero bytes across 909 pages; byte-stable from idle through recovery | Stable combat-window residency confirmed; allocation ownership `UNRESOLVED` | Capture team/stage loading and compare cart configurations |
+| SCSP | Sound RAM changes in five pages and one SCSP-register byte changes per transition | Event-associated audio activity confirmed; voice/sample ownership `UNRESOLVED` | Trace slot writes and isolate normal versus hit events |
 | CD block | One data track plus eleven audio tracks | Disc transport verified; event routing `UNRESOLVED` | Log file reads and CDDA commands during the slice |
 | DMA | No direct trace | `UNRESOLVED` | Record transfers during loading and active gameplay |
 

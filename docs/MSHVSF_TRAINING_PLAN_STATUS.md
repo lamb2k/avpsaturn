@@ -12,7 +12,7 @@ production route or Git history.
 | Function/data correspondence | PARTIAL | `data/mshvsf_correspondence.json` | Concrete addresses and functions on both systems |
 | Measured difference ledger | PARTIAL | `data/mshvsf_difference_ledger.json` | Same-attack mechanics, normalized presentation, audio, performance, and content differences |
 | Reconstructed vertical slice | PARTIAL | `data/mshvsf_reconstructed_vertical_slice.json` | Saturn Hadouken and paired internal state; this is semantic reconstruction, not an executable port |
-| Saturn reference architecture | PARTIAL | `docs/MSHVSF_SATURN_ARCHITECTURE.md`, `data/mshvsf_saturn_program_inventory.json` | Runtime load addresses; master/slave, VDP1/VDP2, SCSP, RAM, cart, CD, and DMA ownership |
+| Saturn reference architecture | PARTIAL | `docs/MSHVSF_SATURN_ARCHITECTURE.md`, `data/mshvsf_saturn_program_inventory.json`, `data/mshvsf_saturn_runtime_memory.json` | Join measured changes to SH-2 writers and resolve VDP1/VDP2, SCSP, cart, CD, and DMA ownership |
 | Fidelity standard and scorecard | PARTIAL | `docs/CAPCOM_SATURN_FIDELITY_STANDARD.md`, `data/mshvsf_fidelity_scorecard.json` | Full route, roster, stress, audio, performance, and hardware validation |
 | Candidate assessment | COMPLETE AS TEMPLATE | `templates/capcom_saturn_porting/candidate_assessment.template.json` | Apply to each future title with measured evidence |
 | System mapping template | COMPLETE AS TEMPLATE | `templates/capcom_saturn_porting/system_mapping.template.json` | Apply per semantic concept |
@@ -29,8 +29,10 @@ production route or Git history.
 
 - Phase 1 is partial: deterministic external behavior exists on both systems,
   but the preferred projectile slice and internal function/data mapping do not.
-- Phase 2 is open structurally: capacities and disc topology are measured, but
-  official runtime ownership and allocation are not traced.
+- Phase 2 is partial structurally: exact-frame work RAM, cartridge, VDP1,
+  VDP2, color-RAM, and SCSP dumps now exist for a normal-hit window, but
+  ownership, allocation, loading transitions, and processor division remain
+  unresolved.
 - Phase 3 has a complete standard and a deliberately incomplete pilot scorecard.
 - Phase 4 now has reusable templates, curriculum, and candidate gates.
 - Phase 5 is open because no second authorized title pair is present in this
@@ -38,14 +40,17 @@ production route or Git history.
 
 ## Next evidence order
 
-1. Use the static module, filename, and hardware-address leads to capture Saturn
-   high/low work RAM, expansion RAM, VDP1, VDP2, SCSP, and CD/DMA state at the
-   existing deterministic anchors.
-2. Locate player structures and normal attack/collision/damage writers on both
-   systems, including an out-of-range falsification replay.
-3. Complete the Saturn Hadouken path and pair the same projectile event.
-4. Decode one CPS-2 and Saturn Ryu animation table and normalize pose timing.
-5. Map normal/hit/Hadouken audio events and transport.
-6. Measure a worst-case super/tag route and fill the hardware peaks.
-7. Repeat the method on a second official port before promoting any candidate
+1. Use the measured changed-page ranges and MCP breakpoints to locate Saturn
+   player structures and normal attack/collision/damage writers, including an
+   out-of-range falsification replay.
+2. Traverse the measured VDP1 command jumps/calls and map referenced textures
+   to stable cartridge and VDP1 residency.
+3. Capture team/stage loading to resolve cartridge writes, VDP2 ownership,
+   CD reads, and DMA transfers; do not infer them from the stable combat window.
+4. Locate the matching CPS-2 normal attack/collision/damage writers.
+5. Decode one CPS-2 and Saturn Ryu animation table and normalize pose timing.
+6. Add the Saturn Hadouken route only after the normal-hit structures are proven.
+7. Map normal/hit/Hadouken audio events and transport.
+8. Measure a worst-case super/tag route and fill the hardware peaks.
+9. Repeat the method on a second official port before promoting any candidate
    Capcom architecture pattern to a team standard.

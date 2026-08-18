@@ -2,6 +2,7 @@
 param(
     [string]$EmulatorPath,
     [string]$PlayRecordDirectory,
+    [switch]$EnableMcpDebugServer,
     [switch]$NoLaunch
 )
 
@@ -51,6 +52,9 @@ $values = [ordered]@{
     'Cartridge\Type' = '7'
     'autostart' = 'false'
 }
+if ($EnableMcpDebugServer) {
+    $values['Debug\McpServerEnabled'] = 'true'
+}
 foreach ($entry in $values.GetEnumerator()) {
     $pattern = '(?m)^' + [regex]::Escape($entry.Key) + '=.*$'
     $line = $entry.Key + '=' + $entry.Value
@@ -68,6 +72,9 @@ $cueHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $launchCue).Hash
 Write-Host "Temporary corrected cue: $launchCue"
 Write-Host "Temporary cue SHA-256: $cueHash"
 Write-Host 'Cartridge: 32 Mbit (4 MB) DRAM'
+if ($EnableMcpDebugServer) {
+    Write-Host 'MCP debug server: enabled on the emulator-configured localhost port'
+}
 
 if ($NoLaunch) {
     return

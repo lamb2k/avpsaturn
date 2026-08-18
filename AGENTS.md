@@ -2,6 +2,16 @@
 
 These instructions apply to the entire repository.
 
+## MSHvSF reference-lane override
+
+When the current branch is `codex/mshvsf-reference-lane`, this checkout is the
+isolated official-Saturn research lane, not the AvP implementation checkout.
+Read `docs/MSHVSF_AGENT_HANDOFF.md` and `docs/MSHVSF_REFERENCE_LANE.md` after
+this file. Do not edit AvP runtime code, merge either lane, or follow stale AvP
+implementation directions inherited in `docs/AGENT_HANDOFF.md`. The Marvel
+lane may produce evidence, analyzers, and candidate patterns only; every AvP
+transfer still requires an AvP-specific validation probe.
+
 ## Mission
 
 - Build a private, capture-faithful, native Sega Saturn port capability test of

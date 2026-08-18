@@ -158,12 +158,13 @@ def mame_rompath_overlay(rom_path: Path) -> Iterator[Path]:
 
 
 def run_mame(mame_path: Path, rom_path: Path) -> dict[str, object]:
+    recorded_rom_path = f"<reference-root>/{rom_path.name}"
     try:
         overlay_context = mame_rompath_overlay(rom_path)
         overlay = overlay_context.__enter__()
     except FileNotFoundError as error:
         return {
-            "source_rom_path": str(rom_path),
+            "source_rom_path": recorded_rom_path,
             "layout": "temporary hard-link set/shared-ROM overlay",
             "returncode": None,
             "output": [str(error)],
@@ -189,9 +190,10 @@ def run_mame(mame_path: Path, rom_path: Path) -> dict[str, object]:
         overlay_context.__exit__(None, None, None)
     output = (result.stdout + result.stderr).strip()
     recorded_command = list(command)
+    recorded_command[0] = "<mame-executable>"
     recorded_command[2] = "<temporary-mame-rompath>"
     return {
-        "source_rom_path": str(rom_path),
+        "source_rom_path": recorded_rom_path,
         "layout": "temporary hard-link set/shared-ROM overlay",
         "command": recorded_command,
         "returncode": result.returncode,

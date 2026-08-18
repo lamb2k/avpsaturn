@@ -6,6 +6,10 @@ history. The purpose is to use Marvel Super Heroes vs. Street Fighter as a
 second Capcom CPS-2-to-Saturn reference so that reusable porting practices are
 separated from AvP-specific implementation choices.
 
+The volatile restart checkpoint for this branch is
+`docs/MSHVSF_AGENT_HANDOFF.md`. The inherited `docs/AGENT_HANDOFF.md` describes
+the AvP implementation line and is not the Marvel work queue.
+
 ## Operating rule
 
 Use the MSHvSF CPS-2 program and graphics data to study Capcom's source-side
@@ -99,6 +103,10 @@ Verified reports:
   filename references, short SH-2 instruction samples, and static hardware
   address leads derived from ignored private members. Runtime ownership stays
   unresolved.
+- `data/mshvsf_saturn_runtime_memory.json`: exact-frame MCP dumps at idle 3540,
+  normal-active 3828, impact 3840, and recovery 3900. It records per-region
+  hashes, nonzero and changed 4 KiB pages, changed-byte counts, and sequential
+  VDP1 command-table summaries without committing raw memory.
 - `data/mshvsf_correspondence.json`: one-sided and paired evidence records.
 - `data/mshvsf_difference_ledger.json`: only differences supported by current
   evidence; exact mechanics and the Saturn projectile path remain unresolved.
@@ -138,6 +146,18 @@ Yaba Sanshiro play-record directory to reproduce a captured route:
     -PlayRecordDirectory .\.deps\mshvsf_saturn_playrecord\saturn_ryu_first_pass_b
 ```
 
+Capture synchronized Saturn memory through stock Yaba Sanshiro v1.20.37's
+localhost MCP debug server:
+
+```powershell
+.\capture_mshvsf_saturn_memory.ps1
+```
+
+The wrapper replays the same deterministic record, pauses on exact frame
+boundaries, writes ignored raw dumps under `.deps\mshvsf_saturn_state`, and
+regenerates `data/mshvsf_saturn_runtime_memory.json`. It refuses to overwrite
+an existing raw capture.
+
 The deterministic Saturn emulated-pad gate is closed. Yaba's native play-record
 path restores a fixed backup state and applies exact Port 1 and Port 2 bytes at
 recorded frames. Two cold replays produced the same 25 screenshot hashes. The
@@ -145,6 +165,12 @@ first pass intentionally stops after the normal-hit reaction; Hadouken command
 acceptance and projectile lifecycle are second-pass work. Exact movement,
 collision, damage, hitstop, and recovery relationships also stay `UNRESOLVED`
 until paired internal measurements exist.
+
+The first internal-memory pass is measured on the Saturn side. Across the four
+anchors, the 4 MiB cartridge and VDP2 VRAM are byte-identical while high work
+RAM, low work RAM, sound RAM, VDP1 VRAM, SCSP registers, and color RAM change.
+This proves stable residency during this short normal-hit window, not allocator
+ownership or an AvP budget. Hadouken remains deferred.
 
 ## Reusable playbook outputs
 

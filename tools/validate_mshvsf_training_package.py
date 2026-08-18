@@ -28,6 +28,7 @@ JSON_ARTIFACTS = (
     "data/mshvsf_saturn_first_pass.json",
     "data/mshvsf_saturn_asset_topology.json",
     "data/mshvsf_saturn_program_inventory.json",
+    "data/mshvsf_saturn_runtime_memory.json",
     "data/mshvsf_cps2_semantic_model.json",
     "data/mshvsf_saturn_semantic_model.json",
     "data/mshvsf_reconstructed_vertical_slice.json",
@@ -43,6 +44,7 @@ JSON_ARTIFACTS = (
 )
 
 DOC_ARTIFACTS = (
+    "docs/MSHVSF_AGENT_HANDOFF.md",
     "docs/MSHVSF_REFERENCE_LANE.md",
     "docs/MSHVSF_SATURN_ARCHITECTURE.md",
     "docs/MSHVSF_TRAINING_PLAN_STATUS.md",
@@ -199,6 +201,23 @@ def main() -> int:
     runtime = manifest["verified_runtime_observation"]
     if runtime.get("paired_report") != "data/mshvsf_saturn_first_pass.json":
         raise RuntimeError("Disc manifest contains stale deterministic-input status")
+
+    memory = load("data/mshvsf_saturn_runtime_memory.json")
+    if memory.get("evidence_class") != "MEASURED_ON_MARVEL_NOT_YET_VALIDATED_ON_AVP":
+        raise RuntimeError("Saturn memory evidence lost its AvP promotion boundary")
+    expected_anchors = {
+        "idle": 3540,
+        "normal_active": 3828,
+        "impact": 3840,
+        "recovery": 3900,
+    }
+    actual_anchors = {
+        item["label"]: item["captured_frame"] for item in memory["anchors"]
+    }
+    if actual_anchors != expected_anchors:
+        raise RuntimeError(f"Unexpected Saturn memory anchors: {actual_anchors}")
+    if len(memory.get("transitions", [])) != 3:
+        raise RuntimeError("Saturn memory report must contain three anchor transitions")
 
     print(
         f"Validated {len(JSON_ARTIFACTS)} JSON artifacts, "
