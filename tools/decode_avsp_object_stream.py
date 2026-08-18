@@ -117,6 +117,42 @@ class Rom:
 
 A2_TABLE_BASE = 0x1FD1C8
 
+# Every group is announced by this 2-byte tag immediately before its 3-word
+# header - not just the first group in a pose's list, but every subsequent
+# one too (the tag reappears at the position the previous group's own stride
+# lands on). This matches avsp_anim_script.h's own naming for the pose
+# `assembly` field ("selector-6 assembly"): what looked at first like a
+# fixed "assembly+4" offset was really "scan forward from assembly for this
+# tag", and the earlier "+12+count*6 stride to the next group" finding is
+# the SAME mechanism applied again, not a second rule.
+GROUP_TAG = 0x0006
+
+
+def find_group_header(rom: Rom, scan_from: int, max_scan: int = 8) -> int:
+    """Find the first group header starting at-or-after `scan_from` (usually
+    a pose's `assembly` field) by locating the GROUP_TAG word. Returns the
+    header address (tag address + 2), or None if not found within
+    `max_scan` bytes. Verified exact against 5 independent (actor, pose)
+    pairs across 2 actors - see docs/AGENT_HANDOFF.md."""
+    for off in range(0, max_scan, 2):
+        if rom.u16(scan_from + off) == GROUP_TAG:
+            return scan_from + off + 2
+    return None
+
+
+def next_group_header(rom: Rom, header_addr: int, count: int) -> int:
+    """Address the NEXT group's header would occupy if this pose dispatches
+    another group after this one - i.e. `find_group_header` starting right
+    after this group's own data. A GROUP_TAG existing there is NECESSARY but
+    NOT SUFFICIENT proof the game actually dispatches it: a plausible-looking
+    "group 3" tag follows both already-verified 2-group poses in the oracle,
+    but a live trace independently proved the dispatcher never calls it for
+    those poses. How many groups a given pose actually uses is a separate,
+    still-unresolved fact (apparently fixed per actor TYPE, not per pose) -
+    callers must supply the group count externally (live-trace-confirmed),
+    not infer it from tag presence alone."""
+    return header_addr + 12 + count * 6
+
 
 def decode_group_header(rom: Rom, header_addr: int) -> dict:
     budget = rom.u16(header_addr)
@@ -375,6 +411,32 @@ _ORACLE_GROUPS = [
      ]},
 ]
 
+# (pose record address, expected group1 header address) - ground truth for
+# `find_group_header`, all from live traces: actor1's two poses (each a
+# 2-group dispatch) and actor2's three poses (each a 1-group dispatch),
+# confirmed via a live entry-point breakpoint (a0 at 0x0AA00E) reading the
+# actor's own pose pointer at the exact moment of dispatch, not a
+# separately-sampled snapshot. See docs/AGENT_HANDOFF.md for the derivation.
+_POSE_HEADER_ORACLE = [
+    (0x0012EB4C, 0x0012F72E),
+    (0x0012D8A0, 0x0012FEC0),
+    (0x0012EC04, 0x0012F7CE),
+    (0x0012EC14, 0x0012F7E6),
+    (0x0012EC24, 0x0012F7FE),
+]
+
+
+def verify_pose_header_chain(rom: Rom) -> bool:
+    ok = True
+    for pose_addr, expected_header in _POSE_HEADER_ORACLE:
+        assembly = rom.u32(pose_addr + 4)
+        found = find_group_header(rom, assembly)
+        passed = found == expected_header
+        ok = ok and passed
+        print("  pose=0x%06x assembly=0x%06x -> header=0x%06x expected=0x%06x %s" %
+              (pose_addr, assembly, found or 0, expected_header, "OK" if passed else "MISMATCH"))
+    return ok
+
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
@@ -382,6 +444,11 @@ def main() -> int:
     ap.add_argument("--report", default=str(Path(__file__).resolve().parents[1] / "data" / "avsp_object_stream.json"))
     ap.add_argument("--verify-deterministic", action="store_true")
     args = ap.parse_args()
+
+    rom_for_chain = Rom(Path(args.rom).read_bytes())
+    print("pose-to-group-header chain (find_group_header):")
+    chain_ok = verify_pose_header_chain(rom_for_chain)
+    print("pose-header chain: %s" % ("ALL EXACT" if chain_ok else "MISMATCH"))
 
     report = build_report(Path(args.rom), _ORACLE_GROUPS)
     text = json.dumps(report, indent=1, sort_keys=True) + "\n"
@@ -401,7 +468,7 @@ def main() -> int:
     for g in report["groups"]:
         print("  %-24s exact=%s count=%d" % (
             g["label"], g.get("exact_match_vs_expected"), g["header"]["count"]))
-    return 0 if report["all_groups_exact"] else 1
+    return 0 if (report["all_groups_exact"] and chain_ok) else 1
 
 
 if __name__ == "__main__":
