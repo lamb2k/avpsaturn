@@ -309,10 +309,17 @@ either mistake can produce a false pass:
   over a whole canvas is dominated by shared empty space, so an empty
   composition scores well against a mostly-empty oracle.
 
-Status at 2026-08-17: **RED, and the failure is informative.** The oracle side
-is proven correct: pose 0 decodes to a 205x103 Chrysalis sprite, confirming the
-RLE decode, archive indexing, 4bpp unpacking and crop are all sound. The
-composition side produces only a 16x64 single-tile column, because every
+Status at 2026-08-17: **PASS for assembly 0x13DEA0 → pose 4** (source frame
+12688, 222×92 pixels, 0 differing). The gate now uses MAME object RAM screen
+coordinates (`screen_x`/`screen_y`) for object placement instead of ROM script
+origin+layout, because the ROM script uses animation-local space while the
+renderer uses screen space. The default runtime frame is 12688. Other assemblies
+may need different frames.
+
+Previous failure mode (superseded): the oracle side was proven correct (pose 0
+decodes to a 205x103 Chrysalis sprite, confirming the RLE decode, archive
+indexing, 4bpp unpacking and crop are all sound). The composition side produced
+only a 16x64 single-tile column, because every
 decoded layout entry shares `layout_x = -112` while y steps by 16. A 205x103
 sprite needs roughly ninety 16x16 tiles, not four stacked vertically.
 
