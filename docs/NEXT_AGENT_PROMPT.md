@@ -79,7 +79,7 @@ wanted.
 Prefer a tracked, evidence-labelled field map plus a generated header over a
 hand-written struct, so the layout is auditable and regenerable.
 
-## Gates
+## Exit checks
 
 1. **Field-for-field equality.** Load captured work-RAM frames into the native
    record and read back every field above, for every live actor, across the two
@@ -95,7 +95,7 @@ hand-written struct, so the layout is auditable and regenerable.
    explained, the same 12 residuals. A different number is a defect in the port,
    not a new finding.
 
-Gate 2 is the point of S1. It converts milestone 2's correct-but-inert evidence
+Check 2 is the point of S1. It converts milestone 2's correct-but-inert evidence
 into working C with an exact oracle, and it is the first time this project's
 decoded data does anything.
 
@@ -112,8 +112,8 @@ decoded data does anything.
 
 ## Acceptance
 
-S1 passes when both gates pass with reported counts. It closes **no** Gate 1
-condition: Gate 1 stays 0/7 and the full-game goal stays 0/9, because nothing
+S1 passes when both checks pass with reported counts. It closes **no**
+Capability Gate 1 condition: Capability Gate 1 stays 0/7 and the full-game goal stays 0/9, because nothing
 ROM-driven has reached the runtime yet. Say so plainly in the handoff.
 
 ## Handoff discipline
@@ -121,13 +121,13 @@ ROM-driven has reached the runtime yet. Say so plainly in the handoff.
 Update `docs/AGENT_HANDOFF.md` and `docs/PARITY_PLAN.md` with the result and
 honest status; record branch, HEAD, dirty files, raw paths, hashes and exact
 commands; stop MAME and emulator processes or record their ownership; stage
-explicit files only; commit one coherent checkpoint if both gates pass.
+explicit files only; commit one coherent checkpoint if both checks pass.
 
 ## What comes next (do not start it here)
 
 S2 — link `avsp_anim_script.c` into the Saturn build and drive pose selection
 from the record pointer at `+0x1C` instead of the capture-derived clip tables.
-Its gate is the strong one: the native walk must reproduce MAME's exact
+Its exit check is the strong one: the native walk must reproduce MAME's exact
 per-frame animation-record-pointer sequence across the 2,121-frame street fight.
 S2 is also where the renderer work resumes, because that is the first point at
 which the runtime can *produce* an object list rather than replay one.

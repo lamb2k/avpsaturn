@@ -1,9 +1,12 @@
-/* S1 gates.
+/* S1 exit checks.
  *
- * Gate 1: every field of the native actor record matches the captured work RAM
- *         it was loaded from, for every live actor across the capture windows.
+ * "Gate" is reserved for Capability Gate 1, the seven-condition acceptance
+ * contract in docs/PARITY_PLAN.md. A slice step's own criteria are "checks".
  *
- * Gate 2: the C port of the collision predicate and its guards reproduces the
+ * Check 1: every field of the native actor record matches the captured work RAM
+ *          it was loaded from, for every live actor across the capture windows.
+ *
+ * Check 2: the C port of the collision predicate and its guards reproduces the
  *         Python falsification EXACTLY over the same captures. The expected
  *         numbers come from tools/verify_avsp_collision.py:
  *           21908 non-overlapping active pairs, none of which produced a hit
@@ -88,7 +91,7 @@ static unsigned long be32_at(const unsigned char *p)
          | ((unsigned long)p[2] << 8)  | (unsigned long)p[3];
 }
 
-/* Gate 1: re-read every field straight out of the image and compare. */
+/* Check 1: re-read every field straight out of the image and compare. */
 static void check_fields(const AvspActor *a, const unsigned char *work, unsigned long addr,
                          long *checked, long *mismatched)
 {
@@ -284,13 +287,13 @@ int main(void)
     }
     free(rom_data);
 
-    printf("gate 1: actor fields\n");
+    printf("check 1: actor fields\n");
     printf("  actor loads checked      %ld\n", field_checks);
     printf("  field mismatches         %ld\n", field_mismatches);
     if (field_mismatches != 0L) fail("actor record does not match captured work RAM");
     if (field_checks < 10000L) fail("suspiciously few actor loads checked");
 
-    printf("gate 2: collision predicate in C\n");
+    printf("check 2: collision predicate in C\n");
     printf("  pairs, no overlap        %ld (expected 21908)\n", pairs_no_overlap);
     printf("  pairs, overlap latched   %ld (expected 25)\n", pairs_overlap_latched);
     printf("  pairs, overlap guarded   %ld (expected 2516)\n", pairs_overlap_guarded);

@@ -142,6 +142,10 @@ The seven Gate 1 acceptance conditions are **unchanged**; only the execution
 order and its exit gates are. Each phase below has a gate that can independently
 go green, so progress is visible before the whole gate closes.
 
+**Terminology.** "Gate" is reserved for **Capability Gate 1**, the seven-condition
+acceptance contract above. A slice step's own pass criteria are **checks**, so
+"S1 check 2" can never be confused with "Gate 1 condition 2".
+
 **Vertical-slice target: the Room 1 fight.** The player walks right from the
 Round 1 start, meets the first street-alien wave, fights it, and the wave clears
 - on real Saturn at 60 Hz, with animation, collision, damage and enemy decisions
@@ -152,7 +156,7 @@ equality, not cycle timing. The window is deliberately the one with the densest
 existing evidence, `.deps/mame/enemy_actions` frames 4080-6200, so every layer
 below has an oracle already on disk.
 
-| Order | Step | Required work | Exit gate | Oracle |
+| Order | Step | Required work | Exit checks | Oracle |
 |---|---|---|---|---|
 | **S1** | **Actor spine** — PASSED 2026-08-18 | A native actor record mirroring the game's `0xC0` layout for the fields its own code consumes; port the collision overlap predicate and guards into C over that record | Field-for-field equality against 2,900 captured work-RAM frames, **and** the C predicate reproduces the Python falsification exactly (21,908 non-overlapping active pairs with no hit, 44/56 latches explained, same 12 residuals) | `.deps/mame/collision_probe*` |
 | **S2** | **Animation from ROM scripts, and the renderer** (active) | Link `avsp_anim_script.c` into the Saturn build; drive pose selection from the record pointer at `+0x1C` instead of the capture-derived clip tables; emit the object list and render it per CPS2 object (slice-V design, retained above) | The native walk reproduces MAME's exact per-frame animation-record-pointer sequence across the 2,121-frame street fight, and the produced object list matches MAME's captured active object list frame for frame | 5,302-frame object-list oracle |

@@ -56,6 +56,9 @@ B is open. Milestone 2 is the demonstration — correct, falsified, and inert.
 
 ## S1 actor spine — PASSED (2026-08-18)
 
+**Terminology note:** "Gate" means **Capability Gate 1**, the seven-condition
+acceptance contract. A slice step's own pass criteria are **checks**.
+
 The first time this project's decoded data does anything. Host-only; no shipped
 runtime behaviour changed, no Saturn build, no emulator run.
 
@@ -68,11 +71,11 @@ routine address that proves each field), `tests/avsp_actor_test.c`, wired into
 `+0x50`; **only the 10 trusted families are emitted**, the 10 suspect ones are
 deliberately omitted.
 
-**Gate 1 — actor fields: PASS.** 481,566 actor loads across the two full-work-RAM
+**Check 1 — actor fields: PASS.** 481,566 actor loads across the two full-work-RAM
 windows (4201–5500 and 13000–14600), **0 field mismatches**. Every field is
 re-read straight from the capture and compared, not sampled.
 
-**Gate 2 — the collision predicate in C: PASS, exactly.** The C port reproduces
+**Check 2 — the collision predicate in C: PASS, exactly.** The C port reproduces
 `tools/verify_avsp_collision.py` on all eight counters:
 
 | counter | C | Python |
@@ -100,7 +103,7 @@ usable table-set pointer. Aligning the C to that contract made all eight
 counters agree. The lesson generalises to every later port: geometry agreeing is
 not the same as the two implementations measuring the same population.
 
-**What this does NOT close.** Gate 1 stays **0/7** and the full-game goal stays
+**What this does NOT close.** Capability Gate 1 stays **0/7** and the full-game goal stays
 **0/9**. Nothing ROM-driven has reached the Saturn runtime: `capability_model.c`
 still uses its inferred lane/reach checks and the boss 21/55/97 and Stalker
 schedules, and `avsp_collision.c` runs beside it, not in front of it. Swapping
