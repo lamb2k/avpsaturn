@@ -141,8 +141,9 @@ Gate 1 index.
 This is the current Capability Gate 1 order of work. It supersedes older resume
 lists in the handoff and refines the broad phases below. The order was rebuilt
 around the actor spine on 2026-08-18; the rationale and the current step table
-follow. **Milestone 1 is closed
-(2026-08-18); the first body assigned to the next agent is milestone 2 only.**
+follow. **S1 is passed and S2 is active. The next agent finishes S2 only, in the
+dependency order stated in `docs/NEXT_AGENT_PROMPT.md`.** Historical milestone
+results remain evidence, not the forward work vocabulary.
 
 ### Decisions taken this session (2026-08-18), binding going forward
 
@@ -237,7 +238,7 @@ below has an oracle already on disk.
 | Order | Step | Required work | Exit checks | Oracle |
 |---|---|---|---|---|
 | **S1** | **Actor spine** — PASSED 2026-08-18 | A native actor record mirroring the game's `0xC0` layout for the fields its own code consumes; port the collision overlap predicate and guards into C over that record | Field-for-field equality against 2,900 captured work-RAM frames, **and** the C predicate reproduces the Python falsification exactly (21,908 non-overlapping active pairs with no hit, 44/56 latches explained, same 12 residuals) | `.deps/mame/collision_probe*` |
-| **S2** | **Animation from ROM scripts, and the renderer** (active: interpreter + record extraction validated; spine linked into the Saturn build; object-word formula CONFIRMED and coded in C with a passing host test (3/5 parts exact); origin routine `bsr $0AA59A` fully disassembled (also the source of the D1 flip mask - the actor's own facing byte); general part-table walk still open, header/count/skip mechanism unresolved after a systematic search; no live actor in `main.c` yet; VDP1 per-object renderer not started) | Link `avsp_anim_script.c` into the Saturn build; drive pose selection from the record pointer at `+0x1C` instead of the capture-derived clip tables; emit the object list and render it per CPS2 object (slice-V design, retained above) | The native walk reproduces MAME's exact per-frame animation-record-pointer sequence across the 2,121-frame street fight, and the produced object list matches MAME's captured active object list frame for frame | 5,302-frame object-list oracle |
+| **S2** | **Animation from ROM scripts, and the renderer** (active: interpreter + record extraction validated; spine sources linked into the Saturn build but not called by `main.c`; X/Y geometry formula confirmed and coded for 3/5 observed object entries, using ROM `dx/dy` plus route-matched live origin/priority and oracle-supplied code/attr; this is not a complete ROM-only decoder; origin routine `bsr $0AA59A` fully disassembled, including the actor-facing source of the D1 flip mask; general part-stream header/count/advance/emission mechanism unresolved; VDP1 per-object renderer not started) | Resolve and exactly validate the general Family-1 part-stream walk first; promote it to reusable C; drive one street alien's pose selection from the record pointer at `+0x1C`; emit a normalized semantic object list and render it per CPS2 object using the retained slice-V design | The native animation walk remains exact; all five previously observed four-word entries and the complete widened target-actor emission derive without expected-output constants; the declared eligible subset of the 5,302-frame oracle is 100% exact with zero unexplained mismatches; one live street alien uses the real per-object VDP1 path | 5,302-frame object-list oracle plus route-matched widened trace |
 | S3 | Widen to Round 1's cast | Player, remaining street aliens, Stalkers and Chrysalis onto the same spine; `/SPR4/*.RLE` archives demoted to regression oracles | Every slice actor selects poses and emits objects from ROM data; no capture-derived pose table in a runtime decision | same |
 | S4 | Collision, damage, reaction | Consume the decoded boxes at runtime; decode the five post-hit routines at `0x1D314`, `0x1D504`, `0x1D492`, `0x1D622`, `0x1D6E2`; retire the inferred Chrysalis 21/55/97 and Stalker schedules | Every hit event and health delta in the slice window matches MAME; no inferred contact schedule remains in a runtime decision | recorded contacts |
 | S5 | Enemy decisions | Identify the PRNG generator and call order, then translate the street-alien decision routines by the differential-replay method in "How game logic gets translated" | Same initial state and inputs produce the same action/state sequence as MAME, with a negative control that fails on a perturbed input | recorded calls |
@@ -410,7 +411,7 @@ and measured now, with no actor spine, no collision and no AI.
   per-frame delta DMA'd in (measured: 5.7 KB mean, 15.2 KB p95, 29.5 KB peak).
 - **Palettes:** the <=13 live 16-colour banks into VDP2 CRAM.
 
-Gates: (1) **coverage** - every object shape and flag combination in the 215,646
+Checks: (1) **coverage** - every object shape and flag combination in the 215,646
 captured objects maps to a legal VDP1 command, with unhandled cases enumerated;
 (2) on Saturn, the peak frame holds 60 Hz with measured frame time; (3) the peak
 texture delta lands inside vblank. If (2) fails at per-object, fall back to
@@ -421,7 +422,7 @@ Note what check (1) is **not**. When the producer replays MAME's own object list
 comparing the emitted list back to that list is close to vacuous. The
 5,302-frame object-list oracle is **S2's** check, where the ROM-driven
 producer must generate the list itself. Slice V's real result is the hardware
-frame time, and emulator frame time is indicative only - gate (2) binds on
+frame time, and emulator frame time is indicative only - check (2) binds on
 physical Saturn per `docs/HARDWARE_TEST.md`, or an FPGA core as a closer proxy
 that is still not the physical-hardware condition.
 
@@ -456,8 +457,10 @@ hardcoding as the expansion method. Continue in this order:
 ### Immediate evidence contract
 
 The ready-to-invoke, implementation-level contract is
-[`NEXT_AGENT_PROMPT.md`](NEXT_AGENT_PROMPT.md). It now contains **the
-integration half of S2 only** and does not authorize S3 or any later step.
+[`NEXT_AGENT_PROMPT.md`](NEXT_AGENT_PROMPT.md). It contains **finishing S2
+only**: prove the general part-stream walk, promote it to reusable C, integrate
+one live street alien, then implement the real per-object VDP1 consumer. It does
+not authorize S3 or any later step.
 
 Completed under the previous order, and still valid as evidence:
 

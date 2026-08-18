@@ -1,8 +1,11 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-18 EDT. **Next body: the integration half of S2** — link the
-ROM animation interpreter into the Saturn build, emit the object list, render
-per CPS2 object. See `docs/NEXT_AGENT_PROMPT.md`.
+Updated: 2026-08-18 EDT. **Next body: finish S2 in dependency order** — first
+resolve and exactly validate the general Family-1 part-stream walk, then promote
+it to reusable C, integrate one live street-alien `AvspActor`, and render its
+semantic object list per CPS2 object. See the hyper-detailed
+`docs/NEXT_AGENT_PROMPT.md`; do not integrate from the current partial 3-entry
+geometry check.
 
 Session order, newest first. **S2 record extraction — PASSED:** 614 reachable
 records, 10,244 bytes in 63 spans, and the interpreter over that 10 KB
@@ -37,6 +40,54 @@ The current capture-derived Round 1 route remains a useful regression baseline,
 but it does not satisfy Gate 1's ROM-derived animation, collision, AI or stage-
 table requirements and cannot close a full-game condition. Do not describe the
 project as functionally parity complete or hardware-ready.
+
+## S2 prompt and evidence-contract audit (2026-08-18)
+
+The continuation contract was reconciled against the live source, test, this
+handoff, and `PARITY_PLAN.md` before further implementation. The direction is
+unchanged — finish S2 — but four precision corrections are now binding:
+
+1. A CPS2 object is a **four-word entry** `[X,Y,code,attr]`. The C container was
+   renamed from `AvspObjectWord` to `AvspObjectEntry`; five observed objects are
+   five entries, not five words.
+2. The current `avsp_emit_test` is a **partial geometry check**, not a complete
+   ROM-only decoder. ROM supplies `dx/dy`; route-matched live capture supplies
+   origin and actor `+0x2E`; the captured oracle still supplies code/attr. It
+   proves X/Y for three observed entries and no more.
+3. The two 6-byte source entries between the third and fourth observed writes
+   are proven consumed, but their emission behaviour is `UNRESOLVED`. The old
+   narrow watch window cannot distinguish writes outside its range from a
+   conditional non-emitting path. A widened live trace or reachable-path CFG
+   must decide it.
+4. S2's oracle check is exact over a population declared before comparison:
+   100% of eligible route/actor/family entries must match with zero unexplained
+   mismatches. A reported or high match percentage is not a pass; S3-only
+   formats may be excluded only when enumerated by reason.
+
+`docs/NEXT_AGENT_PROMPT.md` now gives the complete ordered continuation:
+route-matched widened trace, reachable-path part-stream decode, exact oracle
+falsification, reusable C, one live street-alien `AvspActor`, then the real
+per-object VDP1 consumer. It also records why both naming layers remain: S1-S6
+are execution steps with checks; Capability Gate 1 is the seven-condition Round
+1 acceptance contract. S-steps are not milestones or gates. This audit changes
+no shipped gameplay or disc content.
+
+Verification after the naming/comment correction:
+
+- `test.ps1` passed: controller route reached Round 2 in 4,485 model frames,
+  the 12,000-frame soak passed, actor/collision counters stayed exact, the S2
+  animation walk retained its 732-frame longest exact run, and the renamed
+  object-entry geometry check passed all three current entries.
+- `build.ps1 -Clean -Release -SkipHostTests` passed, including SH-2 compile/link
+  of `avsp_emit.c` and all ISO member size/SHA-256 checks.
+- The regenerated ignored manifest is `profile=normal-release` with compile
+  stamp `release-normal-release`; ISO 5,541,888 bytes, run-dependent SHA-256
+  `5802871415fabcebc1ecdaa7974385be5a5ea7e5be7f0d3e78290b3ec23c10e3`;
+  cue SHA-256 remains
+  `bfc58c7020d90952e93bef7ecba32dea8d4faddf6ce6a90e1054206ee1807b12`.
+- No MAME, Yaba Sanshiro, Mednafen, or RetroArch process from this checkout was
+  running after verification. No emulator boot or physical-hardware check was
+  run because shipped runtime behaviour did not change.
 
 ## Plan re-sequenced around the actor spine (2026-08-18)
 
@@ -98,11 +149,14 @@ confirms the block width comes from attribute bits 8-11, matching MAME's
 `cps2_render_sprites`, and the flipped loop places the block's right edge at the
 origin, which is the CPS2 flip semantics.
 
-**This also resolves an oddity in milestone 1's log.** The recorded `A0` values
+**This also resolves an oddity in the historical milestone-1 log.** The recorded `A0` values
 jumped `0x12F748 -> 0x12F75A`, a stride of 0x12 rather than 6. The loop advances
-`A0` by exactly 6 per part; the 0x12 gap is three parts, two of which wrote to
-object slots outside the 20-word watchpoint window and so were never logged.
-Stride is uniformly 6 and there is no conditional skip.
+`A0` by exactly 6 per visited source entry; the 0x12 gap proves that two
+additional entries were consumed. The narrow watchpoint evidence does **not**
+prove whether those entries wrote to object slots outside the watched range or
+were consumed without emission. The 6-byte source stride is confirmed; the
+emission/skip behaviour is still `UNRESOLVED` and must be settled by a widened
+live trace or reachable-path control-flow trace.
 
 **Still unresolved for part 2, each needing its source named before use:**
 `A2`'s initial value, `D1`'s flip mask, the actor field at `+0x2E`, and the
@@ -209,11 +263,12 @@ this project:** two different capture routes must never be cross-referenced by
 source-frame number as if they shared a timeline.
 
 With `+0x2E=0x8000` (the correct, route-matched live value) and the previously
-established width formula, the **full per-part X/Y arithmetic was verified
-against the live-captured writer data for all 5 watched slots of the frame-4214
-emission**, using only the ROM's own dx/dy table (read directly from
-`decrypted_program_2m.bin` at the live-captured `A2` addresses) plus the
-confirmed origin, width and `+0x2E`:
+established width formula, the per-part X/Y arithmetic was checked against the
+five watched entries of the frame-4214 emission. The first three can be
+reconstructed independently with the currently understood source walk; the
+last two remain blocked by two intervening source entries. Inputs are the ROM's
+own `dx/dy` table (read directly from `decrypted_program_2m.bin` at the
+live-captured `A2` addresses) plus the confirmed origin, width and `+0x2E`:
 
 ```text
 X_masked = (origin_x - width - dx) & 0x3FF ; width = 16 * (((attr>>8)&0xF)+1)
@@ -222,8 +277,11 @@ Y_masked = (origin_y + dy) & 0x3FF
 Y_final  = Y_masked                         ; no OR for Y ("ori.w #0" is a no-op)
 ```
 
-**Slots 0, 1 and 2 match exactly**, both X and Y, computed independently from
-ROM data with zero reference to the oracle:
+**Slots 0, 1 and 2 match exactly**, both X and Y. The expected X/Y output was
+not used as a calculation input: `dx/dy` came from ROM and origin/`+0x2E` came
+from route-matched live capture. The code/attribute words were already known
+from the captured oracle, so this proves the geometry formula, not a complete
+ROM-to-object decoder:
 
 | slot | dx | dy | width | X (computed) | X (actual) | Y (computed) | Y (actual) |
 |---|---|---|---|---|---|---|---|
@@ -231,22 +289,19 @@ ROM data with zero reference to the oracle:
 | 1 | -48 | -32 | 80 | `0x80E3` | `0x80E3` | `0x0A9` | `0x00A9` |
 | 2 | -16 | -16 | 32 | `0x80F3` | `0x80F3` | `0x0B9` | `0x00B9` |
 
-This closes the model: origin, per-part width, the `+0x2E` OR, and the flipped
-variant's subtract-not-add sign convention are all independently confirmed by
-arithmetic that used no oracle data as an input.
+This confirms the geometry formula for those three entries: origin, per-part
+width, the `+0x2E` OR, and the flipped variant's subtract-not-add convention.
+It does not close code/attribute derivation, the full source walk, or entries
+3/4; the oracle still supplies code/attribute to the current C test.
 
-**Slots 3 and 4 (in watch-window order) do not yet match**, and the reason is
-identified, not mysterious: milestone 1 already noted that the alien's part
-list has entries between watched slots that fall outside the 24-word watchpoint
-window (confirmed again here: the raw part-table gap between slot 2's and slot
-3's logged `A0` is `0x12F75A - 0x12F748 = 0x12`, i.e. two full 6-byte part
-iterations, each with its own `A2` advance-word, ran and wrote object-buffer
-words outside `0x7080A0..0x7080CE` before slot 3's write fired). The alien's
-assembly has more than 5 parts; only 5 land inside the watch window. Getting
-slots 3/4 to match requires summing the two hidden parts' own `A2`
-advance-words correctly (mechanical, not a new unknown) — **or, more simply,
-widening the watchpoint window to cover the alien's full part range for the
-next capture**, which sidesteps the reconstruction entirely.
+**Slots 3 and 4 (in watch-window order) do not yet match.** The raw source
+address gap is proven: `0x12F75A - 0x12F748 = 0x12`, so two full 6-byte source
+entries were visited between the third and fourth observed writes, each with
+its own `A2` advance word. What the narrow capture cannot distinguish is whether
+those entries emitted outside `0x7080A0..0x7080CE` or a conditional path
+suppressed their writes. Getting entries 3/4 and the complete actor emission to
+match requires a widened actor-scoped object-RAM trace plus reachable control
+flow. Do not bake either explanation into the walker before that evidence.
 
 A related loose end, resolvable the same mechanical way: the palette
 contribution at actor `+0x0E` was **inferred, not yet live-read** — working
@@ -265,7 +320,7 @@ part count from ROM data alone rather than from watchpoint-observed gaps, which
 matters once this moves from "confirmed for one captured pose" to "general for
 any pose".
 
-### The object-word formula is now C, tested; `bsr $0AA59A` identified as the origin routine
+### The object-entry geometry formula is now C, tested; `bsr $0AA59A` identified as the origin routine
 
 `avsp_emit.h`/`.c` implements the confirmed formula
 (`X = ((origin_x - width - dx) & 0x3FF) | or_value`, `Y = (origin_y + dy) &
@@ -313,7 +368,8 @@ part count consistent with the 5 confirmed object-buffer writes** once the
 observed earlier in this session is therefore still unexplained by a single
 extra `bsr` call; either the header format assumed here (3 words,
 budget/count/selector) is wrong, or something else consumes entries
-mid-loop. This needs either capstone-based control-flow-aware disassembly
+mid-loop. This needs either a reachable-path control-flow graph built with
+Capstone as the instruction decoder
 (the naive flat scan `.deps/mame/actorprobe/disasm_full.txt` has already
 produced one confirmed misalignment this session, at
 `0xAA732`-adjacent addresses) or a live disassemble-at-runtime pass, not more
@@ -334,7 +390,7 @@ and ruled out here.
 |---|---|
 | S1 actor spine | **PASSED.** 481,566 actor-field loads, 0 mismatches; the collision predicate ported to C reproduces the Python falsification exactly on all 8 counters. |
 | S2 animation walk | **VALIDATED.** Interpreter predicts 23,676 of the game's own frames exactly free-running from one seed; 614 records extracted to 63 spans (10 KB), proven to reproduce the full 2 MB image on every counter. |
-| S2 object emitter | **Formula confirmed and coded** (3/5 parts, exact, from pure ROM arithmetic); **general part-table walk still open** (header/count/skip mechanism, see above); **not linked into `main.c`**; **VDP1 per-object renderer not started**. |
+| S2 object emitter | **X/Y geometry formula confirmed and coded** for 3/5 observed object entries. `dx/dy` are ROM-derived and expected X/Y are not calculation inputs, but origin/`+0x2E` are route-matched live values and code/attr are supplied by the oracle; this is **not** a complete ROM-only decoder. The general part-table walk remains open (header/count/advance/emission mechanism); **not called by `main.c`**; **VDP1 per-object renderer not started**. |
 | S2 integration into `main.c` | **Not started.** No live actor in the shipped runtime carries an `AvspActor` or ticks `avsp_anim_frame_tick`. A same-session proof-of-concept overlay was built, boot-tested successfully (real Round 1 combat played through to the Round 2 title without regressing), but was inconclusive on visual confirmation and was removed before committing rather than left in an unverified state. |
 | S3 (widen to full cast) | Not started; depends on S2. |
 | S4 (collision integration) | Not started; `avsp_collision.c` exists and is proven (S1) but nothing calls it from gameplay; depends on S2 for live selectors. |
@@ -408,13 +464,15 @@ is the round-trip proof that the extraction is complete and correctly addressed.
 hashes, no record bytes); `generated/avsp_anim_records.h` is git-ignored because
 it contains program-image bytes.
 
-**Remaining in S2:** add `avsp_anim_script.c` to `SRCS` in the makefile, drive
-pose selection from the actor's `+0x1C` instead of the capture-derived clip
-tables in `generated/avsp_boss_animation.h`, and emit the object list. Nothing
-in the shipped runtime changed in this body. Note the dependency S2's check A
-exposed: the interpreter advances an animation but does not *choose* one, so
-until S5 supplies the decisions, the runtime must seed the pointer on every
-action change.
+**Remaining in S2:** `avsp_actor.c`, `avsp_anim_script.c`, and `avsp_emit.c` are
+already in `SRCS` and cross-compile, but are not called by `main.c`. First
+resolve the general part-stream header/count/advance/emission mechanism and
+require exact agreement over the declared eligible population of the 5,302-
+frame oracle. Then drive one street alien from actor `+0x1C`, produce its
+semantic object list, and render it through the real per-object VDP1 path. The
+interpreter advances an animation but does not choose one, so until S5 supplies
+the decisions the runtime must seed the pointer on every action change and label
+that bridge `ADAPTED`.
 
 **Capability Gate 1 stays 0/7; the full-game goal stays 0/9.**
 

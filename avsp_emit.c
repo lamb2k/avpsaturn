@@ -10,7 +10,7 @@ static unsigned short mask10(int v)
 void avsp_emit_part_flipped(unsigned short origin_x, unsigned short origin_y,
                             short dx, short dy, unsigned short code,
                             unsigned short attr, unsigned short or_value,
-                            AvspObjectWord *out)
+                            AvspObjectEntry *out)
 {
     unsigned int nx;
     int width;

@@ -1,16 +1,17 @@
-/* S2 exit check: the object-word formula reproduces the game's own output,
- * computed from ROM data alone (dx/dy read from decrypted_program_2m.bin at
- * live-confirmed table addresses), for the parts where the full ROM part-
- * table walk is understood.
+/* S2 partial check: the object-entry X/Y formula reproduces the game's own
+ * output for the parts where the ROM part-table walk is understood. dx/dy are
+ * read from decrypted_program_2m.bin at live-confirmed table addresses;
+ * origin/or_value come from route-matched live capture; code/attr are supplied
+ * from the captured oracle. This is not yet a complete ROM-to-object decoder.
  *
  * "Gate" means Capability Gate 1. This is a step check, not a gate.
  *
- * Covers 3 of the street alien's 5 rendered parts at source frame 4214 (parts
- * 0-2; the part-table walk for parts 3-4 has a confirmed, documented gap - a
- * conditional part-skip not yet located, see avsp_emit.h and
- * docs/AGENT_HANDOFF.md). origin_x/origin_y and or_value (actor +0x2E) are
- * taken from live capture, not derived by this test; deriving them from world
- * state is a separate, undecoded routine.
+ * Covers 3 of the street alien's 5 observed object entries at source frame
+ * 4214 (entries 0-2). Two source entries lie between observed entries 2 and 3,
+ * but the narrow watchpoint evidence cannot prove whether they emitted outside
+ * the watched range or were conditionally suppressed. See avsp_emit.h and
+ * docs/AGENT_HANDOFF.md. Deriving origin from world state is separate from
+ * this test.
  *
  * C90.
  */
@@ -25,7 +26,7 @@ static void check_part(const char *label, unsigned short origin_x, unsigned shor
                        short dx, short dy, unsigned short code, unsigned short attr,
                        unsigned short or_value, unsigned short want_x, unsigned short want_y)
 {
-    AvspObjectWord w;
+    AvspObjectEntry w;
     avsp_emit_part_flipped(origin_x, origin_y, dx, dy, code, attr, or_value, &w);
     printf("  %-8s X=%04x (want %04x) %s   Y=%04x (want %04x) %s\n",
            label, w.x, want_x, (w.x == want_x) ? "OK" : "FAIL",
@@ -43,7 +44,7 @@ int main(void)
      * confirmed addresses; code/attr are the oracle's own known values,
      * supplied here as inputs (not computed) since resolving attr from the
      * raw part-table long is part of the still-open part-table walk. */
-    printf("S2 object-word formula\n");
+    printf("S2 object-entry geometry formula\n");
 
     check_part("part0", 259, 201, -48, -48, 0x4EFE, 0x0131, 0x8000, 0x8113, 0x0099);
     check_part("part1", 259, 201, -48, -32, 0x4EF6, 0x0431, 0x8000, 0x80E3, 0x00A9);
