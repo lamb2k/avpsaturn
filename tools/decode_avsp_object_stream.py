@@ -31,12 +31,18 @@ list; it was not a skip and there is no non-emitting part.
 +0x04  selector  (u16) index into the ROM table at 0x1FD1C8: A2 (the per-part
                        dx/dy table base) = 0x1FD1C8 + word[0x1FD1C8 + selector*2]
 +0x06  (4 bytes) consumed by the origin routine (bsr 0x0AA59A) as one of its
-                 own inputs; not a sprite part. The routine's own semantics
-                 (actor world position minus a fixed camera anchor) are
-                 disassembled in the handoff; the two anchor constants still
-                 need a route-matched live read before this module can derive
-                 origin from world state alone. Origin is therefore always a
-                 caller-supplied input here, not computed by this decoder.
+                 own inputs (`D2`); not a sprite part. `decode_group_origin`
+                 reproduces the routine exactly (live-disassembled via MAME's
+                 own trace facility, not the static ROM dump, which reads as
+                 garbage at this code address): origin is actor world
+                 position (`+0x10`/`+0x14`) adjusted by this D2 long (split by
+                 a `swap`, one half per axis, added or subtracted per a
+                 facing-conditional branch) and two now-resolved camera-anchor
+                 constants (`ANCHOR_Y=0x00FF`, `ANCHOR_X=0x03F0`, solved by
+                 equating the formula against 4 independent oracle group
+                 instances and cross-verified identical in every case). Origin
+                 is therefore ROM + actor-record derived, not a caller-supplied
+                 live-trace value.
 +0x0A  part[0]   6 bytes: u16 code, u16 attr, u16 a2_advance
 +0x10  part[1]   ...
        ...       `count` parts total, each 6 bytes
@@ -75,11 +81,11 @@ every dx/dy - matches independently, and the resulting ten object entries
 
 Not yet resolved (see docs/AGENT_HANDOFF.md and NEXT_AGENT_PROMPT.md):
 - how a pose's ANIMATION RECORD (`avsp_anim_read_pose`'s `assembly` field)
-  maps to the list of group header addresses for that pose. The addresses
-  used above were found by live trace, not derived structurally. This is
-  required before this decoder can be driven from a pose record alone.
-- the two fixed camera-anchor constants inside the origin routine, needed to
-  compute origin from live actor state rather than take it as an input.
+  maps to the list of group header addresses for that pose (n=2, both from
+  this one street-alien actor - `group1_header = pose.assembly + 4`, then a
+  fixed per-group stride; not yet proven to generalize past this actor/pose).
+- whether `ANCHOR_Y`/`ANCHOR_X` and the "exactly 2 groups per actor-frame"
+  dispatch count are ROM-wide constants or specific to this route/actor.
 - whether `a2_advance` is ever non-zero in practice (not yet observed).
 
 This module takes a decrypted ROM image and explicit group header addresses;
@@ -180,20 +186,25 @@ def decode_group_origin(rom: Rom, header_addr: int, world_x: int, world_y: int,
 
 
 def decode_group_entries(rom: Rom, header_addr: int, origin_x: int, origin_y: int,
-                         palette_byte: int, flip_byte: int,
+                         palette_byte: int, facing_raw: int,
                          or_value: int = 0x8000) -> list:
     """Returns `count` four-word entries: [{code, attr, x, y}, ...].
 
-    `palette_byte` (actor `+0x0E`) and `flip_byte` (`D1`, derived from actor
-    `+0x0F` facing, confirmed live as `0x20` when facing is non-zero) are
-    caller-supplied live inputs, not hardcoded: the raw ROM attr's low byte is
-    only the game's TEMPLATE, transformed per-actor before use:
+    `palette_byte` (actor `+0x0E`) is a plain actor-record field, read the
+    same way as `world_x`/`world_y`. `facing_raw` (actor `+0x0F`) is the same
+    value `decode_group_origin` takes; the emitter's flip mask is not an
+    independent input - the origin routine's own `lsl.b #5,D1` (see
+    `decode_group_origin`'s docstring) proves it is exactly
+    `(facing_raw << 5) & 0xFF`, derived here rather than supplied separately.
+    The raw ROM attr's low byte is only the game's TEMPLATE, transformed
+    per-actor before use:
 
       attr_final_low  = ((attr_raw_low & 0xE0) + palette_byte) ^ flip_byte
       attr_final_high = attr_raw_high   (unchanged; carries the nx/ny block
                                           size bits `decode_group_header`'s
                                           width computation already reads)
     """
+    flip_byte = (facing_raw << 5) & 0xFF
     header = decode_group_header(rom, header_addr)
     count = header["count"]
     a0 = header_addr + 0x0A
@@ -224,10 +235,12 @@ def decode_group_entries(rom: Rom, header_addr: int, origin_x: int, origin_y: in
 
 def build_report(rom_path: Path, groups: list) -> dict:
     """`groups` is a list of dicts: {header, world_x, world_y, facing_raw,
-    palette_byte, flip_byte, label, expected: [{code,attr,x,y}, ...] or None}.
+    palette_byte, label, expected: [{code,attr,x,y}, ...] or None}.
     `origin_x`/`origin_y` are no longer caller-supplied: they are derived from
-    `world_x`/`world_y`/`facing_raw` via `decode_group_origin`, so the whole
-    report is ROM + actor-record only, with no live-trace-captured origin."""
+    `world_x`/`world_y`/`facing_raw` via `decode_group_origin`, and the attr
+    flip byte is derived from that same `facing_raw` (see
+    `decode_group_entries`), so the whole report is ROM + actor-record only,
+    with no live-trace-captured value anywhere in the calculation."""
     rom_bytes = rom_path.read_bytes()
     rom = Rom(rom_bytes)
     results = []
@@ -238,7 +251,7 @@ def build_report(rom_path: Path, groups: list) -> dict:
         origin_x, origin_y = decode_group_origin(rom, header_addr, g["world_x"], g["world_y"],
                                                   g["facing_raw"])
         entries = decode_group_entries(rom, header_addr, origin_x, origin_y,
-                                       g["palette_byte"], g["flip_byte"],
+                                       g["palette_byte"], g["facing_raw"],
                                        g.get("or_value", 0x8000))
         entry = {
             "label": g.get("label"),
@@ -269,17 +282,16 @@ def build_report(rom_path: Path, groups: list) -> dict:
                 "width": "16 * (((attr_raw>>8)&0xF)+1)",
                 "x": "((origin_x - width - dx) & 0x3FF) | or_value",
                 "y": "(origin_y + dy) & 0x3FF",
-                "attr": "(attr_raw & 0xFF00) | (((attr_raw & 0xE0) + palette_byte) ^ flip_byte)",
+                "attr": "(attr_raw & 0xFF00) | (((attr_raw & 0xE0) + palette_byte) ^ ((facing_raw<<5)&0xFF))",
                 "origin": "see decode_group_origin - world position adjusted by the header's own "
                           "trailing D2 long and the two now-resolved camera-anchor constants "
                           "(ANCHOR_Y=0x00FF, ANCHOR_X=0x03F0)",
             },
         },
         "unresolved": [
-            "pose-record-to-group-header-list mapping (group addresses here are from live trace, not derived structurally)",
-            "whether ANCHOR_Y/ANCHOR_X (0x00FF/0x03F0) are a ROM-wide constant or specific to this route - solved by equating 4 oracle group instances, not yet observed to vary or proven fixed elsewhere",
+            "pose-record-to-group-header-list mapping (group addresses here are from live trace, not derived structurally; n=2, both this one street-alien actor)",
+            "whether ANCHOR_Y/ANCHOR_X (0x00FF/0x03F0) and the exactly-2-groups-per-actor-frame dispatch count are ROM-wide constants or specific to this route/actor - solved/observed on 4 oracle group instances, all from one actor",
             "whether a2_advance is ever non-zero in practice",
-            "palette_byte/flip_byte are per-actor live-trace inputs here (0x11/0x20 for this street-alien instance), not yet derived from a general actor-record read",
         ],
         "inputs": {
             "program_image": {"path": str(rom_path).replace("\\", "/"),
@@ -298,7 +310,7 @@ def build_report(rom_path: Path, groups: list) -> dict:
 _ORACLE_GROUPS = [
     {"label": "4214 group1 (3 parts)", "header": "0x12F72E",
      "world_x": 1257, "world_y": 310, "facing_raw": 1,
-     "palette_byte": 0x11, "flip_byte": 0x20,
+     "palette_byte": 0x11,
      "expected": [
          {"code": "0x4efe", "attr": "0x0131", "x": "0x8113", "y": "0x0099"},
          {"code": "0x4ef6", "attr": "0x0431", "x": "0x80e3", "y": "0x00a9"},
@@ -306,21 +318,21 @@ _ORACLE_GROUPS = [
      ]},
     {"label": "4214 group2 (2 parts)", "header": "0x12F74C",
      "world_x": 1257, "world_y": 310, "facing_raw": 1,
-     "palette_byte": 0x11, "flip_byte": 0x20,
+     "palette_byte": 0x11,
      "expected": [
          {"code": "0x473a", "attr": "0x2431", "x": "0x8121", "y": "0x007b"},
          {"code": "0x479c", "attr": "0x1331", "x": "0x8111", "y": "0x00ab"},
      ]},
     {"label": "4253 group1 (2 parts)", "header": "0x12FEC0",
      "world_x": 1313, "world_y": 310, "facing_raw": 1,
-     "palette_byte": 0x11, "flip_byte": 0x20,
+     "palette_byte": 0x11,
      "expected": [
          {"code": "0x4df8", "attr": "0x0131", "x": "0x814f", "y": "0x009e"},
          {"code": "0x4ef0", "attr": "0x0531", "x": "0x810f", "y": "0x00ae"},
      ]},
     {"label": "4253 group2 (3 parts)", "header": "0x12FED8",
      "world_x": 1313, "world_y": 310, "facing_raw": 1,
-     "palette_byte": 0x11, "flip_byte": 0x20,
+     "palette_byte": 0x11,
      "expected": [
          {"code": "0x4b04", "attr": "0x2531", "x": "0x815b", "y": "0x007b"},
          {"code": "0x4a88", "attr": "0x1431", "x": "0x814b", "y": "0x00ab"},
