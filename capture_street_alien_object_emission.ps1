@@ -5,6 +5,13 @@ param(
     [int]$FrameB = 4253,
     [string]$ObjectListBase = '7080A0',
     [int]$Words = 20,
+    # Word-write watchpoints installed from ObjectListBase. Defaults to $Words.
+    # The alien's slot run starts at a run-dependent list index, so a window as
+    # wide as the gated word count can attribute only a prefix of the burst on
+    # frames where non-alien objects precede it; widen this (staying under the
+    # empirical 34-watchpoint ceiling, watchpoints + 1 bank) to attribute every
+    # gated word. It never changes what is decoded - decoding reads the dumps.
+    [int]$WatchWords = 0,
     [string]$BankSelectRegister = '8040E0',
     [string]$ActorBase = 'FFA000',
     [string]$RawDir = '.deps\mame\object_emission',
@@ -85,7 +92,7 @@ $envVars = @{
     'AVP_OE_FRAME_A'    = "$FrameA"
     'AVP_OE_FRAME_B'    = "$FrameB"
     'AVP_OE_OBJ_BASE'   = $ObjectListBase
-    'AVP_OE_WORDS'      = "$Words"
+    'AVP_OE_WORDS'      = "$(if ($WatchWords -gt 0) { $WatchWords } else { $Words })"
     'AVP_OE_BANK_REG'   = $BankSelectRegister
     'AVP_OE_ACTOR'      = $ActorBase
     'AVP_OE_RAWDIR'     = $RawDir

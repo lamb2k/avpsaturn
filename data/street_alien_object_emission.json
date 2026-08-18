@@ -311,8 +311,8 @@
    },
    "writer_attribution": {
     "matched_watchpoint_burst": true,
-    "attributed_words": "16/20",
-    "attributed_note": "the remaining words were written above the watchpoint window (watchpoints cover a fixed address range, the alien's slot run is run-dependent); they are still decoded from the raw object dump",
+    "attributed_words": "20/20",
+    "attributed_note": null,
     "writer_pcs": [
      "000AA214",
      "000AA216"
@@ -321,7 +321,8 @@
      "0012FECE",
      "0012FED4",
      "0012FEE6",
-     "0012FEEC"
+     "0012FEEC",
+     "0012FEF2"
     ],
     "emitting_actor_a4": [
      "FFFF9DC0"
@@ -338,7 +339,7 @@
    "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\error.log",
    "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\.deps\\mame\\object_emission\\mame_console.log"
   ],
-  "obj_event_count": 23120,
+  "obj_event_count": 27744,
   "bank_event_count": 1156,
   "writer_pc_obj_sample": [
    "000A9D88",

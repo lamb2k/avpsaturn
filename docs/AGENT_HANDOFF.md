@@ -85,12 +85,20 @@ Writer burst attributed 20/20: X|Y at **PC `0x000AA214`**, code|attr at **PC
 **Frame 4253 (target) — 20/20.** Located independently at `0x7080A8` in the
 write buffer (one extra leading object that frame) and at word indices
 80/84/88/92/96 in the active bank — the indices the milestone's exit gate
-names. Writer burst attributed 16/20 (the last four words land above the fixed
-watchpoint window; they are still decoded from the raw dump): same PCs
-`0x000AA214`/`0x000AA216`, a **different** part-table family **A0 =
-`0x12FECE`/`0x12FED4`/`0x12FEE6`/`0x12FEEC`**, same emitting actor **A4 = A6 =
-`0xFF9DC0`**. Different pose, different ROM part table, same code path — the
-anti-hardcoding property the control frame exists to prove.
+names. Writer burst attributed 20/20: same PCs `0x000AA214`/`0x000AA216`, a
+**different** part-table family **A0 = `0x12FECE`/`0x12FED4`/`0x12FEE6`/
+`0x12FEEC`/`0x12FEF2`**, same emitting actor **A4 = A6 = `0xFF9DC0`**.
+Different pose, different ROM part table, same code path — the anti-hardcoding
+property the control frame exists to prove.
+
+**Watchpoint window (deviation from the body-1 capture contract, deliberate).**
+The contract said "exactly 20 word-write watchpoints at `0x7080A0..0x7080C6`".
+With a 20-word window only a 16/20 prefix of frame 4253's burst is attributable,
+because the alien's slot run starts one object later that frame. The wrapper now
+takes `-WatchWords` (default = `-Words`) and this capture used **24**
+watchpoints at `0x7080A0..0x7080CE`, plus the one bank watchpoint — still well
+under the empirical 34 ceiling, still no `0x7000A0` mirror watchpoints. Widening
+it changed no dump: every SHA-256 below is identical to the 20-watchpoint run.
 
 **Fixture metadata corrected (values untouched).**
 `data/street_alien_object_emission_oracles.json` declared
@@ -103,19 +111,24 @@ byte-identical to the original fixture**; only provenance metadata changed. The
 analyzer now takes `--state` and records the state the run actually used, so
 `scenario.state` can no longer inherit the fixture's declared state.
 
-**Open metadata defect — the fixture's `actor_base` is not an actor base.** The
-brief's `0xFFA000` is not on the actor grid: type-12 actor bases in this window
-sit on a **`0x180` stride** (`0xFF9C40`, `0xFF9DC0`, `0xFF9F40`, `0xFFA0C0`,
-`0xFFA240`, `0xFFA3C0`), and every A4/A6 seen in the watchpoint log lies on that
-grid. `0xFFA000` is mid-struct (`0xFF9F40 + 0xC0`), which is why reads there
-still look plausible. The **emitting actor for the gated slots is `0xFF9DC0`**,
-corroborated by its worldX advancing `1257 → 1313` between the two frames
-against the slot-0 screen X advancing `275 → 335`. The oracle's
-`actor_signatures` still reproduce exactly at `0xFFA000` (they are the same
-bytes at the same address as in the oracle route), so they remain a valid
-reproduction check — but they are **not** the emitting actor's fields. Fixing
-`actor_base` in the fixture is deliberately left for the next agent, who should
-re-derive the actor field offsets against `0xFF9DC0` before rewriting them.
+**Open metadata defect — the fixture names the wrong actor (not a wrong
+address).** Actor records are **`0xC0` bytes** apart: every distinct A6 in the
+watchpoint log lands on that grid (`0xFF9C40`, `0xFF9D00`, `0xFF9DC0`,
+`0xFF9E80`, `0xFF9F40`, `0xFFA000`, `0xFFA0C0`, `0xFFA180`, `0xFFA240`,
+`0xFFA300`, `0xFFA3C0`, plus the player at `0xFF8380`), and each holds the same
+field layout (`+0x08` type, `+0x0F` facing, `+0x10` worldX, `+0x14` worldY,
+`+0x1C` anim, `+0x50`). So `0xFFA000` **is** a valid street-alien actor — it is
+simply **not the actor that emits the gated slots**. The emitter is `0xFF9DC0`,
+by two independent lines: the watchpoint bursts carry `A4 = A6 = 0xFF9DC0` at
+both frames, and with the camera provably static between the frames (the pal-05
+scenery sits at px 317/333/349 in both) the sprite's slot-0 screen X advances
+`275 → 335` (Δ+60) against `0xFF9DC0`'s worldX `1257 → 1313` (Δ+56, the 4 px
+residual being the pose's part-0 offset change), while `0xFFA000` moves Δ+111
+and no other actor is within 15 px. The oracle's `actor_signatures` do reproduce
+exactly at `0xFFA000`, so they stay a valid reproduction check — they just
+describe a bystander alien. Correcting `scenario.actor_base` and
+`actor_signatures` to `0xFF9DC0` is left for the next agent, together with a
+re-derivation of what the current signature fields were meant to witness.
 
 **Raw evidence (SHA-256, `.deps/mame/object_emission/`), MAME 0.289, driver
 `avspu`, state `avspu_stage1_replay4200`
@@ -138,7 +151,7 @@ samples: `objram_active_04214.tsv`
 capture and the analyzer):
 
 ```powershell
-.\capture_street_alien_object_emission.ps1 -State avspu_stage1_replay4200 -StateFrame 4200 -FrameA 4214 -FrameB 4253 -ActorBase FFA000 -ObjectListBase 7080A0 -Words 20 -BankSelectRegister 8040E0 -RawDir .deps\mame\object_emission -SkipSave
+.\capture_street_alien_object_emission.ps1 -State avspu_stage1_replay4200 -StateFrame 4200 -FrameA 4214 -FrameB 4253 -ActorBase FFA000 -ObjectListBase 7080A0 -Words 20 -WatchWords 24 -BankSelectRegister 8040E0 -RawDir .deps\mame\object_emission -SkipSave
 ```
 
 `-SkipSave` reuses the existing `replay4200.sta`; without it phase 1 re-saves it
@@ -149,23 +162,30 @@ side parses them with `tonumber(v, 16)`, which rejects `0x`. Expected output is
 
 **Next work (milestone 2 boundary).** Milestone 1's exit gate is met, so the
 next body is milestone 2 (replace inferred collision) per
-`docs/PARITY_PLAN.md`. Before promoting the street-alien decoder in milestone 3,
-first re-derive the actor field offsets against the real actor base `0xFF9DC0`
-and correct the fixture's `actor_base`/`actor_signatures`, and widen the
-watchpoint window (or make it follow the located slot run) so all 20 words are
-writer-attributed at both frames. MAME confirmed **not running** at the end of
-this session.
+`docs/PARITY_PLAN.md`. Carry these two items into milestone 3, before the
+street-alien decoder is promoted: correct the fixture's `actor_base` /
+`actor_signatures` to the emitting actor `0xFF9DC0` (with a re-derivation of
+what the current signature fields witness), and consider making the watchpoint
+window follow the located slot run instead of a fixed base, so attribution does
+not depend on choosing `-WatchWords` by hand. MAME confirmed **not running** at
+the end of this session.
 
 ## Current resume point: master plan intercept
+
+> **SUPERSEDED 2026-08-18.** The emission gate this section assigns is CLOSED —
+> see "Capability Gate 1 — street-alien emission (2026-08-18 execution)" above.
+> The static call-chain evidence below is retained because it is still the map
+> of the object-list builder; the instructions and the "still red" status are
+> not. The next executable body is **milestone 2 (replace inferred collision)**.
 
 The plan of record is now
 [`PARITY_PLAN.md#master-execution-plan-2026-08-18`](PARITY_PLAN.md#master-execution-plan-2026-08-18).
 Its order supersedes every older resume list in this handoff.
 
-The ready-to-invoke first body is
-[`NEXT_AGENT_PROMPT.md`](NEXT_AGENT_PROMPT.md). It is deliberately limited to
-the street-alien emission proof and does not authorize later Gate 1 work,
-Marvel research or full-game content expansion.
+[`NEXT_AGENT_PROMPT.md`](NEXT_AGENT_PROMPT.md) still holds the body-1
+assignment; it is now marked complete at its head and does not authorize new
+work. No later Gate 1 work, Marvel research or full-game content expansion is
+authorized by it.
 
 **Resume with one focused proof, not another broad disassembly pass.** The
 static chain has been checked against
@@ -181,12 +201,15 @@ static chain has been checked against
      or Family 2 effect emitter 0xAA644..0xAA7F8
 ```
 
-That proves where and how the CPS2 object list is built. It does **not** yet
-prove the street alien's exact group/type path, Family-1 variant, per-part
-source layout, or the actor `+0x1c/+0x50` relationship to
-`0x12FE06..0x12FEEE`. The frame-4214/4253 two-frame five-slot gate is still red.
+That proves where and how the CPS2 object list is built. **Closed since:** the
+two-frame five-slot gate now passes 20/20 on both frames, with the emitter
+pinned to PCs `0x000AA214`/`0x000AA216` inside the Family-1 body emitter and the
+per-part source layout walked through `A0` (`0x12F73C…` at 4214, `0x12FECE…` at
+4253, i.e. inside the `0x12FE06..0x12FEEE` window this section predicted). Still
+**not** proven: the street alien's exact group/type path and Family-1 variant
+selection, and the actor `+0x1c`/`+0x50` relationship to those tables.
 
-### Immediate trace and gate
+### Immediate trace and gate (COMPLETE — historical)
 
 1. Start from the verified frame-4200 state under stock MAME 0.289 `-debug`.
 2. Install exactly 20 write watchpoints for logical object-buffer word indices
@@ -215,7 +238,7 @@ source layout, or the actor `+0x1c/+0x50` relationship to
 6. The derivation must read new capture/RAM evidence before consulting the
    validation fixture. It must fail if frame-4253 constants are hard-coded.
 
-The execution body must add
+The execution body added, and has now committed,
 `capture_street_alien_object_emission.ps1`,
 `tools/mame_watch_street_alien_object_emission.lua`,
 `tools/analyze_street_alien_object_emission.py`,
@@ -264,8 +287,10 @@ research backlog.
 
 Use Marvel at these points:
 
-1. **Not now:** finish the AvP frame-4214/4253 five-slot source-decoder gate.
-   Marvel cannot identify AvP's 68000 group/type handler.
+1. **Not now:** the AvP frame-4214/4253 five-slot source-decoder gate is closed
+   (2026-08-18); the current not-now body is milestone 2, replacing inferred
+   collision. Marvel cannot identify AvP's 68000 group/type handler or its
+   hitbox records.
 2. **After AvP's referenced tile set is measured, before choosing its actor
    renderer:** trace Marvel work RAM, both cartridge banks, VDP1 command tables,
    and VDP1 VRAM at the existing idle/normal/hit anchors. Use the result to
@@ -430,10 +455,16 @@ demo, host-only simulation or focused animation viewer.
 - Current documentation/planning branch: `codex/avp-master-plan`, created from
   AvP checkpoint `5327c3a`; `d9e40fd` is the parent of the full-game scope-
   synchronization checkpoint. Run `git rev-parse HEAD` for the current commit.
+- Street-alien emission gate checkpoint: `40e7f76` (`Close street-alien
+  five-slot emission gate (Gate 1 milestone 1)`), the first code/data commit on
+  this branch. It commits the wrapper, watcher, analyzer, anchor-state script,
+  the oracle fixture (values unchanged, provenance corrected) and the analyzer
+  report. Raw evidence stays ignored under `.deps/mame/object_emission/`.
 - `docs/GOAL.md`, `docs/PARITY_PLAN.md`, this handoff, repository bootstrap,
-  test/hardware documents and `docs/NEXT_AGENT_PROMPT.md` now share one
-  hierarchy: complete `avspu` is the destination, Round 1 is Capability Gate 1,
-  and the street-alien emission proof is the next-agent execution body.
+  test/hardware documents and `docs/NEXT_AGENT_PROMPT.md` share one hierarchy:
+  complete `avspu` is the destination, Round 1 is Capability Gate 1. The
+  street-alien emission proof is **closed**; the next-agent execution body is
+  milestone 2, replacing inferred collision.
 - AvP production baseline remains `prototype/private-capability-test` at
   `5327c3a`; this planning branch does not rewrite its history.
 - MSHvSF research remains isolated on `codex/mshvsf-reference-lane` at

@@ -61,10 +61,13 @@ tail (P1 Left 4201–4210, `0xFF83C1 = 0x65` held from 4200) — not a fixture
 defect; the fixture's declared state was corrected to its true origin with every
 oracle value left byte-identical. **Gate 1 stays 0/7 conditions closed**;
 milestone 1 advances conditions 1 and 5 without closing either. One open
-metadata defect is recorded in the handoff: the fixture's `actor_base`
-`0xFFA000` is not on the `0x180` actor grid and is not the emitting actor. See
-the handoff's "Capability Gate 1 — street-alien emission (2026-08-18 execution)"
-section for SHA-256 evidence and the exact reproduction command.
+metadata defect is recorded in the handoff: actor records are `0xC0` apart and
+the fixture's `actor_base` `0xFFA000` is a valid street-alien actor but **not
+the one that emits the gated slots** — the emitter is `0xFF9DC0`, by watchpoint
+`A4`/`A6` and by sprite-versus-worldX motion with the camera provably static
+between the two frames. Committed at `40e7f76`. See the handoff's "Capability
+Gate 1 — street-alien emission (2026-08-18 execution)" section for SHA-256
+evidence and the exact reproduction command.
 
 | # | Gate 1 condition | Status | Current evidence and remaining gate |
 |---|---|---|---|

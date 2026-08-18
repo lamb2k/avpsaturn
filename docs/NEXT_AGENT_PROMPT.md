@@ -8,9 +8,10 @@
 > (`avspu_stage1_debug_hitboxes`) is **not** the oracle's route — the oracle came
 > from the cold-boot route in `tools/mame_capture_enemy_actions.lua`, replayed
 > from the `avspu_stage1_replay4200` anchor plus its post-anchor tail; and the
-> actor base named here (`0xFFA000`) is **not** an actor base — type-12 actors
-> sit on a `0x180` grid and the emitting actor is `0xFF9DC0`. See the handoff
-> section "Capability Gate 1 — street-alien emission (2026-08-18 execution)".
+> actor named here (`0xFFA000`) is a real street-alien actor but **not the one
+> that emits the gated slots** — actor records are `0xC0` apart and the emitter
+> is `0xFF9DC0`. See the handoff section "Capability Gate 1 — street-alien
+> emission (2026-08-18 execution)". Committed at `40e7f76`.
 
 Continue the native Alien vs Predator Saturn port using the
 `port-cps2-to-sega-saturn` skill.

@@ -16,7 +16,12 @@ Canonical project status:
 - [`docs/AGENT_HANDOFF.md`](docs/AGENT_HANDOFF.md) contains volatile hashes,
   commands, current blockers and immediate next work.
 - [`docs/NEXT_AGENT_PROMPT.md`](docs/NEXT_AGENT_PROMPT.md) contains the first
-  executable body for the next agent; it does not redefine project scope.
+  executable body for the next agent; it does not redefine project scope. Its
+  body 1 (the street-alien object-emission gate) is **closed** as of
+  2026-08-18; the next body is milestone 2, replacing inferred collision.
+
+Capability Gate 1's seven acceptance conditions are **0 of 7 closed**. The
+"Gate 1 baseline" below is the capture-derived regression route, not the gate.
 
 The native route described below is the capture-derived regression baseline.
 It is not yet the ROM-derived functional-parity implementation required by the
