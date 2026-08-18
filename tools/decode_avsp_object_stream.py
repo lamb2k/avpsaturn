@@ -129,6 +129,56 @@ def decode_group_header(rom: Rom, header_addr: int) -> dict:
     }
 
 
+# The two camera-anchor constants inside the origin routine (bsr $0AA59A),
+# read as (A5+0x27C) and (A5+0x278) - NOT negative displacements, despite an
+# earlier session's hand-transcription assuming so; MAME's own live
+# disassembler (tools/mame_trace_origin_disasm.lua) printed the true
+# instructions as `sub.w ($27c,A5),D3` / `sub.w ($278,A5),D3` (positive
+# displacement). Solved by equating the routine's known formula against the
+# already-verified origin_x/origin_y oracle values and cross-checked exact
+# across all 4 oracle group instances (2 different D2 values, 2 different
+# actor world positions) - not yet proven to be a ROM-wide constant beyond
+# this route/actor.
+ANCHOR_Y = 0x00FF
+ANCHOR_X = 0x03F0
+
+
+def decode_group_origin(rom: Rom, header_addr: int, world_x: int, world_y: int,
+                        facing_raw: int) -> tuple:
+    """Reproduce the origin routine (bsr $0AA59A) from ROM + actor-record
+    inputs alone - no live-trace-captured origin needed. `world_x`/`world_y`
+    are the actor's own `+0x10`/`+0x14` fields; `facing_raw` is the actor's
+    `+0x0F` facing byte (also the source of the emitter's flip mask via
+    `facing_raw << 5`). `header_addr + 6` is the group header's own trailing
+    4-byte long (`D2`), consumed here, not part of the part table.
+
+    Disassembled live, instruction for instruction, via
+    tools/mame_trace_origin_disasm.lua:
+        moveq #0,D1 ; move.b (0xF,A4),D1        ; D1 = facing_raw
+        move.l (A0)+,D2                          ; D2 = header's trailing long
+        move.w (0x14,A4),D3 ; sub.w ($27c,A5),D3 ; D3 = world_y - anchor_y
+        neg.w D3 ; addi.w #0x100,D3              ; D3 = anchor_y - world_y + 0x100
+        btst #1,D1 ; bne .add                    ; facing bit 1 selects add/sub
+        sub.w D2,D3 / (taken:) add.w D2,D3        ; D3 -/+= D2's low word
+        swap D2 ; swap D3                         ; D2's high word now first;
+                                                    ; D3's result moves to its
+                                                    ; high word (this becomes Y)
+        move.w (0x10,A4),D3 ; sub.w ($278,A5),D3  ; D3(low) = world_x - anchor_x
+        addi.w #0x40,D3
+        btst #0,D1 ; bne .add                     ; facing bit 0 selects add/sub
+        sub.w D2,D3 / (taken:) add.w D2,D3         ; D3(low) -/+= D2's (post-swap)
+                                                    ; low word = original high word
+        move.l D3,(-0x64f4,A5)                     ; store: hi=origin_y, lo=origin_x
+    """
+    d2 = rom.u32(header_addr + 6)
+    d2_hi, d2_lo = (d2 >> 16) & 0xFFFF, d2 & 0xFFFF
+    y = (ANCHOR_Y - world_y + 0x100) & 0xFFFF
+    y = (y + d2_lo if (facing_raw & 2) else y - d2_lo) & 0xFFFF
+    x = (world_x - ANCHOR_X + 0x40) & 0xFFFF
+    x = (x + d2_hi if (facing_raw & 1) else x - d2_hi) & 0xFFFF
+    return x, y
+
+
 def decode_group_entries(rom: Rom, header_addr: int, origin_x: int, origin_y: int,
                          palette_byte: int, flip_byte: int,
                          or_value: int = 0x8000) -> list:
@@ -173,8 +223,11 @@ def decode_group_entries(rom: Rom, header_addr: int, origin_x: int, origin_y: in
 
 
 def build_report(rom_path: Path, groups: list) -> dict:
-    """`groups` is a list of dicts: {header, origin_x, origin_y, label,
-    expected: [{code,attr,x,y}, ...] or None}."""
+    """`groups` is a list of dicts: {header, world_x, world_y, facing_raw,
+    palette_byte, flip_byte, label, expected: [{code,attr,x,y}, ...] or None}.
+    `origin_x`/`origin_y` are no longer caller-supplied: they are derived from
+    `world_x`/`world_y`/`facing_raw` via `decode_group_origin`, so the whole
+    report is ROM + actor-record only, with no live-trace-captured origin."""
     rom_bytes = rom_path.read_bytes()
     rom = Rom(rom_bytes)
     results = []
@@ -182,14 +235,16 @@ def build_report(rom_path: Path, groups: list) -> dict:
     for g in groups:
         header_addr = int(g["header"], 16)
         header = decode_group_header(rom, header_addr)
-        entries = decode_group_entries(rom, header_addr, g["origin_x"], g["origin_y"],
+        origin_x, origin_y = decode_group_origin(rom, header_addr, g["world_x"], g["world_y"],
+                                                  g["facing_raw"])
+        entries = decode_group_entries(rom, header_addr, origin_x, origin_y,
                                        g["palette_byte"], g["flip_byte"],
                                        g.get("or_value", 0x8000))
         entry = {
             "label": g.get("label"),
             "header": header,
-            "origin_x": g["origin_x"],
-            "origin_y": g["origin_y"],
+            "origin_x": origin_x,
+            "origin_y": origin_y,
             "entries": entries,
         }
         if g.get("expected") is not None:
@@ -215,11 +270,14 @@ def build_report(rom_path: Path, groups: list) -> dict:
                 "x": "((origin_x - width - dx) & 0x3FF) | or_value",
                 "y": "(origin_y + dy) & 0x3FF",
                 "attr": "(attr_raw & 0xFF00) | (((attr_raw & 0xE0) + palette_byte) ^ flip_byte)",
+                "origin": "see decode_group_origin - world position adjusted by the header's own "
+                          "trailing D2 long and the two now-resolved camera-anchor constants "
+                          "(ANCHOR_Y=0x00FF, ANCHOR_X=0x03F0)",
             },
         },
         "unresolved": [
             "pose-record-to-group-header-list mapping (group addresses here are from live trace, not derived structurally)",
-            "the two camera-anchor constants inside the origin routine 0x0AA59A",
+            "whether ANCHOR_Y/ANCHOR_X (0x00FF/0x03F0) are a ROM-wide constant or specific to this route - solved by equating 4 oracle group instances, not yet observed to vary or proven fixed elsewhere",
             "whether a2_advance is ever non-zero in practice",
             "palette_byte/flip_byte are per-actor live-trace inputs here (0x11/0x20 for this street-alien instance), not yet derived from a general actor-record read",
         ],
@@ -238,26 +296,30 @@ def build_report(rom_path: Path, groups: list) -> dict:
 # data/street_alien_object_emission_oracles.json. Kept here as the anti-
 # hardcoding control set this module is falsified against by default.
 _ORACLE_GROUPS = [
-    {"label": "4214 group1 (3 parts)", "header": "0x12F72E", "origin_x": 259, "origin_y": 201,
+    {"label": "4214 group1 (3 parts)", "header": "0x12F72E",
+     "world_x": 1257, "world_y": 310, "facing_raw": 1,
      "palette_byte": 0x11, "flip_byte": 0x20,
      "expected": [
          {"code": "0x4efe", "attr": "0x0131", "x": "0x8113", "y": "0x0099"},
          {"code": "0x4ef6", "attr": "0x0431", "x": "0x80e3", "y": "0x00a9"},
          {"code": "0x4fc8", "attr": "0x0131", "x": "0x80f3", "y": "0x00b9"},
      ]},
-    {"label": "4214 group2 (2 parts)", "header": "0x12F74C", "origin_x": 321, "origin_y": 203,
+    {"label": "4214 group2 (2 parts)", "header": "0x12F74C",
+     "world_x": 1257, "world_y": 310, "facing_raw": 1,
      "palette_byte": 0x11, "flip_byte": 0x20,
      "expected": [
          {"code": "0x473a", "attr": "0x2431", "x": "0x8121", "y": "0x007b"},
          {"code": "0x479c", "attr": "0x1331", "x": "0x8111", "y": "0x00ab"},
      ]},
-    {"label": "4253 group1 (2 parts)", "header": "0x12FEC0", "origin_x": 319, "origin_y": 190,
+    {"label": "4253 group1 (2 parts)", "header": "0x12FEC0",
+     "world_x": 1313, "world_y": 310, "facing_raw": 1,
      "palette_byte": 0x11, "flip_byte": 0x20,
      "expected": [
          {"code": "0x4df8", "attr": "0x0131", "x": "0x814f", "y": "0x009e"},
          {"code": "0x4ef0", "attr": "0x0531", "x": "0x810f", "y": "0x00ae"},
      ]},
-    {"label": "4253 group2 (3 parts)", "header": "0x12FED8", "origin_x": 379, "origin_y": 203,
+    {"label": "4253 group2 (3 parts)", "header": "0x12FED8",
+     "world_x": 1313, "world_y": 310, "facing_raw": 1,
      "palette_byte": 0x11, "flip_byte": 0x20,
      "expected": [
          {"code": "0x4b04", "attr": "0x2531", "x": "0x815b", "y": "0x007b"},

@@ -3,6 +3,7 @@
   "a2_table_base": "0x1fd1c8",
   "formula": {
    "attr": "(attr_raw & 0xFF00) | (((attr_raw & 0xE0) + palette_byte) ^ flip_byte)",
+   "origin": "see decode_group_origin - world position adjusted by the header's own trailing D2 long and the two now-resolved camera-anchor constants (ANCHOR_Y=0x00FF, ANCHOR_X=0x03F0)",
    "width": "16 * (((attr_raw>>8)&0xF)+1)",
    "x": "((origin_x - width - dx) & 0x3FF) | or_value",
    "y": "(origin_y + dy) & 0x3FF"
@@ -183,7 +184,7 @@
  "schema": 1,
  "unresolved": [
   "pose-record-to-group-header-list mapping (group addresses here are from live trace, not derived structurally)",
-  "the two camera-anchor constants inside the origin routine 0x0AA59A",
+  "whether ANCHOR_Y/ANCHOR_X (0x00FF/0x03F0) are a ROM-wide constant or specific to this route - solved by equating 4 oracle group instances, not yet observed to vary or proven fixed elsewhere",
   "whether a2_advance is ever non-zero in practice",
   "palette_byte/flip_byte are per-actor live-trace inputs here (0x11/0x20 for this street-alien instance), not yet derived from a general actor-record read"
  ]
