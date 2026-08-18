@@ -61,24 +61,49 @@ The audit is metadata-only. It records file hashes, cue references, track
 types, archive members, and the MAME verification result without extracting or
 rewriting ROM data. Its output is `data/mshvsf_reference_audit.json`.
 
-The supplied reference set currently has two packaging blockers that must
-remain visible:
+The supplied reference set has two source-packaging defects, both handled by
+temporary launch overlays that leave the supplied files unchanged:
 
 1. The cue references `Marvel Super Heroes vs. Street Fighter.iso`, while the
    supplied binary is named `.bin`. This makes the cue internally inconsistent;
    do not silently rename or overwrite the supplied media.
-2. `mshvsf.key` and `dl-1425.bin` are now present beside the archive and their
-   SHA-1 values match the MAME 0.289 manifest, but MAME still reports them as
-   missing because they are not in the set/shared-ROM layout it searches. No
-   CPS-2 behavior claim should be marked verified until the complete,
-   authorized set passes `-verifyroms`.
+2. `mshvsf.key` and `dl-1425.bin` are loose beside the archive instead of in
+   MAME's set/shared-ROM layout. The MAME launcher creates a temporary hard-link
+   overlay containing the archive and both loose dependencies.
 
-These blockers do not prevent static inspection of the supplied media or
-preparation of the comparison schema. They do prevent a reproducible MAME
-behavior capture and a clean Saturn boot from the supplied cue as-is. Keep the
-source files untouched; place them in the loader's expected set/shared-ROM
-layout or package them through the normal authorized ROM-set workflow before
-the next audit.
+The overlay passes MAME 0.289 `-verifyroms`: `romset mshvsf is good`. A cold
+replay also produced the same derived vertical-slice report hash twice. The
+Saturn launcher writes a temporary cue whose first `FILE` entry points at the
+unchanged BIN and selects the 32 Mbit expansion cartridge. Yaba Sanshiro 2
+v1.20.37 then reaches the licensed legal screen, title, and attract gameplay.
+
+Verified reports:
+
+- `data/mshvsf_reference_audit.json`: source hashes, cue defect, and passing
+  MAME audit.
+- `data/mshvsf_cps2_vertical_slice.json`: deterministic Ryu idle, walk, jump,
+  normal, Hadouken, collision, and hit-reaction anchors.
+- `data/mshvsf_saturn_disc_manifest.json`: boot header, ISO filesystem, track
+  layout, hashes, and the verified Saturn runtime observation.
+- `data/mshvsf_correspondence.json`: one-sided and paired evidence records.
+- `data/mshvsf_difference_ledger.json`: only differences supported by current
+  evidence; gameplay rows remain unresolved until Saturn input capture exists.
+
+Run the CPS-2 slice and its analyzer together:
+
+```powershell
+.\capture_mshvsf_vertical_slice.ps1
+```
+
+Run the Saturn reference without editing the source cue or BIN:
+
+```powershell
+.\run_mshvsf_saturn_reference.ps1
+```
+
+The remaining instrumentation gate is deterministic Saturn emulated-pad input.
+Until the same Ryu route is captured on Saturn, no gameplay relationship may be
+promoted above `UNRESOLVED`.
 
 ## Reusable playbook outputs
 
@@ -94,6 +119,10 @@ The reference lane will grow these artifacts without modifying the AvP runtime:
    hardware rationale, constraints, and which AvP systems can reuse it.
 5. `acceptance checklist` covers route parity, animation coverage, stress-case
    performance, loading, audio, and unresolved deviations.
+
+The reusable method and initial hardware-responsibility map are recorded in
+`docs/CAPCOM_SATURN_PORTING_PLAYBOOK.md` and
+`docs/MSHVSF_SATURN_ARCHITECTURE.md`.
 
 No pattern becomes an AvP standard from a single screenshot or from a local
 file-name coincidence. The evidence chain is:

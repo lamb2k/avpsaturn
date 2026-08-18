@@ -245,10 +245,12 @@
   },
   "rights_boundary": "Private research only; no ROM data or generated disc content is committed.",
   "mame_verifyroms": {
+    "source_rom_path": "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\Marvel Super Heroes vs. Street Fighter\\Mame",
+    "layout": "temporary hard-link set/shared-ROM overlay",
     "command": [
       "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\.deps\\mame\\mame0289\\mame.exe",
       "-rompath",
-      "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\Marvel Super Heroes vs. Street Fighter\\Mame",
+      "<temporary-mame-rompath>",
       "-verifyroms",
       "mshvsf",
       "-video",
@@ -258,13 +260,11 @@
       "-nothrottle",
       "-skip_gameinfo"
     ],
-    "returncode": 2,
+    "returncode": 0,
     "output": [
-      "mshvsf      : mshvsf.key (20 bytes) - NOT FOUND",
-      "mshvsf      : dl-1425.bin (24576 bytes) - NOT FOUND (qsound_hle)",
-      "romset mshvsf is bad",
-      "1 romsets found, 0 were OK."
+      "romset mshvsf is good",
+      "1 romsets found, 1 were OK."
     ],
-    "status": "blocked"
+    "status": "pass"
   }
 }

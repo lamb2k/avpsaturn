@@ -1,0 +1,47 @@
+{
+  "title": "MSHvSF CPS-2 versus Saturn difference ledger",
+  "scope": "Facts established before deterministic Saturn gameplay capture",
+  "entries": [
+    {
+      "id": "media-layout",
+      "observable": "CPS-2 is audited as a MAME ROM set with key and QSound dependency; the Saturn reference is a mixed-mode disc with one data track, eleven audio tracks, and an ISO9660 filesystem.",
+      "classification": "PLATFORM ADAPTATION",
+      "evidence": ["data/mshvsf_reference_audit.json", "data/mshvsf_saturn_disc_manifest.json"],
+      "confidence": "HIGH",
+      "mechanical_impact": "UNRESOLVED",
+      "presentation_impact": "UNRESOLVED",
+      "falsification": "A fresh manifest shows a different audited source layout or disc track layout."
+    },
+    {
+      "id": "saturn-file-families",
+      "observable": "The Saturn data track exposes a flat 414-file root with large ST2 families, PAC packages, ADP files, and executable-looking BIN members.",
+      "classification": "PLATFORM ADAPTATION",
+      "evidence": ["data/mshvsf_saturn_disc_manifest.json"],
+      "confidence": "HIGH",
+      "mechanical_impact": "UNRESOLVED",
+      "presentation_impact": "UNRESOLVED",
+      "falsification": "The raw-sector ISO parser fails against an independent manifest or reports a directory hierarchy."
+    },
+    {
+      "id": "vertical-slice-gameplay",
+      "observable": "Idle, walk, jump, standing light punch, Hadouken, collision, damage, and hit reaction have not yet been measured on Saturn against the deterministic CPS-2 route.",
+      "classification": "UNRESOLVED",
+      "evidence": ["data/mshvsf_cps2_vertical_slice.json", "Saturn deterministic-pad gate remains open."],
+      "confidence": "HIGH",
+      "mechanical_impact": "UNRESOLVED",
+      "presentation_impact": "UNRESOLVED",
+      "falsification": "A deterministic Saturn capture supplies paired measurements for every event."
+    },
+    {
+      "id": "four-megabyte-cartridge-role",
+      "observable": "The official port boots with Yaba Sanshiro configured for a 32 Mbit expansion cartridge.",
+      "classification": "UNRESOLVED",
+      "evidence": ["Verified runtime observation in data/mshvsf_saturn_disc_manifest.json"],
+      "confidence": "HIGH",
+      "mechanical_impact": "UNRESOLVED",
+      "presentation_impact": "UNRESOLVED",
+      "falsification": "Controlled boots with cartridge configurations plus memory traces establish a more specific role."
+    }
+  ],
+  "guardrail": "Absence of paired Saturn gameplay evidence is not evidence of a reduction or alteration."
+}

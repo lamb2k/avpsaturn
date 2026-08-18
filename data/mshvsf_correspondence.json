@@ -1,0 +1,97 @@
+{
+  "title": "MSHvSF CPS-2 to Saturn correspondence database",
+  "scope": "First Ryu vertical slice and verified reference-media structure",
+  "classification_vocabulary": [
+    "MATCH",
+    "EQUIVALENT",
+    "PLATFORM ADAPTATION",
+    "OPTIMIZATION",
+    "REDUCTION",
+    "ALTERATION",
+    "ADDITION",
+    "BUG",
+    "UNRESOLVED"
+  ],
+  "confidence_vocabulary": ["HIGH", "MEDIUM", "LOW"],
+  "records": [
+    {
+      "id": "route-ryu-neutral-target",
+      "semantic_concept": "Deterministic Ryu route with a neutral human-controlled target",
+      "claim": "The CPS-2 route reaches Ryu and Ken versus Spider-Man and Captain America with P2 neutral; the matching Saturn route is not captured.",
+      "cps2_evidence": ["data/mshvsf_cps2_vertical_slice.json", "frame 1610 idle anchor SHA-256 eeadf29e80b4ec4a63d3b8a3bc3664f1a51ef57f7954c1105468822b0446a795"],
+      "saturn_evidence": ["Official port boots through title and attract gameplay, but deterministic player input is not established."],
+      "relationship": "UNRESOLVED",
+      "test": "Cold boot both versions and replay a documented input route to the same teams, positions, and neutral target.",
+      "falsification": "The Saturn route cannot reach the same controllable setup or produces a different team or target state.",
+      "confidence": "HIGH",
+      "uncertainty": "Saturn gameplay route and input timing are missing.",
+      "avp_lesson": "Use a neutral second player for collision tests so AI decisions do not contaminate deterministic evidence."
+    },
+    {
+      "id": "input-and-movement",
+      "semantic_concept": "Idle, forward walk, and jump response",
+      "claim": "The CPS-2 action order and visual anchors are deterministic; Saturn timing and mechanics are unmeasured.",
+      "cps2_evidence": ["idle frame 1610", "walk frame 1650", "jump frame 1720", "recorded input_events in data/mshvsf_cps2_vertical_slice.json"],
+      "saturn_evidence": [],
+      "relationship": "UNRESOLVED",
+      "test": "Replay identical direction edges and compare input-to-state latency, displacement, jump apex, and recovery separately from rendered animation frames.",
+      "falsification": "Any measured timing or trajectory differs outside the declared tolerance.",
+      "confidence": "HIGH",
+      "uncertainty": "CPS-2 actor addresses and all Saturn measurements remain unmapped.",
+      "avp_lesson": "Keep gameplay timing and presentation-frame count as separate acceptance dimensions."
+    },
+    {
+      "id": "standing-light-punch",
+      "semantic_concept": "Standing light punch",
+      "claim": "A deterministic CPS-2 normal-attack visual anchor exists; its state, collision, damage, and Saturn counterpart are not decoded.",
+      "cps2_evidence": ["input frames 1780-1784", "active visual frame 1788 SHA-256 1024053d01e9b0648375567629e2aaade174eec3f4e946799b82c4a30ee0a1fa"],
+      "saturn_evidence": [],
+      "relationship": "UNRESOLVED",
+      "test": "Measure startup, active, recovery, collision geometry, damage, hitstop, and audio onset on both systems.",
+      "falsification": "A paired measurement differs and cannot be explained by a documented presentation-only adaptation.",
+      "confidence": "HIGH",
+      "uncertainty": "The CPS-2 active frame is visual, not yet a proven collision-active state.",
+      "avp_lesson": "Do not infer hitboxes or damage from a visually active pose."
+    },
+    {
+      "id": "hadouken-projectile",
+      "semantic_concept": "Hadouken command, spawn, travel, collision, damage, and hit reaction",
+      "claim": "The complete CPS-2 visual sequence is captured; internal fields and the Saturn sequence are unresolved.",
+      "cps2_evidence": ["command completion frame 1860", "projectile-visible frame 1875 SHA-256 9ed9c34528302cd70729cdb565e406854a0672b664a639700946f855d8302512", "collision and reaction frame 1890 SHA-256 4a84edc1a418f11e6bdf411c8c1f27abdfd425d966144640839523e24dacb9d9"],
+      "saturn_evidence": [],
+      "relationship": "UNRESOLVED",
+      "test": "Compare command acceptance, spawn delay, projectile velocity, collision frame, damage delta, hitstop, reaction state, and recovery.",
+      "falsification": "The Saturn event order or a measured mechanical value differs outside the declared tolerance.",
+      "confidence": "HIGH",
+      "uncertainty": "Health, collision, projectile, and actor structures are not identified on either side of the pair.",
+      "avp_lesson": "A projectile test is a compact probe of input parsing, entity creation, collision, damage, reactions, rendering, and sound."
+    },
+    {
+      "id": "audio-event-routing",
+      "semantic_concept": "Normal and Hadouken audio-event routing",
+      "claim": "CPS-2 QSound bus activity is synchronized to the slice, while event-to-voice semantics and Saturn SCSP/CDDA responsibility are unresolved.",
+      "cps2_evidence": ["83379 QSound bus-write rows", "27793 register-commit rows", "normal and Hadouken windows in data/mshvsf_cps2_vertical_slice.json"],
+      "saturn_evidence": ["Disc contains one data track and eleven audio tracks.", "ISO contains 71 .ADP files."],
+      "relationship": "UNRESOLVED",
+      "test": "Mute or trace one event at a time and map command, sample/stream source, voice allocation, onset frame, and duration on both systems.",
+      "falsification": "The proposed event mapping fails under isolated replay or routes through a different audio source.",
+      "confidence": "HIGH",
+      "uncertainty": "File extensions and track types do not prove which assets serve the vertical slice.",
+      "avp_lesson": "Treat audio transport, event semantics, and perceived timing as three separate mappings."
+    },
+    {
+      "id": "saturn-packaging-and-bootstrap",
+      "semantic_concept": "Official Saturn packaging and bootstrap",
+      "claim": "The unchanged Saturn BIN boots when a temporary cue points to it and a 32 Mbit expansion cartridge is configured.",
+      "cps2_evidence": ["MAME 0.289 audit passes through a temporary hard-link ROM overlay."],
+      "saturn_evidence": ["Boot header product T-1238G, version V1.000, date 19980903", "Yaba Sanshiro 2 v1.20.37 reaches legal screen, title, and attract gameplay", "414 ISO files and 12 cue tracks recorded in data/mshvsf_saturn_disc_manifest.json"],
+      "relationship": "PLATFORM ADAPTATION",
+      "test": "Cold boot from temporary overlays while hashing and leaving every source-media file unchanged.",
+      "falsification": "A source file changes, audit fails, or the Saturn runtime does not reach attract gameplay.",
+      "confidence": "HIGH",
+      "uncertainty": "The successful 4 MB configuration does not by itself prove the exact runtime allocation or failure behavior without the cartridge.",
+      "avp_lesson": "Separate source-media defects from runtime fidelity by using disposable loader overlays."
+    }
+  ],
+  "promotion_rule": "No UNRESOLVED gameplay record may be reclassified until the Saturn route has deterministic input, paired measurements, and a falsification replay."
+}

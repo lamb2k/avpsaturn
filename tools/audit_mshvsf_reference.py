@@ -6,9 +6,13 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
+import tempfile
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Iterator
 from zipfile import ZipFile
 
 
@@ -132,24 +136,64 @@ def audit_mame_archive(zip_path: Path) -> dict[str, object]:
     }
 
 
+@contextmanager
+def mame_rompath_overlay(rom_path: Path) -> Iterator[Path]:
+    source_files = {
+        rom_path / "mshvsf.zip": Path("mshvsf.zip"),
+        rom_path / "mshvsf.key": Path("mshvsf") / "mshvsf.key",
+        rom_path / "dl-1425.bin": Path("qsound_hle") / "dl-1425.bin",
+    }
+    missing = [str(path) for path in source_files if not path.is_file()]
+    if missing:
+        raise FileNotFoundError("Missing MAME source files: " + ", ".join(missing))
+
+    with tempfile.TemporaryDirectory(prefix="mshvsf-mame-rompath-") as temp:
+        overlay = Path(temp)
+        for source, relative_target in source_files.items():
+            target = overlay / relative_target
+            target.parent.mkdir(parents=True, exist_ok=True)
+            os.link(source, target)
+
+        yield overlay
+
+
 def run_mame(mame_path: Path, rom_path: Path) -> dict[str, object]:
-    command = [
-        str(mame_path),
-        "-rompath",
-        str(rom_path),
-        "-verifyroms",
-        "mshvsf",
-        "-video",
-        "none",
-        "-sound",
-        "none",
-        "-nothrottle",
-        "-skip_gameinfo",
-    ]
-    result = subprocess.run(command, capture_output=True, text=True, check=False)
+    try:
+        overlay_context = mame_rompath_overlay(rom_path)
+        overlay = overlay_context.__enter__()
+    except FileNotFoundError as error:
+        return {
+            "source_rom_path": str(rom_path),
+            "layout": "temporary hard-link set/shared-ROM overlay",
+            "returncode": None,
+            "output": [str(error)],
+            "status": "blocked",
+        }
+
+    try:
+        command = [
+            str(mame_path),
+            "-rompath",
+            str(overlay),
+            "-verifyroms",
+            "mshvsf",
+            "-video",
+            "none",
+            "-sound",
+            "none",
+            "-nothrottle",
+            "-skip_gameinfo",
+        ]
+        result = subprocess.run(command, capture_output=True, text=True, check=False)
+    finally:
+        overlay_context.__exit__(None, None, None)
     output = (result.stdout + result.stderr).strip()
+    recorded_command = list(command)
+    recorded_command[2] = "<temporary-mame-rompath>"
     return {
-        "command": command,
+        "source_rom_path": str(rom_path),
+        "layout": "temporary hard-link set/shared-ROM overlay",
+        "command": recorded_command,
         "returncode": result.returncode,
         "output": output.splitlines(),
         "status": "pass" if result.returncode == 0 and "is good" in output else "blocked",
