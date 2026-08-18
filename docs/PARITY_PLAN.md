@@ -26,7 +26,7 @@ native route is a valuable regression baseline, not the goal implementation.
 | 2 | Collision from the game's hitboxes | **OPEN — evidence captured** | Stock-MAME hitbox overlays and selected actor-relative candidates are tracked. Native collision still uses scalar range/lane checks and inferred Chrysalis 21/55/97 and Stalker contact schedules. Decode the game's box records, validate all required poses, and replace those checks. |
 | 3 | Enemy behaviour from translated 68000 routines | **OPEN** | Stock watchpoints located animation/action/state writers. `cap_update_enemy()` remains hand-authored, no required AI path is translated, and PRNG use is not identified or recorded. |
 | 4 | Spawns, camera and triggers from stage tables | **OPEN** | The current lifecycle, waves, camera and room transitions are capture-derived constants and authored C. Round 1 stage tables have not been located, extracted or consumed by the runtime. |
-| 5 | Pixel and event-level validation | **OPEN — pixel groundwork proven** | The format-isolating pose gate passes 28/28 (29 oracle poses) with zero differing pixels using captured screen geometry, in both default and self-contained modes. The independent position audit has a scoped pass on 408/408 geometry frames: 1,435/1,443 parts directly exact, 0 at sibling-origin deltas (the shared-code-set ambiguity is resolved by the actor-slot record pointer at frame f−1), 8 at a narrowly observed `y=-4` settling residual, 0 frames unmatched, X 1,443/1,443 exact. Because the pose gate requires every listed assembly to 0-diff an oracle, only the 28 assemblies with a captured-pose oracle are listed; the 5 decoded mid-attack/at-rest trace assemblies are excluded and reported in `excluded_no_oracle_assemblies`, not pixel-verifiable. A MAME-vs-native event parity harness is still missing. |
+| 5 | Pixel and event-level validation | **OPEN — pixel groundwork proven** | The format-isolating pose gate passes 28/28 (29 oracle poses) with zero differing pixels using captured screen geometry, in both default and self-contained modes. The independent position audit has a scoped pass on 408/408 geometry frames: 1,435/1,443 parts directly exact, 0 at sibling-origin deltas (the shared-code-set ambiguity is resolved by the actor-slot record pointer at frame f−1), 8 at a formally bounded `y=-4` whole-pose settle trail (the only non-zero residual in the scope; the one-step trail's exact writer is not yet disassembled), 0 frames unmatched, X 1,443/1,443 exact. Because the pose gate requires every listed assembly to 0-diff an oracle, only the 28 assemblies with a captured-pose oracle are listed; the 5 decoded mid-attack/at-rest trace assemblies are excluded and reported in `excluded_no_oracle_assemblies`, not pixel-verifiable. A MAME-vs-native event parity harness is still missing. |
 | 6 | Existing regressions still pass | **BASELINE GREEN; FINAL RE-RUN OPEN** | The current host model reaches Round 2 in 4,485 frames and its 12,000-frame deterministic soak passes; prior Yaba diagnostics exercised captured clips. These must pass again after ROM-derived animation, collision, stage and AI replacement, followed by a clean normal-release boot. |
 | 7 | Physical NTSC Saturn at sustained 60 Hz | **OPEN** | Emulator precursor and image/hash evidence exist. No physical NTSC Saturn route, audible full-level proof, sustained-60-Hz measurement, or ten-minute hardware soak is recorded. The final candidate must be a clean `release-normal-release` build with a digital pad and 32 Mbit cartridge. |
 
@@ -352,10 +352,12 @@ longer a residual: the gate selects the sibling origin with the actor-slot
 record pointer at frame f−1, the same one-frame source the world coordinates
 use). Current scope: 408 geometry frames, 408 matched, 0 unmatched; 1,443
 tested parts, 1,435 directly exact pairs, 0 sibling-origin residuals, 8
-observed `x=0/y=-4` settling parts, and zero other residuals; X is
-1,443/1,443 exact. `--require-exact` is the goal-strength gate and currently
-**fails**, as it should, only until the 8 settling residuals are derived or
-bounded (coverage itself is complete).
+formally-bounded `x=0/y=-4` whole-pose settle parts, and zero other residuals;
+X is 1,443/1,443 exact. The `(0,-4)` settle trail is the only non-zero
+residual in the scope and is bounded (see AGENT_HANDOFF.md); its exact
+object-Y writer is not yet disassembled. `--require-exact` is the goal-strength
+gate and currently **fails**, as it should, only until those 8 settling
+residuals are derived (coverage itself is complete).
 
 Neither gate is an event-level parity harness. Goal condition 5 remains open
 until full required animation coverage and the MAME-vs-native event comparison

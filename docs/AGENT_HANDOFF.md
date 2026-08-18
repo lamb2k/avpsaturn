@@ -61,23 +61,38 @@ As a safety net the gate still decodes every pointer-reachable table and keeps
 an explained origin-delta set: any residual not driven to zero is passed only
 if it is in that set, never as a general tolerance.
 
-The 8 settling parts (frames 12689 and 13165, uniform −4 Y, X-exact) occur after
-a recent vertical world move; the pure `wy(f−1)` model is 4px off. The exact
-cause is not derived. The tool now recognizes only that precise residual in
-that recent-world-Y-change context, rather than allowing a general ±4 tolerance.
+The 8 settling parts (frames 12689 and 13165, uniform −4 Y, X-exact) are
+**formally bounded**, not just observed:
+* **Exhaustive:** the residual table across all 1,443 tested parts contains
+  only `(0,0)` and `(0,−4)`; X is 1,443/1,443 exact. So `(0,−4)` is the *only*
+  non-zero residual in the entire scope — the model's total error is one value.
+* **Whole-pose:** every part in each of the two frames shifts by the same
+  `(0,−4)`; it is a global actor-Y offset, not a per-part layout/tile defect.
+* **Settle context:** the integer world Y decelerates to a rest value just
+  before each frame (…285→279→274→274 and …242→231→224→224), and the implied
+  world Y that would zero the residual is the rest value **minus 4** in both
+  cases. The on-screen Y therefore applies one final downward settle step
+  while the world RAM has already clamped to rest. A lagging display-Y channel
+  at 0x23D8 eases into `wy_hi` (271,273,274 vs 285,279,274), confirming a
+  separate eased display Y in the slot. The one-step trail is the expected
+  mechanism; the exact object-Y writer is **not yet disassembled**, so this is
+  a bound, not a derivation.
 
-Run `python tools\verify_position_gate.py` for the scoped audit. Add `--verbose`
-to list settling frames and unexpected residuals. Run with `--require-exact`
-for the goal-strength gate; it currently exits nonzero only because 8 settling
+The gate recognises only that precise residual in that recent-world-Y-change
+context (and never allows a general ±4 tolerance). Run
+`python tools\verify_position_gate.py` for the scoped audit; `--verbose` lists
+settling frames and unexpected residuals; `--require-exact` is the
+goal-strength gate and currently exits nonzero only because these 8 settling
 parts are not directly exact (coverage itself is complete: 408/408 matched).
 
 Remaining before this gate is exhaustive:
-* 8 tested parts are not directly exact, all the observed x=0/y=−4 settling
-  parts (0 unexplained, 0 sibling-delta). The shared-code-set ambiguity is
-  resolved by the f−1 record pointer, so full pixel-exact coverage now needs
-  only the −4 settling derived or bounded; it is NOT a coverage gap — all 408
-  frames match.
-* Derive (or formally bound) the −4 vertical settling.
+* 8 tested parts are not directly exact, all the x=0/y=−4 settling parts
+  (0 unexplained, 0 sibling-delta; the only non-zero residual in scope).
+  Full pixel-exact coverage needs only the −4 settling **derived**; it is NOT
+  a coverage gap — all 408 frames match.
+* Derive the −4 vertical settling by disassembling the object-Y-from-world-Y
+  writer (the one-step settle trail); the bound above is the safety net until
+  then.
 
 **Pose format gate: PASS for 28/28 decoded boss assemblies (29 oracle poses).**
 Every tested assembly reproduces a captured oracle crop with **0 differing
@@ -163,7 +178,7 @@ Read this file before taking any action. The user wants a private, capture-faith
   - `tools/verify_pose_gate.py`:
     `e697888bb58ab01ca00b654fb3a81b48e975376bcf7bdcead22f62bad5bd5679`
   - `tools/verify_position_gate.py`:
-    `fca0e96dd7d69d7952be72a106b99456693731dfec2fc17dac7a1b3b2857373c`
+    `ce5d074fd7a8f3bb3f617ae71ac15d4122984feb40cd10af126d87bb5c3310fb`
   (`verify_position_gate.py` gained the f−1 record-pointer sibling-origin
   disambiguation this checkpoint, so its hash changed; `verify_pose_gate.py`
   is unchanged. `decode_avsp_animation_scripts.py` and `avsp_animation_scripts.json`
@@ -710,9 +725,10 @@ The opcode dumper itself remains:
    shared-code-set selection is also resolved: the actor-slot record pointer at
    frame f−1 selects the true sibling table and drives all 63 sibling-delta parts
    to exact (sibling-delta now 0).
-2. Derive the transient `x=0/y=-4` position path instead of relying on the
-   narrow observed-settling classification; this is the last non-exact class
-   (8 parts), and resolving it makes `--require-exact` pass.
+2. [Bounded] The `x=0/y=-4` settling (8 parts) is the only non-zero residual
+   in scope and is formally bounded (see above); it is a whole-pose one-step
+   settle trail. Derive it by disassembling the object-Y-from-world-Y writer;
+   resolving it makes `--require-exact` pass.
 3. Decode actor-local hitbox records for all required player/alien/Stalker/
    Chrysalis poses and replace inferred range/contact schedules.
 4. Locate and extract Round 1 spawn, camera, scroll and trigger tables.

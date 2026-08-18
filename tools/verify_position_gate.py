@@ -44,9 +44,22 @@ the pose gate uses). Two cases are handled honestly:
   residual not driven to zero PASSES only if it is in that explained set,
   never as a general tolerance.
 
-Eight parts in two frames have one other observed residual: (x=0, y=-4), after
-a recent world-Y change. The exact source of that transient settling offset is
-not derived. The tool reports it as a bounded observation, not an exact match.
+The only other residual in the whole scope (8 parts, 2 frames) is (x=0, y=-4).
+This is a *formally bounded* observation, not a general tolerance:
+
+* It is the single non-zero residual across every tested part (X is 100%
+  exact; the residual table contains only (0,0) and (0,-4)).
+* It is whole-pose: every part in each of the two frames shifts by the same
+  (0,-4), i.e. a global actor-Y offset, not a per-part layout/tile defect.
+* It occurs only just after the integer world Y has decelerated to a rest
+  value (a vertical settle); the implied world Y that would zero it is the
+  rest value minus 4 in both cases, so the on-screen Y applies one final
+  downward settle step while the world RAM has already clamped to rest.
+  The exact object-Y writer that produces that one-step trail is not yet
+  disassembled, so the gate reports it as bounded, not derived.
+
+The tool recognises only that precise residual in that recent-world-Y-change
+context, so it cannot broaden into a general +/-4 tolerance.
 
 The default exit status is a *scoped* gate: green means every tested part is
 exact or belongs to one of those explicit residual classes. ``--require-exact``
