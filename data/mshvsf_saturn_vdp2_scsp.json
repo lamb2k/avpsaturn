@@ -1,0 +1,655 @@
+{
+  "anchors": [
+    {
+      "captured_frame": 3540,
+      "label": "idle",
+      "scsp": {
+        "active_slot_count": 3,
+        "common_region_nonzero_offsets": [
+          "0x400",
+          "0x404",
+          "0x405",
+          "0x407",
+          "0x409",
+          "0x420",
+          "0x421",
+          "0x42C",
+          "0x42D"
+        ],
+        "slot_detail": [
+          {
+            "nonzero_bytes": 10,
+            "sha256": "6144c38f7f7363800340fdb59194ab2a62da0f0137e93bf6ce697795e8afd628",
+            "slot": 0
+          },
+          {
+            "nonzero_bytes": 10,
+            "sha256": "2bfe95f0dca5be45868c2af72025a0bacc774a00827d6abb612d13b7d7b3e7e5",
+            "slot": 1
+          },
+          {
+            "nonzero_bytes": 11,
+            "sha256": "ec69f631214a866b99b43794c2a4027944052a30990119ef9052821cab52d8ba",
+            "slot": 2
+          }
+        ],
+        "slots_total": 32,
+        "slots_with_nonzero_registers": [
+          0,
+          1,
+          2
+        ],
+        "sound_ram_sha256": "7c94f6e60365d2f4e5a050f1eae1422e050eb30a119557cf033744af7e5de642"
+      },
+      "vdp2": {
+        "all_referenced_banks_populated": true,
+        "color_ram_banks_populated": 128,
+        "color_ram_banks_total": 128,
+        "color_ram_bytes": 4096,
+        "color_ram_nonzero_bytes": 3620,
+        "vdp1_color_bank_resolution": [
+          {
+            "candidate_cram_bank": 8,
+            "candidate_cram_entry": 128,
+            "cmdcolr": "0x6080",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 12,
+            "candidate_cram_entry": 192,
+            "cmdcolr": "0x60C0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 15,
+            "candidate_cram_entry": 240,
+            "cmdcolr": "0x60F0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 25,
+            "candidate_cram_entry": 400,
+            "cmdcolr": "0x6190",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 26,
+            "candidate_cram_entry": 416,
+            "cmdcolr": "0x61A0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 27,
+            "candidate_cram_entry": 432,
+            "cmdcolr": "0x61B0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 0,
+            "candidate_cram_entry": 0,
+            "cmdcolr": "0x7000",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 3,
+            "candidate_cram_entry": 48,
+            "cmdcolr": "0x7030",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 4,
+            "candidate_cram_entry": 64,
+            "cmdcolr": "0x7040",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 5,
+            "candidate_cram_entry": 80,
+            "cmdcolr": "0x7050",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 12,
+            "candidate_cram_entry": 192,
+            "cmdcolr": "0x70C0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 15,
+            "candidate_cram_entry": 240,
+            "cmdcolr": "0x70F0",
+            "cram_bank_is_populated": true
+          }
+        ],
+        "vdp1_color_banks_referenced": 12,
+        "vdp2_registers_nonzero_bytes": 0,
+        "vdp2_registers_readable": false,
+        "vdp2_vram_sha256": "2edb20f3941cc875d766237ff2ffa1994e8db639a0d587ca90a9bfccf95f717a"
+      }
+    },
+    {
+      "captured_frame": 3828,
+      "label": "normal_active",
+      "scsp": {
+        "active_slot_count": 3,
+        "common_region_nonzero_offsets": [
+          "0x400",
+          "0x404",
+          "0x405",
+          "0x407",
+          "0x409",
+          "0x420",
+          "0x421",
+          "0x42C",
+          "0x42D"
+        ],
+        "slot_detail": [
+          {
+            "nonzero_bytes": 10,
+            "sha256": "6144c38f7f7363800340fdb59194ab2a62da0f0137e93bf6ce697795e8afd628",
+            "slot": 0
+          },
+          {
+            "nonzero_bytes": 10,
+            "sha256": "2bfe95f0dca5be45868c2af72025a0bacc774a00827d6abb612d13b7d7b3e7e5",
+            "slot": 1
+          },
+          {
+            "nonzero_bytes": 11,
+            "sha256": "ec69f631214a866b99b43794c2a4027944052a30990119ef9052821cab52d8ba",
+            "slot": 2
+          }
+        ],
+        "slots_total": 32,
+        "slots_with_nonzero_registers": [
+          0,
+          1,
+          2
+        ],
+        "sound_ram_sha256": "6243e75187536226d47e3c77dc81ad6ef2e9892068556fb221808efc8ea0a989"
+      },
+      "vdp2": {
+        "all_referenced_banks_populated": true,
+        "color_ram_banks_populated": 128,
+        "color_ram_banks_total": 128,
+        "color_ram_bytes": 4096,
+        "color_ram_nonzero_bytes": 3616,
+        "vdp1_color_bank_resolution": [
+          {
+            "candidate_cram_bank": 7,
+            "candidate_cram_entry": 112,
+            "cmdcolr": "0x6070",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 8,
+            "candidate_cram_entry": 128,
+            "cmdcolr": "0x6080",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 12,
+            "candidate_cram_entry": 192,
+            "cmdcolr": "0x60C0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 15,
+            "candidate_cram_entry": 240,
+            "cmdcolr": "0x60F0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 25,
+            "candidate_cram_entry": 400,
+            "cmdcolr": "0x6190",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 26,
+            "candidate_cram_entry": 416,
+            "cmdcolr": "0x61A0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 27,
+            "candidate_cram_entry": 432,
+            "cmdcolr": "0x61B0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 0,
+            "candidate_cram_entry": 0,
+            "cmdcolr": "0x7000",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 1,
+            "candidate_cram_entry": 16,
+            "cmdcolr": "0x7010",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 3,
+            "candidate_cram_entry": 48,
+            "cmdcolr": "0x7030",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 4,
+            "candidate_cram_entry": 64,
+            "cmdcolr": "0x7040",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 5,
+            "candidate_cram_entry": 80,
+            "cmdcolr": "0x7050",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 12,
+            "candidate_cram_entry": 192,
+            "cmdcolr": "0x70C0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 15,
+            "candidate_cram_entry": 240,
+            "cmdcolr": "0x70F0",
+            "cram_bank_is_populated": true
+          }
+        ],
+        "vdp1_color_banks_referenced": 14,
+        "vdp2_registers_nonzero_bytes": 0,
+        "vdp2_registers_readable": false,
+        "vdp2_vram_sha256": "2edb20f3941cc875d766237ff2ffa1994e8db639a0d587ca90a9bfccf95f717a"
+      }
+    },
+    {
+      "captured_frame": 3840,
+      "label": "impact",
+      "scsp": {
+        "active_slot_count": 3,
+        "common_region_nonzero_offsets": [
+          "0x400",
+          "0x404",
+          "0x405",
+          "0x407",
+          "0x409",
+          "0x420",
+          "0x421",
+          "0x42C",
+          "0x42D"
+        ],
+        "slot_detail": [
+          {
+            "nonzero_bytes": 10,
+            "sha256": "6144c38f7f7363800340fdb59194ab2a62da0f0137e93bf6ce697795e8afd628",
+            "slot": 0
+          },
+          {
+            "nonzero_bytes": 10,
+            "sha256": "2bfe95f0dca5be45868c2af72025a0bacc774a00827d6abb612d13b7d7b3e7e5",
+            "slot": 1
+          },
+          {
+            "nonzero_bytes": 11,
+            "sha256": "ec69f631214a866b99b43794c2a4027944052a30990119ef9052821cab52d8ba",
+            "slot": 2
+          }
+        ],
+        "slots_total": 32,
+        "slots_with_nonzero_registers": [
+          0,
+          1,
+          2
+        ],
+        "sound_ram_sha256": "3fb4d4bbef2cc0077c67ebd71e8a9ada7594d59a0da92e64e6ce5f7c2b8b034f"
+      },
+      "vdp2": {
+        "all_referenced_banks_populated": true,
+        "color_ram_banks_populated": 128,
+        "color_ram_banks_total": 128,
+        "color_ram_bytes": 4096,
+        "color_ram_nonzero_bytes": 3616,
+        "vdp1_color_bank_resolution": [
+          {
+            "candidate_cram_bank": 8,
+            "candidate_cram_entry": 128,
+            "cmdcolr": "0x6080",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 12,
+            "candidate_cram_entry": 192,
+            "cmdcolr": "0x60C0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 15,
+            "candidate_cram_entry": 240,
+            "cmdcolr": "0x60F0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 25,
+            "candidate_cram_entry": 400,
+            "cmdcolr": "0x6190",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 26,
+            "candidate_cram_entry": 416,
+            "cmdcolr": "0x61A0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 27,
+            "candidate_cram_entry": 432,
+            "cmdcolr": "0x61B0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 0,
+            "candidate_cram_entry": 0,
+            "cmdcolr": "0x7000",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 1,
+            "candidate_cram_entry": 16,
+            "cmdcolr": "0x7010",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 3,
+            "candidate_cram_entry": 48,
+            "cmdcolr": "0x7030",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 4,
+            "candidate_cram_entry": 64,
+            "cmdcolr": "0x7040",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 5,
+            "candidate_cram_entry": 80,
+            "cmdcolr": "0x7050",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 12,
+            "candidate_cram_entry": 192,
+            "cmdcolr": "0x70C0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 15,
+            "candidate_cram_entry": 240,
+            "cmdcolr": "0x70F0",
+            "cram_bank_is_populated": true
+          }
+        ],
+        "vdp1_color_banks_referenced": 13,
+        "vdp2_registers_nonzero_bytes": 0,
+        "vdp2_registers_readable": false,
+        "vdp2_vram_sha256": "2edb20f3941cc875d766237ff2ffa1994e8db639a0d587ca90a9bfccf95f717a"
+      }
+    },
+    {
+      "captured_frame": 3900,
+      "label": "recovery",
+      "scsp": {
+        "active_slot_count": 3,
+        "common_region_nonzero_offsets": [
+          "0x400",
+          "0x404",
+          "0x405",
+          "0x407",
+          "0x409",
+          "0x420",
+          "0x421",
+          "0x42C",
+          "0x42D"
+        ],
+        "slot_detail": [
+          {
+            "nonzero_bytes": 10,
+            "sha256": "6144c38f7f7363800340fdb59194ab2a62da0f0137e93bf6ce697795e8afd628",
+            "slot": 0
+          },
+          {
+            "nonzero_bytes": 10,
+            "sha256": "2bfe95f0dca5be45868c2af72025a0bacc774a00827d6abb612d13b7d7b3e7e5",
+            "slot": 1
+          },
+          {
+            "nonzero_bytes": 11,
+            "sha256": "ec69f631214a866b99b43794c2a4027944052a30990119ef9052821cab52d8ba",
+            "slot": 2
+          }
+        ],
+        "slots_total": 32,
+        "slots_with_nonzero_registers": [
+          0,
+          1,
+          2
+        ],
+        "sound_ram_sha256": "4db8b2acc46a91c76085b6f894a195f209bd5da283b82f8f9e66c07a7c33af3f"
+      },
+      "vdp2": {
+        "all_referenced_banks_populated": true,
+        "color_ram_banks_populated": 128,
+        "color_ram_banks_total": 128,
+        "color_ram_bytes": 4096,
+        "color_ram_nonzero_bytes": 3617,
+        "vdp1_color_bank_resolution": [
+          {
+            "candidate_cram_bank": 8,
+            "candidate_cram_entry": 128,
+            "cmdcolr": "0x6080",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 12,
+            "candidate_cram_entry": 192,
+            "cmdcolr": "0x60C0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 15,
+            "candidate_cram_entry": 240,
+            "cmdcolr": "0x60F0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 25,
+            "candidate_cram_entry": 400,
+            "cmdcolr": "0x6190",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 26,
+            "candidate_cram_entry": 416,
+            "cmdcolr": "0x61A0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 27,
+            "candidate_cram_entry": 432,
+            "cmdcolr": "0x61B0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 0,
+            "candidate_cram_entry": 0,
+            "cmdcolr": "0x7000",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 1,
+            "candidate_cram_entry": 16,
+            "cmdcolr": "0x7010",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 3,
+            "candidate_cram_entry": 48,
+            "cmdcolr": "0x7030",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 4,
+            "candidate_cram_entry": 64,
+            "cmdcolr": "0x7040",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 5,
+            "candidate_cram_entry": 80,
+            "cmdcolr": "0x7050",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 12,
+            "candidate_cram_entry": 192,
+            "cmdcolr": "0x70C0",
+            "cram_bank_is_populated": true
+          },
+          {
+            "candidate_cram_bank": 15,
+            "candidate_cram_entry": 240,
+            "cmdcolr": "0x70F0",
+            "cram_bank_is_populated": true
+          }
+        ],
+        "vdp1_color_banks_referenced": 13,
+        "vdp2_registers_nonzero_bytes": 0,
+        "vdp2_registers_readable": false,
+        "vdp2_vram_sha256": "2edb20f3941cc875d766237ff2ffa1994e8db639a0d587ca90a9bfccf95f717a"
+      }
+    }
+  ],
+  "evidence_class": "MEASURED_ON_MARVEL_NOT_YET_VALIDATED_ON_AVP",
+  "findings": [
+    {
+      "claim": "The VDP2 register block reads back as all zeros, so layer enables, plane maps, priorities and scroll values cannot be decoded from this capture.",
+      "consequence": "VDP2 layer responsibility stays UNRESOLVED for an instrument reason, not for lack of analysis. Resolving it needs a different instrument, not a better parser.",
+      "evidence": "MEASURED",
+      "falsification": "A capture in which any VDP2 register byte is non-zero, which would show the register block is in fact readable.",
+      "holds": true,
+      "id": "VDP2-1"
+    },
+    {
+      "claim": "Every VDP1 sprite colour bank measured at every anchor resolves into a populated 16-colour bank of VDP2 colour RAM.",
+      "consequence": "VDP2 owns sprite colour for the VDP1 actor path. Colour-bank mode sprites cost colour-RAM banks, which is a VDP2 budget, not a VDP1 texture budget.",
+      "evidence": "MEASURED",
+      "falsification": "A referenced CMDCOLR bank whose colour-RAM bank is entirely zero, which would mean the bank index is being read wrongly.",
+      "holds": true,
+      "id": "VDP2-2"
+    },
+    {
+      "claim": "Only a small fixed set of SCSP slots holds any register content, and their registers are byte-identical across the whole window.",
+      "consequence": "Attack and impact audio are not delivered by keying a fresh SCSP slot per game event in this window.",
+      "evidence": "MEASURED",
+      "falsification": "An anchor at which a previously-zero slot becomes non-zero, or at which any active slot's registers differ from another anchor's.",
+      "holds": true,
+      "id": "SCSP-1"
+    },
+    {
+      "claim": "Sound RAM changes on every transition while the slot registers do not, which fits a continuously-playing buffer that a sound program refills rather than per-event slot key-on.",
+      "consequence": "The audio adapter should model a mixed stream plus a small static slot set, and treat per-event routing as a sound-program concern.",
+      "evidence": "INFERRED",
+      "falsification": "A trace showing slot key-on writes between the captured anchors, which a four-frame sample would miss; or an anchor whose sound RAM is unchanged while audio is audibly playing.",
+      "holds": true,
+      "id": "SCSP-2"
+    }
+  ],
+  "limits": [
+    "Four sampled frames cannot show a register write that happens between them; only a write trace can.",
+    "A static slot register set does not prove which sample is playing or which cue it represents.",
+    "Colour-bank resolution assumes CMDCOLR's low bits are a colour-RAM entry index in colour-bank mode; the join succeeding is consistent with that, not a proof of the bit width.",
+    "VDP2 VRAM stability during combat says nothing about load-time layer ownership.",
+    "No count, slot index, bank index or page total here is a budget for any other title."
+  ],
+  "method": "Compare the VDP2 register block, colour RAM, VDP2 VRAM, SCSP register block and sound RAM at the four normal-hit anchors, and resolve every measured VDP1 CMDCOLR bank into a colour-RAM bank.",
+  "purpose": "Close the VDP2 and audio gaps left by the VDP1 command analysis",
+  "title": "MSHvSF Saturn VDP2 colour ownership and SCSP slot activity",
+  "transitions": [
+    {
+      "color_ram_changed_banks": [
+        17
+      ],
+      "color_ram_changed_bytes": 16,
+      "frame_delta": 288,
+      "from": "idle",
+      "scsp_common_changed_offsets": [
+        "0x409"
+      ],
+      "scsp_slot_registers_identical": true,
+      "scsp_slots_changed": [],
+      "sound_ram_changed_bytes": 16124,
+      "sound_ram_changed_pages": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "to": "normal_active",
+      "vdp2_registers_identical": true,
+      "vdp2_vram_identical": true
+    },
+    {
+      "color_ram_changed_banks": [],
+      "color_ram_changed_bytes": 0,
+      "frame_delta": 12,
+      "from": "normal_active",
+      "scsp_common_changed_offsets": [
+        "0x409"
+      ],
+      "scsp_slot_registers_identical": true,
+      "scsp_slots_changed": [],
+      "sound_ram_changed_bytes": 16193,
+      "sound_ram_changed_pages": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "to": "impact",
+      "vdp2_registers_identical": true,
+      "vdp2_vram_identical": true
+    },
+    {
+      "color_ram_changed_banks": [
+        3,
+        4,
+        5
+      ],
+      "color_ram_changed_bytes": 35,
+      "frame_delta": 60,
+      "from": "impact",
+      "scsp_common_changed_offsets": [
+        "0x409"
+      ],
+      "scsp_slot_registers_identical": true,
+      "scsp_slots_changed": [],
+      "sound_ram_changed_bytes": 16168,
+      "sound_ram_changed_pages": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "to": "recovery",
+      "vdp2_registers_identical": true,
+      "vdp2_vram_identical": true
+    }
+  ]
+}

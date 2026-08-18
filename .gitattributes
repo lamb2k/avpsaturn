@@ -1,3 +1,9 @@
 *.patch whitespace=-blank-at-eol
 *.bin binary
 *.tga binary
+
+# Reference-engine reports record their own SHA-256, so their bytes must not be
+# rewritten on checkout. --check compares bytes against a freshly generated run.
+data/mshvsf_saturn_vdp1_control_flow.json text eol=lf
+data/mshvsf_saturn_vdp2_scsp.json text eol=lf
+data/reference_engine_normal_hit_report.json text eol=lf

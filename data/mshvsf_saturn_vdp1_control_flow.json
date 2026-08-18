@@ -1,0 +1,753 @@
+{
+  "anchors": [
+    {
+      "captured_frame": 3540,
+      "color_banks": [
+        "0x6080",
+        "0x60C0",
+        "0x60F0",
+        "0x6190",
+        "0x61A0",
+        "0x61B0",
+        "0x7000",
+        "0x7030",
+        "0x7040",
+        "0x7050",
+        "0x70C0",
+        "0x70F0"
+      ],
+      "command_table_bytes": 9472,
+      "command_type_histogram": {
+        "DRAW_END": 1,
+        "LOCAL_COORDINATE": 1,
+        "NORMAL_SPRITE": 293,
+        "SYSTEM_CLIP": 1
+      },
+      "control_flow_anomalies": [],
+      "distinct_color_banks": 12,
+      "drawn_command_count": 293,
+      "flip_histogram": {
+        "FLIP_X": 103,
+        "FLIP_XY": 0,
+        "FLIP_Y": 0,
+        "NONE": 190
+      },
+      "jump_mode_histogram": {
+        "JUMP_NEXT": 296
+      },
+      "label": "idle",
+      "links_followed": [],
+      "reachable_equals_sequential": true,
+      "reachable_slot_count": 296,
+      "residual_slots_after_terminator": 476,
+      "sequential_slot_count": 296,
+      "skipped_command_count": 0,
+      "sprite_size_histogram": {
+        "16x16": 293
+      },
+      "state_command_count": 2,
+      "stored_nonzero_slots": 772,
+      "terminated_by_draw_end": true,
+      "texture_bytes_referenced": 19968,
+      "texture_span_count": 17,
+      "texture_spans": [
+        {
+          "bytes": 384,
+          "end": "0x008180",
+          "start": "0x008000"
+        },
+        {
+          "bytes": 5888,
+          "end": "0x00B880",
+          "start": "0x00A180"
+        },
+        {
+          "bytes": 384,
+          "end": "0x00BB80",
+          "start": "0x00BA00"
+        },
+        {
+          "bytes": 1664,
+          "end": "0x00C380",
+          "start": "0x00BD00"
+        },
+        {
+          "bytes": 1024,
+          "end": "0x00DB80",
+          "start": "0x00D780"
+        },
+        {
+          "bytes": 128,
+          "end": "0x00E000",
+          "start": "0x00DF80"
+        },
+        {
+          "bytes": 128,
+          "end": "0x00E100",
+          "start": "0x00E080"
+        },
+        {
+          "bytes": 256,
+          "end": "0x00F000",
+          "start": "0x00EF00"
+        },
+        {
+          "bytes": 256,
+          "end": "0x00F580",
+          "start": "0x00F480"
+        },
+        {
+          "bytes": 128,
+          "end": "0x014780",
+          "start": "0x014700"
+        },
+        {
+          "bytes": 3200,
+          "end": "0x016000",
+          "start": "0x015380"
+        },
+        {
+          "bytes": 3328,
+          "end": "0x02C300",
+          "start": "0x02B600"
+        },
+        {
+          "bytes": 128,
+          "end": "0x03B900",
+          "start": "0x03B880"
+        },
+        {
+          "bytes": 256,
+          "end": "0x074100",
+          "start": "0x074000"
+        },
+        {
+          "bytes": 1152,
+          "end": "0x074600",
+          "start": "0x074180"
+        },
+        {
+          "bytes": 1280,
+          "end": "0x076480",
+          "start": "0x075F80"
+        },
+        {
+          "bytes": 384,
+          "end": "0x076780",
+          "start": "0x076600"
+        }
+      ],
+      "traversal_start": "0x000000",
+      "traversal_stop_reason": "draw_end",
+      "vdp1_vram_sha256": "9e9cb9a701edd9f5ade662abebbe642c80f08b32339df899a71c440d239f77a5"
+    },
+    {
+      "captured_frame": 3828,
+      "color_banks": [
+        "0x6070",
+        "0x6080",
+        "0x60C0",
+        "0x60F0",
+        "0x6190",
+        "0x61A0",
+        "0x61B0",
+        "0x7000",
+        "0x7010",
+        "0x7030",
+        "0x7040",
+        "0x7050",
+        "0x70C0",
+        "0x70F0"
+      ],
+      "command_table_bytes": 10688,
+      "command_type_histogram": {
+        "DRAW_END": 1,
+        "LOCAL_COORDINATE": 1,
+        "NORMAL_SPRITE": 331,
+        "SYSTEM_CLIP": 1
+      },
+      "control_flow_anomalies": [],
+      "distinct_color_banks": 14,
+      "drawn_command_count": 331,
+      "flip_histogram": {
+        "FLIP_X": 107,
+        "FLIP_XY": 11,
+        "FLIP_Y": 2,
+        "NONE": 211
+      },
+      "jump_mode_histogram": {
+        "JUMP_NEXT": 334
+      },
+      "label": "normal_active",
+      "links_followed": [],
+      "reachable_equals_sequential": true,
+      "reachable_slot_count": 334,
+      "residual_slots_after_terminator": 438,
+      "sequential_slot_count": 334,
+      "skipped_command_count": 0,
+      "sprite_size_histogram": {
+        "16x16": 331
+      },
+      "state_command_count": 2,
+      "stored_nonzero_slots": 772,
+      "terminated_by_draw_end": true,
+      "texture_bytes_referenced": 23552,
+      "texture_span_count": 17,
+      "texture_spans": [
+        {
+          "bytes": 384,
+          "end": "0x008180",
+          "start": "0x008000"
+        },
+        {
+          "bytes": 5888,
+          "end": "0x00B880",
+          "start": "0x00A180"
+        },
+        {
+          "bytes": 384,
+          "end": "0x00BB80",
+          "start": "0x00BA00"
+        },
+        {
+          "bytes": 1664,
+          "end": "0x00C380",
+          "start": "0x00BD00"
+        },
+        {
+          "bytes": 896,
+          "end": "0x00DB80",
+          "start": "0x00D800"
+        },
+        {
+          "bytes": 128,
+          "end": "0x00E000",
+          "start": "0x00DF80"
+        },
+        {
+          "bytes": 128,
+          "end": "0x00E100",
+          "start": "0x00E080"
+        },
+        {
+          "bytes": 384,
+          "end": "0x00F000",
+          "start": "0x00EE80"
+        },
+        {
+          "bytes": 256,
+          "end": "0x00F580",
+          "start": "0x00F480"
+        },
+        {
+          "bytes": 128,
+          "end": "0x011800",
+          "start": "0x011780"
+        },
+        {
+          "bytes": 1024,
+          "end": "0x011D00",
+          "start": "0x011900"
+        },
+        {
+          "bytes": 128,
+          "end": "0x03B480",
+          "start": "0x03B400"
+        },
+        {
+          "bytes": 128,
+          "end": "0x047200",
+          "start": "0x047180"
+        },
+        {
+          "bytes": 8960,
+          "end": "0x049780",
+          "start": "0x047480"
+        },
+        {
+          "bytes": 256,
+          "end": "0x074100",
+          "start": "0x074000"
+        },
+        {
+          "bytes": 1152,
+          "end": "0x074600",
+          "start": "0x074180"
+        },
+        {
+          "bytes": 1664,
+          "end": "0x076600",
+          "start": "0x075F80"
+        }
+      ],
+      "traversal_start": "0x000000",
+      "traversal_stop_reason": "draw_end",
+      "vdp1_vram_sha256": "101018c17d81c4d68e9c2891e7b3c4ea35a58f8ab7caa5d93668152063a67776"
+    },
+    {
+      "captured_frame": 3840,
+      "color_banks": [
+        "0x6080",
+        "0x60C0",
+        "0x60F0",
+        "0x6190",
+        "0x61A0",
+        "0x61B0",
+        "0x7000",
+        "0x7010",
+        "0x7030",
+        "0x7040",
+        "0x7050",
+        "0x70C0",
+        "0x70F0"
+      ],
+      "command_table_bytes": 9856,
+      "command_type_histogram": {
+        "DRAW_END": 1,
+        "LOCAL_COORDINATE": 1,
+        "NORMAL_SPRITE": 305,
+        "SYSTEM_CLIP": 1
+      },
+      "control_flow_anomalies": [],
+      "distinct_color_banks": 13,
+      "drawn_command_count": 305,
+      "flip_histogram": {
+        "FLIP_X": 101,
+        "FLIP_XY": 0,
+        "FLIP_Y": 2,
+        "NONE": 202
+      },
+      "jump_mode_histogram": {
+        "JUMP_NEXT": 308
+      },
+      "label": "impact",
+      "links_followed": [],
+      "reachable_equals_sequential": true,
+      "reachable_slot_count": 308,
+      "residual_slots_after_terminator": 464,
+      "sequential_slot_count": 308,
+      "skipped_command_count": 0,
+      "sprite_size_histogram": {
+        "16x16": 305
+      },
+      "state_command_count": 2,
+      "stored_nonzero_slots": 772,
+      "terminated_by_draw_end": true,
+      "texture_bytes_referenced": 21632,
+      "texture_span_count": 26,
+      "texture_spans": [
+        {
+          "bytes": 384,
+          "end": "0x008180",
+          "start": "0x008000"
+        },
+        {
+          "bytes": 5888,
+          "end": "0x00B880",
+          "start": "0x00A180"
+        },
+        {
+          "bytes": 384,
+          "end": "0x00BB80",
+          "start": "0x00BA00"
+        },
+        {
+          "bytes": 1664,
+          "end": "0x00C380",
+          "start": "0x00BD00"
+        },
+        {
+          "bytes": 896,
+          "end": "0x00DB80",
+          "start": "0x00D800"
+        },
+        {
+          "bytes": 128,
+          "end": "0x00E000",
+          "start": "0x00DF80"
+        },
+        {
+          "bytes": 128,
+          "end": "0x00E100",
+          "start": "0x00E080"
+        },
+        {
+          "bytes": 128,
+          "end": "0x00E900",
+          "start": "0x00E880"
+        },
+        {
+          "bytes": 256,
+          "end": "0x00F000",
+          "start": "0x00EF00"
+        },
+        {
+          "bytes": 256,
+          "end": "0x00F580",
+          "start": "0x00F480"
+        },
+        {
+          "bytes": 3200,
+          "end": "0x012F80",
+          "start": "0x012300"
+        },
+        {
+          "bytes": 128,
+          "end": "0x03B480",
+          "start": "0x03B400"
+        },
+        {
+          "bytes": 128,
+          "end": "0x047200",
+          "start": "0x047180"
+        },
+        {
+          "bytes": 128,
+          "end": "0x047500",
+          "start": "0x047480"
+        },
+        {
+          "bytes": 2304,
+          "end": "0x048900",
+          "start": "0x048000"
+        },
+        {
+          "bytes": 1024,
+          "end": "0x048D80",
+          "start": "0x048980"
+        },
+        {
+          "bytes": 512,
+          "end": "0x049000",
+          "start": "0x048E00"
+        },
+        {
+          "bytes": 384,
+          "end": "0x049780",
+          "start": "0x049600"
+        },
+        {
+          "bytes": 128,
+          "end": "0x04A400",
+          "start": "0x04A380"
+        },
+        {
+          "bytes": 128,
+          "end": "0x04AB80",
+          "start": "0x04AB00"
+        },
+        {
+          "bytes": 128,
+          "end": "0x04B500",
+          "start": "0x04B480"
+        },
+        {
+          "bytes": 128,
+          "end": "0x04B980",
+          "start": "0x04B900"
+        },
+        {
+          "bytes": 128,
+          "end": "0x04BB00",
+          "start": "0x04BA80"
+        },
+        {
+          "bytes": 512,
+          "end": "0x074480",
+          "start": "0x074280"
+        },
+        {
+          "bytes": 1280,
+          "end": "0x075A80",
+          "start": "0x075580"
+        },
+        {
+          "bytes": 1280,
+          "end": "0x076F80",
+          "start": "0x076A80"
+        }
+      ],
+      "traversal_start": "0x000000",
+      "traversal_stop_reason": "draw_end",
+      "vdp1_vram_sha256": "5569a95eed0a0ee5a4191aa29ff6fe6f50e30c4a6e11c01c719d0618bbaddd43"
+    },
+    {
+      "captured_frame": 3900,
+      "color_banks": [
+        "0x6080",
+        "0x60C0",
+        "0x60F0",
+        "0x6190",
+        "0x61A0",
+        "0x61B0",
+        "0x7000",
+        "0x7010",
+        "0x7030",
+        "0x7040",
+        "0x7050",
+        "0x70C0",
+        "0x70F0"
+      ],
+      "command_table_bytes": 9824,
+      "command_type_histogram": {
+        "DRAW_END": 1,
+        "LOCAL_COORDINATE": 1,
+        "NORMAL_SPRITE": 304,
+        "SYSTEM_CLIP": 1
+      },
+      "control_flow_anomalies": [],
+      "distinct_color_banks": 13,
+      "drawn_command_count": 304,
+      "flip_histogram": {
+        "FLIP_X": 101,
+        "FLIP_XY": 0,
+        "FLIP_Y": 0,
+        "NONE": 203
+      },
+      "jump_mode_histogram": {
+        "JUMP_NEXT": 307
+      },
+      "label": "recovery",
+      "links_followed": [],
+      "reachable_equals_sequential": true,
+      "reachable_slot_count": 307,
+      "residual_slots_after_terminator": 465,
+      "sequential_slot_count": 307,
+      "skipped_command_count": 0,
+      "sprite_size_histogram": {
+        "16x16": 304
+      },
+      "state_command_count": 2,
+      "stored_nonzero_slots": 772,
+      "terminated_by_draw_end": true,
+      "texture_bytes_referenced": 21504,
+      "texture_span_count": 24,
+      "texture_spans": [
+        {
+          "bytes": 384,
+          "end": "0x008180",
+          "start": "0x008000"
+        },
+        {
+          "bytes": 5888,
+          "end": "0x00B880",
+          "start": "0x00A180"
+        },
+        {
+          "bytes": 384,
+          "end": "0x00BB80",
+          "start": "0x00BA00"
+        },
+        {
+          "bytes": 1664,
+          "end": "0x00C380",
+          "start": "0x00BD00"
+        },
+        {
+          "bytes": 896,
+          "end": "0x00DB80",
+          "start": "0x00D800"
+        },
+        {
+          "bytes": 128,
+          "end": "0x00E000",
+          "start": "0x00DF80"
+        },
+        {
+          "bytes": 128,
+          "end": "0x00E100",
+          "start": "0x00E080"
+        },
+        {
+          "bytes": 128,
+          "end": "0x00E900",
+          "start": "0x00E880"
+        },
+        {
+          "bytes": 256,
+          "end": "0x00F000",
+          "start": "0x00EF00"
+        },
+        {
+          "bytes": 256,
+          "end": "0x00F580",
+          "start": "0x00F480"
+        },
+        {
+          "bytes": 3200,
+          "end": "0x015380",
+          "start": "0x014700"
+        },
+        {
+          "bytes": 3200,
+          "end": "0x037D80",
+          "start": "0x037100"
+        },
+        {
+          "bytes": 128,
+          "end": "0x03E900",
+          "start": "0x03E880"
+        },
+        {
+          "bytes": 128,
+          "end": "0x047500",
+          "start": "0x047480"
+        },
+        {
+          "bytes": 512,
+          "end": "0x049000",
+          "start": "0x048E00"
+        },
+        {
+          "bytes": 384,
+          "end": "0x049780",
+          "start": "0x049600"
+        },
+        {
+          "bytes": 128,
+          "end": "0x04A400",
+          "start": "0x04A380"
+        },
+        {
+          "bytes": 128,
+          "end": "0x04AB80",
+          "start": "0x04AB00"
+        },
+        {
+          "bytes": 128,
+          "end": "0x04B500",
+          "start": "0x04B480"
+        },
+        {
+          "bytes": 128,
+          "end": "0x04B980",
+          "start": "0x04B900"
+        },
+        {
+          "bytes": 128,
+          "end": "0x04BB00",
+          "start": "0x04BA80"
+        },
+        {
+          "bytes": 128,
+          "end": "0x04CD00",
+          "start": "0x04CC80"
+        },
+        {
+          "bytes": 1920,
+          "end": "0x074780",
+          "start": "0x074000"
+        },
+        {
+          "bytes": 1152,
+          "end": "0x075580",
+          "start": "0x075100"
+        }
+      ],
+      "traversal_start": "0x000000",
+      "traversal_stop_reason": "draw_end",
+      "vdp1_vram_sha256": "3c9d240134260c0f01910f0a99498e788e1fe913f23be3267730bb77cb056a6a"
+    }
+  ],
+  "evidence_class": "MEASURED_ON_MARVEL_NOT_YET_VALIDATED_ON_AVP",
+  "findings": [
+    {
+      "claim": "Every reachable command at all four anchors uses jump-next.",
+      "consequence": "For this title in this window a stored-order scan and a real traversal agree, which the earlier analysis assumed but did not show.",
+      "evidence": "MEASURED",
+      "falsification": "Any anchor whose jump-mode histogram contains a mode other than JUMP_NEXT, or whose reachable slot set differs from the stored set.",
+      "holds": true,
+      "id": "VDP1-CF-1"
+    },
+    {
+      "claim": "The command table holds more non-zero slots than the current list reaches; the excess is residue from longer earlier lists.",
+      "consequence": "Non-zero extent is not this frame's command count and is not an allocator high-water mark.",
+      "evidence": "MEASURED",
+      "falsification": "A capture whose non-zero slot count equals its reachable slot count while the list length varies between frames.",
+      "holds": true,
+      "id": "VDP1-CF-2"
+    },
+    {
+      "claim": "Actor and background sprites are drawn one VDP1 command per 16x16 tile rather than as precomposed cels.",
+      "consequence": "Command-table pressure scales with visible tile count, so a tile pipeline is the strategy this reference port actually uses.",
+      "evidence": "MEASURED",
+      "falsification": "Any drawn command with a size other than 16x16, or a scaled or distorted sprite command in the reachable set.",
+      "holds": true,
+      "id": "VDP1-CF-3"
+    },
+    {
+      "claim": "Horizontal flip is expressed in CMDCTRL, not by storing mirrored art.",
+      "consequence": "Facing costs no extra texture memory on this hardware path.",
+      "evidence": "MEASURED",
+      "falsification": "An anchor in which no command sets the character-read-direction bits while the actor is visibly mirrored.",
+      "holds": true,
+      "id": "VDP1-CF-4"
+    }
+  ],
+  "limits": [
+    "VDP1 registers read back as zero through the debug interface, so the real draw-start address and frame-buffer state are unresolved.",
+    "A single captured frame cannot show a control-flow mode the game uses only in other scenes.",
+    "Texture spans are the bytes commands reference, not proof of allocation, lifetime or ownership.",
+    "No count, address or span here is a budget for any other title."
+  ],
+  "method": "Walk the command table from address 0 following VDP1 jump, call, return and skip modes with a single return-address register, stopping at the draw-end bit, at a revisited slot, or outside the VRAM image.",
+  "observed_drawing_mode": {
+    "color_bank_stride": 16,
+    "command_pmod": "0x0880",
+    "note": "Every drawn command across every anchor is a normal sprite of one size in 16-colour bank mode with an identical CMDPMOD.",
+    "sprite_size": [
+      16,
+      16
+    ],
+    "sprite_size_histogram": {
+      "16x16": 1233
+    },
+    "uniform_sprite_size": true
+  },
+  "purpose": "Reachable VDP1 command evidence for CPS2-to-Saturn reference-engine calibration",
+  "title": "MSHvSF Saturn VDP1 command-list control-flow analysis",
+  "transitions": [
+    {
+      "color_bank_delta": 2,
+      "drawn_command_delta": 38,
+      "flip_delta": {
+        "FLIP_X": 4,
+        "FLIP_XY": 11,
+        "FLIP_Y": 2,
+        "NONE": 21
+      },
+      "from": "idle",
+      "reachable_slot_delta": 38,
+      "texture_bytes_delta": 3584,
+      "to": "normal_active"
+    },
+    {
+      "color_bank_delta": -1,
+      "drawn_command_delta": -26,
+      "flip_delta": {
+        "FLIP_X": -6,
+        "FLIP_XY": -11,
+        "FLIP_Y": 0,
+        "NONE": -9
+      },
+      "from": "normal_active",
+      "reachable_slot_delta": -26,
+      "texture_bytes_delta": -1920,
+      "to": "impact"
+    },
+    {
+      "color_bank_delta": 0,
+      "drawn_command_delta": -1,
+      "flip_delta": {
+        "FLIP_X": 0,
+        "FLIP_XY": 0,
+        "FLIP_Y": -2,
+        "NONE": 1
+      },
+      "from": "impact",
+      "reachable_slot_delta": -1,
+      "texture_bytes_delta": -128,
+      "to": "recovery"
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "id": "normal_hit_v1",
+  "title": "CPS2-to-Saturn reference engine: one actor, one normal attack",
+  "actor": "reference_attacker",
+  "defender": "reference_defender",
+  "inputs": {
+    "animation_scripts": "data/avsp_animation_scripts.json",
+    "vdp1_control_flow": "data/mshvsf_saturn_vdp1_control_flow.json",
+    "runtime_memory": "data/mshvsf_saturn_runtime_memory.json",
+    "vdp2_scsp": "data/mshvsf_saturn_vdp2_scsp.json"
+  },
+  "input_notes": {
+    "animation_scripts": "Source-form animation-script and selector-6 assembly records decoded by this repository. They exercise the source layer; their per-program roles are NOT proven.",
+    "vdp1_control_flow": "Reference-title Saturn measurements. They calibrate the backend drawing mode only.",
+    "runtime_memory": "Reference-title per-region residency evidence, quoted for responsibility mapping only.",
+    "vdp2_scsp": "Reference-title VDP2 colour ownership and SCSP slot evidence. Establishes where sprite colour is spent and that audio is not one slot per event."
+  },
+  "states": [
+    {
+      "name": "idle",
+      "program": "0x13cc18",
+      "completion": "held",
+      "role_binding": "ADAPTED",
+      "note": "An eight-pose looping program; chosen because it exercises multi-pose control flow and loop closure."
+    },
+    {
+      "name": "attack_active",
+      "program": "0x13ce70",
+      "completion": "timed",
+      "role_binding": "ADAPTED",
+      "note": "A single-pose program with a distinct interaction selector. Its attack role is not proven."
+    },
+    {
+      "name": "attack_impact",
+      "program": "0x13ce4c",
+      "completion": "timed",
+      "role_binding": "ADAPTED",
+      "note": "Stands in for the contact/hitstop pose. Its impact role is not proven."
+    },
+    {
+      "name": "attack_recovery",
+      "program": "0x13cec4",
+      "completion": "timed",
+      "role_binding": "ADAPTED",
+      "note": "Stands in for the recovery pose. Its recovery role is not proven."
+    }
+  ],
+  "transitions": [
+    {
+      "from": "idle",
+      "to": "attack_active",
+      "trigger": "attack_input"
+    },
+    {
+      "from": "attack_active",
+      "to": "attack_impact",
+      "trigger": "contact"
+    },
+    {
+      "from": "attack_impact",
+      "to": "attack_recovery",
+      "trigger": "impact_end"
+    },
+    {
+      "from": "attack_recovery",
+      "to": "idle",
+      "trigger": "recovery_end"
+    }
+  ],
+  "schedule": [
+    {
+      "frame": 0,
+      "trigger": "start"
+    },
+    {
+      "frame": 24,
+      "trigger": "attack_input"
+    },
+    {
+      "frame": 34,
+      "trigger": "contact",
+      "collision": true
+    },
+    {
+      "frame": 39,
+      "trigger": "impact_end"
+    },
+    {
+      "frame": 42,
+      "trigger": "recovery_end",
+      "hold": 12
+    }
+  ],
+  "anchors": [
+    {
+      "label": "idle",
+      "frame": 12
+    },
+    {
+      "label": "normal_active",
+      "frame": 30
+    },
+    {
+      "label": "impact",
+      "frame": 34
+    },
+    {
+      "label": "recovery",
+      "frame": 40
+    }
+  ],
+  "audio_cues": [
+    {
+      "frame": 24,
+      "cue": "attack_swing",
+      "category": "attack_swing"
+    },
+    {
+      "frame": 34,
+      "cue": "impact",
+      "category": "impact"
+    }
+  ],
+  "prohibited_inferences": [
+    "The reference title's reachable command counts, changed-page counts, cartridge occupancy or texture spans are not budgets for any other game.",
+    "A program's role in this scenario is a modelling choice, not evidence that the program is an attack, impact or recovery animation.",
+    "The scheduled trigger and contact frames are not the source game's startup, active or recovery timing.",
+    "The inferred attribute tile span and palette index are not confirmed field definitions; one of twenty-eight assemblies already disagrees with the tile-span reading.",
+    "A stable cartridge or VDP2 region during one combat window does not prove load-time ownership or full-match residency.",
+    "Similar record shapes across two Capcom titles do not make one title's structure mandatory for the other.",
+    "A static SCSP slot set across four sampled frames does not prove that no slot is ever keyed per event; only a write trace can."
+  ],
+  "avp_probe": "Before any part of this model is promoted into the AvP implementation lane, decode one AvP actor's real attack program, gate its assemblies against captured pose oracles, then capture AvP's own VDP1 command list at idle, attack-active, impact and recovery and confirm AvP's own reachable command count, sprite granularity, colour-bank use and per-region residency. Add an out-of-range whiff replay as the falsification control before treating any changing field as collision or damage.",
+  "decision_statement": {
+    "will_decide": "This will decide whether AvP should emit one VDP1 command per 16x16 tile in colour-bank mode with source assembly order as list order, or precompose poses into larger cels.",
+    "must_verify": "Before AvP adopts it, the AvP lane must verify its own per-frame reachable VDP1 command count, texture working set and colour-bank count for a real AvP actor at the same four anchors, on AvP evidence alone."
+  }
+}

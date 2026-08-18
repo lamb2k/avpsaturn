@@ -37,6 +37,9 @@ JSON_ARTIFACTS = (
     "data/mshvsf_hardware_budget.json",
     "data/mshvsf_fidelity_scorecard.json",
     "data/mshvsf_porting_patterns.json",
+    "data/mshvsf_saturn_vdp1_control_flow.json",
+    "data/mshvsf_saturn_vdp2_scsp.json",
+    "data/reference_engine_normal_hit_report.json",
     "templates/capcom_saturn_porting/candidate_assessment.template.json",
     "templates/capcom_saturn_porting/system_mapping.template.json",
     "templates/capcom_saturn_porting/hardware_budget.template.json",
@@ -54,7 +57,11 @@ DOC_ARTIFACTS = (
     "docs/CAPCOM_SATURN_PORT_CANDIDATE_CHECKLIST.md",
     "docs/CAPCOM_SATURN_PORT_ACCEPTANCE_CHECKLIST.md",
     "docs/CAPCOM_SATURN_FIDELITY_STANDARD.md",
+    "docs/CPS2_SATURN_REFERENCE_ENGINE.md",
+    "docs/CPS2_SATURN_REFERENCE_ENGINE_AVP_ADAPTERS.md",
 )
+
+EVIDENCE_LABELS = ("MEASURED", "DECODED", "INFERRED", "ADAPTED", "UNRESOLVED")
 
 
 def load(path: str) -> dict[str, object]:
@@ -218,6 +225,95 @@ def main() -> int:
         raise RuntimeError(f"Unexpected Saturn memory anchors: {actual_anchors}")
     if len(memory.get("transitions", [])) != 3:
         raise RuntimeError("Saturn memory report must contain three anchor transitions")
+
+    vdp1 = load("data/mshvsf_saturn_vdp1_control_flow.json")
+    if vdp1.get("evidence_class") != "MEASURED_ON_MARVEL_NOT_YET_VALIDATED_ON_AVP":
+        raise RuntimeError("VDP1 control-flow report lost its AvP promotion boundary")
+    vdp1_anchors = {item["label"]: item["captured_frame"] for item in vdp1["anchors"]}
+    if vdp1_anchors != expected_anchors:
+        raise RuntimeError(f"Unexpected VDP1 control-flow anchors: {vdp1_anchors}")
+    for anchor in vdp1["anchors"]:
+        for key in ("reachable_slot_count", "sequential_slot_count", "stored_nonzero_slots"):
+            if key not in anchor:
+                raise RuntimeError(f"VDP1 anchor {anchor['label']} is missing {key}")
+        if anchor["stored_nonzero_slots"] <= anchor["reachable_slot_count"]:
+            raise RuntimeError(
+                f"VDP1 anchor {anchor['label']} no longer distinguishes reachable "
+                "commands from sequentially stored commands"
+            )
+        if anchor["control_flow_anomalies"]:
+            raise RuntimeError(
+                f"VDP1 anchor {anchor['label']} reports control-flow anomalies: "
+                f"{anchor['control_flow_anomalies']}"
+            )
+    for finding in vdp1["findings"]:
+        require_fields(
+            finding,
+            {"id", "claim", "holds", "consequence", "falsification", "evidence"},
+            f"vdp1_finding[{finding.get('id')}]",
+        )
+        if finding["evidence"] not in EVIDENCE_LABELS:
+            raise RuntimeError(f"Invalid VDP1 finding label: {finding['evidence']}")
+
+    video_audio = load("data/mshvsf_saturn_vdp2_scsp.json")
+    if video_audio.get("evidence_class") != "MEASURED_ON_MARVEL_NOT_YET_VALIDATED_ON_AVP":
+        raise RuntimeError("VDP2/SCSP report lost its AvP promotion boundary")
+    va_anchors = {item["label"]: item["captured_frame"] for item in video_audio["anchors"]}
+    if va_anchors != expected_anchors:
+        raise RuntimeError(f"Unexpected VDP2/SCSP anchors: {va_anchors}")
+    for anchor in video_audio["anchors"]:
+        if anchor["vdp2"]["vdp2_registers_readable"]:
+            raise RuntimeError(
+                f"VDP2 registers became readable at {anchor['label']}; the recorded "
+                "instrument limit is stale and layer claims must be re-derived"
+            )
+        if not anchor["vdp2"]["all_referenced_banks_populated"]:
+            raise RuntimeError(
+                f"A VDP1 colour bank at {anchor['label']} does not resolve into "
+                "populated colour RAM"
+            )
+    for transition in video_audio["transitions"]:
+        if not transition["scsp_slot_registers_identical"]:
+            raise RuntimeError(
+                f"SCSP slot registers changed between {transition['from']} and "
+                f"{transition['to']}; the static-slot finding no longer holds"
+            )
+        if transition["sound_ram_changed_bytes"] <= 0:
+            raise RuntimeError(
+                f"Sound RAM did not change between {transition['from']} and "
+                f"{transition['to']}; the streaming inference loses its support"
+            )
+    for finding in video_audio["findings"]:
+        require_fields(
+            finding,
+            {"id", "claim", "holds", "consequence", "falsification", "evidence"},
+            f"vdp2_scsp_finding[{finding.get('id')}]",
+        )
+        if finding["evidence"] not in EVIDENCE_LABELS:
+            raise RuntimeError(f"Invalid VDP2/SCSP finding label: {finding['evidence']}")
+
+    engine = load("data/reference_engine_normal_hit_report.json")
+    for claim_name, claim in engine["claims"].items():
+        if claim["evidence"] not in EVIDENCE_LABELS:
+            raise RuntimeError(f"Unlabelled reference-engine claim: {claim_name}")
+        if claim["evidence"] == "INFERRED" and not claim.get("falsification"):
+            raise RuntimeError(f"Inferred claim without falsification: {claim_name}")
+        if claim["evidence"] == "UNRESOLVED" and not claim.get("probe"):
+            raise RuntimeError(f"Unresolved claim without probe: {claim_name}")
+    counts = engine["evidence_label_counts"]
+    missing_labels = [label for label in EVIDENCE_LABELS if not counts.get(label)]
+    if missing_labels:
+        raise RuntimeError(f"Reference-engine report lacks labels: {missing_labels}")
+    if not engine["prohibited_inferences"]:
+        raise RuntimeError("Reference-engine report must state its prohibited inferences")
+    if not engine["required_avp_probe"].strip():
+        raise RuntimeError("Reference-engine report must name the required AvP probe")
+    for sentence in ("will_decide", "must_verify"):
+        if not engine["decision_statement"].get(sentence, "").strip():
+            raise RuntimeError(f"Reference-engine report must complete {sentence}")
+    for item in engine["inputs"]:
+        if len(item["sha256"]) != 64:
+            raise RuntimeError(f"Reference-engine input lacks a hash: {item['path']}")
 
     print(
         f"Validated {len(JSON_ARTIFACTS)} JSON artifacts, "

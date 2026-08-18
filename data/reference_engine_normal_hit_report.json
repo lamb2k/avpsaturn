@@ -1,0 +1,3127 @@
+{
+  "boundary": [
+    "This is a host-side executable specification, not a Saturn runtime.",
+    "It is not a CPS2 emulator and contains no 68000 interpreter.",
+    "It does not run on SH-2 and produces no Saturn executable.",
+    "Reference-title measurements calibrate the backend and are never budgets.",
+    "No measured value here authorises a constant in any implementation lane."
+  ],
+  "claims": {
+    "animation_record_format": {
+      "evidence": "DECODED",
+      "note": "Flags bit 15 redirects control flow; a 4-byte record closes the loop",
+      "source": "data/avsp_animation_scripts.json",
+      "value": "16-byte pose record: duration, flags, assembly pointer, 8-byte tail"
+    },
+    "attribute_palette_index": {
+      "evidence": "INFERRED",
+      "falsification": "A pose whose observed colour bank does not follow the low five attribute bits",
+      "source": "data/avsp_animation_scripts.json",
+      "value": "Attribute bits 0-4 hold the 16-colour subpalette index"
+    },
+    "attribute_tile_span": {
+      "evidence": "INFERRED",
+      "falsification": "An assembly whose declared budget does not equal the summed tile span under this bit split; one of 28 already disagrees by two tiles",
+      "source": "data/avsp_animation_scripts.json",
+      "value": "Attribute bits 8-11 and 12-15 hold horizontal and vertical tile span"
+    },
+    "audio_delivery_model": {
+      "evidence": "INFERRED",
+      "falsification": "A slot key-on write between the sampled anchors, or an anchor whose sound RAM is unchanged while audio is audibly playing",
+      "note": "Three static slots plus a per-transition sound-RAM refill fits a continuously-playing buffer; four sampled frames cannot see a write that happens between them",
+      "source": "data/mshvsf_saturn_vdp2_scsp.json",
+      "value": "Gameplay audio reaches the DAC as a mixed stream, not one keyed slot per event"
+    },
+    "cartridge_lifetime": {
+      "evidence": "UNRESOLVED",
+      "note": "A byte-stable combat window cannot show when the cartridge is written",
+      "probe": "Capture team and stage loading and compare cartridge contents before and after",
+      "value": null
+    },
+    "collision_geometry": {
+      "evidence": "UNRESOLVED",
+      "note": "The model raises an abstract contact event with no box extents",
+      "probe": "Decode actor-local hitbox and attack-box records and validate them against the game's own debug overlays",
+      "value": null
+    },
+    "damage_magnitude": {
+      "evidence": "UNRESOLVED",
+      "note": "Damage is carried as an opaque token, never as a number",
+      "probe": "Locate the health field and its writer, then confirm with an out-of-range whiff control that the field only moves on contact",
+      "value": null
+    },
+    "draw_order_is_priority": {
+      "evidence": "ADAPTED",
+      "note": "VDP1 has no per-command priority field, so list order is the only ordering",
+      "value": "Source assembly order becomes VDP1 list position"
+    },
+    "object_part_order": {
+      "evidence": "DECODED",
+      "source": "data/avsp_animation_scripts.json",
+      "value": "Selector-6 assemblies list object parts in an explicit draw order"
+    },
+    "scsp_cue_attribution": {
+      "evidence": "UNRESOLVED",
+      "note": "Slot registers cannot attribute a cue because they do not change; the evidence lives in the buffer refills, not in the slot set",
+      "probe": "Trace sound-RAM writes with a write watchpoint across an attack and an impact in isolation, with a whiff control, and attribute each refill region to a cue",
+      "value": null
+    },
+    "scsp_slot_set_is_static": {
+      "evidence": "MEASURED",
+      "note": "The one changing SCSP register byte is the same byte at every transition while sound RAM moves by roughly 16 KiB",
+      "source": "data/mshvsf_saturn_vdp2_scsp.json",
+      "value": "Only three of thirty-two SCSP slots hold register content, unchanged across the window"
+    },
+    "sh2_work_division": {
+      "evidence": "UNRESOLVED",
+      "note": "No evidence yet separates gameplay, list building and audio driver work",
+      "probe": "Trace master and slave SH-2 program counters across one frame boundary",
+      "value": null
+    },
+    "state_role_binding": {
+      "evidence": "ADAPTED",
+      "note": "Program-to-state roles are not proven; the binding exists so the model can run and is not a claim about the source game",
+      "value": "Scenario names which decoded program plays in which state"
+    },
+    "texture_layout": {
+      "evidence": "ADAPTED",
+      "note": "Chosen so byte accounting is reproducible; not an observed layout",
+      "value": "Textures are placed by a deterministic first-come allocator"
+    },
+    "trigger_timing": {
+      "evidence": "ADAPTED",
+      "note": "Real attack startup, active and recovery timing is unresolved",
+      "value": "Trigger and contact frames are scenario inputs"
+    },
+    "vdp1_color_mode": {
+      "evidence": "MEASURED",
+      "source": "data/mshvsf_saturn_vdp1_control_flow.json",
+      "value": "CMDPMOD 0x0880 for every drawn command: colour-bank mode, 16 colours"
+    },
+    "vdp1_control_flow_shape": {
+      "evidence": "MEASURED",
+      "note": "No jump, call, return or skip mode occurs at any of the four anchors",
+      "source": "data/mshvsf_saturn_vdp1_control_flow.json",
+      "value": "Every reachable command uses JUMP_NEXT; the list is a flat run to a draw-end"
+    },
+    "vdp1_draw_granularity": {
+      "evidence": "MEASURED",
+      "note": "1,233 drawn commands across four anchors, no other size present",
+      "source": "data/mshvsf_saturn_vdp1_control_flow.json",
+      "value": "Every drawn command is a 16x16 normal sprite"
+    },
+    "vdp2_colour_effects_during_combat": {
+      "evidence": "MEASURED",
+      "note": "16 bytes in one bank at attack start, 35 bytes across three banks at recovery",
+      "source": "data/mshvsf_saturn_vdp2_scsp.json",
+      "value": "Colour RAM changes inside the combat window while VDP2 VRAM does not"
+    },
+    "vdp2_layer_assignment": {
+      "evidence": "UNRESOLVED",
+      "note": "MEASURED: the VDP2 register block is entirely zero at all four anchors, so layer enables, plane maps, priorities and scroll values cannot be decoded from this capture. The gap is an instrument limit, not a missing parser",
+      "probe": "Use an instrument that can observe VDP2 register writes, such as a write watchpoint or breakpoint, because the register block itself reads back as all zeros",
+      "value": null
+    },
+    "vdp2_owns_sprite_colour": {
+      "evidence": "MEASURED",
+      "note": "Colour-bank mode sprites spend a VDP2 colour-RAM budget, not a VDP1 texture budget; 12 to 14 banks are live per anchor",
+      "source": "data/mshvsf_saturn_vdp2_scsp.json",
+      "value": "Every VDP1 sprite colour bank resolves into a populated VDP2 colour-RAM bank"
+    }
+  },
+  "decision_statement": {
+    "must_verify": "Before AvP adopts it, the AvP lane must verify its own per-frame reachable VDP1 command count, texture working set and colour-bank count for a real AvP actor at the same four anchors, on AvP evidence alone.",
+    "will_decide": "This will decide whether AvP should emit one VDP1 command per 16x16 tile in colour-bank mode with source assembly order as list order, or precompose poses into larger cels."
+  },
+  "evidence_label_counts": {
+    "ADAPTED": 4,
+    "DECODED": 2,
+    "INFERRED": 3,
+    "MEASURED": 6,
+    "UNRESOLVED": 6
+  },
+  "inputs": [
+    {
+      "evidence": "DECODED",
+      "note": "Source-form animation script and selector-6 assembly records, decoded by this repository's own decoder from private ROM data",
+      "path": "data/avsp_animation_scripts.json",
+      "role": "animation_scripts",
+      "sha256": "7d63775a983e0fc7489a3017bdd3947933e2fb2e51df4eed306c7ee4ea071ef6"
+    },
+    {
+      "evidence": "MEASURED",
+      "note": "Saturn VDP1 drawing mode and control-flow shape measured on the reference title; calibration only, never a budget",
+      "path": "data/mshvsf_saturn_vdp1_control_flow.json",
+      "role": "vdp1_control_flow",
+      "sha256": "54e6fece9020af8255bec515fb71034a07e076fe199a535587559c8cde7d189e"
+    },
+    {
+      "evidence": "MEASURED",
+      "note": "Colour ownership and SCSP slot activity for the same four anchors; responsibility mapping only",
+      "path": "data/mshvsf_saturn_vdp2_scsp.json",
+      "role": "vdp2_scsp",
+      "sha256": "a17f2e9c8d013d10436522ce7749ba624cc0fa3f5bc157a0bcf68049865b375a"
+    },
+    {
+      "evidence": "MEASURED",
+      "note": "Per-region residency and change evidence for the four anchors",
+      "path": "data/mshvsf_saturn_runtime_memory.json",
+      "role": "runtime_memory",
+      "sha256": "28085bc843099cc2ee9d6473d0987e7a5004bb11169b9c4f952ecf07217dfbf8"
+    }
+  ],
+  "layers": {
+    "saturn_backend": {
+      "audio_routing": {
+        "default": "UNRESOLVED",
+        "routes": {
+          "attack_swing": "SCSP_MIXED_STREAM",
+          "impact": "SCSP_MIXED_STREAM",
+          "music": "CDDA"
+        }
+      },
+      "calibration": {
+        "color_bank_stride": 16,
+        "pmod": "0x0880",
+        "source": "MSHvSF Saturn VDP1 command-list control-flow analysis",
+        "tile_bytes": 128,
+        "tile_size": [
+          16,
+          16
+        ]
+      },
+      "phases": [
+        {
+          "loads": [
+            "actor_pose_textures"
+          ],
+          "phase": "normal_hit_window",
+          "retains": [
+            "actor_pose_textures",
+            "stage_background"
+          ],
+          "retires": []
+        }
+      ],
+      "reference_envelope": {
+        "anchors": [
+          {
+            "drawn_commands": 293,
+            "label": "idle",
+            "reachable_slots": 296,
+            "sequentially_stored_slots": 296,
+            "stored_nonzero_slots": 772
+          },
+          {
+            "drawn_commands": 331,
+            "label": "normal_active",
+            "reachable_slots": 334,
+            "sequentially_stored_slots": 334,
+            "stored_nonzero_slots": 772
+          },
+          {
+            "drawn_commands": 305,
+            "label": "impact",
+            "reachable_slots": 308,
+            "sequentially_stored_slots": 308,
+            "stored_nonzero_slots": 772
+          },
+          {
+            "drawn_commands": 304,
+            "label": "recovery",
+            "reachable_slots": 307,
+            "sequentially_stored_slots": 307,
+            "stored_nonzero_slots": 772
+          }
+        ],
+        "available": true,
+        "evidence": "MEASURED",
+        "scope": "reference title only; never an implementation budget"
+      },
+      "resources": {
+        "note": "Regions are physically distinct and are never summed into a single machine total.",
+        "overcommitted": [],
+        "regions": [
+          {
+            "capacity_bytes": 4194304,
+            "name": "cartridge_dram",
+            "owner": "expansion cartridge",
+            "per_frame_bytes": 0,
+            "resident_bytes": 0,
+            "resident_fraction": 0.0,
+            "responsibility": {
+              "evidence": "MEASURED",
+              "note": "Stable residency only; allocation and lifetime remain unresolved",
+              "source": "data/mshvsf_saturn_runtime_memory.json",
+              "value": "Byte-identical through the whole combat window"
+            }
+          },
+          {
+            "capacity_bytes": 524288,
+            "name": "sound_ram",
+            "owner": "SCSP",
+            "per_frame_bytes": 0,
+            "resident_bytes": 0,
+            "resident_fraction": 0.0,
+            "responsibility": {
+              "evidence": "MEASURED",
+              "note": "Which refill region carries which cue is unresolved",
+              "source": "data/mshvsf_saturn_vdp2_scsp.json",
+              "value": "A refilled mixed-audio buffer: five changed pages on every transition while the SCSP slot registers stay identical"
+            }
+          },
+          {
+            "name": "vdp1_command_table",
+            "owner": "VDP1",
+            "per_frame_bytes": 2080,
+            "resident_bytes": 0,
+            "responsibility": {
+              "evidence": "MEASURED",
+              "note": "Marvel reaches 296-334 slots at the four normal-hit anchors",
+              "source": "data/mshvsf_saturn_vdp1_control_flow.json",
+              "value": "One 32-byte command slot per drawn part; the list is rebuilt per frame"
+            }
+          },
+          {
+            "capacity_bytes": 524288,
+            "name": "vdp1_texture",
+            "owner": "VDP1",
+            "per_frame_bytes": 0,
+            "resident_bytes": 51328,
+            "resident_fraction": 0.0979,
+            "responsibility": {
+              "evidence": "MEASURED",
+              "note": "Command table and textures share the same 512 KiB VDP1 VRAM",
+              "source": "data/mshvsf_saturn_vdp1_control_flow.json",
+              "value": "Character pixels referenced by CMDSRCA, shared across frames"
+            }
+          },
+          {
+            "capacity_bytes": 4096,
+            "name": "vdp2_color_ram",
+            "owner": "VDP2",
+            "per_frame_bytes": 0,
+            "resident_bytes": 32,
+            "resident_fraction": 0.007812,
+            "responsibility": {
+              "evidence": "MEASURED",
+              "note": "This is where colour-bank sprites actually spend memory",
+              "source": "data/mshvsf_saturn_vdp2_scsp.json",
+              "value": "16-colour banks addressed by CMDCOLR; every referenced bank is populated"
+            }
+          },
+          {
+            "capacity_bytes": 524288,
+            "name": "vdp2_vram",
+            "owner": "VDP2",
+            "per_frame_bytes": 0,
+            "resident_bytes": 0,
+            "resident_fraction": 0.0,
+            "responsibility": {
+              "evidence": "MEASURED",
+              "note": "Stage residency is stable during combat; load-time ownership is separate",
+              "source": "data/mshvsf_saturn_runtime_memory.json",
+              "value": "Scrolling background layers; byte-identical across the combat window"
+            }
+          },
+          {
+            "capacity_bytes": 1048576,
+            "name": "work_ram_high",
+            "owner": "SH-2",
+            "per_frame_bytes": 0,
+            "resident_bytes": 0,
+            "resident_fraction": 0.0,
+            "responsibility": {
+              "evidence": "MEASURED",
+              "note": "Actor, health and collision fields are not yet located inside it",
+              "source": "data/mshvsf_saturn_runtime_memory.json",
+              "value": "Principal gameplay state; 39-42 changed pages per transition"
+            }
+          },
+          {
+            "capacity_bytes": 1048576,
+            "name": "work_ram_low",
+            "owner": "SH-2",
+            "per_frame_bytes": 0,
+            "resident_bytes": 0,
+            "resident_fraction": 0.0,
+            "responsibility": {
+              "evidence": "MEASURED",
+              "note": "Which structures live here is unresolved",
+              "source": "data/mshvsf_saturn_runtime_memory.json",
+              "value": "Small per-frame gameplay mutation; 2-8 changed pages per transition"
+            }
+          }
+        ]
+      },
+      "vdp1_pressure": {
+        "note": "Command pressure is reported as a bounded range because the object-part tile span is an inferred attribute reading. per_part is the floor (one command per source part); per_tile is the ceiling and is the granularity the reference capture measures.",
+        "per_part": {
+          "max_command_slots": 7,
+          "max_command_table_bytes": 224,
+          "max_texture_bytes": 7936,
+          "min_command_slots": 6
+        },
+        "per_tile": {
+          "max_command_slots": 65,
+          "max_command_table_bytes": 2080,
+          "max_texture_bytes": 7936,
+          "min_command_slots": 51
+        }
+      }
+    },
+    "source_semantic": {
+      "actor": "reference_attacker",
+      "animation_control_flow": [
+        {
+          "assembly_order": [
+            "0x13E00A"
+          ],
+          "cycle_frames": 10,
+          "durations": [
+            10
+          ],
+          "jump_count": 1,
+          "loops": true,
+          "pose_count": 1,
+          "pose_order": [
+            "0x13CE70"
+          ],
+          "program": "0x13CE70",
+          "state": "attack_active"
+        },
+        {
+          "assembly_order": [
+            "0x13E04C"
+          ],
+          "cycle_frames": 5,
+          "durations": [
+            5
+          ],
+          "jump_count": 1,
+          "loops": true,
+          "pose_count": 1,
+          "pose_order": [
+            "0x13CE4C"
+          ],
+          "program": "0x13CE4C",
+          "state": "attack_impact"
+        },
+        {
+          "assembly_order": [
+            "0x13DE46"
+          ],
+          "cycle_frames": 3,
+          "durations": [
+            3
+          ],
+          "jump_count": 1,
+          "loops": true,
+          "pose_count": 1,
+          "pose_order": [
+            "0x13CEC4"
+          ],
+          "program": "0x13CEC4",
+          "state": "attack_recovery"
+        },
+        {
+          "assembly_order": [
+            "0x13E574",
+            "0x13E592",
+            "0x13E5B6",
+            "0x13E5D4",
+            "0x13E5F8",
+            "0x13E616",
+            "0x13E63A",
+            "0x13E65E"
+          ],
+          "cycle_frames": 48,
+          "durations": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "jump_count": 1,
+          "loops": true,
+          "pose_count": 8,
+          "pose_order": [
+            "0x13CC18",
+            "0x13CC28",
+            "0x13CC38",
+            "0x13CC48",
+            "0x13CC58",
+            "0x13CC68",
+            "0x13CC78",
+            "0x13CC88"
+          ],
+          "program": "0x13CC18",
+          "state": "idle"
+        }
+      ],
+      "defender": "reference_defender",
+      "object_assemblies": [
+        {
+          "address": "0x13DE46",
+          "budget": 62,
+          "budget_matches_tile_total": true,
+          "origin": [
+            -26,
+            -12
+          ],
+          "palettes": [
+            27
+          ],
+          "part_count": 3,
+          "parts": [
+            {
+              "attribute": "0x271B",
+              "code": "0x8297",
+              "layout": [
+                -112,
+                -96
+              ],
+              "order": 0,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 24,
+              "tile_span": [
+                8,
+                3
+              ]
+            },
+            {
+              "attribute": "0x2B1B",
+              "code": "0x8340",
+              "layout": [
+                -112,
+                -48
+              ],
+              "order": 1,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 36,
+              "tile_span": [
+                12,
+                3
+              ]
+            },
+            {
+              "attribute": "0x011B",
+              "code": "0x82CE",
+              "layout": [
+                64,
+                -64
+              ],
+              "order": 2,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 2,
+              "tile_span": [
+                2,
+                1
+              ]
+            }
+          ],
+          "selector": 6,
+          "tile_total": 62
+        },
+        {
+          "address": "0x13E00A",
+          "budget": 62,
+          "budget_matches_tile_total": true,
+          "origin": [
+            -32,
+            3
+          ],
+          "palettes": [
+            27
+          ],
+          "part_count": 4,
+          "parts": [
+            {
+              "attribute": "0x271B",
+              "code": "0x8508",
+              "layout": [
+                -112,
+                -80
+              ],
+              "order": 0,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 24,
+              "tile_span": [
+                8,
+                3
+              ]
+            },
+            {
+              "attribute": "0x141B",
+              "code": "0x8538",
+              "layout": [
+                -96,
+                -112
+              ],
+              "order": 1,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 10,
+              "tile_span": [
+                5,
+                2
+              ]
+            },
+            {
+              "attribute": "0x141B",
+              "code": "0x8552",
+              "layout": [
+                -48,
+                -32
+              ],
+              "order": 2,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 10,
+              "tile_span": [
+                5,
+                2
+              ]
+            },
+            {
+              "attribute": "0x251B",
+              "code": "0x8522",
+              "layout": [
+                16,
+                -112
+              ],
+              "order": 3,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 18,
+              "tile_span": [
+                6,
+                3
+              ]
+            }
+          ],
+          "selector": 6,
+          "tile_total": 62
+        },
+        {
+          "address": "0x13E04C",
+          "budget": 48,
+          "budget_matches_tile_total": true,
+          "origin": [
+            -52,
+            23
+          ],
+          "palettes": [
+            27
+          ],
+          "part_count": 3,
+          "parts": [
+            {
+              "attribute": "0x421B",
+              "code": "0xD900",
+              "layout": [
+                -128,
+                -80
+              ],
+              "order": 0,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 15,
+              "tile_span": [
+                3,
+                5
+              ]
+            },
+            {
+              "attribute": "0x421B",
+              "code": "0xD85D",
+              "layout": [
+                -80,
+                -96
+              ],
+              "order": 1,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 15,
+              "tile_span": [
+                3,
+                5
+              ]
+            },
+            {
+              "attribute": "0x181B",
+              "code": "0xD8E6",
+              "layout": [
+                -32,
+                -48
+              ],
+              "order": 2,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 18,
+              "tile_span": [
+                9,
+                2
+              ]
+            }
+          ],
+          "selector": 6,
+          "tile_total": 48
+        },
+        {
+          "address": "0x13E574",
+          "budget": 58,
+          "budget_matches_tile_total": true,
+          "origin": [
+            -26,
+            -5
+          ],
+          "palettes": [
+            27
+          ],
+          "part_count": 3,
+          "parts": [
+            {
+              "attribute": "0x161B",
+              "code": "0xDC06",
+              "layout": [
+                -112,
+                -96
+              ],
+              "order": 0,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 14,
+              "tile_span": [
+                7,
+                2
+              ]
+            },
+            {
+              "attribute": "0x181B",
+              "code": "0xDC26",
+              "layout": [
+                -112,
+                -64
+              ],
+              "order": 1,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 18,
+              "tile_span": [
+                9,
+                2
+              ]
+            },
+            {
+              "attribute": "0x1C1B",
+              "code": "0xDC60",
+              "layout": [
+                -96,
+                -32
+              ],
+              "order": 2,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 26,
+              "tile_span": [
+                13,
+                2
+              ]
+            }
+          ],
+          "selector": 6,
+          "tile_total": 58
+        },
+        {
+          "address": "0x13E592",
+          "budget": 55,
+          "budget_matches_tile_total": true,
+          "origin": [
+            -22,
+            -2
+          ],
+          "palettes": [
+            27
+          ],
+          "part_count": 4,
+          "parts": [
+            {
+              "attribute": "0x161B",
+              "code": "0xDC46",
+              "layout": [
+                -112,
+                -96
+              ],
+              "order": 0,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 14,
+              "tile_span": [
+                7,
+                2
+              ]
+            },
+            {
+              "attribute": "0x271B",
+              "code": "0xDC80",
+              "layout": [
+                -112,
+                -64
+              ],
+              "order": 1,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 24,
+              "tile_span": [
+                8,
+                3
+              ]
+            },
+            {
+              "attribute": "0x041B",
+              "code": "0xDCA8",
+              "layout": [
+                -64,
+                -16
+              ],
+              "order": 2,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 5,
+              "tile_span": [
+                5,
+                1
+              ]
+            },
+            {
+              "attribute": "0x151B",
+              "code": "0xDC88",
+              "layout": [
+                16,
+                -48
+              ],
+              "order": 3,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 12,
+              "tile_span": [
+                6,
+                2
+              ]
+            }
+          ],
+          "selector": 6,
+          "tile_total": 55
+        },
+        {
+          "address": "0x13E5B6",
+          "budget": 60,
+          "budget_matches_tile_total": true,
+          "origin": [
+            -43,
+            0
+          ],
+          "palettes": [
+            27
+          ],
+          "part_count": 3,
+          "parts": [
+            {
+              "attribute": "0x161B",
+              "code": "0xDCB0",
+              "layout": [
+                -128,
+                -96
+              ],
+              "order": 0,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 14,
+              "tile_span": [
+                7,
+                2
+              ]
+            },
+            {
+              "attribute": "0x181B",
+              "code": "0xDCB7",
+              "layout": [
+                -128,
+                -64
+              ],
+              "order": 1,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 18,
+              "tile_span": [
+                9,
+                2
+              ]
+            },
+            {
+              "attribute": "0x1D1B",
+              "code": "0xDCD0",
+              "layout": [
+                -112,
+                -32
+              ],
+              "order": 2,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 28,
+              "tile_span": [
+                14,
+                2
+              ]
+            }
+          ],
+          "selector": 6,
+          "tile_total": 60
+        },
+        {
+          "address": "0x13E5D4",
+          "budget": 56,
+          "budget_matches_tile_total": true,
+          "origin": [
+            -27,
+            -2
+          ],
+          "palettes": [
+            27
+          ],
+          "part_count": 4,
+          "parts": [
+            {
+              "attribute": "0x161B",
+              "code": "0xDD00",
+              "layout": [
+                -112,
+                -96
+              ],
+              "order": 0,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 14,
+              "tile_span": [
+                7,
+                2
+              ]
+            },
+            {
+              "attribute": "0x281B",
+              "code": "0xDD20",
+              "layout": [
+                -112,
+                -64
+              ],
+              "order": 1,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 27,
+              "tile_span": [
+                9,
+                3
+              ]
+            },
+            {
+              "attribute": "0x041B",
+              "code": "0xDCF0",
+              "layout": [
+                -64,
+                -16
+              ],
+              "order": 2,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 5,
+              "tile_span": [
+                5,
+                1
+              ]
+            },
+            {
+              "attribute": "0x141B",
+              "code": "0xDD07",
+              "layout": [
+                32,
+                -32
+              ],
+              "order": 3,
+              "palette_index": 27,
+              "source_flip": [
+                false,
+                false
+              ],
+              "tile_count": 10,
+              "tile_span": [
+                5,
+                2
+              ]
+            }
+          ],
+          "selector": 6,
+          "tile_total": 56
+        }
+      ],
+      "state_machine": {
+        "initial": "idle",
+        "states": [
+          {
+            "completion": "timed",
+            "name": "attack_active",
+            "program": "0x13CE70"
+          },
+          {
+            "completion": "timed",
+            "name": "attack_impact",
+            "program": "0x13CE4C"
+          },
+          {
+            "completion": "timed",
+            "name": "attack_recovery",
+            "program": "0x13CEC4"
+          },
+          {
+            "completion": "held",
+            "name": "idle",
+            "program": "0x13CC18"
+          }
+        ],
+        "transitions": [
+          {
+            "from": "idle",
+            "to": "attack_active",
+            "trigger": "attack_input"
+          },
+          {
+            "from": "attack_active",
+            "to": "attack_impact",
+            "trigger": "contact"
+          },
+          {
+            "from": "attack_impact",
+            "to": "attack_recovery",
+            "trigger": "impact_end"
+          },
+          {
+            "from": "attack_recovery",
+            "to": "idle",
+            "trigger": "recovery_end"
+          }
+        ]
+      },
+      "tile_span_agreement": {
+        "agreeing": 27,
+        "assemblies": 28,
+        "disagreeing": 1,
+        "disagreements": [
+          {
+            "assembly": "0x13E36E",
+            "budget": 59,
+            "difference": -2,
+            "inferred_tile_total": 57
+          }
+        ]
+      }
+    },
+    "translation": {
+      "coordinate_handling": "Packed source coordinate fields are sign-extended before use; part positions are plain signed screen offsets from the actor origin.",
+      "flip_handling": "Actor facing and the part's own source flip combine by exclusive or; a mirrored multi-tile part also reverses its tile grid.",
+      "ordering_rule": "Source assembly order is preserved exactly and becomes target list position, because the target has no per-command priority field.",
+      "palette_rule": "Palettes cross the boundary as identities, not as target addresses."
+    }
+  },
+  "prohibited_inferences": [
+    "A program's role in this scenario is a modelling choice, not evidence that the program is an attack, impact or recovery animation.",
+    "A stable cartridge or VDP2 region during one combat window does not prove load-time ownership or full-match residency.",
+    "A static SCSP slot set across four sampled frames does not prove that no slot is ever keyed per event; only a write trace can.",
+    "Similar record shapes across two Capcom titles do not make one title's structure mandatory for the other.",
+    "The inferred attribute tile span and palette index are not confirmed field definitions; one of twenty-eight assemblies already disagrees with the tile-span reading.",
+    "The reference title's reachable command counts, changed-page counts, cartridge occupancy or texture spans are not budgets for any other game.",
+    "The scheduled trigger and contact frames are not the source game's startup, active or recovery timing."
+  ],
+  "purpose": "Show how one CPS2 normal attack becomes native Saturn work, with every field labelled measured, decoded, inferred, adapted or unresolved.",
+  "required_avp_probe": "Before any part of this model is promoted into the AvP implementation lane, decode one AvP actor's real attack program, gate its assemblies against captured pose oracles, then capture AvP's own VDP1 command list at idle, attack-active, impact and recovery and confirm AvP's own reachable command count, sprite granularity, colour-bank use and per-region residency. Add an out-of-range whiff replay as the falsification control before treating any changing field as collision or damage.",
+  "run": {
+    "anchor_states": {
+      "idle": "idle",
+      "impact": "attack_impact",
+      "normal_active": "attack_active",
+      "recovery": "attack_recovery"
+    },
+    "event_histogram": {
+      "audio": 2,
+      "collision": 1,
+      "damage": 1,
+      "input": 4,
+      "pose": 9,
+      "render": 54,
+      "state_enter": 5,
+      "state_exit": 4
+    },
+    "event_order_is_total": true,
+    "frame_count": 54,
+    "frames": [
+      {
+        "assembly": "0x13E574",
+        "frame": 0,
+        "part_count": 3,
+        "pose": "0x13CC18",
+        "state": "idle",
+        "tile_total": 58,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7424
+        },
+        "vdp1_per_tile": {
+          "command_slots": 61,
+          "command_table_bytes": 1952,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7424
+        }
+      },
+      {
+        "assembly": "0x13E574",
+        "frame": 1,
+        "part_count": 3,
+        "pose": "0x13CC18",
+        "state": "idle",
+        "tile_total": 58,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7424
+        },
+        "vdp1_per_tile": {
+          "command_slots": 61,
+          "command_table_bytes": 1952,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7424
+        }
+      },
+      {
+        "assembly": "0x13E574",
+        "frame": 2,
+        "part_count": 3,
+        "pose": "0x13CC18",
+        "state": "idle",
+        "tile_total": 58,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7424
+        },
+        "vdp1_per_tile": {
+          "command_slots": 61,
+          "command_table_bytes": 1952,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7424
+        }
+      },
+      {
+        "assembly": "0x13E574",
+        "frame": 3,
+        "part_count": 3,
+        "pose": "0x13CC18",
+        "state": "idle",
+        "tile_total": 58,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7424
+        },
+        "vdp1_per_tile": {
+          "command_slots": 61,
+          "command_table_bytes": 1952,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7424
+        }
+      },
+      {
+        "assembly": "0x13E574",
+        "frame": 4,
+        "part_count": 3,
+        "pose": "0x13CC18",
+        "state": "idle",
+        "tile_total": 58,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7424
+        },
+        "vdp1_per_tile": {
+          "command_slots": 61,
+          "command_table_bytes": 1952,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7424
+        }
+      },
+      {
+        "assembly": "0x13E574",
+        "frame": 5,
+        "part_count": 3,
+        "pose": "0x13CC18",
+        "state": "idle",
+        "tile_total": 58,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7424
+        },
+        "vdp1_per_tile": {
+          "command_slots": 61,
+          "command_table_bytes": 1952,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7424
+        }
+      },
+      {
+        "assembly": "0x13E592",
+        "frame": 6,
+        "part_count": 4,
+        "pose": "0x13CC28",
+        "state": "idle",
+        "tile_total": 55,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7040
+        },
+        "vdp1_per_tile": {
+          "command_slots": 58,
+          "command_table_bytes": 1856,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7040
+        }
+      },
+      {
+        "assembly": "0x13E592",
+        "frame": 7,
+        "part_count": 4,
+        "pose": "0x13CC28",
+        "state": "idle",
+        "tile_total": 55,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7040
+        },
+        "vdp1_per_tile": {
+          "command_slots": 58,
+          "command_table_bytes": 1856,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7040
+        }
+      },
+      {
+        "assembly": "0x13E592",
+        "frame": 8,
+        "part_count": 4,
+        "pose": "0x13CC28",
+        "state": "idle",
+        "tile_total": 55,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7040
+        },
+        "vdp1_per_tile": {
+          "command_slots": 58,
+          "command_table_bytes": 1856,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7040
+        }
+      },
+      {
+        "assembly": "0x13E592",
+        "frame": 9,
+        "part_count": 4,
+        "pose": "0x13CC28",
+        "state": "idle",
+        "tile_total": 55,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7040
+        },
+        "vdp1_per_tile": {
+          "command_slots": 58,
+          "command_table_bytes": 1856,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7040
+        }
+      },
+      {
+        "assembly": "0x13E592",
+        "frame": 10,
+        "part_count": 4,
+        "pose": "0x13CC28",
+        "state": "idle",
+        "tile_total": 55,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7040
+        },
+        "vdp1_per_tile": {
+          "command_slots": 58,
+          "command_table_bytes": 1856,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7040
+        }
+      },
+      {
+        "assembly": "0x13E592",
+        "frame": 11,
+        "part_count": 4,
+        "pose": "0x13CC28",
+        "state": "idle",
+        "tile_total": 55,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7040
+        },
+        "vdp1_per_tile": {
+          "command_slots": 58,
+          "command_table_bytes": 1856,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7040
+        }
+      },
+      {
+        "assembly": "0x13E5B6",
+        "frame": 12,
+        "part_count": 3,
+        "pose": "0x13CC38",
+        "state": "idle",
+        "tile_total": 60,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7680
+        },
+        "vdp1_per_tile": {
+          "command_slots": 63,
+          "command_table_bytes": 2016,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7680
+        }
+      },
+      {
+        "assembly": "0x13E5B6",
+        "frame": 13,
+        "part_count": 3,
+        "pose": "0x13CC38",
+        "state": "idle",
+        "tile_total": 60,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7680
+        },
+        "vdp1_per_tile": {
+          "command_slots": 63,
+          "command_table_bytes": 2016,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7680
+        }
+      },
+      {
+        "assembly": "0x13E5B6",
+        "frame": 14,
+        "part_count": 3,
+        "pose": "0x13CC38",
+        "state": "idle",
+        "tile_total": 60,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7680
+        },
+        "vdp1_per_tile": {
+          "command_slots": 63,
+          "command_table_bytes": 2016,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7680
+        }
+      },
+      {
+        "assembly": "0x13E5B6",
+        "frame": 15,
+        "part_count": 3,
+        "pose": "0x13CC38",
+        "state": "idle",
+        "tile_total": 60,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7680
+        },
+        "vdp1_per_tile": {
+          "command_slots": 63,
+          "command_table_bytes": 2016,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7680
+        }
+      },
+      {
+        "assembly": "0x13E5B6",
+        "frame": 16,
+        "part_count": 3,
+        "pose": "0x13CC38",
+        "state": "idle",
+        "tile_total": 60,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7680
+        },
+        "vdp1_per_tile": {
+          "command_slots": 63,
+          "command_table_bytes": 2016,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7680
+        }
+      },
+      {
+        "assembly": "0x13E5B6",
+        "frame": 17,
+        "part_count": 3,
+        "pose": "0x13CC38",
+        "state": "idle",
+        "tile_total": 60,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7680
+        },
+        "vdp1_per_tile": {
+          "command_slots": 63,
+          "command_table_bytes": 2016,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7680
+        }
+      },
+      {
+        "assembly": "0x13E5D4",
+        "frame": 18,
+        "part_count": 4,
+        "pose": "0x13CC48",
+        "state": "idle",
+        "tile_total": 56,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7168
+        },
+        "vdp1_per_tile": {
+          "command_slots": 59,
+          "command_table_bytes": 1888,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7168
+        }
+      },
+      {
+        "assembly": "0x13E5D4",
+        "frame": 19,
+        "part_count": 4,
+        "pose": "0x13CC48",
+        "state": "idle",
+        "tile_total": 56,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7168
+        },
+        "vdp1_per_tile": {
+          "command_slots": 59,
+          "command_table_bytes": 1888,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7168
+        }
+      },
+      {
+        "assembly": "0x13E5D4",
+        "frame": 20,
+        "part_count": 4,
+        "pose": "0x13CC48",
+        "state": "idle",
+        "tile_total": 56,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7168
+        },
+        "vdp1_per_tile": {
+          "command_slots": 59,
+          "command_table_bytes": 1888,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7168
+        }
+      },
+      {
+        "assembly": "0x13E5D4",
+        "frame": 21,
+        "part_count": 4,
+        "pose": "0x13CC48",
+        "state": "idle",
+        "tile_total": 56,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7168
+        },
+        "vdp1_per_tile": {
+          "command_slots": 59,
+          "command_table_bytes": 1888,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7168
+        }
+      },
+      {
+        "assembly": "0x13E5D4",
+        "frame": 22,
+        "part_count": 4,
+        "pose": "0x13CC48",
+        "state": "idle",
+        "tile_total": 56,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7168
+        },
+        "vdp1_per_tile": {
+          "command_slots": 59,
+          "command_table_bytes": 1888,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7168
+        }
+      },
+      {
+        "assembly": "0x13E5D4",
+        "frame": 23,
+        "part_count": 4,
+        "pose": "0x13CC48",
+        "state": "idle",
+        "tile_total": 56,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7168
+        },
+        "vdp1_per_tile": {
+          "command_slots": 59,
+          "command_table_bytes": 1888,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7168
+        }
+      },
+      {
+        "assembly": "0x13E00A",
+        "frame": 24,
+        "part_count": 4,
+        "pose": "0x13CE70",
+        "state": "attack_active",
+        "tile_total": 62,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7936
+        },
+        "vdp1_per_tile": {
+          "command_slots": 65,
+          "command_table_bytes": 2080,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7936
+        }
+      },
+      {
+        "assembly": "0x13E00A",
+        "frame": 25,
+        "part_count": 4,
+        "pose": "0x13CE70",
+        "state": "attack_active",
+        "tile_total": 62,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7936
+        },
+        "vdp1_per_tile": {
+          "command_slots": 65,
+          "command_table_bytes": 2080,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7936
+        }
+      },
+      {
+        "assembly": "0x13E00A",
+        "frame": 26,
+        "part_count": 4,
+        "pose": "0x13CE70",
+        "state": "attack_active",
+        "tile_total": 62,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7936
+        },
+        "vdp1_per_tile": {
+          "command_slots": 65,
+          "command_table_bytes": 2080,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7936
+        }
+      },
+      {
+        "assembly": "0x13E00A",
+        "frame": 27,
+        "part_count": 4,
+        "pose": "0x13CE70",
+        "state": "attack_active",
+        "tile_total": 62,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7936
+        },
+        "vdp1_per_tile": {
+          "command_slots": 65,
+          "command_table_bytes": 2080,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7936
+        }
+      },
+      {
+        "assembly": "0x13E00A",
+        "frame": 28,
+        "part_count": 4,
+        "pose": "0x13CE70",
+        "state": "attack_active",
+        "tile_total": 62,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7936
+        },
+        "vdp1_per_tile": {
+          "command_slots": 65,
+          "command_table_bytes": 2080,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7936
+        }
+      },
+      {
+        "assembly": "0x13E00A",
+        "frame": 29,
+        "part_count": 4,
+        "pose": "0x13CE70",
+        "state": "attack_active",
+        "tile_total": 62,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7936
+        },
+        "vdp1_per_tile": {
+          "command_slots": 65,
+          "command_table_bytes": 2080,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7936
+        }
+      },
+      {
+        "assembly": "0x13E00A",
+        "frame": 30,
+        "part_count": 4,
+        "pose": "0x13CE70",
+        "state": "attack_active",
+        "tile_total": 62,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7936
+        },
+        "vdp1_per_tile": {
+          "command_slots": 65,
+          "command_table_bytes": 2080,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7936
+        }
+      },
+      {
+        "assembly": "0x13E00A",
+        "frame": 31,
+        "part_count": 4,
+        "pose": "0x13CE70",
+        "state": "attack_active",
+        "tile_total": 62,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7936
+        },
+        "vdp1_per_tile": {
+          "command_slots": 65,
+          "command_table_bytes": 2080,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7936
+        }
+      },
+      {
+        "assembly": "0x13E00A",
+        "frame": 32,
+        "part_count": 4,
+        "pose": "0x13CE70",
+        "state": "attack_active",
+        "tile_total": 62,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7936
+        },
+        "vdp1_per_tile": {
+          "command_slots": 65,
+          "command_table_bytes": 2080,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7936
+        }
+      },
+      {
+        "assembly": "0x13E00A",
+        "frame": 33,
+        "part_count": 4,
+        "pose": "0x13CE70",
+        "state": "attack_active",
+        "tile_total": 62,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7936
+        },
+        "vdp1_per_tile": {
+          "command_slots": 65,
+          "command_table_bytes": 2080,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7936
+        }
+      },
+      {
+        "assembly": "0x13E04C",
+        "frame": 34,
+        "part_count": 3,
+        "pose": "0x13CE4C",
+        "state": "attack_impact",
+        "tile_total": 48,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 6144
+        },
+        "vdp1_per_tile": {
+          "command_slots": 51,
+          "command_table_bytes": 1632,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 6144
+        }
+      },
+      {
+        "assembly": "0x13E04C",
+        "frame": 35,
+        "part_count": 3,
+        "pose": "0x13CE4C",
+        "state": "attack_impact",
+        "tile_total": 48,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 6144
+        },
+        "vdp1_per_tile": {
+          "command_slots": 51,
+          "command_table_bytes": 1632,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 6144
+        }
+      },
+      {
+        "assembly": "0x13E04C",
+        "frame": 36,
+        "part_count": 3,
+        "pose": "0x13CE4C",
+        "state": "attack_impact",
+        "tile_total": 48,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 6144
+        },
+        "vdp1_per_tile": {
+          "command_slots": 51,
+          "command_table_bytes": 1632,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 6144
+        }
+      },
+      {
+        "assembly": "0x13E04C",
+        "frame": 37,
+        "part_count": 3,
+        "pose": "0x13CE4C",
+        "state": "attack_impact",
+        "tile_total": 48,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 6144
+        },
+        "vdp1_per_tile": {
+          "command_slots": 51,
+          "command_table_bytes": 1632,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 6144
+        }
+      },
+      {
+        "assembly": "0x13E04C",
+        "frame": 38,
+        "part_count": 3,
+        "pose": "0x13CE4C",
+        "state": "attack_impact",
+        "tile_total": 48,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 6144
+        },
+        "vdp1_per_tile": {
+          "command_slots": 51,
+          "command_table_bytes": 1632,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 6144
+        }
+      },
+      {
+        "assembly": "0x13DE46",
+        "frame": 39,
+        "part_count": 3,
+        "pose": "0x13CEC4",
+        "state": "attack_recovery",
+        "tile_total": 62,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7936
+        },
+        "vdp1_per_tile": {
+          "command_slots": 65,
+          "command_table_bytes": 2080,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7936
+        }
+      },
+      {
+        "assembly": "0x13DE46",
+        "frame": 40,
+        "part_count": 3,
+        "pose": "0x13CEC4",
+        "state": "attack_recovery",
+        "tile_total": 62,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7936
+        },
+        "vdp1_per_tile": {
+          "command_slots": 65,
+          "command_table_bytes": 2080,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7936
+        }
+      },
+      {
+        "assembly": "0x13DE46",
+        "frame": 41,
+        "part_count": 3,
+        "pose": "0x13CEC4",
+        "state": "attack_recovery",
+        "tile_total": 62,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7936
+        },
+        "vdp1_per_tile": {
+          "command_slots": 65,
+          "command_table_bytes": 2080,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7936
+        }
+      },
+      {
+        "assembly": "0x13E574",
+        "frame": 42,
+        "part_count": 3,
+        "pose": "0x13CC18",
+        "state": "idle",
+        "tile_total": 58,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7424
+        },
+        "vdp1_per_tile": {
+          "command_slots": 61,
+          "command_table_bytes": 1952,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7424
+        }
+      },
+      {
+        "assembly": "0x13E574",
+        "frame": 43,
+        "part_count": 3,
+        "pose": "0x13CC18",
+        "state": "idle",
+        "tile_total": 58,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7424
+        },
+        "vdp1_per_tile": {
+          "command_slots": 61,
+          "command_table_bytes": 1952,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7424
+        }
+      },
+      {
+        "assembly": "0x13E574",
+        "frame": 44,
+        "part_count": 3,
+        "pose": "0x13CC18",
+        "state": "idle",
+        "tile_total": 58,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7424
+        },
+        "vdp1_per_tile": {
+          "command_slots": 61,
+          "command_table_bytes": 1952,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7424
+        }
+      },
+      {
+        "assembly": "0x13E574",
+        "frame": 45,
+        "part_count": 3,
+        "pose": "0x13CC18",
+        "state": "idle",
+        "tile_total": 58,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7424
+        },
+        "vdp1_per_tile": {
+          "command_slots": 61,
+          "command_table_bytes": 1952,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7424
+        }
+      },
+      {
+        "assembly": "0x13E574",
+        "frame": 46,
+        "part_count": 3,
+        "pose": "0x13CC18",
+        "state": "idle",
+        "tile_total": 58,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7424
+        },
+        "vdp1_per_tile": {
+          "command_slots": 61,
+          "command_table_bytes": 1952,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7424
+        }
+      },
+      {
+        "assembly": "0x13E574",
+        "frame": 47,
+        "part_count": 3,
+        "pose": "0x13CC18",
+        "state": "idle",
+        "tile_total": 58,
+        "vdp1_per_part": {
+          "command_slots": 6,
+          "command_table_bytes": 192,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7424
+        },
+        "vdp1_per_tile": {
+          "command_slots": 61,
+          "command_table_bytes": 1952,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7424
+        }
+      },
+      {
+        "assembly": "0x13E592",
+        "frame": 48,
+        "part_count": 4,
+        "pose": "0x13CC28",
+        "state": "idle",
+        "tile_total": 55,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7040
+        },
+        "vdp1_per_tile": {
+          "command_slots": 58,
+          "command_table_bytes": 1856,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7040
+        }
+      },
+      {
+        "assembly": "0x13E592",
+        "frame": 49,
+        "part_count": 4,
+        "pose": "0x13CC28",
+        "state": "idle",
+        "tile_total": 55,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7040
+        },
+        "vdp1_per_tile": {
+          "command_slots": 58,
+          "command_table_bytes": 1856,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7040
+        }
+      },
+      {
+        "assembly": "0x13E592",
+        "frame": 50,
+        "part_count": 4,
+        "pose": "0x13CC28",
+        "state": "idle",
+        "tile_total": 55,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7040
+        },
+        "vdp1_per_tile": {
+          "command_slots": 58,
+          "command_table_bytes": 1856,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7040
+        }
+      },
+      {
+        "assembly": "0x13E592",
+        "frame": 51,
+        "part_count": 4,
+        "pose": "0x13CC28",
+        "state": "idle",
+        "tile_total": 55,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7040
+        },
+        "vdp1_per_tile": {
+          "command_slots": 58,
+          "command_table_bytes": 1856,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7040
+        }
+      },
+      {
+        "assembly": "0x13E592",
+        "frame": 52,
+        "part_count": 4,
+        "pose": "0x13CC28",
+        "state": "idle",
+        "tile_total": 55,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7040
+        },
+        "vdp1_per_tile": {
+          "command_slots": 58,
+          "command_table_bytes": 1856,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7040
+        }
+      },
+      {
+        "assembly": "0x13E592",
+        "frame": 53,
+        "part_count": 4,
+        "pose": "0x13CC28",
+        "state": "idle",
+        "tile_total": 55,
+        "vdp1_per_part": {
+          "command_slots": 7,
+          "command_table_bytes": 224,
+          "distinct_color_banks": 1,
+          "strategy": "per_part",
+          "texture_bytes": 7040
+        },
+        "vdp1_per_tile": {
+          "command_slots": 58,
+          "command_table_bytes": 1856,
+          "distinct_color_banks": 1,
+          "strategy": "per_tile",
+          "texture_bytes": 7040
+        }
+      }
+    ],
+    "state_flow": [
+      {
+        "entered_frame": 0,
+        "frames": 24,
+        "state": "idle"
+      },
+      {
+        "entered_frame": 24,
+        "frames": 10,
+        "state": "attack_active"
+      },
+      {
+        "entered_frame": 34,
+        "frames": 5,
+        "state": "attack_impact"
+      },
+      {
+        "entered_frame": 39,
+        "frames": 3,
+        "state": "attack_recovery"
+      },
+      {
+        "entered_frame": 42,
+        "frames": 12,
+        "state": "idle"
+      }
+    ]
+  },
+  "scenario": "normal_hit_v1",
+  "schema": 1,
+  "semantic_events": [
+    {
+      "detail": {
+        "state": "idle"
+      },
+      "frame": 0,
+      "kind": "state_enter",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "assembly": "0x13E574",
+        "interaction_selector": 2,
+        "pose": "0x13CC18",
+        "sequence_index": 0
+      },
+      "frame": 0,
+      "kind": "pose",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 61,
+        "strategy": "per_tile"
+      },
+      "frame": 0,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 61,
+        "strategy": "per_tile"
+      },
+      "frame": 1,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 61,
+        "strategy": "per_tile"
+      },
+      "frame": 2,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 61,
+        "strategy": "per_tile"
+      },
+      "frame": 3,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 61,
+        "strategy": "per_tile"
+      },
+      "frame": 4,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 61,
+        "strategy": "per_tile"
+      },
+      "frame": 5,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "assembly": "0x13E592",
+        "interaction_selector": 2,
+        "pose": "0x13CC28",
+        "sequence_index": 1
+      },
+      "frame": 6,
+      "kind": "pose",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 58,
+        "strategy": "per_tile"
+      },
+      "frame": 6,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 58,
+        "strategy": "per_tile"
+      },
+      "frame": 7,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 58,
+        "strategy": "per_tile"
+      },
+      "frame": 8,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 58,
+        "strategy": "per_tile"
+      },
+      "frame": 9,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 58,
+        "strategy": "per_tile"
+      },
+      "frame": 10,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 58,
+        "strategy": "per_tile"
+      },
+      "frame": 11,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "assembly": "0x13E5B6",
+        "interaction_selector": 2,
+        "pose": "0x13CC38",
+        "sequence_index": 2
+      },
+      "frame": 12,
+      "kind": "pose",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 63,
+        "strategy": "per_tile"
+      },
+      "frame": 12,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 63,
+        "strategy": "per_tile"
+      },
+      "frame": 13,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 63,
+        "strategy": "per_tile"
+      },
+      "frame": 14,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 63,
+        "strategy": "per_tile"
+      },
+      "frame": 15,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 63,
+        "strategy": "per_tile"
+      },
+      "frame": 16,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 63,
+        "strategy": "per_tile"
+      },
+      "frame": 17,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "assembly": "0x13E5D4",
+        "interaction_selector": 2,
+        "pose": "0x13CC48",
+        "sequence_index": 3
+      },
+      "frame": 18,
+      "kind": "pose",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 59,
+        "strategy": "per_tile"
+      },
+      "frame": 18,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 59,
+        "strategy": "per_tile"
+      },
+      "frame": 19,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 59,
+        "strategy": "per_tile"
+      },
+      "frame": 20,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 59,
+        "strategy": "per_tile"
+      },
+      "frame": 21,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 59,
+        "strategy": "per_tile"
+      },
+      "frame": 22,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 59,
+        "strategy": "per_tile"
+      },
+      "frame": 23,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "trigger": "attack_input"
+      },
+      "frame": 24,
+      "kind": "input",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "state": "idle"
+      },
+      "frame": 24,
+      "kind": "state_exit",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "state": "attack_active"
+      },
+      "frame": 24,
+      "kind": "state_enter",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "assembly": "0x13E00A",
+        "interaction_selector": 7,
+        "pose": "0x13CE70",
+        "sequence_index": 0
+      },
+      "frame": 24,
+      "kind": "pose",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "category": "attack_swing",
+        "cue": "attack_swing",
+        "transport": "SCSP_MIXED_STREAM"
+      },
+      "frame": 24,
+      "kind": "audio",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 65,
+        "strategy": "per_tile"
+      },
+      "frame": 24,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 65,
+        "strategy": "per_tile"
+      },
+      "frame": 25,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 65,
+        "strategy": "per_tile"
+      },
+      "frame": 26,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 65,
+        "strategy": "per_tile"
+      },
+      "frame": 27,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 65,
+        "strategy": "per_tile"
+      },
+      "frame": 28,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 65,
+        "strategy": "per_tile"
+      },
+      "frame": 29,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 65,
+        "strategy": "per_tile"
+      },
+      "frame": 30,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 65,
+        "strategy": "per_tile"
+      },
+      "frame": 31,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 65,
+        "strategy": "per_tile"
+      },
+      "frame": 32,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 65,
+        "strategy": "per_tile"
+      },
+      "frame": 33,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "trigger": "contact"
+      },
+      "frame": 34,
+      "kind": "input",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "state": "attack_active"
+      },
+      "frame": 34,
+      "kind": "state_exit",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "state": "attack_impact"
+      },
+      "frame": 34,
+      "kind": "state_enter",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "assembly": "0x13E04C",
+        "interaction_selector": 8,
+        "pose": "0x13CE4C",
+        "sequence_index": 0
+      },
+      "frame": 34,
+      "kind": "pose",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "attacker": "reference_attacker",
+        "attacker_pose": "0x13CE70",
+        "damage": "UNRESOLVED_DAMAGE_MAGNITUDE",
+        "defender": "reference_defender",
+        "outcome": "confirmed_hit"
+      },
+      "frame": 34,
+      "kind": "collision",
+      "subject": "reference_defender"
+    },
+    {
+      "detail": {
+        "magnitude": "UNRESOLVED_DAMAGE_MAGNITUDE",
+        "source": "reference_attacker"
+      },
+      "frame": 34,
+      "kind": "damage",
+      "subject": "reference_defender"
+    },
+    {
+      "detail": {
+        "category": "impact",
+        "cue": "impact",
+        "transport": "SCSP_MIXED_STREAM"
+      },
+      "frame": 34,
+      "kind": "audio",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 51,
+        "strategy": "per_tile"
+      },
+      "frame": 34,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 51,
+        "strategy": "per_tile"
+      },
+      "frame": 35,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 51,
+        "strategy": "per_tile"
+      },
+      "frame": 36,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 51,
+        "strategy": "per_tile"
+      },
+      "frame": 37,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 51,
+        "strategy": "per_tile"
+      },
+      "frame": 38,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "trigger": "impact_end"
+      },
+      "frame": 39,
+      "kind": "input",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "state": "attack_impact"
+      },
+      "frame": 39,
+      "kind": "state_exit",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "state": "attack_recovery"
+      },
+      "frame": 39,
+      "kind": "state_enter",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "assembly": "0x13DE46",
+        "interaction_selector": 1,
+        "pose": "0x13CEC4",
+        "sequence_index": 0
+      },
+      "frame": 39,
+      "kind": "pose",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 65,
+        "strategy": "per_tile"
+      },
+      "frame": 39,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 65,
+        "strategy": "per_tile"
+      },
+      "frame": 40,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 65,
+        "strategy": "per_tile"
+      },
+      "frame": 41,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "trigger": "recovery_end"
+      },
+      "frame": 42,
+      "kind": "input",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "state": "attack_recovery"
+      },
+      "frame": 42,
+      "kind": "state_exit",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "state": "idle"
+      },
+      "frame": 42,
+      "kind": "state_enter",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "assembly": "0x13E574",
+        "interaction_selector": 2,
+        "pose": "0x13CC18",
+        "sequence_index": 0
+      },
+      "frame": 42,
+      "kind": "pose",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 61,
+        "strategy": "per_tile"
+      },
+      "frame": 42,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 61,
+        "strategy": "per_tile"
+      },
+      "frame": 43,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 61,
+        "strategy": "per_tile"
+      },
+      "frame": 44,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 61,
+        "strategy": "per_tile"
+      },
+      "frame": 45,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 61,
+        "strategy": "per_tile"
+      },
+      "frame": 46,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 61,
+        "strategy": "per_tile"
+      },
+      "frame": 47,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "assembly": "0x13E592",
+        "interaction_selector": 2,
+        "pose": "0x13CC28",
+        "sequence_index": 1
+      },
+      "frame": 48,
+      "kind": "pose",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 58,
+        "strategy": "per_tile"
+      },
+      "frame": 48,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 58,
+        "strategy": "per_tile"
+      },
+      "frame": 49,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 58,
+        "strategy": "per_tile"
+      },
+      "frame": 50,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 58,
+        "strategy": "per_tile"
+      },
+      "frame": 51,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 58,
+        "strategy": "per_tile"
+      },
+      "frame": 52,
+      "kind": "render",
+      "subject": "reference_attacker"
+    },
+    {
+      "detail": {
+        "command_slots": 58,
+        "strategy": "per_tile"
+      },
+      "frame": 53,
+      "kind": "render",
+      "subject": "reference_attacker"
+    }
+  ],
+  "title": "CPS2-to-Saturn reference engine: one actor, one normal attack",
+  "unresolved_fields": [
+    {
+      "field": "cartridge_lifetime",
+      "note": "A byte-stable combat window cannot show when the cartridge is written",
+      "probe": "Capture team and stage loading and compare cartridge contents before and after"
+    },
+    {
+      "field": "collision_geometry",
+      "note": "The model raises an abstract contact event with no box extents",
+      "probe": "Decode actor-local hitbox and attack-box records and validate them against the game's own debug overlays"
+    },
+    {
+      "field": "damage_magnitude",
+      "note": "Damage is carried as an opaque token, never as a number",
+      "probe": "Locate the health field and its writer, then confirm with an out-of-range whiff control that the field only moves on contact"
+    },
+    {
+      "field": "scsp_cue_attribution",
+      "note": "Slot registers cannot attribute a cue because they do not change; the evidence lives in the buffer refills, not in the slot set",
+      "probe": "Trace sound-RAM writes with a write watchpoint across an attack and an impact in isolation, with a whiff control, and attribute each refill region to a cue"
+    },
+    {
+      "field": "sh2_work_division",
+      "note": "No evidence yet separates gameplay, list building and audio driver work",
+      "probe": "Trace master and slave SH-2 program counters across one frame boundary"
+    },
+    {
+      "field": "vdp2_layer_assignment",
+      "note": "MEASURED: the VDP2 register block is entirely zero at all four anchors, so layer enables, plane maps, priorities and scroll values cannot be decoded from this capture. The gap is an instrument limit, not a missing parser",
+      "probe": "Use an instrument that can observe VDP2 register writes, such as a write watchpoint or breakpoint, because the register block itself reads back as all zeros"
+    }
+  ]
+}

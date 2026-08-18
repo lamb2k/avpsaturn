@@ -6,7 +6,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sys
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from reference_engine import vdp1 as vdp1_model  # noqa: E402
 
 
 PAGE_SIZE = 4096
@@ -47,32 +54,38 @@ def nonzero_bounds(data: bytes) -> list[int] | None:
 
 
 def parse_vdp1_commands(data: bytes) -> dict[str, object]:
-    commands: list[dict[str, object]] = []
-    for offset in range(0, min(len(data), 0x10000), 0x20):
-        words = [int.from_bytes(data[offset + i : offset + i + 2], "big") for i in range(0, 0x20, 2)]
-        control = words[0]
-        command = {
-            "index": offset // 0x20,
-            "offset": offset,
-            "control": f"0x{control:04X}",
-            "link": f"0x{words[1]:04X}",
-            "pmod": f"0x{words[2]:04X}",
-            "color": f"0x{words[3]:04X}",
-            "source": f"0x{words[4] * 8:05X}",
-            "width": ((words[5] >> 8) & 0x3F) * 8,
-            "height": words[5] & 0xFF,
-            "coordinates": [
-                value - 0x10000 if value & 0x8000 else value
-                for value in words[6:14]
-            ],
-        }
-        commands.append(command)
-        if control & 0x8000:
-            break
+    """Summarise the VDP1 list by real control flow, not by stored order.
+
+    ``sequential_*`` reproduces the earlier stored-order reading so the two can
+    be compared; ``reachable_*`` is what the command processor would visit when
+    jump, call, return and skip modes are honoured. The residual count is the
+    non-zero extent a longer earlier list left behind, and is not this frame's
+    command count.
+    """
+    walk = vdp1_model.traverse(data)
+    stored = vdp1_model.sequential_scan(data)
+    stored_slots = vdp1_model.stored_nonzero_slots(data)
     return {
-        "sequential_command_count": len(commands),
-        "terminated": bool(commands and int(commands[-1]["control"], 16) & 0x8000),
-        "commands": commands,
+        "sequential_command_count": len(stored),
+        "terminated": bool(stored and stored[-1].is_end),
+        "reachable_command_count": walk.reachable_slot_count,
+        "reachable_equals_sequential": (
+            {c.offset for c in walk.visited} == {c.offset for c in stored}
+        ),
+        "drawn_command_count": walk.drawn_command_count,
+        "state_command_count": walk.state_command_count,
+        "skipped_command_count": walk.skipped_command_count,
+        "stored_nonzero_slots": stored_slots,
+        "residual_slots_after_terminator": stored_slots - walk.reachable_slot_count,
+        "jump_mode_histogram": walk.jump_mode_histogram(),
+        "command_type_histogram": walk.command_type_histogram(),
+        "sprite_size_histogram": walk.size_histogram(),
+        "flip_histogram": walk.flip_histogram(),
+        "links_followed": len(walk.links_followed),
+        "control_flow_anomalies": walk.anomalies,
+        "traversal_stop_reason": walk.stop_reason,
+        "texture_bytes_referenced": walk.texture_bytes_referenced(),
+        "detail_report": "data/mshvsf_saturn_vdp1_control_flow.json",
     }
 
 
@@ -147,7 +160,7 @@ def build_report(anchors: list[dict[str, object]]) -> dict[str, object]:
         "transitions": transitions,
         "limits": [
             "Changed and nonzero bytes are occupancy leads, not allocator ownership proof.",
-            "VDP1 parsing follows the sequential table only; jump/call traversal remains to be added.",
+            "VDP1 parsing now follows real jump/call/return/skip control flow; reachable and stored-order counts are reported separately.",
             "No Marvel address, timing, or package size transfers directly into AvP.",
         ],
     }

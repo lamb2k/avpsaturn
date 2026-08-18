@@ -107,6 +107,17 @@ Verified reports:
   normal-active 3828, impact 3840, and recovery 3900. It records per-region
   hashes, nonzero and changed 4 KiB pages, changed-byte counts, and sequential
   VDP1 command-table summaries without committing raw memory.
+- `data/mshvsf_saturn_vdp1_control_flow.json`: VDP1 command lists walked by real
+  jump/call/return/skip control flow. Reports reachable slots separately from
+  sequentially stored slots and from stored non-zero extent, plus command types,
+  sprite sizes, flip use, colour banks and merged texture spans.
+- `data/mshvsf_saturn_vdp2_scsp.json`: VDP2 colour ownership and SCSP slot
+  activity at the same four anchors. Records the unreadable VDP2 register block
+  as an explicit instrument limit.
+- `data/reference_engine_normal_hit_report.json`: the generated CPS2-to-Saturn
+  reference-engine normal-hit report, with input hashes, semantic events,
+  per-frame VDP1 pressure, separate resource regions, unresolved fields,
+  prohibited inferences and the required AvP probe.
 - `data/mshvsf_correspondence.json`: one-sided and paired evidence records.
 - `data/mshvsf_difference_ledger.json`: only differences supported by current
   evidence; exact mechanics and the Saturn projectile path remain unresolved.
@@ -190,6 +201,34 @@ The reference lane will grow these artifacts without modifying the AvP runtime:
 The reusable method and initial hardware-responsibility map are recorded in
 `docs/CAPCOM_SATURN_PORTING_PLAYBOOK.md` and
 `docs/MSHVSF_SATURN_ARCHITECTURE.md`.
+
+## CPS2-to-Saturn reference engine
+
+`reference_engine/` is a host-side executable model of the translation boundary:
+source semantic layer, translation layer, Saturn backend layer, with every field
+labelled `MEASURED`, `DECODED`, `INFERRED`, `ADAPTED` or `UNRESOLVED` and the
+labelling enforced in code. Its architecture is
+`docs/CPS2_SATURN_REFERENCE_ENGINE.md`; the AvP-facing question set is
+`docs/CPS2_SATURN_REFERENCE_ENGINE_AVP_ADAPTERS.md`.
+
+It is not a Saturn runtime, not a CPS2 emulator, and not an AvP implementation
+branch. Run the analyzers, the model and its tests with:
+
+```powershell
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\analyze_mshvsf_saturn_vdp1.py
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\analyze_mshvsf_saturn_video_audio.py
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\build_reference_engine_report.py
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\run_reference_engine_tests.py
+```
+
+The two analyzers need the ignored raw captures under
+`.deps\mshvsf_saturn_state`; the model and its tests run from tracked JSON
+alone. `build_reference_engine_report.py --check` verifies the tracked report
+against a fresh run without rewriting it.
 
 The team package also includes:
 
