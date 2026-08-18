@@ -337,6 +337,25 @@ def emit_header(report: dict, path: Path) -> None:
                 e["hit_value"], e["knockback_mode"]))
         lines.append("};")
         lines.append("")
+    lines.append("typedef struct {")
+    lines.append("    unsigned long table_set;")
+    lines.append("    const avsp_collision_box *hurt;")
+    lines.append("    unsigned short hurt_count;")
+    lines.append("    const avsp_collision_attack *attack;")
+    lines.append("    unsigned short attack_count;")
+    lines.append("} avsp_collision_family;")
+    lines.append("")
+    trusted = [f for f in report["families"] if not f["suspect_not_a_box_family"]]
+    lines.append("/* Trusted families only. Families whose attack table does not follow their")
+    lines.append("   hurt table at a whole number of entries are omitted deliberately. */")
+    lines.append("static const avsp_collision_family avsp_collision_families[%d] = {" % len(trusted))
+    for fam in trusted:
+        tag = fam["table_set"].replace("0x", "")
+        lines.append("    { 0x%sUL, avsp_hurt_%s, %d, avsp_attack_%s, %d }," % (
+            tag, tag, len(fam["hurt_entries"]), tag, len(fam["attack_entries"])))
+    lines.append("};")
+    lines.append("static const unsigned short avsp_collision_family_count = %d;" % len(trusted))
+    lines.append("")
     lines += ["#endif /* AVSP_COLLISION_H */", ""]
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines))

@@ -54,6 +54,68 @@ in `capability_model.c`), which gives ROM assemblies no consumer.
 **Standing rule:** do not decode another ROM table in isolation while phase A or
 B is open. Milestone 2 is the demonstration — correct, falsified, and inert.
 
+## S1 actor spine — PASSED (2026-08-18)
+
+The first time this project's decoded data does anything. Host-only; no shipped
+runtime behaviour changed, no Saturn build, no emulator run.
+
+**New files.** `avsp_actor.h` / `.c` (the native actor record),
+`avsp_collision.h` / `.c` (the C port of the game's overlap test and guards),
+`data/avsp_actor_layout.json` (tracked, evidence-labelled field map naming the
+routine address that proves each field), `tests/avsp_actor_test.c`, wired into
+`test.ps1`. `tools/decode_avsp_collision.py` now also emits an
+`avsp_collision_families` lookup so C can resolve a family from an actor's
+`+0x50`; **only the 10 trusted families are emitted**, the 10 suspect ones are
+deliberately omitted.
+
+**Gate 1 — actor fields: PASS.** 481,566 actor loads across the two full-work-RAM
+windows (4201–5500 and 13000–14600), **0 field mismatches**. Every field is
+re-read straight from the capture and compared, not sampled.
+
+**Gate 2 — the collision predicate in C: PASS, exactly.** The C port reproduces
+`tools/verify_avsp_collision.py` on all eight counters:
+
+| counter | C | Python |
+|---|---|---|
+| pairs, active but no overlap | 21,908 | 21,908 |
+| pairs, overlap latched | 25 | 25 |
+| pairs, overlap guarded | 2,516 | 2,516 |
+| pairs, overlap unguarded | 24 | 24 |
+| latch explained, defender side | 25 | 25 |
+| latch explained, attacker side | 19 | 19 |
+| latch, simultaneous broadcast | 8 | 8 |
+| latch, unexplained | 4 | 4 |
+
+Two independent implementations — Python over the raw program image and
+captures, C over the generated header and the actor record — agree on every
+number. That is a cross-implementation verification, not a re-run.
+
+**One real difference found and fixed during the port**, worth recording because
+it would have silently changed the population under measurement: the C initially
+counted 29,278 non-overlapping pairs against Python's 21,908 while every
+geometry counter already matched. The cause was the **participation contract**,
+not the geometry — the reference implementation treats an actor as taking part
+only when it is in a live state *and* carries a usable animation record *and* a
+usable table-set pointer. Aligning the C to that contract made all eight
+counters agree. The lesson generalises to every later port: geometry agreeing is
+not the same as the two implementations measuring the same population.
+
+**What this does NOT close.** Gate 1 stays **0/7** and the full-game goal stays
+**0/9**. Nothing ROM-driven has reached the Saturn runtime: `capability_model.c`
+still uses its inferred lane/reach checks and the boss 21/55/97 and Stalker
+schedules, and `avsp_collision.c` runs beside it, not in front of it. Swapping
+the runtime over is S4, and it needs S2 first so the selectors come from a live
+animation record instead of a capture.
+
+**Reproduce:**
+
+```powershell
+.	est.ps1
+```
+
+or directly, under WSL gcc with `-std=c90 -pedantic -Wall -Wextra -Werror`:
+`gcc ... avsp_actor.c avsp_collision.c tests/avsp_actor_test.c -o build/avsp_actor_test && ./build/avsp_actor_test`
+
 ## Phase A: AvP sprite demand measured (2026-08-18)
 
 AvP and the reference title run on **the same CPS2 arcade hardware**, so the

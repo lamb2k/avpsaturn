@@ -1,0 +1,154 @@
+{
+ "schema": 1,
+ "classification": "actor record layout - offsets and semantics only, no game data",
+ "purpose": "The native runtime's actor record mirrors the game's own actor layout so that decoded ROM tables index correctly and translated 68000 routines need no field shims.",
+ "actor_stride": "0xC0",
+ "actor_stride_evidence": "MEASURED",
+ "actor_stride_source": "every distinct A4/A6 in the milestone-1 object-emission watchpoint log lands on this grid; the grid is anchored at the player slot 0xFF8380",
+ "work_ram_first": "0xFF8000",
+ "scope_note": "Only fields the game's own collision, animation-selection and emission paths are proven to consume are listed. An exhaustive labelling of the whole record is deliberately not attempted; unlisted bytes are UNRESOLVED and must not be invented.",
+ "fields": [
+  {
+   "name": "state",
+   "offset": "0x00",
+   "width": 1,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "0x01D042 tests it against 1 before a hit is allowed",
+   "meaning": "actor liveness/state; collision requires the value 1 on the defender"
+  },
+  {
+   "name": "type",
+   "offset": "0x08",
+   "width": 1,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "0x0A9B80 actor-type jump table; street aliens are type 12",
+   "meaning": "actor family selector for the emission jump table"
+  },
+  {
+   "name": "facing",
+   "offset": "0x0F",
+   "width": 1,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "0x01D296 and 0x01D2A4 negate the box x centre when non-zero",
+   "meaning": "facing flag; mirrors actor-local x offsets when set"
+  },
+  {
+   "name": "world_x",
+   "offset": "0x10",
+   "width": 2,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "0x01D2AE adds it to the attacker box x; 0x01D008 compares it for knockback direction",
+   "meaning": "actor world x"
+  },
+  {
+   "name": "world_y",
+   "offset": "0x14",
+   "width": 2,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "0x01D2EA adds it to the attacker box y",
+   "meaning": "actor world y"
+  },
+  {
+   "name": "world_z",
+   "offset": "0x18",
+   "width": 2,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "0x01D26A adds it to the attacker box depth",
+   "meaning": "actor depth along the belt-scroller lane axis"
+  },
+  {
+   "name": "anim_record",
+   "offset": "0x1C",
+   "width": 4,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "0x01CF84 and 0x01CF90 dereference it for the collision selectors; milestone 1 tracked it across the emission window",
+   "meaning": "pointer to the live animation record; bytes +8 and +9 are the hurt and attack box selectors"
+  },
+  {
+   "name": "hit_value",
+   "offset": "0x2C",
+   "width": 1,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "0x01CFCE writes the attack record's +0x0E here on the defender, and 0x01CFDA on the attacker when its own is still zero",
+   "meaning": "latched hit value; written on BOTH parties, which is why a naive defender-only reading of this byte mis-scores hit events"
+  },
+  {
+   "name": "hit_source",
+   "offset": "0x2D",
+   "width": 1,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "0x01CFEA writes the attacker's +0x67 here",
+   "meaning": "identifier of the actor that landed the hit"
+  },
+  {
+   "name": "table_set",
+   "offset": "0x50",
+   "width": 4,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "0x01CF9C and 0x01CFB0; word +0 offsets the hurt table, word +2 the attack table",
+   "meaning": "pointer to this actor family's collision table set"
+  },
+  {
+   "name": "attacker_id",
+   "offset": "0x67",
+   "width": 1,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "0x01D05C compares it against the defender's per-attacker latch",
+   "meaning": "this actor's identity when acting as an attacker"
+  },
+  {
+   "name": "per_attacker_latch",
+   "offset": "0x68",
+   "width": 8,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "0x01D058 indexes it by the attacker's +0xD1; 0x01D0C2 writes the attacker's +0x67 into it",
+   "meaning": "per-attacker already-hit latch preventing one attack from repeatedly hitting"
+  },
+  {
+   "name": "suppress",
+   "offset": "0x70",
+   "width": 1,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "0x01D04A rejects the hit when non-zero",
+   "meaning": "hit suppression flag"
+  },
+  {
+   "name": "latch_index",
+   "offset": "0xD1",
+   "width": 1,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "0x01D054 loads it as the index into the defender's latch array",
+   "meaning": "this actor's slot index within a defender's per-attacker latch array"
+  }
+ ],
+ "derived_fields": [
+  {
+   "name": "sel_hurt",
+   "evidence": "DECODED",
+   "source": "byte +8 of the record at anim_record, read at 0x01CF94",
+   "meaning": "hurt-box selector; 0 means the actor cannot be hit",
+   "note": "not stored in the actor record; the runtime resolves it from the live animation record"
+  },
+  {
+   "name": "sel_attack",
+   "evidence": "DECODED",
+   "source": "byte +9 of the record at anim_record, read at 0x01CF88",
+   "meaning": "attack-box selector; 0 means the actor cannot hit",
+   "note": "not stored in the actor record; the runtime resolves it from the live animation record"
+  }
+ ]
+}

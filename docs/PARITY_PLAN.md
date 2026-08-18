@@ -142,13 +142,34 @@ The seven Gate 1 acceptance conditions are **unchanged**; only the execution
 order and its exit gates are. Each phase below has a gate that can independently
 go green, so progress is visible before the whole gate closes.
 
-| Order | Phase | Required work | Exit gate | Gate 1 conditions advanced |
+**Vertical-slice target: the Room 1 fight.** The player walks right from the
+Round 1 start, meets the first street-alien wave, fights it, and the wave clears
+- on real Saturn at 60 Hz, with animation, collision, damage and enemy decisions
+all ROM-derived. *Faithful* means: same initial state and same inputs produce
+the same state trajectory as MAME at the event level - per-frame animation
+record pointer, hit events, health deltas, action/state transitions. Not pixel
+equality, not cycle timing. The window is deliberately the one with the densest
+existing evidence, `.deps/mame/enemy_actions` frames 4080-6200, so every layer
+below has an oracle already on disk.
+
+| Order | Step | Required work | Exit gate | Oracle |
 |---|---|---|---|---|
-| A | Decide the renderer by measurement | Measure **our own** two candidate pipelines against each other on the same deterministic route, for one street wave plus Chrysalis: the current precomposed per-palette cels versus one 16x16 VDP1 command per source tile. Record reachable command count (walk control flow, not stored slots), **live colour banks per frame**, and per-resource high-water marks (VDP1 VRAM, colour RAM, work RAM, cartridge). Fidelity is judged against MAME's CPS2 output; affordability is judged against Saturn hardware limits | A tracked, copyright-safe AvP measurement report shows which of our two pipelines fits AvP's colour RAM and VDP1 budget on the same route, with the losing pipeline's specific failure named. No native rendering change is made in this phase | 1, 5 and 7, by making the decision evidence-based |
-| B | Build the actor spine on one actor | Give one street alien a native actor record carrying its ROM animation-record pointer, selector bytes `+8`/`+9`, facing and world X/Y/Z. Drive its animation from the ROM script interpreter (already written in `avsp_anim_script.c`), its sprite output from the phase-A winner, its hurt/attack boxes from `data/avsp_collision.json`, and its damage from attack byte `+0x0E` | One street alien runs ROM-driven end to end: pose selection, tile emission, box overlap and damage all read decoded ROM data. Controlled hit and whiff fixtures pass against MAME evidence for that actor, and its `/SPR4` archive is demoted to a regression oracle | 1, 2, 5 and 6 |
-| C | Widen the spine to Round 1's cast | Move the player, remaining street aliens, Stalkers and Chrysalis onto the same spine. Retire the inferred Chrysalis 21/55/97 and Stalker contact schedules from runtime collision. Decode the projectile/weapon collision path and the simultaneous-broadcast path that milestone 2 left open | Every Round 1 actor selects poses and resolves collision from ROM data; no capture-derived contact schedule remains in a runtime decision; `/SPR4/*.RLE` archives are oracles only | 1, 2, 5 and 6 |
-| D | Stage tables and enemy logic | On top of the now-existing actor model, decode spawn records, camera bounds, room triggers and transitions, then translate the required street-alien, Stalker and Chrysalis decision routines with the PRNG generator and call order identified | The deterministic route consumes extracted stage tables and translated routines and reaches the same ordered room/event anchors as MAME under identical input | 3, 4, 5 and 6 |
-| E | Budget, validate, hardware candidate | Re-measure every resource after integration; run host, soak, focused, full-route, clean normal release, audible route; then the physical NTSC Saturn gate | Conditions 1–6 independently green, then sustained 60 Hz and a ten-minute physical Saturn proof with a digital pad and 32 Mbit cartridge | 1–7 |
+| **S1** | **Actor spine** — PASSED 2026-08-18 | A native actor record mirroring the game's `0xC0` layout for the fields its own code consumes; port the collision overlap predicate and guards into C over that record | Field-for-field equality against 2,900 captured work-RAM frames, **and** the C predicate reproduces the Python falsification exactly (21,908 non-overlapping active pairs with no hit, 44/56 latches explained, same 12 residuals) | `.deps/mame/collision_probe*` |
+| **S2** | **Animation from ROM scripts, and the renderer** (active) | Link `avsp_anim_script.c` into the Saturn build; drive pose selection from the record pointer at `+0x1C` instead of the capture-derived clip tables; emit the object list and render it per CPS2 object (slice-V design, retained above) | The native walk reproduces MAME's exact per-frame animation-record-pointer sequence across the 2,121-frame street fight, and the produced object list matches MAME's captured active object list frame for frame | 5,302-frame object-list oracle |
+| S3 | Widen to Round 1's cast | Player, remaining street aliens, Stalkers and Chrysalis onto the same spine; `/SPR4/*.RLE` archives demoted to regression oracles | Every slice actor selects poses and emits objects from ROM data; no capture-derived pose table in a runtime decision | same |
+| S4 | Collision, damage, reaction | Consume the decoded boxes at runtime; decode the five post-hit routines at `0x1D314`, `0x1D504`, `0x1D492`, `0x1D622`, `0x1D6E2`; retire the inferred Chrysalis 21/55/97 and Stalker schedules | Every hit event and health delta in the slice window matches MAME; no inferred contact schedule remains in a runtime decision | recorded contacts |
+| S5 | Enemy decisions | Identify the PRNG generator and call order, then translate the street-alien decision routines by the differential-replay method in "How game logic gets translated" | Same initial state and inputs produce the same action/state sequence as MAME, with a negative control that fails on a perturbed input | recorded calls |
+| S6 | Integrate and run on hardware | Seed the wave from the captured initial state (an `ADAPTED` shortcut, labelled; stage-table decode is post-slice); re-measure resources; run host, soak, focused, full-route, clean normal release | 60 Hz on physical NTSC Saturn with a digital pad and 32 Mbit cartridge, and a deterministic replay matching the MAME event log | `docs/HARDWARE_TEST.md` |
+
+The slice is **not** Capability Gate 1. It is one room, one enemy family, no
+stage tables, no boss, no audio work. It exists to prove the method end to end
+so that widening becomes mechanical. Gate 1 stays 0/7 until Round 1 itself
+passes its seven acceptance conditions, and the full-game goal stays 0/9.
+
+Post-slice, the earlier phase lettering still describes the widening work:
+stage-table extraction and full-cast AI (old phase D) and the full budget,
+validation and hardware-candidate pass (old phase E). Old phase A is deferred
+into S2 and old phase B/C are S1-S3.
 
 **Rule carried out of milestone 2:** do not decode another ROM table in
 isolation while phase A or B is open. Evidence that has no runtime consumer is

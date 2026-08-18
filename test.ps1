@@ -61,3 +61,11 @@ $animCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror 
 if ($LASTEXITCODE -ne 0) {
     throw "Animation-script interpreter test failed with exit code $LASTEXITCODE."
 }
+
+# Actor record + the C port of the game's collision predicate. Requires the
+# private captures and program image; the test skips cleanly without them.
+$actorCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_actor.c avsp_collision.c tests/avsp_actor_test.c -o build/avsp_actor_test && ./build/avsp_actor_test"
+& $wsl.Source sh '-lc' $actorCommand
+if ($LASTEXITCODE -ne 0) {
+    throw "Actor-spine / collision-port test failed with exit code $LASTEXITCODE."
+}
