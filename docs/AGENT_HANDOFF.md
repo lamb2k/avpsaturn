@@ -424,24 +424,10 @@ zero oracle values used as calculation inputs, only for comparison).
 (`0x11`/`0x20` for this street-alien instance), not yet derived from a general
 actor-record read.
 
-**5. The pose-to-group-header chain is derivable from ROM alone (n=2, not yet
-generalized).** The actor's `+0x1C` field (already established by the S2
-animation-walk validation as the live animation-record/pose pointer) led to a
-pose record whose `assembly` field (per `avsp_anim_script.h`, pose `+4`) plus
-`4` gives the first group's header address exactly, in both oracle cases
-(`0x12F72A+4=0x12F72E`; `0x12FEBC+4=0x12FEC0`). The second group's header is
-the first group's header plus `12 + count*6` bytes (its own 6-byte header +
-4-byte bsr-consumed long + `count` 6-byte parts + a constant 2-byte gap whose
-bytes were `0x0006` in both instances) — also exact in both cases (30 bytes and
-24 bytes respectively). **Not yet resolved:** the 4 bytes immediately before the
-first group's header are a *fixed* constant pair (`0x000c, 0x0006`) identical in
-both poses, so they do not encode "how many groups to dispatch" — Body A's live
-trace independently established exactly 2 dispatch calls for this actor, but
-nothing ROM-side yet proves that count generalizes to other poses/actors. A
-plausible-looking third header exists at the same stride past group2 in both
-cases but is not actually called per the live trace, so it is either an unused
-table continuation or belongs to a different pose — do not assume an N-group
-loop from this alone.
+**5. (Superseded by finding 8 below.) The pose-to-group-header chain was
+first derived as `pose.assembly + 4` from n=2 (both this one street-alien
+actor). That specific "+4" offset is now known NOT to generalize (see
+finding 7) and was replaced by the general tag-scan mechanism (finding 8).
 
 **6. Correction: an initial live probe of the camera anchors used the wrong
 sign and measured zero; the origin routine has now been fully disassembled
@@ -520,22 +506,51 @@ one probe:
 Added as a second block in `_ORACLE_GROUPS`; all 7 groups (16 entries, 2
 actors) decode exactly.
 
+**8. The general pose-to-group-header mechanism is solved.** Investigating
+why `assembly+4` broke for the second actor found the real rule: a 2-byte
+`0x0006` tag word immediately precedes every group header - not just the
+first group in a pose's list, but every subsequent one too. The
+previously-found "`+12+count*6` stride to the next group" is this *same*
+mechanism applied again, not a second, separate rule - both are "scan
+forward for the next `0x0006` tag, header follows immediately after it".
+This also explains `avsp_anim_script.h`'s existing field name for the pose
+record ("`selector-6` assembly"): `0x0006` is a format tag, and `assembly+4`
+only ever worked for the first actor by coincidence (its tag happened to sit
+2 bytes further in than the second actor's). `find_group_header()` scans
+forward from `assembly` for this tag; verified exact against **5 independent
+(actor, pose) pairs across both traced actors** (`_POSE_HEADER_ORACLE`,
+wired into `main()`'s output).
+
+**Important caveat, not yet resolved:** tag *presence* proves a group entry
+is validly formatted, not that the game actually dispatches it for the
+current pose - the plausible "group 3" tag noted in finding 4 (superseded
+item 5) still sits right after both of the first actor's confirmed 2-group
+poses, and Body A's live trace already proved the dispatcher never calls it.
+**How many groups a given pose actually uses remains unresolved** - both
+traced actors are internally consistent (actor 1: always 2 groups across
+both its poses; actor 2: always 1 group across all three of its poses) but
+that is exactly the kind of per-actor-TYPE fixed constant that can't be
+inferred from the tag-chain data itself. A caller must still supply the
+group count from a live trace (or a future per-actor-type table), not from
+tag presence alone.
+
 **Still blocking a fully general (any actor, any pose) ROM-only decoder, in
-priority order:** finding how a pose actually determines its group-header
-list (the `assembly+4` shortcut is now known wrong; no replacement structural
-rule proposed yet - live entry-point breakpoints remain the reliable fallback
-for ground truth), confirming `ANCHOR_Y`/`ANCHOR_X` hold outside this one
-route, and deriving `palette_byte` from a general actor-record read rather
-than the two hand-read instances so far (trivial in principle - it is a plain
-actor field, already read the same way for both actors - just not yet wired
-as a live/general read path). The declared-eligible-subset run against the
-full 5,302-frame oracle (`data/avsp_sprite_demand.json`) required by
-`NEXT_AGENT_PROMPT.md` Body B item 6 has **not** been done yet — only 7 hand-
-verified group instances (16 entries, 2 actors) are proven exact so far.
+priority order:** determining how many groups a given pose/actor-type
+dispatches (see caveat above - the header-chain-walking mechanism itself is
+now solved, this is what's left), confirming `ANCHOR_Y`/`ANCHOR_X` hold
+outside this one route, and deriving `palette_byte` from a general
+actor-record read rather than the two hand-read instances so far (trivial in
+principle - it is a plain actor field, already read the same way for both
+actors - just not yet wired as a live/general read path). The
+declared-eligible-subset run against the full 5,302-frame oracle
+(`data/avsp_sprite_demand.json`) required by `NEXT_AGENT_PROMPT.md` Body B
+item 6 has **not** been done yet — only 7 hand-verified group instances (16
+entries, 2 actors) are proven exact so far.
 
 Committed: `tools/decode_avsp_object_stream.py` (attr-transform fix at
 `b6f5a4e`, ROM-only origin derivation at `ac1b435`, flip-byte derivation at
-`1ece891`, second-actor generalization test at `120a9f8`) and
+`1ece891`, second-actor generalization test at `120a9f8`, general
+pose-header-chain solve at `6e0db90`) and
 `data/avsp_object_stream.json`.
 
 ## Status across S1-S6 (2026-08-18, end of session)
@@ -544,7 +559,7 @@ Committed: `tools/decode_avsp_object_stream.py` (attr-transform fix at
 |---|---|
 | S1 actor spine | **PASSED.** 481,566 actor-field loads, 0 mismatches; the collision predicate ported to C reproduces the Python falsification exactly on all 8 counters. |
 | S2 animation walk | **VALIDATED.** Interpreter predicts 23,676 of the game's own frames exactly free-running from one seed; 614 records extracted to 63 spans (10 KB), proven to reproduce the full 2 MB image on every counter. |
-| S2 object emitter | **Full geometry pipeline (part walk, attr transform, origin) proven ROM + actor-record only** for all 16 object entries across 7 group instances, **confirmed on 2 independent actors** (different palette bytes, different poses, same anchor constants, zero per-actor tuning). The remaining gap is structural, not geometric: how a pose determines its group-header list is still unresolved (the one shortcut tried, `pose.assembly+4`, is confirmed NOT to generalize past the first actor). **Not yet run against the full 5,302-frame oracle**; **not called by `main.c`**; **VDP1 per-object renderer not started**. |
+| S2 object emitter | **Full pipeline (pose-to-header chain, part walk, attr transform, origin) proven ROM + actor-record only** for all 16 object entries across 7 group instances, **confirmed on 2 independent actors** (different palette bytes, different poses, same anchor constants and header-chain mechanism, zero per-actor tuning). The one remaining structural gap: how many groups a given pose/actor-type actually dispatches is not derivable from the group data itself (tag presence is necessary but not sufficient - a live trace still supplies this count). **Not yet run against the full 5,302-frame oracle**; **not called by `main.c`**; **VDP1 per-object renderer not started**. |
 | S2 integration into `main.c` | **Not started.** No live actor in the shipped runtime carries an `AvspActor` or ticks `avsp_anim_frame_tick`. A same-session proof-of-concept overlay was built, boot-tested successfully (real Round 1 combat played through to the Round 2 title without regressing), but was inconclusive on visual confirmation and was removed before committing rather than left in an unverified state. |
 | S3 (widen to full cast) | Not started; depends on S2. |
 | S4 (collision integration) | Not started; `avsp_collision.c` exists and is proven (S1) but nothing calls it from gameplay; depends on S2 for live selectors. |
