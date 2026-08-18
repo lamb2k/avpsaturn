@@ -1,6 +1,6 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-18 EDT (Chrysalis ROM-composition vertical slice)
+Updated: 2026-08-18 EDT (Chrysalis ROM-composition slice; Phase 1 stabilization checkpoint committed)
 
 **Goal audit: 0/7 final conditions closed.** The condition-by-condition index
 is now at [PARITY_PLAN.md#goal-progress-index](PARITY_PLAN.md#goal-progress-index).
@@ -95,26 +95,35 @@ Read this file before taking any action. The user wants a private, capture-faith
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `prototype/private-capability-test`
+- Phase 1 (stabilization) checkpoint: `c1de5f5` (`Stabilize Chrysalis
+  ROM-composition slice (Phase 1 checkpoint)`), the current HEAD. It commits the
+  ROM-composition runtime change plus the promoted generators, C90 pose-record
+  interpreter and host test, self-contained pose gate, reference interpreter, and
+  work-RAM play-sequence trace. Run `git rev-parse HEAD` for the hash.
 - Goal-audit checkpoint: `068ff6b` (`Audit goal progress and harden validation
   gates`), following position-gate implementation `483f088` and handoff command
-  update `020aa5b`. This handoff-only update follows the audit checkpoint; run
-  `git rev-parse HEAD` for its immutable final hash.
+  update `020aa5b`.
 - Pre-existing untracked scratch file: `check_tail.py`. It is not part of the
   checkpoint and was preserved rather than deleted or committed.
 - Current disc profile: `normal-release`; `build/last_compile_profile.txt` now
   says `release-normal-release` after the 2026-08-18 `-Release` build, so the
   build mode and profile are consistent. This is still not the final hardware
   candidate; run `build.ps1 -Clean -Release` for the real final image.
-- `main.c` is MODIFIED (uncommitted) since checkpoint `068ff6b`: the Chrysalis
-  boss now composes from ROM (`compose_boss_rom_pose`,
+- `main.c` (plus the promoted tools/tests/data) is COMMITTED at `c1de5f5`: the
+  Chrysalis boss composes from ROM (`compose_boss_rom_pose`,
   `generated/avsp_boss_rom.h`) and no longer loads `BACT`/`BHIT`/`BKO` for
-  animation. The ISO below reflects that uncommitted change; commit it before
-  treating it as an immutable checkpoint.
+  animation. The ISO below reflects that committed change.
 - Current ISO: 5,541,888 bytes, SHA-256
-  `418b801cce4c0781e17caf7b45e9d24feb2b85d02cccfdc23478bee8084569e8` (the
-  2026-08-18 Chrysalis ROM-composition release; supersedes the 5,410,816-byte
-  `be49e9aef82d3a02f98eb1370ea7cbcdf6a6a6014074d7a4d853aad7b7b42062` image from
-  checkpoint `068ff6b`). The size growth is the ROM tile/palette/pose data.
+  `31d53a6ea4552b6c3dc75afdb0b5d3ee07c97b38f4c3a36f821833c1897dbad6` (the
+  2026-08-18 Chrysalis ROM-composition release, rebuilt for the Phase 1
+  checkpoint; supersedes the 5,410,816-byte `be49e9aef82d3a02f98eb1370ea7cbcdf6a6a6014074d7a4d853aad7b7b42062`
+  image from checkpoint `068ff6b`). The size growth is the ROM tile/palette/pose
+  data. NOTE: the whole-image SHA-256 is build-run-dependent — `build.ps1` runs
+  `mkisofs` without `-r`/`-mtime`/`-D`, so the embedded per-file/volume
+  timestamps change the image bytes (same 5,541,888 size) on every rebuild; the
+  prior run recorded `418b801c...`. Verify by byte size and the stable per-member
+  hashes, not the whole-image hash, unless comparing two images from the same
+  build run.
 - Current cue SHA-256: `bfc58c7020d90952e93bef7ecba32dea8d4faddf6ce6a90e1054206ee1807b12`.
 - Both values match `build/hardware_release_manifest.txt` at
   `profile=normal-release`.
@@ -127,6 +136,9 @@ Read this file before taking any action. The user wants a private, capture-faith
     `e697888bb58ab01ca00b654fb3a81b48e975376bcf7bdcead22f62bad5bd5679`
   - `tools/verify_position_gate.py`:
     `e807521f518ac92accf4a955d57e3d3de77fa85aef027a92e47ab45d7858c6ca`
+  (`decode_avsp_animation_scripts.py` and `verify_pose_gate.py` were extended in
+  the Phase 1 checkpoint `c1de5f5`; the values above are the goal-audit-checkpoint
+  hashes, not the current file hashes.)
 - Goal-audit verification:
   - `test.ps1`: PASS; controller-only model reached Round 2 in 4,485 frames and
     the 12,000-frame deterministic soak passed.
@@ -1146,7 +1158,7 @@ still uses the capture-derived per-frame clip/step tables in
 animation-script / selector-6 interpreter is decoded only host-side (Python)
 and is not yet linked into the runtime.
 
-### What changed in `main.c` (uncommitted since `068ff6b`)
+### What changed in `main.c` (committed at `c1de5f5`)
 
 - New `compose_boss_rom_pose(int pose)` composes a boss pose straight from
   `generated/avsp_boss_rom.h`: for `pr = avsp_boss_rom_poses[pose]` it iterates
@@ -1171,8 +1183,8 @@ and is not yet linked into the runtime.
   (`_run_batch_selfcontained`) that reproduces the 12 canonical assemblies
   purely from the ROM assembly (layout words at `0x1FD1C8`) + the oracle
   archives, independent of `main.c`.
-- `test.ps1` and `tools/decode_avsp_animation_scripts.py` carry small uncommitted
-  edits from the prior ROM-decode work.
+- `test.ps1` and `tools/decode_avsp_animation_scripts.py` carry small edits from
+  the prior ROM-decode work (now committed at `c1de5f5`).
 - **Unchanged (still capture-derived): pose *selection*.** `draw_boss` still
   calls `boss_clip_for_action` → `boss_pose_for_frame`, which walks the
   capture-derived `avsp_boss_step_counts/durations/poses` tables in
@@ -1207,31 +1219,45 @@ inter-shot mean-abs-per-channel diff).
   0.013 — title, no banner. ISO 5,541,888 B SHA-256
   `418B801CCE4C0781E17CAF7B45E9D24FEB2B85D02CCCFDC23478BEE8084569E8`; CUE 188 B
   SHA-256 `BFC58C7020D90952E93BEF7ECBA32DEA8D4FADDF6CE6A90E1054206EE1807B12`
-  (unchanged). This is the image recorded in "Repository state" above.
+  (unchanged). This is this session's release build; the whole-image hash is
+  run-dependent (mkisofs), so the current manifest rebuild of the same
+  checkpoint is the `31d53a6e...` image recorded in "Repository state" above,
+  with identical member hashes.
 - Every build re-ran the host tests + 12,000-frame soak green, and the ISO
   `/SPR4/*.RLE` + `/AUDIO/*.PCM` members matched their manifest sizes/SHA-256.
 
-### Git state and manifest staleness
+### Git state (after the Phase 1 checkpoint)
 
-- Branch `prototype/private-capability-test`; HEAD still `57b860c`
-  (`Handoff: record goal audit checkpoint`). Dirty (M): `main.c`, `test.ps1`,
-  `tools/decode_avsp_animation_scripts.py`, `tools/verify_pose_gate.py`.
-  Untracked: `avsp_anim_script.c/.h`, `tests/avsp_anim_script_test.c`,
-  `data/boss_play_sequence.json`, `generated/avsp_boss_rom.h`, the boss-ROM
-  gen/verify tools (`tools/gen_boss_rom_data.py`,
-  `tools/verify_boss_rom_poses.py`, `tools/build_boss_tile_workset.py`,
-  `tools/generate_boss_anim_script.py`, `tools/test_boss_rom_data.py`, and the
-  `tools/diag_*`/`tools/probe_*`/`tools/locate_*`/`tools/ref_interp.py`/
-  `tools/trace_boss_play_sequence.py` helpers), plus this session's
-  `tools/{screenshot,analyze_shots,crop_shots,window_rect}.ps1` and untracked
-  capture PNGs under `tools/`.
-- `build/hardware_release_manifest.txt` (regenerated by the `-Release` build)
-  matches it (ISO 5,541,888 / `418b801c...`, CUE `bfc58c70...`). The three
-  `boss_*_archive_load_phase` fields (`cold-boot` /
-  `retired-character-select-before-cdda`) are now **historical**: the runtime no
+- Branch `prototype/private-capability-test`; HEAD is `c1de5f5`
+  (`Stabilize Chrysalis ROM-composition slice (Phase 1 checkpoint)`), which
+  committed `main.c`, `test.ps1`, `tools/decode_avsp_animation_scripts.py`,
+  `tools/verify_pose_gate.py` plus the 11 new files (`avsp_anim_script.c/.h`,
+  `tests/avsp_anim_script_test.c`, `data/boss_play_sequence.json`, and the
+  `tools/{gen_boss_rom_data,generate_boss_anim_script,build_boss_tile_workset,
+  verify_boss_rom_poses,test_boss_rom_data,ref_interp,
+  trace_boss_play_sequence}.py` generators). The working tree is clean apart
+  from intentionally-untracked one-off diagnostics / session helpers
+  (`tools/diag_*`, `tools/probe_*`, `tools/locate_*`,
+  `tools/{screenshot,analyze_shots,crop_shots,window_rect}.ps1`,
+  `check_tail.py`) and git-ignored `generated/` / `build/`. No ROMs, captures,
+  or generated assets are tracked.
+- Phase 1 re-verification (this session, all fresh, committed code): the
+  self-contained pose gate reproduces 12/12 assemblies exactly from ROM data;
+  the host suite + 12,000-frame soak pass; and the focused KO/HIT, full Round 1
+  route, and clean `-Release` boots each render busy and animating with no
+  `CAPABILITY TEST FAILED` banner.
+- `build/hardware_release_manifest.txt` (git-ignored, regenerated by the
+  `-Release` build) records ISO 5,541,888 / `31d53a6e...`, CUE
+  `bfc58c70...`. The three `boss_*_archive_load_phase` fields (`cold-boot` /
+  `retired-character-select-before-cdda`) are **historical**: the runtime no
   longer loads `BACT`/`BHIT`/`BKO` for animation; the archives are on-disc
   oracles. Do NOT "fix" them by dropping the archives from the ISO or weakening
   the member-hash gate — that would remove the host-test regression oracle.
+- The "Gate results this session" section above is the ROM-work session's
+  verification (Yaba window 320x208; c1de5f5-era release whole-image hash
+  `418b801c...`). The current manifest (`31d53a6e...`) is a same-checkpoint
+  rebuild with identical member hashes; the whole-image hash is run-dependent
+  (mkisofs), so verify by byte size + member hashes, not the whole-image value.
 
 ### What remains for condition 1 (not closed)
 
@@ -1245,5 +1271,6 @@ inter-shot mean-abs-per-channel diff).
   `/SPR4/*.RLE` pose archives through generated frame tables. Decode their ROM
   programs/assemblies and route them through the same tile-composition path
   (retiring their archives) before condition 1 can close.
-- Commit the uncommitted `main.c` (and the generated/tooling files) before the
-  ISO is treated as an immutable checkpoint.
+- Phase 1 (stabilize the Chrysalis slice) is **complete** and committed at
+  `c1de5f5`; the Phase 1 checklist above is satisfied. Next is Phase 2 (prove
+  the static translator) per `docs/PARITY_PLAN.md`.
