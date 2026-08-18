@@ -1,4 +1,4 @@
-# Next agent prompt: Capability Gate 1, phase A — decide the renderer
+# Next agent prompt: slice V — the VDP1 shape proof
 
 Continue the private native Alien vs Predator Saturn port using the
 `port-cps2-to-sega-saturn` skill.
@@ -11,108 +11,139 @@ C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest
 
 Expected branch: `codex/avp-master-plan`.
 
-The execution order was re-sequenced on 2026-08-18. Phases A–E are in
-`docs/PARITY_PLAN.md`. **This prompt authorizes phase A only.**
+**This prompt authorizes slice V only.** Not the actor spine, not collision
+integration, not AI, not stage work.
 
 ## Read and verify first
-
-Read completely, in this order:
 
 1. The skill's `SKILL.md` and `references/workflow.md`.
 2. `AGENTS.md` and `CLAUDE.md`.
 3. `docs/GOAL.md`.
-4. `docs/AGENT_HANDOFF.md` — especially "Plan re-sequenced around the actor
-   spine" and "Official Saturn reference-port findings".
-5. `docs/PARITY_PLAN.md` — the phase A–E table and the re-sequence rationale.
-6. `docs/TEST_PLAN.md`.
+4. `docs/AGENT_HANDOFF.md` — "Phase A: AvP sprite demand measured", "Plan
+   re-sequenced around the actor spine", "Official Saturn reference-port
+   findings".
+5. `docs/PARITY_PLAN.md` — the phase table, the demand measurement, and
+   "Slice V — the VDP1 shape proof".
+6. `docs/TEST_PLAN.md` and `docs/HARDWARE_TEST.md`.
 
 Record branch, HEAD, recent commits and `git status`. Preserve every existing
 untracked/private ROM, MAME state, raw capture, `nvram/`, `snap/`,
 `check_tail.py`, `tools/diag_*`, `tools/probe_*`, screenshot and helper file.
-Stage explicit paths only. Never use `git add -A`, `git add .`, reset, clean or
-a broad stash. Do not switch, merge or cherry-pick the Marvel lane, and do not
-edit the separate MSHvSF worktree.
+Stage explicit paths only. Never `git add -A`, `git add .`, reset, clean or a
+broad stash. Do not switch, merge or cherry-pick the Marvel lane; do not edit
+the separate MSHvSF worktree.
 
-## Two facts that shape this body
+## Why this slice exists
 
-1. **There is no Saturn Alien vs Predator.** Capcom never shipped one; this port
-   is the first. Do not look for an AvP Saturn reference, disc or memory dump.
-   Fidelity is always judged against MAME's CPS2 `avspu` under identical input.
-2. **The only official CPS2-to-Saturn port available is a different game**
-   (MSHvSF, research lane, immutable checkpoint `dc5d3ea`). Its per-tile VDP1
-   finding is an `INFERRED` hypothesis recorded in the handoff, not a
-   specification. Its numbers are not AvP budgets. This phase exists to get
-   AvP's own answer, which may legitimately differ.
+Everything downstream — the actor spine, ROM-driven animation, collision
+integration, AI translation — assumes AvP can render its own worst frame from
+its own object list, natively, at 60 Hz. If that is false the runtime's shape
+changes, and it is much cheaper to learn now than after the actor model is
+built around it.
+
+Already measured and not to be re-derived (`data/avsp_sprite_demand.json`,
+5,302 captured frames):
+
+- peak 86 objects / **909 16x16 tiles** per frame (peak frame **5776**);
+- **83.6% of objects are blocked sprites**, mean 8.51 tiles, largest 55 tiles;
+- **13 live 16-colour palettes** at peak, against 128 CRAM banks available;
+- texture: 68 KB peak per frame, ~309 KB one-second working set, 665 KB for the
+  whole street-wave window;
+- per-frame new tiles: 5.7 KB mean, 15.2 KB p95, **29.5 KB peak**.
 
 ## Sole objective
 
-Decide, by measurement, which of **our two candidate sprite pipelines** AvP
-should use, before any actor is moved onto the ROM-record spine in phase B.
+Prove, by measurement on real hardware, that AvP's peak frame renders at 60 Hz
+as **one VDP1 normal-sprite command per CPS2 object**.
 
-Pipeline 1 (current): precomposed per-palette 288x192 pose cels, built by
-`compose_boss_rom_pose` in `main.c` and streamed through
-`jo_sprite_add_4bits_image`.
+- **Producer for this slice is a replay harness, never shipped:** feed the
+  captured CPS2 object lists for a window containing frame 5776. Phase B
+  replaces the producer with the ROM-driven actor spine; the consumer built here
+  does not change.
+- **Consumer is real and permanent:** one VDP1 normal sprite per object,
+  `nx*16 x ny*16`, 16-colour bank mode, flip in `CMDCTRL`, jump-next linked,
+  source list order preserved as draw order.
+- **Textures:** a per-block cache (a blocked object needs its tiles contiguous as
+  an `nx*16`-wide texture), cartridge-resident, with the per-frame delta DMA'd.
+- **Palettes:** the live 16-colour banks into VDP2 CRAM.
 
-Pipeline 2 (candidate): one 16x16 VDP1 command per source tile, in source
-assembly order, colour-bank mode, with flip in `CMDCTRL` — the shape in which a
-decoded ROM assembly *is* the command list.
+## Honest scoping of the offline work
 
-## What to measure
+An earlier framing claimed the 5,302-frame object-list oracle gates this slice.
+It does not, and do not build the slice around that idea: when the producer is a
+replay of MAME's own object list, comparing the emitted list back to it is close
+to vacuous. That oracle belongs to **phase B**, where the ROM-driven producer
+must generate the list itself.
 
-On one deterministic route, for **one street wave plus Chrysalis**, at matched
-anchors (idle, attack-active, impact, recovery), for **both** pipelines:
+The meaningful offline gate here is narrower: **coverage**. Every object shape
+and flag combination that appears in the captures must map to a legal VDP1
+command. That is worth testing across all 215,646 captured objects because an
+unhandled block shape, size limit, palette-bank range or flip combination would
+otherwise surface as a rendering bug much later.
 
-- reachable VDP1 command count — walk the command list's control flow; do not
-  count stored non-zero slots, the two numbers differ substantially;
-- **live colour banks per frame** — this is the resource a per-tile pipeline
-  actually spends, and AvP's current allocation was sized for precomposed
-  per-palette cels. If this number does not fit, pipeline 2 is dead regardless
-  of command count;
-- per-resource high-water marks: VDP1 VRAM, colour RAM, work RAM, cartridge;
-- texture working set: distinct referenced tiles per anchor and across the wave.
-
-Pipeline 2 does not need a finished renderer to be measured. A host-side model
-driven by the already-decoded assemblies (`data/avsp_animation_scripts.json`,
-`generated/avsp_boss_rom.h`) that emits the command list it *would* build is
-sufficient, provided the model's output is validated against the pixels
-pipeline 1 already produces for the same pose.
+Keep the offline work to what is needed to boot. The value of this slice is the
+hardware number.
 
 ## Deliverables
 
-- a focused measurement tool and a tracked, copyright-safe report
-  (suggested: `tools/measure_avsp_sprite_pipelines.py`,
-  `data/avsp_sprite_pipeline_budget.json`);
-- every asserted field carries an evidence label — `MEASURED`, `DECODED`,
-  `INFERRED` (with its falsifier), `ADAPTED` (with its reason), or `UNRESOLVED`
-  (with the probe that resolves it), per the parity plan;
-- determinism: run the tool twice, require an identical report hash;
-- a written recommendation naming the **losing pipeline's specific failure**
-  (which budget it exceeds, by how much, at which anchor). "Pipeline 2 looks
-  cleaner" is not a result.
+- `tools/build_avsp_block_textures.py` — from the private ROM tiles plus the
+  window's captured object lists, emit the per-block texture set and a **tracked
+  manifest** carrying counts, sizes and hashes only. Never commit tile data.
+- `tools/test_avsp_object_to_vdp1.py` — the coverage gate above, over every
+  captured object; report any shape/flag that has no legal mapping.
+- a focused Saturn build that replays the window and emits per-object commands;
+- a frame-time measurement at the peak frame, recorded with its method.
+
+Every asserted field carries an evidence label (`MEASURED`, `DECODED`,
+`INFERRED` with its falsifier, `ADAPTED` with its reason, `UNRESOLVED` with its
+probe). Generated reports must be deterministic — run twice, identical hash.
+
+## Gates
+
+1. **Coverage:** every captured object maps to a legal VDP1 command; unhandled
+   cases are enumerated, not silently skipped.
+2. **Frame time at peak:** the peak frame (86 objects / 909 tiles) holds 60 Hz.
+   Record measured frame time, not a pass/fail impression.
+3. **DMA:** the 29.5 KB peak texture delta completes inside vblank.
+
+**Emulator frame time is indicative only.** Yaba Sanshiro will not tell you
+truthfully whether VDP1 holds 60 Hz. Gate 2 is binding only on physical NTSC
+Saturn per `docs/HARDWARE_TEST.md`, or on an FPGA core as a closer proxy that is
+still not the hardware gate. Say which instrument produced each number.
+
+If gate 2 fails at per-object, **fall back to one command per 16x16 tile and
+re-measure** before changing anything upstream. Both granularities draw the same
+~233k pixels; only command count and per-command SH-2 build cost differ. Report
+both numbers either way — that comparison is the durable result of this slice.
 
 ## Boundaries
 
-- **Do not change the native rendering path in this phase.** Phase A decides;
-  phase B implements. If the measurement is ambiguous, say so and name the
-  further probe rather than picking.
-- Do not start phase B, stage extraction, AI translation or full-game work.
-- Do not decode further ROM tables in isolation — the standing rule from
-  milestone 2, whose correct-but-inert collision records are the reason.
-- Do not commit ROM bytes, raw screenshots, raw RAM dumps or disc members.
-- Leave the milestone-1 fixture-signature cleanup (bystander `0xFFA000` versus
-  emitting `0xFF9DC0`) deferred; it belongs with phase B/C actor work.
+- The replay harness is a test instrument. Do not let it become a rendering path,
+  and do not present a replayed frame as ROM-driven rendering.
+- Do not modify `capability_model.c` or the existing cel path yet; slice V runs
+  beside them.
+- Do not start the actor spine, collision integration, AI or stage work.
+- Do not decode further ROM tables — the standing rule from milestone 2.
+- Never commit ROM bytes, tile data, raw screenshots, RAM dumps or disc members.
+- Restore `normal-release` after any diagnostic build.
 
 ## Acceptance
 
-Phase A passes when the tracked report shows, from AvP's own route, which
-pipeline fits AvP's colour RAM and VDP1 budget, with the loser's failure named
-and every field labelled. A host measurement does not close any Gate 1
-condition and does not prove Saturn behaviour; say so in the handoff.
+Slice V passes when gates 1 and 3 pass and gate 2 has a measured frame time from
+a named instrument, with the per-object and per-tile command counts both
+reported. A passing slice does **not** close any Gate 1 condition: Gate 1 stays
+0/7 and the full-game goal stays 0/9, because nothing here is ROM-driven yet.
 
 ## Handoff discipline
 
-Before stopping: update `docs/AGENT_HANDOFF.md` and `docs/PARITY_PLAN.md` with
-the measurement and an honest Gate 1 / full-game status (both currently 0/7 and
-0/9); record branch, HEAD, dirty files, raw paths, hashes and exact commands;
-stop MAME and emulator processes or record their ownership; stage explicit files
-only; commit one coherent checkpoint if the gates pass.
+Update `docs/AGENT_HANDOFF.md` and `docs/PARITY_PLAN.md` with the measurement and
+honest status; record branch, HEAD, dirty files, raw paths, hashes and exact
+commands; stop MAME and emulator processes or record their ownership; stage
+explicit files only; commit one coherent checkpoint if the gates pass.
+
+## What comes after (do not start it here)
+
+S1 actor spine — mirror the ROM's `0xC0` actor record in a native struct, gated
+by loading captured work-RAM frames and reading back identical fields. It is
+independent of this slice and unblocks both collision and AI, so it may run in
+parallel in a separate body if you have a second agent.

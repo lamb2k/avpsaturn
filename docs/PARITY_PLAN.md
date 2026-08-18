@@ -271,11 +271,20 @@ and measured now, with no actor spine, no collision and no AI.
   per-frame delta DMA'd in (measured: 5.7 KB mean, 15.2 KB p95, 29.5 KB peak).
 - **Palettes:** the <=13 live 16-colour banks into VDP2 CRAM.
 
-Gates: (1) offline, the emitted command list matches MAME's captured active
-object list frame for frame, against the 5,302-frame oracle; (2) on Saturn, the
-peak frame holds 60 Hz with measured frame time; (3) the peak texture delta
-lands inside vblank. If (2) fails at per-object, fall back to per-tile and
-re-measure before redesigning anything upstream.
+Gates: (1) **coverage** - every object shape and flag combination in the 215,646
+captured objects maps to a legal VDP1 command, with unhandled cases enumerated;
+(2) on Saturn, the peak frame holds 60 Hz with measured frame time; (3) the peak
+texture delta lands inside vblank. If (2) fails at per-object, fall back to
+per-tile and re-measure before redesigning anything upstream; report both command
+counts either way.
+
+Note what gate (1) is **not**. When the producer replays MAME's own object list,
+comparing the emitted list back to that list is close to vacuous. The
+5,302-frame object-list oracle is **phase B's** gate, where the ROM-driven
+producer must generate the list itself. Slice V's real result is the hardware
+frame time, and emulator frame time is indicative only - gate (2) binds on
+physical Saturn per `docs/HARDWARE_TEST.md`, or an FPGA core as a closer proxy
+that is still not the hardware gate.
 
 **There is no Saturn Alien vs Predator to measure against. That is the project.**
 Capcom never shipped one; this port is the first. So no phase above may be
