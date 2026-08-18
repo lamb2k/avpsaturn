@@ -67,34 +67,39 @@ Three parts, in this order:
    of this part is to give the runtime's street alien an `AvspActor` carrying a
    live `anim_record`, ticked once per frame by `avsp_anim_frame_tick`.
 
-2. **Emit the object list.** The emitter is **decoded from the game's code and
-   mostly confirmed against live register capture** — read the handoff sections
-   "S2 integration — part 1 done, the object emitter decoded" AND its follow-up
-   "Correction and live verification of the above" before writing any code; the
-   second section corrects a real PC-attribution caveat and flags one open
-   contradiction. Do not re-derive the parts that are already confirmed. In
-   short: the pose record's `+4` assembly is a part list of 6-byte entries (a
-   `long` code|attr plus a `word` advancing a separate offset table at
-   `A2 = 0x1FD1C8 + word[0x1FD1C8 + selector*2]`, confirmed live), and that
-   offset table supplies a `dx`,`dy` word pair per part (confirmed live,
-   stride 4). `D1`'s bit 5/6 flip mask is confirmed to match the oracle's own
-   flip state; its own source (which actor field sets it) is not yet traced.
-   The screen origin at `(A5-0x64F4)` is confirmed to be a **per-actor
-   scratch value**, not a frame constant — written once per actor per frame at
-   PC `0x000AA5E4` immediately before that actor's own emission loop; filter any
-   capture of it to the actor you care about, or you will read a different
-   actor's leftover value (this was a live bug in the first probe attempt).
-   **`+0x2E`, the actor field OR'd into the X word, is NOT resolved and has an
-   open contradiction**: it reads `0x0000` for the alien in the existing
-   `collision_probe` capture, but the observed output word has priority bits
-   set that the current model has no other source for. Before implementing the
-   priority/width bits, capture `D2` and `D3` at the TRUE store instructions
-   (`0x0AA210`/`0x0AA212` — not the watchpoint-reported `0x0AA214`/`0x0AA216`,
-   which are two instructions later, a confirmed MAME PC-reporting skew for this
-   store pattern) for a handful of live parts, and re-derive the width/OR
-   contribution from those registers rather than from static disassembly.
-   Once `+0x2E` is resolved, falsify the whole emitter against the captured
-   object lists — the 5,302-frame oracle.
+2. **Emit the object list.** The emitter's geometry is **CONFIRMED, not just
+   decoded** — read the handoff's "S2 integration — part 1 done, the object
+   emitter decoded", its follow-up "Correction and live verification of the
+   above", and "`+0x2E` resolved" before writing any code; do not re-derive
+   what those sections already close. In short, all independently verified by
+   arithmetic against ROM data with no oracle input:
+   `X = ((origin_x - width - dx) & 0x3FF) | 0x8000`,
+   `Y = (origin_y + dy) & 0x3FF`, where `width = 16*(((attr>>8)&0xF)+1)`,
+   `dx,dy` come from a table at `A2 = 0x1FD1C8 + word[0x1FD1C8 + selector*2]`
+   (stride 4, one pair per part), and `0x8000` is the actor's `+0x2E` field —
+   this is a real per-pose/per-actor value that must be read live, not a
+   universal constant, but it held `0x8000` for the confirmed case. The screen
+   origin at `(A5-0x64F4)` is a **per-actor scratch value**, not a frame
+   constant, written once per actor per frame at PC `0x000AA5E4`; any capture
+   of it must filter to the actor of interest or read a different actor's
+   leftover value. **`D1`'s own source (which actor field sets the flip mask)
+   is not yet traced**, though its value is confirmed to match the oracle's
+   flip state. The 3-word header preceding the part list (budget/count/
+   selector) was not located; the loops never re-read it, so this only matters
+   for computing a part count from ROM data alone rather than a capture.
+   **The one remaining verification gap:** of the alien's 5 watched parts, only
+   3 (slots 0-2) were checked against a live-captured `A2`, and all 3 matched
+   exactly on both X and Y. Slots 3-4 sit past a run of hidden parts that wrote
+   outside the watchpoint window (a known, explained gap, not a mystery — see
+   the handoff), so their `A2` needs either the hidden parts' advances summed
+   correctly, or — simpler — a wider watchpoint window on the next capture so
+   every part in the pose lands inside it. Do that before implementing, then
+   falsify the C port against the 5,302-frame object-list oracle.
+   **Standing caution, learned the hard way this session:** never cross-
+   reference two different MAME capture routes by source-frame number as if
+   they shared one timeline — `collision_probe` and the object-emission
+   captures are different routes with different inputs, and "frame 4214" names
+   a different game state in each.
 
 3. **Render per CPS2 object.** One VDP1 normal sprite per object,
    `nx*16 x ny*16`, 16-colour bank mode, flip in `CMDCTRL`, jump-next linked,

@@ -182,10 +182,94 @@ boundaries on its own. Findings, each checked against real execution:
   a handful of parts, and re-derive the OR/width contribution from those, rather
   than reasoning about it from static disassembly alone.
 
+### `+0x2E` resolved: the contradiction was a route-mixing bug, not the game's
+
+The `+0x2E` "open contradiction" above was investigated further in the same
+session, live. Two decisive tests:
+
+1. **A write watchpoint on `0xFF9DC0+0x2E` never fired** across the whole
+   capture window. So the field is not a per-frame scratch value the way the
+   origin is; whatever it holds, it holds constant through this window.
+2. **A periodic live read of `0xFF9DC0+0x0D` and `+0x2E`, filtered to the
+   correct route, gives `+0x0D=0x01` and `+0x2E=0x8000`** — both non-zero,
+   both contradicting the earlier `0x00`/`0x0000` reading from the offline
+   `.deps/mame/collision_probe/workram.bin` capture.
+
+The offline capture was not wrong about its own route — **it is a different
+route.** `collision_probe` replays the `round1_debug_overlays` input schedule
+(right, gun, attack, jump on a fixed schedule, debug DIPs enabled);
+the object-emission work uses the `replay4200` anchor plus a short `P1 Left`
+tail. Both are internally deterministic and both are legitimate, but "source
+frame 4214" names a different game state in each — different player input
+history means a different alien, a different pose, or both, sitting at the
+same 0xC0-grid address by frame 4214. Reading one route's capture and treating
+it as ground truth for the other route's frame numbering was the actual bug,
+not anything wrong with the emitter model. **This is now a standing caution for
+this project:** two different capture routes must never be cross-referenced by
+source-frame number as if they shared a timeline.
+
+With `+0x2E=0x8000` (the correct, route-matched live value) and the previously
+established width formula, the **full per-part X/Y arithmetic was verified
+against the live-captured writer data for all 5 watched slots of the frame-4214
+emission**, using only the ROM's own dx/dy table (read directly from
+`decrypted_program_2m.bin` at the live-captured `A2` addresses) plus the
+confirmed origin, width and `+0x2E`:
+
+```text
+X_masked = (origin_x - width - dx) & 0x3FF ; width = 16 * (((attr>>8)&0xF)+1)
+X_final  = X_masked | 0x8000                ; 0x8000 = confirmed +0x2E value
+Y_masked = (origin_y + dy) & 0x3FF
+Y_final  = Y_masked                         ; no OR for Y ("ori.w #0" is a no-op)
+```
+
+**Slots 0, 1 and 2 match exactly**, both X and Y, computed independently from
+ROM data with zero reference to the oracle:
+
+| slot | dx | dy | width | X (computed) | X (actual) | Y (computed) | Y (actual) |
+|---|---|---|---|---|---|---|---|
+| 0 | -48 | -48 | 32 | `0x8113` | `0x8113` | `0x099` | `0x0099` |
+| 1 | -48 | -32 | 80 | `0x80E3` | `0x80E3` | `0x0A9` | `0x00A9` |
+| 2 | -16 | -16 | 32 | `0x80F3` | `0x80F3` | `0x0B9` | `0x00B9` |
+
+This closes the model: origin, per-part width, the `+0x2E` OR, and the flipped
+variant's subtract-not-add sign convention are all independently confirmed by
+arithmetic that used no oracle data as an input.
+
+**Slots 3 and 4 (in watch-window order) do not yet match**, and the reason is
+identified, not mysterious: milestone 1 already noted that the alien's part
+list has entries between watched slots that fall outside the 24-word watchpoint
+window (confirmed again here: the raw part-table gap between slot 2's and slot
+3's logged `A0` is `0x12F75A - 0x12F748 = 0x12`, i.e. two full 6-byte part
+iterations, each with its own `A2` advance-word, ran and wrote object-buffer
+words outside `0x7080A0..0x7080CE` before slot 3's write fired). The alien's
+assembly has more than 5 parts; only 5 land inside the watch window. Getting
+slots 3/4 to match requires summing the two hidden parts' own `A2`
+advance-words correctly (mechanical, not a new unknown) — **or, more simply,
+widening the watchpoint window to cover the alien's full part range for the
+next capture**, which sidesteps the reconstruction entirely.
+
+A related loose end, resolvable the same mechanical way: the palette
+contribution at actor `+0x0E` was **inferred, not yet live-read** — working
+backward from slot 0's known raw and final attr bytes gives `+0x0E=0x11`,
+which independently matches milestone 1's original palette observation
+(`palette 0x11`) for this same actor/pose. A live read would make this
+`CONFIRMED` rather than `DECODED-by-inference`.
+
+**The part-table header (budget/count/selector, 3 words preceding the first
+part) was not located.** The address hypothesized by simple 6-byte backward
+offset from the first part (`0x12F732`) does not hold a plausible header
+(`count` decoded as `65482`, not a small integer). This does not block the
+confirmed slots — the loops themselves never re-read the header, only walk
+parts sequentially — but the header format is still needed to determine a
+part count from ROM data alone rather than from watchpoint-observed gaps, which
+matters once this moves from "confirmed for one captured pose" to "general for
+any pose".
+
 None of this is wired into any committed C code yet; `avsp_collision.c` and the
 runtime remain untouched. This is discovery evidence for the still-open part 2
 of S2's integration, recorded so the next session does not have to re-derive
-what is now confirmed, and does not repeat the `+0x2E` mistake un-flagged.
+what is now confirmed, and does not repeat either the `+0x2E` mistake or the
+cross-route mixing that caused it.
 
 **Capability Gate 1 stays 0/7; the full-game goal stays 0/9.**
 
