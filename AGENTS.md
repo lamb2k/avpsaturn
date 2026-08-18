@@ -77,6 +77,18 @@ larger workspace. Relocation is organizational only; never move or delete the
 working checkout without first preserving `.git` and all required ignored
 private inputs.
 
+## Terminology
+
+- **"Gate" means Capability Gate 1**, the seven-condition acceptance contract in
+  `docs/PARITY_PLAN.md`, and nothing else. Never call anything else a gate - not
+  a pose comparison, a format check, a coverage run, a step's exit criteria, or
+  the physical-hardware requirement.
+- A step's own pass criteria are **checks**: "S1 check 2", "check C".
+- Physical-hardware validation is **Capability Gate 1 condition 7** and
+  full-game condition 9, not a gate of its own.
+- A step passing every check it has does **not** move Capability Gate 1. Report
+  the two separately and never let a green check read as gate progress.
+
 ## Evidence and fidelity
 
 - Prefer ROM tables and the game's own debug overlays as source truth. Use

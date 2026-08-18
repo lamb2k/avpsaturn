@@ -1,28 +1,26 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-18 EDT (**plan re-sequenced around the actor spine** — new
-execution order A–E in `PARITY_PLAN.md`, next body is phase A, the renderer
-measurement; the seven Gate 1 acceptance conditions are unchanged. Reference-lane
-method adopted through its promotion gate with nothing imported, and note that
-**no Saturn AvP exists to compare against — this port is the first**, so MAME's
-CPS2 `avspu` is always the fidelity oracle. Earlier this session: Capability
-Gate 1 **milestone 2 executed, NOT closed**:
-the actor-local collision record format is decoded from the game's own routines
-and survives a controlled hit/whiff falsification — 21,908 non-overlapping
-active pairs produced no hit, 44/56 hit latches explained exactly — but native
-collision is deliberately unchanged because the records are indexed by ROM
-animation-record bytes the runtime does not yet carry. That linkage is
-phase B of the re-sequenced plan. Gate 1 stays 0/7, full-game 0/9. See "Capability Gate 1 — collision
-records (milestone 2, 2026-08-18)" below. Earlier: street-alien emission
-**milestone 1 CLOSED**: both gated frames, 4214 and 4253, reproduce **20/20** from a fresh
-deterministic run, with writer-PC, emitting-actor and ROM part-table
-attribution. The earlier 4253 failure this session was an instrument defect,
-not a fixture defect: an off-by-one source-frame label plus an unreplayed
-post-anchor route tail. Gate 1's seven acceptance conditions are still 0/7;
-milestone 1 advances conditions 1 and 5. See
-"Capability Gate 1 — street-alien emission (2026-08-18 execution)" below.
-Full-game destination unchanged; Round 1 retained as Capability Gate 1;
-applicable MSHvSF probes remain isolated and integrated by decision point)
+Updated: 2026-08-18 EDT. **Next body: the integration half of S2** — link the
+ROM animation interpreter into the Saturn build, emit the object list, render
+per CPS2 object. See `docs/NEXT_AGENT_PROMPT.md`.
+
+Session order, newest first. **S2 record extraction — PASSED:** 614 reachable
+records, 10,244 bytes in 63 spans, and the interpreter over that 10 KB
+reproduces the full 2 MB program image on every counter. **S2 animation walk —
+interpreter VALIDATED:** 5,738 of the game's own pointer moves predicted, 23,676
+frames predicted exactly free-running, longest run 732 frames; runtime
+integration still open. **S1 actor spine — PASSED:** 481,566 actor loads with 0
+field mismatches, and the C collision port reproduces the Python falsification
+exactly on all eight counters. **Plan re-sequenced** around the actor spine into
+slice steps S1–S6, with the renderer decision (old phase A) deferred into S2
+after measurement showed the shipped build already draws more VDP1 sprite fill
+than the candidate pipeline needs. **Milestone 2 (collision records) executed,
+not closed**; **milestone 1 (street-alien emission) closed**.
+
+Two standing facts. **No Saturn AvP exists to compare against — this port is the
+first**, so MAME's CPS2 `avspu` is always the fidelity oracle. **"Gate" means
+Capability Gate 1 only**; a step's own criteria are checks, and a green check is
+not gate progress (see `AGENTS.md` and the plan's Terminology section).
 
 **Full-game goal audit: 0/9 conditions closed. Capability Gate 1: 0/7
 conditions closed.** The indexes are at
@@ -38,7 +36,7 @@ project as functionally parity complete or hardware-ready.
 
 The execution order in [`PARITY_PLAN.md`](PARITY_PLAN.md#master-execution-plan-2026-08-18)
 was rebuilt. The seven Gate 1 acceptance conditions are **unchanged**; only the
-order of work and its exit gates changed. New order: **A** decide the renderer by
+order of work and its exit checks changed. New order: **A** decide the renderer by
 measurement, **B** build the actor spine on one street alien, **C** widen to
 Round 1's cast, **D** stage tables and enemy logic, **E** budget/validate/hardware.
 
@@ -612,7 +610,7 @@ static chain has been checked against
 ```
 
 That proves where and how the CPS2 object list is built. **Closed since:** the
-two-frame five-slot gate now passes 20/20 on both frames, with the emitter
+two-frame five-slot proof now passes 20/20 on both frames, with the emitter
 pinned to PCs `0x000AA214`/`0x000AA216` inside the Family-1 body emitter and the
 per-part source layout walked through `A0` (`0x12F73C…` at 4214, `0x12FECE…` at
 4253, i.e. inside the `0x12FE06..0x12FEEE` window this section predicted). Still
@@ -1431,7 +1429,7 @@ six canonical programs plus aliases with
 `data/avsp_animation_scripts.json`. Twelve selector-6 assemblies are decoded as
 budget, object count, offset-table index, signed origin, then
 `(code, attribute, layout-adjust)` entries. The layout chain advances by
-`4 + s16(layout_adjust)`. All 12 pass the format-isolating pose gate with zero
+`4 + s16(layout_adjust)`. All 12 pass the format-isolating pose check with zero
 differing pixels; the independent position audit has a scoped pass but full
 coverage remains open as recorded at the top of this handoff.
 
@@ -2108,7 +2106,7 @@ Data: `data/avsp_animation_scripts.json` SHA-256 changed.
 - Within each block, run-length encoded tile data uses 0xAA as separator and
   0x99/0x9D/0xDD/0x66/0x77/0x44/0x55/0x33 as tile color/luma values.
 - The SPR4 format appears to pre-compose tiles from the CPS2 graphics region,
-  providing an oracle for the selector-6 pixel gate.
+  providing an oracle for the selector-6 pixel check.
 
 The SPR4 file format is **not yet decoded into named fields**. The goal is to
 match the selector-6 assembly to the SPR4 pose pixel-for-pixel.
@@ -2119,7 +2117,7 @@ match the selector-6 assembly to the SPR4 pose pixel-for-pixel.
 previously recorded here were disproved by the count/origin/command decoder and
 the 12/12 pose gate. Do not use them. Current selector-6 structure, position
 model, exact limitations and commands are at the top of this handoff and in
-`PARITY_PLAN.md` under "Pose and position gates".
+`PARITY_PLAN.md` under "Pose and position checks".
 
 ## Resume in this order
 
@@ -2255,7 +2253,7 @@ The build scripts locate their bundled Python/MAME/Jo Engine dependencies; do no
 ## Superseded pixel-gate investigation
 
 The earlier "selector-6 tile decoding blocked" conclusion is superseded. The
-format-isolating pose gate now passes 28/28 decoded boss assemblies (29 oracle
+format-isolating pose check now passes 28/28 decoded boss assemblies (29 oracle
 poses) with zero differing pixels. The valid remaining blockers are complete
 actor/pose coverage, exact position coverage, native table/routine integration,
 and the event-level parity harness; see the goal-progress index.

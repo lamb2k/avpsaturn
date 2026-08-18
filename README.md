@@ -17,8 +17,9 @@ Canonical project status:
   commands, current blockers and immediate next work.
 - [`docs/NEXT_AGENT_PROMPT.md`](docs/NEXT_AGENT_PROMPT.md) contains the current
   executable body for the next agent; it does not redefine project scope.
-  Milestone 1 (the street-alien object-emission gate) is **closed** as of
-  2026-08-18; the assigned body is milestone 2, replacing inferred collision.
+  The plan is now a vertical slice, steps S1-S6. S1 (actor spine) has passed and
+  S2 (ROM animation) is part-way; the assigned body is the integration half of
+  S2. "Gate" refers only to Capability Gate 1; a step's own criteria are checks.
 
 Capability Gate 1's seven acceptance conditions are **0 of 7 closed**. The
 "Gate 1 baseline" below is the capture-derived regression route, not the gate.
