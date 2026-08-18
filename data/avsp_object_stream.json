@@ -171,6 +171,111 @@
    "label": "4253 group2 (3 parts)",
    "origin_x": 379,
    "origin_y": 203
+  },
+  {
+   "entries": [
+    {
+     "attr": "0x0930",
+     "code": "0x46f0",
+     "dx": -80,
+     "dy": -16,
+     "width": 160,
+     "x": "0x8085",
+     "y": "0x00c8"
+    },
+    {
+     "attr": "0x2630",
+     "code": "0x5060",
+     "dx": -48,
+     "dy": -64,
+     "width": 112,
+     "x": "0x8095",
+     "y": "0x0098"
+    }
+   ],
+   "exact_match_vs_expected": true,
+   "header": {
+    "a2_base": "0x1fdc24",
+    "a2_table_entry_address": "0x1fd246",
+    "budget": 31,
+    "count": 2,
+    "header_address": "0x12f7ce",
+    "part0_code_attr_address": "0x12f7d8",
+    "selector": 63
+   },
+   "label": "actor2 4214-ish header 0x12F7CE (2 parts)",
+   "origin_x": 213,
+   "origin_y": 216
+  },
+  {
+   "entries": [
+    {
+     "attr": "0x0930",
+     "code": "0x4800",
+     "dx": -80,
+     "dy": -16,
+     "width": 160,
+     "x": "0x8075",
+     "y": "0x00c8"
+    },
+    {
+     "attr": "0x2530",
+     "code": "0x5090",
+     "dx": -64,
+     "dy": -64,
+     "width": 96,
+     "x": "0x80a5",
+     "y": "0x0098"
+    }
+   ],
+   "exact_match_vs_expected": true,
+   "header": {
+    "a2_base": "0x1fdc24",
+    "a2_table_entry_address": "0x1fd246",
+    "budget": 28,
+    "count": 2,
+    "header_address": "0x12f7e6",
+    "part0_code_attr_address": "0x12f7f0",
+    "selector": 63
+   },
+   "label": "actor2 4214-ish header 0x12F7E6 (2 parts)",
+   "origin_x": 197,
+   "origin_y": 216
+  },
+  {
+   "entries": [
+    {
+     "attr": "0x1830",
+     "code": "0x4830",
+     "dx": -80,
+     "dy": -32,
+     "width": 144,
+     "x": "0x8085",
+     "y": "0x00b8"
+    },
+    {
+     "attr": "0x1530",
+     "code": "0x50c0",
+     "dx": -48,
+     "dy": -64,
+     "width": 96,
+     "x": "0x8095",
+     "y": "0x0098"
+    }
+   ],
+   "exact_match_vs_expected": true,
+   "header": {
+    "a2_base": "0x1fdc20",
+    "a2_table_entry_address": "0x1fd244",
+    "budget": 30,
+    "count": 2,
+    "header_address": "0x12f7fe",
+    "part0_code_attr_address": "0x12f808",
+    "selector": 62
+   },
+   "label": "actor2 4214-ish header 0x12F7FE (2 parts)",
+   "origin_x": 197,
+   "origin_y": 216
   }
  ],
  "inputs": {

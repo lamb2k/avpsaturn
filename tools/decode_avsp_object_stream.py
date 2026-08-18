@@ -338,6 +338,41 @@ _ORACLE_GROUPS = [
          {"code": "0x4a88", "attr": "0x1431", "x": "0x814b", "y": "0x00ab"},
          {"code": "0x4958", "attr": "0x0131", "x": "0x816b", "y": "0x006b"},
      ]},
+    # A SECOND, independent actor (0xFFFFA000, not the tracked street alien),
+    # same frame window, different palette byte and poses - added specifically
+    # to test generalization beyond the one actor/pose pair above. Header
+    # addresses and expected entries are ground truth from a live entry-point
+    # breakpoint (0x0AA00E, a0 == the header address before any part read) and
+    # the object-buffer write tap, both a6-conditioned to this actor
+    # (tools/mame_trace_actor2.lua, untracked one-off). world_x/world_y/
+    # facing_raw/palette_byte are this actor's own record fields, read the
+    # same way as the first actor's. This independently confirms the origin
+    # formula (same ANCHOR_Y/ANCHOR_X, no per-actor tuning) and the attr
+    # transform (different palette_byte=0x10) generalize; it does NOT test
+    # the pose.assembly+4 header-derivation rule, which is known NOT to
+    # generalize to this actor (predicted 0x12F7D0, real header is 0x12F7CE) -
+    # these header addresses are supplied directly, not derived from a pose.
+    {"label": "actor2 4214-ish header 0x12F7CE (2 parts)", "header": "0x12F7CE",
+     "world_x": 1181, "world_y": 297, "facing_raw": 1,
+     "palette_byte": 0x10,
+     "expected": [
+         {"code": "0x46f0", "attr": "0x0930", "x": "0x8085", "y": "0x00c8"},
+         {"code": "0x5060", "attr": "0x2630", "x": "0x8095", "y": "0x0098"},
+     ]},
+    {"label": "actor2 4214-ish header 0x12F7E6 (2 parts)", "header": "0x12F7E6",
+     "world_x": 1181, "world_y": 297, "facing_raw": 1,
+     "palette_byte": 0x10,
+     "expected": [
+         {"code": "0x4800", "attr": "0x0930", "x": "0x8075", "y": "0x00c8"},
+         {"code": "0x5090", "attr": "0x2530", "x": "0x80a5", "y": "0x0098"},
+     ]},
+    {"label": "actor2 4214-ish header 0x12F7FE (2 parts)", "header": "0x12F7FE",
+     "world_x": 1181, "world_y": 297, "facing_raw": 1,
+     "palette_byte": 0x10,
+     "expected": [
+         {"code": "0x4830", "attr": "0x1830", "x": "0x8085", "y": "0x00b8"},
+         {"code": "0x50c0", "attr": "0x1530", "x": "0x8095", "y": "0x0098"},
+     ]},
 ]
 
 
