@@ -443,45 +443,69 @@ cases but is not actually called per the live trace, so it is either an unused
 table continuation or belongs to a different pose — do not assume an N-group
 loop from this alone.
 
-**6. The two camera-anchor constants measure as zero throughout this route,
-with `A5` confirmed fixed.** A breakpoint at the origin routine's entry
-(`0x0AA59A`) reading `w@(a5-0x27C)` and `w@(a5-0x278)` directly (MAME debugger
-memory-read expressions) fired **1,194 times** across the full `replay4200`
-window (frames 4210-4262, every dispatched actor, both oracle frames included):
-`a5=0x00FF8000` and `(anchor_y, anchor_x)=(0x0000, 0x0000)` on **every single
-firing, zero variance**. `MEASURED` via `tools/mame_trace_camera_anchor.lua`
-(untracked one-off, kept per convention; its `error.log` was deleted after
-extraction per convention — rerun the script to reproduce).
+**6. Correction: an initial live probe of the camera anchors used the wrong
+sign and measured zero; the origin routine has now been fully disassembled
+live and the real anchor constants solved and cross-verified.** A first
+breakpoint at the origin routine's entry reading `w@(a5-0x27C)`/`w@(a5-0x278)`
+fired 1,194 times across the full route window with every reading `0x0000` -
+but this was reading the wrong address. MAME's own `trace` disassembly
+facility (ground truth from live execution, not the static ROM dump, which
+reads as garbage at this code address - consistent with CPS2 opcode-fetch
+decryption not applying to this dump, unlike the data region at `0x12F72E`
+where the same dump reads correctly) shows the true instructions are
+`sub.w ($27c,A5),D3` / `sub.w ($278,A5),D3` - a **positive** displacement
+(`A5+0x27C`/`A5+0x278`), not negative. Full routine, instruction for
+instruction (`tools/mame_trace_origin_disasm.lua`):
 
-This is a real result but scoped to this route: it proves the anchor
-subtraction is a no-op *here*, not that these addresses are hardwired zero
-everywhere (a level with real camera scroll could show nonzero values — this
-route's captured window may simply not scroll horizontally/vertically during
-these frames). Falsifier: capture a route segment with visible camera motion
-and re-run the same probe; a nonzero reading there would still be consistent
-with this finding, not a contradiction of it.
+```text
+0aa59a: moveq #0,D1 ; move.b (0xF,A4),D1     ; D1 = facing_raw
+0aa5a0: move.l (A0)+,D2                       ; D2 = group header's trailing long
+0aa5a2: move.w (0x14,A4),D3                   ; D3 = actor world_y
+0aa5a6: sub.w  ($27c,A5),D3                   ; D3 -= anchor_y
+0aa5aa: neg.w  D3                             ; D3 = anchor_y - world_y
+0aa5ac: addi.w #0x100,D3
+0aa5b0: btst #1,D1 ; bne .add                 ; facing bit 1 selects add/sub
+0aa5b8: sub.w D2,D3  /  (taken) add.w D2,D3   ; +/- D2's low word
+0aa5c0: swap D2 ; swap D3                     ; D2's high word now first;
+                                               ; this Y result moves to D3's
+                                               ; high word
+0aa5c4: move.w (0x10,A4),D3                   ; D3(low) = actor world_x
+0aa5c8: sub.w  ($278,A5),D3                   ; D3(low) -= anchor_x
+0aa5cc: addi.w #0x40,D3
+0aa5d0: btst #0,D1 ; bne .add                 ; facing bit 0 selects add/sub
+0aa5d8: sub.w D2,D3  /  (taken) add.w D2,D3   ; +/- D2's (post-swap) low word
+0aa5e0: move.l D3,(-0x64f4,A5)                ; store: hi=origin_y, lo=origin_x
+0aa5e4: lsl.b #5,D1                           ; flip mask = facing_raw << 5
+0aa5e6: rts
+```
 
-With anchor confirmed zero in this route, `origin_x`/`origin_y` reduce here to
-`actor world position (+0x10/+0x14) adjusted by the facing-conditional
-add/sub of the one part-table long (D2) the routine consumes` — the anchor
-term drops out entirely for this data. **Not yet resolved:** the exact
-facing-conditional add/sub logic itself (which half of D2 applies to X vs Y,
-and the add-vs-sub condition) has not been disassembled/verified live: that is
-now the last piece needed before `origin_x`/`origin_y` can be computed from
-ROM+RAM alone (actor fields already captured per-frame in the existing
-`enemy_actions` workram snapshots) without any further live-trace instrument.
+Solving this formula against the 4 already-verified oracle groups (`D2` read
+directly from ROM at each group header `+6`; world_x/world_y from the actor
+record; facing_raw=1 for this street-alien instance) for the two unknown
+anchor constants gives **the identical result in all 4 independent cases**
+(2 different `D2` values per frame, 2 different actor world positions):
+`ANCHOR_Y = 0x00FF (255)`, `ANCHOR_X = 0x03F0 (1008)`. `decode_group_origin()`
+implements this exactly; `decode_avsp_object_stream.py` now takes
+`world_x`/`world_y`/`facing_raw` instead of a caller-supplied origin, and all
+4 oracle groups still decode exactly. **The full pipeline (header chain, part
+walk, attr transform, origin) is now ROM + actor-record only - no
+live-trace-captured value anywhere in the calculation.** Scoped caveat
+unchanged from before the correction: not yet proven that `ANCHOR_Y`/`ANCHOR_X`
+are ROM-wide constants rather than specific to this route/scene.
 
-**Still blocking a ROM-only (no-live-trace) decoder, in priority order:**
-disassembling/verifying the facing-conditional D2 add/sub in the origin
-routine (see above), confirming the per-actor-type dispatch count generalizes
-beyond this one actor/pose pair, and deriving `palette_byte`/`flip_byte` from
-the actor record rather than supplying them by hand. The declared-eligible-
-subset run against the full 5,302-frame oracle (`data/avsp_sprite_demand.json`)
-required by `NEXT_AGENT_PROMPT.md` Body B item 6 has **not** been done yet —
-only the 2 hand-verified frames (10 entries) are proven exact so far.
+**Still blocking a fully general (any actor, any pose) ROM-only decoder, in
+priority order:** confirming the per-actor-type dispatch count (currently
+"exactly 2 groups") generalizes beyond this one actor/pose pair, deriving
+`palette_byte`/`flip_byte` from the actor record rather than supplying them by
+hand, and confirming `ANCHOR_Y`/`ANCHOR_X` hold outside this route. The
+declared-eligible-subset run against the full 5,302-frame oracle
+(`data/avsp_sprite_demand.json`) required by `NEXT_AGENT_PROMPT.md` Body B
+item 6 has **not** been done yet — only the 2 hand-verified frames
+(10 entries) are proven exact so far.
 
-Committed: `tools/decode_avsp_object_stream.py` (attr-transform fix) and
-`data/avsp_object_stream.json` at `b6f5a4e`.
+Committed: `tools/decode_avsp_object_stream.py` (attr-transform fix at
+`b6f5a4e`, ROM-only origin derivation at `ac1b435`) and
+`data/avsp_object_stream.json`.
 
 ## Status across S1-S6 (2026-08-18, end of session)
 
@@ -489,7 +513,7 @@ Committed: `tools/decode_avsp_object_stream.py` (attr-transform fix) and
 |---|---|
 | S1 actor spine | **PASSED.** 481,566 actor-field loads, 0 mismatches; the collision predicate ported to C reproduces the Python falsification exactly on all 8 counters. |
 | S2 animation walk | **VALIDATED.** Interpreter predicts 23,676 of the game's own frames exactly free-running from one seed; 614 records extracted to 63 spans (10 KB), proven to reproduce the full 2 MB image on every counter. |
-| S2 object emitter | **X/Y geometry formula confirmed and coded** for 3/5 observed object entries. `dx/dy` are ROM-derived and expected X/Y are not calculation inputs, but origin/`+0x2E` are route-matched live values and code/attr are supplied by the oracle; this is **not** a complete ROM-only decoder. The general part-table walk remains open (header/count/advance/emission mechanism); **not called by `main.c`**; **VDP1 per-object renderer not started**. |
+| S2 object emitter | **Full geometry pipeline (header chain, part walk, attr transform, origin) proven ROM + actor-record only** for all 10 object entries across 2 oracle frames (4 group instances) — zero live-trace-captured values in the calculation. `palette_byte`/`flip_byte` still per-actor live-trace inputs, not yet derived generally; the 2-groups-per-actor dispatch count and the two anchor constants not yet confirmed to generalize beyond this one actor/pose pair; **not yet run against the full 5,302-frame oracle**; **not called by `main.c`**; **VDP1 per-object renderer not started**. |
 | S2 integration into `main.c` | **Not started.** No live actor in the shipped runtime carries an `AvspActor` or ticks `avsp_anim_frame_tick`. A same-session proof-of-concept overlay was built, boot-tested successfully (real Round 1 combat played through to the Round 2 title without regressing), but was inconclusive on visual confirmation and was removed before committing rather than left in an unverified state. |
 | S3 (widen to full cast) | Not started; depends on S2. |
 | S4 (collision integration) | Not started; `avsp_collision.c` exists and is proven (S1) but nothing calls it from gameplay; depends on S2 for live selectors. |
