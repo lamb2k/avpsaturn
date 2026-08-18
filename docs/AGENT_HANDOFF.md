@@ -726,6 +726,72 @@ The opcode dumper itself remains:
 - `tools/mame_dump_code_spaces.lua`:
   `1f22a221c87c5ab2bc07eeab0608cc2bb10d980f5a574cd5f73f0a4bf246ccd6`.
 
+### Street-alien extraction checkpoint (Phase 2a, second actor)
+
+This generalises the ROM animation-record walker and the assembly-discovery
+path — it reuses `tools/decode_avsp_animation_scripts.py` against a second
+actor. It does **not** yet exercise the planned ahead-of-time 68000 code
+translator or any `avsp_core_*` interface. The boss record format was the first
+actor through that record path; the street-alien is the second, and it proves
+the record path generalises. Findings from read-only scans of the existing
+`.deps/mame/enemy_actions` per-frame dumps plus one short ROM-window boot:
+
+- The street-alien (actor_id 31) occupies actor slot `0xFFA000` in the
+  `enemy_actions` run, so its struct base is workram file offset `0x2000`. That
+  run already has the full boss-equivalent per-frame dump set
+  (`workram`/`objram_active`/`cps_a_regs`/`palette`, frames 4080..6200), so its
+  programs need **no new capture**.
+- Scanning all 2121 `workram_*.bin` for the `w1c:w1e` animation-script pointer
+  yields **48 distinct pointers in `0x12D2F8..0x12EC74`** (hi-word `0x0012`).
+  They canonicalise, through the same record walker, to **12 programs**.
+- The record format is identical to the boss: 16-byte pose records (duration
+  `+0`, flags `+2`, assembly pointer `+4`, 8-byte tail) plus a 4-byte jump
+  record when the flags word is negative. Sample program `0x12D2F8` walks to 4
+  poses (duration 6, tail byte `+8`=1, `+9`=0) and a `flags=0x8000` record
+  whose jump loops back to `0x12D2F8` — the same explicit-loop structure.
+- The 12 programs reference **28 distinct sprite assemblies in
+  `0x12F5AC..0x130346`**, all within one dumped window
+  (`.deps/mame/actorprobe/rom_window_12c_134.bin`, `0x12C000..0x134000`,
+  SHA-256 `8df491bbb3f0e52f762f6064e8d40ed5419ff63bfe6134fb03270177a7aef417`),
+  produced by `tools/mame_dump_rom_window.lua`:
+  `set "AVSP_ROM_FIRST=0x12c000" && set "AVSP_ROM_LAST=0x134000" && set
+  "AVSP_ROM_OUT=.deps/mame/actorprobe/rom_window_12c_134.bin" &&
+  .deps\mame\mame0289\mame.exe avspu -rompath . -video none -sound none
+  -nothrottle -skip_gameinfo -autoboot_delay 0 -autoboot_script
+  .\tools\mame_dump_rom_window.lua`.
+- Decoding those 28 assemblies against the shared global offset table
+  (`0x1FD1C8`) and layout window (`0x1E0000..0x200000`) gives selector
+  distribution **`{2: 2, 6: 5, 12: 21}`**. Selectors 2 and 6 reuse the boss
+  dumps cleanly (selector-6 layout addresses `0x1FDC1C..0x1FDD44` are in-window).
+  **Selector 12 is a new, unmapped assembly format the boss never used, and only
+  its raw prefix is structurally suggestive — every field after the selector
+  word is still unproven.** Across the 21 selector-12 assemblies the second word
+  (`+02`, a selector-6 "budget" if the analogy held) is `0x0006` in 17 and
+  `0x0002` in 4, and the fourth word (`+06`, a selector-6 "offset-index" if the
+  analogy held) is `0x0002` in 10, `0x0003` in 7 and `0x2210` in 4. Those four
+  `[0x000c, 0x0002, 0x0009, 0x2210]` heads break the selector-6 reading (a
+  `0x2210` offset-index is implausible into the small layout table), so the
+  field interpretation is **not universal**. The entry body and the meaning of
+  every word after the selector must be established by the assembly-renderer /
+  updater disassembly — exactly how selectors 2/6/10 were originally
+  characterised — not by guessing from the raw words.
+- `data/enemy_action_capture.json`'s per-frame `animation` field was re-checked
+  against the live workram `w1e` word: **335/335 samples match** (e.g. frame
+  4214 = `0xEC04` in both). It is a valid per-frame script-pointer index, not
+  stale.
+- The **player** is the only actor still missing RAM-side dumps:
+  `tools/mame_capture_player_action.lua` has the object-bank tap and objram/
+  palette/snapshot writers but no per-frame `workram` (`read_range`) and no
+  `:cps_a_regs`/`:cps_b_regs` share dumps, so the player needs a lua edit plus a
+  re-capture before its programs can be walked. The **stalkers**
+  (`0xFFA240`/`0xFFA300`) already have the full dump set and follow the same path.
+
+Next for the street-alien: disassemble the assembly renderer to establish the
+selector-12 field semantics (do not guess from the raw prefix), then build
+per-pose ROM oracles and gate the 28 assemblies the same way as the boss.
+Condition 1 stays OPEN until a second actor's ROM-decoded assembly reproduces a
+captured pose pixel-for-pixel; nothing here weakens that.
+
 ### Next steps for this direction
 
 1. [Done] All 408 geometry frames now match a decoded assembly in the 28-assembly
