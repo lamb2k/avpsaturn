@@ -1,0 +1,190 @@
+{
+ "algorithm": {
+  "a2_table_base": "0x1fd1c8",
+  "formula": {
+   "attr": "(attr_raw & 0xFF00) | (((attr_raw & 0xE0) + palette_byte) ^ flip_byte)",
+   "width": "16 * (((attr_raw>>8)&0xF)+1)",
+   "x": "((origin_x - width - dx) & 0x3FF) | or_value",
+   "y": "(origin_y + dy) & 0x3FF"
+  },
+  "header_layout": "u16 budget, u16 count, u16 selector, 4 bytes consumed by the origin routine",
+  "part_layout": "u16 code, u16 attr, u16 a2_advance, repeated `count` times"
+ },
+ "all_groups_exact": true,
+ "classification": "decoded CPS2 object-stream groups - coordinates only, no ROM bytes",
+ "groups": [
+  {
+   "entries": [
+    {
+     "attr": "0x0131",
+     "code": "0x4efe",
+     "dx": -48,
+     "dy": -48,
+     "width": 32,
+     "x": "0x8113",
+     "y": "0x0099"
+    },
+    {
+     "attr": "0x0431",
+     "code": "0x4ef6",
+     "dx": -48,
+     "dy": -32,
+     "width": 80,
+     "x": "0x80e3",
+     "y": "0x00a9"
+    },
+    {
+     "attr": "0x0131",
+     "code": "0x4fc8",
+     "dx": -16,
+     "dy": -16,
+     "width": 32,
+     "x": "0x80f3",
+     "y": "0x00b9"
+    }
+   ],
+   "exact_match_vs_expected": true,
+   "header": {
+    "a2_base": "0x1fdb64",
+    "a2_table_entry_address": "0x1fd216",
+    "budget": 9,
+    "count": 3,
+    "header_address": "0x12f72e",
+    "part0_code_attr_address": "0x12f738",
+    "selector": 39
+   },
+   "label": "4214 group1 (3 parts)",
+   "origin_x": 259,
+   "origin_y": 201
+  },
+  {
+   "entries": [
+    {
+     "attr": "0x2431",
+     "code": "0x473a",
+     "dx": -48,
+     "dy": -80,
+     "width": 80,
+     "x": "0x8121",
+     "y": "0x007b"
+    },
+    {
+     "attr": "0x1331",
+     "code": "0x479c",
+     "dx": -16,
+     "dy": -32,
+     "width": 64,
+     "x": "0x8111",
+     "y": "0x00ab"
+    }
+   ],
+   "exact_match_vs_expected": true,
+   "header": {
+    "a2_base": "0x1fdd4c",
+    "a2_table_entry_address": "0x1fd29a",
+    "budget": 23,
+    "count": 2,
+    "header_address": "0x12f74c",
+    "part0_code_attr_address": "0x12f756",
+    "selector": 105
+   },
+   "label": "4214 group2 (2 parts)",
+   "origin_x": 321,
+   "origin_y": 203
+  },
+  {
+   "entries": [
+    {
+     "attr": "0x0131",
+     "code": "0x4df8",
+     "dx": -48,
+     "dy": -32,
+     "width": 32,
+     "x": "0x814f",
+     "y": "0x009e"
+    },
+    {
+     "attr": "0x0531",
+     "code": "0x4ef0",
+     "dx": -48,
+     "dy": -16,
+     "width": 96,
+     "x": "0x810f",
+     "y": "0x00ae"
+    }
+   ],
+   "exact_match_vs_expected": true,
+   "header": {
+    "a2_base": "0x1fdad0",
+    "a2_table_entry_address": "0x1fd1ec",
+    "budget": 8,
+    "count": 2,
+    "header_address": "0x12fec0",
+    "part0_code_attr_address": "0x12feca",
+    "selector": 18
+   },
+   "label": "4253 group1 (2 parts)",
+   "origin_x": 319,
+   "origin_y": 190
+  },
+  {
+   "entries": [
+    {
+     "attr": "0x2531",
+     "code": "0x4b04",
+     "dx": -64,
+     "dy": -80,
+     "width": 96,
+     "x": "0x815b",
+     "y": "0x007b"
+    },
+    {
+     "attr": "0x1431",
+     "code": "0x4a88",
+     "dx": -32,
+     "dy": -32,
+     "width": 80,
+     "x": "0x814b",
+     "y": "0x00ab"
+    },
+    {
+     "attr": "0x0131",
+     "code": "0x4958",
+     "dx": -16,
+     "dy": -96,
+     "width": 32,
+     "x": "0x816b",
+     "y": "0x006b"
+    }
+   ],
+   "exact_match_vs_expected": true,
+   "header": {
+    "a2_base": "0x1fde8c",
+    "a2_table_entry_address": "0x1fd2ea",
+    "budget": 30,
+    "count": 3,
+    "header_address": "0x12fed8",
+    "part0_code_attr_address": "0x12fee2",
+    "selector": 145
+   },
+   "label": "4253 group2 (3 parts)",
+   "origin_x": 379,
+   "origin_y": 203
+  }
+ ],
+ "inputs": {
+  "program_image": {
+   "bytes": 2097152,
+   "path": ".deps/mame/actorprobe/decrypted_program_2m.bin",
+   "sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9"
+  }
+ },
+ "method": "68000 routine decode; see tools/decode_avsp_object_stream.py docstring",
+ "schema": 1,
+ "unresolved": [
+  "pose-record-to-group-header-list mapping (group addresses here are from live trace, not derived structurally)",
+  "the two camera-anchor constants inside the origin routine 0x0AA59A",
+  "whether a2_advance is ever non-zero in practice",
+  "palette_byte/flip_byte are per-actor live-trace inputs here (0x11/0x20 for this street-alien instance), not yet derived from a general actor-record read"
+ ]
+}
