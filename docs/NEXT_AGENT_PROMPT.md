@@ -1,4 +1,4 @@
-# Next agent prompt: S1 — the actor spine
+# Next agent prompt: S2 integration — put the ROM animation walk in the runtime
 
 Continue the private native Alien vs Predator Saturn port using the
 `port-cps2-to-sega-saturn` skill.
@@ -11,18 +11,22 @@ C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest
 
 Expected branch: `codex/avp-master-plan`.
 
-**This prompt authorizes S1 only.** Not the renderer, not AI, not stage work,
-and no change to shipped runtime behaviour.
+**Terminology:** "Gate" means **Capability Gate 1**, the seven-condition
+acceptance contract. A slice step's own pass criteria are **checks**.
+
+**This prompt authorizes the integration half of S2 only.** Not S3, not
+collision rewiring (S4), not AI (S5), not stage work.
 
 ## Read and verify first
 
 1. The skill's `SKILL.md` and `references/workflow.md`.
 2. `AGENTS.md` and `CLAUDE.md`.
 3. `docs/GOAL.md`.
-4. `docs/AGENT_HANDOFF.md` — "Capability Gate 1 — collision records", "Phase A:
-   AvP sprite demand measured", "Plan re-sequenced around the actor spine".
-5. `docs/PARITY_PLAN.md` — the phase table and "How game logic gets translated".
-6. `docs/TEST_PLAN.md`.
+4. `docs/AGENT_HANDOFF.md` — "S2 animation walk", "S1 actor spine",
+   "Phase A: AvP sprite demand measured".
+5. `docs/PARITY_PLAN.md` — the slice table, the slice-V design retained for
+   S2/S3, and "How game logic gets translated".
+6. `docs/TEST_PLAN.md` and `docs/HARDWARE_TEST.md`.
 
 Record branch, HEAD, recent commits and `git status`. Preserve every existing
 untracked/private ROM, MAME state, raw capture, `nvram/`, `snap/`,
@@ -31,103 +35,101 @@ Stage explicit paths only. Never `git add -A`, `git add .`, reset, clean or a
 broad stash. Do not switch, merge or cherry-pick the Marvel lane; do not edit
 the separate MSHvSF worktree.
 
-## Why this is first
+## What is already done, and must not be redone
 
-Four separate pieces of work are blocked behind one missing abstraction: the
-native runtime has no actor that carries its ROM animation-record pointer.
-Collision records are decoded and falsified but unusable. Animation scripts are
-decoded and `avsp_anim_script.c` is written and host-tested but **not in the
-Saturn build** (`SRCS = main.c capability_model.c`). Stage triggers and AI read
-actor fields through the same record.
-
-The renderer question was considered for this slot and deferred. Every measured
-budget has an order of magnitude of headroom, the shipped build already sustains
-more VDP1 sprite fill than a per-object pipeline would need, and the spine's
-output is "a CPS2 object list" whichever granularity the renderer later
-consumes. See the deferral note in `PARITY_PLAN.md`.
+- **S1 passed.** `avsp_actor.h/.c` mirrors the game's `0xC0` actor record;
+  481,566 loads, 0 field mismatches. `avsp_collision.h/.c` ports the overlap
+  test and guards and reproduces the Python falsification exactly on all eight
+  counters.
+- **S2 validation passed.** The interpreter in `avsp_anim_script.c` predicts
+  5,738 of the game's own pointer moves, and free-running from a single seed it
+  predicts 23,676 frames exactly, longest run 732 frames.
+- **S2 record extraction passed.** `tools/gen_avsp_anim_records.py` extracts the
+  614 reachable records — **10,244 bytes in 63 spans** at their original
+  addresses — and the interpreter over those 10 KB reproduces the full 2 MB
+  program image on every counter (check C). The interpreter's `AvspAnimSpan`
+  sparse form is what makes that possible.
+- **Sprite demand measured.** Peak 86 objects / 909 tiles per frame, 83.6% of
+  objects blocked averaging 8.51 tiles, 13 live palettes against 128 CRAM banks,
+  per-frame texture delta 5.7 KB mean / 29.5 KB peak.
 
 ## Sole objective
 
-A native actor record that mirrors the game's own `0xC0` actor layout, proven
-field-for-field against captured work RAM, and enough C to make the already
-decoded collision data live.
+Make the Saturn runtime animate one street alien from ROM records, and render it
+from the object list those records produce.
 
-### Layout
+Three parts, in this order:
 
-Mirror the ROM record for the fields the game's own code consumes. These are
-already proven and must not be re-derived:
+1. **Link the interpreter.** Add `avsp_anim_script.c`, `avsp_actor.c` and the
+   generated record spans to the Saturn build (`SRCS` in `makefile`). Give the
+   runtime's street alien an `AvspActor` carrying a live `anim_record`, ticked
+   once per frame by `avsp_anim_frame_tick`.
 
-| Offset | Field |
-|---|---|
-| `+0x00` | state |
-| `+0x08` | type |
-| `+0x0F` | facing |
-| `+0x10` / `+0x14` / `+0x18` | world x / y / z |
-| `+0x1C` | animation-record pointer |
-| `+0x2C` / `+0x2D` | hit value / hit source |
-| `+0x50` | collision table-set pointer |
-| `+0x67` | attacker id |
-| `+0x68..0x6F` | per-attacker hit latch |
-| `+0x70` | suppress |
-| `+0xD1` | latch index |
+2. **Emit the object list.** The pose record's `+4` assembly address is the
+   entry to the part table milestone 1 proved (`0x12F73C…` at frame 4214,
+   `0x12FECE…` at 4253, written by PCs `0x000AA214` / `0x000AA216`). Walk it and
+   produce CPS2 object entries — X, Y, code, attribute — for the actor.
 
-Actor slots sit on a `0xC0` grid anchored at the player slot `0xFF8380`. Do not
-label fields beyond what collision, animation and the differential-replay method
-actually consume — an exhaustive labelling of all 96 words is explicitly not
-wanted.
-
-Prefer a tracked, evidence-labelled field map plus a generated header over a
-hand-written struct, so the layout is auditable and regenerable.
+3. **Render per CPS2 object.** One VDP1 normal sprite per object,
+   `nx*16 x ny*16`, 16-colour bank mode, flip in `CMDCTRL`, jump-next linked,
+   source list order as draw order, with a per-block texture cache. The full
+   design and its fallback are in `PARITY_PLAN.md` under the retained slice-V
+   detail. Per-tile is the fallback if per-object misses 60 Hz; report both
+   command counts either way.
 
 ## Exit checks
 
-1. **Field-for-field equality.** Load captured work-RAM frames into the native
-   record and read back every field above, for every live actor, across the two
-   collision-probe windows (`.deps/mame/collision_probe`, 4201–5500, and
-   `.deps/mame/collision_probe_boss`, 13000–14600 — 2,900 frames). Any mismatch
-   fails; report counts, not a sample.
+1. **Object list matches.** For the street-alien actor over the street-fight
+   window, the object entries the runtime produces match MAME's captured active
+   object list for the same source frame. This is the oracle slice V could not
+   use and this step can: 5,302 captured frames under `.deps/mame/enemy_actions`,
+   `.deps/mame/stalker_actions` and `.deps/mame/boss_actions`. Report matched
+   frames and the first mismatch.
+2. **The alien animates from ROM data on Saturn**, with its `/SPR4` pose archive
+   no longer loaded for that actor.
+3. **Frame time at the peak frame** (86 objects / 909 tiles, source frame 5776)
+   measured and reported with the instrument named. Emulator frame time is
+   indicative only; 60 Hz binds on physical Saturn per `docs/HARDWARE_TEST.md`.
 
-2. **The decoded collision data becomes live C.** Port the overlap predicate and
-   its guards from `tools/verify_avsp_collision.py` into C consuming this record
-   and `data/avsp_collision.json`, then re-run the same falsification over the
-   same captures. The C result must reproduce the Python result **exactly**:
-   21,908 non-overlapping active pairs producing no hit, 44 of 56 latch events
-   explained, the same 12 residuals. A different number is a defect in the port,
-   not a new finding.
+## The dependency check A exposed
 
-Check 2 is the point of S1. It converts milestone 2's correct-but-inert evidence
-into working C with an exact oracle, and it is the first time this project's
-decoded data does anything.
+The interpreter *advances* an animation; it does not *choose* one. The 804
+unexplained transitions are the game re-pointing the record on an AI decision,
+action change or input — about one every 78 actor-frames for a street alien.
+Until S5 translates those decisions, the runtime must seed the pointer on every
+action change. **Seed it from the existing capture-derived action schedule and
+label that `ADAPTED` in the handoff.** Do not invent a decision rule, and do not
+present a seeded animation as ROM-driven behaviour: the *animation* is
+ROM-driven in this step, the *decision to start it* is not yet.
 
 ## Boundaries
 
-- **Host-only.** No change to `main.c`, no Saturn build change, no ISO, no
-  emulator run. Nothing in the shipped runtime's behaviour changes in S1.
-- Add the new record and collision code **alongside** `capability_model.c`. Do
-  not rewire the existing inferred collision path yet; that is S4, after the
-  animation record is live and can supply the selectors.
-- Do not link `avsp_anim_script.c` into the Saturn build yet — that is S2.
+- Do not rewire collision to `avsp_collision.c` yet — that is S4, and it needs
+  the selectors this step makes live.
+- Do not touch the boss, Stalkers or the player in this step; one street alien.
 - Do not decode further ROM tables. The standing rule from milestone 2 holds.
 - Never commit ROM bytes, tile data, raw screenshots, RAM dumps or disc members.
+  `generated/avsp_anim_records.h` is git-ignored for exactly this reason.
+- Restore `normal-release` after any diagnostic build.
 
 ## Acceptance
 
-S1 passes when both checks pass with reported counts. It closes **no**
-Capability Gate 1 condition: Capability Gate 1 stays 0/7 and the full-game goal stays 0/9, because nothing
-ROM-driven has reached the runtime yet. Say so plainly in the handoff.
+The integration half of S2 passes when check 1 passes with reported counts,
+check 2 renders on Saturn, and check 3 has a measured frame time from a named
+instrument. It closes **no** Capability Gate 1 condition: Gate 1 stays 0/7 and
+the full-game goal stays 0/9, because one actor's animation is not Round 1's
+animation and nothing has been validated on physical hardware.
 
 ## Handoff discipline
 
 Update `docs/AGENT_HANDOFF.md` and `docs/PARITY_PLAN.md` with the result and
 honest status; record branch, HEAD, dirty files, raw paths, hashes and exact
 commands; stop MAME and emulator processes or record their ownership; stage
-explicit files only; commit one coherent checkpoint if both checks pass.
+explicit files only; commit one coherent checkpoint if the checks pass.
 
 ## What comes next (do not start it here)
 
-S2 — link `avsp_anim_script.c` into the Saturn build and drive pose selection
-from the record pointer at `+0x1C` instead of the capture-derived clip tables.
-Its exit check is the strong one: the native walk must reproduce MAME's exact
-per-frame animation-record-pointer sequence across the 2,121-frame street fight.
-S2 is also where the renderer work resumes, because that is the first point at
-which the runtime can *produce* an object list rather than replay one.
+S3 widens the spine to the player, remaining street aliens, Stalkers and
+Chrysalis. S4 rewires collision onto `avsp_collision.c` and retires the inferred
+Chrysalis 21/55/97 and Stalker schedules. S5 translates the enemy decisions that
+this step has to seed by hand.

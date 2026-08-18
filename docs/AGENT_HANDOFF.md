@@ -102,10 +102,26 @@ which is what a beat-'em-up enemy switching between approach, attack and recover
 looks like. **Supplying those decisions is S5**, and until S5 exists the runtime
 will need to seed the pointer from somewhere on every action change.
 
+**Check C — the shipped record subset: PASS, exactly.** The Saturn build cannot
+carry the arcade program image, so it carries only the records the game actually
+reaches. `tools/gen_avsp_anim_records.py` walks the script's own control flow
+from every observed `+0x1C` seed and extracts **614 reachable records, 10,244
+bytes in 63 spans**, each keeping its original source address; the interpreter
+gained an `AvspAnimSpan` sparse form so reads resolve by address in either
+storage. Re-running the identical measurement over those 10 KB reproduces the
+full 2 MB image **on every counter, including every per-type breakdown**. That
+is the round-trip proof that the extraction is complete and correctly addressed.
+`data/avsp_anim_records.json` is the tracked manifest (addresses, counts and
+hashes, no record bytes); `generated/avsp_anim_records.h` is git-ignored because
+it contains program-image bytes.
+
 **Remaining in S2:** add `avsp_anim_script.c` to `SRCS` in the makefile, drive
 pose selection from the actor's `+0x1C` instead of the capture-derived clip
 tables in `generated/avsp_boss_animation.h`, and emit the object list. Nothing
-in the shipped runtime changed in this body.
+in the shipped runtime changed in this body. Note the dependency S2's check A
+exposed: the interpreter advances an animation but does not *choose* one, so
+until S5 supplies the decisions, the runtime must seed the pointer on every
+action change.
 
 **Capability Gate 1 stays 0/7; the full-game goal stays 0/9.**
 

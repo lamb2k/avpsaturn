@@ -8,7 +8,8 @@
 static const AvspAnimScript script = {
     avsp_boss_anim_script,
     AVSP_BOSS_ANIM_SCRIPT_BASE,
-    AVSP_BOSS_ANIM_SCRIPT_SIZE
+    AVSP_BOSS_ANIM_SCRIPT_SIZE,
+    0, 0u
 };
 
 /* Walk each of the six canonical programs and require the decoded records to
@@ -75,7 +76,7 @@ static const unsigned char synth_rom[] = {
 
 static void test_frame_hold_and_jump(void)
 {
-    AvspAnimScript s = { synth_rom, SYNTH_BASE, sizeof(synth_rom) };
+    AvspAnimScript s = { synth_rom, SYNTH_BASE, sizeof(synth_rom), 0, 0u };
     AvspAnimFrame f;
     unsigned int expected_asm[7] = {0xA, 0xA, 0xB, 0xC, 0xC, 0xC, 0xA};
     int i;

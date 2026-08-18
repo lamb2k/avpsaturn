@@ -1,0 +1,287 @@
+{
+ "address_high": "0x15feec",
+ "address_low": "0x010000",
+ "classification": "animation-record extraction manifest - addresses and counts only, no record bytes",
+ "evidence": "DECODED",
+ "inputs": {
+  "captures": [
+   {
+    "distinct_seed_pointers": 375,
+    "path": ".deps/mame/collision_probe/workram.bin",
+    "sha256": "52b710835e9fbcd279a04a9e1ea284ded9132bdc6ea0b9ce9cf0f845669d6f59"
+   },
+   {
+    "distinct_seed_pointers": 331,
+    "path": ".deps/mame/collision_probe_boss/workram.bin",
+    "sha256": "6896ab7feddb3e7b9f4638bab74794c14fd239be79cce78ce6ab80f829500246"
+   }
+  ],
+  "program_image": {
+   "bytes": 2097152,
+   "path": ".deps/mame/actorprobe/decrypted_program_2m.bin",
+   "sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9"
+  }
+ },
+ "method": "reachability walk from every observed actor +0x1C, following the script's own control flow",
+ "reachable_records": 614,
+ "record_bytes": 10368,
+ "record_format": "16 bytes, advancing to +16; 20 bytes and jumping to the u32 at +16 when flags bit 15 is set",
+ "schema": 1,
+ "seed_pointers": 537,
+ "span_bytes": 10244,
+ "span_count": 63,
+ "spans": [
+  {
+   "base": "0x010000",
+   "bytes": 40
+  },
+  {
+   "base": "0x02fb48",
+   "bytes": 132
+  },
+  {
+   "base": "0x03078c",
+   "bytes": 700
+  },
+  {
+   "base": "0x06d418",
+   "bytes": 20
+  },
+  {
+   "base": "0x06dbda",
+   "bytes": 180
+  },
+  {
+   "base": "0x077e54",
+   "bytes": 68
+  },
+  {
+   "base": "0x078bc0",
+   "bytes": 116
+  },
+  {
+   "base": "0x078c56",
+   "bytes": 84
+  },
+  {
+   "base": "0x07a09c",
+   "bytes": 164
+  },
+  {
+   "base": "0x07a6ac",
+   "bytes": 164
+  },
+  {
+   "base": "0x07b774",
+   "bytes": 68
+  },
+  {
+   "base": "0x07b840",
+   "bytes": 228
+  },
+  {
+   "base": "0x08db1a",
+   "bytes": 20
+  },
+  {
+   "base": "0x08f8e0",
+   "bytes": 516
+  },
+  {
+   "base": "0x08fff0",
+   "bytes": 260
+  },
+  {
+   "base": "0x0928e0",
+   "bytes": 104
+  },
+  {
+   "base": "0x09a884",
+   "bytes": 296
+  },
+  {
+   "base": "0x09ac82",
+   "bytes": 164
+  },
+  {
+   "base": "0x09d676",
+   "bytes": 240
+  },
+  {
+   "base": "0x09dca8",
+   "bytes": 20
+  },
+  {
+   "base": "0x09dcd0",
+   "bytes": 20
+  },
+  {
+   "base": "0x09dd20",
+   "bytes": 20
+  },
+  {
+   "base": "0x09dd5c",
+   "bytes": 20
+  },
+  {
+   "base": "0x09dd84",
+   "bytes": 20
+  },
+  {
+   "base": "0x09e606",
+   "bytes": 20
+  },
+  {
+   "base": "0x09e62e",
+   "bytes": 20
+  },
+  {
+   "base": "0x09e6f6",
+   "bytes": 80
+  },
+  {
+   "base": "0x0a7408",
+   "bytes": 180
+  },
+  {
+   "base": "0x12d380",
+   "bytes": 780
+  },
+  {
+   "base": "0x12d890",
+   "bytes": 100
+  },
+  {
+   "base": "0x12d9dc",
+   "bytes": 348
+  },
+  {
+   "base": "0x12dbbc",
+   "bytes": 148
+  },
+  {
+   "base": "0x12dd78",
+   "bytes": 112
+  },
+  {
+   "base": "0x12de10",
+   "bytes": 20
+  },
+  {
+   "base": "0x12de38",
+   "bytes": 180
+  },
+  {
+   "base": "0x12e04c",
+   "bytes": 100
+  },
+  {
+   "base": "0x12e214",
+   "bytes": 208
+  },
+  {
+   "base": "0x12e65c",
+   "bytes": 68
+  },
+  {
+   "base": "0x12e708",
+   "bytes": 552
+  },
+  {
+   "base": "0x12e9cc",
+   "bytes": 88
+  },
+  {
+   "base": "0x12eafc",
+   "bytes": 132
+  },
+  {
+   "base": "0x12ec04",
+   "bytes": 132
+  },
+  {
+   "base": "0x12ed90",
+   "bytes": 264
+  },
+  {
+   "base": "0x13cbd4",
+   "bytes": 400
+  },
+  {
+   "base": "0x13cdf8",
+   "bytes": 224
+  },
+  {
+   "base": "0x13d0e8",
+   "bytes": 84
+  },
+  {
+   "base": "0x13d278",
+   "bytes": 264
+  },
+  {
+   "base": "0x13d5e8",
+   "bytes": 72
+  },
+  {
+   "base": "0x13dab8",
+   "bytes": 196
+  },
+  {
+   "base": "0x13dbb8",
+   "bytes": 244
+  },
+  {
+   "base": "0x13dcf4",
+   "bytes": 184
+  },
+  {
+   "base": "0x13dde0",
+   "bytes": 20
+  },
+  {
+   "base": "0x15e540",
+   "bytes": 84
+  },
+  {
+   "base": "0x15e9d8",
+   "bytes": 84
+  },
+  {
+   "base": "0x15eee8",
+   "bytes": 20
+  },
+  {
+   "base": "0x15ef24",
+   "bytes": 188
+  },
+  {
+   "base": "0x15f1f4",
+   "bytes": 252
+  },
+  {
+   "base": "0x15f344",
+   "bytes": 116
+  },
+  {
+   "base": "0x15f520",
+   "bytes": 100
+  },
+  {
+   "base": "0x15f6b0",
+   "bytes": 36
+  },
+  {
+   "base": "0x15f9c0",
+   "bytes": 68
+  },
+  {
+   "base": "0x15fcfc",
+   "bytes": 296
+  },
+  {
+   "base": "0x15fe78",
+   "bytes": 116
+  }
+ ]
+}

@@ -28,13 +28,36 @@ typedef struct
     int valid;
 } AvspPose;
 
-/* A window of raw script bytes and the ROM address of its first byte. */
+/* One contiguous run of script bytes at its original source address. */
+typedef struct
+{
+    unsigned int base;
+    unsigned int size;
+    const unsigned char *data;
+} AvspAnimSpan;
+
+/* Script storage, in either of two forms.
+ *
+ * Single window: set rom/base/size, leave spans null. This is what the host
+ * tests use when they have the whole program image.
+ *
+ * Sparse spans: set spans/span_count. The reachable records occupy about 10 KB
+ * scattered across ~63 runs of a 1.3 MB address range, so the disc carries only
+ * those runs, each keeping its original address. Reads resolve by address in
+ * both forms, so the interpreter is identical either way.
+ */
 typedef struct
 {
     const unsigned char *rom;
     unsigned int base;
     unsigned int size;
+    const AvspAnimSpan *spans;
+    unsigned int span_count;
 } AvspAnimScript;
+
+/* Resolve `need` bytes at source address `addr`, or 0 when unavailable. */
+const unsigned char *avsp_anim_resolve(const AvspAnimScript *script,
+                                       unsigned int addr, unsigned int need);
 
 /* Decode the pose record at ROM address `addr`. Sets `pose->valid` to 0 when
  * the record does not fit inside the window. */

@@ -72,7 +72,13 @@ if ($LASTEXITCODE -ne 0) {
 
 # ROM animation-script walk against the game's own per-frame record pointer.
 # Requires the private captures and program image; skips cleanly without them.
-$walkCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_actor.c avsp_anim_script.c tests/avsp_anim_walk_test.c -o build/avsp_anim_walk_test && ./build/avsp_anim_walk_test"
+# The shipped-subset equivalence check (check C) needs the generated record
+# spans; without them the walk test still runs checks A and B.
+$recordsDefine = ''
+if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'generated/avsp_anim_records.h')) {
+    $recordsDefine = '-DAVSP_GENERATED_RECORDS '
+}
+$walkCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 $recordsDefine" + "avsp_actor.c avsp_anim_script.c tests/avsp_anim_walk_test.c -o build/avsp_anim_walk_test && ./build/avsp_anim_walk_test"
 & $wsl.Source sh '-lc' $walkCommand
 if ($LASTEXITCODE -ne 0) {
     throw "Animation-walk test failed with exit code $LASTEXITCODE."

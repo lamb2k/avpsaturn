@@ -11,10 +11,34 @@ static unsigned int read_u32_be(const unsigned char *d)
             ((unsigned int)d[2] << 8) | (unsigned int)d[3]);
 }
 
+const unsigned char *avsp_anim_resolve(const AvspAnimScript *script,
+                                       unsigned int addr, unsigned int need)
+{
+    long off;
+
+    if (script->spans != 0 && script->span_count != 0u) {
+        unsigned int i;
+        for (i = 0u; i < script->span_count; ++i) {
+            const AvspAnimSpan *s = &script->spans[i];
+            if (addr >= s->base && (addr - s->base) + need <= s->size) {
+                return s->data + (addr - s->base);
+            }
+        }
+        return 0;
+    }
+    if (script->rom == 0) {
+        return 0;
+    }
+    off = (long)addr - (long)script->base;
+    if (off < 0 || off + (long)need > (long)script->size) {
+        return 0;
+    }
+    return script->rom + off;
+}
+
 void avsp_anim_read_pose(const AvspAnimScript *script, AvspPose *pose,
                          unsigned int addr)
 {
-    long off;
     const unsigned char *d;
 
     pose->valid = 0;
@@ -26,10 +50,9 @@ void avsp_anim_read_pose(const AvspAnimScript *script, AvspPose *pose,
     pose->param_byte = 0;
     pose->assembly = 0;
 
-    off = (long)addr - (long)script->base;
-    if (off < 0 || off + 16L > (long)script->size)
+    d = avsp_anim_resolve(script, addr, 16u);
+    if (d == 0)
         return;
-    d = script->rom + off;
     pose->duration = read_u16_be(d);
     pose->flags = read_u16_be(d + 2);
     pose->assembly = read_u32_be(d + 4);
@@ -42,17 +65,15 @@ void avsp_anim_read_pose(const AvspAnimScript *script, AvspPose *pose,
 unsigned int avsp_anim_next_address(const AvspAnimScript *script,
                                     const AvspPose *pose)
 {
-    long off;
     const unsigned char *d;
     unsigned int target;
 
     if (pose->flags & 0x8000u) {
-        off = (long)pose->address - (long)script->base + 16L;
-        if (off + 4L <= (long)script->size) {
-            d = script->rom + off;
+        d = avsp_anim_resolve(script, pose->address + 16u, 4u);
+        if (d != 0) {
             target = read_u32_be(d);
-            if (target >= script->base &&
-                target < script->base + script->size)
+            /* A jump target counts only when its record is actually present. */
+            if (avsp_anim_resolve(script, target, 16u) != 0)
                 return target;
         }
     }
