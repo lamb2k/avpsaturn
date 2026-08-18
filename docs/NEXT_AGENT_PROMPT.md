@@ -60,15 +60,23 @@ from the object list those records produce.
 
 Three parts, in this order:
 
-1. **Link the interpreter.** Add `avsp_anim_script.c`, `avsp_actor.c` and the
-   generated record spans to the Saturn build (`SRCS` in `makefile`). Give the
-   runtime's street alien an `AvspActor` carrying a live `anim_record`, ticked
-   once per frame by `avsp_anim_frame_tick`.
+1. **Link the interpreter — DONE.** `avsp_actor.c` and `avsp_anim_script.c` are
+   already in `SRCS` and the Saturn image builds clean with them (ELF 709,853 B,
+   ISO 5,554,176 B). They are linked but not called: `main.c` still runs the cel
+   path and nothing references `generated/avsp_anim_records.h` yet. What remains
+   of this part is to give the runtime's street alien an `AvspActor` carrying a
+   live `anim_record`, ticked once per frame by `avsp_anim_frame_tick`.
 
-2. **Emit the object list.** The pose record's `+4` assembly address is the
-   entry to the part table milestone 1 proved (`0x12F73C…` at frame 4214,
-   `0x12FECE…` at 4253, written by PCs `0x000AA214` / `0x000AA216`). Walk it and
-   produce CPS2 object entries — X, Y, code, attribute — for the actor.
+2. **Emit the object list.** The emitter is now **decoded from the game's code** -
+   the full specification, both facing variants, is in the handoff section
+   "S2 integration — part 1 done, the object emitter decoded". Implement that,
+   do not re-derive it. In short: the pose record's `+4` assembly is a part list
+   of 6-byte entries (a `long` code|attr plus a `word` advancing a separate
+   offset table), and that offset table supplies a `dx`,`dy` word pair per part.
+   Four inputs remain unresolved and **must have their source named before use**:
+   `A2`'s initial value, `D1`'s flip mask, the actor field at `+0x2E`, and the
+   screen origin at `(A5-0x64F4)`. Recover each from live evidence, then falsify
+   the whole emitter against the captured object lists.
 
 3. **Render per CPS2 object.** One VDP1 normal sprite per object,
    `nx*16 x ny*16`, 16-colour bank mode, flip in `CMDCTRL`, jump-next linked,

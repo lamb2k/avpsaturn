@@ -52,6 +52,60 @@ in `capability_model.c`), which gives ROM assemblies no consumer.
 **Standing rule:** do not decode another ROM table in isolation while phase A or
 B is open. Milestone 2 is the demonstration — correct, falsified, and inert.
 
+## S2 integration — part 1 done, the object emitter decoded (2026-08-18)
+
+**Part 1, linking: DONE.** `avsp_actor.c` and `avsp_anim_script.c` are in `SRCS`
+and the Saturn image builds clean with them. That proves both are SH-2-clean and
+link into the runtime. **They are linked, not yet called** — `main.c` still runs
+the cel path, and `generated/avsp_anim_records.h` is not referenced by anything
+in the image yet, so nothing in the shipped runtime's behaviour changed.
+
+**Part 2, the object emitter: DECODED from the game's own code.** This is the
+specification the next body implements. Two sibling loops, selected by facing:
+
+```text
+non-flipped 0x0AA1A8..0x0AA1DA        flipped 0x0AA1DC..0x0AA21E
+  D2 = long (A0)+        ; code|attr from the assembly part list
+  D2.b &= 0xE0           ; keep the attribute's high bits
+  D2.b += A4[+0x0E]      ; add the actor's palette base
+                              flipped only: D2 ^= D1        ; flip mask
+                              flipped only: D4 = ((attr>>4)&0xF0)+0x10   ; nx*16
+  D3 = long (A5-0x64F4)  ; the actor's screen origin
+                              flipped only: D3.w -= D4      ; right edge at origin
+  D3.w += word (A2)+     ; X += dx     (flipped: -= dx)
+  D3.w &= 0x3FF
+  D3.w |= A6[+0x2E]      ; priority and block-size bits
+  swap D3
+  D3.w += word (A2)+     ; Y += dy
+  D3.w &= 0x3FF
+  write long D3 -> X|Y   ; 0x0AA1CC / 0x0AA210
+  write long D2 -> code|attr ; 0x0AA1CE / 0x0AA212
+  D2 = word (A0)+        ; per-part advance for the offset table
+  A2 += D2.w
+  dbra D0                ; D0 = part count - 1
+```
+
+So the assembly at pose record `+4` is a part list of **6-byte entries** — a
+`long` code|attr followed by a `word` that advances the separate `A2` offset
+table — and `A2` supplies a `dx`,`dy` word pair per part. `(attr>>4)&0xF0 + 0x10`
+confirms the block width comes from attribute bits 8-11, matching MAME's
+`cps2_render_sprites`, and the flipped loop places the block's right edge at the
+origin, which is the CPS2 flip semantics.
+
+**This also resolves an oddity in milestone 1's log.** The recorded `A0` values
+jumped `0x12F748 -> 0x12F75A`, a stride of 0x12 rather than 6. The loop advances
+`A0` by exactly 6 per part; the 0x12 gap is three parts, two of which wrote to
+object slots outside the 20-word watchpoint window and so were never logged.
+Stride is uniformly 6 and there is no conditional skip.
+
+**Still unresolved for part 2, each needing its source named before use:**
+`A2`'s initial value, `D1`'s flip mask, the actor field at `+0x2E`, and the
+screen origin at `(A5-0x64F4)`. Recover each from live evidence, then falsify the
+whole emitter against the captured object lists — the 5,302-frame oracle is the
+right check and it is what makes part 2 verifiable offline.
+
+**Capability Gate 1 stays 0/7; the full-game goal stays 0/9.**
+
 ## S2 animation walk — interpreter VALIDATED, integration open (2026-08-18)
 
 S2 has two halves. The **validation** half is done; the **integration** half
