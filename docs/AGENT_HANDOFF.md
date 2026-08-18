@@ -265,13 +265,87 @@ part count from ROM data alone rather than from watchpoint-observed gaps, which
 matters once this moves from "confirmed for one captured pose" to "general for
 any pose".
 
+### The object-word formula is now C, tested; `bsr $0AA59A` identified as the origin routine
+
+`avsp_emit.h`/`.c` implements the confirmed formula
+(`X = ((origin_x - width - dx) & 0x3FF) | or_value`, `Y = (origin_y + dy) &
+0x3FF`) and `tests/avsp_emit_test.c` checks it against parts 0-2 exactly, using
+ROM-read `dx`/`dy` and the already-proven oracle `code`/`attr` — wired into
+`test.ps1`. Committed and cross-compiles clean for SH-2 (confirmed by a Saturn
+build during this session); not called from `main.c` yet, same as
+`avsp_actor.c`/`avsp_anim_script.c`.
+
+**New finding: the per-actor origin scratch is written by `bsr $0AA59A`, called
+once per dispatch from the SAME entry point that reads the 3-word header**
+(`0x0AA00E..0x0AA038`). Disassembled in full:
+
+```text
+0aa59a: moveq #0, D1
+0aa59c: move.b (0xF,A4), D1        ; actor facing byte
+0aa5a0: move.l (A0)+, D2           ; consumes ONE part-table entry
+0aa5a2: move.w (0x14,A4), D3       ; actor world_y
+0aa5a6: sub.w  (-0x27C,A5), D3     ; minus a fixed camera/scroll-Y anchor
+... (facing-conditional add/sub of D2, giving the Y half of the origin)
+0aa5c4: move.w (0x10,A4), D3       ; actor world_x
+0aa5c8: sub.w  (-0x278,A5), D3     ; minus a fixed camera/scroll-X anchor
+... (facing-conditional add/sub of D2, giving the X half of the origin)
+0aa5e0: move.l D3, (-0x64F4,A5)    ; the confirmed origin scratch write
+0aa5e4: lsl.b  #5, D1              ; the confirmed D1 flip mask (bit 5 = facing)
+0aa5e6: rts
+```
+
+This resolves two things at once: **`D1`'s own source** is the actor's own
+facing byte at `+0x0F`, shifted into bit 5 — so the flip mask is not a
+mystery input, it is derived from a field S1's actor record already carries.
+And **the origin computation itself** is now readable: it is `actor world
+position minus a fixed camera/scroll anchor` (two constants at `(A5-0x27C)`
+and `(A5-0x278)`, not yet read live), adjusted by one part-table long (`D2`)
+whose role is not yet named.
+
+**Still not resolved: exact part count / the skip mechanism.** `bsr $0AA59A`
+consuming one part-table entry means the header is further back than the
+`extra=6` position tried previously. A systematic search over header
+candidates at `extra=0..18` bytes before part0 finds several with plausible
+small `(budget, count, selector)` triples (`extra=10`: `9,3,39`; `extra=12`:
+`6,9,3`; `extra=14`: `12,6,9`; `extra=16`: `0,12,6`) but **none give a total
+part count consistent with the 5 confirmed object-buffer writes** once the
+1-entry `bsr` consumption is added back. The 2-entry gap between slots 2 and 3
+observed earlier in this session is therefore still unexplained by a single
+extra `bsr` call; either the header format assumed here (3 words,
+budget/count/selector) is wrong, or something else consumes entries
+mid-loop. This needs either capstone-based control-flow-aware disassembly
+(the naive flat scan `.deps/mame/actorprobe/disasm_full.txt` has already
+produced one confirmed misalignment this session, at
+`0xAA732`-adjacent addresses) or a live disassemble-at-runtime pass, not more
+hand-parsing of the flat scan.
+
 None of this is wired into any committed C code yet; `avsp_collision.c` and the
 runtime remain untouched. This is discovery evidence for the still-open part 2
 of S2's integration, recorded so the next session does not have to re-derive
-what is now confirmed, and does not repeat either the `+0x2E` mistake or the
-cross-route mixing that caused it.
+what is now confirmed, and does not repeat either the `+0x2E` mistake, the
+cross-route mixing that caused it, or re-search header offsets already tried
+and ruled out here.
 
 **Capability Gate 1 stays 0/7; the full-game goal stays 0/9.**
+
+## Status across S1-S6 (2026-08-18, end of session)
+
+| Step | Status |
+|---|---|
+| S1 actor spine | **PASSED.** 481,566 actor-field loads, 0 mismatches; the collision predicate ported to C reproduces the Python falsification exactly on all 8 counters. |
+| S2 animation walk | **VALIDATED.** Interpreter predicts 23,676 of the game's own frames exactly free-running from one seed; 614 records extracted to 63 spans (10 KB), proven to reproduce the full 2 MB image on every counter. |
+| S2 object emitter | **Formula confirmed and coded** (3/5 parts, exact, from pure ROM arithmetic); **general part-table walk still open** (header/count/skip mechanism, see above); **not linked into `main.c`**; **VDP1 per-object renderer not started**. |
+| S2 integration into `main.c` | **Not started.** No live actor in the shipped runtime carries an `AvspActor` or ticks `avsp_anim_frame_tick`. A same-session proof-of-concept overlay was built, boot-tested successfully (real Round 1 combat played through to the Round 2 title without regressing), but was inconclusive on visual confirmation and was removed before committing rather than left in an unverified state. |
+| S3 (widen to full cast) | Not started; depends on S2. |
+| S4 (collision integration) | Not started; `avsp_collision.c` exists and is proven (S1) but nothing calls it from gameplay; depends on S2 for live selectors. |
+| S5 (AI/PRNG) | Not started. |
+| S6 (hardware) | Not started. |
+
+**The current normal-release build (no debug flags, no autoplay) is the one to
+hand to a person who wants to actually play the game** — it is the existing
+capture-derived pipeline, unaffected by any S1/S2 work this session, and it
+plays through Round 1 to Round 2 as already documented in `README.md`. None of
+this session's ROM-driven work has reached that build's rendering yet.
 
 ## S2 animation walk — interpreter VALIDATED, integration open (2026-08-18)
 
