@@ -69,3 +69,11 @@ $actorCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror
 if ($LASTEXITCODE -ne 0) {
     throw "Actor-spine / collision-port test failed with exit code $LASTEXITCODE."
 }
+
+# ROM animation-script walk against the game's own per-frame record pointer.
+# Requires the private captures and program image; skips cleanly without them.
+$walkCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_actor.c avsp_anim_script.c tests/avsp_anim_walk_test.c -o build/avsp_anim_walk_test && ./build/avsp_anim_walk_test"
+& $wsl.Source sh '-lc' $walkCommand
+if ($LASTEXITCODE -ne 0) {
+    throw "Animation-walk test failed with exit code $LASTEXITCODE."
+}

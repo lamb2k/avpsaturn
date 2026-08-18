@@ -54,6 +54,61 @@ in `capability_model.c`), which gives ROM assemblies no consumer.
 **Standing rule:** do not decode another ROM table in isolation while phase A or
 B is open. Milestone 2 is the demonstration — correct, falsified, and inert.
 
+## S2 animation walk — interpreter VALIDATED, integration open (2026-08-18)
+
+S2 has two halves. The **validation** half is done; the **integration** half
+(linking the interpreter into the Saturn build, driving pose selection from
+`+0x1C`, and producing the object list) is not started.
+
+The oracle is the capture itself: every actor's `+0x1C` is the live
+animation-record pointer, sampled once per source frame, so a faithful reading
+of the script format must reproduce the pointer's movement.
+`tests/avsp_anim_walk_test.c`, wired into `test.ps1`, over the same two
+full-work-RAM windows:
+
+**Check A — permitted transitions.** Of 32,624 frame-to-frame observations:
+26,050 holds, **5,738 moves the script predicts exactly**, 32 external re-points
+that coincide with an observable actor event, and **804 unexplained** — 87.7% of
+all non-hold transitions predicted.
+
+**Check B — free-running prediction.** Seeded once at a pointer change and then
+ticked with no further help: 1,435 runs, 1,188 predicting at least one frame,
+**23,768 frames predicted exactly**, and a **longest exact run of 732 frames**.
+This is the check that matters, because it exercises hold duration and not just
+control flow. An interpreter with the wrong record size, duration field or jump
+rule produces runs of one to three frames, not twelve seconds of frame-perfect
+animation.
+
+Per actor type (script moves / unexplained / longest exact run):
+
+| type | moves | unexplained | longest run |
+|---|---|---|---|
+| 0 (player) | 390 | 121 | 71 |
+| 4 | 319 | 12 | 37 |
+| **12 (street alien)** | **1,897** | **299** | **160** |
+| 20 (Stalker) | 178 | 118 | 8 |
+| 24 | 1,921 | 134 | 278 |
+| 28 | 896 | 54 | 240 |
+| 32 | 0 | 3 | 732 |
+| 36 | 137 | 63 | 60 |
+
+**What the 804 unexplained are, and are not.** They are not interpreter errors —
+check B rules that out. They are the game re-pointing an actor's animation for a
+reason the script does not contain: an AI decision, an action change, an input.
+The test's "external" classifier only catches re-points that coincide with a
+state or hit-value change, which is why most land in "unexplained" rather than
+"external". For street aliens that is roughly one re-point every 78 actor-frames,
+which is what a beat-'em-up enemy switching between approach, attack and recover
+looks like. **Supplying those decisions is S5**, and until S5 exists the runtime
+will need to seed the pointer from somewhere on every action change.
+
+**Remaining in S2:** add `avsp_anim_script.c` to `SRCS` in the makefile, drive
+pose selection from the actor's `+0x1C` instead of the capture-derived clip
+tables in `generated/avsp_boss_animation.h`, and emit the object list. Nothing
+in the shipped runtime changed in this body.
+
+**Capability Gate 1 stays 0/7; the full-game goal stays 0/9.**
+
 ## S1 actor spine — PASSED (2026-08-18)
 
 **Terminology note:** "Gate" means **Capability Gate 1**, the seven-condition
