@@ -1,8 +1,9 @@
 """The pixel-exact pose gate.
 
-This is the gate that blocks native reimplementation, collision replacement
-and AI translation. It answers one question: does a sprite assembly decoded
-from program ROM reproduce an already-verified captured pose exactly?
+This is the format gate that blocks native animation reimplementation on a
+misread sprite table. It answers one question: does a sprite assembly decoded
+from program ROM reproduce an already-verified captured pose exactly when the
+captured object's screen geometry is used as the placement oracle?
 
 Two rules make the answer trustworthy, and both were wrong in the earlier
 ad-hoc attempt:
@@ -48,12 +49,12 @@ bounding boxes, so the test does not depend on knowing the assembly's
 screen origin yet. If the crops differ in size the geometry is wrong, which
 is itself a real answer.
 
-Remaining gate (next milestone): reproduce the object positions from the
-ROM layout table instead of the recorded RAM geometry. First evidence is
-already in: layout Y words are pixel offsets of each object's bottom edge
-from a per-frame anchor that is constant across all entries of a pose
-(verified for 0x13dea0 at frame 12688 and 0x13e04c at frame 12664). The
-layout X words are not yet explained.
+Position is audited independently by ``verify_position_gate.py``. Its current
+scope covers 246 matched geometry frames: most parts are directly exact, shared
+code sets leave decoded sibling-origin deltas, and two frames retain a narrow
+four-pixel Y settling observation. Attack/hit assemblies and full exact
+coverage remain open; a pose-gate pass must not be presented as a complete
+runtime or functional-parity pass.
 """
 from __future__ import annotations
 

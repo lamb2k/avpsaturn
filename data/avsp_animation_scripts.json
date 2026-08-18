@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "classification": "missing pixel gate (ROM-derived script structure)",
+  "classification": "ROM-derived boss animation structures; decoded assemblies have separate pose/position validation",
   "source": {
     "rom_window": ".deps/mame/actorprobe/rom_window_13c_13f.bin",
     "window_base": "0x13c000",
@@ -1404,5 +1404,5 @@
       "trailing_word": "0x0006"
     }
   ],
-  "remaining_gate": "Map packed assembly source words and offset-table entries to CPS object commands, then prove one rendered pose pixel for pixel against a captured pose; label tail fields and actor-local hitboxes."
+  "remaining_gate": "Expand ROM-derived animation coverage to every required Round 1 actor and attack/hit pose; resolve record-selection timing and the transient position settling observation; label unresolved tail fields and actor-local hitboxes."
 }

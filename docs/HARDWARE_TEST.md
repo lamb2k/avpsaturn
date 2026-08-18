@@ -6,6 +6,9 @@ asset pack through the Saturn CD filesystem, renders through VDP1/VDP2, polls
 controller port 1, and requires a detected 32 Mbit (4 MB) DRAM cartridge.
 The runtime registers both 2 MB cartridge banks; failure to access DRAM1 at
 `0x22600000` is a hardware failure, not a reason to drop animation or audio.
+This procedure validates the current capture-derived regression route. The
+physical goal condition closes only after the ROM-derived gameplay replacement
+also passes this route at sustained 60 Hz.
 
 ## Build the hardware image
 
@@ -89,9 +92,11 @@ alter console copy protection or supply copyrighted disc data.
    must last 39, 120, 36, and 140 frames respectively, with no KO flicker.
 7. Confirm eight total KOs unlock the room and moving right reaches the exit
    transition.
-8. Defeat Chrysalis and confirm the native Stage Clear state. With the
-   diagnostic enabled, require `PCM OPEN 1111`, `PCM D/T 1/1`,
-   `PCM SEQ 1/1`, and all `SEEN 1` latches before Round 2.
+8. Defeat Chrysalis and confirm the native Stage Clear state. The normal-release
+   hardware candidate does not compile the encounter diagnostic, so do not
+   expect `PCM OPEN`, `PCM D/T`, `PCM SEQ`, or `SEEN` text on hardware. Require
+   those latches first in the separate `-EncounterTest` emulator precursor; on
+   hardware, verify the corresponding cues audibly and record the result.
    Before the defeat, confirm Chrysalis cycles the 106-frame captured walk and
    changes through the complete 189-frame attack/recovery sequence, with three
    contacts at offsets 21/55/97, without clipping, partial cels, palette

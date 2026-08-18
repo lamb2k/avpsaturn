@@ -1,15 +1,21 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-17 21:10 EDT
+Updated: 2026-08-17 22:30 EDT
 
-**Pixel-exact position gate: PASS.** A boss object's screen position is
-reproduced exactly from the *previous* frame's world coordinates in the actor
-slot plus the ROM assembly's layout words. `tools/verify_position_gate.py`
-compares every part's predicted ring position against the captured object RAM
-across all matched geometry frames and classifies every residual. Result on
-864 parts / 246 matched frames: **801 exact, 63 explained by a sibling-assembly
-origin delta, 8 by a bounded vertical settling offset, 0 unexplained** — the X
-model is 100% exact on every matched part.
+**Goal audit: 0/7 final conditions closed.** The condition-by-condition index
+is now at [PARITY_PLAN.md#goal-progress-index](PARITY_PLAN.md#goal-progress-index).
+The current capture-derived native route remains a useful regression baseline,
+but it does not satisfy the ROM-derived animation, collision, AI or stage-table
+requirements in `GOAL.md`. Do not describe the project as functionally parity
+complete or hardware-ready.
+
+**Position audit: scoped PASS; full pixel-exact coverage OPEN.**
+`tools/verify_position_gate.py` compares the previous frame's actor world
+coordinates plus ROM assembly origin/layout words against captured object RAM.
+Current scope: 408 geometry frames, 246 matched and 162 unmatched; 864 tested
+parts split into **793 directly exact pairs, 63 known sibling-origin residuals,
+8 observed x=0/y=-4 settling residuals, and 0 other residuals**. The earlier
+801 count was X-exact only, not the mutually exclusive exact-pair count.
 
 Model (world coordinates are 16.16 fixed point at actor slot 0x23D0/0x23D4,
 world Y is up, objects render one frame behind, from f−1):
@@ -25,27 +31,29 @@ world Y is up, objects render one frame behind, from f−1):
 * Compare in the 1024 game ring (low 10 bits of the object X/Y words).
   `shift_x`/`shift_y` are capture-tool unwraps, **not** game state — the model
   predicts the raw ring position, so do not add them.
-* Layout words must come from `offset_program.bin` (base 0x1FD1C8);
-  `offset_full_program.bin` holds different (wrong) values at the same
-  addresses. Pass `layout_data=None` to `decode_assembly` to force the right
-  source.
+* Layout words may be read from `offset_program.bin` relative to base 0x1FD1C8,
+  or from `offset_full_program.bin` relative to base 0x1E0000; those sources
+  agree at the tested addresses. The old wrong values came from pairing the
+  full window with base 0x1F6000. The position audit deliberately passes
+  `layout_data=None` and uses the first form.
 
-The earlier "+48 / −10 / +4 anomalies" are **not magic offsets**: they are the
-origin deltas between two assemblies that share a code set. Assembly 3 has an
+The earlier +48/−10 residual pair is **not a magic offset**: it is the origin
+delta between two assemblies that share a code set. Assembly 3 has an
 airborne table at 0x13e04c (origin −52, +23) and an at-rest table at 0x13e44c
 (origin −62, −25); picking the wrong one shifts X by −10 and Y by +48. The gate
 decodes every assembly the actor-slot record pointer selects (frames f and f−1)
 and builds the set of origin deltas a shared code set can produce, so such a
 residual is passed only when it is in that set.
 
-The 8 settling parts (2 frames, uniform −4 Y, X-exact) occur ~2 frames after a
-vertical world move; the drawn Y eases toward the new world Y and the pure
-`wy(f−1)` model is 4px off. This is a real, small, transient vertical component
-not yet fully derived — it is the only non-exact residual class and is
-classified by a bounded Y-only tolerance rather than asserted as exact.
+The 8 settling parts (frames 12689 and 13165, uniform −4 Y, X-exact) occur after
+a recent vertical world move; the pure `wy(f−1)` model is 4px off. The exact
+cause is not derived. The tool now recognizes only that precise residual in
+that recent-world-Y-change context, rather than allowing a general ±4 tolerance.
 
-Run: `python tools\verify_position_gate.py` (add `--verbose` to list the
-settling frames and any unexplained residuals).
+Run `python tools\verify_position_gate.py` for the scoped audit. Add `--verbose`
+to list settling frames and unexpected residuals. Run with `--require-exact`
+for the goal-strength gate; it currently exits nonzero because coverage and
+direct exactness are incomplete.
 
 Remaining before this gate is exhaustive:
 * 162 unmatched frames (attack / hit poses) whose assemblies are not yet in the
@@ -56,9 +64,11 @@ Remaining before this gate is exhaustive:
   build the explained-delta set.
 * Derive (or formally bound) the −4 vertical settling.
 
-**Previous milestone — pixel-exact pose gate: PASS for assembly 0x13DEA0.**
-The assembly reproduces
-pose 4 (source frame 12688, 222×92 pixels) with **0 differing pixels**. Key
+**Pose format gate: PASS for 12/12 decoded boss assemblies.** Every tested
+assembly reproduces a captured oracle crop with **0 differing pixels**. The
+gate deliberately uses captured object-RAM screen geometry to isolate
+code/tile/palette and composition correctness; the position audit above is the
+independent ROM-origin/layout check. Key
 fixes: (1) corrected selector-6 decoder to read `count` entries starting at
 +12 with signed origin at +8; (2) switched object positions from ROM script
 origin+layout to MAME object RAM screen coordinates (`screen_x`, `screen_y`)
@@ -66,11 +76,11 @@ because the ROM script uses animation-local space while the renderer uses
 screen space; (3) fixed `compose_assembly` to use `screen_x`/`screen_y` keys;
 (4) fixed oracle dump to write the best-matching pose instead of always pose 0;
 (5) removed double-flip (tile-order reversal + image flip) — the reference
-renderer reverses tile order AND pixel positions, not the image itself. The
-gate defaults to frame 12688 for this assembly. Other assemblies may need
-different frames.
+renderer reverses tile order AND pixel positions, not the image itself.
 
-**Previous findings (superseded)**: Budget=62 entries from layout pointer 0x1FDE40 produce 11×6 tiles (176×96 pixels). The BACT.RLE oracle pose 0 requires 13×7 tiles (205×103 pixels). The gap was caused by 62 entries only covering column positions 0-10 (x=-112 to +48) and 6 y-values (y=-96 to -16), while the oracle needs columns 0-12 (+13) and 7 y-values including y=-112. The layout grid at 0x1DE40 has a cyclic structure of 16×7 grid positions with a 98-entry cycle. Entry 90 has x=-128, entry 97 has y=-112 — both outside the budget=62 range. Budget values in the ROM assembly fields may control something other than layout entry count, or the selector-6 offset_adjust values modify layout coordinates during rendering.
+**Previous budget-as-entry-count findings are superseded.** `count`, not
+`budget`, is the object-command count; budget accounts for expanded tile cells,
+and the signed layout adjustment advances the layout chain.
 
 **Direction as of 2026-08-17: functional parity by ROM translation, with an
 instrumented MAME build retained only as a contingency. Stock MAME 0.289 debug
@@ -85,28 +95,45 @@ Read this file before taking any action. The user wants a private, capture-faith
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `prototype/private-capability-test`
-- Implementation checkpoint: `a788147` (`Pose gate: use budget for entry count (62 vs 4), document layout grid structure and shape mismatch`),
-  following `9afebf5` (`Implement frame-comparison pose gate with oracle verification`).
-  `e978e7c` (`Pair debug hitboxes with actor pivots`),
-  `d8a57e1` (`Decode ROM animation script structure`),
-  `1f15ea5` (`Extract screen-space hitbox brackets`),
-  `dbc070b` (`Update handoff with watchpoint checkpoint`), `4182edb` (`Trace
-  actor writers with stock MAME watchpoints`), and `b24a4e0` (Round 1 debug
-  overlay evidence) and the
-  independently committed plan correction `9417f53`.
-- The handoff-only commit follows the implementation checkpoint; run
-  `git rev-parse HEAD` for the immutable current hash.
-- Worktree should be clean immediately after the handoff-only commit. Verify
-  with `git status --short --branch` before resuming.
-- Current disc profile: `normal-release`.
+- Position-gate implementation checkpoint: `483f088` (`Add per-part position
+  gate: exact from world(f-1) + ROM layout`), followed by handoff command update
+  `020aa5b`. The current audit refresh will supersede this paragraph's HEAD;
+  run `git rev-parse HEAD` for the immutable final hash.
+- Pre-existing untracked scratch file: `check_tail.py`. It is not part of the
+  checkpoint and was preserved rather than deleted or committed.
+- Current disc profile: `normal-release`, but
+  `build/last_compile_profile.txt` says `debug-normal-release`. This is not the
+  final hardware candidate; run `build.ps1 -Clean -Release` after the translated
+  route gates pass. The hardware manifest records only the disc profile and
+  does not prove release optimization.
 - Current ISO: 5,410,816 bytes, SHA-256
-  `30522182d9c577f3d4ddf7be7b7af499597d00ac1bb5e468110e1bf080410f17`. This
+  `be49e9aef82d3a02f98eb1370ea7cbcdf6a6a6014074d7a4d853aad7b7b42062`. This
   replaces the pre-shutter 5,400,576-byte image
   `4296b66ec63276524c588b27a786d596e2d4404c747e57fe513806655f4000f6`; the
-  growth is the shutter code.
+  growth is the shutter code. The audit's normal build regenerated the ISO and
+  changed the whole-image hash from the previously documented
+  `30522182...`; size, cue hash and every checked ISO member remained valid.
 - Current cue SHA-256: `bfc58c7020d90952e93bef7ecba32dea8d4faddf6ce6a90e1054206ee1807b12`.
 - Both values match `build/hardware_release_manifest.txt` at
   `profile=normal-release`.
+- Goal-audit tool/report SHA-256 values:
+  - `tools/decode_avsp_animation_scripts.py`:
+    `a2bc47602766e5e80a8a77a5119029f6126f558edaf9ca65f7f416cc1a80f32b`
+  - `data/avsp_animation_scripts.json`:
+    `e0bcd2b71c86f692b22169a7038641dcbdd8f17f15cf904d085999c8813865e7`
+  - `tools/verify_pose_gate.py`:
+    `e697888bb58ab01ca00b654fb3a81b48e975376bcf7bdcead22f62bad5bd5679`
+  - `tools/verify_position_gate.py`:
+    `e807521f518ac92accf4a955d57e3d3de77fa85aef027a92e47ab45d7858c6ca`
+- Goal-audit verification:
+  - `test.ps1`: PASS; controller-only model reached Round 2 in 4,485 frames and
+    the 12,000-frame deterministic soak passed.
+  - `build.ps1`: PASS; normal disc-profile ISO/cue rebuilt and every member
+    checked by the build matched its expected size/SHA-256.
+  - `tools/verify_pose_gate.py`: PASS, 12/12 assemblies, zero differing pixels.
+  - `tools/verify_position_gate.py`: scoped PASS (793 exact pairs, 63 sibling,
+    8 settling, 0 other); `--require-exact` exits 1 as expected while 162
+    frames and 71 tested parts remain non-exact/unmatched.
 - No MAME process from this checkout remained after the overlay checkpoint.
   Do not kill an emulator owned by another checkout or concurrent session.
 
@@ -235,8 +262,10 @@ Deterministic source hashes:
 
 - No MAME, Yaba Sanshiro, Mednafen, or RetroArch process was running at the
   checkpoint. No capture/build command is partially active.
-- The latest normal-release ISO/cue remains the verified release listed above;
-  the frontend analyzer did not rebuild or overwrite it.
+- The latest `normal-release` disc-profile ISO/cue remains the verified image
+  listed above; its compile stamp is `debug-normal-release`, so it is regression
+  evidence rather than the final physical-hardware candidate. The frontend
+  analyzer did not rebuild or overwrite it.
 - A reuse-only run of `capture_frontend.ps1` passed the ROM audit, reproduced
   every report total, and reproduced the report SHA-256 exactly.
 - `tools/analyze_frontend.py` passes `py_compile`; the Pillow 14 deprecation was
@@ -569,14 +598,15 @@ Findings from the `avspu_stage1_boss_12660` state, 240 frames:
   the known actors at `FFA240`, `FFA300`, `FFA3C0`.
 - Of 96 struct words, 34 change during animation.
 - Words `w1c:w1e` form a 32-bit **animation-script pointer into program ROM**,
-  taking 29 distinct values in `0x13CC18..0x13CEC4`. The boss has 29 unique
-  captured poses, which is a strong independent corroboration.
+  taking 29 observed values in `0x13CC18..0x13CEC4`; those canonicalize to six
+  programs plus 23 mid-program aliases.
 - Word `w88` takes 224 distinct values over 240 frames and is very likely a
   per-frame timer or counter.
-- Script records are 16 or 20 bytes. Decoded layout, big-endian:
-  `+0` word duration in frames, `+2` word flags (`0x8000` observed, almost
-  certainly horizontal flip), `+4` long pointer to a sprite assembly, then X and
-  Y offset words.
+- Normal script records are 16 bytes, followed when required by a four-byte
+  jump pointer. Big-endian fields proven so far: `+0` duration; `+2` control
+  word (bit-15 flip, seven-bit sequence index, low parameter byte); `+4`
+  assembly pointer; eight-byte tail. Bytes `+8/+9` are interaction selectors,
+  not X/Y offsets; the remaining tail is unlabeled.
 - The pointer advances by the record size and then **jumps backwards to
   `0x13CD0C`**, which is visited twice: the script has an explicit loop, so the
   format includes control flow, not just a frame list.
@@ -585,16 +615,15 @@ Findings from the `avspu_stage1_boss_12660` state, 240 frames:
 
 ### Animation script structure checkpoint
 
-The private decrypted ROM window now decodes 29 distinct boss animation
-programs with `tools/decode_avsp_animation_scripts.py`. The tracked report is
-`data/avsp_animation_scripts.json`; it is structural evidence only and does
-not pass the pixel-exact pose gate. The renderer's selector-6 assembly command
-is also structurally decoded: budget, tile count, offset-table index, and
-packed-long/offset-word entries for 14 blocks. The selector-six handler at
-`0xAA00E` reads the offset-table pointer from `0x1FD1C8`, consumes two layout
-words per tile, applies the signed per-entry adjustment, and emits a CPS
-object-command pair. The packed-source and layout-word meanings still need a
-rendered-pose comparison.
+The private decrypted ROM window now decodes 29 observed boss pointers into
+six canonical programs plus aliases with
+`tools/decode_avsp_animation_scripts.py`. The tracked report is
+`data/avsp_animation_scripts.json`. Twelve selector-6 assemblies are decoded as
+budget, object count, offset-table index, signed origin, then
+`(code, attribute, layout-adjust)` entries. The layout chain advances by
+`4 + s16(layout_adjust)`. All 12 pass the format-isolating pose gate with zero
+differing pixels; the independent position audit has a scoped pass but full
+coverage remains open as recorded at the top of this handoff.
 
 The updater disassembly from the MAME opcode space establishes the format:
 normal pose records are 16 bytes, with duration at `+0`, flags at `+2`, and an
@@ -622,29 +651,26 @@ windows with `tools/mame_dump_code_spaces.lua` by setting `AVSP_ROM_FIRST`,
 The associated opcode-space dumper is `tools/mame_dump_code_spaces.lua`; raw
 program/opcode dumps remain ignored under `.deps\mame\actorprobe`.
 
-Tracked hashes for this checkpoint:
+The decoder/report hashes in the older structural checkpoint are superseded by
+the goal-audit checkpoint hashes near the top/final repository-state update.
+The opcode dumper itself remains:
 
-- `tools/decode_avsp_animation_scripts.py`:
-  `2a7247ab30d1a239f4d325883075ae798ff25c0ebd2211a8c1b97d2f99702a2d`.
-- `data/avsp_animation_scripts.json`:
-  `B61F89B68E147521BBFA2934A0F9A21932C0D2C05F8977D8500BEAA8BC9551DA`.
 - `tools/mame_dump_code_spaces.lua`:
   `1f22a221c87c5ab2bc07eeab0608cc2bb10d980f5a574cd5f73f0a4bf246ccd6`.
 
 ### Next steps for this direction
 
-1. Decode the sprite-assembly table at the `+4` pointers: tile codes, palette
-   bank, per-tile offsets, and size. Cross-check a decoded assembly against an
-   already-captured boss pose; they must match pixel for pixel.
-2. Determine the script opcode/terminator encoding. The 16 vs 20 byte record
-   sizes and the backward jump imply a discriminator field; find it rather than
-   assuming record size from observed deltas.
-3. Map the rest of the 192-byte actor struct: position, health, state, timers,
-   facing. Use the existing captured events with known frames as labels.
-4. Only then attack AI. Find the routines that write the script-pointer field;
-   those are the state machines worth translating.
-5. Keep the deterministic captures as regression oracles: a translated table
-   must reproduce the already-verified clips exactly.
+1. Decode the 162 unmatched boss attack/hit geometry frames and resolve the
+   record-pointer timing/shared-code-set selection.
+2. Derive the transient `x=0/y=-4` position path instead of relying on the
+   narrow observed-settling classification; make `--require-exact` pass.
+3. Decode actor-local hitbox records for all required player/alien/Stalker/
+   Chrysalis poses and replace inferred range/contact schedules.
+4. Locate and extract Round 1 spawn, camera, scroll and trigger tables.
+5. Disassemble one complete labeled AI writer path, map only the actor fields it
+   consumes, and identify/record PRNG use before translation.
+6. Extend ROM animation extraction to every required Round 1 actor, then build
+   the SH-2 interpreter and retain captures only as regression oracles.
 
 Note on RNG: if AI decisions consume a PRNG, functional parity requires the
 same generator and call order for behaviour to match, even though exact frame
@@ -948,26 +974,11 @@ match the selector-6 assembly to the SPR4 pose pixel-for-pixel.
 
 ## Session notes: selector-6 tile decoding progress
 
-- The 12 selector-6 assemblies decoded from ROM reference tiles from the
-  16 MiB `gfx_region.bin`. Tile code = `(packed_source >> 16) & 0xFFFF`,
-  palette index = `tile_code & 0xFF` (boss poses use palette 27 = 0x1B).
-- Layout table x/y values are 16-bit with 6-bit fractional part. Shifting
-  by 6 (`>> 6`) gives screen-space coordinates suitable for composition:
-  e.g., 2526 → 39, -4092 → -63, 1284 → 20.
-- Layout y values for some entries exceed 224 (e.g., 17157 → 268), indicating
-  display-space coordinates that may need crop/clip subtraction to match the
-  384×224 Saturn canvas.
-- The boss KO capture at frame 13492 has `object_shift_x=268, object_shift_y=345`
-  and bounds `[344, 448, 552, 544]`. Adding object_shift to the >>6
-  coordinates produces positions within the 384-wide display window.
-- The selector-6 at `0x13dea0` (Program 3, hold loop, dur=1, flip_x=64)
-  references 4 tiles; `0x13de46` (Program 6) references 3 tiles.
-  These are the KO and hit pose handlers respectively.
-- Rendering tiles at layout position `(x>>6, y>>6)` produces non-blank 8×8
-  bitmap frames with correct palette indices.
-- Next step for the pixel gate: subtract screen offset (or apply bounding
-  box crop) and use the palette bank color table to color tiles; compare
-  against the RLE boss KO archive or MAME screenshot at frame 13492.
+**Superseded investigation.** The fixed-point/layout and packed-source guesses
+previously recorded here were disproved by the count/origin/command decoder and
+the 12/12 pose gate. Do not use them. Current selector-6 structure, position
+model, exact limitations and commands are at the top of this handoff and in
+`PARITY_PLAN.md` under "Pose and position gates".
 
 ## Resume in this order
 
@@ -986,13 +997,14 @@ contingency only.
 3. Use the completed stock-MAME writer evidence to disassemble the remaining
    state/action PCs and identify AI/RNG consumers. Do not build custom MAME
    unless stock watchpoints demonstrably fail.
-4. Finish sprite-assembly decoding and require a ROM-decoded pose to match a
-   verified capture pixel for pixel.
+4. Extend the green 12-assembly boss format gate to the unmatched attack/hit
+   poses and all required Round 1 actors; make the full position gate exact.
 5. Compute the exact Round 1 referenced tile set, translate required 68k AI and
-   stage tables to native C/data, and compare functional events.
-6. Only after the pixel gate passes, replace `player_pose_for_frame()` and the
-   hand-written `cap_world_step()` behaviour. Measure composed cels versus
-   per-tile VDP1 commands on hardware before choosing.
+   stage tables to native C/data, and build the MAME/native event comparison.
+6. Replace `player_pose_for_frame()` and the hand-written `cap_world_step()`
+   behaviour only for actors whose required ROM tables and routines are proven.
+   Measure composed cels versus per-tile VDP1 commands on hardware before
+   choosing.
 
 The older capture-and-bind resume list below is retained only as historical
 context for the frontend slice; it is not the current work queue.
@@ -1087,55 +1099,31 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -Clean -Rele
 & "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
     .\tools\verify_pose_gate.py
 
-# Per-part position gate: predicted from world(f-1) + ROM layout vs capture.
-# PASS = every part exact, or a sibling-assembly origin delta, or bounded
-# vertical settling; 0 unexplained. --verbose lists settling/unexplained.
+# Scoped position audit: predicted from world(f-1) + ROM layout vs capture.
+# Scoped PASS permits only explicit sibling-origin and observed settling
+# classes. --require-exact is the goal-strength gate and currently must fail.
 & "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
     .\tools\verify_position_gate.py
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\verify_position_gate.py --require-exact
 ```
 
 The build scripts locate their bundled Python/MAME/Jo Engine dependencies; do not assume `python` is on PATH. A bundled Python is also available at `C:\Users\lambd\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe`.
 
-## 2026-08-17 session: pixel gate investigation — selector-6 tile decoding blocked
+## Superseded pixel-gate investigation
 
-**Layout window base fixed**: The decoder default `offset_window_base=0x1F6000`
-produces wrong layout x/y values. Correct base is `0x1E0000`. Verified by
-reading `offset_full_program.bin`: layout values (-112, -96), (-112, -80),
-(-112, -64), (-112, -48) appear at file offset `0x1DE40 = layout_address
-(0x1FDE40) - 0x1E0000`. Previous decoder output at wrong base
-(`0x1F6000`) gave values like x=2526, y=2782 which are garbage.
-
-**Pixel-exact pose gate BLOCKED on selector-6 → tile code mapping**. The
-packed_source values in the ROM assembly (e.g., `0x161B0008`, `0x181B0004`) do
-not decode to tiles in the 16 MiB `gfx_region.bin` that match the boss KO pose.
-- `decode_tile(gfx, packed >> 16, 8)` decodes non-blank tiles, but they render
-  at positions (-112,-96..-48) which are off-screen in the 384×224 MAME
-  capture frame 13492.
-- Shifting layout values by 6 bits (`>> 6`) gives better positions (e.g.,
-  -96→-1, -80→-1), but still no match to the MAME screenshot (0.3% similarity).
-- MAME object RAM at frame 13492 contains different tile codes than the
-  selector-6 entries. The selector-6 handler at `0xAA00E` transforms packed_source
-  into GPU sprite codes in a way I have not reverse-engineered.
-- The selector-6 assembly entries may be a template; each KO frame may use
-  different tile codes than the static assembly ROM data.
-
-**Known facts about the selector-6 format**:
-- Packed source contains: `packed >> 16` ≅ tile code candidate, `(packed >>
-  16) & 0xFF` ≅ palette index (boss=27=0x1B)
-- Layout table x/y at `0x1E0000+0x1DE40`: all x=-112, y staggered by 16
-  (-96, -80, -64, -48)
-- Selector-6 offset_adjust values (0x8400, 0x8407, 0x8420, 0x8428) are NOT
-  layout table chain links; they are consumed by the CPS2 GPU renderer.
-- MAME object RAM tile codes (0xC3, 0x8178, 0x80FC, 0x97) ≠ selector-6 codes
-  (0xFFE6, 0x161B, 0x181B, 0x171B).
-
-**Next attempt to unblock**: Research CPS2 selector-6 handler `0xAA00E` to
-understand how packed_source is transformed into GPU sprite codes. Alternatively,
-reverse the CPS2 sprite rendering path from GPU command → tile code in
-`gfx_region.bin`. Until this mapping is known, the pixel gate cannot pass.
+The earlier "selector-6 tile decoding blocked" conclusion is superseded. The
+format-isolating pose gate now passes 12/12 decoded boss assemblies with zero
+differing pixels. The valid remaining blockers are complete actor/pose
+coverage, exact position coverage, native table/routine integration, and the
+event-level parity harness; see the goal-progress index.
 
 ## Remaining product-level work
 
+- Close all seven conditions in the goal-progress index. In particular, replace
+  capture-bound animation and hand-authored collision/AI/stage logic with
+  ROM-derived tables and translated routines before treating the route as the
+  goal implementation.
 - Verify the complete first level audibly in a captured real-time emulator run;
   visual full-route completion is proven, while this pass did not independently
   record every intermediate sound cue.

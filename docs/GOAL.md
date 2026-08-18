@@ -4,6 +4,10 @@ Pursue this until every completion condition holds. This file does not change
 as the method or phase changes; `docs/PARITY_PLAN.md` holds the route, this
 holds the destination.
 
+Current status is indexed condition-by-condition in
+[`PARITY_PLAN.md`](PARITY_PLAN.md#goal-progress-index). Exact hashes, commands,
+dirty files and immediate blockers remain in [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md).
+
 ## Objective
 
 A private, native Sega Saturn build that plays Alien vs Predator Round 1,

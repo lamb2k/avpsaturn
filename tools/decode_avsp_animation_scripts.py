@@ -303,7 +303,10 @@ def main() -> None:
                   for address in assembly_addresses]
     result = {
         "schema": 1,
-        "classification": "missing pixel gate (ROM-derived script structure)",
+        "classification": (
+            "ROM-derived boss animation structures; decoded assemblies have "
+            "separate pose/position validation"
+        ),
         "source": {
             "rom_window": args.rom_window.as_posix(),
             "window_base": f"0x{args.base:06x}",
@@ -349,9 +352,9 @@ def main() -> None:
         "programs": programs,
         "assemblies": assemblies,
         "remaining_gate": (
-            "Map packed assembly source words and offset-table entries to CPS object "
-            "commands, then prove one rendered pose pixel for pixel against a captured "
-            "pose; label tail fields and actor-local hitboxes."
+            "Expand ROM-derived animation coverage to every required Round 1 actor and "
+            "attack/hit pose; resolve record-selection timing and the transient position "
+            "settling observation; label unresolved tail fields and actor-local hitboxes."
         ),
     }
     args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="ascii")

@@ -271,6 +271,11 @@ with one SCSP command and safely retriggers the shared contact channel.
 
 ## What is exact and what is not
 
+"Exact" in this section means exact to the stated capture or payload within the
+legacy regression baseline. It does not mean the ROM-derived functional-parity
+conditions in `GOAL.md` are complete; see the goal-progress index in
+`PARITY_PLAN.md`.
+
 Exact in the current milestone:
 
 - CPS2 graphics-region reconstruction
@@ -326,14 +331,11 @@ Still approximate or incomplete:
 
 ## Next implementation sequence
 
-1. Extend the captured player timeline into remaining transition and interaction clips.
-2. Repeat the proven state-slot capture for the remaining enemy archetypes and
-   validate attack hit windows against player-health transitions.
-3. Replace prototype combat with Stage 1 scripts, collision, spawn, and camera
-   data.
-4. Add bounded CD-to-cartridge prefetch and VDP1 cache scheduling.
-5. Replace the CDDA reference mix with isolated music/SFX assets and verify the
-   complete level on real Saturn hardware.
+The capture-and-bind sequence previously listed here is superseded. Follow
+`PARITY_PLAN.md`: finish required ROM animation coverage, decode game hitboxes
+and stage tables, translate required 68000 actor routines with PRNG handling
+recorded, integrate those sources into the native runtime, then run event-level,
+regression, emulator, audible-route and physical-hardware gates in order.
 
 ## Hardware boundary
 

@@ -1,5 +1,10 @@
 # Capability test plan
 
+Gates C and D retain the capture-derived route as regression evidence. They do
+not replace the seven completion conditions in `GOAL.md`; current goal status
+is indexed in `PARITY_PLAN.md`. New actor, collision, stage and AI work follows
+the ROM-translation route rather than extending capture-and-bind.
+
 ## Gate A: reproducible source decode
 
 - Official MAME reports the local `avspu` set as good.
@@ -71,8 +76,10 @@ Round 2 title surfaces. No data-track reads occur after Stage 1 CDDA begins.
   Round 2 boundary deterministically.
 - Validate the Chrysalis actor at `FF A3C0`, preserve its exact frame-12660 idle,
   and extract the 44-frame leap, 106-frame walk, and uninterrupted 189-frame
-  attack/recovery clips into an indexed archive. Require contacts at offsets
-  21/55/97 for 10/10/16 health. Also require the natural frame-13491 melee
+  attack/recovery clips into an indexed archive. Retain contacts at offsets
+  21/55/97 for 10/10/16 health as a **legacy regression oracle only**; these
+  inferred timings do not satisfy the final real-hitbox collision gate. Also
+  require the natural frame-13491 melee
   impact to reduce boss health from 38 to 35 and drive the exact 40-frame hit
   clip from frames 13492-13531. Verify the original `/SPR4/BACT.RLE` remains
   119,868 bytes with SHA-256

@@ -6,6 +6,19 @@ the build cross-compiles SH-2 code and feeds reconstructed graphics to VDP1 and
 VDP2. It currently proves an authentic-asset Stage 1 route slice, not a content-
 complete or frame-exact port.
 
+Canonical project status:
+
+- [`docs/GOAL.md`](docs/GOAL.md) defines the seven non-negotiable completion
+  conditions.
+- [`docs/PARITY_PLAN.md`](docs/PARITY_PLAN.md#goal-progress-index) contains the
+  condition-by-condition goal index and ROM-translation route.
+- [`docs/AGENT_HANDOFF.md`](docs/AGENT_HANDOFF.md) contains volatile hashes,
+  commands, current blockers and immediate next work.
+
+The native route described below is the capture-derived regression baseline.
+It is not yet the ROM-derived functional-parity implementation required by the
+goal.
+
 Current milestone:
 
 - verifies a user-supplied `avspu` ROM set with official MAME 0.289
@@ -289,10 +302,12 @@ Verified on August 17, 2026:
 - the refreshed emulator controller route crosses that RAM overlay and reaches
   the Round 2 card without an asset failure
 
-Next proof gate: verify the full-width mapping, complete KO, and CD audio on
-physical Saturn, then extend the proven QSound isolation to remaining combat effects while
-replacing the approximate route gaps with the remaining captured
-rooms, actors, and actions.
+Next proof gates are the open conditions in the goal-progress index: complete
+ROM-derived animation coverage, real hitbox and stage-table extraction,
+translated 68000 enemy behaviour with PRNG handling recorded, and an
+event-level MAME/native comparison. Existing captured clips remain regression
+oracles; do not extend capture-and-bind for new actors or actions. Physical
+Saturn validation follows the final translated normal-release route.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
 [docs/TEST_PLAN.md](docs/TEST_PLAN.md).

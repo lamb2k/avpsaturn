@@ -1,10 +1,11 @@
-"""The per-part position gate.
+"""The scoped per-part position gate.
 
-Answers one question: does a boss object's screen position, predicted from the
-previous frame's world coordinates in the actor slot plus the ROM assembly's
-layout words, match the captured object RAM exactly?
+Answers one question for the currently decoded boss poses: does an object's
+screen position, predicted from the previous frame's world coordinates plus
+the ROM assembly's layout words, match captured object RAM or leave only a
+known, explicitly classified residual?
 
-Model (derived and verified pixel-exact; see docs/AGENT_HANDOFF.md):
+Model (see docs/AGENT_HANDOFF.md):
 
     right_ring = wx(f-1) + origin_x - lx + 64
     left_ring  = right_ring - width
@@ -29,7 +30,8 @@ Assembly selection is by the captured object-code set (the same robust match
 the pose gate uses). Two cases are handled honestly:
 
 * Attack / hit poses whose code set is not one of the decoded assemblies are
-  counted as unmatched (their assemblies are not yet in the JSON).
+  counted as unmatched (their assemblies are not yet in the JSON). They do not
+  silently pass full-coverage validation.
 * Where two assemblies share a code set (the airborne vs at-rest forms of
   assembly 3, and a sibling of assembly 1), the code-set match cannot tell
   them apart. Such a frame keeps a residual equal to the origin delta between
@@ -39,9 +41,14 @@ the pose gate uses). Two cases are handled honestly:
   produce. A frame with a nonzero residual PASSES only if that residual is in
   this explained set; anything else is a genuine model failure.
 
-So the gate is green when every part is either exact or explainable by a
-known sibling-assembly origin delta, and it stays red on any unexplained
-residual.
+Eight parts in two frames have one other observed residual: (x=0, y=-4), after
+a recent world-Y change. The exact source of that transient settling offset is
+not derived. The tool reports it as a bounded observation, not an exact match.
+
+The default exit status is a *scoped* gate: green means every tested part is
+exact or belongs to one of those explicit residual classes. ``--require-exact``
+is the goal-strength gate: it also requires every geometry frame to be matched
+and every tested part to have residual (0, 0).
 """
 from __future__ import annotations
 
@@ -155,7 +162,7 @@ def build_explained(rom: bytes, offset_data: bytes,
     return explained
 
 
-def run(verbose: bool = False) -> int:
+def run(verbose: bool = False, require_exact: bool = False) -> int:
     scripts = json.loads(SCRIPTS.read_text(encoding="ascii"))
     assemblies = scripts["assemblies"]
     by_codes = build_by_codes(assemblies)
@@ -171,15 +178,21 @@ def run(verbose: bool = False) -> int:
     y_resid = Counter()
     pair_resid = Counter()
     settling = 0
+    settling_cases: list[tuple[int, int, int]] = []
     sibling = 0
     unexplained: list[tuple[int, int, int, int, int]] = []
     per_asm: dict[int, dict] = defaultdict(
         lambda: {"parts": Counter(), "x": Counter(), "y": Counter()})
 
-    def is_settling(xr: int, yr: int) -> bool:
-        # A small Y-only offset seen ~2 frames after a vertical world move:
-        # the drawn position eases toward the new world Y. Bounded, X-exact.
-        return xr == 0 and 0 < abs(yr) <= 4
+    def is_settling(frame: int, xr: int, yr: int) -> bool:
+        # The only observed transient is exactly (0, -4), about two frames
+        # after world Y changes. Keep this narrow so it cannot become a general
+        # tolerance that hides a new position-model error.
+        if (xr, yr) != (0, -4):
+            return False
+        recent_y = [world[f][1] for f in range(frame - 3, frame)
+                    if f in world]
+        return len(recent_y) >= 2 and recent_y[0] != recent_y[-1]
 
     for frame in sorted(geometry):
         if frame - 1 not in world:
@@ -227,13 +240,15 @@ def run(verbose: bool = False) -> int:
                 continue
             if (xr, yr) in explained:
                 sibling += 1
-            elif is_settling(xr, yr):
+            elif is_settling(frame, xr, yr):
                 settling += 1
+                settling_cases.append((frame, idx, part["code"]))
             else:
                 unexplained.append((frame, idx, part["code"], xr, yr))
 
     x_exact = x_resid.get(0, 0)
     y_exact = y_resid.get(0, 0)
+    pair_exact = pair_resid.get((0, 0), 0)
 
     print("Position gate: predicted from world(f-1) + ROM layout vs capture")
     print(f"  frames total {total_frames}  matched {matched_frames}  "
@@ -241,7 +256,7 @@ def run(verbose: bool = False) -> int:
     print(f"  parts tested {total_parts}")
     print(f"  X exact {x_exact}/{total_parts}   "
           f"Y exact {y_exact}/{total_parts}")
-    print(f"  classification:  exact {x_exact}  sibling-delta {sibling}  "
+    print(f"  classification:  exact-pair {pair_exact}  sibling-delta {sibling}  "
           f"settling {settling}  unexplained {len(unexplained)}")
     print(f"  sibling origin-delta pairs (from decoded record tables): "
           f"{len(explained) - 1} nonzero")
@@ -254,8 +269,10 @@ def run(verbose: bool = False) -> int:
             tag = "  (exact)"
         elif (xr, yr) in explained:
             tag = "  (sibling delta)"
-        elif is_settling(xr, yr):
+        elif (xr, yr) == (0, -4) and settling == n:
             tag = "  (settling)"
+        elif (xr, yr) == (0, -4) and settling:
+            tag = "  (mixed settling / UNEXPLAINED)"
         else:
             tag = "  <-- UNEXPLAINED"
         print(f"    (x{xr:+d}, y{yr:+d})  {n}{tag}")
@@ -266,23 +283,29 @@ def run(verbose: bool = False) -> int:
         print(f"    asm[{idx:2d}]  parts {d['parts']['n']:4d}  "
               f"X-exact {d['x'].get(0, 0):4d}  Y-exact {d['y'].get(0, 0):4d}")
 
-    ok = total_parts > 0 and not unexplained
+    scoped_ok = total_parts > 0 and not unexplained
+    exact_ok = (scoped_ok and unmatched_frames == 0 and
+                pair_exact == total_parts)
     if verbose and unexplained:
         print(f"\n  {len(unexplained)} UNEXPLAINED residuals (model failures):")
         for frame, idx, code, xr, yr in unexplained[:40]:
             print(f"    frame {frame} asm[{idx}] code {code}  (x{xr:+d}, y{yr:+d})")
 
     if verbose and settling:
-        print(f"\n  {settling} settling parts (small Y-only easing after a "
-              f"vertical move; model otherwise holds)")
+        frames = sorted({frame for frame, _idx, _code in settling_cases})
+        print(f"\n  {settling} settling parts in frames {frames} "
+              f"(observed x+0/y-4 after a recent world-Y change; exact "
+              f"cause remains open)")
 
-    print("\n" + ("PASS: every part is exact, or explained by a known "
-                 "sibling-assembly origin delta, or a bounded vertical "
-                 "settling effect; no unexplained residual."
-                 if ok else
-                 "FAIL: unexplained residuals present; the position model "
-                 "does not hold for those parts."))
-    return 0 if ok else 1
+    print("\n" + ("SCOPED PASS: every tested part is exact or belongs to an "
+                 "explicit sibling/settling class; no unexpected residual."
+                 if scoped_ok else
+                 "FAIL: unexpected residuals are present in the decoded scope."))
+    print("FULL PIXEL-EXACT COVERAGE: " +
+          ("PASS" if exact_ok else
+           f"OPEN ({unmatched_frames} unmatched frames, "
+           f"{total_parts - pair_exact} tested parts not directly exact)"))
+    return 0 if (exact_ok if require_exact else scoped_ok) else 1
 
 
 def main() -> None:
@@ -290,8 +313,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--verbose", action="store_true",
                         help="list unexplained residuals")
+    parser.add_argument("--require-exact", action="store_true",
+                        help="fail unless all frames match and every residual is zero")
     args = parser.parse_args()
-    raise SystemExit(run(verbose=args.verbose))
+    raise SystemExit(run(verbose=args.verbose, require_exact=args.require_exact))
 
 
 if __name__ == "__main__":

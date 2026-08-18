@@ -9,6 +9,31 @@ not bit-exact frame parity; see "What parity means here".
 This document supersedes the capture-and-bind method for new work. Read it with
 `AGENTS.md` and `docs/AGENT_HANDOFF.md`.
 
+## Goal-progress index
+
+Audited 2026-08-17 against every completion condition in
+[`GOAL.md`](GOAL.md). Status describes the **required final implementation**,
+not how much useful groundwork exists. No percentage is used because a green
+host model cannot substitute for a missing ROM-derived runtime or physical
+hardware proof.
+
+**Overall: 0 of 7 final conditions are closed.** The existing capture-derived
+native route is a valuable regression baseline, not the goal implementation.
+
+| # | Goal condition | Status | Current evidence and remaining gate |
+|---|---|---|---|
+| 1 | Animation from ROM scripts at runtime | **OPEN — groundwork proven** | Six canonical boss programs and 12 selector-6 assemblies are decoded; the pose gate passes 12/12. The Saturn runtime still selects captured `/SPR4/*.RLE` pose archives through generated frame tables. Extract all required actors and replace those paths with an SH-2 script interpreter and ROM-referenced tile working set. |
+| 2 | Collision from the game's hitboxes | **OPEN — evidence captured** | Stock-MAME hitbox overlays and selected actor-relative candidates are tracked. Native collision still uses scalar range/lane checks and inferred Chrysalis 21/55/97 and Stalker contact schedules. Decode the game's box records, validate all required poses, and replace those checks. |
+| 3 | Enemy behaviour from translated 68000 routines | **OPEN** | Stock watchpoints located animation/action/state writers. `cap_update_enemy()` remains hand-authored, no required AI path is translated, and PRNG use is not identified or recorded. |
+| 4 | Spawns, camera and triggers from stage tables | **OPEN** | The current lifecycle, waves, camera and room transitions are capture-derived constants and authored C. Round 1 stage tables have not been located, extracted or consumed by the runtime. |
+| 5 | Pixel and event-level validation | **OPEN — pixel groundwork proven** | The format-isolating pose gate passes 12/12 with zero differing pixels using captured screen geometry. The independent position audit has a scoped pass on 246/408 geometry frames: 793/864 parts directly exact, 63 at known sibling-origin deltas, 8 at a narrowly observed `y=-4` settling residual, 162 frames unmatched. A self-contained full-coverage ROM assembly test and MAME-vs-native event parity harness are still missing. |
+| 6 | Existing regressions still pass | **BASELINE GREEN; FINAL RE-RUN OPEN** | The current host model reaches Round 2 in 4,485 frames and its 12,000-frame deterministic soak passes; prior Yaba diagnostics exercised captured clips. These must pass again after ROM-derived animation, collision, stage and AI replacement, followed by a clean normal-release boot. |
+| 7 | Physical NTSC Saturn at sustained 60 Hz | **OPEN** | Emulator precursor and image/hash evidence exist. No physical NTSC Saturn route, audible full-level proof, sustained-60-Hz measurement, or ten-minute hardware soak is recorded. The final candidate must be a clean `release-normal-release` build with a digital pad and 32 Mbit cartridge. |
+
+The volatile evidence, exact commands, hashes, current HEAD and immediate work
+queue stay in [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md); this table is the concise
+goal index.
+
 ## Why the method changes
 
 The project reached a playable Round 1 by capturing finished frames off the
@@ -64,16 +89,17 @@ Verified in this repository; do not re-derive.
 **Animation scripts, located in program ROM**
 
 - Actor struct words `w1c:w1e` form a 32-bit **animation-script pointer**. For
-  the boss it takes 29 distinct values in `0x13CC18..0x13CEC4`, matching the 29
-  unique poses recovered by the older capture method.
+  the boss, 29 observed pointer values in `0x13CC18..0x13CEC4` canonicalize to
+  **six programs plus 23 mid-program aliases**.
 - Script programs use 16-byte pose records plus four-byte long-pointer jump
-  records. Decoded, big-endian, a pose record is `+0` duration, `+2` flags
-  (`0x8000` is the negative/flip branch), `+4` long pointer to a sprite
-  assembly, and an eight-byte tail. The tail is **not** yet an X/Y word pair:
+  records. Decoded, big-endian, a pose record is `+0` duration, `+2` control
+  word, `+4` long pointer to a sprite assembly, and an eight-byte tail. The
+  control word splits into bit-15 horizontal flip, a seven-bit sequence index,
+  and an independent low parameter byte. The tail is **not** an X/Y word pair:
   code at `0x1cf88`/`0x1cf94` consumes bytes `+9`/`+8` as interaction-table
   selectors, while `0x88e16` copies the complete 16-byte record into actor
-  scratch. Keep the remaining tail fields unlabeled until the pixel and event
-  gates prove their meaning.
+  scratch. Keep the remaining tail fields unlabeled until their consumers are
+  proven.
 - The animation updater at `0x16536`, `0x165C4` and `0x16644` advances by
   `0x10`, then follows the long pointer at the next record when the current
   flags word is negative. That four-byte jump record is why observed pointer
@@ -81,14 +107,16 @@ Verified in this repository; do not re-derive.
   format includes control flow, not just a frame list.
 - Observed sprite-assembly pointers: `0x13DEA0`, `0x13DE46`, `0x13DFEC`,
   `0x13E00A`, `0x13E04C`, `0x13E44C`.
-- The renderer at `0xA9CB6` dispatches on the first assembly word. The
-  observed Round 1 assemblies use selector `6`, followed by a budget word, a
-  tile count, an offset-table index, and one packed long plus one offset word
-  per tile. Fourteen such assembly blocks are structurally decoded. The
-  selector-six handler at `0xAA00E` reads the offset-table pointer from
-  `0x1FD1C8`, consumes two layout words per tile, applies the signed
-  per-entry adjustment, and emits a CPS object-command pair. The packed-source
-  and layout-word meanings still require a rendered-pose comparison.
+- The renderer at `0xA9CB6` dispatches on the first assembly word. The 12
+  currently decoded boss assemblies use selector `6`, followed by budget,
+  object-command count, offset-table index, signed X/Y origin, then
+  `(code, attribute, signed layout-adjust)` records. The selector-six handler
+  at `0xAA00E` reads the offset-table pointer from `0x1FD1C8`; each layout link
+  advances by `4 + s16(layout_adjust)`. The pose gate proves all 12 decoded code
+  sets and pixels against captured oracles. The independent position audit
+  proves the previous-frame world-coordinate/layout model over its matched
+  scope, while attack/hit coverage and a transient four-pixel Y residual remain
+  open.
 - Word `w88` takes 224 distinct values over 240 frames; likely a frame timer.
 
 **The retail ROM still contains Capcom's development tools**
@@ -204,18 +232,19 @@ and it is cheaper than Phase 2. Do it first.
 
 ## Phase 2: decode the tables
 
-**2a. Animation scripts.** Extend the located format into a full decoder.
-The normal/jump discriminator is now grounded in the updater: normal records
-are 16 bytes and a negative flags record is followed by a four-byte pointer
-that redirects the script. Identify loop and terminator encodings, label the
-eight-byte tail from its consumers, then decode the sprite-assembly table at
-the `+4` pointers into tile codes, palette bank and per-tile offsets. The
-current decoder also follows the selector-six offset-table chain; it remains a
-structural result until the rendered-pose comparison.
+**2a. Animation scripts.** Extend the proven boss format into complete Round 1
+coverage. The normal/jump discriminator is grounded in the updater: normal
+records are 16 bytes and a negative control word is followed by a four-byte
+pointer that redirects the script. The current 12 decoded boss assemblies pass
+the rendered-pose comparison. Next decode the unmatched boss attack/hit poses,
+extract every required player/enemy program, resolve record-selection timing,
+and label the remaining eight-byte tail fields from their consumers.
 
-Validation, non-negotiable: a ROM-decoded assembly must reproduce an
-already-captured pose **pixel for pixel**. That test converts every existing
-captured clip from source-of-truth into regression oracle.
+Validation, non-negotiable: every required ROM-decoded assembly must reproduce
+an already-captured pose **pixel for pixel**, with ROM-derived position and
+dimensions covered independently rather than hidden by captured placement.
+That test converts every existing captured clip from source-of-truth into a
+regression oracle.
 
 **2b. Actor struct.** Map fields **on demand**, not exhaustively. Only the
 fields the native runtime actually consumes need identifying; mapping all 96
@@ -231,8 +260,8 @@ translate them to C. Record RNG use explicitly the moment it appears. Use the
 custom-build tracer only if stock watchpoints prove inadequate.
 
 Gate for the phase: Round 1's animation, collision, spawn and AI data all exist
-as extracted tables plus translated routines, with the pixel-exact pose test
-passing.
+as extracted tables plus translated routines, with full required pose/position
+coverage passing and no tolerance silently treated as exact.
 
 ## Phase 3: native reimplementation
 
@@ -244,8 +273,9 @@ passing.
   region, replacing the pose archives. Ship only the unique tile working set
   referenced by Round 1 scripts, not the 16 MiB reconstructed source region.
 - Replace `player_pose_for_frame()` and the generated action tables with a
-  small SH-2 script interpreter: duration, bit-15 flip, assembly pointer, X/Y
-  offsets, advance, backward jumps and termination.
+  small SH-2 script interpreter for the proven fields: duration, bit-15 flip,
+  sequence index, parameter byte, assembly pointer, advance, backward jumps
+  and termination. Add tail semantics only after their consumers prove them.
 - Convert sprite assemblies into either load-time composed cels or per-tile
   VDP1 commands. Keep both options open until 60 Hz hardware measurements show
   the RAM, CPU and command-table tradeoff.
@@ -283,51 +313,45 @@ only a contingency if stock watchpoints are inadequate. Phase 3 follows once
 the decoder is proven. Phase 4 runs continuously from the first extracted
 events.
 
-Do not start Phase 3 before the pixel-exact pose test passes. Reimplementing on
-top of a misread table format is the most expensive available mistake.
+Do not start Phase 3 for an actor until its required pose/position coverage is
+proven. The format gate is green for the current 12 boss assemblies, but that
+does not authorize replacing actors or actions whose tables remain undecoded.
 
-## The pose gate is implemented and currently RED
+## Pose and position gates
 
-`tools/verify_pose_gate.py` is the gate. Run it before claiming any progress on
-assembly decoding:
+`tools/verify_pose_gate.py` is the format-isolating pixel gate:
 
+```powershell
+python tools\verify_pose_gate.py
 ```
-python tools\verify_pose_gate.py --assembly 0x13dea0
+
+It decodes verified poses from `/SPR4/*.RLE`, checks that each ROM assembly has
+the captured object-code set, composes with captured screen geometry, crops to
+the non-transparent bounds, and requires **zero differing pixels** with no
+colour tolerance. Current status: **12/12 decoded boss assemblies pass**. The
+captured placement is intentional here: this test isolates code/tile/palette
+and composition correctness and must not be described as a self-contained
+position proof.
+
+`tools/verify_position_gate.py` independently tests the ROM origins/layout
+words against previous-frame actor world coordinates and captured object RAM:
+
+```powershell
+python tools\verify_position_gate.py
+python tools\verify_position_gate.py --require-exact
 ```
 
-It decodes a verified pose from `/SPR4/*.RLE` via the index tables in
-`generated/avsp_boss_animation.h`, composes the ROM assembly, crops both to
-their own content bounding boxes, and requires **zero** differing pixels.
+The default scoped gate passes when every tested residual is directly exact or
+belongs to an explicit sibling-origin/settling class. Current scope: 408
+geometry frames, 246 matched, 162 unmatched; 864 tested parts, 793 directly
+exact pairs, 63 sibling-origin residuals, 8 observed `x=0/y=-4` settling parts,
+and zero other residuals. `--require-exact` is the goal-strength gate and
+currently **fails**, as it should, until every frame is matched and every
+residual is zero.
 
-Two rules in it exist because the first ad-hoc attempt got them wrong, and
-either mistake can produce a false pass:
-
-- **The oracle is a decoded archive pose, never a screenshot.** A full-screen
-  capture holds background, HUD and other actors, so one assembly can never
-  match it.
-- **Pass means zero differing pixels**, with no colour tolerance. A percentage
-  over a whole canvas is dominated by shared empty space, so an empty
-  composition scores well against a mostly-empty oracle.
-
-Status at 2026-08-17: **PASS for assembly 0x13DEA0 → pose 4** (source frame
-12688, 222×92 pixels, 0 differing). The gate now uses MAME object RAM screen
-coordinates (`screen_x`/`screen_y`) for object placement instead of ROM script
-origin+layout, because the ROM script uses animation-local space while the
-renderer uses screen space. The default runtime frame is 12688. Other assemblies
-may need different frames.
-
-Previous failure mode (superseded): the oracle side was proven correct (pose 0
-decodes to a 205x103 Chrysalis sprite, confirming the RLE decode, archive
-indexing, 4bpp unpacking and crop are all sound). The composition side produced
-only a 16x64 single-tile column, because every
-decoded layout entry shares `layout_x = -112` while y steps by 16. A 205x103
-sprite needs roughly ninety 16x16 tiles, not four stacked vertically.
-
-That points at one of three things, and the next work should decide which:
-a single pose is assembled from several assemblies; the declared tile count is
-short and the record continues past what is currently decoded; or the layout
-table is being read down a single column. Adjust `compose_assembly()` as the
-interpretation improves and never relax the comparison.
+Neither gate is an event-level parity harness. Goal condition 5 remains open
+until full required animation coverage and the MAME-vs-native event comparison
+both pass.
 
 ## Explicitly out of scope
 
