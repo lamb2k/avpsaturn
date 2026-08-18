@@ -61,7 +61,8 @@ deliberately unchanged**: the records are indexed by the live ROM
 animation-record pointer at actor `+0x1C`, which the runtime does not yet carry
 (pose selection is still capture-derived), so consuming them today would require
 hand-mapped per-pose constants — the exact substitution this milestone forbids.
-That linkage is milestone 3. Gate 1 condition 2 stays **OPEN**; Gate 1 stays
+That linkage is **phase B** under the re-sequenced order below — this milestone
+is the reason the order changed. Gate 1 condition 2 stays **OPEN**; Gate 1 stays
 **0/7**. See the handoff's "Capability Gate 1 — collision records (milestone 2,
 2026-08-18)" section for the routine addresses, SHA-256 evidence and exact
 commands.
@@ -96,7 +97,7 @@ evidence and the exact reproduction command.
 | # | Gate 1 condition | Status | Current evidence and remaining gate |
 |---|---|---|---|
 | 1 | Animation from ROM scripts at runtime | **OPEN — Chrysalis tile-composition slice proven** | For the Chrysalis boss the runtime now composes all 29 of its poses from ROM-referenced 4bpp tiles (`compose_boss_rom_pose` in `main.c`, `generated/avsp_boss_rom.h`), and the boss's `BACT`/`BHIT`/`BKO` pose archives are no longer loaded for animation (they remain on disc only as host-test regression oracles). This is a composition slice, not full ROM animation: pose *selection* still uses the capture-derived per-frame clip/step tables (`boss_pose_for_frame`, `generated/avsp_boss_animation.h`), and the ROM selector-6 / control-word script interpreter is decoded host-side only, not yet linked into the runtime. The 29-pose / 28-assembly composition gate passes 28/28 with 0 differing pixels, the focused KO/HIT builds and the full controller route through Round 2 all render on Yaba Sanshiro without an asset error, and a clean normal release boots to title. **Remaining:** link the ROM script interpreter for pose selection, and decode the player/street-aliens/Stalker programs to route them through the same tile-composition path (retiring their `/SPR4/*.RLE` archives), before this condition is closed. |
-| 2 | Collision from the game's hitboxes | **OPEN — record format decoded and falsified; runtime unchanged** | The game's own routines give the format: selectors at animation-record `+8`/`+9`, table bases from actor `+0x50` words `+0`/`+2`, strides 8 and 16, and a three-axis centre/half-extent test at `0x01D25E` with the depth delta projected into Y. `data/avsp_collision.json` holds 10 trusted family table-sets (player, street aliens, Stalkers, boss) decoded deterministically, with 10 further families explicitly flagged suspect rather than invented. The controlled falsification passes: 21,908 non-overlapping active pairs produced no hit and 44/56 hit latches are explained exactly, with the 12 residuals named (one simultaneous broadcast, and a projectile/weapon path that is not decoded). Native collision still uses scalar range/lane checks and the inferred Chrysalis 21/55/97 and Stalker schedules, deliberately: the records are indexed by the live ROM animation-record pointer the runtime does not yet carry, so consuming them now would mean hand-mapped per-pose constants. **Remaining:** milestone 3 must link ROM animation records into the runtime; then decode the projectile path, resolve the broadcast path and the attack-table lengths, and replace the inferred schedules. |
+| 2 | Collision from the game's hitboxes | **OPEN — record format decoded and falsified; runtime unchanged** | The game's own routines give the format: selectors at animation-record `+8`/`+9`, table bases from actor `+0x50` words `+0`/`+2`, strides 8 and 16, and a three-axis centre/half-extent test at `0x01D25E` with the depth delta projected into Y. `data/avsp_collision.json` holds 10 trusted family table-sets (player, street aliens, Stalkers, boss) decoded deterministically, with 10 further families explicitly flagged suspect rather than invented. The controlled falsification passes: 21,908 non-overlapping active pairs produced no hit and 44/56 hit latches are explained exactly, with the 12 residuals named (one simultaneous broadcast, and a projectile/weapon path that is not decoded). Native collision still uses scalar range/lane checks and the inferred Chrysalis 21/55/97 and Stalker schedules, deliberately: the records are indexed by the live ROM animation-record pointer the runtime does not yet carry, so consuming them now would mean hand-mapped per-pose constants. **Remaining:** phase B must link ROM animation records into the runtime; then decode the projectile path, resolve the broadcast path and the attack-table lengths, and replace the inferred schedules. |
 | 3 | Enemy behaviour from translated 68000 routines | **OPEN** | Stock watchpoints located animation/action/state writers. `cap_update_enemy()` remains hand-authored, no required AI path is translated, and PRNG use is not identified or recorded. |
 | 4 | Spawns, camera and triggers from stage tables | **OPEN** | The current lifecycle, waves, camera and room transitions are capture-derived constants and authored C. Round 1 stage tables have not been located, extracted or consumed by the runtime. |
 | 5 | Pixel and event-level validation | **OPEN — pixel groundwork proven** | The format-isolating pose gate passes 28/28 (29 oracle poses) with zero differing pixels using captured screen geometry, in both default and self-contained modes. The independent position audit has a scoped pass on 408/408 geometry frames: 1,435/1,443 parts directly exact, 0 at sibling-origin deltas (the shared-code-set ambiguity is resolved by the actor-slot record pointer at frame f−1), 8 at a formally bounded `y=-4` whole-pose settle trail (the only non-zero residual in the scope; the one-step trail's exact writer is not yet disassembled), 0 frames unmatched, X 1,443/1,443 exact. Because the pose gate requires every listed assembly to 0-diff an oracle, only the 28 assemblies with a captured-pose oracle are listed; the 5 decoded mid-attack/at-rest trace assemblies are excluded and reported in `excluded_no_oracle_assemblies`, not pixel-verifiable. A MAME-vs-native event parity harness is still missing. |
@@ -116,16 +117,57 @@ after that narrow gate, work returns to the real-hitbox priority before
 broadening animation, stage and AI coverage. **Milestone 1 is closed
 (2026-08-18); the first body assigned to the next agent is milestone 2 only.**
 
-| Order | Milestone | Required work | Exit gate | Gate 1 conditions advanced |
+### Why this order changed (2026-08-18 re-sequence)
+
+The previous order ran emission → collision → animation → stage → AI. Executing
+it exposed a **dependency inversion**: milestone 2 decoded the collision record
+format and falsified it successfully, then could not integrate, because the
+records are indexed by the live ROM animation-record pointer at actor `+0x1C`
+and **no actor in the native runtime carries one**. Stage triggers and enemy AI
+read actor fields through the same record. Four of five remaining milestones were
+therefore queued behind one missing abstraction.
+
+The reason the runtime has no record pointer is architectural. Its unit of work
+is a *precomposed pose picture*: `main.c` builds 288x192 cels and hands them to
+`jo_sprite_add_4bits_image`, with pose selection from capture-derived tables and
+collision from scalar lane tests in `capability_model.c`. ROM assemblies have no
+runtime consumer, so nothing forces an actor to carry its record.
+
+So the order below is rebuilt around **one spine — an actor that carries its ROM
+record — and the renderer question that decides whether that spine is
+affordable**. Decoding further ROM tables before that spine exists produces
+correct evidence that cannot be consumed, which is what milestone 2 demonstrated.
+
+The seven Gate 1 acceptance conditions are **unchanged**; only the execution
+order and its exit gates are. Each phase below has a gate that can independently
+go green, so progress is visible before the whole gate closes.
+
+| Order | Phase | Required work | Exit gate | Gate 1 conditions advanced |
 |---|---|---|---|---|
-| 0 | Preserve the intercept boundary | Commit the documentation-only master plan on an AvP branch; keep the MSHvSF research checkpoint isolated | AvP baseline, Marvel checkpoint, dirty files, and exact resume command are recorded without merging either history | All, by preserving provenance |
-| 1 | Close the street-alien five-slot emission gate | Trace object-buffer word indices 80–99 at frames 4214 and 4253; identify the street alien's group list, actor type, jump-table target, Family-1 variant, `A0` source, emitting `A4=A6=0xFF9DC0`, and actor `+0x1c/+0x50` relationship to the source longs | A deterministic analyzer regenerates all five four-word slots at indices 80/84/88/92/96 for both frames, including X, Y, code, attribute, order, bank and frame relation; frame 4214 is the different-pose anti-hardcoding control | 1 and 5 |
-| 2 | Replace inferred collision | Decode actor-local hitbox/attack-box records for every required player, street-alien, Stalker, and Chrysalis pose by joining the debug overlays, pivots, interaction selectors, and writer/table evidence | Native collision consumes ROM-derived boxes; inferred Chrysalis 21/55/97 and Stalker schedules are removed; controlled hit and whiff fixtures pass | 2 and 5 |
-| 3 | Complete Round 1 animation extraction | Promote the street-alien decoder only after milestone 1; gate all 28 street-alien assemblies, then Stalkers and player; add the player's missing work-RAM/register capture; link the proven script interpreter for boss pose selection | Every required actor/action has ROM-derived script, assembly, tile, position, and duration coverage; capture archives remain regression oracles, not runtime animation sources | 1, 5, and 6 |
-| 4 | Recover Round 1 stage data | Locate and decode spawn records, camera bounds, scroll parameters, room triggers, barricade/door transitions, boss-room entry, and Round 2 handoff | The deterministic route consumes extracted tables rather than authored lifecycle constants and reaches the same ordered room/event anchors | 4, 5, and 6 |
-| 5 | Translate required enemy logic | Follow stock-MAME writer PCs from action/state fields into complete labeled 68000 paths; map only consumed actor fields; identify PRNG generator and call order before translating | Street alien, Stalker, and Chrysalis decisions used by Round 1 run through translated routines and pass controlled branch/negative-control fixtures | 3, 5, and 6 |
-| 6 | Integrate and budget the Saturn runtime | Preserve the existing Saturn platform pipeline; integrate proven tables/routines actor by actor; measure referenced-tile working set, cartridge/work-RAM lifetimes, VDP1 commands/VRAM, VDP2, SCSP, DMA, and CD access before changing overlays or renderer strategy | Focused and full-route builds both fit measured budgets; no CD-data read occurs during CDDA without a passing hardware measurement; normal release is restored after every diagnostic | 1–6 |
-| 7 | Validate and release-candidate test | Compare MAME and native semantic events on identical input; retain pixel/position oracles; run host, soak, focused, full-route, clean release, audible route, then physical hardware | Conditions 1–6 are independently green, followed by sustained 60 Hz and ten-minute physical NTSC Saturn proof with digital pad and 32 Mbit cartridge | 5–7 |
+| A | Decide the renderer by measurement | Measure **our own** two candidate pipelines against each other on the same deterministic route, for one street wave plus Chrysalis: the current precomposed per-palette cels versus one 16x16 VDP1 command per source tile. Record reachable command count (walk control flow, not stored slots), **live colour banks per frame**, and per-resource high-water marks (VDP1 VRAM, colour RAM, work RAM, cartridge). Fidelity is judged against MAME's CPS2 output; affordability is judged against Saturn hardware limits | A tracked, copyright-safe AvP measurement report shows which of our two pipelines fits AvP's colour RAM and VDP1 budget on the same route, with the losing pipeline's specific failure named. No native rendering change is made in this phase | 1, 5 and 7, by making the decision evidence-based |
+| B | Build the actor spine on one actor | Give one street alien a native actor record carrying its ROM animation-record pointer, selector bytes `+8`/`+9`, facing and world X/Y/Z. Drive its animation from the ROM script interpreter (already written in `avsp_anim_script.c`), its sprite output from the phase-A winner, its hurt/attack boxes from `data/avsp_collision.json`, and its damage from attack byte `+0x0E` | One street alien runs ROM-driven end to end: pose selection, tile emission, box overlap and damage all read decoded ROM data. Controlled hit and whiff fixtures pass against MAME evidence for that actor, and its `/SPR4` archive is demoted to a regression oracle | 1, 2, 5 and 6 |
+| C | Widen the spine to Round 1's cast | Move the player, remaining street aliens, Stalkers and Chrysalis onto the same spine. Retire the inferred Chrysalis 21/55/97 and Stalker contact schedules from runtime collision. Decode the projectile/weapon collision path and the simultaneous-broadcast path that milestone 2 left open | Every Round 1 actor selects poses and resolves collision from ROM data; no capture-derived contact schedule remains in a runtime decision; `/SPR4/*.RLE` archives are oracles only | 1, 2, 5 and 6 |
+| D | Stage tables and enemy logic | On top of the now-existing actor model, decode spawn records, camera bounds, room triggers and transitions, then translate the required street-alien, Stalker and Chrysalis decision routines with the PRNG generator and call order identified | The deterministic route consumes extracted stage tables and translated routines and reaches the same ordered room/event anchors as MAME under identical input | 3, 4, 5 and 6 |
+| E | Budget, validate, hardware candidate | Re-measure every resource after integration; run host, soak, focused, full-route, clean normal release, audible route; then the physical NTSC Saturn gate | Conditions 1–6 independently green, then sustained 60 Hz and a ten-minute physical Saturn proof with a digital pad and 32 Mbit cartridge | 1–7 |
+
+**Rule carried out of milestone 2:** do not decode another ROM table in
+isolation while phase A or B is open. Evidence that has no runtime consumer is
+not progress toward the gate, however well falsified it is.
+
+**There is no Saturn Alien vs Predator to measure against. That is the project.**
+Capcom never shipped one; this port is the first. So no phase above may be
+gated on "matching the Saturn version", and no agent should go looking for an
+AvP Saturn reference, disc, or memory dump — none exists. Two consequences:
+
+- **The fidelity oracle is MAME's CPS2 `avspu`**, always. Every parity claim
+  compares native Saturn behaviour to arcade behaviour under identical input.
+- **The only official CPS2-to-Saturn port available is a different game**
+  (MSHvSF, in the isolated research lane). It can teach *method* — how Capcom
+  solved a CPS2-to-Saturn problem once — but it is not a specification, its
+  numbers are not AvP budgets, and its rendering choice is a hypothesis AvP must
+  test on its own content. AvP's cast, sprite sizes, palette count and
+  scrolling-beat'em-up load differ from a two-character fighter's, and phase A
+  exists precisely because that difference could flip the answer.
 
 ### Full-game continuation after Capability Gate 1
 
@@ -140,14 +182,36 @@ hardcoding as the expansion method. Continue in this order:
 | D. Original multiplayer | Add the arcade revision's simultaneous-player capability after single-player is green; implement joins, HUD/score ownership, camera, spawns, collision, items and transitions | A maximum-player complete route passes deterministic, stress, emulator and physical-controller tests |
 | E. Final hardware candidate | Measure peak CPU, VDP1/VDP2, RAM, cartridge, SCSP, DMA and CD/CDDA behavior across the complete game; restore a clean release | Required single-player and multiplayer routes pass at sustained 60 Hz on physical NTSC Saturn with digital pads, multitap and 32 Mbit cartridge |
 
-### Immediate milestone 2 evidence contract
+### Immediate evidence contract
 
 The ready-to-invoke, implementation-level contract is
-[`NEXT_AGENT_PROMPT.md`](NEXT_AGENT_PROMPT.md). It contains only the collision
-body and does not authorize later milestones.
+[`NEXT_AGENT_PROMPT.md`](NEXT_AGENT_PROMPT.md). It now contains **phase A only**
+(the renderer measurement) and does not authorize phase B or any later phase.
 
-Milestone 1's object-emission proof is closed at `40e7f76`, with corrected
-actor attribution at `4695dee`; its detailed evidence remains in the handoff.
+Completed under the previous order, and still valid as evidence:
+
+- Milestone 1's object-emission proof is closed at `40e7f76`, with corrected
+  actor attribution at `4695dee`.
+- Milestone 2's collision-record decode and falsification is at `35d2d4d`. Its
+  records are correct and unconsumed; phase B is where they become live.
+
+### Evidence labelling (adopted 2026-08-18)
+
+New AvP artifacts carry one label per asserted field, the discipline taken from
+the reference lane's `reference_engine/evidence.py`:
+
+| Label | Meaning | Requirement |
+|---|---|---|
+| `MEASURED` | read from an instrument, or computed losslessly from such a reading | must name its source |
+| `DECODED` | produced by a validated decoder over private source data into a tracked artifact | must name its source |
+| `INFERRED` | a hypothesis consistent with evidence, not yet falsified | **must name what would falsify it** |
+| `ADAPTED` | a deliberate choice by this port, not a claim about the original | must say why |
+| `UNRESOLVED` | named, required, not known | **must name the probe that resolves it** |
+
+`UNRESOLVED` is the only label allowed to carry no value. This exists because
+two consecutive sessions lost time to unlabelled metadata that turned out to be
+wrong (a fixture's declared capture state, and an actor base that was a
+bystander), in both cases discovered only when a downstream result failed.
 Milestone 2 begins from the existing cadence-1 debug-hitbox capture, tracked
 screen-space/pivot candidates, animation-record interaction selectors, and
 reader routines at `0x1CF94`/`0x1CF88`. Those are leads, not native collision
@@ -182,8 +246,8 @@ with two governed lanes:
 
 | Lane | Branch ownership | Purpose | Scheduling rule |
 |---|---|---|---|
-| AvP production discovery | Continue from `codex/avp-master-plan` (master-plan root `e37ab9f`) until its changes are deliberately promoted to `prototype/private-capability-test` | Build the complete AvP port, with Round 1 as Capability Gate 1 | Always owns the critical path; current milestone 1 remains first |
-| MSHvSF official-port reference | `codex/mshvsf-reference-lane` (`43e88ac`) | Answer a named Saturn architecture or historical-fidelity question | Run only when it informs an upcoming AvP decision, or while AvP is independently blocked; open-ended fighter archaeology is not an AvP task |
+| AvP production discovery | Continue from `codex/avp-master-plan` (master-plan root `e37ab9f`) until its changes are deliberately promoted to `prototype/private-capability-test` | Build the complete AvP port, with Round 1 as Capability Gate 1 | Always owns the critical path; current phase A remains first |
+| MSHvSF official-port reference | `codex/mshvsf-reference-lane` (`dc5d3ea`) | Answer a named Saturn architecture or historical-fidelity question | Run only when it informs an upcoming AvP decision, or while AvP is independently blocked; open-ended fighter archaeology is not an AvP task |
 
 The Marvel lane may create evidence, analyzers, templates and candidate
 patterns. It may not directly change AvP runtime code, close an AvP goal
@@ -199,13 +263,13 @@ design within the next milestone.
 
 | AvP point | Saturn decision Marvel can inform | Required Marvel investigation | How AvP uses the result |
 |---|---|---|---|
-| Milestone 1: current five-slot CPS2 writer gate | None yet | Do not pause for additional Marvel work | Finish the AvP source decoder; Marvel cannot identify AvP's 68000 group/type handler or source layout |
-| Milestone 2: collision | Whether gameplay collision state is kept separate from presentation objects in the official Saturn port | Only investigate when Saturn actor/collision RAM fields and writer paths can be traced around a controlled hit and whiff | Use it as a candidate architecture pattern; AvP still consumes its own ROM-derived boxes and proves its own hit/whiff behavior |
-| Milestone 3: animation extraction, after AvP has a measured referenced-tile set | Precomposed cels versus per-part VDP1 commands; palette/flip/order representation; what stays resident in expansion RAM | Capture Marvel VDP1 command tables, VDP1 VRAM, work RAM, and cartridge RAM at idle, normal startup/active/recovery, hit reaction, and character transition anchors | Compare the official port's measured command/VRAM/residency tradeoff with both AvP renderer prototypes; choose only after AvP measurements agree |
-| Milestone 4: stage reconstruction, after AvP stage ownership is known | VDP2 layer division, background package boundaries, phase loading, and whether CD reads overlap music | Trace Marvel VDP2 registers/VRAM, file reads, DMA, and CDDA commands across stage entry and a stage/mode transition | Design AvP's background ownership and load windows, then validate against AvP's longer scrolling Round 1 route |
-| Milestone 5: AI translation | Little direct value; fighter AI/object logic is not AvP enemy logic | Do not use Marvel as a shortcut for AvP AI or PRNG recovery | Translate AvP's own 68000 paths and RNG call order |
-| Milestone 6: Saturn integration and budgeting | 4 MB cartridge layout/lifetimes, internal-RAM roles, master/slave SH-2 division, DMA/CD scheduling, SCSP/CDDA split | Add deterministic state dumps and access traces at boot, character load, normal hit, tag/super stress, audio event, and transition anchors | Turn measured official-port behavior into candidate constraints, then fill the AvP high-water/lifetime ledger with AvP measurements |
-| Milestone 7: validation and release | Which differences are necessary platform adaptations versus avoidable reductions; what stress scene exposes the real limit | Complete Marvel gameplay/animation/audio/performance difference records and a tag/super worst-case run; validate any proposed general pattern on a second official port before calling it a Capcom standard | Classify AvP deviations honestly; an official compromise is precedent, not automatic permission |
+| Phase A: renderer decision (**active**) | Precomposed cels versus one 16x16 VDP1 command per source tile; palette/flip/order representation; what stays resident in expansion RAM | Already delivered at `dc5d3ea`: every reachable command at four anchors is a 16x16 normal sprite in colour-bank mode, jump-next linked, flip in `CMDCTRL` | Recorded in the handoff as an `INFERRED` hypothesis with its falsifier. AvP must measure its own two pipelines and may legitimately reach the opposite answer; Marvel's counts are not AvP budgets |
+| Phase B/C: actor spine and collision | Whether gameplay collision state is kept separate from presentation objects in the official Saturn port | Only investigate when Saturn actor/collision RAM fields and writer paths can be traced around a controlled hit and whiff | Use it as a candidate architecture pattern; AvP still consumes its own ROM-derived boxes and proves its own hit/whiff behavior |
+| (superseded by phase A) animation extraction | Precomposed cels versus per-part VDP1 commands; palette/flip/order representation; what stays resident in expansion RAM | Capture Marvel VDP1 command tables, VDP1 VRAM, work RAM, and cartridge RAM at idle, normal startup/active/recovery, hit reaction, and character transition anchors | Compare the official port's measured command/VRAM/residency tradeoff with both AvP renderer prototypes; choose only after AvP measurements agree |
+| Phase D: stage reconstruction, after AvP stage ownership is known | VDP2 layer division, background package boundaries, phase loading, and whether CD reads overlap music | Trace Marvel VDP2 registers/VRAM, file reads, DMA, and CDDA commands across stage entry and a stage/mode transition | Design AvP's background ownership and load windows, then validate against AvP's longer scrolling Round 1 route |
+| Phase D: AI translation | Little direct value; fighter AI/object logic is not AvP enemy logic | Do not use Marvel as a shortcut for AvP AI or PRNG recovery | Translate AvP's own 68000 paths and RNG call order |
+| Phase E: Saturn integration and budgeting | 4 MB cartridge layout/lifetimes, internal-RAM roles, master/slave SH-2 division, DMA/CD scheduling, SCSP/CDDA split | Add deterministic state dumps and access traces at boot, character load, normal hit, tag/super stress, audio event, and transition anchors | Turn measured official-port behavior into candidate constraints, then fill the AvP high-water/lifetime ledger with AvP measurements |
+| Phase E: validation and release | Which differences are necessary platform adaptations versus avoidable reductions; what stress scene exposes the real limit | Complete Marvel gameplay/animation/audio/performance difference records and a tag/super worst-case run; validate any proposed general pattern on a second official port before calling it a Capcom standard | Classify AvP deviations honestly; an official compromise is precedent, not automatic permission |
 
 The next useful Marvel package is therefore **not Hadouken by default**. The
 normal-hit route already supplies the behavioral anchors needed to instrument

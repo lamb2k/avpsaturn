@@ -1,12 +1,18 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-18 EDT (Capability Gate 1 **milestone 2 executed, NOT closed**:
+Updated: 2026-08-18 EDT (**plan re-sequenced around the actor spine** — new
+execution order A–E in `PARITY_PLAN.md`, next body is phase A, the renderer
+measurement; the seven Gate 1 acceptance conditions are unchanged. Reference-lane
+method adopted through its promotion gate with nothing imported, and note that
+**no Saturn AvP exists to compare against — this port is the first**, so MAME's
+CPS2 `avspu` is always the fidelity oracle. Earlier this session: Capability
+Gate 1 **milestone 2 executed, NOT closed**:
 the actor-local collision record format is decoded from the game's own routines
 and survives a controlled hit/whiff falsification — 21,908 non-overlapping
 active pairs produced no hit, 44/56 hit latches explained exactly — but native
 collision is deliberately unchanged because the records are indexed by ROM
 animation-record bytes the runtime does not yet carry. That linkage is
-milestone 3. Gate 1 stays 0/7, full-game 0/9. See "Capability Gate 1 — collision
+phase B of the re-sequenced plan. Gate 1 stays 0/7, full-game 0/9. See "Capability Gate 1 — collision
 records (milestone 2, 2026-08-18)" below. Earlier: street-alien emission
 **milestone 1 CLOSED**: both gated frames, 4214 and 4253, reproduce **20/20** from a fresh
 deterministic run, with writer-PC, emitting-actor and ROM part-table
@@ -27,6 +33,65 @@ The current capture-derived Round 1 route remains a useful regression baseline,
 but it does not satisfy Gate 1's ROM-derived animation, collision, AI or stage-
 table requirements and cannot close a full-game condition. Do not describe the
 project as functionally parity complete or hardware-ready.
+
+## Plan re-sequenced around the actor spine (2026-08-18)
+
+The execution order in [`PARITY_PLAN.md`](PARITY_PLAN.md#master-execution-plan-2026-08-18)
+was rebuilt. The seven Gate 1 acceptance conditions are **unchanged**; only the
+order of work and its exit gates changed. New order: **A** decide the renderer by
+measurement, **B** build the actor spine on one street alien, **C** widen to
+Round 1's cast, **D** stage tables and enemy logic, **E** budget/validate/hardware.
+
+Why: milestone 2 decoded the collision record format and falsified it, then could
+not integrate, because the records are indexed by the live ROM animation-record
+pointer at actor `+0x1C` and no native actor carries one. Stage triggers and AI
+read actor fields through the same record, so four of five remaining milestones
+were queued behind one missing abstraction. The runtime has no record pointer
+because its unit of work is a precomposed pose picture (`main.c` cels through
+`jo_sprite_add_4bits_image`, capture-derived pose tables, scalar lane collision
+in `capability_model.c`), which gives ROM assemblies no consumer.
+
+**Standing rule:** do not decode another ROM table in isolation while phase A or
+B is open. Milestone 2 is the demonstration — correct, falsified, and inert.
+
+## Official Saturn reference-port findings (research lane, 2026-08-18)
+
+**There is no Saturn Alien vs Predator.** Capcom never shipped one; this port is
+the first. No phase is gated on matching a Saturn AvP, no such reference exists
+to look for, and the fidelity oracle is always MAME's CPS2 `avspu` under
+identical input.
+
+The only official CPS2-to-Saturn port available for study is a **different
+game**: Marvel Super Heroes vs. Street Fighter, in the isolated research lane at
+worktree `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-MSHvSF`, branch
+`codex/mshvsf-reference-lane`, immutable checkpoint **`dc5d3ea`**. That lane is
+not merged and must not be.
+
+**Findings that have passed an AvP validation probe: none yet.** Per the lane's
+own promotion gate (`docs/MSHVSF_TO_AVP_TRANSFER_MATRIX.md`), a reference result
+may change AvP's *method* or add a probe, but cannot close an AvP condition
+without AvP evidence. Two items crossed as method only:
+
+1. **Rendering-granularity hypothesis (`INFERRED`, drives phase A).** On the
+   reference title every reachable VDP1 command at all four measured anchors is
+   a 16x16 normal sprite in colour-bank mode, linked jump-next, with flip in
+   `CMDCTRL`. That is the shape in which a source assembly *is* the command
+   list, which is what would let an AvP actor carry a ROM record instead of a
+   picture. **Falsified by:** AvP's own phase-A measurement showing a per-tile
+   pipeline exceeding AvP's colour-RAM or VDP1 budget on the same route. AvP's
+   cast size, sprite dimensions and scrolling-beat'em-up load differ from a
+   two-character fighter's, so the answer can legitimately differ.
+2. **Evidence-label discipline (`ADAPTED`, adopted).** The lane's
+   `MEASURED / DECODED / INFERRED / ADAPTED / UNRESOLVED` labelling, with
+   `INFERRED` requiring a falsifier and `UNRESOLVED` requiring a probe, is now
+   recorded in the parity plan for new AvP artifacts. Adopted because two
+   consecutive AvP sessions lost time to unlabelled metadata that was wrong.
+
+**No MSHvSF timing values, gameplay constants, addresses, package sizes, command
+counts, colour-bank counts, code or assets were imported.** The reference
+numbers (1,233 drawn commands, 296-334 reachable, 772 stored slots, 128
+populated banks with 12-14 live) are cited here only as the reference lane's
+measurements of a different game; they are explicitly **not** AvP budgets.
 
 ## Capability Gate 1 — collision records (milestone 2, 2026-08-18)
 
@@ -169,7 +234,7 @@ selector — exactly the "pose-specific replacement constants by hand" this
 assignment forbids, and it would bake a second inferred layer under a
 ROM-derived name.
 
-**The dependency is milestone 3**, which links ROM animation records into the
+**The dependency is phase B**, which links ROM animation records into the
 runtime. Once an actor carries its live record pointer, the selector bytes and
 therefore these boxes follow directly, and `capability_model.c` can drop the
 21/55/97 boss schedule and the Stalker schedule in one coherent change.
@@ -325,8 +390,8 @@ side parses them with `tonumber(v, 16)`, which rejects `0x`. Expected output is
 `4253: match=20/20 slot=0x7080a8`.
 
 **Next work (milestone 2 boundary).** Milestone 1's exit gate is met, so the
-next body is milestone 2 (replace inferred collision) per
-`docs/PARITY_PLAN.md`. Carry these two items into milestone 3, before the
+next body is phase A (decide the renderer by measurement) per
+`docs/PARITY_PLAN.md`. Carry these two items into phase B/C, before the
 street-alien decoder is promoted: correct the fixture's `actor_base` /
 `actor_signatures` to the emitting actor `0xFF9DC0` (with a re-derivation of
 what the current signature fields witness), and consider making the watchpoint
@@ -340,14 +405,14 @@ the end of this session.
 > see "Capability Gate 1 — street-alien emission (2026-08-18 execution)" above.
 > The static call-chain evidence below is retained because it is still the map
 > of the object-list builder; the instructions and the "still red" status are
-> not. The next executable body is **milestone 2 (replace inferred collision)**.
+> not. Milestone 2 has since run too; the next executable body is **phase A**.
 
 The plan of record is now
 [`PARITY_PLAN.md#master-execution-plan-2026-08-18`](PARITY_PLAN.md#master-execution-plan-2026-08-18).
 Its order supersedes every older resume list in this handoff.
 
 [`NEXT_AGENT_PROMPT.md`](NEXT_AGENT_PROMPT.md) now holds the milestone-2
-collision assignment. It does not authorize milestone 3, Marvel research or
+collision assignment. It does not authorize phase B, Marvel research or
 full-game content expansion.
 
 **Resume with one focused proof, not another broad disassembly pass.** The
