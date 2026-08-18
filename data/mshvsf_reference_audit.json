@@ -1,0 +1,270 @@
+{
+  "title": "Marvel Super Heroes vs. Street Fighter",
+  "purpose": "Concurrent Capcom Saturn reference lane for the AvP conversion",
+  "reference_root": "Marvel Super Heroes vs. Street Fighter",
+  "files": [
+    {
+      "path": "Mame/dl-1425.bin",
+      "bytes": 24576,
+      "sha256": "524a25bcd153be24594d37c0dbd334fe4f384f77da73c2058dc60fc1f581cf18"
+    },
+    {
+      "path": "Mame/mshvsf.key",
+      "bytes": 20,
+      "sha256": "cc4f8d714cc747f84fde20eb440c5542837b55076e4144fcb82116d00a94fb4f"
+    },
+    {
+      "path": "Mame/mshvsf.zip",
+      "bytes": 21896860,
+      "sha256": "5fae509a111b7403243956322c642e24ad1811630f54775bed761095f956385d"
+    },
+    {
+      "path": "Saturn/Marvel Super Heroes vs. Street Fighter Back.jpg",
+      "bytes": 426118,
+      "sha256": "7e599557df1c11971ab3cd4901e7f33bc36e3233315e4f1660db647d13247c20"
+    },
+    {
+      "path": "Saturn/Marvel Super Heroes vs. Street Fighter CD.jpg",
+      "bytes": 171936,
+      "sha256": "706f9bb227e23c60223ba7d92617ffe6324aeafa54e70c6fe5c65239515969e7"
+    },
+    {
+      "path": "Saturn/Marvel Super Heroes vs. Street Fighter Front.jpg",
+      "bytes": 357768,
+      "sha256": "b1ac109823eb93947fed1351489a701db03bbbc02288b45be29aee99efc103d2"
+    },
+    {
+      "path": "Saturn/Marvel Super Heroes vs. Street Fighter.bin",
+      "bytes": 509652528,
+      "sha256": "fa933d2283df59a31640304f089202c4f085c121686fb4c6053fc22a41241998"
+    },
+    {
+      "path": "Saturn/Marvel Super Heroes vs. Street Fighter.cue",
+      "bytes": 806,
+      "sha256": "cf764900d04effff8f1b3da532771c2e9a91d7750ac5dd171fbf88f13cf68101"
+    },
+    {
+      "path": "Saturn/readme.html",
+      "bytes": 730,
+      "sha256": "229745e49b586490b9c30028a1b1dab50982f47cf54235e7d3f25046ae4dd83d"
+    }
+  ],
+  "saturn": {
+    "cue": {
+      "cue": "Saturn/Marvel Super Heroes vs. Street Fighter.cue",
+      "tracks": [
+        {
+          "number": 1,
+          "type": "MODE1/2352",
+          "file": "Marvel Super Heroes vs. Street Fighter.iso"
+        },
+        {
+          "number": 2,
+          "type": "AUDIO",
+          "file": "Marvel Super Heroes vs. Street Fighter.iso"
+        },
+        {
+          "number": 3,
+          "type": "AUDIO",
+          "file": "Marvel Super Heroes vs. Street Fighter.iso"
+        },
+        {
+          "number": 4,
+          "type": "AUDIO",
+          "file": "Marvel Super Heroes vs. Street Fighter.iso"
+        },
+        {
+          "number": 5,
+          "type": "AUDIO",
+          "file": "Marvel Super Heroes vs. Street Fighter.iso"
+        },
+        {
+          "number": 6,
+          "type": "AUDIO",
+          "file": "Marvel Super Heroes vs. Street Fighter.iso"
+        },
+        {
+          "number": 7,
+          "type": "AUDIO",
+          "file": "Marvel Super Heroes vs. Street Fighter.iso"
+        },
+        {
+          "number": 8,
+          "type": "AUDIO",
+          "file": "Marvel Super Heroes vs. Street Fighter.iso"
+        },
+        {
+          "number": 9,
+          "type": "AUDIO",
+          "file": "Marvel Super Heroes vs. Street Fighter.iso"
+        },
+        {
+          "number": 10,
+          "type": "AUDIO",
+          "file": "Marvel Super Heroes vs. Street Fighter.iso"
+        },
+        {
+          "number": 11,
+          "type": "AUDIO",
+          "file": "Marvel Super Heroes vs. Street Fighter.iso"
+        },
+        {
+          "number": 12,
+          "type": "AUDIO",
+          "file": "Marvel Super Heroes vs. Street Fighter.iso"
+        }
+      ],
+      "missing_referenced_files": [
+        "Marvel Super Heroes vs. Street Fighter.iso"
+      ],
+      "cue_consistent": false
+    },
+    "bin": {
+      "path": "Saturn/Marvel Super Heroes vs. Street Fighter.bin",
+      "bytes": 509652528,
+      "raw2352_sectors": 216689,
+      "raw2352_remainder": 0,
+      "iso_primary_volume_descriptor": {
+        "signature": "CD001",
+        "system_id": "SEGA SEGASATURN",
+        "volume_id": "MSH_VS_STREET_FIGHTER",
+        "volume_space_size_le": 216839
+      }
+    }
+  },
+  "cps2_mame_archive": {
+    "archive": "Marvel Super Heroes vs. Street Fighter/Mame/mshvsf.zip",
+    "members": [
+      {
+        "name": "mvs.01",
+        "bytes": 131072
+      },
+      {
+        "name": "mvs.02",
+        "bytes": 131072
+      },
+      {
+        "name": "mvs.05a",
+        "bytes": 524288
+      },
+      {
+        "name": "mvs.06a",
+        "bytes": 524288
+      },
+      {
+        "name": "mvs.07b",
+        "bytes": 524288
+      },
+      {
+        "name": "mvs.08a",
+        "bytes": 524288
+      },
+      {
+        "name": "mvs.09b",
+        "bytes": 524288
+      },
+      {
+        "name": "mvs.10b",
+        "bytes": 524288
+      },
+      {
+        "name": "mvs.11m",
+        "bytes": 4194304
+      },
+      {
+        "name": "mvs.12m",
+        "bytes": 4194304
+      },
+      {
+        "name": "mvs.13m",
+        "bytes": 4194304
+      },
+      {
+        "name": "mvs.14m",
+        "bytes": 4194304
+      },
+      {
+        "name": "mvs.15m",
+        "bytes": 4194304
+      },
+      {
+        "name": "mvs.16m",
+        "bytes": 4194304
+      },
+      {
+        "name": "mvs.17m",
+        "bytes": 4194304
+      },
+      {
+        "name": "mvs.18m",
+        "bytes": 4194304
+      },
+      {
+        "name": "mvs.19m",
+        "bytes": 4194304
+      },
+      {
+        "name": "mvs.20m",
+        "bytes": 4194304
+      },
+      {
+        "name": "mvse.03f",
+        "bytes": 524288
+      },
+      {
+        "name": "mvse.04f",
+        "bytes": 524288
+      }
+    ],
+    "archive_members_present": false,
+    "missing_archive_members": [
+      "dl-1425.bin",
+      "mshvsf.key"
+    ],
+    "loose_reference_files": {
+      "mshvsf.key": {
+        "path": "Marvel Super Heroes vs. Street Fighter/Mame/mshvsf.key",
+        "present": true,
+        "bytes": 20,
+        "sha1": "448eb440494c971800370f103b4d1f21a7266c6c",
+        "expected_bytes": 20,
+        "expected_sha1": "448eb440494c971800370f103b4d1f21a7266c6c",
+        "matches_mame_manifest": true
+      },
+      "dl-1425.bin": {
+        "path": "Marvel Super Heroes vs. Street Fighter/Mame/dl-1425.bin",
+        "present": true,
+        "bytes": 24576,
+        "sha1": "555f50fe5cdf127619da7d854c03f4a244a0c501",
+        "expected_bytes": 24576,
+        "expected_sha1": "555f50fe5cdf127619da7d854c03f4a244a0c501",
+        "matches_mame_manifest": true
+      }
+    },
+    "loose_reference_files_match_mame_manifest": true
+  },
+  "rights_boundary": "Private research only; no ROM data or generated disc content is committed.",
+  "mame_verifyroms": {
+    "command": [
+      "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\.deps\\mame\\mame0289\\mame.exe",
+      "-rompath",
+      "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\Marvel Super Heroes vs. Street Fighter\\Mame",
+      "-verifyroms",
+      "mshvsf",
+      "-video",
+      "none",
+      "-sound",
+      "none",
+      "-nothrottle",
+      "-skip_gameinfo"
+    ],
+    "returncode": 2,
+    "output": [
+      "mshvsf      : mshvsf.key (20 bytes) - NOT FOUND",
+      "mshvsf      : dl-1425.bin (24576 bytes) - NOT FOUND (qsound_hle)",
+      "romset mshvsf is bad",
+      "1 romsets found, 0 were OK."
+    ],
+    "status": "blocked"
+  }
+}
