@@ -443,15 +443,42 @@ cases but is not actually called per the live trace, so it is either an unused
 table continuation or belongs to a different pose — do not assume an N-group
 loop from this alone.
 
-**Still blocking a ROM-only (no-live-trace) decoder, in priority order:** the two
-camera-anchor constants inside `bsr $0AA59A` at `(A5-0x27C)`/`(A5-0x278)` (not
-yet read live — needed to compute origin from actor world position without a
-live capture), confirming the per-actor-type dispatch count generalizes beyond
-this one actor/pose pair, and deriving `palette_byte`/`flip_byte` from the actor
-record rather than supplying them by hand. The declared-eligible-subset run
-against the full 5,302-frame oracle (`data/avsp_sprite_demand.json`) required by
-`NEXT_AGENT_PROMPT.md` Body B item 6 has **not** been done yet — only the 2
-hand-verified frames (10 entries) are proven exact so far.
+**6. The two camera-anchor constants measure as zero throughout this route,
+with `A5` confirmed fixed.** A breakpoint at the origin routine's entry
+(`0x0AA59A`) reading `w@(a5-0x27C)` and `w@(a5-0x278)` directly (MAME debugger
+memory-read expressions) fired **1,194 times** across the full `replay4200`
+window (frames 4210-4262, every dispatched actor, both oracle frames included):
+`a5=0x00FF8000` and `(anchor_y, anchor_x)=(0x0000, 0x0000)` on **every single
+firing, zero variance**. `MEASURED` via `tools/mame_trace_camera_anchor.lua`
+(untracked one-off, kept per convention; its `error.log` was deleted after
+extraction per convention — rerun the script to reproduce).
+
+This is a real result but scoped to this route: it proves the anchor
+subtraction is a no-op *here*, not that these addresses are hardwired zero
+everywhere (a level with real camera scroll could show nonzero values — this
+route's captured window may simply not scroll horizontally/vertically during
+these frames). Falsifier: capture a route segment with visible camera motion
+and re-run the same probe; a nonzero reading there would still be consistent
+with this finding, not a contradiction of it.
+
+With anchor confirmed zero in this route, `origin_x`/`origin_y` reduce here to
+`actor world position (+0x10/+0x14) adjusted by the facing-conditional
+add/sub of the one part-table long (D2) the routine consumes` — the anchor
+term drops out entirely for this data. **Not yet resolved:** the exact
+facing-conditional add/sub logic itself (which half of D2 applies to X vs Y,
+and the add-vs-sub condition) has not been disassembled/verified live: that is
+now the last piece needed before `origin_x`/`origin_y` can be computed from
+ROM+RAM alone (actor fields already captured per-frame in the existing
+`enemy_actions` workram snapshots) without any further live-trace instrument.
+
+**Still blocking a ROM-only (no-live-trace) decoder, in priority order:**
+disassembling/verifying the facing-conditional D2 add/sub in the origin
+routine (see above), confirming the per-actor-type dispatch count generalizes
+beyond this one actor/pose pair, and deriving `palette_byte`/`flip_byte` from
+the actor record rather than supplying them by hand. The declared-eligible-
+subset run against the full 5,302-frame oracle (`data/avsp_sprite_demand.json`)
+required by `NEXT_AGENT_PROMPT.md` Body B item 6 has **not** been done yet —
+only the 2 hand-verified frames (10 entries) are proven exact so far.
 
 Committed: `tools/decode_avsp_object_stream.py` (attr-transform fix) and
 `data/avsp_object_stream.json` at `b6f5a4e`.
