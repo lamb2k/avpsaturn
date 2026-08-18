@@ -182,10 +182,9 @@ The plan of record is now
 [`PARITY_PLAN.md#master-execution-plan-2026-08-18`](PARITY_PLAN.md#master-execution-plan-2026-08-18).
 Its order supersedes every older resume list in this handoff.
 
-[`NEXT_AGENT_PROMPT.md`](NEXT_AGENT_PROMPT.md) still holds the body-1
-assignment; it is now marked complete at its head and does not authorize new
-work. No later Gate 1 work, Marvel research or full-game content expansion is
-authorized by it.
+[`NEXT_AGENT_PROMPT.md`](NEXT_AGENT_PROMPT.md) now holds the milestone-2
+collision assignment. It does not authorize milestone 3, Marvel research or
+full-game content expansion.
 
 **Resume with one focused proof, not another broad disassembly pass.** The
 static chain has been checked against
@@ -219,7 +218,8 @@ selection, and the actor `+0x1c`/`+0x50` relationship to those tables.
 3. In one bounded run, capture bank-select register `0x8040E0` per frame and
    prove the source-frame mapping for frames 4214 and 4253 from synchronized
    actor/work-RAM evidence. Record `(frame, pc, address, width, data)` plus the
-   live source/actor context needed to identify `A0`, `A4=0xFFA000`, and `A6`.
+   live source/actor context needed to identify `A0` and the now-proven
+   emitting context `A4=A6=0xFF9DC0`.
    If the debugger action cannot print every address register, combine writer
    PCs with synchronized RAM and the static jump table; do not widen into
    another address sweep.

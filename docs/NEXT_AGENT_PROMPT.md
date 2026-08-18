@@ -1,19 +1,6 @@
-# Next agent prompt: Capability Gate 1, body 1
+# Next agent prompt: Capability Gate 1, milestone 2
 
-> **STATUS 2026-08-18: this body is COMPLETE. Do not re-execute it.** Both gated
-> frames (4214 and 4253) reproduce 20/20 from a fresh deterministic run; the
-> exit gate in `docs/PARITY_PLAN.md` milestone 1 is met. The next executable
-> body is **milestone 2 (replace inferred collision)**. Two corrections to the
-> assignment text below, kept for the record: the state named here
-> (`avspu_stage1_debug_hitboxes`) is **not** the oracle's route — the oracle came
-> from the cold-boot route in `tools/mame_capture_enemy_actions.lua`, replayed
-> from the `avspu_stage1_replay4200` anchor plus its post-anchor tail; and the
-> actor named here (`0xFFA000`) is a real street-alien actor but **not the one
-> that emits the gated slots** — actor records are `0xC0` apart and the emitter
-> is `0xFF9DC0`. See the handoff section "Capability Gate 1 — street-alien
-> emission (2026-08-18 execution)". Committed at `40e7f76`.
-
-Continue the native Alien vs Predator Saturn port using the
+Continue the private native Alien vs Predator Saturn port using the
 `port-cps2-to-sega-saturn` skill.
 
 Repository:
@@ -22,136 +9,252 @@ Repository:
 C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest
 ```
 
+Expected branch: `codex/avp-master-plan`.
+
+Milestone 1 is complete at `40e7f76`, with the actor-attribution correction
+at `4695dee`. Do not rerun the street-alien object-emission gate. This prompt
+authorizes milestone 2 only: replace inferred collision with collision data
+decoded from the game.
+
 ## Read and verify first
 
 Read completely, in this order:
 
 1. The skill's `SKILL.md` and `references/workflow.md`.
-2. `AGENTS.md`.
+2. `AGENTS.md` and `CLAUDE.md`.
 3. `docs/GOAL.md`.
 4. `docs/AGENT_HANDOFF.md`.
 5. `docs/PARITY_PLAN.md`.
+6. `docs/TEST_PLAN.md`.
 
-Then record the current branch, HEAD, recent commits and `git status`. The work
-must remain on `codex/avp-master-plan` or an explicitly authorized descendant;
-`prototype/private-capability-test` remains the production baseline. Preserve
-all existing untracked/private ROM, MAME, `nvram/`, `snap/`, `check_tail.py`,
-diagnostic and screenshot files. Stage explicit paths only. Never use
-`git add -A`, `git add .`, reset, clean or a broad stash.
+Then record the branch, HEAD, recent commits and `git status`. Preserve every
+existing untracked/private ROM, MAME state, raw capture, `nvram/`, `snap/`,
+`check_tail.py`, `tools/diag_*`, `tools/probe_*`, screenshot and helper file.
+Stage explicit paths only. Never use `git add -A`, `git add .`, reset, clean or
+a broad stash.
 
-Do not switch to, merge or cherry-pick `codex/mshvsf-reference-lane`. Marvel is
-an isolated Saturn reference lane and has no role in locating this AvP CPS2
-writer.
+Remain on `codex/avp-master-plan` or an explicitly authorized descendant. Do
+not switch, merge or cherry-pick the Marvel lane. Do not edit the separate
+MSHvSF worktree. Marvel cannot identify AvP's collision tables.
 
-The final project destination is the complete `avspu` game. Round 1 through the
-Round 2 title is Capability Gate 1. This assignment is only the first body of
-Gate 1 and does not authorize later milestones.
+The final destination remains the complete `avspu` game at functional parity.
+Round 1 through the Round 2 title is Capability Gate 1. This assignment is one
+Gate 1 milestone and does not authorize animation milestone 3, stage work, AI
+translation, full-game expansion or a CPS2 emulator.
 
 ## Sole objective
 
-Close the street-alien five-slot object-emission gate.
+Close milestone 2: decode actor-local hurtboxes, attack boxes and required
+interaction records for every Round 1 player, street-alien, Stalker and
+Chrysalis pose, then make the native collision path consume those game-derived
+records.
 
-Use stock MAME 0.289 and state `avspu_stage1_debug_hitboxes`. Adapt the existing
-actor-writer capture pattern into:
+The exit gate is:
 
-- `capture_street_alien_object_emission.ps1`
-- `tools/mame_watch_street_alien_object_emission.lua`
-- `tools/analyze_street_alien_object_emission.py`
-- `data/street_alien_object_emission_oracles.json`
-- `data/street_alien_object_emission.json`
-- ignored raw evidence under `.deps/mame/object_emission/`
+- inferred Chrysalis contact frames 21/55/97 are no longer runtime collision
+  rules;
+- the inferred Stalker contact schedule is no longer a runtime collision rule;
+- scalar range/lane checks are replaced by game-derived box overlap for the
+  covered actors and actions;
+- controlled hit and whiff fixtures pass;
+- existing captures remain regression oracles rather than shipped collision
+  data;
+- Capability Gate 1 and the full-game goal remain open unless their complete
+  acceptance conditions independently pass.
 
-The wrapper, watcher and analyzer must accept scenario parameters for state,
-post-load frame count, actor base, object base, first word, word count, bank-
-select register and raw-output directory. Street-alien defaults are allowed;
-the derivation must remain reusable for another AvP actor. Expected object
-values belong only in the oracle fixture and validation path, never in the
-derivation logic.
+## Evidence already available
 
-## Capture contract
+Do not start by recapturing the full route. Validate and reuse the existing
+ignored raw evidence first:
 
-- Install exactly 20 word-write watchpoints at `0x7080A0..0x7080C6`.
-- Do not add simultaneous `0x7000A0..0x7000C6` watchpoints. Static disassembly
-  proves `0xA99DC` initializes the logical writer pointer `A1=0x708000`.
-- Remain below the empirical 34-watchpoint ceiling.
-- Capture bank-select register `0x8040E0` once per frame to prove the logical
-  write-buffer versus active/display-bank relationship.
-- In one bounded run from the frame-4200 state, capture frames 4214 and 4253.
-  Prove source-frame mapping from synchronized actor/work-RAM evidence; never
-  assume Lua notifier count equals the source frame.
-- Log mapped source frame, writer PC, address, width and data. Include A0/A4/A6
-  when debugger expressions support them. Otherwise combine synchronized RAM
-  evidence with static PC, caller and jump-table attribution.
+- `.deps/mame/round1_debug_hitboxes/`: frames 4201..15000 at cadence 1,
+  synchronized overlay screenshots and actor-state samples;
+- `.deps/mame/round1_debug_collision/`: stage-collision evidence, not a
+  substitute for actor boxes;
+- `data/round1_debug_overlays.json`: tracked capture manifest;
+- `data/round1_hitbox_brackets.json`: selected screen-space bracket evidence;
+- `data/round1_hitbox_geometry.json`: four pivot-relative candidates;
+- `data/avsp_animation_scripts.json`: animation records with byte `+8` and
+  byte `+9` identified as interaction-table selectors;
+- `.deps/mame/actorprobe/disasm_full.txt`: existing static disassembly;
+- `tools/decode_avsp_animation_scripts.py`: current record decoder;
+- `capability_model.c` and `tests/capability_model_test.c`: current inferred
+  collision implementation and regression tests.
 
-Useful actor signatures:
+The four rows in `round1_hitbox_geometry.json` are leads, not authoritative
+actor-local tables. Re-derive the raw sample layout and actor attribution
+before expanding them. Actor records are `0xC0` bytes apart. Do not repeat the
+earlier `0x180` scan, and do not assume a hard-coded actor address identifies
+the box owner. Tie each box to live actor context, script/record pointer,
+facing, pivot and source frame.
 
-- actor base `0xFFA000`
-- actor type at `+0x08` = `12`
-- facing flag at `+0x0F` = `1`
-- frame 4214 animation pointer at `+0x1C` = `0x0012EC04`
-- frame 4253 animation pointer at `+0x1C` = `0x0012E8EC`
-- actor `+0x50` pointer on both frames = `0x00130AC8`
+The animation-record consumers at `0x1CF94` and `0x1CF88` are high-value
+starting points for bytes `+8` and `+9`. Their table format, role, coordinate
+system and lifetime are not proven merely because the selector readers are
+known.
 
-## Independent derivation and oracles
+## Required investigation
 
-Reconstruct each ordered five-slot list from the new run before consulting the
-validation fixture.
+### 1. Revalidate actor and overlay attribution
 
-Frame 4214, different-pose anti-hardcoding control:
+- Validate the tracked overlay manifest against the ignored raw files and
+  record the exact hashes used.
+- Document the actor-state sample layout and the `0xC0` actor grid.
+- Pair overlay rectangles and pivots with the correct actor slot, complete
+  32-bit animation-record pointer, action/state, facing and source frame.
+- Separate hurtboxes, attack boxes, throw/special boxes, inactive records and
+  stage collision. Do not infer box role from color or overlap alone.
+- Reject HUD/text/debug-glyph false positives deterministically.
 
-```text
-[8113,0099,4efe,0131]
-[80e3,00a9,4ef6,0431]
-[80f3,00b9,4fc8,0131]
-[8121,007b,473a,2431]
-[8111,00ab,479c,1331]
-```
+If the current raw route cannot distinguish a role, add only the smallest
+targeted deterministic capture needed. Write fresh raw evidence to a new
+ignored directory unless replacement is deliberate and recorded.
 
-Frame 4253 target:
+### 2. Locate the game tables and readers
 
-```text
-[814f,009e,4df8,0131]
-[810f,00ae,4ef0,0531]
-[815b,007b,4b04,2531]
-[814b,00ab,4a88,1431]
-[816b,006b,4958,0131]
-```
+- Disassemble `0x1CF88`, `0x1CF94`, their callers and the complete paths from
+  animation-record selectors to collision data.
+- Identify the ROM table bases, entry widths, terminators/control flow,
+  signedness, coordinate convention, facing transform, actor-local origin and
+  box-role encoding.
+- Identify the runtime routines that test overlap and write damage, hit state
+  or reaction state.
+- Use stock MAME 0.289 debugger watchpoints before considering a custom MAME
+  build. Record `(frame, pc, address, width, data)` and relevant registers for
+  bounded hit and whiff windows.
+- Map only actor fields consumed by collision. Do not exhaustively label all
+  96 words of every actor structure.
 
-Trace the street alien through:
+Every decoded field must name its source address/routine, evidence class,
+confidence and falsification test. Do not promote a format inferred only from
+screen rectangles.
 
-```text
-0xA99DC list builder
-  -> exact group emitter
-  -> 0xA9B48 common actor loop
-  -> 0xA9B80 actor-type jump table
-  -> exact per-type handler
-  -> exact Family-1 variant in 0xAA4A4..0xAA598
-```
+### 3. Build a deterministic collision decoder
 
-Establish the per-part source layout and relationship among actor `+0x1C`,
-actor `+0x50` and ROM data around `0x12FE06..0x12FEEE`. Derive every X, Y,
-code, attribute, flag, palette/type transformation, preceding-entry offset,
-slot order and bank/frame relationship.
+Prefer extending a proven extractor when its abstractions fit. Otherwise add
+a focused decoder and tracked copyright-safe report, using names such as:
 
-## Gate and stopping point
+- `tools/decode_avsp_collision.py`
+- `data/avsp_collision.json`
+- a generated native header produced by the decoder
+- focused host tests for the decoded format
 
-The gate passes only when all 20 words for both frames are independently
-derived and traced to their actual writer and source data, and frame 4214
-demonstrates that frame-4253 values are not hard-coded.
+The tracked report should contain, at minimum:
 
-Do not promote selector 12, implement Saturn rendering, begin collision work,
-activate Marvel research or start full-game content expansion before this gate
-passes. The existing actor-writer summary's `0x1665E`/`0x16636` reporting issue
-is a separate non-gating cleanup; do not detour into it during this body.
+- ROM/table provenance and input hashes;
+- actor family and action/pose or animation-record linkage;
+- interaction selector values;
+- box role and active/inactive lifetime;
+- signed actor-local left/top/right/bottom coordinates;
+- facing transformation;
+- damage or reaction linkage where proven;
+- matching overlay frames and controlled-event evidence;
+- unresolved fields and prohibited inferences;
+- coverage totals for player, street alien, Stalker and Chrysalis.
 
-At completion:
+Generated data must be deterministic. Run the decoder twice and require an
+identical report hash. Never commit ROM bytes, raw screenshots, raw RAM dumps,
+disc members or generated copyrighted graphics.
 
-- Update `docs/AGENT_HANDOFF.md` and `docs/PARITY_PLAN.md` with proven evidence
-  and honest Gate 1/full-game status.
-- Record exact commands, MAME/save-state provenance, raw paths and SHA-256
-  hashes, tracked-report hash, frame-mapping proof, writer/source attribution,
-  bank relationship and per-frame pass/fail.
-- Commit one coherent AvP technical checkpoint only if the gate passes. If it
-  remains blocked, retain reproducible evidence, document the precise blocker
-  and next command, and do not claim completion.
-- Confirm no MAME process remains running.
+### 4. Prove hit and whiff behavior
+
+Create controlled source fixtures that hold actor/action/pose and input route
+constant while changing only whether the relevant boxes overlap. At least one
+fixture must prove a hit and one must prove a whiff for the same attack family.
+
+Validate semantic events, not only pictures:
+
+- attack box becomes active;
+- overlap is or is not present;
+- health changes only on the hit route;
+- hit reaction/state transition occurs only on the hit route;
+- repeated contact obeys the game's latch/retrigger behavior;
+- facing and lane/depth behavior agree with the decoded records.
+
+Use existing natural contacts as regression evidence, including the Chrysalis
+and Stalker routes, but do not define the tables from their damage timing.
+
+### 5. Replace the native inferred collision path
+
+Only after the source decoder and controls pass:
+
+- make `capability_model.c` consume generated game-derived collision records;
+- remove the boss 21/55/97 contact schedule from runtime collision decisions;
+- remove the inferred Stalker contact schedule from runtime collision
+  decisions;
+- replace applicable scalar reach/lane tests with actor-local box overlap;
+- preserve old timing captures as explicitly named regression oracles;
+- keep gameplay logic independent from rendering archives and screen-space
+  debug geometry.
+
+Do not add pose-specific replacement constants by hand. Do not treat overlay
+pixels as the shipped collision source. Do not begin milestone 3 animation
+integration while this collision gate is open.
+
+## Validation order
+
+Run the narrowest checks first, then broaden only after they pass:
+
+1. Raw-evidence and manifest validation.
+2. Decoder tests and deterministic report-hash reproduction.
+3. Hit/whiff and facing negative controls.
+4. Focused native collision tests.
+5. `test.ps1`, including the controller route and 12,000-frame soak.
+6. Relevant focused Saturn profile and ISO-member verification.
+7. Full `-EncounterTest` route through the Round 2 boundary.
+8. Restore and build `normal-release`, then boot its exact cue.
+
+A host pass does not prove the Saturn build. An emulator pass does not close
+physical-hardware validation. If no native code changes are justified because
+the source format remains unresolved, do not perform the later build gates.
+
+## Acceptance gate
+
+Milestone 2 passes only when all of the following are true:
+
+1. Collision records are derived from identified game ROM tables and reader
+   routines, not inferred from damage frames or overlay pixels.
+2. Every required Round 1 pose for the player, street aliens, Stalkers and
+   Chrysalis has a resolved box set or an explicitly proven inactive record.
+3. Actor attribution, facing, coordinate conversion and box roles are proven.
+4. Controlled hit and whiff fixtures pass from decoded source data.
+5. Native collision consumes the generated records and the inferred boss and
+   Stalker schedules are absent from runtime decisions.
+6. Host, soak, focused, full-route and restored normal-release checks pass in
+   that order.
+7. No private/raw/copyrighted source material is staged.
+
+Partial table discovery is useful evidence but does not pass the milestone.
+If blocked, leave the native collision implementation unchanged, document the
+exact blocker and the next bounded command, and commit only a coherent
+copyright-safe discovery checkpoint when tests permit.
+
+## Deferred work
+
+Do not detour into the milestone-1 fixture metadata cleanup. Its bystander
+`0xFFA000` signature versus emitting actor `0xFF9DC0`, and dynamic object-list
+watchpoint-window improvement, are explicitly carried into milestone 3 before
+the street-alien animation decoder is promoted.
+
+Do not activate Marvel research during this body. Do not begin Hadouken,
+renderer selection, stage extraction, AI translation or full-game content
+expansion.
+
+## Handoff discipline
+
+Before stopping:
+
+- update `docs/AGENT_HANDOFF.md` and `docs/PARITY_PLAN.md` with proven evidence
+  and honest Gate 1/full-game status;
+- record branch, HEAD, dirty files, raw paths, hashes, exact commands, writer
+  PCs/table addresses, coverage, controls and remaining uncertainty;
+- distinguish decoded ROM data, capture evidence, inference and native
+  integration;
+- stop MAME and Saturn emulator processes or record their exact ownership and
+  command lines;
+- stage explicit files only;
+- commit one coherent AvP checkpoint if the applicable gates pass.
+
+Begin with raw-evidence validation and a focused disassembly of the two known
+interaction-selector readers. Do not edit native collision until the source
+record format survives a controlled hit/whiff falsification test.

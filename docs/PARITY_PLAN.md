@@ -95,7 +95,7 @@ broadening animation, stage and AI coverage. **Milestone 1 is closed
 | Order | Milestone | Required work | Exit gate | Gate 1 conditions advanced |
 |---|---|---|---|---|
 | 0 | Preserve the intercept boundary | Commit the documentation-only master plan on an AvP branch; keep the MSHvSF research checkpoint isolated | AvP baseline, Marvel checkpoint, dirty files, and exact resume command are recorded without merging either history | All, by preserving provenance |
-| 1 | Close the street-alien five-slot emission gate | Trace object-buffer word indices 80–99 at frames 4214 and 4253; identify the street alien's group list, actor type, jump-table target, Family-1 variant, `A0` source, `A4=0xFFA000`, and `A6` context; map actor `+0x1c/+0x50` to the source longs | A deterministic analyzer regenerates all five four-word slots at indices 80/84/88/92/96 for both frames, including X, Y, code, attribute, order, bank and frame relation; frame 4214 is the different-pose anti-hardcoding control | 1 and 5 |
+| 1 | Close the street-alien five-slot emission gate | Trace object-buffer word indices 80–99 at frames 4214 and 4253; identify the street alien's group list, actor type, jump-table target, Family-1 variant, `A0` source, emitting `A4=A6=0xFF9DC0`, and actor `+0x1c/+0x50` relationship to the source longs | A deterministic analyzer regenerates all five four-word slots at indices 80/84/88/92/96 for both frames, including X, Y, code, attribute, order, bank and frame relation; frame 4214 is the different-pose anti-hardcoding control | 1 and 5 |
 | 2 | Replace inferred collision | Decode actor-local hitbox/attack-box records for every required player, street-alien, Stalker, and Chrysalis pose by joining the debug overlays, pivots, interaction selectors, and writer/table evidence | Native collision consumes ROM-derived boxes; inferred Chrysalis 21/55/97 and Stalker schedules are removed; controlled hit and whiff fixtures pass | 2 and 5 |
 | 3 | Complete Round 1 animation extraction | Promote the street-alien decoder only after milestone 1; gate all 28 street-alien assemblies, then Stalkers and player; add the player's missing work-RAM/register capture; link the proven script interpreter for boss pose selection | Every required actor/action has ROM-derived script, assembly, tile, position, and duration coverage; capture archives remain regression oracles, not runtime animation sources | 1, 5, and 6 |
 | 4 | Recover Round 1 stage data | Locate and decode spawn records, camera bounds, scroll parameters, room triggers, barricade/door transitions, boss-room entry, and Round 2 handoff | The deterministic route consumes extracted tables rather than authored lifecycle constants and reaches the same ordered room/event anchors | 4, 5, and 6 |
@@ -116,47 +116,24 @@ hardcoding as the expansion method. Continue in this order:
 | D. Original multiplayer | Add the arcade revision's simultaneous-player capability after single-player is green; implement joins, HUD/score ownership, camera, spawns, collision, items and transitions | A maximum-player complete route passes deterministic, stress, emulator and physical-controller tests |
 | E. Final hardware candidate | Measure peak CPU, VDP1/VDP2, RAM, cartridge, SCSP, DMA and CD/CDDA behavior across the complete game; restore a clean release | Required single-player and multiplayer routes pass at sustained 60 Hz on physical NTSC Saturn with digital pads, multitap and 32 Mbit cartridge |
 
-### Immediate milestone 1 evidence contract
+### Immediate milestone 2 evidence contract
 
 The ready-to-invoke, implementation-level contract is
-[`NEXT_AGENT_PROMPT.md`](NEXT_AGENT_PROMPT.md). It contains only this first
-execution body and does not authorize later milestones.
+[`NEXT_AGENT_PROMPT.md`](NEXT_AGENT_PROMPT.md). It contains only the collision
+body and does not authorize later milestones.
 
-The CPS2 chain is already established through static disassembly:
+Milestone 1's object-emission proof is closed at `40e7f76`, with corrected
+actor attribution at `4695dee`; its detailed evidence remains in the handoff.
+Milestone 2 begins from the existing cadence-1 debug-hitbox capture, tracked
+screen-space/pivot candidates, animation-record interaction selectors, and
+reader routines at `0x1CF94`/`0x1CF88`. Those are leads, not native collision
+tables. The next agent must prove actor attribution and the ROM table format,
+validate controlled hit and whiff routes, then replace the inferred Chrysalis
+21/55/97 and Stalker contact schedules with game-derived actor-local boxes.
 
-```text
-0xA99DC list builder (A1=0x708000)
-  -> per-group emitters
-  -> 0xA9B48 common actor loop
-  -> 0xA9B80 actor-type jump table
-  -> per-type handler
-  -> Family 1 body or Family 2 effect emitter
-```
-
-The remaining trace must use stock MAME 0.289, the frame-4200 state and no more
-than 34 debugger write watchpoints. Watch exactly the 20 logical writer words
-at `0x708000 + 0xA0..0xC6`; `0xA99DC` is statically proven to initialize
-`A1=0x708000`, so do not add simultaneous `0x700000` watchpoints. Capture bank-
-select register `0x8040E0` once per frame to prove the write-buffer/display-bank
-relationship. In one bounded run, prove the source-frame mapping for frames
-4214 and 4253 from synchronized actor/work-RAM evidence, then record
-`(frame, pc, address, width, data)` plus the register/source context needed to
-attribute each write.
-
-The frame-4214 different-pose control entries are
-`[8113,0099,4efe,0131]`, `[80e3,00a9,4ef6,0431]`,
-`[80f3,00b9,4fc8,0131]`, `[8121,007b,473a,2431]`, and
-`[8111,00ab,479c,1331]`. The frame-4253 target entries are
-`[814f,009e,4df8,0131]`, `[810f,00ae,4ef0,0531]`,
-`[815b,007b,4b04,2531]`, `[814b,00ab,4a88,1431]`, and
-`[816b,006b,4958,0131]`. Codes and attributes alone are insufficient: the gate
-requires all 20 words, list positions, frame mappings and bank relationships
-for both frames.
-
-Do not promote a selector-12 decoder from the watchpoint PC sequence alone.
-The decoder must derive the output from ROM/actor source data before consulting
-the validation fixture, then reproduce both oracles. Frame 4214 must expose any
-hard-coded frame-4253 values.
+Do not change native collision from overlay geometry alone. If ROM/table
+provenance or a falsification control remains open, retain the current runtime,
+record the precise blocker, and leave milestone 2 open.
 
 ### CPS2-to-Saturn representation boundary
 
