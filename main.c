@@ -4,6 +4,7 @@
 #include "generated/avsp_boss_animation.h"
 #include "generated/avsp_boss_clear_audio.h"
 #include "generated/avsp_boss_intro_audio.h"
+#include "generated/avsp_boss_rom.h"
 #include "generated/avsp_breach_audio.h"
 #include "generated/avsp_audio.h"
 #include "generated/avsp_contact_audio.h"
@@ -32,10 +33,6 @@
 #define SNAPSHOT_FIT_BYTES (SNAPSHOT_FIT_WIDTH * SNAPSHOT_HEIGHT)
 #define AVSP_CART_DRAM1_BASE ((unsigned char *)0x22600000)
 #define AVSP_CART_DRAM1_BYTES 0x200000
-#define AVSP_BOSS_KO_ARCHIVE_OFFSET \
-    ((AVSP_BOSS_HIT_ARCHIVE_BYTES + 1 + 3) & ~3)
-#define AVSP_BOSS_SUPPLEMENT_ARCHIVE_BYTES \
-    (AVSP_BOSS_KO_ARCHIVE_OFFSET + AVSP_BOSS_KO_ARCHIVE_BYTES + 1)
 #define AVSP_PCM_CHANNEL_WEAPON 0
 #define AVSP_PCM_CHANNEL_MELEE 1
 #define AVSP_PCM_CHANNEL_CONTACT 2
@@ -107,10 +104,6 @@ static unsigned char *player_action_archive;
 static unsigned char *enemy_action_archive;
 static unsigned char *stalker_action_archive;
 static unsigned char *enemy_action_buffer;
-static unsigned char *boss_action_archive;
-static unsigned char *boss_supplement_archive_block;
-static unsigned char *boss_hit_action_archive;
-static unsigned char *boss_ko_action_archive;
 static jo_img_4bits player_action_images[AVSP_PLAYER_ACTION_LAYERS];
 static jo_img_4bits enemy_action_images[CAP_MAX_ENEMIES];
 static jo_img_4bits boss_action_image;
@@ -492,125 +485,102 @@ static int decode_stalker_action_pose(const int pose, const int slot)
     return 1;
 }
 
-static int load_boss_action_archive(void)
+/* Compose the given Chrysalis pose into boss_action_image from the ROM tile
+   tables in generated/avsp_boss_rom.h. The ROM stores raw CPS2 pens (0..14
+   visible, 15 transparent) in two-pens-per-byte tiles; the composed cel keeps
+   pen+1 so the buffer's zero value stays transparent, in the same 4bpp
+   high-nibble-first layout the VDP1 sprite and the archive oracles use. Parts
+   are painted in reverse order so earlier parts overdraw later ones, matching
+   the host-test compose that verifies all 29 poses against the archived
+   BACT/BHIT/BKO output pixel for pixel. */
+static int compose_boss_rom_pose(const int pose)
 {
-    int length = 0;
-    boss_action_archive = (unsigned char *)jo_fs_read_file_in_dir(
-        AVSP_BOSS_ARCHIVE_FILE, "SPR4", &length);
-    if (boss_action_archive == JO_NULL ||
-        length != AVSP_BOSS_ARCHIVE_BYTES)
+    const AvspBossRomPose *rom_pose;
+    const AvspBossRomPart *parts;
+    const AvspBossRomPart *part;
+    const unsigned short *part_tiles;
+    const unsigned char *tile;
+    unsigned char *output;
+    int min_x, max_x, min_y, max_y;
+    int origin_x, origin_y;
+    int i, p, tile_x, tile_y;
+    int source_x, source_y, index, dest_x, dest_y;
+    int tx, ty, src_tx, src_ty, cx, cy, pen, bit, tile_byte;
+
+    output = boss_action_image.data;
+    if (pose < 0 || pose >= AVSP_BOSS_ROM_POSE_COUNT || output == JO_NULL)
     {
-        failed_asset = AVSP_BOSS_ARCHIVE_FILE;
+        failed_asset = "BOSS ROM POSE";
         return 0;
     }
-    return 1;
-}
-
-static int load_boss_supplement_archives(void)
-{
-    int hit_length = 0;
-    int ko_length = 0;
-    int valid = 1;
-
-    if (boss_hit_action_archive != JO_NULL &&
-        boss_ko_action_archive != JO_NULL)
+    memset(output, 0, AVSP_BOSS_DECODED_BYTES);
+    rom_pose = &avsp_boss_rom_poses[pose];
+    parts = &avsp_boss_rom_parts[rom_pose->part_offset];
+    if (rom_pose->part_count == 0)
         return 1;
-
-    /* Jo's reuse allocator deliberately does not split a freed block. Loading
-       BHIT as its own 5,900-byte allocation therefore consumes the complete
-       retired 78,848-byte character-select block and leaves no reusable tail
-       for BKO. Allocate both supplements once, then read each file into its
-       fixed subrange. Keep both destinations four-byte aligned for the Saturn
-       CD loader. The +1 bytes are required because jo_fs_read_file_ptr writes
-       a trailing zero after every file. */
-    boss_supplement_archive_block =
-        (unsigned char *)jo_malloc_with_behaviour(
-            AVSP_BOSS_SUPPLEMENT_ARCHIVE_BYTES,
-            JO_MALLOC_TRY_REUSE_BLOCK);
-    if (boss_supplement_archive_block == JO_NULL)
+    min_x = -parts[0].lx - parts[0].nx * 16;
+    max_x = -parts[0].lx;
+    min_y = parts[0].ly;
+    max_y = parts[0].ly + parts[0].ny * 16;
+    for (i = 1; i < (int)rom_pose->part_count; ++i)
     {
-        failed_asset = "BOSS SUPPLEMENT BUFFER";
-        return 0;
+        part = &parts[i];
+        if (-part->lx - part->nx * 16 < min_x)
+            min_x = -part->lx - part->nx * 16;
+        if (-part->lx > max_x)
+            max_x = -part->lx;
+        if (part->ly < min_y)
+            min_y = part->ly;
+        if (part->ly + part->ny * 16 > max_y)
+            max_y = part->ly + part->ny * 16;
     }
-
-    boss_hit_action_archive = boss_supplement_archive_block;
-    boss_ko_action_archive = boss_supplement_archive_block +
-        AVSP_BOSS_KO_ARCHIVE_OFFSET;
-    jo_fs_cd("SPR4");
-    if (jo_fs_read_file_ptr(AVSP_BOSS_HIT_ARCHIVE_FILE,
-                            boss_hit_action_archive,
-                            &hit_length) == JO_NULL ||
-        hit_length != AVSP_BOSS_HIT_ARCHIVE_BYTES)
+    origin_x = AVSP_BOSS_ROM_CEL_WIDTH / 2 - (min_x + max_x) / 2 + rom_pose->dx;
+    origin_y = AVSP_BOSS_ROM_CEL_HEIGHT / 2 - (min_y + max_y) / 2 + rom_pose->dy;
+    for (p = (int)rom_pose->part_count - 1; p >= 0; --p)
     {
-        failed_asset = AVSP_BOSS_HIT_ARCHIVE_FILE;
-        valid = 0;
-    }
-    if (valid &&
-        (jo_fs_read_file_ptr(AVSP_BOSS_KO_ARCHIVE_FILE,
-                             boss_ko_action_archive,
-                             &ko_length) == JO_NULL ||
-         ko_length != AVSP_BOSS_KO_ARCHIVE_BYTES))
-    {
-        failed_asset = AVSP_BOSS_KO_ARCHIVE_FILE;
-        valid = 0;
-    }
-    jo_fs_cd(JO_PARENT_DIR);
-    return valid;
-}
-
-static int decode_boss_action_pose(const int pose)
-{
-    unsigned int source = 0;
-    unsigned int target = 0;
-    const unsigned int source_offset = avsp_boss_rle_offsets[pose];
-    const unsigned int source_length = avsp_boss_rle_bytes[pose];
-    unsigned int archive_bytes;
-    const unsigned char *archive_data;
-    const unsigned char *source_data;
-    unsigned char *output = boss_action_image.data;
-    if (avsp_boss_rle_archives[pose] == 0)
-    {
-        archive_bytes = AVSP_BOSS_ARCHIVE_BYTES;
-        archive_data = boss_action_archive;
-    }
-    else if (avsp_boss_rle_archives[pose] == 1)
-    {
-        archive_bytes = AVSP_BOSS_HIT_ARCHIVE_BYTES;
-        archive_data = boss_hit_action_archive;
-    }
-    else if (avsp_boss_rle_archives[pose] == 2)
-    {
-        archive_bytes = AVSP_BOSS_KO_ARCHIVE_BYTES;
-        archive_data = boss_ko_action_archive;
-    }
-    else
-    {
-        failed_asset = "BOSS ACTION ARCHIVE";
-        return 0;
-    }
-    if (archive_data == JO_NULL ||
-        source_offset + source_length > archive_bytes)
-    {
-        failed_asset = "BOSS ACTION INDEX";
-        return 0;
-    }
-    source_data = archive_data + source_offset;
-    while (source + 1 < source_length)
-    {
-        unsigned int count = source_data[source++];
-        unsigned char value = source_data[source++];
-        if (count == 0 || target + count > AVSP_BOSS_DECODED_BYTES)
+        part = &parts[p];
+        part_tiles = &avsp_boss_rom_part_tiles[part->tile_offset];
+        for (tile_y = 0; tile_y < part->ny; ++tile_y)
         {
-            failed_asset = "BOSS ACTION RLE";
-            return 0;
+            for (tile_x = 0; tile_x < part->nx; ++tile_x)
+            {
+                source_y = part->flip_y ? part->ny - 1 - tile_y : tile_y;
+                source_x = part->flip_x ? part->nx - 1 - tile_x : tile_x;
+                index = part_tiles[source_y * part->nx + source_x];
+                tile = &avsp_boss_rom_tiles[index * AVSP_BOSS_ROM_TILE_BYTES];
+                dest_x = origin_x - part->lx - part->nx * 16 + tile_x * 16;
+                dest_y = origin_y + part->ly + tile_y * 16;
+                for (ty = 0; ty < 16; ++ty)
+                {
+                    for (tx = 0; tx < 16; ++tx)
+                    {
+                        src_ty = part->flip_y ? 15 - ty : ty;
+                        src_tx = part->flip_x ? 15 - tx : tx;
+                        tile_byte = tile[(src_ty * 16 + src_tx) / 2];
+                        pen = (src_tx & 1) ? (tile_byte & 0xF) :
+                            (tile_byte >> 4);
+                        if (pen == 15)
+                            continue;
+                        cx = dest_x + tx;
+                        cy = dest_y + ty;
+                        if (cx < 0 || cx >= AVSP_BOSS_ROM_CEL_WIDTH ||
+                            cy < 0 || cy >= AVSP_BOSS_ROM_CEL_HEIGHT)
+                            continue;
+                        bit = cy * AVSP_BOSS_ROM_CEL_WIDTH + cx;
+                        if (bit & 1)
+                        {
+                            output[bit / 2] = (unsigned char)
+                                ((output[bit / 2] & 0x0F) | ((pen + 1) << 4));
+                        }
+                        else
+                        {
+                            output[bit / 2] = (unsigned char)
+                                ((output[bit / 2] & 0xF0) | (pen + 1));
+                        }
+                    }
+                }
+            }
         }
-        memset(output + target, value, count);
-        target += count;
-    }
-    if (source != source_length || target != AVSP_BOSS_DECODED_BYTES)
-    {
-        failed_asset = "BOSS ACTION SIZE";
-        return 0;
     }
     return 1;
 }
@@ -984,15 +954,9 @@ static int prepare_enemy_runtime(void)
 static int prepare_boss_runtime(void)
 {
     if (boss_runtime_ready) return 1;
-    /* Normal play keeps the base archive resident from cold boot and loads
-       the hit/KO supplements from retired character-select RAM before CDDA.
-       Keep guarded lazy paths for diagnostics that bypass the frontend. */
-    if (boss_action_archive == JO_NULL && !load_boss_action_archive())
-        return 0;
-    if ((boss_hit_action_archive == JO_NULL ||
-         boss_ko_action_archive == JO_NULL) &&
-        !load_boss_supplement_archives())
-        return 0;
+    /* The boss is composed entirely from the ROM tile tables (see
+       compose_boss_rom_pose), so no archive is loaded for its animation.
+       Only the single decoded-cel buffer is allocated here. */
     boss_action_image.width = AVSP_BOSS_CEL_WIDTH;
     boss_action_image.height = AVSP_BOSS_CEL_HEIGHT;
     boss_action_image.data = (unsigned char *)jo_malloc_with_behaviour(
@@ -1002,7 +966,7 @@ static int prepare_boss_runtime(void)
         failed_asset = "BOSS ACTION BUFFER";
         return 0;
     }
-    if (!decode_boss_action_pose(0)) return 0;
+    if (!compose_boss_rom_pose(0)) return 0;
     boss_action_sprite = jo_sprite_add_4bits_image(&boss_action_image);
     if (boss_action_sprite < 0)
     {
@@ -1267,7 +1231,7 @@ static void draw_boss(const CapActor *actor, const int screen_x)
     pose = boss_pose_for_frame(clip, frame);
     if (pose != current_boss_action_pose)
     {
-        if (!decode_boss_action_pose(pose))
+        if (!compose_boss_rom_pose(pose))
         {
             runtime_ready = 0;
             return;
@@ -1640,21 +1604,12 @@ static void frame_callback(void)
         }
     }
     /* Character confirmation keeps the already-copied selection pixels in
-       VDP2, so its 78,848-byte source block is no longer needed. Reuse that
-       phase space for the Chrysalis hit and KO supplements before the CDDA
-       start below. This avoids a data-track seek during Stage 1 music and
-       keeps the expanded action data out of the cold-boot allocation. */
-    if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM &&
-        (boss_hit_action_archive == JO_NULL ||
-         boss_ko_action_archive == JO_NULL))
-    {
+       VDP2, so its 78,848-byte source block can return to the allocator for
+       the stage. The Chrysalis boss is composed from ROM tables and needs no
+       archive, so nothing is loaded here (release_frontend_scene is
+       idempotent). */
+    if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM)
         release_frontend_scene(1);
-        if (!load_boss_supplement_archives())
-        {
-            runtime_ready = 0;
-            return;
-        }
-    }
     if (clip_request == CAP_CLIP_SHOOT)
         weapon_audio_pending_shot = world.shots_fired;
     if (clip_request == CAP_CLIP_ATTACK)
@@ -1973,10 +1928,6 @@ void jo_main(void)
     enemy_action_buffer = JO_NULL;
     enemy_runtime_ready = 0;
     boss_action_image.data = JO_NULL;
-    boss_action_archive = JO_NULL;
-    boss_supplement_archive_block = JO_NULL;
-    boss_hit_action_archive = JO_NULL;
-    boss_ko_action_archive = JO_NULL;
     boss_runtime_ready = 0;
     current_bitmap_scene = BITMAP_SCENE_NONE;
 #ifdef AVSP_VISUAL_TEST
@@ -2017,7 +1968,6 @@ void jo_main(void)
                         load_action_audio() &&
                         load_all_cels() && load_player_action_sequences() &&
                         load_enemy_action_archive() &&
-                        load_boss_action_archive() &&
                         create_sprite_working_set();
     }
 #ifdef AVSP_VISUAL_TEST
@@ -2035,15 +1985,16 @@ void jo_main(void)
 #if defined(AVSP_BOSS_HIT_TEST) || defined(AVSP_BOSS_KO_TEST)
     if (runtime_ready)
     {
-        /* Focused boss diagnostics bypass the frontend and prove both
-           supplemental archives plus VDP1 replacement immediately. */
+        /* Focused boss diagnostics bypass the frontend, so the main loop's
+           CHARACTER_SELECT/CONFIRM scene releases are skipped; free those
+           phase assets here to leave room for the stage working set. The
+           boss itself is composed from ROM tables and needs no archive. */
         release_frontend_scene(0);
         release_frontend_scene(1);
         release_pcm_data(&round_title_a_sound);
         release_pcm_data(&round_title_b_sound);
         release_pcm_data(&withdraw_sound);
         release_pcm_data(&breach_sound);
-        runtime_ready = load_boss_supplement_archives();
     }
 #endif
     cap_world_init(&world);

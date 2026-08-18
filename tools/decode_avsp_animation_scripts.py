@@ -163,6 +163,72 @@ def s16(value: int) -> int:
     return value - 0x10000 if value & 0x8000 else value
 
 
+def _decode_assembly_single(data: bytes, base: int, address: int,
+                            offset_data: bytes | None,
+                            layout_data: bytes | None,
+                            offset_base: int, offset_window_base: int,
+                            result: dict[str, object]) -> dict[str, object]:
+    """Decode the selector-2 compact single-object assembly (14 bytes).
+
+    Layout: selector(2), budget(2), attribute(2), param(2), offset-index(2),
+            origin-x(2), code(2).
+
+    The attribute word (word 2) encodes the multi-tile dimensions in its high
+    byte (low nibble = X tiles, high nibble = Y tiles) and the base flips in
+    its low byte.  The tile code is the final word (word 6), not word 2 --
+    verified against the captured palette-27 object for the KO-tumble poses.
+    One object only; compose_rom_pose centres it, so its absolute layout
+    offset is normalised away and the entry carries a zero layout.
+    """
+    offset = address - base
+    budget = u16(data, offset + 2)
+    attribute = u16(data, offset + 4)
+    param = u16(data, offset + 6)
+    offset_index = u16(data, offset + 8)
+    origin_x = s16(u16(data, offset + 10))
+    code = u16(data, offset + 12)
+    result.update({
+        "status": "decoded_structure",
+        "budget": budget,
+        "count": 1,
+        "offset_table_index": offset_index,
+        "origin_x": origin_x,
+        "param_word": f"0x{param:04x}",
+    })
+    entry: dict[str, object] = {
+        "index": 0,
+        "code": f"0x{code:04x}",
+        "source_attribute": f"0x{attribute:04x}",
+        "layout_adjust": "0x0000",
+        "layout_adjust_signed": 0,
+        "layout_x_signed": 0,
+        "layout_y_signed": 0,
+    }
+    if offset_data is not None and offset_index * 2 + 2 <= len(offset_data):
+        table_offset = u16(offset_data, offset_index * 2)
+        layout_address = offset_base + table_offset
+        result["layout_table_pointer"] = f"0x{layout_address:06x}"
+        layout_offset = layout_address - offset_window_base
+        source = layout_data
+        source_offset = layout_offset
+        if (source is None or source_offset < 0 or
+                source_offset + 4 > len(source)) and offset_data is not None:
+            source = offset_data
+            source_offset = layout_address - offset_base
+        if source is not None and 0 <= source_offset + 4 <= len(source):
+            x_word = u16(source, source_offset)
+            y_word = u16(source, source_offset + 2)
+            entry.update({
+                "layout_address": f"0x{layout_address:06x}",
+                "layout_x_word": f"0x{x_word:04x}",
+                "layout_y_word": f"0x{y_word:04x}",
+                "layout_x_signed": s16(x_word),
+                "layout_y_signed": s16(y_word),
+            })
+    result["entries"] = [entry]
+    return result
+
+
 def decode_assembly(data: bytes, base: int, address: int,
                     offset_data: bytes | None = None,
                     layout_data: bytes | None = None,
@@ -195,9 +261,13 @@ def decode_assembly(data: bytes, base: int, address: int,
             "(code,attribute,layout-adjust)*count"
         ),
     }
-    if selector != 6:
+    if selector not in (2, 6, 10):
         result["status"] = "unmapped_selector"
         return result
+    if selector == 2:
+        return _decode_assembly_single(data, base, address, offset_data,
+                                       layout_data, offset_base,
+                                       offset_window_base, result)
     budget = u16(data, offset + 2)
     count = u16(data, offset + 4)
     offset_index = u16(data, offset + 6)
@@ -217,9 +287,15 @@ def decode_assembly(data: bytes, base: int, address: int,
         table_offset = u16(offset_data, offset_index * 2)
         layout_address = offset_base + table_offset
         result["layout_table_pointer"] = f"0x{layout_address:06x}"
+    # Selector-6 uses 3-word entries (code, attribute, layout-adjust) whose
+    # layout words are resolved through the 0x1FD1C8 offset table.  Selector-10
+    # uses 4-word entries (code, attribute, layout-x, layout-y) that store the
+    # signed pixel offsets directly, bypassing the offset table.
+    direct_layout = selector == 10
+    entry_stride = 8 if direct_layout else 6
     cursor = offset + 12
     for index in range(count):
-        if cursor + 6 > len(data):
+        if cursor + entry_stride > len(data):
             result["status"] = "truncated"
             break
         code = u16(data, cursor)
@@ -232,7 +308,15 @@ def decode_assembly(data: bytes, base: int, address: int,
             "layout_adjust": f"0x{layout_adjust:04x}",
             "layout_adjust_signed": s16(layout_adjust),
         }
-        if layout_address is not None:
+        if direct_layout:
+            layout_y = u16(data, cursor + 6)
+            entry.update({
+                "layout_x_word": f"0x{layout_adjust:04x}",
+                "layout_y_word": f"0x{layout_y:04x}",
+                "layout_x_signed": s16(layout_adjust),
+                "layout_y_signed": s16(layout_y),
+            })
+        elif layout_address is not None:
             layout_offset = layout_address - offset_window_base
             source = layout_data
             source_offset = layout_offset
@@ -252,7 +336,7 @@ def decode_assembly(data: bytes, base: int, address: int,
                 })
             layout_address += 4 + s16(layout_adjust)
         entries.append(entry)
-        cursor += 6
+        cursor += entry_stride
     result["entries"] = entries
     result["trailing_word"] = (f"0x{u16(data, cursor):04x}"
                                 if cursor + 2 <= len(data) else None)

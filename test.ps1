@@ -32,6 +32,11 @@ if ($LASTEXITCODE -ne 0) {
     throw "Stage 1 route-ledger validation failed with exit code $LASTEXITCODE."
 }
 
+& $PythonPath (Join-Path $PSScriptRoot 'tools\generate_boss_anim_script.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Boss animation script generation failed with exit code $LASTEXITCODE."
+}
+
 $wsl = Get-Command 'wsl.exe' -ErrorAction SilentlyContinue
 if (-not $wsl) {
     throw 'WSL with GCC is required for the strict host-side gameplay-model test.'
@@ -49,4 +54,10 @@ $command = "cd '$linuxRoot' && mkdir -p build && gcc -std=c90 -pedantic -Wall -W
 & $wsl.Source sh '-lc' $command
 if ($LASTEXITCODE -ne 0) {
     throw "Gameplay-model tests failed with exit code $LASTEXITCODE."
+}
+
+$animCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_anim_script.c tests/avsp_anim_script_test.c -o build/avsp_anim_script_test && ./build/avsp_anim_script_test"
+& $wsl.Source sh '-lc' $animCommand
+if ($LASTEXITCODE -ne 0) {
+    throw "Animation-script interpreter test failed with exit code $LASTEXITCODE."
 }

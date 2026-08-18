@@ -1,6 +1,6 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-17 22:45 EDT
+Updated: 2026-08-18 EDT (Chrysalis ROM-composition vertical slice)
 
 **Goal audit: 0/7 final conditions closed.** The condition-by-condition index
 is now at [PARITY_PLAN.md#goal-progress-index](PARITY_PLAN.md#goal-progress-index).
@@ -101,18 +101,20 @@ Read this file before taking any action. The user wants a private, capture-faith
   `git rev-parse HEAD` for its immutable final hash.
 - Pre-existing untracked scratch file: `check_tail.py`. It is not part of the
   checkpoint and was preserved rather than deleted or committed.
-- Current disc profile: `normal-release`, but
-  `build/last_compile_profile.txt` says `debug-normal-release`. This is not the
-  final hardware candidate; run `build.ps1 -Clean -Release` after the translated
-  route gates pass. The hardware manifest records only the disc profile and
-  does not prove release optimization.
-- Current ISO: 5,410,816 bytes, SHA-256
-  `be49e9aef82d3a02f98eb1370ea7cbcdf6a6a6014074d7a4d853aad7b7b42062`. This
-  replaces the pre-shutter 5,400,576-byte image
-  `4296b66ec63276524c588b27a786d596e2d4404c747e57fe513806655f4000f6`; the
-  growth is the shutter code. The audit's normal build regenerated the ISO and
-  changed the whole-image hash from the previously documented
-  `30522182...`; size, cue hash and every checked ISO member remained valid.
+- Current disc profile: `normal-release`; `build/last_compile_profile.txt` now
+  says `release-normal-release` after the 2026-08-18 `-Release` build, so the
+  build mode and profile are consistent. This is still not the final hardware
+  candidate; run `build.ps1 -Clean -Release` for the real final image.
+- `main.c` is MODIFIED (uncommitted) since checkpoint `068ff6b`: the Chrysalis
+  boss now composes from ROM (`compose_boss_rom_pose`,
+  `generated/avsp_boss_rom.h`) and no longer loads `BACT`/`BHIT`/`BKO` for
+  animation. The ISO below reflects that uncommitted change; commit it before
+  treating it as an immutable checkpoint.
+- Current ISO: 5,541,888 bytes, SHA-256
+  `418b801cce4c0781e17caf7b45e9d24feb2b85d02cccfdc23478bee8084569e8` (the
+  2026-08-18 Chrysalis ROM-composition release; supersedes the 5,410,816-byte
+  `be49e9aef82d3a02f98eb1370ea7cbcdf6a6a6014074d7a4d853aad7b7b42062` image from
+  checkpoint `068ff6b`). The size growth is the ROM tile/palette/pose data.
 - Current cue SHA-256: `bfc58c7020d90952e93bef7ecba32dea8d4faddf6ce6a90e1054206ee1807b12`.
 - Both values match `build/hardware_release_manifest.txt` at
   `profile=normal-release`.
@@ -1131,3 +1133,117 @@ event-level parity harness; see the goal-progress index.
 - Continue remaining fidelity gaps after the KO slice: exact Chrysalis action-selection AI, palette/explosion/victory details, remaining nonlethal Stalker reaction fidelity, and any route/intermediate details still listed in `docs/TEST_PLAN.md`.
 - Once a faithful full slice passes, forward-test and refine the private skill at `C:\Users\lambd\.codex\skills\port-cps2-to-sega-saturn`.
 - Assemble the full-port evidence package for the development team before proposing anything beyond private use.
+
+## 2026-08-18 Chrysalis ROM-composition vertical slice
+
+Goal condition 1 stays OPEN overall, but its **Chrysalis boss** now has a
+proven *tile-composition* vertical slice: the runtime composes all 29 of the
+boss's poses (all 6 actions) from ROM-referenced 4bpp tiles in the real Saturn
+build, with no `/SPR4/*.RLE` boss archive in the animation path. Two caveats
+keep this from being full ROM-driven animation: (a) production pose *selection*
+still uses the capture-derived per-frame clip/step tables in
+`generated/avsp_boss_animation.h` (`boss_pose_for_frame`), and (b) the ROM
+animation-script / selector-6 interpreter is decoded only host-side (Python)
+and is not yet linked into the runtime.
+
+### What changed in `main.c` (uncommitted since `068ff6b`)
+
+- New `compose_boss_rom_pose(int pose)` composes a boss pose straight from
+  `generated/avsp_boss_rom.h`: for `pr = avsp_boss_rom_poses[pose]` it iterates
+  `avsp_boss_rom_parts[pr->part_offset .. +part_count]` in reverse, writing each
+  part's `avsp_boss_rom_part_tiles`/`avsp_boss_rom_tiles` 4bpp pen+1
+  (high-nibble-first) into the `288x192` `boss_action_image.data`
+  (`AVSP_BOSS_DECODED_BYTES` = 27,648), applying per-pixel flip and a pen-15
+  transparency skip. Palette bank is 7; the sprite is added with
+  `jo_sprite_add_4bits_image`.
+- The retired archive path is gone from the RUNTIME ANIMATION PATH: the
+  `BACT`/`BHIT`/`BKO` cold-boot / character-select loads, their four archive
+  globals, two `#define`s, the teardown frees, and the cold-boot
+  `load_boss_action_archive() &&` / `load_boss_supplement_archives()` guards in
+  `frame_callback` were removed. `draw_boss` calls `compose_boss_rom_pose(pose)`
+  on pose change.
+- The three archives **remain on disc and are still SHA-256-verified by the
+  build ISO gate** — they are now host-test regression oracles (`test.ps1` reads
+  `build/avsp_cd/SPR4`), NOT the animation runtime path. `build.ps1`,
+  `prepare_avsp_port.ps1`, and the ISO manifest member list are UNCHANGED on
+  purpose.
+- `tools/verify_pose_gate.py` gained a `--self-contained` mode
+  (`_run_batch_selfcontained`) that reproduces the 12 canonical assemblies
+  purely from the ROM assembly (layout words at `0x1FD1C8`) + the oracle
+  archives, independent of `main.c`.
+- `test.ps1` and `tools/decode_avsp_animation_scripts.py` carry small uncommitted
+  edits from the prior ROM-decode work.
+- **Unchanged (still capture-derived): pose *selection*.** `draw_boss` still
+  calls `boss_clip_for_action` → `boss_pose_for_frame`, which walks the
+  capture-derived `avsp_boss_step_counts/durations/poses` tables in
+  `generated/avsp_boss_animation.h` to pick the pose index per frame. Only the
+  *composition* of the selected pose moved to ROM tiles. The ROM selector-6 /
+  control-word animation scripts are decoded by
+  `tools/decode_avsp_animation_scripts.py` (host-only) and are not yet
+  interpreted in C. This is the selection/interpreter gap Phase 1 must close
+  before the Chrysalis path counts as fully ROM-driven.
+
+### Gate results this session (all PASS, Yaba Sanshiro 2 v1.20.37)
+
+The model cannot read emulator screenshots, so each boot was judged by pixel
+statistics: a `CAPABILITY TEST FAILED: <asset>` banner is a near-black static
+screen (low bright-pixel count, ~0 inter-shot diff); a passing scene is busy
+(high bright-pixel count) and, when animating, changes between shots (nonzero
+inter-shot mean-abs-per-channel diff).
+
+- **Self-contained pose gate**: 12/12 assemblies reproduced exactly from ROM
+  data, 0 differing pixels each (`facing_flip_x=True`, 29 oracle poses).
+- **Focused KO build** (replays the 428-frame KO every 600 frames): bright-pixel
+  57569/57771/43792, inter-shot diff 8.42/54.34 per channel — live animating
+  corpse, no banner. ISO 5,552,128 B SHA-256
+  `0F209A90B2DA76BC9A9D135D839346B66789781EC62227C4ED4CF866D29A3443`.
+- **Focused HIT build** (resets to the hit action every 120 frames): bright-pixel
+  100826/101020/100526, diff 8.53/10.57 — PASS. ISO SHA-256
+  `0719FC5851AA1F8EBFF82FD538F45943B2E2CD1AA6FF8484ED1EBB0F7A2AE5E0`.
+- **Full controller route** (Round 2 in 4,485 frames, then soak): bright-pixel
+  99971/63551/85570, diff 65.31/44.80 — route progressing. ISO 5,554,176 B
+  SHA-256 `C3B0622DBD87191C1EADFB80F7324F91EA9122E51E16C4AC948886F3277E29CD`.
+- **Clean `-Release` boot** (title, static): bright-pixel 97479/97478, diff
+  0.013 — title, no banner. ISO 5,541,888 B SHA-256
+  `418B801CCE4C0781E17CAF7B45E9D24FEB2B85D02CCCFDC23478BEE8084569E8`; CUE 188 B
+  SHA-256 `BFC58C7020D90952E93BEF7ECBA32DEA8D4FADDF6CE6A90E1054206EE1807B12`
+  (unchanged). This is the image recorded in "Repository state" above.
+- Every build re-ran the host tests + 12,000-frame soak green, and the ISO
+  `/SPR4/*.RLE` + `/AUDIO/*.PCM` members matched their manifest sizes/SHA-256.
+
+### Git state and manifest staleness
+
+- Branch `prototype/private-capability-test`; HEAD still `57b860c`
+  (`Handoff: record goal audit checkpoint`). Dirty (M): `main.c`, `test.ps1`,
+  `tools/decode_avsp_animation_scripts.py`, `tools/verify_pose_gate.py`.
+  Untracked: `avsp_anim_script.c/.h`, `tests/avsp_anim_script_test.c`,
+  `data/boss_play_sequence.json`, `generated/avsp_boss_rom.h`, the boss-ROM
+  gen/verify tools (`tools/gen_boss_rom_data.py`,
+  `tools/verify_boss_rom_poses.py`, `tools/build_boss_tile_workset.py`,
+  `tools/generate_boss_anim_script.py`, `tools/test_boss_rom_data.py`, and the
+  `tools/diag_*`/`tools/probe_*`/`tools/locate_*`/`tools/ref_interp.py`/
+  `tools/trace_boss_play_sequence.py` helpers), plus this session's
+  `tools/{screenshot,analyze_shots,crop_shots,window_rect}.ps1` and untracked
+  capture PNGs under `tools/`.
+- `build/hardware_release_manifest.txt` (regenerated by the `-Release` build)
+  matches it (ISO 5,541,888 / `418b801c...`, CUE `bfc58c70...`). The three
+  `boss_*_archive_load_phase` fields (`cold-boot` /
+  `retired-character-select-before-cdda`) are now **historical**: the runtime no
+  longer loads `BACT`/`BHIT`/`BKO` for animation; the archives are on-disc
+  oracles. Do NOT "fix" them by dropping the archives from the ISO or weakening
+  the member-hash gate — that would remove the host-test regression oracle.
+
+### What remains for condition 1 (not closed)
+
+- **The Chrysalis path is a composition slice, not full ROM animation.**
+  Production pose *selection* still uses the capture-derived clip/step tables
+  in `generated/avsp_boss_animation.h`, and the ROM selector-6 / control-word
+  script interpreter is not yet linked into C. Link the interpreter (or
+  otherwise replace the clip tables with ROM-driven pose sequencing) so the
+  boss's timing/sequence is also ROM-derived.
+- The player, street aliens, and Stalkers still select captured
+  `/SPR4/*.RLE` pose archives through generated frame tables. Decode their ROM
+  programs/assemblies and route them through the same tile-composition path
+  (retiring their archives) before condition 1 can close.
+- Commit the uncommitted `main.c` (and the generated/tooling files) before the
+  ISO is treated as an immutable checkpoint.
