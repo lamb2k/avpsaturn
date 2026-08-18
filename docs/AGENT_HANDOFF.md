@@ -493,18 +493,49 @@ live-trace-captured value anywhere in the calculation.** Scoped caveat
 unchanged from before the correction: not yet proven that `ANCHOR_Y`/`ANCHOR_X`
 are ROM-wide constants rather than specific to this route/scene.
 
+**7. The geometry engine generalizes to a second, independent actor; the
+pose-header shortcut does not.** Traced a completely different actor
+(`0xFFFFA000`, same frame window, different palette byte, different poses)
+via `tools/mame_trace_actor2.lua` (untracked one-off), with a live
+entry-point breakpoint at `0x0AA00E` giving ground-truth header addresses
+directly (`a0` at that PC, before any part read). Two opposite results from
+one probe:
+
+- **`pose.assembly + 4` does NOT generalize.** For this actor's pose it
+  predicted header `0x12F7D0`; the real, live-confirmed header is `0x12F7CE`
+  - off by 2, with a differently-shaped prefix before it (`0x0006, 0x001F...`
+  vs the first actor's `0x000C, 0x0006`). This structural derivation is
+  correctly labeled a known-broken shortcut specific to (at least) the first
+  actor/pose pair, not a general rule - do not re-attempt "assembly+N for a
+  fixed N" without new evidence.
+- **The geometry engine itself DOES generalize**, given the header address
+  directly rather than derived. `decode_group_origin`/`decode_group_entries`
+  reproduce all 3 of this second actor's dispatched groups (6 object entries:
+  code, attr, x, y) exactly, using the *same* `ANCHOR_Y`/`ANCHOR_X` and the
+  same attr-transform formula with a different `palette_byte` (`0x10` vs the
+  first actor's `0x11`) - zero per-actor tuning. This is real, if partial,
+  evidence that `ANCHOR_Y`/`ANCHOR_X` are not specific to the first actor
+  (though still only observed within this one captured route/window).
+
+Added as a second block in `_ORACLE_GROUPS`; all 7 groups (16 entries, 2
+actors) decode exactly.
+
 **Still blocking a fully general (any actor, any pose) ROM-only decoder, in
-priority order:** confirming the per-actor-type dispatch count (currently
-"exactly 2 groups") generalizes beyond this one actor/pose pair, deriving
-`palette_byte`/`flip_byte` from the actor record rather than supplying them by
-hand, and confirming `ANCHOR_Y`/`ANCHOR_X` hold outside this route. The
-declared-eligible-subset run against the full 5,302-frame oracle
-(`data/avsp_sprite_demand.json`) required by `NEXT_AGENT_PROMPT.md` Body B
-item 6 has **not** been done yet — only the 2 hand-verified frames
-(10 entries) are proven exact so far.
+priority order:** finding how a pose actually determines its group-header
+list (the `assembly+4` shortcut is now known wrong; no replacement structural
+rule proposed yet - live entry-point breakpoints remain the reliable fallback
+for ground truth), confirming `ANCHOR_Y`/`ANCHOR_X` hold outside this one
+route, and deriving `palette_byte` from a general actor-record read rather
+than the two hand-read instances so far (trivial in principle - it is a plain
+actor field, already read the same way for both actors - just not yet wired
+as a live/general read path). The declared-eligible-subset run against the
+full 5,302-frame oracle (`data/avsp_sprite_demand.json`) required by
+`NEXT_AGENT_PROMPT.md` Body B item 6 has **not** been done yet — only 7 hand-
+verified group instances (16 entries, 2 actors) are proven exact so far.
 
 Committed: `tools/decode_avsp_object_stream.py` (attr-transform fix at
-`b6f5a4e`, ROM-only origin derivation at `ac1b435`) and
+`b6f5a4e`, ROM-only origin derivation at `ac1b435`, flip-byte derivation at
+`1ece891`, second-actor generalization test at `120a9f8`) and
 `data/avsp_object_stream.json`.
 
 ## Status across S1-S6 (2026-08-18, end of session)
@@ -513,7 +544,7 @@ Committed: `tools/decode_avsp_object_stream.py` (attr-transform fix at
 |---|---|
 | S1 actor spine | **PASSED.** 481,566 actor-field loads, 0 mismatches; the collision predicate ported to C reproduces the Python falsification exactly on all 8 counters. |
 | S2 animation walk | **VALIDATED.** Interpreter predicts 23,676 of the game's own frames exactly free-running from one seed; 614 records extracted to 63 spans (10 KB), proven to reproduce the full 2 MB image on every counter. |
-| S2 object emitter | **Full geometry pipeline (header chain, part walk, attr transform, origin) proven ROM + actor-record only** for all 10 object entries across 2 oracle frames (4 group instances) — zero live-trace-captured values in the calculation. `palette_byte`/`flip_byte` still per-actor live-trace inputs, not yet derived generally; the 2-groups-per-actor dispatch count and the two anchor constants not yet confirmed to generalize beyond this one actor/pose pair; **not yet run against the full 5,302-frame oracle**; **not called by `main.c`**; **VDP1 per-object renderer not started**. |
+| S2 object emitter | **Full geometry pipeline (part walk, attr transform, origin) proven ROM + actor-record only** for all 16 object entries across 7 group instances, **confirmed on 2 independent actors** (different palette bytes, different poses, same anchor constants, zero per-actor tuning). The remaining gap is structural, not geometric: how a pose determines its group-header list is still unresolved (the one shortcut tried, `pose.assembly+4`, is confirmed NOT to generalize past the first actor). **Not yet run against the full 5,302-frame oracle**; **not called by `main.c`**; **VDP1 per-object renderer not started**. |
 | S2 integration into `main.c` | **Not started.** No live actor in the shipped runtime carries an `AvspActor` or ticks `avsp_anim_frame_tick`. A same-session proof-of-concept overlay was built, boot-tested successfully (real Round 1 combat played through to the Round 2 title without regressing), but was inconclusive on visual confirmation and was removed before committing rather than left in an unverified state. |
 | S3 (widen to full cast) | Not started; depends on S2. |
 | S4 (collision integration) | Not started; `avsp_collision.c` exists and is proven (S1) but nothing calls it from gameplay; depends on S2 for live selectors. |
