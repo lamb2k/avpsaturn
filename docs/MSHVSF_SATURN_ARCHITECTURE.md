@@ -12,6 +12,11 @@ The unchanged raw BIN contains a valid Saturn boot header for product
 414-file root totaling 393,365,484 file bytes. The cue describes one data track
 and eleven audio tracks.
 
+The boot fields declare a `0x1800`-byte IP area, first-program load address
+`0x060f0000`, and `0x10000`-byte first-read envelope. Pairing that envelope to
+a specific ISO member remains unresolved until the boot file-read and SH-2 PC
+path are traced.
+
 The largest families are 235 `.ST2`, 79 `.PAC`, 71 `.ADP`, and 14 `.BIN`
 members. Names and extensions are navigation leads only. They do not establish
 compression, ownership, load address, or runtime purpose without decoder or
@@ -34,6 +39,12 @@ This proves repeatable external behavior, not internal hardware ownership. The
 canonical report is `data/mshvsf_saturn_first_pass.json`; RAM, VDP, SCSP, CD,
 and DMA responsibilities remain open until traced.
 
+Platform capacities, measured disc-package envelopes, open peak fields, and the
+required next trace for every resource are tracked in
+`data/mshvsf_hardware_budget.json`. The package-family measurements come from
+`data/mshvsf_saturn_asset_topology.json`; they are storage evidence only and are
+not treated as decompressed or simultaneously resident bytes.
+
 ## Responsibility and budget map
 
 | Resource | Verified evidence | Current responsibility | Next proof |
@@ -49,16 +60,29 @@ and DMA responsibilities remain open until traced.
 
 ## Static leads requiring proof
 
-- `MM.BIN` is 848,396 bytes and is a main-program candidate by position and
-  naming, not a confirmed responsibility assignment.
-- `00LOAD.BIN`, `SYS.BIN`, `CPK.BIN`, and `CPK.CPK` are loader/system/video
-  candidates only.
+- `00LOAD.BIN` contains valid SH-2 instructions and names `SYS.BIN` and
+  `CPK.BIN`; its exact boot/load responsibility is not yet traced.
+- `MM.BIN`, `SYS.BIN`, and `MVSOPEN.BIN` each branch over an `MBI1` marker at
+  offset `0x4`. In each file, the big-endian word at `0x0c` points to another
+  `MBI1` marker. This proves a repeatable module/container boundary relation,
+  not the field's full semantics.
+- `MM.BIN` statically names player, background, sound, and ADP package
+  families. That makes it a strong file-read trace target, not a confirmed
+  ownership assignment.
+- `SYS.BIN` names `HMM.BIN`, `DIRBUF.BIN`, `NORMAL.BIN`, and `MVSOPEN.BIN` and
+  contains an `EXT RAM ERROR.` diagnostic string.
+- `CPK.BIN` contains exact aligned constants `0x22400000` and `0x22600000`,
+  consistent with the two cartridge DRAM bank windows used by the pinned
+  Saturn environment. It also contains exact constants in VDP1, VDP2, and
+  SCSP spaces. Static constants are trace leads; they do not prove access,
+  allocation, lifetime, or ownership.
 - `MEMFIX.PAC`, `SEL.PAC`, `SEL2.PAC`, and character-named PAC/ADP files are
   useful capture breakpoints, not decoded formats.
 - `M15_SRYU.ADP` is character-named, but its audio content and routing are not
   established.
 
-The canonical machine-readable evidence is
+The static program evidence is in
+`data/mshvsf_saturn_program_inventory.json`; disc evidence is in
 `data/mshvsf_saturn_disc_manifest.json`. Any architecture claim promoted above
 `UNRESOLVED` must point to a runtime trace or a validated decoder and include a
 falsification test.

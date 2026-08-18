@@ -229,6 +229,10 @@ def main() -> int:
             "compatible_area_symbols": ascii_field(boot[64:74]),
             "compatible_peripherals": ascii_field(boot[74:90]),
             "title": ascii_field(boot[96:208]),
+            "ip_size_bytes": int.from_bytes(boot[0xE0:0xE4], "big"),
+            "first_program_load_address": f"0x{int.from_bytes(boot[0xF0:0xF4], 'big'):08x}",
+            "first_program_read_size_bytes": int.from_bytes(boot[0xF4:0xF8], "big"),
+            "program_identity_status": "The boot fields establish address and read envelope; pairing them to a specific ISO member remains unresolved until a boot trace.",
             "sector0_sha256": sha256_bytes(boot),
         },
         "iso9660": {
@@ -255,9 +259,10 @@ def main() -> int:
         "verified_runtime_observation": {
             "emulator": "Yaba Sanshiro 2 v1.20.37",
             "cartridge": "32 Mbit (4 MB) DRAM, emulator type 7",
-            "result": "Booted licensed legal screen, Marvel/Capcom intro, title, and attract gameplay from a temporary cue pointing at the unchanged BIN.",
+            "result": "Booted from a temporary cue pointing at the unchanged BIN and deterministically replayed Versus mode through Ryu movement, jump, normal collision, visible health response, hit reaction, and recovery.",
             "status": "PASS",
-            "remaining_gate": "Deterministic emulated-pad input capture for the Ryu gameplay slice is not yet established.",
+            "paired_report": "data/mshvsf_saturn_first_pass.json",
+            "remaining_gate": "Saturn internal state tracing and the Hadouken projectile path are not yet established.",
         },
         "rights_boundary": "Metadata and hashes only; no disc file payload is written or committed.",
     }

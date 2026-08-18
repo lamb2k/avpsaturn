@@ -1,0 +1,2060 @@
+{
+  "title": "MSHvSF Saturn static program-member inventory",
+  "status": "STATIC_ADDRESS_AND_MODULE_LEADS_FOUND_DYNAMIC_OWNERSHIP_UNRESOLVED",
+  "source": {
+    "disc_sha256": "fa933d2283df59a31640304f089202c4f085c121686fb4c6053fc22a41241998",
+    "private_manifest": ".deps/mshvsf_saturn_members/private_manifest.json",
+    "rights_boundary": "Only hashes, names, offsets, short instruction samples, and derived metadata are tracked. Extracted members remain ignored and private."
+  },
+  "method": {
+    "word_endianness": "big",
+    "address_scan_alignment_bytes": 4,
+    "disassembler": "Capstone 5.0.7 SH-2 big-endian",
+    "caution": "Address-shaped words and filenames are trace leads, not proof of access, residency, allocation, or subsystem ownership."
+  },
+  "members": [
+    {
+      "path": "SYS.BIN",
+      "bytes": 61536,
+      "sha256": "ad0be6107400a4dbb5f834da4b7c1221ac6846c9504fc7428bcd7635fe70123f",
+      "candidate_role": "system_and_mode_loader_candidate",
+      "role_confidence": "LOW",
+      "first_32_bytes_hex": "a0 06 00 09 4d 42 49 31 00 00 00 01 00 00 f0 50 2f 06 d1 4d 21 02 90 2f 40 0e d8 18 68 82 e4 ff",
+      "sh2_entry_evidence": {
+        "entry_offset": "0x00000010",
+        "branch_over_mbi1_header": true,
+        "sample": [
+          {
+            "offset": "0x00000010",
+            "mnemonic": "mov.l",
+            "operands": "r0,@-r15"
+          },
+          {
+            "offset": "0x00000012",
+            "mnemonic": "mov.l",
+            "operands": "0x148,r1"
+          },
+          {
+            "offset": "0x00000014",
+            "mnemonic": "mov.l",
+            "operands": "r0,@r1"
+          },
+          {
+            "offset": "0x00000016",
+            "mnemonic": "mov.w",
+            "operands": "0x78,r0"
+          },
+          {
+            "offset": "0x00000018",
+            "mnemonic": "ldc",
+            "operands": "r0,sr"
+          },
+          {
+            "offset": "0x0000001a",
+            "mnemonic": "mov.l",
+            "operands": "0x7c,r8"
+          },
+          {
+            "offset": "0x0000001c",
+            "mnemonic": "mov.l",
+            "operands": "@r8,r8"
+          },
+          {
+            "offset": "0x0000001e",
+            "mnemonic": "mov",
+            "operands": "#-1,r4"
+          },
+          {
+            "offset": "0x00000020",
+            "mnemonic": "jsr",
+            "operands": "@r8"
+          },
+          {
+            "offset": "0x00000022",
+            "mnemonic": "nop",
+            "operands": ""
+          },
+          {
+            "offset": "0x00000024",
+            "mnemonic": "mov",
+            "operands": "#0,r0"
+          },
+          {
+            "offset": "0x00000026",
+            "mnemonic": "ldc",
+            "operands": "r0,sr"
+          },
+          {
+            "offset": "0x00000028",
+            "mnemonic": "mov.l",
+            "operands": "0x80,r5"
+          },
+          {
+            "offset": "0x0000002a",
+            "mnemonic": "mov.l",
+            "operands": "0x84,r0"
+          },
+          {
+            "offset": "0x0000002c",
+            "mnemonic": "mov.l",
+            "operands": "@r0,r1"
+          },
+          {
+            "offset": "0x0000002e",
+            "mnemonic": "jsr",
+            "operands": "@r1"
+          }
+        ],
+        "interpretation": "Valid SH-2 instructions are static executable evidence; exact load address and runtime ownership remain unresolved."
+      },
+      "mbi1_structure": {
+        "marker_offsets": [
+          "0x00000004",
+          "0x0000ae54",
+          "0x0000f050",
+          "0x0000f05c"
+        ],
+        "header_word_0x08": "0x00000001",
+        "header_word_0x0c": "0x0000f050",
+        "header_word_0x0c_points_to_mbi1": true,
+        "interpretation": "The marker and boundary relationship prove structure, but the MBI1 format and field semantics remain unresolved."
+      },
+      "filename_references": [
+        "hmm.bin",
+        "dirbuf.bin",
+        "normal.bin",
+        "mvsopen.bin"
+      ],
+      "diagnostic_strings": [
+        "!0EXT RAM ERROR.",
+        "0123456789ABCDEF",
+        "CPU ADDRESS ERROR",
+        "DMA ADDRESS ERROR",
+        "0 DIV ERROR",
+        "Error!! Next packet's command is illigal. infinity loop!"
+      ],
+      "address_leads": {
+        "high_work_ram_candidates": {
+          "aligned_word_count": 954,
+          "sample": [
+            {
+              "file_offset": "0x0000007c",
+              "value": "0x06000340"
+            },
+            {
+              "file_offset": "0x00000080",
+              "value": "0x06002238"
+            },
+            {
+              "file_offset": "0x00000084",
+              "value": "0x06000310"
+            },
+            {
+              "file_offset": "0x000000cc",
+              "value": "0x06002158"
+            },
+            {
+              "file_offset": "0x000000d0",
+              "value": "0x06011b00"
+            },
+            {
+              "file_offset": "0x000000d4",
+              "value": "0x060020e0"
+            },
+            {
+              "file_offset": "0x000000d8",
+              "value": "0x06018b00"
+            },
+            {
+              "file_offset": "0x000000dc",
+              "value": "0x0600bd68"
+            },
+            {
+              "file_offset": "0x000000f0",
+              "value": "0x0600026c"
+            },
+            {
+              "file_offset": "0x00000114",
+              "value": "0x06003b96"
+            },
+            {
+              "file_offset": "0x0000012c",
+              "value": "0x06002130"
+            },
+            {
+              "file_offset": "0x00000148",
+              "value": "0x0600214c"
+            },
+            {
+              "file_offset": "0x000001ac",
+              "value": "0x060021b8"
+            },
+            {
+              "file_offset": "0x000001b0",
+              "value": "0x06000310"
+            },
+            {
+              "file_offset": "0x000001b4",
+              "value": "0x06000300"
+            },
+            {
+              "file_offset": "0x000001b8",
+              "value": "0x06002238"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "cartridge_dram_candidates": {
+          "aligned_word_count": 10,
+          "sample": [
+            {
+              "file_offset": "0x00000a4c",
+              "value": "0x22488900"
+            },
+            {
+              "file_offset": "0x00007d18",
+              "value": "0x22427f18"
+            },
+            {
+              "file_offset": "0x00008358",
+              "value": "0x22426043"
+            },
+            {
+              "file_offset": "0x000083b0",
+              "value": "0x224263f3"
+            },
+            {
+              "file_offset": "0x00008470",
+              "value": "0x2242e010"
+            },
+            {
+              "file_offset": "0x00008c0c",
+              "value": "0x225103fc"
+            },
+            {
+              "file_offset": "0x00009238",
+              "value": "0x22406380"
+            },
+            {
+              "file_offset": "0x000095a0",
+              "value": "0x2240d31c"
+            },
+            {
+              "file_offset": "0x000095bc",
+              "value": "0x22606052"
+            },
+            {
+              "file_offset": "0x000095c4",
+              "value": "0x22406052"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "scsp_space_candidates": {
+          "aligned_word_count": 1,
+          "sample": [
+            {
+              "file_offset": "0x0000bfd8",
+              "value": "0x25a0042c"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "vdp1_space_candidates": {
+          "aligned_word_count": 4,
+          "sample": [
+            {
+              "file_offset": "0x000007c8",
+              "value": "0x25c00004"
+            },
+            {
+              "file_offset": "0x00000904",
+              "value": "0x25c00000"
+            },
+            {
+              "file_offset": "0x000080ec",
+              "value": "0x25c26ef3"
+            },
+            {
+              "file_offset": "0x0000e54c",
+              "value": "0x25c00040"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "vdp2_space_candidates": {
+          "aligned_word_count": 5,
+          "sample": [
+            {
+              "file_offset": "0x00000998",
+              "value": "0x25e00000"
+            },
+            {
+              "file_offset": "0x0000099c",
+              "value": "0x25e20000"
+            },
+            {
+              "file_offset": "0x00007fec",
+              "value": "0x25e266d3"
+            },
+            {
+              "file_offset": "0x00008940",
+              "value": "0x25e94509"
+            },
+            {
+              "file_offset": "0x0000e67c",
+              "value": "0x25e80000"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "exact_canonical_constants": [
+          {
+            "value": "0x25c00000",
+            "candidate_label": "vdp1_vram_base_candidate",
+            "offsets": [
+              "0x00000904"
+            ]
+          },
+          {
+            "value": "0x25e00000",
+            "candidate_label": "vdp2_vram_base_candidate",
+            "offsets": [
+              "0x00000998"
+            ]
+          },
+          {
+            "value": "0x25e20000",
+            "candidate_label": "vdp2_vram_offset_0x20000_candidate",
+            "offsets": [
+              "0x0000099c"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "path": "MM.BIN",
+      "bytes": 848396,
+      "sha256": "103a3d1d9df085cd9ae3a6cea1600f37e988dd4719361666296fb147fc0d29c9",
+      "candidate_role": "game_content_index_or_loader_candidate",
+      "role_confidence": "LOW",
+      "first_32_bytes_hex": "a0 06 00 09 4d 42 49 31 00 00 00 02 00 0c c6 90 d4 02 41 08 31 4c 61 12 41 2b 00 09 06 01 8b 20",
+      "sh2_entry_evidence": {
+        "entry_offset": "0x00000010",
+        "branch_over_mbi1_header": true,
+        "sample": [
+          {
+            "offset": "0x00000010",
+            "mnemonic": "mov.l",
+            "operands": "0x1c,r4"
+          },
+          {
+            "offset": "0x00000012",
+            "mnemonic": "shll2",
+            "operands": "r1"
+          },
+          {
+            "offset": "0x00000014",
+            "mnemonic": "add",
+            "operands": "r4,r1"
+          },
+          {
+            "offset": "0x00000016",
+            "mnemonic": "mov.l",
+            "operands": "@r1,r1"
+          },
+          {
+            "offset": "0x00000018",
+            "mnemonic": "jmp",
+            "operands": "@r1"
+          },
+          {
+            "offset": "0x0000001a",
+            "mnemonic": "nop",
+            "operands": ""
+          }
+        ],
+        "interpretation": "Valid SH-2 instructions are static executable evidence; exact load address and runtime ownership remain unresolved."
+      },
+      "mbi1_structure": {
+        "marker_offsets": [
+          "0x00000004",
+          "0x000cc690",
+          "0x000cf205"
+        ],
+        "header_word_0x08": "0x00000002",
+        "header_word_0x0c": "0x000cc690",
+        "header_word_0x0c_points_to_mbi1": true,
+        "interpretation": "The marker and boundary relationship prove structure, but the MBI1 format and field semantics remain unresolved."
+      },
+      "filename_references": [
+        "dmemfix.pac",
+        "pl00.pac",
+        "pl01.pac",
+        "pl02.pac",
+        "pl03.pac",
+        "pl04.pac",
+        "pl05.pac",
+        "pl06.pac",
+        "pl07.pac",
+        "pl08.pac",
+        "pl09.pac",
+        "pl0a.pac",
+        "pl0b.pac",
+        "pl0c.pac",
+        "pl0d.pac",
+        "pl0e.pac",
+        "pl0f.pac",
+        "pl10.pac",
+        "pl11.pac",
+        "pl12.pac",
+        "pl13.pac",
+        "pl16.pac",
+        "so00.pac",
+        "so01.pac",
+        "so02.pac",
+        "so03.pac",
+        "so04.pac",
+        "so05.pac",
+        "so06.pac",
+        "so07.pac",
+        "so08.pac",
+        "so09.pac",
+        "so0a.pac",
+        "memfix.pac",
+        "sel.pac",
+        "selcmp.pac",
+        "sel2.pac",
+        "end.pac",
+        "cmnse.pac",
+        "bg00.pac",
+        "bg01.pac",
+        "bg02.pac",
+        "bg03.pac",
+        "bg04.pac",
+        "bg05.pac",
+        "bg06.pac",
+        "bg07.pac",
+        "bg08.pac",
+        "bg09.pac",
+        "bg0a.pac",
+        "bg0b.pac",
+        "bg0c.pac",
+        "bg0d.pac",
+        "bg0e.pac",
+        "bg0f.pac",
+        "bgsel.pac",
+        "mc00.pac",
+        "mc01.pac",
+        "mc02.pac",
+        "mc03.pac",
+        "mc04.pac",
+        "mc05.pac",
+        "mc06.pac",
+        "mc07.pac",
+        "mc08.pac",
+        "mc09.pac",
+        "mc0a.pac",
+        "mc0b.pac",
+        "mc0c.pac",
+        "mc0d.pac",
+        "mc0e.pac",
+        "mc0f.pac",
+        "mc10.pac",
+        "mc11.pac",
+        "mc12.pac",
+        "mc13.pac",
+        "mc14.pac",
+        "mc15.pac",
+        "mc16.pac",
+        "me.pac",
+        "M01_OPEN.ADP",
+        "M02_SELE.ADP",
+        "M03_HERE.ADP",
+        "M04_VS.ADP",
+        "M06_EXP.ADP",
+        "M078QLGR.ADP",
+        "M09_CONT.ADP",
+        "M0A_OVER.ADP",
+        "M0B_DBOS.ADP",
+        "M0C_SAPO.ADP",
+        "M0D_SCYC.ADP",
+        "M0E_SCAP.ADP",
+        "M0F_SHUL.ADP",
+        "M10_SWOL.ADP",
+        "M11_SSHU.ADP",
+        "M12_SOME.ADP",
+        "M13_SSPI.ADP",
+        "M14_SBLA.ADP",
+        "M15_SRYU.ADP",
+        "M16_SKEN.ADP",
+        "M17_SCHU.ADP",
+        "M18_SDHA.ADP",
+        "M19_SZAN.ADP",
+        "M1A_SVEG.ADP",
+        "M1B_SGO1.ADP",
+        "M1C_SSAK.ADP",
+        "M1D_SKIN.ADP",
+        "M1E_SDAN.ADP",
+        "M20_SSTA.ADP",
+        "M21_EGOK.ADP",
+        "M22_EHON.ADP",
+        "M23_ECAP.ADP",
+        "M24_EDAN.ADP",
+        "M25_EGOU.ADP",
+        "M26_ECHU.ADP",
+        "M27_EHUL.ADP",
+        "M28_EWOL.ADP",
+        "M29_ESH1.ADP",
+        "M2A_ESH2.ADP",
+        "M2B_ESPI.ADP",
+        "M2C_ERYU.ADP",
+        "M2D_EDHA.ADP",
+        "M2E_ENO1.ADP",
+        "M2F_ENO2.ADP",
+        "M30_ECYC.ADP",
+        "M31_SKAK.ADP",
+        "M32_EINT.ADP",
+        "M33_DNOR.ADP",
+        "M05_WIN.ADP",
+        "M06_ASER.ADP",
+        "M05_WI00.ADP",
+        "M05_WI01.ADP",
+        "M05_WI02.ADP",
+        "M05_WI03.ADP",
+        "M05_WI04.ADP",
+        "M05_WI05.ADP",
+        "M05_WI06.ADP",
+        "M05_WI07.ADP",
+        "M05_WI08.ADP",
+        "M05_WI09.ADP",
+        "M05_WI0A.ADP",
+        "M05_WI0B.ADP",
+        "M05_WI0C.ADP",
+        "M05_WI0D.ADP",
+        "M05_WI0E.ADP",
+        "M05_WI0F.ADP",
+        "M05_WI10.ADP",
+        "M05_WI11.ADP",
+        "M05_WI12.ADP"
+      ],
+      "diagnostic_strings": [
+        "0123456789ABCDEF",
+        "33#\"C32243##CC22D43#TCC2CD43UCCC\"",
+        "\"###\"\"23\"\"##\"2\"3\"###\"\"22\"\"##\"\"22DTVg4EefDTVV4EUfCEVV4DUfCDTV4EEUgw",
+        "\"#!\"\"4Vgv4Ufg3FVg#EVg3Def#4FV23EW##EWTD44eCCCeT4CfUCDwfUD",
+        "DDDTDDDDDDDDDDDCCDD444D33CC3344EDDDDDDDDDDDDDDDDDDDDDDDDDDD444DDEEEDDTTDDDEDDDTDDEEDDDTDDEEDDDUV",
+        "veDCCfTDDfeTDfffUffffffffffffffffCCCCDD44DCCCUUUDfffffffwffwxfww",
+        "DVDD44veCDx",
+        "!\"\"22\"\"##\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"3333##332223\"\"##\"\"\"2\"\"\"#\"\"\"2\"\"\"\"CCCD344433CC33343333#3342233\"##",
+        "3DDEUDDTUDDEU4DTUDDEE4DTUCDEE4DDTVfvwefggVVffefffVVVfUeeeUVVVTUUUwvvfggfffffVfeeefVUUeeUUUEEUTTT",
+        "3UEDETTDTEDDEDDDD4DDDCDDD44DD3CCDEUEETTTUEDEETDTUDEEUDDTUDEEUDDTUVffvUfffVfffefeeVfVVUeeeVVVVUeU",
+        "\"\"\"\"\"23\"##3\"\"23\"\"#3\"\"33\"##3\"\"23\"\"#3CDDD44DD3CCC344433C3333333333333EEEEDDDDDDDD44443333333333333",
+        "333EEDEDDDDCCCC444433C3333333333333EEEDDDDDC444333C3333333333333333DDDDDCDC4444CCCC4334333333333",
+        "3334333C3333333333333333333333333333444333C334433333333332333##22224EEEDDDU4DEECDDU34ED33DD#33D2",
+        "33#3333#\"\"22\"\"#\"\"\"22\"\"##\"\"222\"33##3322\"##3\"\"23\"\"##\"\"\"2\"\"\"\"\"\"\"\"\"\"\"\"2\"\"\"3DTU34DE##CD2244###C\"234\"#",
+        "!DDUE4DTT3DTD3ED4#D3C2332\"\"##!\"\"\"EEEUDDDDCCCD4444333323##\"\"22\"!\"#VVfgUeevEEVW4TUfCEEV44TU33DE##4",
+        "224E#3CD#344\"33D",
+        "TUfxEVVxTUegEEVgDVUg4EVWCDUf",
+        "!!44DV3CDU344V3CDE#44F33DE#44F23DEg",
+        "34###D224T33EE#\"\"\"22223#34C3DDCDTT4EUUDUVVEUee\"\"\"\"2222DD43DDCCTUDDUUTTUUUEeUUT\"",
+        "3EV#4Ue#DVV34Ue4DUT34EE3CDTUC3#U422eC3#T434UC33UT34DCCCD44E#3CE444TCCEE4DTVDEEe4TUVEEVgEVfwEgy",
+        "TUVVVEEUUDTUTDEEUDDTTDDEEDDDDDDDDVVVVUUUUUUTTUEEETTDDDDD4CCCCD44DVVffUfffUVfeEVVVEEUeDTUUDEEEDDD",
+        "\"\"2344D3CDE#4DT3CE544SS2435\"33T#34DDDDTDEEETTUU5EUeTUVVEEegTVVwEegxUfw",
+        "7uCCCDD44CCCD44DCC3443#CC2243#\"C22\"DDD4CCCC333#2222#\"\"\"\"\"!!\"\"",
+        "##!\"23\"##3\"234##3C23CD#44D3CDE44DTDEEUDTUV5EVfTUffEEfwTVgwEffxVfx",
+        "\"23\"\"#3\"\"33\"334#33C#34433CD34DU3DEV4DUfDEVgUUfgUfgxVvw",
+        "\"2\"###\"23C3#44#3CD##34233D#33E33EU3DEEDTTVEEUgTUVfEUfwUVgwVfwvegvSgwe1wu",
+        "\"22###323443CCDDDDU\"\"##\"223##3C3444CCDD4DDUDUU2UC!",
+        "eCDDDDDDDDDDDTDDDEDDDDDDDDDDDDDDDDDDDVDDEVDDEVDDEVVeUVEVwgDDUxDEVfg",
+        "eDeDDDTCCCdD43fTCC",
+        "eTeDDDDDDCDEC3Cc336333cCC3",
+        "\"\"#!4CD#C4EDDEfEVfvVgggw",
+        "S33uC33d333T333C3333344C3CD3###332334343C3C444DCCDUDEVgEVfx344hCCUy4Vg"
+      ],
+      "address_leads": {
+        "high_work_ram_candidates": {
+          "aligned_word_count": 7610,
+          "sample": [
+            {
+              "file_offset": "0x0000001c",
+              "value": "0x06018b20"
+            },
+            {
+              "file_offset": "0x00000020",
+              "value": "0x06018be8"
+            },
+            {
+              "file_offset": "0x00000024",
+              "value": "0x06018c34"
+            },
+            {
+              "file_offset": "0x00000028",
+              "value": "0x06018c2c"
+            },
+            {
+              "file_offset": "0x0000002c",
+              "value": "0x06018e22"
+            },
+            {
+              "file_offset": "0x00000030",
+              "value": "0x06018e3e"
+            },
+            {
+              "file_offset": "0x00000034",
+              "value": "0x06018e5a"
+            },
+            {
+              "file_offset": "0x00000038",
+              "value": "0x06018e7a"
+            },
+            {
+              "file_offset": "0x0000003c",
+              "value": "0x06018c72"
+            },
+            {
+              "file_offset": "0x00000040",
+              "value": "0x06018d38"
+            },
+            {
+              "file_offset": "0x00000044",
+              "value": "0x06018e0c"
+            },
+            {
+              "file_offset": "0x00000048",
+              "value": "0x06018cb4"
+            },
+            {
+              "file_offset": "0x0000004c",
+              "value": "0x06018d7e"
+            },
+            {
+              "file_offset": "0x00000050",
+              "value": "0x06018e12"
+            },
+            {
+              "file_offset": "0x00000054",
+              "value": "0x06018cf6"
+            },
+            {
+              "file_offset": "0x00000058",
+              "value": "0x06018dc6"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "cartridge_dram_candidates": {
+          "aligned_word_count": 60,
+          "sample": [
+            {
+              "file_offset": "0x00000514",
+              "value": "0x22488912"
+            },
+            {
+              "file_offset": "0x0000055c",
+              "value": "0x224889ef"
+            },
+            {
+              "file_offset": "0x00000560",
+              "value": "0x22494210"
+            },
+            {
+              "file_offset": "0x000005b4",
+              "value": "0x22488915"
+            },
+            {
+              "file_offset": "0x0000062c",
+              "value": "0x224889db"
+            },
+            {
+              "file_offset": "0x00000630",
+              "value": "0x22494210"
+            },
+            {
+              "file_offset": "0x00002434",
+              "value": "0x22404009"
+            },
+            {
+              "file_offset": "0x0000249c",
+              "value": "0x22404009"
+            },
+            {
+              "file_offset": "0x000044b4",
+              "value": "0x22493e2c"
+            },
+            {
+              "file_offset": "0x00005824",
+              "value": "0x22492228"
+            },
+            {
+              "file_offset": "0x0000724c",
+              "value": "0x22417202"
+            },
+            {
+              "file_offset": "0x00008448",
+              "value": "0x22722232"
+            },
+            {
+              "file_offset": "0x00008450",
+              "value": "0x22722232"
+            },
+            {
+              "file_offset": "0x00008f1c",
+              "value": "0x22432232"
+            },
+            {
+              "file_offset": "0x0000e088",
+              "value": "0x22688459"
+            },
+            {
+              "file_offset": "0x0000e814",
+              "value": "0x22454123"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "scsp_space_candidates": {
+          "aligned_word_count": 5,
+          "sample": [
+            {
+              "file_offset": "0x00003390",
+              "value": "0x25a73309"
+            },
+            {
+              "file_offset": "0x000033ac",
+              "value": "0x25a7330a"
+            },
+            {
+              "file_offset": "0x00016344",
+              "value": "0x25a025b0"
+            },
+            {
+              "file_offset": "0x000726a4",
+              "value": "0x25ac716a"
+            },
+            {
+              "file_offset": "0x0007efbc",
+              "value": "0x25a30470"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "vdp1_space_candidates": {
+          "aligned_word_count": 10,
+          "sample": [
+            {
+              "file_offset": "0x00003544",
+              "value": "0x25c00000"
+            },
+            {
+              "file_offset": "0x0000375c",
+              "value": "0x25c00040"
+            },
+            {
+              "file_offset": "0x00003e0c",
+              "value": "0x25c08000"
+            },
+            {
+              "file_offset": "0x0000423c",
+              "value": "0x25c08000"
+            },
+            {
+              "file_offset": "0x00004eb0",
+              "value": "0x25c08000"
+            },
+            {
+              "file_offset": "0x00039d50",
+              "value": "0x25c09199"
+            },
+            {
+              "file_offset": "0x0006f290",
+              "value": "0x25ca7bde"
+            },
+            {
+              "file_offset": "0x00074958",
+              "value": "0x25c927fe"
+            },
+            {
+              "file_offset": "0x0007a670",
+              "value": "0x25c25a24"
+            },
+            {
+              "file_offset": "0x00080354",
+              "value": "0x25c08000"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "vdp2_space_candidates": {
+          "aligned_word_count": 35,
+          "sample": [
+            {
+              "file_offset": "0x00001e64",
+              "value": "0x25e60000"
+            },
+            {
+              "file_offset": "0x00001ec8",
+              "value": "0x25e01000"
+            },
+            {
+              "file_offset": "0x00002140",
+              "value": "0x25e60000"
+            },
+            {
+              "file_offset": "0x00002168",
+              "value": "0x25e62000"
+            },
+            {
+              "file_offset": "0x0000216c",
+              "value": "0x25e80000"
+            },
+            {
+              "file_offset": "0x000027f4",
+              "value": "0x25e63000"
+            },
+            {
+              "file_offset": "0x00002828",
+              "value": "0x25e63c00"
+            },
+            {
+              "file_offset": "0x00002970",
+              "value": "0x25e68000"
+            },
+            {
+              "file_offset": "0x000029b0",
+              "value": "0x25e6c000"
+            },
+            {
+              "file_offset": "0x00002a18",
+              "value": "0x25e70000"
+            },
+            {
+              "file_offset": "0x00002e14",
+              "value": "0x25e60000"
+            },
+            {
+              "file_offset": "0x00002ed8",
+              "value": "0x25e00000"
+            },
+            {
+              "file_offset": "0x00007fdc",
+              "value": "0x25e64000"
+            },
+            {
+              "file_offset": "0x00007fe0",
+              "value": "0x25e64800"
+            },
+            {
+              "file_offset": "0x00007fe4",
+              "value": "0x25e65000"
+            },
+            {
+              "file_offset": "0x00007fe8",
+              "value": "0x25e65800"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "exact_canonical_constants": [
+          {
+            "value": "0x25c00000",
+            "candidate_label": "vdp1_vram_base_candidate",
+            "offsets": [
+              "0x00003544"
+            ]
+          },
+          {
+            "value": "0x25e00000",
+            "candidate_label": "vdp2_vram_base_candidate",
+            "offsets": [
+              "0x00002ed8"
+            ]
+          },
+          {
+            "value": "0x25e60000",
+            "candidate_label": "vdp2_vram_offset_0x60000_candidate",
+            "offsets": [
+              "0x00001e64",
+              "0x00002140",
+              "0x00002e14",
+              "0x00081670",
+              "0x00081c7c"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "path": "00LOAD.BIN",
+      "bytes": 39296,
+      "sha256": "ecddbac80c531fe97967e6dc099aa108a2b93cde7275e3433287f9daf2edb40e",
+      "candidate_role": "boot_or_load_orchestrator_candidate",
+      "role_confidence": "LOW",
+      "first_32_bytes_hex": "b0 14 00 09 d8 07 b0 37 00 09 d1 20 41 0b 00 09 b0 0c 00 09 d8 04 b0 2f 00 09 e0 01 d1 1b 41 2b",
+      "sh2_entry_evidence": {
+        "entry_offset": "0x00000000",
+        "branch_over_mbi1_header": false,
+        "sample": [
+          {
+            "offset": "0x00000000",
+            "mnemonic": "bsr",
+            "operands": "0x2c"
+          },
+          {
+            "offset": "0x00000002",
+            "mnemonic": "nop",
+            "operands": ""
+          },
+          {
+            "offset": "0x00000004",
+            "mnemonic": "mov.l",
+            "operands": "0x24,r8"
+          },
+          {
+            "offset": "0x00000006",
+            "mnemonic": "bsr",
+            "operands": "0x78"
+          },
+          {
+            "offset": "0x00000008",
+            "mnemonic": "nop",
+            "operands": ""
+          },
+          {
+            "offset": "0x0000000a",
+            "mnemonic": "mov.l",
+            "operands": "0x8c,r1"
+          },
+          {
+            "offset": "0x0000000c",
+            "mnemonic": "jsr",
+            "operands": "@r1"
+          },
+          {
+            "offset": "0x0000000e",
+            "mnemonic": "nop",
+            "operands": ""
+          },
+          {
+            "offset": "0x00000010",
+            "mnemonic": "bsr",
+            "operands": "0x2c"
+          },
+          {
+            "offset": "0x00000012",
+            "mnemonic": "nop",
+            "operands": ""
+          },
+          {
+            "offset": "0x00000014",
+            "mnemonic": "mov.l",
+            "operands": "0x28,r8"
+          },
+          {
+            "offset": "0x00000016",
+            "mnemonic": "bsr",
+            "operands": "0x78"
+          },
+          {
+            "offset": "0x00000018",
+            "mnemonic": "nop",
+            "operands": ""
+          },
+          {
+            "offset": "0x0000001a",
+            "mnemonic": "mov",
+            "operands": "#1,r0"
+          },
+          {
+            "offset": "0x0000001c",
+            "mnemonic": "mov.l",
+            "operands": "0x8c,r1"
+          },
+          {
+            "offset": "0x0000001e",
+            "mnemonic": "jmp",
+            "operands": "@r1"
+          }
+        ],
+        "interpretation": "Valid SH-2 instructions are static executable evidence; exact load address and runtime ownership remain unresolved."
+      },
+      "mbi1_structure": {
+        "marker_offsets": [],
+        "header_word_0x08": null,
+        "header_word_0x0c": null,
+        "header_word_0x0c_points_to_mbi1": false,
+        "interpretation": "The marker and boundary relationship prove structure, but the MBI1 format and field semantics remain unresolved."
+      },
+      "filename_references": [
+        "sys.bin",
+        "cpk.bin"
+      ],
+      "diagnostic_strings": [],
+      "address_leads": {
+        "high_work_ram_candidates": {
+          "aligned_word_count": 431,
+          "sample": [
+            {
+              "file_offset": "0x00000024",
+              "value": "0x060f00c4"
+            },
+            {
+              "file_offset": "0x00000028",
+              "value": "0x060f00bc"
+            },
+            {
+              "file_offset": "0x00000060",
+              "value": "0x06000340"
+            },
+            {
+              "file_offset": "0x00000064",
+              "value": "0x060f01a0"
+            },
+            {
+              "file_offset": "0x00000068",
+              "value": "0x06000310"
+            },
+            {
+              "file_offset": "0x00000074",
+              "value": "0x0600026c"
+            },
+            {
+              "file_offset": "0x0000008c",
+              "value": "0x06002000"
+            },
+            {
+              "file_offset": "0x000000b0",
+              "value": "0x060f1afe"
+            },
+            {
+              "file_offset": "0x00000114",
+              "value": "0x060f0120"
+            },
+            {
+              "file_offset": "0x00000118",
+              "value": "0x06000310"
+            },
+            {
+              "file_offset": "0x0000011c",
+              "value": "0x06000300"
+            },
+            {
+              "file_offset": "0x00000120",
+              "value": "0x060f01a0"
+            },
+            {
+              "file_offset": "0x00000184",
+              "value": "0x060f0c7e"
+            },
+            {
+              "file_offset": "0x00000188",
+              "value": "0x060f0c7e"
+            },
+            {
+              "file_offset": "0x0000018c",
+              "value": "0x060f0c7e"
+            },
+            {
+              "file_offset": "0x000001f0",
+              "value": "0x060f01fc"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "cartridge_dram_candidates": {
+          "aligned_word_count": 10,
+          "sample": [
+            {
+              "file_offset": "0x000009b4",
+              "value": "0x22488900"
+            },
+            {
+              "file_offset": "0x00007c80",
+              "value": "0x22427f18"
+            },
+            {
+              "file_offset": "0x000082c0",
+              "value": "0x22426043"
+            },
+            {
+              "file_offset": "0x00008318",
+              "value": "0x224263f3"
+            },
+            {
+              "file_offset": "0x000083d8",
+              "value": "0x2242e010"
+            },
+            {
+              "file_offset": "0x00008b74",
+              "value": "0x225103fc"
+            },
+            {
+              "file_offset": "0x000091a0",
+              "value": "0x22406380"
+            },
+            {
+              "file_offset": "0x00009508",
+              "value": "0x2240d31c"
+            },
+            {
+              "file_offset": "0x00009524",
+              "value": "0x22606052"
+            },
+            {
+              "file_offset": "0x0000952c",
+              "value": "0x22406052"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "scsp_space_candidates": {
+          "aligned_word_count": 0,
+          "sample": [],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "vdp1_space_candidates": {
+          "aligned_word_count": 3,
+          "sample": [
+            {
+              "file_offset": "0x00000730",
+              "value": "0x25c00004"
+            },
+            {
+              "file_offset": "0x0000086c",
+              "value": "0x25c00000"
+            },
+            {
+              "file_offset": "0x00008054",
+              "value": "0x25c26ef3"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "vdp2_space_candidates": {
+          "aligned_word_count": 4,
+          "sample": [
+            {
+              "file_offset": "0x00000900",
+              "value": "0x25e00000"
+            },
+            {
+              "file_offset": "0x00000904",
+              "value": "0x25e20000"
+            },
+            {
+              "file_offset": "0x00007f54",
+              "value": "0x25e266d3"
+            },
+            {
+              "file_offset": "0x000088a8",
+              "value": "0x25e94509"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "exact_canonical_constants": [
+          {
+            "value": "0x25c00000",
+            "candidate_label": "vdp1_vram_base_candidate",
+            "offsets": [
+              "0x0000086c"
+            ]
+          },
+          {
+            "value": "0x25e00000",
+            "candidate_label": "vdp2_vram_base_candidate",
+            "offsets": [
+              "0x00000900"
+            ]
+          },
+          {
+            "value": "0x25e20000",
+            "candidate_label": "vdp2_vram_offset_0x20000_candidate",
+            "offsets": [
+              "0x00000904"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "path": "CPK.BIN",
+      "bytes": 349680,
+      "sha256": "0669b820dc956ae042f6a5098f208024d3b93ac1b191c70d51526f9c112e7a98",
+      "candidate_role": "saturn_platform_support_runtime_candidate",
+      "role_confidence": "LOW",
+      "first_32_bytes_hex": "00 2a d1 03 21 02 d0 23 6f 03 d0 21 40 2b 00 09 06 00 20 98 d0 04 40 0e 00 09 00 09 00 09 00 09",
+      "sh2_entry_evidence": {
+        "entry_offset": "0x00000000",
+        "branch_over_mbi1_header": false,
+        "sample": [
+          {
+            "offset": "0x00000000",
+            "mnemonic": "sts",
+            "operands": "pr,r0"
+          },
+          {
+            "offset": "0x00000002",
+            "mnemonic": "mov.l",
+            "operands": "0x10,r1"
+          },
+          {
+            "offset": "0x00000004",
+            "mnemonic": "mov.l",
+            "operands": "r0,@r1"
+          },
+          {
+            "offset": "0x00000006",
+            "mnemonic": "mov.l",
+            "operands": "0x94,r0"
+          },
+          {
+            "offset": "0x00000008",
+            "mnemonic": "mov",
+            "operands": "r0,r15"
+          },
+          {
+            "offset": "0x0000000a",
+            "mnemonic": "mov.l",
+            "operands": "0x90,r0"
+          },
+          {
+            "offset": "0x0000000c",
+            "mnemonic": "jmp",
+            "operands": "@r0"
+          },
+          {
+            "offset": "0x0000000e",
+            "mnemonic": "nop",
+            "operands": ""
+          }
+        ],
+        "interpretation": "Valid SH-2 instructions are static executable evidence; exact load address and runtime ownership remain unresolved."
+      },
+      "mbi1_structure": {
+        "marker_offsets": [],
+        "header_word_0x08": null,
+        "header_word_0x0c": null,
+        "header_word_0x0c_points_to_mbi1": false,
+        "interpretation": "The marker and boundary relationship prove structure, but the MBI1 format and field semantics remain unresolved."
+      },
+      "filename_references": [
+        "ERR1.BIN",
+        "ERR2.BIN",
+        "ERR3.BIN",
+        "ERR4.BIN",
+        "ERR5.BIN",
+        "CR.BIN"
+      ],
+      "diagnostic_strings": [
+        "UeCaCdc7l4r",
+        "cDbt3 ",
+        "CD001",
+        "CDC Version 1.22 1997-02-27",
+        "ecdcC+n",
+        "cdS ",
+        "UYVcd",
+        "NmCdRv",
+        "mCdc4",
+        "cDflF",
+        "cDc<4",
+        "FeccDc<C",
+        "%;cDc<C",
+        "$eccDc<C",
+        "cDc<C",
+        "4cDecc<%;cDc<C",
+        "%;cDc<C(%;'Rc",
+        "eccDc<4",
+        "cDc<C(4",
+        "cD%04",
+        "VWcD&0v"
+      ],
+      "address_leads": {
+        "high_work_ram_candidates": {
+          "aligned_word_count": 1780,
+          "sample": [
+            {
+              "file_offset": "0x00000010",
+              "value": "0x06002098"
+            },
+            {
+              "file_offset": "0x0000002c",
+              "value": "0x06002098"
+            },
+            {
+              "file_offset": "0x0000008c",
+              "value": "0x06080000"
+            },
+            {
+              "file_offset": "0x00000090",
+              "value": "0x06040fd0"
+            },
+            {
+              "file_offset": "0x00000094",
+              "value": "0x060efc00"
+            },
+            {
+              "file_offset": "0x000000d8",
+              "value": "0x0600026c"
+            },
+            {
+              "file_offset": "0x0000020c",
+              "value": "0x0600209c"
+            },
+            {
+              "file_offset": "0x00000300",
+              "value": "0x060412ec"
+            },
+            {
+              "file_offset": "0x00000304",
+              "value": "0x06041d30"
+            },
+            {
+              "file_offset": "0x00000308",
+              "value": "0x06041a12"
+            },
+            {
+              "file_offset": "0x0000030c",
+              "value": "0x06041f6e"
+            },
+            {
+              "file_offset": "0x00000310",
+              "value": "0x060421f8"
+            },
+            {
+              "file_offset": "0x00000314",
+              "value": "0x06042210"
+            },
+            {
+              "file_offset": "0x00000318",
+              "value": "0x06042650"
+            },
+            {
+              "file_offset": "0x00000320",
+              "value": "0x06042684"
+            },
+            {
+              "file_offset": "0x00000324",
+              "value": "0x06042068"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "cartridge_dram_candidates": {
+          "aligned_word_count": 50,
+          "sample": [
+            {
+              "file_offset": "0x000008f4",
+              "value": "0x22400000"
+            },
+            {
+              "file_offset": "0x000008f8",
+              "value": "0x22600000"
+            },
+            {
+              "file_offset": "0x00001948",
+              "value": "0x22492059"
+            },
+            {
+              "file_offset": "0x0003f28c",
+              "value": "0x224889fb"
+            },
+            {
+              "file_offset": "0x0003f3e0",
+              "value": "0x2241637d"
+            },
+            {
+              "file_offset": "0x0003ff68",
+              "value": "0x2259000b"
+            },
+            {
+              "file_offset": "0x0004008c",
+              "value": "0x22488908"
+            },
+            {
+              "file_offset": "0x000400d0",
+              "value": "0x22488906"
+            },
+            {
+              "file_offset": "0x000400fc",
+              "value": "0x22488906"
+            },
+            {
+              "file_offset": "0x00040140",
+              "value": "0x22488d07"
+            },
+            {
+              "file_offset": "0x00040154",
+              "value": "0x22488908"
+            },
+            {
+              "file_offset": "0x0004016c",
+              "value": "0x22488d21"
+            },
+            {
+              "file_offset": "0x000401b4",
+              "value": "0x22488d07"
+            },
+            {
+              "file_offset": "0x00041148",
+              "value": "0x22427fff"
+            },
+            {
+              "file_offset": "0x000412b8",
+              "value": "0x2242d308"
+            },
+            {
+              "file_offset": "0x000423bc",
+              "value": "0x2252a01c"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "scsp_space_candidates": {
+          "aligned_word_count": 14,
+          "sample": [
+            {
+              "file_offset": "0x00001008",
+              "value": "0x25a20000"
+            },
+            {
+              "file_offset": "0x00041410",
+              "value": "0x25a00000"
+            },
+            {
+              "file_offset": "0x00045aa4",
+              "value": "0x25a00000"
+            },
+            {
+              "file_offset": "0x00045aac",
+              "value": "0x25a00400"
+            },
+            {
+              "file_offset": "0x00045ab8",
+              "value": "0x25a00404"
+            },
+            {
+              "file_offset": "0x00045abc",
+              "value": "0x25a00412"
+            },
+            {
+              "file_offset": "0x00045ac0",
+              "value": "0x25a00414"
+            },
+            {
+              "file_offset": "0x00045acc",
+              "value": "0x25a00408"
+            },
+            {
+              "file_offset": "0x00045dcc",
+              "value": "0x25a00418"
+            },
+            {
+              "file_offset": "0x0004663c",
+              "value": "0x25a00000"
+            },
+            {
+              "file_offset": "0x000544d8",
+              "value": "0x25a00404"
+            },
+            {
+              "file_offset": "0x000544dc",
+              "value": "0x25a000a0"
+            },
+            {
+              "file_offset": "0x0005462c",
+              "value": "0x25a000a0"
+            },
+            {
+              "file_offset": "0x00054630",
+              "value": "0x25a00404"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "vdp1_space_candidates": {
+          "aligned_word_count": 7,
+          "sample": [
+            {
+              "file_offset": "0x00000bc4",
+              "value": "0x25c80000"
+            },
+            {
+              "file_offset": "0x00000bc8",
+              "value": "0x25c00000"
+            },
+            {
+              "file_offset": "0x00000d5c",
+              "value": "0x25c00000"
+            },
+            {
+              "file_offset": "0x00001194",
+              "value": "0x25c08000"
+            },
+            {
+              "file_offset": "0x0003f1a0",
+              "value": "0x25c00000"
+            },
+            {
+              "file_offset": "0x00041640",
+              "value": "0x25c26ef3"
+            },
+            {
+              "file_offset": "0x00046558",
+              "value": "0x25c27c08"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "vdp2_space_candidates": {
+          "aligned_word_count": 12,
+          "sample": [
+            {
+              "file_offset": "0x00000214",
+              "value": "0x25e00000"
+            },
+            {
+              "file_offset": "0x0000031c",
+              "value": "0x25e00000"
+            },
+            {
+              "file_offset": "0x00000d30",
+              "value": "0x25e7fffe"
+            },
+            {
+              "file_offset": "0x000402e8",
+              "value": "0x25e00000"
+            },
+            {
+              "file_offset": "0x000403ec",
+              "value": "0x25e00000"
+            },
+            {
+              "file_offset": "0x000403f4",
+              "value": "0x25e20000"
+            },
+            {
+              "file_offset": "0x000403fc",
+              "value": "0x25e40000"
+            },
+            {
+              "file_offset": "0x000404c0",
+              "value": "0x25e40000"
+            },
+            {
+              "file_offset": "0x000404c8",
+              "value": "0x25e60000"
+            },
+            {
+              "file_offset": "0x00040648",
+              "value": "0x25e00000"
+            },
+            {
+              "file_offset": "0x00041064",
+              "value": "0x25e00000"
+            },
+            {
+              "file_offset": "0x00041540",
+              "value": "0x25e266d3"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "exact_canonical_constants": [
+          {
+            "value": "0x22400000",
+            "candidate_label": "cartridge_dram_bank_0_base_candidate",
+            "offsets": [
+              "0x000008f4"
+            ]
+          },
+          {
+            "value": "0x22600000",
+            "candidate_label": "cartridge_dram_bank_1_base_candidate",
+            "offsets": [
+              "0x000008f8"
+            ]
+          },
+          {
+            "value": "0x25a00000",
+            "candidate_label": "scsp_space_base_candidate",
+            "offsets": [
+              "0x00041410",
+              "0x00045aa4",
+              "0x0004663c"
+            ]
+          },
+          {
+            "value": "0x25c00000",
+            "candidate_label": "vdp1_vram_base_candidate",
+            "offsets": [
+              "0x00000bc8",
+              "0x00000d5c",
+              "0x0003f1a0"
+            ]
+          },
+          {
+            "value": "0x25c80000",
+            "candidate_label": "vdp1_framebuffer_base_candidate",
+            "offsets": [
+              "0x00000bc4"
+            ]
+          },
+          {
+            "value": "0x25e00000",
+            "candidate_label": "vdp2_vram_base_candidate",
+            "offsets": [
+              "0x00000214",
+              "0x0000031c",
+              "0x000402e8",
+              "0x000403ec",
+              "0x00040648",
+              "0x00041064"
+            ]
+          },
+          {
+            "value": "0x25e20000",
+            "candidate_label": "vdp2_vram_offset_0x20000_candidate",
+            "offsets": [
+              "0x000403f4"
+            ]
+          },
+          {
+            "value": "0x25e40000",
+            "candidate_label": "vdp2_vram_offset_0x40000_candidate",
+            "offsets": [
+              "0x000403fc",
+              "0x000404c0"
+            ]
+          },
+          {
+            "value": "0x25e60000",
+            "candidate_label": "vdp2_vram_offset_0x60000_candidate",
+            "offsets": [
+              "0x000404c8"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "path": "CR.BIN",
+      "bytes": 39512,
+      "sha256": "6fdbd0d07516d9a595cb9c272140f1fd297c1fe24c91a205527c4d8c52af26f8",
+      "candidate_role": "data_or_resource_member_candidate",
+      "role_confidence": "LOW",
+      "first_32_bytes_hex": "42 4d 58 9a 00 00 00 00 00 00 56 00 00 00 28 00 00 00 60 01 00 00 e0 00 00 00 01 00 04 00 00 00",
+      "sh2_entry_evidence": {
+        "entry_offset": "0x00000000",
+        "branch_over_mbi1_header": false,
+        "sample": [],
+        "interpretation": "Valid SH-2 instructions are static executable evidence; exact load address and runtime ownership remain unresolved."
+      },
+      "mbi1_structure": {
+        "marker_offsets": [],
+        "header_word_0x08": null,
+        "header_word_0x0c": null,
+        "header_word_0x0c_points_to_mbi1": false,
+        "interpretation": "The marker and boundary relationship prove structure, but the MBI1 format and field semantics remain unresolved."
+      },
+      "filename_references": [],
+      "diagnostic_strings": [],
+      "address_leads": {
+        "high_work_ram_candidates": {
+          "aligned_word_count": 5,
+          "sample": [
+            {
+              "file_offset": "0x00003d2c",
+              "value": "0x06000066"
+            },
+            {
+              "file_offset": "0x00006e68",
+              "value": "0x06006666"
+            },
+            {
+              "file_offset": "0x00006edc",
+              "value": "0x06000666"
+            },
+            {
+              "file_offset": "0x00008758",
+              "value": "0x06000000"
+            },
+            {
+              "file_offset": "0x00008fc0",
+              "value": "0x06006600"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "cartridge_dram_candidates": {
+          "aligned_word_count": 2,
+          "sample": [
+            {
+              "file_offset": "0x000030d4",
+              "value": "0x22550000"
+            },
+            {
+              "file_offset": "0x00005190",
+              "value": "0x22550000"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "scsp_space_candidates": {
+          "aligned_word_count": 0,
+          "sample": [],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "vdp1_space_candidates": {
+          "aligned_word_count": 0,
+          "sample": [],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "vdp2_space_candidates": {
+          "aligned_word_count": 0,
+          "sample": [],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "exact_canonical_constants": []
+      }
+    },
+    {
+      "path": "MVSOPEN.BIN",
+      "bytes": 16720,
+      "sha256": "9b75057583ed8cd17eec6173ed2394a6a3e6c66e68ece5c5a625bb8e5836a1db",
+      "candidate_role": "opening_mode_runtime_candidate",
+      "role_confidence": "LOW",
+      "first_32_bytes_hex": "a0 06 00 09 4d 42 49 31 00 00 00 26 00 00 41 40 d1 28 21 02 d0 28 40 0b 4f 22 90 43 40 0e d2 27",
+      "sh2_entry_evidence": {
+        "entry_offset": "0x00000010",
+        "branch_over_mbi1_header": true,
+        "sample": [
+          {
+            "offset": "0x00000010",
+            "mnemonic": "mov.l",
+            "operands": "0xb4,r1"
+          },
+          {
+            "offset": "0x00000012",
+            "mnemonic": "mov.l",
+            "operands": "r0,@r1"
+          },
+          {
+            "offset": "0x00000014",
+            "mnemonic": "mov.l",
+            "operands": "0xb8,r0"
+          },
+          {
+            "offset": "0x00000016",
+            "mnemonic": "jsr",
+            "operands": "@r0"
+          },
+          {
+            "offset": "0x00000018",
+            "mnemonic": "sts.l",
+            "operands": "pr,@-r15"
+          },
+          {
+            "offset": "0x0000001a",
+            "mnemonic": "mov.w",
+            "operands": "0xa4,r0"
+          },
+          {
+            "offset": "0x0000001c",
+            "mnemonic": "ldc",
+            "operands": "r0,sr"
+          },
+          {
+            "offset": "0x0000001e",
+            "mnemonic": "mov.l",
+            "operands": "0xbc,r2"
+          },
+          {
+            "offset": "0x00000020",
+            "mnemonic": "bsr",
+            "operands": "0xec"
+          },
+          {
+            "offset": "0x00000022",
+            "mnemonic": "nop",
+            "operands": ""
+          },
+          {
+            "offset": "0x00000024",
+            "mnemonic": "mov.l",
+            "operands": "0xc0,r1"
+          },
+          {
+            "offset": "0x00000026",
+            "mnemonic": "mov.w",
+            "operands": "0xa6,r0"
+          },
+          {
+            "offset": "0x00000028",
+            "mnemonic": "mov.w",
+            "operands": "r0,@r1"
+          },
+          {
+            "offset": "0x0000002a",
+            "mnemonic": "mov.w",
+            "operands": "0xa8,r1"
+          },
+          {
+            "offset": "0x0000002c",
+            "mnemonic": "mov.w",
+            "operands": "0xaa,r0"
+          },
+          {
+            "offset": "0x0000002e",
+            "mnemonic": "mov.w",
+            "operands": "@r1,r2"
+          }
+        ],
+        "interpretation": "Valid SH-2 instructions are static executable evidence; exact load address and runtime ownership remain unresolved."
+      },
+      "mbi1_structure": {
+        "marker_offsets": [
+          "0x00000004",
+          "0x00004140",
+          "0x0000414c"
+        ],
+        "header_word_0x08": "0x00000026",
+        "header_word_0x0c": "0x00004140",
+        "header_word_0x0c_points_to_mbi1": true,
+        "interpretation": "The marker and boundary relationship prove structure, but the MBI1 format and field semantics remain unresolved."
+      },
+      "filename_references": [],
+      "diagnostic_strings": [
+        " !\"#$%&'()*+,-.0245679:;>?@ABCDEFIJKLMNOQRSUVWXYZ[\\]^bcdefghijklmnoprstuvwxyz}~"
+      ],
+      "address_leads": {
+        "high_work_ram_candidates": {
+          "aligned_word_count": 305,
+          "sample": [
+            {
+              "file_offset": "0x000000b4",
+              "value": "0x0602104c"
+            },
+            {
+              "file_offset": "0x000000b8",
+              "value": "0x0600de0c"
+            },
+            {
+              "file_offset": "0x000000bc",
+              "value": "0x060211bc"
+            },
+            {
+              "file_offset": "0x000000c0",
+              "value": "0x06040000"
+            },
+            {
+              "file_offset": "0x000000c4",
+              "value": "0x0601f2c8"
+            },
+            {
+              "file_offset": "0x000000c8",
+              "value": "0x0602118e"
+            },
+            {
+              "file_offset": "0x000000d4",
+              "value": "0x06000280"
+            },
+            {
+              "file_offset": "0x000000d8",
+              "value": "0x06021380"
+            },
+            {
+              "file_offset": "0x000000dc",
+              "value": "0x06000340"
+            },
+            {
+              "file_offset": "0x000000e4",
+              "value": "0x0600de5c"
+            },
+            {
+              "file_offset": "0x000000e8",
+              "value": "0x0601f374"
+            },
+            {
+              "file_offset": "0x00000150",
+              "value": "0x06000300"
+            },
+            {
+              "file_offset": "0x00000154",
+              "value": "0x06000310"
+            },
+            {
+              "file_offset": "0x000002f8",
+              "value": "0x0601f158"
+            },
+            {
+              "file_offset": "0x0000046c",
+              "value": "0x0601044c"
+            },
+            {
+              "file_offset": "0x00000470",
+              "value": "0x06021db0"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "cartridge_dram_candidates": {
+          "aligned_word_count": 1,
+          "sample": [
+            {
+              "file_offset": "0x000012bc",
+              "value": "0x22404009"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "scsp_space_candidates": {
+          "aligned_word_count": 0,
+          "sample": [],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "vdp1_space_candidates": {
+          "aligned_word_count": 6,
+          "sample": [
+            {
+              "file_offset": "0x0000035c",
+              "value": "0x25c00000"
+            },
+            {
+              "file_offset": "0x000009ac",
+              "value": "0x25c00040"
+            },
+            {
+              "file_offset": "0x00000d6c",
+              "value": "0x25c00040"
+            },
+            {
+              "file_offset": "0x0000156c",
+              "value": "0x25c06080"
+            },
+            {
+              "file_offset": "0x00001574",
+              "value": "0x25c43040"
+            },
+            {
+              "file_offset": "0x00001fd8",
+              "value": "0x25c00040"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "vdp2_space_candidates": {
+          "aligned_word_count": 31,
+          "sample": [
+            {
+              "file_offset": "0x000002f0",
+              "value": "0x25e00000"
+            },
+            {
+              "file_offset": "0x00000450",
+              "value": "0x25e7fffe"
+            },
+            {
+              "file_offset": "0x00000468",
+              "value": "0x25e63bfe"
+            },
+            {
+              "file_offset": "0x00000478",
+              "value": "0x25e63c00"
+            },
+            {
+              "file_offset": "0x00000530",
+              "value": "0x25e68000"
+            },
+            {
+              "file_offset": "0x00000704",
+              "value": "0x25e6959c"
+            },
+            {
+              "file_offset": "0x0000071c",
+              "value": "0x25e68e98"
+            },
+            {
+              "file_offset": "0x00000df8",
+              "value": "0x25e70000"
+            },
+            {
+              "file_offset": "0x00000f24",
+              "value": "0x25e6c000"
+            },
+            {
+              "file_offset": "0x00000fa4",
+              "value": "0x25e64000"
+            },
+            {
+              "file_offset": "0x00001570",
+              "value": "0x25e00000"
+            },
+            {
+              "file_offset": "0x00001578",
+              "value": "0x25e30000"
+            },
+            {
+              "file_offset": "0x0000255c",
+              "value": "0x25e63bfe"
+            },
+            {
+              "file_offset": "0x0000257c",
+              "value": "0x25e63c00"
+            },
+            {
+              "file_offset": "0x00002dac",
+              "value": "0x25e60000"
+            },
+            {
+              "file_offset": "0x00002dc8",
+              "value": "0x25e60000"
+            }
+          ],
+          "interpretation": "Static aligned-word candidates only; code/data context and runtime access remain unproven."
+        },
+        "exact_canonical_constants": [
+          {
+            "value": "0x25c00000",
+            "candidate_label": "vdp1_vram_base_candidate",
+            "offsets": [
+              "0x0000035c"
+            ]
+          },
+          {
+            "value": "0x25e00000",
+            "candidate_label": "vdp2_vram_base_candidate",
+            "offsets": [
+              "0x000002f0",
+              "0x00001570"
+            ]
+          },
+          {
+            "value": "0x25e60000",
+            "candidate_label": "vdp2_vram_offset_0x60000_candidate",
+            "offsets": [
+              "0x00002dac",
+              "0x00002dc8"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "established_findings": [
+    "00LOAD.BIN contains SH-2 code and names SYS.BIN and CPK.BIN.",
+    "MM.BIN, SYS.BIN, and MVSOPEN.BIN branch over an MBI1 header at file offset 0x4.",
+    "For those three files, the big-endian word at offset 0x0c points to another MBI1 marker, establishing a repeatable module/container boundary relationship.",
+    "MM.BIN statically names player, background, sound, and ADP package families already present in the disc manifest.",
+    "SYS.BIN statically names additional BIN members and contains an EXT RAM ERROR diagnostic string.",
+    "CPK.BIN contains exact aligned constants 0x22400000 and 0x22600000 plus constants in VDP1, VDP2, and SCSP address spaces."
+  ],
+  "next_dynamic_proofs": [
+    "Trace CD reads to establish which member loads each file and at what phase.",
+    "Dump high work RAM and both cartridge banks at semantic route anchors to establish load addresses, residency, lifetimes, and high-water marks.",
+    "Trace VDP1, VDP2, SCSP, DMA, and CD-block writes to assign hardware responsibility.",
+    "Record master/slave SH-2 PCs around load, combat, collision, and transition anchors."
+  ],
+  "avp_application": "Use the recovered module and address leads to design AvP ownership and high-water probes. Do not copy MSHvSF addresses, package sizes, or gameplay constants into AvP."
+}

@@ -1,0 +1,43 @@
+{
+  "template": "Capcom Saturn port candidate assessment",
+  "title": "<title>",
+  "revisions": {
+    "arcade": "<board, region, date, ROM-set hash>",
+    "saturn_precedent": "<official port or related engine, region, date, disc hash>"
+  },
+  "authorization": {
+    "source_code_or_rom_data": "UNVERIFIED",
+    "official_port_media": "UNVERIFIED",
+    "distribution_boundary": "Private research inputs; derived evidence only"
+  },
+  "hard_gates": [
+    {"gate": "complete audited source set", "status": "OPEN", "evidence": []},
+    {"gate": "repeatable source runtime", "status": "OPEN", "evidence": []},
+    {"gate": "repeatable Saturn precedent", "status": "OPEN", "evidence": []},
+    {"gate": "deterministic neutral-target route", "status": "OPEN", "evidence": []},
+    {"gate": "instrumentable state and rendering", "status": "OPEN", "evidence": []},
+    {"gate": "private-input and Git-isolation plan", "status": "OPEN", "evidence": []}
+  ],
+  "technical_assessment": {
+    "engine_similarity": {"rating": "UNRESOLVED", "evidence": [], "risk": ""},
+    "working_set_size": {"rating": "UNRESOLVED", "measured_peak_bytes": null, "risk": ""},
+    "sprite_load": {"rating": "UNRESOLVED", "worst_case_commands": null, "texture_bytes": null},
+    "background_complexity": {"rating": "UNRESOLVED", "layers": null, "line_scroll": null, "rotation": null},
+    "object_count": {"rating": "UNRESOLVED", "worst_case": null},
+    "effect_complexity": {"rating": "UNRESOLVED", "stress_route": ""},
+    "audio_requirements": {"rating": "UNRESOLVED", "pcm_peak_bytes": null, "streaming": ""},
+    "cpu_requirements": {"rating": "UNRESOLVED", "master_cycles": null, "slave_cycles": null},
+    "expansion_ram_fit": {"rating": "UNRESOLVED", "peak_bytes": null, "headroom_bytes": null},
+    "vdp1_vram_fit": {"rating": "UNRESOLVED", "peak_bytes": null, "headroom_bytes": null},
+    "vdp2_vram_fit": {"rating": "UNRESOLVED", "peak_bytes": null, "headroom_bytes": null},
+    "cd_loading_risk": {"rating": "UNRESOLVED", "worst_seek_ms": null, "cdda_overlap": ""},
+    "existing_saturn_precedents": {"rating": "UNRESOLVED", "titles": [], "confirmed_patterns": []}
+  },
+  "worst_case_routes": [],
+  "decision": {
+    "status": "UNRESOLVED",
+    "rationale": "",
+    "blocking_evidence": [],
+    "accepted_risks": []
+  }
+}

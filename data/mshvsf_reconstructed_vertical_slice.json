@@ -1,0 +1,152 @@
+{
+  "title": "MSHvSF paired reconstructed vertical slice",
+  "reconstruction_kind": "Semantic event reconstruction; not a Saturn executable or code port",
+  "status": "FIRST_PASS_COMPLETE_PROJECTILE_DEFERRED",
+  "route_setup": {
+    "relationship": "EQUIVALENT",
+    "confidence": "HIGH",
+    "evidence": "Both cold-boot routes reach Ryu/Ken versus Spider-Man/Captain America with P2 neutral."
+  },
+  "events": [
+    {
+      "semantic_concept": "idle",
+      "cps2": {
+        "event": "idle",
+        "frame": 1610,
+        "framebuffer_sha256": "eeadf29e80b4ec4a63d3b8a3bc3664f1a51ef57f7954c1105468822b0446a795",
+        "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+      },
+      "saturn": {
+        "event": "idle",
+        "frame": 3540,
+        "framebuffer_sha256": "71644a1bad1bf5e864b61296bc1c30392814b72912e9aa09e037a8a9d2649898",
+        "evidence_scope": "external framebuffer and exact replay input state"
+      },
+      "relationship": "UNRESOLVED",
+      "observation": "Stable neutral state observed on both systems.",
+      "missing_for_classification": "Paired internal state and normalized timing/geometry measurements"
+    },
+    {
+      "semantic_concept": "forward walk",
+      "cps2": {
+        "event": "walk",
+        "frame": 1650,
+        "framebuffer_sha256": "4e3490aca86e435b95627aa488b4003d0eb20a225de8819323a51326eda84dde",
+        "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+      },
+      "saturn": {
+        "event": "walk",
+        "frame": 3620,
+        "framebuffer_sha256": "4d3d8b72185adac469f41980fada1613d8b20a27acd01efc459252ab0884bc76",
+        "evidence_scope": "external framebuffer and exact replay input state"
+      },
+      "relationship": "UNRESOLVED",
+      "observation": "Forward movement follows a recorded right input on both systems.",
+      "missing_for_classification": "Paired internal state and normalized timing/geometry measurements"
+    },
+    {
+      "semantic_concept": "jump",
+      "cps2": {
+        "event": "jump",
+        "frame": 1720,
+        "framebuffer_sha256": "6a59d7c59aed30bda9735e6cbf1889b65e8fcd46391118bc76b54a11357b3d65",
+        "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+      },
+      "saturn": {
+        "event": "jump",
+        "frame": 3720,
+        "framebuffer_sha256": "b78c101685e2635d73d5627a4d85ba9521fc17b0fc35eb62ef2a650d01f97c50",
+        "evidence_scope": "external framebuffer and exact replay input state"
+      },
+      "relationship": "UNRESOLVED",
+      "observation": "Airborne Ryu follows a recorded up input on both systems.",
+      "missing_for_classification": "Paired internal state and normalized timing/geometry measurements"
+    },
+    {
+      "semantic_concept": "standing normal attack",
+      "cps2": {
+        "event": "normal_attack_active",
+        "frame": 1788,
+        "framebuffer_sha256": "1024053d01e9b0648375567629e2aaade174eec3f4e946799b82c4a30ee0a1fa",
+        "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+      },
+      "saturn": {
+        "event": "normal_attack_active",
+        "frame": 3828,
+        "framebuffer_sha256": "f4b8233c74f37d6e4ce2b00739c72f61e0186a03e86c40a105e1cd8032d46e8c",
+        "evidence_scope": "external framebuffer and exact replay input state"
+      },
+      "relationship": "UNRESOLVED",
+      "observation": "A visually active standing punch follows the recorded attack input on both systems.",
+      "missing_for_classification": "Paired internal state and normalized timing/geometry measurements"
+    },
+    {
+      "semantic_concept": "collision, damage response, and hit reaction",
+      "cps2": {
+        "event": "projectile_collision_hit_reaction",
+        "frame": 1890,
+        "framebuffer_sha256": "4a84edc1a418f11e6bdf411c8c1f27abdfd425d966144640839523e24dacb9d9",
+        "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+      },
+      "saturn": {
+        "event": "collision_damage_hit_reaction",
+        "frame": 3840,
+        "framebuffer_sha256": "f9a08b2bd1e86f79743cbd19f3d8ead7e0a69c74f7cd11e5220090a3d735c6a1",
+        "evidence_scope": "external framebuffer and exact replay input state"
+      },
+      "relationship": "UNRESOLVED",
+      "observation": "Both captures include a target reaction and visible damage response, but the CPS-2 anchor is projectile-driven while the Saturn first pass is normal-driven.",
+      "missing_for_classification": "Same-attack paired collision, health, damage, hitstop, and reaction-state measurements"
+    },
+    {
+      "semantic_concept": "recovery",
+      "cps2": {
+        "event": "recovery",
+        "frame": 1920,
+        "framebuffer_sha256": "1afe7e0bca3e158051a9445b768449ff987ec3f5916c70bec17e830f356ce894",
+        "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+      },
+      "saturn": {
+        "event": "recovery",
+        "frame": 3900,
+        "framebuffer_sha256": "740c2e925991f11161bd6d8bc258bae601d0676d6eaa5e58bd9ebde94c1656d7",
+        "evidence_scope": "external framebuffer and exact replay input state"
+      },
+      "relationship": "UNRESOLVED",
+      "observation": "Ryu returns to a stable post-action state on both systems.",
+      "missing_for_classification": "Paired internal state and normalized timing/geometry measurements"
+    },
+    {
+      "semantic_concept": "Hadouken projectile lifecycle",
+      "cps2": {
+        "input": {
+          "event": "hadouken_input_complete",
+          "frame": 1860,
+          "framebuffer_sha256": "c639e21e850e899d3412a7b81c6fefbe87f045b990bdde72ed10207a160c0918",
+          "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+        },
+        "visible": {
+          "event": "hadouken_visible",
+          "frame": 1875,
+          "framebuffer_sha256": "9ed9c34528302cd70729cdb565e406854a0672b664a639700946f855d8302512",
+          "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+        },
+        "collision": {
+          "event": "projectile_collision_hit_reaction",
+          "frame": 1890,
+          "framebuffer_sha256": "4a84edc1a418f11e6bdf411c8c1f27abdfd425d966144640839523e24dacb9d9",
+          "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+        }
+      },
+      "saturn": null,
+      "relationship": "UNRESOLVED",
+      "observation": "CPS-2 is captured; Saturn command acceptance and projectile lifecycle are deferred.",
+      "missing_for_classification": "Deterministic Saturn Hadouken, projectile spawn/travel/collision, damage, and recovery evidence"
+    }
+  ],
+  "completion_boundary": {
+    "proven": "Deterministic paired route and external normal-hit first pass",
+    "not_proven": "Function/data correspondence, exact mechanics, audio parity, hardware responsibilities, and full preferred projectile slice"
+  },
+  "acceptance_rule": "Do not promote an event above UNRESOLVED until the same attack is paired with normalized timing and internal state evidence."
+}

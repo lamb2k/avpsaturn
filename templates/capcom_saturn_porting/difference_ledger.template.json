@@ -1,0 +1,21 @@
+{
+  "template": "Historical-port difference ledger entry",
+  "system_or_dimension": "<gameplay, animation, graphics, content, audio, performance>",
+  "semantic_concept": "",
+  "original_behavior": "",
+  "saturn_behavior": "",
+  "classification": "UNRESOLVED",
+  "reason": "",
+  "gameplay_impact": "UNRESOLVED",
+  "presentation_impact": "UNRESOLVED",
+  "evidence": {
+    "arcade": [],
+    "saturn": []
+  },
+  "test_performed": "",
+  "falsification_attempt": "",
+  "confidence": "LOW",
+  "validation_status": "OPEN",
+  "remaining_uncertainty": [],
+  "acceptance_owner": ""
+}

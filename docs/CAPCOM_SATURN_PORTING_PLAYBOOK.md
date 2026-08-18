@@ -121,6 +121,9 @@ probe without weakening AvP route parity.
 - Region, revision, expansion hardware, and controller configuration are fixed.
 - Raw copyrighted inputs remain private and excluded from Git.
 
+Use `docs/CAPCOM_SATURN_PORT_CANDIDATE_CHECKLIST.md` and the machine-readable
+template under `templates/capcom_saturn_porting/` for the full candidate gate.
+
 ## Fidelity acceptance checklist
 
 - Route and state-transition order match.
@@ -134,6 +137,19 @@ probe without weakening AvP route parity.
 - Memory and hardware budgets have measured peaks and ownership.
 - Every deviation is classified, evidenced, and either accepted or open.
 - No unresolved MSHvSF inference is silently promoted into AvP.
+
+The complete release gate is
+`docs/CAPCOM_SATURN_PORT_ACCEPTANCE_CHECKLIST.md`; the dimension definitions and
+pilot state are in `docs/CAPCOM_SATURN_FIDELITY_STANDARD.md` and
+`data/mshvsf_fidelity_scorecard.json`.
+
+## Reusable artifact templates
+
+The versioned templates in `templates/capcom_saturn_porting/` cover candidate
+assessment, semantic system mapping, hardware budgets, and difference-ledger
+entries. Training modules are in
+`docs/CAPCOM_SATURN_TRAINING_EXERCISES.md`. Template completeness does not imply
+that the MSHvSF pilot has passed the corresponding runtime or hardware gate.
 
 ## Current pilot result
 

@@ -1,0 +1,118 @@
+{
+  "title": "MSHvSF CPS-2 semantic model",
+  "model_kind": "Evidence-backed behavioral model; not a decompilation",
+  "source": "data/mshvsf_cps2_vertical_slice.json",
+  "runtime": {
+    "emulator": "MAME 0.289",
+    "romset": "mshvsf (Europe 970625)",
+    "rom_audit": "pass",
+    "route": "Two-player Ryu/Ken vs Spider-Man/Captain America; P2 remains neutral"
+  },
+  "route": {
+    "actors": "Ryu/Ken versus Spider-Man/Captain America",
+    "control": "P1 scripted; P2 human port held neutral",
+    "capture_frames": [
+      1560,
+      1960
+    ]
+  },
+  "subsystems": [
+    {
+      "semantic_system": "game_state",
+      "proven": "The deterministic frontend reaches the same two-player match on cold replay.",
+      "structural_status": "UNRESOLVED",
+      "missing": "Mode, round, team, and active-character addresses and writer functions."
+    },
+    {
+      "semantic_system": "input",
+      "proven": "Exact coin, start, direction, and light-punch edges are recorded with frame and 68000 PC samples.",
+      "structural_status": "PARTIAL",
+      "missing": "Input-buffer address, command parser, and state-transition call path."
+    },
+    {
+      "semantic_system": "player_structure",
+      "proven": "Per-frame work RAM and object-list evidence exists for the complete slice.",
+      "structural_status": "UNRESOLVED",
+      "missing": "Ryu and Spider-Man actor bases, struct stride, coordinate, velocity, state, animation, collision, and health fields."
+    },
+    {
+      "semantic_system": "movement_and_animation",
+      "proven": "Idle, walk, and jump visual anchors reproduce with contiguous work RAM, object RAM, palette, and CPS register streams.",
+      "structural_status": "PARTIAL",
+      "missing": "Movement writers, animation-script pointer, duration fields, assembly decoder, and normalized trajectory."
+    },
+    {
+      "semantic_system": "attack_collision_damage",
+      "proven": "Standing light punch and Hadouken visual sequences, projectile collision, and hit reaction are captured.",
+      "structural_status": "UNRESOLVED",
+      "missing": "Attack-state writers, hitbox records, health address, damage value, hitstop, and reaction-state fields."
+    },
+    {
+      "semantic_system": "rendering",
+      "proven": "Final framebuffer, CPS object list, palette, and CPS-A/CPS-B register streams are synchronized at every frame.",
+      "structural_status": "PARTIAL",
+      "missing": "ROM animation/assembly tables and the exact object-command generation path."
+    },
+    {
+      "semantic_system": "audio",
+      "proven": "QSound bus writes and register commits are synchronized to normal and Hadouken windows.",
+      "structural_status": "PARTIAL",
+      "missing": "Event identifiers, sample ownership, voice allocation, and audible-onset mapping."
+    }
+  ],
+  "timeline": [
+    {
+      "event": "idle",
+      "frame": 1610,
+      "framebuffer_sha256": "eeadf29e80b4ec4a63d3b8a3bc3664f1a51ef57f7954c1105468822b0446a795",
+      "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+    },
+    {
+      "event": "walk",
+      "frame": 1650,
+      "framebuffer_sha256": "4e3490aca86e435b95627aa488b4003d0eb20a225de8819323a51326eda84dde",
+      "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+    },
+    {
+      "event": "jump",
+      "frame": 1720,
+      "framebuffer_sha256": "6a59d7c59aed30bda9735e6cbf1889b65e8fcd46391118bc76b54a11357b3d65",
+      "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+    },
+    {
+      "event": "normal_attack_active",
+      "frame": 1788,
+      "framebuffer_sha256": "1024053d01e9b0648375567629e2aaade174eec3f4e946799b82c4a30ee0a1fa",
+      "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+    },
+    {
+      "event": "hadouken_input_complete",
+      "frame": 1860,
+      "framebuffer_sha256": "c639e21e850e899d3412a7b81c6fefbe87f045b990bdde72ed10207a160c0918",
+      "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+    },
+    {
+      "event": "hadouken_visible",
+      "frame": 1875,
+      "framebuffer_sha256": "9ed9c34528302cd70729cdb565e406854a0672b664a639700946f855d8302512",
+      "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+    },
+    {
+      "event": "projectile_collision_hit_reaction",
+      "frame": 1890,
+      "framebuffer_sha256": "4a84edc1a418f11e6bdf411c8c1f27abdfd425d966144640839523e24dacb9d9",
+      "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+    },
+    {
+      "event": "recovery",
+      "frame": 1920,
+      "framebuffer_sha256": "1afe7e0bca3e158051a9445b768449ff987ec3f5916c70bec17e830f356ce894",
+      "evidence_scope": "framebuffer plus synchronized work RAM, object RAM, palette, video registers, and QSound log"
+    }
+  ],
+  "confidence": {
+    "behavioral_order": "HIGH",
+    "internal_state_mapping": "LOW",
+    "warning": "Captured RAM and registers are evidence streams, not labeled fields until ownership and writer paths are proven."
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "title": "MSHvSF-derived Capcom Saturn porting pattern library",
+  "promotion_rule": "A research method may be reusable after deterministic proof. A claimed Capcom engineering practice remains a candidate until runtime evidence and a second official port confirm it.",
+  "patterns": [
+    {
+      "id": "RESEARCH-IMMUTABLE-OVERLAY",
+      "pattern_class": "RESEARCH_METHOD",
+      "problem": "Authorized source media may have loader-layout defects, and repairing it in place destroys provenance.",
+      "official_capcom_solution": "Not applicable; this is a modern research-control pattern.",
+      "hardware_rationale": "None",
+      "implementation_pattern": "Hash immutable inputs and build disposable MAME ROM-path and Saturn cue overlays for audit and boot.",
+      "constraints": ["Never rewrite source archives, cue, BIN, or keys", "Hash the overlay recipe and source inputs"],
+      "applicable_game_types": ["Any ROM/disc comparative study"],
+      "evidence": ["data/mshvsf_reference_audit.json", "data/mshvsf_saturn_disc_manifest.json"],
+      "confidence": "HIGH",
+      "status": "REUSABLE_METHOD"
+    },
+    {
+      "id": "RESEARCH-NEUTRAL-TARGET",
+      "pattern_class": "RESEARCH_METHOD",
+      "problem": "AI decisions contaminate collision, damage, and hit-reaction timing.",
+      "official_capcom_solution": "Not applicable; this is a test-construction pattern.",
+      "hardware_rationale": "Removes nondeterministic decision paths from cross-platform evidence.",
+      "implementation_pattern": "Use two human controller ports, hold the target neutral after setup, and record every input byte.",
+      "constraints": ["Prove P2 is neutral during gameplay", "Use the same matchup and spacing"],
+      "applicable_game_types": ["Versus fighters", "Cooperative action games with a controllable test target"],
+      "evidence": ["data/mshvsf_cps2_vertical_slice.json", "data/mshvsf_saturn_first_pass.json"],
+      "confidence": "HIGH",
+      "status": "REUSABLE_METHOD"
+    },
+    {
+      "id": "RESEARCH-SEMANTIC-FIRST",
+      "pattern_class": "RESEARCH_METHOD",
+      "problem": "68000 and SH-2 machine code are not directly comparable and visual similarity can hide mechanical differences.",
+      "official_capcom_solution": "Not applicable; this is a comparative-analysis pattern.",
+      "hardware_rationale": "Separates behavior from processor and renderer implementation.",
+      "implementation_pattern": "Pair semantic events first, then require state, timing, data, and falsification evidence before classifying mechanics.",
+      "constraints": ["Keep gameplay and presentation timing separate", "Leave unsupported mappings UNRESOLVED"],
+      "applicable_game_types": ["All cross-architecture ports"],
+      "evidence": ["data/mshvsf_correspondence.json", "data/mshvsf_reconstructed_vertical_slice.json"],
+      "confidence": "HIGH",
+      "status": "REUSABLE_METHOD"
+    },
+    {
+      "id": "CAPCOM-MIXED-AUDIO-TRANSPORT",
+      "pattern_class": "CANDIDATE_CAPCOM_PATTERN",
+      "problem": "A CD game must divide music, speech, and short effects across disc and sound hardware.",
+      "official_capcom_solution": "The MSHvSF disc contains eleven CD audio tracks and 71 ADP files.",
+      "hardware_rationale": "Candidate division between streamed music and file-loaded audio; event routing is not traced.",
+      "implementation_pattern": "UNRESOLVED",
+      "constraints": ["Do not infer ADP content from names alone", "Trace CDDA and SCSP behavior before reuse"],
+      "applicable_game_types": ["CD-based arcade conversions with music and many short voice/effect assets"],
+      "evidence": ["data/mshvsf_saturn_disc_manifest.json", "data/mshvsf_saturn_asset_topology.json"],
+      "confidence": "LOW",
+      "status": "CANDIDATE_NOT_STANDARD"
+    },
+    {
+      "id": "CAPCOM-DISC-PACKAGE-FAMILIES",
+      "pattern_class": "CANDIDATE_CAPCOM_PATTERN",
+      "problem": "Large rosters and stages require independently loadable asset groups.",
+      "official_capcom_solution": "The flat ISO exposes distinct PLxx, BGxx, SOxx, PAC, ADP, and ST2 naming families.",
+      "hardware_rationale": "Individually addressable files could support phase loading, but destination and lifetime are not traced.",
+      "implementation_pattern": "UNRESOLVED",
+      "constraints": ["File naming is not format proof", "On-disc size is not resident size", "Confirm load calls and allocation lifetime"],
+      "applicable_game_types": ["Roster fighters", "Asset-heavy action games"],
+      "evidence": ["data/mshvsf_saturn_asset_topology.json"],
+      "confidence": "LOW",
+      "status": "CANDIDATE_NOT_STANDARD"
+    },
+    {
+      "id": "CAPCOM-4MB-EXPANSION",
+      "pattern_class": "CANDIDATE_CAPCOM_PATTERN",
+      "problem": "The Saturn base-memory working set may not hold a large CPS-2 fighter roster and effects.",
+      "official_capcom_solution": "The official port boots and replays with a configured 32 Mbit DRAM cartridge.",
+      "hardware_rationale": "An additional 4 MiB is available, but allocation and residency are untraced.",
+      "implementation_pattern": "UNRESOLVED",
+      "constraints": ["Successful configuration does not prove exact requirement or layout", "Measure cartridge writes and no-cart behavior"],
+      "applicable_game_types": ["Large-roster 2D fighters", "Ports with high animation working sets"],
+      "evidence": ["data/mshvsf_saturn_first_pass.json", "data/mshvsf_hardware_budget.json"],
+      "confidence": "LOW",
+      "status": "CANDIDATE_NOT_STANDARD"
+    }
+  ]
+}

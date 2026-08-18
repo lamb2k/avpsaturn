@@ -18,6 +18,16 @@
       "id": "route-ryu-neutral-target",
       "semantic_concept": "Deterministic Ryu route with a neutral human-controlled target",
       "claim": "Both deterministic routes reach Ryu and Ken versus Spider-Man and Captain America with P2 neutral after setup.",
+      "cps2_address_data_function": {
+        "address": "UNRESOLVED",
+        "data": "Exact frontend and two-player input edges in data/mshvsf_cps2_vertical_slice.json",
+        "function": "Game route/state function UNRESOLVED; Lua input injection is a research harness, not a game function"
+      },
+      "saturn_address_data_function": {
+        "address": "UNRESOLVED",
+        "data": "Exact active-low Port 1 and Port 2 states in the generated native play record",
+        "function": "Game route/state function UNRESOLVED; Yaba play recording is a research harness, not a game function"
+      },
       "cps2_evidence": ["data/mshvsf_cps2_vertical_slice.json", "frame 1610 idle anchor SHA-256 eeadf29e80b4ec4a63d3b8a3bc3664f1a51ef57f7954c1105468822b0446a795"],
       "saturn_evidence": ["data/mshvsf_saturn_first_pass.json", "frame 3540 idle anchor SHA-256 71644a1bad1bf5e864b61296bc1c30392814b72912e9aa09e037a8a9d2649898", "two cold replays produced 25 identical screenshot hashes"],
       "relationship": "EQUIVALENT",
@@ -31,6 +41,16 @@
       "id": "input-and-movement",
       "semantic_concept": "Idle, forward walk, and jump response",
       "claim": "Idle, forward walk, and jump are deterministic on both versions; paired timing and trajectory measurements remain unresolved.",
+      "cps2_address_data_function": {
+        "address": "Player actor, coordinates, velocity, and action state UNRESOLVED",
+        "data": "Direction edges plus synchronized work RAM, object RAM, palette, and CPS register streams",
+        "function": "Input-to-movement writer path UNRESOLVED"
+      },
+      "saturn_address_data_function": {
+        "address": "Player actor, coordinates, velocity, and action state UNRESOLVED",
+        "data": "Direction edges and deterministic framebuffer anchors",
+        "function": "SMPC/game-input and movement writer paths UNRESOLVED"
+      },
       "cps2_evidence": ["idle frame 1610", "walk frame 1650", "jump frame 1720", "recorded input_events in data/mshvsf_cps2_vertical_slice.json"],
       "saturn_evidence": ["idle frame 3540", "walk input frame 3600 and visual frame 3620", "jump input frame 3690 and visual frame 3720", "data/mshvsf_saturn_first_pass.json"],
       "relationship": "UNRESOLVED",
@@ -44,6 +64,16 @@
       "id": "standing-light-punch",
       "semantic_concept": "Standing light punch",
       "claim": "Both versions have deterministic normal-attack anchors; the Saturn normal visibly collides, changes the health HUD, and causes Spider-Man's hit reaction, but internal fields and exact paired mechanics are not decoded.",
+      "cps2_address_data_function": {
+        "address": "Attack state, animation, hitbox, collision, health, and reaction fields UNRESOLVED",
+        "data": "Light-punch input and synchronized frame/object/work-RAM evidence",
+        "function": "Attack, collision, damage, and reaction writers UNRESOLVED"
+      },
+      "saturn_address_data_function": {
+        "address": "Attack state, animation, hitbox, collision, health, and reaction fields UNRESOLVED",
+        "data": "X input plus active, FIRST ATTACK, HUD-response, hit-reaction, and recovery anchors",
+        "function": "Attack, collision, damage, and reaction SH-2 writers UNRESOLVED"
+      },
       "cps2_evidence": ["input frames 1780-1784", "active visual frame 1788 SHA-256 1024053d01e9b0648375567629e2aaade174eec3f4e946799b82c4a30ee0a1fa"],
       "saturn_evidence": ["X input frame 3820", "active visual frame 3828 SHA-256 f4b8233c74f37d6e4ce2b00739c72f61e0186a03e86c40a105e1cd8032d46e8c", "FIRST ATTACK, HUD response, and hit reaction frame 3840 SHA-256 f9a08b2bd1e86f79743cbd19f3d8ead7e0a69c74f7cd11e5220090a3d735c6a1"],
       "relationship": "UNRESOLVED",
@@ -57,6 +87,16 @@
       "id": "hadouken-projectile",
       "semantic_concept": "Hadouken command, spawn, travel, collision, damage, and hit reaction",
       "claim": "The complete CPS-2 visual sequence is captured; the Saturn Hadouken and projectile lifecycle are deliberately deferred after the deterministic normal-hit first pass.",
+      "cps2_address_data_function": {
+        "address": "Command buffer, projectile actor, collision, health, and reaction fields UNRESOLVED",
+        "data": "Quarter-circle-forward input plus projectile-visible and impact evidence",
+        "function": "Command parser, projectile spawn/update, collision, and damage writers UNRESOLVED"
+      },
+      "saturn_address_data_function": {
+        "address": "UNRESOLVED",
+        "data": "NOT CAPTURED",
+        "function": "UNRESOLVED"
+      },
       "cps2_evidence": ["command completion frame 1860", "projectile-visible frame 1875 SHA-256 9ed9c34528302cd70729cdb565e406854a0672b664a639700946f855d8302512", "collision and reaction frame 1890 SHA-256 4a84edc1a418f11e6bdf411c8c1f27abdfd425d966144640839523e24dacb9d9"],
       "saturn_evidence": ["Explicitly deferred in data/mshvsf_saturn_first_pass.json"],
       "relationship": "UNRESOLVED",
@@ -70,6 +110,16 @@
       "id": "audio-event-routing",
       "semantic_concept": "Normal and Hadouken audio-event routing",
       "claim": "CPS-2 QSound bus activity is synchronized to the slice, while event-to-voice semantics and Saturn SCSP/CDDA responsibility are unresolved.",
+      "cps2_address_data_function": {
+        "address": "QSound bus/register writes captured; semantic event and sample addresses UNRESOLVED",
+        "data": "83379 bus-write rows and 27793 register-commit rows",
+        "function": "Normal/Hadouken event dispatch and voice ownership UNRESOLVED"
+      },
+      "saturn_address_data_function": {
+        "address": "SCSP RAM, slot, and CD block command addresses for the events UNRESOLVED",
+        "data": "71 ADP files and eleven CD audio tracks inventoried",
+        "function": "ADP decode, SCSP dispatch, and CDDA routing UNRESOLVED"
+      },
       "cps2_evidence": ["83379 QSound bus-write rows", "27793 register-commit rows", "normal and Hadouken windows in data/mshvsf_cps2_vertical_slice.json"],
       "saturn_evidence": ["Disc contains one data track and eleven audio tracks.", "ISO contains 71 .ADP files."],
       "relationship": "UNRESOLVED",
@@ -83,6 +133,16 @@
       "id": "saturn-packaging-and-bootstrap",
       "semantic_concept": "Official Saturn packaging and bootstrap",
       "claim": "The unchanged Saturn BIN boots when a temporary cue points to it and a 32 Mbit expansion cartridge is configured.",
+      "cps2_address_data_function": {
+        "address": "Not applicable to Saturn bootstrap",
+        "data": "Audited MAME ROM set plus key and QSound dependency",
+        "function": "MAME driver boot path; original CPS-2 bootstrap is outside this mapping"
+      },
+      "saturn_address_data_function": {
+        "address": "Boot header and executable load addresses beyond the header are UNRESOLVED",
+        "data": "T-1238G V1.000 disc, temporary corrected cue, and 32 Mbit cartridge configuration",
+        "function": "Boot/load function chain UNRESOLVED"
+      },
       "cps2_evidence": ["MAME 0.289 audit passes through a temporary hard-link ROM overlay."],
       "saturn_evidence": ["Boot header product T-1238G, version V1.000, date 19980903", "Yaba Sanshiro 2 v1.20.37 reaches legal screen, title, and attract gameplay", "414 ISO files and 12 cue tracks recorded in data/mshvsf_saturn_disc_manifest.json"],
       "relationship": "PLATFORM ADAPTATION",

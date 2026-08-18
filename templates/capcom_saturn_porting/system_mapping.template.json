@@ -1,0 +1,33 @@
+{
+  "template": "Cross-system semantic mapping",
+  "semantic_concept": "<behavior or data responsibility>",
+  "arcade": {
+    "system": "<board and revision>",
+    "address_or_data": "UNRESOLVED",
+    "function_or_writer": "UNRESOLVED",
+    "state_transition": "",
+    "timing": {},
+    "evidence": []
+  },
+  "saturn": {
+    "address_or_data": "UNRESOLVED",
+    "function_or_writer": "UNRESOLVED",
+    "hardware_responsibility": "UNRESOLVED",
+    "state_transition": "",
+    "timing": {},
+    "evidence": []
+  },
+  "normalization": {
+    "coordinate_transform": "UNRESOLVED",
+    "resolution_and_crop": "UNRESOLVED",
+    "timing_basis": "source frames and rendered frames reported separately"
+  },
+  "relationship": "UNRESOLVED",
+  "confidence": "LOW",
+  "test_performed": "",
+  "expected_result": "",
+  "falsification_attempt": "",
+  "remaining_uncertainty": [],
+  "reusable_lesson": "",
+  "title_specific_boundary": ""
+}

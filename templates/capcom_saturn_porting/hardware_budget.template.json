@@ -1,0 +1,21 @@
+{
+  "template": "Saturn hardware budget",
+  "route": "<focused and worst-case routes>",
+  "profile": "<focused, full-route, or release>",
+  "resources": [
+    {"resource": "work_ram_low", "capacity_bytes": 1048576, "baseline_bytes": null, "peak_bytes": null, "headroom_bytes": null, "owners": [], "evidence": []},
+    {"resource": "work_ram_high", "capacity_bytes": 1048576, "baseline_bytes": null, "peak_bytes": null, "headroom_bytes": null, "owners": [], "evidence": []},
+    {"resource": "expansion_ram_32mbit", "capacity_bytes": 4194304, "baseline_bytes": null, "peak_bytes": null, "headroom_bytes": null, "owners": [], "evidence": []},
+    {"resource": "vdp1_vram", "capacity_bytes": 524288, "baseline_bytes": null, "peak_bytes": null, "headroom_bytes": null, "owners": [], "evidence": []},
+    {"resource": "vdp2_vram", "capacity_bytes": 524288, "baseline_bytes": null, "peak_bytes": null, "headroom_bytes": null, "owners": [], "evidence": []},
+    {"resource": "vdp2_color_ram", "capacity_bytes": 4096, "baseline_bytes": null, "peak_bytes": null, "headroom_bytes": null, "owners": [], "evidence": []},
+    {"resource": "scsp_sound_ram", "capacity_bytes": 524288, "baseline_bytes": null, "peak_bytes": null, "headroom_bytes": null, "owners": [], "evidence": []},
+    {"resource": "master_sh2", "capacity": "frame deadline", "peak_cycles": null, "headroom_cycles": null, "owners": [], "evidence": []},
+    {"resource": "slave_sh2", "capacity": "frame deadline", "peak_cycles": null, "headroom_cycles": null, "owners": [], "evidence": []},
+    {"resource": "dma", "capacity": "bus and channel dependent", "peak_bytes_per_frame": null, "overlap": [], "evidence": []},
+    {"resource": "cd", "capacity": "seek and transfer dependent", "peak_read_bytes": null, "worst_seek_ms": null, "cdda_overlap": null, "evidence": []}
+  ],
+  "allocation_timeline": [],
+  "fit_status": "UNRESOLVED",
+  "acceptance": "Every peak is measured on both focused and full-route stress cases; all simultaneous owners and retirement events are identified."
+}

@@ -1,0 +1,492 @@
+{
+  "title": "MSHvSF Saturn on-disc asset topology",
+  "source_manifest": "data/mshvsf_saturn_disc_manifest.json",
+  "disc_file_count": 414,
+  "disc_file_bytes": 393365484,
+  "families": {
+    "adp_audio": {
+      "file_count": 71,
+      "total_file_bytes": 41933183,
+      "minimum_file_bytes": 56346,
+      "median_file_bytes": 260691,
+      "p95_file_bytes": 1713022,
+      "maximum_file_bytes": 1778602,
+      "largest_members": [
+        {
+          "path": "M0E_SCAP.ADP",
+          "bytes": 1778602,
+          "extent": 16559,
+          "sha256": "7005b52aa56076df042daf724f4e95b58666c77a9f29d603148de126f098afab"
+        },
+        {
+          "path": "M1B_SGO1.ADP",
+          "bytes": 1746930,
+          "extent": 25696,
+          "sha256": "041483bacd4125888fec38981386aba3c38d646f45c7ca903c94aef6d2c05bc0"
+        },
+        {
+          "path": "M17_SCHU.ADP",
+          "bytes": 1725244,
+          "extent": 22886,
+          "sha256": "36b25f9b5b41b74841eae51f73963989eaa449981f06dde81cbcbe8deea11ca5"
+        },
+        {
+          "path": "M13_SSPI.ADP",
+          "bytes": 1713022,
+          "extent": 20238,
+          "sha256": "ad00e8d9f102f135de0a693542989a15e021f321e02ba2a3869f499418549cba"
+        },
+        {
+          "path": "M0D_SCYC.ADP",
+          "bytes": 1646636,
+          "extent": 15754,
+          "sha256": "cfcea7534d81c7357f1fadac4db8f4e68f386584d538936983df37a5a7d92fbe"
+        },
+        {
+          "path": "M16_SKEN.ADP",
+          "bytes": 1554545,
+          "extent": 22126,
+          "sha256": "e53a82ed312ce40035524829d0935740612255145016adb02c4d07405dce71a0"
+        },
+        {
+          "path": "M12_SOME.ADP",
+          "bytes": 1515535,
+          "extent": 19497,
+          "sha256": "f3f3615b0bfbc6e31b3cbe6e659d1bf948e9aa6a7f22cd7d0fe9f1fc02a1a507"
+        },
+        {
+          "path": "M1C_SSAK.ADP",
+          "bytes": 1514411,
+          "extent": 26549,
+          "sha256": "cc3e58799979d803fe22406cb9293a471d810a9f37747ad5741081b0a389edf1"
+        }
+      ]
+    },
+    "background_packages": {
+      "file_count": 16,
+      "total_file_bytes": 1924584,
+      "minimum_file_bytes": 45744,
+      "median_file_bytes": 98944,
+      "p95_file_bytes": 226096,
+      "maximum_file_bytes": 226096,
+      "largest_members": [
+        {
+          "path": "BG0D.PAC",
+          "bytes": 226096,
+          "extent": 3287,
+          "sha256": "0cb8b6a41c01abc29add8d71b00d3af13e9632d527fafb1d2db31dd0e5e690d8"
+        },
+        {
+          "path": "BG06.PAC",
+          "bytes": 221004,
+          "extent": 2631,
+          "sha256": "48e27c1ef18bead51fb6952e59acfdf3f92f87941314be5c09b74a9d870df7ec"
+        },
+        {
+          "path": "BG0B.PAC",
+          "bytes": 188824,
+          "extent": 3137,
+          "sha256": "3e3aa64949a2df0240c5320d1f61d5da4298fff995ce4def24c0544f23d031ce"
+        },
+        {
+          "path": "BG08.PAC",
+          "bytes": 175964,
+          "extent": 2832,
+          "sha256": "afc6411b78bb2f1e6ec1f6a94a2e995ecad25a1fdaeec90a7ea2bdaf1e4ffd35"
+        },
+        {
+          "path": "BG00.PAC",
+          "bytes": 159792,
+          "extent": 2243,
+          "sha256": "f8d3fa21785e28e6d709b01fe6501cc497da5a6897f28217d6e96e7dc1ec4aea"
+        },
+        {
+          "path": "BG0A.PAC",
+          "bytes": 146464,
+          "extent": 3041,
+          "sha256": "9b61c22965548a0e9b254ffc9353f7ec0d12c6bd5c8755740f14ae6d3ea28521"
+        },
+        {
+          "path": "BG09.PAC",
+          "bytes": 144704,
+          "extent": 2941,
+          "sha256": "680e49d3c4af3849639033db7039f7f20cd6ad943287b1487bf37d29b69ac4dc"
+        },
+        {
+          "path": "BG0C.PAC",
+          "bytes": 115632,
+          "extent": 3230,
+          "sha256": "e6be68873692180f85c4e46e774da812c0a7a08ff04251aa50b8da48f11c17ec"
+        }
+      ]
+    },
+    "binary_members": {
+      "file_count": 14,
+      "total_file_bytes": 1576754,
+      "minimum_file_bytes": 1952,
+      "median_file_bytes": 42358,
+      "p95_file_bytes": 848396,
+      "maximum_file_bytes": 848396,
+      "largest_members": [
+        {
+          "path": "MM.BIN",
+          "bytes": 848396,
+          "extent": 65,
+          "sha256": "103a3d1d9df085cd9ae3a6cea1600f37e988dd4719361666296fb147fc0d29c9"
+        },
+        {
+          "path": "CPK.BIN",
+          "bytes": 349680,
+          "extent": 1105,
+          "sha256": "0669b820dc956ae042f6a5098f208024d3b93ac1b191c70d51526f9c112e7a98"
+        },
+        {
+          "path": "SYS.BIN",
+          "bytes": 61536,
+          "extent": 34,
+          "sha256": "ad0be6107400a4dbb5f834da4b7c1221ac6846c9504fc7428bcd7635fe70123f"
+        },
+        {
+          "path": "ERR1.BIN",
+          "bytes": 42358,
+          "extent": 12436,
+          "sha256": "2946144631f0e64153e23a594eb168ee0cff0cf9d5ff4d2d05be456663a3d271"
+        },
+        {
+          "path": "ERR2.BIN",
+          "bytes": 42358,
+          "extent": 12457,
+          "sha256": "125a33a853ff2411cc6af8cc5630973176df6d84f688b78e927b2a573e1c07c5"
+        },
+        {
+          "path": "ERR3.BIN",
+          "bytes": 42358,
+          "extent": 12478,
+          "sha256": "4315c7282c5fe7db579db2f812b4af07ce2dbf3a5dc3d6ca4b258991e4e3f465"
+        },
+        {
+          "path": "ERR4.BIN",
+          "bytes": 42358,
+          "extent": 12499,
+          "sha256": "1941080c33218394861c1f0191b2e719c52b2fb5dde4014a6e05b07eedaa4f52"
+        },
+        {
+          "path": "ERR5.BIN",
+          "bytes": 42358,
+          "extent": 12520,
+          "sha256": "0732e81d863c0921088e4ce142b10e0db33ff7cd9d39432213407910528e6ac1"
+        }
+      ]
+    },
+    "other_members": {
+      "file_count": 15,
+      "total_file_bytes": 3355591,
+      "minimum_file_bytes": 85,
+      "median_file_bytes": 60674,
+      "p95_file_bytes": 1955240,
+      "maximum_file_bytes": 1955240,
+      "largest_members": [
+        {
+          "path": "CPK.CPK",
+          "bytes": 1955240,
+          "extent": 1276,
+          "sha256": "039951d30080f82a62f657c0451d16a8eef5259c6cf44e4d0596a10c9fcf1b98"
+        },
+        {
+          "path": "BB.DAT",
+          "bytes": 584800,
+          "extent": 819,
+          "sha256": "d21cd553db1d3562c3cd44a25d877d7a709bb206190b0682a66d64c10958b6ff"
+        },
+        {
+          "path": "CHRCOPY.I16",
+          "bytes": 157696,
+          "extent": 720,
+          "sha256": "1e0ab96a4322871766a55166eed76e78a06c99547ddc9a4c3be9f512cdbdeb6b"
+        },
+        {
+          "path": "SS_CAPM.I16",
+          "bytes": 157696,
+          "extent": 566,
+          "sha256": "937bbb835a7151bb2c3d4b45b8a098735394ce9760479d79af1217b810067628"
+        },
+        {
+          "path": "SSQ_S.I16",
+          "bytes": 157696,
+          "extent": 643,
+          "sha256": "0ef7a4143f88b26d87b3304823f247b293e69bca0d7b39d05476f463f86f6aed"
+        },
+        {
+          "path": "PALET.TBL",
+          "bytes": 131072,
+          "extent": 12372,
+          "sha256": "3eed8e46561f12e930b0d5012e42d090916d9e2813a1b4e2fbbe509c36754696"
+        },
+        {
+          "path": "EDALL.PRS",
+          "bytes": 114528,
+          "extent": 510,
+          "sha256": "24a1e6b557afbaed8c3df1cdcd58292cfe4e742564d6639d8d262353ea245d7a"
+        },
+        {
+          "path": "ME.SHX",
+          "bytes": 60674,
+          "extent": 480,
+          "sha256": "4c96bff75c6aceb6c9a20a61f4daf2ec5b7d3a3b2804d10b756b5ccab29a276a"
+        }
+      ]
+    },
+    "other_pac_packages": {
+      "file_count": 31,
+      "total_file_bytes": 5628396,
+      "minimum_file_bytes": 20848,
+      "median_file_bytes": 33508,
+      "p95_file_bytes": 1293860,
+      "maximum_file_bytes": 1744100,
+      "largest_members": [
+        {
+          "path": "MEMFIX.PAC",
+          "bytes": 1744100,
+          "extent": 3954,
+          "sha256": "fdbc871a5ba5086a620131c92f0ffb811f3d743e53405f2a674ccdffb1d465d9"
+        },
+        {
+          "path": "SEL.PAC",
+          "bytes": 1293860,
+          "extent": 11310,
+          "sha256": "6e1544e08a5e1726e1fb6b775acb29046d8ebc9348a140bc4c6f661cdc8fc543"
+        },
+        {
+          "path": "SEL2.PAC",
+          "bytes": 694092,
+          "extent": 11942,
+          "sha256": "b0974d75b137a9d67a2d9a54c954cbf0c113c1392b5772b6fcb66e1a0d9bd0aa"
+        },
+        {
+          "path": "CMNSE.PAC",
+          "bytes": 358164,
+          "extent": 3582,
+          "sha256": "2123cab23a27750bdf9e1314d9b9ed48be86b3bd2325cae099ff5bd443dbb723"
+        },
+        {
+          "path": "END.PAC",
+          "bytes": 340632,
+          "extent": 3757,
+          "sha256": "c2c1ee2e722c4f08cd43049f47f220a1faea49c2815cbe7409d9b064191a80ff"
+        },
+        {
+          "path": "BGSEL.PAC",
+          "bytes": 276280,
+          "extent": 3447,
+          "sha256": "f8ddffed96045b95f0dfd95ff64b50797a528663f5fd757a550a7a0b61a735b3"
+        },
+        {
+          "path": "SELCMP.PAC",
+          "bytes": 149536,
+          "extent": 12281,
+          "sha256": "12200057d1a53fe922ef509f1b0a750d84d70e1d75af307024bbe56821b9a6e9"
+        },
+        {
+          "path": "ME.PAC",
+          "bytes": 60692,
+          "extent": 3924,
+          "sha256": "77210963cab27db6dccd0fd5c0f7fc84c64e924ac396ea68bf7ab2ee41a98b8d"
+        }
+      ]
+    },
+    "player_packages": {
+      "file_count": 21,
+      "total_file_bytes": 12566492,
+      "minimum_file_bytes": 276128,
+      "median_file_bytes": 675572,
+      "p95_file_bytes": 765644,
+      "maximum_file_bytes": 765760,
+      "largest_members": [
+        {
+          "path": "PL06.PAC",
+          "bytes": 765760,
+          "extent": 6878,
+          "sha256": "53e2c44481fe4a6f6444fc90654a03db2b82330e73b4d92f613e87117bdd2314"
+        },
+        {
+          "path": "PL08.PAC",
+          "bytes": 765644,
+          "extent": 7652,
+          "sha256": "c5c69431bf96a3a6503bf93fdf9b0c4ce174a92ebdb8205e0837ee3cd57d7830"
+        },
+        {
+          "path": "PL04.PAC",
+          "bytes": 765588,
+          "extent": 6099,
+          "sha256": "eef2a8e34649a208f6ad070ecf5f2420845512b3c4251b8efc0ac6100755b784"
+        },
+        {
+          "path": "PL02.PAC",
+          "bytes": 759668,
+          "extent": 5328,
+          "sha256": "3b21163d599399ed667aac3f8d64ae7d9148a2aa224635c12c1d1cd1ab012f01"
+        },
+        {
+          "path": "PL05.PAC",
+          "bytes": 757784,
+          "extent": 6490,
+          "sha256": "a35676ee39089f723779e6e2d0473b1769579804af73fc71ecd9982408cab437"
+        },
+        {
+          "path": "PL03.PAC",
+          "bytes": 752892,
+          "extent": 5717,
+          "sha256": "85830a16f094033f12bbee66206f735cab14a5f3f1aa8a3095be1e4eede4d8da"
+        },
+        {
+          "path": "PL07.PAC",
+          "bytes": 737620,
+          "extent": 7271,
+          "sha256": "c4ff8ee1e0ce8cc684695bd71fbbeec09d51f61839028d7593925ea1e3bf1de4"
+        },
+        {
+          "path": "PL01.PAC",
+          "bytes": 734604,
+          "extent": 4952,
+          "sha256": "6e958a96b2e108e53fb9351391d585bacbfd68c5bf3affbea26c9d044dd48c64"
+        }
+      ]
+    },
+    "st2_streams": {
+      "file_count": 235,
+      "total_file_bytes": 325867520,
+      "minimum_file_bytes": 385024,
+      "median_file_bytes": 1249280,
+      "p95_file_bytes": 2447360,
+      "maximum_file_bytes": 3006464,
+      "largest_members": [
+        {
+          "path": "MVSOP1.ST2",
+          "bytes": 3006464,
+          "extent": 34396,
+          "sha256": "df9b4310ced946e4a228d7b0e6f6e110ed087866c2ef531cc445c3bd5808d1c6"
+        },
+        {
+          "path": "MVSOP3.ST2",
+          "bytes": 2955264,
+          "extent": 37127,
+          "sha256": "f4ea36221e6b624e7fc3700e8f1aaea7b6f603d1f122bcc64eb94498580df732"
+        },
+        {
+          "path": "MVSOP5.ST2",
+          "bytes": 2770944,
+          "extent": 39814,
+          "sha256": "40cd8096cb281491939838fa4926a5efe8613e8714f5f6b85b9e3cc2df80db5e"
+        },
+        {
+          "path": "MVSOP0.ST2",
+          "bytes": 2693120,
+          "extent": 33081,
+          "sha256": "9e72b60bd9cc59c2c11bbccc78abe28b14fc47568052624cff79a6159d7b7732"
+        },
+        {
+          "path": "MVSOP7.ST2",
+          "bytes": 2682880,
+          "extent": 42338,
+          "sha256": "05009e63a5894cf09aa4afe088c515f9b59ee9bfb6cf98b628e4d38a03a728a0"
+        },
+        {
+          "path": "MVSOP2.ST2",
+          "bytes": 2586624,
+          "extent": 35864,
+          "sha256": "d22256f933f8943f2246b168b78e4034a6744ca5d2970457a21ca2757c2d6aea"
+        },
+        {
+          "path": "MVDEMO66.ST2",
+          "bytes": 2547712,
+          "extent": 128730,
+          "sha256": "855faad421ed670507cc2eeda00be6c3496137ac32003db9e104b254543398cc"
+        },
+        {
+          "path": "MVSOP4.ST2",
+          "bytes": 2547712,
+          "extent": 38570,
+          "sha256": "2eca40dab34ad95389dc4785b0e00f1f3c610ec5da8c409b7bcc484dcddad711"
+        }
+      ]
+    },
+    "stage_support_packages": {
+      "file_count": 11,
+      "total_file_bytes": 512964,
+      "minimum_file_bytes": 21772,
+      "median_file_bytes": 45056,
+      "p95_file_bytes": 88148,
+      "maximum_file_bytes": 88148,
+      "largest_members": [
+        {
+          "path": "SO00.PAC",
+          "bytes": 88148,
+          "extent": 2322,
+          "sha256": "6131d360e281f4246ee0d4083f8c64497cff5c8d4d9ea805fe9e5bbb424eb426"
+        },
+        {
+          "path": "SO06.PAC",
+          "bytes": 87604,
+          "extent": 2739,
+          "sha256": "f5fc3f8ca97874b47ea6d8969cd7b69d6c025359f564e46bc38f3567708fb62c"
+        },
+        {
+          "path": "SO09.PAC",
+          "bytes": 57548,
+          "extent": 3012,
+          "sha256": "9687bbac5b46fea877e36ae3564469d3b5fb9be5b0992fde3157c8f8bb33975c"
+        },
+        {
+          "path": "SO0A.PAC",
+          "bytes": 49136,
+          "extent": 3113,
+          "sha256": "d4601d6627369b2c7e90b2157ae90f5a6c5852590113d590d402fd7ccdae47f8"
+        },
+        {
+          "path": "SO08.PAC",
+          "bytes": 46892,
+          "extent": 2918,
+          "sha256": "1cc547e1ae9fe9cd830163052b92285cd242199395bcbef8fb403d0bca85d75f"
+        },
+        {
+          "path": "SO07.PAC",
+          "bytes": 45056,
+          "extent": 2810,
+          "sha256": "b8f5caa5084fb73db41567cb4d69bcafcb4874ec09337f517c933e3656bdb3e8"
+        },
+        {
+          "path": "SO01.PAC",
+          "bytes": 30868,
+          "extent": 2391,
+          "sha256": "3616e05a839d5d8a46e3a9969d86fd7705bbaa3d245d236656b91931bb658d53"
+        },
+        {
+          "path": "SO03.PAC",
+          "bytes": 29900,
+          "extent": 2498,
+          "sha256": "224e0892dc810fa719ae182ed0a8a65e3ac32512c0321bc3807b7ec061ab83a2"
+        }
+      ]
+    }
+  },
+  "storage_envelopes": {
+    "two_largest_player_packages_bytes": 1531404,
+    "two_largest_players_plus_largest_background_and_support_bytes": 1845648,
+    "meaning": "Conservative compressed/on-disc package sums for candidate assessment only.",
+    "warning": "File size does not reveal decompressed size, simultaneous residency, destination RAM, or runtime lifetime."
+  },
+  "proven_observations": [
+    "The ISO root is flat and contains distinct player, background, stage-support, ADP-audio, ST2-stream, and binary naming families.",
+    "Player, background, and stage-support PAC members are individually addressable ISO files.",
+    "ADP assets and eleven CD audio tracks coexist on the same release disc."
+  ],
+  "unresolved": [
+    "PAC and ST2 internal formats",
+    "compression ratios and decompressed sizes",
+    "which named package maps to each character or stage",
+    "runtime load order, destination, lifetime, and eviction policy",
+    "whether adjacent extents imply intentional seek optimization"
+  ],
+  "confidence": "HIGH for file metadata; LOW for any runtime implication",
+  "rights_boundary": "Derived metadata only; no disc payload is committed."
+}

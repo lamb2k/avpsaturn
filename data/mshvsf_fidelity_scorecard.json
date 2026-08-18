@@ -1,0 +1,63 @@
+{
+  "title": "MSHvSF CPS-2 to Saturn historical-fidelity scorecard",
+  "scoring_policy": "No numeric or composite score is issued while mandatory dimensions are incomplete. Coverage and confidence are reported separately from fidelity classification.",
+  "route": "Ryu/Ken versus Spider-Man/Captain America with P2 neutral",
+  "dimensions": [
+    {
+      "dimension": "gameplay",
+      "coverage": "PARTIAL",
+      "proven": ["Equivalent deterministic match setup", "Observed idle, walk, jump, normal attack, hit reaction, and recovery on both systems"],
+      "unresolved": ["Same-attack collision pairing", "Input latency", "Movement trajectory", "Startup/active/recovery", "Hitboxes", "Damage", "Hitstop", "Projectile lifecycle", "Meter, supers, tags, and character-specific mechanics"],
+      "classification": "UNRESOLVED",
+      "confidence": "HIGH for route reproduction; LOW for exact parity"
+    },
+    {
+      "dimension": "animation",
+      "coverage": "PARTIAL",
+      "proven": ["Selected visual anchors reproduce deterministically on both systems"],
+      "unresolved": ["Pose identities", "Frame durations", "Dropped or merged frames", "Pivot offsets", "Full move coverage", "Presentation timing versus gameplay timing"],
+      "classification": "UNRESOLVED",
+      "confidence": "MEDIUM"
+    },
+    {
+      "dimension": "graphics",
+      "coverage": "PARTIAL",
+      "proven": ["CPS-2 final framebuffer/object/palette/register streams captured", "Saturn external framebuffer anchors captured", "Saturn disc package families inventoried"],
+      "unresolved": ["Normalized resolution/crop comparison", "VDP1 command path", "VDP2 layer map", "Palette ownership", "Sprite/effect reductions", "Stress-scene command and VRAM pressure"],
+      "classification": "UNRESOLVED",
+      "confidence": "MEDIUM"
+    },
+    {
+      "dimension": "content",
+      "coverage": "MINIMAL",
+      "proven": ["One shared versus matchup and stage route", "Official Saturn disc file and track inventory"],
+      "unresolved": ["Roster and move completeness", "Stages", "Modes", "Home-version additions", "Endings", "Regional or revision changes"],
+      "classification": "UNRESOLVED",
+      "confidence": "LOW"
+    },
+    {
+      "dimension": "audio",
+      "coverage": "MINIMAL",
+      "proven": ["CPS-2 QSound write windows captured", "Saturn ADP members and CD audio track topology measured"],
+      "unresolved": ["Event mapping", "Sample identity", "SCSP slot behavior", "CDDA track routing", "Onset", "Duration", "Mix", "Retrigger and channel pressure"],
+      "classification": "UNRESOLVED",
+      "confidence": "LOW"
+    },
+    {
+      "dimension": "performance",
+      "coverage": "NOT_MEASURED",
+      "proven": ["Deterministic Saturn route completes in the pinned emulator"],
+      "unresolved": ["Frame time", "Dropped frames", "Master/slave SH-2 load", "VDP1 draw completion", "DMA contention", "CD stalls", "Worst-case super/tag scene", "Physical hardware"],
+      "classification": "UNRESOLVED",
+      "confidence": "LOW"
+    }
+  ],
+  "classification_summary": {
+    "EQUIVALENT": 1,
+    "PLATFORM ADAPTATION": 1,
+    "UNRESOLVED": 4,
+    "source": "data/mshvsf_correspondence.json"
+  },
+  "release_gate": "OPEN",
+  "gate_reason": "The preferred projectile slice, internal state mapping, hardware budget peaks, audio parity, performance, full-roster coverage, and physical Saturn validation are incomplete."
+}

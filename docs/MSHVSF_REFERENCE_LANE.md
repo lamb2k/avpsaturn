@@ -86,16 +86,48 @@ Verified reports:
 - `data/mshvsf_saturn_first_pass.json`: two byte-identical cold replays of the
   Saturn Ryu route through idle, walk, jump, normal collision, visible health
   response, hit reaction, and recovery.
+- `data/mshvsf_cps2_semantic_model.json` and
+  `data/mshvsf_saturn_semantic_model.json`: system-by-system behavioral models
+  with structural gaps kept explicit.
+- `data/mshvsf_reconstructed_vertical_slice.json`: paired semantic event order
+  and the exact first-pass/projectile boundary.
 - `data/mshvsf_saturn_disc_manifest.json`: boot header, ISO filesystem, track
   layout, hashes, and the verified Saturn runtime observation.
+- `data/mshvsf_saturn_asset_topology.json`: measured package-family counts and
+  sizes without treating disc bytes as RAM residency.
+- `data/mshvsf_saturn_program_inventory.json`: hashes, module boundaries,
+  filename references, short SH-2 instruction samples, and static hardware
+  address leads derived from ignored private members. Runtime ownership stays
+  unresolved.
 - `data/mshvsf_correspondence.json`: one-sided and paired evidence records.
 - `data/mshvsf_difference_ledger.json`: only differences supported by current
   evidence; exact mechanics and the Saturn projectile path remain unresolved.
+- `data/mshvsf_hardware_budget.json`, `data/mshvsf_fidelity_scorecard.json`, and
+  `data/mshvsf_porting_patterns.json`: open measurement ledger, six-dimension
+  scorecard, and reusable/candidate pattern library.
 
 Run the CPS-2 slice and its analyzer together:
 
 ```powershell
 .\capture_mshvsf_vertical_slice.ps1
+```
+
+Regenerate and validate the tracked semantic/training package:
+
+```powershell
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\analyze_mshvsf_saturn_disc.py
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\analyze_mshvsf_saturn_asset_topology.py
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\extract_mshvsf_saturn_members.py
+$env:PYTHONPATH = (Resolve-Path .\.deps\capstone)
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\analyze_mshvsf_saturn_programs.py
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\build_mshvsf_semantic_models.py
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\validate_mshvsf_training_package.py
 ```
 
 Run the Saturn reference without editing the source cue or BIN. Pass a native
@@ -132,6 +164,16 @@ The reference lane will grow these artifacts without modifying the AvP runtime:
 The reusable method and initial hardware-responsibility map are recorded in
 `docs/CAPCOM_SATURN_PORTING_PLAYBOOK.md` and
 `docs/MSHVSF_SATURN_ARCHITECTURE.md`.
+
+The team package also includes:
+
+- `docs/CAPCOM_SATURN_TRAINING_EXERCISES.md`
+- `docs/CAPCOM_SATURN_PORT_CANDIDATE_CHECKLIST.md`
+- `docs/CAPCOM_SATURN_PORT_ACCEPTANCE_CHECKLIST.md`
+- `docs/CAPCOM_SATURN_FIDELITY_STANDARD.md`
+- `docs/MSHVSF_TRAINING_PLAN_STATUS.md`
+- `docs/MSHVSF_TO_AVP_TRANSFER_MATRIX.md`
+- reusable JSON templates under `templates/capcom_saturn_porting/`
 
 ## Non-invasive AvP validation probe
 

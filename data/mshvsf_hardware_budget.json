@@ -1,0 +1,140 @@
+{
+  "title": "MSHvSF Saturn hardware budget and measurement ledger",
+  "scope": "Platform capacities, measured disc storage, and open runtime peaks",
+  "budget_rule": "Platform capacity is not runtime usage. On-disc package size is not decompressed or resident size. No fit claim is valid until destination, lifetime, overlap, and peak are traced.",
+  "capacity_provenance": {
+    "kind": "Pinned emulator memory-model constants, not MSHvSF runtime measurements",
+    "repository": "https://github.com/ticohq/tico-yabasanshiro.git",
+    "commit": "71c973f92966d33de464c1ba4dac1953af6ec462",
+    "source_sha256": {
+      "yabause/src/yabause.c": "e146c4e7bdc4ae97a50aabfb1909e130734a47b6fd7f94c4e1275a392e2828b6",
+      "yabause/src/vdp1.cpp": "def92d1e75c4aa13715bf49f9b924d8df97a07b61129c22159190bcd48d36915",
+      "yabause/src/vdp2.cpp": "f50157b0093f2644d059ab3d9df598aede41fea63ffe9a58a10d72a867cf24e9",
+      "yabause/src/scsp2.c": "58e9a25c54b0b973dd77e90cd1e121f2feceead92bdcaad03ab92d7427b0f727",
+      "yabause/src/cs0.c": "0d8a1e3ddc74bc6ef8ce3ca41b77b06ddcb59a5a36628ecddfcbe423acb8b200"
+    }
+  },
+  "resources": [
+    {
+      "resource": "master_sh2",
+      "platform_capacity": "One SH-2 execution context",
+      "observed_peak": null,
+      "official_port_responsibility": "UNRESOLVED",
+      "evidence": ["Successful deterministic runtime"],
+      "next_measurement": "Capture per-frame PC samples, interrupt ownership, and cycle counts around input, collision, rendering submission, and loading."
+    },
+    {
+      "resource": "slave_sh2",
+      "platform_capacity": "One SH-2 execution context",
+      "observed_peak": null,
+      "official_port_responsibility": "UNRESOLVED",
+      "evidence": [],
+      "next_measurement": "Prove whether and when the slave is started, then trace its task entry points and synchronization."
+    },
+    {
+      "resource": "work_ram_low",
+      "platform_capacity_bytes": 1048576,
+      "observed_peak_bytes": null,
+      "official_port_layout": "UNRESOLVED",
+      "capacity_evidence": "Saturn emulator memory model allocates 0x100000 bytes",
+      "next_measurement": "Dump cold boot, frontend, team load, stage load, idle, normal hit, and recovery; classify stable, transient, code, stack, and heap regions."
+    },
+    {
+      "resource": "work_ram_high",
+      "platform_capacity_bytes": 1048576,
+      "observed_peak_bytes": null,
+      "official_port_layout": "UNRESOLVED",
+      "capacity_evidence": "Saturn emulator memory model allocates 0x100000 bytes",
+      "next_measurement": "Trace writes and allocation boundaries across the same route phases as low work RAM."
+    },
+    {
+      "resource": "expansion_ram_32mbit",
+      "platform_capacity_bytes": 4194304,
+      "observed_peak_bytes": null,
+      "official_port_layout": "UNRESOLVED",
+      "capacity_evidence": "Yaba Sanshiro cartridge type 7 allocates 0x400000 bytes; the official port boots and replays with that configuration",
+      "next_measurement": "Compare no-cart and 4 MB boots, trace cartridge writes during team/stage loading, and map resident ranges and retirement events."
+    },
+    {
+      "resource": "vdp1_vram",
+      "platform_capacity_bytes": 524288,
+      "observed_peak_bytes": null,
+      "official_port_layout": "UNRESOLVED",
+      "capacity_evidence": "Saturn emulator memory model allocates 0x80000 bytes",
+      "next_measurement": "Dump command tables and referenced texture ranges at idle, jump, normal-active, impact, and effect-heavy stress frames."
+    },
+    {
+      "resource": "vdp1_framebuffers",
+      "platform_capacity_bytes_each": 262144,
+      "buffer_count": 2,
+      "observed_mode": null,
+      "official_port_layout": "UNRESOLVED",
+      "capacity_evidence": "Saturn emulator memory model allocates two 0x40000-byte buffers",
+      "next_measurement": "Record framebuffer mode, erase/write behavior, clipping, and swap timing."
+    },
+    {
+      "resource": "vdp2_vram",
+      "platform_capacity_bytes": 524288,
+      "observed_peak_bytes": null,
+      "official_port_layout": "UNRESOLVED",
+      "capacity_evidence": "Saturn emulator memory model allocates 0x80000 bytes",
+      "next_measurement": "Capture layer enables, map/character bases, line-scroll tables, and occupied ranges for the deterministic stage."
+    },
+    {
+      "resource": "vdp2_color_ram",
+      "platform_capacity_bytes": 4096,
+      "observed_peak_bytes": null,
+      "official_port_layout": "UNRESOLVED",
+      "capacity_evidence": "Saturn emulator memory model allocates 0x1000 bytes",
+      "next_measurement": "Dump color-RAM mode and palette ranges at the paired anchors."
+    },
+    {
+      "resource": "scsp_sound_ram",
+      "platform_capacity_bytes": 524288,
+      "observed_peak_bytes": null,
+      "official_port_layout": "UNRESOLVED",
+      "capacity_evidence": "Saturn emulator memory model allocates 0x80000 bytes",
+      "next_measurement": "Trace ADP transfers, decoded sample ranges, slot allocation, reuse, and hit-event onset."
+    },
+    {
+      "resource": "cd_data_track",
+      "platform_capacity": "Disc/runtime dependent",
+      "observed_storage": {
+        "file_count": 414,
+        "file_bytes": 393365484,
+        "two_largest_player_packages_bytes": 1531404,
+        "two_largest_players_plus_largest_background_and_support_bytes": 1845648,
+        "st2_stream_bytes": 325867520,
+        "adp_audio_bytes": 41933183
+      },
+      "official_port_strategy": "Flat ISO and separately addressable package families are proven; read order and residency are UNRESOLVED",
+      "evidence": ["data/mshvsf_saturn_asset_topology.json"],
+      "next_measurement": "Log file-open/read operations, FAD/LBA, transfer size, destination, duration, and overlap with CDDA."
+    },
+    {
+      "resource": "cdda",
+      "platform_capacity": "Eleven audio tracks after the data track in this release",
+      "observed_peak": null,
+      "official_port_strategy": "Track topology proven; event-to-track routing UNRESOLVED",
+      "evidence": ["data/mshvsf_saturn_disc_manifest.json"],
+      "next_measurement": "Trace play/stop/seek commands and audible onset across frontend, versus, stage, and results transitions."
+    },
+    {
+      "resource": "dma",
+      "platform_capacity": "Channel and bus dependent",
+      "observed_peak": null,
+      "official_port_responsibility": "UNRESOLVED",
+      "evidence": [],
+      "next_measurement": "Trace DMA channel registers and transfer destinations during package load, VDP upload, and SCSP upload."
+    }
+  ],
+  "current_fit_result": "UNRESOLVED",
+  "current_blockers": [
+    "No runtime memory dumps or allocation traces",
+    "No decompression or package-format decoder",
+    "No simultaneous-residency timeline",
+    "No VDP command/register capture",
+    "No SCSP or DMA trace",
+    "No worst-case super, tag, or full-roster stress capture"
+  ]
+}

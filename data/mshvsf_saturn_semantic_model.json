@@ -1,0 +1,144 @@
+{
+  "title": "MSHvSF Saturn semantic model",
+  "model_kind": "Evidence-backed external behavioral model; internal SH-2 state is not yet traced",
+  "source": "data/mshvsf_saturn_first_pass.json",
+  "runtime": {
+    "emulator": "Yaba Sanshiro 2 v1.20.37",
+    "disc_product": "T-1238G V1.000 19980903",
+    "cartridge": "32 Mbit (4 MB) DRAM",
+    "temporary_cue_sha256": "5319d8063444e1a5f8c2949bbca6735627f28df86ac85aca9020a68e5d830305",
+    "route": "Two-player Ryu/Ken vs Spider-Man/Captain America; P2 remains neutral after setup"
+  },
+  "route": {
+    "actors": "Ryu/Ken versus Spider-Man/Captain America",
+    "control": "Native replay applies exact Port 1 and Port 2 bytes; P2 is neutral after setup",
+    "record_sha256": "e751d4f79a7a94d3474f5fc9a2685e7484d0beeef91d871a903857b62dd7480b",
+    "cold_replays": 2,
+    "identical_screenshot_anchors": 25
+  },
+  "subsystems": [
+    {
+      "semantic_system": "game_state",
+      "proven": "The fixed backup plus replay deterministically traverses title, Versus selection, teams, mode, speed, stage, and gameplay.",
+      "structural_status": "UNRESOLVED",
+      "missing": "SH-2 state addresses, mode/round structures, and writer functions."
+    },
+    {
+      "semantic_system": "input",
+      "proven": "Standard-pad active-low bytes and exact frame edges are reproduced for both controller ports.",
+      "structural_status": "PARTIAL",
+      "missing": "SMPC read routine, game input buffer, command parser, and latency to actor state."
+    },
+    {
+      "semantic_system": "player_structure",
+      "proven": "Ryu responds to walk, jump, and normal inputs and Spider-Man remains neutral until the hit reaction.",
+      "structural_status": "UNRESOLVED",
+      "missing": "Actor bases, struct stride, coordinates, velocity, state, animation, collision, and health fields."
+    },
+    {
+      "semantic_system": "movement_and_animation",
+      "proven": "Idle, walk, jump, normal, hit reaction, and recovery anchors reproduce byte-identically across two cold runs.",
+      "structural_status": "EXTERNAL_ONLY",
+      "missing": "Animation tables, rendered-frame durations, normalized trajectories, and SH-2 state transitions."
+    },
+    {
+      "semantic_system": "attack_collision_damage",
+      "proven": "The normal visibly contacts Spider-Man, triggers FIRST ATTACK, changes the health HUD, and produces a hit reaction while P2 is neutral.",
+      "structural_status": "EXTERNAL_ONLY",
+      "missing": "Hitbox records, collision routine, health field, exact damage, hitstop, and reaction-state data. Hadouken is deferred."
+    },
+    {
+      "semantic_system": "rendering",
+      "proven": "The route produces stable foreground, background, effects, and HUD output.",
+      "structural_status": "UNRESOLVED",
+      "missing": "VDP1 command tables, VDP2 registers/layers, VRAM addresses, palette ownership, and transfer path."
+    },
+    {
+      "semantic_system": "audio",
+      "proven": "The disc contains ADP members and eleven CD audio tracks; the runtime emits audio.",
+      "structural_status": "UNRESOLVED",
+      "missing": "Normal-hit event routing, SCSP slots/RAM, ADP decoder, CDDA selection, and onset timing."
+    },
+    {
+      "semantic_system": "asset_loading",
+      "proven": "The flat ISO contains 414 files in eight measured naming families.",
+      "structural_status": "UNRESOLVED",
+      "missing": "Package format, decompressed size, load destination, lifetime, eviction, DMA, and CD seek schedule."
+    }
+  ],
+  "timeline": [
+    {
+      "event": "idle",
+      "frame": 3540,
+      "framebuffer_sha256": "71644a1bad1bf5e864b61296bc1c30392814b72912e9aa09e037a8a9d2649898",
+      "evidence_scope": "external framebuffer and exact replay input state"
+    },
+    {
+      "event": "walk",
+      "frame": 3620,
+      "framebuffer_sha256": "4d3d8b72185adac469f41980fada1613d8b20a27acd01efc459252ab0884bc76",
+      "evidence_scope": "external framebuffer and exact replay input state"
+    },
+    {
+      "event": "jump",
+      "frame": 3720,
+      "framebuffer_sha256": "b78c101685e2635d73d5627a4d85ba9521fc17b0fc35eb62ef2a650d01f97c50",
+      "evidence_scope": "external framebuffer and exact replay input state"
+    },
+    {
+      "event": "normal_input",
+      "frame": 3820,
+      "framebuffer_sha256": "24dd959a720a87ef47e8ab0b10211358317ad4a0d8cbda5378927ae266d10675",
+      "evidence_scope": "external framebuffer and exact replay input state"
+    },
+    {
+      "event": "normal_attack_active",
+      "frame": 3828,
+      "framebuffer_sha256": "f4b8233c74f37d6e4ce2b00739c72f61e0186a03e86c40a105e1cd8032d46e8c",
+      "evidence_scope": "external framebuffer and exact replay input state"
+    },
+    {
+      "event": "collision_damage_hit_reaction",
+      "frame": 3840,
+      "framebuffer_sha256": "f9a08b2bd1e86f79743cbd19f3d8ead7e0a69c74f7cd11e5220090a3d735c6a1",
+      "evidence_scope": "external framebuffer and exact replay input state"
+    },
+    {
+      "event": "recovery",
+      "frame": 3900,
+      "framebuffer_sha256": "740c2e925991f11161bd6d8bc258bae601d0676d6eaa5e58bd9ebde94c1656d7",
+      "evidence_scope": "external framebuffer and exact replay input state"
+    }
+  ],
+  "input_edges": [
+    {
+      "frame": 3600,
+      "action": "P1 right press"
+    },
+    {
+      "frame": 3645,
+      "action": "P1 right release"
+    },
+    {
+      "frame": 3690,
+      "action": "P1 up press"
+    },
+    {
+      "frame": 3698,
+      "action": "P1 up release"
+    },
+    {
+      "frame": 3820,
+      "action": "P1 X press"
+    },
+    {
+      "frame": 3828,
+      "action": "P1 X release"
+    }
+  ],
+  "confidence": {
+    "behavioral_order": "HIGH",
+    "internal_state_mapping": "LOW",
+    "warning": "Byte-identical screenshots prove repeatable external behavior, not SH-2, VDP, SCSP, RAM, CD, or DMA responsibility."
+  }
+}

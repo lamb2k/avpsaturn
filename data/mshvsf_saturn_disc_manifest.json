@@ -18,6 +18,10 @@
     "compatible_area_symbols": "J",
     "compatible_peripherals": "      JW",
     "title": "MARVEL SUPER HEROES VS. STREET FIGHTER",
+    "ip_size_bytes": 6144,
+    "first_program_load_address": "0x060f0000",
+    "first_program_read_size_bytes": 65536,
+    "program_identity_status": "The boot fields establish address and read envelope; pairing them to a specific ISO member remains unresolved until a boot trace.",
     "sector0_sha256": "74a7abfd6154f43de2207c056ddffc5a33532acd994c9fba59dfb5c1ab1bbc28"
   },
   "iso9660": {
@@ -4293,9 +4297,10 @@
   "verified_runtime_observation": {
     "emulator": "Yaba Sanshiro 2 v1.20.37",
     "cartridge": "32 Mbit (4 MB) DRAM, emulator type 7",
-    "result": "Booted licensed legal screen, Marvel/Capcom intro, title, and attract gameplay from a temporary cue pointing at the unchanged BIN.",
+    "result": "Booted from a temporary cue pointing at the unchanged BIN and deterministically replayed Versus mode through Ryu movement, jump, normal collision, visible health response, hit reaction, and recovery.",
     "status": "PASS",
-    "remaining_gate": "Deterministic emulated-pad input capture for the Ryu gameplay slice is not yet established."
+    "paired_report": "data/mshvsf_saturn_first_pass.json",
+    "remaining_gate": "Saturn internal state tracing and the Hadouken projectile path are not yet established."
   },
   "rights_boundary": "Metadata and hashes only; no disc file payload is written or committed."
 }
