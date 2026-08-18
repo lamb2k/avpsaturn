@@ -42,6 +42,30 @@ or physical-hardware proof.
 route is a valuable regression baseline, not the Gate 1 implementation and not
 the full-game destination.
 
+**2026-08-18 collision records (milestone 2) — EXECUTED, NOT CLOSED.** The
+actor-local record format is decoded from the game's own routines: selectors are
+animation-record bytes `+8` (hurt) and `+9` (attack), the actor's `+0x50`
+table-set pointer plus the words at `+0`/`+2` give the hurt and attack table
+bases, strides are 8 and 16 bytes, and the test at `0x01D25E` is three axes of
+signed centre plus unsigned half-extent with the depth delta projected into the
+Y axis. `tools/decode_avsp_collision.py` emits the tracked, deterministic,
+coordinate-only `data/avsp_collision.json` (10 trusted families including the
+player, street aliens, Stalkers and the boss; 10 more explicitly flagged
+suspect). `tools/verify_avsp_collision.py` falsifies it against two bounded
+full-work-RAM captures: **21,908 non-overlapping active pairs produced no hit**,
+and **44 of 56 hit latches are explained exactly** by an overlapping pair whose
+attack record carries the latched value. The 12 residuals are named, not
+smoothed: 8 are one simultaneous broadcast at frame 5463, and 4 belong to a
+projectile/weapon path this decode does not cover. **Native collision is
+deliberately unchanged**: the records are indexed by the live ROM
+animation-record pointer at actor `+0x1C`, which the runtime does not yet carry
+(pose selection is still capture-derived), so consuming them today would require
+hand-mapped per-pose constants — the exact substitution this milestone forbids.
+That linkage is milestone 3. Gate 1 condition 2 stays **OPEN**; Gate 1 stays
+**0/7**. See the handoff's "Capability Gate 1 — collision records (milestone 2,
+2026-08-18)" section for the routine addresses, SHA-256 evidence and exact
+commands.
+
 **2026-08-18 street-alien emission (milestone 1) — CLOSED.** The wrapper /
 20-word watchpoints / analyzer are scenario-parameterized (no logic tied to
 actor `0xFFA000`, base `0x7080A0`, frame 4253, or the five slots). **Both gated
@@ -72,7 +96,7 @@ evidence and the exact reproduction command.
 | # | Gate 1 condition | Status | Current evidence and remaining gate |
 |---|---|---|---|
 | 1 | Animation from ROM scripts at runtime | **OPEN — Chrysalis tile-composition slice proven** | For the Chrysalis boss the runtime now composes all 29 of its poses from ROM-referenced 4bpp tiles (`compose_boss_rom_pose` in `main.c`, `generated/avsp_boss_rom.h`), and the boss's `BACT`/`BHIT`/`BKO` pose archives are no longer loaded for animation (they remain on disc only as host-test regression oracles). This is a composition slice, not full ROM animation: pose *selection* still uses the capture-derived per-frame clip/step tables (`boss_pose_for_frame`, `generated/avsp_boss_animation.h`), and the ROM selector-6 / control-word script interpreter is decoded host-side only, not yet linked into the runtime. The 29-pose / 28-assembly composition gate passes 28/28 with 0 differing pixels, the focused KO/HIT builds and the full controller route through Round 2 all render on Yaba Sanshiro without an asset error, and a clean normal release boots to title. **Remaining:** link the ROM script interpreter for pose selection, and decode the player/street-aliens/Stalker programs to route them through the same tile-composition path (retiring their `/SPR4/*.RLE` archives), before this condition is closed. |
-| 2 | Collision from the game's hitboxes | **OPEN — evidence captured** | Stock-MAME hitbox overlays and selected actor-relative candidates are tracked. Native collision still uses scalar range/lane checks and inferred Chrysalis 21/55/97 and Stalker contact schedules. Decode the game's box records, validate all required poses, and replace those checks. |
+| 2 | Collision from the game's hitboxes | **OPEN — record format decoded and falsified; runtime unchanged** | The game's own routines give the format: selectors at animation-record `+8`/`+9`, table bases from actor `+0x50` words `+0`/`+2`, strides 8 and 16, and a three-axis centre/half-extent test at `0x01D25E` with the depth delta projected into Y. `data/avsp_collision.json` holds 10 trusted family table-sets (player, street aliens, Stalkers, boss) decoded deterministically, with 10 further families explicitly flagged suspect rather than invented. The controlled falsification passes: 21,908 non-overlapping active pairs produced no hit and 44/56 hit latches are explained exactly, with the 12 residuals named (one simultaneous broadcast, and a projectile/weapon path that is not decoded). Native collision still uses scalar range/lane checks and the inferred Chrysalis 21/55/97 and Stalker schedules, deliberately: the records are indexed by the live ROM animation-record pointer the runtime does not yet carry, so consuming them now would mean hand-mapped per-pose constants. **Remaining:** milestone 3 must link ROM animation records into the runtime; then decode the projectile path, resolve the broadcast path and the attack-table lengths, and replace the inferred schedules. |
 | 3 | Enemy behaviour from translated 68000 routines | **OPEN** | Stock watchpoints located animation/action/state writers. `cap_update_enemy()` remains hand-authored, no required AI path is translated, and PRNG use is not identified or recorded. |
 | 4 | Spawns, camera and triggers from stage tables | **OPEN** | The current lifecycle, waves, camera and room transitions are capture-derived constants and authored C. Round 1 stage tables have not been located, extracted or consumed by the runtime. |
 | 5 | Pixel and event-level validation | **OPEN — pixel groundwork proven** | The format-isolating pose gate passes 28/28 (29 oracle poses) with zero differing pixels using captured screen geometry, in both default and self-contained modes. The independent position audit has a scoped pass on 408/408 geometry frames: 1,435/1,443 parts directly exact, 0 at sibling-origin deltas (the shared-code-set ambiguity is resolved by the actor-slot record pointer at frame f−1), 8 at a formally bounded `y=-4` whole-pose settle trail (the only non-zero residual in the scope; the one-step trail's exact writer is not yet disassembled), 0 frames unmatched, X 1,443/1,443 exact. Because the pose gate requires every listed assembly to 0-diff an oracle, only the 28 assemblies with a captured-pose oracle are listed; the 5 decoded mid-attack/at-rest trace assemblies are excluded and reported in `excluded_no_oracle_assemblies`, not pixel-verifiable. A MAME-vs-native event parity harness is still missing. |

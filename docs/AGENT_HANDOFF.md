@@ -1,7 +1,14 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-18 EDT (Capability Gate 1 street-alien emission **milestone 1
-CLOSED**: both gated frames, 4214 and 4253, reproduce **20/20** from a fresh
+Updated: 2026-08-18 EDT (Capability Gate 1 **milestone 2 executed, NOT closed**:
+the actor-local collision record format is decoded from the game's own routines
+and survives a controlled hit/whiff falsification — 21,908 non-overlapping
+active pairs produced no hit, 44/56 hit latches explained exactly — but native
+collision is deliberately unchanged because the records are indexed by ROM
+animation-record bytes the runtime does not yet carry. That linkage is
+milestone 3. Gate 1 stays 0/7, full-game 0/9. See "Capability Gate 1 — collision
+records (milestone 2, 2026-08-18)" below. Earlier: street-alien emission
+**milestone 1 CLOSED**: both gated frames, 4214 and 4253, reproduce **20/20** from a fresh
 deterministic run, with writer-PC, emitting-actor and ROM part-table
 attribution. The earlier 4253 failure this session was an instrument defect,
 not a fixture defect: an off-by-one source-frame label plus an unreplayed
@@ -20,6 +27,163 @@ The current capture-derived Round 1 route remains a useful regression baseline,
 but it does not satisfy Gate 1's ROM-derived animation, collision, AI or stage-
 table requirements and cannot close a full-game condition. Do not describe the
 project as functionally parity complete or hardware-ready.
+
+## Capability Gate 1 — collision records (milestone 2, 2026-08-18)
+
+**Milestone 2 result: NOT CLOSED. The record format is decoded from the game's
+own routines and survives a controlled falsification test, but native collision
+is deliberately UNCHANGED.** Gate 1 stays **0/7**; full-game stays **0/9**. The
+blocker is named at the end of this section and is structural, not a defect.
+
+### The format, read out of the code (not inferred)
+
+Caller `0x01CF84..0x01CFC6`, duplicated at `0x01D064..0x01D0A6`:
+
+```text
+A0 = [A6+0x1C]        attacker animation record
+D2 = A0[+9]           attack-box selector; 0 => actor cannot hit
+A0 = [A1+0x1C]        defender animation record
+D3 = A0[+8]           hurt-box selector;   0 => actor cannot be hit
+A3 = [A6+0x50]  ; A3 += word[A3+2] ; A3 += D2*16   -> attack entry (stride 16)
+A2 = [A1+0x50]  ; A2 += word[A2+0] ; A2 += D3*8    -> hurt entry   (stride 8)
+bsr 0x01D25E          -> overlap test; the caller's "bhi" means no overlap
+```
+
+Overlap test `0x01D25E..0x01D312` is **three axes of centre + half-extent**, not
+left/top/right/bottom:
+
+- depth: `d = (hurt[+4] + def[+0x18]) - (atk[+4] + atk_actor[+0x18])`, miss when
+  `|d| > atk[+5] + hurt[+5]`; `d` is kept **signed** for the Y axis;
+- x: `atk[+0]` negated when the attacker's `+0x0F` facing byte is non-zero, plus
+  `+0x10`; same for the defender; miss when the separation exceeds
+  `atk[+2] + hurt[+2]`;
+- y: `atk[+1] + d + atk_actor[+0x14]` versus `hurt[+1] + def[+0x14]`; miss when
+  the separation exceeds `atk[+3] + hurt[+3]`. The depth delta feeding the Y
+  axis is the belt-scroller's depth-to-screen projection.
+
+Record bytes: `+0` signed x centre, `+1` signed y centre, `+2`/`+3` unsigned
+x/y half-extents, `+4` signed z centre, `+5` unsigned z half-extent. Hurt `+7`
+is a role byte read at `0x01D314` (meaning **not** proven). Attack `+0x0A` is
+the knockback treatment, `+0x0E` is the value written to the defender's `+0x2C`
+on a hit — and, per `0x01CFD2..0x01CFDA`, to the **attacker's** `+0x2C` too when
+its own is still zero. That second write is why a naive "who got hit" classifier
+mis-scores the evidence.
+
+Coordinates are actor-local, so one record set serves every actor sharing the
+family pointer at `+0x50`. Actor records are `0xC0` apart on one grid anchored at
+the player slot `0xFF8380` (confirmed: every distinct A4/A6 in the milestone-1
+watchpoint log lands on it).
+
+### Decoded coverage
+
+`tools/decode_avsp_collision.py` → `data/avsp_collision.json` (tracked,
+coordinates only, no ROM bytes) and `generated/avsp_collision.h` (ignored).
+20 family table-sets were censused; **10 are trusted** and 10 are flagged
+`suspect_not_a_box_family` because their attack table does not follow their hurt
+table at a whole number of 8-byte entries — for those the two words at `+0/+2`
+are probably not box offsets at all, and the report says so rather than
+publishing invented boxes. Trusted families include the player (`0x11AE02`,
+24 hurt entries exact, 12 attack observed), street aliens (`0x130AC8`, 16 hurt
+exact, 9 attack observed; also `0x130984`), the Stalkers (`0x06D516`,
+`0x06DE6C`) and the boss family (`0x13E97A`, 34 hurt exact, 15 attack observed).
+Hurt counts are **exact** (the adjacency gap proves them); attack counts are an
+**observed bound** from the censused route, not a proven table length.
+
+### Falsification (the controlled hit/whiff test)
+
+`tools/verify_avsp_collision.py` re-implements the game's test from the tracked
+report plus live actor context, over two bounded full-work-RAM captures
+(street route 4201–5500, boss route 13000–14600):
+
+- **whiff side: 21,908** `(attacker, defender, frame)` triples had an active
+  attack selector and an active hurt selector with **no** box overlap, and not
+  one produced a hit. A wrong coordinate convention, facing transform or depth
+  axis would show up here immediately;
+- **hit side: 44 of 56** `+0x2C` latch events are explained exactly — same pair,
+  same frame (or the one before), and the attack record's `+0x0E` equal to the
+  latched value — 25 defender-side and 19 attacker-side;
+- 2,516 overlapping pairs produced no latch and are accounted for by the guards
+  the caller actually tests (defender state ≠ 1, defender `+0x70` set, or the
+  per-attacker latch at defender `+0x68 + attacker[+0xD1]` already equal to the
+  attacker's `+0x67`); 24 overlapped un-guarded without latching (1% residual,
+  most likely intra-frame ordering the end-of-frame sample cannot see);
+- **12 latch events are not explained** and are named, not smoothed over: 8 are
+  one simultaneous same-value broadcast at frame 5463 (all live actors latch at
+  once — not a pairwise box event, path unidentified); 4 are singles — frame
+  4250 value 8 and frame 5481 value 12 on the street route, and a player/boss
+  pair at frame 13942 value 3. The two street singles line up with the player's
+  gun and a Stalker contact, i.e. **the projectile/weapon path is a different
+  routine that is not decoded here.**
+
+`tools/test_avsp_collision.py` checks the report's structure and anchors: all
+pass, including the independent prediction that **selector 0 is an inactive
+record in every trusted family** — the callers reject selector 0 before any
+table read, and nothing in the decoder forces that outcome.
+
+### Evidence (SHA-256)
+
+- `data/avsp_collision.json`
+  `49ce678bee49d331a3b9e6cee97708b7644c5b0727de477ffc89671bf64bd78c` (486,317 B),
+  deterministic: `--verify-deterministic` re-decodes in-process and agrees.
+- `.deps/mame/collision_probe/workram.bin` (ignored, 42,598,400 B)
+  `52b710835e9fbcd279a04a9e1ea284ded9132bdc6ea0b9ce9cf0f845669d6f59`.
+- `.deps/mame/collision_probe_boss/workram.bin` (ignored, 52,461,568 B)
+  `6896ab7feddb3e7b9f4638bab74794c14fd239be79cce78ce6ab80f829500246`.
+- Program image (ignored, private, 2,097,152 B)
+  `0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9`.
+
+The pre-existing `.deps/mame/round1_debug_hitboxes/actor_state.bin` was tried
+first and is **insufficient for attribution**: it dumps only `0xFF8300..0xFF8FFF`
+and `0xFFA000..0xFFBFFF`, so every enemy actor slot below `0xFFA000` is absent.
+`tools/mame_capture_collision_probe.lua` replays that capture's route verbatim
+and dumps the whole work RAM instead, with no screenshots.
+
+### Exact reproduction commands
+
+```powershell
+$env:AVSP_CP_CAPTURE_ROOT=".deps/mame/collision_probe"; $env:AVSP_CP_STATE_NAME="avspu_stage1_debug_hitboxes"; $env:AVSP_CP_ROW2="0x80"; $env:AVSP_CP_FIRST_FRAME="4201"; $env:AVSP_CP_FINAL_FRAME="5500"
+.deps\mame\mame0289\mame.exe avspu -rompath . -video none -sound none -nothrottle -skip_gameinfo -cfg_directory .deps\mame\cfg_debugoverlay -nvram_directory .deps\mame\nvram_debugoverlay -state_directory .deps\mame\captures -snapshot_directory .deps\mame -autoboot_delay 0 -autoboot_script .\tools\mame_capture_collision_probe.lua
+```
+
+(repeat with `collision_probe_boss` / 13000 / 14600), then:
+
+```powershell
+python tools\decode_avsp_collision.py --rom .deps\mame\actorprobe\decrypted_program_2m.bin --census-workram .deps\mame\collision_probe\workram.bin --census-workram .deps\mame\collision_probe_boss\workram.bin --verify-deterministic
+```
+
+```powershell
+python tools\verify_avsp_collision.py --report data\avsp_collision.json --rom .deps\mame\actorprobe\decrypted_program_2m.bin --workram .deps\mame\collision_probe\workram.bin --first-frame 4201 --workram .deps\mame\collision_probe_boss\workram.bin --first-frame 13000 --max-unexplained 12
+```
+
+### Why native collision was NOT changed — the blocker
+
+The records are indexed by **animation-record bytes `+8` and `+9`**, read
+through the actor's live ROM animation-record pointer at `+0x1C`. The native
+runtime has no such pointer: pose *selection* for the player, street aliens and
+Stalkers still walks the capture-derived clip/step tables in
+`generated/avsp_boss_animation.h` and the `/SPR4/*.RLE` archives, and only the
+Chrysalis *composition* path touches ROM data at all (milestone-1 / condition-1
+status, unchanged). So there is no runtime value that can index these tables.
+Consuming the boxes today would mean hand-mapping each native pose to a ROM
+selector — exactly the "pose-specific replacement constants by hand" this
+assignment forbids, and it would bake a second inferred layer under a
+ROM-derived name.
+
+**The dependency is milestone 3**, which links ROM animation records into the
+runtime. Once an actor carries its live record pointer, the selector bytes and
+therefore these boxes follow directly, and `capability_model.c` can drop the
+21/55/97 boss schedule and the Stalker schedule in one coherent change.
+
+**Next bounded command for the agent that resumes this:** decode the
+projectile/weapon collision path (the frame-4250 value-8 and frame-5481 value-12
+singles above) by putting stock-MAME watchpoints on the defender's `+0x2C` byte
+across those two frames and recording the writer PC — that is the one remaining
+collision path in Round 1 that this decode does not cover.
+
+`capability_model.c`, `tests/capability_model_test.c` and every build artefact
+are untouched by this body. No build, soak, ISO or emulator gate was run,
+because no native code changed and running them would prove nothing about this
+work.
 
 ## Capability Gate 1 — street-alien emission (2026-08-18 execution)
 
