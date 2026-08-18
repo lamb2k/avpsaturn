@@ -22,11 +22,11 @@ native route is a valuable regression baseline, not the goal implementation.
 
 | # | Goal condition | Status | Current evidence and remaining gate |
 |---|---|---|---|
-| 1 | Animation from ROM scripts at runtime | **OPEN — Chrysalis tile-composition slice proven** | For the Chrysalis boss the runtime now composes all 29 of its poses from ROM-referenced 4bpp tiles (`compose_boss_rom_pose` in `main.c`, `generated/avsp_boss_rom.h`), and the boss's `BACT`/`BHIT`/`BKO` pose archives are no longer loaded for animation (they remain on disc only as host-test regression oracles). This is a composition slice, not full ROM animation: pose *selection* still uses the capture-derived per-frame clip/step tables (`boss_pose_for_frame`, `generated/avsp_boss_animation.h`), and the ROM selector-6 / control-word script interpreter is decoded host-side only, not yet linked into the runtime. The 29-pose / 12-assembly composition gate passes 12/12 with 0 differing pixels, the focused KO/HIT builds and the full controller route through Round 2 all render on Yaba Sanshiro without an asset error, and a clean normal release boots to title. **Remaining:** link the ROM script interpreter for pose selection, and decode the player/street-aliens/Stalker programs to route them through the same tile-composition path (retiring their `/SPR4/*.RLE` archives), before this condition is closed. |
+| 1 | Animation from ROM scripts at runtime | **OPEN — Chrysalis tile-composition slice proven** | For the Chrysalis boss the runtime now composes all 29 of its poses from ROM-referenced 4bpp tiles (`compose_boss_rom_pose` in `main.c`, `generated/avsp_boss_rom.h`), and the boss's `BACT`/`BHIT`/`BKO` pose archives are no longer loaded for animation (they remain on disc only as host-test regression oracles). This is a composition slice, not full ROM animation: pose *selection* still uses the capture-derived per-frame clip/step tables (`boss_pose_for_frame`, `generated/avsp_boss_animation.h`), and the ROM selector-6 / control-word script interpreter is decoded host-side only, not yet linked into the runtime. The 29-pose / 28-assembly composition gate passes 28/28 with 0 differing pixels, the focused KO/HIT builds and the full controller route through Round 2 all render on Yaba Sanshiro without an asset error, and a clean normal release boots to title. **Remaining:** link the ROM script interpreter for pose selection, and decode the player/street-aliens/Stalker programs to route them through the same tile-composition path (retiring their `/SPR4/*.RLE` archives), before this condition is closed. |
 | 2 | Collision from the game's hitboxes | **OPEN — evidence captured** | Stock-MAME hitbox overlays and selected actor-relative candidates are tracked. Native collision still uses scalar range/lane checks and inferred Chrysalis 21/55/97 and Stalker contact schedules. Decode the game's box records, validate all required poses, and replace those checks. |
 | 3 | Enemy behaviour from translated 68000 routines | **OPEN** | Stock watchpoints located animation/action/state writers. `cap_update_enemy()` remains hand-authored, no required AI path is translated, and PRNG use is not identified or recorded. |
 | 4 | Spawns, camera and triggers from stage tables | **OPEN** | The current lifecycle, waves, camera and room transitions are capture-derived constants and authored C. Round 1 stage tables have not been located, extracted or consumed by the runtime. |
-| 5 | Pixel and event-level validation | **OPEN — pixel groundwork proven** | The format-isolating pose gate passes 12/12 with zero differing pixels using captured screen geometry. The independent position audit has a scoped pass on 246/408 geometry frames: 793/864 parts directly exact, 63 at known sibling-origin deltas, 8 at a narrowly observed `y=-4` settling residual, 162 frames unmatched. A self-contained full-coverage ROM assembly test and MAME-vs-native event parity harness are still missing. |
+| 5 | Pixel and event-level validation | **OPEN — pixel groundwork proven** | The format-isolating pose gate passes 28/28 (29 oracle poses) with zero differing pixels using captured screen geometry, in both default and self-contained modes. The independent position audit has a scoped pass on 408/408 geometry frames: 1,372/1,443 parts directly exact, 63 at known sibling-origin deltas, 8 at a narrowly observed `y=-4` settling residual, 0 frames unmatched. Because the pose gate requires every listed assembly to 0-diff an oracle, only the 28 assemblies with a captured-pose oracle are listed; the 5 decoded mid-attack/at-rest trace assemblies are excluded and reported in `excluded_no_oracle_assemblies`, not pixel-verifiable. A MAME-vs-native event parity harness is still missing. |
 | 6 | Existing regressions still pass | **BASELINE GREEN; FINAL RE-RUN OPEN** | The current host model reaches Round 2 in 4,485 frames and its 12,000-frame deterministic soak passes; prior Yaba diagnostics exercised captured clips. These must pass again after ROM-derived animation, collision, stage and AI replacement, followed by a clean normal-release boot. |
 | 7 | Physical NTSC Saturn at sustained 60 Hz | **OPEN** | Emulator precursor and image/hash evidence exist. No physical NTSC Saturn route, audible full-level proof, sustained-60-Hz measurement, or ten-minute hardware soak is recorded. The final candidate must be a clean `release-normal-release` build with a digital pad and 32 Mbit cartridge. |
 
@@ -107,16 +107,18 @@ Verified in this repository; do not re-derive.
   format includes control flow, not just a frame list.
 - Observed sprite-assembly pointers: `0x13DEA0`, `0x13DE46`, `0x13DFEC`,
   `0x13E00A`, `0x13E04C`, `0x13E44C`.
-- The renderer at `0xA9CB6` dispatches on the first assembly word. The 12
-  currently decoded boss assemblies use selector `6`, followed by budget,
-  object-command count, offset-table index, signed X/Y origin, then
-  `(code, attribute, signed layout-adjust)` records. The selector-six handler
-  at `0xAA00E` reads the offset-table pointer from `0x1FD1C8`; each layout link
-  advances by `4 + s16(layout_adjust)`. The pose gate proves all 12 decoded code
-  sets and pixels against captured oracles. The independent position audit
-  proves the previous-frame world-coordinate/layout model over its matched
-  scope, while attack/hit coverage and a transient four-pixel Y residual remain
-  open.
+- The renderer at `0xA9CB6` dispatches on the first assembly word. The decoded
+  boss assemblies use selector `6` (budget, object-command count, offset-table
+  index, signed X/Y origin, then `(code, attribute, signed layout-adjust)`
+  records), selector `2` (a 14-byte single centred object), or selector `10`
+  (direct layout x/y words); the original 12 were all selector `6`, and the
+  full 28-assembly pose set spans all three. The selector-six handler at
+  `0xAA00E` reads the offset-table pointer from `0x1FD1C8`; each layout link
+  advances by `4 + s16(layout_adjust)`. The pose gate now proves all 28 decoded
+  code sets and pixels (29 poses) against captured oracles. The independent
+  position audit proves the previous-frame world-coordinate/layout model over
+  its full matched scope (408/408 frames), while the shared-code-set sibling
+  deltas and a transient four-pixel Y residual remain open.
 - Word `w88` takes 224 distinct values over 240 frames; likely a frame timer.
 
 **The retail ROM still contains Capcom's development tools**
@@ -235,10 +237,11 @@ and it is cheaper than Phase 2. Do it first.
 **2a. Animation scripts.** Extend the proven boss format into complete Round 1
 coverage. The normal/jump discriminator is grounded in the updater: normal
 records are 16 bytes and a negative control word is followed by a four-byte
-pointer that redirects the script. The current 12 decoded boss assemblies pass
-the rendered-pose comparison. Next decode the unmatched boss attack/hit poses,
-extract every required player/enemy program, resolve record-selection timing,
-and label the remaining eight-byte tail fields from their consumers.
+pointer that redirects the script. The 28 decoded boss pose assemblies (all 29
+poses; the 162 previously-unmatched frames now all match a decoded assembly)
+pass the rendered-pose comparison. Next: extract every required player/enemy
+program, resolve record-selection timing, and label the remaining eight-byte tail
+fields from their consumers.
 
 Validation, non-negotiable: every required ROM-decoded assembly must reproduce
 an already-captured pose **pixel for pixel**, with ROM-derived position and
@@ -328,7 +331,8 @@ python tools\verify_pose_gate.py
 It decodes verified poses from `/SPR4/*.RLE`, checks that each ROM assembly has
 the captured object-code set, composes with captured screen geometry, crops to
 the non-transparent bounds, and requires **zero differing pixels** with no
-colour tolerance. Current status: **12/12 decoded boss assemblies pass**. The
+colour tolerance. Current status: **28/28 decoded boss assemblies (29 oracle
+poses) pass**. The
 captured placement is intentional here: this test isolates code/tile/palette
 and composition correctness and must not be described as a self-contained
 position proof.
@@ -343,7 +347,7 @@ python tools\verify_position_gate.py --require-exact
 
 The default scoped gate passes when every tested residual is directly exact or
 belongs to an explicit sibling-origin/settling class. Current scope: 408
-geometry frames, 246 matched, 162 unmatched; 864 tested parts, 793 directly
+geometry frames, 408 matched, 0 unmatched; 1,443 tested parts, 1,372 directly
 exact pairs, 63 sibling-origin residuals, 8 observed `x=0/y=-4` settling parts,
 and zero other residuals. `--require-exact` is the goal-strength gate and
 currently **fails**, as it should, until every frame is matched and every

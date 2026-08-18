@@ -1,6 +1,7 @@
 # Agent handoff: AvP Saturn capability test
 
-Updated: 2026-08-18 EDT (Chrysalis ROM-composition slice; Phase 1 stabilization checkpoint committed)
+Updated: 2026-08-18 EDT (Phase 2 static-translator coverage: the 28-assembly boss
+pose set proven pixel-exact and position-scoped; Phase 1 stabilization checkpoint committed)
 
 **Goal audit: 0/7 final conditions closed.** The condition-by-condition index
 is now at [PARITY_PLAN.md#goal-progress-index](PARITY_PLAN.md#goal-progress-index).
@@ -12,10 +13,12 @@ complete or hardware-ready.
 **Position audit: scoped PASS; full pixel-exact coverage OPEN.**
 `tools/verify_position_gate.py` compares the previous frame's actor world
 coordinates plus ROM assembly origin/layout words against captured object RAM.
-Current scope: 408 geometry frames, 246 matched and 162 unmatched; 864 tested
-parts split into **793 directly exact pairs, 63 known sibling-origin residuals,
-8 observed x=0/y=-4 settling residuals, and 0 other residuals**. The earlier
-801 count was X-exact only, not the mutually exclusive exact-pair count.
+Current scope: 408 geometry frames, 408 matched and 0 unmatched; 1,443 tested
+parts split into **1,372 directly exact pairs, 63 known sibling-origin residuals,
+8 observed x=0/y=-4 settling residuals, and 0 other residuals**. Phase 2 extended
+the JSON from 12 to 28 assemblies, so every one of the 408 frames now resolves to
+a decoded assembly; the residual classes above are unchanged. (The earlier
+801/793 counts were from the 12-assembly scope and are superseded.)
 
 Model (world coordinates are 16.16 fixed point at actor slot 0x23D0/0x23D4,
 world Y is up, objects render one frame behind, from f−1):
@@ -56,19 +59,34 @@ for the goal-strength gate; it currently exits nonzero because coverage and
 direct exactness are incomplete.
 
 Remaining before this gate is exhaustive:
-* 162 unmatched frames (attack / hit poses) whose assemblies are not yet in the
-  JSON — need their selector-6 decodes plus the record-pointer path.
+* 71 tested parts are not directly exact: 63 sibling-origin-delta parts and 8
+  settling parts (both explicitly classified, 0 unexplained). Full pixel-exact
+  coverage needs the shared-code-set ambiguity resolved and the −4 settling
+  derived or bounded; it is NOT a coverage gap — all 408 frames now match.
 * The record pointer sometimes advances one record before the visual pose
   changes (sub-frame timing); by_codes matching avoids this but cannot
   disambiguate shared code sets, which is why the gate uses the pointer only to
   build the explained-delta set.
 * Derive (or formally bound) the −4 vertical settling.
 
-**Pose format gate: PASS for 12/12 decoded boss assemblies.** Every tested
-assembly reproduces a captured oracle crop with **0 differing pixels**. The
-gate deliberately uses captured object-RAM screen geometry to isolate
-code/tile/palette and composition correctness; the position audit above is the
-independent ROM-origin/layout check. Key
+**Pose format gate: PASS for 28/28 decoded boss assemblies (29 oracle poses).**
+Every tested assembly reproduces a captured oracle crop with **0 differing
+pixels**, in both the default and `--self-contained` modes. The gate deliberately
+uses captured object-RAM screen geometry to isolate code/tile/palette and
+composition correctness; the position audit above is the independent
+ROM-origin/layout check.
+
+Phase 2 extended the decoded set from the 12 program-referenced assemblies to
+all 28 assemblies the boss poses actually display (poses 0–28; poses 0 and 1
+share 0x13dfec). The set is now sourced data-drivenly from
+`generated/avsp_boss_rom_data.json`, which already maps each pose to its 0-diff
+assembly, unioned with the program-referenced addresses (a subset). Five trace-only
+assemblies — 0x13e0e8, 0x13e10c, 0x13e130, 0x13e3b0 (mid-attack transients) and
+0x13e44c (an at-rest sibling) — are decoded by the generator but **intentionally
+excluded** from the JSON: they have no captured-pose oracle, and the pose gate
+requires every listed assembly to 0-diff an oracle (a no-oracle entry would turn
+the gate red). They are reported in `excluded_no_oracle_assemblies` rather than
+silently dropped or forced to pass. Key
 fixes: (1) corrected selector-6 decoder to read `count` entries starting at
 +12 with signed origin at +8; (2) switched object positions from ROM script
 origin+layout to MAME object RAM screen coordinates (`screen_x`, `screen_y`)
@@ -129,25 +147,28 @@ Read this file before taking any action. The user wants a private, capture-faith
   `profile=normal-release`.
 - Goal-audit tool/report SHA-256 values:
   - `tools/decode_avsp_animation_scripts.py`:
-    `a2bc47602766e5e80a8a77a5119029f6126f558edaf9ca65f7f416cc1a80f32b`
+    `33e730edd45b0c49eb57062ee4934d45cdd10b756cde1f41181576f4fbdbb644`
   - `data/avsp_animation_scripts.json`:
-    `e0bcd2b71c86f692b22169a7038641dcbdd8f17f15cf904d085999c8813865e7`
+    `2e4e272e55d8d0e573bcc176579e509afc9877c5cc7b3f139cab201a1ff9396f`
   - `tools/verify_pose_gate.py`:
     `e697888bb58ab01ca00b654fb3a81b48e975376bcf7bdcead22f62bad5bd5679`
   - `tools/verify_position_gate.py`:
     `e807521f518ac92accf4a955d57e3d3de77fa85aef027a92e47ab45d7858c6ca`
-  (`decode_avsp_animation_scripts.py` and `verify_pose_gate.py` were extended in
-  the Phase 1 checkpoint `c1de5f5`; the values above are the goal-audit-checkpoint
-  hashes, not the current file hashes.)
+  (`decode_avsp_animation_scripts.py` was re-run and `avsp_animation_scripts.json`
+  regenerated for the Phase 2 28-assembly coverage extension, so those two are
+  the current file hashes; the two gate hashes above are unchanged from the
+  goal-audit checkpoint because the gate criteria were not modified.)
 - Goal-audit verification:
   - `test.ps1`: PASS; controller-only model reached Round 2 in 4,485 frames and
     the 12,000-frame deterministic soak passed.
   - `build.ps1`: PASS; normal disc-profile ISO/cue rebuilt and every member
     checked by the build matched its expected size/SHA-256.
-  - `tools/verify_pose_gate.py`: PASS, 12/12 assemblies, zero differing pixels.
-  - `tools/verify_position_gate.py`: scoped PASS (793 exact pairs, 63 sibling,
-    8 settling, 0 other); `--require-exact` exits 1 as expected while 162
-    frames and 71 tested parts remain non-exact/unmatched.
+  - `tools/verify_pose_gate.py`: PASS, 28/28 assemblies (29 oracle poses),
+    zero differing pixels, in both default and self-contained modes.
+  - `tools/verify_position_gate.py`: scoped PASS (1,372 exact pairs, 63
+    sibling, 8 settling, 0 other; 408/408 frames matched, 0 unmatched);
+    `--require-exact` exits 1 as expected while 71 tested parts remain
+    non-exact (all classified, none unexplained).
 - No MAME process from this checkout remained after the overlay checkpoint.
   Do not kill an emulator owned by another checkout or concurrent session.
 
@@ -674,8 +695,10 @@ The opcode dumper itself remains:
 
 ### Next steps for this direction
 
-1. Decode the 162 unmatched boss attack/hit geometry frames and resolve the
-   record-pointer timing/shared-code-set selection.
+1. [Done] All 408 geometry frames now match a decoded assembly in the 28-assembly
+   JSON (was 162 unmatched at the 12-assembly scope). Remaining here: resolve the
+   record-pointer timing / shared-code-set selection so the 63 sibling-delta parts
+   become directly exact.
 2. Derive the transient `x=0/y=-4` position path instead of relying on the
    narrow observed-settling classification; make `--require-exact` pass.
 3. Decode actor-local hitbox records for all required player/alien/Stalker/
@@ -1109,7 +1132,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\capture_frontend.ps1 -
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -Clean -Release
 
 # Pixel-exact pose gate: each decoded assembly must reproduce a captured pose
-# with 0 differing pixels. Currently 12/12 assemblies pass.
+# with 0 differing pixels. Currently 28/28 assemblies pass (29 oracle poses).
 & "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
     .\tools\verify_pose_gate.py
 
@@ -1127,10 +1150,10 @@ The build scripts locate their bundled Python/MAME/Jo Engine dependencies; do no
 ## Superseded pixel-gate investigation
 
 The earlier "selector-6 tile decoding blocked" conclusion is superseded. The
-format-isolating pose gate now passes 12/12 decoded boss assemblies with zero
-differing pixels. The valid remaining blockers are complete actor/pose
-coverage, exact position coverage, native table/routine integration, and the
-event-level parity harness; see the goal-progress index.
+format-isolating pose gate now passes 28/28 decoded boss assemblies (29 oracle
+poses) with zero differing pixels. The valid remaining blockers are complete
+actor/pose coverage, exact position coverage, native table/routine integration,
+and the event-level parity harness; see the goal-progress index.
 
 ## Remaining product-level work
 

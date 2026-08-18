@@ -193,6 +193,9 @@ def _decode_assembly_single(data: bytes, base: int, address: int,
         "count": 1,
         "offset_table_index": offset_index,
         "origin_x": origin_x,
+        # The 14-byte selector-2 record has no Y origin word; compose_rom_pose
+        # centres the single object, so the Y origin is zero by construction.
+        "origin_y": 0,
         "param_word": f"0x{param:04x}",
     })
     entry: dict[str, object] = {
@@ -353,6 +356,10 @@ def main() -> None:
                         default=Path(".deps/mame/actorprobe/offset_program.bin"))
     parser.add_argument("--layout-window", type=Path,
                         default=Path(".deps/mame/actorprobe/offset_full_program.bin"))
+    parser.add_argument("--pose-data", type=Path,
+                        default=Path("generated/avsp_boss_rom_data.json"))
+    parser.add_argument("--trace", type=Path,
+                        default=Path("data/boss_play_sequence.json"))
     parser.add_argument("--offset-window-base", type=lambda value: int(value, 0),
                         default=0x1E0000)
     parser.add_argument("-o", "--output", type=Path,
@@ -377,9 +384,41 @@ def main() -> None:
             })
     programs = list(canonical_map.values())
     
-    assembly_addresses = sorted({int(address, 16)
+    program_assembly_addresses = sorted({int(address, 16)
                                  for program in programs
                                  for address in program["assembly_pointers"]})
+
+    # The 28 unique pose assemblies (one per captured pose, two poses share
+    # 0x13dfec) are the "required ROM-decoded assemblies" for the pixel gate.
+    # The six actor-TSV programs reference only the 12 walk/idle assemblies;
+    # the attack/hit/KO pose assemblies appear only in the full play trace.
+    # The verified pose->assembly mapping in generated/avsp_boss_rom_data.json
+    # (tools/gen_boss_rom_data.py) is the authoritative source for that set.
+    # Trace assemblies that map to no captured pose (mid-attack transients and
+    # the at-rest sibling) have no pixel oracle, so they are excluded from the
+    # pose gate and reported rather than silently dropped.
+    pose_addresses: set[int] = set()
+    excluded_no_oracle: list[str] = []
+    pose_assembly_source = (
+        "program-referenced only (generated/avsp_boss_rom_data.json absent); "
+        "run tools/gen_boss_rom_data.py for the full 28-pose set"
+    )
+    if args.pose_data.exists():
+        pose_records = json.loads(
+            args.pose_data.read_text(encoding="ascii")).get("poses", [])
+        pose_addresses = {int(rec["assembly"], 16) for rec in pose_records
+                          if rec.get("assembly")}
+        if args.trace.exists():
+            trace_records = json.loads(
+                args.trace.read_text(encoding="ascii")).get("frames", [])
+            trace_addresses = {int(rec["assembly"]) for rec in trace_records
+                               if isinstance(rec.get("assembly"), int)}
+            excluded_no_oracle = sorted(hex(address)
+                                        for address in
+                                        trace_addresses - pose_addresses)
+        pose_assembly_source = args.pose_data.as_posix()
+
+    assembly_addresses = sorted(set(program_assembly_addresses) | pose_addresses)
     offset_data = args.offset_table.read_bytes() if args.offset_table.exists() else None
     layout_data = args.layout_window.read_bytes() if args.layout_window.exists() else None
     assemblies = [decode_assembly(data, args.base, address, offset_data, layout_data,
@@ -397,6 +436,8 @@ def main() -> None:
             "actor_trace": args.actor_tsv.as_posix(),
             "offset_table": args.offset_table.as_posix(),
             "layout_window": args.layout_window.as_posix(),
+            "pose_assembly_data": args.pose_data.as_posix(),
+            "play_trace": args.trace.as_posix(),
             "offset_table_base": "0x1fd1c8",
             "offset_window_base": f"0x{args.offset_window_base:06x}",
         },
@@ -433,16 +474,24 @@ def main() -> None:
         "snapshot_aliases": snapshot_aliases,
         "assembly_range_hint": [f"0x{ASSEMBLY_FIRST:06x}",
                                 f"0x{ASSEMBLY_LAST:06x}"],
+        "pose_assembly_source": pose_assembly_source,
+        "pose_assembly_count": len(pose_addresses),
+        "excluded_no_oracle_assemblies": excluded_no_oracle,
         "programs": programs,
         "assemblies": assemblies,
         "remaining_gate": (
-            "Expand ROM-derived animation coverage to every required Round 1 actor and "
-            "attack/hit pose; resolve record-selection timing and the transient position "
-            "settling observation; label unresolved tail fields and actor-local hitboxes."
+            "Boss: all 28 pose assemblies are in the pose/position gate; the 5 "
+            "no-oracle trace assemblies (mid-attack transients + at-rest "
+            "sibling) are decoded but not pixel-verifiable. Next: extract the "
+            "player, street-aliens and Stalker programs, resolve record-"
+            "selection timing and the transient position settling "
+            "observation, and label the unresolved tail fields and actor-"
+            "local hitboxes."
         ),
     }
     args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="ascii")
-    print(f"Decoded {len(programs)} animation programs: {args.output}")
+    print(f"Decoded {len(programs)} animation programs, {len(assemblies)} "
+          f"assemblies: {args.output}")
 
 
 if __name__ == "__main__":
