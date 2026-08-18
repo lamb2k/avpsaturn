@@ -1081,6 +1081,17 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\capture_frontend.ps1 -
 
 # Final clean release only after full-route changes pass:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -Clean -Release
+
+# Pixel-exact pose gate: each decoded assembly must reproduce a captured pose
+# with 0 differing pixels. Currently 12/12 assemblies pass.
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\verify_pose_gate.py
+
+# Per-part position gate: predicted from world(f-1) + ROM layout vs capture.
+# PASS = every part exact, or a sibling-assembly origin delta, or bounded
+# vertical settling; 0 unexplained. --verbose lists settling/unexplained.
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" `
+    .\tools\verify_position_gate.py
 ```
 
 The build scripts locate their bundled Python/MAME/Jo Engine dependencies; do not assume `python` is on PATH. A bundled Python is also available at `C:\Users\lambd\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe`.
