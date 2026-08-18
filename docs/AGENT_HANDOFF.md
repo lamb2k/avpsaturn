@@ -110,6 +110,83 @@ screen origin at `(A5-0x64F4)`. Recover each from live evidence, then falsify th
 whole emitter against the captured object lists — the 5,302-frame oracle is the
 right check and it is what makes part 2 verifiable offline.
 
+### Correction and live verification of the above (2026-08-18, same session)
+
+The four unresolved inputs were investigated with a **live, register-capturing
+MAME probe** (`tools/mame_probe_emitter_pc.lua`, untracked one-off diagnostic,
+not a proof artifact) rather than more static disassembly, because the static
+tool (`.deps/mame/actorprobe/disasm_full.txt`) is a naive linear scan with no
+control-flow awareness and cannot be trusted to have found true instruction
+boundaries on its own. Findings, each checked against real execution:
+
+- **The static decode was right; the PC attribution needs a caveat.** Live
+  capture confirms the writer PCs for the alien's own writes really are
+  `0x000AA214` (X|Y) and `0x000AA216` (code|attr), exactly as milestone 1
+  recorded — but those addresses are **not** store instructions; they are two
+  instructions *after* the true stores at `0x0AA210`/`0x0AA212`. MAME's `pc`
+  debugger symbol reports the position 2 instructions past the causing
+  instruction for this store pattern, evidently a consequence of 68000
+  prefetch/PC-update timing. **Anyone reading a raw watchpoint PC log from this
+  project should expect a possible small forward skew, not assume the reported
+  PC is the store's own address**, and should verify against live register
+  capture as done here rather than trust it blindly.
+- **`A0` stride and part-table base: CONFIRMED live.** `a0=0012F73C` at the
+  first part, advancing by exactly 6 per part (`0012F73C -> 0012F742 -> ...`),
+  matching the loop's per-part reads (`move.l (A0)+` for the 4-byte code|attr,
+  then `move.w (A0)+` for the 2-byte `A2` advance amount).
+- **`A2`'s initial value: CONFIRMED live, with corroboration.** `a2=0x1FDB68`
+  for the alien's frame-4214 emission — consistent with the hypothesized
+  `A2 = 0x1FD1C8 + word[0x1FD1C8 + selector*2]` formula, and `0x1FD1C8` is
+  independently attested elsewhere in this project's own history as a known
+  ROM layout-table base. `A2` advances by exactly 4 per part (two words: a
+  `dx,dy` pair), confirmed across multiple consecutive part writes.
+- **`D1` (flip mask): CONFIRMED live, matching the oracle.** `d1=0x00000020`
+  (bit 5 set) for this alien at frame 4214, which is exactly `flip_x=1` — the
+  flip state the oracle fixture already records for this actor. `D1`'s own
+  source (which routine sets it, and from what actor field) is not yet traced.
+- **`A4 == A6`: CONFIRMED live.** Both equal `0xFF9DC0`, the emitting alien
+  itself — the two "different" actor pointers debated earlier are the same
+  actor. This resolves the concern that `+0x2E` might belong to a separate
+  camera/world structure: it does not, it is a field on the emitting actor.
+- **The screen origin at `(A5-0x64F4)` (`0xFF1B0C`/`0xFF1B0E`, since
+  `A5=0x00FF8000` is a fixed global anchor, confirmed constant across the
+  entire captured watchpoint log): CONFIRMED to be a per-actor SCRATCH value,
+  not a frame-global camera constant.** A write watchpoint on that address
+  shows a single writer, `PC 0x000AA5E4`, firing once per actor per frame with
+  `a4`/`a6` equal to whichever actor is about to emit — i.e. this is a "compute
+  this actor's screen origin" step that runs immediately before each actor's
+  own part-emission loop. Filtered to the alien (`a4=a6=0xFF9DC0`) at frame
+  4214: origin X (the long's low word, used first, before the swap) = `259`,
+  origin Y (the long's high word, used after the swap) = `201`. Reconciled
+  against the oracle's slot-0 word `[0x8113,0x0099,...]`: `xpos=275`,
+  `259 + delta_x(16) = 275`; `ypos=153`, `201 + delta_y(-48) = 153`. Both close
+  with small, plausible per-part pixel offsets — this is corroborating evidence
+  for the whole model, not just the origin address.
+- **`+0x2E` (actor field OR'd into the X word): NOT YET RESOLVED, open
+  contradiction.** Reading the alien's own `+0x2E` word directly from the
+  existing `.deps/mame/collision_probe/workram.bin` capture at frame 4214 gives
+  `0x0000`. But the observed output word is `0x8113` (priority bits set), and
+  if `+0x2E` truly contributes nothing, the OR step cannot be the source of
+  those bits from this actor. **Do not trust the `+0x2E` OR hypothesis as
+  written until this is resolved.** The most likely explanations, in order of
+  suspicion: (a) the priority bits come from elsewhere in the sequence not yet
+  correctly transcribed for the flipped variant (the flipped loop subtracts a
+  *part-local* computed width `D4`, derived from the part's own attr bits, not
+  from `+0x2E`, before the OR — the width and the OR are two separate steps
+  that may have been conflated in the part-1 write-up); (b) `+0x2E` is written
+  dynamically earlier in the SAME frame by another routine and the offline
+  capture's sample timing does not reflect that, unlike the scratch-origin case
+  which was captured live at the exact write. **Next step to close this:**
+  extend the live probe to capture `D2` and `D3` register values at the actual
+  store PCs (`0x0AA210`/`0x0AA212`, not the reported `0x0AA214`/`0x0AA216`) for
+  a handful of parts, and re-derive the OR/width contribution from those, rather
+  than reasoning about it from static disassembly alone.
+
+None of this is wired into any committed C code yet; `avsp_collision.c` and the
+runtime remain untouched. This is discovery evidence for the still-open part 2
+of S2's integration, recorded so the next session does not have to re-derive
+what is now confirmed, and does not repeat the `+0x2E` mistake un-flagged.
+
 **Capability Gate 1 stays 0/7; the full-game goal stays 0/9.**
 
 ## S2 animation walk — interpreter VALIDATED, integration open (2026-08-18)

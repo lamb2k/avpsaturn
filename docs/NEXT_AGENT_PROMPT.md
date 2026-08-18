@@ -67,16 +67,34 @@ Three parts, in this order:
    of this part is to give the runtime's street alien an `AvspActor` carrying a
    live `anim_record`, ticked once per frame by `avsp_anim_frame_tick`.
 
-2. **Emit the object list.** The emitter is now **decoded from the game's code** -
-   the full specification, both facing variants, is in the handoff section
-   "S2 integration — part 1 done, the object emitter decoded". Implement that,
-   do not re-derive it. In short: the pose record's `+4` assembly is a part list
-   of 6-byte entries (a `long` code|attr plus a `word` advancing a separate
-   offset table), and that offset table supplies a `dx`,`dy` word pair per part.
-   Four inputs remain unresolved and **must have their source named before use**:
-   `A2`'s initial value, `D1`'s flip mask, the actor field at `+0x2E`, and the
-   screen origin at `(A5-0x64F4)`. Recover each from live evidence, then falsify
-   the whole emitter against the captured object lists.
+2. **Emit the object list.** The emitter is **decoded from the game's code and
+   mostly confirmed against live register capture** — read the handoff sections
+   "S2 integration — part 1 done, the object emitter decoded" AND its follow-up
+   "Correction and live verification of the above" before writing any code; the
+   second section corrects a real PC-attribution caveat and flags one open
+   contradiction. Do not re-derive the parts that are already confirmed. In
+   short: the pose record's `+4` assembly is a part list of 6-byte entries (a
+   `long` code|attr plus a `word` advancing a separate offset table at
+   `A2 = 0x1FD1C8 + word[0x1FD1C8 + selector*2]`, confirmed live), and that
+   offset table supplies a `dx`,`dy` word pair per part (confirmed live,
+   stride 4). `D1`'s bit 5/6 flip mask is confirmed to match the oracle's own
+   flip state; its own source (which actor field sets it) is not yet traced.
+   The screen origin at `(A5-0x64F4)` is confirmed to be a **per-actor
+   scratch value**, not a frame constant — written once per actor per frame at
+   PC `0x000AA5E4` immediately before that actor's own emission loop; filter any
+   capture of it to the actor you care about, or you will read a different
+   actor's leftover value (this was a live bug in the first probe attempt).
+   **`+0x2E`, the actor field OR'd into the X word, is NOT resolved and has an
+   open contradiction**: it reads `0x0000` for the alien in the existing
+   `collision_probe` capture, but the observed output word has priority bits
+   set that the current model has no other source for. Before implementing the
+   priority/width bits, capture `D2` and `D3` at the TRUE store instructions
+   (`0x0AA210`/`0x0AA212` — not the watchpoint-reported `0x0AA214`/`0x0AA216`,
+   which are two instructions later, a confirmed MAME PC-reporting skew for this
+   store pattern) for a handful of live parts, and re-derive the width/OR
+   contribution from those registers rather than from static disassembly.
+   Once `+0x2E` is resolved, falsify the whole emitter against the captured
+   object lists — the 5,302-frame oracle.
 
 3. **Render per CPS2 object.** One VDP1 normal sprite per object,
    `nx*16 x ny*16`, 16-colour bank mode, flip in `CMDCTRL`, jump-next linked,
