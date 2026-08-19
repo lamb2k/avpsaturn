@@ -1,6 +1,57 @@
 {
+ "action_histogram_absent": {
+  "0x0000": 193,
+  "0x0200": 62,
+  "0x0400": 49,
+  "0x0e02": 214,
+  "0x0e04": 1,
+  "0x1204": 2,
+  "0x1600": 76
+ },
+ "action_histogram_exact": {
+  "0x0000": 2709,
+  "0x0002": 15,
+  "0x0200": 120,
+  "0x0202": 3,
+  "0x0204": 48,
+  "0x020a": 102,
+  "0x0400": 1046,
+  "0x0402": 421,
+  "0x0408": 58,
+  "0x0600": 435,
+  "0x0800": 94,
+  "0x0802": 29,
+  "0x0a00": 88,
+  "0x0c00": 12,
+  "0x0c02": 729,
+  "0x0c06": 72,
+  "0x0e00": 3,
+  "0x0e02": 667,
+  "0x0e04": 1,
+  "0x1000": 73,
+  "0x1002": 12,
+  "0x1204": 16,
+  "0x1600": 2897,
+  "0x1800": 4240
+ },
  "classification": "decoder-vs-corpus verification counts only",
- "declared_population": "active actor-grid slots with pose pointer in [0x120000,0x140000), plain pose record, known selector (0x0006/0x000C)",
+ "declared_population": "active actor-grid slots with pose pointer in [0x120000,0x140000), positive +0x0D coordinate mode, plain pose record, known top word (0x0002/0x0006/0x000C) and known family tags (0x0002/0x0006/0x0008)",
+ "family_matrix": {
+  "top=0x0002 2": 132,
+  "top=0x0006 6x2": 1503,
+  "top=0x0006 6x3": 938,
+  "top=0x0006 6x4": 1161,
+  "top=0x0006 6x7": 18,
+  "top=0x000c 2+2": 3166,
+  "top=0x000c 2+6x2": 221,
+  "top=0x000c 6x2+2": 4839,
+  "top=0x000c 6x2+6x2": 1118,
+  "top=0x000c 6x2+6x3": 164,
+  "top=0x000c 6x2+6x4": 15,
+  "top=0x000c 6x3+2": 119,
+  "top=0x000c 6x3+6x2": 1066,
+  "top=0x000c 6x3+6x3": 27
+ },
  "mismatch_examples": [],
  "pass": true,
  "per_root": {
@@ -10,55 +61,48 @@
    "exact": 552,
    "excl:jump-record": 242,
    "excl:pose-outside-declared-region": 3737,
-   "excl:unknown-selector": 45,
+   "excl:unknown-top-word": 45,
    "frames": 899,
    "no-objram-pair": 1
   },
   "boss_ko": {
-   "eligible": 141,
-   "exact": 141,
+   "eligible": 173,
+   "exact": 173,
    "excl:jump-record": 63,
    "excl:pose-outside-declared-region": 3416,
-   "excl:unknown-selector": 47,
+   "excl:unknown-top-word": 15,
    "frames": 840,
    "no-objram-pair": 1
   },
   "enemy_actions": {
-   "absent": 131,
-   "eligible": 3918,
-   "exact": 3787,
+   "absent": 332,
+   "eligible": 12291,
+   "exact": 11959,
    "excl:jump-record": 3093,
    "excl:pose-outside-declared-region": 12437,
-   "excl:unknown-family-0x0002-in-composite": 8345,
-   "excl:unknown-selector": 28,
    "frames": 2120,
    "no-objram-pair": 1
   },
   "stalker_actions": {
    "absent": 205,
-   "eligible": 1339,
-   "exact": 1134,
+   "eligible": 1411,
+   "exact": 1206,
    "excl:coordinate-mode-not-decoded": 4813,
    "excl:jump-record": 513,
    "excl:pose-outside-declared-region": 9906,
-   "excl:unknown-selector": 266,
+   "excl:unknown-top-word": 194,
    "frames": 2280,
    "no-objram-pair": 1
   }
  },
- "schema": 1,
- "selector_group_matrix": {
-  "0x0006 groups=1": 3620,
-  "0x000c groups=2": 2390
- },
+ "schema": 2,
  "totals": {
-  "absent_game_omitted": 396,
-  "eligible": 6010,
-  "exact": 5614,
+  "absent_game_omitted": 597,
+  "eligible": 14487,
+  "exact": 13890,
   "mismatch": 0
  },
- "unknown_selectors": {
-  "unknown-selector-0x0002": 132,
-  "unknown-selector-0x000a": 254
+ "unknown_tags": {
+  "unknown-top-word-0x000a": 254
  }
 }

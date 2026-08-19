@@ -231,6 +231,69 @@ def decode_group_origin(rom: Rom, header_addr: int, world_x: int, world_y: int,
     return x, y
 
 
+def decode_family2_entry(rom: Rom, record_addr: int, world_x: int, world_y: int,
+                         facing_raw: int, palette_byte: int, or_value: int,
+                         anchor_x: int = ANCHOR_X,
+                         anchor_y: int = ANCHOR_Y,
+                         coord_mode_positive: bool = True) -> dict:
+    """Family-0x0002: a single-entry record with inline code/attr.
+
+    Live-disassembled (tools/mame_trace_family2b.lua) at its jump-table
+    handler 0x0A9D52 (fresh-budget entry 0x0A9D4A):
+
+        move.w (A0)+,D0            ; attr raw
+        tst.b (0xD,A4) ; beq/bmi   ; positive coordinate mode only:
+        andi.b #0xE0,D0            ;   attr low = (raw & 0xE0) + palette
+        add.b (0xE,A4),D0
+        move.w (A0)+,D2 ; ...      ; selector -> A2 via the 0x1FD1C8 table
+        bsr $0AA59A                ; SAME origin routine (consumes D2 long)
+        eor.b D1,D0                ; attr ^= flip mask
+        bsr $0A9D8C                ; X/Y: plain path identical to family-6's
+                                   ;   plain loop (X = origin_x + dx,
+                                   ;   Y = origin_y + dy); flip paths branch
+                                   ;   on D1 bits 5 (X) and 6 (Y)
+        move.l D3,(A1)+            ; store X,Y
+        move.w (A0)+,(A1)+         ; store code (read straight from record)
+        move.w D0,(A1)+            ; store attr
+
+    `record_addr` points at the record's payload (after [tag][budget]):
+    [attr u16][selector u16][D2 u32][code u16] = 10 bytes.
+
+    The flipped (facing bit set) X path at 0x0A9D9E is not yet traced; the
+    flipped formula used here (origin - width - dx, mirroring family-6) is
+    corpus-verified, not disassembly-verified - falsified against every
+    flipped family-2 instance in the captured corpus."""
+    attr_raw = rom.u16(record_addr)
+    selector = rom.u16(record_addr + 2)
+    code = rom.u16(record_addr + 8)
+    a2 = A2_TABLE_BASE + rom.u16(A2_TABLE_BASE + selector * 2)
+    dx = s16(rom.u16(a2))
+    dy = s16(rom.u16(a2 + 2))
+
+    # origin: header_addr semantics in decode_group_origin expect the D2
+    # long at header+6; here it sits at record+4.
+    d2 = rom.u32(record_addr + 4)
+    d2_hi, d2_lo = (d2 >> 16) & 0xFFFF, d2 & 0xFFFF
+    oy = (anchor_y - world_y + 0x100) & 0xFFFF
+    oy = (oy + d2_lo if (facing_raw & 2) else oy - d2_lo) & 0xFFFF
+    ox = (world_x - anchor_x + 0x40) & 0xFFFF
+    ox = (ox + d2_hi if (facing_raw & 1) else ox - d2_hi) & 0xFFFF
+
+    if coord_mode_positive:
+        flip = (facing_raw << 5) & 0xFF
+        attr = (attr_raw & 0xFF00) | ((((attr_raw & 0xE0) + palette_byte) ^ flip) & 0xFF)
+    else:
+        attr = attr_raw
+    if facing_raw & 1:
+        width = ((((attr_raw >> 8) & 0xF) + 1) * 16)
+        x = ((ox - width - dx) & 0x3FF) | or_value
+    else:
+        x = ((ox + dx) & 0x3FF) | or_value
+    y = (oy + dy) & 0x3FF
+    return {"code": "0x%04x" % code, "attr": "0x%04x" % attr,
+            "x": "0x%04x" % x, "y": "0x%04x" % y}
+
+
 def decode_group_entries(rom: Rom, header_addr: int, origin_x: int, origin_y: int,
                          palette_byte: int, facing_raw: int,
                          or_value: int = 0x8000) -> list:
