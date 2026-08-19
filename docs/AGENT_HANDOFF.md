@@ -47,16 +47,28 @@ currently track actor byte `+0x02` for its ROM-driven actors, and
 to the ROM's real `+0x02` — it is a value invented for palette-bank
 selection in the capability model, not a translation of the game's own
 byte. Using it to index `table_set` would silently reintroduce a guess.
-**Next step to close this**: check whether `CapActor.variant`'s
-spawn-order for the captured route happens to correlate with `+0x02`'s
-real observed sequence (same method as `gen_avsp_action_seeds.py`'s
-re-point keying) — if it does, cleanly; if not, the runtime needs a new
-per-actor byte tracked from spawn, which is deeper work (likely S5-
-adjacent, since spawn-time variant assignment is itself AI-adjacent
-logic not yet translated). `sel_hurt`/`sel_attack` (animation record
-+8/+9) are the other half of what `avsp_collision_overlap` needs; those
-ARE already readable for ROM-driven actors from the live record the
-runtime carries — `table_set` is now the only remaining blocker.
+**Checked this session, ruled out the cheap path**: `CapActor.variant`
+comes from `cap_stage1_spawns[]` in `capability_model.c`, a hand-authored
+table the comment there labels "capture-derived opening-room composition"
+(palette mix observed by frame 3480, unrelated to this investigation) —
+it takes 4 distinct values (0-3, one per palette bank 0x10-0x13). `+0x02`
+takes exactly 3 distinct values. **A 4-valued field cannot be a clean
+identity mapping onto a 3-valued one**, so `CapActor.variant` is ruled
+out as `+0x02`'s stand-in without further work — a many-to-one mapping
+is conceivable but unproven, and guessing one would be the same mistake
+again. **Next step to close this properly**: correlate the real `+0x02`
+byte, read in spawn order from the captured route, against the actual
+`cap_stage1_spawns[]` index sequence (same method as
+`gen_avsp_action_seeds.py`'s re-point keying) to see whether a genuine
+per-spawn `+0x02` value can be mined and shipped as its own small table,
+independent of the existing (differently-sourced) `variant` field. If
+that doesn't resolve cleanly, the runtime needs a new per-actor byte
+tracked from spawn, which is deeper work (likely S5-adjacent, since
+spawn-time variant assignment is itself AI-adjacent logic not yet
+translated). `sel_hurt`/`sel_attack` (animation record +8/+9) are the
+other half of what `avsp_collision_overlap` needs; those ARE already
+readable for ROM-driven actors from the live record the runtime carries
+— `table_set` is now the only remaining blocker.
 
 ## Deterministic tile archive build contract (2026-08-19)
 
