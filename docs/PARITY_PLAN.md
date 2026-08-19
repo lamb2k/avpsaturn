@@ -176,7 +176,18 @@ S-step vocabulary it lives in:
    QSound capture pipeline or a sequence player), disc layout/streaming for
    all stages' tile sets. This is the old phase-lettered widening; it can
    proceed stage by stage while S5 routines land.
-6. **Budgets and hardware — S6.** VRAM/RAM fit with streaming, 60 Hz, real
+6. **RAM cartridge is a design requirement (binding, 2026-08-18).** The
+   game targets the Saturn expansion RAM cartridge (32 Mbit / 4 MB, the
+   same requirement the reference title itself ships with). Memory design
+   follows the reference lane's measured model: assets load at phase
+   boundaries into cartridge DRAM and stay resident through play (its
+   cartridge region was byte-identical across the whole combat window);
+   VDP1 textures persist across frames beside a per-frame command table.
+   Consequences: per-round tile sets are cartridge-resident, Body E needs
+   phase loads rather than mid-combat streaming, and the decoder's ROM
+   windows (28 KiB for the whole enemy emission surface) are trivial
+   against the cart. S6's hardware check already names the 32 Mbit cart.
+7. **Budgets and hardware — S6.** VRAM/RAM fit with streaming, 60 Hz, real
    hardware per `docs/HARDWARE_TEST.md`. Capability Gate 1 closes first as
    proof-of-method, then the nine full-game conditions.
 
