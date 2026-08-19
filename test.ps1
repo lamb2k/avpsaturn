@@ -126,3 +126,13 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "table_set writer-trace analyzer self-test failed with exit code $LASTEXITCODE."
 }
+
+# table_set source rule: transcribes three LIVE instruction-trace findings
+# (each family's store is an immediate constant, not a table read) and
+# falsifies them against the full-corpus attribution watchpoint log with a
+# negative control. No file dependencies - always runs, no private inputs
+# needed.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\gen_avsp_table_set_source.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "table_set source-rule falsification failed with exit code $LASTEXITCODE."
+}

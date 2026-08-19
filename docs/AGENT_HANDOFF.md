@@ -1,14 +1,106 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-19 EDT (writer-trace handoff). **STABLE BUILD; COLLISION
-PROVENANCE TRACE CAPTURED, ANALYSIS PENDING.** Evidence/instrument baseline
-`b8bcf48` repairs the `table_set` correlation instrument and retracts the
-incorrect `+0x02` explanation. This handoff is a docs-only successor, so use
-`git rev-parse HEAD` for its self-referential current commit. The retained
-headless stock-MAME run completed its full 6,260-frame schedule and exited; no MAME, Yaba
-Sanshiro, Mednafen, or RetroArch process is running. **Next: analyze the
-retained writer trace, live-disassemble the two nonzero writer routines, then
-capture the third observed `table_set`; do not change runtime collision yet.**
+Updated: 2026-08-19 EDT (table_set provenance RESOLVED). **`table_set`
+(actor +0x50) provenance is now proven from live instruction traces alone,
+for all three observed families, with a full-corpus falsification (zero
+unexplained mismatches, negative control rejected). See "table_set source
+rule: RESOLVED" below — it supersedes every earlier table_set section.
+Collision wiring was correctly NOT attempted this turn (explicit scope
+limit). No MAME, Yaba Sanshiro, Mednafen, or RetroArch process is running
+under this checkout as of this update. **Next: either (a) decode the
+state-dispatch mechanism that selects which of the three initializer
+routines runs — real S5-adjacent AI/state-machine work, not table_set
+provenance — or (b) proceed to wiring collision now that `table_set` and
+`sel_hurt`/`sel_attack` are both provably readable for ROM-driven actors.**
+
+## table_set source rule: RESOLVED via live instruction trace (2026-08-19)
+
+**The question is closed for all three observed families.** Correlation
+(the repaired instrument, `b8bcf48`) could only say three candidate bytes
+were "perfectly correlated in this corpus" and explicitly refused to pick
+among them. The live, decrypted 68000 instruction trace — the only method
+this project trusts for provenance — answers it completely differently
+than any correlation candidate predicted:
+
+**`table_set` is a literal immediate constant baked into the object code
+of one of (at least) three distinct per-state initializer routines,
+reached by an INDEXED JUMP, not `bsr`/`jsr`.** It is not read from any
+actor field, descriptor table, or spawn-time parameter at all — no
+correlation candidate could ever have found this, because there is no
+data-dependent read to correlate against.
+
+```text
+0x060570: move.l #$130ac8,($50,A6)   ; "normal" - 35 hits in the full corpus
+0x0495FC: move.l #$13e97a,($50,A6)   ; "replace" - 1 hit
+0x0003F0F0: move.l #$12ce5c,($50,A6) ; "type_promotion" - 2 hits
+```
+
+Each instruction confirmed live via a guaranteed-instruction-boundary
+trace bracketing the watchpoint-reported store (reported PC = store PC +
+8 for all three — confirmed live for each, not assumed universal; the
+unrelated teardown/zeroing writer at reported `0x0172BA` uses a different
+instruction form and has a different, separately-confirmed +4 skew to its
+true store at `0x0172B6`, a generic multi-field clear loop, not a fourth
+value family).
+
+**Dispatch, not per-spawn call**: a caller-side trace
+(`tools/mame_trace_table_set_callers.lua`) found the SAME fixed stack-top
+value (`0x00FF00D8`, an outer dispatch loop's own address) present at
+entry to every hit of every routine — proof nothing pushed a per-call
+return address. These are state-dispatch jump TARGETS, executed every
+time an actor (re-)enters that state class, not one-time spawn
+initializers; "normal" fired 40 times across ~7 street aliens in one
+capture window, consistent with a recurring state-entry event.
+
+**Full-corpus falsification, zero unexplained mismatches**: a single
+watchpoint trace over the ENTIRE actor slot band (33-50) across the
+complete cold-boot corpus route (enemy_actions frames 1-4200 + the
+stalker_actions continuation to frame 7800) found exactly 38 nonzero
+`table_set` stores, and every single one came from one of the three known
+writer PCs with its known value — no unknown PC, no unexpected value.
+`tools/gen_avsp_table_set_source.py` (wired into `test.ps1`, no private-
+input dependency) encodes this as a checked assertion with a negative
+control (a fabricated PC/value pair is correctly rejected, proving the
+check is not vacuous); tracked report `data/avsp_table_set_source.json`.
+
+**Genuinely UNRESOLVED, correctly left that way**: the `type_promotion`
+routine (`0x0003F0F0`) does much more than write `table_set` — it also
+rewrites actor `+0xC` (type) to `0x18`, and `+0x40`/`+0x42`/`+0x44` from a
+REAL ROM table lookup keyed off a stage-state word (`A5`-relative
+`+0x1EA`) and an actor sub-field, then calls out via `jsr $17020`. This is
+genuine AI/state-machine logic — a type-transition handler — and decoding
+which index selects which of the three routines, and what `0x18` and the
+table-lookup fields mean, is real S5-adjacent work, not table_set
+provenance. It was correctly not pursued further this turn per the
+explicit scope limit ("do not wire collision into Saturn gameplay in this
+turn").
+
+**Practical notes for reproducing or extending this trace** (all
+untracked one-off diagnostics, preserved per convention):
+
+- `-video none` headless runs in this environment only advance frame
+  notifiers reliably when `-debug -debugger windows` is passed AND the
+  script explicitly sets `debugger.execution_state = "run"` at the end.
+  Every attempt that omitted either one stalled indefinitely with no
+  error (several stray `mame.exe` processes accumulated this session
+  before this was understood — always verify `tasklist` / `ps -W` show
+  no lingering `mame.exe` before ending a session).
+- `machine:load()` (loading a save state) reliably failed silently in
+  this environment/build when called from a frame notifier's `boot_frame
+  == 1` branch OR from script top-level — cause not resolved, not worth
+  more time given cold-boot replay is completely reliable and cheap
+  (~20-30s for ~6000-8000 frames at `-nothrottle`). Prefer cold-boot
+  replay of the known input schedule over `machine:load()` for any
+  future trace in this project.
+- `ps -W`'s process-name column does not include the `.exe` suffix in
+  this shell; a `grep -qi mame.exe` wait-loop silently never matches and
+  returns instantly regardless of whether MAME is still running. Use
+  `tasklist //FI "IMAGENAME eq mame.exe"` to check process state instead.
+
+## Superseded: table_set correlation instrument section (2026-08-19, earlier same day)
+
+Kept for history; the correlation approach below never named a source —
+only the live trace above did. Do not re-read this as an open question.
 
 The stable Saturn checkpoint remains valid: `build.ps1 -Clean -Release
 -SkipHostTests` produces a normal-release ISO with `runtime_ready=1`, zero

@@ -1,0 +1,46 @@
+{
+ "classification": "table_set source rule, live-trace-proven - ROM addresses/PCs/values/counts only, no ROM bytes, no raw log excerpts",
+ "falsification": {
+  "corpus_route": "cold-boot enemy_actions (frames 1-4200) + stalker_actions continuation (4200-7800), watched over the full actor slot band 33-50",
+  "mismatches": [],
+  "negative_control_input": {
+   "pc": "0x099999",
+   "value": "0xABCDEF"
+  },
+  "negative_control_rejected": true,
+  "result": "PASS",
+  "total_nonzero_observations": 38,
+  "unexplained_mismatches": 0
+ },
+ "families": {
+  "0x03F0F8": {
+   "corpus_observations": 2,
+   "instruction": "move.l #$12ce5c,($50,A6)",
+   "name": "type_promotion",
+   "store_pc": "0x03F0F0",
+   "value": "0x12CE5C"
+  },
+  "0x049604": {
+   "corpus_observations": 1,
+   "instruction": "move.l #$13e97a,($50,A6)",
+   "name": "replace",
+   "store_pc": "0x0495FC",
+   "value": "0x13E97A"
+  },
+  "0x060578": {
+   "corpus_observations": 35,
+   "instruction": "move.l #$130ac8,($50,A6)",
+   "name": "normal",
+   "store_pc": "0x060570",
+   "value": "0x130AC8"
+  }
+ },
+ "finding": "table_set is a literal immediate constant baked into one of (at least) three distinct per-state indexed-jump-dispatched initializer routines - NOT read from any actor field, descriptor, or spawn parameter. Correlation could not have found this; only the live trace could.",
+ "method": "live/decrypted 68000 instruction trace at a guaranteed boundary bracketing each watchpoint-reported store (tools/mame_trace_table_set_writer_insn.lua, tools/mame_trace_table_set_third_insn.lua); caller-side trace (tools/mame_trace_table_set_callers.lua) proving indexed-jump dispatch, not bsr/jsr; full-corpus attribution watchpoint over the whole actor band and the complete cold-boot route (tools/mame_trace_table_set_full_attribution.lua)",
+ "question": "where does the game get actor table_set (actor +0x50) during a state-entry reset?",
+ "schema": 1,
+ "unresolved": [
+  "the 0x0012CE5C 'type_promotion' routine additionally rewrites actor +0xC (type) to 0x18 and +0x40/+0x42/+0x44 from a genuine ROM table lookup keyed off a stage-state word (A5-relative +0x1EA) and an actor sub-field, then calls out via jsr $17020 - this is real AI/state-machine logic (which INDEX selects which of the three routines runs, and why), correctly left UNRESOLVED and out of scope for table_set provenance; likely S5-adjacent work",
+  "the two zeroing/teardown stores at reported PC 0x0172BA (true store confirmed at 0x0172B6, a generic multi-field clear loop, +4 report skew - NOT the same +8 skew as the three value-writing families, since it is a different instruction form) are not a fourth VALUE family and are excluded from the falsification by design"
+ ]
+}
