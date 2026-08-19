@@ -299,7 +299,8 @@ def decode_family2_entry(rom: Rom, record_addr: int, world_x: int, world_y: int,
 def decode_group_entries(rom: Rom, header_addr: int, origin_x: int, origin_y: int,
                          palette_byte: int, facing_raw: int,
                          or_value: int = 0x8000,
-                         mode_positive: bool = True) -> list:
+                         mode_positive: bool = True,
+                         has_advance: bool = True) -> list:
     """Returns `count` four-word entries: [{code, attr, x, y}, ...].
 
     `palette_byte` (actor `+0x0E`) is a plain actor-record field, read the
@@ -325,7 +326,11 @@ def decode_group_entries(rom: Rom, header_addr: int, origin_x: int, origin_y: in
     for _ in range(count):
         code = rom.u16(a0)
         attr_raw = rom.u16(a0 + 2)
-        advance = rom.u16(a0 + 4)
+        # Family 0x0004 (handler 0x0A9DEE; layout decoded offline from the
+        # retained tag-4 write-tap + ROM bytes): identical to family 6 but
+        # parts are 4 bytes (code, attr) with NO advance word - fixed A2
+        # stride of one dx/dy pair per part.
+        advance = rom.u16(a0 + 4) if has_advance else 0
         if mode_positive:
             attr = (attr_raw & 0xFF00) | ((((attr_raw & 0xE0) + palette_byte)
                                            ^ flip_byte) & 0xFF)
@@ -361,7 +366,7 @@ def decode_group_entries(rom: Rom, header_addr: int, origin_x: int, origin_y: in
             "x": "0x%04x" % x, "y": "0x%04x" % y,
             "dx": dx, "dy": dy, "width": width,
         })
-        a0 += 6
+        a0 += 6 if has_advance else 4
         a2 = a2 + 4 + advance
     return entries
 

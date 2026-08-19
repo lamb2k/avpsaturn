@@ -176,12 +176,13 @@ def decode_actor_entries(rom: Rom, work: bytes, slot_off: int,
             ox, oy = decode_group_origin(rom, h, world_x, world_y, facing,
                                          anchor_x, anchor_y)
             entries = decode_group_entries(rom, h, ox, oy, palette, facing,
-                                           or_value, mode_positive)
+                                           or_value, mode_positive,
+                                           tag == 0x0006)
             for e in entries:
                 flat.extend([int(e["x"], 16), int(e["y"], 16),
                              int(e["code"], 16), int(e["attr"], 16)])
             families.append("%dx%d" % (tag, count))
-            pos = h + 10 + count * 6
+            pos = h + 10 + count * (6 if tag == 0x0006 else 4)
         elif tag == 0x0002:
             e = decode_family2_entry(rom, pos + 4, world_x, world_y, facing,
                                      palette, or_value, anchor_x, anchor_y,
