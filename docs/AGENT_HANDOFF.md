@@ -578,6 +578,25 @@ exec_history - addresses passed as hex STRINGS). Frozen-state facts:
   data forever. Explains: only transitions freeze, nondeterminism,
   thousands of healthy frames between, audio unaffected.
 
+SUPERSEDED by the same evening's deeper reads: the wait loop is now
+fully decoded - `mov.l @(0x3CC,gbr),r0; jsr @r0` calls a per-spin idle
+CALLBACK (the pointer 0x0602BF54), then `mov.b @(0x13,gbr),r0; cmp/pz;
+bt` loops while the EVENT BYTE at 0x060FFC13 stays >= 0. Only SGL's
+VBlank ISR sets that byte negative: this is pure VBLANK-EVENT
+STARVATION, not a queue/cache issue (the cross-CPU queue pointer at
+GBR+0x48 is already an uncached 0x2xxxxxxx address - SGL handles that
+correctly). Also measured: VDP2/SCU register reads through the MCP
+debugger return zeros (write-only registers) - do NOT trust them; the
+apparent TVMD=0 was this artifact. Jo calls slTVOff only in init and
+slTVOn once at init end; nothing in the runtime path toggles it.
+
+NEXT PROBE (minutes, over MCP): breakpoint_add a WRITE breakpoint on
+0x060FFC13 and reproduce the freeze - if it never fires, the VBlank
+ISR is dead; then breakpoint the VBlank vector chain (VBR=0x06000000)
+to find where delivery stops. The idle-callback 0x0602BF54 can also be
+disassembled to confirm it is benign. Fix follows from which link is
+broken.
+
 Next session (30 minutes of scripted MCP work): disassemble the slave
 loop at 0x06029110 and slSynch subroutines 0x06028E40/0x06028E5E;
 identify queue head/tail addresses; memory_read both from the DEBUGGER
