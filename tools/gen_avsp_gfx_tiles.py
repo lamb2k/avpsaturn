@@ -35,8 +35,10 @@ one mid-combat frame is used and its choice is recorded in the manifest).
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -48,16 +50,24 @@ from decode_avsp_object_stream import Rom  # noqa: E402
 import verify_avsp_object_corpus as V      # noqa: E402
 
 ROM_PATH = ROOT / ".deps/mame/actorprobe/decrypted_program_2m.bin"
-# Default scope is STREET ONLY (1,533 tiles, 202,564 bytes) - the archive
-# proven to fit the current cartridge budget alongside the rest of the
-# boot working set (MEASURED: the full four-route archive, 612,720 bytes,
-# left EACT.RLE with no single cart zone holding its 131,552 bytes). Pass
-# --full for the complete four-route cast archive; it requires widening
-# AVSP_TILE_REGION_BYTES in main.c AND moving more PCM to phase-boundary
-# loads first, or the build will fail an ISO asset load. Do not flip this
-# default without re-measuring the budget - see docs/AGENT_HANDOFF.md.
-ROUTES_FULL = ("enemy_actions", "stalker_actions", "boss_actions", "boss_ko")
-ROUTES_STREET = ("enemy_actions",)
+MAIN_C = ROOT / "main.c"
+# Two named scopes only - no scope may be inferred from whether TILES.BIN
+# happens to exist (that inference is what let extract_avspu_stage1.py's
+# generic SPR4 sweep silently force a full-scope regen on every build; see
+# docs/AGENT_HANDOFF.md "Item 1 continued"). --scope is REQUIRED, not
+# defaulted, so a caller must say which budget it is asking for.
+ROUTES_BY_SCOPE = {
+    "street": ("enemy_actions",),
+    "round1": ("enemy_actions", "stalker_actions", "boss_actions", "boss_ko"),
+}
+# "street" (1,533 tiles, 202,564 bytes) is the archive MEASURED to fit the
+# current cartridge budget alongside the rest of the boot working set.
+# "round1" (4,640 tiles, 612,720 bytes) is the complete four-route cast;
+# it does NOT fit today - widening AVSP_TILE_REGION_BYTES to hold it left
+# EACT.RLE (131,552 bytes) with no single cart zone able to allocate it
+# (bank0 ~13 KB free, bank1 ~103 KB free, MEASURED live over MCP). Do not
+# build --scope round1 into a normal-release ISO until more PCM moves to
+# phase-boundary loads - see docs/AGENT_HANDOFF.md.
 PALETTE_ROUTE = "enemy_actions"
 OUT_BIN = ROOT / "build" / "avsp_cd" / "SPR4" / "TILES.BIN"
 OUT_JSON = ROOT / "data" / "avsp_gfx_tiles.json"
@@ -165,8 +175,29 @@ def tile_texture(gfx: bytearray, code: int) -> bytes:
     return bytes(out)
 
 
+def read_tile_region_bytes() -> int:
+    """The runtime's carved cart budget, parsed straight from main.c so
+    this generator and the compiled runtime can never silently disagree."""
+    text = MAIN_C.read_text(encoding="utf-8", errors="ignore")
+    m = re.search(r"#define\s+AVSP_TILE_REGION_BYTES\s+(0x[0-9A-Fa-f]+)",
+                 text)
+    if not m:
+        raise SystemExit("AVSP_TILE_REGION_BYTES not found in main.c")
+    return int(m.group(1), 16)
+
+
 def main() -> int:
-    routes = ROUTES_FULL if "--full" in sys.argv[1:] else ROUTES_STREET
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--scope", required=True, choices=("street", "round1"),
+                        help="street: the archive proven to fit the current "
+                             "cartridge budget. round1: the complete "
+                             "four-route cast archive, does not fit today.")
+    parser.add_argument("--allow-over-budget", action="store_true",
+                        help="write the archive even if it exceeds the "
+                             "runtime's AVSP_TILE_REGION_BYTES carve "
+                             "(measurement only - never for a build).")
+    args = parser.parse_args()
+    routes = ROUTES_BY_SCOPE[args.scope]
     avsp.verify_roms()
     gfx = avsp.load_gfx_region()
     avsp.verify_loaded_gfx_region(gfx)
@@ -202,6 +233,21 @@ def main() -> int:
     for code in codes:
         blob += tile_texture(gfx, code)
 
+    region_bytes = read_tile_region_bytes()
+    if len(blob) > region_bytes and not args.allow_over_budget:
+        raise SystemExit(
+            "REFUSING to write: archive is %d bytes but the runtime's "
+            "AVSP_TILE_REGION_BYTES carve (main.c) is only %d bytes. "
+            "A build must never ship an ISO member the runtime cannot "
+            "hold. Either regenerate with --scope street, or widen the "
+            "carve in main.c AND re-measure the cartridge allocator "
+            "budget for every other cart-resident asset before doing so "
+            "(see docs/AGENT_HANDOFF.md). Pass --allow-over-budget only "
+            "to measure an oversized archive offline, never to build."
+            % (len(blob), region_bytes))
+    print("tile region budget: %d / %d bytes used (%.1f%%)"
+         % (len(blob), region_bytes, 100 * len(blob) / region_bytes))
+
     OUT_BIN.parent.mkdir(parents=True, exist_ok=True)
     OUT_BIN.write_bytes(blob)
 
@@ -218,7 +264,9 @@ def main() -> int:
                     "banks": ["0x%02X" % b for b in slots],
                     "label": "ADAPTED single-frame palette"},
         "facing_union": True,
-        "scope": "full" if routes == ROUTES_FULL else "street",
+        "scope": args.scope,
+        "tile_region_budget_bytes": region_bytes,
+        "tile_region_budget_used_pct": round(100 * len(blob) / region_bytes, 2),
         "sample_stride": SAMPLE_STRIDE,
         "routes": per_route,
         "gfx_region_sha256": hashlib.sha256(bytes(gfx)).hexdigest(),

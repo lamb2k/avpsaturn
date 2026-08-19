@@ -107,3 +107,13 @@ $tilesCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror
 if ($LASTEXITCODE -ne 0) {
     throw "ROM tile archive test failed with exit code $LASTEXITCODE."
 }
+
+# Negative test: the tile generator must refuse a --scope round1 archive
+# against the runtime's real cartridge carve, and must leave the on-disk
+# street archive and its manifest untouched when it does. This also
+# regenerates the street archive as its baseline step, so it doubles as
+# the "regenerate after asset extraction" verification build.ps1 relies on.
+& $PythonPath (Join-Path $PSScriptRoot 'tests\test_avsp_gfx_tiles_budget.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Tile archive budget test failed with exit code $LASTEXITCODE."
+}

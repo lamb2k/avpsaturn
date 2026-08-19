@@ -97,18 +97,34 @@ try {
         }
 
         # S2 Body E: the ROM tile archive for the per-object VDP1 renderer.
-        # Generated from the local graphics ROMs and the paired captures;
-        # reused when present (delete it to force regeneration).
+        # ALWAYS regenerated here, with an EXPLICIT scope - never inferred
+        # from whether the file happens to exist. A prior version reused
+        # the file if present, which silently broke when a separate sweep
+        # (extract_avspu_stage1.py's SPR4 cleanup, now excluding TILES.BIN)
+        # deleted it: the "if present" check then always regenerated at
+        # whatever the tool's DEFAULT scope happened to be, not the scope
+        # the normal build actually needs. The generator itself refuses to
+        # write an archive bigger than the runtime's AVSP_TILE_REGION_BYTES
+        # carve, so a scope mismatch fails here, not at boot.
         $tileArchive = Join-Path $projectRoot 'build\avsp_cd\SPR4\TILES.BIN'
-        if (-not (Test-Path -LiteralPath $tileArchive)) {
-            & $PythonPath (Join-Path $projectRoot 'tools\gen_avsp_gfx_tiles.py')
-            if ($LASTEXITCODE -ne 0) {
-                throw "ROM tile archive generation failed with exit code $LASTEXITCODE."
-            }
+        $tileManifest = Join-Path $projectRoot 'data\avsp_gfx_tiles.json'
+        & $PythonPath (Join-Path $projectRoot 'tools\gen_avsp_gfx_tiles.py') `
+            '--scope' 'street'
+        if ($LASTEXITCODE -ne 0) {
+            throw "ROM tile archive generation failed with exit code $LASTEXITCODE."
         }
         if (-not (Test-Path -LiteralPath $tileArchive)) {
             throw 'build\avsp_cd\SPR4\TILES.BIN is missing after generation.'
         }
+        $tileManifestData = Get-Content -LiteralPath $tileManifest -Raw | ConvertFrom-Json
+        if ($tileManifestData.scope -ne 'street') {
+            throw "Tile archive manifest scope is '$($tileManifestData.scope)', expected 'street'."
+        }
+        $tileArchiveBytes = (Get-Item -LiteralPath $tileArchive).Length
+        if ($tileArchiveBytes -ne $tileManifestData.archive.bytes) {
+            throw "Tile archive on disk is $tileArchiveBytes bytes but the manifest records $($tileManifestData.archive.bytes)."
+        }
+        Write-Host "Tile archive: $tileArchiveBytes bytes, scope=street, budget $($tileManifestData.tile_region_budget_used_pct)% used"
 
         $contentRoot = Join-Path $projectRoot 'build\avsp_cd'
         foreach ($metadataName in @('ABS.TXT', 'BIB.TXT', 'CPY.TXT')) {

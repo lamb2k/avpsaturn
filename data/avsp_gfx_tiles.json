@@ -28,5 +28,7 @@
  "schema": 1,
  "scope": "street",
  "tile_bytes": 128,
- "tile_count": 1533
+ "tile_count": 1533,
+ "tile_region_budget_bytes": 262144,
+ "tile_region_budget_used_pct": 77.27
 }
