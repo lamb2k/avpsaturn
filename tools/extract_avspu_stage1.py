@@ -214,9 +214,12 @@ def decode_tile(gfx: bytearray, code: int, size: int, right_half: bool = False) 
 def render_background(gfx: bytearray, gfxram: list[int], cps_a: list[int],
                       cps_b: list[int], palette: list[tuple[int, int, int, int]],
                       width: int = VISIBLE_WIDTH, height: int = VISIBLE_HEIGHT,
-                      include_scroll1: bool = True) -> Image.Image:
+                      include_scroll1: bool = True,
+                      layer_filter: tuple[int, ...] | None = None,
+                      transparent_background: bool = False) -> Image.Image:
     """Flatten the three live CPS tilemaps from the captured Stage 1 frame."""
-    canvas = Image.new("RGBA", (width, height), palette[0xBFF])
+    canvas = Image.new("RGBA", (width, height),
+                       (0, 0, 0, 0) if transparent_background else palette[0xBFF])
     layer_control = cps_b[0x26 // 2]
     order = [
         (layer_control >> 6) & 3,
@@ -229,6 +232,9 @@ def render_background(gfx: bytearray, gfxram: list[int], cps_a: list[int],
     order = [layer for layer in order if layer != 0]
     if not include_scroll1:
         order = [layer for layer in order if layer != 1]
+    if layer_filter is not None:
+        allowed_layers = set(layer_filter)
+        order = [layer for layer in order if layer in allowed_layers]
 
     base_words = []
     for register in (1, 2, 3):
@@ -314,7 +320,7 @@ def render_background(gfx: bytearray, gfxram: list[int], cps_a: list[int],
     return canvas
 
 
-def decode_object_entries(words: list[int]) -> list[dict[str, int]]:
+def decode_object_entries(words: list[int], reverse_priority: bool = True) -> list[dict[str, int]]:
     raw_entries = []
     for offset in range(0, len(words) - 3, 4):
         x, y, code, attribute = words[offset:offset + 4]
@@ -325,7 +331,8 @@ def decode_object_entries(words: list[int]) -> list[dict[str, int]]:
              "attribute": attribute})
 
     rendered = []
-    for entry in reversed(raw_entries):
+    ordered_entries = reversed(raw_entries) if reverse_priority else raw_entries
+    for entry in ordered_entries:
         raw_x = entry["x"]
         raw_y = entry["y"]
         attribute = entry["attribute"]
@@ -344,7 +351,8 @@ def decode_object_entries(words: list[int]) -> list[dict[str, int]]:
     return rendered
 
 
-def decode_objects(gfx: bytearray, words: list[int], palette: list[tuple[int, int, int, int]]) -> tuple[Image.Image, list[dict[str, int]]]:
+def decode_objects(gfx: bytearray, words: list[int], palette: list[tuple[int, int, int, int]],
+                   reverse_priority: bool = True) -> tuple[Image.Image, list[dict[str, int]]]:
     plane_offsets = (24, 16, 8, 0)
     x_offsets = tuple(range(8)) + tuple(range(32, 40))
 
@@ -367,7 +375,7 @@ def decode_objects(gfx: bytearray, words: list[int], palette: list[tuple[int, in
         return image
 
     layer = Image.new("RGBA", (VISIBLE_WIDTH, VISIBLE_HEIGHT), (0, 0, 0, 0))
-    rendered = decode_object_entries(words)
+    rendered = decode_object_entries(words, reverse_priority=reverse_priority)
     for entry in rendered:
         code = entry["tile_code"]
         attribute = entry["attribute"]

@@ -230,6 +230,16 @@ if ($LASTEXITCODE -ne 0) {
     throw "Frontend interaction analysis failed with exit code $LASTEXITCODE."
 }
 
+# ROM-derived Saturn frontend converter: exact title/select composition from
+# tilemaps + object lists, endpoint-aligned 384-to-352 fitting, palette/RLE
+# round trips, live cursor cels, per-phase budgets and byte stability. Private
+# captures and ROMs remain ignored; a checkout without them skips cleanly.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\gen_avsp_frontend.py') `
+    '--verify-deterministic'
+if ($LASTEXITCODE -ne 0) {
+    throw "ROM-derived frontend generation failed with exit code $LASTEXITCODE."
+}
+
 # Sub-state dispatcher enumeration: decodes, from the validated opcode-space
 # image, every per-actor sub-state jump table (actor byte +0x04 indexes a
 # PC-relative word table). Self-tests against the three live-confirmed

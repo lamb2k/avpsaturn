@@ -101,6 +101,16 @@ try {
             throw "AvP Stage 1 asset preparation failed with exit code $LASTEXITCODE."
         }
 
+        # Rebuild the private ROM-derived frontend payload after the general
+        # asset extractor. The converter owns build\avsp_cd\FRONT and enforces
+        # exact source composition, deterministic hashes and both 78,848-byte
+        # phase budgets before the ISO is assembled.
+        & $PythonPath (Join-Path $projectRoot 'tools\gen_avsp_frontend.py') `
+            '--verify-deterministic'
+        if ($LASTEXITCODE -ne 0) {
+            throw "ROM-derived frontend generation failed with exit code $LASTEXITCODE."
+        }
+
         & '.\prepare_qsound_audio.ps1' -PythonPath $PythonPath
         if ($LASTEXITCODE -ne 0) {
             throw "QSound event preparation failed with exit code $LASTEXITCODE."
