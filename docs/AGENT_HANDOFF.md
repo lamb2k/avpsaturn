@@ -11,12 +11,52 @@ during real WAVE_ONE combat (see "Item 1 continued" below for the exact
 readout). The tile-archive build is now structurally safe against the
 class of bug that broke it twice this session (see "Deterministic tile
 archive build contract" below). **Next: item 2 of the ordered gap list
-(collision — `avsp_collision.c/h` is proven but unconnected; the live ROM
-animation record now gives ROM-driven actors real `sel_hurt`/`sel_attack`
-selectors at record+8/+9, but `table_set` at actor+0x50 is not yet known
-to be a safe per-type constant — see the in-progress
-`tools/diag_table_set_by_type.py`, not yet run), or continue item 1 by
-phase-loading more PCM to afford the full four-route tile archive.**
+(collision — `avsp_collision.c/h` is proven but unconnected; `table_set`
+at actor+0x50 is confirmed NOT a per-type constant but its variance is
+now fully explained — see "table_set investigation" below), or continue
+item 1 by phase-loading more PCM to afford the full four-route tile
+archive.**
+
+## table_set investigation: narrowed, not yet wireable (2026-08-19)
+
+Item 2 needs a `table_set` value per ROM-driven actor to read collision
+boxes. `tools/diag_table_set_by_type.py` confirmed the suspicion: for
+street aliens (type 12), actor `+0x50` (`table_set`) takes 3 distinct
+values across the corpus with only 65.6% dominance — hardcoding the
+majority value would repeat the exact mistake the action-seed table's
+withholding step was built to avoid (`agreement < 1.0` keys are guesses,
+not measurements, no matter how popular the winner is).
+
+`tools/diag_table_set_variance.py` then found the explanation:
+**actor byte `+0x02` predicts `table_set` with 100% unanimity over 7,794
+observations**, and has exactly 3 distinct values — matching
+`table_set`'s own cardinality exactly. Byte `+0x0E` (already
+independently identified in milestone-1 as the palette byte) also
+reaches 100% unanimity. Per-slot tracking additionally shows `table_set`
+is fixed for a spawn's entire observed lifetime (only 1 of 13 tracked
+slot-instances ever showed two values, consistent with a despawn/respawn
+of a different variant into the same slot, not a live per-frame change)
+— it is a spawn-time selector, not something needing a per-frame read.
+Recorded as tracked evidence in `data/avsp_table_set_evidence.json`
+(`tools/gen_avsp_table_set_evidence.py`).
+
+**Still not wireable**, and stated precisely why: the runtime does not
+currently track actor byte `+0x02` for its ROM-driven actors, and
+`CapActor.variant` (the model's spawn-table field, set from
+`spawn->variant` in `capability_model.c`) has no PROVEN correspondence
+to the ROM's real `+0x02` — it is a value invented for palette-bank
+selection in the capability model, not a translation of the game's own
+byte. Using it to index `table_set` would silently reintroduce a guess.
+**Next step to close this**: check whether `CapActor.variant`'s
+spawn-order for the captured route happens to correlate with `+0x02`'s
+real observed sequence (same method as `gen_avsp_action_seeds.py`'s
+re-point keying) — if it does, cleanly; if not, the runtime needs a new
+per-actor byte tracked from spawn, which is deeper work (likely S5-
+adjacent, since spawn-time variant assignment is itself AI-adjacent
+logic not yet translated). `sel_hurt`/`sel_attack` (animation record
++8/+9) are the other half of what `avsp_collision_overlap` needs; those
+ARE already readable for ROM-driven actors from the live record the
+runtime carries — `table_set` is now the only remaining blocker.
 
 ## Deterministic tile archive build contract (2026-08-19)
 

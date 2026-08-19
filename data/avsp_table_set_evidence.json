@@ -1,0 +1,89 @@
+{
+ "classification": "table_set investigation evidence - actor field offsets and observation counts, no ROM bytes",
+ "finding": "NOT a per-TYPE constant (type 12 street aliens: 3 distinct values, 65.6% dominant - hardcoding the dominant value would be a guess). IS fully explained by actor byte +0x02 (100% unanimity, matches table_set's own cardinality exactly) and closely by +0x0E (also 100% unanimity, already independently identified as the palette byte in milestone-1). Fixed per spawn-instance lifetime, not a live per-frame value (12 of 13 tracked slot-instances never changed).",
+ "predictors": [
+  {
+   "byte_offset": "0x02",
+   "distinct_byte_values": 3,
+   "observations": 7794,
+   "unanimity": 1.0
+  },
+  {
+   "byte_offset": "0x0E",
+   "distinct_byte_values": 6,
+   "observations": 7794,
+   "unanimity": 1.0
+  }
+ ],
+ "question": "is actor +0x50 (table_set) usable for collision wiring without inventing a value?",
+ "schema": 1,
+ "slot_instances_tracked": 13,
+ "slot_instances_with_multiple_values": 1,
+ "still_blocking": "the runtime does not currently track actor byte +0x02 for its ROM-driven actors, and CapActor.variant (the model's spawn-table field) has no proven correspondence to it - using it directly would reintroduce the exact guess this investigation avoided for the action-seed table.",
+ "target_type": 12,
+ "type_summary": [
+  {
+   "distinct_table_set": 1,
+   "dominant_share": 1.0,
+   "dominant_table_set": "0x11AE02",
+   "observations": 2049,
+   "type": 0
+  },
+  {
+   "distinct_table_set": 2,
+   "dominant_share": 0.8027,
+   "dominant_table_set": "0x030CB6",
+   "observations": 223,
+   "type": 4
+  },
+  {
+   "distinct_table_set": 3,
+   "dominant_share": 0.6564,
+   "dominant_table_set": "0x130AC8",
+   "observations": 7794,
+   "type": 12
+  },
+  {
+   "distinct_table_set": 1,
+   "dominant_share": 1.0,
+   "dominant_table_set": "0x035882",
+   "observations": 25,
+   "type": 16
+  },
+  {
+   "distinct_table_set": 2,
+   "dominant_share": 0.6619,
+   "dominant_table_set": "0x06D516",
+   "observations": 2044,
+   "type": 20
+  },
+  {
+   "distinct_table_set": 4,
+   "dominant_share": 0.9871,
+   "dominant_table_set": "0x000000",
+   "observations": 2484,
+   "type": 24
+  },
+  {
+   "distinct_table_set": 1,
+   "dominant_share": 1.0,
+   "dominant_table_set": "0x0A75E2",
+   "observations": 691,
+   "type": 28
+  },
+  {
+   "distinct_table_set": 4,
+   "dominant_share": 0.3728,
+   "dominant_table_set": "0x028F44",
+   "observations": 2044,
+   "type": 32
+  },
+  {
+   "distinct_table_set": 94,
+   "dominant_share": 0.2102,
+   "dominant_table_set": "0x4C10000",
+   "observations": 314,
+   "type": 36
+  }
+ ]
+}
