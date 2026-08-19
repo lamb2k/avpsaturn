@@ -51,6 +51,65 @@ def load_words(path: Path) -> list[int]:
     return words
 
 
+def live_tilemap_banks(gfxram: list[int], cps_a: list[int], cps_b: list[int]
+                       ) -> dict:
+    """Distinct CPS palette banks actually referenced by the visible tilemap
+    cells, per layer.
+
+    This is the probe the reference-port transfer matrix prescribes: count
+    LIVE colour banks per frame, because a per-tile pipeline spends colour
+    RAM, not VDP1 texture memory. CPS2's palette is 128 banks of 16: objects
+    take 0x00-0x1F, scroll1 +0x20, scroll2 +0x40, scroll3 +0x60 (the same
+    derivation extract_avspu_stage1.render_background uses). Only tile
+    ATTRIBUTES are read - no tile pixels, no ROM bytes.
+    """
+    VISIBLE_LEFT, VISIBLE_TOP = 64, 16
+    VISIBLE_WIDTH, VISIBLE_HEIGHT = 384, 224
+
+    layer_control = cps_b[0x26 // 2]
+    order = [(layer_control >> shift) & 3 for shift in (6, 8, 10, 12)]
+    base_words = []
+    for register in (1, 2, 3):
+        byte_address = (cps_a[register] * 256) & 0x3FFFF
+        byte_address &= ~(0x4000 - 1)
+        base_words.append(byte_address // 2)
+    scroll_x = (cps_a[6], cps_a[8], cps_a[10])
+    scroll_y = (cps_a[7], cps_a[9], cps_a[11])
+
+    per_layer: dict[str, list[int]] = {}
+    for layer_number in order:
+        if layer_number == 0:
+            continue
+        layer_index = layer_number - 1
+        size = (8, 16, 32)[layer_index]
+        enable_mask = (0x02, 0x04, 0x08)[layer_index]
+        if not (layer_control & enable_mask):
+            continue
+        if layer_index > 0 and not (cps_a[17] & (1 << (layer_index + 1))):
+            continue
+        banks: set[int] = set()
+        for screen_y in range(0, VISIBLE_HEIGHT + size, size):
+            world_y = (screen_y + VISIBLE_TOP + scroll_y[layer_index]) % (64 * size)
+            row = world_y // size
+            for screen_x in range(0, VISIBLE_WIDTH + size, size):
+                world_x = (screen_x + VISIBLE_LEFT + scroll_x[layer_index]) % (64 * size)
+                column = world_x // size
+                if layer_index == 0:
+                    tile_index = (row & 0x1F) + ((column & 0x3F) << 5) + ((row & 0x20) << 6)
+                    bias = 0x20
+                elif layer_index == 1:
+                    tile_index = (row & 0x0F) + ((column & 0x3F) << 4) + ((row & 0x30) << 6)
+                    bias = 0x40
+                else:
+                    tile_index = (row & 0x07) + ((column & 0x3F) << 3) + ((row & 0x38) << 6)
+                    bias = 0x60
+                attr_word = base_words[layer_index] + tile_index * 2 + 1
+                if 0 <= attr_word < len(gfxram):
+                    banks.add((gfxram[attr_word] & 0x1F) + bias)
+        per_layer["scroll%d" % layer_number] = sorted(banks)
+    return per_layer
+
+
 def describe(frame: int, decode_object_entries) -> dict | None:
     cps_a_path = CAP / ("cps_a_regs_%04d.tsv" % frame)
     cps_b_path = CAP / ("cps_b_regs_%04d.tsv" % frame)
@@ -58,6 +117,8 @@ def describe(frame: int, decode_object_entries) -> dict | None:
         return None
     cps_a = load_words(cps_a_path)
     cps_b = load_words(cps_b_path)
+    gfxram_path = CAP / ("gfxram_%04d.tsv" % frame)
+    gfxram = load_words(gfxram_path) if gfxram_path.is_file() else []
 
     obj_path = CAP / ("objram_active_%04d.tsv" % frame)
     if not obj_path.is_file():
@@ -68,6 +129,7 @@ def describe(frame: int, decode_object_entries) -> dict | None:
     order = [(layer_control >> shift) & 3 for shift in (6, 8, 10, 12)]
     tilemaps = [layer for layer in order if layer != 0]
 
+    tilemap_banks = live_tilemap_banks(gfxram, cps_a, cps_b) if gfxram else {}
     entries = decode_object_entries(obj) if obj else []
     # An all-zero entry parked off-screen is an unused slot, not a drawn
     # object; count it separately so "how many sprites does this screen
@@ -90,6 +152,10 @@ def describe(frame: int, decode_object_entries) -> dict | None:
         "objects_drawn": len(drawn),
         "object_distinct_tile_codes": len({e["tile_code"] for e in drawn}),
         "object_palette_banks": sorted({e["colour"] for e in drawn}),
+        "live_tilemap_palette_banks": tilemap_banks,
+        "live_palette_banks_total": (
+            len({e["colour"] for e in drawn})
+            + sum(len(v) for v in tilemap_banks.values())),
         "objects": [
             {
                 "x": e["screen_x"], "y": e["screen_y"],
@@ -142,19 +208,32 @@ def main() -> int:
                                     "VDP1 object path; it cannot be done "
                                     "with sprites alone, and it does not "
                                     "need a captured picture.",
+        "colour_ram_finding": "LIVE palette banks per frame: character "
+                              "select 17, title/attract 19, round-1 title "
+                              "32. The Saturn build currently allocates "
+                              "AVSP_EXACT_PALETTE_BANKS = 8 (128 colours) "
+                              "for actors. The frontend therefore needs 2-4x "
+                              "the current colour-RAM allocation and cannot "
+                              "be rendered faithfully inside it. This is the "
+                              "AvP-specific validation of the reference "
+                              "port's warning that a per-tile pipeline "
+                              "spends COLOUR RAM rather than VDP1 texture "
+                              "memory; the reference's own 12-14 live banks "
+                              "per combat anchor is context, never an AvP "
+                              "budget.",
         "key_frames": frames,
     }
     OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     OUT_JSON.write_text(json.dumps(manifest, indent=1, sort_keys=True) + "\n")
 
     for entry in frames:
-        print("frame %d: tilemaps %s bases %s | objects drawn %d "
-              "(slots %d, codes %d, banks %s)"
+        print("frame %d: tilemaps %s | objects drawn %d (banks %s) | "
+              "live tilemap banks %s | LIVE PALETTE BANKS TOTAL %d"
               % (entry["frame"], entry["active_tilemap_layers"],
-                 list(entry["tilemap_bases"].values()),
-                 entry["objects_drawn"], entry["object_slots_parsed"],
-                 entry["object_distinct_tile_codes"],
-                 entry["object_palette_banks"]))
+                 entry["objects_drawn"], entry["object_palette_banks"],
+                 {k: len(v) for k, v in
+                  entry["live_tilemap_palette_banks"].items()},
+                 entry["live_palette_banks_total"]))
     print("wrote", OUT_JSON)
     return 0
 

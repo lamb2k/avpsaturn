@@ -111,6 +111,22 @@ work is routing them to VDP2 tilemap + tiles and VDP1 cursor sprites. All
 four characters' plates and portraits are present in the ROM tilemaps, so a
 four-way select is asset-complete; what stays ADAPTED is any character whose
 in-game animation set has not been extracted.
+
+**Second measurement, prompted by the reference-port lane (user directive:
+consult `AvPSaturnCapabilityTest-MSHvSF` for menus/loading/sprite
+architecture): LIVE colour banks per frontend frame.** The reference lane's
+transfer matrix warns that a per-tile pipeline spends VDP2 COLOUR RAM, and
+prescribes counting live banks per frame as the AvP probe. Done — the
+composition manifest now counts banks actually referenced by visible
+tilemap cells plus drawn objects: **character select 17, title 19, round-1
+title 32**, against the Saturn build's current `AVSP_EXACT_PALETTE_BANKS` =
+8. The frontend needs 2-4x the current colour-RAM allocation; the frontend
+body must plan CRAM before writing renderer code. The reference lane's own
+numbers (12-14 live banks in Marvel combat) are context, never AvP budgets,
+per its `MSHVSF_TO_AVP_TRANSFER_MATRIX.md` rule. That lane also
+independently documents the same Jo allocator no-split trap this session
+measured (its handoff, "Jo Engine reuses but does not split a freed
+allocation") — corroboration, not coincidence.
 The frontend body's evidence base already exists and must be read before any
 re-capture: `data/frontend_segments.json` (note `round_1_title` needs 22
 segments — an animated window with a real memory plan under the measured

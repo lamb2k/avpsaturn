@@ -132,6 +132,33 @@ stage background decode already consumes — and never reads pixels):
 tilemap path** (per-layer tile codes + palette, decoded from the graphics
 ROM) IN ADDITION to the existing per-tile VDP1 object path. It cannot be
 done with sprites alone, and it does not need a captured picture.
+
+**Colour RAM is the frontend's real budget problem (MEASURED).** The same
+manifest counts LIVE palette banks per frame — banks actually referenced by
+visible tilemap cells plus drawn objects: character select **17**, title
+**19**, round-1 title **32**. The Saturn build allocates
+`AVSP_EXACT_PALETTE_BANKS` = **8** (sized for the actor cel path). The
+frontend cannot be rendered faithfully inside that; plan the colour-RAM
+allocation (Saturn CRAM holds 2048 16-bit entries = 128 banks of 16 in
+16-colour mode, minus what VDP2 layers themselves consume) BEFORE writing
+any frontend renderer code. This is the AvP-specific confirmation of the
+reference port's measured warning that a per-tile pipeline spends COLOUR
+RAM, not VDP1 texture memory.
+
+**Reference-port lane (user directive, 2026-08-19): consult
+`C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-MSHvSF` for
+inspiration on menus, loading screens, and Saturn sprite architecture.** It
+holds MEASUREMENTS of the official Capcom Saturn port of MSHvSF. Its
+binding usage rule (from its own `docs/MSHVSF_TO_AVP_TRANSFER_MATRIX.md`):
+a reference finding may change AvP's METHOD or add a validation probe, but
+its numbers are NEVER AvP budgets, and nothing closes an AvP condition
+without AvP evidence. Never import its code, assets, timing, or constants;
+never modify that worktree. Directly relevant rows: the 16x16
+normal-sprite/jump-next VDP1 command model (already adopted by Body E), the
+colour-RAM ownership finding (validated for AvP above), VDP2 layer
+ownership via register WRITE observation (readback is proven useless on the
+reference), phase-boundary loading with stable combat residency, and the
+difference-ledger schema for every accepted deviation.
 `tools/extract_avspu_stage1.py` already has both halves —
 `render_background()` flattens the three live tilemaps from ROM tiles and
 `decode_objects()` decodes the object list — so this is a matter of routing

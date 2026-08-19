@@ -1,5 +1,6 @@
 {
  "classification": "frontend screen composition - CPS layer/object structure only; no ROM bytes, no imagery",
+ "colour_ram_finding": "LIVE palette banks per frame: character select 17, title/attract 19, round-1 title 32. The Saturn build currently allocates AVSP_EXACT_PALETTE_BANKS = 8 (128 colours) for actors. The frontend therefore needs 2-4x the current colour-RAM allocation and cannot be rendered faithfully inside it. This is the AvP-specific validation of the reference port's warning that a per-tile pipeline spends COLOUR RAM rather than VDP1 texture memory; the reference's own 12-14 live banks per combat anchor is context, never an AvP budget.",
  "finding": "the settled character-select screen is drawn almost entirely by the three CPS tilemap layers; its only drawn objects are the small 1P cursor marker. The plate slide-in is a large transient object burst. The title/attract page uses a DIFFERENT set of tilemap base addresses than the select page, so the two are distinct tilemap pages in gfxram.",
  "implication_for_the_port": "a faithful rebuild needs a CPS tilemap path (tile codes + palette per layer) in addition to the existing per-tile VDP1 object path; it cannot be done with sprites alone, and it does not need a captured picture.",
  "key_frames": [
@@ -17,6 +18,32 @@
     0,
     1
    ],
+   "live_palette_banks_total": 19,
+   "live_tilemap_palette_banks": {
+    "scroll1": [
+     32,
+     43
+    ],
+    "scroll2": [
+     64,
+     65,
+     66,
+     67,
+     68,
+     69,
+     70,
+     71,
+     72,
+     73,
+     74,
+     75,
+     76,
+     77
+    ],
+    "scroll3": [
+     102
+    ]
+   },
    "object_distinct_tile_codes": 12,
    "object_palette_banks": [
     26,
@@ -164,6 +191,31 @@
     1,
     0
    ],
+   "live_palette_banks_total": 17,
+   "live_tilemap_palette_banks": {
+    "scroll1": [
+     32,
+     40,
+     41,
+     42,
+     43,
+     61,
+     62,
+     63
+    ],
+    "scroll2": [
+     64,
+     67,
+     68,
+     70,
+     71,
+     72
+    ],
+    "scroll3": [
+     96,
+     102
+    ]
+   },
    "object_distinct_tile_codes": 1,
    "object_palette_banks": [
     5
@@ -346,6 +398,31 @@
     1,
     0
    ],
+   "live_palette_banks_total": 17,
+   "live_tilemap_palette_banks": {
+    "scroll1": [
+     32,
+     40,
+     41,
+     42,
+     43,
+     61,
+     62,
+     63
+    ],
+    "scroll2": [
+     64,
+     67,
+     68,
+     70,
+     71,
+     72
+    ],
+    "scroll3": [
+     96,
+     102
+    ]
+   },
    "object_distinct_tile_codes": 2,
    "object_palette_banks": [
     15
@@ -402,6 +479,31 @@
     1,
     0
    ],
+   "live_palette_banks_total": 17,
+   "live_tilemap_palette_banks": {
+    "scroll1": [
+     32,
+     40,
+     41,
+     42,
+     43,
+     61,
+     62,
+     63
+    ],
+    "scroll2": [
+     64,
+     67,
+     68,
+     70,
+     71,
+     72
+    ],
+    "scroll3": [
+     96,
+     102
+    ]
+   },
    "object_distinct_tile_codes": 2,
    "object_palette_banks": [
     15
@@ -458,6 +560,31 @@
     1,
     0
    ],
+   "live_palette_banks_total": 17,
+   "live_tilemap_palette_banks": {
+    "scroll1": [
+     32,
+     40,
+     41,
+     42,
+     43,
+     61,
+     62,
+     63
+    ],
+    "scroll2": [
+     64,
+     67,
+     68,
+     70,
+     71,
+     72
+    ],
+    "scroll3": [
+     96,
+     102
+    ]
+   },
    "object_distinct_tile_codes": 1,
    "object_palette_banks": [
     5
@@ -640,6 +767,38 @@
     0,
     1
    ],
+   "live_palette_banks_total": 32,
+   "live_tilemap_palette_banks": {
+    "scroll1": [
+     32,
+     38,
+     39,
+     41,
+     48,
+     50,
+     61
+    ],
+    "scroll2": [
+     64,
+     65,
+     66,
+     67,
+     69,
+     71,
+     76,
+     77,
+     78,
+     79,
+     80,
+     82,
+     90
+    ],
+    "scroll3": [
+     96,
+     102,
+     112
+    ]
+   },
    "object_distinct_tile_codes": 19,
    "object_palette_banks": [
     0,
