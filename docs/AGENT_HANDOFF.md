@@ -557,6 +557,29 @@ Committed: `tools/decode_avsp_object_stream.py` (attr-transform fix at
 pose-header-chain solve at `6e0db90`) and
 `data/avsp_object_stream.json`.
 
+## CRITICAL CORRECTION: the Saturn build has NEVER booted to gameplay (2026-08-18, user-verified)
+
+First real interactive boot attempt (Yaba Sanshiro, keyboard input):
+the build traverses the main menu and reaches character select, then
+FREEZES at the character-confirm transition. A/B testing with the
+pre-Body-D runtime reproduces the same freeze, and the user confirms
+the freeze predates tonight entirely: **this project's Saturn build has
+never successfully booted into Round 1 gameplay**. Every earlier claim
+that the normal release "plays through Round 1 to Round 2" is hereby
+marked FALSIFIED - those claims were never backed by an observed boot.
+Body D's runtime check therefore cannot close until basic boot bringup
+does.
+
+**Next session's overriding priority (before Body E, before everything):**
+real boot bringup under a debugger. The user reports an emulator with a
+live MCP/debug server for watching execution (identify it - Kronos and
+Mednafen both expose debuggers; check the available MCP servers/skills
+in the session environment). Diagnose where the PC hangs at the
+character-confirm transition (suspects: asset load at the state change,
+memory-map collision, SGL/Jo init order), fix, and only then re-enable
+the Body D verification path. rom_actor_tick is currently gated to the
+street-wave states and is NOT the freeze cause (freeze reproduces with
+it fully absent).
 ## Body D LANDED: the ROM pipeline runs native; Body E is next (2026-08-18, final)
 
 State at session close (35 commits, `main` = `codex/avp-master-plan` tip):
