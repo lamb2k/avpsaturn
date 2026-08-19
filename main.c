@@ -2,6 +2,7 @@
 #include <string.h>
 #include "capability_model.h"
 #include "avsp_tiles.h"
+#include "avsp_collision.h"
 
 #include "generated/avsp_anim_records.h"
 #include "generated/avsp_emit_windows.h"
@@ -1467,6 +1468,12 @@ static int rom_actor_entry_counts[CAP_MAX_ENEMIES];
 /* HUD/back-compat aggregates: total entries and the first live code. */
 static int rom_actor_entry_count = 0;
 static AvspObjectEntry rom_actor_entries[16];
+/* Step 3: a ROM street alien whose live record advertises a hurt selector of 0
+ * (or whose box cannot be resolved) cannot be hit - the game rejects the
+ * selector before any table read. Counted per frame on the debug HUD (like the
+ * tile MISS counters) so the cannot-hit windows are visible; it is never a
+ * silent fallback to the point approximation. */
+static volatile int rom_collision_no_hurt;
 
 static void rom_actor_tick(void)
 {
@@ -1474,6 +1481,16 @@ static void rom_actor_tick(void)
     AvspEmitActor state;
 
     rom_actor_entry_count = 0;
+    /* The ROM collision view is valid only for ROM-driven street aliens in the
+     * two street-wave states; zero it for every slot each frame so the point
+     * approximation applies everywhere else (capture-cel actors, boss, etc.). */
+    for (index = 0; index < CAP_MAX_ENEMIES; ++index)
+    {
+        world.enemies[index].rom_street_alien = 0;
+        world.enemies[index].rom_can_hit = 0;
+        world.enemies[index].rom_box_x_lo = 0;
+        world.enemies[index].rom_box_x_hi = 0;
+    }
     /* Run only in the two street-wave combat states: outside them enemy
      * slots can be mid-initialization, and a reported freeze at the
      * character-confirm transition traced to ticking against one. */
@@ -1504,9 +1521,17 @@ static void rom_actor_tick(void)
         int n;
 
         rom_actor_entry_counts[index] = 0;
-        if (!enemy->active || enemy->kind != CAP_ACTOR_ALIEN ||
-            (enemy->action != CAP_ACT_WALK &&
-             enemy->action != CAP_ACT_ATTACK))
+        if (!enemy->active || enemy->kind != CAP_ACTOR_ALIEN)
+        {
+            rom_actor_seeded[index] = 0;
+            continue;
+        }
+        /* This slot is a ROM-driven street alien for the whole wave, so its
+         * defender geometry is never the point approximation (Step 3). The
+         * measured box below is populated only while it walks or attacks. */
+        enemy->rom_street_alien = 1;
+        if (enemy->action != CAP_ACT_WALK &&
+            enemy->action != CAP_ACT_ATTACK)
         {
             rom_actor_seeded[index] = 0;
             continue;
@@ -1544,6 +1569,57 @@ static void rom_actor_tick(void)
         if (rom_actor_entry_counts[index] > 0 && rom_actor_entry_count == 0)
             rom_actor_entries[0] = rom_actor_entries_all[index][0];
         rom_actor_entry_count += rom_actor_entry_counts[index];
+        /* Step 2: the DEFENDER's MEASURED hurt box. sel_hurt is the live
+         * animation record's byte +8 (byte +9, sel_attack, is the attacker
+         * side and is deferred - the player has no ROM record yet). The X
+         * centre is resolved in the same ADAPTED model-space world_x/facing
+         * the emitter above used, so it is comparable to the player's reach in
+         * cap_resolve_player_hit. This view lags the model step by one frame
+         * (rom_actor_tick runs after cap_world_step). */
+        {
+            const unsigned char *rec = avsp_anim_resolve(&rom_actor_script,
+                                                         rom_actor_frames[index].addr,
+                                                         10);
+            /* table_set: MEASURED constant, not ADAPTED. Proven safe for the
+             * street walk/attack spans by the Step 1 offline gate (data/
+             * avsp_table_set_gate.json) and the live instruction trace (data/
+             * avsp_table_set_source.json): the game stores this immediate in
+             * the street alien's per-state initializers. MUST be revisited when
+             * hit/KO/spawn join the ROM path - their per-state initializers may
+             * carry a different constant. */
+            const unsigned long street_table_set = 0x00130AC8uL;
+            if (rec != 0)
+            {
+                unsigned char sel_hurt = rec[8];
+                AvspBox hurt;
+                if (sel_hurt == 0u)
+                {
+                    /* The game rejects selector 0 before any table read: this
+                     * pose cannot be hit. Honor it - never fall back to the
+                     * point approximation - and count it for the debug HUD. */
+                    enemy->rom_can_hit = 0;
+                    ++rom_collision_no_hurt;
+                }
+                else if (avsp_collision_hurt_box(street_table_set, sel_hurt,
+                                                 &hurt))
+                {
+                    int center = (int)state.world_x +
+                                 (state.facing ? -(int)hurt.x_center
+                                               : (int)hurt.x_center);
+                    enemy->rom_can_hit = 1;
+                    enemy->rom_box_x_lo = center - (int)hurt.x_half;
+                    enemy->rom_box_x_hi = center + (int)hurt.x_half;
+                }
+                else
+                {
+                    /* Unknown family or out-of-range selector: no box, cannot
+                     * be hit. A real data gap, not a cannot-hit pose; it must
+                     * not occur for the gated street constant. */
+                    enemy->rom_can_hit = 0;
+                }
+            }
+            /* rec == 0 leaves rom_can_hit at its zeroed value (cannot hit). */
+        }
     }
 }
 
@@ -2311,10 +2387,10 @@ static void frame_callback(void)
               (int)world.frame);
     rom_actor_tick();
     if (debug_hud_enabled && rom_actor_entry_count > 0)
-        jo_printf(0, 2, "ROM ACTOR n=%d code=%04x MISS %d/%d/%d POOL %d",
+        jo_printf(0, 2, "ROM ACTOR n=%d code=%04x MISS %d/%d/%d POOL %d NH %d",
                   rom_actor_entry_count, rom_actor_entries[0].code,
                   tile_diag_no_bank, tile_diag_no_rank, tile_diag_no_sprite,
-                  tile_pool_used);
+                  tile_pool_used, rom_collision_no_hurt);
     draw_world();
     draw_arcade_hud();
     draw_route_overlay();

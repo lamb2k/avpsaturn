@@ -160,6 +160,12 @@ static void cap_deactivate_enemy(CapActor *enemy, const int index)
     enemy->active = 0;
     enemy->variant = 0;
     enemy->kind = CAP_ACTOR_ALIEN;
+    /* Runtime-only collision view (filled by main.c's rom_actor_tick); always
+     * 0 at the model level. */
+    enemy->rom_street_alien = 0;
+    enemy->rom_can_hit = 0;
+    enemy->rom_box_x_lo = 0;
+    enemy->rom_box_x_hi = 0;
 }
 
 static void cap_spawn_enemy(CapActor *enemy, const int index)
@@ -178,6 +184,12 @@ static void cap_spawn_enemy(CapActor *enemy, const int index)
     enemy->active = 1;
     enemy->variant = spawn->variant;
     enemy->kind = CAP_ACTOR_ALIEN;
+    /* Runtime-only collision view (filled by main.c's rom_actor_tick); always
+     * 0 at the model level. */
+    enemy->rom_street_alien = 0;
+    enemy->rom_can_hit = 0;
+    enemy->rom_box_x_lo = 0;
+    enemy->rom_box_x_hi = 0;
 }
 
 static void cap_spawn_boss(CapWorld *world)
@@ -196,6 +208,12 @@ static void cap_spawn_boss(CapWorld *world)
     boss->active = 1;
     boss->variant = 0;
     boss->kind = CAP_ACTOR_BOSS;
+    /* Runtime-only collision view (filled by main.c's rom_actor_tick); always
+     * 0 at the model level. */
+    boss->rom_street_alien = 0;
+    boss->rom_can_hit = 0;
+    boss->rom_box_x_lo = 0;
+    boss->rom_box_x_hi = 0;
 }
 
 static void cap_spawn_boss_add(CapWorld *world)
@@ -218,6 +236,12 @@ static void cap_spawn_boss_add(CapWorld *world)
         add->active = 1;
         add->variant = 0;
         add->kind = CAP_ACTOR_STALKER;
+        /* Runtime-only collision view (filled by main.c's rom_actor_tick);
+         * always 0 at the model level. */
+        add->rom_street_alien = 0;
+        add->rom_can_hit = 0;
+        add->rom_box_x_lo = 0;
+        add->rom_box_x_hi = 0;
         ++world->boss_adds_spawned;
         return;
     }
@@ -320,13 +344,39 @@ static int cap_resolve_player_hit(CapWorld *world, const int range, const int da
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
     {
         CapActor *enemy = &world->enemies[index];
-        int delta_x;
         if (!enemy->active || enemy->action == CAP_ACT_KO) continue;
-        delta_x = enemy->x - player->x;
+        /* The lane band is part of the ADAPTED attacker reach, so it applies to
+         * every defender. The DEFENDER geometry below is what changes. */
         if (cap_abs(enemy->lane - player->lane) > 19) continue;
-        if (delta_x * player->facing < 0 || cap_abs(delta_x) > range) continue;
-        cap_damage_enemy(world, enemy, damage);
-        ++hits;
+        if (enemy->rom_street_alien)
+        {
+            /* ROM-driven street alien: the defender geometry is the MEASURED
+             * decoded hurt box (main.c resolved it each frame from the live
+             * animation record + gated table_set via avsp_collision_hurt_box);
+             * the attacker reach stays ADAPTED (this model's fixed range). The
+             * box lags the model step by one frame (rom_actor_tick runs after
+             * cap_world_step) - accepted and labelled. A slot with no valid box
+             * this frame (cannot-hit hurt selector, or a non-walk/attack pose)
+             * is NOT hit, and never falls back to the point approximation. */
+            int reach_a, reach_b, reach_lo, reach_hi;
+            if (!enemy->rom_can_hit) continue;
+            reach_a = player->x;
+            reach_b = player->x + player->facing * range;
+            reach_lo = reach_a < reach_b ? reach_a : reach_b;
+            reach_hi = reach_a < reach_b ? reach_b : reach_a;
+            if (reach_hi < enemy->rom_box_x_lo ||
+                reach_lo > enemy->rom_box_x_hi) continue;
+            cap_damage_enemy(world, enemy, damage);
+            ++hits;
+            continue;
+        }
+        /* Capture-cel actors and non-rom slots keep the point approximation. */
+        {
+            int delta_x = enemy->x - player->x;
+            if (delta_x * player->facing < 0 || cap_abs(delta_x) > range) continue;
+            cap_damage_enemy(world, enemy, damage);
+            ++hits;
+        }
     }
     return hits;
 }

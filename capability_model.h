@@ -99,6 +99,20 @@ typedef struct
     int active;
     int variant;
     CapActorKind kind;
+    /* Step 2/3 ROM-driven street-alien collision view. Filled by main.c's
+     * rom_actor_tick each frame from the decoded animation record and the gated
+     * table_set; consumed by cap_resolve_player_hit to replace the point
+     * approximation with the MEASURED hurt box for these slots. rom_street_alien
+     * marks a slot as a ROM-driven street alien for the whole wave (its defender
+     * geometry is never the point approximation); rom_can_hit is 1 only while a
+     * valid box is available this frame (walk/attack pose, non-zero hurt
+     * selector, resolved against the gated table_set). rom_box_x_lo/hi are the
+     * resolved hurt-box X extent in CPS x (screen) space. All 0 for capture-cel
+     * actors and outside the street waves. */
+    int rom_street_alien;
+    int rom_can_hit;
+    int rom_box_x_lo;
+    int rom_box_x_hi;
 } CapActor;
 
 typedef struct
