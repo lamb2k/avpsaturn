@@ -1,5 +1,92 @@
 # Agent handoff: native AvP Saturn port
 
+Updated: 2026-08-19 EDT (defender-side collision wired; Step 4 host
+falsification green; boot re-verified by pixels). **Collision is now
+connected to gameplay, defender side first.** For each active type-12 ROM
+street alien whose record pointer is in the walk/attack street spans, the
+runtime drives its DEFENDER geometry from the player's ADAPTED attack-reach
+interval against the alien's REAL decoded hurt box (`sel_hurt` from the
+live record +8 via the anim-script span view; `table_set` = the Step-1-gated
+constant `0x00130AC8`) on the existing ADAPTED coordinate bridge. Step 4
+(`tests/avsp_runtime_collision_test.c`, wired into `test.ps1`) replays the
+S1 predicate over the SAME `collision_probe` + `collision_probe_boss`
+captures through the runtime's new input path: check A (input identity)
+1392 street frames, 0/0/0 mismatches (non-vacuous); check B the exact S1
+known contact set (21908/25/2516/24; latches 25/19/8/4). Full `test.ps1`
+exits 0 (both the single-window full-image form and the sparse-span form).
+The normal-release ISO booted in Yaba Sanshiro 1.20.37 and was read back by
+pixel statistics (this model cannot read screenshots): a busy, non-black
+scene (brightPx ~100.8k / 101.3k, inter-shot diff 0.375, static —
+title-screen signature) with NO `CAPABILITY TEST FAILED` banner, so it boots
+and renders with no failed asset. **Named pending, NOT claimed:** the literal
+`runtime_ready=1` / `rom_collision_no_hurt` values and the WAVE_ONE hit
+behavior need emulator state readback (absent on this host: no emulator MCP
+client, no image input), and the full Saturn `-EncounterTest` route was NOT
+rerun this turn (the 12,000-frame host soak is not a substitute). No MAME,
+Yaba Sanshiro, Mednafen, or RetroArch process is running after the readback.
+**Next: the state-dispatch / `type_promotion` decode (the still-unresolved
+provenance item, S5-adjacent) — see `docs/NEXT_AGENT_PROMPT.md` for the next
+body; the two named-pending verifications above run first on a host that can
+read emulator state.**
+
+## Defender-side collision wiring + Step 4 host falsification (2026-08-19)
+
+**What changed (committed across `f56821f`, `e9febe6`, and this turn's
+checkpoint-3 commit, all on `codex/avp-master-plan`):**
+
+- `makefile`: `SRCS` ends `avsp_tiles.c avsp_collision.c` — the C port of
+  the game's collision predicate is now in the Saturn build.
+- `capability_model.h`: `CapActor` gains `rom_street_alien`, `rom_can_hit`,
+  `rom_box_x_lo`, `rom_box_x_hi`.
+- `capability_model.c` `cap_resolve_player_hit`: for
+  `enemy->rom_street_alien`, the DEFENDER test is the player's ADAPTED
+  attack-reach interval (`player->x` .. `player->x + player->facing*range`)
+  against `rom_box_x_lo`/`rom_box_x_hi` (the MEASURED decoded hurt box);
+  `rom_can_hit==0` skips the alien (a `sel_hurt=0` record = "cannot be hit",
+  the game's own rule — no fallback to the approximation). Capture-cel
+  actors keep the existing point test untouched. The four fields are zeroed
+  in every spawn/deactivate path.
+- `main.c` `rom_actor_tick`: sets `rom_street_alien` per active ALIEN slot,
+  skips non-WALK/ATTACK states, and for each street slot resolves the live
+  record via `avsp_anim_resolve(script, record, 10)`, takes
+  `sel_hurt = rec[8]`, sets `table_set = 0x00130AC8` (the comment names the
+  Step-1 gate + `data/avsp_table_set_gate.json`; MEASURED, not ADAPTED —
+  revisit when hit/KO/spawn join), derives the facing-mirrored world-center
+  `rom_box_x_lo`/`rom_box_x_hi`, and on `sel_hurt==0` sets `rom_can_hit=0`
+  and bumps the `rom_collision_no_hurt` debug-HUD counter (visible on the
+  `ROM ACTOR ... NH` HUD line).
+
+**The Step-1 gate (committed `f56821f`):** over the stride-1 street capture,
+every active type-12 frame whose record pointer (+0x1C) lies in the walk
+(`0x12EB4C`) or attack (`0x12D8A0`) span carries `table_set` (+0x50) ==
+`0x00130AC8` — 2186/2186, zero exceptions
+(`tools/gate_avsp_table_set.py`, manifest `data/avsp_table_set_gate.json`).
+
+**Step 4 host falsification (`tests/avsp_runtime_collision_test.c`):** C90
+strict-clean, wired into `test.ps1` (which adds `-DAVSP_GENERATED_RECORDS`
+when `generated/avsp_anim_records.h` is present, so the runtime's sparse-span
+form is exercised; the single-window full-image form otherwise). Check A
+proves the RUNTIME's input assembly (gated constant `table_set` + span-view
+selectors) is byte-identical to the library assembly on all 1392 street
+walk/attack type-12 frames (0/0/0 mismatches, non-vacuous). Check B
+reproduces the exact S1 known contact set over those runtime-assembled
+inputs: pairs 21908 no-overlap / 25 latched / 2516 guarded / 24 unguarded;
+latches 25 defender / 19 attacker / 8 broadcast / 4 unexplained.
+
+**Honest scope limit (this turn, binding):** a street alien in
+`CAP_ACT_HIT` has no measured hurt box until it returns to WALK — the
+hit/KO/spawn ROM actions were deliberately NOT widened this turn, so such an
+alien is unhittable in the hit state. That is the honest consequence of
+holding ROM action coverage at WALK/ATTACK; widening it requires the
+state-dispatch / `type_promotion` decode first.
+
+**Verification:** full `test.ps1` exit 0; the clean `-Release` build + ISO
+member-hash verification ran this session before this readback; the Yaba
+Sanshiro 1.20.37 boot of the normal-release ISO was read back by pixel
+statistics (busy, no asset-error banner). `-EncounterTest` was NOT rerun
+(named pending). The emulator was stopped and verified absent after the
+readback.
+
 Updated: 2026-08-19 EDT (table_set provenance RESOLVED). **`table_set`
 (actor +0x50) provenance is now proven from live instruction traces alone,
 for all three observed families, with a full-corpus falsification (zero

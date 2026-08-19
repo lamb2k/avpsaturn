@@ -70,6 +70,24 @@ if ($LASTEXITCODE -ne 0) {
     throw "Actor-spine / collision-port test failed with exit code $LASTEXITCODE."
 }
 
+# Step 4: the RUNTIME's input-assembly path (gated constant table_set +
+# span-view selectors) must reproduce the S1 known contact set over the same
+# captures. The new assertion is that the runtime path - not just the library -
+# assembles identical inputs (check A, zero mismatches, non-vacuous) and the
+# full predicate over those inputs still counts the exact S1 numbers (check B).
+# Requires the private captures and program image; skips cleanly without them.
+# When generated/avsp_anim_records.h is present the span-view selector check
+# upgrades to the runtime's sparse record-span form, same guard as the walk test.
+$rtDefine = ''
+if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'generated/avsp_anim_records.h')) {
+    $rtDefine = '-DAVSP_GENERATED_RECORDS '
+}
+$rtCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 $rtDefine" + "avsp_actor.c avsp_anim_script.c avsp_collision.c tests/avsp_runtime_collision_test.c -o build/avsp_runtime_collision_test && ./build/avsp_runtime_collision_test"
+& $wsl.Source sh '-lc' $rtCommand
+if ($LASTEXITCODE -ne 0) {
+    throw "Runtime input-assembly collision test failed with exit code $LASTEXITCODE."
+}
+
 # ROM animation-script walk against the game's own per-frame record pointer.
 # Requires the private captures and program image; skips cleanly without them.
 # The shipped-subset equivalence check (check C) needs the generated record
