@@ -108,15 +108,21 @@ turn").
 untracked one-off diagnostics, preserved per convention):
 
 - `-video none` headless runs in this environment advance frame notifiers
-  reliably with `-debug` (NOT `-debugger windows`) AND the script
-  explicitly sets `debugger.execution_state = "run"` at the end.
-  **Correction (2026-08-19, follow-up turn):** this note previously said
-  `-debug -debugger windows` is required; empirically that is wrong for
-  headless `-video none` — with the `windows` debugger backend the process
-  exits code 6 within ~1s before writing any log, while `-debug` alone
-  completed and produced the trace file. Run from a scratch CWD so the
-  project `error.log` is not clobbered. (Always verify `tasklist` /
-  `ps -W` show no lingering `mame.exe` before ending a session.)
+  reliably with `-debug` AND the script explicitly setting
+  `debugger.execution_state = "run"` at the end. `-debug` alone
+  suffices; `-debugger windows` is OPTIONAL and harmless when passed as
+  two separate arguments. **Second correction (2026-08-19, review):** an
+  intermediate correction here claimed `-debugger windows` makes the
+  process exit code 6 — that was an argument-quoting artifact in one
+  harness (the two words passed to MAME as a SINGLE token, which MAME
+  rejects as an unknown option). Direct test this session: `-debug
+  -debugger windows` as two tokens starts normally and pauses at the
+  debugger, and roughly six completed traces earlier this same day ran
+  with exactly those flags. The load-bearing ingredients are `-debug` +
+  the script's `execution_state = "run"`; nothing else. Run from a
+  scratch CWD so the project `error.log` is not clobbered. (Always
+  verify `tasklist` shows no lingering `mame.exe` before ending a
+  session.)
 - `machine:load()` (loading a save state) reliably failed silently in
   this environment/build when called from a frame notifier's `boot_frame
   == 1` branch OR from script top-level — cause not resolved, not worth
