@@ -160,15 +160,57 @@ int main(void)
                    want, 2);
     }
 
-    /* Unknown selector words must be reported, never guessed at. */
+    /* Family-0x0002 records (inline code/attr, single entry each), all
+     * corpus-verified against the game's own object RAM. The 2+2 pose at
+     * 0x12F5DE is the record that was undecodable before the family-2
+     * handler (0x0A9D52) was live-disassembled. */
+    actor.world_x = 1292; actor.world_y = 258;
+    actor.facing = 1; actor.palette = 0x10;
+    {
+        static const unsigned short want[] = {
+            0x8105, 0x00C7, 0x463D, 0x2230,
+            0x8116, 0x00CF, 0x4605, 0x2730,
+        };
+        check_pose(rom, rom_size, "family2 2+2 (2)", 0x12F5DEul, &actor,
+                   want, 2);
+    }
+
+    /* Mixed composite: family-6 group then a family-2 record. */
+    actor.world_x = 1005; actor.world_y = 334;
+    actor.facing = 1; actor.palette = 0x10;
+    {
+        static const unsigned short want[] = {
+            0x83E4, 0x006C, 0x4EFB, 0x0230,
+            0x83E4, 0x007C, 0x4BEA, 0x1130,
+            0x83D5, 0x0083, 0x4850, 0x2730,
+        };
+        check_pose(rom, rom_size, "mixed 6x2+2 (3)", 0x12F890ul, &actor,
+                   want, 3);
+    }
+
+    /* Mixed composite the other way: family-2 then a family-6 group. */
+    actor.world_x = 1331; actor.world_y = 308;
+    actor.facing = 1; actor.palette = 0x11;
+    {
+        static const unsigned short want[] = {
+            0x812E, 0x009B, 0x4FC0, 0x1431,
+            0x816D, 0x006D, 0x499B, 0x2431,
+            0x815D, 0x009D, 0x4696, 0x2531,
+        };
+        check_pose(rom, rom_size, "mixed 2+6x2 (3)", 0x12FD0Aul, &actor,
+                   want, 3);
+    }
+
+    /* Undecoded layouts must be reported, never guessed at. 0x12F72E holds
+     * a record's budget word (0x0009), not a valid top word. */
     {
         AvspObjectEntry tmp[4];
-        int n = avsp_emit_pose(rom, rom_size, 0x12F5DEul, &actor, tmp, 4);
+        int n = avsp_emit_pose(rom, rom_size, 0x12F72Eul, &actor, tmp, 4);
         if (n != -1) {
-            printf("  unknown-family selector: got %d (want -1) FAIL\n", n);
+            printf("  unknown top word: got %d (want -1) FAIL\n", n);
             ++failures;
         } else {
-            printf("  unknown-family selector rejected OK\n");
+            printf("  unknown top word rejected OK\n");
         }
     }
 

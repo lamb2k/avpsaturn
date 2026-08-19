@@ -25,17 +25,25 @@
  *   (= CPS-A scroll1_x + 0x40 and 0x300 - scroll1_y, verified across two
  *   camera positions), not ROM constants.
  *
- *   A pose's `assembly` field starts with a selector word: 0x0006 = one
- *   group (header follows), 0x000C = two groups, each prefixed by its own
- *   0x0006 tag. Other selector words are other emitter families, not yet
- *   decoded; avsp_emit_pose reports them rather than guessing.
+ *   A pose's `assembly` is a record list (universal walker at
+ *   0x0A9D1A/0x0A9D2A, tag jump table at 0x0A9D3E - read through the
+ *   decrypted-opcodes view; the raw dump stores PC-relative-read tables
+ *   encrypted): the top word is either a family tag itself (one record) or
+ *   0x000C ("two records follow"). Each record is [tag][budget][payload]:
+ *   tag 0x0006 = the multi-part group above; tag 0x0002 = one entry with
+ *   inline [attr][selector][D2 long][code] (same origin routine, same A2
+ *   table, same plain/flipped X paths); tag 0x0008 = no-op (rts). Tags
+ *   0x0000/0x0004/0x000A have located, undecoded handlers
+ *   (0x0AA26C/0x0A9DEE/0x0AA38A); avsp_emit_pose reports them (-1) rather
+ *   than guessing.
  *
  * Falsification: tools/verify_avsp_object_corpus.py runs the identical
- * algorithm over 6,139 captured frames across four routes: 6,010 eligible
- * actor-frame instances, 5,614 exact four-word matches against the game's
- * own object RAM, 396 game-omitted (its live-proven per-frame tile-budget
- * bail, offscreen edge band, flicker), ZERO mismatches. See
- * data/avsp_object_corpus_verification.json and docs/AGENT_HANDOFF.md.
+ * algorithm over 6,139 captured frames across four routes: 14,487 eligible
+ * actor-frame instances, 13,890 exact four-word matches against the game's
+ * own object RAM, 597 game-omitted (its live-proven per-frame tile-budget
+ * bail, offscreen edge band, spawn-in/dying visibility gating), ZERO
+ * mismatches. See data/avsp_object_corpus_verification.json and
+ * docs/AGENT_HANDOFF.md.
  *
  * C90.
  */
