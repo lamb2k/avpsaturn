@@ -1,228 +1,253 @@
-# Next agent prompt: execute the critical path — S2 Bodies D/E, S3 family widening, S4 collision
+# Qwen next-turn prompt: finish `table_set` provenance from the retained writer trace
 
-The S2 source walk is CLOSED (2026-08-18): the complete ROM-to-object
-pipeline is decoded, corpus-falsified with **zero mismatches over 6,010
-eligible actor-frame instances across four routes**, and promoted to C
-(`avsp_emit_pose`/`avsp_emit_group`, wired into `test.ps1`). Do not re-derive
-it. This prompt authorizes the next phases of the critical path in
-`docs/PARITY_PLAN.md` ("Critical path to the end-to-end full game"):
+Work in `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`, an independent
+private Git repository nested in an unrelated workspace. Stay on
+`codex/avp-master-plan`; do not switch, merge, rebase, cherry-pick, add a remote,
+or touch the separate Marvel worktree.
 
-- **S2 Body D**: LANDED and RUNTIME-VERIFIED 2026-08-18 night
-  (`rom_actor_tick` in `main.c`): the normal release booted into live
-  WAVE_ONE combat and the debug HUD plus direct memory sampling showed
-  the ROM actor's entry count (4<->5) and codes cycling with its poses.
-  The boot-freeze diagnosis that blocked this was falsified (see the
-  handoff top note); the frontend is traversable end-to-end into Round 1
-  (traversable, not faithful — the title, select and intro screens are
-  static captured keyframes; see the handoff's scope table).
-- **S2 Body E**: LANDED and RUNTIME-VERIFIED 2026-08-18 late night
-  (`89bc4ce`): the ROM actor renders per-16x16-tile VDP1 sprites from the
-  cart-resident TILES.BIN archive in live WAVE_ONE combat; miss counters
-  zero, tile pool LRU active. Read the handoff's Body E section for the
-  three cartridge-I/O platform rules before touching any disc load.
-- **S3**: decode the remaining emitter families and coordinate modes,
-  corpus-falsified the same way.
-- **S4**: collision/damage/reaction integration.
+## Read and verify before acting
 
-S3 corpus work may proceed in parallel with D/E (it is offline and does not
-touch the runtime); do not let it stall the render keystone indefinitely.
+Read these completely, in order:
 
-## What the build is NOT, as of 2026-08-19
+1. `C:\Users\lambd\.codex\skills\port-cps2-to-sega-saturn\SKILL.md`
+2. That skill's `references/workflow.md`
+3. `AGENTS.md`
+4. `CLAUDE.md` only as a cross-harness pointer; `AGENTS.md` remains canonical
+5. `docs/GOAL.md`
+6. `docs/AGENT_HANDOFF.md` completely, newest sections first when reconciling
+   corrections
+7. `docs/PARITY_PLAN.md`, especially terminology, S1-S6, static translation,
+   and the collision sections
+8. `docs/TEST_PLAN.md` and `docs/HARDWARE_TEST.md`
+9. This file again
 
-The build is a **native technical slice**: it boots, traverses the
-frontend, and runs Round 1 wave combat with one ROM-tile-rendered alien.
-It is **functionally approximate and not a faithful playable level.** The
-per-surface gap table is in `docs/AGENT_HANDOFF.md` (Body E section).
-Never describe this build as visually correct, faithful, or parity-
-complete; a green miss counter proves nothing was dropped, not that what
-was drawn matches the arcade.
+Then run, from this repository:
 
-The ordered work that closes the gap, ahead of everything else:
+```powershell
+git status --short --branch
+git log --oneline -12
+git rev-parse HEAD
+git branch --show-current
+Get-CimInstance Win32_Process | Where-Object {
+    $_.Name -match 'mame|yaba|mednafen|retroarch'
+} | Select-Object ProcessId,Name,CommandLine
+```
 
-1. ROM-driven animation for the complete Round 1 cast (the second street
-   alien onward), retiring the capture cels as production actors.
-   **PARTIALLY LANDED 2026-08-19** (`1350cf8`): every active street alien
-   in WALK/ATTACK is now ROM-driven, not just one — see the handoff's
-   "Item 1 continued" section for what's still missing (hit/KO/spawn
-   actions, stalkers, the full four-route tile archive) and why the
-   mined action-seed table can't be wired in yet without guessing.
-2. Connect the decoded CPS2 hitboxes and stage collision to gameplay,
-   retiring the X-distance/lane approximations in `capability_model.c`.
-   **Scoped 2026-08-19, not yet implemented**: `avsp_collision.c/h`
-   operates on `AvspActor` (the S1 spine). `sel_hurt`/`sel_attack` (the
-   live animation record's bytes +8/+9) ARE already readable for
-   ROM-driven street aliens today. `table_set` at actor +0x50 is
-   confirmed NOT a per-type constant (3 distinct values for street
-   aliens). Correlation CANNOT identify its source: after instrument
-   repair (stride 1, generation segmentation, negative control) three
-   informative candidates remain (`+0x0E`, `+0x5E`, `+0x64`;
-   `data/avsp_table_set_evidence.json` schema 2) and they are
-   "perfectly correlated in this corpus", nothing more. The deciding
-   step is the WRITER TRACE prescribed in the handoff's "table_set
-   investigation" section — only the field a live MAME trace proves the
-   spawn initializer reads may enter the runtime.
-3. Translate the real enemy AI, including actor separation.
-4. Replace the static frontend/level keyframes with real title, cursor,
-   selection, and sequence logic.
-5. Restore CDDA and validate it without reintroducing the transition
-   stall (the call is commented out in `main.c` while
-   `stage_music_started` is still set).
+The evidence/instrument baseline is `b8bcf48`; this prompt is in its docs-only
+successor, whose exact self-referential hash must be read with
+`git rev-parse HEAD`. Preserve every untracked diagnostic. Never use
+`git add .`, `git add -A`, `git clean`, a broad stash, reset, or destructive
+checkout. Stage explicit files only. Never commit ROMs, raw captures, MAME
+logs, emulator states, generated copyrighted assets, disc images, or the raw
+trace sidecar.
 
-## Why the project uses both S-steps and Capability Gate 1
+## Project status you must preserve
 
-"Gate" means Capability Gate 1 only: the seven-condition Round 1 acceptance
-contract (0/7). S1-S6 are execution steps with checks; a green check is not
-gate progress. The full-game goal is 0/9. See `docs/PARITY_PLAN.md` Naming.
+- The target is a native SH-2 port at functional parity, not a CPS2 emulator.
+- Capability Gate 1 remains `0/7`; full-game completion remains `0/9`.
+- S1's actor spine and collision predicate are already proven.
+- The ROM animation interpreter and enemy object-emission families are already
+  decoded and host-tested. Do not re-derive them.
+- Every active street alien in WALK/ATTACK now has independent ROM-driven
+  animation state. Hit/KO/spawn actions, the player, Stalkers and some boss
+  paths still fall back to capture-derived production data.
+- The visible Body E path currently expands decoded CPS2 objects into 16x16
+  VDP1 tile sprites. It is a working native diagnostic path, not yet the final
+  one-command-per-CPS2-object renderer.
+- The deterministic tile-archive build contract is green. Normal builds
+  explicitly request `--scope street`; `--scope round1` correctly fails before
+  writing because 612,720 bytes exceeds the current 262,144-byte carve.
+- The clean normal release boot passed. The Saturn `-EncounterTest` route was
+  not rerun after the multi-actor change and remains pending; do not confuse
+  the 12,000-frame host soak with that emulator run.
 
-## Mandatory startup and repository safety
+## The correction already landed; do not undo it
 
-Read in order before changing anything: the `port-cps2-to-sega-saturn` skill
-(`SKILL.md`, `references/workflow.md`), `AGENTS.md`, `CLAUDE.md`,
-`docs/GOAL.md`, `docs/AGENT_HANDOFF.md` completely (the "S2 source walk
-CLOSED" section supersedes every earlier S2 emission claim; later sections
-correct earlier ones), `docs/PARITY_PLAN.md` (Naming, the critical-path
-section, Master execution plan, How game logic gets translated, Sprite
-demand, retained slice-V design, representation boundary),
-`docs/TEST_PLAN.md`, `docs/HARDWARE_TEST.md`, then this file again.
+Commit `b8bcf48` repaired `tools/gen_avsp_table_set_evidence.py`:
 
-Record the live state (`git status --short --branch`, `git log --oneline
--10`, `git rev-parse HEAD`, `git branch --show-current`); trust the commands,
-not this file, for HEAD.
+- stride 1 over every captured frame;
+- inactive-to-active and type-change generation segmentation;
+- all candidate bytes retained;
+- a perturbation negative control;
+- honest correlation wording.
 
-Rules (binding):
+`data/avsp_table_set_evidence.json` schema 2 records 33 target-type-12
+generations, each holding one `table_set` for its observed lifetime. Three
+informative candidate bytes remain perfectly correlated in this corpus:
+`+0x0E`, `+0x5E`, and `+0x64`. Fourteen other perfect candidates, including
+`+0x02`, are marked vacuous because their mappings survive the negative
+control. None of these correlations may enter runtime code. Only the game's
+writer/source path may determine provenance.
 
-- Stay on `codex/avp-master-plan`. Do not switch, merge, or cherry-pick the
-  MSHvSF reference lane; do not edit its separate worktree.
-- Never `git add .`/`git add -A`/`git clean`/broad stash/reset/destructive
-  checkout. Stage explicit paths only.
-- Never commit ROMs, raw captures, generated copyrighted assets, emulator
-  states, or disc images. Preserve untracked one-off diagnostics
-  (`tools/diag_*`, `tools/probe_*`, `tools/mame_trace_*.lua`, screenshot
-  helpers) and all ignored dependencies.
-- Use the bundled Python/MAME paths; nothing is assumed on `PATH`.
-- Before stopping, terminate only MAME processes owned by this checkout.
+## Retained writer-trace inputs: do not rerun first
 
-## Evidence labels
+The headless stock-MAME run completed all 6,260 Lua frames and exited normally.
+No MAME process was running when this prompt was written. These are raw/private
+diagnostic inputs; preserve but do not commit them:
 
-Label every new assertion `MEASURED`, `DECODED`, `INFERRED` (state the
-falsifier), `ADAPTED` (state why), or `UNRESOLVED` (name the resolving
-probe). The standing method for all decode work is the corpus method proven
-in the S2 source walk: offline paired captures as oracle
-(`workram_N` -> `objram_active_{N+1}`, the measured one-frame pipeline
-delay), live disassembly via MAME's own trace facility only to resolve
-structure (the static ROM dump reads as garbage at code addresses), declared
-eligible populations BEFORE results, every exclusion named and counted, zero
-unexplained mismatches to pass.
+| File | Bytes | SHA-256 |
+|---|---:|---|
+| `error.log` | 66,310 | `c1c34eb427a1130a5121982af2000059d1240edcff1b0ae18620f37da0d85c08` |
+| `tools_tsw_frames.tsv` | 66,434 | `f5ac294c4854809b2f145735a3cf0c187a3e438352b9cd183a887a410050604e` |
+| `tools/mame_trace_table_set_writer.lua` | 4,963 | `a34a5a9edd1164e7ab7e2c418f86d5445a34b338d70a842065eb00ad86a83127` |
 
-## Confirmed baseline: do not re-derive
+The Lua file is an untracked one-off probe and the two outputs are raw evidence.
+The run recorded:
 
-- **S1**: actor spine (`0xC0` records on the grid `0xFF8380 + n*0xC0`) and
-  the C collision predicate, both validated.
-- **S2 animation**: interpreter validated (23,676 frames exact); 614 records
-  extracted to 63 spans (10 KB) reproducing the full image.
-- **S2 emission (CLOSED)**: dispatcher `0x0AA00E`; pose assembly selector
-  word `0x0006` = one Family-1 group / `0x000C` = two tagged groups; group
-  header = budget (tile count, gated against a per-frame budget register
-  D7), count, selector -> dx/dy table via `0x1FD1C8`; origin routine
-  `0x0AA59A` uses live camera anchors at `0xFF8278`/`0xFF827C`
-  (= `scroll1_x + 0x40`, `0x300 - scroll1_y`) and the header's trailing D2
-  long with facing-conditional add/sub; two loop bodies chosen by facing
-  (flipped: `X = origin - width - dx`, attr low `^= 0x20`; plain:
-  `X = origin + dx`); A2 walk `+4+advance` in both; attr low byte
-  `= (raw & 0xE0) + palette (+ flip XOR)`. All in `avsp_emit.c` and
-  `tools/decode_avsp_object_stream.py`; corpus verifier
-  `tools/verify_avsp_object_corpus.py`; result JSON
-  `data/avsp_object_corpus_verification.json`.
-- **Named, located, NOT yet decoded** (S3's targets): emitter families with
-  store loops at `0x0A99EA/F0/F6/FC+0x0A9A36/3C`, `0x0A9D88/8A/8C`,
-  `0x0AA0BA/BC`, `0x0AAA9C/9E`; assembly sub-record tags `0x0002`, `0x0004`
-  (8,345 street-route instances excluded as `unknown-family-0x0002`); the
-  zero/negative `+0x0D` coordinate modes (all stalker-route creatures are
-  `+0x0D = 0xFF`); the player's script region outside
-  `[0x120000, 0x140000)`.
+- 3,810 `AVP_TSW_FRAME` markers;
+- 14 `AVP_TSW_STATE` lines;
+- 58 `AVP_TSW_CAND` lines;
+- 14 `AVP_TSW_TSET` lines.
 
-## Required execution
+The 4-byte watchpoint emits **two lines per logical 32-bit store**. Pair
+consecutive same-frame/same-PC/same-register-context lines and reconstruct the
+big-endian pointer. There are seven logical `table_set` stores:
 
-### S2 Body D: integrate one street alien into the native runtime
+- four nonzero stores of `0x00130AC8`, writer report PC `0x060578`;
+- two zeroing stores, writer report PC `0x0172BA`;
+- one nonzero store of `0x0013E97A`, writer report PC `0x049604`.
 
-1. One real `AvspActor` on the existing street-alien runtime slot in
-   `main.c`; no detached viewer, no debug overlay.
-2. Carry a live `anim_record`, call `avsp_anim_frame_tick`, obtain the
-   object list through `avsp_emit_pose` with actor-state inputs (world
-   position, facing, palette, or-value, camera anchors from the runtime
-   camera).
-3. Until S5, seed the record on action changes from the capture-derived
-   schedule, labelled `ADAPTED`.
-4. The capture-derived cel remains only as a regression/comparison path,
-   never secretly the visible production actor.
-5. Preserve input, HUD, camera, audio, 352x224 mapping, allocation, and
-   route behavior.
+Do not treat raw `wpdata` as a complete byte/long without accounting for bus
+lane and mem-mask behavior. One candidate line is printed as `data=600`, which
+is itself a warning that the byte watchpoint's display is lane-positioned. Use
+memory readback or the traced instruction/source operand to establish values.
 
-### S2 Body E: the real per-object VDP1 consumer
+## Sole objective for this turn
 
-No markers, boxes, repositioned old cels, or screen-captured poses.
+Determine where the game gets actor `table_set` (`actor +0x50`) during spawn
+initialization and reproduce that source for all three observed type-12
+families (`0x00130AC8`, `0x0013E97A`, `0x0012CE5C`) without using correlation.
+Produce a deterministic tracked analyzer/report and a precise continuation.
+Do **not** wire collision into Saturn gameplay in this turn.
 
-1. One VDP1 normal-sprite command per CPS2 object entry; `nx*16 x ny*16`
-   dimensions; 16-colour bank mode; flip in `CMDCTRL`; jump-next linkage;
-   source order as draw order (retained slice-V design).
-2. Contiguous per-block textures from the referenced 4bpp tiles through a
-   residency cache (key, palette, dimensions, flip treatment, VRAM budget).
-3. Measure frame time; per-tile emission is the measured fallback only.
+## Required work, in order
 
-### S3: widen emission coverage (corpus method, family by family)
+### 1. Parse the retained run deterministically
 
-For each family, in corpus-frequency order (0x0002 first - it is 8,345
-instances on the street route alone):
+Create a reusable tracked analyzer, preferably
+`tools/analyze_avsp_table_set_writer.py`, that:
 
-1. Locate a live dispatch on the replayable route (the cold-boot replay in
-   `tools/mame_trace_facing0.lua` is the template); trace-toggle MAME's
-   disassembly around one dispatch; capture the loop body and register walk.
-2. Extend the Python decoder and the corpus verifier; widen the DECLARED
-   population to include the family; rerun the full corpus; require zero
-   unexplained mismatches.
-3. Promote to C in `avsp_emit.c` under the same test pattern.
-4. Repeat for the `+0x0D <= 0` coordinate modes and the player's region.
+1. Validates the three retained input hashes before analysis, with optional
+   explicit path/hash overrides if needed for regeneration.
+2. Scans `error.log` in order and counts `AVP_TSW_FRAME` markers.
+3. Uses `tools_tsw_frames.tsv` to map cumulative bank-write marker counts to
+   Lua/source frames. State the exact mapping rule and handle the initial
+   nonzero marker count explicitly.
+4. Parses state, candidate, and table-set events.
+5. Pairs the split table-set lines only when frame, PC, registers, actor slot,
+   and event adjacency agree; rejects an orphan or ambiguous half instead of
+   guessing.
+6. Emits logical stores with frame, reported PC, reconstructed pointer,
+   registers, source-address candidates and surrounding candidate writes.
+7. Separates nonzero initialization from the `0x0172BA` zero/teardown path.
+8. Includes negative parser fixtures: orphan half, mismatched PC/context, and
+   lane-positioned byte data must be rejected or explicitly unresolved.
 
-### S4: collision, damage, reaction
+Write a tracked coordinate/control-flow-only report such as
+`data/avsp_table_set_writer.json`. It may contain ROM addresses, PCs, register
+values, counts, mappings and hashes, but no ROM bytes or raw log excerpts.
 
-1. Consume the S1-decoded boxes at runtime through the live actor(s).
-2. Decode the five post-hit routines (`0x1D314`, `0x1D504`, `0x1D492`,
-   `0x1D622`, `0x1D6E2`) by the same live-disassembly + corpus method.
-3. Retire the inferred Chrysalis 21/55/97 and Stalker schedules from
-   runtime decisions.
-4. Exit check: every hit event and health delta in the slice window matches
-   MAME's recorded contacts.
+### 2. Establish the exact store instructions from the live/decrypted path
 
-## Verification order (after each body/family lands)
+Watchpoint PCs can be skewed +2/+4. Do not name the instruction from the
+reported PC alone, and do not trust the flat opcode dump at code addresses.
 
-1. Full `test.ps1` (host suite) exits 0.
-2. Saturn cross-compile via `build.ps1` exits 0 and rebuilds the ISO.
-3. For runtime changes: boot the normal release and play the affected
-   window; the `-EncounterTest` route where applicable.
-4. Corpus verifier rerun for decoder changes; the JSON result is committed.
+Using stock MAME 0.289 and a bounded Lua-driven trace:
 
-## Prohibited shortcuts and known failure modes
+1. Trace a small window around the normal initializer near `0x060578`.
+2. Trace a small window around the replacement initializer near `0x049604`.
+3. Capture enough preceding instructions to identify the register or memory
+   operand that supplies the long written to `actor +0x50`.
+4. Record the exact source address calculation, not merely the final register
+   value.
+5. Capture the nearby candidate writes so their relationship is explicit:
+   - normal path: `+0x64` near `0x06056A`, `table_set` near `0x060578`, then
+     `+0x57`/`+0x45`/`+0x0E`/`+0x5E` near
+     `0x06059E/0x0605B2/0x0605CC/0x0605DC`;
+   - replacement path: `+0x64` near `0x0495F6`, `table_set` near `0x049604`,
+     then `+0x57`/`+0x5E`/`+0x0E` near
+     `0x049620/0x049626/0x049636`; `+0x45` was observed separately at
+     `0x04BDAA`.
+6. Label the `0x0172BA` writer as teardown only after the instruction trace
+   confirms the clear/copy behavior.
 
-- Do not mix capture routes by frame number; routes are input schedules.
-- Do not trust the static flat disassembly at code addresses; live-trace.
-- Do not treat MAME watchpoint-reported PCs as store addresses (+2/+4 skew).
-- Do not pair `workram_N` with `objram_active_N`; the delay is one frame.
-- Do not infer a group count from tag presence; the selector word carries it.
-- Do not call a result ROM-only while any calculation input is supplied from
-  the expected output; state every remaining live input.
-- Do not decode a table without a consumer on the critical path.
+Use the existing headless Lua breakpoint/trace-toggle patterns. A custom MAME
+build is not authorized or necessary. If a second run is needed, write to new
+output filenames so the retained first run remains unchanged.
 
-## Checkpoint and handoff requirements
+### 3. Cover the third type-12 family
 
-Commit at every green checkpoint with explicit paths. Update
-`docs/AGENT_HANDOFF.md` with findings (newest first) and correct any
-superseded claims in place, marked as superseded. Keep
-`docs/NEXT_AGENT_PROMPT.md` pointing at the next unexecuted phase of the
-critical path.
+The slot-43 street run covered `0x00130AC8` and `0x0013E97A`, not
+`0x0012CE5C`. After understanding the first two writers:
 
-## What follows, but is not authorized here
+1. Use `data/avsp_table_set_evidence.json` to select a route and physical slot
+   whose generation holds `0x0012CE5C`—the Stalker action route contains such
+   generations.
+2. Replay that route's exact input/state schedule; do not mix frame numbers or
+   schedules from `enemy_actions`.
+3. Trace the nonzero `table_set` initialization and its source operand.
+4. Determine whether all three values come from one descriptor/table shape,
+   parallel type-specific initializers, or distinct structures.
 
-S5 (PRNG + decision routines by differential replay), full-game content
-widening (Rounds 2-7, audio generalization, disc streaming), and S6
-(budgets, 60 Hz, physical hardware) proceed per the critical-path section of
-`docs/PARITY_PLAN.md` once D/E/S3/S4 close.
+### 4. Decode and falsify the source rule
+
+Promote a source rule only when the live traces prove it. Then:
+
+1. Implement the smallest decoder needed to reproduce the three pointers from
+   the proven spawn/template inputs.
+2. Run it over every stride-one target-type generation in the repaired corpus.
+3. Require zero unexplained mismatches.
+4. Add a negative control that perturbs the proven selector/source and fails.
+5. If the rule does not generalize, keep the result `UNRESOLVED`, name the exact
+   missing path, and do not create a majority/default mapping.
+
+### 5. Correct project documentation
+
+Update the newest sections of `docs/AGENT_HANDOFF.md` with:
+
+- exact HEAD and dirty files;
+- input/output hashes;
+- writer PCs versus confirmed store instruction PCs;
+- source operand/table and all three covered pointer values;
+- analyzer population, exclusions, mismatch count and negative control;
+- exact MAME commands and output locations;
+- whether any MAME process remains;
+- ordered next work.
+
+Update this file so it points to the next unexecuted body. Correct stale text
+you encounter rather than adding another contradictory layer. In particular,
+do not say only one street alien is ROM-driven, and do not describe the current
+per-16x16-tile renderer as the final one-command-per-object implementation.
+
+## Acceptance checks for this turn
+
+All of these are required before claiming provenance is resolved:
+
+- retained trace parser passes its positive and negative fixtures;
+- all split long writes are paired unambiguously;
+- MAME's live/decrypted trace identifies the actual store and source read for
+  both already captured nonzero paths;
+- the `0x0012CE5C` route is captured and decoded;
+- one source rule reproduces all declared stride-one target generations with
+  zero unexplained mismatches;
+- a perturbed-source negative control fails;
+- `test.ps1` exits 0 after tracked analyzer/report changes;
+- no runtime collision code, `CapActor.variant` mapping, inferred default, or
+  majority mapping was introduced;
+- all emulator processes owned by this checkout are stopped before handoff.
+
+This is evidence/analyzer work, so a Saturn rebuild is not required unless you
+change SH-2/runtime/build inputs. The previously skipped `-EncounterTest`
+remains pending and must stay named; do not claim it as run.
+
+## Commit discipline
+
+Commit coherent green checkpoints with explicit paths only. A suitable split
+is:
+
+1. retained-trace analyzer, tests and coordinate-only report;
+2. live-proven source decoder/falsification plus handoff/prompt updates.
+
+Do not commit `error.log`, `tools_tsw_frames.tsv`, raw trace files, ROMs,
+captures, disc images, emulator state, or unrelated diagnostics. Capability
+Gate 1 remains `0/7` regardless of a successful provenance check.

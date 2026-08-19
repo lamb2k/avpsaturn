@@ -1,21 +1,71 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-19 EDT (stabilization checkpoint). **STABLE, CLEAN-BUILD
-VERIFIED**: `build.ps1 -Clean -Release -SkipHostTests` (commit `1eaaa98`)
-produces a bootable ISO with `runtime_ready=1`, zero failed assets, and the
-tile archive at its known-good SHA
-`7c47627c3c2d34af59dbf42bc6d677297ac0038e547d64305f0985a7bd64b01a`. Multi-
-actor ROM rendering (commit `1350cf8`) is live-validated: independent
-per-slot progression and clean deactivation/reseed, both caught over MCP
-during real WAVE_ONE combat (see "Item 1 continued" below for the exact
-readout). The tile-archive build is now structurally safe against the
-class of bug that broke it twice this session (see "Deterministic tile
-archive build contract" below). **Next: item 2 of the ordered gap list
-(collision — `avsp_collision.c/h` is proven but unconnected; `table_set`
-at actor+0x50 is confirmed NOT a per-type constant but its variance is
-now fully explained — see "table_set investigation" below), or continue
-item 1 by phase-loading more PCM to afford the full four-route tile
-archive.**
+Updated: 2026-08-19 EDT (writer-trace handoff). **STABLE BUILD; COLLISION
+PROVENANCE TRACE CAPTURED, ANALYSIS PENDING.** Evidence/instrument baseline
+`b8bcf48` repairs the `table_set` correlation instrument and retracts the
+incorrect `+0x02` explanation. This handoff is a docs-only successor, so use
+`git rev-parse HEAD` for its self-referential current commit. The retained
+headless stock-MAME run completed its full 6,260-frame schedule and exited; no MAME, Yaba
+Sanshiro, Mednafen, or RetroArch process is running. **Next: analyze the
+retained writer trace, live-disassemble the two nonzero writer routines, then
+capture the third observed `table_set`; do not change runtime collision yet.**
+
+The stable Saturn checkpoint remains valid: `build.ps1 -Clean -Release
+-SkipHostTests` produces a normal-release ISO with `runtime_ready=1`, zero
+failed assets, and street tile archive SHA
+`7c47627c3c2d34af59dbf42bc6d677297ac0038e547d64305f0985a7bd64b01a`.
+Multi-actor ROM rendering (`1350cf8`) is live-validated for every active
+street alien in WALK/ATTACK. The full Saturn `-EncounterTest` route was not
+rerun in that stabilization session and remains an explicitly pending
+verification; the 12,000-frame host soak is not a substitute.
+
+## table_set writer trace captured: parse first, bounded live disassembly next (2026-08-19)
+
+The interrupted session did not leave MAME running: the diagnostic reached
+frame 6260, closed `tools_tsw_frames.tsv`, and exited normally. Preserve these
+private/raw files until a tracked analyzer and coordinate-only report are
+derived from them; do not commit the raw log or sidecar:
+
+- `error.log`: 66,310 bytes, SHA-256
+  `c1c34eb427a1130a5121982af2000059d1240edcff1b0ae18620f37da0d85c08`
+- `tools_tsw_frames.tsv`: 66,434 bytes, SHA-256
+  `f5ac294c4854809b2f145735a3cf0c187a3e438352b9cd183a887a410050604e`
+- `tools/mame_trace_table_set_writer.lua`: 4,963 bytes, SHA-256
+  `a34a5a9edd1164e7ab7e2c418f86d5445a34b338d70a842065eb00ad86a83127`
+  (untracked one-off diagnostic; preserve it)
+
+The run recorded 3,810 `AVP_TSW_FRAME` markers, 14 state writes, 58 candidate
+writes and 14 `AVP_TSW_TSET` lines. **Important instrument detail:** the 4-byte
+watchpoint reports each logical 32-bit `table_set` store as two consecutive
+lines. Pair same-frame/same-PC/same-register-context lines before reconstructing
+the pointer; there are seven logical stores, not fourteen. Preliminary
+`MEASURED` writer attribution, not yet promoted to a decoder:
+
+- `PC 0x060578`: four logical writes of `0x00130AC8` on normal street-alien
+  initializations. In the same initializer, `+0x64` writes at `0x06056A`,
+  followed by `+0x57` at `0x06059E`, `+0x45` at `0x0605B2`, `+0x0E` at
+  `0x0605CC`, and `+0x5E` at `0x0605DC`.
+- `PC 0x049604`: one logical write of `0x0013E97A` for the later slot-43
+  replacement. Nearby writes are `+0x64` at `0x0495F6`, `+0x57` at
+  `0x049620`, `+0x5E` at `0x049626`, `+0x45` at `0x04BDAA`, and `+0x0E` at
+  `0x049636`.
+- `PC 0x0172BA`: two logical zeroing writes during record teardown. This is a
+  clear path, not the nonzero collision-family source.
+
+The trace therefore proves that the correlated candidate bytes are initialized
+around the same time as `table_set`; it does **not** prove that any candidate
+selects it. The next agent must use MAME's decrypted/live instruction path to
+trace the source read feeding the stores near `0x060578` and `0x049604`.
+Watchpoint PCs may be skewed by +2/+4, so disassemble and trace a window around
+each address rather than naming the store from the watchpoint PC alone. The
+static flat opcode dump is not authoritative at code addresses.
+
+`0x0012CE5C`, the third target-type-12 `table_set` in the repaired corpus, was
+not written in this slot-43 cold-boot run. After the first two writers are
+decoded, run a route-matched Stalker trace on the slot whose captured generation
+holds `0x0012CE5C`; do not claim universal provenance from two of three values.
+The exact executable assignment for Qwen is now in
+`docs/NEXT_AGENT_PROMPT.md`.
 
 ## table_set investigation: perfectly correlated candidates only; writer trace required (2026-08-19, instrument repaired same day)
 
