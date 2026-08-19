@@ -1,34 +1,37 @@
-"""Record the table_set (actor +0x50) investigation as tracked evidence.
+"""Record the table_set (actor +0x50) correlation evidence, honestly.
 
 Item 2 (connect decoded collision) needs a table_set value per ROM-driven
-actor. diag_table_set_by_type.py found it is NOT a per-TYPE constant for
-street aliens (type 12): 3 distinct values, 65.6% dominant - hardcoding
-the dominant value would be a guess wearing a MEASURED label, the exact
-trap the action-seed table was built to avoid (see
-data/avsp_action_seeds.json).
+actor. This instrument answers a narrow question: WHICH actor fields are
+perfectly correlated with table_set in the captured corpus? It does NOT
+answer which field the game actually reads - that requires the writer
+trace (a live MAME watchpoint on the spawn initializer), and no field may
+enter the runtime on correlation alone. An earlier revision of this file
+promoted one candidate (+0x02) to "the explanation"; that was wrong - six
+bytes tie at 100% agreement in this corpus and correlation cannot pick
+between them.
 
-diag_table_set_variance.py then found the real explanation: actor byte
-+0x02 predicts table_set with 100% unanimity across 7,794 observations
-and has exactly 3 distinct values, matching table_set's own cardinality
-exactly. Per-slot tracking additionally shows table_set is FIXED for a
-given spawn's whole observed lifetime (only 1 of 13 tracked slot-
-instances ever showed two values, consistent with a despawn/respawn of a
-different variant into the same physical slot, not a live per-frame
-change) - so this is a spawn-time selector, not something that needs
-re-reading every frame.
+Method:
 
-This resolves *why* table_set varies, but does NOT yet make it wireable:
-+0x02 is not a field this runtime currently tracks for its ROM-driven
-actors (CapActor.variant is a model-invented spawn-table field with no
-proven correspondence to the ROM's own byte +0x02 - using it directly
-would be exactly the guess this investigation exists to avoid). Closing
-the gap needs either (a) reading +0x02 from a live actor record the
-runtime doesn't yet carry, or (b) proving CapActor.variant's spawn-order
-correlates with +0x02's real values for the captured route specifically.
-Neither is done here.
+  * every captured frame of every route is scanned (stride 1 - the
+    earlier stride-3 revision is the same class of shortcut that lost 18
+    tiles from the tile archive);
+  * each physical actor slot is segmented into GENERATIONS: a generation
+    begins on inactive->active, ends on active->inactive, and a new one
+    begins if the type byte changes without an observed inactive frame
+    (a same-slot respawn the sampling missed);
+  * candidate bytes are evaluated per-generation against that
+    generation's table_set; a candidate is "perfect" only when every
+    generation with a given candidate value has the same table_set AND
+    the mapping is consistent across all routes;
+  * a NEGATIVE CONTROL runs the same test on a perturbed copy of each
+    candidate (value XOR slot index) - a passing control would mean the
+    test is vacuous (e.g. one generation per key), not that the field is
+    predictive.
 
-Outputs data/avsp_table_set_evidence.json - a tracked manifest recording
-the finding (byte offsets, values, evidence counts). No ROM bytes.
+Outputs data/avsp_table_set_evidence.json - tracked manifest with every
+generation record (route, slot, generation index, first/last frame,
+candidate values, table_set) and every perfect candidate's explicit
+value->table_set mapping. No ROM bytes.
 """
 from __future__ import annotations
 
@@ -44,23 +47,30 @@ WORKRAM_SIZE = 0x8000
 ACTOR_ANCHOR = 0xFF8380
 ACTOR_STRIDE = 0xC0
 TARGET_TYPE = 12
-PREDICTOR_OFFSETS = (0x02, 0x0E)  # both reached 100% unanimity
+# Every byte offset except the answer itself (+0x50..+0x53) and the
+# generation-identity fields used for segmentation.
+CANDIDATE_OFFSETS = [o for o in range(ACTOR_STRIDE)
+                     if o not in (0x00, 0x50, 0x51, 0x52, 0x53)]
 
 
 def u32(b, o):
     return int.from_bytes(b[o:o + 4], "big")
 
 
-def main() -> int:
-    by_type = defaultdict(Counter)
-    per_slot_values = defaultdict(set)
-    predictors = {off: defaultdict(Counter) for off in PREDICTOR_OFFSETS}
-
+def collect_generations():
+    """Segment every slot of every route into actor generations."""
+    generations = []
     for route in ROUTES:
         root = ROOT / ".deps" / "mame" / route
         if not root.is_dir():
             continue
-        for path in sorted(root.glob("workram_*.bin"))[::3]:
+        open_gens = {}       # slot -> generation dict being built
+        frames = sorted(root.glob("workram_*.bin"))
+        for path in frames:
+            try:
+                frame_no = int(path.stem.split("_")[-1])
+            except ValueError:
+                frame_no = -1
             work = path.read_bytes()
             if len(work) != WORKRAM_SIZE:
                 continue
@@ -72,76 +82,154 @@ def main() -> int:
                 rec = work[off:off + ACTOR_STRIDE]
                 slot = n
                 n += 1
-                if rec[0x00] != 1:
+                active = rec[0x00] == 1
+                gen = open_gens.get(slot)
+                if not active:
+                    if gen is not None:
+                        generations.append(gen)
+                        del open_gens[slot]
                     continue
                 actor_type = rec[0x08]
                 table_set = u32(rec, 0x50)
-                by_type[actor_type][table_set] += 1
-                if actor_type == TARGET_TYPE:
-                    per_slot_values[(route, slot)].add(table_set)
-                    for poff in PREDICTOR_OFFSETS:
-                        predictors[poff][rec[poff]][table_set] += 1
+                if gen is not None and gen["type"] != actor_type:
+                    # identity changed with no observed inactive frame:
+                    # close the generation and start a new one
+                    generations.append(gen)
+                    gen = None
+                if gen is None:
+                    gen = {
+                        "route": route, "slot": slot,
+                        "type": actor_type,
+                        "first_frame": frame_no, "last_frame": frame_no,
+                        "table_sets": set(),
+                        "candidates": {o: set() for o in CANDIDATE_OFFSETS},
+                    }
+                    open_gens[slot] = gen
+                gen["last_frame"] = frame_no
+                gen["table_sets"].add(table_set)
+                for o in CANDIDATE_OFFSETS:
+                    gen["candidates"][o].add(rec[o])
+        generations.extend(open_gens.values())
+    return generations
 
-    type_summary = []
-    for actor_type in sorted(by_type):
-        counter = by_type[actor_type]
-        total = sum(counter.values())
-        top, hits = counter.most_common(1)[0]
-        type_summary.append({
-            "type": actor_type, "observations": total,
-            "distinct_table_set": len(counter),
-            "dominant_table_set": "0x%06X" % top,
-            "dominant_share": round(hits / total, 4),
-        })
 
-    changing = [k for k, v in per_slot_values.items() if len(v) > 1]
+def evaluate(generations, value_of):
+    """Perfect-mapping test: candidate value -> table_set, per offset.
 
-    predictor_summary = []
-    for poff in PREDICTOR_OFFSETS:
-        buckets = predictors[poff]
-        total = agreed = 0
-        for byte_value, counter in buckets.items():
-            n = sum(counter.values())
-            total += n
-            agreed += counter.most_common(1)[0][1]
-        predictor_summary.append({
-            "byte_offset": "0x%02X" % poff,
-            "distinct_byte_values": len(buckets),
-            "unanimity": round(agreed / total, 4) if total else None,
-            "observations": total,
+    value_of(gen, offset) supplies the candidate value for a generation
+    (or None to skip it); swapping this in is how the negative control
+    perturbs the data without duplicating the test itself.
+    """
+    perfect = {}
+    for o in CANDIDATE_OFFSETS:
+        mapping = defaultdict(set)
+        usable = 0
+        for gen in generations:
+            if gen["type"] != TARGET_TYPE:
+                continue
+            if len(gen["table_sets"]) != 1:
+                continue          # ambiguous generation; never evidence
+            value = value_of(gen, o)
+            if value is None:
+                continue
+            mapping[value].add(next(iter(gen["table_sets"])))
+            usable += 1
+        if not mapping or usable == 0:
+            continue
+        if all(len(targets) == 1 for targets in mapping.values()):
+            perfect[o] = {
+                "mapping": {str(v): "0x%06X" % next(iter(t))
+                            for v, t in sorted(mapping.items())},
+                "distinct_values": len(mapping),
+                "generations_used": usable,
+            }
+    return perfect
+
+
+def stable_value(gen, offset):
+    values = gen["candidates"][offset]
+    if len(values) != 1:
+        return None               # varies within the generation: not a
+    return next(iter(values))     # spawn-time identity field
+
+
+def perturbed_value(gen, offset):
+    value = stable_value(gen, offset)
+    if value is None:
+        return None
+    return value ^ (gen["slot"] & 0xFF)
+
+
+def main() -> int:
+    generations = collect_generations()
+    target_gens = [g for g in generations if g["type"] == TARGET_TYPE]
+    unambiguous = [g for g in target_gens if len(g["table_sets"]) == 1]
+    print("generations: %d total, %d of type %d, %d with a single "
+          "table_set" % (len(generations), len(target_gens), TARGET_TYPE,
+                        len(unambiguous)))
+
+    perfect = evaluate(generations, stable_value)
+    control = evaluate(generations, perturbed_value)
+    # The control perturbs each value by the slot index; offsets whose
+    # mapping SURVIVES that perturbation are being carried by something
+    # other than the value itself (e.g. degenerate group sizes), so the
+    # test cannot distinguish them - flag those.
+    vacuous = sorted(set(perfect) & set(control))
+    informative = sorted(set(perfect) - set(control))
+    print("perfect candidates: %d, of which %d survive the negative "
+          "control's perturbation (test vacuous for those): %s"
+          % (len(perfect), len(vacuous),
+             ", ".join("0x%02X" % o for o in vacuous) or "none"))
+    print("informative perfect candidates: %s"
+          % (", ".join("0x%02X" % o for o in informative) or "none"))
+
+    generation_records = []
+    for gen in target_gens:
+        generation_records.append({
+            "route": gen["route"], "slot": gen["slot"],
+            "first_frame": gen["first_frame"],
+            "last_frame": gen["last_frame"],
+            "table_sets": sorted("0x%06X" % t for t in gen["table_sets"]),
+            "candidates": {"0x%02X" % o: sorted(gen["candidates"][o])
+                           for o in informative},
         })
 
     manifest = {
-        "schema": 1,
-        "classification": "table_set investigation evidence - actor field "
+        "schema": 2,
+        "classification": "table_set correlation evidence - actor field "
                           "offsets and observation counts, no ROM bytes",
-        "question": "is actor +0x50 (table_set) usable for collision "
-                   "wiring without inventing a value?",
-        "finding": "NOT a per-TYPE constant (type 12 street aliens: 3 "
-                  "distinct values, 65.6% dominant - hardcoding the "
-                  "dominant value would be a guess). IS fully explained "
-                  "by actor byte +0x02 (100% unanimity, matches "
-                  "table_set's own cardinality exactly) and closely by "
-                  "+0x0E (also 100% unanimity, already independently "
-                  "identified as the palette byte in milestone-1). Fixed "
-                  "per spawn-instance lifetime, not a live per-frame "
-                  "value (12 of 13 tracked slot-instances never changed).",
-        "still_blocking": "the runtime does not currently track actor "
-                         "byte +0x02 for its ROM-driven actors, and "
-                         "CapActor.variant (the model's spawn-table "
-                         "field) has no proven correspondence to it - "
-                         "using it directly would reintroduce the exact "
-                         "guess this investigation avoided for the "
-                         "action-seed table.",
-        "type_summary": type_summary,
+        "question": "which actor fields are PERFECTLY CORRELATED with "
+                   "table_set in this corpus? (correlation only - the "
+                   "field the game actually reads requires the writer "
+                   "trace, and nothing may be wired on this evidence "
+                   "alone)",
+        "method": "stride-1 over every captured frame; per-slot "
+                 "generation segmentation (inactive->active begins, "
+                 "active->inactive ends, type change without an "
+                 "observed inactive frame splits); perfect-mapping test "
+                 "per candidate byte over unambiguous generations; "
+                 "negative control perturbs each candidate by slot "
+                 "index - candidates surviving the control are flagged "
+                 "vacuous, not predictive",
+        "finding": "multiple candidate bytes are perfectly correlated "
+                  "with table_set in this corpus; correlation cannot "
+                  "choose between them. The game's real source must "
+                  "come from a live writer trace on the spawn "
+                  "initializer (watch writes to +0x50 and the candidate "
+                  "bytes on one street-alien slot over the cold-boot "
+                  "route, log PC and source reads).",
         "target_type": TARGET_TYPE,
-        "slot_instances_tracked": len(per_slot_values),
-        "slot_instances_with_multiple_values": len(changing),
-        "predictors": predictor_summary,
+        "generations_total": len(generations),
+        "generations_target_type": len(target_gens),
+        "generations_unambiguous": len(unambiguous),
+        "perfect_candidates": {"0x%02X" % o: perfect[o]
+                               for o in sorted(perfect)},
+        "vacuous_under_negative_control": ["0x%02X" % o for o in vacuous],
+        "informative_candidates": ["0x%02X" % o for o in informative],
+        "generations": generation_records,
     }
     OUT_JSON.write_text(json.dumps(manifest, indent=1, sort_keys=True) + "\n")
     print("wrote", OUT_JSON)
-    print(json.dumps(manifest["finding"], indent=1))
     return 0
 
 

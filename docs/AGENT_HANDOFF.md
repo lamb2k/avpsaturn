@@ -17,58 +17,64 @@ now fully explained — see "table_set investigation" below), or continue
 item 1 by phase-loading more PCM to afford the full four-route tile
 archive.**
 
-## table_set investigation: narrowed, not yet wireable (2026-08-19)
+## table_set investigation: perfectly correlated candidates only; writer trace required (2026-08-19, instrument repaired same day)
 
 Item 2 needs a `table_set` value per ROM-driven actor to read collision
-boxes. `tools/diag_table_set_by_type.py` confirmed the suspicion: for
+boxes. `tools/diag_table_set_by_type.py` established the ground fact: for
 street aliens (type 12), actor `+0x50` (`table_set`) takes 3 distinct
 values across the corpus with only 65.6% dominance — hardcoding the
 majority value would repeat the exact mistake the action-seed table's
-withholding step was built to avoid (`agreement < 1.0` keys are guesses,
-not measurements, no matter how popular the winner is).
+withholding step was built to avoid.
 
-`tools/diag_table_set_variance.py` then found the explanation:
-**actor byte `+0x02` predicts `table_set` with 100% unanimity over 7,794
-observations**, and has exactly 3 distinct values — matching
-`table_set`'s own cardinality exactly. Byte `+0x0E` (already
-independently identified in milestone-1 as the palette byte) also
-reaches 100% unanimity. Per-slot tracking additionally shows `table_set`
-is fixed for a spawn's entire observed lifetime (only 1 of 13 tracked
-slot-instances ever showed two values, consistent with a despawn/respawn
-of a different variant into the same slot, not a live per-frame change)
-— it is a spawn-time selector, not something needing a per-frame read.
-Recorded as tracked evidence in `data/avsp_table_set_evidence.json`
-(`tools/gen_avsp_table_set_evidence.py`).
+**Correction history, kept deliberately:** the first pass at explaining
+the variance claimed actor byte `+0x02` "fully explained" `table_set`.
+That claim was WRONG twice over: (a) the same scan showed SIX bytes
+(`+0x02`, `+0x0E`, `+0x45`, `+0x57`, `+0x5E`, `+0x64`) at 100% agreement
+— correlation cannot choose among ties; (b) after the instrument was
+repaired (stride 1 over every frame instead of every 3rd; per-slot
+GENERATION segmentation with inactive->active boundaries and type-change
+splits; a negative control that perturbs each candidate by slot index),
+`+0x02` itself lands among 14 candidates whose "perfect" mappings
+SURVIVE the perturbation — i.e. their groupings are too thin to be
+informative at all. `MEASURED` result from the repaired instrument
+(`tools/gen_avsp_table_set_evidence.py`, schema 2, full per-generation
+records in `data/avsp_table_set_evidence.json`):
 
-**Still not wireable**, and stated precisely why: the runtime does not
-currently track actor byte `+0x02` for its ROM-driven actors, and
-`CapActor.variant` (the model's spawn-table field, set from
-`spawn->variant` in `capability_model.c`) has no PROVEN correspondence
-to the ROM's real `+0x02` — it is a value invented for palette-bank
-selection in the capability model, not a translation of the game's own
-byte. Using it to index `table_set` would silently reintroduce a guess.
-**Checked this session, ruled out the cheap path**: `CapActor.variant`
-comes from `cap_stage1_spawns[]` in `capability_model.c`, a hand-authored
-table the comment there labels "capture-derived opening-room composition"
-(palette mix observed by frame 3480, unrelated to this investigation) —
-it takes 4 distinct values (0-3, one per palette bank 0x10-0x13). `+0x02`
-takes exactly 3 distinct values. **A 4-valued field cannot be a clean
-identity mapping onto a 3-valued one**, so `CapActor.variant` is ruled
-out as `+0x02`'s stand-in without further work — a many-to-one mapping
-is conceivable but unproven, and guessing one would be the same mistake
-again. **Next step to close this properly**: correlate the real `+0x02`
-byte, read in spawn order from the captured route, against the actual
-`cap_stage1_spawns[]` index sequence (same method as
-`gen_avsp_action_seeds.py`'s re-point keying) to see whether a genuine
-per-spawn `+0x02` value can be mined and shipped as its own small table,
-independent of the existing (differently-sourced) `variant` field. If
-that doesn't resolve cleanly, the runtime needs a new per-actor byte
-tracked from spawn, which is deeper work (likely S5-adjacent, since
-spawn-time variant assignment is itself AI-adjacent logic not yet
-translated). `sel_hurt`/`sel_attack` (animation record +8/+9) are the
-other half of what `avsp_collision_overlap` needs; those ARE already
-readable for ROM-driven actors from the live record the runtime carries
-— `table_set` is now the only remaining blocker.
+- 33 street-alien generations across all four routes, **every one
+  holding a single `table_set` for its whole observed lifetime** — the
+  spawn-time-selector reading survives the stride-1 rescan.
+- 17 candidate bytes show perfect value->table_set mappings; **14 are
+  vacuous under the negative control**; the three INFORMATIVE
+  candidates are **`+0x0E`** (independently known as the palette byte),
+  **`+0x5E`**, and **`+0x64`**.
+- These are "perfectly correlated in this corpus" — NOT "the
+  explanation". Correlation cannot decide which field (if any of these)
+  the game actually reads.
+
+**The deciding instrument is a live writer trace, not more correlation.**
+Next step, concretely: stock-MAME watchpoints over the cold-boot street
+route (the `tools/mame_trace_facing0.lua` replay pattern) on ONE
+street-alien slot's `+0x02`, `+0x0E`, `+0x45`, `+0x57`, `+0x5E`, `+0x64`
+and `+0x50..+0x53`, logging frame, PC, actor pointer, written value and
+the source-read address; capture the spawn initializer with MAME's live
+trace; determine whether one spawn descriptor supplies both a candidate
+and `table_set`, whether a candidate indexes a ROM pointer table, or
+whether `table_set` is copied from another structure entirely. Repeat
+until all three observed street `table_set` values are covered, then
+decode the source table and reproduce every stride-1 street observation
+with zero mismatches. **Only the field proven by the writer trace may
+enter the runtime**, under a semantic name derived from the traced
+routine.
+
+Also checked and ruled out: `CapActor.variant` (the model's hand-authored
+spawn-table field, 4 values for palette banks) cannot stand in for any
+3-valued candidate — cardinality mismatch, and its provenance is a
+capture-derived palette observation unrelated to collision. Do not
+correlate against it; resolve provenance directly with the trace.
+`sel_hurt`/`sel_attack` (animation record +8/+9) are the other half of
+what `avsp_collision_overlap` needs; those ARE already readable for
+ROM-driven actors from the live record the runtime carries — `table_set`
+remains the only blocker.
 
 ## Deterministic tile archive build contract (2026-08-19)
 

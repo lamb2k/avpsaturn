@@ -53,13 +53,14 @@ The ordered work that closes the gap, ahead of everything else:
    live animation record's bytes +8/+9) ARE already readable for
    ROM-driven street aliens today. `table_set` at actor +0x50 is
    confirmed NOT a per-type constant (3 distinct values for street
-   aliens, 65.6% dominant) but IS fully explained by actor byte +0x02
-   (100% unanimity, `data/avsp_table_set_evidence.json`) — the runtime
-   just doesn't track that byte yet, and `CapActor.variant` has no
-   proven correspondence to it. See the handoff's "table_set
-   investigation" section for the exact next step (check whether
-   `CapActor.variant`'s spawn order correlates with the real `+0x02`
-   sequence) before wiring anything.
+   aliens). Correlation CANNOT identify its source: after instrument
+   repair (stride 1, generation segmentation, negative control) three
+   informative candidates remain (`+0x0E`, `+0x5E`, `+0x64`;
+   `data/avsp_table_set_evidence.json` schema 2) and they are
+   "perfectly correlated in this corpus", nothing more. The deciding
+   step is the WRITER TRACE prescribed in the handoff's "table_set
+   investigation" section — only the field a live MAME trace proves the
+   spawn initializer reads may enter the runtime.
 3. Translate the real enemy AI, including actor separation.
 4. Replace the static frontend/level keyframes with real title, cursor,
    selection, and sequence logic.

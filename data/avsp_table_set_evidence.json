@@ -1,89 +1,858 @@
 {
- "classification": "table_set investigation evidence - actor field offsets and observation counts, no ROM bytes",
- "finding": "NOT a per-TYPE constant (type 12 street aliens: 3 distinct values, 65.6% dominant - hardcoding the dominant value would be a guess). IS fully explained by actor byte +0x02 (100% unanimity, matches table_set's own cardinality exactly) and closely by +0x0E (also 100% unanimity, already independently identified as the palette byte in milestone-1). Fixed per spawn-instance lifetime, not a live per-frame value (12 of 13 tracked slot-instances never changed).",
- "predictors": [
+ "classification": "table_set correlation evidence - actor field offsets and observation counts, no ROM bytes",
+ "finding": "multiple candidate bytes are perfectly correlated with table_set in this corpus; correlation cannot choose between them. The game's real source must come from a live writer trace on the spawn initializer (watch writes to +0x50 and the candidate bytes on one street-alien slot over the cold-boot route, log PC and source reads).",
+ "generations": [
   {
-   "byte_offset": "0x02",
-   "distinct_byte_values": 3,
-   "observations": 7794,
-   "unanimity": 1.0
+   "candidates": {
+    "0x0E": [
+     17
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4080,
+   "last_frame": 4130,
+   "route": "enemy_actions",
+   "slot": 43,
+   "table_sets": [
+    "0x130AC8"
+   ]
   },
   {
-   "byte_offset": "0x0E",
-   "distinct_byte_values": 6,
-   "observations": 7794,
-   "unanimity": 1.0
+   "candidates": {
+    "0x0E": [
+     16
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4080,
+   "last_frame": 4136,
+   "route": "enemy_actions",
+   "slot": 33,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     16
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4080,
+   "last_frame": 4278,
+   "route": "enemy_actions",
+   "slot": 37,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     16
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4143,
+   "last_frame": 4442,
+   "route": "enemy_actions",
+   "slot": 33,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     16
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4080,
+   "last_frame": 4442,
+   "route": "enemy_actions",
+   "slot": 38,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     17
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4080,
+   "last_frame": 4538,
+   "route": "enemy_actions",
+   "slot": 36,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     17
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4080,
+   "last_frame": 4650,
+   "route": "enemy_actions",
+   "slot": 35,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     16
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4279,
+   "last_frame": 4742,
+   "route": "enemy_actions",
+   "slot": 43,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     18
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4287,
+   "last_frame": 4788,
+   "route": "enemy_actions",
+   "slot": 37,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     18
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4447,
+   "last_frame": 4896,
+   "route": "enemy_actions",
+   "slot": 38,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     19
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4455,
+   "last_frame": 5108,
+   "route": "enemy_actions",
+   "slot": 33,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     17
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4751,
+   "last_frame": 5170,
+   "route": "enemy_actions",
+   "slot": 43,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     19
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4080,
+   "last_frame": 5191,
+   "route": "enemy_actions",
+   "slot": 39,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     18
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4543,
+   "last_frame": 5282,
+   "route": "enemy_actions",
+   "slot": 36,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     16
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4935,
+   "last_frame": 5328,
+   "route": "enemy_actions",
+   "slot": 37,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     19
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4903,
+   "last_frame": 5329,
+   "route": "enemy_actions",
+   "slot": 38,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     16
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4080,
+   "last_frame": 5330,
+   "route": "enemy_actions",
+   "slot": 41,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     19
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 4791,
+   "last_frame": 5394,
+   "route": "enemy_actions",
+   "slot": 35,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     17
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 5111,
+   "last_frame": 5500,
+   "route": "enemy_actions",
+   "slot": 33,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     18
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 5503,
+   "last_frame": 6152,
+   "route": "enemy_actions",
+   "slot": 33,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     17
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 5399,
+   "last_frame": 6152,
+   "route": "enemy_actions",
+   "slot": 35,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     16
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 5431,
+   "last_frame": 6152,
+   "route": "enemy_actions",
+   "slot": 36,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     18
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 5487,
+   "last_frame": 6152,
+   "route": "enemy_actions",
+   "slot": 37,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     17
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 5471,
+   "last_frame": 6152,
+   "route": "enemy_actions",
+   "slot": 38,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     16
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 5335,
+   "last_frame": 6152,
+   "route": "enemy_actions",
+   "slot": 39,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     17
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 5479,
+   "last_frame": 6152,
+   "route": "enemy_actions",
+   "slot": 41,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     16
+    ],
+    "0x5E": [
+     46
+    ],
+    "0x64": [
+     5
+    ]
+   },
+   "first_frame": 5175,
+   "last_frame": 6152,
+   "route": "enemy_actions",
+   "slot": 43,
+   "table_sets": [
+    "0x130AC8"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     27
+    ],
+    "0x5E": [
+     32
+    ],
+    "0x64": [
+     18
+    ]
+   },
+   "first_frame": 6168,
+   "last_frame": 6200,
+   "route": "enemy_actions",
+   "slot": 43,
+   "table_sets": [
+    "0x13E97A"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     0
+    ],
+    "0x5E": [
+     1
+    ],
+    "0x64": [
+     4
+    ]
+   },
+   "first_frame": 5520,
+   "last_frame": 7800,
+   "route": "stalker_actions",
+   "slot": 41,
+   "table_sets": [
+    "0x12CE5C"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     0
+    ],
+    "0x5E": [
+     1
+    ],
+    "0x64": [
+     4
+    ]
+   },
+   "first_frame": 5520,
+   "last_frame": 7800,
+   "route": "stalker_actions",
+   "slot": 42,
+   "table_sets": [
+    "0x12CE5C"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     27
+    ],
+    "0x5E": [
+     32
+    ],
+    "0x64": [
+     18
+    ]
+   },
+   "first_frame": 5520,
+   "last_frame": 7800,
+   "route": "stalker_actions",
+   "slot": 43,
+   "table_sets": [
+    "0x13E97A"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     27
+    ],
+    "0x5E": [
+     32
+    ],
+    "0x64": [
+     18
+    ]
+   },
+   "first_frame": 12661,
+   "last_frame": 13560,
+   "route": "boss_actions",
+   "slot": 43,
+   "table_sets": [
+    "0x13E97A"
+   ]
+  },
+  {
+   "candidates": {
+    "0x0E": [
+     27
+    ],
+    "0x5E": [
+     32
+    ],
+    "0x64": [
+     18
+    ]
+   },
+   "first_frame": 13420,
+   "last_frame": 13670,
+   "route": "boss_ko",
+   "slot": 43,
+   "table_sets": [
+    "0x13E97A"
+   ]
   }
  ],
- "question": "is actor +0x50 (table_set) usable for collision wiring without inventing a value?",
- "schema": 1,
- "slot_instances_tracked": 13,
- "slot_instances_with_multiple_values": 1,
- "still_blocking": "the runtime does not currently track actor byte +0x02 for its ROM-driven actors, and CapActor.variant (the model's spawn-table field) has no proven correspondence to it - using it directly would reintroduce the exact guess this investigation avoided for the action-seed table.",
- "target_type": 12,
- "type_summary": [
-  {
-   "distinct_table_set": 1,
-   "dominant_share": 1.0,
-   "dominant_table_set": "0x11AE02",
-   "observations": 2049,
-   "type": 0
+ "generations_target_type": 33,
+ "generations_total": 146,
+ "generations_unambiguous": 33,
+ "informative_candidates": [
+  "0x0E",
+  "0x5E",
+  "0x64"
+ ],
+ "method": "stride-1 over every captured frame; per-slot generation segmentation (inactive->active begins, active->inactive ends, type change without an observed inactive frame splits); perfect-mapping test per candidate byte over unambiguous generations; negative control perturbs each candidate by slot index - candidates surviving the control are flagged vacuous, not predictive",
+ "perfect_candidates": {
+  "0x02": {
+   "distinct_values": 3,
+   "generations_used": 33,
+   "mapping": {
+    "0": "0x12CE5C",
+    "31": "0x130AC8",
+    "6": "0x13E97A"
+   }
   },
-  {
-   "distinct_table_set": 2,
-   "dominant_share": 0.8027,
-   "dominant_table_set": "0x030CB6",
-   "observations": 223,
-   "type": 4
+  "0x06": {
+   "distinct_values": 1,
+   "generations_used": 1,
+   "mapping": {
+    "18": "0x13E97A"
+   }
   },
-  {
-   "distinct_table_set": 3,
-   "dominant_share": 0.6564,
-   "dominant_table_set": "0x130AC8",
-   "observations": 7794,
-   "type": 12
+  "0x07": {
+   "distinct_values": 2,
+   "generations_used": 21,
+   "mapping": {
+    "0": "0x130AC8",
+    "4": "0x13E97A"
+   }
   },
-  {
-   "distinct_table_set": 1,
-   "dominant_share": 1.0,
-   "dominant_table_set": "0x035882",
-   "observations": 25,
-   "type": 16
+  "0x0C": {
+   "distinct_values": 3,
+   "generations_used": 14,
+   "mapping": {
+    "0": "0x13E97A",
+    "6": "0x130AC8",
+    "8": "0x130AC8"
+   }
   },
-  {
-   "distinct_table_set": 2,
-   "dominant_share": 0.6619,
-   "dominant_table_set": "0x06D516",
-   "observations": 2044,
-   "type": 20
+  "0x0E": {
+   "distinct_values": 6,
+   "generations_used": 33,
+   "mapping": {
+    "0": "0x12CE5C",
+    "16": "0x130AC8",
+    "17": "0x130AC8",
+    "18": "0x130AC8",
+    "19": "0x130AC8",
+    "27": "0x13E97A"
+   }
   },
-  {
-   "distinct_table_set": 4,
-   "dominant_share": 0.9871,
-   "dominant_table_set": "0x000000",
-   "observations": 2484,
-   "type": 24
+  "0x10": {
+   "distinct_values": 2,
+   "generations_used": 2,
+   "mapping": {
+    "4": "0x13E97A",
+    "5": "0x130AC8"
+   }
   },
-  {
-   "distinct_table_set": 1,
-   "dominant_share": 1.0,
-   "dominant_table_set": "0x0A75E2",
-   "observations": 691,
-   "type": 28
+  "0x11": {
+   "distinct_values": 1,
+   "generations_used": 1,
+   "mapping": {
+    "184": "0x13E97A"
+   }
   },
-  {
-   "distinct_table_set": 4,
-   "dominant_share": 0.3728,
-   "dominant_table_set": "0x028F44",
-   "observations": 2044,
-   "type": 32
+  "0x12": {
+   "distinct_values": 9,
+   "generations_used": 10,
+   "mapping": {
+    "0": "0x13E97A",
+    "170": "0x130AC8",
+    "216": "0x130AC8",
+    "255": "0x130AC8",
+    "3": "0x130AC8",
+    "44": "0x130AC8",
+    "45": "0x130AC8",
+    "52": "0x130AC8",
+    "84": "0x130AC8"
+   }
   },
-  {
-   "distinct_table_set": 94,
-   "dominant_share": 0.2102,
-   "dominant_table_set": "0x4C10000",
-   "observations": 314,
-   "type": 36
+  "0x16": {
+   "distinct_values": 11,
+   "generations_used": 12,
+   "mapping": {
+    "0": "0x13E97A",
+    "185": "0x130AC8",
+    "187": "0x130AC8",
+    "188": "0x130AC8",
+    "194": "0x130AC8",
+    "31": "0x130AC8",
+    "58": "0x130AC8",
+    "63": "0x130AC8",
+    "83": "0x130AC8",
+    "86": "0x130AC8",
+    "90": "0x130AC8"
+   }
+  },
+  "0x25": {
+   "distinct_values": 2,
+   "generations_used": 2,
+   "mapping": {
+    "0": "0x13E97A",
+    "8": "0x130AC8"
+   }
+  },
+  "0x2A": {
+   "distinct_values": 2,
+   "generations_used": 3,
+   "mapping": {
+    "0": "0x130AC8",
+    "90": "0x13E97A"
+   }
+  },
+  "0x41": {
+   "distinct_values": 3,
+   "generations_used": 21,
+   "mapping": {
+    "24": "0x12CE5C",
+    "248": "0x13E97A",
+    "87": "0x130AC8"
+   }
+  },
+  "0x43": {
+   "distinct_values": 3,
+   "generations_used": 23,
+   "mapping": {
+    "24": "0x12CE5C",
+    "248": "0x13E97A",
+    "87": "0x130AC8"
+   }
+  },
+  "0x45": {
+   "distinct_values": 3,
+   "generations_used": 33,
+   "mapping": {
+    "24": "0x12CE5C",
+    "248": "0x13E97A",
+    "87": "0x130AC8"
+   }
+  },
+  "0x57": {
+   "distinct_values": 3,
+   "generations_used": 33,
+   "mapping": {
+    "1": "0x12CE5C",
+    "16": "0x130AC8",
+    "8": "0x13E97A"
+   }
+  },
+  "0x5E": {
+   "distinct_values": 3,
+   "generations_used": 33,
+   "mapping": {
+    "1": "0x12CE5C",
+    "32": "0x13E97A",
+    "46": "0x130AC8"
+   }
+  },
+  "0x64": {
+   "distinct_values": 3,
+   "generations_used": 33,
+   "mapping": {
+    "18": "0x13E97A",
+    "4": "0x12CE5C",
+    "5": "0x130AC8"
+   }
   }
+ },
+ "question": "which actor fields are PERFECTLY CORRELATED with table_set in this corpus? (correlation only - the field the game actually reads requires the writer trace, and nothing may be wired on this evidence alone)",
+ "schema": 2,
+ "target_type": 12,
+ "vacuous_under_negative_control": [
+  "0x02",
+  "0x06",
+  "0x07",
+  "0x0C",
+  "0x10",
+  "0x11",
+  "0x12",
+  "0x16",
+  "0x25",
+  "0x2A",
+  "0x41",
+  "0x43",
+  "0x45",
+  "0x57"
  ]
 }
