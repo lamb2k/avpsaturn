@@ -96,10 +96,10 @@
    "absent": 569,
    "eligible": 5338,
    "exact": 4769,
+   "excl:decode-out-of-range": 318,
    "excl:jump-record": 1081,
    "excl:pose-outside-declared-region": 9906,
-   "excl:unknown-family-tag": 292,
-   "excl:unknown-top-word": 220,
+   "excl:unknown-top-word": 194,
    "frames": 2280,
    "no-objram-pair": 1
   }
@@ -112,8 +112,6 @@
   "mismatch": 0
  },
  "unknown_tags": {
-  "unknown-family-tag-0x0004": 292,
-  "unknown-top-word-0x0004": 26,
   "unknown-top-word-0x000a": 254
  }
 }

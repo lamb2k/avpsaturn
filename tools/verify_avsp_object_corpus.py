@@ -144,7 +144,7 @@ def decode_actor_entries(rom: Rom, work: bytes, slot_off: int,
     if top == SELECTOR_TWO:
         record_pos = assembly + 2
         n_records = 2
-    elif top in (0x0002, 0x0006):
+    elif top in (0x0002, 0x0004, 0x0006):
         record_pos = assembly
         n_records = 1
     else:
@@ -161,7 +161,14 @@ def decode_actor_entries(rom: Rom, work: bytes, slot_off: int,
     pos = record_pos
     for _ in range(n_records):
         tag = rom.u16(pos)
-        if tag == 0x0006:
+        if tag in (0x0004, 0x0006):
+            # Family 0x0004 (handler 0x0A9DEE, live-traced via
+            # tools/mame_trace_tag4.lua) is structurally identical to
+            # family 0x0006 - same count/selector/origin/loop layout with
+            # its own loop-body copies (e.g. 0x0A9E6C) - corpus-falsified
+            # under family-6 semantics below.
+            pass
+        if tag in (0x0004, 0x0006):
             h = pos + 2      # budget at h+0, count h+2, selector h+4, D2 h+6
             count = rom.u16(h + 2)
             if not (1 <= count <= 8):
@@ -173,7 +180,7 @@ def decode_actor_entries(rom: Rom, work: bytes, slot_off: int,
             for e in entries:
                 flat.extend([int(e["x"], 16), int(e["y"], 16),
                              int(e["code"], 16), int(e["attr"], 16)])
-            families.append("6x%d" % count)
+            families.append("%dx%d" % (tag, count))
             pos = h + 10 + count * 6
         elif tag == 0x0002:
             e = decode_family2_entry(rom, pos + 4, world_x, world_y, facing,
@@ -276,8 +283,11 @@ def main() -> int:
                 slot_off = (ACTOR_ANCHOR - WORKRAM_BASE) + n * ACTOR_STRIDE
                 if slot_off + ACTOR_STRIDE > len(work):
                     break
-                flat, meta = decode_actor_entries(rom, work, slot_off,
-                                                  anchor_x, anchor_y)
+                try:
+                    flat, meta = decode_actor_entries(rom, work, slot_off,
+                                                      anchor_x, anchor_y)
+                except IndexError:
+                    flat, meta = None, "decode-out-of-range"
                 if flat is None:
                     reason = meta
                     if reason.startswith("unknown-"):
