@@ -699,10 +699,17 @@ static void copy_snapshot_to_background(const unsigned char *source)
     for (y = 0; y < BACKGROUND_HEIGHT; ++y)
     {
         unsigned char *target = background_bitmap + y * BACKGROUND_WIDTH;
-        jo_dma_copy(empty_row, target, BACKGROUND_WIDTH);
+        /* Boot-bringup fix: these were back-to-back jo_dma_copy calls -
+         * hundreds of DMA transfers into VDP2 VRAM per transition - and the
+         * first interactive boots froze nondeterministically at scene
+         * transitions with the CPU spinning while audio continued, the
+         * signature of a DMA-status busy-wait deadlock. Plain CPU copies
+         * take a few milliseconds once per scene change and cannot
+         * deadlock. */
+        memcpy(target, empty_row, BACKGROUND_WIDTH);
         if (y < SNAPSHOT_HEIGHT)
-            jo_dma_copy((void *)(source + y * SNAPSHOT_FIT_WIDTH), target,
-                        SNAPSHOT_FIT_WIDTH);
+            memcpy(target, source + y * SNAPSHOT_FIT_WIDTH,
+                   SNAPSHOT_FIT_WIDTH);
     }
 }
 
@@ -1895,7 +1902,11 @@ static void frame_callback(void)
            Saturn plays it through its CD audio path; no QSound emulator ships
            in the executable. Isolated SCSP PCM event cues are the next audio
            fidelity step. */
-        jo_audio_play_cd_track(2, 2, true);
+        /* Boot-bringup probe: the second boot wall is ST 3 / T 2 - exactly
+         * when this CD-DA start command fires - matching a CDC command
+         * ACK spin. Disabled to test; stage music returns once the CD
+         * track start is made non-blocking or the cue layout is fixed. */
+        /* jo_audio_play_cd_track(2, 2, true); */
         stage_music_started = 1;
     }
 #ifdef AVSP_VISUAL_TEST
