@@ -861,7 +861,7 @@ static int load_background(void)
        the same deterministic coordinate mapping. */
     slZoomModeNbg1(ZOOM_1);
     slBMPaletteNbg1((unsigned short)background_palette.id);
-    jo_dma_copy(background_image.data, background_bitmap, BACKGROUND_WIDTH * BACKGROUND_HEIGHT);
+    memcpy(background_bitmap, background_image.data, BACKGROUND_WIDTH * BACKGROUND_HEIGHT);
     current_bitmap_scene = BITMAP_SCENE_CORRIDOR;
     jo_set_displayed_screens(JO_NBG0_SCREEN | JO_NBG1_SCREEN);
     return 1;
@@ -893,13 +893,13 @@ static void activate_gameplay_background(const int stage_area)
     if (current_bitmap_scene == requested) return;
     if (stage_area == 1)
     {
-        jo_dma_copy(boss_background_image.data, background_bitmap,
+        memcpy(background_bitmap, boss_background_image.data,
                     BACKGROUND_WIDTH * BACKGROUND_HEIGHT);
         slBMPaletteNbg1((unsigned short)boss_background_palette.id);
     }
     else
     {
-        jo_dma_copy(background_image.data, background_bitmap,
+        memcpy(background_bitmap, background_image.data,
                     BACKGROUND_WIDTH * BACKGROUND_HEIGHT);
         slBMPaletteNbg1((unsigned short)background_palette.id);
     }
@@ -1281,10 +1281,10 @@ static void apply_confirm_shutter(void)
         bottom = previous_bottom;
     }
     for (row = previous_top; row < top; ++row)
-        jo_dma_copy(empty_row, background_bitmap + row * BACKGROUND_WIDTH,
+        memcpy(background_bitmap + row * BACKGROUND_WIDTH, empty_row,
                     BACKGROUND_WIDTH);
     for (row = bottom + 1; row <= previous_bottom; ++row)
-        jo_dma_copy(empty_row, background_bitmap + row * BACKGROUND_WIDTH,
+        memcpy(background_bitmap + row * BACKGROUND_WIDTH, empty_row,
                     BACKGROUND_WIDTH);
 }
 
