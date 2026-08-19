@@ -1,0 +1,845 @@
+{
+ "candidate_events": [
+  {
+   "byte_valid": true,
+   "frame": 2509,
+   "off": "0x02",
+   "pc": "0x0176BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 2509,
+   "off": "0x0E",
+   "pc": "0x0176C0",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 2509,
+   "off": "0x57",
+   "pc": "0x0176C8",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 2509,
+   "off": "0x5E",
+   "pc": "0x0176CC",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 2511,
+   "off": "0x02",
+   "pc": "0x028A42",
+   "raw_data": 31
+  },
+  {
+   "byte_valid": true,
+   "frame": 2511,
+   "off": "0x64",
+   "pc": "0x06056A",
+   "raw_data": 5
+  },
+  {
+   "byte_valid": true,
+   "frame": 2511,
+   "off": "0x57",
+   "pc": "0x06059E",
+   "raw_data": 16
+  },
+  {
+   "byte_valid": true,
+   "frame": 2511,
+   "off": "0x45",
+   "pc": "0x0605B2",
+   "raw_data": 87
+  },
+  {
+   "byte_valid": true,
+   "frame": 2511,
+   "off": "0x0E",
+   "pc": "0x0605CC",
+   "raw_data": 17
+  },
+  {
+   "byte_valid": true,
+   "frame": 2511,
+   "off": "0x5E",
+   "pc": "0x0605DC",
+   "raw_data": 46
+  },
+  {
+   "byte_valid": true,
+   "frame": 4276,
+   "off": "0x02",
+   "pc": "0x0176BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 4276,
+   "off": "0x0E",
+   "pc": "0x0176C0",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 4276,
+   "off": "0x57",
+   "pc": "0x0176C8",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 4276,
+   "off": "0x5E",
+   "pc": "0x0176CC",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 4279,
+   "off": "0x02",
+   "pc": "0x028A42",
+   "raw_data": 31
+  },
+  {
+   "byte_valid": true,
+   "frame": 4279,
+   "off": "0x64",
+   "pc": "0x06056A",
+   "raw_data": 5
+  },
+  {
+   "byte_valid": true,
+   "frame": 4279,
+   "off": "0x57",
+   "pc": "0x06059E",
+   "raw_data": 16
+  },
+  {
+   "byte_valid": true,
+   "frame": 4279,
+   "off": "0x45",
+   "pc": "0x0605B2",
+   "raw_data": 87
+  },
+  {
+   "byte_valid": true,
+   "frame": 4279,
+   "off": "0x0E",
+   "pc": "0x0605CC",
+   "raw_data": 16
+  },
+  {
+   "byte_valid": true,
+   "frame": 4279,
+   "off": "0x5E",
+   "pc": "0x0605DC",
+   "raw_data": 46
+  },
+  {
+   "byte_valid": true,
+   "frame": 4744,
+   "off": "0x02",
+   "pc": "0x0176BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 4744,
+   "off": "0x0E",
+   "pc": "0x0176C0",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 4744,
+   "off": "0x57",
+   "pc": "0x0176C8",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 4744,
+   "off": "0x5E",
+   "pc": "0x0176CC",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 4751,
+   "off": "0x02",
+   "pc": "0x028A42",
+   "raw_data": 31
+  },
+  {
+   "byte_valid": true,
+   "frame": 4751,
+   "off": "0x64",
+   "pc": "0x06056A",
+   "raw_data": 5
+  },
+  {
+   "byte_valid": true,
+   "frame": 4751,
+   "off": "0x57",
+   "pc": "0x06059E",
+   "raw_data": 16
+  },
+  {
+   "byte_valid": true,
+   "frame": 4751,
+   "off": "0x45",
+   "pc": "0x0605B2",
+   "raw_data": 87
+  },
+  {
+   "byte_valid": true,
+   "frame": 4751,
+   "off": "0x0E",
+   "pc": "0x0605CC",
+   "raw_data": 17
+  },
+  {
+   "byte_valid": true,
+   "frame": 4751,
+   "off": "0x5E",
+   "pc": "0x0605DC",
+   "raw_data": 46
+  },
+  {
+   "byte_valid": true,
+   "frame": 5172,
+   "off": "0x02",
+   "pc": "0x0176BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 5172,
+   "off": "0x0E",
+   "pc": "0x0176C0",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 5172,
+   "off": "0x57",
+   "pc": "0x0176C8",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 5172,
+   "off": "0x5E",
+   "pc": "0x0176CC",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 5175,
+   "off": "0x02",
+   "pc": "0x028A42",
+   "raw_data": 31
+  },
+  {
+   "byte_valid": true,
+   "frame": 5175,
+   "off": "0x64",
+   "pc": "0x06056A",
+   "raw_data": 5
+  },
+  {
+   "byte_valid": true,
+   "frame": 5175,
+   "off": "0x57",
+   "pc": "0x06059E",
+   "raw_data": 16
+  },
+  {
+   "byte_valid": true,
+   "frame": 5175,
+   "off": "0x45",
+   "pc": "0x0605B2",
+   "raw_data": 87
+  },
+  {
+   "byte_valid": true,
+   "frame": 5175,
+   "off": "0x0E",
+   "pc": "0x0605CC",
+   "raw_data": 16
+  },
+  {
+   "byte_valid": true,
+   "frame": 5175,
+   "off": "0x5E",
+   "pc": "0x0605DC",
+   "raw_data": 46
+  },
+  {
+   "byte_valid": true,
+   "frame": 6153,
+   "off": "0x02",
+   "pc": "0x0172BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 6153,
+   "off": "0x0E",
+   "pc": "0x0172BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 6153,
+   "off": "0x45",
+   "pc": "0x0172BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 6153,
+   "off": "0x57",
+   "pc": "0x0172BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 6153,
+   "off": "0x5E",
+   "pc": "0x0172BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 6153,
+   "off": "0x64",
+   "pc": "0x0172BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 6164,
+   "off": "0x02",
+   "pc": "0x0172BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 6164,
+   "off": "0x0E",
+   "pc": "0x0172BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 6164,
+   "off": "0x45",
+   "pc": "0x0172BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 6164,
+   "off": "0x57",
+   "pc": "0x0172BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 6164,
+   "off": "0x5E",
+   "pc": "0x0172BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": true,
+   "frame": 6164,
+   "off": "0x64",
+   "pc": "0x0172BA",
+   "raw_data": 0
+  },
+  {
+   "byte_valid": false,
+   "frame": 6168,
+   "off": "0x02",
+   "pc": "0x01BF22",
+   "raw_data": 1536
+  },
+  {
+   "byte_valid": true,
+   "frame": 6168,
+   "off": "0x64",
+   "pc": "0x0495F6",
+   "raw_data": 18
+  },
+  {
+   "byte_valid": true,
+   "frame": 6168,
+   "off": "0x57",
+   "pc": "0x049620",
+   "raw_data": 8
+  },
+  {
+   "byte_valid": true,
+   "frame": 6168,
+   "off": "0x5E",
+   "pc": "0x049626",
+   "raw_data": 32
+  },
+  {
+   "byte_valid": true,
+   "frame": 6168,
+   "off": "0x45",
+   "pc": "0x04BDAA",
+   "raw_data": 248
+  },
+  {
+   "byte_valid": true,
+   "frame": 6168,
+   "off": "0x0E",
+   "pc": "0x049636",
+   "raw_data": 27
+  }
+ ],
+ "classification": "table_set writer-trace reconstruction - coordinate/control-flow only, no ROM bytes and no raw log excerpts",
+ "frame_mapping": {
+  "g_pre_install_count": 2373,
+  "install_frame_from_sidecar": 2509,
+  "rule": "log marker #k (1-based) = global bank-write #(G+k); event frame = smallest F with C(F) >= G + m, m = AVP_TSW_FRAME markers before the event",
+  "total_logged_markers": 3810,
+  "total_tap_count": 6183
+ },
+ "inputs": {
+  "error_log": {
+   "ok": true,
+   "path": "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\error.log",
+   "reason": null,
+   "sha256": "c1c34eb427a1130a5121982af2000059d1240edcff1b0ae18620f37da0d85c08"
+  },
+  "frames_tsv": {
+   "ok": true,
+   "path": "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\tools_tsw_frames.tsv",
+   "reason": null,
+   "sha256": "f5ac294c4854809b2f145735a3cf0c187a3e438352b9cd183a887a410050604e"
+  },
+  "writer_lua": {
+   "ok": true,
+   "path": "C:\\Game Dev\\BrooklynBangoutX\\AvPSaturnCapabilityTest\\tools\\mame_trace_table_set_writer.lua",
+   "reason": null,
+   "sha256": "a34a5a9edd1164e7ab7e2c418f86d5445a34b338d70a842065eb00ad86a83127"
+  }
+ },
+ "notes": [
+  "7 expected logical stores: 4x nonzero at the normal initializer, 2x zeroing (teardown pending instruction-trace confirmation), 1x nonzero at the replacement initializer; the parser asserts the pairing, it does not label provenance."
+ ],
+ "orphan_half_stores": [],
+ "question": "where does the game get actor table_set (actor +0x50) during spawn? This report reconstructs the retained watchpoint run; it does NOT name the source field (that requires the live instruction trace) and it never infers table_set from a correlated byte.",
+ "schema": 1,
+ "state_events": [
+  {
+   "data": "0x00",
+   "frame": 2509,
+   "pc": "0x0176BA"
+  },
+  {
+   "data": "0x01",
+   "frame": 2511,
+   "pc": "0x028A3E"
+  },
+  {
+   "data": "0x02",
+   "frame": 4131,
+   "pc": "0x01F25A"
+  },
+  {
+   "data": "0x00",
+   "frame": 4276,
+   "pc": "0x0176BA"
+  },
+  {
+   "data": "0x01",
+   "frame": 4279,
+   "pc": "0x028A3E"
+  },
+  {
+   "data": "0x02",
+   "frame": 4743,
+   "pc": "0x0608A8"
+  },
+  {
+   "data": "0x00",
+   "frame": 4744,
+   "pc": "0x0176BA"
+  },
+  {
+   "data": "0x01",
+   "frame": 4751,
+   "pc": "0x028A3E"
+  },
+  {
+   "data": "0x02",
+   "frame": 5171,
+   "pc": "0x0608A8"
+  },
+  {
+   "data": "0x00",
+   "frame": 5172,
+   "pc": "0x0176BA"
+  },
+  {
+   "data": "0x01",
+   "frame": 5175,
+   "pc": "0x028A3E"
+  },
+  {
+   "data": "0x00",
+   "frame": 6153,
+   "pc": "0x0172BA"
+  },
+  {
+   "data": "0x00",
+   "frame": 6164,
+   "pc": "0x0172BA"
+  },
+  {
+   "data": "0x01",
+   "frame": 6168,
+   "pc": "0x01BF1E"
+  }
+ ],
+ "stores_by_writer_pc": {
+  "0x0172BA": [
+   "0x00000000",
+   "0x00000000"
+  ],
+  "0x049604": [
+   "0x0013E97A"
+  ],
+  "0x060578": [
+   "0x00130AC8",
+   "0x00130AC8",
+   "0x00130AC8",
+   "0x00130AC8"
+  ]
+ },
+ "surrounding_candidate_writes_by_pc": {
+  "0x000172BA": [
+   {
+    "byte_valid": true,
+    "off": "0x02",
+    "pc": "0x0172BA",
+    "raw_data": 0
+   },
+   {
+    "byte_valid": true,
+    "off": "0x0E",
+    "pc": "0x0172BA",
+    "raw_data": 0
+   },
+   {
+    "byte_valid": true,
+    "off": "0x45",
+    "pc": "0x0172BA",
+    "raw_data": 0
+   },
+   {
+    "byte_valid": true,
+    "off": "0x57",
+    "pc": "0x0172BA",
+    "raw_data": 0
+   },
+   {
+    "byte_valid": true,
+    "off": "0x5E",
+    "pc": "0x0172BA",
+    "raw_data": 0
+   },
+   {
+    "byte_valid": true,
+    "off": "0x64",
+    "pc": "0x0172BA",
+    "raw_data": 0
+   }
+  ],
+  "0x00049604": [
+   {
+    "byte_valid": false,
+    "off": "0x02",
+    "pc": "0x01BF22",
+    "raw_data": 1536
+   },
+   {
+    "byte_valid": true,
+    "off": "0x0E",
+    "pc": "0x049636",
+    "raw_data": 27
+   },
+   {
+    "byte_valid": true,
+    "off": "0x45",
+    "pc": "0x04BDAA",
+    "raw_data": 248
+   },
+   {
+    "byte_valid": true,
+    "off": "0x57",
+    "pc": "0x049620",
+    "raw_data": 8
+   },
+   {
+    "byte_valid": true,
+    "off": "0x5E",
+    "pc": "0x049626",
+    "raw_data": 32
+   },
+   {
+    "byte_valid": true,
+    "off": "0x64",
+    "pc": "0x0495F6",
+    "raw_data": 18
+   }
+  ],
+  "0x00060578": [
+   {
+    "byte_valid": true,
+    "off": "0x02",
+    "pc": "0x028A42",
+    "raw_data": 31
+   },
+   {
+    "byte_valid": true,
+    "off": "0x0E",
+    "pc": "0x0605CC",
+    "raw_data": 16
+   },
+   {
+    "byte_valid": true,
+    "off": "0x45",
+    "pc": "0x0605B2",
+    "raw_data": 87
+   },
+   {
+    "byte_valid": true,
+    "off": "0x57",
+    "pc": "0x06059E",
+    "raw_data": 16
+   },
+   {
+    "byte_valid": true,
+    "off": "0x5E",
+    "pc": "0x0605DC",
+    "raw_data": 46
+   },
+   {
+    "byte_valid": true,
+    "off": "0x64",
+    "pc": "0x06056A",
+    "raw_data": 5
+   }
+  ]
+ },
+ "table_set_stores": [
+  {
+   "frame": 2511,
+   "hi_line": 72,
+   "is_zero": false,
+   "lo_line": 73,
+   "pc": "0x060578",
+   "pointer": "0x00130AC8",
+   "regs": {
+    "a0": "0x00FFA480",
+    "a1": "0x00FF8580",
+    "a2": "0x001F5F00",
+    "a3": "0xFFFFF300",
+    "a4": "0x000B20C6",
+    "a5": "0x00FF8000",
+    "a6": "0x00FFA3C0",
+    "d0": "0x00000000",
+    "d1": "0x00000008",
+    "d2": "0x00000006",
+    "d3": "0x00000000",
+    "d4": "0x00000000",
+    "d5": "0x00000279",
+    "d6": "0x0000FFFF",
+    "d7": "0x00000000",
+    "ret": "0x00FF00D8",
+    "sp": "0x00FF7FF6"
+   },
+   "slot": "0xFFA3C0"
+  },
+  {
+   "frame": 4279,
+   "hi_line": 1855,
+   "is_zero": false,
+   "lo_line": 1856,
+   "pc": "0x060578",
+   "pointer": "0x00130AC8",
+   "regs": {
+    "a0": "0x00FFA480",
+    "a1": "0x00FF8580",
+    "a2": "0x001F647C",
+    "a3": "0xFFFFF192",
+    "a4": "0x000B20C6",
+    "a5": "0x00FF8000",
+    "a6": "0x00FFA3C0",
+    "d0": "0x00000000",
+    "d1": "0x00000008",
+    "d2": "0x00000000",
+    "d3": "0x00000000",
+    "d4": "0x00000000",
+    "d5": "0x00FF054B",
+    "d6": "0x0000FFFF",
+    "d7": "0x00000000",
+    "ret": "0x00FF00D8",
+    "sp": "0x00FF7FF6"
+   },
+   "slot": "0xFFA3C0"
+  },
+  {
+   "frame": 4751,
+   "hi_line": 2342,
+   "is_zero": false,
+   "lo_line": 2343,
+   "pc": "0x060578",
+   "pointer": "0x00130AC8",
+   "regs": {
+    "a0": "0x00FFA480",
+    "a1": "0x00FF8580",
+    "a2": "0x001FDC4C",
+    "a3": "0xFFFFF192",
+    "a4": "0x000B20C6",
+    "a5": "0x00FF8000",
+    "a6": "0x00FFA3C0",
+    "d0": "0x00000000",
+    "d1": "0x00000008",
+    "d2": "0x00000000",
+    "d3": "0x00000000",
+    "d4": "0x00000000",
+    "d5": "0x00000508",
+    "d6": "0x0000FFFF",
+    "d7": "0x00000000",
+    "ret": "0x00FF00D8",
+    "sp": "0x00FF7FF6"
+   },
+   "slot": "0xFFA3C0"
+  },
+  {
+   "frame": 5175,
+   "hi_line": 2781,
+   "is_zero": false,
+   "lo_line": 2782,
+   "pc": "0x060578",
+   "pointer": "0x00130AC8",
+   "regs": {
+    "a0": "0x00FFA480",
+    "a1": "0x00FF8580",
+    "a2": "0x001FDC3C",
+    "a3": "0xFFFFF192",
+    "a4": "0x00FF8680",
+    "a5": "0x00FF8000",
+    "a6": "0x00FFA3C0",
+    "d0": "0x00000000",
+    "d1": "0x00000008",
+    "d2": "0x00000006",
+    "d3": "0x00000000",
+    "d4": "0x00000000",
+    "d5": "0x00FF0550",
+    "d6": "0x0000FFFF",
+    "d7": "0x00000000",
+    "ret": "0x00FF00D8",
+    "sp": "0x00FF7FF6"
+   },
+   "slot": "0xFFA3C0"
+  },
+  {
+   "frame": 6153,
+   "hi_line": 3769,
+   "is_zero": true,
+   "lo_line": 3770,
+   "pc": "0x0172BA",
+   "pointer": "0x00000000",
+   "regs": {
+    "a0": "0x00FFEEC4",
+    "a1": "0x00FFA410",
+    "a2": "0x001F647C",
+    "a3": "0xFFFFF300",
+    "a4": "0x00FF80A0",
+    "a5": "0x00FF8000",
+    "a6": "0x00FFA3C0",
+    "d0": "0x00000000",
+    "d1": "0x00000000",
+    "d2": "0x9A0F0007",
+    "d3": "0x80CD0018",
+    "d4": "0x00000060",
+    "d5": "0x00000000",
+    "d6": "0x0000FFFF",
+    "d7": "0x0000001B",
+    "ret": "0x00FF00D8",
+    "sp": "0x00FF7FF6"
+   },
+   "slot": "0xFFA3C0"
+  },
+  {
+   "frame": 6164,
+   "hi_line": 3789,
+   "is_zero": true,
+   "lo_line": 3790,
+   "pc": "0x0172BA",
+   "pointer": "0x00000000",
+   "regs": {
+    "a0": "0x00FFEEC4",
+    "a1": "0x00FFA410",
+    "a2": "0x001F647C",
+    "a3": "0xFFFFF300",
+    "a4": "0x00FF80A8",
+    "a5": "0x00FF8000",
+    "a6": "0x00FFA3C0",
+    "d0": "0x00000000",
+    "d1": "0x00000000",
+    "d2": "0x00000007",
+    "d3": "0x00000000",
+    "d4": "0x0000FFFF",
+    "d5": "0x00000000",
+    "d6": "0x0000FFFF",
+    "d7": "0x0000001B",
+    "ret": "0x00FF00D8",
+    "sp": "0x00FF7FF6"
+   },
+   "slot": "0xFFA3C0"
+  },
+  {
+   "frame": 6168,
+   "hi_line": 3801,
+   "is_zero": false,
+   "lo_line": 3802,
+   "pc": "0x049604",
+   "pointer": "0x0013E97A",
+   "regs": {
+    "a0": "0x0004956C",
+    "a1": "0x0015C27C",
+    "a2": "0x001FDAE4",
+    "a3": "0xFFFFF300",
+    "a4": "0x00FF19FE",
+    "a5": "0x00FF8000",
+    "a6": "0x00FFA3C0",
+    "d0": "0x00000000",
+    "d1": "0x00000008",
+    "d2": "0x00000000",
+    "d3": "0x81300070",
+    "d4": "0x00000001",
+    "d5": "0x00000001",
+    "d6": "0x0000FFFF",
+    "d7": "0x00000000",
+    "ret": "0x00FF00D8",
+    "sp": "0x00FF7FF6"
+   },
+   "slot": "0xFFA3C0"
+  }
+ ]
+}

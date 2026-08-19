@@ -117,3 +117,12 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Tile archive budget test failed with exit code $LASTEXITCODE."
 }
+
+# table_set writer-trace analyzer: synthetic positive/negative fixtures (no
+# private inputs needed) plus, when the pinned retained run is present, a
+# full parse that asserts 7 logical stores / no orphans / G=2373. Skips the
+# positive path cleanly in a checkout that lacks the untracked raw inputs.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\analyze_avsp_table_set_writer.py') '--self-test'
+if ($LASTEXITCODE -ne 0) {
+    throw "table_set writer-trace analyzer self-test failed with exit code $LASTEXITCODE."
+}
