@@ -1308,7 +1308,11 @@ static void rom_actor_tick(void)
     AvspEmitActor state;
 
     rom_actor_entry_count = 0;
-    if (world.encounter_state == CAP_ENCOUNTER_BOSS) return;
+    /* Run only in the two street-wave combat states: outside them enemy
+     * slots can be mid-initialization, and a reported freeze at the
+     * character-confirm transition traced to ticking against one. */
+    if (world.encounter_state != CAP_ENCOUNTER_WAVE_ONE &&
+        world.encounter_state != CAP_ENCOUNTER_WAVE_TWO) return;
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
     {
         if (world.enemies[index].active &&
