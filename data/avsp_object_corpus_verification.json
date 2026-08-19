@@ -1,0 +1,33 @@
+{
+ "classification": "decoder-vs-corpus verification counts only",
+ "declared_population": "active actor-grid slots with pose pointer in [0x120000,0x140000), plain pose record, known selector (0x0006/0x000C)",
+ "mismatch_examples": [],
+ "pass": true,
+ "per_root": {
+  "enemy_actions": {
+   "absent": 147,
+   "eligible": 3918,
+   "exact": 3771,
+   "excl:jump-record": 3093,
+   "excl:pose-outside-declared-region": 12437,
+   "excl:unknown-family-0x0002-in-composite": 8345,
+   "excl:unknown-selector": 28,
+   "frames": 2120,
+   "no-objram-pair": 1
+  }
+ },
+ "schema": 1,
+ "selector_group_matrix": {
+  "0x0006 groups=1": 1528,
+  "0x000c groups=2": 2390
+ },
+ "totals": {
+  "absent_game_omitted": 147,
+  "eligible": 3918,
+  "exact": 3771,
+  "mismatch": 0
+ },
+ "unknown_selectors": {
+  "unknown-selector-0x0002": 28
+ }
+}

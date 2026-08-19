@@ -257,7 +257,19 @@ def decode_group_entries(rom: Rom, header_addr: int, origin_x: int, origin_y: in
         dy = s16(rom.u16(a2 + 2))
         nx = ((attr_raw >> 8) & 0xF) + 1
         width = nx * 16
-        x = ((origin_x - width - dx) & 0x3FF) | or_value
+        # The dispatcher (0x0AA00E; live-disassembled in full via
+        # tools/mame_trace_facing0.lua) selects one of two loop bodies on the
+        # origin routine's Z flag (set by its final `lsl.b #5,D1`, i.e. by
+        # facing == 0):
+        #   facing != 0 -> flipped loop  (0x0AA1DC..): X = origin - width - dx,
+        #                  attr low byte ^= flip mask (0x20)
+        #   facing == 0 -> plain loop (0x0AA1A8..0x0AA1DA): X = origin + dx,
+        #                  no width term, no XOR (flip_byte is 0 here anyway)
+        # Both walk A2 identically: dx, dy reads then A2 += advance.
+        if facing_raw:
+            x = ((origin_x - width - dx) & 0x3FF) | or_value
+        else:
+            x = ((origin_x + dx) & 0x3FF) | or_value
         y = (origin_y + dy) & 0x3FF
         entries.append({
             "code": "0x%04x" % code, "attr": "0x%04x" % attr,
