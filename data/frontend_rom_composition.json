@@ -1,0 +1,823 @@
+{
+ "classification": "frontend screen composition - CPS layer/object structure only; no ROM bytes, no imagery",
+ "finding": "the settled character-select screen is drawn almost entirely by the three CPS tilemap layers; its only drawn objects are the small 1P cursor marker. The plate slide-in is a large transient object burst. The title/attract page uses a DIFFERENT set of tilemap base addresses than the select page, so the two are distinct tilemap pages in gfxram.",
+ "implication_for_the_port": "a faithful rebuild needs a CPS tilemap path (tile codes + palette per layer) in addition to the existing per-tile VDP1 object path; it cannot be done with sprites alone, and it does not need a captured picture.",
+ "key_frames": [
+  {
+   "active_tilemap_layers": [
+    3,
+    2,
+    1
+   ],
+   "cps_b_layer_control": "0x12CF",
+   "frame": 1620,
+   "layer_draw_order_back_to_front": [
+    3,
+    2,
+    0,
+    1
+   ],
+   "object_distinct_tile_codes": 12,
+   "object_palette_banks": [
+    26,
+    27
+   ],
+   "object_slots_parsed": 14,
+   "objects": [
+    {
+     "colour": 27,
+     "h": 16,
+     "priority": 4,
+     "tile_code": "0xD63F",
+     "w": 16,
+     "x": 56,
+     "y": 96
+    },
+    {
+     "colour": 27,
+     "h": 48,
+     "priority": 4,
+     "tile_code": "0xD3DC",
+     "w": 32,
+     "x": 56,
+     "y": 48
+    },
+    {
+     "colour": 27,
+     "h": 16,
+     "priority": 4,
+     "tile_code": "0xD761",
+     "w": 32,
+     "x": 72,
+     "y": 96
+    },
+    {
+     "colour": 27,
+     "h": 16,
+     "priority": 4,
+     "tile_code": "0xD751",
+     "w": 16,
+     "x": 88,
+     "y": 80
+    },
+    {
+     "colour": 27,
+     "h": 64,
+     "priority": 4,
+     "tile_code": "0xD770",
+     "w": 48,
+     "x": 72,
+     "y": 112
+    },
+    {
+     "colour": 27,
+     "h": 32,
+     "priority": 4,
+     "tile_code": "0xD3EB",
+     "w": 16,
+     "x": 104,
+     "y": 80
+    },
+    {
+     "colour": 27,
+     "h": 32,
+     "priority": 4,
+     "tile_code": "0xD3BE",
+     "w": 32,
+     "x": 88,
+     "y": 48
+    },
+    {
+     "colour": 26,
+     "h": 64,
+     "priority": 4,
+     "tile_code": "0xD3C5",
+     "w": 32,
+     "x": 192,
+     "y": 112
+    },
+    {
+     "colour": 26,
+     "h": 48,
+     "priority": 4,
+     "tile_code": "0xD3D0",
+     "w": 80,
+     "x": 224,
+     "y": 128
+    },
+    {
+     "colour": 26,
+     "h": 80,
+     "priority": 4,
+     "tile_code": "0xD607",
+     "w": 112,
+     "x": 224,
+     "y": 48
+    },
+    {
+     "colour": 26,
+     "h": 48,
+     "priority": 4,
+     "tile_code": "0xD380",
+     "w": 80,
+     "x": 304,
+     "y": 128
+    },
+    {
+     "colour": 26,
+     "h": 48,
+     "priority": 4,
+     "tile_code": "0xD350",
+     "w": 48,
+     "x": 336,
+     "y": 80
+    }
+   ],
+   "objects_drawn": 12,
+   "scroll_x": [
+    65472,
+    65472,
+    65472
+   ],
+   "scroll_y": [
+    0,
+    768,
+    0
+   ],
+   "tilemap_bases": {
+    "scroll1": "0x10000",
+    "scroll2": "0x14000",
+    "scroll3": "0x18000"
+   }
+  },
+  {
+   "active_tilemap_layers": [
+    2,
+    3,
+    1
+   ],
+   "cps_b_layer_control": "0x078F",
+   "frame": 1700,
+   "layer_draw_order_back_to_front": [
+    2,
+    3,
+    1,
+    0
+   ],
+   "object_distinct_tile_codes": 1,
+   "object_palette_banks": [
+    5
+   ],
+   "object_slots_parsed": 362,
+   "objects": [
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 368,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 352,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 336,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 320,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 304,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 288,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 272,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 256,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 240,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 224,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 208,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 192,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 176,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 160,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 144,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 128,
+     "y": 88
+    }
+   ],
+   "objects_drawn": 360,
+   "scroll_x": [
+    65472,
+    65456,
+    65472
+   ],
+   "scroll_y": [
+    0,
+    0,
+    0
+   ],
+   "tilemap_bases": {
+    "scroll1": "0x00000",
+    "scroll2": "0x04000",
+    "scroll3": "0x08000"
+   }
+  },
+  {
+   "active_tilemap_layers": [
+    2,
+    3,
+    1
+   ],
+   "cps_b_layer_control": "0x078F",
+   "frame": 1760,
+   "layer_draw_order_back_to_front": [
+    2,
+    3,
+    1,
+    0
+   ],
+   "object_distinct_tile_codes": 2,
+   "object_palette_banks": [
+    15
+   ],
+   "object_slots_parsed": 4,
+   "objects": [
+    {
+     "colour": 15,
+     "h": 16,
+     "priority": 4,
+     "tile_code": "0x8D04",
+     "w": 32,
+     "x": 48,
+     "y": 67
+    },
+    {
+     "colour": 15,
+     "h": 32,
+     "priority": 4,
+     "tile_code": "0x88DD",
+     "w": 48,
+     "x": 40,
+     "y": 59
+    }
+   ],
+   "objects_drawn": 2,
+   "scroll_x": [
+    65472,
+    65456,
+    65472
+   ],
+   "scroll_y": [
+    0,
+    0,
+    0
+   ],
+   "tilemap_bases": {
+    "scroll1": "0x00000",
+    "scroll2": "0x04000",
+    "scroll3": "0x08000"
+   }
+  },
+  {
+   "active_tilemap_layers": [
+    2,
+    3,
+    1
+   ],
+   "cps_b_layer_control": "0x078F",
+   "frame": 1790,
+   "layer_draw_order_back_to_front": [
+    2,
+    3,
+    1,
+    0
+   ],
+   "object_distinct_tile_codes": 2,
+   "object_palette_banks": [
+    15
+   ],
+   "object_slots_parsed": 4,
+   "objects": [
+    {
+     "colour": 15,
+     "h": 16,
+     "priority": 4,
+     "tile_code": "0x8D04",
+     "w": 32,
+     "x": 48,
+     "y": 67
+    },
+    {
+     "colour": 15,
+     "h": 32,
+     "priority": 4,
+     "tile_code": "0x88DD",
+     "w": 48,
+     "x": 40,
+     "y": 59
+    }
+   ],
+   "objects_drawn": 2,
+   "scroll_x": [
+    65472,
+    65456,
+    65472
+   ],
+   "scroll_y": [
+    0,
+    0,
+    0
+   ],
+   "tilemap_bases": {
+    "scroll1": "0x00000",
+    "scroll2": "0x04000",
+    "scroll3": "0x08000"
+   }
+  },
+  {
+   "active_tilemap_layers": [
+    2,
+    3,
+    1
+   ],
+   "cps_b_layer_control": "0x078F",
+   "frame": 1900,
+   "layer_draw_order_back_to_front": [
+    2,
+    3,
+    1,
+    0
+   ],
+   "object_distinct_tile_codes": 1,
+   "object_palette_banks": [
+    5
+   ],
+   "object_slots_parsed": 362,
+   "objects": [
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 368,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 352,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 336,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 320,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 304,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 288,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 272,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 256,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 240,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 224,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 208,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 192,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 176,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 160,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 144,
+     "y": 88
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 7,
+     "tile_code": "0x3700",
+     "w": 16,
+     "x": 128,
+     "y": 88
+    }
+   ],
+   "objects_drawn": 360,
+   "scroll_x": [
+    65472,
+    65456,
+    65472
+   ],
+   "scroll_y": [
+    0,
+    0,
+    0
+   ],
+   "tilemap_bases": {
+    "scroll1": "0x00000",
+    "scroll2": "0x04000",
+    "scroll3": "0x08000"
+   }
+  },
+  {
+   "active_tilemap_layers": [
+    3,
+    2,
+    1
+   ],
+   "cps_b_layer_control": "0x12CF",
+   "frame": 2100,
+   "layer_draw_order_back_to_front": [
+    3,
+    2,
+    0,
+    1
+   ],
+   "object_distinct_tile_codes": 19,
+   "object_palette_banks": [
+    0,
+    5,
+    7,
+    16,
+    17,
+    18,
+    19,
+    29,
+    30
+   ],
+   "object_slots_parsed": 54,
+   "objects": [
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 4,
+     "tile_code": "0x9B72",
+     "w": 16,
+     "x": 358,
+     "y": 244
+    },
+    {
+     "colour": 5,
+     "h": 32,
+     "priority": 4,
+     "tile_code": "0x9866",
+     "w": 16,
+     "x": 342,
+     "y": 228
+    },
+    {
+     "colour": 5,
+     "h": 32,
+     "priority": 4,
+     "tile_code": "0x9950",
+     "w": 48,
+     "x": 326,
+     "y": 196
+    },
+    {
+     "colour": 5,
+     "h": 32,
+     "priority": 4,
+     "tile_code": "0x99E4",
+     "w": 48,
+     "x": 326,
+     "y": 164
+    },
+    {
+     "colour": 5,
+     "h": 16,
+     "priority": 4,
+     "tile_code": "0x9B72",
+     "w": 16,
+     "x": 306,
+     "y": 244
+    },
+    {
+     "colour": 5,
+     "h": 32,
+     "priority": 4,
+     "tile_code": "0x9866",
+     "w": 16,
+     "x": 290,
+     "y": 228
+    },
+    {
+     "colour": 5,
+     "h": 32,
+     "priority": 4,
+     "tile_code": "0x9950",
+     "w": 48,
+     "x": 274,
+     "y": 196
+    },
+    {
+     "colour": 5,
+     "h": 32,
+     "priority": 4,
+     "tile_code": "0x9963",
+     "w": 48,
+     "x": 274,
+     "y": 164
+    },
+    {
+     "colour": 17,
+     "h": 48,
+     "priority": 4,
+     "tile_code": "0x4635",
+     "w": 128,
+     "x": 956,
+     "y": 194
+    },
+    {
+     "colour": 17,
+     "h": 48,
+     "priority": 4,
+     "tile_code": "0x4F40",
+     "w": 48,
+     "x": 938,
+     "y": 184
+    },
+    {
+     "colour": 18,
+     "h": 96,
+     "priority": 4,
+     "tile_code": "0x4660",
+     "w": 96,
+     "x": 18,
+     "y": 138
+    },
+    {
+     "colour": 18,
+     "h": 16,
+     "priority": 4,
+     "tile_code": "0x4BF2",
+     "w": 48,
+     "x": -31,
+     "y": 166
+    },
+    {
+     "colour": 18,
+     "h": 32,
+     "priority": 4,
+     "tile_code": "0x4F59",
+     "w": 48,
+     "x": 1,
+     "y": 182
+    },
+    {
+     "colour": 16,
+     "h": 96,
+     "priority": 4,
+     "tile_code": "0x4660",
+     "w": 96,
+     "x": -30,
+     "y": 122
+    },
+    {
+     "colour": 16,
+     "h": 16,
+     "priority": 4,
+     "tile_code": "0x4BF2",
+     "w": 48,
+     "x": 945,
+     "y": 150
+    },
+    {
+     "colour": 16,
+     "h": 32,
+     "priority": 4,
+     "tile_code": "0x4F59",
+     "w": 48,
+     "x": -47,
+     "y": 166
+    }
+   ],
+   "objects_drawn": 52,
+   "scroll_x": [
+    65472,
+    576,
+    65472
+   ],
+   "scroll_y": [
+    0,
+    512,
+    1568
+   ],
+   "tilemap_bases": {
+    "scroll1": "0x00000",
+    "scroll2": "0x04000",
+    "scroll3": "0x08000"
+   }
+  }
+ ],
+ "method": "ROM-truth capture (tools/mame_capture_frontend_rom.lua writes gfxram + cps_a/cps_b + objram + palette, the same share set the stage background decode consumes); layer control and object list read with the existing tools/extract_avspu_stage1.py decoders. No pixels.",
+ "question": "what does the ROM draw the title and character-select screens WITH - tilemap layers, objects, or both?",
+ "schema": 1
+}

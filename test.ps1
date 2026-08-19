@@ -174,3 +174,12 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "table_set street-alien gate failed with exit code $LASTEXITCODE."
 }
+
+# Frontend screen composition: derives, from the ROM-truth frontend capture
+# (layers/objects, never pixels), what the title and character-select screens
+# are actually drawn with. Skips cleanly when the private capture is absent;
+# regenerate with capture_frontend_rom.ps1.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\analyze_frontend_rom_composition.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Frontend composition analysis failed with exit code $LASTEXITCODE."
+}

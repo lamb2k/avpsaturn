@@ -84,6 +84,33 @@ The honest answers, recorded so no one re-derives them:
 **Decision (user, 2026-08-19): keep the state-dispatch decode next while its
 trace context is fresh, then do the REAL FRONTEND as the body immediately
 after it — ahead of real enemy AI.** Street traversal follows the frontend.
+
+**Follow-up user requirement: the character-select screen must be built from
+the ORIGINAL ROM ASSETS, not captured pictures.** That is now settled with
+measurement rather than assumption. New ROM-truth capture path this session
+(`tools/mame_capture_frontend_rom.lua`, `capture_frontend_rom.ps1`,
+`tools/analyze_frontend_rom_composition.py`, manifest
+`data/frontend_rom_composition.json`, wired into `test.ps1`): it dumps
+gfxram + cps_a/cps_b + objram + palette — the same share set the stage
+background decode already consumes — and reads no pixels. Measured:
+
+- The settled select screen (1760/1790) is drawn almost entirely by the
+  **three CPS tilemap layers**; its only drawn objects are **2 sprites**,
+  the `1P` cursor marker.
+- The plate slide-in (1700) and confirm (1900) are transient **object
+  bursts** (360 drawn objects, 1 tile code).
+- Title/attract (1620) uses **different tilemap bases** than select — they
+  are distinct tilemap pages in gfxram.
+- Round-1 title (2100) mixes both (52 objects, 9 palette banks).
+
+So a faithful rebuild needs a **CPS tilemap path in addition to the existing
+per-tile VDP1 object path** — sprites alone cannot do it, and no captured
+picture is needed. Both decoder halves already exist in
+`tools/extract_avspu_stage1.py` (`render_background`, `decode_objects`); the
+work is routing them to VDP2 tilemap + tiles and VDP1 cursor sprites. All
+four characters' plates and portraits are present in the ROM tilemaps, so a
+four-way select is asset-complete; what stays ADAPTED is any character whose
+in-game animation set has not been extracted.
 The frontend body's evidence base already exists and must be read before any
 re-capture: `data/frontend_segments.json` (note `round_1_title` needs 22
 segments — an animated window with a real memory plan under the measured

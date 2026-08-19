@@ -105,22 +105,59 @@ presents as a tech slice (static title/select keyframes, no cursor or
 select logic, no title-card animation) and the user wants that fixed before
 more combat internals. Do not re-order this again without the user.
 
-The frontend body's evidence base already exists — do not re-capture before
-reading it: `data/frontend_segments.json` (three segmented windows from the
-tracked frontend capture: `start_transition` frames 1770-1798 fits one
-78,848-byte block; `character_confirm` frames 1800-2038, 31 distinct
-images, 2 segments; `round_1_title` frames 2040-2160, 26 distinct images,
-**22 segments — an animated window needing its own memory plan under the
-measured allocator rules above**), `data/frontend_geometry*.json` (the
-character-confirm shutter model, already implemented as
-`cap_confirm_shutter_band`), `capture_frontend.ps1` /
-`capture_frontend_wipe.ps1` (regeneration), and
-`tools/analyze_frontend_segments.py --report`. Select-screen LOGIC (cursor
-movement, timer, confirm) is game logic and must be decoded from stock-MAME
-observation with deterministic input schedules, the established corpus
-discipline — declared populations, zero unexplained mismatches. Only the
-captured character's assets exist; confirming a different character stays
-ADAPTED (documented, not silently faked).
+**The user has further specified the METHOD: the character-select screen
+must be built from the ORIGINAL ROM ASSETS, not from captured pictures.**
+That question is no longer open — this session captured the ROM-truth state
+and measured what the screens are made of.
+
+**MEASURED composition** (`tools/mame_capture_frontend_rom.lua` →
+`capture_frontend_rom.ps1` → `tools/analyze_frontend_rom_composition.py`,
+manifest `data/frontend_rom_composition.json`, wired into `test.ps1`; it
+captures gfxram + cps_a/cps_b + objram + palette — the same share set the
+stage background decode already consumes — and never reads pixels):
+
+- The settled character-select screen (frames 1760/1790) is drawn almost
+  entirely by the **three CPS tilemap layers** (draw order `[2,3,1]` then
+  objects, bases `0x00000/0x04000/0x08000`). Its only drawn objects are
+  **2 sprites** — the small `1P` cursor marker (palette bank 15).
+- The plate slide-in (frame 1700) and the confirm window (1900) are large
+  transient **object bursts** — 360 drawn objects, 1 distinct tile code.
+- The title/attract page (1620) uses **different tilemap bases**
+  (`0x10000/0x14000/0x18000`) and a different layer order — title and
+  select are distinct tilemap pages in gfxram, not one screen redrawn.
+- The round-1 title (2100) mixes both: 52 objects across 9 palette banks
+  over tilemaps.
+
+**Implication, binding on the build:** a faithful rebuild needs a **CPS
+tilemap path** (per-layer tile codes + palette, decoded from the graphics
+ROM) IN ADDITION to the existing per-tile VDP1 object path. It cannot be
+done with sprites alone, and it does not need a captured picture.
+`tools/extract_avspu_stage1.py` already has both halves —
+`render_background()` flattens the three live tilemaps from ROM tiles and
+`decode_objects()` decodes the object list — so this is a matter of routing
+that output to the Saturn as tilemap + tiles (VDP2) plus cursor sprites
+(VDP1), NOT of writing a new decoder from scratch. Reuse the deterministic
+archive discipline of `tools/gen_avsp_gfx_tiles.py` (explicit scope, budget
+parsed from main.c, refuse-before-write) for whatever tile/tilemap archive
+this ships.
+
+Supporting evidence that still applies: `data/frontend_segments.json`
+(`round_1_title` needs **22 segments** — a genuinely animated window that
+needs its own memory plan under the measured allocator rules above),
+`data/frontend_geometry*.json` (the confirm shutter model, already
+implemented as `cap_confirm_shutter_band`), `capture_frontend.ps1` /
+`capture_frontend_wipe.ps1`, `tools/analyze_frontend_segments.py --report`.
+
+Select-screen LOGIC (cursor movement, the countdown timer visible in the
+reference frame, confirm) is game logic and must be decoded from stock-MAME
+observation with deterministic input schedules under the established corpus
+discipline — declared populations, zero unexplained mismatches — not
+inferred from screenshots. All four characters' plates and portraits are
+present in the ROM tilemaps (the reference frame shows Predator Warrior,
+Maj. D. Schaefer, Lt. Linn Kurosawa, Predator Hunter), so a working
+four-way select is an asset-complete goal; what remains ADAPTED is any
+CHARACTER whose in-game animation set has not been extracted — selecting it
+must not silently fall back to the captured character without saying so.
 
 ## Explicitly deferred (do not start here)
 
