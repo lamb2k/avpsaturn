@@ -394,8 +394,23 @@ static int load_action_audio(void)
                           AVSP_INTERIOR_TRANSITION_PCM_FILE,
                           AVSP_INTERIOR_TRANSITION_PCM_DIRECTORY,
                           AVSP_INTERIOR_TRANSITION_PCM_BYTES,
-                          AVSP_INTERIOR_TRANSITION_PCM_SAMPLE_RATE) &&
-           load_pcm_audio(&round_title_a_sound,
+                          AVSP_INTERIOR_TRANSITION_PCM_SAMPLE_RATE);
+}
+
+/* The four opening-overlay PCMs (title A/B, withdrawal, breach) are the
+   phase-transient part of the boot working set: all four are released by the
+   first wave. Jo's allocator never coalesces free neighbours and only a
+   block adjacent to the zone's bump pointer rolls it back, so these MUST be
+   the LAST large boot allocations - at the TOP of their zone - or their
+   ~900 KB returns as unmergeable islands. The measured 2026-08-19 heap dump
+   showed exactly that: with these loaded before the cel/archive sweep they
+   sat at the BOTTOM of cartridge bank 1 under permanent assets, and the
+   637,084-byte BOSSCLR.PCM phase load could never find more than 498,552
+   contiguous bytes. Called last in the jo_main init chain; do not fold back
+   into load_action_audio. */
+static int load_opening_audio(void)
+{
+    return load_pcm_audio(&round_title_a_sound,
                           AVSP_ROUND_TITLE_A_PCM_FILE,
                           AVSP_ROUND_TITLE_A_PCM_DIRECTORY,
                           AVSP_ROUND_TITLE_A_PCM_BYTES,
@@ -2151,6 +2166,25 @@ static void frame_callback(void)
         boss_clear_sound.data == JO_NULL)
     {
         int loaded;
+        /* The breach cue's natural WAVE_ONE release is gated on the channel
+           going idle, but slPCMStat can stay asserted forever after a finite
+           buffer elapses on Yaba Sanshiro (the withdraw path documents the
+           same quirk), leaving its 298 KB block held. The breach source is
+           long finished by the interior wipe, so close and reclaim it
+           unconditionally here - it is the top-of-zone block whose free
+           rolls the bump pointer back for the load below. */
+        if (breach_sound.data != JO_NULL)
+        {
+            if (jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_OPENING))
+            {
+                jo_audio_stop_sound(&breach_sound);
+                slSndFlush();
+            }
+            release_pcm_data(&breach_sound);
+        }
+        /* Reclaim any trailing run of freed blocks into bump space; jo_free
+           alone rolls back only a block directly adjacent to the pointer. */
+        jo_reduce_memory_fragmentation();
         jo_printf(15, 13, "NOW LOADING");
         loaded = load_pcm_audio(&boss_clear_sound, AVSP_BOSS_CLEAR_PCM_FILE,
                                 AVSP_BOSS_CLEAR_PCM_DIRECTORY,
@@ -2565,7 +2599,12 @@ void jo_main(void)
                         load_action_audio() &&
                         load_all_cels() && load_player_action_sequences() &&
                         load_enemy_action_archive() &&
-                        create_sprite_working_set();
+                        create_sprite_working_set() &&
+                        /* LAST on purpose: the opening overlay's ~900 KB must
+                           sit at the top of its zone so its release rolls the
+                           bump pointer back for the BOSSCLR.PCM phase load
+                           (see load_opening_audio). */
+                        load_opening_audio();
     }
 #ifdef AVSP_VISUAL_TEST
     if (runtime_ready)
@@ -2592,6 +2631,10 @@ void jo_main(void)
         release_pcm_data(&round_title_b_sound);
         release_pcm_data(&withdraw_sound);
         release_pcm_data(&breach_sound);
+        /* The four frees above are not last-in-first-out, so only the final
+           one rolled the bump pointer back; compact the rest of the trailing
+           free run before the large allocation below. */
+        jo_reduce_memory_fragmentation();
         /* These profiles skip the interior transition where the Stage
            Clear composite is phase-loaded; load it here instead so a
            forced BOSS_DEFEAT still plays it. */

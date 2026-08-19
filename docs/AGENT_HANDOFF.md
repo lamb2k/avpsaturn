@@ -1,5 +1,67 @@
 # Agent handoff: native AvP Saturn port
 
+Updated: 2026-08-19 EDT (route blocker FIXED; `-EncounterTest` runs the
+COMPLETE Round 1 route for the first time). **The BOSSCLR.PCM `FS ALLOC`
+halt at `INTERIOR_TRANSITION` is diagnosed from a full live heap dump and
+fixed; the encounter route now runs MAIN_MENU → both street waves → CLEAR →
+INTERIOR_TRANSITION (BOSSCLR loads, `ready` stays 1) → BOSS → BOSS_DEFEAT →
+RESULTS → COMPLETE, with `HITS rom=8` (street kills, measured hurt boxes)
+and `approx=6` (boss/stalker kills, the designed capture-cel point test).**
+
+## Route blocker fixed: opening audio must top its zone (2026-08-19)
+
+**Measurement first (a full heap dump over MCP, walking Jo's real
+`memory_zones[]`/block chain at the reproduced halt — deterministic at
+`world.frame` 1193):** the 637,092-byte BOSSCLR request had, in the whole
+system, a largest free block of 113,208 (the released RND1A) and a largest
+bump space of 498,552 (cart bank 1) — short by ~139 KB. Three structural
+facts of Jo's allocator explain it (`.deps/joengine/jo_engine/malloc.c`):
+free blocks are NEVER coalesced with free neighbours; a reused block is
+consumed WHOLE (no splitting); and only a freed block directly adjacent to
+the zone's bump pointer rolls it back (no cascade —
+`jo_reduce_memory_fragmentation()` exists for the trailing run and nothing
+called it). The transient opening audio (RND1A 113,208 + RND1B 91,124 +
+WITHDRW 396,708 + BREACH 298,476 ≈ 900 KB, all dead by the first wave) was
+loaded BEFORE the cel/archive sweep, so it sat at the BOTTOM of cart bank 1
+with permanent assets (EACT.RLE, cel buffers, a 417 KB archive) stacked
+above — its releases could never return as usable contiguous space. Bonus
+finding from the same dump: BREACH was still HELD at the halt — its WAVE_ONE
+release is gated on `jo_audio_is_channel_playing`, and slPCMStat stays
+asserted forever after a finite buffer elapses on Yaba Sanshiro (the quirk
+the withdraw path already documents).
+
+**The fix (main.c only, three parts):**
+
+1. `load_opening_audio()` — the four opening-overlay PCMs split out of
+   `load_action_audio()` and loaded LAST in the jo_main init chain, so they
+   sit at the TOP of their zone and their phase-end releases roll the bump
+   pointer back (LIFO with their lifetime). The comment in main.c carries
+   the measured numbers; do not fold them back into `load_action_audio`.
+2. At the `INTERIOR_TRANSITION` phase load: reclaim BREACH unconditionally
+   (stop + `slSndFlush()` if the channel still reports busy — the source is
+   long finished there), then `jo_reduce_memory_fragmentation()` before the
+   BOSSCLR allocation.
+3. The boss-test init block gets the same `jo_reduce_memory_fragmentation()`
+   after its non-LIFO releases, before its init-time BOSSCLR load.
+
+**Verified live (encounter-test build, MCP readback, addresses re-derived):**
+the route completed end to end with `runtime_ready` = 1 throughout;
+`boss_clear_sound.data` = 0x2273D270 (bank 1), length 637,084; post-fix heap
+at COMPLETE: bank 1 holds just 5 blocks with 161,012 bump spare, and the
+cel buffers + EACT.RLE migrated to bank 0's former audio space exactly as
+the pre-change simulation predicted. The whole-block hazards the skill
+warns about are now measured facts in this codebase, not folklore.
+
+**Still true / unchanged:** the boss phase's `approx=6` hits are the
+designed ADAPTED point test for capture-cel actors (boss + stalkers) — not
+a regression; street ROM aliens keep `rom=8`, zero approximation hits. NH
+(zero-`sel_hurt`) remains unexercised live. Capability Gate 1 stays `0/7`.
+
+**Next:** the state-dispatch / `type_promotion` decode is now genuinely the
+front of the queue (see `docs/NEXT_AGENT_PROMPT.md`).
+
+## Superseded: the review section below predates the route fix
+
 Updated: 2026-08-19 EDT (review of the collision body; two defects corrected;
 BOTH named-pending verifications actually RUN). **The defender-side collision
 wiring is confirmed live, and the `-EncounterTest` route now has a measured
