@@ -5,7 +5,8 @@ ROM-derived frontend is next**).
 
 ## Bounded S4 runtime integration: COMPLETE (2026-08-19)
 
-**Branch `codex/avp-master-plan`; parent before this checkpoint `ad71de2`.**
+**Branch `codex/avp-master-plan`; implementation committed at `fc1747e`
+(parent `ad71de2`).**
 This body connects the checked per-class evidence to the native street runtime
 without widening any approximation. Capability Gate 1 remains `0/7` and S4 as
 a whole remains open.
