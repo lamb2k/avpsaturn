@@ -1,11 +1,92 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-18 EDT (late night). **S2 BODY E LANDED AND RUNTIME-VERIFIED**
-(commit `89bc4ce`): the ROM-driven street alien renders from its decoded
-object list as per-16x16-tile VDP1 sprites in live WAVE_ONE combat, and the
-whole disc-load path was rebuilt cartridge-safe. See the top session note.
-**Next: S3 family widening (needs the PCM phase-load refactor for cart
-room), runtime alignment polish, then S4.**
+Updated: 2026-08-19 EDT (item-1 session). **S2 Body D widened: EVERY active
+street alien is ROM-driven for WALK/ATTACK** (commit `1350cf8`), not just
+one, and two build hazards that were silently corrupting the tile-archive
+build are fixed. See the new session note below, then the Body E note
+underneath it for the still-standing renderer work. **Next: item 2 of the
+ordered gap list (collision), or continue item 1 by mining a real seed key
+for hit/KO actions (see "action-seed key not yet found" below) and
+phase-loading more PCM to afford the full four-route tile archive.**
+
+## Item 1 continued: multi-actor ROM rendering; two build-corrupting bugs fixed (2026-08-19)
+
+Following the user's ordered gap list (see the "What the build is NOT"
+section of `docs/NEXT_AGENT_PROMPT.md`), item 1 (ROM-driven animation for
+the complete cast) was picked up. Progress and honest limits:
+
+**Landed:** `rom_actor_tick` in `main.c` now ticks every active street
+alien whose action is WALK or ATTACK (previously: only the first active
+non-boss slot). Each gets its own `AvspAnimFrame` and per-slot object-list
+buffer (`rom_actor_entries_all[CAP_MAX_ENEMIES][16]`,
+`rom_actor_entry_counts[]`); Body E's renderer picks up any slot with a
+non-zero count. `MEASURED` live: total entry count across all ROM actors
+now reads 13-22 per frame in WAVE_ONE combat (was 2-5 for the single
+actor before). Coverage is still narrow and stated in the code comment:
+only street aliens (`kind == CAP_ACTOR_ALIEN`) in WALK/ATTACK use the ROM
+path; hit/KO/spawn actions and stalkers still render capture cels.
+
+**Investigated, correctly NOT wired in:** `tools/gen_avsp_action_seeds.py`
+mines a real `(actor_type, action) -> animation_record` table from every
+paired capture, keyed on a TRUE EXTERNAL RE-POINT (the actor's action
+word changed AND the new record pointer is neither the previous frame's
+pointer nor its own script successor — `record + 16`, or the u32 jump
+target when flags bit 15 is set, mirroring the interpreter exactly). The
+naive first attempt (key on action-word change alone, no re-point check)
+produced a poisoned table: `(type=12, action=0x0000)` showed **65
+distinct "seed" records at 7% agreement** — it was recording the pointer
+mid-script-walk, not a real seed. After the re-point fix: 42 keys mined,
+only 16 unanimous (`agreement == 1.0`); those 16 are compiled into
+`generated/avsp_action_seeds.h`, the other 26 are recorded in
+`data/avsp_action_seeds.json` but withheld.
+
+**This table is not usable yet, for a structural reason, not a coverage
+one.** `tools/diag_seed_key.py` (a falsification scan over every actor
+byte/word offset) shows `(type, action)` alone is not the real key: it
+explains only 49% of re-point observations. The best single additional
+field found, actor `+0x10` (`world_x`, already named in
+`data/avsp_actor_layout.json`), raises unanimity to 86% but is obviously
+not itself a selector field — it is *correlated* with a real selector
+this scan has not isolated (candidates worth checking next: sub-byte
+bitfields of `+0x10`/`+0x12`, or a value read from the collision
+table-set pointer at `+0x50` rather than the actor record directly).
+**Do not wire the 16-row table into `rom_actor_tick` by guessing which
+`CapAction` maps to which key** — that would silently reintroduce
+per-instance variant errors the withholding step was built to prevent.
+Closing this properly is real S5 work (the actual action-selection AI),
+not a shortcut available here.
+
+**Two build hazards fixed, both silent (each would have shipped an
+unverified ISO if not caught):**
+
+1. `extract_avspu_stage1.py`'s `write_saturn_assets()` unconditionally
+   deleted every direct file in `SPR4/` on every `prepare_avsp_port.ps1`
+   run, including `TILES.BIN` — a different pipeline's output. This
+   defeated `build.ps1`'s "reuse if present" check silently: the file
+   always looked missing by the time that check ran, so every build
+   regenerated the archive at whatever the generator's *default* scope
+   happened to be, regardless of what was actually budgeted. `TILES.BIN`
+   is now excluded from that sweep (an explicit `keep` set).
+2. Attempting to widen the tile archive to the full four-route cast
+   (4,640 tiles, 612,720 bytes, `--full`) revealed the cartridge does
+   not have room: after growing the carved tile region to fit it,
+   `EACT.RLE` (131,552 bytes) had no single cart zone holding it — bank0
+   had ~13 KB free, bank1 (post-carve) ~103 KB, `MEASURED` live via the
+   allocator's own zone table read over MCP. `gen_avsp_gfx_tiles.py`'s
+   default now stays street-only (1,533 tiles, 202,564 bytes, the
+   archive proven to fit); `--full` is explicit opt-in with the
+   unmet-prerequisite comment attached, and `AVSP_TILE_REGION_BYTES`
+   reverted to `0x40000`. **Widening to stalkers/boss needs more PCM
+   moved to phase-boundary loads first** — this was already flagged as
+   the S3 enabler in the previous session note below; it now also
+   blocks the rest of item 1's tile coverage, not just S3.
+
+Verification: full `test.ps1` green (`avsp_tiles_test` against the
+regenerated street archive); `build.ps1 -Release -SkipHostTests` green,
+`TILES.BIN` ISO-verified against the SAME sha256 as the last known-good
+Body E build (proof the wipe-order fix didn't silently change content);
+headless boot to WAVE_ONE with `runtime_ready=1`, no failed asset, miss
+counters 0/0/0, multi-actor entry counts confirmed live over MCP.
 
 ## S2 Body E LANDED: per-object VDP1 tile renderer live in combat (2026-08-18 late night)
 

@@ -41,6 +41,11 @@ The ordered work that closes the gap, ahead of everything else:
 
 1. ROM-driven animation for the complete Round 1 cast (the second street
    alien onward), retiring the capture cels as production actors.
+   **PARTIALLY LANDED 2026-08-19** (`1350cf8`): every active street alien
+   in WALK/ATTACK is now ROM-driven, not just one — see the handoff's
+   "Item 1 continued" section for what's still missing (hit/KO/spawn
+   actions, stalkers, the full four-route tile archive) and why the
+   mined action-seed table can't be wired in yet without guessing.
 2. Connect the decoded CPS2 hitboxes and stage collision to gameplay,
    retiring the X-distance/lane approximations in `capability_model.c`.
 3. Translate the real enemy AI, including actor separation.
