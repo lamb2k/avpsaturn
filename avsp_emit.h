@@ -1,38 +1,41 @@
-/* CPS2 four-word object-entry geometry for one sprite part.
+/* CPS2 Family-1 object emission: pose assembly -> four-word object entries.
  *
- * Implements the confirmed geometry from the game's own Family-1 flipped-block
- * emitter (0x0AA1DC..0x0AA21E; true store instructions at 0x0AA210/0x0AA212 -
- * the watchpoint-reported 0x0AA214/0x0AA216 are two instructions later, a
- * confirmed MAME debugger PC-reporting skew, not the store addresses). See
- * docs/AGENT_HANDOFF.md "S2 integration" and its two follow-ups for the full
- * derivation and live verification against captured register/ROM data.
+ * Complete ROM-translated port of the game's own dispatcher at 0x0AA00E and
+ * its two Family-1 loop bodies, live-disassembled instruction by instruction
+ * (MAME 0.289 trace facility; the static ROM dump reads as garbage at these
+ * code addresses, so live disassembly is the only trusted source):
  *
- * The X/Y geometry formula is verified for 3 of the street alien's 5 observed
- * object entries at source frame 4214. The expected X/Y words are not used as
- * calculation inputs: dx/dy come from ROM and origin/or_value come from a
- * route-matched live capture. The current test still supplies code/attr from
- * the captured oracle, so this is NOT yet a complete ROM-to-object decoder.
+ *   dispatcher 0x0AA00E: budget (u16, checked against the frame's tile
+ *     budget), count (u16), selector (u16 -> dx/dy table base via the table
+ *     at 0x1FD1C8), then `bsr $0AA59A` (origin; consumes the header's
+ *     trailing u32) whose final `lsl.b #5,D1` Z flag selects the loop:
+ *   facing != 0 -> flipped loop (stores at 0x0AA210/0x0AA212):
+ *     X = ((origin_x - width - dx) & 0x3FF) | or_value, attr low byte
+ *     = ((raw & 0xE0) + palette) ^ 0x20
+ *   facing == 0 -> plain loop (0x0AA1A8..0x0AA1DA):
+ *     X = ((origin_x + dx) & 0x3FF) | or_value, attr low byte
+ *     = (raw & 0xE0) + palette
+ *   both: Y = (origin_y + dy) & 0x3FF; width = 16*(((raw>>8)&0xF)+1);
+ *   A2 walk: dx,dy then A2 += advance (the part's trailing u16).
  *
- *   X = ((origin_x - width - dx) & 0x3FF) | or_value
- *   Y = (origin_y + dy) & 0x3FF
- *   width = 16 * (((attr >> 8) & 0xF) + 1)
+ *   origin (0x0AA59A..0x0AA5E6): D2 = header's trailing u32;
+ *     origin_y = anchor_y - world_y + 0x100 -/+ D2.lo  (facing bit 1)
+ *     origin_x = world_x - anchor_x + 0x40  -/+ D2.hi  (facing bit 0)
+ *   anchor_x/anchor_y are LIVE CAMERA STATE at 0xFF8278/0xFF827C
+ *   (= CPS-A scroll1_x + 0x40 and 0x300 - scroll1_y, verified across two
+ *   camera positions), not ROM constants.
  *
- * `origin_x`/`origin_y` are the actor's own per-actor screen-origin scratch
- * (confirmed live to be written once per actor per frame, NOT a frame-global
- * camera constant). Its writer at 0x0AA59A is decoded; the two camera-anchor
- * inputs still need route-matched live reads before native use. `dx`/`dy` come
- * from a per-part offset table addressed via the
- * pose's own part-list entry. `or_value` was confirmed live as 0x8000 (actor
- * `+0x2E`) for the verified case; it is a real per-actor/per-pose value, not a
- * hardcoded constant, and must be supplied by the caller.
+ *   A pose's `assembly` field starts with a selector word: 0x0006 = one
+ *   group (header follows), 0x000C = two groups, each prefixed by its own
+ *   0x0006 tag. Other selector words are other emitter families, not yet
+ *   decoded; avsp_emit_pose reports them rather than guessing.
  *
- * This function does not walk the ROM part table itself and does not resolve
- * dx/dy/attr/code from an assembly address - the caller supplies per-part
- * inputs already resolved. Two source entries lie between observed entries 2
- * and 3, but the narrow watchpoint evidence does not prove whether they emitted
- * elsewhere in object RAM or were suppressed by a condition. Do not assume
- * either model until a widened live trace or reachable-path control-flow trace
- * resolves it.
+ * Falsification: tools/verify_avsp_object_corpus.py runs the identical
+ * algorithm over 6,139 captured frames across four routes: 6,010 eligible
+ * actor-frame instances, 5,614 exact four-word matches against the game's
+ * own object RAM, 396 game-omitted (its live-proven per-frame tile-budget
+ * bail, offscreen edge band, flicker), ZERO mismatches. See
+ * data/avsp_object_corpus_verification.json and docs/AGENT_HANDOFF.md.
  *
  * C90.
  */
@@ -41,16 +44,42 @@
 #define AVSP_EMIT_H
 
 typedef struct {
-    unsigned short x;     /* word 0: priority (bits 13-15) | position (bits 0-11) */
+    unsigned short x;     /* word 0: priority bits | position (bits 0-9) */
     unsigned short y;     /* word 1: position (bits 0-9) */
     unsigned short code;  /* word 2 */
     unsigned short attr;  /* word 3: palette/flip/block-size */
 } AvspObjectEntry;
 
-/* Compute one part's four-word object entry using the confirmed geometry. */
-void avsp_emit_part_flipped(unsigned short origin_x, unsigned short origin_y,
-                            short dx, short dy, unsigned short code,
-                            unsigned short attr, unsigned short or_value,
-                            AvspObjectEntry *out);
+/* Per-actor inputs, all plain actor-record / camera-state fields:
+ * world_x/world_y = actor +0x10/+0x14; facing = +0x0F; palette = +0x0E;
+ * or_value = +0x2E; anchor_x/anchor_y = the camera anchors at
+ * 0xFF8278/0xFF827C. */
+typedef struct {
+    unsigned short world_x;
+    unsigned short world_y;
+    unsigned char facing;
+    unsigned char palette;
+    unsigned short or_value;
+    unsigned short anchor_x;
+    unsigned short anchor_y;
+} AvspEmitActor;
+
+/* Decode the pose assembly at ROM source address `assembly` into object
+ * entries. `rom` holds the decrypted program image with rom[0] at source
+ * address 0; `rom_size` bounds every read. Writes up to `cap` entries.
+ * Returns the entry count, or:
+ *   -1  unknown/undecoded assembly selector word (another emitter family)
+ *   -2  a read would leave the ROM window, or an implausible part count
+ *   -3  bad arguments
+ * A short `cap` truncates the output but still returns the full count. */
+int avsp_emit_pose(const unsigned char *rom, unsigned long rom_size,
+                   unsigned long assembly, const AvspEmitActor *actor,
+                   AvspObjectEntry *out, int cap);
+
+/* Decode one group given its header address (used by avsp_emit_pose; exposed
+ * for tests and tooling). Same return convention. */
+int avsp_emit_group(const unsigned char *rom, unsigned long rom_size,
+                    unsigned long header, const AvspEmitActor *actor,
+                    AvspObjectEntry *out, int cap);
 
 #endif /* AVSP_EMIT_H */

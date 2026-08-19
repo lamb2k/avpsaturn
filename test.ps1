@@ -84,11 +84,15 @@ if ($LASTEXITCODE -ne 0) {
     throw "Animation-walk test failed with exit code $LASTEXITCODE."
 }
 
-# The confirmed object-entry geometry formula, checked against ROM-derived
-# dx/dy for the entries where the part-table walk is understood. This is not
-# yet the complete ROM-to-object decoder; see avsp_emit.h.
+# The complete ROM-to-object emission pipeline (pose assembly -> selector ->
+# groups -> origin -> both loop variants -> four-word entries), checked
+# against live-captured oracle entries for both selectors, both facing
+# variants and three palettes. The same algorithm passes the 6,010-instance
+# corpus falsification with zero mismatches; see avsp_emit.h and
+# tools/verify_avsp_object_corpus.py. Requires the private program image;
+# skips cleanly without it.
 $emitCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_emit.c tests/avsp_emit_test.c -o build/avsp_emit_test && ./build/avsp_emit_test"
 & $wsl.Source sh '-lc' $emitCommand
 if ($LASTEXITCODE -ne 0) {
-    throw "Object-entry geometry test failed with exit code $LASTEXITCODE."
+    throw "Object-emission pipeline test failed with exit code $LASTEXITCODE."
 }
