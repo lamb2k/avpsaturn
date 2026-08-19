@@ -1,4 +1,14 @@
-# Next agent prompt: locate the action-level dispatch, then wire per-state table_set
+# Next agent prompt: read hit/KO/spawn table_set offline, then wire it
+
+> **Step 1 below is DONE (2026-08-19).** The master actor dispatch is
+> resolved: the loop at `0x01B980` indexes a 43-entry table at `0x01B9B6`
+> with actor byte **`+0x02` (class)**; class `0x1F` → `0x060532` directly.
+> There is **no action-level (`+0x06`) indirection** for the street alien —
+> that part of the earlier model was wrong. See the handoff's "Master actor
+> dispatch: RESOLVED". Tracked:
+> `tools/extract_avsp_actor_classes.py`, `tools/verify_avsp_actor_classes.py`
+> (check B: 2186/2186, zero exceptions; control fails as required).
+> **Start at step 2**, which is now an OFFLINE read rather than a live hunt.
 
 ## Where the project is
 
@@ -85,11 +95,16 @@ The probe:
 Whatever indexes the real action dispatch is the same structure S5's AI
 translation will walk — worth getting right rather than fast.
 
-### Step 2 — reconcile hit/KO/spawn `table_set` (offline, after step 1)
+### Step 2 — reconcile hit/KO/spawn `table_set` (offline; START HERE)
 
-With the action map, find the street alien's HIT/KO/spawn action routines,
-locate their sub-state-0 initializers among the 250 enumerated dispatchers,
-and read their `table_set` immediates directly from the opcode image.
+The street alien's routine is now known exactly: class `0x1F` →
+`0x060532`, a sub-state dispatcher whose 4-entry table is already decoded in
+`data/avsp_substate_dispatchers.json`. Walk its sub-state handlers, identify
+which correspond to HIT/KO/spawn, and read their state-0 `table_set`
+immediates directly from the opcode image — no live tracing needed.
+If a needed state turns out to live under a different class (the promotion
+path `0x00` → `0x03F09C` rewrites the type byte, so a dying/promoting actor
+may change class), follow the class table rather than assuming.
 Cross-check against corpus frames carrying those action words. This answers
 what the collision body left open: today those frames have no measured hurt
 box and correctly fall back to the ADAPTED approximation, counted in the

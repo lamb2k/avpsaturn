@@ -1,0 +1,201 @@
+{
+ "anchors_verified": {
+  "0x00": "0x03F09C",
+  "0x1F": "0x060532"
+ },
+ "classification": "master actor dispatch - loop/table addresses and class indices only; no ROM bytes",
+ "correction": "the sub-state body modelled the outer level as the action byte +0x06; for the street alien the class table entry lands DIRECTLY on sub-state dispatcher 0x060532 with no action-level indirection, which is why scanning the 85 '+0x06' idiom sites found no link. The +0x06 sites are not a universal level 1.",
+ "entries": [
+  {
+   "class": "0x00",
+   "routine": "0x03F09C"
+  },
+  {
+   "class": "0x01",
+   "routine": "0x0407B0"
+  },
+  {
+   "class": "0x02",
+   "routine": "0x0425E0"
+  },
+  {
+   "class": "0x03",
+   "routine": "0x043E2C"
+  },
+  {
+   "class": "0x04",
+   "routine": "0x045456"
+  },
+  {
+   "class": "0x05",
+   "routine": "0x04718C"
+  },
+  {
+   "class": "0x06",
+   "routine": "0x04956C"
+  },
+  {
+   "class": "0x07",
+   "routine": "0x04BE76"
+  },
+  {
+   "class": "0x08",
+   "routine": "0x04DF84"
+  },
+  {
+   "class": "0x09",
+   "routine": "0x04F004"
+  },
+  {
+   "class": "0x0A",
+   "routine": "0x04FF3C"
+  },
+  {
+   "class": "0x0B",
+   "routine": "0x050E74"
+  },
+  {
+   "class": "0x0C",
+   "routine": "0x0522BA"
+  },
+  {
+   "class": "0x0D",
+   "routine": "0x053280"
+  },
+  {
+   "class": "0x0E",
+   "routine": "0x053764"
+  },
+  {
+   "class": "0x0F",
+   "routine": "0x054ED4"
+  },
+  {
+   "class": "0x10",
+   "routine": "0x056644"
+  },
+  {
+   "class": "0x11",
+   "routine": "0x056708"
+  },
+  {
+   "class": "0x12",
+   "routine": "0x05677A"
+  },
+  {
+   "class": "0x13",
+   "routine": "0x05988C"
+  },
+  {
+   "class": "0x14",
+   "routine": "0x05A788"
+  },
+  {
+   "class": "0x15",
+   "routine": "0x05B5A2"
+  },
+  {
+   "class": "0x16",
+   "routine": "0x05C3BC"
+  },
+  {
+   "class": "0x17",
+   "routine": "0x05CA68"
+  },
+  {
+   "class": "0x18",
+   "routine": "0x05D10E"
+  },
+  {
+   "class": "0x19",
+   "routine": "0x05D7B4"
+  },
+  {
+   "class": "0x1A",
+   "routine": "0x05DE5C"
+  },
+  {
+   "class": "0x1B",
+   "routine": "0x05E3EA"
+  },
+  {
+   "class": "0x1C",
+   "routine": "0x05E978"
+  },
+  {
+   "class": "0x1D",
+   "routine": "0x05FC92"
+  },
+  {
+   "class": "0x1E",
+   "routine": "0x05FE24"
+  },
+  {
+   "class": "0x1F",
+   "routine": "0x060532"
+  },
+  {
+   "class": "0x20",
+   "routine": "0x061198"
+  },
+  {
+   "class": "0x21",
+   "routine": "0x06142C"
+  },
+  {
+   "class": "0x22",
+   "routine": "0x061598"
+  },
+  {
+   "class": "0x23",
+   "routine": "0x061A22"
+  },
+  {
+   "class": "0x24",
+   "routine": "0x061F52"
+  },
+  {
+   "class": "0x25",
+   "routine": "0x062800"
+  },
+  {
+   "class": "0x26",
+   "routine": "0x06296C"
+  },
+  {
+   "class": "0x27",
+   "routine": "0x062BE0"
+  },
+  {
+   "class": "0x28",
+   "routine": "0x06518E"
+  },
+  {
+   "class": "0x29",
+   "routine": "0x06774C"
+  },
+  {
+   "class": "0x2A",
+   "routine": "0x068FEC"
+  }
+ ],
+ "entry_count": 43,
+ "failures": [],
+ "master_loop": {
+  "actor_stride": "0xC0",
+  "band_base": "0x00FF9580",
+  "band_base_derivation": "A5 + 0x1580, with A5 = 0x00FF8000 MEASURED live at 0x01B986",
+  "call_form": "movea.l ($10,PC,D0.w),A0 ; jsr (A0)",
+  "index_source": "move.b ($2,A6),D0  - actor +0x02 (class)",
+  "pc": "0x01B980",
+  "slot_gate": "tst.b (A6)  - actor +0x00 nonzero",
+  "slots": 20
+ },
+ "method": "live instruction trace of the master actor loop (bank-write framed window ending at 0x060532), then offline decode of the PC-relative absolute-long table it indexes, from the validated opcode-space dump",
+ "negative_control_ok": true,
+ "opcode_image_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
+ "question": "what calls into a sub-state dispatcher such as 0x060532?",
+ "result": "PASS",
+ "schema": 1,
+ "table_base": "0x01B9B6"
+}

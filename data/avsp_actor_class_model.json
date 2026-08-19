@@ -1,0 +1,51 @@
+{
+ "band": {
+  "base": "0x00FF9580",
+  "slots": 20,
+  "stride": "0xC0"
+ },
+ "check_a_class_in_table_range": {
+  "examples": [],
+  "pass": true,
+  "vacuous": false,
+  "violations": 0
+ },
+ "check_b_runtime_population_class": {
+  "exceptions": {},
+  "expected_class": "0x1F",
+  "matching": 2186,
+  "pass": true,
+  "population": "live band actors whose +0x1C record pointer is in the street walk/attack spans (the population the runtime drives and the table_set gate declares)",
+  "ran": true,
+  "rate": 1.0,
+  "total": 2186
+ },
+ "check_c_negative_control": {
+  "byte": "+0x11",
+  "note": "the control byte MUST go out of table range; if it did not, check A would be trivially satisfiable",
+  "out_of_range_count": 19151,
+  "pass": true
+ },
+ "class_histogram": {
+  "0x00": 4562,
+  "0x06": 4055,
+  "0x1F": 16487
+ },
+ "classification": "master actor class-dispatch falsification - counts and class indices only, no ROM bytes",
+ "live_actor_frames": 25104,
+ "observation_note": "type-12 actors are NOT always class 0x1F; class 0x00 (routine 0x03F09C, the type_promotion path) and 0x06 also occur. The dispatch is keyed on +0x02, not on the type byte.",
+ "observation_type_class_joint": {
+  "0x0C/0x00": 4562,
+  "0x0C/0x06": 4055,
+  "0x0C/0x1F": 16487
+ },
+ "result": "PASS",
+ "routes": [
+  "enemy_actions",
+  "stalker_actions",
+  "boss_actions",
+  "boss_ko"
+ ],
+ "schema": 1,
+ "table_entry_count": 43
+}

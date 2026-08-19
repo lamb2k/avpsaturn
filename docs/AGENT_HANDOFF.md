@@ -1,13 +1,100 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-19 EDT (session paused mid-probe; HEAD unchanged at
-`93c623c`). **The committed dispatch-decode body (below) is complete and
-correct as committed.** This update records a FOLLOW-ON live-probe attempt
-at the caller question it left open, which made real progress on tooling
-but did NOT find the caller. Nothing was committed this session; the only
-change on disk is one new untracked one-off,
-`tools/mame_trace_dispatch_trampoline.lua`, preserved per the untracked-
-diagnostics rule with its findings written into its own header.
+Updated: 2026-08-19 EDT (**master actor dispatch RESOLVED**; the caller
+question is closed). The item left open by the sub-state body — what calls
+into a dispatcher such as `0x060532` — is now decoded, live-traced, and
+falsified, and it CORRECTS that body's level-1 model. See "Master actor
+dispatch: RESOLVED" immediately below; the earlier "caller trace attempted"
+section is superseded and kept only for its two durable tooling lessons.
+
+## Master actor dispatch: RESOLVED (2026-08-19)
+
+**The winning move was not the planned 85-run brute force.** This session's
+own discovery that `trace <file>,0` TRUNCATES on every hit turned out to be
+exploitable: arm the trace ON at the once-per-frame object-bank write
+(`0x8040E0`, the established frame marker) and OFF at `0x060532`, and each
+frame overwrites the log, so the survivor is exactly the window
+`[frame start → dispatcher hit]` — which necessarily CONTAINS the caller.
+One 3-second run, first attempt. Prefer this framing technique over
+candidate-by-candidate search whenever the target PC is known.
+
+**The master actor loop (live-traced, then read offline):**
+
+```text
+01B980: moveq   #$13, D7            ; 20 slots
+01B982: lea     ($1580,A5), A6      ; band base = A5 + 0x1580
+01B986: tst.b   (A6)                ; slot gate: actor +0x00 nonzero
+01B98A: tst.b   ($48,A6) ...        ; per-slot countdown at +0x48, clears +0x47
+01B99A: move.b  ($2,A6), D0         ; INDEX = actor byte +0x02  (the CLASS)
+01B99E: ext.w   D0 ; add.w D0,D0 ; add.w D0,D0     ; x4
+01B9A4: movea.l ($10,PC,D0.w), A0   ; table base = 0x01B9B6, 43 absolute longs
+01B9AA: jsr     (A0)                ; CALL the class routine
+01B9AC: lea     ($c0,A6), A6        ; stride 0xC0
+01B9B0: dbra    D7, $1b986
+```
+
+`A5 = 0x00FF8000` MEASURED live, so the band is `0x00FF9580 … 0x00FFA3C0`
+(twenty 0xC0 slots). Street aliens were observed live in that band carrying
+class `0x1F`, and table entry `0x1F` is exactly `0x060532`.
+
+**THE CORRECTION (supersedes `93c623c`'s level-1 claim).** That body
+modelled the outer level as the ACTION byte `+0x06`. For the street alien
+that is wrong: its class-table entry lands **directly** on the sub-state
+dispatcher, with no action-level indirection — which is precisely why the
+offline scan of all 85 `+0x06` idiom sites found nothing pointing at
+`0x060532`. The `+0x06` sites are real but belong to whichever classes use
+them; they are **not** a universal level 1. The measured chain is:
+
+```text
+actor +0x02 (class 0x1F) -> table 0x01B9B6 -> 0x060532
+  -> actor +0x04 (sub-state) -> state-0 handler -> table_set immediate
+```
+
+This also finally explains the long-standing `+0x02` puzzle: an early
+session found `+0x02` "perfectly correlated" with `table_set` but its
+control called it vacuous. Both were right. `+0x02` is not a predictor of
+`table_set` — it is the **class selector** that chooses the routine which
+*contains* the `table_set` store. The correlation was real; the causal link
+runs through the dispatch, which correlation alone could never show.
+
+**Tracked evidence** (`tools/extract_avsp_actor_classes.py`,
+`tools/verify_avsp_actor_classes.py`, manifests
+`data/avsp_actor_class_table.json`, `data/avsp_actor_class_model.json`,
+both wired into `test.ps1`, both skipping cleanly without private inputs):
+
+- 43-entry class table decoded; anchors verified exactly (`0x1F` →
+  `0x060532`, `0x00` → `0x03F09C`, the type_promotion routine).
+- **Check A:** 25,104 live actor-frames in the loop's own band across four
+  routes — every class byte within the decoded table's range, zero
+  violations. Vacuity is a failure.
+- **Check B:** the runtime-relevant population — live band actors whose
+  `+0x1C` record pointer is in the street walk/attack spans — carries class
+  `0x1F` at **2186/2186, zero exceptions**. That count is *identical* to the
+  `table_set` gate's declared population, an independent cross-check that
+  closes the chain class → dispatcher → initializer → `0x00130AC8`.
+- **Check C (negative control):** `+0x11` (high-entropy coordinate byte)
+  correctly FAILS the range test, 19,151 out-of-range. An earlier control
+  (`+0x03`) was tried, found incapable of failing, and rejected as
+  non-discriminating rather than kept as decoration.
+
+**Honest scope note recorded in the manifest:** "type-12 ⇒ class `0x1F`" is
+**false** and the data says so — live band actors with type byte 12 also
+carry classes `0x00` and `0x06` (lifecycle/promotion states). The dispatch
+is keyed on `+0x02`, never on the type byte. The joint distribution ships as
+an observation, not a rule.
+
+**Still open (unchanged, and now cheaper):** hit/KO/spawn `table_set`. With
+the class table plus the 250 enumerated sub-state dispatchers, this is now
+an offline read — find the street alien's HIT/KO/spawn sub-states under
+class `0x1F`'s dispatcher and read their state-0 immediates. Until it lands
+those frames keep the ADAPTED approximation, counted in the `GAP`
+diagnostic. No runtime code changed this body.
+
+## Superseded: caller trace attempted, harness fixed (2026-08-19, earlier)
+
+Kept for its two durable lessons (both still binding); its conclusion that
+the caller was a RAM-resident trampoline is **withdrawn** — the caller is
+the ROM master loop above.
 
 ## State dispatch: caller trace attempted, harness fixed, caller still open (2026-08-19, later same day)
 

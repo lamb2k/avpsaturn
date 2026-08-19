@@ -201,3 +201,17 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Sub-state model falsification failed with exit code $LASTEXITCODE."
 }
+
+# Master actor dispatch: the per-class routine table the live-traced actor
+# loop indexes with actor byte +0x02, and its corpus falsification. Resolves
+# what calls into a sub-state dispatcher. Both skip cleanly without the
+# private opcode dump / captures.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\extract_avsp_actor_classes.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Actor class-table extraction failed with exit code $LASTEXITCODE."
+}
+
+& $PythonPath (Join-Path $PSScriptRoot 'tools\verify_avsp_actor_classes.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Actor class-dispatch falsification failed with exit code $LASTEXITCODE."
+}
