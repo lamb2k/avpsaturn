@@ -18,6 +18,17 @@
    "kind": "vdp1-4bpp-cel",
    "palette_bank": 15,
    "path": "FRONT/CUR01.BIN",
+   "sha256": "4568d4b9aecade1c9c72f7947079835c96fe8452c42631fd55862f5d1fe6df1e",
+   "tile_code": "0x885D",
+   "width": 48
+  },
+  {
+   "bundle": "select",
+   "bytes": 768,
+   "height": 32,
+   "kind": "vdp1-4bpp-cel",
+   "palette_bank": 15,
+   "path": "FRONT/CUR02.BIN",
    "sha256": "e012b145d7e12c47df6f32d1dc929c9661b6b1f8650ae011c61132696774bfaa",
    "tile_code": "0x887D",
    "width": 48
@@ -28,9 +39,31 @@
    "height": 32,
    "kind": "vdp1-4bpp-cel",
    "palette_bank": 15,
-   "path": "FRONT/CUR02.BIN",
+   "path": "FRONT/CUR03.BIN",
+   "sha256": "f2fb45d4471078cb2b3232a64d8a9c787de825668deb8280145ccf241e45ef71",
+   "tile_code": "0x889D",
+   "width": 48
+  },
+  {
+   "bundle": "select",
+   "bytes": 768,
+   "height": 32,
+   "kind": "vdp1-4bpp-cel",
+   "palette_bank": 15,
+   "path": "FRONT/CUR04.BIN",
    "sha256": "2e872692ba189e9d179d54f75b4d60d209063f95973c497776aa90fb26ef7981",
    "tile_code": "0x88BD",
+   "width": 48
+  },
+  {
+   "bundle": "select",
+   "bytes": 768,
+   "height": 32,
+   "kind": "vdp1-4bpp-cel",
+   "palette_bank": 15,
+   "path": "FRONT/CUR05.BIN",
+   "sha256": "e4733c4a03c319778068e1d4cd5b9ca6232024fb3d1732569255347280001b88",
+   "tile_code": "0x88DD",
    "width": 48
   },
   {
@@ -39,7 +72,7 @@
    "height": 16,
    "kind": "vdp1-4bpp-cel",
    "palette_bank": 15,
-   "path": "FRONT/CUR03.BIN",
+   "path": "FRONT/CUR06.BIN",
    "sha256": "300109b597859cbbe71195db6af03642d6f91c9651bed1e5f2c03e6f3030a2a6",
    "tile_code": "0x8D04",
    "width": 32
@@ -250,7 +283,7 @@
  ],
  "bundle_budget_bytes": 78848,
  "bundle_bytes": {
-  "select": 37506,
+  "select": 39810,
   "title": 55692
  },
  "classification": "Saturn frontend assets derived from ROM graphics + CPS tilemap/object/palette state; no captured pixels",
@@ -410,7 +443,19 @@
    }
   }
  },
- "cursor_unique_cels": 4,
+ "cursor_animation": {
+  "border_assets_in_display_order": [
+   "FRONT/CUR02.BIN",
+   "FRONT/CUR03.BIN",
+   "FRONT/CUR04.BIN",
+   "FRONT/CUR05.BIN",
+   "FRONT/CUR00.BIN",
+   "FRONT/CUR01.BIN"
+  ],
+  "label_asset": "FRONT/CUR06.BIN",
+  "source_frame_period": 6
+ },
+ "cursor_unique_cels": 7,
  "geometry": {
   "height": 224,
   "mapping": "endpoint-aligned-nearest",
@@ -420,7 +465,7 @@
  "object_schedules": {
   "settled_select_cursor_draw_order": [
    {
-    "asset": "FRONT/CUR02.BIN",
+    "asset": "FRONT/CUR04.BIN",
     "palette_bank": 15,
     "saturn_centre_x": -118,
     "saturn_centre_y": -37,
@@ -433,7 +478,7 @@
     "source_y": 59
    },
    {
-    "asset": "FRONT/CUR03.BIN",
+    "asset": "FRONT/CUR06.BIN",
     "palette_bank": 15,
     "saturn_centre_x": -118,
     "saturn_centre_y": -37,

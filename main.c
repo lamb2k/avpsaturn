@@ -3,6 +3,7 @@
 #include "capability_model.h"
 #include "avsp_tiles.h"
 #include "avsp_collision.h"
+#include "avsp_frontend.h"
 
 #include "generated/avsp_anim_records.h"
 #include "generated/avsp_emit_windows.h"
@@ -15,7 +16,6 @@
 #include "generated/avsp_contact_audio.h"
 #include "generated/avsp_door_dialogue_audio.h"
 #include "generated/avsp_enemy_animation.h"
-#include "generated/avsp_frontend_palette.h"
 #include "generated/avsp_hud.h"
 #include "generated/avsp_ko_contact_audio.h"
 #include "generated/avsp_interior_transition_audio.h"
@@ -73,7 +73,8 @@
      CAP_MAX_ENEMIES * AVSP_ENEMY_DECODED_BYTES + \
      AVSP_BOSS_DECODED_BYTES + \
      AVSP_HUD_TEXTURE_BYTES + \
-     AVSP_TILE_SPRITE_POOL * AVSP_TILE_BYTES)
+     AVSP_TILE_SPRITE_POOL * AVSP_TILE_BYTES + \
+     AVSP_FRONTEND_VDP1_MAX_BYTES)
 
 #if JO_TV_WIDTH != CAP_VIEW_WIDTH || JO_TV_HEIGHT != 224
 #error "The AvP fidelity build requires Saturn TV_352x224"
@@ -119,7 +120,7 @@ static jo_palette hud_palette;
 static jo_palette frontend_palettes[AVSP_FRONTEND_SCENES];
 static jo_img_8bits background_image;
 static jo_img_8bits boss_background_image;
-static jo_img_8bits frontend_images[AVSP_FRONTEND_SCENES];
+static AvspFrontend frontend_runtime;
 static unsigned char *sequence_rle[AVSP_SEQUENCE_SCENES];
 static unsigned char *sequence_pixels;
 static unsigned char *background_bitmap;
@@ -190,6 +191,20 @@ static int opening_audio_channel_observed;
 static int enemy_runtime_ready;
 static int boss_runtime_ready;
 static int current_bitmap_scene;
+
+/* Stable headless readback surface. These are intentionally global and
+ * volatile so stock emulator debugger memory reads can verify the focused
+ * frontend profile without relying on a GUI screenshot. */
+volatile int avsp_diag_runtime_ready;
+volatile int avsp_diag_encounter_state;
+volatile int avsp_diag_world_frame;
+volatile int avsp_diag_selected_character;
+volatile int avsp_diag_selection_cursor;
+volatile int avsp_diag_frontend_late_reads;
+volatile int avsp_diag_frontend_missing_assets;
+volatile int avsp_diag_frontend_rle_errors;
+volatile int avsp_diag_frontend_palette_errors;
+volatile int avsp_diag_frontend_commands;
 #ifdef AVSP_VISUAL_TEST
 static int visual_action_index;
 static int visual_walk_frames;
@@ -217,6 +232,11 @@ static unsigned char avsp_fs_staging[AVSP_FS_STAGING_BYTES];
  * debugger-read fields. */
 static const char *volatile avsp_fs_last_error;
 static volatile int avsp_fs_last_read;
+volatile const char *avsp_diag_fs_name;
+volatile const char *avsp_diag_fs_dir;
+volatile int avsp_diag_fs_expected;
+volatile int avsp_diag_fs_offset;
+volatile int avsp_diag_fs_reads;
 
 /* Stream one file into dest (any bus). Returns bytes read, or -1. */
 static int avsp_fs_read_into(const char *const filename,
@@ -231,6 +251,10 @@ static int avsp_fs_read_into(const char *const filename,
     int fsize;
     int offset = 0;
 
+    avsp_diag_fs_name = filename;
+    avsp_diag_fs_dir = sub_dir;
+    avsp_diag_fs_expected = 0;
+    avsp_diag_fs_offset = 0;
     jo_fs_cd(sub_dir);
     fid = GFS_NameToId((Sint8 *)filename);
     if (fid < 0)
@@ -248,6 +272,7 @@ static int avsp_fs_read_into(const char *const filename,
     }
     GFS_GetFileSize(gfs, &sctsize, &nsct, &lastsize);
     fsize = sctsize * (nsct - 1) + lastsize;
+    avsp_diag_fs_expected = fsize;
     if (fsize <= 0 || fsize > max_bytes)
     {
         GFS_Close(gfs);
@@ -259,6 +284,8 @@ static int avsp_fs_read_into(const char *const filename,
     while (offset < fsize)
     {
         int chunk;
+        avsp_diag_fs_offset = offset;
+        ++avsp_diag_fs_reads;
         Sint32 got = GFS_Fread(gfs, AVSP_FS_STAGING_SECTORS,
                                avsp_fs_staging, AVSP_FS_STAGING_BYTES);
         if (got <= 0)
@@ -775,10 +802,7 @@ static void set_frontend_palettes(void)
     for (scene = 0; scene < AVSP_FRONTEND_SCENES; ++scene)
     {
         for (index = 0; index < 256; ++index)
-            colors[index] = JO_COLOR_RGB(
-                avsp_frontend_palettes[scene][index][0],
-                avsp_frontend_palettes[scene][index][1],
-                avsp_frontend_palettes[scene][index][2]);
+            colors[index] = JO_COLOR_Black;
         jo_create_palette_from(&frontend_palettes[scene], colors, 256);
     }
 }
@@ -822,32 +846,23 @@ static int load_hud_assets(void)
 
 static int load_frontend_assets(void)
 {
-    int scene;
-    int length;
-    for (scene = 0; scene < AVSP_FRONTEND_SCENES; ++scene)
+    avsp_frontend_init(&frontend_runtime, avsp_fs_read_file_in_dir,
+                       background_bitmap, &frontend_palettes[0],
+                       &frontend_palettes[1]);
+    if (!avsp_frontend_load_title_surface(&frontend_runtime))
     {
-        jo_img_8bits *image = &frontend_images[scene];
-        image->width = SNAPSHOT_FIT_WIDTH;
-        image->height = SNAPSHOT_HEIGHT;
-        length = 0;
-        image->data = (unsigned char *)avsp_fs_read_file_in_dir(
-            avsp_frontend_files[scene], "SPR8", &length);
-        if (image->data == JO_NULL || length != SNAPSHOT_FIT_BYTES)
-        {
-            failed_asset = avsp_frontend_files[scene];
-            return 0;
-        }
+        failed_asset = "ROM FRONTEND TITLE";
+        return 0;
     }
     return 1;
 }
 
 static void release_frontend_scene(const int scene)
 {
-    if (scene < 0 || scene >= AVSP_FRONTEND_SCENES ||
-        frontend_images[scene].data == JO_NULL)
-        return;
-    jo_free(frontend_images[scene].data);
-    frontend_images[scene].data = JO_NULL;
+    if (scene == 0)
+        avsp_frontend_release_title_objects(&frontend_runtime);
+    else if (scene == 1)
+        avsp_frontend_release_select_objects(&frontend_runtime);
 }
 
 static void copy_snapshot_to_background(const unsigned char *source)
@@ -857,13 +872,10 @@ static void copy_snapshot_to_background(const unsigned char *source)
     for (y = 0; y < BACKGROUND_HEIGHT; ++y)
     {
         unsigned char *target = background_bitmap + y * BACKGROUND_WIDTH;
-        /* Boot-bringup fix: these were back-to-back jo_dma_copy calls -
-         * hundreds of DMA transfers into VDP2 VRAM per transition - and the
-         * first interactive boots froze nondeterministically at scene
-         * transitions with the CPU spinning while audio continued, the
-         * signature of a DMA-status busy-wait deadlock. Plain CPU copies
-         * take a few milliseconds once per scene change and cannot
-         * deadlock. */
+        /* CPU copies avoid the transition-time DMA busy-wait deadlock seen
+         * in interactive boots. This helper remains shared by the route
+         * sequence surfaces; the ROM frontend RLE decoder writes NBG1
+         * directly and does not call it. */
         memcpy(target, empty_row, BACKGROUND_WIDTH);
         if (y < SNAPSHOT_HEIGHT)
             memcpy(target, source + y * SNAPSHOT_FIT_WIDTH,
@@ -875,15 +887,20 @@ static int activate_frontend_scene(const int scene)
 {
     int bitmap_scene = BITMAP_SCENE_FRONTEND_BASE + scene;
     if (current_bitmap_scene == bitmap_scene) return 1;
-    if (scene < 0 || scene >= AVSP_FRONTEND_SCENES ||
-        frontend_images[scene].data == JO_NULL)
+    if (scene == 0 && !frontend_runtime.title_surface_ready)
     {
-        failed_asset = "FRONTEND SCENE";
+        failed_asset = "ROM FRONTEND TITLE";
         return 0;
     }
-    copy_snapshot_to_background(frontend_images[scene].data);
-    slBMPaletteNbg1((unsigned short)frontend_palettes[scene].id);
-    jo_move_background(0, 0);
+    if (scene == 1 && !frontend_runtime.select_surface_ready)
+    {
+        failed_asset = "ROM FRONTEND SELECT";
+        return 0;
+    }
+    if (scene == 0)
+        avsp_frontend_activate_title(&frontend_runtime);
+    else
+        avsp_frontend_activate_select(&frontend_runtime);
     current_bitmap_scene = bitmap_scene;
     return 1;
 }
@@ -1879,7 +1896,22 @@ static void draw_world(void)
         world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM)
     {
         int scene = world.encounter_state == CAP_ENCOUNTER_MAIN_MENU ? 0 : 1;
+        int cursor_visible = 1;
         if (!activate_frontend_scene(scene)) runtime_ready = 0;
+        if (world.encounter_state == CAP_ENCOUNTER_MAIN_MENU)
+            avsp_frontend_draw_title(&frontend_runtime);
+        else
+        {
+            /* The source begins a four-frame-off/four-frame-on cursor blink
+             * three frames after confirmation. Selection itself is a steady
+             * live two-object marker. */
+            if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM &&
+                world.encounter_timer >= 3)
+                cursor_visible = (((world.encounter_timer - 3) / 4) & 1) != 0;
+            avsp_frontend_draw_cursor(
+                &frontend_runtime, world.selection_cursor,
+                world.encounter_timer, cursor_visible);
+        }
         if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM)
             apply_confirm_shutter();
         return;
@@ -2082,6 +2114,26 @@ static CapInput encounter_test_input(void)
 }
 #endif
 
+#ifdef AVSP_FRONTEND_TEST
+static CapInput frontend_test_input(void)
+{
+    CapInput input;
+    memset(&input, 0, sizeof(input));
+    if (world.encounter_state == CAP_ENCOUNTER_MAIN_MENU)
+    {
+        if (world.frame == 120) input.start_pressed = 1;
+    }
+    else if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT)
+    {
+        /* Warrior -> Schaefer -> Hunter, with releases between source edges. */
+        if (world.frame == 180) input.right = 1;
+        if (world.frame == 200) input.down = 1;
+        if (world.frame == 240) input.jump_pressed = 1;
+    }
+    return input;
+}
+#endif
+
 static void draw_hud(void)
 {
     if (!debug_hud_enabled) return;
@@ -2116,6 +2168,9 @@ static void frame_callback(void)
     CapInput input;
     CapClipRequest clip_request;
     jo_clear_screen();
+    avsp_diag_runtime_ready = runtime_ready;
+    avsp_diag_encounter_state = (int)world.encounter_state;
+    avsp_diag_world_frame = world.frame;
     if (!runtime_ready)
     {
         jo_printf(1, 12, "CAPABILITY TEST FAILED: %s", failed_asset == JO_NULL ? "UNKNOWN" : failed_asset);
@@ -2141,6 +2196,9 @@ static void frame_callback(void)
 #endif
 #ifdef AVSP_ENCOUNTER_TEST
     input = encounter_test_input();
+#endif
+#ifdef AVSP_FRONTEND_TEST
+    input = frontend_test_input();
 #endif
 #ifdef AVSP_BOSS_HIT_TEST
     /* Repeat the 40-frame reaction every two seconds so visual inspection is
@@ -2190,9 +2248,19 @@ static void frame_callback(void)
        starts CDDA. This keeps the cold-boot working set unchanged and avoids
        any data-disc seek while Stage 1 music is playing. */
     if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT &&
+        !frontend_runtime.select_surface_ready)
+    {
+        if (!avsp_frontend_enter_select(&frontend_runtime))
+        {
+            failed_asset = "ROM FRONTEND SELECT";
+            runtime_ready = 0;
+            return;
+        }
+        current_bitmap_scene = BITMAP_SCENE_NONE;
+    }
+    if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT &&
         stalker_action_archive == JO_NULL)
     {
-        release_frontend_scene(0);
         if (!load_stalker_action_archive())
         {
             runtime_ready = 0;
@@ -2247,7 +2315,7 @@ static void frame_callback(void)
        the stage. The Chrysalis boss is composed from ROM tables and needs no
        archive, so nothing is loaded here (release_frontend_scene is
        idempotent). */
-    if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM)
+    if (world.encounter_state == CAP_ENCOUNTER_ROUND_TITLE)
         release_frontend_scene(1);
     if (clip_request == CAP_CLIP_SHOOT)
         weapon_audio_pending_shot = world.shots_fired;
@@ -2450,6 +2518,7 @@ static void frame_callback(void)
          * track start is made non-blocking or the cue layout is fixed. */
         /* jo_audio_play_cd_track(2, 2, true); */
         stage_music_started = 1;
+        avsp_frontend_lock_disc_reads(&frontend_runtime);
     }
 #ifdef AVSP_VISUAL_TEST
     {
@@ -2537,6 +2606,14 @@ static void frame_callback(void)
               world.encounter_state, world.enemies_defeated,
               CAP_STAGE1_TOTAL_ENEMIES, active_enemy_count(),
               world.stage_transitioned, world.level_completed);
+    jo_printf(0, 11, "FRONT SEL %d CUR %d ADAPT %d LATE %d MISS %d",
+              world.selected_character, world.selection_cursor,
+              world.adapted_character_fallbacks,
+              frontend_runtime.late_disc_reads,
+              frontend_runtime.missing_assets);
+    jo_printf(0, 12, "FRONT RLE %d PAL %d CMD %d",
+              frontend_runtime.rle_errors, frontend_runtime.palette_errors,
+              frontend_runtime.vdp1_commands_last_frame);
 #endif
 #ifdef AVSP_VISUAL_TEST
     jo_printf(0, 5, "VISUAL A%d P%02d/%02d E%d:%03d/%02d",
@@ -2555,6 +2632,16 @@ static void frame_callback(void)
               world.enemies[0].action, world.enemies[0].action_frame,
               current_boss_action_pose, world.enemies[0].active);
 #endif
+    avsp_diag_runtime_ready = runtime_ready;
+    avsp_diag_encounter_state = (int)world.encounter_state;
+    avsp_diag_world_frame = world.frame;
+    avsp_diag_selected_character = (int)world.selected_character;
+    avsp_diag_selection_cursor = world.selection_cursor;
+    avsp_diag_frontend_late_reads = frontend_runtime.late_disc_reads;
+    avsp_diag_frontend_missing_assets = frontend_runtime.missing_assets;
+    avsp_diag_frontend_rle_errors = frontend_runtime.rle_errors;
+    avsp_diag_frontend_palette_errors = frontend_runtime.palette_errors;
+    avsp_diag_frontend_commands = frontend_runtime.vdp1_commands_last_frame;
 }
 
 void jo_main(void)
@@ -2605,6 +2692,9 @@ void jo_main(void)
     visual_enemy_frame = 0;
     debug_hud_enabled = 1;
 #endif
+#ifdef AVSP_FRONTEND_TEST
+    debug_hud_enabled = 1;
+#endif
     sequence_pixels = JO_NULL;
     for (index = 0; index < AVSP_SEQUENCE_SCENES; ++index)
         sequence_rle[index] = JO_NULL;
@@ -2638,14 +2728,15 @@ void jo_main(void)
            post-boot free space is under 130 KB per bank). No CDDA is
            active at init, so the early read is seek-safe. */
         runtime_ready = load_tile_archive() &&
-                        load_frontend_assets() &&
                         load_route_sequences() &&
                         load_background() && load_boss_background() &&
+                        load_frontend_assets() &&
                         load_hud_assets() &&
                         load_action_audio() &&
                         load_all_cels() && load_player_action_sequences() &&
                         load_enemy_action_archive() &&
                         create_sprite_working_set() &&
+                        avsp_frontend_load_title_objects(&frontend_runtime) &&
                         /* LAST on purpose: the opening overlay's ~900 KB must
                            sit at the top of its zone so its release rolls the
                            bump pointer back for the BOSSCLR.PCM phase load

@@ -5,6 +5,7 @@ param(
     [switch]$Clean,
     [switch]$Release,
     [switch]$VisualTest,
+    [switch]$FrontendTest,
     [switch]$EncounterTest,
     [switch]$BossHitTest,
     [switch]$BossKoTest,
@@ -167,6 +168,7 @@ try {
         $buildProfile = if ($BossKoTest) { 'boss-ko-test' }
             elseif ($BossHitTest) { 'boss-hit-test' }
             elseif ($EncounterTest) { 'encounter-test' }
+            elseif ($FrontendTest) { 'frontend-test' }
             elseif ($VisualTest) { 'visual-test' }
             else { 'normal-release' }
         $optimizationProfile = if ($Release) { 'release' } else { 'debug' }
@@ -214,6 +216,9 @@ try {
         if ($EncounterTest) {
             $makeArguments += 'AVSP_ENCOUNTER_TEST=1'
         }
+        if ($FrontendTest) {
+            $makeArguments += 'AVSP_FRONTEND_TEST=1'
+        }
         if ($BossHitTest) {
             $makeArguments += 'AVSP_BOSS_HIT_TEST=1'
         }
@@ -225,6 +230,24 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Saturn compilation failed with exit code $LASTEXITCODE."
         }
+        # This is not a Sega Saturn executable-size limit.  A controlled A/B
+        # on the pinned Yaba Sanshiro build boots a 407,280-byte first-read
+        # program and stalls in IP.BIN once the monolithic Jo binary crosses
+        # 400 KiB.  Keep that measured emulator compatibility envelope visible
+        # until this project adopts a small first-stage loader like the
+        # commercial MSHvSF disc.  The legal hardware destination range is
+        # documented separately in the handoff.
+        $firstReadEnvelopeBytes = 400KB
+        $firstReadBinary = Get-Item -LiteralPath `
+            (Join-Path $projectRoot 'game.raw')
+        if ($firstReadBinary.Length -gt $firstReadEnvelopeBytes) {
+            throw "Saturn first-read program is $($firstReadBinary.Length) bytes; " +
+                "the pinned-Yaba monolithic boot envelope is " +
+                "$firstReadEnvelopeBytes bytes. Add a first-stage loader " +
+                "instead of treating this emulator check as a hardware limit."
+        }
+        $firstReadHeadroom = $firstReadEnvelopeBytes - $firstReadBinary.Length
+        Write-Host "First-read program: $($firstReadBinary.Length) bytes ($firstReadHeadroom bytes below the pinned-Yaba compatibility envelope)"
         [IO.File]::WriteAllText($profileStamp, $compileProfile)
 
         & $objcopy '-O' 'binary' 'game.elf' (Join-Path $contentRoot '0.bin')
@@ -251,6 +274,19 @@ try {
         & $mkisofs @mkisofsArguments
         if ($LASTEXITCODE -ne 0) {
             throw "Could not create game.iso (exit code $LASTEXITCODE)."
+        }
+        $frontendManifest = Get-Content -LiteralPath `
+            (Join-Path $projectRoot 'data\avsp_frontend_assets.json') -Raw |
+            ConvertFrom-Json
+        foreach ($frontendAsset in $frontendManifest.assets) {
+            $isoMember = '/' + ($frontendAsset.path -replace '\\', '/')
+            $localMember = Join-Path $contentRoot `
+                ($frontendAsset.path -replace '/', '\')
+            & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+                'game.iso' $isoMember '--equals' $localMember
+            if ($LASTEXITCODE -ne 0) {
+                throw "Saturn frontend ISO verification failed for $isoMember with exit code $LASTEXITCODE."
+            }
         }
         & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
             'game.iso' '/SPR4/BACT.RLE' '--equals' `

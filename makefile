@@ -21,6 +21,9 @@ endif
 ifneq ($(AVSP_ENCOUNTER_TEST),)
 CCFLAGS += -DAVSP_ENCOUNTER_TEST=1
 endif
+ifneq ($(AVSP_FRONTEND_TEST),)
+CCFLAGS += -DAVSP_FRONTEND_TEST=1
+endif
 ifneq ($(AVSP_BOSS_HIT_TEST),)
 CCFLAGS += -DAVSP_BOSS_HIT_TEST=1
 endif
@@ -31,7 +34,15 @@ JO_DEBUG ?= 1
 JO_NTSC = 1
 JO_COMPILE_USING_SGL = 1
 
-SRCS = main.c capability_model.c avsp_actor.c avsp_anim_script.c avsp_emit.c avsp_tiles.c avsp_collision.c
+SRCS = main.c capability_model.c avsp_actor.c avsp_anim_script.c avsp_emit.c avsp_tiles.c avsp_collision.c avsp_frontend.c
+
+# The pinned Yaba Sanshiro boot path stalls when Jo Engine's monolithic first-
+# read executable crosses 400 KiB. Keep the integration shell and frontend
+# cold path size-optimized; gameplay, animation, emission, collision, tile and
+# filesystem translation units retain -O2. Replace this compatibility measure
+# with a small first-stage loader if later bodies cannot remain inside the
+# envelope.
+avsp_frontend.o: CCFLAGS += -Os
 
 JO_ENGINE_ROOT ?= .deps/joengine
 JO_ENGINE_SRC_DIR = $(JO_ENGINE_ROOT)/jo_engine

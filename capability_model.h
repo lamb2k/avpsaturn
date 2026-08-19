@@ -50,6 +50,17 @@ typedef enum
     CAP_ACTOR_BOSS
 } CapActorKind;
 
+/* Source index order at work RAM 0xFF8452, proven by the cadence-1 frontend
+ * routes in data/frontend_interaction.json. */
+typedef enum
+{
+    CAP_CHARACTER_PREDATOR_WARRIOR = 0,
+    CAP_CHARACTER_MAJOR_SCHAEFER,
+    CAP_CHARACTER_PREDATOR_HUNTER,
+    CAP_CHARACTER_LINN_KUROSAWA,
+    CAP_CHARACTER_COUNT
+} CapCharacter;
+
 typedef enum
 {
     CAP_ENCOUNTER_MAIN_MENU = 0,
@@ -132,6 +143,13 @@ typedef struct
     int encounter_started;
     CapEncounterState encounter_state;
     int encounter_timer;
+    CapCharacter selected_character;
+    int selection_cursor;
+    int selection_pending_cursor;
+    int selection_move_delay;
+    int selection_direction_latched;
+    int selection_confirm_latched;
+    int adapted_character_fallbacks;
     int enemies_defeated;
     int room_locked;
     int stage_transitioned;
@@ -153,6 +171,10 @@ typedef struct
 #define CAP_CONFIRM_SHUTTER_ROWS_PER_FRAME 4
 #define CAP_CONFIRM_CONTENT_TOP_ROW 40
 #define CAP_CONFIRM_CONTENT_BOTTOM_ROW 223
+
+/* A direction write becomes visible three source frames after its input edge.
+ * A held direction cannot generate another move until released. */
+#define CAP_SELECTION_MOVE_LATENCY_FRAMES 3
 
 /* Diagnostics: how many landed player hits each defender geometry resolved.
  * cap_rom_box_hits counts contacts decided by a ROM-driven actor's MEASURED

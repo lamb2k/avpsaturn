@@ -26,6 +26,87 @@ static int test_abs(const int value)
     return value < 0 ? -value : value;
 }
 
+static void release_selection_input(CapWorld *world)
+{
+    CapInput input;
+    memset(&input, 0, sizeof(input));
+    (void)cap_world_step(world, &input);
+}
+
+static void test_character_selection_semantics(void)
+{
+    CapWorld world;
+    CapInput input;
+
+    cap_world_init(&world);
+    assert(world.selected_character == CAP_CHARACTER_PREDATOR_WARRIOR);
+    assert(world.selection_cursor == CAP_CHARACTER_PREDATOR_WARRIOR);
+    memset(&input, 0, sizeof(input));
+    input.start_pressed = 1;
+    (void)cap_world_step(&world, &input);
+    assert(world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT);
+
+    memset(&input, 0, sizeof(input));
+    input.right = 1;
+    (void)cap_world_step(&world, &input);
+    assert(world.selection_cursor == CAP_CHARACTER_PREDATOR_WARRIOR);
+    step_empty(&world, 2);
+    assert(world.selection_cursor == CAP_CHARACTER_PREDATOR_WARRIOR);
+    step_empty(&world, 1);
+    assert(world.selection_cursor == CAP_CHARACTER_MAJOR_SCHAEFER);
+    /* Holding at the right boundary does not wrap or retrigger. */
+    step_empty(&world, 8);
+    assert(world.selection_cursor == CAP_CHARACTER_MAJOR_SCHAEFER);
+    release_selection_input(&world);
+
+    memset(&input, 0, sizeof(input));
+    input.down = 1;
+    (void)cap_world_step(&world, &input);
+    step_empty(&world, CAP_SELECTION_MOVE_LATENCY_FRAMES);
+    assert(world.selection_cursor == CAP_CHARACTER_PREDATOR_HUNTER);
+    release_selection_input(&world);
+
+    memset(&input, 0, sizeof(input));
+    input.left = 1;
+    (void)cap_world_step(&world, &input);
+    step_empty(&world, CAP_SELECTION_MOVE_LATENCY_FRAMES);
+    assert(world.selection_cursor == CAP_CHARACTER_LINN_KUROSAWA);
+    release_selection_input(&world);
+
+    memset(&input, 0, sizeof(input));
+    input.up = 1;
+    (void)cap_world_step(&world, &input);
+    step_empty(&world, CAP_SELECTION_MOVE_LATENCY_FRAMES);
+    assert(world.selection_cursor == CAP_CHARACTER_PREDATOR_WARRIOR);
+    release_selection_input(&world);
+
+    /* Left/up at the source boundary are accepted as no-op, never wrap. */
+    memset(&input, 0, sizeof(input));
+    input.left = 1;
+    (void)cap_world_step(&world, &input);
+    step_empty(&world, CAP_SELECTION_MOVE_LATENCY_FRAMES);
+    assert(world.selection_cursor == CAP_CHARACTER_PREDATOR_WARRIOR);
+    release_selection_input(&world);
+
+    /* All three gameplay buttons confirm. Use C on a non-default character
+       and prove the source ID survives the current adapted Warrior fallback. */
+    memset(&input, 0, sizeof(input));
+    input.right = 1;
+    (void)cap_world_step(&world, &input);
+    step_empty(&world, CAP_SELECTION_MOVE_LATENCY_FRAMES);
+    release_selection_input(&world);
+    memset(&input, 0, sizeof(input));
+    input.jump_pressed = 1;
+    (void)cap_world_step(&world, &input);
+    assert(world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM);
+    assert(world.selected_character == CAP_CHARACTER_MAJOR_SCHAEFER);
+    assert(world.adapted_character_fallbacks == 0);
+    step_empty(&world, 240);
+    assert(world.selected_character == CAP_CHARACTER_MAJOR_SCHAEFER);
+    assert(world.adapted_character_fallbacks == 1);
+    assert(world.player.variant == 0);
+}
+
 static void start_encounter(CapWorld *world)
 {
     CapInput input;
@@ -799,6 +880,7 @@ static void test_capture_exact_confirm_shutter(void)
 
 int main(void)
 {
+    test_character_selection_semantics();
     test_attack_requests_and_damage();
     test_jump_dash_and_captured_special_chord();
     test_capture_exact_enemy_action_timing();

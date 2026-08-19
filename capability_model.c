@@ -290,6 +290,13 @@ void cap_world_init(CapWorld *world)
     world->encounter_started = 0;
     world->encounter_state = CAP_ENCOUNTER_MAIN_MENU;
     world->encounter_timer = 0;
+    world->selected_character = CAP_CHARACTER_PREDATOR_WARRIOR;
+    world->selection_cursor = CAP_CHARACTER_PREDATOR_WARRIOR;
+    world->selection_pending_cursor = -1;
+    world->selection_move_delay = 0;
+    world->selection_direction_latched = 0;
+    world->selection_confirm_latched = 0;
+    world->adapted_character_fallbacks = 0;
     world->enemies_defeated = 0;
     world->room_locked = 0;
     world->stage_transitioned = 0;
@@ -728,6 +735,11 @@ static void cap_update_enemy(CapWorld *world, CapActor *enemy, const int index)
 
 static void cap_begin_encounter(CapWorld *world)
 {
+    /* Only Predator Warrior gameplay is converted today. Preserve the source
+     * selection while explicitly counting the temporary Warrior fallback. */
+    if (world->selected_character != CAP_CHARACTER_PREDATOR_WARRIOR)
+        ++world->adapted_character_fallbacks;
+    world->player.variant = 0;
     world->encounter_started = 1;
     world->encounter_state = CAP_ENCOUNTER_ROUND_TITLE;
     world->encounter_timer = 0;
@@ -736,10 +748,81 @@ static void cap_begin_encounter(CapWorld *world)
 
 static void cap_confirm_character(CapWorld *world)
 {
+    world->selected_character = (CapCharacter)world->selection_cursor;
     world->encounter_started = 1;
     world->encounter_state = CAP_ENCOUNTER_CHARACTER_CONFIRM;
     world->encounter_timer = 0;
     world->room_locked = 1;
+}
+
+static int cap_selection_target(const int cursor, const CapInput *input)
+{
+    if (input->left)
+    {
+        if (cursor == CAP_CHARACTER_MAJOR_SCHAEFER)
+            return CAP_CHARACTER_PREDATOR_WARRIOR;
+        if (cursor == CAP_CHARACTER_PREDATOR_HUNTER)
+            return CAP_CHARACTER_LINN_KUROSAWA;
+    }
+    else if (input->right)
+    {
+        if (cursor == CAP_CHARACTER_PREDATOR_WARRIOR)
+            return CAP_CHARACTER_MAJOR_SCHAEFER;
+        if (cursor == CAP_CHARACTER_LINN_KUROSAWA)
+            return CAP_CHARACTER_PREDATOR_HUNTER;
+    }
+    else if (input->up)
+    {
+        if (cursor == CAP_CHARACTER_LINN_KUROSAWA)
+            return CAP_CHARACTER_PREDATOR_WARRIOR;
+        if (cursor == CAP_CHARACTER_PREDATOR_HUNTER)
+            return CAP_CHARACTER_MAJOR_SCHAEFER;
+    }
+    else if (input->down)
+    {
+        if (cursor == CAP_CHARACTER_PREDATOR_WARRIOR)
+            return CAP_CHARACTER_LINN_KUROSAWA;
+        if (cursor == CAP_CHARACTER_MAJOR_SCHAEFER)
+            return CAP_CHARACTER_PREDATOR_HUNTER;
+    }
+    return cursor;
+}
+
+static void cap_update_character_select(CapWorld *world, const CapInput *input)
+{
+    int direction_down = input->left || input->right || input->up || input->down;
+    int confirm_down = input->shoot_pressed || input->attack_pressed ||
+                       input->jump_pressed;
+
+    if (world->selection_pending_cursor >= 0 &&
+        world->selection_move_delay > 0)
+    {
+        --world->selection_move_delay;
+        if (world->selection_move_delay == 0)
+        {
+            world->selection_cursor = world->selection_pending_cursor;
+            world->selection_pending_cursor = -1;
+        }
+    }
+
+    if (!direction_down)
+        world->selection_direction_latched = 0;
+    else if (!world->selection_direction_latched &&
+             world->selection_pending_cursor < 0)
+    {
+        world->selection_pending_cursor = cap_selection_target(
+            world->selection_cursor, input);
+        world->selection_move_delay = CAP_SELECTION_MOVE_LATENCY_FRAMES;
+        world->selection_direction_latched = 1;
+    }
+
+    if (!confirm_down)
+        world->selection_confirm_latched = 0;
+    else if (!world->selection_confirm_latched)
+    {
+        world->selection_confirm_latched = 1;
+        cap_confirm_character(world);
+    }
 }
 
 static void cap_update_encounter(CapWorld *world)
@@ -878,9 +961,8 @@ CapClipRequest cap_world_step(CapWorld *world, const CapInput *input)
         world->encounter_state = CAP_ENCOUNTER_CHARACTER_SELECT;
         world->encounter_timer = 0;
     }
-    else if (world->encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT &&
-             input->attack_pressed)
-        cap_confirm_character(world);
+    else if (world->encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT)
+        cap_update_character_select(world, input);
     if (world->encounter_state != CAP_ENCOUNTER_WAVE_ONE &&
         world->encounter_state != CAP_ENCOUNTER_WAVE_TWO &&
         world->encounter_state != CAP_ENCOUNTER_CLEAR &&
