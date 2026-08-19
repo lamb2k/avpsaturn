@@ -244,6 +244,65 @@ int main(void)
                    want, 4);
     }
 
+    /* Sparse-view decode (the Saturn runtime's form): the same 4214
+     * composite through two narrow windows - the assembly region and the
+     * dx/dy table region - must produce identical entries, and removing
+     * the table window must fail the decode (-2), never guess. */
+    actor.world_x = 1257; actor.world_y = 310;
+    actor.facing = 1; actor.palette = 0x11; actor.mode = 1;
+    actor.anchor_x = 0x03F0; actor.anchor_y = 0x00FF;
+    {
+        static const unsigned short want[] = {
+            0x8113, 0x0099, 0x4EFE, 0x0131,
+            0x80E3, 0x00A9, 0x4EF6, 0x0431,
+            0x80F3, 0x00B9, 0x4FC8, 0x0131,
+            0x8121, 0x007B, 0x473A, 0x2431,
+            0x8111, 0x00AB, 0x479C, 0x1331,
+        };
+        AvspRomSpan spans[2];
+        AvspRomView view;
+        AvspObjectEntry got[8];
+        int n;
+        int i;
+        int bad = 0;
+
+        spans[0].data = rom + 0x12F000ul;
+        spans[0].base = 0x12F000ul;
+        spans[0].size = 0x1000ul;
+        spans[1].data = rom + 0x1FD000ul;
+        spans[1].base = 0x1FD000ul;
+        spans[1].size = 0x1000ul;
+        view.spans = spans;
+        view.span_count = 2;
+        n = avsp_emit_pose_view(&view, 0x12F72Aul, &actor, got, 8);
+        if (n != 5) {
+            printf("  sparse view: count=%d (want 5) FAIL\n", n);
+            ++failures;
+        } else {
+            for (i = 0; i < 5; ++i) {
+                const unsigned short *w = want + i * 4;
+                if (got[i].x != w[0] || got[i].y != w[1] ||
+                    got[i].code != w[2] || got[i].attr != w[3]) {
+                    bad = 1;
+                }
+            }
+            if (bad) {
+                printf("  sparse view: entries differ FAIL\n");
+                ++failures;
+            } else {
+                printf("  sparse view (2 windows)  5 entries exact OK\n");
+            }
+        }
+        view.span_count = 1;   /* drop the dx/dy table window */
+        n = avsp_emit_pose_view(&view, 0x12F72Aul, &actor, got, 8);
+        if (n != -2) {
+            printf("  sparse view missing span: got %d (want -2) FAIL\n", n);
+            ++failures;
+        } else {
+            printf("  sparse view missing span rejected OK\n");
+        }
+    }
+
     /* Undecoded layouts must be reported, never guessed at. 0x12F72E holds
      * a record's budget word (0x0009), not a valid top word. */
     {

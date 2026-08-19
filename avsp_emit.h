@@ -51,6 +51,20 @@
 #ifndef AVSP_EMIT_H
 #define AVSP_EMIT_H
 
+/* One contiguous ROM window at its original source address. The Saturn
+ * runtime carries only the windows the decoded families read (assemblies,
+ * dx/dy tables), not the 2 MB image; reads resolve by source address. */
+typedef struct {
+    const unsigned char *data;
+    unsigned long base;
+    unsigned long size;
+} AvspRomSpan;
+
+typedef struct {
+    const AvspRomSpan *spans;
+    int span_count;
+} AvspRomView;
+
 typedef struct {
     unsigned short x;     /* word 0: priority bits | position (bits 0-9) */
     unsigned short y;     /* word 1: position (bits 0-9) */
@@ -85,6 +99,12 @@ typedef struct {
 int avsp_emit_pose(const unsigned char *rom, unsigned long rom_size,
                    unsigned long assembly, const AvspEmitActor *actor,
                    AvspObjectEntry *out, int cap);
+
+/* Same decode through a sparse span view (the Saturn runtime's form). A
+ * read outside every span fails the decode with -2, never guesses. */
+int avsp_emit_pose_view(const AvspRomView *view, unsigned long assembly,
+                        const AvspEmitActor *actor, AvspObjectEntry *out,
+                        int cap);
 
 /* Decode one group given its header address (used by avsp_emit_pose; exposed
  * for tests and tooling). Same return convention. */
