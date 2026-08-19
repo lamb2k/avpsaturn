@@ -141,9 +141,52 @@ Gate 1 index.
 This is the current Capability Gate 1 order of work. It supersedes older resume
 lists in the handoff and refines the broad phases below. The order was rebuilt
 around the actor spine on 2026-08-18; the rationale and the current step table
-follow. **S1 is passed and S2 is active. The next agent finishes S2 only, in the
-dependency order stated in `docs/NEXT_AGENT_PROMPT.md`.** Historical milestone
-results remain evidence, not the forward work vocabulary.
+follow. **S1 is passed. S2's source walk (Bodies A-C) is closed and
+corpus-proven; the next agent executes S2 Bodies D and E (live actor
+integration, then the per-object VDP1 consumer), in the dependency order
+stated in `docs/NEXT_AGENT_PROMPT.md`, then continues along the critical path
+below.** Historical milestone results remain evidence, not the forward work
+vocabulary.
+
+### Critical path to the end-to-end full game (adopted 2026-08-18)
+
+The destination is the full game (`docs/GOAL.md`), not only the slice. The
+remaining work, ordered as the true dependency chain; each phase names the
+S-step vocabulary it lives in:
+
+1. **Render keystone — S2 Bodies D+E.** One live ROM-driven actor in
+   `main.c`, then the real per-object VDP1 consumer (one VDP1 normal-sprite
+   command per CPS2 object entry; 4bpp tile textures through a residency
+   cache). Most leveraged remaining piece: every later phase only produces
+   more object entries for this same consumer.
+2. **Full-cast emission coverage — S3.** Decode the five remaining emitter
+   families (store loops already located at `0x0A99EA+`, `0x0A9D88+`,
+   `0x0AA0BA+`, `0x0AAA9C+`, plus the Family-1 pair already done) and the
+   zero/negative `+0x0D` coordinate modes; then the player's own script
+   region. Method is now mechanical: live-disassemble the loop, extend the
+   decoder, falsify against the same offline corpus with a widened declared
+   population, require zero unexplained mismatches per family.
+3. **Collision, damage, reaction — S4.** Unchanged from the table below.
+4. **Game logic — S5 (the long pole).** PRNG, enemy decisions, player state
+   machine, wave/spawn scheduling, the stage script interpreter,
+   health/score/items/continues, translated per routine by differential
+   replay. This is the irreducible bulk of the remaining wall-clock.
+5. **Full-game content widening (parallel with 4).** Rounds 2-7 backgrounds,
+   stage scripts, per-round cast and bosses, audio generalization (per-stage
+   QSound capture pipeline or a sequence player), disc layout/streaming for
+   all stages' tile sets. This is the old phase-lettered widening; it can
+   proceed stage by stage while S5 routines land.
+6. **Budgets and hardware — S6.** VRAM/RAM fit with streaming, 60 Hz, real
+   hardware per `docs/HARDWARE_TEST.md`. Capability Gate 1 closes first as
+   proof-of-method, then the nine full-game conditions.
+
+The reason this ordering is optimal: the renderer unblocks everything and is
+finite; family decoding multiplies it across the cast; S5 is the long pole so
+everything parallelizable (phase 5) overlaps it; hardware fit is meaningless
+until real content exercises it. The corpus method proven in the S2 source
+walk (offline captures as oracle, live disassembly only to resolve structure,
+declared populations, zero unexplained mismatches) is the standing method for
+phases 2-4.
 
 ### Decisions taken this session (2026-08-18), binding going forward
 
@@ -238,7 +281,7 @@ below has an oracle already on disk.
 | Order | Step | Required work | Exit checks | Oracle |
 |---|---|---|---|---|
 | **S1** | **Actor spine** — PASSED 2026-08-18 | A native actor record mirroring the game's `0xC0` layout for the fields its own code consumes; port the collision overlap predicate and guards into C over that record | Field-for-field equality against 2,900 captured work-RAM frames, **and** the C predicate reproduces the Python falsification exactly (21,908 non-overlapping active pairs with no hit, 44/56 latches explained, same 12 residuals) | `.deps/mame/collision_probe*` |
-| **S2** | **Animation from ROM scripts, and the renderer** (active: interpreter + record extraction validated; spine sources linked into the Saturn build but not called by `main.c`; X/Y geometry formula confirmed and coded for 3/5 observed object entries, using ROM `dx/dy` plus route-matched live origin/priority and oracle-supplied code/attr; this is not a complete ROM-only decoder; origin routine `bsr $0AA59A` fully disassembled, including the actor-facing source of the D1 flip mask; general part-stream header/count/advance/emission mechanism unresolved; VDP1 per-object renderer not started) | Resolve and exactly validate the general Family-1 part-stream walk first; promote it to reusable C; drive one street alien's pose selection from the record pointer at `+0x1C`; emit a normalized semantic object list and render it per CPS2 object using the retained slice-V design | The native animation walk remains exact; all five previously observed four-word entries and the complete widened target-actor emission derive without expected-output constants; the declared eligible subset of the 5,302-frame oracle is 100% exact with zero unexplained mismatches; one live street alien uses the real per-object VDP1 path | 5,302-frame object-list oracle plus route-matched widened trace |
+| **S2** | **Animation from ROM scripts, and the renderer** (source walk CLOSED 2026-08-18: the complete ROM-to-object pipeline — pose assembly selector, group headers, origin routine with live camera anchors at `0xFF8278`/`0xFF827C`, both facing loop variants, attr transform, A2 advance walk — is decoded from live disassembly and corpus-falsified over 6,139 captured frames across four routes: **6,010 eligible actor-frame instances, 5,614 exact, 396 game-omitted by its own budget/visibility gates, zero mismatches**; promoted to C as `avsp_emit_pose`/`avsp_emit_group` and wired into `test.ps1`; five other emitter families and the zero/negative `+0x0D` coordinate modes located and named but not decoded; **Bodies D and E remain**: no live actor in `main.c` calls the pipeline, VDP1 per-object renderer not started) | Integrate one street alien: carry a live `AvspActor`, tick `avsp_anim_frame_tick`, obtain its object list through `avsp_emit_pose` (Body D); then render that list per CPS2 object using the retained slice-V design (Body E) | The native animation walk remains exact; one live street alien draws through the real per-object VDP1 path with its entries derived entirely from ROM + actor state | corpus result in `data/avsp_object_corpus_verification.json`; route-matched captures for the live actor |
 | S3 | Widen to Round 1's cast | Player, remaining street aliens, Stalkers and Chrysalis onto the same spine; `/SPR4/*.RLE` archives demoted to regression oracles | Every slice actor selects poses and emits objects from ROM data; no capture-derived pose table in a runtime decision | same |
 | S4 | Collision, damage, reaction | Consume the decoded boxes at runtime; decode the five post-hit routines at `0x1D314`, `0x1D504`, `0x1D492`, `0x1D622`, `0x1D6E2`; retire the inferred Chrysalis 21/55/97 and Stalker schedules | Every hit event and health delta in the slice window matches MAME; no inferred contact schedule remains in a runtime decision | recorded contacts |
 | S5 | Enemy decisions | Identify the PRNG generator and call order, then translate the street-alien decision routines by the differential-replay method in "How game logic gets translated" | Same initial state and inputs produce the same action/state sequence as MAME, with a negative control that fails on a perturbed input | recorded calls |
