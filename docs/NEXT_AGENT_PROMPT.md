@@ -7,8 +7,14 @@ eligible actor-frame instances across four routes**, and promoted to C
 it. This prompt authorizes the next phases of the critical path in
 `docs/PARITY_PLAN.md` ("Critical path to the end-to-end full game"):
 
-- **S2 Body D**: one live ROM-driven street alien in `main.c`.
-- **S2 Body E**: the real per-object VDP1 consumer.
+- **S2 Body D**: LANDED 2026-08-18 (`rom_actor_tick` in `main.c`;
+  compile-verified). FIRST STEP of the next session: boot the normal
+  release and verify the debug HUD's live entry count/codes before any
+  new work.
+- **S2 Body E**: the real per-object VDP1 consumer - the active body.
+  Design constraints now binding: 32 Mbit RAM cart, phase-boundary loads,
+  cart-resident textures, per-frame command table only (see PARITY_PLAN
+  critical path item 6).
 - **S3**: decode the remaining emitter families and coordinate modes,
   corpus-falsified the same way.
 - **S4**: collision/damage/reaction integration.

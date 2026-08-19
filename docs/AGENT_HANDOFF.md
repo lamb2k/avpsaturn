@@ -557,6 +557,46 @@ Committed: `tools/decode_avsp_object_stream.py` (attr-transform fix at
 pose-header-chain solve at `6e0db90`) and
 `data/avsp_object_stream.json`.
 
+## Body D LANDED: the ROM pipeline runs native; Body E is next (2026-08-18, final)
+
+State at session close (35 commits, `main` = `codex/avp-master-plan` tip):
+
+- **S3 emission surface complete**: all five record families (0x0002 inline
+  single, 0x0004 groups without advance words, 0x0006 groups, 0x0008 no-op,
+  0x000A inline-dx/dy parts) plus both attr modes decoded and
+  corpus-verified - **18,986 eligible instances, 18,025 exact, 961
+  game-omitted, ZERO mismatches** across all four routes. C is at full
+  parity (13 test cases; `avsp_emit_pose_view` reads sparse windows).
+- **Runtime ROM windows**: `tools/gen_avsp_emit_windows.py` measures the
+  touched pages, emits git-ignored `generated/avsp_emit_windows.h` (25
+  windows, 28,416 bytes, the whole enemy emission surface) + tracked
+  manifest `data/avsp_emit_windows.json`, and verifies the window-only
+  decode is byte-identical on 2,701 sampled instances.
+- **RAM cartridge (32 Mbit) is a binding design requirement** (user
+  decision; PARITY_PLAN critical-path item 6): phase-boundary loads into
+  cartridge-resident assets, persistent VDP1 textures beside a per-frame
+  command table - the reference lane's measured model (its cartridge was
+  byte-identical through combat, and the reference title ships requiring
+  the same cart).
+- **Body D is integrated** (`rom_actor_tick` in `main.c`, called before
+  `draw_world`): the first active street-alien slot carries a real
+  animation record over the shipped 63 spans and decodes its semantic
+  object list through the 25-window view every frame. Two labelled
+  ADAPTED bridges: action->pose seeding (walk 0x12EB4C / attack 0x12D8A0)
+  until S5, and the model-space anchor mapping until Body E alignment.
+  The capture cel stays visible until Body E. Debug HUD (X button) shows
+  the live entry count + first code. **Compile-verified only** - the
+  interactive boot check is the NEXT SESSION'S FIRST STEP, before any
+  Body E work.
+
+**Next session, in order**: (1) boot the normal release, toggle the debug
+HUD, confirm the ROM actor's entry count/codes track the walk/attack
+cycle; (2) Body E per NEXT_AGENT_PROMPT - phase-load the referenced 4bpp
+tile blocks (gfx ROM windows generator patterned on the emit-windows
+tool), one VDP1 normal-sprite command per entry, cart-resident textures;
+(3) then S4. Known open decode items (non-blocking): tag 0x0000 handler
+(0x0AA26C, never observed in the corpus), the player's script region.
+
 ## S3 family widening: record walker + family-0x0002 decoded; corpus 14,487/0 (2026-08-18, latest)
 
 The critical-path plan was adopted into `docs/PARITY_PLAN.md` ("Critical path
