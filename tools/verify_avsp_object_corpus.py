@@ -144,7 +144,7 @@ def decode_actor_entries(rom: Rom, work: bytes, slot_off: int,
     if top == SELECTOR_TWO:
         record_pos = assembly + 2
         n_records = 2
-    elif top in (0x0002, 0x0004, 0x0006):
+    elif top in (0x0002, 0x0004, 0x0006, 0x000A):
         record_pos = assembly
         n_records = 1
     else:
