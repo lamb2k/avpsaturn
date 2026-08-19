@@ -1,7 +1,105 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-19 EDT (**bounded S4 runtime integration complete; real
-ROM-derived frontend is next**).
+Updated: 2026-08-19 EDT (**measured findings recorded; VDP1 model ported. The
+street background is a MEASURED fidelity gap — parallax — recorded, not
+fixed.**). The frontend body remains the active implementation line; this
+section is additive evidence and touched no runtime file.
+
+## Measured findings: street parallax, renderer costs, palette coverage (2026-08-19)
+
+This body was scoped down after asking whether it was necessary. Most of it was
+not: the reference lane's numbers are forbidden as AvP budgets by its own
+transfer matrix, its instrument is blind where it would have helped (**both
+VDP2 and VDP1 register blocks read back all zeros**), and AvP already has
+working equivalents for most of its tooling. What survived is the analysis
+below plus one genuinely absent instrument.
+
+**1. The street scrolls its layers at DIFFERENT rates. The flattened
+background cannot express that.** Measured from CPS-A scroll registers over
+every captured frame (`tools/analyze_avsp_stage_scroll.py`, manifest
+`data/avsp_stage_scroll.json`), excluding wrap/room discontinuities:
+
+| Route | Moving frames | sum d(scroll2) | sum d(scroll3) | rate | identical |
+|---|---|---|---|---|---|
+| **street** (`enemy_actions`) | 48 | 70 | 53 | **0.757** | 30/48 |
+| interior (`stalker_actions`) | 230 | 160 | 160 | 1.000 | 230/230 |
+
+One street deceleration runs 11/9, 10/9, 9/8, 8/7, 7/6, 6/5, 5/4 before
+converging — `scroll3` consistently trails `scroll2`. `scroll1` is pinned at
+`0xffc0` (the fixed HUD layer). The runtime flattens all layers into one VDP2
+bitmap scrolled by a single linear rescale (`cap_background_fit_scroll_x`), and
+one surface at one rate cannot express two. **MEASURED fidelity gap, scoped to
+Round 1 street (`stage_area == 0`).**
+
+**Recorded, deliberately NOT fixed.** The remedy is per-layer VDP2 planes
+versus one surface — a CPS2-to-Saturn architectural fork that `AGENTS.md`
+routes to `supervisor` at high effort with a written contract first, and it
+touches `capability_model.c`, which is in flight.
+
+**Methodological lesson, worth more than the finding: the interior route does
+not generalise to the street.** An earlier pass correlated *work-RAM* values
+over the interior pan, found all 12 camera trackers at slope 1.0, and recorded
+a null result; a second pass confirmed that null at register level — also on
+the interior. Both were right about the interior and wrong about the game. The
+street was camera-locked (1008) in the frames first sampled. Measure the street
+before claiming anything about the street.
+
+**Still unresolved, and independent:** row-scroll is enabled (`cps_a[17] & 1`)
+on every street and interior frame. It applies to scroll2 only and indexes a
+per-row table in gfxram, and **no gameplay capture dumps gfxram**, so the table
+has never been observed. A non-constant table is a second, independent way one
+flattened surface could be wrong. Probe: dump the 1024-word row-scroll window
+during a street pan.
+
+**2. Renderer fork, costed on AvP's own frames** (street wave, 213 sampled):
+per-OBJECT VDP1 commands/frame peak **84** (mean 57); per-TILE peak **904**
+(mean 562); drawn pixels/frame peak 231,424. Ratio **10.8x**, and both
+strategies draw *identical pixels* — so fill rate is unchanged and the whole
+difference is command-table slots (904 x 32 B ~= 29 KB, trivial against 512 KB
+VDP1 VRAM) and **SH-2 list-building time**. Independent AvP confirmation of the
+reference lane's claim that per-tile costs command slots and CPU, not texture.
+
+**Correction:** `JO_MAX_SPRITE = 192` is **not** a per-frame draw cap — it
+sizes `__jo_sprite_def[]`/`__jo_sprite_pic[]`, the registered-texture table
+(`.deps/joengine/jo_engine/jo/sprites.h`). The tile path's 96-slot LRU pool sits
+well under it. Do not cite 192 as a command-count limit.
+
+**3. Tile-archive palette coverage** (`tools/analyze_avsp_palette_coverage.py`,
+`data/avsp_palette_coverage.json`): the archive ships **5** banks
+(`0x10-0x13`, `0x1B`) from a single frame, labelled ADAPTED; the street route
+references **15**, and 211/213 sampled frames contain at least one drawn object
+outside the shipped set. **Not a live defect** — the ROM tile path renders
+street aliens only and their banks are shipped. **Not a colour-RAM limit**
+either: `avsp_tiles.c` accepts 32 slots against a measured peak of 13
+concurrent. The binding constraint is archive *content*, and it resolves with
+the tile-region budget under S3 phase loading. Deferred to S3 deliberately,
+because regenerating ahead of its consumer is how milestone 2 produced correct
+but unusable data. `tests/test_avsp_palette_coverage.py` pins the gap open:
+widening the archive scope while banks remain uncovered fails the suite
+(verified by temporarily setting `scope=round1` — the guard fired, then the
+manifest was restored).
+
+**Instrument ported:** `tools/avsp_vdp1_model.py` — Saturn VDP1 command-table
+decode plus control-flow traversal (all 8 jump modes; `traverse()` follows
+JUMP/CALL/RETURN/SKIP while `sequential_scan()`/`stored_nonzero_slots()` report
+stored order separately). AvP had no VDP1 tooling at all. Not needed by the
+current runtime; it exists for S6 hardware-performance work and to settle the
+fork in (2) with real reachable-command counts. The reachable-vs-stored split
+is the point — a command table retains residue past the terminator, so a naive
+scan overcounts. Retargeted from the reference lane's immutable checkpoint
+(`codex/mshvsf-reference-lane`, `dc5d3ea`), analysis half only; the generation
+half and every reference-title constant were left behind, and no measurement,
+budget or asset crossed.
+
+**Verification:** all four new checks wired into `test.ps1` (appended; no
+existing line reordered) and the full suite exits 0. Both manifests regenerate
+byte-identically and contain no absolute paths. No runtime file, build, ISO or
+emulator was touched. Capability Gate 1 stays **0/7**.
+
+**Safety note (not actioned):** `AvPSaturnCapabilityTest-baseline-probe` is a
+stale worktree one commit behind that shares `.deps/` and `avspu/` **by
+symlink** — anything run inside it writes into this project's dependency tree.
+Treat as read-only; retiring it needs `git worktree remove`, not `rm -rf`.
 
 ## Frontend interaction evidence: COMPLETE (2026-08-19)
 

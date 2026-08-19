@@ -298,3 +298,30 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Per-state table_set corpus falsification failed with exit code $LASTEXITCODE."
 }
+
+# Stage layer scroll rates: does any route scroll its CPS tilemap layers at
+# different rates, i.e. need parallax that one flattened VDP2 bitmap cannot
+# express? Register words and counts only. Skips cleanly without captures.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\analyze_avsp_stage_scroll.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Stage scroll analysis failed with exit code $LASTEXITCODE."
+}
+
+# Tile-archive palette coverage, plus the test that pins the known gap open so
+# the archive scope cannot be widened without widening the palette.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\analyze_avsp_palette_coverage.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Palette coverage analysis failed with exit code $LASTEXITCODE."
+}
+
+& $PythonPath (Join-Path $PSScriptRoot 'tests\test_avsp_palette_coverage.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Palette coverage test failed with exit code $LASTEXITCODE."
+}
+
+# Saturn VDP1 command-table model: reachable-versus-stored traversal. No
+# private inputs; fixtures are built in memory.
+& $PythonPath (Join-Path $PSScriptRoot 'tests\test_avsp_vdp1_model.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "VDP1 command-model test failed with exit code $LASTEXITCODE."
+}

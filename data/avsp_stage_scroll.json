@@ -1,0 +1,328 @@
+{
+ "classification": "CPS layer scroll rates - register words and counts only; no ROM bytes, no tile or colour data",
+ "discontinuity_limit": 100,
+ "finding": "layer scroll rates DIFFER by route: ['enemy_actions'] show differing per-layer deltas (parallax), ['stalker_actions'] move every layer identically. The runtime flattens all layers into one VDP2 bitmap scrolled by a single linear rescale (cap_background_fit_scroll_x), which cannot express more than one rate - a MEASURED fidelity gap wherever parallax is present.",
+ "method": "per-frame CPS-A scroll-X deltas (words 6/8/10) between consecutive captured frames; single-frame deltas above 100 are wrap/room discontinuities and are excluded and counted, not dropped",
+ "methodological_note": "the interior route does NOT generalise to the street. An earlier pass correlated work-RAM values over the interior pan, found every tracker at slope 1.0 and recorded a null result; the street was camera-locked in the frames it sampled. Measure the street route before claiming anything about the street.",
+ "not_fixed_here": "the remedy is a CPS2-to-Saturn architectural fork (per-layer VDP2 planes versus one surface) and touches capability_model.c; it belongs to a separate gated body, not to this measurement.",
+ "question": "does any captured route scroll its tilemap layers at DIFFERENT rates, i.e. does the stage need parallax that one flattened VDP2 bitmap cannot express?",
+ "routes": [
+  {
+   "delta_sums": {
+    "scroll1": 0,
+    "scroll2": 70,
+    "scroll3": 53
+   },
+   "excluded_discontinuities": 3,
+   "first_moving_frames": [
+    {
+     "d_scroll2": 11,
+     "d_scroll3": 9,
+     "frame": "05921"
+    },
+    {
+     "d_scroll2": 10,
+     "d_scroll3": 9,
+     "frame": "05923"
+    },
+    {
+     "d_scroll2": 9,
+     "d_scroll3": 8,
+     "frame": "05924"
+    },
+    {
+     "d_scroll2": 8,
+     "d_scroll3": 7,
+     "frame": "05925"
+    },
+    {
+     "d_scroll2": 8,
+     "d_scroll3": 7,
+     "frame": "05926"
+    },
+    {
+     "d_scroll2": 7,
+     "d_scroll3": 6,
+     "frame": "05927"
+    },
+    {
+     "d_scroll2": 7,
+     "d_scroll3": 6,
+     "frame": "05928"
+    },
+    {
+     "d_scroll2": 6,
+     "d_scroll3": 5,
+     "frame": "05929"
+    },
+    {
+     "d_scroll2": 5,
+     "d_scroll3": 4,
+     "frame": "05930"
+    },
+    {
+     "d_scroll2": 4,
+     "d_scroll3": 4,
+     "frame": "05931"
+    },
+    {
+     "d_scroll2": 3,
+     "d_scroll3": 3,
+     "frame": "05932"
+    },
+    {
+     "d_scroll2": 2,
+     "d_scroll3": 1,
+     "frame": "05933"
+    },
+    {
+     "d_scroll2": 2,
+     "d_scroll3": 2,
+     "frame": "05934"
+    },
+    {
+     "d_scroll2": 2,
+     "d_scroll3": 2,
+     "frame": "05935"
+    },
+    {
+     "d_scroll2": 1,
+     "d_scroll3": 1,
+     "frame": "05936"
+    },
+    {
+     "d_scroll2": 1,
+     "d_scroll3": 1,
+     "frame": "05937"
+    },
+    {
+     "d_scroll2": 1,
+     "d_scroll3": 0,
+     "frame": "05938"
+    },
+    {
+     "d_scroll2": 1,
+     "d_scroll3": 1,
+     "frame": "05939"
+    },
+    {
+     "d_scroll2": 1,
+     "d_scroll3": 1,
+     "frame": "05940"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05975"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05976"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": 0,
+     "frame": "05977"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05978"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05979"
+    }
+   ],
+   "frames_scanned": 2121,
+   "identical_delta_frames": 30,
+   "moving_frames": 48,
+   "route": "enemy_actions",
+   "row_scroll_enable_values": [
+    1
+   ],
+   "scroll1_distinct_values": 1,
+   "scroll2_minus_scroll3_bias_values": [
+    "0x0188",
+    "0x0200",
+    "0x02AE",
+    "0x02B0",
+    "0xFEB1",
+    "0xFEB2",
+    "0xFEB3",
+    "0xFEB4"
+   ],
+   "scroll3_over_scroll2_rate": 0.757143,
+   "single_rate": false
+  },
+  {
+   "delta_sums": {
+    "scroll1": 0,
+    "scroll2": 160,
+    "scroll3": 160
+   },
+   "excluded_discontinuities": 0,
+   "first_moving_frames": [
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05898"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05899"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05900"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05901"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05902"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05903"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05904"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05905"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05906"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05907"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05908"
+    },
+    {
+     "d_scroll2": -1,
+     "d_scroll3": -1,
+     "frame": "05909"
+    },
+    {
+     "d_scroll2": -2,
+     "d_scroll3": -2,
+     "frame": "05910"
+    },
+    {
+     "d_scroll2": -2,
+     "d_scroll3": -2,
+     "frame": "05911"
+    },
+    {
+     "d_scroll2": -2,
+     "d_scroll3": -2,
+     "frame": "05912"
+    },
+    {
+     "d_scroll2": -2,
+     "d_scroll3": -2,
+     "frame": "05913"
+    },
+    {
+     "d_scroll2": -2,
+     "d_scroll3": -2,
+     "frame": "05914"
+    },
+    {
+     "d_scroll2": -2,
+     "d_scroll3": -2,
+     "frame": "05915"
+    },
+    {
+     "d_scroll2": -2,
+     "d_scroll3": -2,
+     "frame": "05916"
+    },
+    {
+     "d_scroll2": -2,
+     "d_scroll3": -2,
+     "frame": "05917"
+    },
+    {
+     "d_scroll2": -2,
+     "d_scroll3": -2,
+     "frame": "05918"
+    },
+    {
+     "d_scroll2": -2,
+     "d_scroll3": -2,
+     "frame": "05919"
+    },
+    {
+     "d_scroll2": -2,
+     "d_scroll3": -2,
+     "frame": "05920"
+    },
+    {
+     "d_scroll2": -2,
+     "d_scroll3": -2,
+     "frame": "05921"
+    }
+   ],
+   "frames_scanned": 2281,
+   "identical_delta_frames": 230,
+   "moving_frames": 230,
+   "route": "stalker_actions",
+   "row_scroll_enable_values": [
+    1
+   ],
+   "scroll1_distinct_values": 1,
+   "scroll2_minus_scroll3_bias_values": [
+    "0x0200"
+   ],
+   "scroll3_over_scroll2_rate": 1.0,
+   "single_rate": true
+  },
+  {
+   "delta_sums": {
+    "scroll1": 0,
+    "scroll2": 0,
+    "scroll3": 0
+   },
+   "excluded_discontinuities": 0,
+   "first_moving_frames": [],
+   "frames_scanned": 900,
+   "identical_delta_frames": 0,
+   "moving_frames": 0,
+   "route": "boss_actions",
+   "row_scroll_enable_values": [
+    1
+   ],
+   "scroll1_distinct_values": 1,
+   "scroll2_minus_scroll3_bias_values": [
+    "0xFE00"
+   ],
+   "scroll3_over_scroll2_rate": null,
+   "single_rate": false
+  }
+ ],
+ "schema": 1,
+ "unresolved_row_scroll": "row-scroll is enabled on every scanned frame (control word 17 bit 0). It applies to scroll2 only and indexes a per-row table in gfxram; no gameplay capture dumps gfxram, so the table has never been observed. A non-constant table is a second, independent way one flattened surface could be wrong. Probe: dump the 1024-word row-scroll window during a street pan."
+}
