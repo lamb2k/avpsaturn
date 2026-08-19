@@ -123,8 +123,7 @@ def decode_actor_entries(rom: Rom, work: bytes, slot_off: int,
     pose_ptr = u32(rec, 0x1C)
     if not (POSE_REGION[0] <= pose_ptr < POSE_REGION[1]):
         return None, "pose-outside-declared-region"
-    if not (1 <= rec[0x0D] <= 0x7F):
-        return None, "coordinate-mode-not-decoded"
+    mode_positive = 1 <= rec[0x0D] <= 0x7F
     flags = rom.u16(pose_ptr + 2)
     if flags & 0x8000:
         return None, "jump-record"
@@ -170,7 +169,7 @@ def decode_actor_entries(rom: Rom, work: bytes, slot_off: int,
             ox, oy = decode_group_origin(rom, h, world_x, world_y, facing,
                                          anchor_x, anchor_y)
             entries = decode_group_entries(rom, h, ox, oy, palette, facing,
-                                           or_value)
+                                           or_value, mode_positive)
             for e in entries:
                 flat.extend([int(e["x"], 16), int(e["y"], 16),
                              int(e["code"], 16), int(e["attr"], 16)])
@@ -178,7 +177,8 @@ def decode_actor_entries(rom: Rom, work: bytes, slot_off: int,
             pos = h + 10 + count * 6
         elif tag == 0x0002:
             e = decode_family2_entry(rom, pos + 4, world_x, world_y, facing,
-                                     palette, or_value, anchor_x, anchor_y)
+                                     palette, or_value, anchor_x, anchor_y,
+                                     mode_positive)
             flat.extend([int(e["x"], 16), int(e["y"], 16),
                          int(e["code"], 16), int(e["attr"], 16)])
             families.append("2")

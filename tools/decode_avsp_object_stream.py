@@ -279,11 +279,13 @@ def decode_family2_entry(rom: Rom, record_addr: int, world_x: int, world_y: int,
     ox = (world_x - anchor_x + 0x40) & 0xFFFF
     ox = (ox + d2_hi if (facing_raw & 1) else ox - d2_hi) & 0xFFFF
 
+    flip = (facing_raw << 5) & 0xFF
     if coord_mode_positive:
-        flip = (facing_raw << 5) & 0xFF
         attr = (attr_raw & 0xFF00) | ((((attr_raw & 0xE0) + palette_byte) ^ flip) & 0xFF)
     else:
-        attr = attr_raw
+        # family-2's +0x0D <= 0 path skips only the palette add (beq/bmi
+        # $a9d68); its eor.b D1,D0 at 0x0A9D7E is unconditional.
+        attr = (attr_raw & 0xFF00) | (((attr_raw & 0xFF) ^ flip) & 0xFF)
     if facing_raw & 1:
         width = ((((attr_raw >> 8) & 0xF) + 1) * 16)
         x = ((ox - width - dx) & 0x3FF) | or_value
@@ -296,7 +298,8 @@ def decode_family2_entry(rom: Rom, record_addr: int, world_x: int, world_y: int,
 
 def decode_group_entries(rom: Rom, header_addr: int, origin_x: int, origin_y: int,
                          palette_byte: int, facing_raw: int,
-                         or_value: int = 0x8000) -> list:
+                         or_value: int = 0x8000,
+                         mode_positive: bool = True) -> list:
     """Returns `count` four-word entries: [{code, attr, x, y}, ...].
 
     `palette_byte` (actor `+0x0E`) is a plain actor-record field, read the
@@ -323,9 +326,18 @@ def decode_group_entries(rom: Rom, header_addr: int, origin_x: int, origin_y: in
         code = rom.u16(a0)
         attr_raw = rom.u16(a0 + 2)
         advance = rom.u16(a0 + 4)
-        attr_high = attr_raw & 0xFF00
-        attr_low = (((attr_raw & 0xE0) + palette_byte) ^ flip_byte) & 0xFF
-        attr = attr_high | attr_low
+        if mode_positive:
+            attr = (attr_raw & 0xFF00) | ((((attr_raw & 0xE0) + palette_byte)
+                                           ^ flip_byte) & 0xFF)
+        else:
+            # +0x0D <= 0 mode (live-disassembled at 0x0AA09A via
+            # tools/mame_trace_coordmode.lua, flip contribution
+            # corpus-derived): no palette injection, but the flip XOR still
+            # applies - the facing=0 trace stores the record long raw, and
+            # every flipped instance in the corpus differs from raw by
+            # exactly bit 5. Same origin routine, same X/Y formulas;
+            # "coordinate mode" is really an attr-transform mode.
+            attr = (attr_raw & 0xFF00) | ((attr_raw ^ flip_byte) & 0xFF)
         dx = s16(rom.u16(a2))
         dy = s16(rom.u16(a2 + 2))
         nx = ((attr_raw >> 8) & 0xF) + 1
