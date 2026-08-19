@@ -1,13 +1,71 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-19 EDT (item-1 session). **S2 Body D widened: EVERY active
-street alien is ROM-driven for WALK/ATTACK** (commit `1350cf8`), not just
-one, and two build hazards that were silently corrupting the tile-archive
-build are fixed. See the new session note below, then the Body E note
-underneath it for the still-standing renderer work. **Next: item 2 of the
-ordered gap list (collision), or continue item 1 by mining a real seed key
-for hit/KO actions (see "action-seed key not yet found" below) and
+Updated: 2026-08-19 EDT (stabilization checkpoint). **STABLE, CLEAN-BUILD
+VERIFIED**: `build.ps1 -Clean -Release -SkipHostTests` (commit `1eaaa98`)
+produces a bootable ISO with `runtime_ready=1`, zero failed assets, and the
+tile archive at its known-good SHA
+`7c47627c3c2d34af59dbf42bc6d677297ac0038e547d64305f0985a7bd64b01a`. Multi-
+actor ROM rendering (commit `1350cf8`) is live-validated: independent
+per-slot progression and clean deactivation/reseed, both caught over MCP
+during real WAVE_ONE combat (see "Item 1 continued" below for the exact
+readout). The tile-archive build is now structurally safe against the
+class of bug that broke it twice this session (see "Deterministic tile
+archive build contract" below). **Next: item 2 of the ordered gap list
+(collision — `avsp_collision.c/h` is proven but unconnected; the live ROM
+animation record now gives ROM-driven actors real `sel_hurt`/`sel_attack`
+selectors at record+8/+9, but `table_set` at actor+0x50 is not yet known
+to be a safe per-type constant — see the in-progress
+`tools/diag_table_set_by_type.py`, not yet run), or continue item 1 by
 phase-loading more PCM to afford the full four-route tile archive.**
+
+## Deterministic tile archive build contract (2026-08-19)
+
+The tile-archive build broke silently TWICE in one session from the same
+root shape: a build step could produce or accept an archive whose scope
+did not match what was actually budgeted, with no build-time signal.
+Fixed structurally, not just patched for the one instance:
+
+- `gen_avsp_gfx_tiles.py --scope street|round1` is now REQUIRED (no
+  default scope exists to silently pick the wrong one). The generator
+  parses `AVSP_TILE_REGION_BYTES` live out of `main.c` and REFUSES to
+  write an archive that exceeds it, before writing anything — a
+  scope/budget mismatch is now a generation-time failure, not a boot-time
+  discovery. `--allow-over-budget` exists only for offline measurement,
+  never for a build.
+- `build.ps1` always regenerates with `--scope street` explicitly (no
+  more "reuse if present" — presence-based inference is exactly what let
+  the SPR4-sweep bug silently force a wrong-scope regen) and then
+  validates the manifest's `scope` field and the on-disk byte count
+  against it before proceeding.
+- `tests/test_avsp_gfx_tiles_budget.py` (wired into `test.ps1`) is a
+  negative-path test: `--scope round1` must be refused against the
+  current carve, and the refused run must leave the on-disk archive and
+  manifest byte-for-byte untouched (checked, not assumed).
+
+**Live validation of the item-1 widening** (MCP, real WAVE_ONE combat,
+this session): sampling `rom_actor_seeded[6]` and `rom_actor_entry_counts[6]`
+across ~40 samples showed 5 of 6 enemy slots independently seeded, each
+with its own entry count cycling 2-5 out of phase with the others (e.g.
+one frame: `[4,4,4,4,4]`, next: `[4,4,4,5,5]`, next: `[4,4,2,5,3]` — never
+synchronized). A full wave-clear was caught live: every seeded flag
+dropped to `0` together, then the next wave reseeded cleanly to
+`[1,1,1,1,1,0]` with no stale per-slot carry-over — the deactivation/
+slot-reuse guard (`rom_actor_seeded[index] = 0` on inactive/wrong-kind/
+wrong-action) working exactly as coded, not just as reasoned about
+statically.
+
+**Verification order run this session, in full**: `test.ps1` green
+(including the new negative test); `build.ps1 -Clean -Release
+-SkipHostTests` green; headless boot to `runtime_ready=1`/no failed
+asset; character-select through WAVE_ONE traversal confirmed live;
+multi-actor independence and clean respawn confirmed live as above. The
+`-EncounterTest` 12,000-frame soak was NOT re-run this session (no
+runtime behavior outside the ROM-actor path changed since it last
+passed) — do not claim it without rerunning it. Yaba Sanshiro may still
+be running under this checkout when a session picks this up; check for
+the process and stop it before any destructive operation, and before
+claiming any subsequent boot result re-verify with a fresh launch rather
+than trusting a stale window.
 
 ## Item 1 continued: multi-actor ROM rendering; two build-corrupting bugs fixed (2026-08-19)
 

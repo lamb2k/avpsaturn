@@ -48,6 +48,16 @@ The ordered work that closes the gap, ahead of everything else:
    mined action-seed table can't be wired in yet without guessing.
 2. Connect the decoded CPS2 hitboxes and stage collision to gameplay,
    retiring the X-distance/lane approximations in `capability_model.c`.
+   **Scoped 2026-08-19, not yet implemented**: `avsp_collision.c/h`
+   operates on `AvspActor` (the S1 spine), whose `sel_hurt`/`sel_attack`
+   come from the live animation record's bytes +8/+9 — the ROM-driven
+   street aliens (item 1) already carry a real record pointer, so those
+   two fields are readable today. The blocker is `table_set` at actor
+   +0x50: it is per-actor, not derivable from `avsp_actor_layout.json`
+   alone, and `tools/diag_table_set_by_type.py` (written, not yet run)
+   checks whether it is safely a per-TYPE constant across the corpus
+   before any wiring is attempted. Do not hardcode a table_set value
+   without running that check first.
 3. Translate the real enemy AI, including actor separation.
 4. Replace the static frontend/level keyframes with real title, cursor,
    selection, and sequence logic.
