@@ -1,5 +1,96 @@
 # Agent handoff: native AvP Saturn port
 
+Updated: 2026-08-19 EDT (**state dispatch DECODED and falsified**). The
+mechanism that selects which per-state initializer runs — the last item with
+real discovery risk on the critical path — is decoded offline and falsified
+over 52,982 captured actor-frames. No runtime code changed this body by
+design; wiring is the next, gated body.
+
+## State dispatch: DECODED (2026-08-19)
+
+**A correction that unlocked this, record it:**
+`.deps/mame/actorprobe/decrypted_opcodes_2m.bin` (OPCODE space) disassembles
+CORRECTLY at code addresses — all three live-confirmed `table_set` stores
+appear byte-exact in it (`disasm_full.txt` lines 114966 / 88946 / 77079).
+It is `decrypted_program_2m.bin` (DATA space) that is garbage at code
+addresses. Earlier lore said flatly "a static flat dump is garbage at code
+addresses"; that is true only of the data-space dump. **Offline structural
+decode of game code is therefore possible**, which is what made this body
+cheap and materially de-risks S5. The provenance rule is unchanged and still
+binding: offline disassembly LOCATES and STRUCTURES; anything entering the
+runtime still needs live confirmation or corpus falsification.
+
+**The mechanism — a two-level PC-relative jump-table state machine.** Both
+levels use the identical 68000 idiom:
+
+```text
+102e 0004   move.b ($4,A6), D0      ; level 2: actor byte +0x04 (sub-state)
+323b 0006   move.w ($6,PC,D0.w), D1
+4efb 1002   jmp    ($2,PC,D1.w)
+```
+
+Table base = dispatcher_pc + 12. The table is self-describing: `table[0]` is
+the displacement to the sub-state-0 handler, which sits immediately after
+the table, so `table[0]/2` is the sub-state count. Sub-state-0 handlers are
+the per-state initializers, and each begins `addq.b #2,($4,A6)` — it bumps
+its own index so it runs exactly once per state entry. That is precisely the
+"recurring state-entry event, not a per-spawn call" behaviour the live
+caller trace observed, and it explains the fixed stack pointer (these are
+`jmp` targets, never `bsr`/`jsr` calls).
+
+The three live-proven `table_set` initializers are the state-0 handlers of
+three of these dispatchers:
+
+| dispatcher | state-0 handler | store | family |
+|---|---|---|---|
+| `0x060532` | `0x060546` | `0x060570` | normal `0x130AC8` |
+| `0x0495CC` | `0x0495E0` | `0x0495FC` | replace `0x13E97A` |
+| `0x03F0C4` | `0x03F0D8` | `0x03F0F0` | type_promotion `0x12CE5C` |
+
+**Level 1 is the same idiom keyed on the action byte** (`102e 0006`, the
+big-endian high byte of the action word at `+0x06`): 85 such action-level
+dispatchers exist. So the state machine is: action word selects an action
+routine; that routine's `+0x04` sub-state table selects the phase handler;
+phase 0 initialises (including `table_set`) and advances the index.
+
+**Tracked tools (both wired into `test.ps1`, both skip cleanly without the
+private image):**
+
+- `tools/extract_avsp_dispatchers.py` → `data/avsp_substate_dispatchers.json`.
+  Scans the opcode image for the idiom and decodes every table.
+  **250 sites**, sub-state histogram `{2:3, 3:4, 4:242, 5:1}`. Self-test
+  requires the three known dispatchers to decode to the live-confirmed
+  initializer entries (3/3 PASS) and a perturbation control to break.
+- `tools/verify_avsp_substate_model.py` → `data/avsp_substate_model.json`.
+  Corpus falsification: if `+0x04` is really a word-table index it must be
+  even and within the largest enumerated table. Over **52,982 active
+  actor-frames** across `enemy_actions`, `stalker_actions`, `boss_actions`,
+  `boss_ko`: **zero odd, zero out-of-range**. Observed histogram
+  `{0x00:43, 0x02:49835, 0x04:2817, 0x06:6, 0x08:281}` — all even, all
+  ≤ `0x08` (the max valid index for a 5-state table). The negative control
+  (same test on the neighbouring byte `+0x05`) correctly FAILS with 4,189
+  violations, so the check is not vacuous. Check C reports the street
+  action→`table_set` map: 6 distinct action words inside the walk/attack
+  spans, all on the gated `0x00130AC8`.
+
+**UNRESOLVED, with the next probe named.** Which action-level dispatcher
+owns the street alien, and the action-word→routine map, is NOT statically
+linked in the image: scanning all 85 action dispatchers for an entry landing
+on the enclosing routine starts (`~0x060138`, `0x0495CC`, `0x03F0C4`) found
+nothing. That is consistent with — and independent corroboration of — the
+live caller trace's fixed return address `0x00FF00D8`, i.e. the immediate
+caller is a small RAM-resident trampoline the game builds at run time. The
+remaining probe is live and bounded: dump/disassemble RAM around
+`0xFF0080–0xFF0140` and breakpoint one known sub-state dispatcher to log the
+call chain. Until that lands, hit/KO/spawn per-state `table_set` values stay
+unknown and those frames correctly fall back to the ADAPTED approximation
+(counted in the `GAP` HUD diagnostic).
+
+**Verification:** full `test.ps1` exit 0 with both new checks. No runtime
+code, build, or ISO changed this body. Capability Gate 1 stays `0/7`.
+
+## Superseded below: route-blocker section (2026-08-19, earlier)
+
 Updated: 2026-08-19 EDT (route blocker FIXED; `-EncounterTest` runs the
 COMPLETE Round 1 route for the first time). **The BOSSCLR.PCM `FS ALLOC`
 halt at `INTERIOR_TRANSITION` is diagnosed from a full live heap dump and

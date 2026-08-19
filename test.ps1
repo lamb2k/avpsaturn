@@ -183,3 +183,21 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Frontend composition analysis failed with exit code $LASTEXITCODE."
 }
+
+# Sub-state dispatcher enumeration: decodes, from the validated opcode-space
+# image, every per-actor sub-state jump table (actor byte +0x04 indexes a
+# PC-relative word table). Self-tests against the three live-confirmed
+# table_set initializers and a perturbation control. Skips cleanly without
+# the private opcode dump.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\extract_avsp_dispatchers.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Sub-state dispatcher extraction failed with exit code $LASTEXITCODE."
+}
+
+# Corpus falsification of that structural claim: over every active
+# actor-frame in the captured routes, +0x04 must be an even, in-range word
+# index, with a negative control on the neighbouring byte that must fail.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\verify_avsp_substate_model.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Sub-state model falsification failed with exit code $LASTEXITCODE."
+}

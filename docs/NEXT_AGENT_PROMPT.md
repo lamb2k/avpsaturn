@@ -1,244 +1,152 @@
-# Next agent prompt: decode the state-dispatch index (type_promotion)
+# Next agent prompt: locate the action-level dispatch, then wire per-state table_set
 
 ## Where the project is
 
-The Round 1 route is UNBLOCKED and runs end to end. Read the handoff's newest
-section, "Route blocker fixed: opening audio must top its zone (2026-08-19)",
-before anything else. In short, all MEASURED live over the Yaba Sanshiro MCP
-rig:
+The Round 1 route runs end to end (`-EncounterTest`: MAIN_MENU → both street
+waves → CLEAR → INTERIOR_TRANSITION → BOSS → BOSS_DEFEAT → RESULTS →
+COMPLETE), street aliens animate from ROM scripts and die through the game's
+own decoded hurt boxes (`HITS rom=8 approx=0`), and **the state-dispatch
+mechanism is now decoded and falsified**. Read the handoff's newest section,
+"State dispatch: DECODED (2026-08-19)", before anything else.
 
-- The `-EncounterTest` route completes: MAIN_MENU → both street waves →
-  CLEAR → INTERIOR_TRANSITION (BOSSCLR.PCM loads, `runtime_ready` stays 1) →
-  BOSS → BOSS_DEFEAT → RESULTS → COMPLETE.
-- Street alien kills resolve through the MEASURED decoded hurt boxes
-  (`HITS rom=8 approx=0` across both waves); boss/stalker kills use the
-  designed ADAPTED point test (`approx=6`) — capture-cel actors, unchanged.
-- The former `FS ALLOC` halt was diagnosed from a full heap dump: Jo's
-  allocator never coalesces free neighbours, consumes reused blocks whole,
-  and rolls the bump pointer back only for a directly-adjacent free. The fix
-  (main.c only): the four opening-overlay PCMs load LAST at init via
-  `load_opening_audio()` so their phase-end releases roll the bump pointer
-  back; BREACH is reclaimed unconditionally at the interior transition
-  (slPCMStat stays asserted forever on Yaba — release gated on it never
-  fires); `jo_reduce_memory_fragmentation()` runs before both BOSSCLR load
-  sites. Post-fix margin at COMPLETE: 161,012 bytes of bank-1 bump spare.
+What is MEASURED and tracked:
 
-Allocator rules now MEASURED in this codebase (treat as binding design
-constraints for any future load): phase-transient allocations must be the
-LAST allocations in their zone (LIFO with their lifetime); never rely on a
-mid-heap free becoming usable contiguous space; call
-`jo_reduce_memory_fragmentation()` after non-LIFO releases before a large
-allocation; on Yaba Sanshiro never gate a release on
-`jo_audio_is_channel_playing` alone.
+- The actor state machine is a **two-level PC-relative jump-table** system.
+  Both levels use the idiom `move.b ($N,A6),D0 / move.w ($6,PC,D0.w),D1 /
+  jmp ($2,PC,D1.w)`, table base = dispatcher_pc + 12, `table[0]/2` = entry
+  count. Level 2 is keyed on actor byte `+0x04` (sub-state); level 1 on the
+  action byte at `+0x06`.
+- Sub-state-0 handlers are the per-state initializers; each begins
+  `addq.b #2,($4,A6)` so it runs once per state entry — the reason the live
+  caller trace saw a recurring state-entry event with a fixed stack pointer.
+- `tools/extract_avsp_dispatchers.py` enumerates **250** sub-state
+  dispatchers (`data/avsp_substate_dispatchers.json`), self-tested against
+  the three live-confirmed `table_set` initializers with a perturbation
+  control.
+- `tools/verify_avsp_substate_model.py` falsifies the index claim over
+  **52,982** active actor-frames (`data/avsp_substate_model.json`): zero odd
+  values, zero out-of-range, negative control correctly failing.
+- **The opcode-space dump is valid at code addresses** (the data-space dump
+  is not). Offline structural decode of game code is available and cheap.
+  Provenance rule unchanged: offline LOCATES and STRUCTURES; live trace or
+  corpus falsification CONFIRMS anything that enters the runtime.
 
-**The MCP rig is available on this host** (`http://127.0.0.1:9640/mcp`).
-Re-derive symbol addresses EVERY build with
-`.deps/joengine/Compiler/WINDOWS/sh-elf/bin/nm.exe --target=coff-sh game.elf`
-(leading underscore on symbols) and struct offsets from a host `offsetof`
-program. The session scratchpad pattern (readback.py / heapdump.py) is
-described in the handoff. A previous turn recorded this readback as
-impossible; it is not.
+## The body of work
 
-## Named pending (recorded, not claimed)
+### Step 1 — locate the action-level dispatch (the one open item)
 
-- NH (the game's zero-`sel_hurt` cannot-be-hit rule) is wired but has never
-  fired live — no zero-selector record appears in the walk/attack loops.
-- The normal-release ISO's own full route (manual input) has not been driven
-  end to end by a human; the encounter-test route is the measured evidence.
-- Physical-hardware validation remains pending per `docs/HARDWARE_TEST.md`.
+85 action-level dispatchers exist, but none statically links to the street
+alien's routines: scanning every one of them for a table entry landing on
+the enclosing routine starts (`~0x060138`, `0x0495CC`, `0x03F0C4`) found
+nothing. This corroborates the live caller trace's fixed return address
+`0x00FF00D8` — the immediate caller is a **RAM-resident trampoline** the
+game builds at run time.
 
-## The body of work: decode the state-dispatch index (type_promotion)
+The probe is live and bounded:
 
-`table_set` provenance is RESOLVED for three families as literal immediates
-in three per-state initializer routines, reached by an INDEXED JUMP (not
-`bsr`/`jsr`):
+1. Cold-boot replay to a street wave using the pinned recipe (`-debug`, the
+   script sets `debugger.execution_state = "run"`, byte-for-byte
+   `enemy_actions` input schedule — copy it from
+   `tools/mame_trace_table_set_writer_insn.lua` or the untracked
+   `tools/mame_trace_dispatch_index.lua`). Check `tasklist //FI "IMAGENAME
+   eq mame.exe"`, never a `ps -W` grep.
+2. Dump and disassemble RAM around `0xFF0080–0xFF0140` (the trampoline
+   region implied by `0x00FF00D8`), and breakpoint sub-state dispatcher
+   `0x060532` logging the call chain and registers, to see what wrote the
+   trampoline and what indexes it.
+3. Deliverable: the action-word → action-routine rule, recorded in a tracked
+   manifest (addresses/rules only, no ROM bytes), falsified offline against
+   the stride-1 corpus with zero unexplained mismatches and a control that
+   breaks. Extend `tools/extract_avsp_dispatchers.py` or add a sibling; wire
+   into `test.ps1`.
 
-```text
-0x060570:   move.l #$130ac8,($50,A6)  ; "normal"
-0x0495FC:   move.l #$13e97a,($50,A6)  ; "replace"
-0x0003F0F0: move.l #$12ce5c,($50,A6)  ; "type_promotion"
-```
+If the trampoline turns out to be data-driven from a per-type table, that
+table is the real prize — it is the same structure S5's AI translation will
+walk.
 
-The UNRESOLVED item is the dispatch itself: what index selects which
-initializer runs, and how it is computed from actor/spawn context. It is the
-prerequisite for hit/KO/spawn actions joining the ROM path with correct
-per-state `table_set` — today the runtime holds the WALK/ATTACK-gated
-constant `0x00130AC8` and frames outside those loops fall back to the
-ADAPTED approximation (counted in the GAP diagnostic).
+### Step 2 — reconcile hit/KO/spawn `table_set` (offline, after step 1)
 
-Ordered — each step gates the next; stop and record honestly if a gate
-fails:
+With the action map, find the street alien's HIT/KO/spawn action routines,
+locate their sub-state-0 initializers among the 250 enumerated dispatchers,
+and read their `table_set` immediates directly from the opcode image.
+Cross-check against corpus frames carrying those action words. This answers
+what the collision body left open: today those frames have no measured hurt
+box and correctly fall back to the ADAPTED approximation, counted in the
+`GAP` HUD diagnostic. **Do not assume `0x00130AC8` applies.**
 
-1. **Locate the indexed jump.** From a live WALK/ATTACK frame, trace forward
-   to the instruction that dispatches among the three initializers. Capture,
-   per state, the exact source of the index (register, memory field, or
-   constant) and the jump targets. Confirm each target reaches one of the
-   three store PCs above. The caller-side evidence so far: a fixed stack-top
-   value `0x00FF00D8` at every entry (an outer dispatch loop's own address).
-2. **Falsify the index→family map offline** across the stride-1 type-12
-   corpus (`data/avsp_table_set_evidence.json`) with ZERO unexplained
-   mismatches, plus a perturbation/negative control that must break — the
-   same discipline as `tools/decode_avsp_table_set.py`.
-3. **Reconcile hit/KO/spawn.** Determine which initializer — hence which
-   `table_set` — those states actually run. If their store is a DIFFERENT
-   immediate, that is the per-state value the runtime must adopt when they
-   join; do not assume `0x00130AC8`.
-4. **Wiring is a SEPARATE, gated turn.** Keep provenance and wiring apart,
-   as the `table_set` and collision bodies did.
+### Step 3 — wiring (SEPARATE, gated turn — not in the same turn as step 2)
 
-Provenance rule (binding): only a live, decrypted 68000 instruction trace is
-trusted provenance. Correlation is never provenance. `spawn_type()` in
-`tools/decode_avsp_table_set.py` is a hand-authored capture-context
-classifier, NOT the game's dispatch, and must never appear in runtime code.
+Only once steps 1–2 are green: carry per-state `table_set` and the hit/KO
+records into the ROM actor path in `main.c`/`capability_model.c`, retiring
+the `GAP` fallback for the states now covered. Keep the discipline the
+collision body used: the offline gate passes first, in the same turn as the
+constant it authorises; attacker/defender labelling stays honest; a missing
+measurement keeps the ADAPTED approximation and stays counted, never
+becoming silent invulnerability. Re-run the full chain: `test.ps1`,
+`build.ps1 -Release`, `-EncounterTest` route to COMPLETE, MCP readback of
+`runtime_ready` and the collision counters, clean `-Clean -Release` last.
 
-Headless MAME tracing needs `-debug` plus the script's
-`debugger.execution_state = "run"`; `-debugger windows` is optional and
-harmless as two tokens. Cold-boot replay is reliable; `machine:load()` is
-not, in this environment. Check `tasklist //FI "IMAGENAME eq mame.exe"`
-(never a `ps -W | grep mame.exe` loop — silently vacuous) and stop strays.
+## Queue after this body (user priority, do not re-order without the user)
 
-## Queue after this body (USER PRIORITY DECISION, 2026-08-19)
+**frontend → AI (S5) → traversal.**
 
-The user has re-sequenced the roadmap: **the real frontend is the body
-immediately AFTER this one, ahead of real enemy AI.** The build currently
-presents as a tech slice (static title/select keyframes, no cursor or
-select logic, no title-card animation) and the user wants that fixed before
-more combat internals. Do not re-order this again without the user.
+The **real frontend** is next and is fully specified. Key measured facts:
+the settled character-select screen is drawn by the three CPS tilemap layers
+plus a 2-sprite `1P` cursor; title and select are distinct tilemap pages;
+both decoder halves already exist in `tools/extract_avspu_stage1.py`
+(`render_background`, `decode_objects`); and **colour RAM is the binding
+constraint** — live banks per frame are 17 (select), 19 (title), 32 (round-1
+title) against `AVSP_EXACT_PALETTE_BANKS` = 8. Plan CRAM before writing
+renderer code. See `data/frontend_rom_composition.json` and the handoff's
+frontend sections. The user requires the select screen be built from
+ORIGINAL ROM ASSETS, not captured pictures.
 
-**The user has further specified the METHOD: the character-select screen
-must be built from the ORIGINAL ROM ASSETS, not from captured pictures.**
-That question is no longer open — this session captured the ROM-truth state
-and measured what the screens are made of.
-
-**MEASURED composition** (`tools/mame_capture_frontend_rom.lua` →
-`capture_frontend_rom.ps1` → `tools/analyze_frontend_rom_composition.py`,
-manifest `data/frontend_rom_composition.json`, wired into `test.ps1`; it
-captures gfxram + cps_a/cps_b + objram + palette — the same share set the
-stage background decode already consumes — and never reads pixels):
-
-- The settled character-select screen (frames 1760/1790) is drawn almost
-  entirely by the **three CPS tilemap layers** (draw order `[2,3,1]` then
-  objects, bases `0x00000/0x04000/0x08000`). Its only drawn objects are
-  **2 sprites** — the small `1P` cursor marker (palette bank 15).
-- The plate slide-in (frame 1700) and the confirm window (1900) are large
-  transient **object bursts** — 360 drawn objects, 1 distinct tile code.
-- The title/attract page (1620) uses **different tilemap bases**
-  (`0x10000/0x14000/0x18000`) and a different layer order — title and
-  select are distinct tilemap pages in gfxram, not one screen redrawn.
-- The round-1 title (2100) mixes both: 52 objects across 9 palette banks
-  over tilemaps.
-
-**Implication, binding on the build:** a faithful rebuild needs a **CPS
-tilemap path** (per-layer tile codes + palette, decoded from the graphics
-ROM) IN ADDITION to the existing per-tile VDP1 object path. It cannot be
-done with sprites alone, and it does not need a captured picture.
-
-**Colour RAM is the frontend's real budget problem (MEASURED).** The same
-manifest counts LIVE palette banks per frame — banks actually referenced by
-visible tilemap cells plus drawn objects: character select **17**, title
-**19**, round-1 title **32**. The Saturn build allocates
-`AVSP_EXACT_PALETTE_BANKS` = **8** (sized for the actor cel path). The
-frontend cannot be rendered faithfully inside that; plan the colour-RAM
-allocation (Saturn CRAM holds 2048 16-bit entries = 128 banks of 16 in
-16-colour mode, minus what VDP2 layers themselves consume) BEFORE writing
-any frontend renderer code. This is the AvP-specific confirmation of the
-reference port's measured warning that a per-tile pipeline spends COLOUR
-RAM, not VDP1 texture memory.
-
-**Reference-port lane (user directive, 2026-08-19): consult
-`C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-MSHvSF` for
-inspiration on menus, loading screens, and Saturn sprite architecture.** It
-holds MEASUREMENTS of the official Capcom Saturn port of MSHvSF. Its
-binding usage rule (from its own `docs/MSHVSF_TO_AVP_TRANSFER_MATRIX.md`):
-a reference finding may change AvP's METHOD or add a validation probe, but
-its numbers are NEVER AvP budgets, and nothing closes an AvP condition
-without AvP evidence. Never import its code, assets, timing, or constants;
-never modify that worktree. Directly relevant rows: the 16x16
-normal-sprite/jump-next VDP1 command model (already adopted by Body E), the
-colour-RAM ownership finding (validated for AvP above), VDP2 layer
-ownership via register WRITE observation (readback is proven useless on the
-reference), phase-boundary loading with stable combat residency, and the
-difference-ledger schema for every accepted deviation.
-`tools/extract_avspu_stage1.py` already has both halves —
-`render_background()` flattens the three live tilemaps from ROM tiles and
-`decode_objects()` decodes the object list — so this is a matter of routing
-that output to the Saturn as tilemap + tiles (VDP2) plus cursor sprites
-(VDP1), NOT of writing a new decoder from scratch. Reuse the deterministic
-archive discipline of `tools/gen_avsp_gfx_tiles.py` (explicit scope, budget
-parsed from main.c, refuse-before-write) for whatever tile/tilemap archive
-this ships.
-
-Supporting evidence that still applies: `data/frontend_segments.json`
-(`round_1_title` needs **22 segments** — a genuinely animated window that
-needs its own memory plan under the measured allocator rules above),
-`data/frontend_geometry*.json` (the confirm shutter model, already
-implemented as `cap_confirm_shutter_band`), `capture_frontend.ps1` /
-`capture_frontend_wipe.ps1`, `tools/analyze_frontend_segments.py --report`.
-
-Select-screen LOGIC (cursor movement, the countdown timer visible in the
-reference frame, confirm) is game logic and must be decoded from stock-MAME
-observation with deterministic input schedules under the established corpus
-discipline — declared populations, zero unexplained mismatches — not
-inferred from screenshots. All four characters' plates and portraits are
-present in the ROM tilemaps (the reference frame shows Predator Warrior,
-Maj. D. Schaefer, Lt. Linn Kurosawa, Predator Hunter), so a working
-four-way select is an asset-complete goal; what remains ADAPTED is any
-CHARACTER whose in-game animation set has not been extracted — selecting it
-must not silently fall back to the captured character without saying so.
-
-## Explicitly deferred (do not start here)
-
-- The real frontend (NEXT body after this one — see the queue note above).
-- Widening ROM action coverage to hit/KO/spawn (needs step 3's result
-  first).
-- Real enemy AI + actor separation (now sequenced AFTER the frontend, per
-  the user decision above).
-- Player ROM animation (blocks full two-sided ROM collision and the
-  attack-box side of the predicate).
-- Street traversal (camera scroll between encounter points, mid-street
-  spawn triggers); stage collision beyond room/lane clamps; projectile
-  path.
-- The `round1` tile archive (any new carve must be re-simulated against the
-  measured allocator rules above).
+**Reference lane:** consult
+`C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-MSHvSF` (measured
+official Capcom Saturn port) for menus, loading, and sprite architecture.
+Binding rule from its own transfer matrix: findings may change AvP's METHOD
+or add a probe; its numbers are NEVER AvP budgets; never import its code,
+assets, timing, or constants; never modify that worktree.
 
 ## Prohibited shortcuts
 
 - No `table_set` constant in runtime code without its offline gate passing
   first, in the same turn.
-- Do not treat correlation output as provenance, ever.
-- Do not turn a missing measurement into a gameplay rule: a pose the ROM
-  path does not cover keeps the ADAPTED approximation and is COUNTED; it
-  never becomes silent invulnerability.
+- Do not treat correlation output as provenance, ever. `spawn_type()` in
+  `tools/decode_avsp_table_set.py` is a capture-context classifier, not game
+  logic, and must never appear in runtime code.
+- Do not turn a missing measurement into a gameplay rule.
 - Do not claim a verification that was not run; this host CAN run the MCP
-  readback and the encounter route, so "impossible here" is not available.
-- Do not add a large load without stating which zone it lands in and what
-  frees before it, under the measured allocator rules above.
-- Do not describe the per-tile renderer as final, or the build as a
-  faithful playable level (see the handoff's gap table).
+  readback and the encounter route.
+- Do not add a large load without stating its zone and what frees before it
+  (allocator rules: no coalescing, whole-block reuse, transients must top
+  their zone, `jo_reduce_memory_fragmentation()` after non-LIFO releases,
+  never gate a release on `jo_audio_is_channel_playing` alone).
+- Do not describe the per-tile renderer as final, or the build as a faithful
+  playable level.
 
 ## Mandatory startup and repository safety
 
-Read in order before changing anything: the `port-cps2-to-sega-saturn`
-skill (`SKILL.md`, `references/workflow.md`), `AGENTS.md`, `CLAUDE.md`,
-`docs/GOAL.md`, `docs/AGENT_HANDOFF.md` completely (newest sections
-supersede older), `docs/PARITY_PLAN.md`, `docs/TEST_PLAN.md`,
-`docs/HARDWARE_TEST.md`, then this file again.
+Read in order: the `port-cps2-to-sega-saturn` skill (`SKILL.md`,
+`references/workflow.md`), `AGENTS.md`, `CLAUDE.md`, `docs/GOAL.md`,
+`docs/AGENT_HANDOFF.md` completely (newest sections supersede older),
+`docs/PARITY_PLAN.md`, `docs/TEST_PLAN.md`, `docs/HARDWARE_TEST.md`, then
+this file again.
 
-Record the live state (`git status --short --branch`, `git log --oneline
--10`, `git rev-parse HEAD`, `git branch --show-current`); trust the
-commands for HEAD. Stop any stray emulator before starting; an emulator
-holding `game.iso` open can break a build's ISO step.
+Record live state (`git status --short --branch`, `git log --oneline -10`,
+`git rev-parse HEAD`, `git branch --show-current`). Stop stray emulators
+before starting; one holding `game.iso` open can break a build's ISO step.
 
-Rules (binding, unchanged): stay on `codex/avp-master-plan`; never
-`git add .`/`-A`/`clean`/broad stash/reset/destructive checkout — stage
-explicit paths only; never commit ROMs, raw captures, MAME logs, emulator
-states, generated copyrighted assets, or disc images; preserve every
-untracked `tools/diag_*`/`tools/mame_trace_*.lua`/instruction-log one-off.
+Rules (binding): stay on `codex/avp-master-plan`; never `git add
+.`/`-A`/`clean`/broad stash/reset/destructive checkout — stage explicit
+paths only; never commit ROMs, raw captures, MAME logs, emulator states,
+generated copyrighted assets, or disc images; preserve every untracked
+`tools/diag_*` / `tools/mame_trace_*.lua` / instruction-log one-off.
 
 ## Checkpoint and handoff requirements
 
 Commit at every green checkpoint with explicit paths. Keep
-`docs/AGENT_HANDOFF.md` newest-first with: HEAD, dirty files, the exact code
-or trace paths changed, live readbacks with the values actually read, which
-verifications ran, and ordered next work. Keep this file pointing at the
-next unexecuted body. Capability Gate 1 stays `0/7` regardless of outcome.
+`docs/AGENT_HANDOFF.md` newest-first with HEAD, dirty files, exact paths
+changed, live readbacks with values actually read, which verifications ran,
+and ordered next work. Keep this file pointing at the next unexecuted body.
+Capability Gate 1 stays `0/7` regardless of outcome.

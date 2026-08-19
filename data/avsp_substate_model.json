@@ -1,0 +1,70 @@
+{
+ "check_a_index_validity": {
+  "odd_values": [],
+  "out_of_range_values": [],
+  "result": "PASS",
+  "vacuous": false
+ },
+ "check_b_negative_control": {
+  "description": "same test on the neighbouring byte (+0x05) must fail, proving check A is not trivially true",
+  "result": "PASS (control correctly fails)",
+  "violations": 4189
+ },
+ "check_c_street_family_map": {
+  "action_to_table_set": {
+   "0x0000": {
+    "0x130AC8": 18
+   },
+   "0x0400": {
+    "0x130AC8": 6
+   },
+   "0x0402": {
+    "0x130AC8": 334
+   },
+   "0x0404": {
+    "0x130AC8": 28
+   },
+   "0x0C02": {
+    "0x130AC8": 37
+   },
+   "0x1600": {
+    "0x130AC8": 1763
+   }
+  },
+  "actions_not_matching_gated_constant": {},
+  "description": "table_set observed per action word for type-12 actors inside the walk/attack street spans; the gated claim is that these are all 0x00130AC8"
+ },
+ "claim": "actor byte +0x04 is a WORD-table index into the PC-relative sub-state jump table decoded in data/avsp_substate_dispatchers.json, so it must be even and within the largest enumerated table",
+ "classification": "sub-state index falsification - counts and addresses only, no ROM bytes",
+ "declared_population": "every active actor-frame (any type) in the scanned routes",
+ "max_sub_states_enumerated": 5,
+ "max_valid_index": "0x08",
+ "observed_index_histogram": {
+  "0x00": 43,
+  "0x02": 49835,
+  "0x04": 2817,
+  "0x06": 6,
+  "0x08": 281
+ },
+ "population": 52982,
+ "result": "PASS",
+ "routes_scanned": {
+  "boss_actions": {
+   "active_actor_frames": 4641,
+   "frames": 900
+  },
+  "boss_ko": {
+   "active_actor_frames": 3671,
+   "frames": 841
+  },
+  "enemy_actions": {
+   "active_actor_frames": 27826,
+   "frames": 2121
+  },
+  "stalker_actions": {
+   "active_actor_frames": 16844,
+   "frames": 2281
+  }
+ },
+ "schema": 1
+}
