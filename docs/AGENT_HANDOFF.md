@@ -1,24 +1,28 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-18 EDT. **Next body: finish S2 in dependency order** — first
-resolve and exactly validate the general Family-1 part-stream walk, then promote
-it to reusable C, integrate one live street-alien `AvspActor`, and render its
-semantic object list per CPS2 object. See the hyper-detailed
-`docs/NEXT_AGENT_PROMPT.md`; do not integrate from the current partial 3-entry
-geometry check.
+Updated: 2026-08-18 EDT (late session). **Next body: S2 Bodies D and E** —
+integrate one live street-alien `AvspActor` into `main.c` driven by the now
+fully proven pipeline, then render its semantic object list per CPS2 object
+through a real VDP1 path. Bodies A-C are closed (see "S2 source walk closed"
+below).
 
-Session order, newest first. **S2 record extraction — PASSED:** 614 reachable
-records, 10,244 bytes in 63 spans, and the interpreter over that 10 KB
-reproduces the full 2 MB program image on every counter. **S2 animation walk —
-interpreter VALIDATED:** 5,738 of the game's own pointer moves predicted, 23,676
-frames predicted exactly free-running, longest run 732 frames; runtime
-integration still open. **S1 actor spine — PASSED:** 481,566 actor loads with 0
-field mismatches, and the C collision port reproduces the Python falsification
-exactly on all eight counters. **Plan re-sequenced** around the actor spine into
-slice steps S1–S6, with the renderer decision (old phase A) deferred into S2
-after measurement showed the shipped build already draws more VDP1 sprite fill
-than the candidate pipeline needs. **Milestone 2 (collision records) executed,
-not closed**; **milestone 1 (street-alien emission) closed**.
+Session order, newest first. **S2 source walk (Bodies A-C) — CLOSED:** the
+complete ROM-to-object emission pipeline (pose assembly selector -> group
+headers -> origin routine with live camera anchors -> both loop variants ->
+four-word entries) is decoded, corpus-falsified over 6,139 captured frames
+across four routes — **6,010 eligible actor-frame instances, 5,614 exact,
+396 game-omitted, ZERO mismatches** — and promoted to C
+(`avsp_emit_pose`/`avsp_emit_group`, wired into `test.ps1`). **S2 record
+extraction — PASSED:** 614 reachable records, 10,244 bytes in 63 spans, and
+the interpreter over that 10 KB reproduces the full 2 MB program image on
+every counter. **S2 animation walk — interpreter VALIDATED:** 5,738 of the
+game's own pointer moves predicted, 23,676 frames predicted exactly
+free-running, longest run 732 frames; runtime integration still open.
+**S1 actor spine — PASSED:** 481,566 actor loads with 0 field mismatches, and
+the C collision port reproduces the Python falsification exactly on all eight
+counters. **Plan re-sequenced** around the actor spine into slice steps
+S1–S6. **Milestone 2 (collision records) executed, not closed**; **milestone
+1 (street-alien emission) closed**.
 
 **Naming.** Two vocabularies only: **Capability Gate 1** conditions (and the
 nine full-game conditions) for acceptance, and slice steps **S1-S6** with
@@ -553,13 +557,80 @@ Committed: `tools/decode_avsp_object_stream.py` (attr-transform fix at
 pose-header-chain solve at `6e0db90`) and
 `data/avsp_object_stream.json`.
 
+## S2 source walk CLOSED: corpus-falsified, zero mismatches, promoted to C (2026-08-18, latest)
+
+The remaining Body B questions were collapsed into one offline corpus job
+(`tools/verify_avsp_object_corpus.py`): the paired
+`workram_N.bin`/`objram_active_N.tsv` captures already on disk hold both the
+inputs (actor records) and the ground truth (the game's own object lists), so
+no live MAME was needed for the falsification itself. Findings, each
+live-verified or corpus-verified:
+
+- **The dispatch count is the assembly's own leading selector word**:
+  `0x0006` = one Family-1 group (header follows), `0x000C` = two groups, each
+  prefixed by its own `0x0006` tag. Pose assemblies are packed contiguously;
+  what looked like "the tag after the last group" is the next pose's selector.
+  Other selector/tag values (`0x0002`, `0x0004`, others) are OTHER emitter
+  families — a live unfiltered write-tap found **six distinct emitting store
+  loops** (`0x0A99EA/F0/F6/FC+`, `0x0A9D88/8A/8C`, `0x0AA0BA/BC`,
+  `0x0AA1D0/D2`, `0x0AA210..216` (Family-1 flipped), `0x0AAA9C/9E`) — counted
+  as named exclusions, never guessed at.
+- **One-frame pipeline delay (MEASURED)**: actor state in `workram_N`
+  produces `objram_active_{N+1}`. Moving actors proved it; stationary actors
+  had masked it.
+- **The facing=0 loop variant**: the dispatcher (`0x0AA00E`, fully
+  live-disassembled via a cold-boot route replay,
+  `tools/mame_trace_facing0.lua`) selects the loop body on the origin
+  routine's Z flag: facing!=0 takes the proven flipped loop
+  (X = origin - width - dx, attr low ^= 0x20); facing==0 takes the plain loop
+  at `0x0AA1A8..0x0AA1DA` (X = origin + dx, no width term, no XOR). Same A2
+  advance walk in both. This resolved all 212 initial corpus mismatches.
+- **The dispatcher's first act is a frame tile-budget gate**
+  (`sub.w D0,D7; bmi bail`) — the header's `budget` word is the group's tile
+  count (Σ per-part (nx+1)*(ny+1)), subtracted from a per-frame register;
+  exhaustion suppresses emission entirely. One named cause of oracle
+  "absent" instances.
+- **Actor byte `+0x0D` is a coordinate-mode selector** (`tst.b (0xD,A4)`;
+  positive -> the decoded origin path; zero/negative -> an undecoded path).
+  The stalker-route creatures that decode structurally but never matched are
+  all `+0x0D = 0xFF`. Positive `+0x0D` joined the declared eligibility gates.
+- **The camera anchors are LIVE STATE, not ROM constants**: stalker/boss
+  actors decoded to exact code/attr with X/Y offset by a per-route constant;
+  the anchors live at `0xFF8278`/`0xFF827C` (inside every workram capture,
+  read directly) and equal `scroll1_x + 0x40` / `0x300 - scroll1_y`
+  (verified across two camera positions). `decode_group_origin` takes them
+  as parameters.
+
+**Final corpus result over all four paired routes (6,139 frames, exceeding
+the 5,302-frame requirement): eligible=6,010, exact=5,614, absent=396 (the
+game's own gates: tile budget, offscreen edge band, flicker), mismatch=0.**
+Per-route: street 3,787/3,918 exact, stalkers 1,134/1,339, boss 552/612,
+boss-KO 141/141; every exclusion named and counted in
+`data/avsp_object_corpus_verification.json`.
+
+**Promoted to C (Body C)**: `avsp_emit_pose`/`avsp_emit_group` in
+`avsp_emit.h/.c` implement the identical pipeline (C90, bounds-checked,
+allocation-free; unknown families return -1). `tests/avsp_emit_test.c`
+drives both selectors, both facing variants, three palettes from pose
+assemblies against live oracle entries; wired into `test.ps1`. Full host
+suite exits 0; the Saturn ISO rebuilds clean with the module in `SRCS`.
+
+**Still open in S2 (Bodies D, E)**: no live actor in `main.c` carries an
+`AvspActor` or calls `avsp_emit_pose`; the per-object VDP1 renderer is not
+started. **Known bounded gaps, all named**: the five other emitter families;
+the zero/negative `+0x0D` coordinate modes; the game-side visibility/budget
+scheduling that decides WHETHER an eligible actor emits (the 396 absents).
+
+Committed: `ece9eef` (corpus verifier + facing-0 loop), `3da5583` (anchors
+from live state; full-corpus pass), `c5cd7b5` (C promotion).
+
 ## Status across S1-S6 (2026-08-18, end of session)
 
 | Step | Status |
 |---|---|
 | S1 actor spine | **PASSED.** 481,566 actor-field loads, 0 mismatches; the collision predicate ported to C reproduces the Python falsification exactly on all 8 counters. |
 | S2 animation walk | **VALIDATED.** Interpreter predicts 23,676 of the game's own frames exactly free-running from one seed; 614 records extracted to 63 spans (10 KB), proven to reproduce the full 2 MB image on every counter. |
-| S2 object emitter | **Full pipeline (pose-to-header chain, part walk, attr transform, origin) proven ROM + actor-record only** for all 16 object entries across 7 group instances, **confirmed on 2 independent actors** (different palette bytes, different poses, same anchor constants and header-chain mechanism, zero per-actor tuning). The one remaining structural gap: how many groups a given pose/actor-type actually dispatches is not derivable from the group data itself (tag presence is necessary but not sufficient - a live trace still supplies this count). **Not yet run against the full 5,302-frame oracle**; **not called by `main.c`**; **VDP1 per-object renderer not started**. |
+| S2 object emitter | **SOURCE WALK CLOSED.** Complete pipeline (selector -> groups -> origin with live camera anchors -> both facing loop variants -> entries) corpus-falsified over 6,139 frames / four routes: **6,010 eligible, 5,614 exact, 396 game-omitted, zero mismatches**; promoted to C (`avsp_emit_pose`) and wired into `test.ps1`. Named bounded gaps: five other emitter families, zero/negative `+0x0D` coordinate modes, the game-side budget/visibility scheduling. **Not called by `main.c`**; **VDP1 per-object renderer not started**. |
 | S2 integration into `main.c` | **Not started.** No live actor in the shipped runtime carries an `AvspActor` or ticks `avsp_anim_frame_tick`. A same-session proof-of-concept overlay was built, boot-tested successfully (real Round 1 combat played through to the Round 2 title without regressing), but was inconclusive on visual confirmation and was removed before committing rather than left in an unverified state. |
 | S3 (widen to full cast) | Not started; depends on S2. |
 | S4 (collision integration) | Not started; `avsp_collision.c` exists and is proven (S1) but nothing calls it from gameplay; depends on S2 for live selectors. |
