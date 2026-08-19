@@ -3,9 +3,10 @@
 Updated: 2026-08-19 EDT (**per-class `table_set` evidence check repaired;
 runtime still unchanged**).
 
-## Per-class table_set evidence: READY TO COMMIT (2026-08-19)
+## Per-class table_set evidence: COMMITTED (2026-08-19)
 
-**Branch `codex/avp-master-plan`, baseline HEAD `9c72af2`.** This is an
+**Branch `codex/avp-master-plan`, committed at `1b2dc29` (parent
+`9c72af2`).** This is an
 offline evidence-only body. It changes no runtime source, build product, ISO,
 ROM input, or raw capture. The coherent checkpoint paths are:
 
