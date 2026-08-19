@@ -1,79 +1,79 @@
-# Next agent prompt: decode the state-dispatch index (type_promotion) that
-# selects the per-state table_set initializer
+# Next agent prompt: unblock the Round 1 route (BOSSCLR.PCM phase-load), then decode the state dispatch
 
-## Where the project is (the collision body is COMPLETE as scoped)
+## Where the project is
 
 The "connect decoded collision to gameplay (defender side first)" body is
-done. All five of its steps ran on `codex/avp-master-plan`:
+complete AND confirmed live. Its review turn corrected two defects and ran
+both verifications that had been carried as pending. Read the handoff's newest
+section, "Review of the collision body: two defects corrected (2026-08-19)",
+before anything else.
 
-- **Step 1 — offline gate** (`f56821f`, `data/avsp_table_set_gate.json`):
-  over the stride-1 street capture, every active type-12 frame whose record
-  pointer (+0x1C) is in the walk (`0x12EB4C`) or attack (`0x12D8A0`) span
-  carries `table_set` (+0x50) == `0x00130AC8` — 2186/2186, zero exceptions.
-- **Steps 2 + 3 — runtime plumbing + defender-side wiring** (`e9febe6`:
-  `makefile`, `capability_model.h`, `capability_model.c`, `main.c`): ROM
-  street aliens (active type-12 whose record pointer is in the walk/attack
-  street spans) now carry `table_set = 0x00130AC8` (the gated constant),
-  `sel_hurt` from the live record +8 via the anim-script span view, and their
-  DEFENDER geometry in `cap_resolve_player_hit` is the player's ADAPTED
-  attack-reach interval against the alien's REAL decoded hurt box.
-  `sel_hurt == 0` means "cannot be hit" (no fallback), counted in the
-  `rom_collision_no_hurt` debug-HUD counter.
-- **Step 4 — host falsification** (`tests/avsp_runtime_collision_test.c`,
-  wired into `test.ps1`): replays the S1 predicate over `collision_probe` +
-  `collision_probe_boss` through the RUNTIME's input path — check A 1392
-  street frames, 0/0/0 mismatches (non-vacuous); check B the exact S1 known
-  contact set (21908/25/2516/24; latches 25/19/8/4). Full `test.ps1` exits 0
-  (single-window and sparse-span forms).
-- **Step 5 — verification**: full `test.ps1` exit 0; the clean `-Release`
-  build + ISO member-hash verification ran green; the normal-release ISO
-  booted in Yaba Sanshiro 1.20.37 and was read back by pixel statistics
-  (busy, non-black, no `CAPABILITY TEST FAILED` banner).
+What is now MEASURED, not inferred:
 
-Read the handoff's newest section, "Defender-side collision wiring + Step 4
-host falsification (2026-08-19)", and its "table_set source rule: RESOLVED"
-section before anything else. Do not re-open `table_set` provenance.
+- `runtime_ready = 1` read literally over the Yaba Sanshiro MCP debug server.
+- ROM street aliens carry REAL decoded hurt boxes in WAVE_ONE (58 px wide,
+  facing-mirrored, tracking model x).
+- Player hits resolve through those boxes: the `-EncounterTest` route cleared
+  both street waves with `HITS rom=8 approx=0` — 8 kills, every one decided by
+  the measured hurt box, none by the ADAPTED point approximation.
+- Frames with no ROM measurement (a pose outside the walk/attack loops) keep
+  the ADAPTED approximation and are counted in `GAP`. They are NOT treated as
+  invulnerable; that earlier behaviour was an invented rule and is gone.
+- `NH` (the game's own zero-`sel_hurt` cannot-be-hit rule) is wired but stayed
+  0 all session — UNEXERCISED live. Do not claim it works.
 
-## Carried forward as NAMED PENDING (do NOT claim; run on a capable host)
+**The rig is available on this host.** The MCP debug server answers at
+`http://127.0.0.1:9640/mcp`. Re-derive symbol addresses EVERY build with
+`.deps/joengine/Compiler/WINDOWS/sh-elf/bin/nm.exe --target=coff-sh game.elf`
+(coff-sh symbols carry a leading underscore), and get struct offsets from a
+host `offsetof` program rather than reusing absolute addresses from an older
+build. A previous turn recorded this readback as impossible; it is not.
 
-1. **Live readback of the literal `runtime_ready=1` and
-   `rom_collision_no_hurt` (NH) values, plus WAVE_ONE hit behavior** (ROM
-   street aliens take hits with plausible reach differences from the
-   capture-cel actors; the NH counter nonzero only in the expected windows).
-   Pixel statistics CANNOT read these: this model has no image input, and
-   this host has no emulator MCP client. They need a host that can read
-   emulator state (the prior "Yaba Sanshiro MCP" path) or a debug HUD
-   resolvable at the window's scale.
-2. **The full Saturn `-EncounterTest` route** (`build.ps1 -EncounterTest`).
-   It was NOT rerun this turn (it soaks combat resolution, which this turn
-   touched). The 12,000-frame host soak is not a substitute.
+## The body of work, part 1: the route blocker (do this first)
 
-## Project status to preserve
+**Measured symptom.** The `-EncounterTest` ISO auto-drives MAIN_MENU →
+WAVE_ONE → WAVE_TWO → CLEAR, then HALTS at `INTERIOR_TRANSITION` with
+`world.frame` frozen (the emulator keeps running; only the model stops).
+Cause, read from the runtime's own diagnostics: `avsp_fs_last_error` =
+`FS ALLOC`, `boss_clear_sound.data` = 0. The phase-load in `main.c` calls
+`jo_malloc_with_behaviour(637084, JO_MALLOC_TRY_REUSE_BLOCK)` for
+`/AUDIO/BOSSCLR.PCM`, gets null, sets `runtime_ready = 0`, and returns early
+from that function on every subsequent frame.
 
-- Native SH-2 port at functional parity, not a CPS2 emulator. Capability
-  Gate 1 remains `0/7`; the full-game goal remains `0/9`.
-- The S1 actor spine and collision predicate (`avsp_collision.c/h`,
-  `avsp_actor.c/h`) are proven on the host AND now called from gameplay
-  (defender side) for ROM street aliens.
-- Every active street alien in WALK/ATTACK carries independent ROM-driven
-  animation state (`1350cf8`, live-validated). Hit/KO/spawn actions, the
-  player, stalkers, and boss paths still use capture-derived production
-  data; a street alien in `CAP_ACT_HIT` has no measured hurt box until it
-  returns to WALK.
-- Body E renders ROM-driven actors as per-16x16-tile VDP1 sprites — a
-  working native diagnostic path, NOT the final one-command-per-object
-  renderer of `docs/PARITY_PLAN.md`.
-- Tile-archive builds are deterministic (`--scope street` explicit; `round1`
-  refuses over-budget before writing).
-- The clean normal-release boot renders (pixel-verified this turn); the
-  literal `runtime_ready`/NH readback and the Saturn `-EncounterTest` route
-  remain the two named-pending verifications above.
+**Why it outranks the dispatch decode:** the phase-load site is common code,
+not gated by the test profile, so the NORMAL RELEASE hits the same wall. Round
+1 cannot currently reach BOSS. No amount of further ROM decoding matters while
+the route cannot finish.
 
-## The body of work: decode the state-dispatch index (type_promotion)
+Ordered:
 
-`table_set` provenance is RESOLVED for three families as literal immediates
-in three per-state initializer routines, reached by an INDEXED JUMP (not
-`bsr`/`jsr`):
+1. **Measure the real allocation state at the failure point** before changing
+   any budget. At `INTERIOR_TRANSITION`, report what is actually free and in
+   how many blocks (cartridge bank 0, bank 1, and work RAM separately), and
+   what holds the space — the `AVSP_TILE_REGION_BYTES` carve (0x40000 at the
+   head of cart bank 1), the earlier PCM loads, the RLE archives. Declare the
+   numbers before proposing a fix. The skill's rule applies: treat the reuse
+   allocator as a WHOLE-BLOCK allocator until proven otherwise — a small
+   earlier load can consume the only block large enough for this one.
+2. **Choose the fix from those numbers, not from a guess.** Candidates, in
+   rough order of how little they invent: pack the phase assets into one
+   aligned allocation so the 637 KB request is not competing for a fragmented
+   remainder; retire an allocation that is provably dead by the interior
+   transition (the street tile archive is a candidate ONLY if nothing still
+   renders from it — prove it, do not assume); move the load to a boundary
+   where a large block demonstrably exists. Whichever is chosen, the
+   allocation must be proven to fit in the FULL route, not in a focused
+   diagnostic.
+3. **Verify by running the route to completion**, not by reasoning: the
+   `-EncounterTest` ISO must reach BOSS, BOSS_DEFEAT, and the end of the
+   route with `runtime_ready` staying 1 and `avsp_fs_last_error` unset. Report
+   the states it passed through and the frame at each.
+
+## The body of work, part 2: the state-dispatch index (type_promotion)
+
+Only after the route runs end to end. `table_set` provenance is RESOLVED for
+three families as literal immediates in three per-state initializer routines,
+reached by an INDEXED JUMP (not `bsr`/`jsr`):
 
 ```text
 0x060570:   move.l #$130ac8,($50,A6)  ; "normal"
@@ -81,88 +81,84 @@ in three per-state initializer routines, reached by an INDEXED JUMP (not
 0x0003F0F0: move.l #$12ce5c,($50,A6)  ; "type_promotion"
 ```
 
-The UNRESOLVED item is the **dispatch itself**: what index selects which
-initializer runs, and how that index is computed from the actor / spawn
-context. This is real S5-adjacent state-machine work (not `table_set`
-provenance), and it is the prerequisite for hit/KO/spawn actions joining the
-ROM path with correct per-state `table_set` — today the runtime holds the
-WALK/ATTACK-gated constant `0x00130AC8` and a street alien in `CAP_ACT_HIT`
-has no measured hurt box until it returns to WALK.
+The UNRESOLVED item is the dispatch itself: what index selects which
+initializer runs, and how it is computed. It is the prerequisite for
+hit/KO/spawn actions joining the ROM path with correct per-state `table_set`
+— today the runtime holds the WALK/ATTACK-gated constant `0x00130AC8` and
+frames outside those loops fall back to the ADAPTED approximation.
+
+1. **Locate the indexed jump** from a live WALK/ATTACK frame; capture, per
+   state, the exact source of the index (register, memory field, or constant)
+   and the jump targets. Confirm each target reaches one of the three store
+   PCs above.
+2. **Falsify the index→family map offline** across the stride-1 type-12
+   corpus (`data/avsp_table_set_evidence.json`) with zero unexplained
+   mismatches plus a perturbation control that must break.
+3. **Reconcile hit/KO/spawn.** Determine which initializer those states run.
+   If their store is a different immediate, that is the per-state value the
+   runtime must adopt when they join. Do not assume `0x00130AC8`.
+4. **Wiring is a SEPARATE, gated turn** — keep provenance and wiring apart,
+   as the `table_set` and collision bodies did.
 
 Provenance rule (binding): only a live, decrypted 68000 instruction trace is
-trusted provenance here. Correlation is never provenance. `spawn_type()` in
-the stride-1 decoder (`tools/decode_avsp_table_set.py`) is a hand-authored
-capture-context classifier used to falsify the constants map offline; it is
-NOT the game's dispatch and must never be wired into runtime code.
+trusted provenance. Correlation is never provenance. `spawn_type()` in
+`tools/decode_avsp_table_set.py` is a hand-authored capture-context
+classifier, NOT the game's dispatch, and must never appear in runtime code.
 
-Ordered — each step gates the next; stop and record honestly if a gate
-fails:
-
-1. **Locate the indexed jump.** From a live WALK/ATTACK frame, trace forward
-   to the instruction that dispatches among the three initializers. Capture,
-   per state, the exact source of the index (register, memory field, or
-   constant) and the jump target(s). Confirm each target reaches one of the
-   three store PCs above.
-2. **Falsify the index→family map offline.** Map the observed index values to
-   {normal, replace, type_promotion} and predict each generation's store PC
-   (hence its `table_set`) across the stride-1 target-type-12 corpus
-   (`data/avsp_table_set_evidence.json`) with ZERO unexplained mismatches,
-   plus a perturbation/negative control that must break — the same discipline
-   as `tools/decode_avsp_table_set.py`.
-3. **Reconcile the hit/KO/spawn states.** Once the dispatch is decoded,
-   determine which initializer — hence which `table_set` — the hit/KO/spawn
-   states actually run. If their store is a DIFFERENT immediate, that is the
-   per-state value the runtime must adopt when those states join; do not
-   assume `0x00130AC8`.
-4. **Wiring is a SEPARATE, gated turn.** Do not widen ROM action coverage in
-   the same turn as the decode (keep provenance and wiring separated, the
-   same discipline the `table_set` and collision bodies used).
+Headless MAME tracing needs `-debug` plus the script's
+`debugger.execution_state = "run"`; `-debugger windows` is optional and
+harmless as two tokens. Cold-boot replay is reliable; `machine:load()` is not,
+in this environment.
 
 ## Explicitly deferred (do not start here)
 
-- Widening ROM action coverage to hit/KO/spawn (needs step 3's result first).
+- Widening ROM action coverage to hit/KO/spawn (needs part 2, step 3 first).
 - Player ROM animation (blocks full two-sided ROM collision and the
   attack-box side of the predicate).
-- Stage collision beyond room/lane clamps; actor separation; projectile path
-  (S4 items after this body).
-- The PCM phase-load refactor that affords the `round1` tile archive.
+- Stage collision beyond room/lane clamps; actor separation; projectile path.
+- The `round1` tile archive (its budget question is downstream of part 1's
+  allocation measurements).
 
-## Prohibited shortcuts (unchanged)
+## Prohibited shortcuts
 
-- No `table_set` constant in runtime code without the offline gate passing
+- No `table_set` constant in runtime code without its offline gate passing
   first, in the same turn.
-- `spawn_type()` from the stride-1 decoder must not appear in runtime code
-  (capture-context classifier, not game logic).
 - Do not treat correlation output as provenance, ever.
-- Do not widen ROM action coverage in the same turn as the dispatch decode.
+- Do not turn a missing measurement into a gameplay rule. A pose the ROM path
+  does not cover keeps the ADAPTED approximation and is COUNTED; it never
+  becomes silent invulnerability. (This is exactly the defect the review turn
+  removed.)
+- Do not claim a verification that was not run. If the emulator readback or
+  the route is not executed, say so plainly — but note that this host CAN run
+  both, so "impossible here" is not an available excuse.
 - Do not describe the per-tile renderer as final, or the build as a faithful
   playable level (see the handoff's gap table).
 
 ## Mandatory startup and repository safety
 
-Read in order before changing anything: the `port-cps2-to-sega-saturn`
-skill (`SKILL.md`, `references/workflow.md`), `AGENTS.md`, `CLAUDE.md`,
-`docs/GOAL.md`, `docs/AGENT_HANDOFF.md` completely (newest sections
-supersede older), `docs/PARITY_PLAN.md`, `docs/TEST_PLAN.md`,
-`docs/HARDWARE_TEST.md`, then this file again.
+Read in order before changing anything: the `port-cps2-to-sega-saturn` skill
+(`SKILL.md`, `references/workflow.md`), `AGENTS.md`, `CLAUDE.md`,
+`docs/GOAL.md`, `docs/AGENT_HANDOFF.md` completely (newest sections supersede
+older), `docs/PARITY_PLAN.md`, `docs/TEST_PLAN.md`, `docs/HARDWARE_TEST.md`,
+then this file again.
 
-Record the live state (`git status --short --branch`, `git log --oneline
--10`, `git rev-parse HEAD`, `git branch --show-current`); trust the
-commands for HEAD. Check `tasklist //FI "IMAGENAME eq mame.exe"` (not a
-`ps -W | grep mame.exe` loop — that grep is silently vacuous here) and
-stop any stray emulator before starting.
+Record the live state (`git status --short --branch`, `git log --oneline -10`,
+`git rev-parse HEAD`, `git branch --show-current`); trust the commands for
+HEAD. Check `tasklist //FI "IMAGENAME eq mame.exe"` (not a `ps -W | grep
+mame.exe` loop — that grep is silently vacuous here) and stop any stray
+emulator before starting. An emulator holding `game.iso` open can break a
+build's ISO step; stop it before rebuilding.
 
-Rules (binding, unchanged): stay on `codex/avp-master-plan`; never
-`git add .`/`-A`/`clean`/broad stash/reset/destructive checkout — stage
-explicit paths only; never commit ROMs, raw captures, MAME logs, emulator
-states, generated copyrighted assets, or disc images; preserve every
-untracked `tools/diag_*`/`tools/mame_trace_*.lua`/instruction-log one-off.
+Rules (binding, unchanged): stay on `codex/avp-master-plan`; never `git add
+.`/`-A`/`clean`/broad stash/reset/destructive checkout — stage explicit paths
+only; never commit ROMs, raw captures, MAME logs, emulator states, generated
+copyrighted assets, or disc images; preserve every untracked
+`tools/diag_*`/`tools/mame_trace_*.lua`/instruction-log one-off.
 
 ## Checkpoint and handoff requirements
 
 Commit at every green checkpoint with explicit paths. Keep
 `docs/AGENT_HANDOFF.md` newest-first with: HEAD, dirty files, the exact code
-or trace paths changed, MCP/pixel readbacks, whether the named-pending
+or trace paths changed, live readbacks with the values actually read, which
 verifications ran, and ordered next work. Keep this file pointing at the next
-unexecuted body. Capability Gate 1 stays `0/7` regardless of this body's
-outcome.
+unexecuted body. Capability Gate 1 stays `0/7` regardless of outcome.

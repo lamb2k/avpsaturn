@@ -1,5 +1,106 @@
 # Agent handoff: native AvP Saturn port
 
+Updated: 2026-08-19 EDT (review of the collision body; two defects corrected;
+BOTH named-pending verifications actually RUN). **The defender-side collision
+wiring is confirmed live, and the `-EncounterTest` route now has a measured
+result instead of a pending label: it does NOT complete — it halts at
+`INTERIOR_TRANSITION` on a failed 637,084-byte `BOSSCLR.PCM` allocation.**
+This section supersedes the "Named pending" paragraph immediately below it,
+which was written when this host was believed to lack an emulator MCP client.
+
+**The rig was there all along.** The previous turn recorded the live readback
+as impossible ("no emulator MCP client, no image input"). That was wrong: the
+Yaba Sanshiro MCP debug server (`http://127.0.0.1:9640/mcp`) answered
+normally this turn, and both pending verifications ran against it with
+addresses re-derived per build via
+`.deps/joengine/Compiler/WINDOWS/sh-elf/bin/nm.exe --target=coff-sh game.elf`
+and `CapWorld`/`CapActor` offsets computed by a host `offsetof` program
+(`sizeof(CapActor)`=68, `enemies`=+68, `active`=+40, `action`=+24,
+`rom_street_alien`=+52; `world.frame`=+616, `encounter_state`=+648). Do not
+re-record these verifications as impossible.
+
+## Review of the collision body: two defects corrected (2026-08-19)
+
+**Defect 1 — fabricated invulnerability (fixed).** `rom_actor_tick` set
+`rom_street_alien = 1` for EVERY active alien slot in the street waves, before
+the WALK/ATTACK check. `cap_resolve_player_hit` therefore took the ROM branch
+for those slots in every state, and since only WALK/ATTACK resolve a box, a
+street alien was un-hittable for the whole 36-frame `CAP_ENEMY_HIT_TOTAL_FRAMES`
+hitstun (and the IDLE frame after it) with no fallback. The previous turn
+disclosed this as an "honest scope limit", but it is not a measured rule: the
+game says nothing about those poses, and turning missing data into
+invulnerability invents behaviour. Absent measurement is not evidence of
+invulnerability. Corrected semantics: `rom_street_alien` marks only frames
+where the ROM path produced a MEASURED verdict — a resolved hurt box, or the
+game's own zero-`sel_hurt` cannot-be-hit rule. Every other frame keeps the
+pre-existing ADAPTED point approximation and is counted, not silenced. The
+gate manifest quantifies why this matters: of the type-12 actor-frames in the
+street capture, 2,186 are in the walk/attack spans and 13,199 are outside them.
+
+**Defect 2 — an unreadable counter (fixed).** The `NH` counter was printed on
+HUD row 2, but `draw_hud()` runs later in the same `frame_callback` and
+rewrites rows 0-7, so the diagnostic was overwritten before it was ever
+displayed. The ROM diagnostics moved to rows 24/25, which no overlay touches.
+
+**Added: hit attribution.** `cap_rom_box_hits` / `cap_approx_hits`
+(`capability_model.c`, declared in `capability_model.h`, on HUD row 25 as
+`HIT r/a`) record which geometry resolved each landed player hit. Without
+them "the alien died" cannot be attributed — a slot with no measurement that
+frame falls through to the approximation. Diagnostics only; nothing reads
+them back into the model.
+
+**Live readback, normal release (Yaba Sanshiro 1.20.37, MCP):**
+
+- `runtime_ready` = **1**, read literally (both rebuilds this turn).
+- WAVE_ONE carried five ROM street aliens with `rom=1 hit=1` and REAL decoded
+  hurt boxes — 58 px wide, facing-mirrored, tracking model x (e.g. slot0 at
+  x=267 → `[226,284]`; the same slot at x=129 → `[112,170]`).
+- The `GAP` counter incremented exactly when slots left WALK/ATTACK (observed
+  IDLE slots reading `rom=0 hit=0`) — the frames the fix keeps on the
+  approximation instead of making invulnerable.
+- Player hits land through the MEASURED box. Five aliens keep the player in
+  permanent hitstun, so a single-target scenario was forced through the
+  debugger (other slots' `active` zeroed, player health topped up —
+  instrumentation, not gameplay evidence): the isolated ROM alien died with
+  `KO` 0→1, `score` 0→140, and **`HITS rom=3 approx=0`**.
+- `NH` stayed **0** for the entire session: no zero-`sel_hurt` record appeared
+  in the walk/attack loops, so the cannot-be-hit path is wired but
+  UNEXERCISED live. Do not claim it works from this run.
+
+**`-EncounterTest` route: RUN, and it FAILS (new blocker).** The
+`profile=encounter-test` ISO auto-drove MAIN_MENU → WAVE_ONE → WAVE_TWO →
+CLEAR, defeating 8 street aliens (`score` 800) with **`HITS rom=8 approx=0`**
+— every kill in both street waves resolved through the measured hurt box,
+zero through the approximation. It then **halted at `INTERIOR_TRANSITION`,
+`world.frame` frozen at 1193 while the emulator kept running** (emu frame
+counter advanced 15,009 → 15,391; `MSH2 PC` inside the CD/wait path). Cause,
+read out of the runtime's own diagnostic: `avsp_fs_last_error` = **`FS
+ALLOC`** and `boss_clear_sound.data` = 0, i.e.
+`jo_malloc_with_behaviour(637084, JO_MALLOC_TRY_REUSE_BLOCK)` for
+`/AUDIO/BOSSCLR.PCM` returned null. `main.c`'s phase-load then sets
+`runtime_ready = 0` and returns early every frame, so the model never steps
+again and BOSS is unreachable.
+
+This is NOT caused by the collision change (which adds four ints of BSS and
+no allocation). It is the whole-block reuse-allocator hazard the skill warns
+about, and it blocks the full Round 1 route in the NORMAL RELEASE too — the
+phase-load site is common code, not gated by the test profile. The deferred
+"PCM phase-load refactor" is therefore not a nice-to-have behind the
+state-dispatch decode; it is the blocker for finishing the route.
+
+**Verification this turn:** baseline `test.ps1` exit 0 before any edit; full
+`test.ps1` exit 0 after the model change (gate still 2186/2186 non-vacuous,
+`table_set` falsifications PASS with controls rejected); `build.ps1 -Release
+-SkipHostTests` green twice; `build.ps1 -EncounterTest -SkipHostTests` green
+(`profile=encounter-test`); final `build.ps1 -Clean -Release -SkipHostTests`
+green with ISO members verified. No emulator process remains.
+
+**Next:** the `BOSSCLR.PCM` phase-load allocation failure (route blocker,
+measured above), then the state-dispatch / `type_promotion` decode. See
+`docs/NEXT_AGENT_PROMPT.md`. Capability Gate 1 stays `0/7`.
+
+## Superseded below: the "named pending" framing (2026-08-19, earlier)
+
 Updated: 2026-08-19 EDT (defender-side collision wired; Step 4 host
 falsification green; boot re-verified by pixels). **Collision is now
 connected to gameplay, defender side first.** For each active type-12 ROM

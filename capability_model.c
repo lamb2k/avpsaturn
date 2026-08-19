@@ -333,6 +333,14 @@ static void cap_damage_enemy(CapWorld *world, CapActor *enemy, const int damage)
     }
 }
 
+/* Which geometry actually resolved each landed player hit. Diagnostics only -
+ * nothing reads them back into the model - but they are what makes a live
+ * readback attributable: "the alien died" does not by itself say the MEASURED
+ * hurt box resolved the contact, since a slot with no measurement this frame
+ * falls through to the approximation. */
+int cap_rom_box_hits = 0;
+int cap_approx_hits = 0;
+
 static int cap_resolve_player_hit(CapWorld *world, const int range, const int damage)
 {
     CapActor *player = &world->player;
@@ -350,14 +358,15 @@ static int cap_resolve_player_hit(CapWorld *world, const int range, const int da
         if (cap_abs(enemy->lane - player->lane) > 19) continue;
         if (enemy->rom_street_alien)
         {
-            /* ROM-driven street alien: the defender geometry is the MEASURED
-             * decoded hurt box (main.c resolved it each frame from the live
-             * animation record + gated table_set via avsp_collision_hurt_box);
-             * the attacker reach stays ADAPTED (this model's fixed range). The
-             * box lags the model step by one frame (rom_actor_tick runs after
-             * cap_world_step) - accepted and labelled. A slot with no valid box
-             * this frame (cannot-hit hurt selector, or a non-walk/attack pose)
-             * is NOT hit, and never falls back to the point approximation. */
+            /* This frame carries a MEASURED verdict for the slot (main.c
+             * resolved it from the live animation record + the gated table_set
+             * via avsp_collision_hurt_box); the attacker reach stays ADAPTED
+             * (this model's fixed range). The box lags the model step by one
+             * frame (rom_actor_tick runs after cap_world_step) - accepted and
+             * labelled. rom_can_hit 0 here is the game's own cannot-be-hit rule
+             * (zero hurt selector), so it is honored with no fallback. Frames
+             * with no measurement never reach this branch; they fall through to
+             * the approximation below. */
             int reach_a, reach_b, reach_lo, reach_hi;
             if (!enemy->rom_can_hit) continue;
             reach_a = player->x;
@@ -368,6 +377,7 @@ static int cap_resolve_player_hit(CapWorld *world, const int range, const int da
                 reach_lo > enemy->rom_box_x_hi) continue;
             cap_damage_enemy(world, enemy, damage);
             ++hits;
+            ++cap_rom_box_hits;
             continue;
         }
         /* Capture-cel actors and non-rom slots keep the point approximation. */
@@ -376,6 +386,7 @@ static int cap_resolve_player_hit(CapWorld *world, const int range, const int da
             if (delta_x * player->facing < 0 || cap_abs(delta_x) > range) continue;
             cap_damage_enemy(world, enemy, damage);
             ++hits;
+            ++cap_approx_hits;
         }
     }
     return hits;

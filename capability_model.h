@@ -102,13 +102,15 @@ typedef struct
     /* Step 2/3 ROM-driven street-alien collision view. Filled by main.c's
      * rom_actor_tick each frame from the decoded animation record and the gated
      * table_set; consumed by cap_resolve_player_hit to replace the point
-     * approximation with the MEASURED hurt box for these slots. rom_street_alien
-     * marks a slot as a ROM-driven street alien for the whole wave (its defender
-     * geometry is never the point approximation); rom_can_hit is 1 only while a
-     * valid box is available this frame (walk/attack pose, non-zero hurt
-     * selector, resolved against the gated table_set). rom_box_x_lo/hi are the
-     * resolved hurt-box X extent in CPS x (screen) space. All 0 for capture-cel
-     * actors and outside the street waves. */
+     * approximation with the MEASURED hurt box for these slots.
+     * rom_street_alien marks the frames for which the ROM path produced a
+     * MEASURED verdict - either a resolved hurt box (rom_can_hit 1, extents in
+     * rom_box_x_lo/hi, model x space) or the game's own cannot-be-hit rule, a
+     * zero hurt selector (rom_can_hit 0). Frames with no measurement at all (a
+     * pose outside the two street loops, an unresolvable record) leave this 0
+     * and keep the ADAPTED approximation: absent data is not evidence of
+     * invulnerability. All 0 for capture-cel actors and outside the street
+     * waves. */
     int rom_street_alien;
     int rom_can_hit;
     int rom_box_x_lo;
@@ -151,6 +153,13 @@ typedef struct
 #define CAP_CONFIRM_SHUTTER_ROWS_PER_FRAME 4
 #define CAP_CONFIRM_CONTENT_TOP_ROW 40
 #define CAP_CONFIRM_CONTENT_BOTTOM_ROW 223
+
+/* Diagnostics: how many landed player hits each defender geometry resolved.
+ * cap_rom_box_hits counts contacts decided by a ROM-driven actor's MEASURED
+ * hurt box; cap_approx_hits counts those decided by the ADAPTED point test.
+ * Nothing in the model reads them. */
+extern int cap_rom_box_hits;
+extern int cap_approx_hits;
 
 void cap_world_init(CapWorld *world);
 CapClipRequest cap_world_step(CapWorld *world, const CapInput *input);

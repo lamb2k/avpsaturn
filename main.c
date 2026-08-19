@@ -1468,12 +1468,22 @@ static int rom_actor_entry_counts[CAP_MAX_ENEMIES];
 /* HUD/back-compat aggregates: total entries and the first live code. */
 static int rom_actor_entry_count = 0;
 static AvspObjectEntry rom_actor_entries[16];
-/* Step 3: a ROM street alien whose live record advertises a hurt selector of 0
- * (or whose box cannot be resolved) cannot be hit - the game rejects the
- * selector before any table read. Counted per frame on the debug HUD (like the
- * tile MISS counters) so the cannot-hit windows are visible; it is never a
- * silent fallback to the point approximation. */
+/* Step 3 collision diagnostics, both per-frame and cumulative.
+ *
+ * NH counts the MEASURED cannot-be-hit verdict: the live record advertises a
+ * hurt selector of 0, which the game rejects before any table read. That is a
+ * real rule, so it is honored with no fallback to the point approximation.
+ *
+ * GAP counts the opposite case - a ROM-driven slot for which this frame
+ * produced NO measured verdict at all (a pose outside the two street loops,
+ * an unresolvable record, or a selector the decoded family cannot resolve).
+ * A missing measurement is not evidence of invulnerability, so those frames
+ * keep the pre-existing ADAPTED point approximation; the counter is what keeps
+ * the gap visible instead of silent. */
 static volatile int rom_collision_no_hurt;
+static volatile int rom_collision_no_hurt_frame;
+static volatile int rom_collision_gap;
+static volatile int rom_collision_gap_frame;
 
 static void rom_actor_tick(void)
 {
@@ -1481,6 +1491,8 @@ static void rom_actor_tick(void)
     AvspEmitActor state;
 
     rom_actor_entry_count = 0;
+    rom_collision_no_hurt_frame = 0;
+    rom_collision_gap_frame = 0;
     /* The ROM collision view is valid only for ROM-driven street aliens in the
      * two street-wave states; zero it for every slot each frame so the point
      * approximation applies everywhere else (capture-cel actors, boss, etc.). */
@@ -1526,14 +1538,19 @@ static void rom_actor_tick(void)
             rom_actor_seeded[index] = 0;
             continue;
         }
-        /* This slot is a ROM-driven street alien for the whole wave, so its
-         * defender geometry is never the point approximation (Step 3). The
-         * measured box below is populated only while it walks or attacks. */
-        enemy->rom_street_alien = 1;
         if (enemy->action != CAP_ACT_WALK &&
             enemy->action != CAP_ACT_ATTACK)
         {
+            /* No ROM record is driven outside the two street loops (hit, KO,
+             * idle, spawn), so this frame has NO measured hit geometry for the
+             * slot. It keeps the ADAPTED point approximation: silence about a
+             * pose is not a measurement that it cannot be hit, and inventing a
+             * 36-frame hitstun invulnerability out of missing data would be a
+             * fabricated rule. Per-state ROM coverage needs the state-dispatch
+             * decode first (docs/NEXT_AGENT_PROMPT.md). */
             rom_actor_seeded[index] = 0;
+            ++rom_collision_gap;
+            ++rom_collision_gap_frame;
             continue;
         }
         /* ADAPTED action bridge: the two live-verified street-alien loops. */
@@ -1588,37 +1605,40 @@ static void rom_actor_tick(void)
              * hit/KO/spawn join the ROM path - their per-state initializers may
              * carry a different constant. */
             const unsigned long street_table_set = 0x00130AC8uL;
-            if (rec != 0)
+            unsigned char sel_hurt = (rec != 0) ? rec[8] : 0u;
+            AvspBox hurt;
+            /* rom_street_alien is set ONLY where this frame produced a measured
+             * verdict, so cap_resolve_player_hit leaves every other frame on the
+             * ADAPTED approximation rather than on an invented invulnerability. */
+            if (rec != 0 && sel_hurt == 0u)
             {
-                unsigned char sel_hurt = rec[8];
-                AvspBox hurt;
-                if (sel_hurt == 0u)
-                {
-                    /* The game rejects selector 0 before any table read: this
-                     * pose cannot be hit. Honor it - never fall back to the
-                     * point approximation - and count it for the debug HUD. */
-                    enemy->rom_can_hit = 0;
-                    ++rom_collision_no_hurt;
-                }
-                else if (avsp_collision_hurt_box(street_table_set, sel_hurt,
-                                                 &hurt))
-                {
-                    int center = (int)state.world_x +
-                                 (state.facing ? -(int)hurt.x_center
-                                               : (int)hurt.x_center);
-                    enemy->rom_can_hit = 1;
-                    enemy->rom_box_x_lo = center - (int)hurt.x_half;
-                    enemy->rom_box_x_hi = center + (int)hurt.x_half;
-                }
-                else
-                {
-                    /* Unknown family or out-of-range selector: no box, cannot
-                     * be hit. A real data gap, not a cannot-hit pose; it must
-                     * not occur for the gated street constant. */
-                    enemy->rom_can_hit = 0;
-                }
+                /* MEASURED cannot-be-hit: the game rejects selector 0 before
+                 * any table read. Honor it with no fallback, and count it. */
+                enemy->rom_street_alien = 1;
+                enemy->rom_can_hit = 0;
+                ++rom_collision_no_hurt;
+                ++rom_collision_no_hurt_frame;
             }
-            /* rec == 0 leaves rom_can_hit at its zeroed value (cannot hit). */
+            else if (rec != 0 &&
+                     avsp_collision_hurt_box(street_table_set, sel_hurt, &hurt))
+            {
+                int center = (int)state.world_x +
+                             (state.facing ? -(int)hurt.x_center
+                                           : (int)hurt.x_center);
+                enemy->rom_street_alien = 1;
+                enemy->rom_can_hit = 1;
+                enemy->rom_box_x_lo = center - (int)hurt.x_half;
+                enemy->rom_box_x_hi = center + (int)hurt.x_half;
+            }
+            else
+            {
+                /* Unresolvable record, or a selector the decoded family cannot
+                 * resolve: a DATA GAP, not a cannot-hit pose. It must not occur
+                 * for the gated street constant, so it stays on the ADAPTED
+                 * approximation and is counted where it can be seen. */
+                ++rom_collision_gap;
+                ++rom_collision_gap_frame;
+            }
         }
     }
 }
@@ -2386,11 +2406,20 @@ static void frame_callback(void)
               (int)world.encounter_state, (int)world.encounter_timer,
               (int)world.frame);
     rom_actor_tick();
+    /* Rows 24/25: draw_hud() runs after this and rewrites rows 0-7, so a
+     * diagnostic printed on row 2 was overwritten in the same frame - it could
+     * never be read back. These two rows are clear of every overlay. */
     if (debug_hud_enabled && rom_actor_entry_count > 0)
-        jo_printf(0, 2, "ROM ACTOR n=%d code=%04x MISS %d/%d/%d POOL %d NH %d",
+    {
+        jo_printf(0, 24, "ROM n=%d code=%04x MISS %d/%d/%d POOL %d    ",
                   rom_actor_entry_count, rom_actor_entries[0].code,
                   tile_diag_no_bank, tile_diag_no_rank, tile_diag_no_sprite,
-                  tile_pool_used, rom_collision_no_hurt);
+                  tile_pool_used);
+        jo_printf(0, 25, "COLL NH %d/%d GAP %d/%d HIT r%d/a%d    ",
+                  rom_collision_no_hurt_frame, rom_collision_no_hurt,
+                  rom_collision_gap_frame, rom_collision_gap,
+                  cap_rom_box_hits, cap_approx_hits);
+    }
     draw_world();
     draw_arcade_hud();
     draw_route_overlay();
