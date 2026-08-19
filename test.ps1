@@ -145,3 +145,14 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "table_set source-rule decoder falsification failed with exit code $LASTEXITCODE."
 }
+
+# Step-1 GATE: prove the runtime street-alien table_set constant (0x00130AC8)
+# over the stride-1 street capture before any runtime wiring - every active
+# type-12 frame whose record pointer sits in the walk/attack street spans must
+# carry it, zero exceptions. No correlation, no spawn_type. Requires the
+# private program image + street captures; skips cleanly without them (the
+# committed manifest records the run where inputs were present).
+& $PythonPath (Join-Path $PSScriptRoot 'tools\gate_avsp_table_set.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "table_set street-alien gate failed with exit code $LASTEXITCODE."
+}

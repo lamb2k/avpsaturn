@@ -1,0 +1,56 @@
+{
+ "attack_seed": "0x12D8A0",
+ "attack_span_records": 5,
+ "classification": "step-1 offline gate - proves the runtime street-alien table_set constant, no correlation, no spawn_type",
+ "context_exceptions": 0,
+ "context_routes": [
+  {
+   "eligible": 0,
+   "exceptions": [],
+   "frames_scanned": 2281,
+   "route": "stalker_actions",
+   "table_set_distribution": {}
+  },
+  {
+   "eligible": 0,
+   "exceptions": [],
+   "frames_scanned": 900,
+   "route": "boss_actions",
+   "table_set_distribution": {}
+  },
+  {
+   "eligible": 0,
+   "exceptions": [],
+   "frames_scanned": 841,
+   "route": "boss_ko",
+   "table_set_distribution": {}
+  }
+ ],
+ "expected_table_set": "0x130AC8",
+ "gate": "for every stride-1 street-route frame in which a type-12 actor's live record pointer (+0x1C) lies inside the walk (0x12EB4C) or attack (0x12D8A0) record spans, its table_set (+0x50) equals 0x00130AC8; zero exceptions; vacuous (eligible==0) is a failure",
+ "gate_eligible": 2186,
+ "gate_exceptions": [],
+ "gate_exclusions": {
+  "inactive_actors": 324260,
+  "non_type_12_actors": 12441,
+  "type_12_record_ptr_outside_street_spans": 13199,
+  "type_12_record_ptr_unreadable": 0
+ },
+ "gate_frames_scanned": 2121,
+ "gate_population": "active type-12 actor-frames whose +0x1C record pointer lies in the walk/attack street spans",
+ "gate_route": "enemy_actions",
+ "gate_table_set_distribution": {
+  "0x130AC8": 2186
+ },
+ "program_image": {
+  "bytes": 2097152,
+  "path": ".deps/mame/actorprobe/decrypted_program_2m.bin",
+  "sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9"
+ },
+ "result": "PASS - 2186/2186 street-span type-12 frames carry 0x130AC8, zero exceptions",
+ "schema": 1,
+ "street_span_records": 13,
+ "vacuous": false,
+ "walk_seed": "0x12EB4C",
+ "walk_span_records": 8
+}
