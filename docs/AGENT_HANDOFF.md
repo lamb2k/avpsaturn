@@ -557,6 +557,37 @@ Committed: `tools/decode_avsp_object_stream.py` (attr-transform fix at
 pose-header-chain solve at `6e0db90`) and
 `data/avsp_object_stream.json`.
 
+## Boot freeze ROOT-CAUSE NARROWED: slSynch slave-queue wait; cache-staleness prime suspect (2026-08-18, session end)
+
+Full MCP-debugger session (tools/list revealed the complete set:
+breakpoints, step, memory_read/write, disassemble, backtrace,
+exec_history - addresses passed as hex STRINGS). Frozen-state facts:
+
+- Master PC 0x6028D70/76, inside slSynch (0x06028D4A): the wait polls
+  GBR+0x3CC (0x060FFFCC) which holds a POINTER (0x0602BF54) - a queue
+  pointer, not a flag. slSynch prologue (live-disassembled) ENQUEUES a
+  slave command 0x2C at @(0x48,gbr), notifies via a register at the
+  0x06028E3C-referenced address, calls 0x06028E40/0x06028E5E, then
+  waits for the queue to drain.
+- Slave SH2 idles at 0x06029110 and never consumes -> master waits
+  forever. DMA elimination (all jo_dma_copy converted to memcpy) did
+  NOT fix it - the jam is not the SCU DMA.
+- PRIME SUSPECT: SH2 cache staleness on the polled queue line - heavy
+  transition frames (RLE decompress + ~90KB memcpy sweeps) pin/load
+  the polled line into the master cache; subsequent polls read stale
+  data forever. Explains: only transitions freeze, nondeterminism,
+  thousands of healthy frames between, audio unaffected.
+
+Next session (30 minutes of scripted MCP work): disassemble the slave
+loop at 0x06029110 and slSynch subroutines 0x06028E40/0x06028E5E;
+identify queue head/tail addresses; memory_read both from the DEBUGGER
+(uncached view) at a freeze - if the queue is actually drained while
+the master still spins, cache staleness is proven; then fix by making
+Jo/SGL poll through the uncached mirror (0x2xxxxxxx) or purging the
+line, or disable slave usage in SGL if Jo permits. The MCP rig:
+%APPDATA%/YabaSanshiro/yabause.ini gets Debug\McpServerEnabled=true,
+server at http://127.0.0.1:9640/mcp, tools take hex-string addresses.
+
 ## CRITICAL CORRECTION: the Saturn build has NEVER booted to gameplay (2026-08-18, user-verified)
 
 First real interactive boot attempt (Yaba Sanshiro, keyboard input):
