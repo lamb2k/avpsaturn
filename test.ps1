@@ -215,3 +215,30 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Actor class-dispatch falsification failed with exit code $LASTEXITCODE."
 }
+
+# Per-state table_set body (offline): bounded state-0 span decode of each
+# street-class routine - from the dispatch target the handler span is
+# decoded as far as the sequential decoder stays clean (the handlers
+# embed inline data tables, where the clean decode stops and the tail is
+# recorded), and the state-0 class-entry immediate store is the sole +0x50
+# writer in the proven code region, cross-matched PC and value against
+# the live-trace families. Plus byte-exact re-verification of each
+# class's sub-state dispatch table and the second-level dispatch idiom.
+# Skips cleanly without the private opcode dump and manifests.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\extract_avsp_table_set_states.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Per-state table_set extraction failed with exit code $LASTEXITCODE."
+}
+
+# Semantic anchor + corpus falsification of that claim: the captured
+# enemy_action actor (RAM 0xffa000) must carry its class constant in
+# every frame of its cited HIT and KO clips. Their animation-record sets
+# define conservatively named anchor-record-signature populations; they do
+# not promote action/sub-state correlations to semantic HIT/KO labels. The
+# constant must stay unchanged for every active street frame in all four
+# deterministic MAME routes, with exclusive lifecycle accounting and one
+# corrupted-constant control for every populated class.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\verify_avsp_table_set_states.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Per-state table_set corpus falsification failed with exit code $LASTEXITCODE."
+}

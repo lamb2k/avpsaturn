@@ -1,0 +1,966 @@
+{
+ "anchor": {
+  "actor_address": "0xffa000",
+  "actor_id": 31,
+  "hit_clip": {
+   "action_words": [
+    "0x0002",
+    "0x0200",
+    "0x0202",
+    "0x0204"
+   ],
+   "animation_records": [
+    "0x0012D2F8",
+    "0x0012DD50"
+   ],
+   "class": "0x1F",
+   "clip": "hit",
+   "field_histograms": {
+    "action": {
+     "0x0002": 9,
+     "0x0200": 1,
+     "0x0202": 23,
+     "0x0204": 3
+    },
+    "anim_record": {
+     "0x0012D2F8": 3,
+     "0x0012DD50": 33
+    },
+    "class": {
+     "0x1F": 36
+    },
+    "route": {
+     "enemy_actions": 36
+    },
+    "state": {
+     "0x01": 36
+    },
+    "sub_state": {
+     "0x02": 36
+    },
+    "table_set": {
+     "0x00130AC8": 36
+    }
+   },
+   "frame": {
+    "count": 36,
+    "end": 5226,
+    "start": 5191
+   },
+   "frames_verified": 36,
+   "state_bytes": [
+    "0x01"
+   ],
+   "sub_states": [
+    "0x02"
+   ],
+   "table_set_mismatches": 0,
+   "type": "0x0C"
+  },
+  "ko_clip": {
+   "action_words": [
+    "0x0000",
+    "0x0200",
+    "0x0400",
+    "0x0600"
+   ],
+   "animation_records": [
+    "0x0012E214",
+    "0x0012E224",
+    "0x0012E234",
+    "0x0012E244",
+    "0x0012E254",
+    "0x0012E268"
+   ],
+   "class": "0x1F",
+   "clip": "ko",
+   "field_histograms": {
+    "action": {
+     "0x0000": 74,
+     "0x0200": 52,
+     "0x0400": 3,
+     "0x0600": 11
+    },
+    "anim_record": {
+     "0x0012E214": 13,
+     "0x0012E224": 2,
+     "0x0012E234": 5,
+     "0x0012E244": 7,
+     "0x0012E254": 49,
+     "0x0012E268": 64
+    },
+    "class": {
+     "0x1F": 140
+    },
+    "route": {
+     "enemy_actions": 140
+    },
+    "state": {
+     "0x02": 140
+    },
+    "sub_state": {
+     "0x04": 139,
+     "0x06": 1
+    },
+    "table_set": {
+     "0x00130AC8": 140
+    }
+   },
+   "frame": {
+    "count": 140,
+    "end": 5469,
+    "start": 5330
+   },
+   "frames_verified": 140,
+   "state_bytes": [
+    "0x02"
+   ],
+   "sub_states": [
+    "0x04",
+    "0x06"
+   ],
+   "table_set_mismatches": 0,
+   "type": "0x0C"
+  },
+  "route": "enemy_actions",
+  "slot": 14
+ },
+ "anchor_capture_manifest_sha256": "3a4980d410c01534f1cd1e5a7452cbe9721efb9badf80ed2672c27fbec055e4d",
+ "anchor_record_signature_populations": {
+  "definition": {
+   "class": "0x1F",
+   "hit_anchor_record_signature": "animation record in the exact HIT clip set ['0x0012D2F8', '0x0012DD50']; this is a record-signature population, not a semantic HIT claim",
+   "ko_anchor_record_signature": "animation record in the exact KO clip set ['0x0012E214', '0x0012E224', '0x0012E234', '0x0012E244', '0x0012E254', '0x0012E268']; this is a record-signature population, not a semantic KO claim"
+  },
+  "hit_anchor_record_signature": {
+   "field_histograms": {
+    "action": {
+     "0x0000": 13,
+     "0x0002": 54,
+     "0x0200": 6,
+     "0x0202": 128,
+     "0x0204": 39
+    },
+    "anim_record": {
+     "0x0012D2F8": 52,
+     "0x0012DD50": 188
+    },
+    "class": {
+     "0x1F": 240
+    },
+    "route": {
+     "enemy_actions": 240
+    },
+    "state": {
+     "0x01": 240
+    },
+    "sub_state": {
+     "0x02": 240
+    },
+    "table_set": {
+     "0x00130AC8": 240
+    }
+   },
+   "frames": 240,
+   "mismatches": 0
+  },
+  "ko_anchor_record_signature": {
+   "field_histograms": {
+    "action": {
+     "0x0000": 300,
+     "0x0200": 208,
+     "0x0400": 12,
+     "0x0600": 44
+    },
+    "anim_record": {
+     "0x0012E214": 52,
+     "0x0012E224": 8,
+     "0x0012E234": 20,
+     "0x0012E244": 28,
+     "0x0012E254": 196,
+     "0x0012E268": 260
+    },
+    "class": {
+     "0x1F": 564
+    },
+    "route": {
+     "enemy_actions": 564
+    },
+    "state": {
+     "0x01": 4,
+     "0x02": 560
+    },
+    "sub_state": {
+     "0x02": 4,
+     "0x04": 556,
+     "0x06": 4
+    },
+    "table_set": {
+     "0x00130AC8": 564
+    }
+   },
+   "frames": 564,
+   "mismatches": 0
+  }
+ },
+ "check_A": "private opcode-image instruction-form and immediate validation; no opcode bytes serialized",
+ "check_B": "semantic anchor: cited clip actor (RAM 0xffa000, slot 14) valid per-frame on the HIT and KO clips; animation-record sets separable",
+ "check_C": "per-slot constancy, exclusive lifecycle accounting and anchor-record-signature populations over enemy_actions, stalker_actions, boss_actions, boss_ko",
+ "check_D": "one corrupted-constant control per populated class; each must fail its lifetime and every nonempty claimed population",
+ "check_E": "manifest stores cross-match live-trace families",
+ "check_F": "manifest internal consistency (schema 3: class-entry == other == store value, corpus-observed wording, one clean-region writer, recorded undecoded tail, store inside the clean region)",
+ "classification": "semantic anchor + corpus falsification of per-state table_set constancy - counts, addresses, decoded instruction forms and field histograms only; no ROM bytes",
+ "corpus": {
+  "boss_actions": {
+   "frames": 900,
+   "mismatch_samples": [],
+   "mismatches": 0,
+   "street_frames": 900
+  },
+  "boss_ko": {
+   "frames": 841,
+   "mismatch_samples": [],
+   "mismatches": 0,
+   "street_frames": 841
+  },
+  "enemy_actions": {
+   "frames": 2121,
+   "mismatch_samples": [],
+   "mismatches": 0,
+   "street_frames": 16520
+  },
+  "stalker_actions": {
+   "frames": 2281,
+   "mismatch_samples": [],
+   "mismatches": 0,
+   "street_frames": 6843
+  }
+ },
+ "coverage_requirements": {
+  "0x00": "lifetime >= 1; exclusive lifecycle sum == lifetime",
+  "0x06": "lifetime >= 1; exclusive lifecycle sum == lifetime; sub-state 0x04 lifecycle-signature >= 1",
+  "0x1F": "lifetime >= 1; exclusive lifecycle sum == lifetime; exact HIT/KO anchors fully validated; both anchor-record signature populations nonempty"
+ },
+ "expected_table_set": {
+  "0x00": "0x0012CE5C",
+  "0x06": "0x0013E97A",
+  "0x1F": "0x00130AC8"
+ },
+ "extractor_manifest_sha256": "4b45cbc65b87a201f557acaf8eec53ca7ba822d320bb8d457d3cca39f224b50b",
+ "image_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
+ "negative_controls": {
+  "0x00": {
+   "anchor_record_signature_mismatches": {},
+   "corrupted_value": "0x0013E97A",
+   "lifecycle_mismatches": {
+    "activation": 0,
+    "class_transition": 0,
+    "continuation": 4560,
+    "route_start_adoption": 2
+   },
+   "lifetime_frames": 4562,
+   "mismatches": 4562
+  },
+  "0x06": {
+   "anchor_record_signature_mismatches": {},
+   "corrupted_value": "0x00130AC8",
+   "lifecycle_mismatches": {
+    "activation": 1,
+    "class_transition": 0,
+    "continuation": 4051,
+    "route_start_adoption": 3
+   },
+   "lifetime_frames": 4055,
+   "mismatches": 4055
+  },
+  "0x1F": {
+   "anchor_record_signature_mismatches": {
+    "hit_anchor_record_signature": 240,
+    "ko_anchor_record_signature": 564
+   },
+   "corrupted_value": "0x0012CE5C",
+   "lifecycle_mismatches": {
+    "activation": 19,
+    "class_transition": 0,
+    "continuation": 16460,
+    "route_start_adoption": 8
+   },
+   "lifetime_frames": 16487,
+   "mismatches": 16487
+  }
+ },
+ "per_class": {
+  "0": {
+   "field_histograms": {
+    "action": {
+     "0x0000": 64,
+     "0x0002": 9,
+     "0x0200": 174,
+     "0x0202": 47,
+     "0x0204": 5,
+     "0x0206": 11,
+     "0x0208": 60,
+     "0x020A": 25,
+     "0x0400": 2730,
+     "0x0600": 52,
+     "0x0800": 3,
+     "0x0802": 156,
+     "0x0804": 21,
+     "0x0806": 17,
+     "0x0C00": 153,
+     "0x1000": 283,
+     "0x1006": 34,
+     "0x1200": 1,
+     "0x1202": 11,
+     "0x1204": 48,
+     "0x1206": 21,
+     "0x1600": 145,
+     "0x2000": 492
+    },
+    "anim_record": {
+     "0x0012A268": 95,
+     "0x0012A278": 81,
+     "0x0012A288": 80,
+     "0x0012A29C": 124,
+     "0x0012A2AC": 107,
+     "0x0012A2BC": 97,
+     "0x0012A2CC": 95,
+     "0x0012A2E0": 98,
+     "0x0012A2F0": 96,
+     "0x0012A300": 96,
+     "0x0012A310": 96,
+     "0x0012A320": 96,
+     "0x0012A330": 96,
+     "0x0012A340": 90,
+     "0x0012A350": 16,
+     "0x0012A364": 56,
+     "0x0012A374": 56,
+     "0x0012A384": 56,
+     "0x0012A394": 56,
+     "0x0012A3A4": 56,
+     "0x0012A3B4": 56,
+     "0x0012A3C4": 56,
+     "0x0012A3D4": 8,
+     "0x0012A3E8": 108,
+     "0x0012A3F8": 103,
+     "0x0012A408": 102,
+     "0x0012A418": 102,
+     "0x0012A428": 102,
+     "0x0012A438": 96,
+     "0x0012A448": 96,
+     "0x0012A458": 96,
+     "0x0012A468": 21,
+     "0x0012A47C": 102,
+     "0x0012A48C": 102,
+     "0x0012A49C": 102,
+     "0x0012A4AC": 102,
+     "0x0012A4BC": 102,
+     "0x0012A4CC": 102,
+     "0x0012A4DC": 102,
+     "0x0012A4EC": 102,
+     "0x0012A4FC": 24,
+     "0x0012A6AC": 33,
+     "0x0012A6BC": 33,
+     "0x0012A6CC": 33,
+     "0x0012A6DC": 33,
+     "0x0012A6EC": 33,
+     "0x0012A6FC": 32,
+     "0x0012A70C": 30,
+     "0x0012A71C": 31,
+     "0x0012A72C": 27,
+     "0x0012A970": 8,
+     "0x0012A980": 8,
+     "0x0012A990": 8,
+     "0x0012A9A0": 4,
+     "0x0012A9B4": 8,
+     "0x0012A9C4": 8,
+     "0x0012A9D4": 8,
+     "0x0012A9E4": 4,
+     "0x0012A9F8": 40,
+     "0x0012AA08": 80,
+     "0x0012AA18": 40,
+     "0x0012AA28": 11,
+     "0x0012AA3C": 44,
+     "0x0012AA4C": 86,
+     "0x0012AA5C": 40,
+     "0x0012AA6C": 10,
+     "0x0012AC78": 7,
+     "0x0012AC88": 9,
+     "0x0012AD40": 7,
+     "0x0012AD50": 13,
+     "0x0012AD60": 9,
+     "0x0012AD70": 4,
+     "0x0012AD80": 7,
+     "0x0012AD90": 12,
+     "0x0012AEF0": 10,
+     "0x0012AF00": 4,
+     "0x0012AF10": 45,
+     "0x0012AF24": 16,
+     "0x0012AF34": 4,
+     "0x0012AF44": 2,
+     "0x0012B3FC": 11,
+     "0x0012B410": 63,
+     "0x0012B470": 3,
+     "0x0012B480": 3,
+     "0x0012B490": 3,
+     "0x0012B4A0": 3,
+     "0x0012B4B0": 3,
+     "0x0012B4C0": 3,
+     "0x0012B4D0": 3,
+     "0x0012B4E0": 3,
+     "0x0012B4F0": 2,
+     "0x0012B588": 17,
+     "0x0012B598": 8,
+     "0x0012B5A8": 8,
+     "0x0012B5B8": 8,
+     "0x0012B5C8": 8,
+     "0x0012B5D8": 7,
+     "0x0012BA08": 26,
+     "0x0012BACC": 23,
+     "0x0012BADC": 4,
+     "0x0012BAEC": 4,
+     "0x0012BAFC": 14,
+     "0x0012BB0C": 18,
+     "0x0012BB1C": 6,
+     "0x0012BB2C": 6,
+     "0x0012BB3C": 6,
+     "0x0012BB4C": 16,
+     "0x0012BB5C": 13
+    },
+    "class": {
+     "0x00": 4562
+    },
+    "route": {
+     "stalker_actions": 4562
+    },
+    "state": {
+     "0x01": 4562
+    },
+    "sub_state": {
+     "0x02": 4562
+    },
+    "table_set": {
+     "0x0012CE5C": 4562
+    }
+   },
+   "lifecycle": {
+    "activation": 0,
+    "class_transition": 0,
+    "continuation": 4560,
+    "route_start_adoption": 2
+   },
+   "lifecycle_mismatches": {
+    "activation": 0,
+    "class_transition": 0,
+    "continuation": 0,
+    "route_start_adoption": 0
+   },
+   "lifetime": 4562,
+   "mismatches": 0,
+   "sub_state_action_histogram": {
+    "0x02": {
+     "0x0000": 64,
+     "0x0002": 9,
+     "0x0200": 174,
+     "0x0202": 47,
+     "0x0204": 5,
+     "0x0206": 11,
+     "0x0208": 60,
+     "0x020A": 25,
+     "0x0400": 2730,
+     "0x0600": 52,
+     "0x0800": 3,
+     "0x0802": 156,
+     "0x0804": 21,
+     "0x0806": 17,
+     "0x0C00": 153,
+     "0x1000": 283,
+     "0x1006": 34,
+     "0x1200": 1,
+     "0x1202": 11,
+     "0x1204": 48,
+     "0x1206": 21,
+     "0x1600": 145,
+     "0x2000": 492
+    }
+   }
+  },
+  "6": {
+   "field_histograms": {
+    "action": {
+     "0x0000": 456,
+     "0x0002": 45,
+     "0x0200": 248,
+     "0x0202": 223,
+     "0x0204": 18,
+     "0x0206": 33,
+     "0x0208": 3,
+     "0x020A": 57,
+     "0x0400": 666,
+     "0x0600": 19,
+     "0x0C00": 12,
+     "0x0C02": 901,
+     "0x0C04": 146,
+     "0x0E00": 12,
+     "0x0E02": 1171,
+     "0x0E04": 12,
+     "0x1204": 33
+    },
+    "anim_record": {
+     "0x0013CBD4": 12,
+     "0x0013CC18": 132,
+     "0x0013CC28": 136,
+     "0x0013CC38": 130,
+     "0x0013CC48": 121,
+     "0x0013CC58": 97,
+     "0x0013CC68": 73,
+     "0x0013CC78": 65,
+     "0x0013CC88": 46,
+     "0x0013CC9C": 53,
+     "0x0013CCAC": 55,
+     "0x0013CCBC": 48,
+     "0x0013CCCC": 41,
+     "0x0013CCDC": 34,
+     "0x0013CCEC": 39,
+     "0x0013CCFC": 30,
+     "0x0013CD0C": 59,
+     "0x0013CD20": 3,
+     "0x0013CD30": 2,
+     "0x0013CD40": 2,
+     "0x0013CD50": 2,
+     "0x0013CDF8": 16,
+     "0x0013CE08": 42,
+     "0x0013CE18": 14,
+     "0x0013CE28": 14,
+     "0x0013CE3C": 62,
+     "0x0013CE4C": 146,
+     "0x0013CE60": 65,
+     "0x0013CE70": 139,
+     "0x0013CE84": 50,
+     "0x0013CE94": 109,
+     "0x0013CEA4": 26,
+     "0x0013CEB4": 26,
+     "0x0013CEC4": 32,
+     "0x0013CFF8": 18,
+     "0x0013D008": 15,
+     "0x0013D0B4": 1,
+     "0x0013D0E8": 69,
+     "0x0013D0F8": 133,
+     "0x0013D108": 52,
+     "0x0013D118": 39,
+     "0x0013D128": 123,
+     "0x0013D278": 3,
+     "0x0013D288": 3,
+     "0x0013D2FC": 12,
+     "0x0013D30C": 28,
+     "0x0013D31C": 4,
+     "0x0013D32C": 45,
+     "0x0013D33C": 27,
+     "0x0013D34C": 9,
+     "0x0013D35C": 6,
+     "0x0013D36C": 9,
+     "0x0013D380": 10,
+     "0x0013D390": 15,
+     "0x0013D3A0": 85,
+     "0x0013D3B0": 10,
+     "0x0013D3C0": 56,
+     "0x0013D3D4": 8,
+     "0x0013D3E4": 12,
+     "0x0013D3F4": 64,
+     "0x0013D404": 42,
+     "0x0013D414": 30,
+     "0x0013D424": 27,
+     "0x0013D434": 12,
+     "0x0013D444": 9,
+     "0x0013D454": 6,
+     "0x0013D464": 6,
+     "0x0013D474": 6,
+     "0x0013D4AC": 16,
+     "0x0013D4BC": 19,
+     "0x0013D4D0": 14,
+     "0x0013D4E0": 6,
+     "0x0013D4F0": 6,
+     "0x0013D500": 6,
+     "0x0013D510": 6,
+     "0x0013D520": 6,
+     "0x0013D530": 6,
+     "0x0013D540": 6,
+     "0x0013D550": 6,
+     "0x0013D560": 6,
+     "0x0013D570": 6,
+     "0x0013D580": 4,
+     "0x0013D590": 2,
+     "0x0013D5A4": 6,
+     "0x0013D5B4": 14,
+     "0x0013D5C4": 7,
+     "0x0013D5D4": 3,
+     "0x0013DAD8": 27,
+     "0x0013DB90": 111,
+     "0x0013DBDC": 42,
+     "0x0013DBF0": 3,
+     "0x0013DC64": 97,
+     "0x0013DC74": 151,
+     "0x0013DC88": 342,
+     "0x0013DD48": 9,
+     "0x0013DD58": 12,
+     "0x0013DD68": 12,
+     "0x0013DD78": 12,
+     "0x0013DD88": 9,
+     "0x0013DD98": 6,
+     "0x0013E862": 42,
+     "0x0013E872": 25,
+     "0x0013E882": 25,
+     "0x0013E892": 24,
+     "0x0013E8A2": 24,
+     "0x0013E8B2": 22
+    },
+    "class": {
+     "0x06": 4055
+    },
+    "route": {
+     "boss_actions": 900,
+     "boss_ko": 841,
+     "enemy_actions": 33,
+     "stalker_actions": 2281
+    },
+    "state": {
+     "0x01": 3465,
+     "0x02": 590
+    },
+    "sub_state": {
+     "0x02": 3464,
+     "0x04": 591
+    },
+    "table_set": {
+     "0x0013E97A": 4055
+    }
+   },
+   "lifecycle": {
+    "activation": 1,
+    "class_transition": 0,
+    "continuation": 4051,
+    "route_start_adoption": 3
+   },
+   "lifecycle_mismatches": {
+    "activation": 0,
+    "class_transition": 0,
+    "continuation": 0,
+    "route_start_adoption": 0
+   },
+   "lifetime": 4055,
+   "mismatches": 0,
+   "sub_state_action_histogram": {
+    "0x02": {
+     "0x0000": 48,
+     "0x0002": 45,
+     "0x0200": 79,
+     "0x0202": 223,
+     "0x0204": 18,
+     "0x0206": 33,
+     "0x0208": 3,
+     "0x020A": 57,
+     "0x0400": 663,
+     "0x0600": 8,
+     "0x0C00": 12,
+     "0x0C02": 901,
+     "0x0C04": 146,
+     "0x0E00": 12,
+     "0x0E02": 1171,
+     "0x0E04": 12,
+     "0x1204": 33
+    },
+    "0x04": {
+     "0x0000": 408,
+     "0x0200": 169,
+     "0x0400": 3,
+     "0x0600": 11
+    }
+   }
+  },
+  "31": {
+   "field_histograms": {
+    "action": {
+     "0x0000": 4341,
+     "0x0002": 140,
+     "0x0200": 567,
+     "0x0202": 307,
+     "0x0204": 42,
+     "0x0206": 12,
+     "0x0208": 150,
+     "0x020A": 50,
+     "0x0400": 522,
+     "0x0402": 428,
+     "0x0404": 28,
+     "0x0408": 60,
+     "0x0600": 534,
+     "0x0800": 97,
+     "0x0802": 30,
+     "0x0A00": 92,
+     "0x0C00": 3,
+     "0x0C02": 148,
+     "0x0C04": 3,
+     "0x0C06": 73,
+     "0x0E00": 1,
+     "0x0E02": 103,
+     "0x1000": 83,
+     "0x1002": 13,
+     "0x1600": 3349,
+     "0x1800": 5311
+    },
+    "anim_record": {
+     "0x0012D2F8": 52,
+     "0x0012D380": 24,
+     "0x0012D390": 18,
+     "0x0012D3A0": 18,
+     "0x0012D3B0": 18,
+     "0x0012D3C0": 18,
+     "0x0012D3D0": 18,
+     "0x0012D3E0": 18,
+     "0x0012D3F0": 3,
+     "0x0012D404": 6,
+     "0x0012D414": 6,
+     "0x0012D424": 6,
+     "0x0012D434": 6,
+     "0x0012D444": 6,
+     "0x0012D454": 6,
+     "0x0012D464": 6,
+     "0x0012D474": 1,
+     "0x0012D488": 32,
+     "0x0012D498": 30,
+     "0x0012D4A8": 25,
+     "0x0012D4B8": 24,
+     "0x0012D4C8": 24,
+     "0x0012D4D8": 24,
+     "0x0012D4E8": 24,
+     "0x0012D4F8": 9,
+     "0x0012D50C": 25,
+     "0x0012D51C": 24,
+     "0x0012D52C": 24,
+     "0x0012D53C": 24,
+     "0x0012D54C": 24,
+     "0x0012D55C": 24,
+     "0x0012D56C": 24,
+     "0x0012D57C": 6,
+     "0x0012D590": 8,
+     "0x0012D5A0": 8,
+     "0x0012D5B0": 8,
+     "0x0012D5C0": 8,
+     "0x0012D5D0": 4,
+     "0x0012D5E4": 20,
+     "0x0012D5F4": 20,
+     "0x0012D604": 20,
+     "0x0012D614": 9,
+     "0x0012D628": 120,
+     "0x0012D638": 140,
+     "0x0012D648": 140,
+     "0x0012D658": 113,
+     "0x0012D668": 54,
+     "0x0012D678": 34,
+     "0x0012D890": 81,
+     "0x0012D8A0": 59,
+     "0x0012D8B0": 81,
+     "0x0012D8C0": 90,
+     "0x0012D8D0": 134,
+     "0x0012D8E0": 40,
+     "0x0012DA70": 8,
+     "0x0012DA80": 11,
+     "0x0012DA90": 9,
+     "0x0012DAA0": 10,
+     "0x0012DAB0": 16,
+     "0x0012DAC0": 4,
+     "0x0012DAD4": 20,
+     "0x0012DAE4": 12,
+     "0x0012DAF4": 15,
+     "0x0012DB04": 10,
+     "0x0012DB14": 16,
+     "0x0012DB24": 2,
+     "0x0012DD14": 25,
+     "0x0012DD28": 111,
+     "0x0012DD3C": 105,
+     "0x0012DD50": 188,
+     "0x0012DD78": 19,
+     "0x0012DD88": 13,
+     "0x0012DD9C": 23,
+     "0x0012DDB0": 218,
+     "0x0012DE38": 6,
+     "0x0012DE48": 6,
+     "0x0012DE58": 6,
+     "0x0012DE68": 6,
+     "0x0012DE78": 4,
+     "0x0012DE88": 4,
+     "0x0012DE98": 4,
+     "0x0012DEA8": 4,
+     "0x0012DEB8": 4,
+     "0x0012DEC8": 4,
+     "0x0012DED8": 4,
+     "0x0012E04C": 19,
+     "0x0012E05C": 11,
+     "0x0012E06C": 10,
+     "0x0012E07C": 10,
+     "0x0012E08C": 10,
+     "0x0012E09C": 10,
+     "0x0012E0B0": 20,
+     "0x0012E0C0": 4,
+     "0x0012E0D0": 10,
+     "0x0012E0E0": 14,
+     "0x0012E0F0": 107,
+     "0x0012E104": 130,
+     "0x0012E214": 52,
+     "0x0012E224": 8,
+     "0x0012E234": 20,
+     "0x0012E244": 28,
+     "0x0012E254": 196,
+     "0x0012E268": 260,
+     "0x0012E27C": 9,
+     "0x0012E28C": 2,
+     "0x0012E29C": 5,
+     "0x0012E2AC": 7,
+     "0x0012E2BC": 49,
+     "0x0012E2D0": 65,
+     "0x0012E550": 6,
+     "0x0012E560": 7,
+     "0x0012E570": 6,
+     "0x0012E580": 1,
+     "0x0012E590": 4,
+     "0x0012E5A0": 1,
+     "0x0012E5B0": 4,
+     "0x0012E5C0": 1,
+     "0x0012E5D0": 4,
+     "0x0012E5E0": 6,
+     "0x0012E5F0": 11,
+     "0x0012E604": 6,
+     "0x0012E614": 5,
+     "0x0012E624": 1,
+     "0x0012E638": 22,
+     "0x0012E648": 20,
+     "0x0012E65C": 63,
+     "0x0012E66C": 44,
+     "0x0012E67C": 20,
+     "0x0012E68C": 6,
+     "0x0012E708": 8,
+     "0x0012E718": 8,
+     "0x0012E728": 8,
+     "0x0012E738": 8,
+     "0x0012E748": 8,
+     "0x0012E758": 8,
+     "0x0012E768": 12,
+     "0x0012E778": 4,
+     "0x0012E78C": 38,
+     "0x0012E79C": 38,
+     "0x0012E7AC": 26,
+     "0x0012E7BC": 26,
+     "0x0012E7CC": 26,
+     "0x0012E7DC": 26,
+     "0x0012E7EC": 32,
+     "0x0012E7FC": 18,
+     "0x0012E8A8": 1515,
+     "0x0012E8B8": 1464,
+     "0x0012E8C8": 1399,
+     "0x0012E8D8": 1200,
+     "0x0012E8EC": 997,
+     "0x0012E8FC": 888,
+     "0x0012E90C": 802,
+     "0x0012E91C": 708,
+     "0x0012EAFC": 246,
+     "0x0012EB0C": 244,
+     "0x0012EB1C": 228,
+     "0x0012EB2C": 225,
+     "0x0012EB3C": 224,
+     "0x0012EB4C": 217,
+     "0x0012EB5C": 215,
+     "0x0012EB6C": 183,
+     "0x0012EC04": 144,
+     "0x0012EC14": 218,
+     "0x0012EC24": 145,
+     "0x0012EC34": 219,
+     "0x0012EC44": 148,
+     "0x0012EC54": 221,
+     "0x0012EC64": 148,
+     "0x0012EC74": 193,
+     "0x0012EF1C": 5,
+     "0x0012EF2C": 4,
+     "0x0012EF3C": 4,
+     "0x0012EF4C": 4,
+     "0x0012EF5C": 4,
+     "0x0012EF6C": 4,
+     "0x0012EF7C": 4,
+     "0x0012EF8C": 4
+    },
+    "class": {
+     "0x1F": 16487
+    },
+    "route": {
+     "enemy_actions": 16487
+    },
+    "state": {
+     "0x01": 15352,
+     "0x02": 1135
+    },
+    "sub_state": {
+     "0x02": 15344,
+     "0x04": 1124,
+     "0x06": 19
+    },
+    "table_set": {
+     "0x00130AC8": 16487
+    }
+   },
+   "lifecycle": {
+    "activation": 19,
+    "class_transition": 0,
+    "continuation": 16460,
+    "route_start_adoption": 8
+   },
+   "lifecycle_mismatches": {
+    "activation": 0,
+    "class_transition": 0,
+    "continuation": 0,
+    "route_start_adoption": 0
+   },
+   "lifetime": 16487,
+   "mismatches": 0,
+   "sub_state_action_histogram": {
+    "0x02": {
+     "0x0000": 3744,
+     "0x0002": 140,
+     "0x0200": 133,
+     "0x0202": 307,
+     "0x0204": 42,
+     "0x0206": 12,
+     "0x0208": 150,
+     "0x020A": 50,
+     "0x0400": 498,
+     "0x0402": 428,
+     "0x0404": 28,
+     "0x0408": 60,
+     "0x0600": 446,
+     "0x0800": 97,
+     "0x0802": 30,
+     "0x0A00": 92,
+     "0x0C00": 3,
+     "0x0C02": 148,
+     "0x0C04": 3,
+     "0x0C06": 73,
+     "0x0E00": 1,
+     "0x0E02": 103,
+     "0x1000": 83,
+     "0x1002": 13,
+     "0x1600": 3349,
+     "0x1800": 5311
+    },
+    "0x04": {
+     "0x0000": 578,
+     "0x0200": 434,
+     "0x0400": 24,
+     "0x0600": 88
+    },
+    "0x06": {
+     "0x0000": 19
+    }
+   }
+  }
+ },
+ "problems": [],
+ "result": "PASS",
+ "schema": 3
+}

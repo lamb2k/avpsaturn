@@ -1,0 +1,213 @@
+{
+ "classification": "step-2 offline extraction - per-state street table_set constants; bounded state-0 span decode (addresses/PCs/decoded immediates and counts only, no ROM bytes)",
+ "inputs": {
+  "class_table": {
+   "path": "data/avsp_actor_class_table.json",
+   "recorded_image_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
+   "sha256": "f703f523282533dbb1b624e887c910e0955851a8d3f2824a4580c8905132466f"
+  },
+  "sub_state_dispatchers": {
+   "path": "data/avsp_substate_dispatchers.json",
+   "sha256": "0719377beeec54f98b7b278cf606219f10e260584e5e74292a86d6da91a5f08e",
+   "site_count": 250
+  },
+  "table_set_source": {
+   "family_count": 3,
+   "path": "data/avsp_table_set_source.json",
+   "sha256": "d6c44ea64cdcd156ea271505781da16dca7ff287552bb445f38e5027f8fd58a4"
+  }
+ },
+ "method": {
+  "scope": "bounded to each class's state-0 handler span - NOT a whole-image claim; other code regions may write +0x50 for other actor systems",
+  "state0_span_decode": "for each class, linear capstone M68K decode of [state0_target, state2_target) starting at the dispatch target (a known instruction boundary), instruction by instruction, as long as the decoder stays clean; a handler that embeds an inline data table stops the clean decode there, and the undecoded tail is recorded (not scanned as code); the store must lie in the clean region, reached without derailing, and be the sole +0x50 writer there; writers recognised by write-capable mnemonic + destination exactly $50(a6)",
+  "write_mnemonics": [
+   "clr.b",
+   "clr.l",
+   "clr.w",
+   "ext.l",
+   "move.b",
+   "move.l",
+   "move.w",
+   "movem.l",
+   "neg.b",
+   "neg.l",
+   "neg.w",
+   "not.b",
+   "not.l",
+   "not.w",
+   "swap"
+  ]
+ },
+ "problems": [],
+ "program_image": {
+  "bytes": 2097152,
+  "path": ".deps/mame/actorprobe/decrypted_opcodes_2m.bin",
+  "sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501"
+ },
+ "result": "PASS",
+ "schema": 3,
+ "semantic_answer": "The street alien's table_set is written once per class, in the state-0 class-entry initializer: the clean code region of the linearly-decoded state-0 span of each of the three street classes contains exactly one +0x50 writer, an immediate move.l store whose PC and immediate cross-match the live-trace families. For every other observed sub-state behaviour (walk/attack; the hit sequence observed inside sub-state 0x02 under action word +0x06; the KO sequence observed in sub-states 0x04/0x06) the value shows corpus-OBSERVED constancy at that class's state-0 value over the four deterministic MAME routes. Do not assume 0x00130AC8: the per-class constants are 0x0012CE5C (class 0x00 type_promotion), 0x0013E97A (class 0x06 replace), 0x00130AC8 (class 0x1F normal).",
+ "street_classes": {
+  "0x00": {
+   "dispatcher": "0x03F0C4",
+   "family": "type_promotion",
+   "routine": "0x03F09C",
+   "routine_end": "0x0407B0",
+   "state0_span": {
+    "clean_code_end": "0x03F1BC",
+    "decode_note": "invalid/undecodable opcode at 0X3F1BC - end of the clean code region (inline data follows)",
+    "decode_reached_span_end": false,
+    "end": "0x03F44C",
+    "start": "0x03F0D8",
+    "writers_found_in_clean_region": 1
+   },
+   "state0_store": {
+    "cross_match": {
+     "family_name": "type_promotion",
+     "live_trace_pc": "0x03F0F0",
+     "live_trace_value": "0x12CE5C",
+     "matched": true
+    },
+    "instruction": "move.l #$12ce5c, $50(a6)",
+    "pc": "0x03F0F0",
+    "value": "0x0012CE5C"
+   },
+   "state1_nested_dispatch": {
+    "head": "bsr.w $40132",
+    "idiom": false,
+    "target": "0x03F44C"
+   },
+   "states": {
+    "class_entry": {
+     "table_set": "0x0012CE5C",
+     "via": "state-0 (sub-state index 0x00) initializer store 0x03F0F0 - the only +0x50 writer in the clean code region [0x03F0D8, 0x03F1BC) of the linearly-decoded state-0 span"
+    },
+    "other_sub_states": {
+     "table_set": "0x0012CE5C",
+     "via": "corpus-observed constancy - no observed sub-state frame ever carries a different value (walk/attack in sub-state 0x02, the hit sequence inside sub-state 0x02 under action word +0x06, the KO sequence in sub-states 0x04/0x06; falsified with the exact HIT/KO anchors and lifecycle populations in tools/verify_avsp_table_set_states.py). This is corpus-observed constancy, not a claim that no other writer exists outside the decoded span and the observed routes."
+    }
+   },
+   "sub_state_targets": [
+    "0x03F0D8",
+    "0x03F44C",
+    "0x040346",
+    "0x04034C"
+   ],
+   "undecoded_tail": {
+    "end": "0x03F44C",
+    "note": "the state-0 handler embeds an inline data table here; the sequential decode stops because data words are not instructions. Writer status in this tail is settled by corpus-observed constancy in the verifier: every observed execution of this handler across the four deterministic MAME routes ended with the store's constant.",
+    "start": "0x03F1BC"
+   }
+  },
+  "0x06": {
+   "dispatcher": "0x0495CC",
+   "family": "replace",
+   "routine": "0x04956C",
+   "routine_end": "0x04BE76",
+   "state0_span": {
+    "clean_code_end": "0x049670",
+    "decode_note": null,
+    "decode_reached_span_end": true,
+    "end": "0x049670",
+    "start": "0x0495E0",
+    "writers_found_in_clean_region": 1
+   },
+   "state0_store": {
+    "cross_match": {
+     "family_name": "replace",
+     "live_trace_pc": "0x0495FC",
+     "live_trace_value": "0x13E97A",
+     "matched": true
+    },
+    "instruction": "move.l #$13e97a, $50(a6)",
+    "pc": "0x0495FC",
+    "value": "0x0013E97A"
+   },
+   "state1_nested_dispatch": {
+    "head": "btst.b #$0, $19(a5)",
+    "idiom": false,
+    "target": "0x049670"
+   },
+   "states": {
+    "class_entry": {
+     "table_set": "0x0013E97A",
+     "via": "state-0 (sub-state index 0x00) initializer store 0x0495FC - the only +0x50 writer in the clean code region [0x0495E0, 0x049670) of the linearly-decoded state-0 span"
+    },
+    "other_sub_states": {
+     "table_set": "0x0013E97A",
+     "via": "corpus-observed constancy - no observed sub-state frame ever carries a different value (walk/attack in sub-state 0x02, the hit sequence inside sub-state 0x02 under action word +0x06, the KO sequence in sub-states 0x04/0x06; falsified with the exact HIT/KO anchors and lifecycle populations in tools/verify_avsp_table_set_states.py). This is corpus-observed constancy, not a claim that no other writer exists outside the decoded span and the observed routes."
+    }
+   },
+   "sub_state_targets": [
+    "0x0495E0",
+    "0x049670",
+    "0x04B3CE",
+    "0x04B3F8"
+   ],
+   "undecoded_tail": null
+  },
+  "0x1F": {
+   "dispatcher": "0x060532",
+   "family": "normal",
+   "routine": "0x060532",
+   "routine_end": "0x061198",
+   "state0_span": {
+    "clean_code_end": "0x060616",
+    "decode_note": "invalid/undecodable opcode at 0X60616 - end of the clean code region (inline data follows)",
+    "decode_reached_span_end": false,
+    "end": "0x06075A",
+    "start": "0x060546",
+    "writers_found_in_clean_region": 1
+   },
+   "state0_store": {
+    "cross_match": {
+     "family_name": "normal",
+     "live_trace_pc": "0x060570",
+     "live_trace_value": "0x130AC8",
+     "matched": true
+    },
+    "instruction": "move.l #$130ac8, $50(a6)",
+    "pc": "0x060570",
+    "value": "0x00130AC8"
+   },
+   "state1_nested_dispatch": {
+    "all_targets_in_range": true,
+    "entries": 6,
+    "idiom": true,
+    "key_byte": "0x05(a6)",
+    "table_base": "0x060766",
+    "target": "0x06075A",
+    "targets": [
+     "0x060772",
+     "0x06105A",
+     "0x061134",
+     "0x061134",
+     "0x0610F6",
+     "0x060E26"
+    ],
+    "targets_out_of_range": []
+   },
+   "states": {
+    "class_entry": {
+     "table_set": "0x00130AC8",
+     "via": "state-0 (sub-state index 0x00) initializer store 0x060570 - the only +0x50 writer in the clean code region [0x060546, 0x060616) of the linearly-decoded state-0 span"
+    },
+    "other_sub_states": {
+     "table_set": "0x00130AC8",
+     "via": "corpus-observed constancy - no observed sub-state frame ever carries a different value (walk/attack in sub-state 0x02, the hit sequence inside sub-state 0x02 under action word +0x06, the KO sequence in sub-states 0x04/0x06; falsified with the exact HIT/KO anchors and lifecycle populations in tools/verify_avsp_table_set_states.py). This is corpus-observed constancy, not a claim that no other writer exists outside the decoded span and the observed routes."
+    }
+   },
+   "sub_state_targets": [
+    "0x060546",
+    "0x06075A",
+    "0x061146",
+    "0x06114C"
+   ],
+   "undecoded_tail": {
+    "end": "0x06075A",
+    "note": "the state-0 handler embeds an inline data table here; the sequential decode stops because data words are not instructions. Writer status in this tail is settled by corpus-observed constancy in the verifier: every observed execution of this handler across the four deterministic MAME routes ended with the store's constant.",
+    "start": "0x060616"
+   }
+  }
+ }
+}

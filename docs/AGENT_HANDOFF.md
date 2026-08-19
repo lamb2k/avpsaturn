@@ -1,11 +1,92 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-19 EDT (**master actor dispatch RESOLVED**; the caller
-question is closed). The item left open by the sub-state body — what calls
-into a dispatcher such as `0x060532` — is now decoded, live-traced, and
-falsified, and it CORRECTS that body's level-1 model. See "Master actor
-dispatch: RESOLVED" immediately below; the earlier "caller trace attempted"
-section is superseded and kept only for its two durable tooling lessons.
+Updated: 2026-08-19 EDT (**per-class `table_set` evidence check repaired;
+runtime still unchanged**).
+
+## Per-class table_set evidence: READY TO COMMIT (2026-08-19)
+
+**Branch `codex/avp-master-plan`, baseline HEAD `9c72af2`.** This is an
+offline evidence-only body. It changes no runtime source, build product, ISO,
+ROM input, or raw capture. The coherent checkpoint paths are:
+
+- `tools/extract_avsp_table_set_states.py`
+- `tools/verify_avsp_table_set_states.py`
+- `data/avsp_table_set_states.json` (schema 3)
+- `data/avsp_table_set_states_verification.json` (schema 3)
+- `test.ps1`
+- `docs/AGENT_HANDOFF.md`, `docs/NEXT_AGENT_PROMPT.md`, `docs/PARITY_PLAN.md`
+
+`tools/diag_semantic_anchors.py` is a scratch probe from the preceding body and
+must remain untracked. All other existing `tools/diag_*`,
+`tools/mame_trace_*.lua`, `tools_tsw_*`, root diagnostics, logs, raw captures,
+and generated assets are pre-existing private/untracked work and must remain
+untouched.
+
+**Bounded code claim.** Sequential Capstone decode begins at each proven
+state-0 dispatch target and stops when inline data prevents clean decoding.
+Exactly one `+0x50` writer is present in each proven clean region, and its PC
+and immediate match the retained live instruction trace:
+
+| class | class routine | clean region | store PC | `table_set` |
+|---|---:|---:|---:|---:|
+| `0x00` | `0x03F09C` | `0x03F0D8..0x03F1BC` | `0x03F0F0` | `0x0012CE5C` |
+| `0x06` | `0x04956C` | `0x0495E0..0x049670` | `0x0495FC` | `0x0013E97A` |
+| `0x1F` | `0x060532` | `0x060546..0x060616` | `0x060570` | `0x00130AC8` |
+
+State 0 is a **class-entry initializer**, not universally a spawn routine.
+The manifests do not claim that all writers in the ROM were enumerated. The
+private opcode image is used to validate the instruction form, but no opcode
+bytes are serialized; tracked output contains addresses, decoded operands,
+counts, bounds, and hashes only.
+
+**Exact semantic anchors.** The `enemy_actions` actor at `0xffa000`/slot 14
+is validated on every cited frame:
+
+- HIT frames `5191..5226`: **36/36**, class `0x1F`, zero `table_set`
+  mismatches.
+- KO frames `5330..5469`: **140/140**, class `0x1F`, zero mismatches; inactive
+  at captured frame 5470.
+
+The exact clips define disjoint animation-record sets. Corpus matches are
+conservatively reported as **240 `hit_anchor_record_signature` frames** and
+**564 `ko_anchor_record_signature` frames**. They are not promoted to semantic
+HIT/KO populations merely because the same record appeared elsewhere. Class
+`0x06` sub-state `0x04` remains a lifecycle signature, not an asserted KO.
+
+**Corpus check.** Across `enemy_actions`, `stalker_actions`, `boss_actions`,
+and `boss_ko`: **6,143 capture frames / 25,104 active street actor-frames / 0
+per-class constant mismatches**. Exclusive lifecycle accounting reconciles:
+
+| class | lifetime | route-start adoption | activation | class transition | continuation |
+|---|---:|---:|---:|---:|---:|
+| `0x00` | 4,562 | 2 | 0 | 0 | 4,560 |
+| `0x06` | 4,055 | 3 | 1 | 0 | 4,051 |
+| `0x1F` | 16,487 | 8 | 19 | 0 | 16,460 |
+
+Each populated class has its own corrupted-constant control. The controls
+produce exactly 4,562 / 4,055 / 16,487 mismatches respectively and fail every
+nonempty lifecycle and anchor-record-signature population they cover.
+
+**Determinism:** two consecutive regenerations were byte-identical:
+
+- `data/avsp_table_set_states.json` SHA-256
+  `4B45CBC65B87A201F557ACAF8EEC53CA7BA822D320BB8D457D3CCA39F224B50B`
+- `data/avsp_table_set_states_verification.json` SHA-256
+  `521CC8AEA11363282DDC5047EF7AC3887CEE020B44CEBD900932164472178DAA`
+
+**Verification:** full `test.ps1` exited 0 on 2026-08-19 after the audit
+repair. Every prior host block remained green, including the 12,000-frame soak,
+S1 actor/collision checks, S2 animation/emission, tile budget, runtime collision
+input assembly, writer/source checks, frontend composition, dispatcher model,
+and actor class model. Capability Gate 1 remains `0/7`; this body changes
+evidence quality, not shipped behavior.
+
+**Next executable body after this checkpoint commits:** bounded S4 runtime
+integration per `docs/NEXT_AGENT_PROMPT.md`: extend `AvspActor` with the proven
+class/sub-state/action fields, generate the class-to-`table_set` lookup, keep
+the current adapted street route at class `0x1F`, test HIT/KO ROM program
+trajectories before enabling them, and preserve counted `GAP` fallback on any
+unproven record.
 
 ## Master actor dispatch: RESOLVED (2026-08-19)
 
@@ -82,6 +163,12 @@ both wired into `test.ps1`, both skipping cleanly without private inputs):
 carry classes `0x00` and `0x06` (lifecycle/promotion states). The dispatch
 is keyed on `+0x02`, never on the type byte. The joint distribution ships as
 an observation, not a rule.
+
+**[Superseded same day by the "hit/KO/spawn table_set: RESOLVED offline"
+section above.]** The item below is closed: `table_set` is written exactly
+once per class (the state-0 spawn initializer) and the hit/KO sub-states
+inherit it. The last sentence — no runtime code changed in THIS body —
+remains true for this body.
 
 **Still open (unchanged, and now cheaper):** hit/KO/spawn `table_set`. With
 the class table plus the 250 enumerated sub-state dispatchers, this is now

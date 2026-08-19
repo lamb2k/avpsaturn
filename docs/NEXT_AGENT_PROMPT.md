@@ -1,188 +1,113 @@
-# Next agent prompt: read hit/KO/spawn table_set offline, then wire it
+# Next agent prompt: bounded S4 class/table-set and HIT/KO integration
 
-> **Step 1 below is DONE (2026-08-19).** The master actor dispatch is
-> resolved: the loop at `0x01B980` indexes a 43-entry table at `0x01B9B6`
-> with actor byte **`+0x02` (class)**; class `0x1F` → `0x060532` directly.
-> There is **no action-level (`+0x06`) indirection** for the street alien —
-> that part of the earlier model was wrong. See the handoff's "Master actor
-> dispatch: RESOLVED". Tracked:
-> `tools/extract_avsp_actor_classes.py`, `tools/verify_avsp_actor_classes.py`
-> (check B: 2186/2186, zero exceptions; control fails as required).
-> **Start at step 2**, which is now an OFFLINE read rather than a live hunt.
+## Scope lock
 
-## Where the project is
+Execute only the bounded S4 body below. Do not start the frontend, S5 AI,
+stage traversal, remaining cast conversion, or physical-hardware claims in the
+same checkpoint.
 
-The Round 1 route runs end to end (`-EncounterTest`: MAIN_MENU → both street
-waves → CLEAR → INTERIOR_TRANSITION → BOSS → BOSS_DEFEAT → RESULTS →
-COMPLETE), street aliens animate from ROM scripts and die through the game's
-own decoded hurt boxes (`HITS rom=8 approx=0`), and **the state-dispatch
-mechanism is now decoded and falsified**. Read the handoff's newest section,
-"State dispatch: DECODED (2026-08-19)", before anything else.
+Read the repository startup documents in the order required by `AGENTS.md`.
+The newest handoff section, "Per-class table_set evidence", supersedes older
+caller-search and broad HIT/KO-population language.
 
-What is MEASURED and tracked:
+## Established evidence — do not re-derive
 
-- The actor state machine is a **two-level PC-relative jump-table** system.
-  Both levels use the idiom `move.b ($N,A6),D0 / move.w ($6,PC,D0.w),D1 /
-  jmp ($2,PC,D1.w)`, table base = dispatcher_pc + 12, `table[0]/2` = entry
-  count. Level 2 is keyed on actor byte `+0x04` (sub-state); level 1 on the
-  action byte at `+0x06`.
-- Sub-state-0 handlers are the per-state initializers; each begins
-  `addq.b #2,($4,A6)` so it runs once per state entry — the reason the live
-  caller trace saw a recurring state-entry event with a fixed stack pointer.
-- `tools/extract_avsp_dispatchers.py` enumerates **250** sub-state
-  dispatchers (`data/avsp_substate_dispatchers.json`), self-tested against
-  the three live-confirmed `table_set` initializers with a perturbation
-  control.
-- `tools/verify_avsp_substate_model.py` falsifies the index claim over
-  **52,982** active actor-frames (`data/avsp_substate_model.json`): zero odd
-  values, zero out-of-range, negative control correctly failing.
-- **The opcode-space dump is valid at code addresses** (the data-space dump
-  is not). Offline structural decode of game code is available and cheap.
-  Provenance rule unchanged: offline LOCATES and STRUCTURES; live trace or
-  corpus falsification CONFIRMS anything that enters the runtime.
+- Master actor dispatch: `0x01B980` indexes the 43-entry table at `0x01B9B6`
+  with actor class byte `+0x02`.
+- Per-class constants, checked offline and cross-matched to live instruction
+  traces:
+  - `0x00 -> 0x0012CE5C`
+  - `0x06 -> 0x0013E97A`
+  - `0x1F -> 0x00130AC8`
+- Exact semantic anchors: HIT `5191..5226` is 36/36; KO `5330..5469` is
+  140/140; both remain class `0x1F` with zero constant mismatches.
+- Broader matches are record-signature populations only: 240
+  `hit_anchor_record_signature` frames and 564
+  `ko_anchor_record_signature` frames. Do not call them semantic HIT/KO.
+- Corpus result: 25,104 active street actor-frames, zero per-class constant
+  mismatches. Each class has a working corrupted-constant control.
+- The current runtime drives only street WALK/ATTACK through ROM animation and
+  uses one hardcoded `0x00130AC8`. HIT/KO/spawn remain counted `GAP` frames.
+- The current defender hurt box is ROM-derived, but player attack reach and
+  lane geometry remain ADAPTED. S4 is not complete.
 
-## The body of work
+## Required implementation
 
-### Step 1 — locate the action-level dispatch (the one open item)
+### 1. Canonical actor fields and generated lookup
 
-85 sites match the generic action-dispatch idiom, but none statically links
-to the street alien's routines (an offline table-entry scan found nothing),
-and the earlier caller-side stack trace is a red herring: the transfer into
-a sub-state dispatcher is a `jmp`, not `jsr`/`bsr`, so there is no return
-address to read for that specific transfer — the "fixed `0x00FF00D8`"
-finding was leftover stack content from an outer call frame, not a caller
-address. **Do not re-attempt the RAM-trampoline-dump probe** (dumping
-`0xFF0080–0xFF0140`); it was based on that misread and a follow-up session
-(2026-08-19, see handoff) found no trampoline code there worth pursuing
-further via that route.
+- Add `class_id` (`+0x02`), `sub_state` (`+0x04`), and `action_word`
+  (`+0x06`, big-endian) to `AvspActor`.
+- Extend `avsp_actor_load()` and the actor-layout host test with field-for-field
+  corpus equality.
+- Generate a copyright-safe class-to-`table_set` header from
+  `data/avsp_table_set_states.json`; do not duplicate the three constants by
+  hand in runtime source.
+- Expose `int avsp_table_set_for_class(unsigned char class_id,
+  unsigned long *out)` and test all three values plus an unknown-class failure.
 
-**A validated harness now exists** (`tools/mame_trace_dispatch_trampoline.lua`,
-untracked): building trace scripts as a **minimal delta from
-`tools/mame_trace_table_set_third_insn.lua`** (known-good: 7,800 frames in
-~7 seconds) avoided a hang that an equivalent script built from scratch hit
-reliably and unexplainably. Reuse this file's structure; do not rebuild from
-first principles. It also carries a load-bearing fix: `trace <file>,0 ; g`
-**truncates on every hit**, so arming multiple ON triggers on the same trace
-file is destructive — only the last restart before OFF survives. Arm ONE
-candidate at a time.
+### 2. One canonical runtime collision view per enemy
 
-The probe:
+- Maintain an `AvspActor` collision view for every native enemy slot.
+- Populate its animation record from `AvspAnimFrame.addr`, selectors from that
+  ROM record, facing/world coordinates from the existing native model, and
+  `table_set` through `avsp_table_set_for_class()`.
+- The approximate capability model does not produce real CPS2 class
+  transitions yet. Assign class `0x1F` only to the already validated street
+  WALK/ATTACK route and any HIT/KO anchor program that passes the replay check
+  below. Do not synthesize class `0x00` or `0x06` transitions.
+- Count unknown class, missing animation record, unknown collision family, and
+  out-of-range selector as `GAP`. Selector zero remains the measured
+  cannot-be-hurt verdict.
 
-1. Pick one of the 85 idiom sites (`data/avsp_substate_dispatchers.json` or
-   re-scan per `tools/extract_avsp_dispatchers.py`'s documented byte
-   pattern, `+0x06` variant). Set it as `CANDIDATE` in
-   `tools/mame_trace_dispatch_trampoline.lua`, with `0x060532` as the OFF
-   trigger (already wired). Run via the pinned recipe (`-debug -debugger
-   windows`, script sets `debugger.execution_state = "run"`); check
-   `tasklist //FI "IMAGENAME eq mame.exe"` before and after, never a `ps -W`
-   grep.
-2. Grep the resulting `tools_dispatch_trampoline_insn.log` for `060532:` —
-   if present, the candidate's traced chain reached the target and the
-   instructions immediately before it are the real caller. If absent within
-   the frame window, that candidate is not the one (or didn't fire in this
-   window); try the next.
-3. Narrow the search order before brute-forcing all 85: prioritize sites
-   near other known actor-related code (the three `table_set` families, the
-   collision routine at `0x01D25E`) over file order, since the idiom is
-   confirmed generic (one live sample this session landed in
-   interrupt-adjacent code, not an actor) and blind order wastes runs.
-4. Deliverable: the action-word → action-routine rule, recorded in a tracked
-   manifest (addresses/rules only, no ROM bytes), falsified offline against
-   the stride-1 corpus with zero unexplained mismatches and a control that
-   breaks. Extend `tools/extract_avsp_dispatchers.py` or add a sibling; wire
-   into `test.ps1`.
+### 3. HIT/KO record replay check before runtime enablement
 
-Whatever indexes the real action dispatch is the same structure S5's AI
-translation will walk — worth getting right rather than fast.
+- Extend the sparse animation span generator to include every exact-anchor
+  HIT/KO animation record plus reachable control records from the ROM.
+- Identify a ROM program entry point and use the existing interpreter; do not
+  create a captured per-frame record-pointer table.
+- Add a host replay comparing the interpreter's animation-record pointer on
+  every exact anchor frame.
+- If either trajectory is not exact, leave that action on the counted ADAPTED
+  fallback and record the first mismatch. The state routine that rewrites
+  `+0x1C` then becomes an explicit S5 target.
+- Enable ROM HIT or KO only when its replay has zero pointer mismatches. Retire
+  `GAP` only on frames whose class, record, selector, family, and decoded hurt
+  entry are all measured.
 
-### Step 2 — reconcile hit/KO/spawn `table_set` (offline; START HERE)
+### 4. Same-frame collision ordering
 
-The street alien's routine is now known exactly: class `0x1F` →
-`0x060532`, a sub-state dispatcher whose 4-entry table is already decoded in
-`data/avsp_substate_dispatchers.json`. Walk its sub-state handlers, identify
-which correspond to HIT/KO/spawn, and read their state-0 `table_set`
-immediates directly from the opcode image — no live tracing needed.
-If a needed state turns out to live under a different class (the promotion
-path `0x00` → `0x03F09C` rewrites the type byte, so a dying/promoting actor
-may change class), follow the class table rather than assuming.
-Cross-check against corpus frames carrying those action words. This answers
-what the collision body left open: today those frames have no measured hurt
-box and correctly fall back to the ADAPTED approximation, counted in the
-`GAP` HUD diagnostic. **Do not assume `0x00130AC8` applies.**
+Split the current combined tick so each frame does this once:
 
-### Step 3 — wiring (SEPARATE, gated turn — not in the same turn as step 2)
+1. resolve the current ROM animation record and collision view;
+2. run `cap_world_step()` against that view;
+3. render from the same record;
+4. advance the animation driver once for the next frame.
 
-Only once steps 1–2 are green: carry per-state `table_set` and the hit/KO
-records into the ROM actor path in `main.c`/`capability_model.c`, retiring
-the `GAP` fallback for the states now covered. Keep the discipline the
-collision body used: the offline gate passes first, in the same turn as the
-constant it authorises; attacker/defender labelling stays honest; a missing
-measurement keeps the ADAPTED approximation and stays counted, never
-becoming silent invulnerability. Re-run the full chain: `test.ps1`,
-`build.ps1 -Release`, `-EncounterTest` route to COMPLETE, MCP readback of
-`runtime_ready` and the collision counters, clean `-Clean -Release` last.
+Do not retain the documented one-frame collision lag and do not tick animation
+from both collision and rendering paths.
 
-## Queue after this body (user priority, do not re-order without the user)
+## Required checks
 
-**frontend → AI (S5) → traversal.**
+1. Actor field equality, class lookup, anchor replay, and runtime collision
+   host tests.
+2. Full `test.ps1`.
+3. Focused Saturn build plus ISO-member size/hash verification.
+4. `-EncounterTest` through `COMPLETE`.
+5. Live readback of `runtime_ready`, lookup misses, selector-zero, `GAP`, and
+   ROM-versus-approximate hit counters.
+6. Final `-Clean -Release` title/menu boot.
 
-The **real frontend** is next and is fully specified. Key measured facts:
-the settled character-select screen is drawn by the three CPS tilemap layers
-plus a 2-sprite `1P` cursor; title and select are distinct tilemap pages;
-both decoder halves already exist in `tools/extract_avspu_stage1.py`
-(`render_background`, `decode_objects`); and **colour RAM is the binding
-constraint** — live banks per frame are 17 (select), 19 (title), 32 (round-1
-title) against `AVSP_EXACT_PALETTE_BANKS` = 8. Plan CRAM before writing
-renderer code. See `data/frontend_rom_composition.json` and the handoff's
-frontend sections. The user requires the select screen be built from
-ORIGINAL ROM ASSETS, not captured pictures.
+Keep every fallback visible and counted. This body may reduce `GAP`; it cannot
+close S4 while player attack boxes, post-hit routines, projectile/broadcast
+paths, inferred boss/Stalker collision, and stage collision remain open.
 
-**Reference lane:** consult
-`C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-MSHvSF` (measured
-official Capcom Saturn port) for menus, loading, and sprite architecture.
-Binding rule from its own transfer matrix: findings may change AvP's METHOD
-or add a probe; its numbers are NEVER AvP budgets; never import its code,
-assets, timing, or constants; never modify that worktree.
+## Repository safety
 
-## Prohibited shortcuts
-
-- No `table_set` constant in runtime code without its offline gate passing
-  first, in the same turn.
-- Do not treat correlation output as provenance, ever. `spawn_type()` in
-  `tools/decode_avsp_table_set.py` is a capture-context classifier, not game
-  logic, and must never appear in runtime code.
-- Do not turn a missing measurement into a gameplay rule.
-- Do not claim a verification that was not run; this host CAN run the MCP
-  readback and the encounter route.
-- Do not add a large load without stating its zone and what frees before it
-  (allocator rules: no coalescing, whole-block reuse, transients must top
-  their zone, `jo_reduce_memory_fragmentation()` after non-LIFO releases,
-  never gate a release on `jo_audio_is_channel_playing` alone).
-- Do not describe the per-tile renderer as final, or the build as a faithful
-  playable level.
-
-## Mandatory startup and repository safety
-
-Read in order: the `port-cps2-to-sega-saturn` skill (`SKILL.md`,
-`references/workflow.md`), `AGENTS.md`, `CLAUDE.md`, `docs/GOAL.md`,
-`docs/AGENT_HANDOFF.md` completely (newest sections supersede older),
-`docs/PARITY_PLAN.md`, `docs/TEST_PLAN.md`, `docs/HARDWARE_TEST.md`, then
-this file again.
-
-Record live state (`git status --short --branch`, `git log --oneline -10`,
-`git rev-parse HEAD`, `git branch --show-current`). Stop stray emulators
-before starting; one holding `game.iso` open can break a build's ISO step.
-
-Rules (binding): stay on `codex/avp-master-plan`; never `git add
-.`/`-A`/`clean`/broad stash/reset/destructive checkout — stage explicit
-paths only; never commit ROMs, raw captures, MAME logs, emulator states,
-generated copyrighted assets, or disc images; preserve every untracked
-`tools/diag_*` / `tools/mame_trace_*.lua` / instruction-log one-off.
-
-## Checkpoint and handoff requirements
-
-Commit at every green checkpoint with explicit paths. Keep
-`docs/AGENT_HANDOFF.md` newest-first with HEAD, dirty files, exact paths
-changed, live readbacks with values actually read, which verifications ran,
-and ordered next work. Keep this file pointing at the next unexecuted body.
-Capability Gate 1 stays `0/7` regardless of outcome.
+- Stay on `codex/avp-master-plan`.
+- Preserve all unrelated untracked diagnostics.
+- Stage explicit paths only; never use `git add .`, `git add -A`, broad stash,
+  reset, clean, or destructive checkout.
+- Never commit ROMs, raw captures, logs, generated copyrighted graphics, build
+  output, emulator state, or disc images.
+- Update `docs/AGENT_HANDOFF.md` newest-first and leave no emulator process
+  running before stopping.
