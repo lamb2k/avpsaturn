@@ -1,6 +1,8 @@
 #include <jo/jo.h>
 #include <string.h>
 #include "capability_model.h"
+#include "generated/avsp_anim_records.h"
+#include "generated/avsp_emit_windows.h"
 #include "generated/avsp_boss_animation.h"
 #include "generated/avsp_boss_clear_audio.h"
 #include "generated/avsp_boss_intro_audio.h"
@@ -1279,6 +1281,91 @@ static void apply_confirm_shutter(void)
                     BACKGROUND_WIDTH);
 }
 
+/* S2 Body D: one live ROM-driven street alien. The first active alien slot
+ * carries a real animation record (avsp_anim_frame_tick over the shipped
+ * spans) and produces its semantic object list each frame through the
+ * proven decoder (avsp_emit_pose_view over the generated ROM windows).
+ * Pose seeding on action change is ADAPTED from the capture-derived action
+ * schedule until S5 translates action selection; the coordinate/anchor
+ * mapping between the capability model's space and CPS2 world space is
+ * ADAPTED likewise. The capture-derived cel remains the visible actor
+ * until Body E's per-object VDP1 consumer replaces it - this actor's
+ * output is the entry list itself, consumed by Body E. */
+static AvspAnimScript rom_actor_script;
+static AvspRomView rom_actor_view;
+static AvspAnimFrame rom_actor_frame;
+static AvspObjectEntry rom_actor_entries[16];
+static int rom_actor_entry_count = 0;
+static int rom_actor_slot = -1;
+static int rom_actor_last_action = -1;
+
+static void rom_actor_tick(void)
+{
+    int index;
+    int slot = -1;
+    CapActor *enemy = 0;
+    unsigned int seed;
+    AvspEmitActor state;
+
+    rom_actor_entry_count = 0;
+    if (world.encounter_state == CAP_ENCOUNTER_BOSS) return;
+    for (index = 0; index < CAP_MAX_ENEMIES; ++index)
+    {
+        if (world.enemies[index].active &&
+            world.enemies[index].kind != CAP_ACTOR_BOSS)
+        {
+            slot = index;
+            enemy = &world.enemies[index];
+            break;
+        }
+    }
+    if (enemy == 0)
+    {
+        rom_actor_slot = -1;
+        return;
+    }
+    if (rom_actor_script.spans == 0)
+    {
+        rom_actor_script.rom = 0;
+        rom_actor_script.base = 0;
+        rom_actor_script.size = 0;
+        rom_actor_script.spans = avsp_anim_spans;
+        rom_actor_script.span_count = avsp_anim_span_count;
+        rom_actor_view.spans = avsp_emit_windows;
+        rom_actor_view.span_count = AVSP_EMIT_WINDOW_COUNT;
+    }
+    /* ADAPTED action bridge: the two live-verified street-alien loops. */
+    seed = (enemy->action == CAP_ACT_ATTACK) ? 0x12D8A0u : 0x12EB4Cu;
+    if (slot != rom_actor_slot || (int)enemy->action != rom_actor_last_action)
+    {
+        avsp_anim_frame_start(&rom_actor_frame, &rom_actor_script, seed);
+        rom_actor_slot = slot;
+        rom_actor_last_action = (int)enemy->action;
+    }
+    else
+    {
+        avsp_anim_frame_tick(&rom_actor_frame, &rom_actor_script);
+    }
+    if (!rom_actor_frame.pose.valid) return;
+    /* ADAPTED coordinate bridge: model-space camera as the anchor pair so
+     * decoded X approximates screen position; exact CPS2 anchors arrive
+     * with Body E's renderer alignment. */
+    state.world_x = (unsigned short)enemy->x;
+    state.world_y = (unsigned short)(200 + enemy->height);
+    state.facing = (unsigned char)(enemy->facing < 0 ? 1 : 0);
+    state.palette = 0x11;
+    state.mode = 1;
+    state.or_value = 0x8000;
+    state.anchor_x = (unsigned short)world.camera_x;
+    state.anchor_y = 0x00FF;
+    {
+        int n = avsp_emit_pose_view(&rom_actor_view,
+                                    rom_actor_frame.pose.assembly,
+                                    &state, rom_actor_entries, 16);
+        rom_actor_entry_count = (n > 0) ? n : 0;
+    }
+}
+
 static void draw_world(void)
 {
     int index;
@@ -1832,6 +1919,10 @@ static void frame_callback(void)
     }
 #endif
     if (jo_is_pad1_key_down(JO_KEY_X)) debug_hud_enabled = !debug_hud_enabled;
+    rom_actor_tick();
+    if (debug_hud_enabled && rom_actor_entry_count > 0)
+        jo_printf(0, 2, "ROM ACTOR n=%d code=%04x", rom_actor_entry_count,
+                  rom_actor_entries[0].code);
     draw_world();
     draw_arcade_hud();
     draw_route_overlay();
