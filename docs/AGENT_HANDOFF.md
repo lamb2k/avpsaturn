@@ -557,6 +557,49 @@ Committed: `tools/decode_avsp_object_stream.py` (attr-transform fix at
 pose-header-chain solve at `6e0db90`) and
 `data/avsp_object_stream.json`.
 
+## S3 family widening: record walker + family-0x0002 decoded; corpus 14,487/0 (2026-08-18, latest)
+
+The critical-path plan was adopted into `docs/PARITY_PLAN.md` ("Critical path
+to the end-to-end full game") and `docs/NEXT_AGENT_PROMPT.md` was rewritten
+for D/E/S3/S4. S3 then opened with the biggest excluded block
+(`unknown-family-0x0002`, 8,345 street instances) and closed it same-day:
+
+- **The record architecture** (live-disassembled via a cold-boot route
+  replay, `tools/mame_trace_family2b.lua`, plus a decrypted-opcodes dump
+  `tools/mame_dump_optable.lua` for the PC-relative-read jump table that the
+  raw program dump stores encrypted - CPS2 decrypts program-space fetches,
+  and PC-relative operand reads use program space): a pose `assembly` is a
+  record list. Top word = a family tag (one record) or 0x000C (two records).
+  Each record is `[tag][budget][payload]`, dispatched through the tag table
+  at `0x0A9D3E`: tag 0x0002 -> 0x0A9D52, 0x0006 -> 0x0AA016 (the group
+  family's post-budget entry), 0x0008 -> rts (no-op), 0x0000/0x0004/0x000A
+  -> located, undecoded handlers (0x0AA26C/0x0A9DEE/0x0AA38A). The earlier
+  "selector/composite" model parsed identical bytes with different labels,
+  so every prior result carried over unchanged.
+- **Family-0x0002**: single entry, inline `[attr][selector][D2 long][code]`;
+  same origin routine, same `0x1FD1C8` A2 table, same plain/flipped X paths
+  (flip branches on D1 bits 5/6 = facing bits 0/1 shifted). The flipped X
+  formula is corpus-verified against thousands of flipped instances.
+- **Corpus (all four routes)**: eligible=14,487 (2.4x), exact=13,890,
+  absent=597, **mismatch=0**. Family matrix includes 2+2, 6x2+2, 2+6x2,
+  6x7, 6x4 compositions - all exact. Promoted to C (`avsp_emit_pose` record
+  walker + `emit_family2`); host suite exit 0; ISO rebuilds.
+- **Lifecycle evidence** (user hypothesis: enemies persist until a
+  hit/KO event): the corpus now records absent-vs-exact ACTION histograms.
+  Absents cluster in spawn-in (0x0200), idle-hold (0x0000), and a
+  dying/flicker state (0x0E02: 214 absent vs 667 exact); exacts dominate in
+  walk/attack states. Consistent with records persisting while drawing is
+  state-gated. `MEASURED` (histogram), interpretation `INFERRED`.
+
+**Next S3 targets, in corpus-frequency order**: the zero/negative `+0x0D`
+coordinate modes (4,813 stalker-route instances, all `+0x0D=0xFF`, via the
+dispatcher's `bmi $aa038` branch - needs a stalker-window live trace); the
+254 `unknown-top-word` instances; tags 0x0000/0x0004/0x000A; the player's
+script region. Then S4 per `docs/NEXT_AGENT_PROMPT.md`.
+
+Committed: `5127719` (family-2 + walker in Python, corpus 14,487/0),
+`14b2cec` (C promotion), `c1555cc` (critical-path docs).
+
 ## S2 source walk CLOSED: corpus-falsified, zero mismatches, promoted to C (2026-08-18, latest)
 
 The remaining Body B questions were collapsed into one offline corpus job
