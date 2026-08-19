@@ -1,9 +1,89 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-18 EDT (night session). **FIRST VERIFIED BOOT INTO ROUND 1
-GAMEPLAY** — see the top session note below. The slSynch/VBlank-starvation
-diagnosis from earlier tonight is FALSIFIED; Body D's runtime check PASSED
-live. **Next body: S2 Body E** (the real per-object VDP1 consumer).
+Updated: 2026-08-18 EDT (late night). **S2 BODY E LANDED AND RUNTIME-VERIFIED**
+(commit `89bc4ce`): the ROM-driven street alien renders from its decoded
+object list as per-16x16-tile VDP1 sprites in live WAVE_ONE combat, and the
+whole disc-load path was rebuilt cartridge-safe. See the top session note.
+**Next: S3 family widening (needs the PCM phase-load refactor for cart
+room), runtime alignment polish, then S4.**
+
+## S2 Body E LANDED: per-object VDP1 tile renderer live in combat (2026-08-18 late night)
+
+The renderer follows the MEASURED architecture of the official Capcom
+Saturn reference port (MSHvSF lane): every foreground draw is a 16x16
+normal sprite in 16-colour bank mode, flip carried in the command, flat
+draw order — no composed cels, no mirrored art. Pipeline:
+`rom_actor_tick` entries -> `avsp_entry_tiles` (a transcription of MAME
+0.289 `cps2_render_sprites`' block expansion, both facings, non-flip
+row-wrap vs flip linear) -> tile lookup in the cart-resident archive ->
+96-slot VDP1 sprite pool with in-place LRU replacement
+(`jo_sprite_replace_4bits_image`, 128 bytes/tile) -> per-tile
+`jo_sprite_draw3D` with `jo_sprite_set_palette_4bits` bank selection.
+Placement is ADAPTED origin-relative (entry minus decoded origin,
+re-anchored at the model actor's screen position) until S5's world-space
+translation.
+
+**Texture source**: `tools/gen_avsp_gfx_tiles.py` decodes every captured
+street-route frame (stride 1 — stride-3 sampling MISSED the two-frame
+pose at record `0x12DE78`, tiles `0x4A20-0x4A28`/`0x4A30-0x4A38`, and the
+renderer dropped it silently; never sample this corpus) through the proven
+corpus decoder, expands both facings, converts tiles via the SHA-verified
+`extract_avspu_stage1.load_gfx_region` (interleave + unshuffle) with the
+cel pipeline's pen+1 packing, and writes `build/avsp_cd/SPR4/TILES.BIN`
+(1,533 tiles, 202,564 bytes, 5 palette banks from a captured mid-combat
+palette frame, ADAPTED single-frame palette). Tracked manifest:
+`data/avsp_gfx_tiles.json`. Host test `tests/avsp_tiles_test.c` (wired
+into `test.ps1`) falsifies the reader and expansion against the committed
+oracle entries. The runtime carves `AVSP_TILE_REGION_BYTES` (256 KB) at
+the head of cartridge bank 1, outside the allocator — cart-resident and
+byte-stable through combat, like the reference port.
+
+**Headless verification (Yaba Sanshiro MCP, this session)**: full boot to
+WAVE_ONE with `runtime_ready=1`, `failed_asset=NULL`, entries animating
+2..5 per frame, miss counters (no-bank/no-rank/no-sprite, on the debug
+HUD as `MISS a/b/c POOL n`) all ZERO, tile pool at 96/96 with LRU active,
+and the tile-rendered alien visibly correct on screen. `MEASURED`.
+
+**Three hard-won platform rules (each cost a broken boot tonight):**
+
+1. **jo's whole-file `jo_fs_read_file*` (GFS_Load) cannot fill a buffer in
+   cartridge DRAM** — SBL's transfer DMAs, and SCU DMA cannot write the
+   A-bus. With the cart carrying most of the working set, almost every
+   large allocation lands there. ALL disc reads in `main.c` now go
+   through `avsp_fs_read_into`/`avsp_fs_read_file_in_dir`: 32-sector
+   `GFS_Fread` bursts into a fixed work-RAM staging buffer, CPU-copied
+   out (BrooklynBangout2D's proven staging pattern — that project's
+   main.c documents the same DMA rule).
+2. **Never call `jo_fs_set_read_sector_count` with `jo_fs_read_next_bytes`
+   in play**: jo's refill passes `nsct=1` to GFS_Fread regardless of the
+   configured buffer size, so an enlarged buffer serves one valid sector
+   plus garbage. This silently corrupted every asset for one build (the
+   first content-validated consumer, PLAYER ACTION RLE, caught it).
+3. **Never change GFS directories while a streamed handle is open** — the
+   dir reload leaves GFS unable to resolve the next name (the
+   MENUFIT.BIN "FS OPEN" failure). Open, read, close inside the
+   subdirectory, then cd back.
+
+**Cartridge budget (measured tonight)**: the pre-Body-E boot working set
+left only ~79 KB free in cart bank 0 and ~123 KB in bank 1 — ~2.7 MB is
+pre-loaded PCM. To fit the tile region, the 637 KB Stage Clear composite
+(`BOSSCLR.PCM`) now phase-loads at the interior wipe behind a
+`NOW LOADING` line (the standing loading-page pattern the user directed
+for stage-boundary memory management; guarded for the boss-test
+profiles). **S3's full four-route tile set (4,441 tiles, 586 KB) does NOT
+fit until more PCM moves to phase loads** — that refactor is S3's first
+enabler. `MEASURED`.
+
+**Known open items (labelled):** boot takes ~45 s with the staged reader
+(raise burst size or overlap with the logo screens); the tile pool sits
+at its 96 ceiling in combat (JO_MAX_SPRITE now 192, pool can grow);
+completeness beyond the captured corpus is `UNRESOLVED` (a free-running
+interpreter pose outside the four routes would miss — closing it needs an
+actor-state-free assembly part walker; the miss counters make any such
+event visible); exact CPS2 anchor alignment and the second street alien
+remain ADAPTED/cel respectively; frontend keyboard note — menu
+confirmation needs ATTACK (Saturn B, key H), and synthetic taps need
+~500 ms holds to register through Yaba Sanshiro.
 
 ## FIRST VERIFIED BOOT: Round 1 gameplay reached; freeze diagnosis corrected (2026-08-18, night)
 

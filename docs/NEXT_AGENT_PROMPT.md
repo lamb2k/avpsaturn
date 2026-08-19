@@ -13,10 +13,11 @@ it. This prompt authorizes the next phases of the critical path in
   the ROM actor's entry count (4<->5) and codes cycling with its poses.
   The boot-freeze diagnosis that blocked this was falsified (see the
   handoff top note); the frontend is playable end-to-end into Round 1.
-- **S2 Body E**: the real per-object VDP1 consumer - the active body.
-  Design constraints now binding: 32 Mbit RAM cart, phase-boundary loads,
-  cart-resident textures, per-frame command table only (see PARITY_PLAN
-  critical path item 6).
+- **S2 Body E**: LANDED and RUNTIME-VERIFIED 2026-08-18 late night
+  (`89bc4ce`): the ROM actor renders per-16x16-tile VDP1 sprites from the
+  cart-resident TILES.BIN archive in live WAVE_ONE combat; miss counters
+  zero, tile pool LRU active. Read the handoff's Body E section for the
+  three cartridge-I/O platform rules before touching any disc load.
 - **S3**: decode the remaining emitter families and coordinate modes,
   corpus-falsified the same way.
 - **S4**: collision/damage/reaction integration.
