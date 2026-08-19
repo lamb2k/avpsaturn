@@ -7,10 +7,12 @@ eligible actor-frame instances across four routes**, and promoted to C
 it. This prompt authorizes the next phases of the critical path in
 `docs/PARITY_PLAN.md` ("Critical path to the end-to-end full game"):
 
-- **S2 Body D**: LANDED 2026-08-18 (`rom_actor_tick` in `main.c`;
-  compile-verified). FIRST STEP of the next session: boot the normal
-  release and verify the debug HUD's live entry count/codes before any
-  new work.
+- **S2 Body D**: LANDED and RUNTIME-VERIFIED 2026-08-18 night
+  (`rom_actor_tick` in `main.c`): the normal release booted into live
+  WAVE_ONE combat and the debug HUD plus direct memory sampling showed
+  the ROM actor's entry count (4<->5) and codes cycling with its poses.
+  The boot-freeze diagnosis that blocked this was falsified (see the
+  handoff top note); the frontend is playable end-to-end into Round 1.
 - **S2 Body E**: the real per-object VDP1 consumer - the active body.
   Design constraints now binding: 32 Mbit RAM cart, phase-boundary loads,
   cart-resident textures, per-frame command table only (see PARITY_PLAN

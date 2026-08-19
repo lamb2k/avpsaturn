@@ -1,6 +1,98 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-18 EDT (late session). **Next body: S2 Bodies D and E** —
+Updated: 2026-08-18 EDT (night session). **FIRST VERIFIED BOOT INTO ROUND 1
+GAMEPLAY** — see the top session note below. The slSynch/VBlank-starvation
+diagnosis from earlier tonight is FALSIFIED; Body D's runtime check PASSED
+live. **Next body: S2 Body E** (the real per-object VDP1 consumer).
+
+## FIRST VERIFIED BOOT: Round 1 gameplay reached; freeze diagnosis corrected (2026-08-18, night)
+
+The current build (HEAD `5e27c5b`, ISO built at 54ad319's verification,
+`profile=normal-release`) **booted through the entire frontend into live
+WAVE_ONE street combat** under Yaba Sanshiro 1.20.37 with the MCP debug
+server, observed end-to-end by a memory-sampling monitor:
+`CHARACTER_SELECT -> CHARACTER_CONFIRM -> ROUND_TITLE -> BARRICADE_INTRO ->
+WAVE_ONE`, all with `runtime_ready=1`, `world.frame` advancing continuously,
+and real combat rendering (player + two street aliens + HUD). The
+historically fatal character-confirm transition passed cleanly. `MEASURED`
+(monitor log + screenshots this session; the monitor script pattern is in
+the session scratchpad, trivially recreatable: sample `world.frame`,
+`encounter_state`, `encounter_timer`, `runtime_ready` over MCP
+`memory_read`).
+
+**Body D's runtime check PASSED.** With the debug HUD toggled (X button),
+`ROM ACTOR n=<count> code=<code>` renders live, and direct memory sampling
+of `rom_actor_entry_count`/`rom_actor_entries` (`0x060690F0`/`0x060690F4`)
+across ~4 s shows the count oscillating 4<->5 and the first entry cycling
+poses (codes `0x47BD`, `0x4EFE`, `0x4DF6`, `0x495A`; X words carrying the
+confirmed `0x8000` or-value). The native ROM pipeline decodes the street
+alien's object list every frame in the shipped runtime. `MEASURED`.
+
+**The earlier freeze diagnosis is FALSIFIED — in two layers:**
+
+1. **"Master deadlocked in slSynch waiting for a VBlank event" was a
+   PC-sampling artifact.** A healthy frame loop parks in slSynch's wait
+   loop ~99% of each frame, so sampled PCs of `0x6028D70..7A`/`0x602BF54`
+   (the per-spin idle callback, which is `slInitInterrupt+0xC4`, benign)
+   are what a WORKING game shows too. Under a code breakpoint at slSynch
+   entry (`0x6028D4A`), the "frozen" build hit it EVERY frame. The main
+   loop was never stuck; `jo_core_run+0x44` calls slSynch once per frame,
+   normally.
+2. **The "VBlank-event starvation" model of GBR+0x13 was wrong in
+   detail.** Live disassembly of the real VBlank handler
+   (`0x602BD90..0x602BE40`) shows the byte at `0x060FFC13` is a frame
+   COUNTDOWN: the handler conditionally re-arms it to +1/+2
+   (`0x602BE02..0C`, from the 30fps flag bit 0x10 of GBR+0xB0) and
+   decrements it (`0x602BE16..1C`, `add #0xFF`); slSynch exits when it
+   goes negative. A write watchpoint on it fired during the supposed
+   freeze with value `0xFE`, master SR=0x101 (interrupt mask 0 —
+   interrupts fully enabled). VBlank delivery was alive the whole time.
+   The freeze-tonight observations (black screen, "not progressing") were:
+   the state machine WAITING for input (MAIN_MENU/CHARACTER_SELECT wait
+   indefinitely; the select-screen "14" countdown is baked into the
+   captured bitmap, not live), plus my own debugger pauses and the slow
+   debug-interpreter core. `MEASURED`, all live this session.
+
+**What actually fixed the pre-fix interactive freeze** (user-verified real
+on earlier builds) cannot be isolated retroactively: tonight's build
+carries 66f09c4's two transition-hang fixes, 54ad319's jo_dma_copy
+elimination, AND the disabled CD-DA start (`jo_audio_play_cd_track(2,2,
+true)` commented at main.c ~line 1909). The freeze no longer reproduces at
+character-confirm with all three in place. Re-enabling stage music is now
+the remaining boot-bringup item: the "ST 3 T 2" wall note says the CD-DA
+start command coincided with a CDC command ACK spin — restore it
+non-blocking (or fix the cue layout) and re-verify the confirm transition.
+
+Practical rig notes for reproduction (this session's method):
+
+- `run.ps1` launches the pinned Yaba Sanshiro; `Debug\McpServerEnabled=true`
+  already set in `%APPDATA%\YabaSanshiro\yabause.ini`; MCP at
+  `http://127.0.0.1:9640/mcp`. Tool names this build: `debug_status`,
+  `pause`/`resume`, `wait_for_stop`, `breakpoint_add/remove/list`,
+  `registers_get/set`, `memory_read` (accepts `length=`), `memory_write`,
+  `disassemble`, `exec_history`, `backtrace`,
+  `set_debug_option {cpu_core: interpreter|dynarec}` (breakpoints/step need
+  the interpreter core; switch back to dynarec for full speed).
+- Keyboard mapping (P1, from the ini): W/S/A/D = up/down/left/right,
+  G/H/J = A/B/C, T/Y/U = X/Y/Z, Enter = Start, 5/6 = L/R. The frontend
+  confirm is ATTACK = Saturn B = **H** (not G; G is shoot).
+- Useful symbol addresses (nm --target=coff-sh game.elf): `world` =
+  `0x060694BC` (tail: camera_x +0x1D4, frame +0x1D8, ...,
+  encounter_started +0x1F4, encounter_state +0x1F8, encounter_timer
+  +0x1FC), `runtime_ready` = `0x06069208`, `rom_actor_entry_count` =
+  `0x060690F0`, `rom_actor_entries` = `0x060690F4`.
+
+**Next session, in order:** (1) S2 Body E per `NEXT_AGENT_PROMPT.md` — the
+per-object VDP1 consumer (the boot gate that blocked it is now open); (2)
+re-enable CD-DA stage music non-blocking and re-verify the confirm
+transition; (3) longer soak through WAVE_TWO/boss to check for any
+remaining nondeterministic transition stalls (none observed tonight up to
+WAVE_ONE, but the route beyond was not yet traversed under observation).
+
+**Capability Gate 1 stays 0/7; the full-game goal stays 0/9** (a verified
+boot enables progress but closes no condition by itself).
+
+Previous top note (superseded framing kept for history): **Next body: S2 Bodies D and E** —
 integrate one live street-alien `AvspActor` into `main.c` driven by the now
 fully proven pipeline, then render its semantic object list per CPS2 object
 through a real VDP1 path. Bodies A-C are closed (see "S2 source walk closed"
@@ -557,7 +649,13 @@ Committed: `tools/decode_avsp_object_stream.py` (attr-transform fix at
 pose-header-chain solve at `6e0db90`) and
 `data/avsp_object_stream.json`.
 
-## Boot freeze ROOT-CAUSE NARROWED: slSynch slave-queue wait; cache-staleness prime suspect (2026-08-18, session end)
+## Boot freeze ROOT-CAUSE NARROWED: slSynch slave-queue wait; cache-staleness prime suspect (2026-08-18, session end) — SUPERSEDED
+
+**SUPERSEDED (2026-08-18 night): the entire slSynch-deadlock /
+VBlank-starvation model in this section and its follow-up was falsified
+live — see "FIRST VERIFIED BOOT" at the top. The PC evidence was a
+sampling artifact of a healthy frame loop; GBR+0x13 is a per-frame
+countdown, not a starved event flag; the build now boots into gameplay.**
 
 Full MCP-debugger session (tools/list revealed the complete set:
 breakpoints, step, memory_read/write, disassemble, backtrace,
