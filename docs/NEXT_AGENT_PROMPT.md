@@ -97,13 +97,42 @@ harmless as two tokens. Cold-boot replay is reliable; `machine:load()` is
 not, in this environment. Check `tasklist //FI "IMAGENAME eq mame.exe"`
 (never a `ps -W | grep mame.exe` loop — silently vacuous) and stop strays.
 
+## Queue after this body (USER PRIORITY DECISION, 2026-08-19)
+
+The user has re-sequenced the roadmap: **the real frontend is the body
+immediately AFTER this one, ahead of real enemy AI.** The build currently
+presents as a tech slice (static title/select keyframes, no cursor or
+select logic, no title-card animation) and the user wants that fixed before
+more combat internals. Do not re-order this again without the user.
+
+The frontend body's evidence base already exists — do not re-capture before
+reading it: `data/frontend_segments.json` (three segmented windows from the
+tracked frontend capture: `start_transition` frames 1770-1798 fits one
+78,848-byte block; `character_confirm` frames 1800-2038, 31 distinct
+images, 2 segments; `round_1_title` frames 2040-2160, 26 distinct images,
+**22 segments — an animated window needing its own memory plan under the
+measured allocator rules above**), `data/frontend_geometry*.json` (the
+character-confirm shutter model, already implemented as
+`cap_confirm_shutter_band`), `capture_frontend.ps1` /
+`capture_frontend_wipe.ps1` (regeneration), and
+`tools/analyze_frontend_segments.py --report`. Select-screen LOGIC (cursor
+movement, timer, confirm) is game logic and must be decoded from stock-MAME
+observation with deterministic input schedules, the established corpus
+discipline — declared populations, zero unexplained mismatches. Only the
+captured character's assets exist; confirming a different character stays
+ADAPTED (documented, not silently faked).
+
 ## Explicitly deferred (do not start here)
 
+- The real frontend (NEXT body after this one — see the queue note above).
 - Widening ROM action coverage to hit/KO/spawn (needs step 3's result
   first).
+- Real enemy AI + actor separation (now sequenced AFTER the frontend, per
+  the user decision above).
 - Player ROM animation (blocks full two-sided ROM collision and the
   attack-box side of the predicate).
-- Stage collision beyond room/lane clamps; actor separation; projectile
+- Street traversal (camera scroll between encounter points, mid-street
+  spawn triggers); stage collision beyond room/lane clamps; projectile
   path.
 - The `round1` tile archive (any new carve must be re-simulated against the
   measured allocator rules above).

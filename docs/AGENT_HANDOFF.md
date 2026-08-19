@@ -57,8 +57,40 @@ designed ADAPTED point test for capture-cel actors (boss + stalkers) — not
 a regression; street ROM aliens keep `rom=8`, zero approximation hits. NH
 (zero-`sel_hurt`) remains unexercised live. Capability Gate 1 stays `0/7`.
 
-**Next:** the state-dispatch / `type_promotion` decode is now genuinely the
-front of the queue (see `docs/NEXT_AGENT_PROMPT.md`).
+**Next:** the state-dispatch / `type_promotion` decode (see
+`docs/NEXT_AGENT_PROMPT.md`), then the real frontend — see the roadmap note
+below.
+
+## Roadmap re-sequenced by the user: frontend moves up (2026-08-19)
+
+The user asked why the title screen is skipped, why character select is a
+still image, and why part of zone 1 is skipped straight to an encounter.
+The honest answers, recorded so no one re-derives them:
+
+- **Title/select are static captured keyframes.** There is no boot/attract
+  flow, no cursor, no select logic, and no animated title card. Only the
+  character-confirm shutter wipe is modelled (from capture geometry,
+  `cap_confirm_shutter_band`). This is gap item 4 on the user's own list.
+- **The route skips street traversal.** The capability model is a slice
+  anchored to the captured encounter chain (barricade intro → two street
+  waves → door dialogue → interior transition → boss). Camera-scrolled
+  traversal between encounter points and mid-street spawn triggers are not
+  modelled; encounters are room-locked arenas the route jumps between.
+- **Fast frontend skips in this session's runs were the `-EncounterTest`
+  disc**, which auto-presses Start at frame 120 and confirm at 240 by
+  design. The normal release does wait for input — it just has nothing
+  animated to show.
+
+**Decision (user, 2026-08-19): keep the state-dispatch decode next while its
+trace context is fresh, then do the REAL FRONTEND as the body immediately
+after it — ahead of real enemy AI.** Street traversal follows the frontend.
+The frontend body's evidence base already exists and must be read before any
+re-capture: `data/frontend_segments.json` (note `round_1_title` needs 22
+segments — an animated window with a real memory plan under the measured
+allocator rules), `data/frontend_geometry*.json`, `capture_frontend*.ps1`,
+`tools/analyze_frontend_segments.py`. Select-screen logic is game logic:
+decode it from stock-MAME observation with deterministic input schedules and
+the usual corpus discipline, not from screenshots.
 
 ## Superseded: the review section below predates the route fix
 
