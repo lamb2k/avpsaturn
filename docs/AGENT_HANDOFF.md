@@ -591,14 +591,32 @@ for D/E/S3/S4. S3 then opened with the biggest excluded block
   walk/attack states. Consistent with records persisting while drawing is
   state-gated. `MEASURED` (histogram), interpretation `INFERRED`.
 
-**Next S3 targets, in corpus-frequency order**: the zero/negative `+0x0D`
-coordinate modes (4,813 stalker-route instances, all `+0x0D=0xFF`, via the
-dispatcher's `bmi $aa038` branch - needs a stalker-window live trace); the
-254 `unknown-top-word` instances; tags 0x0000/0x0004/0x000A; the player's
-script region. Then S4 per `docs/NEXT_AGENT_PROMPT.md`.
+**The `+0x0D` mode is also closed (same day):** live-disassembled on the
+stalker route (`tools/mame_trace_coordmode.lua`, `avspu_stage1` state +
+route replay to frame 5526). It is NOT a coordinate system - same origin
+routine, same X/Y formulas, same A2 walk - it only changes the attr
+transform: `attr = raw ^ (facing << 5)`, no palette injection (facing=0
+plain loop at `0x0AA09A` traced; the flip-bit contribution corpus-derived
+from every flipped instance differing from raw by exactly bit 5; family-2's
+variant keeps its unconditional `eor` and skips only the palette add,
+matching its disassembly). **Corpus now: eligible=18,414 (3x the S2-close
+population), exact=17,453, absent=961, mismatch=0**, spanning street
+aliens, stalkers, and the boss-window cast. C `avsp_emit.c` carries
+families 2/6/8 with the palette mode only - the raw-attr mode is
+Python-verified but not yet promoted to C (small, mechanical).
+
+**Next S3 targets, in corpus-frequency order**: the ~280
+`unknown-top-word` instances; family tags 0x0000/0x0004/0x000A (located
+handlers 0x0AA26C/0x0A9DEE/0x0AA38A, undecoded); the raw-attr mode into C;
+the player's script region (outside [0x120000,0x140000)). **S4 starting
+point** per `docs/NEXT_AGENT_PROMPT.md`: consume the S1-decoded collision
+boxes at runtime and decode the five post-hit routines
+(0x1D314/0x1D504/0x1D492/0x1D622/0x1D6E2) with the same live-disassembly +
+corpus method (the paired captures include recorded contacts).
 
 Committed: `5127719` (family-2 + walker in Python, corpus 14,487/0),
-`14b2cec` (C promotion), `c1555cc` (critical-path docs).
+`14b2cec` (C promotion), `c1555cc` (critical-path docs), plus the
+`+0x0D`-mode closure commit above this note.
 
 ## S2 source walk CLOSED: corpus-falsified, zero mismatches, promoted to C (2026-08-18, latest)
 
