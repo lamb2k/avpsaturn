@@ -1923,6 +1923,14 @@ static void frame_callback(void)
     }
 #endif
     if (jo_is_pad1_key_down(JO_KEY_X)) debug_hud_enabled = !debug_hud_enabled;
+    /* Boot-bringup breadcrumb: encounter state + timer heartbeat, always
+     * on until the first verified boot into WAVE_ONE. If the timer stops
+     * counting, the main loop is stuck inside a draw/load call; if it
+     * counts but the state never changes, the model's transition is the
+     * bug. Remove after boot bringup. */
+    jo_printf(0, 0, "ST %d T %d F %d   ",
+              (int)world.encounter_state, (int)world.encounter_timer,
+              (int)world.frame);
     rom_actor_tick();
     if (debug_hud_enabled && rom_actor_entry_count > 0)
         jo_printf(0, 2, "ROM ACTOR n=%d code=%04x", rom_actor_entry_count,
