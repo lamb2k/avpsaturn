@@ -171,22 +171,32 @@ def decode_group_header(rom: Rom, header_addr: int) -> dict:
     }
 
 
-# The two camera-anchor constants inside the origin routine (bsr $0AA59A),
-# read as (A5+0x27C) and (A5+0x278) - NOT negative displacements, despite an
-# earlier session's hand-transcription assuming so; MAME's own live
-# disassembler (tools/mame_trace_origin_disasm.lua) printed the true
-# instructions as `sub.w ($27c,A5),D3` / `sub.w ($278,A5),D3` (positive
-# displacement). Solved by equating the routine's known formula against the
-# already-verified origin_x/origin_y oracle values and cross-checked exact
-# across all 4 oracle group instances (2 different D2 values, 2 different
-# actor world positions) - not yet proven to be a ROM-wide constant beyond
-# this route/actor.
+# The two camera-anchor values inside the origin routine (bsr $0AA59A),
+# read from RAM at (A5+0x27C) and (A5+0x278) - positive displacements per
+# MAME's own live disassembler (tools/mame_trace_origin_disasm.lua), not the
+# negative ones an earlier hand-transcription assumed. They are NOT ROM
+# constants: they are live camera state, derived from the CPS-A scroll1
+# registers (corpus-verified across two routes with different camera
+# positions - street window scroll1=(944,513) -> anchors (1008,255);
+# stalker window scroll1=(747,544) -> anchors (811,224)):
+#
+#   anchor_x = scroll1_x + 0x40
+#   anchor_y = 0x300 - scroll1_y
+#
+# The module-level defaults below are the street-window values, kept so the
+# tracked oracle set (captured in that window) stays self-contained.
 ANCHOR_Y = 0x00FF
 ANCHOR_X = 0x03F0
 
 
+def anchors_from_scroll(scroll1_x: int, scroll1_y: int) -> tuple:
+    """Camera anchors from the CPS-A scroll1 registers (see comment above)."""
+    return (scroll1_x + 0x40) & 0xFFFF, (0x300 - scroll1_y) & 0xFFFF
+
+
 def decode_group_origin(rom: Rom, header_addr: int, world_x: int, world_y: int,
-                        facing_raw: int) -> tuple:
+                        facing_raw: int, anchor_x: int = ANCHOR_X,
+                        anchor_y: int = ANCHOR_Y) -> tuple:
     """Reproduce the origin routine (bsr $0AA59A) from ROM + actor-record
     inputs alone - no live-trace-captured origin needed. `world_x`/`world_y`
     are the actor's own `+0x10`/`+0x14` fields; `facing_raw` is the actor's
@@ -214,9 +224,9 @@ def decode_group_origin(rom: Rom, header_addr: int, world_x: int, world_y: int,
     """
     d2 = rom.u32(header_addr + 6)
     d2_hi, d2_lo = (d2 >> 16) & 0xFFFF, d2 & 0xFFFF
-    y = (ANCHOR_Y - world_y + 0x100) & 0xFFFF
+    y = (anchor_y - world_y + 0x100) & 0xFFFF
     y = (y + d2_lo if (facing_raw & 2) else y - d2_lo) & 0xFFFF
-    x = (world_x - ANCHOR_X + 0x40) & 0xFFFF
+    x = (world_x - anchor_x + 0x40) & 0xFFFF
     x = (x + d2_hi if (facing_raw & 1) else x - d2_hi) & 0xFFFF
     return x, y
 

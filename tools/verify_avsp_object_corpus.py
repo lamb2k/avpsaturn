@@ -18,9 +18,16 @@ An actor-slot instance (one slot in one frame) is ELIGIBLE iff all of:
   4. the pose record is a plain pose, not a jump record (flags bit 15 clear);
   5. the pose's assembly selector word is a KNOWN selector (0x0006 = one
      group; 0x000C = two tagged groups). Unknown selectors are counted and
-     listed as exclusions, not silently skipped.
+     listed as exclusions, not silently skipped;
+  6. the actor's coordinate-mode byte (+0x0D) is positive. The dispatcher's
+     own first branch (`tst.b ($d,A4); bmi $aa038` / `bne $aa13e`,
+     live-disassembled via tools/mame_trace_facing0.lua) routes zero and
+     negative modes to a coordinate path not yet decoded; only the positive
+     path (the one every street alien uses) feeds the decoded origin
+     routine. The stalker-route creatures that decode structurally but
+     never matched are all +0x0D = 0xFF - the undecoded branch.
 
-Every actor-slot instance failing 3-5 is an EXCLUSION with a named reason.
+Every actor-slot instance failing 3-6 is an EXCLUSION with a named reason.
 Eligible instances are decoded (groups -> four-word entries, all inputs from
 ROM + the actor record; zero values from the oracle) and their concatenated
 entry list is searched for as a consecutive run in that frame's active
@@ -97,7 +104,18 @@ def read_objram_words(path: Path) -> list:
     return words
 
 
-def decode_actor_entries(rom: Rom, work: bytes, slot_off: int):
+def read_anchors(work: bytes) -> tuple:
+    """The origin routine's camera anchors, read from the game's OWN state:
+    (A5+0x278)/(A5+0x27C) with A5=0xFF8000 -> workram offsets 0x278/0x27C,
+    inside every 32 KiB capture. Their relationship to the CPS-A scroll1
+    registers (anchor_x = scroll1_x + 0x40, anchor_y = 0x300 - scroll1_y)
+    was verified across two routes with different camera positions before
+    this direct read replaced the derivation."""
+    return (work[0x278] << 8) | work[0x279], (work[0x27C] << 8) | work[0x27D]
+
+
+def decode_actor_entries(rom: Rom, work: bytes, slot_off: int,
+                         anchor_x: int, anchor_y: int):
     """Returns (entries_flat_words, meta) or (None, exclusion_reason)."""
     rec = work[slot_off:slot_off + ACTOR_STRIDE]
     if rec[0] != 0x01:
@@ -105,6 +123,8 @@ def decode_actor_entries(rom: Rom, work: bytes, slot_off: int):
     pose_ptr = u32(rec, 0x1C)
     if not (POSE_REGION[0] <= pose_ptr < POSE_REGION[1]):
         return None, "pose-outside-declared-region"
+    if not (1 <= rec[0x0D] <= 0x7F):
+        return None, "coordinate-mode-not-decoded"
     flags = rom.u16(pose_ptr + 2)
     if flags & 0x8000:
         return None, "jump-record"
@@ -147,7 +167,8 @@ def decode_actor_entries(rom: Rom, work: bytes, slot_off: int):
         count = rom.u16(h + 2)
         if not (1 <= count <= 8):
             return None, "implausible-count"
-        ox, oy = decode_group_origin(rom, h, world_x, world_y, facing)
+        ox, oy = decode_group_origin(rom, h, world_x, world_y, facing,
+                                     anchor_x, anchor_y)
         entries = decode_group_entries(rom, h, ox, oy, palette, facing,
                                        or_value)
         group_counts.append(count)
@@ -225,6 +246,7 @@ def main() -> int:
             if len(work) != 0x8000:
                 stats["bad-workram-size"] += 1
                 continue
+            anchor_x, anchor_y = read_anchors(work)
             objram = None  # lazy-load
             stats["frames"] += 1
             n_slots = (0x10000 - (ACTOR_ANCHOR - 0xFF0000)) // ACTOR_STRIDE
@@ -232,7 +254,8 @@ def main() -> int:
                 slot_off = (ACTOR_ANCHOR - WORKRAM_BASE) + n * ACTOR_STRIDE
                 if slot_off + ACTOR_STRIDE > len(work):
                     break
-                flat, meta = decode_actor_entries(rom, work, slot_off)
+                flat, meta = decode_actor_entries(rom, work, slot_off,
+                                                  anchor_x, anchor_y)
                 if flat is None:
                     reason = meta
                     if reason.startswith("unknown-selector"):

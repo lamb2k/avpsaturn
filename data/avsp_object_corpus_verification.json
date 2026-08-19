@@ -4,30 +4,61 @@
  "mismatch_examples": [],
  "pass": true,
  "per_root": {
+  "boss_actions": {
+   "absent": 60,
+   "eligible": 612,
+   "exact": 552,
+   "excl:jump-record": 242,
+   "excl:pose-outside-declared-region": 3737,
+   "excl:unknown-selector": 45,
+   "frames": 899,
+   "no-objram-pair": 1
+  },
+  "boss_ko": {
+   "eligible": 141,
+   "exact": 141,
+   "excl:jump-record": 63,
+   "excl:pose-outside-declared-region": 3416,
+   "excl:unknown-selector": 47,
+   "frames": 840,
+   "no-objram-pair": 1
+  },
   "enemy_actions": {
-   "absent": 147,
+   "absent": 131,
    "eligible": 3918,
-   "exact": 3771,
+   "exact": 3787,
    "excl:jump-record": 3093,
    "excl:pose-outside-declared-region": 12437,
    "excl:unknown-family-0x0002-in-composite": 8345,
    "excl:unknown-selector": 28,
    "frames": 2120,
    "no-objram-pair": 1
+  },
+  "stalker_actions": {
+   "absent": 205,
+   "eligible": 1339,
+   "exact": 1134,
+   "excl:coordinate-mode-not-decoded": 4813,
+   "excl:jump-record": 513,
+   "excl:pose-outside-declared-region": 9906,
+   "excl:unknown-selector": 266,
+   "frames": 2280,
+   "no-objram-pair": 1
   }
  },
  "schema": 1,
  "selector_group_matrix": {
-  "0x0006 groups=1": 1528,
+  "0x0006 groups=1": 3620,
   "0x000c groups=2": 2390
  },
  "totals": {
-  "absent_game_omitted": 147,
-  "eligible": 3918,
-  "exact": 3771,
+  "absent_game_omitted": 396,
+  "eligible": 6010,
+  "exact": 5614,
   "mismatch": 0
  },
  "unknown_selectors": {
-  "unknown-selector-0x0002": 28
+  "unknown-selector-0x0002": 132,
+  "unknown-selector-0x000a": 254
  }
 }
