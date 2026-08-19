@@ -40,7 +40,14 @@
 /* Body E: the ROM tile archive owns a carved region at the head of
    cartridge bank 1, mirroring the reference port's cart-resident,
    byte-stable texture source; only the remainder joins the general
-   allocator, so the archive can never displace main-pool assets. */
+   allocator, so the archive can never displace main-pool assets.
+   MEASURED budget ceiling: growing this to 0xC0000 for the full
+   four-route archive (612,720 bytes) left EACT.RLE (131,552 bytes)
+   with no single zone holding it - cart bank0 had ~13 KB free and
+   bank1 ~103 KB, neither enough alone. The street-only archive
+   (202,564 bytes) is what currently fits; widening to stalkers/boss
+   needs more PCM moved to phase-boundary loads first (S3 enabler,
+   tracked in the handoff), not a bigger carve alone. */
 #define AVSP_TILE_REGION_BYTES 0x40000
 #define AVSP_PCM_CHANNEL_WEAPON 0
 #define AVSP_PCM_CHANNEL_MELEE 1
@@ -1423,30 +1430,47 @@ static void apply_confirm_shutter(void)
                     BACKGROUND_WIDTH);
 }
 
-/* S2 Body D: one live ROM-driven street alien. The first active alien slot
+/* S2 Body D, widened toward the full cast: EVERY active street alien
  * carries a real animation record (avsp_anim_frame_tick over the shipped
  * spans) and produces its semantic object list each frame through the
  * proven decoder (avsp_emit_pose_view over the generated ROM windows).
- * Pose seeding on action change is ADAPTED from the capture-derived action
- * schedule until S5 translates action selection; the coordinate/anchor
- * mapping between the capability model's space and CPS2 world space is
- * ADAPTED likewise. The capture-derived cel remains the visible actor
- * until Body E's per-object VDP1 consumer replaces it - this actor's
- * output is the entry list itself, consumed by Body E. */
+ * Coverage boundary, stated plainly: the ROM path runs for street aliens
+ * in their WALK and ATTACK actions only, using the same two live-verified
+ * script seeds Body D shipped; hit/KO/spawn actions and stalkers fall
+ * back to the capture cels.
+ *
+ * tools/gen_avsp_action_seeds.py mined a real (actor_type, action ->
+ * record) table from the captures (data/avsp_action_seeds.json), but it
+ * is NOT wired here: its key is the game's OWN action word at actor
+ * +0x06, a different space from this model's CapAction enum, and no
+ * translation between the two exists yet - inventing one would be a
+ * guess, not a measurement. That table becomes usable once S5 supplies
+ * the real action-selection logic (which naturally produces the ROM
+ * action word instead of the model's enum); until then it is decoded
+ * evidence, not a wireable bridge. Of 42 mined keys only 16 were
+ * unanimous across every observed re-point; the rest showed the game
+ * choosing among per-instance variants this table doesn't yet resolve,
+ * and were withheld rather than guessed.
+ *
+ * Pose seeding on action change is ADAPTED from the capability model's
+ * action enum; the coordinate/anchor mapping between model space and
+ * CPS2 world space is ADAPTED likewise; the per-slot palette follows the
+ * corpus-observed street bank set 0x10..0x13 through the model's variant
+ * field (ADAPTED). */
 static AvspAnimScript rom_actor_script;
 static AvspRomView rom_actor_view;
-static AvspAnimFrame rom_actor_frame;
-static AvspObjectEntry rom_actor_entries[16];
+static AvspAnimFrame rom_actor_frames[CAP_MAX_ENEMIES];
+static unsigned char rom_actor_seeded[CAP_MAX_ENEMIES];
+static int rom_actor_last_actions[CAP_MAX_ENEMIES];
+static AvspObjectEntry rom_actor_entries_all[CAP_MAX_ENEMIES][16];
+static int rom_actor_entry_counts[CAP_MAX_ENEMIES];
+/* HUD/back-compat aggregates: total entries and the first live code. */
 static int rom_actor_entry_count = 0;
-static int rom_actor_slot = -1;
-static int rom_actor_last_action = -1;
+static AvspObjectEntry rom_actor_entries[16];
 
 static void rom_actor_tick(void)
 {
     int index;
-    int slot = -1;
-    CapActor *enemy = 0;
-    unsigned int seed;
     AvspEmitActor state;
 
     rom_actor_entry_count = 0;
@@ -1454,20 +1478,13 @@ static void rom_actor_tick(void)
      * slots can be mid-initialization, and a reported freeze at the
      * character-confirm transition traced to ticking against one. */
     if (world.encounter_state != CAP_ENCOUNTER_WAVE_ONE &&
-        world.encounter_state != CAP_ENCOUNTER_WAVE_TWO) return;
-    for (index = 0; index < CAP_MAX_ENEMIES; ++index)
+        world.encounter_state != CAP_ENCOUNTER_WAVE_TWO)
     {
-        if (world.enemies[index].active &&
-            world.enemies[index].kind != CAP_ACTOR_BOSS)
+        for (index = 0; index < CAP_MAX_ENEMIES; ++index)
         {
-            slot = index;
-            enemy = &world.enemies[index];
-            break;
+            rom_actor_seeded[index] = 0;
+            rom_actor_entry_counts[index] = 0;
         }
-    }
-    if (enemy == 0)
-    {
-        rom_actor_slot = -1;
         return;
     }
     if (rom_actor_script.spans == 0)
@@ -1480,35 +1497,53 @@ static void rom_actor_tick(void)
         rom_actor_view.spans = avsp_emit_windows;
         rom_actor_view.span_count = AVSP_EMIT_WINDOW_COUNT;
     }
-    /* ADAPTED action bridge: the two live-verified street-alien loops. */
-    seed = (enemy->action == CAP_ACT_ATTACK) ? 0x12D8A0u : 0x12EB4Cu;
-    if (slot != rom_actor_slot || (int)enemy->action != rom_actor_last_action)
+    for (index = 0; index < CAP_MAX_ENEMIES; ++index)
     {
-        avsp_anim_frame_start(&rom_actor_frame, &rom_actor_script, seed);
-        rom_actor_slot = slot;
-        rom_actor_last_action = (int)enemy->action;
-    }
-    else
-    {
-        avsp_anim_frame_tick(&rom_actor_frame, &rom_actor_script);
-    }
-    if (!rom_actor_frame.pose.valid) return;
-    /* ADAPTED coordinate bridge: model-space camera as the anchor pair so
-     * decoded X approximates screen position; exact CPS2 anchors arrive
-     * with Body E's renderer alignment. */
-    state.world_x = (unsigned short)enemy->x;
-    state.world_y = (unsigned short)(200 + enemy->height);
-    state.facing = (unsigned char)(enemy->facing < 0 ? 1 : 0);
-    state.palette = 0x11;
-    state.mode = 1;
-    state.or_value = 0x8000;
-    state.anchor_x = (unsigned short)world.camera_x;
-    state.anchor_y = 0x00FF;
-    {
-        int n = avsp_emit_pose_view(&rom_actor_view,
-                                    rom_actor_frame.pose.assembly,
-                                    &state, rom_actor_entries, 16);
-        rom_actor_entry_count = (n > 0) ? n : 0;
+        CapActor *enemy = &world.enemies[index];
+        unsigned int seed;
+        int n;
+
+        rom_actor_entry_counts[index] = 0;
+        if (!enemy->active || enemy->kind != CAP_ACTOR_ALIEN ||
+            (enemy->action != CAP_ACT_WALK &&
+             enemy->action != CAP_ACT_ATTACK))
+        {
+            rom_actor_seeded[index] = 0;
+            continue;
+        }
+        /* ADAPTED action bridge: the two live-verified street-alien loops. */
+        seed = (enemy->action == CAP_ACT_ATTACK) ? 0x12D8A0u : 0x12EB4Cu;
+        if (!rom_actor_seeded[index] ||
+            (int)enemy->action != rom_actor_last_actions[index])
+        {
+            avsp_anim_frame_start(&rom_actor_frames[index],
+                                  &rom_actor_script, seed);
+            rom_actor_seeded[index] = 1;
+            rom_actor_last_actions[index] = (int)enemy->action;
+        }
+        else
+        {
+            avsp_anim_frame_tick(&rom_actor_frames[index],
+                                 &rom_actor_script);
+        }
+        if (!rom_actor_frames[index].pose.valid) continue;
+        /* ADAPTED coordinate bridge: model-space camera as the anchor pair
+         * so decoded X approximates screen position. */
+        state.world_x = (unsigned short)enemy->x;
+        state.world_y = (unsigned short)(200 + enemy->height);
+        state.facing = (unsigned char)(enemy->facing < 0 ? 1 : 0);
+        state.palette = (unsigned char)(0x10 + (enemy->variant & 3));
+        state.mode = 1;
+        state.or_value = 0x8000;
+        state.anchor_x = (unsigned short)world.camera_x;
+        state.anchor_y = 0x00FF;
+        n = avsp_emit_pose_view(&rom_actor_view,
+                                rom_actor_frames[index].pose.assembly,
+                                &state, rom_actor_entries_all[index], 16);
+        rom_actor_entry_counts[index] = (n > 0) ? n : 0;
+        if (rom_actor_entry_counts[index] > 0 && rom_actor_entry_count == 0)
+            rom_actor_entries[0] = rom_actor_entries_all[index][0];
+        rom_actor_entry_count += rom_actor_entry_counts[index];
     }
 }
 
@@ -1615,7 +1650,7 @@ static int fit_352(const int cps_x)
     return (cps_x * CAP_VIEW_WIDTH) / CAP_CPS2_VIEW_WIDTH;
 }
 
-static void draw_rom_actor_tiles(const CapActor *actor)
+static void draw_rom_actor_tiles(const CapActor *actor, const int slot)
 {
     /* ADAPTED placement bridge: the emitter ran with model-space anchors
        (rom_actor_tick), so entries are positioned as offsets from the
@@ -1631,9 +1666,9 @@ static void draw_rom_actor_tiles(const CapActor *actor)
     int index;
 
     jo_sprite_set_palette_4bits(tile_palette.id, 0);
-    for (index = rom_actor_entry_count - 1; index >= 0; --index)
+    for (index = rom_actor_entry_counts[slot] - 1; index >= 0; --index)
     {
-        const AvspObjectEntry *entry = &rom_actor_entries[index];
+        const AvspObjectEntry *entry = &rom_actor_entries_all[slot][index];
         AvspEntryTile tiles[64];
         int offset_x = wrap_signed_10bit((int)(entry->x & 0x3FF) -
                                          (origin_cps_x & 0x3FF));
@@ -1713,12 +1748,11 @@ static void draw_world(void)
         if (screen_x < -256 || screen_x > 256) continue;
         if (enemy->kind == CAP_ACTOR_BOSS)
             draw_boss(enemy, screen_x);
-        else if (index == rom_actor_slot && rom_actor_entry_count > 0 &&
-                 tile_archive_ready)
-            /* Body E: the ROM-driven actor renders from its own decoded
+        else if (rom_actor_entry_counts[index] > 0 && tile_archive_ready)
+            /* Body E: any ROM-driven actor renders from its own decoded
                object list; its capture cel stays unused as the
                regression/comparison path. */
-            draw_rom_actor_tiles(enemy);
+            draw_rom_actor_tiles(enemy, index);
         else
             draw_alien(enemy, screen_x, index);
     }

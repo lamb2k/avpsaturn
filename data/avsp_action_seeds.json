@@ -1,0 +1,534 @@
+{
+ "classification": "action->record seed manifest - ROM offsets, no ROM bytes",
+ "keys": 42,
+ "method": "seed recorded only on a true external re-point: the actor's action word changed AND the new record pointer is neither the previous pointer nor its own script successor. Only agreement==1.0 keys are compiled into avsp_action_seeds.h; split keys are listed here for visibility but withheld from the shipped table.",
+ "observations": 646,
+ "routes": {
+  "boss_actions": {
+   "frames": 900
+  },
+  "boss_ko": {
+   "frames": 841
+  },
+  "enemy_actions": {
+   "frames": 2121
+  },
+  "stalker_actions": {
+   "frames": 2281
+  }
+ },
+ "schema": 1,
+ "seeds": [
+  {
+   "action": "0x0000",
+   "agreement": 0.971,
+   "distinct_records": 2,
+   "observations": 69,
+   "record": "0x15F1F4",
+   "routes": [
+    "boss_actions",
+    "boss_ko",
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 0
+  },
+  {
+   "action": "0x0200",
+   "agreement": 0.3621,
+   "distinct_records": 9,
+   "observations": 58,
+   "record": "0x15F208",
+   "routes": [
+    "boss_actions",
+    "boss_ko",
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 0
+  },
+  {
+   "action": "0x0202",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 2,
+   "record": "0x15F054",
+   "routes": [
+    "stalker_actions"
+   ],
+   "type": 0
+  },
+  {
+   "action": "0x0204",
+   "agreement": 0.7879,
+   "distinct_records": 3,
+   "observations": 33,
+   "record": "0x15F1F4",
+   "routes": [
+    "boss_actions",
+    "boss_ko",
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 0
+  },
+  {
+   "action": "0x0206",
+   "agreement": 0.7143,
+   "distinct_records": 2,
+   "observations": 7,
+   "record": "0x15EFA8",
+   "routes": [
+    "boss_actions",
+    "boss_ko",
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 0
+  },
+  {
+   "action": "0x0208",
+   "agreement": 0.7143,
+   "distinct_records": 2,
+   "observations": 7,
+   "record": "0x15EFBC",
+   "routes": [
+    "boss_actions",
+    "boss_ko",
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 0
+  },
+  {
+   "action": "0x020A",
+   "agreement": 0.7143,
+   "distinct_records": 2,
+   "observations": 7,
+   "record": "0x15EFE0",
+   "routes": [
+    "boss_actions",
+    "boss_ko",
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 0
+  },
+  {
+   "action": "0x020E",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 2,
+   "record": "0x15F148",
+   "routes": [
+    "stalker_actions"
+   ],
+   "type": 0
+  },
+  {
+   "action": "0x0602",
+   "agreement": 0.475,
+   "distinct_records": 3,
+   "observations": 40,
+   "record": "0x16012C",
+   "routes": [
+    "boss_actions",
+    "boss_ko",
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 0
+  },
+  {
+   "action": "0x0604",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 2,
+   "record": "0x1601F4",
+   "routes": [
+    "enemy_actions"
+   ],
+   "type": 0
+  },
+  {
+   "action": "0x0C02",
+   "agreement": 0.6,
+   "distinct_records": 3,
+   "observations": 5,
+   "record": "0x15E540",
+   "routes": [
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 0
+  },
+  {
+   "action": "0x0E00",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 1,
+   "record": "0x15F96C",
+   "routes": [
+    "enemy_actions"
+   ],
+   "type": 0
+  },
+  {
+   "action": "0x1004",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 1,
+   "record": "0x15FE78",
+   "routes": [
+    "boss_ko"
+   ],
+   "type": 0
+  },
+  {
+   "action": "0x1402",
+   "agreement": 0.3333,
+   "distinct_records": 3,
+   "observations": 3,
+   "record": "0x160288",
+   "routes": [
+    "enemy_actions"
+   ],
+   "type": 0
+  },
+  {
+   "action": "0x1A02",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 10,
+   "record": "0x15FCFC",
+   "routes": [
+    "stalker_actions"
+   ],
+   "type": 0
+  },
+  {
+   "action": "0x0000",
+   "agreement": 0.5,
+   "distinct_records": 2,
+   "observations": 2,
+   "record": "0x12BA08",
+   "routes": [
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0002",
+   "agreement": 0.3,
+   "distinct_records": 8,
+   "observations": 20,
+   "record": "0x12DD50",
+   "routes": [
+    "boss_actions",
+    "boss_ko",
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0200",
+   "agreement": 0.3684,
+   "distinct_records": 6,
+   "observations": 19,
+   "record": "0x12A29C",
+   "routes": [
+    "boss_actions",
+    "boss_ko",
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0202",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 1,
+   "record": "0x13E872",
+   "routes": [
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0204",
+   "agreement": 0.5909,
+   "distinct_records": 6,
+   "observations": 22,
+   "record": "0x12D2F8",
+   "routes": [
+    "boss_actions",
+    "boss_ko",
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0206",
+   "agreement": 0.5,
+   "distinct_records": 2,
+   "observations": 2,
+   "record": "0x12DD9C",
+   "routes": [
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0208",
+   "agreement": 0.5,
+   "distinct_records": 3,
+   "observations": 6,
+   "record": "0x13DBF0",
+   "routes": [
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x020A",
+   "agreement": 0.5,
+   "distinct_records": 3,
+   "observations": 6,
+   "record": "0x13DD48",
+   "routes": [
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0400",
+   "agreement": 0.1746,
+   "distinct_records": 10,
+   "observations": 63,
+   "record": "0x13CC18",
+   "routes": [
+    "boss_actions",
+    "boss_ko",
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0402",
+   "agreement": 0.9167,
+   "distinct_records": 2,
+   "observations": 12,
+   "record": "0x12D890",
+   "routes": [
+    "enemy_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0408",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 2,
+   "record": "0x12D628",
+   "routes": [
+    "enemy_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0600",
+   "agreement": 0.5217,
+   "distinct_records": 6,
+   "observations": 23,
+   "record": "0x12D628",
+   "routes": [
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0800",
+   "agreement": 0.6,
+   "distinct_records": 2,
+   "observations": 5,
+   "record": "0x12E65C",
+   "routes": [
+    "enemy_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0802",
+   "agreement": 0.5,
+   "distinct_records": 4,
+   "observations": 6,
+   "record": "0x12BACC",
+   "routes": [
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0806",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 1,
+   "record": "0x12A9F8",
+   "routes": [
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0A00",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 5,
+   "record": "0x12E65C",
+   "routes": [
+    "enemy_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0C00",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 9,
+   "record": "0x12A9F8",
+   "routes": [
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0C02",
+   "agreement": 0.5,
+   "distinct_records": 7,
+   "observations": 16,
+   "record": "0x13D0E8",
+   "routes": [
+    "boss_actions",
+    "boss_ko",
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0C06",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 3,
+   "record": "0x12D628",
+   "routes": [
+    "enemy_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x0E02",
+   "agreement": 0.7333,
+   "distinct_records": 4,
+   "observations": 15,
+   "record": "0x13CDF8",
+   "routes": [
+    "boss_actions",
+    "boss_ko",
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x1000",
+   "agreement": 0.6667,
+   "distinct_records": 2,
+   "observations": 3,
+   "record": "0x12A6AC",
+   "routes": [
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x1002",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 1,
+   "record": "0x12D5E4",
+   "routes": [
+    "enemy_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x1006",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 2,
+   "record": "0x12AA3C",
+   "routes": [
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x1202",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 1,
+   "record": "0x12AEF0",
+   "routes": [
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x1206",
+   "agreement": 1.0,
+   "distinct_records": 1,
+   "observations": 1,
+   "record": "0x12AF24",
+   "routes": [
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x1600",
+   "agreement": 0.4737,
+   "distinct_records": 5,
+   "observations": 95,
+   "record": "0x12EAFC",
+   "routes": [
+    "enemy_actions",
+    "stalker_actions"
+   ],
+   "type": 12
+  },
+  {
+   "action": "0x1800",
+   "agreement": 0.5172,
+   "distinct_records": 2,
+   "observations": 58,
+   "record": "0x12E8EC",
+   "routes": [
+    "enemy_actions"
+   ],
+   "type": 12
+  }
+ ],
+ "shipped_keys": 16,
+ "unanimous_keys": 16
+}

@@ -48,14 +48,16 @@ from decode_avsp_object_stream import Rom  # noqa: E402
 import verify_avsp_object_corpus as V      # noqa: E402
 
 ROM_PATH = ROOT / ".deps/mame/actorprobe/decrypted_program_2m.bin"
-# Scope: the street route only, matching the one ROM-driven street-alien
-# actor Body E renders. The full four-route set is 4,441 tiles (568 KB) and
-# does not fit the 32 Mbit cartridge beside the current boot working set
-# (~3.8 MB resident, dominated by 2.7 MB of pre-loaded PCM); widening to
-# stalkers/boss in S3 requires phase-loading those PCMs first. Pass --full
-# to measure the complete set.
-ROUTES = ("enemy_actions",)
+# Default scope is STREET ONLY (1,533 tiles, 202,564 bytes) - the archive
+# proven to fit the current cartridge budget alongside the rest of the
+# boot working set (MEASURED: the full four-route archive, 612,720 bytes,
+# left EACT.RLE with no single cart zone holding its 131,552 bytes). Pass
+# --full for the complete four-route cast archive; it requires widening
+# AVSP_TILE_REGION_BYTES in main.c AND moving more PCM to phase-boundary
+# loads first, or the build will fail an ISO asset load. Do not flip this
+# default without re-measuring the budget - see docs/AGENT_HANDOFF.md.
 ROUTES_FULL = ("enemy_actions", "stalker_actions", "boss_actions", "boss_ko")
+ROUTES_STREET = ("enemy_actions",)
 PALETTE_ROUTE = "enemy_actions"
 OUT_BIN = ROOT / "build" / "avsp_cd" / "SPR4" / "TILES.BIN"
 OUT_JSON = ROOT / "data" / "avsp_gfx_tiles.json"
@@ -164,7 +166,7 @@ def tile_texture(gfx: bytearray, code: int) -> bytes:
 
 
 def main() -> int:
-    routes = ROUTES_FULL if "--full" in sys.argv[1:] else ROUTES
+    routes = ROUTES_FULL if "--full" in sys.argv[1:] else ROUTES_STREET
     avsp.verify_roms()
     gfx = avsp.load_gfx_region()
     avsp.verify_loaded_gfx_region(gfx)

@@ -2317,9 +2317,14 @@ def write_saturn_assets(gfx: bytearray, palette: list[tuple[int, int, int, int]]
 
     # These directories are generated and ignored. Remove only their direct
     # files so stale approximate assets cannot leak into a clean image pack.
+    # TILES.BIN is a SEPARATE pipeline's output (tools/gen_avsp_gfx_tiles.py,
+    # driven by build.ps1's own reuse-if-present check) and must survive this
+    # sweep - wiping it here defeated that check and forced an unbudgeted
+    # full-scope regeneration on every prepare_avsp_port.ps1 run.
+    keep = {"TILES.BIN"}
     for output_dir in (sprite_dir, snapshot_dir, background_dir):
         for stale_file in output_dir.iterdir():
-            if stale_file.is_file():
+            if stale_file.is_file() and stale_file.name not in keep:
                 stale_file.unlink()
 
     manifest: list[dict[str, object]] = []
