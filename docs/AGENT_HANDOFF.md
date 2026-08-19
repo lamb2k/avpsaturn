@@ -605,11 +605,13 @@ aliens, stalkers, and the boss-window cast. C `avsp_emit.c` carries
 families 2/6/8 with the palette mode only - the raw-attr mode is
 Python-verified but not yet promoted to C (small, mechanical).
 
-**Next S3 targets** (updated after same-day closures of the +0x0D mode
-AND family 0x0004 - the latter is family-6 with 4-byte parts and no
-advance word, corpus 18,732/17,771/0): top-word 0x000A (254 instances,
-handler 0x0AA38A located, untraced); tag 0x0000 (handler 0x0AA26C); the
-raw-attr mode and family-4 into C;
+**S3 enemy-region emission surface COMPLETE (same day):** family 0x000A
+(inline dx/dy parts) traced and implemented - corpus 18,986 eligible /
+18,025 exact / 961 absent / ZERO mismatches with no unknown-tag
+exclusions left in the four routes; and the C module now carries the
+whole surface (mode byte, attr_final helper, families 2/4/6/8/A, 11
+corpus-verified test cases, suite+ISO green). Remaining S3: tag 0x0000
+(handler 0x0AA26C, never observed in the corpus);
 the player's script region (outside [0x120000,0x140000)). **S4 starting
 point** per `docs/NEXT_AGENT_PROMPT.md`: consume the S1-decoded collision
 boxes at runtime and decode the five post-hit routines
