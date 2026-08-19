@@ -3,6 +3,58 @@
 Updated: 2026-08-19 EDT (**bounded S4 runtime integration complete; real
 ROM-derived frontend is next**).
 
+## Frontend interaction evidence: COMPLETE (2026-08-19)
+
+**Branch `codex/avp-master-plan`; parent HEAD `3967cf3`.** This is the first
+coherent checkpoint of the ROM-derived frontend body. It changes no Saturn
+runtime or generated disc content. Capability Gate 1 remains `0/7`.
+
+The new cadence-1 route is `capture_frontend_interaction.ps1` plus
+`tools/mame_capture_frontend_interaction.lua`. It runs five stock-MAME 0.289
+cold boots (`topology`, `button1`, `button2`, `button3`,
+`alternate_confirm`), captures both object banks and work RAM privately under
+`.deps/mame/frontend_interaction`, and uses one explicit frame-2500 gameplay
+input to skip the source story panels. This explicit skip is required: the
+old recurring input schedule silently shortened those panels and made the
+select settle frame look earlier than an unassisted route.
+
+`tools/analyze_frontend_interaction.py` writes tracked semantic evidence only
+to `data/frontend_interaction.json`:
+
+- Four non-wrapping positions are proven: Warrior `(48,67)` index 0,
+  Schaefer `(304,67)` index 1, Hunter `(304,171)` index 2, Linn `(48,171)`
+  index 3. Every accepted direction becomes visible three source frames after
+  the input edge. Left and Up at Warrior stay on Warrior; no wrap was observed.
+- The live marker is a two-object palette-15 composition with anchor tile code
+  `0x8D04`. Both CPS object banks agree at every stable anchor.
+- All three CPS gameplay buttons produce the identical confirmation schedule.
+  **There is no source cancel button.** Do not implement the older prompt's
+  invented cancel/back action. First cursor blink is input +3; the full
+  transient reaches 360 objects at input +71 and zero objects at input +109.
+- Work-RAM selection index `0xFF8452` carries `0,1,2,3`; the matching one-hot
+  mask at `0xFF81CC` carries `1,2,4,8`. The topology route's live writer PCs
+  are recorded as bounded observations (`0x07989C` index, `0x079894` clear,
+  `0x0798A6` mask value), not an exhaustive ROM writer enumeration.
+- Non-default confirmation is real: Hunter index 2 persists through gameplay
+  frame 3283. A one-frame-perturbed confirmation edge fails the expected
+  three-frame response, so the timing check is non-vacuous.
+
+Raw evidence at this checkpoint: **34,011 files / 1,323,743,465 bytes**, all
+ignored. Regenerate with:
+
+```powershell
+$py = "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
+.\capture_frontend_interaction.ps1 -Refresh -PythonPath $py
+```
+
+The manifest regenerated three times byte-identically at SHA-256
+`A4126E44F5AA89D6A12CA81B58252A776DAB255433C8B3AA7EC526031D5DCCBB`.
+The full `test.ps1` suite exits 0 with the new analyzer wired in.
+
+**Next:** implement the deterministic ROM-layer converter and CRAM/bundle
+checks. Use the measured four-position/no-wrap/all-buttons-confirm semantics;
+do not re-capture interaction or add cancel.
+
 ## Bounded S4 runtime integration: COMPLETE (2026-08-19)
 
 **Branch `codex/avp-master-plan`; implementation committed at `fc1747e`

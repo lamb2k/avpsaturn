@@ -158,9 +158,12 @@ S-step vocabulary it lives in:
 1. **Bounded S4 integration — COMPLETE 2026-08-19.** Generated and consumed the
    per-class `table_set` map, extended canonical actor fields, proved HIT/KO
    require external state writers, and removed the collision-view one-frame lag.
-2. **Real frontend — NEXT (user priority).** Allocate CRAM from AvP's measured 17/19/32
-   live-bank demand, convert the CPS tilemaps and cursor from original ROM
-   assets, and carry real selection state into gameplay at 352x224.
+2. **Real frontend — IN PROGRESS (user priority).** Cadence-1 interaction is
+   resolved: four non-wrapping positions, three-frame cursor response, all
+   three gameplay buttons confirm, no source cancel, and selection index
+   `0xFF8452` persists into gameplay. Next allocate CRAM from AvP's measured
+   17/19/32 live-bank demand, convert the CPS tilemaps/cursor from original ROM
+   assets, and carry that measured selection state into gameplay at 352x224.
 3. **Game logic — S5 Room 1 (the long pole).** PRNG, enemy decisions, player state
    machine, wave/spawn scheduling, the stage script interpreter,
    health/score/items/continues, translated per routine by differential

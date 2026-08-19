@@ -30,6 +30,13 @@ HEAD and worktree before relying on the handoff.
 - Existing `MENUFIT.BIN`, `CHARFIT.BIN` and capture-derived sequence surfaces
   are regression oracles only. New runtime frontend content must come from ROM
   tables/assets.
+- `data/frontend_interaction.json` is the cadence-1 interaction source of
+  truth. The four positions are Warrior 0, Schaefer 1, Hunter 2, Linn 3; the
+  grid does not wrap; accepted movement appears after three source frames.
+  Work-RAM index `0xFF8452` and one-hot mask `0xFF81CC` agree with the cursor.
+- All three CPS gameplay buttons confirm with the same schedule. No source
+  cancel button was observed. The older instruction to implement cancel is
+  retired: do not invent back navigation.
 
 ## Required implementation
 
@@ -69,8 +76,9 @@ HEAD and worktree before relying on the handoff.
 - Decode and render the 1P marker as live VDP1 objects from ROM-derived object
   data. It must move; no cursor pixels may be baked into a VDP2 layer.
 - Implement controller movement over the actual supported character choices,
-  including boundary/wrap behavior measured from the source route.
-- Maintain explicit selected-character state. Implement confirm and cancel,
+  using the measured non-wrapping 2x2 topology and three-frame response.
+- Maintain explicit selected-character state. Treat all three gameplay
+  buttons as confirm and implement no cancel/back action,
   and pass the selection into the gameplay initializer rather than always
   choosing the current predetermined character.
 - Preserve the measured confirm shutter timing/geometry. The shutter may keep
@@ -86,7 +94,7 @@ Run in order:
 3. Full `test.ps1`.
 4. Focused Saturn frontend build and ISO-member hash verification.
 5. Live normal-release boot: title waits indefinitely, Start reaches select,
-   D-pad visibly changes the live cursor/selection, cancel returns correctly,
+   D-pad visibly changes the live cursor/selection, boundaries do not wrap,
    confirm preserves the shutter and propagates the chosen state.
 6. Capture title, settled select, cursor positions, confirm transition and
    Round 1 title at 352x224; compare against the established oracles with crop,

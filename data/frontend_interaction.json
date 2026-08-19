@@ -1,0 +1,290 @@
+{
+ "capture_frames": {
+  "cadence": 1,
+  "first": 1500,
+  "last": 3350
+ },
+ "classification": "cadence-1 frontend interaction semantics; no ROM bytes, screenshots, object RAM or work RAM",
+ "confirmation": {
+  "alternate_selection": "predator_hunter",
+  "alternate_selection_persisted_to_frame": 3283,
+  "cancel_button": null,
+  "confirm_buttons": [
+   "button1",
+   "button2",
+   "button3"
+  ],
+  "cursor_blink_object_counts": {
+   "2753": 0,
+   "2757": 2,
+   "2761": 0,
+   "2765": 2,
+   "2769": 0,
+   "2773": 2,
+   "2777": 0,
+   "2821": 360,
+   "2859": 0
+  },
+  "default_selection_persisted_to_frame": 3283,
+  "input_to_first_blink_frames": 3,
+  "negative_control": {
+   "expected_latency": 3,
+   "mutation": "confirm input edge +1 frame",
+   "observed_latency_under_mutation": 2,
+   "result": "failed_as_required"
+  },
+  "object_burst_count": 360,
+  "object_burst_first_full_frame": 2821,
+  "objects_empty_frame": 2859,
+  "source_behavior": "all three CPS gameplay buttons confirm; no cancel button was observed"
+ },
+ "cursor_positions": [
+  {
+   "character": "predator_warrior",
+   "cursor_anchor_x": 48,
+   "cursor_anchor_y": 67,
+   "index": 0,
+   "marker_objects": [
+    {
+     "height": 16,
+     "palette_bank": 15,
+     "tile_code": "0x8D04",
+     "width": 32,
+     "x": 48,
+     "y": 67
+    },
+    {
+     "height": 32,
+     "palette_bank": 15,
+     "tile_code": "0x883D",
+     "width": 48,
+     "x": 40,
+     "y": 59
+    }
+   ],
+   "stable_frames": [
+    2695,
+    2943
+   ]
+  },
+  {
+   "character": "major_schaefer",
+   "cursor_anchor_x": 304,
+   "cursor_anchor_y": 67,
+   "index": 1,
+   "marker_objects": [
+    {
+     "height": 16,
+     "palette_bank": 15,
+     "tile_code": "0x8D04",
+     "width": 32,
+     "x": 304,
+     "y": 67
+    },
+    {
+     "height": 32,
+     "palette_bank": 15,
+     "tile_code": "0x887D",
+     "width": 48,
+     "x": 296,
+     "y": 59
+    }
+   ],
+   "stable_frames": [
+    2763,
+    3123
+   ]
+  },
+  {
+   "character": "predator_hunter",
+   "cursor_anchor_x": 304,
+   "cursor_anchor_y": 171,
+   "index": 2,
+   "marker_objects": [
+    {
+     "height": 16,
+     "palette_bank": 15,
+     "tile_code": "0x8D04",
+     "width": 32,
+     "x": 304,
+     "y": 171
+    },
+    {
+     "height": 32,
+     "palette_bank": 15,
+     "tile_code": "0x887D",
+     "width": 48,
+     "x": 296,
+     "y": 163
+    }
+   ],
+   "stable_frames": [
+    2823,
+    3223
+   ]
+  },
+  {
+   "character": "linn_kurosawa",
+   "cursor_anchor_x": 48,
+   "cursor_anchor_y": 171,
+   "index": 3,
+   "marker_objects": [
+    {
+     "height": 16,
+     "palette_bank": 15,
+     "tile_code": "0x8D04",
+     "width": 32,
+     "x": 48,
+     "y": 171
+    },
+    {
+     "height": 32,
+     "palette_bank": 15,
+     "tile_code": "0x887D",
+     "width": 48,
+     "x": 40,
+     "y": 163
+    }
+   ],
+   "stable_frames": [
+    2883
+   ]
+  }
+ ],
+ "cursor_tile_code": "0x8D04",
+ "direction_transitions": [
+  {
+   "boundary_no_wrap": false,
+   "direction": "right",
+   "from_character": "predator_warrior",
+   "input_frame": 2760,
+   "latency_frames": 3,
+   "observed_frame": 2763,
+   "to_character": "major_schaefer"
+  },
+  {
+   "boundary_no_wrap": false,
+   "direction": "down",
+   "from_character": "major_schaefer",
+   "input_frame": 2820,
+   "latency_frames": 3,
+   "observed_frame": 2823,
+   "to_character": "predator_hunter"
+  },
+  {
+   "boundary_no_wrap": false,
+   "direction": "left",
+   "from_character": "predator_hunter",
+   "input_frame": 2880,
+   "latency_frames": 3,
+   "observed_frame": 2883,
+   "to_character": "linn_kurosawa"
+  },
+  {
+   "boundary_no_wrap": false,
+   "direction": "up",
+   "from_character": "linn_kurosawa",
+   "input_frame": 2940,
+   "latency_frames": 3,
+   "observed_frame": 2943,
+   "to_character": "predator_warrior"
+  },
+  {
+   "boundary_no_wrap": true,
+   "direction": "left",
+   "from_character": "predator_warrior",
+   "input_frame": 3000,
+   "latency_frames": 3,
+   "observed_frame": 3003,
+   "to_character": "predator_warrior"
+  },
+  {
+   "boundary_no_wrap": true,
+   "direction": "up",
+   "from_character": "predator_warrior",
+   "input_frame": 3060,
+   "latency_frames": 3,
+   "observed_frame": 3063,
+   "to_character": "predator_warrior"
+  },
+  {
+   "boundary_no_wrap": false,
+   "direction": "right",
+   "from_character": "predator_warrior",
+   "input_frame": 3120,
+   "latency_frames": 3,
+   "observed_frame": 3123,
+   "to_character": "major_schaefer"
+  },
+  {
+   "boundary_no_wrap": false,
+   "direction": "down",
+   "from_character": "major_schaefer",
+   "input_frame": 3220,
+   "latency_frames": 3,
+   "observed_frame": 3223,
+   "to_character": "predator_hunter"
+  }
+ ],
+ "held_direction_behavior": "one transition after three frames, then no repeat beyond the 2x2 boundary",
+ "mame_version": "0.289",
+ "raw_evidence_hashes": {
+  "alternate_confirm": {
+   "samples_tsv_sha256": "5ed48132a01f76e24cbc5bff47774755f9379398d600cb2a4820cfe25235c7b3"
+  },
+  "button1": {
+   "samples_tsv_sha256": "db4de68cbb7004e81eb4e8cbbadf00217e996dc975b46783cbb93bd1fa9b4f28"
+  },
+  "button2": {
+   "samples_tsv_sha256": "eefbee92f583b5b884598fed946c117a81bdb319ab3178bcc091cbed2dff123d"
+  },
+  "button3": {
+   "samples_tsv_sha256": "ba165b521e42d74b2f415d20d19c383400cffbc1d44b438b4c8032cb2e1df114"
+  },
+  "topology": {
+   "samples_tsv_sha256": "a61d2237e0fa6cc5397ccf15ec3f577a2c00f75e068e6cdc9f34778954e34d6d",
+   "selection_writes_tsv_sha256": "99e19a6d5042738cc8433622db1d47088308868fce7cd1824ecb8485fbe991b4"
+  }
+ },
+ "romset": "avspu",
+ "route_control": "one credit, Start, explicit pre-select story skip at frame 2500, then route-specific input after settle",
+ "schema": 1,
+ "settled_select_first_cursor_frame": 2677,
+ "workram_fields": {
+  "all_observed_writer_pcs_by_tapped_word": {
+   "0xFF81CC": [
+    "0x07982C",
+    "0x079894",
+    "0x0798A6"
+   ],
+   "0xFF8452": [
+    "0x079810",
+    "0x079818",
+    "0x07989C"
+   ]
+  },
+  "scope": "writer PCs observed in the deterministic topology route; not an exhaustive ROM writer enumeration",
+  "selection_index": {
+   "address": "0xFF8452",
+   "value_writer_pc": "0x07989C",
+   "values": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  "selection_one_hot_mask": {
+   "address": "0xFF81CC",
+   "clear_writer_pc": "0x079894",
+   "value_writer_pc": "0x0798A6",
+   "values": [
+    1,
+    2,
+    4,
+    8
+   ]
+  }
+ },
+ "wrap_behavior": "none at the left and top boundaries"
+}

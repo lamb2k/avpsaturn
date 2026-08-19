@@ -220,6 +220,16 @@ if ($LASTEXITCODE -ne 0) {
     throw "Frontend composition analysis failed with exit code $LASTEXITCODE."
 }
 
+# Cadence-1 character-select semantics: four cursor positions, source boundary
+# behavior, all three confirm buttons, no observed cancel, selected-character
+# work-RAM fields/writers, and a perturbed-input negative control.  Raw object
+# RAM/work RAM/screenshots remain private and the analyzer skips cleanly when
+# they are absent.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\analyze_frontend_interaction.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Frontend interaction analysis failed with exit code $LASTEXITCODE."
+}
+
 # Sub-state dispatcher enumeration: decodes, from the validated opcode-space
 # image, every per-actor sub-state jump table (actor byte +0x04 indexes a
 # PC-relative word table). Self-tests against the three live-confirmed
