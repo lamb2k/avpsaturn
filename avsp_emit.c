@@ -71,9 +71,25 @@ static int emit_origin(const unsigned char *rom, unsigned long rom_size,
     return 0;
 }
 
-int avsp_emit_group(const unsigned char *rom, unsigned long rom_size,
-                    unsigned long header, const AvspEmitActor *actor,
-                    AvspObjectEntry *out, int cap)
+/* attr transform shared by every decoded family: palette-injected in the
+ * positive +0x0D mode, raw in the zero/negative mode; the facing flip XOR
+ * (bit 5) applies in both. */
+static unsigned int attr_final(unsigned int attr_raw,
+                               const AvspEmitActor *actor)
+{
+    unsigned int flip = (unsigned int)(actor->facing & 0x01u) << 5;
+
+    if (actor->mode >= 0x01u && actor->mode <= 0x7Fu) {
+        return (attr_raw & 0xFF00u)
+             | ((((attr_raw & 0xE0u) + (unsigned int)actor->palette) ^ flip)
+                & 0xFFu);
+    }
+    return (attr_raw & 0xFF00u) | ((attr_raw ^ flip) & 0xFFu);
+}
+
+static int emit_group_ex(const unsigned char *rom, unsigned long rom_size,
+                         unsigned long header, const AvspEmitActor *actor,
+                         AvspObjectEntry *out, int cap, int has_advance)
 {
     int ok = 1;
     unsigned int count;
@@ -109,7 +125,8 @@ int avsp_emit_group(const unsigned char *rom, unsigned long rom_size,
     for (i = 0; i < count; ++i) {
         unsigned int code = rd16(rom, rom_size, a0, &ok);
         unsigned int attr_raw = rd16(rom, rom_size, a0 + 2ul, &ok);
-        unsigned int advance = rd16(rom, rom_size, a0 + 4ul, &ok);
+        unsigned int advance = has_advance
+            ? rd16(rom, rom_size, a0 + 4ul, &ok) : 0u;
         unsigned int dx = rd16(rom, rom_size, a2, &ok);
         unsigned int dy = rd16(rom, rom_size, a2 + 2ul, &ok);
         unsigned int attr;
@@ -120,9 +137,7 @@ int avsp_emit_group(const unsigned char *rom, unsigned long rom_size,
             return -2;
         }
 
-        attr = (attr_raw & 0xFF00u)
-             | ((((attr_raw & 0xE0u) + (unsigned int)actor->palette)
-                 ^ ((unsigned int)(actor->facing & 0x01u) << 5)) & 0xFFu);
+        attr = attr_final(attr_raw, actor);
 
         if (actor->facing & 0x01u) {
             unsigned int width = ((((attr_raw >> 8) & 0xFu) + 1u) * 16u);
@@ -139,7 +154,7 @@ int avsp_emit_group(const unsigned char *rom, unsigned long rom_size,
             out[i].attr = (unsigned short)attr;
         }
 
-        a0 += 6ul;
+        a0 += has_advance ? 6ul : 4ul;
         a2 += 4ul + (unsigned long)advance;
     }
 
@@ -174,9 +189,7 @@ static int emit_family2(const unsigned char *rom, unsigned long rom_size,
         return -2;
     }
 
-    attr = (attr_raw & 0xFF00u)
-         | ((((attr_raw & 0xE0u) + (unsigned int)actor->palette)
-             ^ ((unsigned int)(actor->facing & 0x01u) << 5)) & 0xFFu);
+    attr = attr_final(attr_raw, actor);
     if (actor->facing & 0x01u) {
         unsigned int width = ((((attr_raw >> 8) & 0xFu) + 1u) * 16u);
         x = (origin_x - width - dx) & 0x3FFu;
@@ -192,6 +205,68 @@ static int emit_family2(const unsigned char *rom, unsigned long rom_size,
         out->attr = (unsigned short)attr;
     }
     return 1;
+}
+
+int avsp_emit_group(const unsigned char *rom, unsigned long rom_size,
+                    unsigned long header, const AvspEmitActor *actor,
+                    AvspObjectEntry *out, int cap)
+{
+    return emit_group_ex(rom, rom_size, header, actor, out, cap, 1);
+}
+
+/* Family 0x000A (handler 0x0AA38A, live-traced): [count][pad][D2 long] then
+ * parts of 8 bytes each - code|attr plus INLINE dx,dy (no A2 table).
+ * `payload` points past [tag][budget]. Returns count, and sets *end to the
+ * first byte past the record. */
+static int emit_familyA(const unsigned char *rom, unsigned long rom_size,
+                        unsigned long payload, const AvspEmitActor *actor,
+                        AvspObjectEntry *out, int cap, unsigned long *end)
+{
+    int ok = 1;
+    unsigned int count = rd16(rom, rom_size, payload, &ok);
+    unsigned int origin_x;
+    unsigned int origin_y;
+    unsigned long p;
+    unsigned int i;
+
+    if (!ok || count < 1u || count > 16u) {
+        return -2;
+    }
+    if (emit_origin(rom, rom_size, payload + 4ul, actor,
+                    &origin_x, &origin_y) != 0) {
+        return -2;
+    }
+    p = payload + 8ul;
+    for (i = 0; i < count; ++i) {
+        unsigned int code = rd16(rom, rom_size, p, &ok);
+        unsigned int attr_raw = rd16(rom, rom_size, p + 2ul, &ok);
+        unsigned int dx = rd16(rom, rom_size, p + 4ul, &ok);
+        unsigned int dy = rd16(rom, rom_size, p + 6ul, &ok);
+        unsigned int attr;
+        unsigned int x;
+        unsigned int y;
+
+        if (!ok) {
+            return -2;
+        }
+        attr = attr_final(attr_raw, actor);
+        if (actor->facing & 0x01u) {
+            unsigned int width = ((((attr_raw >> 8) & 0xFu) + 1u) * 16u);
+            x = (origin_x - width - dx) & 0x3FFu;
+        } else {
+            x = (origin_x + dx) & 0x3FFu;
+        }
+        y = (origin_y + dy) & 0x3FFu;
+        if ((int)i < cap) {
+            out[i].x = (unsigned short)(x | (unsigned int)actor->or_value);
+            out[i].y = (unsigned short)y;
+            out[i].code = (unsigned short)code;
+            out[i].attr = (unsigned short)attr;
+        }
+        p += 8ul;
+    }
+    *end = p;
+    return (int)count;
 }
 
 int avsp_emit_pose(const unsigned char *rom, unsigned long rom_size,
@@ -218,7 +293,8 @@ int avsp_emit_pose(const unsigned char *rom, unsigned long rom_size,
     if (top == AVSP_EMIT_SEL_TWO) {
         pos = assembly + 2ul;
         n_records = 2;
-    } else if (top == 0x0002u || top == AVSP_EMIT_TAG) {
+    } else if (top == 0x0002u || top == 0x0004u || top == AVSP_EMIT_TAG
+               || top == 0x000Au) {
         pos = assembly;
         n_records = 1;
     } else {
@@ -232,21 +308,35 @@ int avsp_emit_pose(const unsigned char *rom, unsigned long rom_size,
         if (!ok) {
             return -2;
         }
-        if (tag == AVSP_EMIT_TAG) {          /* family 6: multi-part group */
+        if (tag == AVSP_EMIT_TAG || tag == 0x0004u) {
+            /* family 6: multi-part group; family 4: same layout with 4-byte
+             * parts and no advance word (fixed A2 stride). */
             unsigned long header = pos + 2ul;
             unsigned int count = rd16(rom, rom_size, header + 2ul, &ok);
+            int adv = (tag == AVSP_EMIT_TAG);
 
             if (!ok || count < 1u || count > 8u) {
                 return -2;
             }
-            n = avsp_emit_group(rom, rom_size, header, actor,
-                                (total < cap) ? out + total : 0,
-                                (total < cap) ? cap - total : 0);
+            n = emit_group_ex(rom, rom_size, header, actor,
+                              (total < cap) ? out + total : 0,
+                              (total < cap) ? cap - total : 0, adv);
             if (n < 0) {
                 return n;
             }
             total += n;
-            pos = header + 10ul + (unsigned long)count * 6ul;
+            pos = header + 10ul + (unsigned long)count * (adv ? 6ul : 4ul);
+        } else if (tag == 0x000Au) {         /* family A: inline dx/dy */
+            unsigned long rec_end = 0;
+
+            n = emit_familyA(rom, rom_size, pos + 4ul, actor,
+                             (total < cap) ? out + total : 0,
+                             (total < cap) ? cap - total : 0, &rec_end);
+            if (n < 0) {
+                return n;
+            }
+            total += n;
+            pos = rec_end;
         } else if (tag == 0x0002u) {         /* family 2: single entry */
             n = emit_family2(rom, rom_size, pos + 4ul, actor,
                              (total < cap) ? out + total : 0,

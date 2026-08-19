@@ -67,6 +67,8 @@ typedef struct {
     unsigned short world_y;
     unsigned char facing;
     unsigned char palette;
+    unsigned char mode;      /* actor +0x0D: 0x01..0x7F = palette-injected
+                                attr; zero/negative = raw attr ^ flip only */
     unsigned short or_value;
     unsigned short anchor_x;
     unsigned short anchor_y;

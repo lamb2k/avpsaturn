@@ -104,7 +104,7 @@ int main(void)
      * two groups, five entries. Actor fields from the route-matched capture;
      * camera anchors are the street-window values at 0xFF8278/0xFF827C. */
     actor.world_x = 1257; actor.world_y = 310;
-    actor.facing = 1; actor.palette = 0x11;
+    actor.facing = 1; actor.palette = 0x11; actor.mode = 1;
     actor.or_value = 0x8000;
     actor.anchor_x = 0x03F0; actor.anchor_y = 0x00FF;
     {
@@ -136,7 +136,7 @@ int main(void)
     /* Second, independent actor 0xFFA000: selector-6 single group, other
      * palette, flipped loop. */
     actor.world_x = 1181; actor.world_y = 297;
-    actor.facing = 1; actor.palette = 0x10;
+    actor.facing = 1; actor.palette = 0x10; actor.mode = 1;
     {
         static const unsigned short want[] = {
             0x8085, 0x00C8, 0x46F0, 0x0930,
@@ -150,7 +150,7 @@ int main(void)
      * X = origin + dx, no width term, no flip XOR. Oracle entries from the
      * enemy_actions route at source frame 4491 (objram 4492). */
     actor.world_x = 1387; actor.world_y = 241;
-    actor.facing = 0; actor.palette = 0x13;
+    actor.facing = 0; actor.palette = 0x13; actor.mode = 1;
     {
         static const unsigned short want[] = {
             0x8183, 0x0100, 0x46F0, 0x0913,
@@ -165,7 +165,7 @@ int main(void)
      * 0x12F5DE is the record that was undecodable before the family-2
      * handler (0x0A9D52) was live-disassembled. */
     actor.world_x = 1292; actor.world_y = 258;
-    actor.facing = 1; actor.palette = 0x10;
+    actor.facing = 1; actor.palette = 0x10; actor.mode = 1;
     {
         static const unsigned short want[] = {
             0x8105, 0x00C7, 0x463D, 0x2230,
@@ -177,7 +177,7 @@ int main(void)
 
     /* Mixed composite: family-6 group then a family-2 record. */
     actor.world_x = 1005; actor.world_y = 334;
-    actor.facing = 1; actor.palette = 0x10;
+    actor.facing = 1; actor.palette = 0x10; actor.mode = 1;
     {
         static const unsigned short want[] = {
             0x83E4, 0x006C, 0x4EFB, 0x0230,
@@ -190,7 +190,7 @@ int main(void)
 
     /* Mixed composite the other way: family-2 then a family-6 group. */
     actor.world_x = 1331; actor.world_y = 308;
-    actor.facing = 1; actor.palette = 0x11;
+    actor.facing = 1; actor.palette = 0x11; actor.mode = 1;
     {
         static const unsigned short want[] = {
             0x812E, 0x009B, 0x4FC0, 0x1431,
@@ -199,6 +199,49 @@ int main(void)
         };
         check_pose(rom, rom_size, "mixed 2+6x2 (3)", 0x12FD0Aul, &actor,
                    want, 3);
+    }
+
+    /* Family-4 (4-byte parts, no advance), raw-attr mode (+0x0D <= 0):
+     * corpus-verified vector from the boss route. */
+    actor.world_x = 1144; actor.world_y = 224;
+    actor.facing = 0; actor.palette = 0x00; actor.mode = 0;
+    actor.anchor_x = 886; actor.anchor_y = 208;
+    {
+        static const unsigned short want[] = {
+            0x8117, 0x00E3, 0x43F9, 0x0511,
+            0x8127, 0x0093, 0x4400, 0x4311,
+        };
+        check_pose(rom, rom_size, "family4 raw (2)", 0x12C7A4ul, &actor,
+                   want, 2);
+    }
+
+    /* Family-6 group in the raw-attr mode, stalker route. */
+    actor.world_x = 1216; actor.world_y = 288;
+    actor.facing = 0; actor.palette = 0x00; actor.mode = 0;
+    actor.anchor_x = 811; actor.anchor_y = 224;
+    {
+        static const unsigned short want[] = {
+            0x81DA, 0x0094, 0x44AF, 0x1011,
+            0x81EA, 0x00A4, 0x4505, 0x1211,
+            0x81AB, 0x0064, 0x4000, 0x5311,
+        };
+        check_pose(rom, rom_size, "family6 raw (3)", 0x12BC14ul, &actor,
+                   want, 3);
+    }
+
+    /* Family-A (inline dx/dy parts), palette mode, stalker route. */
+    actor.world_x = 1133; actor.world_y = 309;
+    actor.facing = 0; actor.palette = 0x1B; actor.mode = 1;
+    actor.anchor_x = 811; actor.anchor_y = 224;
+    {
+        static const unsigned short want[] = {
+            0x810C, 0x0067, 0x83ED, 0x121B,
+            0x813C, 0x0057, 0x8390, 0x261B,
+            0x814C, 0x0087, 0x83C0, 0x261B,
+            0x81BC, 0x0097, 0x8376, 0x151B,
+        };
+        check_pose(rom, rom_size, "familyA inline (4)", 0x13DF48ul, &actor,
+                   want, 4);
     }
 
     /* Undecoded layouts must be reported, never guessed at. 0x12F72E holds
