@@ -35,34 +35,55 @@ What is MEASURED and tracked:
 
 ### Step 1 — locate the action-level dispatch (the one open item)
 
-85 action-level dispatchers exist, but none statically links to the street
-alien's routines: scanning every one of them for a table entry landing on
-the enclosing routine starts (`~0x060138`, `0x0495CC`, `0x03F0C4`) found
-nothing. This corroborates the live caller trace's fixed return address
-`0x00FF00D8` — the immediate caller is a **RAM-resident trampoline** the
-game builds at run time.
+85 sites match the generic action-dispatch idiom, but none statically links
+to the street alien's routines (an offline table-entry scan found nothing),
+and the earlier caller-side stack trace is a red herring: the transfer into
+a sub-state dispatcher is a `jmp`, not `jsr`/`bsr`, so there is no return
+address to read for that specific transfer — the "fixed `0x00FF00D8`"
+finding was leftover stack content from an outer call frame, not a caller
+address. **Do not re-attempt the RAM-trampoline-dump probe** (dumping
+`0xFF0080–0xFF0140`); it was based on that misread and a follow-up session
+(2026-08-19, see handoff) found no trampoline code there worth pursuing
+further via that route.
 
-The probe is live and bounded:
+**A validated harness now exists** (`tools/mame_trace_dispatch_trampoline.lua`,
+untracked): building trace scripts as a **minimal delta from
+`tools/mame_trace_table_set_third_insn.lua`** (known-good: 7,800 frames in
+~7 seconds) avoided a hang that an equivalent script built from scratch hit
+reliably and unexplainably. Reuse this file's structure; do not rebuild from
+first principles. It also carries a load-bearing fix: `trace <file>,0 ; g`
+**truncates on every hit**, so arming multiple ON triggers on the same trace
+file is destructive — only the last restart before OFF survives. Arm ONE
+candidate at a time.
 
-1. Cold-boot replay to a street wave using the pinned recipe (`-debug`, the
-   script sets `debugger.execution_state = "run"`, byte-for-byte
-   `enemy_actions` input schedule — copy it from
-   `tools/mame_trace_table_set_writer_insn.lua` or the untracked
-   `tools/mame_trace_dispatch_index.lua`). Check `tasklist //FI "IMAGENAME
-   eq mame.exe"`, never a `ps -W` grep.
-2. Dump and disassemble RAM around `0xFF0080–0xFF0140` (the trampoline
-   region implied by `0x00FF00D8`), and breakpoint sub-state dispatcher
-   `0x060532` logging the call chain and registers, to see what wrote the
-   trampoline and what indexes it.
-3. Deliverable: the action-word → action-routine rule, recorded in a tracked
+The probe:
+
+1. Pick one of the 85 idiom sites (`data/avsp_substate_dispatchers.json` or
+   re-scan per `tools/extract_avsp_dispatchers.py`'s documented byte
+   pattern, `+0x06` variant). Set it as `CANDIDATE` in
+   `tools/mame_trace_dispatch_trampoline.lua`, with `0x060532` as the OFF
+   trigger (already wired). Run via the pinned recipe (`-debug -debugger
+   windows`, script sets `debugger.execution_state = "run"`); check
+   `tasklist //FI "IMAGENAME eq mame.exe"` before and after, never a `ps -W`
+   grep.
+2. Grep the resulting `tools_dispatch_trampoline_insn.log` for `060532:` —
+   if present, the candidate's traced chain reached the target and the
+   instructions immediately before it are the real caller. If absent within
+   the frame window, that candidate is not the one (or didn't fire in this
+   window); try the next.
+3. Narrow the search order before brute-forcing all 85: prioritize sites
+   near other known actor-related code (the three `table_set` families, the
+   collision routine at `0x01D25E`) over file order, since the idiom is
+   confirmed generic (one live sample this session landed in
+   interrupt-adjacent code, not an actor) and blind order wastes runs.
+4. Deliverable: the action-word → action-routine rule, recorded in a tracked
    manifest (addresses/rules only, no ROM bytes), falsified offline against
    the stride-1 corpus with zero unexplained mismatches and a control that
    breaks. Extend `tools/extract_avsp_dispatchers.py` or add a sibling; wire
    into `test.ps1`.
 
-If the trampoline turns out to be data-driven from a per-type table, that
-table is the real prize — it is the same structure S5's AI translation will
-walk.
+Whatever indexes the real action dispatch is the same structure S5's AI
+translation will walk — worth getting right rather than fast.
 
 ### Step 2 — reconcile hit/KO/spawn `table_set` (offline, after step 1)
 

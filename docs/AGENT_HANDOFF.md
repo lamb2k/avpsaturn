@@ -1,5 +1,76 @@
 # Agent handoff: native AvP Saturn port
 
+Updated: 2026-08-19 EDT (session paused mid-probe; HEAD unchanged at
+`93c623c`). **The committed dispatch-decode body (below) is complete and
+correct as committed.** This update records a FOLLOW-ON live-probe attempt
+at the caller question it left open, which made real progress on tooling
+but did NOT find the caller. Nothing was committed this session; the only
+change on disk is one new untracked one-off,
+`tools/mame_trace_dispatch_trampoline.lua`, preserved per the untracked-
+diagnostics rule with its findings written into its own header.
+
+## State dispatch: caller trace attempted, harness fixed, caller still open (2026-08-19, later same day)
+
+**Goal:** resolve the one bounded item `93c623c` left open — which
+action-level dispatcher (of the 85 enumerated by the same offline idiom
+scan) is the street alien's, i.e. what actually jumps into the known
+sub-state dispatcher `0x060532`. Two things were learned; neither closes
+the question.
+
+**1. The live-trace harness was broken and is now fixed.** A trace script
+built up from scratch reliably HUNG MAME — the frame counter stalled
+somewhere in the low hundreds to low thousands of frames, every time, with
+no error printed, regardless of what debugger calls it made (confirmed the
+hang persisted even with ZERO debugger interaction — just frame-counting
+input scheduling and a delayed `machine:exit()`). The root cause was never
+isolated by inspection. What worked, immediately and reliably: building the
+new script as a **minimal delta from a script already proven to run** —
+copying `mame_trace_table_set_third_insn.lua` (known to run 7,800 frames in
+~7 seconds) and changing only the exit frame and the installed breakpoints,
+rather than reassembling an equivalent script from first principles. **If a
+future trace script hangs with no error, do not debug it forward — revert
+to the nearest known-working script and re-diff narrowly.** This is now the
+binding recipe addition alongside the existing `-debug`/`-debugger windows`
+/`execution_state="run"` rules.
+
+**2. `trace <file>,0 ; g` TRUNCATES on every hit, not just the first.**
+Confirmed empirically: a test arming all 85 offline-enumerated
+action-dispatcher-idiom sites simultaneously as ON triggers (hoping
+whichever one is the street alien's would naturally trace into `0x060532`)
+produced a log holding only ONE surviving chain — from site `0x09E428`,
+which traced into what reads as an interrupt/exception-return sequence
+(`bra $ddc` into code restoring `A7` from a fixed offset), not an actor
+routine — and the `0x060532` OFF trigger was never reached in that run. The
+earlier segments from any other site that may have fired first were
+destroyed by the truncation. **Do not fan out multiple ON triggers to the
+same trace file** — arm one candidate at a time.
+
+**A real correction, not just a caveat:** the "85 action-level dispatchers"
+count from `93c623c`'s discovery notes should NOT be read as "85 actor
+action tables." The idiom scanned for (`move.b ($6,A6),D0 / move.w
+($6,PC,D0.w),D1 / jmp ($2,PC,D1.w)`) is generic — any A6-relative two-level
+jump table matches it — and this session's one live sample landed in
+interrupt-adjacent code, not actor logic. The 85 sites are candidates, not
+a confirmed actor-dispatch roster.
+
+**Left for the next agent:** `tools/mame_trace_dispatch_trampoline.lua`
+(new, untracked, fully documented) is the fixed, validated harness with a
+`CANDIDATE` placeholder — arm one of the 85 sites at a time (ON) with
+`0x060532` as OFF, across separate short runs (each should take single-digit
+seconds per the validated harness), and check whether that candidate's
+traced chain actually reaches `0x060532`. Narrow the search order by
+proximity to other known actor-related code rather than trying all 85 in
+file order. This is still the correct probe for the still-open question;
+it was not completed, not abandoned.
+
+**No runtime code, docs claims, or tracked files changed by this probe.**
+The dispatch decode body's own claims (`93c623c`) are unaffected and remain
+true: state dispatch is decoded and falsified; the ACTION-level caller
+question was explicitly left open by that body, and remains open now.
+Capability Gate 1 stays `0/7`. No emulator processes left running.
+
+## State dispatch: DECODED and falsified (2026-08-19, committed 93c623c)
+
 Updated: 2026-08-19 EDT (**state dispatch DECODED and falsified**). The
 mechanism that selects which per-state initializer runs — the last item with
 real discovery risk on the critical path — is decoded offline and falsified
