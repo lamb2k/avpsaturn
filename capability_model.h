@@ -99,9 +99,9 @@ typedef struct
     int active;
     int variant;
     CapActorKind kind;
-    /* Step 2/3 ROM-driven street-alien collision view. Filled by main.c's
-     * rom_actor_tick each frame from the decoded animation record and the gated
-     * table_set; consumed by cap_resolve_player_hit to replace the point
+    /* S4 ROM-driven street-alien collision view. Filled by main.c's
+     * rom_actor_prepare each frame from the decoded animation record and the
+     * checked class table_set; consumed by cap_resolve_player_hit to replace the point
      * approximation with the MEASURED hurt box for these slots.
      * rom_street_alien marks the frames for which the ROM path produced a
      * MEASURED verdict - either a resolved hurt box (rom_can_hit 1, extents in

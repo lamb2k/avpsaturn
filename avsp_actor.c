@@ -3,6 +3,9 @@
 #include "avsp_actor.h"
 
 #define OFF_STATE        0x00u
+#define OFF_CLASS_ID     0x02u
+#define OFF_SUB_STATE    0x04u
+#define OFF_ACTION_WORD  0x06u
 #define OFF_TYPE         0x08u
 #define OFF_FACING       0x0Fu
 #define OFF_WORLD_X      0x10u
@@ -57,6 +60,9 @@ int avsp_actor_load(AvspActor *actor, const unsigned char *work, unsigned long a
 
     actor->address     = address;
     actor->state       = p[OFF_STATE];
+    actor->class_id    = p[OFF_CLASS_ID];
+    actor->sub_state   = be16(p + OFF_SUB_STATE);
+    actor->action_word = be16(p + OFF_ACTION_WORD);
     actor->type        = p[OFF_TYPE];
     actor->facing      = p[OFF_FACING];
     actor->world_x     = be16(p + OFF_WORLD_X);

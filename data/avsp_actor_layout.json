@@ -18,6 +18,33 @@
    "meaning": "actor liveness/state; collision requires the value 1 on the defender"
   },
   {
+   "name": "class_id",
+   "offset": "0x02",
+   "width": 1,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "0x01B99A loads +0x02 before indexing the class table at 0x01B9B6",
+   "meaning": "class selector for the master actor-state routine table"
+  },
+  {
+   "name": "sub_state",
+   "offset": "0x04",
+   "width": 2,
+   "signed": false,
+   "evidence": "DECODED",
+   "source": "the decoded per-class dispatchers load word +0x04 before indexing their state tables; the checked street-class targets are recorded in data/avsp_table_set_states.json",
+   "meaning": "per-class sub-state dispatch index"
+  },
+  {
+   "name": "action_word",
+   "offset": "0x06",
+   "width": 2,
+   "signed": false,
+   "evidence": "OBSERVED",
+   "source": "the deterministic street corpus and nested state handlers use +0x06 to distinguish action/lifecycle paths inside a class sub-state",
+   "meaning": "action/state word consumed by nested class logic; its values are class-specific"
+  },
+  {
    "name": "type",
    "offset": "0x08",
    "width": 1,

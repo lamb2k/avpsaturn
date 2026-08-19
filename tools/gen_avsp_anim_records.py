@@ -50,6 +50,14 @@ JUMP_RECORD_BYTES = 20
 SPAN_JOIN_GAP = 8   # runs closer than this are merged rather than split
 
 
+def manifest_path(path: Path) -> str:
+    resolved = path.resolve()
+    try:
+        return str(resolved.relative_to(ROOT)).replace("\\", "/")
+    except ValueError:
+        return str(resolved).replace("\\", "/")
+
+
 def u16(b: bytes, o: int) -> int:
     return (b[o] << 8) | b[o + 1]
 
@@ -72,6 +80,26 @@ def seeds_from_capture(path: Path, rom_len: int) -> set:
                     out.add(rec)
             addr += ACTOR_STRIDE
     return out
+
+
+def seeds_from_capture_range(path: Path, first: int, last: int, rom_len: int) -> tuple[set, str]:
+    out = set()
+    digest = hashlib.sha256()
+    for frame in range(first, last + 1):
+        frame_path = path / f"workram_{frame:05d}.bin"
+        raw = frame_path.read_bytes()
+        if len(raw) != WORKRAM_SIZE:
+            raise ValueError(f"{frame_path}: expected {WORKRAM_SIZE} bytes, got {len(raw)}")
+        digest.update(raw)
+        addr = ACTOR_GRID_ANCHOR
+        while addr + ACTOR_STRIDE <= WORKRAM_FIRST + WORKRAM_SIZE:
+            o = addr - WORKRAM_FIRST
+            if raw[o] != 0:
+                rec = int.from_bytes(raw[o + 0x1C:o + 0x20], "big")
+                if 0 < rec and rec + JUMP_RECORD_BYTES <= rom_len:
+                    out.add(rec)
+            addr += ACTOR_STRIDE
+    return out, digest.hexdigest()
 
 
 def walk(rom: bytes, seeds: set) -> dict:
@@ -134,10 +162,10 @@ def emit_header(rom: bytes, spans: list, path: Path) -> None:
     lines.append("#endif /* AVSP_ANIM_RECORDS_H */")
     lines.append("")
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines))
+    path.write_text("\n".join(lines), encoding="ascii", newline="\n")
 
 
-def build(rom_path: Path, captures: list) -> tuple:
+def build(rom_path: Path, captures: list, capture_ranges: list) -> tuple:
     rom = rom_path.read_bytes()
     seeds = set()
     capture_info = []
@@ -146,8 +174,17 @@ def build(rom_path: Path, captures: list) -> tuple:
         s = seeds_from_capture(p, len(rom))
         seeds |= s
         capture_info.append({
-            "path": str(p).replace("\\", "/"),
+            "path": manifest_path(p),
             "sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
+            "distinct_seed_pointers": len(s),
+        })
+    for path, first, last in capture_ranges:
+        s, digest = seeds_from_capture_range(path, first, last, len(rom))
+        seeds |= s
+        capture_info.append({
+            "path": manifest_path(path),
+            "frame_range": {"first": first, "last": last},
+            "sha256_concatenated_workram": digest,
             "distinct_seed_pointers": len(s),
         })
     sizes = walk(rom, seeds)
@@ -160,7 +197,7 @@ def build(rom_path: Path, captures: list) -> tuple:
         "evidence": "DECODED",
         "inputs": {
             "program_image": {
-                "path": str(rom_path).replace("\\", "/"),
+                "path": manifest_path(rom_path),
                 "sha256": hashlib.sha256(rom).hexdigest(),
                 "bytes": len(rom),
             },
@@ -183,16 +220,23 @@ def main() -> int:
     ap.add_argument("--rom", required=True)
     ap.add_argument("--capture", required=True, action="append",
                     help="work-RAM capture supplying seed pointers; repeatable")
+    ap.add_argument("--capture-dir-range", action="append", default=[],
+                    help="directory:first:last for per-frame workram_NNNNN.bin seeds")
     ap.add_argument("--header", default=str(HEADER_DEFAULT))
     ap.add_argument("--manifest", default=str(MANIFEST_DEFAULT))
     ap.add_argument("--verify-deterministic", action="store_true")
     args = ap.parse_args()
 
-    rom, spans, manifest = build(Path(args.rom), args.capture)
+    capture_ranges = []
+    for spec in args.capture_dir_range:
+        path_text, first_text, last_text = spec.rsplit(":", 2)
+        capture_ranges.append((Path(path_text), int(first_text), int(last_text)))
+
+    rom, spans, manifest = build(Path(args.rom), args.capture, capture_ranges)
     text = json.dumps(manifest, indent=1, sort_keys=True) + "\n"
 
     if args.verify_deterministic:
-        _, spans2, manifest2 = build(Path(args.rom), args.capture)
+        _, spans2, manifest2 = build(Path(args.rom), args.capture, capture_ranges)
         again = json.dumps(manifest2, indent=1, sort_keys=True) + "\n"
         if again != text or spans2 != spans:
             print("NON-DETERMINISTIC: two extractions differ")
@@ -202,7 +246,7 @@ def main() -> int:
     emit_header(rom, spans, Path(args.header))
     out = Path(args.manifest)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(text)
+    out.write_text(text, encoding="utf-8", newline="\n")
     print("wrote %s" % args.header)
     print("wrote %s (sha256=%s)" % (out, hashlib.sha256(text.encode()).hexdigest()))
     print("records=%d spans=%d bytes=%d (%.1f KB)" % (

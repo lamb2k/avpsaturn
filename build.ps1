@@ -67,6 +67,28 @@ try {
     $env:PATH = "$utilities;$(Join-Path $resolvedEngine 'Compiler\WINDOWS\bin');$previousPath"
     Push-Location $projectRoot
     try {
+        & $PythonPath (Join-Path $projectRoot 'tools\gen_avsp_table_set_classes.py')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Class-to-table-set lookup generation failed with exit code $LASTEXITCODE."
+        }
+        $animRom = Join-Path $projectRoot '.deps\mame\actorprobe\decrypted_program_2m.bin'
+        $animCaptureA = Join-Path $projectRoot '.deps\mame\collision_probe\workram.bin'
+        $animCaptureB = Join-Path $projectRoot '.deps\mame\collision_probe_boss\workram.bin'
+        $animAnchorRoot = Join-Path $projectRoot '.deps\mame\enemy_actions'
+        if ((Test-Path -LiteralPath $animRom) -and
+            (Test-Path -LiteralPath $animCaptureA) -and
+            (Test-Path -LiteralPath $animCaptureB) -and
+            (Test-Path -LiteralPath (Join-Path $animAnchorRoot 'workram_05191.bin')) -and
+            (Test-Path -LiteralPath (Join-Path $animAnchorRoot 'workram_05469.bin'))) {
+            & $PythonPath (Join-Path $projectRoot 'tools\gen_avsp_anim_records.py') `
+                '--rom' $animRom '--capture' $animCaptureA '--capture' $animCaptureB `
+                '--capture-dir-range' "$animAnchorRoot`:5191`:5226" `
+                '--capture-dir-range' "$animAnchorRoot`:5330`:5469" `
+                '--verify-deterministic'
+            if ($LASTEXITCODE -ne 0) {
+                throw "Animation-record extraction failed with exit code $LASTEXITCODE."
+            }
+        }
         if (-not $SkipHostTests) {
             & '.\test.ps1' -PythonPath $PythonPath
             if ($LASTEXITCODE -ne 0) {

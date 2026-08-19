@@ -1476,6 +1476,7 @@ static void apply_confirm_shutter(void)
 static AvspAnimScript rom_actor_script;
 static AvspRomView rom_actor_view;
 static AvspAnimFrame rom_actor_frames[CAP_MAX_ENEMIES];
+static AvspActor rom_actor_collision_views[CAP_MAX_ENEMIES];
 static unsigned char rom_actor_seeded[CAP_MAX_ENEMIES];
 static int rom_actor_last_actions[CAP_MAX_ENEMIES];
 static AvspObjectEntry rom_actor_entries_all[CAP_MAX_ENEMIES][16];
@@ -1499,8 +1500,14 @@ static volatile int rom_collision_no_hurt;
 static volatile int rom_collision_no_hurt_frame;
 static volatile int rom_collision_gap;
 static volatile int rom_collision_gap_frame;
+static volatile int rom_class_lookup_miss;
+static volatile int rom_class_lookup_miss_frame;
 
-static void rom_actor_tick(void)
+/* Resolve the record, emitted objects and collision view that BOTH gameplay
+ * and rendering consume this frame. Animation advancement is deliberately in
+ * rom_actor_advance() after draw_world(), so collision and pixels cannot see
+ * adjacent records. */
+static void rom_actor_prepare(void)
 {
     int index;
     AvspEmitActor state;
@@ -1508,11 +1515,13 @@ static void rom_actor_tick(void)
     rom_actor_entry_count = 0;
     rom_collision_no_hurt_frame = 0;
     rom_collision_gap_frame = 0;
+    rom_class_lookup_miss_frame = 0;
     /* The ROM collision view is valid only for ROM-driven street aliens in the
      * two street-wave states; zero it for every slot each frame so the point
      * approximation applies everywhere else (capture-cel actors, boss, etc.). */
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
     {
+        memset(&rom_actor_collision_views[index], 0, sizeof(AvspActor));
         world.enemies[index].rom_street_alien = 0;
         world.enemies[index].rom_can_hit = 0;
         world.enemies[index].rom_box_x_lo = 0;
@@ -1578,11 +1587,6 @@ static void rom_actor_tick(void)
             rom_actor_seeded[index] = 1;
             rom_actor_last_actions[index] = (int)enemy->action;
         }
-        else
-        {
-            avsp_anim_frame_tick(&rom_actor_frames[index],
-                                 &rom_actor_script);
-        }
         if (!rom_actor_frames[index].pose.valid) continue;
         /* ADAPTED coordinate bridge: model-space camera as the anchor pair
          * so decoded X approximates screen position. */
@@ -1601,27 +1605,44 @@ static void rom_actor_tick(void)
         if (rom_actor_entry_counts[index] > 0 && rom_actor_entry_count == 0)
             rom_actor_entries[0] = rom_actor_entries_all[index][0];
         rom_actor_entry_count += rom_actor_entry_counts[index];
-        /* Step 2: the DEFENDER's MEASURED hurt box. sel_hurt is the live
+        /* S4: the DEFENDER's MEASURED hurt box. sel_hurt is the live
          * animation record's byte +8 (byte +9, sel_attack, is the attacker
          * side and is deferred - the player has no ROM record yet). The X
          * centre is resolved in the same ADAPTED model-space world_x/facing
          * the emitter above used, so it is comparable to the player's reach in
-         * cap_resolve_player_hit. This view lags the model step by one frame
-         * (rom_actor_tick runs after cap_world_step). */
+         * cap_resolve_player_hit. The canonical AvspActor below is also the
+         * single source for record, selectors and collision table this frame. */
         {
             const unsigned char *rec = avsp_anim_resolve(&rom_actor_script,
                                                          rom_actor_frames[index].addr,
                                                          10);
-            /* table_set: MEASURED constant, not ADAPTED. Proven safe for the
-             * street walk/attack spans by the Step 1 offline gate (data/
-             * avsp_table_set_gate.json) and the live instruction trace (data/
-             * avsp_table_set_source.json): the game stores this immediate in
-             * the street alien's per-state initializers. MUST be revisited when
-             * hit/KO/spawn join the ROM path - their per-state initializers may
-             * carry a different constant. */
-            const unsigned long street_table_set = 0x00130AC8uL;
             unsigned char sel_hurt = (rec != 0) ? rec[8] : 0u;
+            unsigned char sel_attack = (rec != 0) ? rec[9] : 0u;
+            AvspActor *view = &rom_actor_collision_views[index];
             AvspBox hurt;
+
+            /* Class 0x1F is assigned only on this validated street-alien path.
+             * The approximate model does not produce source sub_state or
+             * action_word values, so those remain zero/unresolved rather than
+             * fabricating class 0x00/0x06 transitions. */
+            view->state = 1u;
+            view->class_id = 0x1Fu;
+            view->type = 0x0Cu;
+            view->facing = state.facing;
+            view->world_x = state.world_x;
+            view->world_y = state.world_y;
+            view->world_z = (unsigned short)enemy->lane;
+            view->anim_record = (unsigned long)rom_actor_frames[index].addr;
+            view->sel_hurt = sel_hurt;
+            view->sel_attack = sel_attack;
+            if (!avsp_table_set_for_class(view->class_id, &view->table_set))
+            {
+                ++rom_class_lookup_miss;
+                ++rom_class_lookup_miss_frame;
+                ++rom_collision_gap;
+                ++rom_collision_gap_frame;
+                continue;
+            }
             /* rom_street_alien is set ONLY where this frame produced a measured
              * verdict, so cap_resolve_player_hit leaves every other frame on the
              * ADAPTED approximation rather than on an invented invulnerability. */
@@ -1635,7 +1656,7 @@ static void rom_actor_tick(void)
                 ++rom_collision_no_hurt_frame;
             }
             else if (rec != 0 &&
-                     avsp_collision_hurt_box(street_table_set, sel_hurt, &hurt))
+                     avsp_collision_hurt_box(view->table_set, sel_hurt, &hurt))
             {
                 int center = (int)state.world_x +
                              (state.facing ? -(int)hurt.x_center
@@ -1649,12 +1670,33 @@ static void rom_actor_tick(void)
             {
                 /* Unresolvable record, or a selector the decoded family cannot
                  * resolve: a DATA GAP, not a cannot-hit pose. It must not occur
-                 * for the gated street constant, so it stays on the ADAPTED
+                 * for the checked street class, so it stays on the ADAPTED
                  * approximation and is counted where it can be seen. */
                 ++rom_collision_gap;
                 ++rom_collision_gap_frame;
             }
         }
+    }
+}
+
+/* Advance exactly once after the prepared record has been rendered. If the
+ * approximate model changed action during cap_world_step(), discard the old
+ * program instead; the next frame starts the newly selected ADAPTED seed. */
+static void rom_actor_advance(void)
+{
+    int index;
+
+    for (index = 0; index < CAP_MAX_ENEMIES; ++index)
+    {
+        if (!rom_actor_seeded[index]) continue;
+        if (!world.enemies[index].active ||
+            world.enemies[index].kind != CAP_ACTOR_ALIEN ||
+            (int)world.enemies[index].action != rom_actor_last_actions[index])
+        {
+            rom_actor_seeded[index] = 0;
+            continue;
+        }
+        avsp_anim_frame_tick(&rom_actor_frames[index], &rom_actor_script);
     }
 }
 
@@ -1764,7 +1806,7 @@ static int fit_352(const int cps_x)
 static void draw_rom_actor_tiles(const CapActor *actor, const int slot)
 {
     /* ADAPTED placement bridge: the emitter ran with model-space anchors
-       (rom_actor_tick), so entries are positioned as offsets from the
+       (rom_actor_prepare), so entries are positioned as offsets from the
        decoded origin and re-anchored at the actor's model screen position;
        exact CPS2 anchor alignment lands with S5's world-space translation.
        The cel pivot convention (pixel 184 of a 192px cel drawn centred at
@@ -2139,6 +2181,9 @@ static void frame_callback(void)
         boss->active = 1;
     }
 #endif
+    /* Prepare one canonical ROM record before gameplay. cap_world_step() and
+     * draw_world() therefore consume the same collision/render frame. */
+    rom_actor_prepare();
     clip_request = cap_world_step(&world, &input);
     /* Start permanently leaves the title scene. Reuse its 78,848-byte RAM
        block for the 64,118-byte Stalker archive before character confirmation
@@ -2439,7 +2484,6 @@ static void frame_callback(void)
     jo_printf(0, 0, "ST %d T %d F %d   ",
               (int)world.encounter_state, (int)world.encounter_timer,
               (int)world.frame);
-    rom_actor_tick();
     /* Rows 24/25: draw_hud() runs after this and rewrites rows 0-7, so a
      * diagnostic printed on row 2 was overwritten in the same frame - it could
      * never be read back. These two rows are clear of every overlay. */
@@ -2449,12 +2493,14 @@ static void frame_callback(void)
                   rom_actor_entry_count, rom_actor_entries[0].code,
                   tile_diag_no_bank, tile_diag_no_rank, tile_diag_no_sprite,
                   tile_pool_used);
-        jo_printf(0, 25, "COLL NH %d/%d GAP %d/%d HIT r%d/a%d    ",
+        jo_printf(0, 25, "COLL N%d/%d G%d/%d C%d/%d H%d/%d    ",
                   rom_collision_no_hurt_frame, rom_collision_no_hurt,
                   rom_collision_gap_frame, rom_collision_gap,
+                  rom_class_lookup_miss_frame, rom_class_lookup_miss,
                   cap_rom_box_hits, cap_approx_hits);
     }
     draw_world();
+    rom_actor_advance();
     draw_arcade_hud();
     draw_route_overlay();
     draw_hud();

@@ -37,6 +37,33 @@ if ($LASTEXITCODE -ne 0) {
     throw "Boss animation script generation failed with exit code $LASTEXITCODE."
 }
 
+& $PythonPath (Join-Path $PSScriptRoot 'tools\gen_avsp_table_set_classes.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Class-to-table-set lookup generation failed with exit code $LASTEXITCODE."
+}
+
+$animRom = Join-Path $PSScriptRoot '.deps\mame\actorprobe\decrypted_program_2m.bin'
+$animCaptureA = Join-Path $PSScriptRoot '.deps\mame\collision_probe\workram.bin'
+$animCaptureB = Join-Path $PSScriptRoot '.deps\mame\collision_probe_boss\workram.bin'
+$animAnchorRoot = Join-Path $PSScriptRoot '.deps\mame\enemy_actions'
+if ((Test-Path -LiteralPath $animRom) -and
+    (Test-Path -LiteralPath $animCaptureA) -and
+    (Test-Path -LiteralPath $animCaptureB) -and
+    (Test-Path -LiteralPath (Join-Path $animAnchorRoot 'workram_05191.bin')) -and
+    (Test-Path -LiteralPath (Join-Path $animAnchorRoot 'workram_05469.bin'))) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tools\gen_avsp_anim_records.py') `
+        '--rom' $animRom '--capture' $animCaptureA '--capture' $animCaptureB `
+        '--capture-dir-range' "$animAnchorRoot`:5191`:5226" `
+        '--capture-dir-range' "$animAnchorRoot`:5330`:5469" `
+        '--verify-deterministic'
+    if ($LASTEXITCODE -ne 0) {
+        throw "Animation-record extraction failed with exit code $LASTEXITCODE."
+    }
+}
+else {
+    Write-Host 'Animation-record extraction skipped: private inputs are incomplete.'
+}
+
 $wsl = Get-Command 'wsl.exe' -ErrorAction SilentlyContinue
 if (-not $wsl) {
     throw 'WSL with GCC is required for the strict host-side gameplay-model test.'
@@ -70,7 +97,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "Actor-spine / collision-port test failed with exit code $LASTEXITCODE."
 }
 
-# Step 4: the RUNTIME's input-assembly path (gated constant table_set +
+# S4 runtime input-assembly path (checked class table_set +
 # span-view selectors) must reproduce the S1 known contact set over the same
 # captures. The new assertion is that the runtime path - not just the library -
 # assembles identical inputs (check A, zero mismatches, non-vacuous) and the
@@ -100,6 +127,15 @@ $walkCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror 
 & $wsl.Source sh '-lc' $walkCommand
 if ($LASTEXITCODE -ne 0) {
     throw "Animation-walk test failed with exit code $LASTEXITCODE."
+}
+
+# S4 HIT/KO anchor replay. GAP_EXTERNAL_REPOINT is a measured, accepted result:
+# it keeps those actions on the ADAPTED fallback and identifies the class 0x1F
+# animation-pointer writer as an S5 translation dependency. The tool fails only
+# for malformed evidence or missing shipped record coverage; private inputs skip.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\verify_avsp_anchor_anim_replay.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "HIT/KO animation-record replay check failed with exit code $LASTEXITCODE."
 }
 
 # The complete ROM-to-object emission pipeline (pose assembly -> selector ->

@@ -3,6 +3,23 @@
 
 #include "avsp_collision.h"
 #include "generated/avsp_collision.h"
+#include "generated/avsp_table_set_classes.h"
+
+int avsp_table_set_for_class(unsigned char class_id, unsigned long *out)
+{
+    unsigned short i;
+
+    if (out == 0) {
+        return 0;
+    }
+    for (i = 0; i < avsp_class_table_set_count; ++i) {
+        if (avsp_class_table_sets[i].class_id == class_id) {
+            *out = avsp_class_table_sets[i].table_set;
+            return 1;
+        }
+    }
+    return 0;
+}
 
 static const avsp_collision_family *find_family(unsigned long table_set)
 {

@@ -38,6 +38,10 @@ typedef struct {
 int avsp_collision_hurt_box(unsigned long table_set, unsigned char selector, AvspBox *out);
 int avsp_collision_attack_box(unsigned long table_set, unsigned char selector, AvspAttackBox *out);
 
+/* Resolve the collision table-set constant established by the checked
+ * class-entry initializer evidence. Returns 0 for an unknown class. */
+int avsp_table_set_for_class(unsigned char class_id, unsigned long *out);
+
 /* The game's overlap test. Returns 1 when the attacker's active attack box
  * overlaps the defender's active hurt box, and writes the attack record's hit
  * value to *hit_value when non-null. Returns 0 otherwise, including when either

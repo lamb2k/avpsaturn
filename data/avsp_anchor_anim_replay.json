@@ -1,0 +1,76 @@
+{
+ "classification": "host animation-record replay check - addresses and counts only",
+ "clips": {
+  "hit": {
+   "actual_record_histogram": {
+    "0x0012D2F8": 3,
+    "0x0012DD50": 33
+   },
+   "entry_record": "0x0012DD50",
+   "first_mismatch": {
+    "actual_record": "0x0012D2F8",
+    "frame": 5224,
+    "predicted_record": "0x0012DD50"
+   },
+   "frame": {
+    "count": 36,
+    "end": 5226,
+    "start": 5191
+   },
+   "mismatches": 3,
+   "observed_records": [
+    "0x0012D2F8",
+    "0x0012DD50"
+   ],
+   "observed_records_in_shipped_spans": 2,
+   "result": "GAP_EXTERNAL_REPOINT"
+  },
+  "ko": {
+   "actual_record_histogram": {
+    "0x0012E214": 13,
+    "0x0012E224": 2,
+    "0x0012E234": 5,
+    "0x0012E244": 7,
+    "0x0012E254": 49,
+    "0x0012E268": 64
+   },
+   "entry_record": "0x0012E214",
+   "first_mismatch": {
+    "actual_record": "0x0012E214",
+    "frame": 5331,
+    "predicted_record": "0x0012E224"
+   },
+   "frame": {
+    "count": 140,
+    "end": 5469,
+    "start": 5330
+   },
+   "mismatches": 90,
+   "observed_records": [
+    "0x0012E214",
+    "0x0012E224",
+    "0x0012E234",
+    "0x0012E244",
+    "0x0012E254",
+    "0x0012E268"
+   ],
+   "observed_records_in_shipped_spans": 6,
+   "result": "GAP_EXTERNAL_REPOINT"
+  }
+ },
+ "inputs": {
+  "animation_spans": {
+   "path": "data/avsp_anim_records.json",
+   "sha256": "b404f61a03f2d8422d04d0b50317ac7d06d1312ddbf58b9fd48f2caa1c0a8397"
+  },
+  "capture_route": ".deps/mame/enemy_actions",
+  "program_image": {
+   "path": ".deps/mame/actorprobe/decrypted_program_2m.bin",
+   "sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9"
+  }
+ },
+ "method": "seed once from the anchor entry record, render it, then apply only record duration and explicit jump control flow once per frame",
+ "result": "GAP_EXTERNAL_REPOINT",
+ "runtime_decision": "preserve ADAPTED HIT/KO fallback and count GAP until the class 0x1F state routine's animation-pointer writes are translated",
+ "schema": 1
+}

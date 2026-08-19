@@ -27,6 +27,9 @@
 typedef struct {
     unsigned long  address;      /* work-RAM address this record was read from */
     unsigned char  state;        /* +0x00 */
+    unsigned char  class_id;     /* +0x02 */
+    unsigned short sub_state;    /* +0x04 */
+    unsigned short action_word;  /* +0x06 */
     unsigned char  type;         /* +0x08 */
     unsigned char  facing;       /* +0x0F */
     unsigned short world_x;      /* +0x10 */

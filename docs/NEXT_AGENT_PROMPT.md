@@ -1,113 +1,111 @@
-# Next agent prompt: bounded S4 class/table-set and HIT/KO integration
+# Next agent prompt: real ROM-derived frontend
 
 ## Scope lock
 
-Execute only the bounded S4 body below. Do not start the frontend, S5 AI,
-stage traversal, remaining cast conversion, or physical-hardware claims in the
-same checkpoint.
+Implement the real title and character-select path from original AvP ROM data.
+Do not begin S5 enemy AI, stage traversal, remaining-cast conversion, attract
+mode, or physical-hardware claims in this checkpoint.
 
-Read the repository startup documents in the order required by `AGENTS.md`.
-The newest handoff section, "Per-class table_set evidence", supersedes older
-caller-search and broad HIT/KO-population language.
+Read `AGENTS.md`, this handoff's newest section, `docs/PARITY_PLAN.md`,
+`docs/TEST_PLAN.md`, and `docs/HARDWARE_TEST.md` in that order. Verify branch,
+HEAD and worktree before relying on the handoff.
 
-## Established evidence — do not re-derive
+## Baseline already proven — do not re-derive
 
-- Master actor dispatch: `0x01B980` indexes the 43-entry table at `0x01B9B6`
-  with actor class byte `+0x02`.
-- Per-class constants, checked offline and cross-matched to live instruction
-  traces:
-  - `0x00 -> 0x0012CE5C`
-  - `0x06 -> 0x0013E97A`
-  - `0x1F -> 0x00130AC8`
-- Exact semantic anchors: HIT `5191..5226` is 36/36; KO `5330..5469` is
-  140/140; both remain class `0x1F` with zero constant mismatches.
-- Broader matches are record-signature populations only: 240
-  `hit_anchor_record_signature` frames and 564
-  `ko_anchor_record_signature` frames. Do not call them semantic HIT/KO.
-- Corpus result: 25,104 active street actor-frames, zero per-class constant
-  mismatches. Each class has a working corrupted-constant control.
-- The current runtime drives only street WALK/ATTACK through ROM animation and
-  uses one hardcoded `0x00130AC8`. HIT/KO/spawn remain counted `GAP` frames.
-- The current defender hurt box is ROM-derived, but player attack reach and
-  lane geometry remain ADAPTED. S4 is not complete.
+- The bounded S4 body is complete: canonical actor fields and generated class
+  lookup are live, collision and rendering share one record, and HIT/KO remain
+  counted GAP because host replay proved external state writers are required.
+- `data/frontend_rom_composition.json` is the structural source of truth. It
+  was generated from CPS layer/object/palette state, not screenshots.
+- Measured live palette demand:
+  - title frame 1620: 19 total banks;
+  - select frames 1760/1790: 17 total banks;
+  - Round 1 title frame 2100: 32 total banks.
+- Character select is primarily three CPS tilemap layers. Its only settled
+  sprite objects are the two-object 1P marker. The 1700 plate slide and 1900
+  confirm are 360-object transient bursts; do not bake them into a background.
+- Saturn output is 352x224. Preserve the established 384-to-352 full-width
+  mapping with all 224 lines; do not crop, stretch vertically, or add black
+  bars.
+- Existing `MENUFIT.BIN`, `CHARFIT.BIN` and capture-derived sequence surfaces
+  are regression oracles only. New runtime frontend content must come from ROM
+  tables/assets.
 
 ## Required implementation
 
-### 1. Canonical actor fields and generated lookup
+### 1. CRAM feasibility check first
 
-- Add `class_id` (`+0x02`), `sub_state` (`+0x04`), and `action_word`
-  (`+0x06`, big-endian) to `AvspActor`.
-- Extend `avsp_actor_load()` and the actor-layout host test with field-for-field
-  corpus equality.
-- Generate a copyright-safe class-to-`table_set` header from
-  `data/avsp_table_set_states.json`; do not duplicate the three constants by
-  hand in runtime source.
-- Expose `int avsp_table_set_for_class(unsigned char class_id,
-  unsigned long *out)` and test all three values plus an unknown-class failure.
+- Inventory the current VDP2/VDP1 CRAM mode and all banks reserved by Jo Engine,
+  fonts, frontend layers, cursor and combat.
+- Model a frontend-only window of 32 16-colour banks / 512 colours.
+- For each screen boundary, densely remap the CPS banks actually live on that
+  screen into the frontend window. Emit a deterministic source-bank to Saturn-
+  bank manifest.
+- Rewrite converted VDP2 pattern-name palette indices and VDP1 cursor palette
+  indices through the same mapping.
+- Reload the mapping only at screen boundaries. Release or reassign it before
+  combat. Perform every required disc read before CDDA playback begins.
+- Add a host check that fails on overflow, an unmapped live bank, bank aliasing,
+  or a pattern/object referring to a bank outside its screen mapping.
+- If the active Saturn CRAM mode cannot expose 32 simultaneous 16-colour banks,
+  implement the affected layer as 8bpp VDP2. Do not merge colours, discard a
+  bank, or lower fidelity silently.
 
-### 2. One canonical runtime collision view per enemy
+### 2. ROM tilemap conversion
 
-- Maintain an `AvspActor` collision view for every native enemy slot.
-- Populate its animation record from `AvspAnimFrame.addr`, selectors from that
-  ROM record, facing/world coordinates from the existing native model, and
-  `table_set` through `avsp_table_set_for_class()`.
-- The approximate capability model does not produce real CPS2 class
-  transitions yet. Assign class `0x1F` only to the already validated street
-  WALK/ATTACK route and any HIT/KO anchor program that passes the replay check
-  below. Do not synthesize class `0x00` or `0x06` transitions.
-- Count unknown class, missing animation record, unknown collision family, and
-  out-of-range selector as `GAP`. Selector zero remains the measured
-  cannot-be-hurt verdict.
+- Reuse the existing CPS graphics/tilemap decoders and the exact bases/registers
+  recorded in `data/frontend_rom_composition.json`.
+- Convert title and character-select tilemaps into native VDP2 assets while
+  retaining layer order, transparency, scroll offsets, palette references and
+  352x224 geometry.
+- Keep generated tile/palette bytes ignored. Track only code, deterministic
+  manifests, hashes, dimensions, source addresses and counts.
+- Render the title and settled select compositions without using captured
+  `MENUFIT.BIN`/`CHARFIT.BIN` pixels. Keep the old surfaces available only to an
+  offline pixel comparison.
 
-### 3. HIT/KO record replay check before runtime enablement
+### 3. Live selection objects and state
 
-- Extend the sparse animation span generator to include every exact-anchor
-  HIT/KO animation record plus reachable control records from the ROM.
-- Identify a ROM program entry point and use the existing interpreter; do not
-  create a captured per-frame record-pointer table.
-- Add a host replay comparing the interpreter's animation-record pointer on
-  every exact anchor frame.
-- If either trajectory is not exact, leave that action on the counted ADAPTED
-  fallback and record the first mismatch. The state routine that rewrites
-  `+0x1C` then becomes an explicit S5 target.
-- Enable ROM HIT or KO only when its replay has zero pointer mismatches. Retire
-  `GAP` only on frames whose class, record, selector, family, and decoded hurt
-  entry are all measured.
+- Decode and render the 1P marker as live VDP1 objects from ROM-derived object
+  data. It must move; no cursor pixels may be baked into a VDP2 layer.
+- Implement controller movement over the actual supported character choices,
+  including boundary/wrap behavior measured from the source route.
+- Maintain explicit selected-character state. Implement confirm and cancel,
+  and pass the selection into the gameplay initializer rather than always
+  choosing the current predetermined character.
+- Preserve the measured confirm shutter timing/geometry. The shutter may keep
+  its current native implementation if its output still matches the oracle.
+- Do not implement attract mode in this body.
 
-### 4. Same-frame collision ordering
+### 4. Required validation
 
-Split the current combined tick so each frame does this once:
+Run in order:
 
-1. resolve the current ROM animation record and collision view;
-2. run `cap_world_step()` against that view;
-3. render from the same record;
-4. advance the animation driver once for the next frame.
+1. Palette-map, tilemap-conversion, cursor-state and selection-state host tests.
+2. Deterministic regeneration twice; require byte-identical manifests/hashes.
+3. Full `test.ps1`.
+4. Focused Saturn frontend build and ISO-member hash verification.
+5. Live normal-release boot: title waits indefinitely, Start reaches select,
+   D-pad visibly changes the live cursor/selection, cancel returns correctly,
+   confirm preserves the shutter and propagates the chosen state.
+6. Capture title, settled select, cursor positions, confirm transition and
+   Round 1 title at 352x224; compare against the established oracles with crop,
+   palette and layer-order differences reported separately.
+7. Re-run `-EncounterTest` through `COMPLETE` to prove frontend resource loads
+   did not break combat memory, CD ownership or the cumulative route.
+8. Final `-Clean -Release` title/menu boot.
 
-Do not retain the documented one-frame collision lag and do not tick animation
-from both collision and rendering paths.
-
-## Required checks
-
-1. Actor field equality, class lookup, anchor replay, and runtime collision
-   host tests.
-2. Full `test.ps1`.
-3. Focused Saturn build plus ISO-member size/hash verification.
-4. `-EncounterTest` through `COMPLETE`.
-5. Live readback of `runtime_ready`, lookup misses, selector-zero, `GAP`, and
-   ROM-versus-approximate hit counters.
-6. Final `-Clean -Release` title/menu boot.
-
-Keep every fallback visible and counted. This body may reduce `GAP`; it cannot
-close S4 while player attack boxes, post-hit routines, projectile/broadcast
-paths, inferred boss/Stalker collision, and stage collision remain open.
+An approximate visual mock-up is not an exit result. If CRAM, VDP2 format or
+disc-lifetime evidence blocks a faithful implementation, stop at a clean
+measured checkpoint and record the exact blocker instead of restoring a
+capture-derived runtime surface.
 
 ## Repository safety
 
-- Stay on `codex/avp-master-plan`.
+- Stay on `codex/avp-master-plan`; no remote publication.
 - Preserve all unrelated untracked diagnostics.
-- Stage explicit paths only; never use `git add .`, `git add -A`, broad stash,
-  reset, clean, or destructive checkout.
-- Never commit ROMs, raw captures, logs, generated copyrighted graphics, build
-  output, emulator state, or disc images.
-- Update `docs/AGENT_HANDOFF.md` newest-first and leave no emulator process
-  running before stopping.
+- Stage explicit paths only; never broad-add, reset, clean or stash.
+- Never commit ROMs, raw captures, generated copyrighted graphics/audio,
+  emulator state, logs, ISO/cue/WAV output, or private disassembly bytes.
+- Update `docs/AGENT_HANDOFF.md` newest-first and stop all emulator/MAME
+  processes before handing off.

@@ -125,7 +125,7 @@ evidence and the exact reproduction command.
 | # | Gate 1 condition | Status | Current evidence and remaining work |
 |---|---|---|---|
 | 1 | Animation from ROM scripts at runtime | **OPEN — street ROM renderer live; full-cast selection incomplete** | Every active street alien in the two wave states now walks/ticks a real ROM animation record, emits the decoded CPS2 object list, and renders through the cartridge-resident 4bpp VDP1 tile path. The Chrysalis composition slice also reproduces its validated poses from ROM tiles. These are mechanism proofs, not parity closure: street action-to-program seeding and world anchors remain ADAPTED; HIT/KO/spawn, the player, Stalkers, and boss pose selection still depend on capture-derived decisions or archives. The full-cast tile set also needs additional PCM phase loading before it fits. **Remaining:** prove ROM record trajectories, finish player/tag-0 and full-cast runtime selection/emission, and retire every capture-derived pose decision. |
-| 2 | Collision from the game's hitboxes | **OPEN — street defender path partially live** | The game's selectors, table families, three-axis overlap predicate, and guards are decoded and corpus-falsified. The native street WALK/ATTACK path now resolves the defender hurt box from the live ROM record and records `HITS rom=8 approx=0` on the deterministic encounter route; missing records stay on a counted ADAPTED fallback. Per-class `table_set` provenance is resolved for classes `0x00`, `0x06`, and `0x1F` over 25,104 active street frames with zero mismatches, but runtime wiring of the generated class map is still pending. The player attacker reach/lane test, HIT/KO record trajectories, post-hit routines, projectile/broadcast paths, boss/Stalker schedules, and stage collision remain approximate or missing. |
+| 2 | Collision from the game's hitboxes | **OPEN — street defender path partially live** | The game's selectors, table families, three-axis overlap predicate, and guards are decoded and corpus-falsified. The native street WALK/ATTACK path resolves the defender hurt box from the same ROM record used for rendering; the generated class map is live with zero lookup misses on the complete encounter route. HIT/KO replay proves external `+0x1C` writers are still required, so those frames remain counted `GAP` rather than guessed. Live completion reads `HITS rom=8 approx=6`, lookup misses 0, selector-zero 0, GAP 120. The player attacker reach/lane test, HIT/KO state writers, post-hit routines, projectile/broadcast paths, boss/Stalker schedules, and stage collision remain approximate or missing. |
 | 3 | Enemy behaviour from translated 68000 routines | **OPEN** | Stock watchpoints located animation/action/state writers. `cap_update_enemy()` remains hand-authored, no required AI path is translated, and PRNG use is not identified or recorded. |
 | 4 | Spawns, camera and triggers from stage tables | **OPEN** | The current lifecycle, waves, camera and room transitions are capture-derived constants and authored C. Round 1 stage tables have not been located, extracted or consumed by the runtime. |
 | 5 | Pixel and event-level validation | **OPEN — pixel groundwork proven** | The format-isolating pose check passes 28/28 (29 oracle poses) with zero differing pixels using captured screen geometry, in both default and self-contained modes. The independent position audit has a scoped pass on 408/408 geometry frames: 1,435/1,443 parts directly exact, 0 at sibling-origin deltas (the shared-code-set ambiguity is resolved by the actor-slot record pointer at frame f−1), 8 at a formally bounded `y=-4` whole-pose settle trail (the only non-zero residual in the scope; the one-step trail's exact writer is not yet disassembled), 0 frames unmatched, X 1,443/1,443 exact. Because the pose check requires every listed assembly to 0-diff an oracle, only the 28 assemblies with a captured-pose oracle are listed; the 5 decoded mid-attack/at-rest trace assemblies are excluded and reported in `excluded_no_oracle_assemblies`, not pixel-verifiable. A MAME-vs-native event parity harness is still missing. |
@@ -142,10 +142,10 @@ This is the current Capability Gate 1 order of work. It supersedes older resume
 lists in the handoff and refines the broad phases below. The order was rebuilt
 around the actor spine on 2026-08-18; the rationale and the current step table
 follow. **S1 is passed. S2 Bodies D/E are live for the street path, the enemy
-emission-family surface is corpus-proven, and S4 has a partial defender-side
-runtime consumer. The immediate body is the bounded class/table-set and HIT/KO
-record integration in `docs/NEXT_AGENT_PROMPT.md`; the user-locked queue after
-that is frontend, S5 Room 1 behavior, remaining S3/S4 Round 1 widening, then
+emission-family surface is corpus-proven, and the bounded S4 class-map and
+same-frame defender integration is complete. The immediate body is the real
+ROM-derived frontend in `docs/NEXT_AGENT_PROMPT.md`; the user-locked queue after
+that is S5 Room 1 behavior, remaining S3/S4 Round 1 widening, then
 traversal and S6.** Historical milestone results remain evidence, not the
 forward work vocabulary.
 
@@ -155,11 +155,10 @@ The destination is the full game (`docs/GOAL.md`), not only the slice. The
 remaining work, ordered as the true dependency chain; each phase names the
 S-step vocabulary it lives in:
 
-1. **Bounded S4 integration.** Generate and consume the proven per-class
-   `table_set` map, extend the canonical actor fields, test exact HIT/KO ROM
-   record trajectories, and remove the collision-view one-frame lag. Preserve
-   counted fallback wherever the trajectory is not proven.
-2. **Real frontend (user priority).** Allocate CRAM from AvP's measured 17/19/32
+1. **Bounded S4 integration — COMPLETE 2026-08-19.** Generated and consumed the
+   per-class `table_set` map, extended canonical actor fields, proved HIT/KO
+   require external state writers, and removed the collision-view one-frame lag.
+2. **Real frontend — NEXT (user priority).** Allocate CRAM from AvP's measured 17/19/32
    live-bank demand, convert the CPS tilemaps and cursor from original ROM
    assets, and carry real selection state into gameplay at 352x224.
 3. **Game logic — S5 Room 1 (the long pole).** PRNG, enemy decisions, player state
@@ -294,7 +293,7 @@ below has an oracle already on disk.
 | **S1** | **Actor spine** — PASSED 2026-08-18 | A native actor record mirroring the game's `0xC0` layout for the fields its own code consumes; port the collision overlap predicate and guards into C over that record | Field-for-field equality against 2,900 captured work-RAM frames, **and** the C predicate reproduces the Python falsification exactly (21,908 non-overlapping active pairs with no hit, 44/56 latches explained, same 12 residuals) | `.deps/mame/collision_probe*` |
 | **S2** | **Animation from ROM scripts and renderer — MECHANISM LIVE, FIDELITY CHECKS OPEN** | Street actors tick ROM records, emit decoded objects, and render through the VDP1 tile path. Action seeding, world anchors, record completeness, and route-matched screen geometry remain adapted/unverified. | Zero unexplained animation-record and object-list mismatches for the declared Room 1 actor; on-screen placement comparison passes. | corpus result in `data/avsp_object_corpus_verification.json`; route-matched captures |
 | S3 | Widen to Round 1's cast — OPEN | Enemy emitter families are decoded; finish player/tag-0, Stalker/Chrysalis runtime selection, phase-loaded full tile residency, and retire `/SPR4/*.RLE` runtime decisions. | Every Round 1 actor selects poses and emits objects from ROM data; no capture-derived pose table in a runtime decision. | same |
-| S4 | Collision, damage, reaction — PARTIAL | Street defender hurt boxes are live for measured WALK/ATTACK records. Wire the class map and proven HIT/KO records, then decode attacker, post-hit, projectile/broadcast, boss/Stalker, and stage paths. | Every hit event and health delta in the slice window matches MAME; no inferred contact schedule remains in a runtime decision. | recorded contacts |
+| S4 | Collision, damage, reaction — PARTIAL | Street defender hurt boxes and the generated class map are live for same-frame WALK/ATTACK records. HIT/KO replay is a measured GAP requiring class `0x1F` state-writer translation; attacker, post-hit, projectile/broadcast, boss/Stalker, and stage paths remain open. | Every hit event and health delta in the slice window matches MAME; no inferred contact schedule remains in a runtime decision. | recorded contacts |
 | S5 | Enemy decisions | Identify the PRNG generator and call order, then translate the street-alien decision routines by the differential-replay method in "How game logic gets translated" | Same initial state and inputs produce the same action/state sequence as MAME, with a negative control that fails on a perturbed input | recorded calls |
 | S6 | Integrate and run on hardware | Seed the wave from the captured initial state (an `ADAPTED` shortcut, labelled; stage-table decode is post-slice); re-measure resources; run host, soak, focused, full-route, clean normal release | 60 Hz on physical NTSC Saturn with a digital pad and 32 Mbit cartridge, and a deterministic replay matching the MAME event log | `docs/HARDWARE_TEST.md` |
 
@@ -319,7 +318,8 @@ translation, routine by routine, validated differentially**:
 
 1. **Mirror the actor layout first (S1).** Translated routines read and
    write the game's actor fields. If the native actor struct mirrors the ROM's
-   `0xC0` record — the fields already mapped: `+0x08` type, `+0x0F` facing,
+   `0xC0` record — the fields already mapped: `+0x02` class, `+0x04` sub-state,
+   `+0x06` action word, `+0x08` type, `+0x0F` facing,
    `+0x10/+0x14/+0x18` world x/y/z, `+0x1C` animation record, `+0x2C/+0x2D` hit
    value and source, `+0x50` collision table set, `+0x67` attacker id, `+0x68`
    per-attacker latch, `+0x70` suppress, `+0xD1` latch index — then translation

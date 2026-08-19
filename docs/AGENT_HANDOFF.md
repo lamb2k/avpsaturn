@@ -1,7 +1,72 @@
 # Agent handoff: native AvP Saturn port
 
-Updated: 2026-08-19 EDT (**per-class `table_set` evidence check repaired;
-runtime still unchanged**).
+Updated: 2026-08-19 EDT (**bounded S4 runtime integration complete; real
+ROM-derived frontend is next**).
+
+## Bounded S4 runtime integration: COMPLETE (2026-08-19)
+
+**Branch `codex/avp-master-plan`; parent before this checkpoint `ad71de2`.**
+This body connects the checked per-class evidence to the native street runtime
+without widening any approximation. Capability Gate 1 remains `0/7` and S4 as
+a whole remains open.
+
+**Canonical actor and lookup.** `AvspActor` now carries source fields class
+`+0x02`, sub-state `+0x04`, and action word `+0x06`; all 481,566 existing actor
+loads match work RAM field-for-field. `tools/gen_avsp_table_set_classes.py`
+generates a build-only lookup from `data/avsp_table_set_states.json`, and
+`avsp_table_set_for_class()` checks all three measured classes plus an unknown
+class. Runtime C no longer hand-duplicates `0x00130AC8`.
+
+Each native street WALK/ATTACK slot now owns one canonical `AvspActor` collision
+view. The already validated adapted street path is assigned class `0x1F` only;
+class `0x00`/`0x06` transitions are not invented. The view receives the current
+`AvspAnimFrame.addr`, record selectors, native coordinates/facing, and the
+generated class lookup. Unknown classes remain counted `GAP`.
+
+**HIT/KO replay result: measured GAP, not enabled.** The sparse record extractor
+now includes the exact `enemy_actions` HIT `5191..5226` and KO `5330..5469`
+ranges plus every record reachable from their observed pointers: **648 records,
+10,824 bytes, 70 spans**. `data/avsp_anim_records.json` is byte-stable at SHA-256
+`B404F61A03F2D8422D04D0B50317AC7D06D1312DDBF58B9FD48F2CAA1C0A8397`.
+
+`tools/verify_avsp_anchor_anim_replay.py` proves the animation records alone do
+not reproduce either pointer trajectory:
+
+- HIT: 36 frames, 3 mismatches; first at frame 5224, actual `0x12D2F8`,
+  interpreter `0x12DD50`. The latter is an 8-frame self-loop that the state
+  logic holds/repoints externally.
+- KO: 140 frames, 90 mismatches; first at frame 5331, actual remains
+  `0x12E214`, interpreter advances to `0x12E224`. Later state logic also rewrites
+  between long-duration records.
+
+Therefore HIT/KO correctly retain the ADAPTED fallback and counted `GAP`.
+The first relevant S5 target is the class `0x1F` state path that controls the
+actor `+0x1C` pointer; do not replace it with a captured per-frame pointer table.
+
+**One-frame lag removed.** `rom_actor_prepare()` resolves the record, emitted
+objects, canonical collision view and measured hurt box before
+`cap_world_step()`. `draw_world()` uses the same prepared record, then
+`rom_actor_advance()` ticks exactly once. A model action change invalidates the
+old program and seeds the new adapted program on the next frame.
+
+**Verification, in required order:**
+
+- Full `test.ps1`: exit 0, including the 12,000-frame soak, 481,566 actor field
+  checks, exact collision corpus, animation-span equivalence and the new anchor
+  replay result.
+- Focused `-Clean -Release -EncounterTest -SkipHostTests`: SH-2 compile/link and
+  ISO construction passed; all existing ISO-member hashes passed.
+- Live Yaba Sanshiro readback at `COMPLETE`: `runtime_ready=1`, class lookup
+  misses `0`, selector-zero total `0`, cumulative `GAP=120`, `HITS rom=8`,
+  `approx=6`. The six approximate hits remain boss/Stalker coverage; the GAP is
+  visible and is not called invulnerability.
+- Final `-Clean -Release -SkipHostTests`: passed. Cold normal-release boot
+  completed after the expected CD preload with `runtime_ready=1`,
+  `failed_asset=NULL`, encounter state `MAIN_MENU`, and class misses `0`.
+- No MAME or Saturn emulator process was left running.
+
+**Next:** execute the real frontend in `docs/NEXT_AGENT_PROMPT.md`. After that,
+resume S5 Room 1 behavior, remaining S3/S4 Round 1 widening, traversal, then S6.
 
 ## Per-class table_set evidence: COMMITTED (2026-08-19)
 

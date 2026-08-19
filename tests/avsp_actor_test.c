@@ -100,6 +100,9 @@ static void check_fields(const AvspActor *a, const unsigned char *work, unsigned
     int i;
 
     if (a->state != p[0x00u]) bad = 1;
+    if (a->class_id != p[0x02u]) bad = 1;
+    if (a->sub_state != be16_at(p + 0x04u)) bad = 1;
+    if (a->action_word != be16_at(p + 0x06u)) bad = 1;
     if (a->type != p[0x08u]) bad = 1;
     if (a->facing != p[0x0Fu]) bad = 1;
     if (a->world_x != be16_at(p + 0x10u)) bad = 1;
@@ -141,8 +144,27 @@ int main(void)
     long latch_defender = 0L, latch_attacker = 0L;
     long latch_broadcast = 0L, latch_unexplained = 0L;
     int w;
+    unsigned long class_table_set;
 
     printf("S1 actor spine\n");
+
+    if (!avsp_table_set_for_class(0x00u, &class_table_set)
+        || class_table_set != 0x0012CE5CuL) {
+        fail("class 0x00 table-set lookup");
+    }
+    if (!avsp_table_set_for_class(0x06u, &class_table_set)
+        || class_table_set != 0x0013E97AuL) {
+        fail("class 0x06 table-set lookup");
+    }
+    if (!avsp_table_set_for_class(0x1Fu, &class_table_set)
+        || class_table_set != 0x00130AC8uL) {
+        fail("class 0x1F table-set lookup");
+    }
+    class_table_set = 0xFFFFFFFFuL;
+    if (avsp_table_set_for_class(0xFFu, &class_table_set)
+        || class_table_set != 0xFFFFFFFFuL) {
+        fail("unknown class table-set lookup");
+    }
 
     rom_data = slurp(ROM_PATH, &rom_size);
     if (rom_data == 0) {
