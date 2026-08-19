@@ -42,7 +42,38 @@ byte-stable through combat, like the reference port.
 WAVE_ONE with `runtime_ready=1`, `failed_asset=NULL`, entries animating
 2..5 per frame, miss counters (no-bank/no-rank/no-sprite, on the debug
 HUD as `MISS a/b/c POOL n`) all ZERO, tile pool at 96/96 with LRU active,
-and the tile-rendered alien visibly correct on screen. `MEASURED`.
+and tiled output present on screen for the ROM actor. `MEASURED`.
+
+**Scope of that claim — read this before quoting it.** An earlier draft
+of this section said the alien was "visibly correct on screen"; that was
+too broad and is retracted. What is proven is narrow: **one** actor's
+ROM-tile emission path runs end to end in the shipped runtime with no
+silently dropped tile, bank, or sprite. It is NOT evidence of pose-
+selection fidelity, placement accuracy against the arcade, or of any
+parity in the frontend, animation selection, collision, AI, or stage
+behaviour. A pixel/geometry comparison against the MAME oracle has not
+been run for the runtime renderer — the emitter's corpus falsification
+covers the object entries, not their on-screen placement after the
+ADAPTED anchor bridge.
+
+**Honest label for the whole build: a native technical slice that boots
+and runs, functionally approximate, NOT a faithful playable level.** The
+gap list, all `MEASURED` from the live build and the source:
+
+| Surface | Actual state |
+|---|---|
+| Title screen | `MENUFIT.BIN` is a captured "PRESS START" street frame, not the game's title sequence. |
+| Character select | One static `CHARFIT.BIN` snapshot; the 1P marker is baked into the image. No cursor movement or character choice — B confirms a predetermined character. |
+| Round title / barricade | `R1TITLE.RLE` is one held keyframe; the barricade sequence switches between three static images instead of animating. |
+| Player idle | One fixed two-layer cel (movement and KO poses do update). |
+| Enemy AI | Hardcoded walk-toward-player with occasional attack, no actor separation — the cast converges on one position. |
+| Collision | Real CPS2 hitboxes are decoded but unconnected; combat still uses X-distance and lane checks in `capability_model.c`. Stage collision is room/lane clamps only. |
+| Music | PCM event cues only; the CDDA call stays commented out while `stage_music_started` is set. |
+| ROM renderer coverage | One alien; its action selection is bridged through two hardcoded script addresses. The rest of the cast is still capture-derived whole cels. |
+
+**Capability Gate 1 remains 0/7 and the full-game goal 0/9** — nothing in
+this session closes a condition, and the boot success must not be read as
+progress against them.
 
 **Three hard-won platform rules (each cost a broken boot tonight):**
 

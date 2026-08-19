@@ -12,7 +12,9 @@ it. This prompt authorizes the next phases of the critical path in
   WAVE_ONE combat and the debug HUD plus direct memory sampling showed
   the ROM actor's entry count (4<->5) and codes cycling with its poses.
   The boot-freeze diagnosis that blocked this was falsified (see the
-  handoff top note); the frontend is playable end-to-end into Round 1.
+  handoff top note); the frontend is traversable end-to-end into Round 1
+  (traversable, not faithful — the title, select and intro screens are
+  static captured keyframes; see the handoff's scope table).
 - **S2 Body E**: LANDED and RUNTIME-VERIFIED 2026-08-18 late night
   (`89bc4ce`): the ROM actor renders per-16x16-tile VDP1 sprites from the
   cart-resident TILES.BIN archive in live WAVE_ONE combat; miss counters
@@ -24,6 +26,29 @@ it. This prompt authorizes the next phases of the critical path in
 
 S3 corpus work may proceed in parallel with D/E (it is offline and does not
 touch the runtime); do not let it stall the render keystone indefinitely.
+
+## What the build is NOT, as of 2026-08-19
+
+The build is a **native technical slice**: it boots, traverses the
+frontend, and runs Round 1 wave combat with one ROM-tile-rendered alien.
+It is **functionally approximate and not a faithful playable level.** The
+per-surface gap table is in `docs/AGENT_HANDOFF.md` (Body E section).
+Never describe this build as visually correct, faithful, or parity-
+complete; a green miss counter proves nothing was dropped, not that what
+was drawn matches the arcade.
+
+The ordered work that closes the gap, ahead of everything else:
+
+1. ROM-driven animation for the complete Round 1 cast (the second street
+   alien onward), retiring the capture cels as production actors.
+2. Connect the decoded CPS2 hitboxes and stage collision to gameplay,
+   retiring the X-distance/lane approximations in `capability_model.c`.
+3. Translate the real enemy AI, including actor separation.
+4. Replace the static frontend/level keyframes with real title, cursor,
+   selection, and sequence logic.
+5. Restore CDDA and validate it without reintroducing the transition
+   stall (the call is commented out in `main.c` while
+   `stage_music_started` is still set).
 
 ## Why the project uses both S-steps and Capability Gate 1
 
