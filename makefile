@@ -12,7 +12,7 @@ JO_COMPILE_WITH_SPRITE_HASHTABLE = 0
 JO_PSEUDO_SATURN_KAI_SUPPORT = 0
 JO_COMPILE_WITH_RAM_CARD_MODULE = 1
 JO_GLOBAL_MEMORY_SIZE_FOR_MALLOC = 262144
-JO_MAX_SPRITE = 96
+JO_MAX_SPRITE = 192
 JO_MAX_FILE_IN_IMAGE_PACK = 64
 CCFLAGS += -include avsp_video_config.h
 ifneq ($(AVSP_VISUAL_TEST),)
@@ -31,7 +31,7 @@ JO_DEBUG ?= 1
 JO_NTSC = 1
 JO_COMPILE_USING_SGL = 1
 
-SRCS = main.c capability_model.c avsp_actor.c avsp_anim_script.c avsp_emit.c
+SRCS = main.c capability_model.c avsp_actor.c avsp_anim_script.c avsp_emit.c avsp_tiles.c
 
 JO_ENGINE_ROOT ?= .deps/joengine
 JO_ENGINE_SRC_DIR = $(JO_ENGINE_ROOT)/jo_engine

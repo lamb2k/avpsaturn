@@ -1,6 +1,8 @@
 #include <jo/jo.h>
 #include <string.h>
 #include "capability_model.h"
+#include "avsp_tiles.h"
+
 #include "generated/avsp_anim_records.h"
 #include "generated/avsp_emit_windows.h"
 #include "generated/avsp_boss_animation.h"
@@ -35,6 +37,11 @@
 #define SNAPSHOT_FIT_BYTES (SNAPSHOT_FIT_WIDTH * SNAPSHOT_HEIGHT)
 #define AVSP_CART_DRAM1_BASE ((unsigned char *)0x22600000)
 #define AVSP_CART_DRAM1_BYTES 0x200000
+/* Body E: the ROM tile archive owns a carved region at the head of
+   cartridge bank 1, mirroring the reference port's cart-resident,
+   byte-stable texture source; only the remainder joins the general
+   allocator, so the archive can never displace main-pool assets. */
+#define AVSP_TILE_REGION_BYTES 0x40000
 #define AVSP_PCM_CHANNEL_WEAPON 0
 #define AVSP_PCM_CHANNEL_MELEE 1
 #define AVSP_PCM_CHANNEL_CONTACT 2
@@ -47,12 +54,18 @@
 #define BITMAP_SCENE_FRONTEND_BASE 100
 #define BITMAP_SCENE_ROUTE_BASE 200
 #define AVSP_VDP1_TEXTURE_BUDGET 458488
+/* S2 Body E: resident VDP1 pool of 16x16 ROM tile textures, LRU-replaced
+   in place, so the per-frame cost is command-table-only (the reference
+   port's measured model: per-16x16-tile normal sprites in colour-bank
+   mode). */
+#define AVSP_TILE_SPRITE_POOL 96
 #define AVSP_VDP1_TEXTURE_BYTES \
     (2 * CEL_BYTES + \
      AVSP_PLAYER_ACTION_LAYERS * AVSP_PLAYER_ACTION_DECODED_BYTES + \
      CAP_MAX_ENEMIES * AVSP_ENEMY_DECODED_BYTES + \
      AVSP_BOSS_DECODED_BYTES + \
-     AVSP_HUD_TEXTURE_BYTES)
+     AVSP_HUD_TEXTURE_BYTES + \
+     AVSP_TILE_SPRITE_POOL * AVSP_TILE_BYTES)
 
 #if JO_TV_WIDTH != CAP_VIEW_WIDTH || JO_TV_HEIGHT != 224
 #error "The AvP fidelity build requires Saturn TV_352x224"
@@ -176,12 +189,131 @@ static int visual_enemy_action_index;
 static int visual_enemy_frame;
 #endif
 
+/* Cartridge-safe file read. jo_fs_read_file_in_dir's whole-file GFS_Load
+ * path cannot fill a buffer the allocator places in cartridge DRAM (SBL's
+ * default transfer is SCU DMA, and SCU DMA cannot write the A-bus), and
+ * with the 4 MB cartridge carrying most of the working set almost every
+ * large allocation lands there. Following the proven period pattern
+ * (BrooklynBangout2D's asset staging), every read streams through a fixed
+ * work-RAM staging buffer in 32-sector bursts and is copied out with the
+ * CPU, which every destination accepts. jo_fs_read_next_bytes is NOT used:
+ * it refills with a single-sector GFS_Fread regardless of the configured
+ * buffer size, so enlarging jo's stream buffer serves garbage.
+ * All disc reads in this file go through here. */
+#define AVSP_FS_STAGING_SECTORS 32
+#define AVSP_FS_SECTOR_BYTES 2048
+#define AVSP_FS_STAGING_BYTES (AVSP_FS_STAGING_SECTORS * AVSP_FS_SECTOR_BYTES)
+static unsigned char avsp_fs_staging[AVSP_FS_STAGING_BYTES];
+/* Boot-bringup diagnostic: which stage of the cartridge-safe reader
+ * failed last. Volatile so the release optimizer keeps these
+ * debugger-read fields. */
+static const char *volatile avsp_fs_last_error;
+static volatile int avsp_fs_last_read;
+
+/* Stream one file into dest (any bus). Returns bytes read, or -1. */
+static int avsp_fs_read_into(const char *const filename,
+                             const char *const sub_dir,
+                             unsigned char *dest, const int max_bytes)
+{
+    Sint32 fid;
+    GfsHn gfs;
+    Sint32 sctsize;
+    Sint32 nsct;
+    Sint32 lastsize;
+    int fsize;
+    int offset = 0;
+
+    jo_fs_cd(sub_dir);
+    fid = GFS_NameToId((Sint8 *)filename);
+    if (fid < 0)
+    {
+        jo_fs_cd(JO_PARENT_DIR);
+        avsp_fs_last_error = "FS NAME";
+        return -1;
+    }
+    gfs = GFS_Open(fid);
+    if (gfs == JO_NULL)
+    {
+        jo_fs_cd(JO_PARENT_DIR);
+        avsp_fs_last_error = "FS OPEN";
+        return -1;
+    }
+    GFS_GetFileSize(gfs, &sctsize, &nsct, &lastsize);
+    fsize = sctsize * (nsct - 1) + lastsize;
+    if (fsize <= 0 || fsize > max_bytes)
+    {
+        GFS_Close(gfs);
+        jo_fs_cd(JO_PARENT_DIR);
+        avsp_fs_last_error = "FS SIZE";
+        avsp_fs_last_read = fsize;
+        return -1;
+    }
+    while (offset < fsize)
+    {
+        int chunk;
+        Sint32 got = GFS_Fread(gfs, AVSP_FS_STAGING_SECTORS,
+                               avsp_fs_staging, AVSP_FS_STAGING_BYTES);
+        if (got <= 0)
+        {
+            GFS_Close(gfs);
+            jo_fs_cd(JO_PARENT_DIR);
+            avsp_fs_last_error = "FS READ";
+            avsp_fs_last_read = offset;
+            return -1;
+        }
+        chunk = (int)got;
+        /* The final burst is sector-padded past the true file size. */
+        if (offset + chunk > fsize) chunk = fsize - offset;
+        memcpy(dest + offset, avsp_fs_staging, (unsigned int)chunk);
+        offset += chunk;
+    }
+    GFS_Close(gfs);
+    jo_fs_cd(JO_PARENT_DIR);
+    return fsize;
+}
+
+static char *avsp_fs_read_file_in_dir(const char *const filename,
+                                      const char *const sub_dir, int *len)
+{
+    jo_file probe;
+    int opened;
+    int read_bytes;
+    char *dest;
+
+    /* Size the allocation with a jo probe, then stream for real. */
+    jo_fs_cd(sub_dir);
+    opened = jo_fs_open(&probe, filename);
+    if (opened) jo_fs_close(&probe);
+    jo_fs_cd(JO_PARENT_DIR);
+    if (!opened || probe.size <= 0)
+    {
+        avsp_fs_last_error = "FS PROBE";
+        return JO_NULL;
+    }
+    dest = (char *)jo_malloc_with_behaviour((unsigned int)probe.size,
+                                            JO_MALLOC_TRY_REUSE_BLOCK);
+    if (dest == JO_NULL)
+    {
+        avsp_fs_last_error = "FS ALLOC";
+        return JO_NULL;
+    }
+    read_bytes = avsp_fs_read_into(filename, sub_dir,
+                                   (unsigned char *)dest, probe.size);
+    if (read_bytes != probe.size)
+    {
+        jo_free(dest);
+        return JO_NULL;
+    }
+    if (len != JO_NULL) *len = read_bytes;
+    return dest;
+}
+
 static int load_cel_asset(CelAsset *asset)
 {
     int length = 0;
     asset->image.width = asset->width;
     asset->image.height = asset->height;
-    asset->image.data = (unsigned char *)jo_fs_read_file_in_dir(asset->filename, "SPR4", &length);
+    asset->image.data = (unsigned char *)avsp_fs_read_file_in_dir(asset->filename, "SPR4", &length);
     if (asset->image.data == JO_NULL || length != asset->expected_bytes)
     {
         failed_asset = asset->filename;
@@ -203,7 +335,7 @@ static int load_pcm_audio(jo_sound *sound, const char *filename,
                           const int sample_rate)
 {
     int length = 0;
-    sound->data = jo_fs_read_file_in_dir(filename, directory, &length);
+    sound->data = avsp_fs_read_file_in_dir(filename, directory, &length);
     if (sound->data == JO_NULL || length != expected_bytes)
     {
         failed_asset = filename;
@@ -238,10 +370,13 @@ static int load_action_audio(void)
                           AVSP_BOSS_INTRO_PCM_DIRECTORY,
                           AVSP_BOSS_INTRO_PCM_BYTES,
                           AVSP_BOSS_INTRO_PCM_SAMPLE_RATE) &&
-           load_pcm_audio(&boss_clear_sound, AVSP_BOSS_CLEAR_PCM_FILE,
-                          AVSP_BOSS_CLEAR_PCM_DIRECTORY,
-                          AVSP_BOSS_CLEAR_PCM_BYTES,
-                          AVSP_BOSS_CLEAR_PCM_SAMPLE_RATE) &&
+           /* boss_clear_sound (637 KB, the largest PCM) is phase-loaded at
+              the interior transition instead of boot: the 32 Mbit cartridge
+              cannot hold the whole boot working set plus the Body E ROM
+              tile archive at once, and by that phase the ~900 KB of
+              released opening PCM leaves ample room. CDDA is not active
+              there (stage music start is currently disabled; when it
+              returns, the interior wipe remains a legal seek window). */
            load_pcm_audio(&door_dialogue_sound,
                           AVSP_DOOR_DIALOGUE_PCM_FILE,
                           AVSP_DOOR_DIALOGUE_PCM_DIRECTORY,
@@ -300,7 +435,7 @@ static int load_player_action_sequences(void)
 {
     int layer;
     int length = 0;
-    player_action_archive = (unsigned char *)jo_fs_read_file_in_dir(
+    player_action_archive = (unsigned char *)avsp_fs_read_file_in_dir(
         AVSP_PLAYER_ACTION_ARCHIVE_FILE, "SPR4", &length);
     if (player_action_archive == JO_NULL ||
         length != AVSP_PLAYER_ACTION_ARCHIVE_BYTES)
@@ -367,7 +502,7 @@ static int decode_player_action_pose(const int pose)
 static int load_enemy_action_archive(void)
 {
     int length = 0;
-    enemy_action_archive = (unsigned char *)jo_fs_read_file_in_dir(
+    enemy_action_archive = (unsigned char *)avsp_fs_read_file_in_dir(
         AVSP_ENEMY_ARCHIVE_FILE, "SPR4", &length);
     if (enemy_action_archive == JO_NULL ||
         length != AVSP_ENEMY_ARCHIVE_BYTES)
@@ -442,7 +577,7 @@ static int decode_enemy_action_pose(const int pose, const int slot)
 static int load_stalker_action_archive(void)
 {
     int length = 0;
-    stalker_action_archive = (unsigned char *)jo_fs_read_file_in_dir(
+    stalker_action_archive = (unsigned char *)avsp_fs_read_file_in_dir(
         AVSP_STALKER_ARCHIVE_FILE, "SPR4", &length);
     if (stalker_action_archive == JO_NULL ||
         length != AVSP_STALKER_ARCHIVE_BYTES)
@@ -642,7 +777,7 @@ static int load_hud_image(jo_img_8bits *image, const char *filename,
     int length = 0;
     image->width = width;
     image->height = height;
-    image->data = (unsigned char *)jo_fs_read_file_in_dir(
+    image->data = (unsigned char *)avsp_fs_read_file_in_dir(
         filename, "SPR8", &length);
     if (image->data == JO_NULL || length != width * height)
     {
@@ -672,7 +807,7 @@ static int load_frontend_assets(void)
         image->width = SNAPSHOT_FIT_WIDTH;
         image->height = SNAPSHOT_HEIGHT;
         length = 0;
-        image->data = (unsigned char *)jo_fs_read_file_in_dir(
+        image->data = (unsigned char *)avsp_fs_read_file_in_dir(
             avsp_frontend_files[scene], "SPR8", &length);
         if (image->data == JO_NULL || length != SNAPSHOT_FIT_BYTES)
         {
@@ -743,7 +878,7 @@ static int load_route_sequences(void)
     for (scene = 0; scene < AVSP_SEQUENCE_SCENES; ++scene)
     {
         length = 0;
-        sequence_rle[scene] = (unsigned char *)jo_fs_read_file_in_dir(
+        sequence_rle[scene] = (unsigned char *)avsp_fs_read_file_in_dir(
             avsp_sequence_files[scene], "SPR8", &length);
         if (sequence_rle[scene] == JO_NULL ||
             length != (int)avsp_sequence_rle_bytes[scene])
@@ -1377,6 +1512,173 @@ static void rom_actor_tick(void)
     }
 }
 
+/* S2 Body E: the per-object VDP1 consumer. The ROM actor's semantic object
+ * list renders as one 16x16 normal-sprite draw per referenced tile - the
+ * measured architecture of the reference Capcom Saturn port (all foreground
+ * commands 16x16, 16-colour bank mode, flip in the command, flat draw
+ * order) - textured from the cart-resident TILES.BIN archive through a
+ * fixed VDP1 pool with in-place LRU replacement. */
+static unsigned char *tile_archive_data;
+static AvspTileArchive tile_archive;
+static jo_palette tile_palette;
+static int tile_archive_ready;
+static int tile_pool_sprite[AVSP_TILE_SPRITE_POOL];
+static long tile_pool_rank[AVSP_TILE_SPRITE_POOL];
+static unsigned long tile_pool_stamp[AVSP_TILE_SPRITE_POOL];
+static unsigned long tile_pool_clock;
+static int tile_pool_used;
+/* A missing tile or bank is an asset defect, never a silent skip: these
+   counters surface on the debug HUD and stay readable by the headless
+   debugger (volatile so the release optimizer keeps them). */
+static volatile int tile_diag_no_bank;
+static volatile int tile_diag_no_rank;
+static volatile int tile_diag_no_sprite;
+
+static int load_tile_archive(void)
+{
+    int read_bytes;
+    int slot;
+    int index;
+    static jo_color colors[256];
+
+    /* Staged CPU read straight into the carved cartridge region. */
+    tile_archive_data = AVSP_CART_DRAM1_BASE;
+    read_bytes = avsp_fs_read_into("TILES.BIN", "SPR4", tile_archive_data,
+                                   AVSP_TILE_REGION_BYTES);
+    if (read_bytes <= 0 ||
+        !avsp_tiles_open(&tile_archive, tile_archive_data,
+                         (unsigned long)read_bytes))
+    {
+        failed_asset = "TILES.BIN";
+        return 0;
+    }
+    /* Pixel value p+1 reads palette array entry p after Jo's CRAM base+1
+       shift, so slot colours transcribe directly. */
+    for (index = 0; index < 256; ++index) colors[index] = JO_COLOR_Black;
+    for (slot = 0; slot < (int)tile_archive.palette_slots; ++slot)
+        for (index = 0; index < 15; ++index)
+            colors[slot * 16 + index] = (jo_color)
+                avsp_tiles_cram_color(&tile_archive, slot, index);
+    jo_create_palette_from(&tile_palette, colors, 256);
+    tile_pool_used = 0;
+    tile_pool_clock = 0;
+    tile_archive_ready = 1;
+    return 1;
+}
+
+static int tile_sprite_for_rank(const long rank)
+{
+    int index;
+    int victim = 0;
+    jo_img_4bits img;
+
+    for (index = 0; index < tile_pool_used; ++index)
+    {
+        if (tile_pool_rank[index] == rank)
+        {
+            tile_pool_stamp[index] = ++tile_pool_clock;
+            return tile_pool_sprite[index];
+        }
+    }
+    img.width = 16;
+    img.height = 16;
+    img.data = (unsigned char *)avsp_tiles_texture(&tile_archive, rank);
+    if (img.data == JO_NULL) return -1;
+    if (tile_pool_used < AVSP_TILE_SPRITE_POOL)
+    {
+        int sprite_id = jo_sprite_add_4bits_image(&img);
+        if (sprite_id < 0) return -1;
+        tile_pool_sprite[tile_pool_used] = sprite_id;
+        tile_pool_rank[tile_pool_used] = rank;
+        tile_pool_stamp[tile_pool_used] = ++tile_pool_clock;
+        return tile_pool_sprite[tile_pool_used++];
+    }
+    for (index = 1; index < AVSP_TILE_SPRITE_POOL; ++index)
+        if (tile_pool_stamp[index] < tile_pool_stamp[victim]) victim = index;
+    if (jo_sprite_replace_4bits_image(&img, tile_pool_sprite[victim]) < 0)
+        return -1;
+    tile_pool_rank[victim] = rank;
+    tile_pool_stamp[victim] = ++tile_pool_clock;
+    return tile_pool_sprite[victim];
+}
+
+static int wrap_signed_10bit(int delta)
+{
+    delta &= 0x3FF;
+    if (delta >= 512) delta -= 1024;
+    return delta;
+}
+
+static int fit_352(const int cps_x)
+{
+    if (cps_x < 0) return -((-cps_x * CAP_VIEW_WIDTH) / CAP_CPS2_VIEW_WIDTH);
+    return (cps_x * CAP_VIEW_WIDTH) / CAP_CPS2_VIEW_WIDTH;
+}
+
+static void draw_rom_actor_tiles(const CapActor *actor)
+{
+    /* ADAPTED placement bridge: the emitter ran with model-space anchors
+       (rom_actor_tick), so entries are positioned as offsets from the
+       decoded origin and re-anchored at the actor's model screen position;
+       exact CPS2 anchor alignment lands with S5's world-space translation.
+       The cel pivot convention (pixel 184 of a 192px cel drawn centred at
+       lane-200-height) puts the actor's CPS2 origin 88px below the cel
+       centre. */
+    const int origin_cps_x = 0x40 + actor->x - world.camera_x;
+    const int origin_dec_y = (0x100 + 0xFF - (200 + actor->height)) & 0x3FF;
+    const int anchor_jo_y = actor->lane - 200 - actor->height + 88;
+    const int depth = 330 - actor->lane;
+    int index;
+
+    jo_sprite_set_palette_4bits(tile_palette.id, 0);
+    for (index = rom_actor_entry_count - 1; index >= 0; --index)
+    {
+        const AvspObjectEntry *entry = &rom_actor_entries[index];
+        AvspEntryTile tiles[64];
+        int offset_x = wrap_signed_10bit((int)(entry->x & 0x3FF) -
+                                         (origin_cps_x & 0x3FF));
+        int offset_y = wrap_signed_10bit((int)(entry->y & 0x3FF) -
+                                         origin_dec_y);
+        int bank_slot = avsp_tiles_bank_slot(&tile_archive,
+                                             entry->attr & 0x1F);
+        int count = avsp_entry_tiles(entry->y, entry->code, entry->attr,
+                                     tiles, 64);
+        int tile;
+        if (count <= 0 || bank_slot < 0)
+        {
+            ++tile_diag_no_bank;
+            continue;
+        }
+        jo_sprite_set_palette_4bits(tile_palette.id, bank_slot);
+        for (tile = 0; tile < count; ++tile)
+        {
+            long rank = avsp_tiles_find(&tile_archive, tiles[tile].code);
+            int sprite_id;
+            int jo_x;
+            int jo_y;
+            if (rank < 0)
+            {
+                ++tile_diag_no_rank;
+                continue;
+            }
+            sprite_id = tile_sprite_for_rank(rank);
+            if (sprite_id < 0)
+            {
+                ++tile_diag_no_sprite;
+                continue;
+            }
+            jo_x = fit_352(origin_cps_x - 256 + offset_x +
+                           tiles[tile].dx + 8);
+            jo_y = anchor_jo_y + offset_y + tiles[tile].dy + 8;
+            if (tiles[tile].flip_x) jo_sprite_enable_horizontal_flip();
+            if (tiles[tile].flip_y) jo_sprite_enable_vertical_flip();
+            jo_sprite_draw3D(sprite_id, jo_x, jo_y, depth);
+            if (tiles[tile].flip_x) jo_sprite_disable_horizontal_flip();
+            if (tiles[tile].flip_y) jo_sprite_disable_vertical_flip();
+        }
+    }
+}
+
 static void draw_world(void)
 {
     int index;
@@ -1411,6 +1713,12 @@ static void draw_world(void)
         if (screen_x < -256 || screen_x > 256) continue;
         if (enemy->kind == CAP_ACTOR_BOSS)
             draw_boss(enemy, screen_x);
+        else if (index == rom_actor_slot && rom_actor_entry_count > 0 &&
+                 tile_archive_ready)
+            /* Body E: the ROM-driven actor renders from its own decoded
+               object list; its capture cel stays unused as the
+               regression/comparison path. */
+            draw_rom_actor_tiles(enemy);
         else
             draw_alien(enemy, screen_x, index);
     }
@@ -1701,6 +2009,30 @@ static void frame_callback(void)
             return;
         }
     }
+    /* Body E note: the ROM tile archive is loaded during jo_main init (see
+       the comment there) - by character select both cartridge banks are
+       already nearly full. */
+    /* Phase-boundary load: the Stage Clear composite arrives during the
+       interior wipe, long before its BOSS_DEFEAT timer-150 play. The
+       loading line is the standing pattern for stage-boundary CD reads:
+       printed before the blocking read so it shows during the stall,
+       cleared on the next frame. */
+    if (world.encounter_state == CAP_ENCOUNTER_INTERIOR_TRANSITION &&
+        boss_clear_sound.data == JO_NULL)
+    {
+        int loaded;
+        jo_printf(15, 13, "NOW LOADING");
+        loaded = load_pcm_audio(&boss_clear_sound, AVSP_BOSS_CLEAR_PCM_FILE,
+                                AVSP_BOSS_CLEAR_PCM_DIRECTORY,
+                                AVSP_BOSS_CLEAR_PCM_BYTES,
+                                AVSP_BOSS_CLEAR_PCM_SAMPLE_RATE);
+        jo_printf(15, 13, "           ");
+        if (!loaded)
+        {
+            runtime_ready = 0;
+            return;
+        }
+    }
     /* Character confirmation keeps the already-copied selection pixels in
        VDP2, so its 78,848-byte source block can return to the allocator for
        the stage. The Chrysalis boss is composed from ROM tables and needs no
@@ -1774,7 +2106,8 @@ static void frame_callback(void)
         ++boss_intro_audio_play_count;
     }
     if (world.encounter_state == CAP_ENCOUNTER_BOSS_DEFEAT &&
-        world.encounter_timer == 150 && boss_clear_audio_play_count == 0)
+        world.encounter_timer == 150 && boss_clear_audio_play_count == 0 &&
+        boss_clear_sound.data != JO_NULL)
     {
         play_pcm_committed(&boss_clear_sound, sequence_channel_sound,
                            AVSP_PCM_CHANNEL_SEQUENCE);
@@ -1944,8 +2277,10 @@ static void frame_callback(void)
               (int)world.frame);
     rom_actor_tick();
     if (debug_hud_enabled && rom_actor_entry_count > 0)
-        jo_printf(0, 2, "ROM ACTOR n=%d code=%04x", rom_actor_entry_count,
-                  rom_actor_entries[0].code);
+        jo_printf(0, 2, "ROM ACTOR n=%d code=%04x MISS %d/%d/%d POOL %d",
+                  rom_actor_entry_count, rom_actor_entries[0].code,
+                  tile_diag_no_bank, tile_diag_no_rank, tile_diag_no_sprite,
+                  tile_pool_used);
     draw_world();
     draw_arcade_hud();
     draw_route_overlay();
@@ -2062,8 +2397,11 @@ void jo_main(void)
         /* Jo Engine registers only DRAM0 for a 32 Mbit cartridge. The Sega
            expansion-RAM map provides a second 2 MiB data bank at
            0x22600000-0x227fffff. Register it before loading assets so the
-           runtime can use the cartridge's complete 4 MiB capacity. */
-        jo_add_memory_zone(AVSP_CART_DRAM1_BASE, AVSP_CART_DRAM1_BYTES);
+           runtime can use the cartridge's complete 4 MiB capacity. The
+           first AVSP_TILE_REGION_BYTES are carved out for the ROM tile
+           archive and stay outside the allocator. */
+        jo_add_memory_zone(AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES,
+                           AVSP_CART_DRAM1_BYTES - AVSP_TILE_REGION_BYTES);
     }
     set_actor_palette();
     set_frontend_palettes();
@@ -2075,7 +2413,13 @@ void jo_main(void)
     }
     else
     {
-        runtime_ready = load_frontend_assets() &&
+        /* The ROM tile archive loads FIRST: it needs one ~200 KB
+           contiguous cartridge block, and the boot asset sweep below
+           fills both cartridge banks nearly to capacity (the measured
+           post-boot free space is under 130 KB per bank). No CDDA is
+           active at init, so the early read is seek-safe. */
+        runtime_ready = load_tile_archive() &&
+                        load_frontend_assets() &&
                         load_route_sequences() &&
                         load_background() && load_boss_background() &&
                         load_hud_assets() &&
@@ -2109,6 +2453,14 @@ void jo_main(void)
         release_pcm_data(&round_title_b_sound);
         release_pcm_data(&withdraw_sound);
         release_pcm_data(&breach_sound);
+        /* These profiles skip the interior transition where the Stage
+           Clear composite is phase-loaded; load it here instead so a
+           forced BOSS_DEFEAT still plays it. */
+        if (runtime_ready)
+            runtime_ready = load_pcm_audio(
+                &boss_clear_sound, AVSP_BOSS_CLEAR_PCM_FILE,
+                AVSP_BOSS_CLEAR_PCM_DIRECTORY, AVSP_BOSS_CLEAR_PCM_BYTES,
+                AVSP_BOSS_CLEAR_PCM_SAMPLE_RATE);
     }
 #endif
     cap_world_init(&world);

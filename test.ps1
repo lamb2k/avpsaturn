@@ -96,3 +96,14 @@ $emitCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror 
 if ($LASTEXITCODE -ne 0) {
     throw "Object-emission pipeline test failed with exit code $LASTEXITCODE."
 }
+
+# S2 Body E: the ROM tile archive reader and the MAME-transcribed per-entry
+# tile expansion, checked against the generated cd/SPR4/TILES.BIN and the
+# committed oracle entries. Skips cleanly when the archive has not been
+# generated (it carries ROM-derived bytes and stays untracked; regenerate
+# with tools/gen_avsp_gfx_tiles.py).
+$tilesCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_tiles.c tests/avsp_tiles_test.c -o build/avsp_tiles_test && ./build/avsp_tiles_test"
+& $wsl.Source sh '-lc' $tilesCommand
+if ($LASTEXITCODE -ne 0) {
+    throw "ROM tile archive test failed with exit code $LASTEXITCODE."
+}

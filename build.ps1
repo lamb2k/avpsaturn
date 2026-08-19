@@ -96,6 +96,20 @@ try {
             throw "Stage 1 opening audio preparation failed with exit code $LASTEXITCODE."
         }
 
+        # S2 Body E: the ROM tile archive for the per-object VDP1 renderer.
+        # Generated from the local graphics ROMs and the paired captures;
+        # reused when present (delete it to force regeneration).
+        $tileArchive = Join-Path $projectRoot 'build\avsp_cd\SPR4\TILES.BIN'
+        if (-not (Test-Path -LiteralPath $tileArchive)) {
+            & $PythonPath (Join-Path $projectRoot 'tools\gen_avsp_gfx_tiles.py')
+            if ($LASTEXITCODE -ne 0) {
+                throw "ROM tile archive generation failed with exit code $LASTEXITCODE."
+            }
+        }
+        if (-not (Test-Path -LiteralPath $tileArchive)) {
+            throw 'build\avsp_cd\SPR4\TILES.BIN is missing after generation.'
+        }
+
         $contentRoot = Join-Path $projectRoot 'build\avsp_cd'
         foreach ($metadataName in @('ABS.TXT', 'BIB.TXT', 'CPY.TXT')) {
             Copy-Item -LiteralPath (Join-Path $projectRoot "cd\$metadataName") `
@@ -207,6 +221,12 @@ try {
             (Join-Path $contentRoot 'SPR4\BKO.RLE')
         if ($LASTEXITCODE -ne 0) {
             throw "Saturn Chrysalis KO archive ISO verification failed with exit code $LASTEXITCODE."
+        }
+        & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+            'game.iso' '/SPR4/TILES.BIN' '--equals' `
+            (Join-Path $contentRoot 'SPR4\TILES.BIN')
+        if ($LASTEXITCODE -ne 0) {
+            throw "ROM tile archive ISO verification failed with exit code $LASTEXITCODE."
         }
         & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
             'game.iso' '/SPR4/SACT.RLE' '--equals' `

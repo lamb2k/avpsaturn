@@ -1,0 +1,32 @@
+{
+ "archive": {
+  "bytes": 202564,
+  "file": "build/avsp_cd/SPR4/TILES.BIN",
+  "sha256": "7c47627c3c2d34af59dbf42bc6d677297ac0038e547d64305f0985a7bd64b01a"
+ },
+ "classification": "tile archive manifest - no ROM bytes",
+ "facing_union": true,
+ "gfx_region_sha256": "ed6afd62ecbc3defddf4d8001b9dbe8735db1112fc7d38c9e21d77383cbd7671",
+ "palette": {
+  "banks": [
+   "0x10",
+   "0x11",
+   "0x12",
+   "0x13",
+   "0x1B"
+  ],
+  "label": "ADAPTED single-frame palette",
+  "source": ".deps/mame/enemy_actions/palette_05140.tsv"
+ },
+ "routes": {
+  "enemy_actions": {
+   "entries": 36043,
+   "frames_sampled": 2121
+  }
+ },
+ "sample_stride": 1,
+ "schema": 1,
+ "scope": "street",
+ "tile_bytes": 128,
+ "tile_count": 1533
+}
