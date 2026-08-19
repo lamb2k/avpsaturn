@@ -191,6 +191,46 @@ def decode_actor_entries(rom: Rom, work: bytes, slot_off: int,
                          int(e["code"], 16), int(e["attr"], 16)])
             families.append("2")
             pos += 14
+        elif tag == 0x000A:
+            # Family 0x000A (handler 0x0AA38A, live-traced via
+            # tools/mame_trace_tagA.lua): [count][pad][D2 long] then parts
+            # of 8 bytes each - a code|attr long plus INLINE dx, dy words
+            # (no A2 table). Same origin routine, same width formula;
+            # raw-mode attr = raw ^ flip; flipped X = origin - width - dx
+            # (traced); the plain variants are corpus-falsified here.
+            count = rom.u16(pos + 4)
+            if not (1 <= count <= 16):
+                return None, "implausible-count"
+            d2 = rom.u32(pos + 8)
+            d2_hi, d2_lo = (d2 >> 16) & 0xFFFF, d2 & 0xFFFF
+            oy = (anchor_y - world_y + 0x100) & 0xFFFF
+            oy = (oy + d2_lo if (facing & 2) else oy - d2_lo) & 0xFFFF
+            ox = (world_x - anchor_x + 0x40) & 0xFFFF
+            ox = (ox + d2_hi if (facing & 1) else ox - d2_hi) & 0xFFFF
+            flip = (facing << 5) & 0xFF
+            p = pos + 12
+            for _ in range(count):
+                code = rom.u16(p)
+                attr_raw = rom.u16(p + 2)
+                dx = rom.u16(p + 4)
+                dy = rom.u16(p + 6)
+                dx = dx - 65536 if dx > 32767 else dx
+                dy = dy - 65536 if dy > 32767 else dy
+                if mode_positive:
+                    attr = (attr_raw & 0xFF00) | (
+                        (((attr_raw & 0xE0) + palette) ^ flip) & 0xFF)
+                else:
+                    attr = (attr_raw & 0xFF00) | ((attr_raw ^ flip) & 0xFF)
+                if facing & 1:
+                    width = ((((attr_raw >> 8) & 0xF) + 1) * 16)
+                    x = ((ox - width - dx) & 0x3FF) | or_value
+                else:
+                    x = ((ox + dx) & 0x3FF) | or_value
+                y = (oy + dy) & 0x3FF
+                flat.extend([x, y, code, attr])
+                p += 8
+            families.append("Ax%d" % count)
+            pos = p
         elif tag == 0x0008:
             families.append("8-noop")
             pos += 4

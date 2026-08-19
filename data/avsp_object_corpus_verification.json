@@ -24,7 +24,7 @@
   "0x0806": 16,
   "0x0a00": 88,
   "0x0c00": 156,
-  "0x0c02": 729,
+  "0x0c02": 983,
   "0x0c06": 72,
   "0x0e00": 3,
   "0x0e02": 667,
@@ -49,6 +49,7 @@
   "top=0x0006 6x3": 1117,
   "top=0x0006 6x4": 1193,
   "top=0x0006 6x7": 18,
+  "top=0x000a Ax4": 254,
   "top=0x000c 2+2": 3166,
   "top=0x000c 2+4x2": 211,
   "top=0x000c 2+6x1": 169,
@@ -69,20 +70,18 @@
  "per_root": {
   "boss_actions": {
    "absent": 60,
-   "eligible": 612,
-   "exact": 552,
+   "eligible": 657,
+   "exact": 597,
    "excl:jump-record": 242,
    "excl:pose-outside-declared-region": 3737,
-   "excl:unknown-family-tag": 45,
    "frames": 899,
    "no-objram-pair": 1
   },
   "boss_ko": {
-   "eligible": 173,
-   "exact": 173,
+   "eligible": 188,
+   "exact": 188,
    "excl:jump-record": 63,
    "excl:pose-outside-declared-region": 3416,
-   "excl:unknown-family-tag": 15,
    "frames": 840,
    "no-objram-pair": 1
   },
@@ -97,11 +96,10 @@
   },
   "stalker_actions": {
    "absent": 569,
-   "eligible": 5656,
-   "exact": 5087,
+   "eligible": 5850,
+   "exact": 5281,
    "excl:jump-record": 1081,
    "excl:pose-outside-declared-region": 9906,
-   "excl:unknown-family-tag": 194,
    "frames": 2280,
    "no-objram-pair": 1
   }
@@ -109,11 +107,9 @@
  "schema": 2,
  "totals": {
   "absent_game_omitted": 961,
-  "eligible": 18732,
-  "exact": 17771,
+  "eligible": 18986,
+  "exact": 18025,
   "mismatch": 0
  },
- "unknown_tags": {
-  "unknown-family-tag-0x000a": 254
- }
+ "unknown_tags": {}
 }
