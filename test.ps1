@@ -136,3 +136,12 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "table_set source-rule falsification failed with exit code $LASTEXITCODE."
 }
+
+# table_set source-rule decoder: maps spawn context (route/slot/timing - NOT
+# any actor byte) to the proven per-type constant and falsifies it across the
+# stride-1 target-type-12 corpus with a non-vacuous perturbation control.
+# Reads only the tracked evidence manifest; always runs, no private inputs.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\decode_avsp_table_set.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "table_set source-rule decoder falsification failed with exit code $LASTEXITCODE."
+}

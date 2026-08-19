@@ -43,6 +43,35 @@ instruction form and has a different, separately-confirmed +4 skew to its
 true store at `0x0172B6`, a generic multi-field clear loop, not a fourth
 value family).
 
+**Re-verified and completed this session (2026-08-19, follow-up turn):** the
+two gaps left open above are now closed.
+
+- **Third-family log is now in the checkout.** The `0x0003F0F0` store's
+  decrypted disassembly was regenerated this session
+  (`tools/mame_trace_table_set_third_insn.lua` -> `tools_tsw_insn_third.log`,
+  preserved at the repo root alongside the other instruction logs, untracked
+  per convention). All four instruction logs now survive in the checkout:
+  `tools_tsw_insn_normal.log`, `tools_tsw_insn_replace.log`,
+  `tools_tsw_insn_teardown.log`, `tools_tsw_insn_third.log` — so every family's
+  store is backed by a surviving log, not just two.
+- **Stride-1 corpus decoder, an additional zero-mismatch falsification.**
+  `tools/decode_avsp_table_set.py` (now wired into `test.ps1`) maps spawn
+  context (route/slot/timing — NOT any actor byte) to the proven per-type
+  constant and predicts `table_set` for every stride-1 target-type-12
+  generation in `data/avsp_table_set_evidence.json` with zero unexplained
+  mismatches (33 generations: normal 27, replace 4, type_promotion 2); a
+  perturbation control (force the type_promotion constant to the normal one)
+  correctly breaks it, proving the map is non-vacuous. Report:
+  `data/avsp_table_set_decode.json`.
+- **Honest caveat on the corpus COUNTS.** The per-family hit counts above
+  (35/1/2 = 38) are transcribed from the full-attribution watchpoint trace,
+  whose raw log is not retained in this checkout. This session re-verified the
+  three STORE INSTRUCTIONS by fresh disassembly (all four logs now present)
+  but did not re-run the full-corpus attribution watchpoint (the log is gone
+  and the watchpoint/tap path was unreliable in recent runs). The reproducible,
+  in-checkout zero-mismatch check is the stride-1 corpus decoder, not the
+  aggregate counts.
+
 **Dispatch, not per-spawn call**: a caller-side trace
 (`tools/mame_trace_table_set_callers.lua`) found the SAME fixed stack-top
 value (`0x00FF00D8`, an outer dispatch loop's own address) present at
@@ -78,13 +107,16 @@ turn").
 **Practical notes for reproducing or extending this trace** (all
 untracked one-off diagnostics, preserved per convention):
 
-- `-video none` headless runs in this environment only advance frame
-  notifiers reliably when `-debug -debugger windows` is passed AND the
-  script explicitly sets `debugger.execution_state = "run"` at the end.
-  Every attempt that omitted either one stalled indefinitely with no
-  error (several stray `mame.exe` processes accumulated this session
-  before this was understood — always verify `tasklist` / `ps -W` show
-  no lingering `mame.exe` before ending a session).
+- `-video none` headless runs in this environment advance frame notifiers
+  reliably with `-debug` (NOT `-debugger windows`) AND the script
+  explicitly sets `debugger.execution_state = "run"` at the end.
+  **Correction (2026-08-19, follow-up turn):** this note previously said
+  `-debug -debugger windows` is required; empirically that is wrong for
+  headless `-video none` — with the `windows` debugger backend the process
+  exits code 6 within ~1s before writing any log, while `-debug` alone
+  completed and produced the trace file. Run from a scratch CWD so the
+  project `error.log` is not clobbered. (Always verify `tasklist` /
+  `ps -W` show no lingering `mame.exe` before ending a session.)
 - `machine:load()` (loading a save state) reliably failed silently in
   this environment/build when called from a frame notifier's `boot_frame
   == 1` branch OR from script top-level — cause not resolved, not worth

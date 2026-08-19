@@ -1,0 +1,354 @@
+{
+ "byte_hypothesis": {
+  "falsified": true,
+  "note": "the prior session's perfect correlates (+0x0E, +0x5E, +0x64) are sibling bytes written by the SAME type-specific initializer that writes table_set (the disassembly shows the normal routine setting +0x57=0x10 and the replace routine setting +0x57=8, +0x5E=0x20 in the same sequence); they are effects of the spawn, not the source table_set is read from"
+ },
+ "classification": "table_set source-rule decoder - spawn-type to hardcoded-constant map, no ROM bytes",
+ "constants": {
+  "normal": "0x130AC8",
+  "replace": "0x13E97A",
+  "stalker": "0x12CE5C"
+ },
+ "decoder": "spawn_type(route, slot, first_frame) -> table_set constant",
+ "falsification": {
+  "mismatches": 0,
+  "result": "PASS - zero unexplained mismatches across the stride-1 target-type corpus",
+  "unexplained_mismatches": 0
+ },
+ "generations_by_spawn_type": {
+  "normal": 27,
+  "replace": 4,
+  "stalker": 2
+ },
+ "generations_tested": 33,
+ "negative_control": {
+  "mismatches": 2,
+  "perturbation": "stalker constant forced to the normal constant (0x00130AC8)",
+  "result": "FAIL as required - the perturbed decoder breaks, so the constant map is non-vacuous"
+ },
+ "proven_source_rule": "table_set (actor +0x50) is a hardcoded 32-bit immediate chosen by the actor's spawn type and written by the type-specific initializer routine; it is NOT derived from any actor-struct byte (live MAME trace)",
+ "records": [
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4080,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 43,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4080,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 33,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4080,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 37,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4143,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 33,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4080,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 38,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4080,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 36,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4080,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 35,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4279,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 43,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4287,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 37,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4447,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 38,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4455,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 33,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4751,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 43,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4080,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 39,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4543,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 36,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4935,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 37,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4903,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 38,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4080,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 41,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 4791,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 35,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 5111,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 33,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 5503,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 33,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 5399,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 35,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 5431,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 36,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 5487,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 37,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 5471,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 38,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 5335,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 39,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 5479,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 41,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x130AC8",
+   "first_frame": 5175,
+   "match": true,
+   "predicted": "0x130AC8",
+   "route": "enemy_actions",
+   "slot": 43,
+   "spawn_type": "normal"
+  },
+  {
+   "actual": "0x13E97A",
+   "first_frame": 6168,
+   "match": true,
+   "predicted": "0x13E97A",
+   "route": "enemy_actions",
+   "slot": 43,
+   "spawn_type": "replace"
+  },
+  {
+   "actual": "0x12CE5C",
+   "first_frame": 5520,
+   "match": true,
+   "predicted": "0x12CE5C",
+   "route": "stalker_actions",
+   "slot": 41,
+   "spawn_type": "stalker"
+  },
+  {
+   "actual": "0x12CE5C",
+   "first_frame": 5520,
+   "match": true,
+   "predicted": "0x12CE5C",
+   "route": "stalker_actions",
+   "slot": 42,
+   "spawn_type": "stalker"
+  },
+  {
+   "actual": "0x13E97A",
+   "first_frame": 5520,
+   "match": true,
+   "predicted": "0x13E97A",
+   "route": "stalker_actions",
+   "slot": 43,
+   "spawn_type": "replace"
+  },
+  {
+   "actual": "0x13E97A",
+   "first_frame": 12661,
+   "match": true,
+   "predicted": "0x13E97A",
+   "route": "boss_actions",
+   "slot": 43,
+   "spawn_type": "replace"
+  },
+  {
+   "actual": "0x13E97A",
+   "first_frame": 13420,
+   "match": true,
+   "predicted": "0x13E97A",
+   "route": "boss_ko",
+   "slot": 43,
+   "spawn_type": "replace"
+  }
+ ],
+ "schema": 1,
+ "store_instructions": {
+  "normal": {
+   "mnemonic": "move.l #$130ac8, ($50, A6)",
+   "pc": "0x00060570",
+   "status": "proven (decrypted MAME trace)"
+  },
+  "replace": {
+   "mnemonic": "move.l #$13e97a, ($50, A6)",
+   "pc": "0x000495FC",
+   "status": "proven (decrypted MAME trace)"
+  },
+  "stalker": {
+   "mnemonic": "move.l #$12ce5c, ($50, A6)",
+   "pc": "0x0003F0F0",
+   "status": "proven (decrypted MAME trace, tools/mame_trace_table_set_third_insn.lua -> tools_tsw_insn_third.log, this session)"
+  }
+ },
+ "structure": "parallel type-specific initializers: each actor type's spawn routine inlines its own 'move.l #<const>, ($50, A6)' at a distinct ROM address (normal 0x060570, replace 0x0495FC, type_promotion 0x0003F0F0); not one shared descriptor/table, not distinct structures",
+ "teardown": {
+  "mnemonic": "move.l D1, (A1)+  (D1 = 0, bulk zero)",
+  "pc": "0x0000172B6",
+  "status": "proven (decrypted MAME trace)"
+ },
+ "unresolved": false
+}

@@ -6,7 +6,12 @@ instruction trace" completely before doing anything else. Do not re-open
 that question or re-attempt correlation; the answer came from a live
 instruction trace, not correlation, and correlation could not have found
 it (the value is a literal immediate constant, not a data-dependent
-field read).
+field read). See the handoff's "Re-verified and completed this session"
+note: all three families' store instructions are now backed by surviving
+instruction logs in the checkout, the stride-1 corpus decoder
+(`tools/decode_avsp_table_set.py`) is the reproducible zero-mismatch
+check, and the full-attribution hit counts are transcribed (their raw log
+is not retained).
 
 ## Mandatory startup and repository safety
 
@@ -99,8 +104,10 @@ callee.
 
 ## Verification order (either option)
 
-1. Full `test.ps1` exits 0 (includes the new
-   `tools/gen_avsp_table_set_source.py` falsification and the existing
+1. Full `test.ps1` exits 0 (includes the
+   `tools/gen_avsp_table_set_source.py` full-attribution falsification,
+   the `tools/decode_avsp_table_set.py` stride-1 target-type-12 corpus
+   decoder falsification, and the existing
    `tools/analyze_avsp_table_set_writer.py --self-test`).
 2. Saturn cross-compile via `build.ps1` exits 0 and rebuilds the ISO, IF
    runtime code changed (Option A). Option B is pure evidence/analysis
