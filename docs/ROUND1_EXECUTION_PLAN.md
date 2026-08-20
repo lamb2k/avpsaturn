@@ -70,10 +70,10 @@ item below is green. A defect here invalidates all dependent batch checks.
 | SP4 | Round 1 title composition | **PASS** at `aa0d671` | Text is scroll1 tilemap (48 tiles, bank 0x26) with a 16-step measured fade; ROM-derived cels drawn as VDP1 objects over the native street; R1TITLE.RLE removed; held text/street/cleared holds exact |
 | SP5 | Resolution transform | **PASS** at `671eca8` | Endpoint 384->352 rule shared by both planes and street VDP1 objects; 113 page-boundary frames exact offline; live MPABN0/1, PNCN0/1, PLSZ readback; aliased-page control detects |
 | SP6 | Input/state propagation | **PASS for frontend** | Non-wrapping 2x2, three-frame response, A/B/C confirm, no cancel, selected ID persists |
-| SP7 | Memory bounds and diagnostics | **PARTIAL** | BSS checks active; cart/VDP1/VDP2/CRAM/PCM high-water and live sprite <128 remain |
-| SP8 | Late-read enforcement | **PARTIAL** | Counter active; pessimistic G0/CDDA experiment remains |
-| SP9 | Two-plane scrolling/priority | **IN PROGRESS** at `8fd75b3` | Evidence/bundle committed; NBG0 ownership, two-page PNT mapping, and per-object priority readback remain |
-| SP10 | Row-scroll requirement | **PARTIAL** | RP4 interval MEASURED constant-zero visible rows (no line scroll needed there); wider route intervals remain unclassified (RP6+) |
+| SP7 | Memory bounds and diagnostics | **PASS (interim review)** at `6ac45b3` | Four-profile __bend ledger under 0x060C0000, carve arithmetic, VDP1/VDP2/CRAM usage recorded and gated in test.ps1; route-wide VDP1 command and allocator/SCSP high-water instruments remain GAP entries inside the ledger |
+| SP8 | Late-read enforcement | **PASS (interim review)** at `6ac45b3` | Guard on every avsp_fs_read_into; host test with negative controls; live EncounterTest COMPLETE with one declared windowed read and zero late reads; live CDDA playback still disabled (ADAPTED skeleton) |
+| SP9 | Two-plane scrolling/priority | **PASS (interim review)** at `671eca8` | Offline reconstruction exact (0 px both planes, 12,118 objects, 8 controls); NBG0 ownership root-caused (SGL ASCII map at VDP2_VRAM_B0) and resolved; live PNCN/MPABN/PRIS/SPCTL readback; VDP1 command classes present |
+| SP10 | Row-scroll requirement | **PASS (interim review)** at classification | Complete-route classification over the private capture: 6 scenes require line scroll (0x8012, 0x8013, 0x8015, 0x8016, 0x8019, 0x801a - all opening/character-select), no gameplay scene does, street group constant-zero route-wide; implementing line scroll for those six scenes is Batch A (RP8) scope |
 
 SP1-SP4 must pass before Batch A expands. SP5-SP10 must pass before Batch B
 expands beyond its representative street fixture.
@@ -87,9 +87,9 @@ expands beyond its representative street fixture.
 | RP2 | Full-route cadence-1 capture and automatic grouping | **PASSED** at `82bb47e` | preserved baseline | Raw private capture plus tracked machine manifest |
 | RP3 | Minimal scene runtime and route controller | **PASSED** at `a28f5df` | RP1 | `AvspSceneDef v0`, player, synthetic host fixtures |
 | RP4 | Representative two-plane renderer | **PASS (interim review)** at `671eca8` | RP1, capture fixture | Offline reconstruction exact (0 px both planes, 12,118 objects, 8 controls); live registers/canaries/priority classes proven; fixture StreetTest-only with test.ps1 gate; Codex ratification pending |
-| RP5 | Pessimistic G0/CDDA residency experiment | **PENDING** | RP1 | Exact resource ledger and late-read/CDDA result |
-| RP6 | Finalize semantic scene IDs | **PENDING** | RP1, RP2 | Authoritative source-state to runtime-ID manifest |
-| RP7 | Shared-primitives check | **PENDING** | RP0, RP3-RP6 | All SP items green |
+| RP5 | Pessimistic G0/CDDA residency experiment | **PASS (interim review)** at `6ac45b3` | RP1 | Four-profile work-RAM ledger (release 2368 / street 220784 / encounter 320 / frontend 2016 bytes headroom), carve/VDP1/VDP2/CRAM/PCM ledger, disc-read guard host-tested and live-proven (one windowed read, zero late reads over EncounterTest COMPLETE); live CDDA playback itself still disabled (ADAPTED) |
+| RP6 | Finalize semantic scene IDs | **PASS (interim review)** at `254719b` | RP1, RP2 | 122-scene manifest with content-addressed stable IDs, transition chain, 23 evidence-bound labels (99 flagged needs-label), test.ps1 gate with 4 controls |
+| RP7 | Shared-primitives check | **PASS (interim review)** | RP0, RP3-RP6 | SP1-SP10 green on interim review (SP7/SP8 carry explicit GAP ledger entries for route-wide high-water instruments; SP10 defers line-scroll implementation for six frontend scenes to RP8) |
 | RP8 | Batch A: frontend and Round 1 title | **PENDING** | RP7 frontend subset | Controller-driven legal/opening/story/title/select/R1 title |
 | RP9 | Batch B: street and interior presentation | **PENDING** | RP7 | Barricade through interior transition |
 | RP10 | Batch C: boss ending and Round 2 title | **PENDING** | RP7 | Boss presentation through held Round 2 title |

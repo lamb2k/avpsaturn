@@ -1,4 +1,4 @@
-# Next implementor prompt: RP6 semantic scene manifest
+# Next implementor prompt: RP8 Batch A frontend scene programs
 
 ## Invocation request
 
@@ -6,9 +6,9 @@ Continue implementation in:
 
 `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 
-Execute the bounded RP6 body below. RP4 passed interim review at `671eca8`
-(offline reconstruction exact, live contract proven, fixture isolated); Codex
-ratification of that acceptance is still pending and may reopen it.
+Execute the bounded RP8 body below. RP4-RP7 passed interim review (see
+`docs/ROUND1_EXECUTION_PLAN.md` status tables and `docs/AGENT_HANDOFF.md`);
+Codex ratification of those acceptances is pending and may reopen them.
 
 Use the `port-cps2-to-sega-saturn` skill. Read completely, in order:
 
@@ -32,48 +32,43 @@ Get-Process mame,yabasanshiro* -ErrorAction SilentlyContinue
 Expected branch is `codex/avp-master-plan`. Preserve all unrelated dirty and
 untracked work. Do not reset, clean, stash, switch branch, or bulk-stage.
 
-## Scope lock: RP6 only
+## Scope lock: RP8 Batch A only
 
-Use RP2's grouped full route (`data/round1_route_census.json`, 122 groups over
-frames 1..18000, plus the private cadence-1 capture) to produce the
-authoritative semantic scene manifest. For every group record:
+Convert the frontend presentation scenes into ROM-derived scene programs
+driven through the RP3 scene player and the RP6 manifest:
 
-- source state/frame range (from the census, MEASURED);
-- provisional bit-15 ID (from the census);
-- final stable ID: content-addressed from the group signature so it survives
-  re-capture and re-grouping, not order-derived;
-- input dependency: whether and when the composite input schedule was active
-  during the group (census `input_word_runs`);
-- layer/object composition: layer bases, video control, object count range,
-  scroll spans, row-scroll usage;
-- audio events: QSound change count (audio payloads stay private);
-- transition target: the next group's final stable ID plus the boundary
-  reason.
+- legal/warning, EPA, QSound, and Capcom screens;
+- opening earth, opening demo, and story panels;
+- title wait and Start transition;
+- character select and confirmation (including the six line-scroll scenes
+  classified at SP10: 0x8012, 0x8013, 0x8015, 0x8016, 0x8019, 0x801a);
+- Round 1 title.
 
-Semantic labels are evidence-bound: label a scene only from measured anchors
-(prior committed measurements or reviewed private screenshots); every other
-group keeps `label: null` with a review flag. Unknown IDs remain hard
-diagnostic errors in the runtime; do not coerce or skip.
+Requirements:
 
-Deliverables:
+- scene content comes from ROM translation (tilemaps, palettes, scripts),
+  not from captured RLE holds; captures remain regression oracles;
+- scenes are addressed by RP6 stable IDs; unknown IDs stay hard errors;
+- the six line-scroll scenes get a measured Saturn line-scroll (or bounded
+  ADAPTED equivalent) proven against source frames;
+- controller-driven route: legal through Round 1 title with real input,
+  proven against the capture at held frames;
+- respect the residency ledger: the encounter profile has only 320 bytes
+  of work-RAM headroom - new unconditional BSS must be paid for first;
+- all reads honour the disc guard; new phase loads declare measured
+  windows.
 
-1. `tools/gen_avsp_scene_manifest.py` — deterministic generator from the
-   tracked census (private capture optional for enrichment);
-2. `data/avsp_scene_manifest.json` — tracked manifest (hashes, counts, ranges
-   and labels only; no ROM bytes, no payloads);
-3. `tools/verify_scene_manifest.py` — structural gate: complete route tiling,
-   unique stable IDs, consistent transition chain, census cross-check, and
-   negative controls; wire into `test.ps1`;
-4. handoff update with evidence and label coverage.
+Work in bounded slices (one scene family per commit), each with offline
+proof, negative controls, live readback where the contract requires it,
+and a handoff update.
 
 ## Do not
 
-- Do not implement RP5 residency, RP7, or content batches in this body.
 - Do not advance Capability Gate counts.
 - Do not commit ROMs, captures, screenshots, audio, or payload bytes.
-- Do not invent semantic labels without measured evidence.
+- Do not replace ROM translation with capture-derived runtime payloads.
 
-## After RP6
+## After RP8
 
-RP5 (pessimistic G0/CDDA residency measurement) is the next dependency-ready
-package, then RP7 per `docs/ROUND1_EXECUTION_PLAN.md`.
+RP9 (Batch B: street and interior presentation) then RP10 (Batch C) per
+`docs/ROUND1_EXECUTION_PLAN.md`.

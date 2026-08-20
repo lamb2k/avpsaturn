@@ -14,10 +14,11 @@ Get-Process mame,yabasanshiro* -ErrorAction SilentlyContinue
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `codex/avp-master-plan`
-- HEAD: `671eca8` (`Share the endpoint 384-to-352 rule with the street
-  object draw`); RP4 chain since the Codex base
-  `8fd75b31c1ed6708de5fbd32ccaa2b98042d9654`: `18c781f` implementation,
-  `c6d1244`/`bd13e31` handoff reports, `671eca8` mapping unification.
+- HEAD: see `git log -12`; autonomous chain since the Codex base
+  `8fd75b31c1ed6708de5fbd32ccaa2b98042d9654`: `18c781f`+`671eca8` (RP4),
+  `247e8a9` (RP4 interim acceptance, prompt rotation), `254719b` (RP6),
+  `6ac45b3` (RP5), plus the row-scroll classification and
+  handoff/plan bookkeeping commits.
 - No remote publication is authorized.
 - Capability Gate 1: **0/7**.
 - Full-game acceptance: **0/9**.
@@ -107,6 +108,77 @@ translated actor/object logic.
 The last linked RP3 map left only 624 bytes below the high-work-RAM boundary.
 RP4 must not add large static/BSS buffers. All map, bundle, and runtime bounds
 must be measured again after the current integration links.
+
+## RP5 and RP6 implementation reports (autonomous session)
+
+### RP6: semantic scene manifest — PASS (interim review) at `254719b`
+
+- `tools/gen_avsp_scene_manifest.py` -> `data/avsp_scene_manifest.json`:
+  all 122 census groups become scenes with content-addressed stable IDs
+  (SHA-256 over CPS-B hash, layer bases, video control, palette
+  population, map-hash counts; occurrence-suffixed for revisits), the
+  measured frame range and provisional ID, input dependency, composition,
+  QSound change counts, and the route transition chain.
+- 23 scenes carry labels bound to explicit evidence (committed
+  measurements or reviewed private screenshots): legal warning, EPA,
+  QSound, Capcom logo, opening earth/demo/story panel, character select,
+  Round 1 title, street gameplay, barricade dialogue, warehouse and
+  Stalker segments, two Chrysalis battle segments, two CONTINUE
+  countdowns, the Round 2 title (frames 15092-15192), and the Round 2
+  underpass tail (15193-18000). 99 scenes keep `label: null` with a
+  `needs-label` review flag; nothing is silently unlabeled.
+- Route-quality finding: the scripted composite route dies twice
+  (CONTINUE countdowns at 6201-6692 and 12800-13292); the capture reaches
+  the Round 2 title and ~2,800 frames of Round 2 underpass.
+- `tools/verify_scene_manifest.py` gates `test.ps1`: exact route tiling,
+  recomputable stable IDs, consistent transition chain, evidence-bound
+  labels, four negative controls (shifted range, forged ID, broken
+  transition, silent unlabeled) all detect.
+
+### RP5: residency ledger and disc-read guard — PASS (interim review) at `6ac45b3`
+
+- `avsp_disc_guard.c/h`: every data-track read through
+  `avsp_fs_read_into` asks the guard; reads are rejected and counted
+  while CDDA owns the drive unless an explicit measured window is open,
+  and windows refuse to open under active CDDA. The interior-wipe
+  boss-clear load is the one declared window
+  ("interior wipe: CDDA paused").
+- Host test `tests/avsp_disc_guard_test.c` (wired into test.ps1, WSL gcc
+  -Werror) proves permit/reject/window/refusal semantics plus both
+  trivial-guard negative controls.
+- Live proof: EncounterTest to COMPLETE with guard counters read by
+  symbol — 66 reads allowed before CDDA ownership, the CDDA flag set at
+  encounter start, exactly one further windowed read, zero late reads,
+  zero refused windows. The CD track start call itself remains disabled,
+  so live CDDA rejection is ADAPTED contract skeleton until it returns.
+- `tools/gen_avsp_residency_budget.py` -> `data/avsp_residency_budget.json`
+  (gated by `tools/verify_residency_budget.py` with recompute checks and
+  three negative controls):
+  - work RAM __bend vs 0x060C0000: debug-normal-release 2,368 bytes
+    headroom; debug-street-test 220,784; debug-encounter-test **320**;
+    debug-frontend-test 2,016. The encounter profile is the tightest
+    lane; any new unconditional BSS must be paid for first.
+  - cartridge DRAM1: 0x200000 with 0x50000 tile carve (297,764 used,
+    29,916 headroom) and 0x48000 street-test strips carve (269,654 used);
+    jo zone recomputes.
+  - VDP2 street scene: 160,704 char + 4,224 PNT = 164,928 of 524,288.
+  - VDP1: 297,764-byte texture archive; live command sample recorded;
+    route-wide command high-water remains a GAP entry.
+  - PCM members staged (2,727,832 bytes total) with the phase-load model;
+    allocator/SCSP high-water instrument remains a GAP entry.
+- BSS regression found and fixed during RP5 groundwork: the encounter
+  profile had crossed the limit after the RP3 carve rework; one FS
+  staging sector (32->31) reclaimed 2 KiB.
+
+### SP status after RP5/RP6
+
+SP1-SP10 are green (interim review) and RP7 passes. SP10's complete-route
+classification (`tools/classify_route_rowscroll.py`, gated capture-free by
+`tools/verify_rowscroll_classification.py`): 6 scenes require line scroll
+(0x8012, 0x8013, 0x8015, 0x8016, 0x8019, 0x801a - all in the
+opening/character-select region), no gameplay scene does, and the street
+group is constant-zero route-wide, confirming RP4's interval measurement.
+Implementing line scroll for those six frontend scenes is RP8 scope.
 
 ## RP4 interim acceptance (autonomous session)
 

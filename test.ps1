@@ -363,6 +363,15 @@ if (Test-Path (Join-Path $PSScriptRoot 'data\avsp_residency_budget.json')) {
     }
 }
 
+# SP10 row-scroll classification: per-scene verdicts must recompute from
+# the recorded counts and match the census ranges. Offline, capture-free.
+if (Test-Path (Join-Path $PSScriptRoot 'data\round1_rowscroll_classification.json')) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tools\verify_rowscroll_classification.py')
+    if ($LASTEXITCODE -ne 0) {
+        throw "Row-scroll classification verification failed with exit code $LASTEXITCODE."
+    }
+}
+
 # Sub-state dispatcher enumeration: decodes, from the validated opcode-space
 # image, every per-actor sub-state jump table (actor byte +0x04 indexes a
 # PC-relative word table). Self-tests against the three live-confirmed
