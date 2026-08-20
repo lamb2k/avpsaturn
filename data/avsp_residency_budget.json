@@ -1,0 +1,110 @@
+{
+ "cartridge": {
+  "dram1_bytes": 2097152,
+  "jo_zone_bytes": 1474560,
+  "note": "strips carve exists only in the street-test profile; the jo zone figure above applies to that profile, other profiles get dram1 - tile_carve",
+  "status": "MEASURED",
+  "strips_carve_bytes": 294912,
+  "strips_carve_headroom": 25258,
+  "strips_file_bytes": 269654,
+  "tile_archive_bytes": 297764,
+  "tile_carve_bytes": 327680,
+  "tile_carve_headroom": 29916
+ },
+ "classification": "pessimistic residency ledger; sizes, addresses and counts only",
+ "cram": {
+  "capacity_bytes": 4096,
+  "colour_ram_offsets": {
+   "nbg0_palette": "colour-ram offset 2",
+   "nbg1_palette": "colour-ram offset 3"
+  },
+  "note": "street planes reuse the two frontend palette blocks; boot claims the remaining blocks (measured when the street palette exhaustion bug was fixed)",
+  "status": "MEASURED"
+ },
+ "disc_guard": {
+  "declared_windows": [
+   "interior wipe: CDDA paused"
+  ],
+  "guard_module": "avsp_disc_guard.c",
+  "host_test": "tests/avsp_disc_guard_test.c",
+  "note": "the CD track start call is still disabled, so live CDDA rejection is contract skeleton; the host test proves the guard semantics including both negative controls",
+  "reader_guarded": "avsp_fs_read_into rejects reads with FS CDDA LOCK when CDDA owns the drive and no measured window is open",
+  "status": "ADAPTED"
+ },
+ "schema": "avsp-residency-budget-v0",
+ "scsp": {
+  "iso_members": {
+   "BOSSCLR.PCM": 637084,
+   "BOSSIN.PCM": 134568,
+   "BREACH.PCM": 298476,
+   "CONTACT.PCM": 90768,
+   "DOOR.PCM": 164076,
+   "GUN.PCM": 159192,
+   "HIT.PCM": 88016,
+   "IMPACT.PCM": 68064,
+   "KOCONT.PCM": 87260,
+   "KOIMP.PCM": 79280,
+   "MELEE.PCM": 144752,
+   "RND1A.PCM": 113208,
+   "RND1B.PCM": 91124,
+   "TRANS.PCM": 175256,
+   "WITHDRW.PCM": 396708
+  },
+  "note": "PCM buffers live in the jo allocator zones (work RAM and cartridge), not SCSP RAM, and are fed to the SCSP by the driver; the constraint is allocator headroom. The total staged member set exceeds any single phase by design: residency is phase-bounded (boss-clear loads at the interior wipe after ~900 KB of opening PCM is released). A live allocator/SCSP high-water instrument is a GAP.",
+  "status": "ADAPTED",
+  "total_member_bytes": 2727832
+ },
+ "vdp1": {
+  "capacity_bytes": 524288,
+  "command_classes": {
+   "0": 1,
+   "1": 2,
+   "2": 268
+  },
+  "headroom_bytes": 226524,
+  "live_command_sample": 271,
+  "note": "command sample from one paused street frame; a route-wide command high-water is a GAP until a soak instrument runs",
+  "status": "MEASURED",
+  "texture_archive_bytes": 297764
+ },
+ "vdp2": {
+  "capacity_bytes": 524288,
+  "character_bytes": 160704,
+  "headroom_bytes": 355400,
+  "note": "street scene (largest measured scene); frontend bitmap scenes measured separately at RP0",
+  "pattern_bytes": 8184,
+  "status": "MEASURED",
+  "used_bytes": 168888
+ },
+ "work_ram_limit": "0x060c0000",
+ "work_ram_profiles": {
+  "debug-encounter-test": {
+   "bend": "0x060bfec0",
+   "headroom_bytes": 320,
+   "limit": "0x060c0000",
+   "profile": "debug-encounter-test",
+   "status": "MEASURED"
+  },
+  "debug-frontend-test": {
+   "bend": "0x060bf820",
+   "headroom_bytes": 2016,
+   "limit": "0x060c0000",
+   "profile": "debug-frontend-test",
+   "status": "MEASURED"
+  },
+  "debug-normal-release": {
+   "bend": "0x060bf6c0",
+   "headroom_bytes": 2368,
+   "limit": "0x060c0000",
+   "profile": "debug-normal-release",
+   "status": "MEASURED"
+  },
+  "debug-street-test": {
+   "bend": "0x0608a190",
+   "headroom_bytes": 220784,
+   "limit": "0x060c0000",
+   "profile": "debug-street-test",
+   "status": "MEASURED"
+  }
+ }
+}

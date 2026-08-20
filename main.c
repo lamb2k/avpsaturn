@@ -5,6 +5,7 @@
 #include "avsp_collision.h"
 #include "avsp_cram.h"
 #include "avsp_frontend.h"
+#include "avsp_disc_guard.h"
 
 #include "generated/avsp_anim_records.h"
 #include "generated/avsp_emit_windows.h"
@@ -336,6 +337,10 @@ static unsigned char avsp_fs_staging[AVSP_FS_STAGING_BYTES];
 /* Boot-bringup diagnostic: which stage of the cartridge-safe reader
  * failed last. Volatile so the release optimizer keeps these
  * debugger-read fields. */
+/* RP5: every data-track read asks this guard first; CDDA ownership and
+ * measured phase-boundary windows are the only inputs. Non-static so the
+ * debug rig reads the counters by symbol. */
+AvspDiscGuard avsp_disc_guard_state;
 static const char *volatile avsp_fs_last_error;
 static volatile int avsp_fs_last_read;
 volatile const char *avsp_diag_fs_name;
@@ -357,6 +362,13 @@ static int avsp_fs_read_into(const char *const filename,
     int fsize;
     int offset = 0;
 
+    if (!avsp_disc_guard_check(&avsp_disc_guard_state))
+    {
+        /* CDDA owns the drive and no measured window is open: reject the
+           read loudly instead of seeking the data track mid-music. */
+        avsp_fs_last_error = "FS CDDA LOCK";
+        return -1;
+    }
     avsp_diag_fs_name = filename;
     avsp_diag_fs_dir = sub_dir;
     avsp_diag_fs_expected = 0;
@@ -2968,12 +2980,29 @@ static void frame_callback(void)
         /* Reclaim any trailing run of freed blocks into bump space; jo_free
            alone rolls back only a block directly adjacent to the pointer. */
         jo_reduce_memory_fragmentation();
+        /* The interior wipe is the declared legal seek window: stage CDDA
+           is paused for the wipe (the start call itself is still disabled,
+           so today this encodes the contract skeleton - ADAPTED until the
+           CD track start returns), the one bounded load runs inside an
+           explicit measured window, and music ownership is restored after.
+           Reads outside declared windows after the music point are
+           rejected and counted by the guard. */
+        avsp_disc_guard_cdda_stopped(&avsp_disc_guard_state);
+        if (!avsp_disc_guard_window_begin(&avsp_disc_guard_state,
+                                          "interior wipe: CDDA paused"))
+        {
+            failed_asset = "DISC WINDOW";
+            runtime_ready = 0;
+            return;
+        }
         jo_printf(15, 13, "NOW LOADING");
         loaded = load_pcm_audio(&boss_clear_sound, AVSP_BOSS_CLEAR_PCM_FILE,
                                 AVSP_BOSS_CLEAR_PCM_DIRECTORY,
                                 AVSP_BOSS_CLEAR_PCM_BYTES,
                                 AVSP_BOSS_CLEAR_PCM_SAMPLE_RATE);
         jo_printf(15, 13, "           ");
+        avsp_disc_guard_window_end(&avsp_disc_guard_state);
+        avsp_disc_guard_cdda_started(&avsp_disc_guard_state);
         if (!loaded)
         {
             runtime_ready = 0;
@@ -3190,6 +3219,10 @@ static void frame_callback(void)
         /* jo_audio_play_cd_track(2, 2, true); */
         stage_music_started = 1;
         avsp_frontend_lock_disc_reads(&frontend_runtime);
+        /* The data-read guard mirrors the frontend lock: from here the
+           drive belongs to CDDA (the start call is temporarily disabled,
+           but the residency contract is enforced as if it were live). */
+        avsp_disc_guard_cdda_started(&avsp_disc_guard_state);
     }
 #ifdef AVSP_VISUAL_TEST
     {
@@ -3327,6 +3360,7 @@ void jo_main(void)
 {
     int index;
     failed_asset = JO_NULL;
+    avsp_disc_guard_init(&avsp_disc_guard_state);
     background_bitmap = JO_NULL;
     background_image.data = JO_NULL;
     boss_background_image.data = JO_NULL;

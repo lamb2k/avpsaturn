@@ -113,6 +113,12 @@ if ($LASTEXITCODE -ne 0) {
     throw "AvspSceneRuntime player test failed with exit code $LASTEXITCODE."
 }
 
+$discGuardCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_disc_guard.c tests/avsp_disc_guard_test.c -o build/avsp_disc_guard_test && ./build/avsp_disc_guard_test"
+& $wsl.Source sh '-lc' $discGuardCommand
+if ($LASTEXITCODE -ne 0) {
+    throw "Disc-read guard test failed with exit code $LASTEXITCODE."
+}
+
 $animCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_anim_script.c tests/avsp_anim_script_test.c -o build/avsp_anim_script_test && ./build/avsp_anim_script_test"
 & $wsl.Source sh '-lc' $animCommand
 if ($LASTEXITCODE -ne 0) {
@@ -343,6 +349,17 @@ if (Test-Path (Join-Path $PSScriptRoot 'data\avsp_scene_manifest.json')) {
     & $PythonPath (Join-Path $PSScriptRoot 'tools\verify_scene_manifest.py')
     if ($LASTEXITCODE -ne 0) {
         throw "Scene manifest verification failed with exit code $LASTEXITCODE."
+    }
+}
+
+# RP5 residency ledger: every recorded profile must sit under the work-RAM
+# limit, carve arithmetic must recompute, bounded resources must show
+# non-negative headroom, and each section needs a MEASURED/ADAPTED/GAP
+# status. Offline check against tracked JSON only.
+if (Test-Path (Join-Path $PSScriptRoot 'data\avsp_residency_budget.json')) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tools\verify_residency_budget.py')
+    if ($LASTEXITCODE -ne 0) {
+        throw "Residency budget verification failed with exit code $LASTEXITCODE."
     }
 }
 
