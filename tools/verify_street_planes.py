@@ -502,6 +502,13 @@ def main() -> None:
         "priority_split": priority_split,
         "negative_controls": controls,
     }
+    # Preserve sections other tools own (verify_street_composite.py
+    # writes the composite/overlap evidence into the same readback file).
+    if OUTPUT.exists():
+        previous = json.loads(OUTPUT.read_text())
+        for key, value in previous.items():
+            if key not in report:
+                report[key] = value
     OUTPUT.write_text(json.dumps(report, indent=1, sort_keys=True) + "\n",
                       encoding="ascii", newline="\n")
     fail = tiles_missing > 0 or objects_ok != 12118 or \
