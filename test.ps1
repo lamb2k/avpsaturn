@@ -466,6 +466,14 @@ if ($LASTEXITCODE -ne 0) {
     throw "RP4 status instrument tests failed with exit code $LASTEXITCODE."
 }
 
+# RP4 v1 Saturn-control evidence schema (capture-free): three named
+# controls, full evidence per control, and no promotion of a blocked
+# or self-comparing control into a pass.
+& $PythonPath (Join-Path $PSScriptRoot 'tests\test_saturn_control_status.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Saturn control schema tests failed with exit code $LASTEXITCODE."
+}
+
 # RP4 v1 source-order acceptance controls (capture-free): the v0
 # verdict stays preserved, and blocked, missing or undetecting
 # controls can never reach PASS.
