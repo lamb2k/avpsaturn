@@ -1,0 +1,56 @@
+{
+ "controls": {
+  "inverted_obj_over_s2": {
+   "detected": true,
+   "dominance": 0.0696
+  },
+  "inverted_obj_over_s3": {
+   "detected": true,
+   "dominance": 0.0
+  },
+  "inverted_s2_over_s3": {
+   "detected": true,
+   "dominance": 0.0
+  },
+  "object_x_shift": {
+   "detected": true,
+   "top_wins_after_shift": 3302,
+   "top_wins_before": 10284
+  }
+ },
+ "controls_all_detect": true,
+ "dominance_threshold": 0.9,
+ "expected_order_holds": true,
+ "limitations": {
+  "actor_class_visibility": "all 402 priority-1 entries in the interval are offscreen; actor-class order rests on live registers only (ADAPTED)",
+  "decoder_residue": "undecidable_neither pixels are offline object-decoder imprecision (GAP), excluded from the vote and reported"
+ },
+ "model_order_bottom_to_top": [
+  "scroll3/NBG1",
+  "scroll2/NBG0",
+  "objects/VDP1"
+ ],
+ "pair_census": {
+  "obj_over_s2": {
+   "ambiguous": 28,
+   "bottom_wins": 769,
+   "top_wins": 10284,
+   "undecidable_neither": 7937
+  },
+  "obj_over_s3": {
+   "ambiguous": 0,
+   "bottom_wins": 0,
+   "top_wins": 493,
+   "undecidable_neither": 2130
+  },
+  "s2_over_s3": {
+   "ambiguous": 0,
+   "bottom_wins": 0,
+   "top_wins": 36503,
+   "undecidable_neither": 2657
+  }
+ },
+ "schema": "rp4-street-overlap-v0",
+ "source_frame": 3474,
+ "summary": "obj_over_s2: 0.930, s2_over_s3: 1.000, obj_over_s3: 1.000"
+}

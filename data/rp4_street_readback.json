@@ -1,5 +1,55 @@
 {
- "frames_pixel_checked": 124,
+ "composite": {
+  "composite_mismatch_max_per_frame": 21066,
+  "composite_mismatch_note": "object pixel-decoder imprecision residue (GAP); the per-plane reconstruction mismatches are 0 (see plane_pixels_mismatched)",
+  "composite_mismatch_total": 2181334,
+  "controls": {
+   "overlap_object_shift": {
+    "detail": "BLOCKED: requires the measured overlap; the interval is falsified (no actor-class pixel is onscreen in frames 3474-3674)",
+    "detected": null
+   },
+   "overlap_priority_swap": {
+    "detail": "BLOCKED: requires the measured overlap; the interval is falsified (no actor-class pixel is onscreen in frames 3474-3674)",
+    "detected": null
+   },
+   "palette_cycle": {
+    "detail": "cycle destination pen 7 (bank 1) recoloured at flip frame",
+    "detected": true,
+    "pixels": 6
+   },
+   "patch_dropped": {
+    "detail": "first patch: 730 map words reverted to interval start",
+    "detected": true,
+    "pixels": 4045
+   },
+   "register_order": {
+    "detail": "foreground class composited below NBG0",
+    "detected": true,
+    "pixels": 18920
+   },
+   "row_entry": {
+    "detail": "row scroll enabled, one visible entry = 1",
+    "detected": true,
+    "pixels": 127
+   },
+   "scroll_shift": {
+    "detail": "scroll2 X register +1",
+    "detected": true,
+    "pixels": 25249
+   },
+   "wrong_transform": {
+    "detail": "naive vs endpoint-aligned fitted composite",
+    "detected": true,
+    "pixels": 17095
+   }
+  },
+  "controls_all_detected": true,
+  "controls_executed": 6,
+  "frames_composited": 201,
+  "overlap": null,
+  "overlap_verdict": "RP4 interval falsified: no deliberate overlap"
+ },
+ "frames_pixel_checked": 201,
  "frames_structural": 201,
  "interval": [
   3474,
@@ -11,27 +61,27 @@
    "failed": true
   },
   "cycle_colour": {
-   "detail": "14 cycle entries; recolouring any changes the CRAM stream",
+   "detail": "rel 4: LUT 52 recoloured, mismatch 6 (baseline 0)",
    "failed": true
   },
   "object_priority": {
-   "detail": "priority classes {1: 402, 4: 11716}; flipping one moves an entry between the two class counters",
+   "detail": "rel 0: class flip moves counts {1: 2, 4: 57} -> {3: 1, 1: 1, 4: 57}",
    "failed": true
   },
   "object_x": {
-   "detail": "12118 schedule entries byte-verified against the capture; any x perturbation breaks the equality assert",
+   "detail": "rel 0: entry 0 x+1 breaks the byte comparison against the captured bank",
    "failed": true
   },
   "patch_dropped": {
-   "detail": "dropping either patch leaves stale pattern names at its 16 cells",
+   "detail": "rel 123: patch 0 dropped, mismatch 460 (baseline 0)",
    "failed": true
   },
   "priority_register": {
-   "detail": "class order inverted (actor 6 / foreground 4) breaks the required actor<foreground register order 4<6",
+   "detail": "overlap fixture frame 3474: obj_over_s2: 0.930, s2_over_s3: 1.000, obj_over_s3: 1.000",
    "failed": true
   },
   "scroll_shift": {
-   "detail": "one-frame shift changes the scroll comparison stream",
+   "detail": "rel 0: scroll+1 mismatch 32470 (baseline 0)",
    "failed": true
   },
   "wrong_transform": {

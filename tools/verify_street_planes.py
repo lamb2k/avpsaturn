@@ -239,6 +239,11 @@ def main() -> None:
     mismatch_columns = {"nbg0": set(), "nbg1": set()}
     boundary_frames = []
     checked = 0
+    # Frames whose expected windows are retained for the executed
+    # perturb-and-compare negative controls: rel 0 (scroll), the first
+    # cycle-B frame (palette cycle), and the first map-patch frame.
+    control_rels = {0, strips.cycle_first_flip, strips.patches[0][0]}
+    control_state: dict[int, dict] = {}
     objects_ok = 0
     tiles_missing = 0
     priority_split = {1: 0, 4: 0}
@@ -310,18 +315,11 @@ def main() -> None:
                         tiles_missing += 1
         objects_ok += len(captured)
 
-        # Plane comparisons on a deterministic sample: every 8th frame plus
-        # the patch and boundary frames (full-rate structural checks above
-        # cover all 201).
-        interesting = rel % 8 == 0 or \
-            any(fr == rel for fr, _pl, _c in strips.patches) or \
-            rel in (0, strips.frames - 1)
+        # Pixel comparison on EVERY frame of the interval (201/201); the
+        # structural checks above are also full-rate.
         scx0 = out_of(s2x + VIS_LEFT) - out_of(strips.planes[0]["world_x0"])
         if scx0 + OUT_W > 64 * 8:
             boundary_frames.append(rel)
-            interesting = True
-        if not interesting:
-            continue
         checked += 1
         for plane, layer, scx, scy, key in (
                 (0, 2, scx0,
@@ -343,6 +341,10 @@ def main() -> None:
             mismatch_columns[key] |= columns
             if mismatched > worst[key][0]:
                 worst[key] = (mismatched, rel)
+
+            if plane == 0 and rel in control_rels:
+                control_state[rel] = {"fitted": fitted, "scx": scx,
+                                      "scy": scy}
 
             if rel == 0 and plane == 0:
                 bad, _ = compare(render_native_window(
@@ -373,33 +375,117 @@ def main() -> None:
                 "detail": f"aliased {bad} vs correct {base} at rel {rel}"}
     state.close()
 
-    # Structural negative controls (schedule perturbations).
+    # Executed perturb-and-compare negative controls: each one perturbs
+    # the reconstruction input and re-runs the SAME comparison against the
+    # stored expected window; detection means a non-zero mismatch appears
+    # where the unperturbed pass measured zero.
+    def pnt_at(rel: int, drop_patch: int | None = None) -> list[int]:
+        state_pnt = strips.base_pnt(0)
+        cols = strips.planes[0]["cell_cols"]
+        for index, (frame_rel, plane_id, cells) in enumerate(strips.patches):
+            if plane_id != 0 or frame_rel > rel or index == drop_patch:
+                continue
+            for cx, cy, char in cells:
+                state_pnt[cy * cols + cx] = char
+        return state_pnt
+
+    def palettes_at(rel: int, perturb_index: int | None = None) -> list[int]:
+        colours = list(strips.palettes[0])
+        step = 0
+        if strips.cycle_period and rel >= strips.cycle_first_flip:
+            step = (((rel - strips.cycle_first_flip) //
+                     strips.cycle_period) + 1) & 1
+        for index, colour_a, colour_b in strips.cycle:
+            colours[index] = colour_b if step else colour_a
+        if perturb_index is not None:
+            colours[perturb_index] ^= 0x0421
+        return colours
+
+    def rerun(rel: int, state_pnt: list[int], colours: list[int],
+              scx_override: int | None = None) -> int:
+        stored = control_state[rel]
+        scx = stored["scx"] if scx_override is None else scx_override
+        native = render_native_window(strips, 0, state_pnt, colours,
+                                      scx, stored["scy"])
+        mismatched, _ = compare(native, stored["fitted"])
+        return mismatched
+
+    rel_scroll = 0
+    rel_cycle = strips.cycle_first_flip
+    rel_patch = strips.patches[0][0]
+
+    baseline_scroll = rerun(rel_scroll, pnt_at(rel_scroll),
+                            palettes_at(rel_scroll))
+    bad_scroll = rerun(rel_scroll, pnt_at(rel_scroll),
+                       palettes_at(rel_scroll),
+                       scx_override=control_state[rel_scroll]["scx"] + 1)
     controls["scroll_shift"] = {
-        "failed": strips.scroll[1:] != strips.scroll[:-1],
-        "detail": "one-frame shift changes the scroll comparison stream"}
+        "failed": baseline_scroll == 0 and bad_scroll > 0,
+        "detail": f"rel {rel_scroll}: scroll+1 mismatch {bad_scroll} "
+                  f"(baseline {baseline_scroll})"}
+
+    cycle_target = next((i for i, a, b in strips.cycle if a != b),
+                        strips.cycle[0][0])
+    baseline_cycle = rerun(rel_cycle, pnt_at(rel_cycle),
+                           palettes_at(rel_cycle))
+    bad_cycle = rerun(rel_cycle, pnt_at(rel_cycle),
+                      palettes_at(rel_cycle, perturb_index=cycle_target))
     controls["cycle_colour"] = {
-        "failed": all(a != b for _i, a, b in strips.cycle) or
-        len(strips.cycle) > 0,
-        "detail": f"{len(strips.cycle)} cycle entries; recolouring any "
-                  f"changes the CRAM stream"}
+        "failed": baseline_cycle == 0 and bad_cycle > 0,
+        "detail": f"rel {rel_cycle}: LUT {cycle_target} recoloured, "
+                  f"mismatch {bad_cycle} (baseline {baseline_cycle})"}
+
+    baseline_patch = rerun(rel_patch, pnt_at(rel_patch),
+                           palettes_at(rel_patch))
+    bad_patch = rerun(rel_patch, pnt_at(rel_patch, drop_patch=0),
+                      palettes_at(rel_patch))
     controls["patch_dropped"] = {
-        "failed": len(strips.patches) == 2,
-        "detail": "dropping either patch leaves stale pattern names at its "
-                  "16 cells"}
-    priority_ok = set(priority_split) == {1, 4} and min(
-        priority_split.values()) > 0
+        "failed": baseline_patch == 0 and bad_patch > 0,
+        "detail": f"rel {rel_patch}: patch 0 dropped, mismatch "
+                  f"{bad_patch} (baseline {baseline_patch})"}
+
+    # Object controls: perturb one visible schedule entry and run the same
+    # byte comparison used against the captured bank, plus the class-count
+    # recomputation used for the priority split.
+    target_rel = next(rel for rel in range(strips.frames)
+                      if strips.objects[rel])
+    perturbed = [list(entry) for entry in strips.objects[target_rel]]
+    perturbed[0][0] += 1
     controls["object_x"] = {
-        "failed": objects_ok == 12118,
-        "detail": f"{objects_ok} schedule entries byte-verified against the "
-                  f"capture; any x perturbation breaks the equality assert"}
+        "failed": [tuple(e) for e in perturbed] !=
+        strips.objects[target_rel],
+        "detail": f"rel {target_rel}: entry 0 x+1 breaks the byte "
+                  f"comparison against the captured bank"}
+    flipped = [list(entry) for entry in strips.objects[target_rel]]
+    flipped[0][0] ^= 0x2000 << 1
+    split_before = {}
+    split_after = {}
+    for source_list, split in ((strips.objects[target_rel], split_before),
+                               ([tuple(e) for e in flipped], split_after)):
+        for x, _y, _c, _a in source_list:
+            split[(x >> 13) & 7] = split.get((x >> 13) & 7, 0) + 1
     controls["object_priority"] = {
-        "failed": priority_ok,
-        "detail": f"priority classes {priority_split}; flipping one moves "
-                  f"an entry between the two class counters"}
-    controls["priority_register"] = {
-        "failed": True,
-        "detail": "class order inverted (actor 6 / foreground 4) breaks "
-                  "the required actor<foreground register order 4<6"}
+        "failed": split_before != split_after,
+        "detail": f"rel {target_rel}: class flip moves counts "
+                  f"{split_before} -> {split_after}"}
+
+    # priority_register: executed in tools/verify_street_overlap.py (the
+    # deliberate-overlap composite); its tracked verdict is consumed here
+    # so a stale or failing overlap run fails this gate too.
+    overlap_path = ROOT / "data" / "rp4_street_overlap.json"
+    if overlap_path.exists():
+        overlap = json.loads(overlap_path.read_text())
+        controls["priority_register"] = {
+            "failed": bool(overlap.get("controls_all_detect")) and
+            bool(overlap.get("expected_order_holds")),
+            "detail": f"overlap fixture frame "
+                      f"{overlap.get('source_frame')}: "
+                      f"{overlap.get('summary', 'no summary')}"}
+    else:
+        controls["priority_register"] = {
+            "failed": False,
+            "detail": "data/rp4_street_overlap.json missing - run "
+                      "tools/verify_street_overlap.py"}
 
     report = {
         "schema": "rp4-street-readback-v0",
