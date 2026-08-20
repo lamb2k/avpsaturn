@@ -10,6 +10,110 @@ git log --oneline -10
 Get-Process mame,yabasanshiro* -ErrorAction SilentlyContinue
 ```
 
+## Implementation report: RP4-RP7 acceptance corrections (2026-08-20)
+
+- Worktree: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-ClaudeCorrections`,
+  branch `claude/rp4-rp7-acceptance-corrections`, BASE_SHA
+  `e79f666c865b096192aa102137db1cfdfad6c321`. The dirty primary worktree was
+  not edited. `.deps`/`avspu` are NTFS junctions into the primary (never
+  committed).
+- Correction commits (oldest first): `c7e8f80` (clean-checkout
+  reproducibility: loader sources, START_TRANSITION interface + exact
+  30-frame test, generated-input preflight, Invoke-Generator harness,
+  lexical manifest paths + junction test), `a12165f` (STRIPS parser
+  extracted to `avsp_street_bundle.c/h`, 23 ASan corrupt/truncated
+  controls), `a1c7ef0` (signature_id/runtime_scene_id policy,
+  `generated/avsp_scene_ids.h`, row-scroll runtime-ID join, 9+4 ID
+  controls), `23566a7` (RP4 201/201 pixel frames, full host composite,
+  6 executed controls, overlap falsification), `41f4c21` (stateless
+  residency: `tools/measure_avsp_profile.ps1`, four explicit profile
+  measurements, byte-identical ledger; street-bundle scoped to the
+  street profile after it pushed encounter-test 704 bytes over the
+  0x060C0000 bound), `9589294`, `875f69f`, `72cb9e2` (verifier/wiring
+  fixes and the live readback record).
+
+### Checks and exact results
+
+1. Narrow host tests: street-bundle (24 cases incl. view-unusable
+   assertion, ASan exact-size buffers), scene manifest (9 controls),
+   row-scroll (4 controls), residency (v1 schema, 3 controls), manifest
+   junction-path test - all PASS.
+2. RP4 reconstruction: `verify_street_planes.py` - 201/201 pixel frames,
+   mismatches nbg0=0 nbg1=0, objects 12118, missing tiles 0, executed
+   controls PASS. `verify_street_composite.py` - 201 frames composited
+   (NBG1 < NBG0 < actor < foreground < scroll1); six executed one-input
+   perturbation controls all detect (wrong_transform 17095 px,
+   scroll_shift 25249, row_entry 127, palette_cycle 6, patch_dropped
+   4045, register_order 18920).
+3. **RP4 interval falsified: no deliberate overlap.** The interval's 402
+   actor-class (CPS priority 1) schedule entries are all parked
+   offscreen (raw-geometry scan, zero opaque actor pixels in all 201
+   frames), so no actor/foreground overlap exists to measure. Recorded
+   verbatim in `data/rp4_street_readback.json` (`composite` section);
+   the two overlap-object controls are BLOCKED, not fabricated. Per the
+   contract stop condition this path stops without substituting another
+   design; actor-class ordering remains ADAPTED (live registers only).
+   Composite-vs-PNG residue (total 2181334 px over 201 frames, max
+   21066/frame) is offline object-decoder + scroll1 imprecision, GAP.
+4. Determinism: STRIPS.BIN
+   `7c28617351ec2bb2099d10e28de561f0ef64feb2fbb1784c5dae11d29c7f1c22`
+   (269654 bytes) twice; scene manifest, `avsp_scene_ids.h`, row-scroll
+   classification and residency ledger each regenerated twice
+   byte-identical (ledger sha256 `c329c380fc81...`).
+5. Full `.\test.ps1`: exit 0 (includes the deterministic capability
+   soak and every RP gate above).
+6. `git diff --check`: clean.
+7. `.\build.ps1 -Clean -StreetTest` WITH host tests: exit 0. Hashes:
+   TILES.BIN `43d9707f2bcd...` (297764), game.iso (street)
+   `f59449e82995...` (6141952), game.cue `bfc58c7020d9...`, loader
+   IP.BIN `a442bd5a5fda...` (4860), 0.BIN `1f55dae40281...` (29036),
+   game.elf `c487105e472f...`.
+8. Visible pinned StreetTest boot: `yabasanshiro.exe -nb -a -i
+   %TEMP%\AvPSaturnCapabilityTest\game.yaba.cue` (staged cue sha256
+   `f8a1b410b96a...`), Yaba Sanshiro 1.20.37. Live readback
+   (`data/rp4_street_live_readback.json`): runtime_ready=1, street
+   frames advancing (109 -> 184 -> 194), PRINA 0x0203 / PRINB 0x0102 /
+   PRISA 0x0406, SPCTL 0x0023, VDP1 classes {0:1, 1:2, 2:308}, CRAOFA
+   0x0032, all VRAM canaries match the staged STRIPS.BIN, print buffer
+   clean.
+9. EncounterTest: exit 0 build, self-driving route reached
+   CAP_ENCOUNTER_COMPLETE (state 18) at frame 3532, live over MCP.
+10. Normal-release: build exit 0 (ISO `5d7112e6f603...`), title boot
+    healthy - runtime_ready=1, frames advancing 596 -> 658,
+    encounter_state 0 (MAIN_MENU title).
+11. All MAME/Yaba/Kronos/Mednafen processes stopped and verified gone.
+12. Work-RAM residency (all four profiles, measured):
+    normal-release __bend 0x060bf6c0 (headroom 2368), frontend-test
+    0x060bf820 (2016), encounter-test 0x060bfec0 (320), street-test
+    0x0608a3a0 (220256); limit 0x060C0000.
+
+### Remaining ADAPTED / GAP / UNRUN
+
+- ADAPTED: actor-class (priority-1) VDP1 ordering above NBG0 - no
+  visible in-interval evidence exists (falsified above); rests on the
+  live register programming. CDDA ownership/rejection path - CD track
+  start still disabled. Character fallback rendering per capability
+  model.
+- GAP: route-wide VDP1 command high-water; allocator/SCSP high-water;
+  offline object pixel-decoder residue in the full composite.
+- UNRUN: physical Saturn hardware boot; audible CDDA on hardware.
+- RP4, RP5, RP6, RP7, SP7, SP8 are NOT represented as passed; Codex
+  owns acceptance. Capability Gate 1 remains 0/7.
+
+### Suggested next body (for Codex only)
+
+The RP4 overlap contract cannot be satisfied inside frames 3474-3674:
+actor-class content never enters the visible window there. Two
+evidence-preserving options: (a) re-select the RP4 proof interval to a
+street window that provably contains onscreen priority-1 objects (a
+census scan over the street group can locate candidates before any
+generator work), keeping the current 201-frame reconstruction as-is; or
+(b) accept the falsification record and carry actor-class ordering as a
+live-register ADAPTED item into the RP8 gameplay renderer, where actors
+are guaranteed onscreen and the same composite census applies. Option
+(a) costs one re-capture-free re-selection pass; option (b) defers the
+pixel proof to a package that needs it anyway.
+
 ## Repository state
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
