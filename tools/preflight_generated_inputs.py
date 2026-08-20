@@ -125,6 +125,45 @@ for name in ("avsp_audio.h", "avsp_boss_clear_audio.h",
     }
 
 
+def ensure_header(name: str) -> None:
+    """Targeted ensure of ONE mapped generated header.
+
+    Used by test.ps1 before the first collision-dependent host
+    compilation. Accepts only headers with a command producer mapping,
+    verifies every required private input first, runs the recorded
+    producer only when the header is missing, and requires the expected
+    output to exist and be nonzero afterwards. Deterministic: the
+    producers are the same deterministic generators the build runs.
+    """
+    producer = PRODUCERS.get(name)
+    if producer is None:
+        raise SystemExit(
+            f"generated/{name}: no producer mapping in "
+            f"{Path(__file__).name}; refusing to guess")
+    if "command" not in producer:
+        raise SystemExit(
+            f"generated/{name} is stage-owned ({producer.get('stage')}); "
+            f"the targeted ensure only runs command producers")
+    output = ROOT / producer.get("output_override", f"generated/{name}")
+    if output.exists() and output.stat().st_size > 0:
+        return
+    missing = [i for i in producer["inputs"] if not (ROOT / i).exists()]
+    if missing:
+        raise SystemExit(
+            f"generated/{name} is missing and cannot be produced: "
+            f"required private input(s) absent: {', '.join(missing)} "
+            f"(producer: {' '.join(str(c) for c in producer['command'][1:])})")
+    result = subprocess.run(producer["command"], cwd=ROOT)
+    if result.returncode != 0:
+        raise SystemExit(
+            f"generated/{name}: producer exited {result.returncode}")
+    if not output.exists() or output.stat().st_size == 0:
+        raise SystemExit(
+            f"generated/{name}: producer exited 0 but produced no "
+            f"nonzero {output.relative_to(ROOT)}")
+    print(f"ensured generated/{name}")
+
+
 def required_headers() -> set[str]:
     pattern = re.compile(r'#include\s+"generated/([A-Za-z0-9_.]+)"')
     found: set[str] = set()
@@ -140,7 +179,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check-mapping", action="store_true",
                         help="capture-free mapping/loader coverage check")
+    parser.add_argument("--ensure", metavar="HEADER",
+                        help="ensure ONE mapped generated header exists, "
+                             "producing it if its private inputs allow")
     args = parser.parse_args()
+
+    if args.ensure:
+        ensure_header(args.ensure)
+        return
 
     errors: list[str] = []
     for source in LOADER_SOURCES:

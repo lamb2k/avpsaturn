@@ -74,6 +74,21 @@ if ($LASTEXITCODE -ne 0 -or -not $linuxRoot) {
     throw 'Could not translate the project path for WSL.'
 }
 
+# Clean-checkout bootstrap (Chapter 0 correction): the mapping check runs
+# BEFORE any host compilation so unmapped generated headers surface here,
+# and the collision header - the first generated input a host test
+# compiles against - is ensured through its recorded producer. Without
+# this, a fresh worktree failed at the actor test with a bare
+# missing-include error instead of reaching the RP4 composite gate.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\preflight_generated_inputs.py') --check-mapping
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated-input mapping check failed with exit code $LASTEXITCODE."
+}
+& $PythonPath (Join-Path $PSScriptRoot 'tools\preflight_generated_inputs.py') --ensure avsp_collision.h
+if ($LASTEXITCODE -ne 0) {
+    throw "Collision-header bootstrap failed with exit code $LASTEXITCODE."
+}
+
 if ($linuxRoot.Contains("'")) {
     throw 'The WSL project path contains an unsupported apostrophe.'
 }
@@ -343,9 +358,22 @@ if ($LASTEXITCODE -ne 0) {
 # RP4 street plane proof: full offline reconstruction of the representative
 # interval (structural checks on all 201 frames, pixel comparison on the
 # sampled set, eight negative controls). Requires the private full-route
-# capture and the generated fixture; skipped when either is absent.
-if ((Test-Path (Join-Path $PSScriptRoot '.deps\mame\full_route\region_index.tsv')) -and
-        (Test-Path (Join-Path $PSScriptRoot 'build\rp4_fixture\STRIPS.BIN'))) {
+# capture. Skipped ONLY when the private capture is absent; on a
+# capture-bearing machine a missing fixture is regenerated here so the
+# FALSIFIED composite result can never hide behind a skip.
+if (Test-Path (Join-Path $PSScriptRoot '.deps\mame\full_route\region_index.tsv')) {
+    if (-not (Test-Path (Join-Path $PSScriptRoot 'build\rp4_fixture\STRIPS.BIN'))) {
+        & $PythonPath (Join-Path $PSScriptRoot 'tools\gen_avsp_street_planes.py')
+        if ($LASTEXITCODE -ne 0) {
+            throw "RP4 fixture generation failed with exit code $LASTEXITCODE."
+        }
+    }
+    if (-not (Test-Path (Join-Path $PSScriptRoot 'build\avsp_cd\SPR4\TILES.BIN'))) {
+        & $PythonPath (Join-Path $PSScriptRoot 'tools\gen_avsp_gfx_tiles.py') --scope street
+        if ($LASTEXITCODE -ne 0) {
+            throw "Street tile archive generation failed with exit code $LASTEXITCODE."
+        }
+    }
     & $PythonPath (Join-Path $PSScriptRoot 'tools\verify_street_planes.py')
     if ($LASTEXITCODE -ne 0) {
         throw "Street plane verification failed with exit code $LASTEXITCODE."
@@ -402,12 +430,11 @@ if (Test-Path (Join-Path $PSScriptRoot 'data\round1_rowscroll_classification.jso
     }
 }
 
-# Clean-checkout coverage: every generated header included by tracked
-# sources must have a producer mapping, and the staged-loader sources
-# must be tracked. Capture-free.
-& $PythonPath (Join-Path $PSScriptRoot 'tools\preflight_generated_inputs.py') --check-mapping
+# Targeted generated-header ensure semantics (capture-free fakes plus the
+# real collision header when private inputs exist).
+& $PythonPath (Join-Path $PSScriptRoot 'tests\test_preflight_ensure.py')
 if ($LASTEXITCODE -ne 0) {
-    throw "Generated-input mapping check failed with exit code $LASTEXITCODE."
+    throw "Preflight ensure tests failed with exit code $LASTEXITCODE."
 }
 
 # RP4 acceptance-instrument unit controls (capture-free): blocked or
