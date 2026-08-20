@@ -227,9 +227,12 @@ must be measured again after the current integration links.
 ### Remaining ADAPTED/GAP
 
 - `ADAPTED`: the world-anchored anamorphic pre-scale realizes the endpoint
-  384->352 mapping at plane level; VDP1 object placement uses `fit_352`
-  (352/384 ratio) while the planes use the endpoint rule (351/383), a
-  <=1 px variance flagged for Codex review.
+  384->352 mapping at plane level. The street object draw now shares the
+  same endpoint rule (`street_out_of - 176`); the previous `fit_352`
+  variance was measured at exactly 0 or 1 px per screen column (6,761 of
+  12,118 scheduled objects sat 1 px left of the plane mapping) before
+  unification. The frontend/gameplay `fit_352` path (RP0-RP3 territory)
+  is unchanged and remains for Codex to rule on.
 - `GAP`: scroll1/HUD layer and row-scroll classification outside this
   interval remain unmodelled; production object sourcing still requires
   translated actor logic (the fixture must never ship in production).

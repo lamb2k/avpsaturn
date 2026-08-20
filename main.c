@@ -2428,9 +2428,13 @@ static void street_test_frame(void)
             if (sprite_id < 0) continue;
             if (entry_tiles[tile].flip_x) jo_sprite_enable_horizontal_flip();
             if (entry_tiles[tile].flip_y) jo_sprite_enable_vertical_flip();
+            /* Objects share the plane's endpoint-aligned 384->352 rule
+               (street_out_of), then shift into Jo's centered space; the
+               centered fit_352 sat 1 px left of the plane mapping for
+               6,761 of the 12,118 scheduled objects (measured). */
             jo_sprite_draw3D(sprite_id,
-                             fit_352((int)(x & 0x3FF) - 64 +
-                                     entry_tiles[tile].dx + 8 - 192),
+                             street_out_of((int)(x & 0x3FF) - 64 +
+                                           entry_tiles[tile].dx + 8) - 176,
                              (int)(y & 0x3FF) - 16 +
                                  entry_tiles[tile].dy + 8 - 112,
                              priority >= 4 ? 120 : 240);
