@@ -225,16 +225,115 @@ def main() -> None:
     for name in PLANES:
         palettes_out[name] += [0x8000] * (256 - len(palettes_out[name]))
 
+    # --- pack strips into VDP2 cell format --------------------------------
+    # Bitmap NBGs only come 512/1024 wide, and two 8bpp bitmaps would take
+    # the whole 512 KiB of VDP2 VRAM, so each pre-scaled strip is packed as
+    # deduplicated 8x8 8bpp characters plus a pattern-name grid. Map patches
+    # become pattern-name updates, matching the v0 MAP_PATCH operation.
+    CELL = 8
+
+    def pack_cells(name):
+        strip_bytes, out_w, height, world_x0, row0 = strips[name]
+        cell_cols = (out_w + CELL - 1) // CELL
+        cell_rows = (height + CELL - 1) // CELL
+        chars = {}
+        char_pool = bytearray()
+        pnt = []
+        for cy in range(cell_rows):
+            for cx in range(cell_cols):
+                cell = bytearray(CELL * CELL)
+                for y in range(CELL):
+                    sy = cy * CELL + y
+                    if sy >= height:
+                        break
+                    row_base = sy * out_w + cx * CELL
+                    span = strip_bytes[row_base:
+                                       row_base + min(CELL,
+                                                      out_w - cx * CELL)]
+                    cell[y * CELL:y * CELL + len(span)] = span
+                key = bytes(cell)
+                index = chars.get(key)
+                if index is None:
+                    index = len(chars)
+                    chars[key] = index
+                    char_pool += key
+                pnt.append(index)
+        return {"cell_cols": cell_cols, "cell_rows": cell_rows,
+                "world_x0": world_x0, "row0": row0, "chars": chars,
+                "char_pool": char_pool, "pnt": pnt,
+                "out_w": out_w, "height": height}
+
+    packed = {name: pack_cells(name) for name in PLANES}
+
+    # Map patches: update strip pixels, recompute affected cells, emit
+    # pattern-name updates (new characters appended to the pool).
+    patch_events = {}
+    for name in PLANES:
+        for frame, col, row, value in patches[name]:
+            patch_events.setdefault((frame, name), []).append(
+                (col, row, value))
+    patch_serial = []
+    for (frame, name), cells in sorted(patch_events.items()):
+        plane = PLANES[name]
+        size = plane["tile"]
+        strip_bytes, out_w, height, world_x0, row0 = strips[name]
+        strip = bytearray(strip_bytes)
+        pack = packed[name]
+        touched = set()
+        for col, row, (code, attr) in cells:
+            decoded = avsp.decode_tile(
+                gfx, plane["code_base"] + (code & plane["code_mask"]),
+                size, False)
+            pixels = decoded.load()
+            bank = attr & 0x1F
+            flip_x = bool(attr & 0x20)
+            flip_y = bool(attr & 0x40)
+            for py in range(size):
+                for px in range(size):
+                    pen = pixels[px, py]
+                    value_out = 0 if pen == 15 else lut_index(name, bank,
+                                                              pen)
+                    tx = size - 1 - px if flip_x else px
+                    ty = size - 1 - py if flip_y else py
+                    wx = col * size + tx
+                    sy = (row - row0) * size + ty
+                    for ox in range(out_of(wx), out_of(wx + 1)):
+                        sx = ox - out_of(world_x0)
+                        if 0 <= sx < out_w and 0 <= sy < height:
+                            strip[sy * out_w + sx] = value_out
+                            touched.add((sx // CELL, sy // CELL))
+        strips[name] = (bytes(strip), out_w, height, world_x0, row0)
+        updates = []
+        for cx, cy in sorted(touched):
+            cell = bytearray(CELL * CELL)
+            for y in range(CELL):
+                sy = cy * CELL + y
+                if sy >= height:
+                    break
+                row_base = sy * out_w + cx * CELL
+                span = strip[row_base:row_base + min(CELL,
+                                                     out_w - cx * CELL)]
+                cell[y * CELL:y * CELL + len(span)] = span
+            key = bytes(cell)
+            index = pack["chars"].get(key)
+            if index is None:
+                index = len(pack["chars"])
+                pack["chars"][key] = index
+                pack["char_pool"] += key
+            pack["pnt"][cy * pack["cell_cols"] + cx] = index
+            updates.append((cx, cy, index))
+        patch_serial.append((frame - FIRST_FRAME,
+                             0 if name == "scroll2" else 1, updates))
+
     # --- assemble the binary ----------------------------------------------
     blob = bytearray()
-    blob += struct.pack(">IHH", 0x41565353, 0, len(frames))
+    blob += struct.pack(">IHH", 0x41565353, 1, len(frames))
     header_pos = {}
     for name in ("scroll2", "scroll3"):
         header_pos[name] = len(blob)
-        blob += struct.pack(">HHHHI", 0, 0, 0, 0, 0)  # patched below
+        blob += struct.pack(">HHHHHHII", 0, 0, 0, 0, 0, 0, 0, 0)
     for name in ("scroll2", "scroll3"):
-        blob += b"".join(struct.pack(">H", c)
-                         for c in palettes_out[name])
+        blob += b"".join(struct.pack(">H", c) for c in palettes_out[name])
 
     # palette cycle: bank 1 of scroll2 alternates between two states.
     cycle_bank = 1
@@ -264,66 +363,11 @@ def main() -> None:
     for frame, s2x, s2y, s3x, s3y in frames:
         blob += struct.pack(">HHHH", s2x, s2y, s3x, s3y)
 
-    # map patches: re-render the touched 16px world column span per event.
-    patch_records = []
-    patch_pixels = bytearray()
-    patch_events = {}
-    for name in PLANES:
-        for frame, col, row, value in patches[name]:
-            patch_events.setdefault((name, frame), []).append(
-                (col, row, value))
-    for (name, frame), cells in sorted(patch_events.items(),
-                                       key=lambda kv: (kv[0][1], kv[0][0])):
-        plane = PLANES[name]
-        size = plane["tile"]
-        strip_bytes, out_w, height, world_x0, row0 = strips[name]
-        cols = sorted({c for c, _r, _v in cells})
-        span_w0 = out_of(cols[0] * size)
-        span_w1 = out_of((cols[-1] + 1) * size)
-        span = bytearray((span_w1 - span_w0) * height)
-        # start from current strip content, repaint the patched cells
-        for ox in range(span_w1 - span_w0):
-            for y in range(height):
-                span[y * (span_w1 - span_w0) + ox] = strip_bytes[
-                    y * out_w + (span_w0 - out_of(world_x0)) + ox]
-        for col, row, (code, attr) in cells:
-            decoded = avsp.decode_tile(
-                gfx, plane["code_base"] + (code & plane["code_mask"]),
-                size, False)
-            pixels = decoded.load()
-            bank = attr & 0x1F
-            flip_x = bool(attr & 0x20)
-            flip_y = bool(attr & 0x40)
-            cell_world_x = col * size
-            for py in range(size):
-                for px in range(size):
-                    pen = pixels[px, py]
-                    value_out = 0 if pen == 15 else \
-                        lut_index(name, bank, pen)
-                    tx = size - 1 - px if flip_x else px
-                    ty = size - 1 - py if flip_y else py
-                    wx = cell_world_x + tx
-                    ox0 = out_of(wx)
-                    ox1 = out_of(wx + 1)
-                    for ox in range(ox0, ox1):
-                        span[((row - row0) * size + ty) *
-                             (span_w1 - span_w0) + ox - span_w0] = value_out
-        patch_records.append((frame - FIRST_FRAME,
-                              0 if name == "scroll2" else 1,
-                              span_w0, span_w1 - span_w0, height,
-                              len(patch_pixels)))
-        patch_pixels += span
-        # keep the master strip current so later patches base on it
-        strip = bytearray(strip_bytes)
-        for ox in range(span_w1 - span_w0):
-            for y in range(height):
-                strip[y * out_w + (span_w0 - out_of(world_x0)) + ox] = \
-                    span[y * (span_w1 - span_w0) + ox]
-        strips[name] = (bytes(strip), out_w, height, world_x0, row0)
-
-    blob += struct.pack(">H", len(patch_records))
-    for record in patch_records:
-        blob += struct.pack(">HHHHHI", *record)
+    blob += struct.pack(">H", len(patch_serial))
+    for frame_rel, plane_id, updates in patch_serial:
+        blob += struct.pack(">HHH", frame_rel, plane_id, len(updates))
+        for cx, cy, index in updates:
+            blob += struct.pack(">HHH", cx, cy, index)
 
     # object schedule with TILES.BIN coverage.
     tile_codes = []
@@ -351,18 +395,16 @@ def main() -> None:
                                 (y & 0x3FF) - VISIBLE_TOP,
                                 attribute, (x >> 13) & 7)
 
-    # patch plane headers, append pixel pools.
-    pixel_cursor = len(blob) + len(patch_pixels)
-    ordered = []
     for name in ("scroll2", "scroll3"):
-        strip_bytes, out_w, height, world_x0, row0 = strips[name]
-        struct.pack_into(">HHHHI", blob, header_pos[name],
-                         out_w, height, world_x0, row0, pixel_cursor)
-        ordered.append(strip_bytes)
-        pixel_cursor += len(strip_bytes)
-    blob += patch_pixels
-    for strip_bytes in ordered:
-        blob += strip_bytes
+        pack = packed[name]
+        char_offset = len(blob)
+        blob += pack["char_pool"]
+        pnt_offset = len(blob)
+        blob += b"".join(struct.pack(">H", i) for i in pack["pnt"])
+        struct.pack_into(">HHHHHHII", blob, header_pos[name],
+                         pack["cell_cols"], pack["cell_rows"],
+                         pack["world_x0"], pack["row0"],
+                         len(pack["chars"]), 0, char_offset, pnt_offset)
 
     OUTPUT_BIN.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT_BIN.write_bytes(blob)
@@ -380,13 +422,17 @@ def main() -> None:
                 "height": strips[name][2],
                 "world_x0": strips[name][3],
                 "row0": strips[name][4],
+                "cell_cols": packed[name]["cell_cols"],
+                "cell_rows": packed[name]["cell_rows"],
+                "unique_chars": len(packed[name]["chars"]),
+                "char_pool_bytes": len(packed[name]["char_pool"]),
                 "pixel_sha256": hashlib.sha256(strips[name][0]).hexdigest(),
                 "colours_used": len(luts[name]) + 1,
             } for name in PLANES
         },
         "palette_cycle": {"bank": cycle_bank, "period_frames": period,
                           "states": len(palette_states)},
-        "map_patches": len(patch_records),
+        "map_patches": len(patch_serial),
         "object_schedule": {
             "frames": len(objects_by_frame),
             "entries": covered + uncovered,
@@ -400,9 +446,11 @@ def main() -> None:
         json.dumps(manifest, indent=1, sort_keys=True) + "\n",
         encoding="ascii", newline="\n")
     print(f"strips: {manifest['strips_bin_bytes']} bytes, "
-          f"scroll2 {strips['scroll2'][1]}x{strips['scroll2'][2]}, "
-          f"scroll3 {strips['scroll3'][1]}x{strips['scroll3'][2]}, "
-          f"patches {len(patch_records)}, objects covered {covered} / "
+          f"scroll2 {strips['scroll2'][1]}x{strips['scroll2'][2]} "
+          f"({len(packed['scroll2']['chars'])} chars), "
+          f"scroll3 {strips['scroll3'][1]}x{strips['scroll3'][2]} "
+          f"({len(packed['scroll3']['chars'])} chars), "
+          f"patches {len(patch_serial)}, objects covered {covered} / "
           f"uncovered {uncovered}")
 
 
