@@ -1,0 +1,480 @@
+{
+ "counterexamples": 0,
+ "distinct_frames": [
+  2345,
+  2616,
+  2887,
+  3158,
+  3429,
+  3700,
+  3971,
+  4242,
+  4513,
+  4784,
+  5055
+ ],
+ "frames_examined": 12,
+ "inputs_sha256": {
+  "route_census": "2ee346bad2973198863a3a1f7cec188459c458681373fc86d9625100040ede30",
+  "scene_manifest": "f776ba219d203f6685e182a0971fe6daefd51f2326b1295cc0f1430cb1975527"
+ },
+ "object_priority_code": 4,
+ "pair_type_basis": "structural: object block size and palette bank, never rendered appearance",
+ "pair_types": [
+  "112x32-pal00/48x48-pal18",
+  "32x16-pal16/80x16-pal00",
+  "64x160-pal29/64x32-pal17",
+  "64x160-pal29/80x48-pal17",
+  "64x48-pal17/80x16-pal00",
+  "64x64-pal00/80x16-pal00",
+  "64x96-pal00/80x16-pal00",
+  "80x16-pal00/80x32-pal00",
+  "80x16-pal00/80x64-pal00"
+ ],
+ "requirements_met": true,
+ "rule": "within one source object priority code the EARLIER object-RAM entry wins, because MAME 0.289 cps2_render_sprites draws the list last-to-first",
+ "schema": "rp4-object-order-witnesses-v0",
+ "witness_count": 11,
+ "witnesses": [
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x931d",
+    "code": "0x9407",
+    "slot": 2,
+    "source_xy": [
+     -32,
+     16
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    51,
+    68
+   ],
+   "fitted_x": 6,
+   "frame": 2345,
+   "later": {
+    "attr": "0x2431",
+    "code": "0x4700",
+    "slot": 43,
+    "source_xy": [
+     -64,
+     114
+    ]
+   },
+   "later_rgb": [
+    51,
+    0,
+    51
+   ],
+   "pair_type": "64x160-pal29/80x48-pal17",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    6,
+    154
+   ],
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x931d",
+    "code": "0x9407",
+    "slot": 2,
+    "source_xy": [
+     -46,
+     16
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    51,
+    68
+   ],
+   "fitted_x": 5,
+   "frame": 2616,
+   "later": {
+    "attr": "0x1331",
+    "code": "0x4f70",
+    "slot": 33,
+    "source_xy": [
+     -50,
+     143
+    ]
+   },
+   "later_rgb": [
+    51,
+    0,
+    51
+   ],
+   "pair_type": "64x160-pal29/64x32-pal17",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    5,
+    156
+   ],
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0420",
+    "code": "0x1f6b",
+    "slot": 3,
+    "source_xy": [
+     246,
+     168
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 270,
+   "frame": 2887,
+   "later": {
+    "attr": "0x3420",
+    "code": "0x0b84",
+    "slot": 17,
+    "source_xy": [
+     251,
+     116
+    ]
+   },
+   "later_rgb": [
+    170,
+    136,
+    68
+   ],
+   "pair_type": "80x16-pal00/80x64-pal00",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    295,
+    171
+   ],
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0420",
+    "code": "0x1f7b",
+    "slot": 4,
+    "source_xy": [
+     139,
+     165
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 181,
+   "frame": 3158,
+   "later": {
+    "attr": "0x0130",
+    "code": "0x9fa7",
+    "slot": 16,
+    "source_xy": [
+     167,
+     165
+    ]
+   },
+   "later_rgb": [
+    221,
+    187,
+    170
+   ],
+   "pair_type": "32x16-pal16/80x16-pal00",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    197,
+    170
+   ],
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0420",
+    "code": "0x1f6b",
+    "slot": 4,
+    "source_xy": [
+     312,
+     168
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 343,
+   "frame": 3429,
+   "later": {
+    "attr": "0x2331",
+    "code": "0x467c",
+    "slot": 54,
+    "source_xy": [
+     368,
+     168
+    ]
+   },
+   "later_rgb": [
+    68,
+    0,
+    68
+   ],
+   "pair_type": "64x48-pal17/80x16-pal00",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    374,
+    177
+   ],
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0420",
+    "code": "0x1f7b",
+    "slot": 3,
+    "source_xy": [
+     312,
+     168
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 330,
+   "frame": 3700,
+   "later": {
+    "attr": "0x5320",
+    "code": "0x0305",
+    "slot": 17,
+    "source_xy": [
+     320,
+     82
+    ]
+   },
+   "later_rgb": [
+    136,
+    102,
+    34
+   ],
+   "pair_type": "64x96-pal00/80x16-pal00",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    360,
+    170
+   ],
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0420",
+    "code": "0x1f6b",
+    "slot": 3,
+    "source_xy": [
+     312,
+     168
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 341,
+   "frame": 3971,
+   "later": {
+    "attr": "0x3420",
+    "code": "0x0b84",
+    "slot": 18,
+    "source_xy": [
+     318,
+     116
+    ]
+   },
+   "later_rgb": [
+    170,
+    136,
+    68
+   ],
+   "pair_type": "80x16-pal00/80x64-pal00",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    372,
+    170
+   ],
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0420",
+    "code": "0x1f6b",
+    "slot": 3,
+    "source_xy": [
+     312,
+     168
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 313,
+   "frame": 4242,
+   "later": {
+    "attr": "0x3320",
+    "code": "0x11c0",
+    "slot": 22,
+    "source_xy": [
+     334,
+     115
+    ]
+   },
+   "later_rgb": [
+    204,
+    170,
+    102
+   ],
+   "pair_type": "64x64-pal00/80x16-pal00",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    341,
+    170
+   ],
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x1620",
+    "code": "0x1f29",
+    "slot": 4,
+    "source_xy": [
+     112,
+     166
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 192,
+   "frame": 4513,
+   "later": {
+    "attr": "0x2232",
+    "code": "0x4f40",
+    "slot": 29,
+    "source_xy": [
+     199,
+     165
+    ]
+   },
+   "later_rgb": [
+    0,
+    34,
+    51
+   ],
+   "pair_type": "112x32-pal00/48x48-pal18",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    209,
+    179
+   ],
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0420",
+    "code": "0x1f6b",
+    "slot": 3,
+    "source_xy": [
+     312,
+     168
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 313,
+   "frame": 4784,
+   "later": {
+    "attr": "0x3320",
+    "code": "0x11c0",
+    "slot": 22,
+    "source_xy": [
+     334,
+     115
+    ]
+   },
+   "later_rgb": [
+    204,
+    170,
+    102
+   ],
+   "pair_type": "64x64-pal00/80x16-pal00",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    341,
+    170
+   ],
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0420",
+    "code": "0x1f6b",
+    "slot": 3,
+    "source_xy": [
+     312,
+     168
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 345,
+   "frame": 5055,
+   "later": {
+    "attr": "0x1420",
+    "code": "0x03a8",
+    "slot": 12,
+    "source_xy": [
+     320,
+     146
+    ]
+   },
+   "later_rgb": [
+    119,
+    119,
+    102
+   ],
+   "pair_type": "80x16-pal00/80x32-pal00",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    376,
+    171
+   ],
+   "winner": "earlier object-RAM slot"
+  }
+ ]
+}
