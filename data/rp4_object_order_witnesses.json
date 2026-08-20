@@ -6,14 +6,22 @@
   2887,
   3158,
   3429,
-  3700,
-  3971,
-  4242,
-  4513,
-  4784,
-  5055
+  3474,
+  3485,
+  3496,
+  3507,
+  3518,
+  3529,
+  3540,
+  3551,
+  3562,
+  3573,
+  3584,
+  3595,
+  3606,
+  3617
  ],
- "frames_examined": 12,
+ "frames_examined": 20,
  "inputs_sha256": {
   "route_census": "2ee346bad2973198863a3a1f7cec188459c458681373fc86d9625100040ede30",
   "scene_manifest": "f776ba219d203f6685e182a0971fe6daefd51f2326b1295cc0f1430cb1975527"
@@ -21,8 +29,11 @@
  "object_priority_code": 4,
  "pair_type_basis": "semantic actor class from the exact re-emission identity join; objects no live actor emits are labelled scene-emitter with their block size and palette bank. A pair counts as semantic when at least one side is an identified actor. Never rendered appearance.",
  "pair_types": [
+  "class-0x09/scene-emitter-128x32-pal00",
+  "player-band/scene-emitter-64x16-pal00",
   "player-band/scene-emitter-80x16-pal00",
-  "scene-emitter-112x32-pal00/street-alien-band",
+  "scene-emitter-112x32-pal00/scene-emitter-128x48-pal19",
+  "scene-emitter-128x32-pal00/scene-emitter-16x16-pal16",
   "scene-emitter-32x16-pal16/scene-emitter-80x16-pal00",
   "scene-emitter-64x160-pal29/street-alien-band",
   "scene-emitter-80x16-pal00/scene-emitter-80x64-pal00",
@@ -32,12 +43,33 @@
  "rule": "within one source object priority code the EARLIER object-RAM entry wins, because MAME 0.289 cps2_render_sprites draws the list last-to-first",
  "schema": "rp4-object-order-witnesses-v0",
  "semantic_pair_types": [
+  "class-0x09/scene-emitter-128x32-pal00",
+  "player-band/scene-emitter-64x16-pal00",
   "player-band/scene-emitter-80x16-pal00",
-  "scene-emitter-112x32-pal00/street-alien-band",
   "scene-emitter-64x160-pal29/street-alien-band",
   "scene-emitter-80x16-pal00/street-alien-band"
  ],
- "witness_count": 11,
+ "streettest_fixture_interval": [
+  3474,
+  3674
+ ],
+ "streettest_mappable_witnesses": [
+  3474,
+  3485,
+  3496,
+  3507,
+  3518,
+  3529,
+  3540,
+  3551,
+  3562,
+  3573,
+  3584,
+  3595,
+  3606,
+  3617
+ ],
+ "witness_count": 19,
  "witnesses": [
   {
    "composite_matches_capture": true,
@@ -77,6 +109,7 @@
     6,
     154
    ],
+   "streettest_rel": null,
    "winner": "earlier object-RAM slot"
   },
   {
@@ -117,6 +150,7 @@
     5,
     156
    ],
+   "streettest_rel": null,
    "winner": "earlier object-RAM slot"
   },
   {
@@ -157,6 +191,7 @@
     295,
     171
    ],
+   "streettest_rel": null,
    "winner": "earlier object-RAM slot"
   },
   {
@@ -197,6 +232,7 @@
     197,
     170
    ],
+   "streettest_rel": null,
    "winner": "earlier object-RAM slot"
   },
   {
@@ -237,6 +273,7 @@
     374,
     177
    ],
+   "streettest_rel": null,
    "winner": "earlier object-RAM slot"
   },
   {
@@ -244,9 +281,91 @@
    "earlier": {
     "attr": "0x0420",
     "code": "0x1f7b",
+    "slot": 5,
+    "source_xy": [
+     15,
+     181
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 36,
+   "frame": 3474,
+   "later": {
+    "attr": "0x1330",
+    "code": "0x47b5",
+    "slot": 25,
+    "source_xy": [
+     15,
+     159
+    ]
+   },
+   "later_rgb": [
+    68,
+    51,
+    68
+   ],
+   "pair_type": "scene-emitter-80x16-pal00/street-alien-band",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    39,
+    184
+   ],
+   "streettest_rel": 0,
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x1720",
+    "code": "0x1f80",
+    "slot": 7,
+    "source_xy": [
+     16,
+     184
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 116,
+   "frame": 3485,
+   "later": {
+    "attr": "0x1205",
+    "code": "0x9950",
+    "slot": 46,
+    "source_xy": [
+     82,
+     196
+    ]
+   },
+   "later_rgb": [
+    136,
+    153,
+    170
+   ],
+   "pair_type": "class-0x09/scene-emitter-128x32-pal00",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    126,
+    198
+   ],
+   "streettest_rel": 11,
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0320",
+    "code": "0x1f4c",
     "slot": 3,
     "source_xy": [
-     312,
+     320,
      168
     ]
    },
@@ -255,12 +374,12 @@
     17,
     17
    ],
-   "fitted_x": 330,
-   "frame": 3700,
+   "fitted_x": 346,
+   "frame": 3496,
    "later": {
     "attr": "0x5320",
-    "code": "0x0305",
-    "slot": 17,
+    "code": "0x0309",
+    "slot": 14,
     "source_xy": [
      320,
      82
@@ -271,23 +390,24 @@
     102,
     34
    ],
-   "pair_type": "player-band/scene-emitter-80x16-pal00",
+   "pair_type": "player-band/scene-emitter-64x16-pal00",
    "reversed_entries_control_detected": true,
    "source_xy": [
-    360,
-    170
+    377,
+    175
    ],
+   "streettest_rel": 22,
    "winner": "earlier object-RAM slot"
   },
   {
    "composite_matches_capture": true,
    "earlier": {
-    "attr": "0x0420",
-    "code": "0x1f6b",
-    "slot": 3,
+    "attr": "0x1720",
+    "code": "0x1f80",
+    "slot": 8,
     "source_xy": [
-     312,
-     168
+     82,
+     198
     ]
    },
    "earlier_rgb": [
@@ -295,68 +415,29 @@
     17,
     17
    ],
-   "fitted_x": 341,
-   "frame": 3971,
+   "fitted_x": 127,
+   "frame": 3507,
    "later": {
-    "attr": "0x3420",
-    "code": "0x0b84",
-    "slot": 18,
+    "attr": "0x0030",
+    "code": "0x4b34",
+    "slot": 33,
     "source_xy": [
-     318,
-     116
+     137,
+     214
     ]
    },
    "later_rgb": [
-    170,
-    136,
-    68
-   ],
-   "pair_type": "scene-emitter-80x16-pal00/scene-emitter-80x64-pal00",
-   "reversed_entries_control_detected": true,
-   "source_xy": [
-    372,
+    119,
+    153,
     170
    ],
-   "winner": "earlier object-RAM slot"
-  },
-  {
-   "composite_matches_capture": true,
-   "earlier": {
-    "attr": "0x0420",
-    "code": "0x1f6b",
-    "slot": 3,
-    "source_xy": [
-     312,
-     168
-    ]
-   },
-   "earlier_rgb": [
-    17,
-    17,
-    17
-   ],
-   "fitted_x": 313,
-   "frame": 4242,
-   "later": {
-    "attr": "0x3320",
-    "code": "0x11c0",
-    "slot": 22,
-    "source_xy": [
-     334,
-     115
-    ]
-   },
-   "later_rgb": [
-    204,
-    170,
-    102
-   ],
-   "pair_type": "player-band/scene-emitter-80x16-pal00",
+   "pair_type": "scene-emitter-128x32-pal00/scene-emitter-16x16-pal16",
    "reversed_entries_control_detected": true,
    "source_xy": [
-    341,
-    170
+    138,
+    219
    ],
+   "streettest_rel": 33,
    "winner": "earlier object-RAM slot"
   },
   {
@@ -366,8 +447,8 @@
     "code": "0x1f29",
     "slot": 4,
     "source_xy": [
-     112,
-     166
+     2,
+     175
     ]
    },
    "earlier_rgb": [
@@ -375,28 +456,29 @@
     17,
     17
    ],
-   "fitted_x": 192,
-   "frame": 4513,
+   "fitted_x": 39,
+   "frame": 3518,
    "later": {
-    "attr": "0x2232",
-    "code": "0x4f40",
-    "slot": 29,
+    "attr": "0x2733",
+    "code": "0x4635",
+    "slot": 22,
     "source_xy": [
-     199,
-     165
+     -5,
+     145
     ]
    },
    "later_rgb": [
-    0,
+    17,
     34,
     51
    ],
-   "pair_type": "scene-emitter-112x32-pal00/street-alien-band",
+   "pair_type": "scene-emitter-112x32-pal00/scene-emitter-128x48-pal19",
    "reversed_entries_control_detected": true,
    "source_xy": [
-    209,
-    179
+    42,
+    190
    ],
+   "streettest_rel": 44,
    "winner": "earlier object-RAM slot"
   },
   {
@@ -406,7 +488,7 @@
     "code": "0x1f6b",
     "slot": 3,
     "source_xy": [
-     312,
+     224,
      168
     ]
    },
@@ -415,28 +497,111 @@
     17,
     17
    ],
-   "fitted_x": 313,
-   "frame": 4784,
+   "fitted_x": 253,
+   "frame": 3529,
    "later": {
-    "attr": "0x3320",
-    "code": "0x11c0",
-    "slot": 22,
+    "attr": "0x3420",
+    "code": "0x0b84",
+    "slot": 20,
     "source_xy": [
-     334,
-     115
+     230,
+     116
     ]
    },
    "later_rgb": [
-    204,
-    170,
-    102
+    136,
+    102,
+    34
    ],
-   "pair_type": "player-band/scene-emitter-80x16-pal00",
+   "pair_type": "scene-emitter-80x16-pal00/scene-emitter-80x64-pal00",
    "reversed_entries_control_detected": true,
    "source_xy": [
-    341,
+    276,
     170
    ],
+   "streettest_rel": 55,
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0320",
+    "code": "0x1f4c",
+    "slot": 3,
+    "source_xy": [
+     217,
+     168
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 214,
+   "frame": 3540,
+   "later": {
+    "attr": "0x5320",
+    "code": "0x0309",
+    "slot": 15,
+    "source_xy": [
+     217,
+     82
+    ]
+   },
+   "later_rgb": [
+    119,
+    119,
+    102
+   ],
+   "pair_type": "player-band/scene-emitter-64x16-pal00",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    233,
+    172
+   ],
+   "streettest_rel": 66,
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0420",
+    "code": "0x1f7b",
+    "slot": 3,
+    "source_xy": [
+     206,
+     168
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 206,
+   "frame": 3551,
+   "later": {
+    "attr": "0x5320",
+    "code": "0x0364",
+    "slot": 14,
+    "source_xy": [
+     214,
+     82
+    ]
+   },
+   "later_rgb": [
+    68,
+    51,
+    0
+   ],
+   "pair_type": "player-band/scene-emitter-80x16-pal00",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    225,
+    172
+   ],
+   "streettest_rel": 77,
    "winner": "earlier object-RAM slot"
   },
   {
@@ -446,7 +611,7 @@
     "code": "0x1f6b",
     "slot": 3,
     "source_xy": [
-     312,
+     208,
      168
     ]
    },
@@ -455,15 +620,138 @@
     17,
     17
    ],
-   "fitted_x": 345,
-   "frame": 5055,
+   "fitted_x": 209,
+   "frame": 3562,
    "later": {
-    "attr": "0x1420",
-    "code": "0x03a8",
-    "slot": 12,
+    "attr": "0x3320",
+    "code": "0x036c",
+    "slot": 16,
     "source_xy": [
-     320,
-     146
+     216,
+     114
+    ]
+   },
+   "later_rgb": [
+    221,
+    221,
+    204
+   ],
+   "pair_type": "player-band/scene-emitter-80x16-pal00",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    228,
+    170
+   ],
+   "streettest_rel": 88,
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0420",
+    "code": "0x1f7b",
+    "slot": 4,
+    "source_xy": [
+     118,
+     172
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 149,
+   "frame": 3573,
+   "later": {
+    "attr": "0x2430",
+    "code": "0x4730",
+    "slot": 48,
+    "source_xy": [
+     106,
+     163
+    ]
+   },
+   "later_rgb": [
+    119,
+    153,
+    170
+   ],
+   "pair_type": "scene-emitter-80x16-pal00/street-alien-band",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    162,
+    173
+   ],
+   "streettest_rel": 99,
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0420",
+    "code": "0x1f7b",
+    "slot": 3,
+    "source_xy": [
+     258,
+     168
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 281,
+   "frame": 3584,
+   "later": {
+    "attr": "0x5320",
+    "code": "0x0305",
+    "slot": 16,
+    "source_xy": [
+     266,
+     82
+    ]
+   },
+   "later_rgb": [
+    68,
+    51,
+    0
+   ],
+   "pair_type": "player-band/scene-emitter-80x16-pal00",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    307,
+    170
+   ],
+   "streettest_rel": 110,
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0320",
+    "code": "0x1f5c",
+    "slot": 3,
+    "source_xy": [
+     290,
+     168
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 296,
+   "frame": 3595,
+   "later": {
+    "attr": "0x5320",
+    "code": "0x0360",
+    "slot": 15,
+    "source_xy": [
+     290,
+     82
     ]
    },
    "later_rgb": [
@@ -471,12 +759,95 @@
     119,
     102
    ],
-   "pair_type": "player-band/scene-emitter-80x16-pal00",
+   "pair_type": "player-band/scene-emitter-64x16-pal00",
    "reversed_entries_control_detected": true,
    "source_xy": [
-    376,
-    171
+    323,
+    170
    ],
+   "streettest_rel": 121,
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0420",
+    "code": "0x1f7b",
+    "slot": 4,
+    "source_xy": [
+     150,
+     174
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 160,
+   "frame": 3606,
+   "later": {
+    "attr": "0x5431",
+    "code": "0x4b6b",
+    "slot": 24,
+    "source_xy": [
+     151,
+     88
+    ]
+   },
+   "later_rgb": [
+    153,
+    102,
+    85
+   ],
+   "pair_type": "scene-emitter-80x16-pal00/street-alien-band",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    174,
+    178
+   ],
+   "streettest_rel": 132,
+   "winner": "earlier object-RAM slot"
+  },
+  {
+   "composite_matches_capture": true,
+   "earlier": {
+    "attr": "0x0420",
+    "code": "0x1f7b",
+    "slot": 4,
+    "source_xy": [
+     150,
+     174
+    ]
+   },
+   "earlier_rgb": [
+    17,
+    17,
+    17
+   ],
+   "fitted_x": 160,
+   "frame": 3617,
+   "later": {
+    "attr": "0x5431",
+    "code": "0x4b40",
+    "slot": 31,
+    "source_xy": [
+     150,
+     88
+    ]
+   },
+   "later_rgb": [
+    51,
+    0,
+    51
+   ],
+   "pair_type": "scene-emitter-80x16-pal00/street-alien-band",
+   "reversed_entries_control_detected": true,
+   "source_xy": [
+    174,
+    178
+   ],
+   "streettest_rel": 143,
    "winner": "earlier object-RAM slot"
   }
  ]

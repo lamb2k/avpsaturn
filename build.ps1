@@ -9,6 +9,9 @@ param(
     [switch]$FrontendShotTest,
     [switch]$EncounterTest,
     [switch]$StreetTest,
+    [switch]$Rp4ForwardOrder,
+    [switch]$Rp4LowSpriteClass,
+    [switch]$Rp4LowClassPriority,
     [switch]$BossHitTest,
     [switch]$BossKoTest,
     [switch]$SkipHostTests
@@ -283,6 +286,15 @@ try {
         }
         if ($StreetTest) {
             $makeArguments += 'AVSP_STREET_TEST=1'
+        }
+        if ($Rp4ForwardOrder) {
+            $makeArguments += 'AVSP_RP4_FORWARD_ORDER=1'
+        }
+        if ($Rp4LowSpriteClass) {
+            $makeArguments += 'AVSP_RP4_LOW_SPRITE_CLASS=1'
+        }
+        if ($Rp4LowClassPriority) {
+            $makeArguments += 'AVSP_RP4_LOW_CLASS_PRIORITY=1'
         }
         if ($FrontendTest) {
             $makeArguments += 'AVSP_FRONTEND_TEST=1'

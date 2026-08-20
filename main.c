@@ -2093,7 +2093,15 @@ static void street_load_planes(void);
  * SPCTL is type 3 (measured 0x0023): frame-buffer bits 14-13 select the
  * sprite priority register, and Jo leaves them zero (class 0, the
  * HUD/debug class). Street objects OR in class 1. */
+/* RP4 v1 Saturn control builds. AVSP_RP4_LOW_SPRITE_CLASS moves
+ * every street object into sprite class 2 by changing ONLY the
+ * CMDCOLR priority-select bits; the class registers stay as the
+ * baseline programs them. */
+#if AVSP_RP4_LOW_SPRITE_CLASS
+#define STREET_SPR_CLASS_OBJECT 0x4000UL
+#else
 #define STREET_SPR_CLASS_OBJECT 0x2000UL
+#endif
 extern jo_sprite_attributes __jo_sprite_attributes;
 
 static void street_object_palette(const int bank_slot)
@@ -2187,8 +2195,17 @@ static int street_setup(void)
        NBG1, which is the whole of the source's object-versus-tile
        programming for priority code 4. Within the class, composite
        order is the command order, not a second priority register. */
+#if AVSP_RP4_LOW_CLASS_PRIORITY
+    /* Control build: class 1 drops BELOW NBG0 (3) and NBG1 (2)
+       while the emitted commands stay byte-identical. */
+    slPriority(scnSPR1, 1);
+#else
     slPriority(scnSPR1, 4);
-    slPriority(scnSPR2, 6);
+#endif
+    /* Class 2 is the control class for the CMDCOLR variant: it
+       sits below both planes, and its value is identical in the
+       baseline and the variant. */
+    slPriority(scnSPR2, 1);
     jo_set_displayed_screens(JO_NBG0_SCREEN | JO_NBG1_SCREEN |
                              JO_SPRITE_SCREEN);
     street_ready = 1;
@@ -2345,14 +2362,33 @@ static void street_test_frame(void)
     objects = street_object_frame_offset[rel];
     entry_count = (int)street_u16(objects);
     objects += 2;
-    /* RP4 v1 command order. MAME 0.289 cps2_render_sprites walks the
-       object list from the LAST entry down to entry 0, so on CPS2 the
-       EARLIER object-RAM entry is drawn over the later one. VDP1 is the
-       opposite: a later command covers an earlier one. Emitting the
-       schedule front-to-back would therefore invert every overlap
-       inside the priority class, so the entries are walked in reverse
-       and the earliest entry is submitted last. */
+    /* RP4 v1 command order, and a MEASURED WARNING.
+
+       On CPS2 the EARLIER object-RAM entry is drawn over the later one
+       (MAME 0.289 cps2_render_sprites walks the list from the last
+       entry down to entry 0), while on VDP1 a later command covers an
+       earlier one. The schedule is therefore walked in reverse here so
+       that the earliest entry is submitted last.
+
+       That submission order is NOT sufficient on its own. Capturing the
+       final VDP1 command table from the running StreetTest, in this
+       build and in a forward-emission control build, gives the SAME
+       draw order: 510 sprite commands, all with jump mode 0, at
+       identical indices, differing only in texture address. SGL does
+       not preserve submission order for equal-Z sprites, so this loop
+       alone does not determine what VDP1 finally draws on top.
+
+       Until an explicitly owned, deterministic emission path lands, the
+       same-priority overlap order on Saturn is UNPROVEN. Do not read
+       this loop as the mechanism that fixes it. */
+#if AVSP_RP4_FORWARD_ORDER
+    /* Control build: forward emission, which submits the latest
+       CPS entry last and must therefore invert every same-class
+       overlap relative to the baseline. */
+    for (entry = 0; entry < entry_count; ++entry)
+#else
     for (entry = entry_count - 1; entry >= 0; --entry)
+#endif
     {
         const unsigned long entry_at = objects + (unsigned long)entry * 8;
         const unsigned int x = street_u16(entry_at);

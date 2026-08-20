@@ -39,6 +39,8 @@ from census_full_route import RouteState                  # noqa: E402
 from verify_street_composite import Frame, in_of          # noqa: E402
 from pin_object_layer_priority import (                   # noqa: E402
     OBJECT_CODE, compose_from_registers, read_registers)
+from select_rp4_interval import (                         # noqa: E402
+    FIRST_FRAME as FIXTURE_FIRST, LAST_FRAME as FIXTURE_LAST)
 from join_street_object_identities import (               # noqa: E402
     ROM_PATH, class_name, decode_entities, find_run_offset,
     object_words)
@@ -51,7 +53,12 @@ OUTPUT = ROOT / "data" / "rp4_object_order_witnesses.json"
 NEEDED_FRAMES = 3
 NEEDED_PAIR_TYPES = 2
 FRAME_STEP = 271
-MAX_FRAMES = 12
+MAX_FRAMES = 20
+# The RP4 StreetTest fixture replays only [FIXTURE_FIRST, FIXTURE_LAST].
+# The route-wide cadence above steps straight over that window, so the
+# interval is sampled separately at a finer step: a witness that cannot
+# be resolved to a StreetTest frame cannot drive a Saturn control.
+FIXTURE_STEP = 11
 
 
 def entries_of(words: list[int]) -> list[dict]:
@@ -168,7 +175,10 @@ def main() -> None:
         if f > last or frames_examined >= MAX_FRAMES:
             break
         workram = bytes(state.current["workram"])
-        if f < first or (f - first) % FRAME_STEP:
+        in_fixture = FIXTURE_FIRST <= f <= FIXTURE_LAST
+        sampled = (f >= first and (f - first) % FRAME_STEP == 0) or (
+            in_fixture and (f - FIXTURE_FIRST) % FIXTURE_STEP == 0)
+        if not sampled:
             previous_workram = workram
             continue
         prior = previous_workram
@@ -246,6 +256,9 @@ def main() -> None:
                                      shape_label(later, labels))))
         witnesses.append({
             "frame": f,
+            "streettest_rel": (f - FIXTURE_FIRST
+                               if FIXTURE_FIRST <= f <= FIXTURE_LAST
+                               else None),
             "source_xy": [x, y],
             "fitted_x": (x * 351 - 175 + 382) // 383,
             "pair_type": pair_type,
@@ -288,6 +301,10 @@ def main() -> None:
                            "an identified actor. Never rendered "
                            "appearance.",
         "frames_examined": frames_examined,
+        "streettest_fixture_interval": [FIXTURE_FIRST, FIXTURE_LAST],
+        "streettest_mappable_witnesses": [
+            w["frame"] for w in witnesses
+            if w["streettest_rel"] is not None],
         "witness_count": len(witnesses),
         "distinct_frames": sorted(frames_with),
         "pair_types": sorted(pair_types),

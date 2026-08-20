@@ -1,0 +1,137 @@
+{
+ "builds": {
+  "baseline": {
+   "command_count": 528,
+   "command_table_sha256": "0273ca8dda048a479cf5a07402ebececeee11311558c58bc077aeb73f835df18",
+   "sha256": "3F5F2DB9D504FBC77BF26A3B3A12D74CD90237D42B9369F6B08150BFB568EF18",
+   "street_objects": 464,
+   "vdp2_shadow_values": {
+    "PRINA": "0x0203",
+    "PRINB": "0x0102",
+    "PRISA": "0x0406",
+    "PRISB": "0x0601",
+    "PRISC": "0x0606",
+    "PRISD": "0x0606",
+    "SPCTL": "0x0023"
+   }
+  },
+  "forward_order": {
+   "command_count": 528,
+   "command_table_sha256": "51bf42ba5d013e739822e980b06269a45eae25137b7cbcbdad2d7feb97be3dab",
+   "sha256": "AD7651A8412EBA832561C1C44F16D8B06DCB3A17BA7DCE6E3FC3B683AEDAE320",
+   "street_objects": 464,
+   "vdp2_shadow_values": {
+    "PRINA": "0x0203",
+    "PRINB": "0x0102",
+    "PRISA": "0x0406",
+    "PRISB": "0x0601",
+    "PRISC": "0x0606",
+    "PRISD": "0x0606",
+    "SPCTL": "0x0023"
+   }
+  }
+ },
+ "controls": {
+  "cmdcolr_priority_selector": {
+   "baseline_build_sha256": "3F5F2DB9D504FBC77BF26A3B3A12D74CD90237D42B9369F6B08150BFB568EF18",
+   "baseline_command_table_sha256": "0273ca8dda048a479cf5a07402ebececeee11311558c58bc077aeb73f835df18",
+   "blocked_reason": "the VDP1 framebuffer is unreadable in this instrument (zeros under the OpenGL core, unmapped under the software core) and this emulator build has no screenshot facility, so no witness pixel can be observed",
+   "expected_winner": "tile layer",
+   "fixture_sha256": "7c28617351ec2bb2099d10e28de561f0ef64feb2fbb1784c5dae11d29c7f1c22",
+   "negative_control_pixels_changed": 0,
+   "observed_winner": null,
+   "source_frame": 3474,
+   "status": "blocked",
+   "streettest_rel": 0,
+   "variant_build_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+   "variant_command_table_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+   "witness_pixels_changed": 0,
+   "witness_sha256": "3e05b51f32b11f3f9d6d8a3a410d9a5c9b0743cd9f1b014d97cc3327f2650ad1"
+  },
+  "command_order": {
+   "baseline_build_sha256": "3F5F2DB9D504FBC77BF26A3B3A12D74CD90237D42B9369F6B08150BFB568EF18",
+   "baseline_command_table_sha256": "0273ca8dda048a479cf5a07402ebececeee11311558c58bc077aeb73f835df18",
+   "blocked_reason": "the VDP1 framebuffer is unreadable in this instrument (zeros under the OpenGL core, unmapped under the software core) and this emulator build has no screenshot facility, so no witness pixel can be observed",
+   "expected_winner": "later object-RAM entry",
+   "fixture_sha256": "7c28617351ec2bb2099d10e28de561f0ef64feb2fbb1784c5dae11d29c7f1c22",
+   "measurement": {
+    "comparable_commands": 510,
+    "comparable_pairs": 129795,
+    "exactly_reversed": false,
+    "order_preserved_fraction": 1.0,
+    "order_preserving_pairs": 129795,
+    "same_command_multiset": true,
+    "same_draw_order": true
+   },
+   "negative_control_pixels_changed": 0,
+   "note": "reversing the emission loop did not change what VDP1 draws: the same commands appear at the same indices in both builds and only texture addresses moved, so SGL does not preserve submission order for equal-Z sprites and the reverse loop is not the mechanism that controls output order",
+   "observed_winner": "unobservable pixel; final VDP1 draw order unchanged",
+   "source_frame": 3474,
+   "status": "failed",
+   "streettest_rel": 0,
+   "variant_build_sha256": "AD7651A8412EBA832561C1C44F16D8B06DCB3A17BA7DCE6E3FC3B683AEDAE320",
+   "variant_command_table_sha256": "51bf42ba5d013e739822e980b06269a45eae25137b7cbcbdad2d7feb97be3dab",
+   "witness_pixels_changed": 0,
+   "witness_sha256": "3e05b51f32b11f3f9d6d8a3a410d9a5c9b0743cd9f1b014d97cc3327f2650ad1"
+  },
+  "sprite_priority_register_effect": {
+   "baseline_build_sha256": "3F5F2DB9D504FBC77BF26A3B3A12D74CD90237D42B9369F6B08150BFB568EF18",
+   "baseline_command_table_sha256": "0273ca8dda048a479cf5a07402ebececeee11311558c58bc077aeb73f835df18",
+   "blocked_reason": "the VDP1 framebuffer is unreadable in this instrument (zeros under the OpenGL core, unmapped under the software core) and this emulator build has no screenshot facility, so no witness pixel can be observed",
+   "expected_winner": "tile layer",
+   "fixture_sha256": "7c28617351ec2bb2099d10e28de561f0ef64feb2fbb1784c5dae11d29c7f1c22",
+   "negative_control_pixels_changed": 0,
+   "observed_winner": null,
+   "source_frame": 3474,
+   "status": "blocked",
+   "streettest_rel": 0,
+   "variant_build_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+   "variant_command_table_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+   "witness_pixels_changed": 0,
+   "witness_sha256": "3e05b51f32b11f3f9d6d8a3a410d9a5c9b0743cd9f1b014d97cc3327f2650ad1"
+  }
+ },
+ "instrument_limits": {
+  "emulator_screenshot": "UNAVAILABLE",
+  "vdp1_command_table": "READABLE",
+  "vdp1_framebuffer": "UNREADABLE",
+  "vdp2_registers": "UNREADABLE"
+ },
+ "schema": "rp4-saturn-controls-v0",
+ "shadow_values_note": "SGL work-RAM shadow of what the program programmed; this is NOT a VDP2 register readback",
+ "status": {
+  "animation_jump_record_coverage": "GAP",
+  "controls_blocked": 2,
+  "controls_executed": 1,
+  "controls_passed": 0,
+  "controls_total": 3,
+  "mshvsf_priority_architecture": "ADAPTED",
+  "per_control": {
+   "cmdcolr_priority_selector": {
+    "detected": null,
+    "reason": "the VDP1 framebuffer is unreadable in this instrument (zeros under the OpenGL core, unmapped under the software core) and this emulator build has no screenshot facility, so no witness pixel can be observed"
+   },
+   "command_order": {
+    "detected": false,
+    "reason": "recorded as failed"
+   },
+   "sprite_priority_register_effect": {
+    "detected": null,
+    "reason": "the VDP1 framebuffer is unreadable in this instrument (zeros under the OpenGL core, unmapped under the software core) and this emulator build has no screenshot facility, so no witness pixel can be observed"
+   }
+  },
+  "saturn_output_order_status": "FAIL",
+  "saturn_vdp2_register_readback": "UNREADABLE"
+ },
+ "witness": {
+  "earlier_slot": 5,
+  "later_slot": 25,
+  "pair_type": "scene-emitter-80x16-pal00/street-alien-band",
+  "source_frame": 3474,
+  "source_xy": [
+   39,
+   184
+  ],
+  "streettest_rel": 0
+ }
+}

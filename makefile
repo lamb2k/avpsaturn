@@ -28,6 +28,18 @@ endif
 ifneq ($(AVSP_STREET_TEST),)
 CCFLAGS += -DAVSP_STREET_TEST=1
 endif
+# RP4 v1 Saturn controls. Each builds a StreetTest variant that
+# differs from the baseline in exactly one declared input. They
+# are diagnostic builds and are never part of a release.
+ifneq ($(AVSP_RP4_FORWARD_ORDER),)
+CCFLAGS += -DAVSP_RP4_FORWARD_ORDER=1
+endif
+ifneq ($(AVSP_RP4_LOW_SPRITE_CLASS),)
+CCFLAGS += -DAVSP_RP4_LOW_SPRITE_CLASS=1
+endif
+ifneq ($(AVSP_RP4_LOW_CLASS_PRIORITY),)
+CCFLAGS += -DAVSP_RP4_LOW_CLASS_PRIORITY=1
+endif
 ifneq ($(AVSP_ENCOUNTER_TEST),)
 CCFLAGS += -DAVSP_ENCOUNTER_TEST=1
 endif
