@@ -96,6 +96,17 @@ if ($LASTEXITCODE -ne 0) {
     throw "Bounded CRAM palette-write test failed with exit code $LASTEXITCODE."
 }
 
+# AvspSceneDef v0 contract (RP1): envelope/version/scene-ID validation, the
+# unknown-scene policy, and the explicit route-controller state machine, with
+# eleven negative controls (truncation, magic, version, ID zero, unknown
+# opcode, short record, trailing payload, unknown lookup, dangling route
+# edge, disagreeing transition). No private inputs.
+$sceneCommand = "cd '$linuxRoot' && mkdir -p build && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_scene.c avsp_route.c tests/avsp_scene_test.c -o build/avsp_scene_test && ./build/avsp_scene_test"
+& $wsl.Source sh '-lc' $sceneCommand
+if ($LASTEXITCODE -ne 0) {
+    throw "AvspSceneDef v0 contract test failed with exit code $LASTEXITCODE."
+}
+
 $animCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_anim_script.c tests/avsp_anim_script_test.c -o build/avsp_anim_script_test && ./build/avsp_anim_script_test"
 & $wsl.Source sh '-lc' $animCommand
 if ($LASTEXITCODE -ne 0) {
