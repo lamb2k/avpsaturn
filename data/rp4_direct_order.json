@@ -1,0 +1,161 @@
+{
+ "builds": {
+  "immediate_forward": {
+   "anomalies": [],
+   "capture_sha256": "7e8088ee239384cc6a63f9c060c7adacc6d46e7a09d6fb5ece72e2bec96e260d",
+   "command_count": 508,
+   "command_table_sha256": "546dc5a044bc48379ea3e58557bb95a161adc9eed183b4fd3c00213bc78cd065",
+   "distinct_texture_slots": 97,
+   "drawn_commands": 505,
+   "elf_sha256": "8fbb553d97e6183cb02fa63660870ae3147bdfc85e0c21e33e2f6f379744a6f8",
+   "frame_lag": 0,
+   "iso_sha256": "4741120a8516d306695dc75be2d98c816f9d7253a374ad833f91cebce5af97ea",
+   "scene_rel": 0,
+   "state_commands": 3,
+   "terminated": true,
+   "witness_direction": "not_uniquely_joinable"
+  },
+  "immediate_reverse": {
+   "anomalies": [],
+   "capture_sha256": "308a7e520aa4d2783fef06063f3b6c155e76125eae840424d6d72a75a998b811",
+   "command_count": 508,
+   "command_table_sha256": "d83ec5a450aa60281b8309baae11266f6684a5adfd088c2cc9fad9dc6f72c9e4",
+   "distinct_texture_slots": 97,
+   "drawn_commands": 505,
+   "elf_sha256": "c100c78432c7cf03c0a0450bb55500ca2fed45c2ad5b236e8c88d6faf95f88ca",
+   "frame_lag": 0,
+   "iso_sha256": "69288aa5c0acc467ffdd8cfefd0b064362173eef73f76ec9a217ae7af1dde53a",
+   "scene_rel": 0,
+   "state_commands": 3,
+   "terminated": true,
+   "witness_direction": "not_uniquely_joinable"
+  },
+  "sorted_forward": {
+   "anomalies": [],
+   "capture_sha256": "666b52c38b4503c0a93fa534b18377364a9aa19da1576bb281520f8f0a5f9b7e",
+   "command_count": 394,
+   "command_table_sha256": "51b8a6dbf1d8febf69cb25357d15d181e8fadb0c092211bc43f4ae38d1e36099",
+   "distinct_texture_slots": 97,
+   "drawn_commands": 391,
+   "elf_sha256": "691311f4f6788987a6956467cfee53670c0b0deb35adcff5a6a18754c73118bb",
+   "frame_lag": 1,
+   "iso_sha256": "4b55beb2f19902cde87bd297fbcdbedfe60a4a8af213b0fd1d8aa73db74c7cde",
+   "scene_rel": 0,
+   "state_commands": 3,
+   "terminated": true,
+   "witness_direction": "earlier_cps_entry_earlier_in_vdp1"
+  },
+  "sorted_reverse": {
+   "anomalies": [],
+   "capture_sha256": "64742f6b298ecc828b5a7bd67ca1a406647bf1e35d51d5946f180c454d27a8f7",
+   "command_count": 394,
+   "command_table_sha256": "ff1f19e1aa879b5f22eae0c78160f72d18cd3b596b82b5ac413e3d485d7731cd",
+   "distinct_texture_slots": 97,
+   "drawn_commands": 391,
+   "elf_sha256": "8f4e81c1a831bebab5bf5d90f7b606772dda103b6be9fea3bf2bee85c003e6ce",
+   "frame_lag": 1,
+   "iso_sha256": "4b101fa40e9bc6cb3abfbea8854f6f2a258d8f8649c9339080bf468352f874c0",
+   "scene_rel": 0,
+   "state_commands": 3,
+   "terminated": true,
+   "witness_direction": "earlier_cps_entry_later_in_vdp1"
+  }
+ },
+ "capability_gate_1": "0/7",
+ "comparisons": {
+  "immediate_reverse_vs_forward": {
+   "ambiguous_identities": 1,
+   "baseline_command_count": 508,
+   "comparable_commands": 9,
+   "comparable_pairs": 36,
+   "exactly_reversed": false,
+   "order_preserved_fraction": 0.722222,
+   "order_preserving_pairs": 26,
+   "same_command_count": true,
+   "same_draw_order": false,
+   "same_identity_multiset": false,
+   "same_state_commands": true,
+   "variant_command_count": 508
+  },
+  "sorted_reverse_vs_forward": {
+   "ambiguous_identities": 1,
+   "baseline_command_count": 394,
+   "comparable_commands": 6,
+   "comparable_pairs": 15,
+   "exactly_reversed": false,
+   "order_preserved_fraction": 0.933333,
+   "order_preserving_pairs": 14,
+   "same_command_count": true,
+   "same_draw_order": false,
+   "same_identity_multiset": false,
+   "same_state_commands": true,
+   "variant_command_count": 394
+  },
+  "sorted_vs_immediate_same_loop": {
+   "ambiguous_identities": 1,
+   "baseline_command_count": 394,
+   "comparable_commands": 4,
+   "comparable_pairs": 6,
+   "exactly_reversed": false,
+   "order_preserved_fraction": 1.0,
+   "order_preserving_pairs": 6,
+   "same_command_count": false,
+   "same_draw_order": false,
+   "same_identity_multiset": false,
+   "same_state_commands": true,
+   "variant_command_count": 508
+  }
+ },
+ "controls_not_promoted": [
+  "cmdcolr_priority_selector",
+  "sprite_priority_register_effect"
+ ],
+ "decision_reasons": [
+  "the immediate slPutSprite path does not preserve geometry: at fixture frame 0 the sorted path lands on the renderer's own computed coordinates (367/391 x and 390/391 y at offset zero) while the immediate path matches no offset of them (99/505 x) and emits 505 commands against 391",
+  "no seam can preserve the texture-content invariant, because every fixture frame needs more distinct resident textures than Jo Engine's whole 255-entry sprite table",
+  "correcting that residency crosses a measured Jo Engine structural limit rather than a VDP1 VRAM budget, so it is an architectural change and not a bounded setup correction"
+ ],
+ "decision_table_result": "D",
+ "falsified_premise": {
+  "claim": "reversing the emission loop leaves the final VDP1 command order unchanged, so SGL does not preserve submission order for equal-Z sprites",
+  "evidence": "with the capture frame pinned by breakpoint, the witness moves from final indices 380-384 (reverse) to 7-11 (forward) against the later entry at 239-246 and 145-152, matching the emission positions 53 and 5 of 59 exactly",
+  "status": "FALSIFIED_BY_FRAME_PINNED_MEASUREMENT",
+  "suspected_cause_of_prior_reading": "the previous capture advanced the fixture by roughly 44 frames per pause/resume round trip, so two captures were not of the same scene"
+ },
+ "fixture_sha256": "7c28617351ec2bb2099d10e28de561f0ef64feb2fbb1784c5dae11d29c7f1c22",
+ "rp4_v1_status": "FALSIFIED",
+ "schema": "rp4-direct-order-v0",
+ "texture_residency": {
+  "distinct_tiles_max": 486,
+  "distinct_tiles_mean": 413.6,
+  "distinct_tiles_min": 329,
+  "fixture_frames": 201,
+  "frames_over_jo_sprite_table": 201,
+  "frames_over_pool": 201,
+  "jo_max_sprite_table": 255,
+  "note": "every fixture frame needs more distinct 16x16 textures than the 96-slot street pool, and more than Jo Engine's entire 255-entry program-wide sprite-definition table. The pool therefore evicts and overwrites texture VRAM inside a single frame, so commands emitted earlier in that frame reference another tile's pixels by the time VDP1 draws the list. VDP1 texture VRAM is NOT the binding limit; the Jo sprite table is",
+  "pool_texture_bytes": 12288,
+  "tile_sprite_pool_slots": 96,
+  "verdict": "TEXTURE_RESIDENCY_EXCEEDS_JO_SPRITE_TABLE",
+  "worst_frame_texture_bytes": 62208
+ },
+ "unchanged_production_behavior": {
+  "default_build_command_table_matches_pristine": true,
+  "note": "the default build keeps the sorted path; its VDP1 command table is byte-identical to the pristine base build, so the diagnostic seam changes no production behavior",
+  "pristine_base_elf_sha256": "8ffd8a113c3bcf66926fc91fc10970c4085e01ebe6ec6f47246e85889aa93e83"
+ },
+ "witness": {
+  "earlier_slot": 5,
+  "join_key": "renderer-computed coordinates",
+  "join_key_limitation": "texture content cannot be used as a join key while the residency contradiction stands, so every direction here is supporting evidence and cannot pass command_order",
+  "later_slot": 25,
+  "pair_type": "scene-emitter-80x16-pal00/street-alien-band",
+  "source_frame": 3474,
+  "source_xy": [
+   39,
+   184
+  ],
+  "streettest_rel": 0
+ },
+ "witness_sha256": "a57301006c0bc8a234d99c9b8125d770141e465a456ae35b13729ad61c3568b0"
+}

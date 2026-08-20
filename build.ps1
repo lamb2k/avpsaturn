@@ -12,6 +12,7 @@ param(
     [switch]$Rp4ForwardOrder,
     [switch]$Rp4LowSpriteClass,
     [switch]$Rp4LowClassPriority,
+    [switch]$Rp4ImmediateSprites,
     [switch]$BossHitTest,
     [switch]$BossKoTest,
     [switch]$SkipHostTests
@@ -236,7 +237,19 @@ try {
             elseif ($VisualTest) { 'visual-test' }
             else { 'normal-release' }
         $optimizationProfile = if ($Release) { 'release' } else { 'debug' }
+        # The RP4 control switches only change preprocessor defines in
+        # main.c, so without them in the profile stamp two different
+        # variants share one cached main.o and the second build silently
+        # ships the first one's code. That would invalidate every
+        # four-build comparison these switches exist to make.
+        $rp4Variant = @(
+            if ($Rp4ForwardOrder) { 'fwd' }
+            if ($Rp4LowSpriteClass) { 'lowspr' }
+            if ($Rp4LowClassPriority) { 'lowcls' }
+            if ($Rp4ImmediateSprites) { 'imm' }
+        ) -join '+'
         $compileProfile = "$optimizationProfile-$buildProfile"
+        if ($rp4Variant) { $compileProfile += "-rp4:$rp4Variant" }
         $profileStamp = Join-Path $projectRoot 'build\last_compile_profile.txt'
         $previousProfile = if (Test-Path -LiteralPath $profileStamp) {
             (Get-Content -LiteralPath $profileStamp -Raw).Trim()
@@ -295,6 +308,9 @@ try {
         }
         if ($Rp4LowClassPriority) {
             $makeArguments += 'AVSP_RP4_LOW_CLASS_PRIORITY=1'
+        }
+        if ($Rp4ImmediateSprites) {
+            $makeArguments += 'AVSP_RP4_IMMEDIATE_SPRITES=1'
         }
         if ($FrontendTest) {
             $makeArguments += 'AVSP_FRONTEND_TEST=1'

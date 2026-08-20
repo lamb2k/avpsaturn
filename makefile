@@ -40,6 +40,13 @@ endif
 ifneq ($(AVSP_RP4_LOW_CLASS_PRIORITY),)
 CCFLAGS += -DAVSP_RP4_LOW_CLASS_PRIORITY=1
 endif
+# Diagnostic only: submit street objects through slPutSprite instead of
+# the sorted slDispSprite path. Measured to place sprites at different
+# coordinates and emit a different command count, so it is never a
+# release or default build.
+ifneq ($(AVSP_RP4_IMMEDIATE_SPRITES),)
+CCFLAGS += -DAVSP_RP4_IMMEDIATE_SPRITES=1
+endif
 ifneq ($(AVSP_ENCOUNTER_TEST),)
 CCFLAGS += -DAVSP_ENCOUNTER_TEST=1
 endif

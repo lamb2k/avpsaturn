@@ -50,8 +50,55 @@ COMMAND_TABLE_MUST_MATCH = ("sprite_priority_register_effect",)
 COMMAND_TABLE_MUST_DIFFER = ("command_order", "cmdcolr_priority_selector")
 
 
+#: The one alternative evidence kind this instrument can actually produce.
+#: The VDP1 framebuffer is unreadable here, so a witness PIXEL cannot be
+#: observed; the final command SEQUENCE can.
+FINAL_COMMAND_SEQUENCE = "final_vdp1_command_sequence"
+
+#: Only the draw-order control is decidable from the command sequence alone.
+#: The other two ask what the composite finally shows when a priority input
+#: changes while the command table stays byte-identical - a question the
+#: command table cannot answer about itself. They stay pixel-only, so this
+#: evidence kind can never promote them.
+SEQUENCE_DECIDABLE_CONTROLS = ("command_order",)
+
+#: Every relationship a command-sequence pass must establish.
+REQUIRED_SEQUENCE_FACTS = (
+    "same_command_count",
+    "same_identity_multiset",
+    "sorted_pair_inert",
+)
+
+
 class ControlEvidenceError(ValueError):
     """A control record that cannot be scored as written."""
+
+
+def command_sequence_faults(name: str, record: dict) -> list:
+    """Why a final-command-sequence pass is not yet earned.
+
+    This exists so `command_order` can pass on evidence this instrument
+    can really obtain. It deliberately does not relax anything: a control
+    that needs a pixel still needs a pixel.
+    """
+    if name not in SEQUENCE_DECIDABLE_CONTROLS:
+        return [f"{name} cannot be decided from the final command sequence: "
+                f"it needs an observed witness pixel, which this instrument "
+                f"cannot read"]
+    sequence = record.get("command_sequence")
+    if not isinstance(sequence, dict):
+        return ["command_sequence evidence is missing"]
+    faults = [f"command_sequence.{fact} is not established"
+              for fact in REQUIRED_SEQUENCE_FACTS if not sequence.get(fact)]
+    unique = sequence.get("unique_witnesses", 0)
+    agreeing = sequence.get("witnesses_in_required_direction", 0)
+    if unique <= 0:
+        faults.append("no source witness joined uniquely to final commands")
+    elif agreeing != unique:
+        faults.append(
+            f"only {agreeing} of {unique} uniquely joined witnesses place the "
+            f"earlier CPS2 entry later in final VDP1 order")
+    return faults
 
 
 def validate_control(name: str, record: dict) -> None:
@@ -91,7 +138,9 @@ def score_control(name: str, record: dict) -> dict:
         reasons.append(
             f"observed winner {record['observed_winner']!r} is not the "
             f"predicted {record['expected_winner']!r}")
-    if record["witness_pixels_changed"] <= 0:
+    if record.get("evidence_kind") == FINAL_COMMAND_SEQUENCE:
+        reasons.extend(command_sequence_faults(name, record))
+    elif record["witness_pixels_changed"] <= 0:
         reasons.append("the witness did not change")
     if record["negative_control_pixels_changed"] != 0:
         reasons.append(

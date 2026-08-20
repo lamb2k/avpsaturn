@@ -289,6 +289,14 @@ def main() -> int:
     parser.add_argument("--repair-config", action="store_true")
     parser.add_argument("--report", type=Path)
     parser.add_argument("--keep-running", action="store_true")
+    parser.add_argument("--capture-label",
+                        help="once live, capture the final VDP1 command "
+                             "sequence under this label before teardown")
+    parser.add_argument("--capture-output", type=Path)
+    parser.add_argument("--capture-rel", type=int, default=0)
+    parser.add_argument("--capture-frame-lag", type=int, default=0,
+                        help="fixture frames the committed VDP1 table trails "
+                             "the draw loop: 0 immediate, 1 sorted")
     args = parser.parse_args()
 
     ini = Path.home() / "AppData/Roaming/YabaSanshiro/yabause.ini"
@@ -336,6 +344,16 @@ def main() -> int:
         report["diagnostics"] = sample
         if state != READY_LIVE:
             report["cpu"] = _cpu_state(mcp)
+        elif args.capture_label:
+            # Capturing inside the launcher keeps one owner of the PID from
+            # boot through capture, so a capture can never be attributed to
+            # a process this run did not start.
+            from capture_street_vdp1 import capture_at
+
+            report["capture"] = capture_at(
+                mcp, symbols, args.capture_label, args.capture_rel,
+                args.elf, args.iso, args.capture_output, args.timeout,
+                frame_lag=args.capture_frame_lag)
     finally:
         if not args.keep_running or report.get("state") != READY_LIVE:
             terminate(process)

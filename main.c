@@ -2110,6 +2110,52 @@ static void street_object_palette(const int bank_slot)
     __jo_sprite_attributes.color_table_index |= STREET_SPR_CLASS_OBJECT;
 }
 
+/* RP4 object submission seam.
+ *
+ * Two SGL entry points can place a street tile, and they differ in the
+ * one property RP4 needs:
+ *
+ *   jo_sprite_draw3D          -> slDispSprite, which registers the sprite
+ *                                in SGL's Z sort list. Every street object
+ *                                shares one Z, and the measured result is
+ *                                that SGL does not preserve submission
+ *                                order among equal-Z sprites: reversing
+ *                                this loop left the final VDP1 command
+ *                                sequence byte-for-byte in the same order.
+ *   jo_sprite_draw(billboard) -> slPutSprite, which writes the command
+ *                                immediately, with no sort list in between.
+ *
+ * MEASURED RESULT: the sorted path is NOT inert. With the capture frame
+ * pinned by a breakpoint instead of raced by pause/resume, reversing this
+ * loop moves the witness the whole way across the final command list
+ * (earlier CPS entry at final indices 380-384 reversed versus 7-11
+ * forward, against the later entry at 239-246 and 145-152). Submission
+ * order therefore already survives into the final VDP1 command order, and
+ * the earlier "reverse loop is refuted" reading came from comparing
+ * captures taken at uncontrolled, different fixture frames.
+ *
+ * The immediate path is kept only as an opt-in diagnostic. It is NOT a
+ * drop-in substitute: slPutSprite does not place sprites where
+ * slDispSprite does. Measured at fixture frame 0, the sorted path lands
+ * on the renderer's own computed coordinates (367/391 x and 390/391 y at
+ * offset 0), while the immediate path matches no offset of them
+ * (99/505 x) and emits 505 commands instead of 391. Do not enable it in
+ * a production build. */
+static __jo_force_inline void street_submit_sprite(const int sprite_id,
+                                                   const int x, const int y,
+                                                   const int z)
+{
+#if AVSP_RP4_IMMEDIATE_SPRITES
+    extern jo_pos3D __jo_sprite_pos;
+    __internal_jo_sprite_set_position3D(x, y, z);
+    /* centred coordinates exactly as jo_sprite_draw3D uses; billboard
+       selects the immediate slPutSprite path. */
+    jo_sprite_draw(sprite_id, &__jo_sprite_pos, true, true);
+#else
+    jo_sprite_draw3D(sprite_id, x, y, z);
+#endif
+}
+
 static unsigned int street_u16(const unsigned long offset)
 {
     return ((unsigned int)street_data[offset] << 8) |
@@ -2419,7 +2465,7 @@ static void street_test_frame(void)
                (street_out_of), then shift into Jo's centered space; the
                centered fit_352 sat 1 px left of the plane mapping for
                6,761 of the 12,118 scheduled objects (measured). */
-            jo_sprite_draw3D(sprite_id,
+            street_submit_sprite(sprite_id,
                              street_out_of((int)(x & 0x3FF) - 64 +
                                            entry_tiles[tile].dx + 8) - 176,
                              (int)(y & 0x3FF) - 16 +
