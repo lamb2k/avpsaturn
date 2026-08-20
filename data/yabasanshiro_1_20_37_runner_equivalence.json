@@ -1,0 +1,32 @@
+{
+  "classification": "REFERENCE_INSTRUMENT_ONLY",
+  "avp_guest_equivalence": "DEFERRED_NOT_REQUIRED_FOR_REFERENCE_ARCHITECTURE",
+  "distinct": {
+    "frame_counter": 2,
+    "runtime_ready": 1,
+    "street_frame": 1,
+    "street_frames": 2,
+    "street_objects": 2,
+    "street_ready": 2
+  },
+  "input_sha256": "0e2af281c5bf3ab12e5a9e693149e0791d35792e3df1ae07636b9546195dd7f2",
+  "last": {
+    "frame_counter": 1,
+    "runtime_ready": 1,
+    "street_frame": 0,
+    "street_frames": 201,
+    "street_objects": 464,
+    "street_ready": 1
+  },
+  "ready_samples": 1076,
+  "reason": "fixture callback stalled at initial frame",
+  "samples": 4500,
+  "scanout_dimensions": [
+    352,
+    224
+  ],
+  "scanout_hashes_after_ready": 15,
+  "schema": "official-runner-equivalence-v1",
+  "source": "post-TitanRender callback metadata; no guest writes",
+  "status": "FAIL"
+}

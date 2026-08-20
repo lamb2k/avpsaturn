@@ -1,0 +1,63 @@
+{
+  "schema": "yabasanshiro-1.20.37-official-scanout-v1",
+  "classification": "REFERENCE_INSTRUMENT_ONLY",
+  "official_source": {
+    "url": "https://d1t36rsydvwkyk.cloudfront.net/yabasanshiro-src-1.20.37.zip",
+    "bytes": 102568341,
+    "sha256": "c12a68e90d8f03001eff8c75790e0a221cb9b79c676cf5f3daf6c08ac9795557",
+    "extracted_root": ".deps/yabasanshiro-src-1.20.37/yabasanshiro-1.20.37",
+    "version_json_sha256": "df86200354e3b8c94b64f71984d915b3fe9b56e76184a5a918b9ede5b6659657",
+    "version": "1.20.37",
+    "code": 354,
+    "source_distribution_readme_sha256": "382fb8d99d2e074026720d89c2806af6ce49e9149d2dfd028e5304b67243fd80",
+    "correspondence_claim": "This archive is the corresponding source for YabaSanshiro 1.20.37,"
+  },
+  "pinned_windows_release": {
+    "url": "https://d1t36rsydvwkyk.cloudfront.net/yabasanshiro-1.20.37-2986eb.zip",
+    "exe_path": ".deps/emulators/yabasanshiro-1.20.37-2986eb/yabasanshiro-1.20.37-2986eb/yabasanshiro.exe",
+    "exe_sha256": "016112708fc77ec53b8a36c4ef52e300a78b3fb079e815f60b1a51fa1661999c"
+  },
+  "official_patch": {
+    "path": "emulator-patches/yabasanshiro-1.20.37-vdp2-scanout.patch",
+    "sha256": "7751693a0e129521ed0ac265a545e0bdd093d5709c1dffa67a4ab7fb41ecd843",
+    "preimage_sha256": {
+      "yabause/src/CMakeLists.txt": "7788e1d286f7637c5768d6fd8c68bb8bc60f0f7e0ae0bccfcf87216a9e39030c",
+      "yabause/src/runner/CMakeLists.txt": "45eba27763ce13327aeddd0f06b575fa2b3d6c5890d512e3257756b2acfe512a",
+      "yabause/src/runner/yui.cpp": "b947db1917b437c4942df50b5bb13314ffa93f0bd572817b0d7e534d6c9db237",
+      "yabause/src/vidsoft.c": "ba4e2babc8eaa4c6c023dca8d37cdfe836437645b63b67f2d96e38dfa1ea183d",
+      "yabause/src/vidsoft.h": "4ebb6896c79d157967743390e053e3604dd321e32673f1651cb567dd9385430b"
+    }
+  },
+  "historical_rejected": {
+    "manifest": "data/yabasanshiro_scanout_diagnostic_manifest.json",
+    "patch": "emulator-patches/yabasanshiro-vdp2-scanout.patch",
+    "classification": "REJECTED_CUSTOM_SOURCE_71C973F"
+  },
+  "toolchain": {
+    "cmake": "3.30.5",
+    "msvc": "19.44.35228.0",
+    "lodepng_revision": "ed6fe5825c6a4fbb7f58ab35a4231c7543cd452a",
+    "lodepng": {
+      "base_url": "https://raw.githubusercontent.com/lvandeve/lodepng/ed6fe5825c6a4fbb7f58ab35a4231c7543cd452a",
+      "files": {
+        "lodepng.cpp": "d98e1f40d303c1038a096ebf93b413a565a91cf2c72b9d2fa5c625c4279c3cb6",
+        "lodepng.h": "23c27abb06883ed98184d16d0b20771b526dca1e8e13236c2397316769c0dc8b"
+      }
+    },
+    "sdl2_vc_archive": {
+      "version": "2.30.10",
+      "url": "https://github.com/libsdl-org/SDL/releases/download/release-2.30.10/SDL2-devel-2.30.10-VC.zip",
+      "sha256": "a9adab9a570a72d2e4f1565dcf0275b7d9ef7b487e05ba0cf7a7a0f35c79c5e7"
+    }
+  },
+  "commands": {
+    "verify": "python tools/verify_yabasanshiro_1_20_37_scanout.py --source <clean-official-extraction> --archive <official-zip> --negative-controls",
+    "apply": "powershell -ExecutionPolicy Bypass -File tools/apply_yabasanshiro_1_20_37_scanout.ps1 -Source <clean-official-extraction> -Archive <official-zip>",
+    "build": "powershell -ExecutionPolicy Bypass -File tools/build_yabasanshiro_1_20_37_scanout.ps1 -Source <patched-source> -OutputRoot <short-ignored-root>"
+  },
+  "route_status": {
+    "runner": "TITAN_CALLBACK_BUILT; AVP_GUEST_EQUIVALENCE_FAIL_HISTORICAL",
+    "avp_integration": "DEFERRED_TO_LATER_VALIDATION",
+    "reference_lane": "MSHVSF_PRIORITY_PROBE_OWNS_SATURN_RULE_MEASUREMENT"
+  }
+}

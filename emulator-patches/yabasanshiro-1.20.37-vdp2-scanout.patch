@@ -1,0 +1,425 @@
+diff --git a/yabause/src/CMakeLists.txt b/yabause/src/CMakeLists.txt
+index 7a127ed..00f091b 100644
+--- a/yabause/src/CMakeLists.txt
++++ b/yabause/src/CMakeLists.txt
+@@ -10,6 +10,13 @@ cmake_minimum_required(VERSION 3.5)
+ 
+ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeTests)
+ 
++# The runner has no host GL context.  Keep the software compositor available
++# (the OpenGL symbols are still compiled for shared core code), but never
++# initialise presentation GL in the measurement port.
++if ("${YAB_PORTS}" STREQUAL "runner")
++  add_definitions(-DYAB_RUNNER_HEADLESS=1)
++endif()
++
+ 
+ set(yabause_HEADERS
+ 	bios.h
+@@ -182,7 +189,7 @@ if (YAB_WANT_DYNAREC_DEVMIYAX)
+ 		if (MSVC) # NASM
+ 		
+ 		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+-	  		set(YABAUSE_LIBRARIES ${YABAUSE_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/sh2_dynarec_devmiyax/dynalib_x86_64 )
++			set(YABAUSE_LIBRARIES ${YABAUSE_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/sh2_dynarec_devmiyax/dynalib_x86_64.obj)
+ 		else()			
+ 			set(YABAUSE_LIBRARIES ${YABAUSE_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/sh2_dynarec_devmiyax/dynalib )
+ 		endif()
+@@ -521,7 +528,10 @@ if (MSVC)
+ 		set(DDK_DIR "$ENV{SYSTEMDRIVE}/WINDDK/7600.16385.0/")
+         endif (EXISTS "$ENV{SYSTEMDRIVE}/WINDDK/3790.1830/")
+ 
+-	add_definitions(/MP -DHAVE_C99_VARIADIC_MACROS -D_CRT_SECURE_NO_WARNINGS -DC68K_NO_JUMP_TABLE
++	# /MP is a C/C++ compiler option.  Passing it through add_definitions also
++	# gives it to rc.exe, which rejects it on the Qt Windows target.
++	add_compile_options($<$<COMPILE_LANGUAGE:C,CXX>:/MP>)
++	add_definitions(-DHAVE_C99_VARIADIC_MACROS -D_CRT_SECURE_NO_WARNINGS -DC68K_NO_JUMP_TABLE
+ 			-D_UNICODE -DUNICODE -D_NO_DEBUG_HEAP=1)
+ endif (MSVC)
+ 
+diff --git a/yabause/src/runner/CMakeLists.txt b/yabause/src/runner/CMakeLists.txt
+index 316d1bc..0e200c2 100644
+--- a/yabause/src/runner/CMakeLists.txt
++++ b/yabause/src/runner/CMakeLists.txt
+@@ -13,6 +13,11 @@ include_directories(${PORT_INCLUDE_DIRS})
+ find_package(Threads)
+ 
+ add_executable(yabause-runner yui.cpp)
+-target_link_libraries(yabause-runner yabause ${YABAUSE_LIBRARIES} ${PORT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
++target_link_libraries(yabause-runner yabause ${YABAUSE_LIBRARIES} ${PORT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT}
++    "${CMAKE_BINARY_DIR}/src/libchdr/lib/chdr.lib")
++add_dependencies(yabause-runner libchdr)
++if (MSVC)
++    target_link_options(yabause-runner PRIVATE /MAP)
++endif()
+ 
+-yab_port_success(yabause-runner)
+\ No newline at end of file
++yab_port_success(yabause-runner)
+diff --git a/yabause/src/runner/yui.cpp b/yabause/src/runner/yui.cpp
+index 1ccc5ef..2a227b2 100644
+--- a/yabause/src/runner/yui.cpp
++++ b/yabause/src/runner/yui.cpp
+@@ -22,10 +22,13 @@
+ extern "C"
+ {
+ #include "../yui.h"
++#include "../yabause.h"
++#include "../osdcore.h"
+ #include "../peripheral.h"
+ #include "../cs0.h"
+ #include "../m68kcore.h"
+ #include "../m68kc68k.h"
++#include "../memory.h"
+ #include "../vidsoft.h"
+ #include "../vdp2.h"
+ #include "../titan/titan.h"
+@@ -44,6 +47,8 @@ extern u8 *vdp1backframebuffer;
+ #include <vector>
+ #include <sstream>
+ #include <fstream>
++#include <stdint.h>
++#include <stdlib.h>
+ 
+ #define AUTO_TEST_SELECT_ADDRESS 0x7F000
+ #define AUTO_TEST_STATUS_ADDRESS 0x7F004
+@@ -57,6 +62,9 @@ extern "C"
+ {
+    SH2Interface_struct *SH2CoreList[] = {
+       &SH2Interpreter,
++#if DYNAREC_DEVMIYAX
++      &SH2Dyn,
++#endif
+       NULL
+    };
+ 
+@@ -92,6 +100,22 @@ extern "C"
+    #endif
+       NULL
+    };
++
++   OSD_struct *OSDCoreList[] = { &OSDDummy, &OSDSoft, NULL };
++
++   int YuiUseOGLOnThisThread(void) { return 0; }
++   int YuiRevokeOGLOnThisThread(void) { return 0; }
++
++   size_t YabauseRA_GetProgressSize(void) { return 0; }
++   int YabauseRA_SerializeProgress(uint8_t *, size_t) { return 1; }
++   int YabauseRA_DeserializeProgress(const uint8_t *, size_t) { return 1; }
++
++   int YabauseThread_IsUseBios(void) { return -1; }
++   const char *YabauseThread_getBackupPath(void) { return "runner-scanout.bup"; }
++   void YabauseThread_setUseBios(int) {}
++   void YabauseThread_setBackupPath(const char *) {}
++   void YabauseThread_coldBoot(void) {}
++   void YabauseThread_resetPlaymode(void) {}
+ }
+ 
+ struct ConsoleColor
+@@ -117,6 +141,155 @@ void set_color(struct ConsoleColor color)
+ static const char *bios = "";
+ static int emulate_bios = 0;
+ 
++struct ScanoutLog
++{
++   std::ofstream stream;
++   unsigned long first_frame;
++   unsigned long last_frame;
++   std::vector<u32> probes;
++};
++
++static uint64_t fnv1a64(const unsigned char *data, size_t length)
++{
++   uint64_t value = UINT64_C(14695981039346656037);
++   for (size_t i = 0; i < length; i++) {
++      value ^= data[i];
++      value *= UINT64_C(1099511628211);
++   }
++   return value;
++}
++
++static void record_scanout(const pixel_t *rgba, int width, int height,
++                           int interlace, unsigned long frame, void *userdata)
++{
++   ScanoutLog *log = (ScanoutLog *)userdata;
++   if (log == NULL || frame < log->first_frame || frame > log->last_frame)
++      return;
++   uint64_t hash = fnv1a64((const unsigned char *)rgba,
++                           (size_t)width * (size_t)height * sizeof(pixel_t));
++   char hash_text[17] = { 0 };
++   sprintf(hash_text, "%016llx", (unsigned long long)hash);
++   log->stream << "{\"emulator_frame\":" << frame
++               << ",\"width\":" << width
++               << ",\"height\":" << height
++               << ",\"interlace\":" << interlace
++               << ",\"pixel_format\":\"pixel_t_native_rgba\""
++               << ",\"fnv1a64\":\"" << hash_text << "\"";
++   if (!log->probes.empty()) {
++      log->stream << ",\"probes\":{";
++      for (size_t i = 0; i < log->probes.size(); i++) {
++         char address[16] = { 0 };
++         sprintf(address, "0x%08x", log->probes[i]);
++         if (i != 0)
++            log->stream << ",";
++         log->stream << "\"" << address << "\":"
++                     << MappedMemoryReadLong(log->probes[i], NULL);
++      }
++      log->stream << "}";
++   }
++   log->stream << "}\n";
++   log->stream.flush();
++}
++
++static int run_scanout(const std::string &disc, unsigned long frames,
++                       const std::string &output, const std::string &probe_csv)
++{
++   yabauseinit_struct yinit = { 0 };
++   ScanoutLog log;
++   log.stream.open(output.c_str(), std::ios::out | std::ios::trunc);
++   if (!log.stream) {
++      std::cerr << "Cannot open scanout metadata: " << output << std::endl;
++      return 2;
++   }
++   log.first_frame = 0;
++   log.last_frame = frames;
++   std::stringstream probe_stream(probe_csv);
++   std::string probe_text;
++   while (std::getline(probe_stream, probe_text, ',')) {
++      char *end = NULL;
++      unsigned long value;
++      if (probe_text.empty())
++         continue;
++      value = strtoul(probe_text.c_str(), &end, 0);
++      if (*end != '\0' || value > 0xffffffffUL) {
++         std::cerr << "Invalid scanout probe address: " << probe_text << std::endl;
++         return 2;
++      }
++      log.probes.push_back((u32)value);
++   }
++   yinit.percoretype = PERCORE_DUMMY;
++#if DYNAREC_DEVMIYAX
++   yinit.sh2coretype = SH2Dyn.id;
++#else
++   yinit.sh2coretype = SH2CORE_INTERPRETER;
++#endif
++   yinit.vidcoretype = VIDCORE_SOFT;
++   /* Match Qt's configured default: C68K when built, not the unavailable
++      Musashi id that this runner does not register. */
++   yinit.m68kcoretype = M68KCORE_C68K;
++   yinit.sndcoretype = SNDCORE_DUMMY;
++   yinit.cdcoretype = CDCORE_ISO;
++   yinit.carttype = CART_DRAM32MBIT;
++   yinit.regionid = REGION_AUTODETECT;
++   yinit.biospath = NULL; /* HLE: equivalent diagnostic choice is logged. */
++   yinit.cdpath = disc.c_str();
++   yinit.buppath = "runner-scanout.bup";
++   yinit.cartpath = "runner-scanout.dram";
++   yinit.frameskip = 0;
++   yinit.videoformattype = VIDEOFORMATTYPE_NTSC;
++   yinit.clocksync = 0;
++   yinit.basetime = 0;
++   yinit.skip_load = 0;
++   yinit.numthreads = 0;
++   yinit.usethreads = 0;
++   yinit.use_new_scsp = 1;
++   /* Qt's default is unthrottled; this only affects host pacing but keeping
++      the same setting removes it as an execution-path variable. */
++   yinit.framelimit = 0;
++   VIDSoftSetScanoutCallback(record_scanout, &log);
++   std::cout << "scanout calling YabauseInit" << std::endl;
++   if (YabauseInit(&yinit) != 0) {
++      std::cerr << "YabauseInit failed for scanout route" << std::endl;
++      VIDSoftSetScanoutCallback(NULL, NULL);
++      return 3;
++   }
++   std::cout << "scanout init ok; cart=32mbit; hle=1; frames=" << frames << std::endl;
++   PerPortReset();
++   PerPadAdd(&PORTDATA1);
++   for (unsigned long i = 0; i < frames; i++) {
++      if ((i % 60) == 0)
++         std::cout << "scanout exec frame=" << i << std::endl;
++      // PERDummyHandleEvents owns exactly one YabauseExec call, matching
++      // YabauseThread::execEmulation in the Qt port. Calling YabauseExec
++      // again here advances the guest twice per requested scanout frame.
++      if (PERCore->HandleEvents() != 0) {
++         std::cerr << "PERCore->HandleEvents failed at frame " << i << std::endl;
++         YabauseDeInit();
++         VIDSoftSetScanoutCallback(NULL, NULL);
++         return 4;
++      }
++   }
++   YabauseDeInit();
++   VIDSoftSetScanoutCallback(NULL, NULL);
++   return 0;
++}
++
++#ifdef _MSC_VER
++static LONG WINAPI scanout_exception_filter(EXCEPTION_POINTERS *info)
++{
++   void *stack[32] = { 0 };
++   USHORT count = CaptureStackBackTrace(0, 32, stack, NULL);
++   fprintf(stderr, "scanout exception code=0x%08lx address=%p stack=",
++           (unsigned long)info->ExceptionRecord->ExceptionCode,
++           info->ExceptionRecord->ExceptionAddress);
++   for (USHORT i = 0; i < count; i++)
++      fprintf(stderr, "%p%s", stack[i], i + 1 == count ? "" : ",");
++   fprintf(stderr, "\n");
++   fflush(stderr);
++   return EXCEPTION_EXECUTE_HANDLER;
++}
++#endif
++
+ void YuiErrorMsg(const char *error_text)
+ {
+    printf("\n\nError: %s\n", error_text);
+@@ -331,7 +504,7 @@ int go_to_next_test(int &current_test, std::string filename, yabauseinit_struct
+       return -1;
+ 
+    MappedMemoryLoadExec(filename.c_str(), 0);
+-   MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_SELECT_ADDRESS, current_test);
++   MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_SELECT_ADDRESS, current_test, NULL);
+ 
+    return 1;
+ }
+@@ -811,7 +984,7 @@ namespace yabauseut
+          return -1;
+ 
+       MappedMemoryLoadExec(yabause_ut_filename.c_str(), 0);
+-      MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_SELECT_ADDRESS, current_test);
++      MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_SELECT_ADDRESS, current_test, NULL);
+ 
+       bool write_images = false;
+ 
+@@ -829,7 +1002,7 @@ namespace yabauseut
+          //emulate a frame
+          PERCore->HandleEvents();
+ 
+-         status = MappedMemoryReadByteNoCache(VDP2_VRAM + AUTO_TEST_STATUS_ADDRESS);
++         status = MappedMemoryReadByteNocache(VDP2_VRAM + AUTO_TEST_STATUS_ADDRESS, NULL);
+ 
+          if (status == AUTO_TEST_MESSAGE_SENT)
+          {
+@@ -898,7 +1071,7 @@ namespace yabauseut
+                   return -1;
+ 
+                MappedMemoryLoadExec(yabause_ut_filename.c_str() , 0);
+-               MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_SELECT_ADDRESS, current_test);
++               MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_SELECT_ADDRESS, current_test, NULL);
+ 
+                go_to_next_test(current_test, yabause_ut_filename, yinit);
+ 
+@@ -974,7 +1147,7 @@ namespace yabauseut
+                printf("Unrecognized message type: %s\n", message);
+             }
+ 
+-            MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_STATUS_ADDRESS, AUTO_TEST_MESSAGE_RECEIVED);
++            MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_STATUS_ADDRESS, AUTO_TEST_MESSAGE_RECEIVED, NULL);
+          }
+       }
+       return stats.regressions || stats.screenshot.diffs;
+@@ -989,6 +1162,9 @@ namespace yabauseut
+ //yabause yabauseut dump yabause_ut_binary_path output_path
+ int main(int argc, char *argv[])
+ {
++#ifdef _MSC_VER
++   SetUnhandledExceptionFilter(scanout_exception_filter);
++#endif
+    int i = 0;
+ 
+    std::vector<std::string> args;
+@@ -998,7 +1174,7 @@ int main(int argc, char *argv[])
+       args.push_back(argv[i++]);
+    }
+ 
+-   if (args.size() < 4)
++   if (args.size() < 2)
+    {
+       std::cout << "Not enough command line arguments." << std::endl;
+       return false;
+@@ -1011,7 +1187,17 @@ int main(int argc, char *argv[])
+       return false;
+    }
+ 
+-   if (args.at(1) == "game")
++   if (args.at(1) == "scanout")
++   {
++      if (args.size() != 5 && args.size() != 6)
++      {
++         std::cout << "Usage: yabasanshiro scanout <cue> <frames> <metadata.jsonl> [probe-addresses]" << std::endl;
++         return false;
++      }
++      return run_scanout(args.at(2), (unsigned long)string_to_int(args.at(3)), args.at(4),
++                         args.size() == 6 ? args.at(5) : "");
++   }
++   else if (args.at(1) == "game")
+    {
+       //game mode
+       if (args.at(2) == "check")
+@@ -1109,4 +1295,4 @@ int main(int argc, char *argv[])
+       std::cout << "Unknown mode argument." << std::endl;
+       return false;
+    }
+-}
+\ No newline at end of file
++}
+diff --git a/yabause/src/vidsoft.c b/yabause/src/vidsoft.c
+index f2a3a78..b6c5df5 100644
+--- a/yabause/src/vidsoft.c
++++ b/yabause/src/vidsoft.c
+@@ -96,6 +96,15 @@ void VIDSoftVdp1FrameChange(){};
+ int VIDSoftVdp2Reset(void);
+ void VIDSoftVdp2DrawStart(void);
+ void VIDSoftVdp2DrawEnd(void);
++
++static VIDSoftScanoutCallback vidsoft_scanout_callback = NULL;
++static void *vidsoft_scanout_userdata = NULL;
++
++void VIDSoftSetScanoutCallback(VIDSoftScanoutCallback callback, void *userdata)
++{
++   vidsoft_scanout_callback = callback;
++   vidsoft_scanout_userdata = userdata;
++}
+ void VIDSoftVdp2DrawScreens(void);
+ void VIDSoftVdp2SetResolution(u16 TVMD);
+ void VIDSoftGetGlSize(int *width, int *height);
+@@ -2192,7 +2201,9 @@ int VIDSoftInit(void)
+    vdp2height = 224;
+ 
+ #ifdef USE_OPENGL
++#ifndef YAB_RUNNER_HEADLESS
+    VIDSoftSetupGL();
++#endif
+ #endif
+ 
+    for (i = 0; i < 6; i++)
+@@ -3876,6 +3887,11 @@ void VIDSoftVdp2DrawEnd(void)
+ 
+    TitanRender(dispbuffer);
+ 
++   if (vidsoft_scanout_callback != NULL)
++      vidsoft_scanout_callback(dispbuffer, vdp2width, vdp2height,
++                               (Vdp2Regs->TVSTAT & 0x0002) != 0,
++                               yabsys.frame_count, vidsoft_scanout_userdata);
++
+    VIDSoftVdp1SwapFrameBuffer();
+ 
+    if (OSDUseBuffer())
+diff --git a/yabause/src/vidsoft.h b/yabause/src/vidsoft.h
+index 9ec519d..13717de 100644
+--- a/yabause/src/vidsoft.h
++++ b/yabause/src/vidsoft.h
+@@ -31,6 +31,14 @@ extern "C" {
+ 
+ extern pixel_t *dispbuffer;
+ 
++/* A post-compositor diagnostic hook.  It observes the native software VDP2
++ * composite before VDP1 swap, OSD, host upload, scaling, or presentation. */
++typedef void (*VIDSoftScanoutCallback)(const pixel_t *rgba, int width,
++                                       int height, int interlace,
++                                       unsigned long emulator_frame,
++                                       void *userdata);
++void VIDSoftSetScanoutCallback(VIDSoftScanoutCallback callback, void *userdata);
++
+ extern VideoInterface_struct VIDSoft;
+ 
+ void VIDSoftVdp2DrawScreen(int screen);
