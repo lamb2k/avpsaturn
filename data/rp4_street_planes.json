@@ -1,0 +1,41 @@
+{
+ "classification": "tracked manifest of the private STRIPS.BIN; dimensions, counts and hashes only",
+ "interval": {
+  "first_frame": 3474,
+  "last_frame": 3674
+ },
+ "map_patches": 2,
+ "object_schedule": {
+  "entries": 12118,
+  "frames": 201,
+  "tiles_bin_covered": 4889,
+  "tiles_bin_uncovered": 7229
+ },
+ "palette_cycle": {
+  "bank": 1,
+  "period_frames": 4,
+  "states": 51
+ },
+ "planes": {
+  "scroll2": {
+   "colours_used": 197,
+   "height": 240,
+   "out_width": 527,
+   "pixel_sha256": "0fbd6d436fea117d59da75281bca8eae9b5b7a291179a7dd38a20946ef6c63c9",
+   "row0": 33,
+   "world_x0": 832
+  },
+  "scroll3": {
+   "colours_used": 15,
+   "height": 256,
+   "out_width": 528,
+   "pixel_sha256": "236bdb818a38d6e5241916b786b5077ddda9fc0c6685bd123f0bec5513ea5cf8",
+   "row0": 49,
+   "world_x0": 160
+  }
+ },
+ "schema": "rp4-street-planes-v0",
+ "strips_bin_bytes": 414310,
+ "strips_bin_sha256": "c754dc9abcd114ecc0e2b1c1632872e7a9f55124ee978688a1f901a780b673d4",
+ "transform": "source_x = (out_x*383+175)//351, unwrapped world space, shared by strips, patches and scroll"
+}
