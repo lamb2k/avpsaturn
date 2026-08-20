@@ -1,0 +1,130 @@
+{
+ "armed_frame": 3500,
+ "code_breakpoint_control": {
+  "address": null,
+  "fired": false
+ },
+ "conclusion": "the write-watchpoint mechanism did not fire even on a control address the game demonstrably writes; this run proves NOTHING about how VDP2 priority is programmed",
+ "cpu_core_note": "sh2 core: SH2 Debugger Interpreter",
+ "hit_count": 0,
+ "hits": [],
+ "positive_control": {
+  "address": "0x06001f18",
+  "fired": false,
+  "method": "a high-work-RAM long observed changing between two frames, watched for writes"
+ },
+ "registers_watched": [
+  "PRINA",
+  "PRINB",
+  "PRIR",
+  "PRISA",
+  "PRISB",
+  "PRISC",
+  "PRISD",
+  "SPCTL"
+ ],
+ "schema": "mshvsf-vdp2-write-trace-v0",
+ "views_watched": [
+  "0x05f80000",
+  "0x25f80000"
+ ],
+ "watchpoints_armed": 16,
+ "watchpoints_failed": [
+  {
+   "address": "0x25f800e0",
+   "cpu": "master",
+   "error": "MCP tool breakpoint_add failed: {'id': 999, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "SPCTL"
+  },
+  {
+   "address": "0x25f800f0",
+   "cpu": "master",
+   "error": "MCP tool breakpoint_add failed: {'id': 1000, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "PRISA"
+  },
+  {
+   "address": "0x25f800f2",
+   "cpu": "master",
+   "error": "MCP tool breakpoint_add failed: {'id': 1001, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "PRISB"
+  },
+  {
+   "address": "0x25f800f4",
+   "cpu": "master",
+   "error": "MCP tool breakpoint_add failed: {'id': 1002, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "PRISC"
+  },
+  {
+   "address": "0x25f800f6",
+   "cpu": "master",
+   "error": "MCP tool breakpoint_add failed: {'id': 1003, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "PRISD"
+  },
+  {
+   "address": "0x25f800f8",
+   "cpu": "master",
+   "error": "MCP tool breakpoint_add failed: {'id': 1004, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "PRINA"
+  },
+  {
+   "address": "0x25f800fa",
+   "cpu": "master",
+   "error": "MCP tool breakpoint_add failed: {'id': 1005, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "PRINB"
+  },
+  {
+   "address": "0x25f800fc",
+   "cpu": "master",
+   "error": "MCP tool breakpoint_add failed: {'id': 1006, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "PRIR"
+  },
+  {
+   "address": "0x25f800e0",
+   "cpu": "slave",
+   "error": "MCP tool breakpoint_add failed: {'id': 1015, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "SPCTL"
+  },
+  {
+   "address": "0x25f800f0",
+   "cpu": "slave",
+   "error": "MCP tool breakpoint_add failed: {'id': 1016, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "PRISA"
+  },
+  {
+   "address": "0x25f800f2",
+   "cpu": "slave",
+   "error": "MCP tool breakpoint_add failed: {'id': 1017, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "PRISB"
+  },
+  {
+   "address": "0x25f800f4",
+   "cpu": "slave",
+   "error": "MCP tool breakpoint_add failed: {'id': 1018, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "PRISC"
+  },
+  {
+   "address": "0x25f800f6",
+   "cpu": "slave",
+   "error": "MCP tool breakpoint_add failed: {'id': 1019, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "PRISD"
+  },
+  {
+   "address": "0x25f800f8",
+   "cpu": "slave",
+   "error": "MCP tool breakpoint_add failed: {'id': 1020, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "PRINA"
+  },
+  {
+   "address": "0x25f800fa",
+   "cpu": "slave",
+   "error": "MCP tool breakpoint_add failed: {'id': 1021, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "PRINB"
+  },
+  {
+   "address": "0x25f800fc",
+   "cpu": "slave",
+   "error": "MCP tool breakpoint_add failed: {'id': 1022, 'jsonrpc': '2.0', 'result': {'content': [{'text': 'failed to add breakpoint (table full or duplicate address)', 'type': 'text'}], 'isError': True}}",
+   "register": "PRIR"
+  }
+ ]
+}

@@ -1,0 +1,34 @@
+{
+ "anchor": {
+  "frame": 3840,
+  "label": "impact"
+ },
+ "conclusion": "VDP2 registers unreadable through every view; the tracked all-zero block is an instrument limit, not a measurement",
+ "reader_proven_working": true,
+ "schema": "mshvsf-vdp2-priority-probe-v0",
+ "usable_views": [],
+ "views": {
+  "cached_a_bus": {
+   "address": "0x05f80000",
+   "nonzero_bytes": 0,
+   "priority_decode": null,
+   "sha256": "2d5565fb483d8ea4525a7a9229677d1038ad34b6e22c8d5152e1d7f7b9817597",
+   "total_bytes": 288,
+   "usable": false
+  },
+  "colour_ram_positive_control": {
+   "address": "0x05f00000",
+   "nonzero_bytes": 455,
+   "reader_proven_working": true,
+   "total_bytes": 512
+  },
+  "uncached_mirror": {
+   "address": "0x25f80000",
+   "nonzero_bytes": 0,
+   "priority_decode": null,
+   "sha256": "2d5565fb483d8ea4525a7a9229677d1038ad34b6e22c8d5152e1d7f7b9817597",
+   "total_bytes": 288,
+   "usable": false
+  }
+ }
+}

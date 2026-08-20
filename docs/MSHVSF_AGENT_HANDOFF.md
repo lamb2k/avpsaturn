@@ -2,6 +2,62 @@
 
 Updated: 2026-08-18 EDT
 
+## VDP2 priority re-read, 2026-08-20 (newest first)
+
+Worktree `AvPSaturnCapabilityTest-MSHvSF-PriorityProbe`, branch
+`claude/mshvsf-vdp2-priority-probe`, from `dc5d3ea`.
+
+**Result: the VDP2 priority programming remains undecodable with this
+instrument, and the reason is now pinned rather than assumed.** Both the
+read path and the write path were attacked, each with its own control.
+
+Reads (`tools/probe_mshvsf_vdp2_priority.py`, replayed on
+`saturn_ryu_first_pass_b` at the four tracked anchors idle 3540,
+normal_active 3828, impact 3840, recovery 3900):
+
+- the 288-byte register block reads back all zeros through BOTH the
+  cached A-bus view `0x05F80000` and the uncached mirror `0x25F80000`,
+  at every anchor;
+- the colour-RAM positive control at `0x05F00000` reads nonzero in every
+  run, so the memory reader itself is proven working and the zeros are a
+  property of the register block, not of the tool.
+
+This closes the "a better parser cannot help" question from the previous
+session: it is not a parser problem and not an address-view problem.
+
+Writes (`tools/trace_mshvsf_vdp2_writes.py`): the fallback of watching
+the writes instead of the state is ALSO closed.
+
+- SH-2 memory write watchpoints were armed on SPCTL, PRISA-PRISD,
+  PRINA/PRINB and PRIR on both CPUs, with the debug interpreter core
+  selected (`sh2 core: SH2 Debugger Interpreter`). Yaba normalizes the
+  uncached mirror onto the cached address, so 16 armed watchpoints cover
+  all eight registers on both CPUs.
+- Zero hits. But zero hits proves nothing on its own, so the run carries
+  two controls, and BOTH fail: a write watchpoint on `0x06001F18`, a
+  work-RAM long observed changing across a frame, never fires; and a
+  code breakpoint set at the master CPU's own current PC never fires
+  either.
+- Conclusion: **the breakpoint mechanism as a whole is inert in this Yaba
+  build**, not merely memory watchpoints. The tool reports this as
+  proving NOTHING about VDP2 rather than as a measurement.
+
+Consequences for the reference lane:
+
+- "list order is the only priority" stays **ADAPTED**. It is not
+  confirmed and not refuted; the instrument cannot see the registers
+  that would decide it.
+- The VDP2 priority decode itself is implemented and unit-tested
+  (`tests/reference_engine/test_vdp2_priority_decode.py`, 8 tests),
+  including that an all-zero block decodes to all-zero priorities. The
+  decode is deliberately naive there; it is the PROBE, not the decode,
+  that refuses to treat an all-zero block as a measurement.
+- The instrument that would answer this: a Saturn emulator whose
+  debugger actually services register reads or breakpoints (a Kronos or
+  Mednafen debug build), or a Yaba build with breakpoint support
+  compiled in. Adding more anchors or more parsing to the current rig
+  cannot help.
+
 ## Repository boundary
 
 - Worktree: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-MSHvSF`
