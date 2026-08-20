@@ -379,16 +379,30 @@ if (Test-Path (Join-Path $PSScriptRoot '.deps\mame\full_route\region_index.tsv')
         throw "Street plane verification failed with exit code $LASTEXITCODE."
     }
 
-    # RP4 composite/priority proof under the SAME private-input gate.
-    # Exit 0 is required; exit 1 is a failed control; exit 3 means the
-    # fixture is FALSIFIED (no measured actor/foreground overlap) and
-    # MUST fail the suite - a falsified acceptance is never a skip.
+    # RP4 v0, retained as a REGRESSION ASSERTION, not as acceptance.
+    # The v0 premise (priority code = actor class, with a deliberate
+    # actor-over-foreground overlap) was falsified route-wide, so this
+    # verifier must report exactly FALSIFIED (exit 3). Exit 0 would
+    # mean the falsified premise had been quietly reinstated, and is
+    # refused just as hard as a failed control.
     & $PythonPath (Join-Path $PSScriptRoot 'tools\verify_street_composite.py')
+    if ($LASTEXITCODE -eq 0) {
+        throw 'RP4 v0 reports PASS, but its source premise is FALSIFIED; acceptance must come from the v1 contract.'
+    }
+    if ($LASTEXITCODE -ne 3) {
+        throw "RP4 v0 regression assertion failed with exit code $LASTEXITCODE (expected 3, FALSIFIED)."
+    }
+
+    # RP4 v1 acceptance: the source-order contract. Exit 0 is
+    # required; exit 3 means the contract is FALSIFIED (blocked
+    # controls or thin witnesses) and exit 1 a failed control. Either
+    # one fails the suite - it is green only when v1 PASSES.
+    & $PythonPath (Join-Path $PSScriptRoot 'tools\verify_rp4_v1_source_order.py')
     if ($LASTEXITCODE -eq 3) {
-        throw 'RP4 composite proof is FALSIFIED (no measured actor/foreground overlap); the suite cannot pass.'
+        throw 'RP4 v1 source-order contract is FALSIFIED (blocked controls or insufficient witnesses); the suite cannot pass.'
     }
     if ($LASTEXITCODE -ne 0) {
-        throw "Street composite verification failed with exit code $LASTEXITCODE."
+        throw "RP4 v1 source-order verification failed with exit code $LASTEXITCODE."
     }
 }
 

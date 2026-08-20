@@ -2076,23 +2076,30 @@ volatile int avsp_diag_street_objects;
 
 static void street_load_planes(void);
 
-/* CPS object priority -> Saturn sprite priority class. SPCTL is type 3
- * (measured 0x0023): frame-buffer bits 14-13 select the sprite priority
- * register. Jo leaves them zero (class 0, the HUD/default class); the
- * street objects OR class 1 (CPS priority 1, actors) or class 2 (CPS
- * priority 4, foreground) into the colour-bank word, exactly the
- * mechanism the official MSHvSF port was measured to use (0x6000/0x7000
- * prefixes over the 11-bit colour entry). */
-#define STREET_SPR_CLASS_ACTOR 0x2000UL
-#define STREET_SPR_CLASS_FOREGROUND 0x4000UL
+/* CPS object priority -> Saturn sprite priority class (RP4 v1).
+ *
+ * The v0 mapping split street objects into an "actor" class (CPS
+ * priority 1) below a "foreground" class (CPS priority 4). That premise
+ * is FALSIFIED: across all 18,000 captured route frames no priority-1
+ * object is ever visible, and every visible street object carries
+ * priority code 4. There is no actor/foreground class split to port.
+ *
+ * What the source actually programs (measured from OBJ_PRI and the
+ * CPS-B layer control, see data/rp4_object_layer_witnesses.json) is a
+ * single relationship: code 4 draws ABOVE scroll2 and scroll3 and
+ * UNDER scroll1. Scroll2/scroll3 are NBG0/NBG1 here at priorities 3 and
+ * 2, so one sprite class above both carries every street object.
+ *
+ * SPCTL is type 3 (measured 0x0023): frame-buffer bits 14-13 select the
+ * sprite priority register, and Jo leaves them zero (class 0, the
+ * HUD/debug class). Street objects OR in class 1. */
+#define STREET_SPR_CLASS_OBJECT 0x2000UL
 extern jo_sprite_attributes __jo_sprite_attributes;
 
-static void street_object_palette(const int bank_slot, const int priority)
+static void street_object_palette(const int bank_slot)
 {
     jo_sprite_set_palette_4bits(tile_palette.id, bank_slot);
-    __jo_sprite_attributes.color_table_index |=
-        priority >= 4 ? STREET_SPR_CLASS_FOREGROUND :
-        STREET_SPR_CLASS_ACTOR;
+    __jo_sprite_attributes.color_table_index |= STREET_SPR_CLASS_OBJECT;
 }
 
 static unsigned int street_u16(const unsigned long offset)
@@ -2175,9 +2182,11 @@ static int street_setup(void)
               (void *)STREET_NBG1_PNT, (void *)STREET_NBG1_PNT);
     slPriority(scnNBG0, 3);
     slPriority(scnNBG1, 2);
-    /* Sprite class registers: class 0 (Jo default, HUD/debug) stays at 6;
-       class 1 carries CPS priority-1 actors above both planes; class 2
-       carries CPS priority-4 foreground above the actors. */
+    /* Sprite class registers (RP4 v1): class 0 (Jo default, HUD/debug)
+       stays at 6; class 1 carries every street object above NBG0 and
+       NBG1, which is the whole of the source's object-versus-tile
+       programming for priority code 4. Within the class, composite
+       order is the command order, not a second priority register. */
     slPriority(scnSPR1, 4);
     slPriority(scnSPR2, 6);
     jo_set_displayed_screens(JO_NBG0_SCREEN | JO_NBG1_SCREEN |
@@ -2336,13 +2345,20 @@ static void street_test_frame(void)
     objects = street_object_frame_offset[rel];
     entry_count = (int)street_u16(objects);
     objects += 2;
-    for (entry = 0; entry < entry_count; ++entry)
+    /* RP4 v1 command order. MAME 0.289 cps2_render_sprites walks the
+       object list from the LAST entry down to entry 0, so on CPS2 the
+       EARLIER object-RAM entry is drawn over the later one. VDP1 is the
+       opposite: a later command covers an earlier one. Emitting the
+       schedule front-to-back would therefore invert every overlap
+       inside the priority class, so the entries are walked in reverse
+       and the earliest entry is submitted last. */
+    for (entry = entry_count - 1; entry >= 0; --entry)
     {
-        const unsigned int x = street_u16(objects);
-        const unsigned int y = street_u16(objects + 2);
-        const unsigned int code = street_u16(objects + 4);
-        const unsigned int attr = street_u16(objects + 6);
-        const int priority = (int)((x >> 13) & 7);
+        const unsigned long entry_at = objects + (unsigned long)entry * 8;
+        const unsigned int x = street_u16(entry_at);
+        const unsigned int y = street_u16(entry_at + 2);
+        const unsigned int code = street_u16(entry_at + 4);
+        const unsigned int attr = street_u16(entry_at + 6);
         AvspEntryTile entry_tiles[64];
         const int bank_slot = avsp_tiles_bank_slot(&tile_archive,
                                                    (int)(attr & 0x1F));
@@ -2351,9 +2367,8 @@ static void street_test_frame(void)
                                            (unsigned short)attr,
                                            entry_tiles, 64);
         int tile;
-        objects += 8;
         if (count <= 0 || bank_slot < 0) continue;
-        street_object_palette(bank_slot, priority);
+        street_object_palette(bank_slot);
         for (tile = 0; tile < count; ++tile)
         {
             const long rank = avsp_tiles_find(&tile_archive,
@@ -2373,7 +2388,7 @@ static void street_test_frame(void)
                                            entry_tiles[tile].dx + 8) - 176,
                              (int)(y & 0x3FF) - 16 +
                                  entry_tiles[tile].dy + 8 - 112,
-                             priority >= 4 ? 120 : 240);
+                             120);
             if (entry_tiles[tile].flip_x)
                 jo_sprite_disable_horizontal_flip();
             if (entry_tiles[tile].flip_y)
