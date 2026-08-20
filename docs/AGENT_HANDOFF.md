@@ -10,6 +10,78 @@ git log --oneline -10
 Get-Process mame,yabasanshiro* -ErrorAction SilentlyContinue
 ```
 
+## RP4 exact-source scanout recovery: defined equivalence stop, 2026-08-20 (newest first)
+
+The old statement that corresponding source was unavailable is
+**SUPERSEDED_BY_OFFICIAL_1_20_37_SOURCE**.  The official Yaba Sanshiro download
+page publishes the corresponding-source archive for the pinned release:
+
+```text
+source URL: https://d1t36rsydvwkyk.cloudfront.net/yabasanshiro-src-1.20.37.zip
+archive bytes: 102568341
+archive SHA-256: c12a68e90d8f03001eff8c75790e0a221cb9b79c676cf5f3daf6c08ac9795557
+extracted version.json: version 1.20.37, code 354
+release URL: https://d1t36rsydvwkyk.cloudfront.net/yabasanshiro-1.20.37-2986eb.zip
+pinned installed exe SHA-256: 016112708fc77ec53b8a36c4ef52e300a78b3fb079e815f60b1a51fa1661999c
+```
+
+This establishes **SOURCE_CORRESPONDENCE_PROVEN**. It does *not* establish a
+guest-equivalent diagnostic build. The prior 71c973f/Tico patch and manifests
+remain historical **REJECTED** evidence and must not be deleted or repurposed.
+
+### Route results
+
+1. **Official-source software-Titan runner: BUILT, guest equivalence FAIL.**
+   A short-root MSVC/CMake runner was built from the official archive with a
+   copied scanout callback directly after `TitanRender(dispbuffer)` and before
+   VDP1 swap, OSD, upload, and present. `game.cue` boots with HLE, 32-Mbit DRAM
+   cart, and a 352x224 callback. Two real runner corrections were made while
+   diagnosing it: `PERDummyHandleEvents()` already invokes `YabauseExec()`
+   (the extra runner call was removed), and the runner now uses C68K plus the
+   Qt default unthrottled setting rather than an unregistered Musashi id.
+   Neither fixes the semantic failure. After 4,500 scanout frames the current
+   StreetTest reports `runtime_ready=1`, `street_ready=1`, 464 objects and
+   201 loaded fixture frames, but `frame_counter=1` and exported
+   `street_frame=0` remain fixed. The prior pinned-release corpus advanced
+   fixture frames. Thus command/VRAM/CRAM equivalence and calibration are
+   blocked; do not use this runner's scanout as evidence.
+
+2. **Official-source Qt/SDL real-context routes: not buildable from the
+   published archive in this environment.** The Qt build reached the UI after
+   a Windows CMake defect (`/MP` was sent to `rc.exe`) and absent updater
+   support were isolated, but then stopped on independent omitted/unguarded
+   components: `VIDCORE_VULKAN` is referenced when Vulkan headers are absent,
+   and the bundled Firebase 6.11 API returns `User*` while the UI source
+   expects a value with `is_valid()`. The fallback SDL route was tried with
+   the pinned SDL 2.30.10 VC package; CMake then requires additional
+   pkg-config/GLFW/OpenGLES dependencies. No arbitrary UI/cloud rewrite was
+   accepted merely to obtain a measurement tool.
+
+3. **MCP/Vulkan readback: rejected as an authority substitute.** The exact
+   source MCP service exposes memory/debug operations only. Vulkan
+   `FbReadback` is explicitly a paused VDP1-offscreen buffer, not the final
+   VDP1+VDP2 composite. `VulkanScene::getScreenshot` reads the host swapchain
+   at host surface dimensions after presentation. None is a deterministic,
+   pre-OSD, native 352x224 final-composite witness.
+
+### Current ruling and next authorised work
+
+`saturn_vdp2_scanout_status` remains **UNREADABLE**;
+`saturn_output_order_status` and `saturn_vdp1_command_status` remain
+**ADAPTED/GAP**, all three visual controls are blocked, `rp4_v1_status`
+remains **FALSIFIED**, and Capability Gate 1 remains **0/7**. Calibration and
+RP4 promotion are not authorised.
+
+The next agent may proceed only with a bounded, failing-first
+guest-equivalence investigation that identifies the remaining official-runner
+execution divergence (disc/core/BIOS/interrupt timing) *or* obtains the
+officially matching UI dependency set without changing emulation semantics.
+Do not model a composite, automate a screenshot, treat VDP1-only or host
+swapchain pixels as VDP2 scanout, or implement Saturn ordering changes while
+this status remains open. Preserve the ignored official archive, extracted
+source, runner builds, Qt/SDL attempts, logs and scanouts. Kill all emulator
+processes before handoff.
+
 ## RP4 correction: reproducible rejected scanout diagnostic, 2026-08-20 (newest first)
 
 Read the actual current commit with `git rev-parse HEAD`; this document must
