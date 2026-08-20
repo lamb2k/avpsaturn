@@ -14,9 +14,10 @@ Get-Process mame,yabasanshiro* -ErrorAction SilentlyContinue
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `codex/avp-master-plan`
-- HEAD: `18c781f` (`Prove the two-plane street renderer with fixture
-  separation (RP4)`), on top of the Codex base
-  `8fd75b31c1ed6708de5fbd32ccaa2b98042d9654`.
+- HEAD: `671eca8` (`Share the endpoint 384-to-352 rule with the street
+  object draw`); RP4 chain since the Codex base
+  `8fd75b31c1ed6708de5fbd32ccaa2b98042d9654`: `18c781f` implementation,
+  `c6d1244`/`bd13e31` handoff reports, `671eca8` mapping unification.
 - No remote publication is authorized.
 - Capability Gate 1: **0/7**.
 - Full-game acceptance: **0/9**.
@@ -111,7 +112,8 @@ must be measured again after the current integration links.
 
 - Mode: `SUPERVISED_IMPLEMENTATION`, `PACKAGE: RP4`, implementor.
 - Base SHA: `8fd75b31c1ed6708de5fbd32ccaa2b98042d9654`.
-- Implementation commit: `18c781f` (single coherent checkpoint).
+- Implementation commits: `18c781f` (renderer proof and hardening),
+  `671eca8` (endpoint-rule unification for the street object draw).
 - Changed files: `main.c`, `build.ps1`, `makefile`, `test.ps1`,
   `tools/gen_avsp_street_planes.py`, `tools/verify_street_planes.py` (new),
   `tools/verify_fixture_separation.py` (new),
