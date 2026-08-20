@@ -52,20 +52,22 @@ Work is sequential. Only one role owns the repository at a time.
   constraints, ordered chapters and acceptance criteria. Codex does not
   delegate parity definitions, architecture ownership, acceptance thresholds
   or overall sequencing.
-- **Claude is the directed investigator and implementor.** Claude runs the
-  prescribed traces and experiments, writes the failing tests, implements the
-  evidence-supported branch, debugs ordinary build/runtime failures, executes
-  the verification ladder and commits coherent checkpoints. Claude may report
-  contradicting evidence and recommend a change, but may not silently redesign
-  the system, weaken acceptance, replace ROM translation with approximation or
-  accept its own recommendation.
+- **The implementor session is the directed investigator and implementor.** It
+  may be Claude or a separately invoked Codex model. Model identity does not
+  change authority: the implementor runs prescribed traces and experiments,
+  writes failing tests, implements the evidence-supported branch, debugs
+  ordinary build/runtime failures, executes the verification ladder and
+  commits coherent checkpoints. It may report contradicting evidence and
+  recommend a change, but may not silently redesign the system, weaken
+  acceptance, replace ROM translation with approximation, issue a supervisor
+  disposition or accept its own recommendation.
 
 Every unknown source fact must receive a bounded contract in
 `docs/NEXT_AGENT_PROMPT.md`: exact question, hypotheses, settled evidence,
 prescribed instruments, distinguishing evidence, negative controls, decision
-table, implementation boundary, tests and regressions. Claude continues into
-the matching implementation branch; investigation completion alone is not a
-handoff condition.
+table, implementation boundary, tests and regressions. The implementor
+continues into the matching implementation branch; investigation completion
+alone is not a handoff condition.
 
 An architectural hard stop exists only when evidence falsifies every
 prescribed branch, materially different designs remain equally supported, a
@@ -79,12 +81,20 @@ Codex reviews a committed result and returns exactly one disposition:
 `ACCEPTED`, `CORRECTIONS REQUIRED`, or `NOT REVIEWABLE`. Every review verifies
 the evidence, falsifying control, failing-first RED, non-weakened GREEN,
 prescribed architecture, reported divergences and cumulative Saturn routes,
-then ends with a complete `CLAUDE_INVOCATION`. Acceptance also records the
-accepted range/evidence in the handoff, updates canonical status only where
+then ends with a complete `IMPLEMENTOR_INVOCATION` (the historical
+`CLAUDE_INVOCATION` name remains a compatible alias). Acceptance also records
+the accepted range/evidence in the handoff, updates canonical status only where
 evidence changed it, selects the next dependency-ready body, replaces
 `docs/NEXT_AGENT_PROMPT.md`, and commits the supervisor documentation
 checkpoint when appropriate. Do not ask whether to continue when the plan
 already orders the next body.
+
+When the implementor is another Codex session, that session must remain in
+implementor role for its entire turn. It must not reinterpret itself as the
+supervisor, issue `ACCEPTED`/`CORRECTIONS REQUIRED`/`NOT REVIEWABLE`, select the
+next tranche or rewrite the master sequence. It returns the same
+`CODEX_REVIEW_INVOCATION` evidence package that Claude would return; the
+separate supervisor session alone reviews and assigns subsequent work.
 
 ## Current direction: functional parity by ROM translation
 

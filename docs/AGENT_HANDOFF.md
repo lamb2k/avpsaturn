@@ -64,10 +64,12 @@ the base control reaches `runtime_ready=1`, `street_objects>0`, and an advancing
 fixture frame with the exact ISO/ELF hashes recorded. The complete decision
 book is `docs/NEXT_AGENT_PROMPT.md`.
 
-Work is now governed by the sequential Codex-supervisor/Claude-implementor
-protocol in `AGENTS.md`. Codex owns the architecture and disposition; Claude
-executes the bounded book and may stop only at its named architectural hard
-stop.
+Work is now governed by the sequential supervisor-session/implementor-session
+protocol in `AGENTS.md`. The implementor may be Claude or a separately invoked
+Codex model; it has identical bounded authority in either case. The supervisor
+session owns architecture and disposition. The implementor executes the book,
+returns a `CODEX_REVIEW_INVOCATION`, and may stop only at a named architectural
+hard stop.
 
 ## Official 1.20.37 source: reference instrument only, 2026-08-20 (newest first)
 
