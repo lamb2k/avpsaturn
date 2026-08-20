@@ -10,6 +10,118 @@ git log --oneline -10
 Get-Process mame,yabasanshiro* -ErrorAction SilentlyContinue
 ```
 
+## RP4 direct command-order implementation report, 2026-08-20 (newest first)
+
+`MODE: DIRECTED_BOOK_IMPLEMENTATION`. Book: `docs/NEXT_AGENT_PROMPT.md` as of
+source commit `e7be907` on `claude/rp4-priority-architecture`. Implementation
+worktree `AvPSaturnCapabilityTest-ClaudeRp4DirectOrder`, branch
+`claude/rp4-direct-command-order`.
+
+- **Base SHA:** `2762d99ac65bc871b201c39f4ebc830f7cbd27e8`.
+- **Implementation commits:**
+  - `1c5faba` launch/readiness instrument and RED tests;
+  - `d4e1115` evidence-supported falsification and GREEN proof.
+- **Changed files (14, +2240/-2):** `build.ps1`, `makefile`, `main.c`,
+  `tools/street_launch.py`, `tools/capture_street_vdp1.py`,
+  `tools/rp4_command_identity.py`, `tools/rp4_source_groups.py`,
+  `tools/verify_rp4_direct_order.py`, `tools/rp4_measure_variants.ps1`,
+  `tools/saturn_control_status.py`, `data/rp4_direct_order.json`,
+  `tests/test_street_launch.py`, `tests/test_rp4_command_identity.py`,
+  `tests/test_rp4_direct_order.py`. No ROM/private payload is committed.
+
+### Decision table result: D — architectural hard stop
+
+The book's Chapter-0 settled premise ("reversing the emission loop does not
+change what VDP1 draws, so SGL does not preserve equal-Z submission order") is
+**FALSIFIED by frame-pinned measurement**, and a **texture-residency
+contradiction** — not an ordering fact — is what makes this body a hard stop.
+
+- **Why the UNRUN candidate never booted:** the pinned-release launches ran with
+  `General\EnableEmulatedBios=false` and no BIOS image, an unbootable
+  configuration. `tools/street_launch.py` now owns the staged cue, repairs the
+  required Yaba settings (`EnableEmulatedBios=true`, `CdRom=1`,
+  `Cartridge\Type=7`, `autostart=false`, MCP on 9640), and classifies the four
+  readiness states, so a launch can no longer burn 600 s on an unbootable
+  machine. This is a harness/config fault, not a guest defect.
+- **Falsified premise:** the prior capture advanced the fixture ~44 frames per
+  pause/resume round trip, so the two "same-scene" captures were not the same
+  scene. With the capture frame pinned by a write-breakpoint on
+  `_avsp_diag_street_frame` (stay stopped, no release-to-boundary drift), the
+  sorted `slDispSprite` path **does** carry the emission order into final VDP1
+  memory: the witness moves from final indices 380-384 (reverse loop) to 7-11
+  (forward loop), against the later entry at 239-246 / 145-152, matching the
+  emission positions 53 and 5 of 59 exactly. Same-build determinism holds:
+  byte-identical command table across two cold boots (392 comparable commands,
+  76636/76636 order-preserving pairs).
+- **Residency contradiction (the hard stop):** every one of the 201 fixture
+  frames needs 329-486 distinct 16x16 tile textures resident in a single frame,
+  exceeding both the 96-slot street tile pool and Jo Engine's entire 255-entry
+  program-wide sprite-definition table (`JO_MAX_SPRITE`). Only 97 distinct
+  texture addresses back the 391 commands, so texture identity is undefined for
+  294/391 commands. The binding limit is the Jo sprite table, not VDP1 texture
+  VRAM; correcting it crosses a Jo structural limit, i.e. an architectural
+  change, not a bounded setup correction.
+- **Immediate path is not a substitute:** `slPutSprite` lands sprites at
+  different coordinates than the sorted path (sorted matches 367/391 x at
+  offset 0; immediate matches 99/505 x at no offset) and emits 505 commands vs
+  391, so it is `not_uniquely_joinable` and cannot pass `command_order`.
+
+### Production behavior unchanged
+
+The `AVSP_RP4_IMMEDIATE_SPRITES` seam in `main.c` is `#if`-gated and defaults to
+the unchanged `jo_sprite_draw3D`/`slDispSprite` path. The default build's VDP1
+command table is **byte-identical** to the pristine base build.
+
+- Pristine base ELF: `8ffd8a113c3bcf66926fc91fc10970c4085e01ebe6ec6f47246e85889aa93e83`.
+- Tracked manifest `data/rp4_direct_order.json` sha256:
+  `47912b205d6f85670acaeb9319f9b0e8a11ee13c26797e9f1f1086c4f0d7fa9b`
+  (deterministic across regenerations).
+
+### Checks and exact results
+
+- `test.ps1`: PASS through the intentional RP4 v1 `FALSIFIED` stop (host-side
+  route/anim/table-set gates and C unit tests).
+- New host tests (bundled Python), all GREEN:
+  - `tests/test_rp4_command_identity.py` — 12 mutation/provenance controls;
+  - `tests/test_rp4_direct_order.py` — manifest shape, falsified-premise
+    assertion, immediate-not-a-substitute, unchanged production behavior, and
+    the residency contradiction recomputed straight from `STRIPS.BIN`;
+  - `tests/test_street_launch.py` — quoting, per-checkout isolation, stale
+    artifacts, four readiness states.
+- **Verification ladder (live over MCP, Yaba 1.20.37-2986eb):**
+  - EncounterTest (`elf f9f26611…`, `iso 7fdd6129…`): self-drove states 0→18,
+    reaching `CAP_ENCOUNTER_COMPLETE` (state 18) with `runtime_ready=1`, world
+    frame 0→3319. **PASS.**
+  - Clean normal-release title boot (`elf 04ce3275…`, exact staged cue):
+    `runtime_ready=1` at ~61 s, world frame 196→314 over ~2 s (full rate).
+    **PASS.**
+  - No MAME/Yaba/compiler process remains after teardown. **PASS.**
+
+### Remaining ADAPTED/GAP and UNRUN
+
+- **GAP (architectural):** street texture residency exceeds the Jo sprite
+  table on every fixture frame; no submission seam preserves the
+  texture-content invariant. Requires a Codex architecture decision (e.g. a
+  bespoke non-Jo command/texture path), out of this body's bounded scope.
+- **Blocked controls, not promoted:** `cmdcolr_priority_selector` and
+  `sprite_priority_register_effect` (object-vs-plane composite controls) remain
+  blocked from command-table evidence. RP4 v1 remains `FALSIFIED`; Capability
+  Gate 1 remains `0/7`.
+- **UNRUN:** physical Saturn hardware; audible CDDA/PCM confirmation;
+  full-game route beyond the captured fixture window. Per-variant captures and
+  the pristine-base capture live only under gitignored
+  `private-evidence/rp4-direct-order/` and are not committed.
+
+### Suggested next body (for Codex disposition only)
+
+The ordering question is answered: the sorted path already preserves CPS object
+order, so no `slPutSprite` rework is warranted. The live blocker is texture
+residency. Recommend Codex scope a bounded investigation into whether the
+street scene can be re-expressed so per-frame distinct-texture demand fits the
+Jo sprite table (or whether a non-Jo VDP1 texture/command path is required),
+before any further attempt at the object-vs-plane priority controls. This is a
+recommendation only; Codex owns the canonical plan and the next assignment.
+
 ## RP4 direct-order supervisor checkpoint, 2026-08-20 (newest first)
 
 Branch `claude/rp4-priority-architecture` was clean at `1cd021b` before this
