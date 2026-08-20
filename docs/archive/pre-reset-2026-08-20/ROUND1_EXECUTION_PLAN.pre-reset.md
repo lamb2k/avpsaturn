@@ -343,6 +343,15 @@ Agents:
 5. never merge or cherry-pick themselves into the integration branch unless
    explicitly assigned as integration owner.
 
+A single Claude session may own several ordered packages only when invoked as
+`MODE: AUTONOMOUS_BOOK_IMPLEMENTATION` with a Codex-authored execution book.
+That mode removes planning pauses between candidate packages; it does not make
+Claude the plan owner. Follow `docs/AUTONOMOUS_EXECUTION_BOOK.md`: run each
+chapter's RED/GREEN/refactor contract, update the candidate ledger, commit, and
+continue. Do not edit this accepted status table or rotate
+`docs/NEXT_AGENT_PROMPT.md`; Codex performs one acceptance review after the
+complete book.
+
 Every package report starts with this machine-readable summary so the
 integration owner can update status without interpreting prose:
 
@@ -352,6 +361,13 @@ BASE_SHA: <40 hex>
 COMMIT_SHA: <40 hex or UNCOMMITTED>
 OWNED_PATHS: <explicit paths>
 STATUS: PASS | PARTIAL | BLOCKED
+RED_COMMIT: <40 hex or N/A with reason>
+RED_COMMAND: <command and expected failure>
+RED_RESULT: <actual failure>
+GREEN_COMMIT: <40 hex or UNCOMMITTED>
+GREEN_COMMAND: <command>
+GREEN_RESULT: <actual result>
+NEGATIVE_CONTROLS: <names and results>
 CHECKS: <command=result list>
 UNRUN: <exact checks>
 DEPENDENCY_CHANGES: <none or explicit proposal>
