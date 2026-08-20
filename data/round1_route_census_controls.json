@@ -1,0 +1,14 @@
+{
+ "baseline_groups": 122,
+ "one_frame_shift": {
+  "boundaries_moved": 114,
+  "detected": true,
+  "groups": 122
+ },
+ "pass": true,
+ "perturbed_boundary": {
+  "detected": true,
+  "groups": 124,
+  "perturbed_frame": 3808
+ }
+}

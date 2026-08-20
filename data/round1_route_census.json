@@ -1,0 +1,12110 @@
+{
+ "classification": "semantic census of the private full-route cadence-1 capture; hashes, counts, addresses and ranges only - no ROM bytes, framebuffer payloads, or audio",
+ "group_count": 122,
+ "groups": [
+  {
+   "boundary_reason": "route-start",
+   "cps_b_sha256": "f5a5fd42d16a20302798ef6ed309979b43003d2320d9f0e8ea9831a92759fb4b",
+   "first_frame": 1,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     0,
+     3
+    ]
+   ],
+   "last_frame": 3,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x9100",
+    "0x0000"
+   ],
+   "map_unique_hashes": [
+    2,
+    3,
+    2
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 1,
+   "palette_population": "ffffffffffffffffffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8000",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "video_control": "0x0000"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ed3b1e6924c47a7e94284b88f4e54a35647b7f227a820e5afb9f9bc9412ba938",
+   "first_frame": 4,
+   "frames": 76,
+   "input_word_runs": [
+    [
+     0,
+     76
+    ]
+   ],
+   "last_frame": 79,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x9100",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    2,
+    3,
+    2
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 1,
+   "palette_population": "ffffffffffffffffffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8001",
+   "qsound_change_frames": 3,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 3,
+   "scroll_max": [
+    65472,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "video_control": "0x003e"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "3cefe73b95fb23f0cb18c1555c371eb5bb378bb7f6b714f1e8a2566824d0f782",
+   "first_frame": 80,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     0,
+     3
+    ]
+   ],
+   "last_frame": 82,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8002",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "video_control": "0x003e"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "3cefe73b95fb23f0cb18c1555c371eb5bb378bb7f6b714f1e8a2566824d0f782",
+   "first_frame": 83,
+   "frames": 4,
+   "input_word_runs": [
+    [
+     0,
+     4
+    ]
+   ],
+   "last_frame": 86,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8003",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "scroll_min": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "eb39a4dbd02cc5e9cd804a5ddfa2911f91ca5f1143282127ece0e9bf03853195",
+   "first_frame": 87,
+   "frames": 9,
+   "input_word_runs": [
+    [
+     0,
+     9
+    ]
+   ],
+   "last_frame": 95,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 2,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8004",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "scroll_min": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 96,
+   "frames": 343,
+   "input_word_runs": [
+    [
+     0,
+     343
+    ]
+   ],
+   "last_frame": 438,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    3,
+    1,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 30,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8005",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    768,
+    65472,
+    1792
+   ],
+   "scroll_min": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "eb39a4dbd02cc5e9cd804a5ddfa2911f91ca5f1143282127ece0e9bf03853195",
+   "first_frame": 439,
+   "frames": 17,
+   "input_word_runs": [
+    [
+     0,
+     17
+    ]
+   ],
+   "last_frame": 455,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    2,
+    1,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 3,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8006",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    768,
+    65472,
+    1792
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    768,
+    65472,
+    1792
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 456,
+   "frames": 210,
+   "input_word_runs": [
+    [
+     0,
+     210
+    ]
+   ],
+   "last_frame": 665,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 16,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8007",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    768,
+    65472,
+    1792
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    768,
+    65472,
+    1792
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "eb39a4dbd02cc5e9cd804a5ddfa2911f91ca5f1143282127ece0e9bf03853195",
+   "first_frame": 666,
+   "frames": 32,
+   "input_word_runs": [
+    [
+     0,
+     32
+    ]
+   ],
+   "last_frame": 697,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    3,
+    1,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 2,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8008",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    768,
+    65472,
+    1792
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 698,
+   "frames": 274,
+   "input_word_runs": [
+    [
+     0,
+     274
+    ]
+   ],
+   "last_frame": 971,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 16,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8009",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    0
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "eb39a4dbd02cc5e9cd804a5ddfa2911f91ca5f1143282127ece0e9bf03853195",
+   "first_frame": 972,
+   "frames": 16,
+   "input_word_runs": [
+    [
+     0,
+     16
+    ]
+   ],
+   "last_frame": 987,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    3,
+    1,
+    2
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 2,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x800a",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    0
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 988,
+   "frames": 118,
+   "input_word_runs": [
+    [
+     0,
+     118
+    ]
+   ],
+   "last_frame": 1105,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 17,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x800b",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    0
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "eb39a4dbd02cc5e9cd804a5ddfa2911f91ca5f1143282127ece0e9bf03853195",
+   "first_frame": 1106,
+   "frames": 10,
+   "input_word_runs": [
+    [
+     0,
+     10
+    ]
+   ],
+   "last_frame": 1115,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    1,
+    2,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 2,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x800c",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    0
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 1116,
+   "frames": 136,
+   "input_word_runs": [
+    [
+     0,
+     84
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     0,
+     27
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     0,
+     19
+    ]
+   ],
+   "last_frame": 1251,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    3,
+    3,
+    1
+   ],
+   "object_count_max": 5,
+   "object_count_min": 2,
+   "palette_hashes": 31,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x800d",
+   "qsound_change_frames": 17,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    256,
+    65472,
+    0
+   ],
+   "scroll_min": [
+    0,
+    0,
+    65472,
+    0,
+    1728,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "eb39a4dbd02cc5e9cd804a5ddfa2911f91ca5f1143282127ece0e9bf03853195",
+   "first_frame": 1252,
+   "frames": 20,
+   "input_word_runs": [
+    [
+     0,
+     20
+    ]
+   ],
+   "last_frame": 1271,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    2,
+    1,
+    1
+   ],
+   "object_count_max": 5,
+   "object_count_min": 2,
+   "palette_hashes": 3,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x800e",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    8,
+    1728,
+    0
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    8,
+    1728,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 1272,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     0,
+     1
+    ]
+   ],
+   "last_frame": 1272,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x800f",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    8,
+    1728,
+    0
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    8,
+    1728,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ebd0125d7e187791bb2de83d5aa2c27c779a4e2d34a4eed4ce5a1279e626a931",
+   "first_frame": 1273,
+   "frames": 241,
+   "input_word_runs": [
+    [
+     0,
+     107
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     0,
+     27
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     0,
+     101
+    ]
+   ],
+   "last_frame": 1513,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    10,
+    1,
+    1
+   ],
+   "object_count_max": 63,
+   "object_count_min": 2,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8010",
+   "qsound_change_frames": 25,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    8,
+    1728,
+    32
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    64,
+    0,
+    64,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "053e22cf2a1b3abee2c1a8f172c777d5cc1526da8aec19ee0d836aab5d1528d8",
+   "first_frame": 1514,
+   "frames": 22,
+   "input_word_runs": [
+    [
+     0,
+     16
+    ],
+    [
+     8,
+     5
+    ],
+    [
+     0,
+     1
+    ]
+   ],
+   "last_frame": 1535,
+   "layer_bases": [
+    "0x9100",
+    "0x9140",
+    "0x9180",
+    "0x91e0",
+    "0x91c0"
+   ],
+   "map_unique_hashes": [
+    4,
+    1,
+    2
+   ],
+   "object_count_max": 24,
+   "object_count_min": 2,
+   "palette_hashes": 2,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8011",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    234,
+    65472,
+    768
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    64,
+    0,
+    64,
+    32
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "1043908ab0a8cb7451c5aefc1ea067b40440918743eab814ff18e190d1eaed30",
+   "first_frame": 1536,
+   "frames": 2,
+   "input_word_runs": [
+    [
+     0,
+     2
+    ]
+   ],
+   "last_frame": 1537,
+   "layer_bases": [
+    "0x9100",
+    "0x9140",
+    "0x9180",
+    "0x91e0",
+    "0x91c0"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 10,
+   "object_count_min": 2,
+   "palette_hashes": 2,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8012",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 2,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    512,
+    65472,
+    768
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    512
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 1538,
+   "frames": 86,
+   "input_word_runs": [
+    [
+     0,
+     22
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     0,
+     27
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     0,
+     27
+    ],
+    [
+     8,
+     4
+    ]
+   ],
+   "last_frame": 1623,
+   "layer_bases": [
+    "0x9100",
+    "0x9140",
+    "0x9180",
+    "0x91e0",
+    "0x91c0"
+   ],
+   "map_unique_hashes": [
+    2,
+    4,
+    2
+   ],
+   "object_count_max": 14,
+   "object_count_min": 13,
+   "palette_hashes": 17,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8013",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    768,
+    65472,
+    512
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    512,
+    65472,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ebd0125d7e187791bb2de83d5aa2c27c779a4e2d34a4eed4ce5a1279e626a931",
+   "first_frame": 1624,
+   "frames": 2,
+   "input_word_runs": [
+    [
+     8,
+     1
+    ],
+    [
+     0,
+     1
+    ]
+   ],
+   "last_frame": 1625,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 58,
+   "object_count_min": 40,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8014",
+   "qsound_change_frames": 2,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    768,
+    65472,
+    32
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    64,
+    0,
+    64,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 1626,
+   "frames": 2,
+   "input_word_runs": [
+    [
+     0,
+     2
+    ]
+   ],
+   "last_frame": 1627,
+   "layer_bases": [
+    "0x9100",
+    "0x9140",
+    "0x9180",
+    "0x91e0",
+    "0x91c0"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 3,
+   "object_count_min": 3,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8015",
+   "qsound_change_frames": 2,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    768
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    64,
+    0,
+    64,
+    32
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "eb39a4dbd02cc5e9cd804a5ddfa2911f91ca5f1143282127ece0e9bf03853195",
+   "first_frame": 1628,
+   "frames": 4,
+   "input_word_runs": [
+    [
+     0,
+     4
+    ]
+   ],
+   "last_frame": 1631,
+   "layer_bases": [
+    "0x9100",
+    "0x9140",
+    "0x9180",
+    "0x91e0",
+    "0x91c0"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8016",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    768
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    768
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "eb39a4dbd02cc5e9cd804a5ddfa2911f91ca5f1143282127ece0e9bf03853195",
+   "first_frame": 1632,
+   "frames": 4,
+   "input_word_runs": [
+    [
+     0,
+     4
+    ]
+   ],
+   "last_frame": 1635,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    2,
+    2,
+    2
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8017",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 2,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    768
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65456,
+    0,
+    65472,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "3cefe73b95fb23f0cb18c1555c371eb5bb378bb7f6b714f1e8a2566824d0f782",
+   "first_frame": 1636,
+   "frames": 52,
+   "input_word_runs": [
+    [
+     0,
+     52
+    ]
+   ],
+   "last_frame": 1687,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    23,
+    1,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8018",
+   "qsound_change_frames": 3,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65456,
+    0,
+    65472,
+    0
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65456,
+    0,
+    65472,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "eb39a4dbd02cc5e9cd804a5ddfa2911f91ca5f1143282127ece0e9bf03853195",
+   "first_frame": 1688,
+   "frames": 5,
+   "input_word_runs": [
+    [
+     0,
+     5
+    ]
+   ],
+   "last_frame": 1692,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    2,
+    1,
+    1
+   ],
+   "object_count_max": 362,
+   "object_count_min": 2,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8019",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 2,
+   "scroll_max": [
+    65472,
+    0,
+    65456,
+    0,
+    65472,
+    0
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65456,
+    0,
+    65472,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "053e22cf2a1b3abee2c1a8f172c777d5cc1526da8aec19ee0d836aab5d1528d8",
+   "first_frame": 1693,
+   "frames": 266,
+   "input_word_runs": [
+    [
+     0,
+     17
+    ],
+    [
+     8,
+     5
+    ],
+    [
+     0,
+     25
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     0,
+     27
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     0,
+     27
+    ],
+    [
+     8,
+     5
+    ],
+    [
+     0,
+     85
+    ],
+    [
+     8,
+     5
+    ],
+    [
+     0,
+     25
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     0,
+     27
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     0,
+     6
+    ]
+   ],
+   "last_frame": 1958,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    8,
+    2,
+    2
+   ],
+   "object_count_max": 362,
+   "object_count_min": 2,
+   "palette_hashes": 19,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x801a",
+   "qsound_change_frames": 6,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 22,
+   "scroll_max": [
+    65472,
+    0,
+    65456,
+    0,
+    65472,
+    0
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65456,
+    0,
+    65472,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "917f951ac1a6bcabcefb07866dae1b0b4ab58d764f72e25ad8974314f30fe105",
+   "first_frame": 1959,
+   "frames": 13,
+   "input_word_runs": [
+    [
+     0,
+     13
+    ]
+   ],
+   "last_frame": 1971,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    2,
+    1,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 2,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x801b",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65456,
+    0,
+    65472,
+    0
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65456,
+    0,
+    65472,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "1faee42dc66f4f766125e8155c21fca0d935dcc4cb2646234eaef1ce458af3ec",
+   "first_frame": 1972,
+   "frames": 102,
+   "input_word_runs": [
+    [
+     0,
+     8
+    ],
+    [
+     8,
+     5
+    ],
+    [
+     0,
+     85
+    ],
+    [
+     8,
+     4
+    ]
+   ],
+   "last_frame": 2073,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    4,
+    3,
+    2
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 15,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x801c",
+   "qsound_change_frames": 2,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65456,
+    256,
+    65472,
+    0
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    640,
+    0,
+    65472,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 2074,
+   "frames": 3469,
+   "input_word_runs": [
+    [
+     8,
+     1
+    ],
+    [
+     0,
+     25
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     0,
+     27
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     0,
+     27
+    ],
+    [
+     8,
+     5
+    ],
+    [
+     0,
+     85
+    ],
+    [
+     8,
+     5
+    ],
+    [
+     0,
+     25
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     0,
+     27
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     0,
+     27
+    ],
+    [
+     8,
+     5
+    ],
+    [
+     0,
+     85
+    ],
+    [
+     8,
+     5
+    ],
+    [
+     0,
+     85
+    ],
+    [
+     8,
+     5
+    ],
+    [
+     0,
+     75
+    ],
+    [
+     4,
+     10
+    ],
+    [
+     12,
+     5
+    ],
+    [
+     4,
+     10
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     69
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     69
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     9
+    ],
+    [
+     28,
+     5
+    ],
+    [
+     20,
+     2
+    ],
+    [
+     4,
+     53
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     24
+    ],
+    [
+     12,
+     5
+    ],
+    [
+     4,
+     40
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     39
+    ],
+    [
+     12,
+     5
+    ],
+    [
+     4,
+     25
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     4
+    ],
+    [
+     36,
+     7
+    ],
+    [
+     4,
+     43
+    ],
+    [
+     12,
+     5
+    ],
+    [
+     4,
+     10
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     19
+    ],
+    [
+     20,
+     7
+    ],
+    [
+     4,
+     43
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     69
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     9
+    ],
+    [
+     12,
+     5
+    ],
+    [
+     4,
+     55
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     24
+    ],
+    [
+     12,
+     5
+    ],
+    [
+     4,
+     40
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     29
+    ],
+    [
+     20,
+     7
+    ],
+    [
+     4,
+     3
+    ],
+    [
+     12,
+     5
+    ],
+    [
+     4,
+     15
+    ],
+    [
+     36,
+     7
+    ],
+    [
+     4,
+     3
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     54
+    ],
+    [
+     12,
+     5
+    ],
+    [
+     4,
+     10
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     69
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     69
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     9
+    ],
+    [
+     12,
+     5
+    ],
+    [
+     4,
+     25
+    ],
+    [
+     20,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     24
+    ],
+    [
+     12,
+     5
+    ],
+    [
+     4,
+     40
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     39
+    ],
+    [
+     44,
+     5
+    ],
+    [
+     36,
+     2
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     54
+    ],
+    [
+     12,
+     5
+    ],
+    [
+     4,
+     10
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     49
+    ],
+    [
+     20,
+     7
+    ],
+    [
+     4,
+     13
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     69
+    ],
+    [
+     12,
+     6
+    ],
+    [
+     4,
+     9
+    ],
+    [
+     12,
+     5
+    ],
+    [
+     4,
+     55
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     60,
+     6
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     11
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     14,
+     4
+    ],
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     13,
+     4
+    ],
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     6,
+     4
+    ],
+    [
+     4,
+     26
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     26
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     6,
+     4
+    ],
+    [
+     4,
+     11
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     31
+    ]
+   ],
+   "last_frame": 5542,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    955,
+    42,
+    17
+   ],
+   "object_count_max": 89,
+   "object_count_min": 6,
+   "palette_hashes": 29,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x801d",
+   "qsound_change_frames": 258,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65526,
+    552,
+    65535,
+    1608
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    1,
+    256,
+    0,
+    224
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "eb39a4dbd02cc5e9cd804a5ddfa2911f91ca5f1143282127ece0e9bf03853195",
+   "first_frame": 5543,
+   "frames": 22,
+   "input_word_runs": [
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ]
+   ],
+   "last_frame": 5564,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    2,
+    2,
+    1
+   ],
+   "object_count_max": 48,
+   "object_count_min": 2,
+   "palette_hashes": 2,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x801e",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    64,
+    552,
+    384,
+    1608
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    64,
+    552,
+    384,
+    1608
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "gfx-rewrite-cut",
+   "cps_b_sha256": "eb39a4dbd02cc5e9cd804a5ddfa2911f91ca5f1143282127ece0e9bf03853195",
+   "first_frame": 5565,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 5565,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x801f",
+   "qsound_change_frames": 0,
+   "review_flags": [
+    "unexplained-full-frame-rewrite"
+   ],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    776,
+    224,
+    384,
+    1608
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    776,
+    224,
+    384,
+    1608
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 5566,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 5566,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8020",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    776,
+    224,
+    384,
+    1608
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    776,
+    224,
+    384,
+    1608
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 5567,
+   "frames": 92,
+   "input_word_runs": [
+    [
+     4,
+     28
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     11
+    ]
+   ],
+   "last_frame": 5658,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9260"
+   ],
+   "map_unique_hashes": [
+    5,
+    1,
+    1
+   ],
+   "object_count_max": 45,
+   "object_count_min": 6,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8021",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    776,
+    544,
+    264,
+    1600
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    712,
+    224,
+    200,
+    192
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 5659,
+   "frames": 541,
+   "input_word_runs": [
+    [
+     4,
+     26
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     11
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     14,
+     4
+    ],
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     12
+    ]
+   ],
+   "last_frame": 6199,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    87,
+    16,
+    9
+   ],
+   "object_count_max": 55,
+   "object_count_min": 15,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8022",
+   "qsound_change_frames": 35,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    544,
+    448,
+    1600
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    712,
+    540,
+    200,
+    1596
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "gfx-rewrite-cut",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 6200,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 6200,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 23,
+   "object_count_min": 23,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8023",
+   "qsound_change_frames": 1,
+   "review_flags": [
+    "unexplained-full-frame-rewrite"
+   ],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    544,
+    448,
+    1600
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    544,
+    448,
+    1600
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "053e22cf2a1b3abee2c1a8f172c777d5cc1526da8aec19ee0d836aab5d1528d8",
+   "first_frame": 6201,
+   "frames": 492,
+   "input_word_runs": [
+    [
+     4,
+     24
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     13,
+     4
+    ],
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     6,
+     3
+    ]
+   ],
+   "last_frame": 6692,
+   "layer_bases": [
+    "0x9100",
+    "0x9140",
+    "0x9180",
+    "0x91e0",
+    "0x91c0"
+   ],
+   "map_unique_hashes": [
+    25,
+    1,
+    1
+   ],
+   "object_count_max": 6,
+   "object_count_min": 6,
+   "palette_hashes": 3,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8024",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    544,
+    65472,
+    1600
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    0,
+    448,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 6693,
+   "frames": 746,
+   "input_word_runs": [
+    [
+     6,
+     1
+    ],
+    [
+     4,
+     26
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     26
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     6,
+     4
+    ],
+    [
+     4,
+     11
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     37
+    ]
+   ],
+   "last_frame": 7438,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    191,
+    7,
+    5
+   ],
+   "object_count_max": 51,
+   "object_count_min": 2,
+   "palette_hashes": 3,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8025",
+   "qsound_change_frames": 64,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    256,
+    65472,
+    560,
+    65472,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    894,
+    0,
+    382,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7439,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 7439,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 23,
+   "object_count_min": 23,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8026",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7440,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     28,
+     3
+    ]
+   ],
+   "last_frame": 7442,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    2,
+    1,
+    1
+   ],
+   "object_count_max": 17,
+   "object_count_min": 17,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8027",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7443,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     28,
+     1
+    ]
+   ],
+   "last_frame": 7443,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 17,
+   "object_count_min": 17,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8028",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7444,
+   "frames": 10,
+   "input_word_runs": [
+    [
+     28,
+     3
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     6
+    ]
+   ],
+   "last_frame": 7453,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 18,
+   "object_count_min": 17,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8029",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7454,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 7454,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 18,
+   "object_count_min": 18,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x802a",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7455,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     4,
+     3
+    ]
+   ],
+   "last_frame": 7457,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 18,
+   "object_count_min": 17,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x802b",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7458,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 7458,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 17,
+   "object_count_min": 17,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x802c",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7459,
+   "frames": 10,
+   "input_word_runs": [
+    [
+     4,
+     10
+    ]
+   ],
+   "last_frame": 7468,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 18,
+   "object_count_min": 16,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x802d",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7469,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 7469,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 18,
+   "object_count_min": 18,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x802e",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7470,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     4,
+     3
+    ]
+   ],
+   "last_frame": 7472,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 20,
+   "object_count_min": 15,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x802f",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7473,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 7473,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 22,
+   "object_count_min": 22,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8030",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7474,
+   "frames": 10,
+   "input_word_runs": [
+    [
+     4,
+     10
+    ]
+   ],
+   "last_frame": 7483,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 22,
+   "object_count_min": 19,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8031",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7484,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 7484,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 22,
+   "object_count_min": 22,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8032",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7485,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     12,
+     3
+    ]
+   ],
+   "last_frame": 7487,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 23,
+   "object_count_min": 21,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8033",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7488,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     12,
+     1
+    ]
+   ],
+   "last_frame": 7488,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 21,
+   "object_count_min": 21,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8034",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7489,
+   "frames": 10,
+   "input_word_runs": [
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     7
+    ]
+   ],
+   "last_frame": 7498,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 17,
+   "object_count_min": 16,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8035",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7499,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 7499,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 17,
+   "object_count_min": 17,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8036",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7500,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     4,
+     3
+    ]
+   ],
+   "last_frame": 7502,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 16,
+   "object_count_min": 15,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8037",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7503,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 7503,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 13,
+   "object_count_min": 13,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8038",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 7504,
+   "frames": 1501,
+   "input_word_runs": [
+    [
+     4,
+     26
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     11
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     14,
+     4
+    ],
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     13,
+     4
+    ],
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     6,
+     4
+    ],
+    [
+     4,
+     26
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     5
+    ]
+   ],
+   "last_frame": 9004,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    287,
+    1,
+    1
+   ],
+   "object_count_max": 44,
+   "object_count_min": 12,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8039",
+   "qsound_change_frames": 133,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    556,
+    448,
+    1612
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9005,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     36,
+     1
+    ]
+   ],
+   "last_frame": 9005,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 24,
+   "object_count_min": 24,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x803a",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9006,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     36,
+     2
+    ],
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 9008,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    2,
+    1,
+    1
+   ],
+   "object_count_max": 30,
+   "object_count_min": 24,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x803b",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9009,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 9009,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 18,
+   "object_count_min": 18,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x803c",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9010,
+   "frames": 10,
+   "input_word_runs": [
+    [
+     4,
+     5
+    ],
+    [
+     12,
+     5
+    ]
+   ],
+   "last_frame": 9019,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    3,
+    1,
+    1
+   ],
+   "object_count_max": 25,
+   "object_count_min": 18,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x803d",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9020,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     12,
+     1
+    ]
+   ],
+   "last_frame": 9020,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 24,
+   "object_count_min": 24,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x803e",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9021,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     12,
+     1
+    ],
+    [
+     4,
+     2
+    ]
+   ],
+   "last_frame": 9023,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    2,
+    1,
+    1
+   ],
+   "object_count_max": 20,
+   "object_count_min": 15,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x803f",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9024,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 9024,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 20,
+   "object_count_min": 20,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8040",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9025,
+   "frames": 10,
+   "input_word_runs": [
+    [
+     4,
+     5
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 9034,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    5,
+    1,
+    1
+   ],
+   "object_count_max": 25,
+   "object_count_min": 17,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8041",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9035,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 9035,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 20,
+   "object_count_min": 20,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8042",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9036,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     4,
+     3
+    ]
+   ],
+   "last_frame": 9038,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    2,
+    1,
+    1
+   ],
+   "object_count_max": 25,
+   "object_count_min": 19,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8043",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9039,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 9039,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 19,
+   "object_count_min": 19,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8044",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9040,
+   "frames": 901,
+   "input_word_runs": [
+    [
+     4,
+     20
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     6,
+     4
+    ],
+    [
+     4,
+     11
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     11
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     14,
+     4
+    ],
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     19
+    ]
+   ],
+   "last_frame": 9940,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    133,
+    1,
+    1
+   ],
+   "object_count_max": 43,
+   "object_count_min": 12,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8045",
+   "qsound_change_frames": 69,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    256,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    896,
+    556,
+    384,
+    1612
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9941,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 9941,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 15,
+   "object_count_min": 15,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8046",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9942,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     4,
+     3
+    ]
+   ],
+   "last_frame": 9944,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 15,
+   "object_count_min": 12,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8047",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9945,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 9945,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 12,
+   "object_count_min": 12,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8048",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9946,
+   "frames": 10,
+   "input_word_runs": [
+    [
+     4,
+     10
+    ]
+   ],
+   "last_frame": 9955,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    2,
+    1,
+    1
+   ],
+   "object_count_max": 15,
+   "object_count_min": 12,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8049",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9956,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 9956,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 14,
+   "object_count_min": 14,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x804a",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9957,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     4,
+     3
+    ]
+   ],
+   "last_frame": 9959,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 18,
+   "object_count_min": 17,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x804b",
+   "qsound_change_frames": 2,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9960,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     60,
+     1
+    ]
+   ],
+   "last_frame": 9960,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 18,
+   "object_count_min": 18,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x804c",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9961,
+   "frames": 10,
+   "input_word_runs": [
+    [
+     60,
+     6
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     3
+    ]
+   ],
+   "last_frame": 9970,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    3,
+    1,
+    1
+   ],
+   "object_count_max": 18,
+   "object_count_min": 13,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x804d",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9971,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 9971,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 18,
+   "object_count_min": 18,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x804e",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9972,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     4,
+     3
+    ]
+   ],
+   "last_frame": 9974,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 20,
+   "object_count_min": 20,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x804f",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    556,
+    448,
+    1612
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9975,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 9975,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 20,
+   "object_count_min": 20,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8050",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 9976,
+   "frames": 1501,
+   "input_word_runs": [
+    [
+     4,
+     29
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     13,
+     4
+    ],
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     6,
+     4
+    ],
+    [
+     4,
+     26
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     26
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     6,
+     4
+    ],
+    [
+     4,
+     11
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     11
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     25
+    ]
+   ],
+   "last_frame": 11476,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    277,
+    1,
+    1
+   ],
+   "object_count_max": 40,
+   "object_count_min": 13,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8051",
+   "qsound_change_frames": 129,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    556,
+    448,
+    1612
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11477,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 11477,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 25,
+   "object_count_min": 25,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8052",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11478,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     4,
+     3
+    ]
+   ],
+   "last_frame": 11480,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 24,
+   "object_count_min": 23,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8053",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11481,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 11481,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 20,
+   "object_count_min": 20,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8054",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11482,
+   "frames": 10,
+   "input_word_runs": [
+    [
+     4,
+     8
+    ],
+    [
+     14,
+     2
+    ]
+   ],
+   "last_frame": 11491,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    3,
+    1,
+    1
+   ],
+   "object_count_max": 22,
+   "object_count_min": 17,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8055",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11492,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     14,
+     1
+    ]
+   ],
+   "last_frame": 11492,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 22,
+   "object_count_min": 22,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8056",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11493,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     14,
+     1
+    ],
+    [
+     12,
+     2
+    ]
+   ],
+   "last_frame": 11495,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 29,
+   "object_count_min": 21,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8057",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11496,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     12,
+     1
+    ]
+   ],
+   "last_frame": 11496,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 31,
+   "object_count_min": 31,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8058",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11497,
+   "frames": 10,
+   "input_word_runs": [
+    [
+     4,
+     10
+    ]
+   ],
+   "last_frame": 11506,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    3,
+    1,
+    1
+   ],
+   "object_count_max": 31,
+   "object_count_min": 30,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8059",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    556,
+    448,
+    1612
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11507,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 11507,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 25,
+   "object_count_min": 25,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x805a",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11508,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     4,
+     3
+    ]
+   ],
+   "last_frame": 11510,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 26,
+   "object_count_min": 25,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x805b",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11511,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 11511,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 25,
+   "object_count_min": 25,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x805c",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11512,
+   "frames": 10,
+   "input_word_runs": [
+    [
+     4,
+     10
+    ]
+   ],
+   "last_frame": 11521,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    3,
+    1,
+    1
+   ],
+   "object_count_max": 21,
+   "object_count_min": 18,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x805d",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11522,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 11522,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 17,
+   "object_count_min": 17,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x805e",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11523,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     4,
+     3
+    ]
+   ],
+   "last_frame": 11525,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 20,
+   "object_count_min": 17,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x805f",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11526,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 11526,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 20,
+   "object_count_min": 20,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8060",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11527,
+   "frames": 10,
+   "input_word_runs": [
+    [
+     4,
+     8
+    ],
+    [
+     12,
+     2
+    ]
+   ],
+   "last_frame": 11536,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    2,
+    1,
+    1
+   ],
+   "object_count_max": 20,
+   "object_count_min": 18,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8061",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11537,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     12,
+     1
+    ]
+   ],
+   "last_frame": 11537,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 18,
+   "object_count_min": 18,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8062",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11538,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     12,
+     3
+    ]
+   ],
+   "last_frame": 11540,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 31,
+   "object_count_min": 18,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8063",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11541,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     12,
+     1
+    ]
+   ],
+   "last_frame": 11541,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 31,
+   "object_count_min": 31,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8064",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 11542,
+   "frames": 901,
+   "input_word_runs": [
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     13,
+     4
+    ],
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     6,
+     4
+    ],
+    [
+     4,
+     26
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 12442,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    158,
+    1,
+    1
+   ],
+   "object_count_max": 38,
+   "object_count_min": 15,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8065",
+   "qsound_change_frames": 70,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    556,
+    448,
+    1612
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 12443,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 12443,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 25,
+   "object_count_min": 25,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8066",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 12444,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     4,
+     3
+    ]
+   ],
+   "last_frame": 12446,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 25,
+   "object_count_min": 25,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8067",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 12447,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 12447,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 27,
+   "object_count_min": 27,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8068",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 12448,
+   "frames": 10,
+   "input_word_runs": [
+    [
+     4,
+     10
+    ]
+   ],
+   "last_frame": 12457,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    3,
+    1,
+    1
+   ],
+   "object_count_max": 27,
+   "object_count_min": 19,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8069",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 12458,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 12458,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 18,
+   "object_count_min": 18,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x806a",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 12459,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     4,
+     3
+    ]
+   ],
+   "last_frame": 12461,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 17,
+   "object_count_min": 17,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x806b",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 12462,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 12462,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 17,
+   "object_count_min": 17,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x806c",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 12463,
+   "frames": 10,
+   "input_word_runs": [
+    [
+     4,
+     10
+    ]
+   ],
+   "last_frame": 12472,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    2,
+    1,
+    1
+   ],
+   "object_count_max": 20,
+   "object_count_min": 15,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x806d",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 12473,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 12473,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 20,
+   "object_count_min": 20,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x806e",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 12474,
+   "frames": 3,
+   "input_word_runs": [
+    [
+     4,
+     3
+    ]
+   ],
+   "last_frame": 12476,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9240"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 21,
+   "object_count_min": 20,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x806f",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 12477,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     4,
+     1
+    ]
+   ],
+   "last_frame": 12477,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9220"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 21,
+   "object_count_min": 21,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8070",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 12478,
+   "frames": 321,
+   "input_word_runs": [
+    [
+     4,
+     2
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     26
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     6,
+     4
+    ],
+    [
+     4,
+     11
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     4
+    ]
+   ],
+   "last_frame": 12798,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    34,
+    1,
+    1
+   ],
+   "object_count_max": 28,
+   "object_count_min": 10,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8071",
+   "qsound_change_frames": 9,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    556,
+    448,
+    1612
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "gfx-rewrite-cut",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 12799,
+   "frames": 1,
+   "input_word_runs": [
+    [
+     12,
+     1
+    ]
+   ],
+   "last_frame": 12799,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x9200"
+   ],
+   "map_unique_hashes": [
+    1,
+    1,
+    1
+   ],
+   "object_count_max": 13,
+   "object_count_min": 13,
+   "palette_hashes": 1,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8072",
+   "qsound_change_frames": 1,
+   "review_flags": [
+    "unexplained-full-frame-rewrite"
+   ],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "053e22cf2a1b3abee2c1a8f172c777d5cc1526da8aec19ee0d836aab5d1528d8",
+   "first_frame": 12800,
+   "frames": 493,
+   "input_word_runs": [
+    [
+     12,
+     2
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     11
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     14,
+     3
+    ]
+   ],
+   "last_frame": 13292,
+   "layer_bases": [
+    "0x9100",
+    "0x9140",
+    "0x9180",
+    "0x91e0",
+    "0x91c0"
+   ],
+   "map_unique_hashes": [
+    25,
+    1,
+    1
+   ],
+   "object_count_max": 6,
+   "object_count_min": 6,
+   "palette_hashes": 2,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8073",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    65472,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    0,
+    448,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 13293,
+   "frames": 1747,
+   "input_word_runs": [
+    [
+     14,
+     1
+    ],
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     13,
+     4
+    ],
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     6,
+     4
+    ],
+    [
+     4,
+     26
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     26
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     6,
+     4
+    ],
+    [
+     4,
+     11
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     6
+    ]
+   ],
+   "last_frame": 15039,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    297,
+    1,
+    1
+   ],
+   "object_count_max": 49,
+   "object_count_min": 2,
+   "palette_hashes": 28,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8074",
+   "qsound_change_frames": 81,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    256,
+    65472,
+    560,
+    65472,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    896,
+    0,
+    384,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "eb39a4dbd02cc5e9cd804a5ddfa2911f91ca5f1143282127ece0e9bf03853195",
+   "first_frame": 15040,
+   "frames": 19,
+   "input_word_runs": [
+    [
+     4,
+     5
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     7
+    ]
+   ],
+   "last_frame": 15058,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    2,
+    2,
+    2
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 2,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8075",
+   "qsound_change_frames": 1,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    560,
+    448,
+    1616
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ebd0125d7e187791bb2de83d5aa2c27c779a4e2d34a4eed4ce5a1279e626a931",
+   "first_frame": 15059,
+   "frames": 22,
+   "input_word_runs": [
+    [
+     4,
+     22
+    ]
+   ],
+   "last_frame": 15080,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    2,
+    1,
+    1
+   ],
+   "object_count_max": 12,
+   "object_count_min": 2,
+   "palette_hashes": 16,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8076",
+   "qsound_change_frames": 2,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    560,
+    65472,
+    1616
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    0,
+    448,
+    0
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "a2ebb1802b5ea7ab574f45e3d7e038a691a114bef15579ee476572bcf164772e",
+   "first_frame": 15081,
+   "frames": 11,
+   "input_word_runs": [
+    [
+     4,
+     9
+    ],
+    [
+     14,
+     2
+    ]
+   ],
+   "last_frame": 15091,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    2,
+    1,
+    1
+   ],
+   "object_count_max": 12,
+   "object_count_min": 2,
+   "palette_hashes": 2,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8077",
+   "qsound_change_frames": 0,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    3
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    3
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "5f7df7df75ccec1b060495a0b5fd2b08540ca4eca77b814aba3ed47554913174",
+   "first_frame": 15092,
+   "frames": 101,
+   "input_word_runs": [
+    [
+     14,
+     2
+    ],
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     5
+    ]
+   ],
+   "last_frame": 15192,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    2,
+    2,
+    1
+   ],
+   "object_count_max": 2,
+   "object_count_min": 2,
+   "palette_hashes": 14,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8078",
+   "qsound_change_frames": 3,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    3
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    65472,
+    0,
+    65472,
+    3
+   ],
+   "video_control": "0x003f"
+  },
+  {
+   "boundary_reason": "signature-change",
+   "cps_b_sha256": "ec19c64e737489be159c440bae57ac155b65a22929840455ac5765fa29734c54",
+   "first_frame": 15193,
+   "frames": 2808,
+   "input_word_runs": [
+    [
+     4,
+     32
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     13,
+     4
+    ],
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     6,
+     4
+    ],
+    [
+     4,
+     26
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     26
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     6,
+     4
+    ],
+    [
+     4,
+     11
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     11
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     14,
+     4
+    ],
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     22
+    ],
+    [
+     13,
+     4
+    ],
+    [
+     12,
+     3
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     6,
+     4
+    ],
+    [
+     4,
+     26
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     23
+    ],
+    [
+     36,
+     8
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     28,
+     7
+    ],
+    [
+     20,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     60,
+     7
+    ],
+    [
+     52,
+     1
+    ],
+    [
+     4,
+     37
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     12,
+     7
+    ],
+    [
+     4,
+     24
+    ]
+   ],
+   "last_frame": 18000,
+   "layer_bases": [
+    "0x9000",
+    "0x9040",
+    "0x9080",
+    "0x90e0",
+    "0x90c0"
+   ],
+   "map_unique_hashes": [
+    532,
+    52,
+    23
+   ],
+   "object_count_max": 66,
+   "object_count_min": 2,
+   "palette_hashes": 8,
+   "palette_population": "0000000000000000ffffffffffffffffffffffffffffffff",
+   "provisional_scene_id": "0x8079",
+   "qsound_change_frames": 230,
+   "review_flags": [],
+   "rowscroll_unique_hashes": 1,
+   "scroll_max": [
+    65472,
+    0,
+    65535,
+    576,
+    1440,
+    1728
+   ],
+   "scroll_min": [
+    65472,
+    0,
+    0,
+    192,
+    704,
+    8
+   ],
+   "video_control": "0x003f"
+  }
+ ],
+ "regions": {
+  "cps_a": {
+   "change_count": 1179,
+   "change_frames_sha256": "e8da77020337485a049c207043b89a2843da8a49033d0b2e78d1a4a908236de9",
+   "first_change": 1,
+   "last_change": 16957
+  },
+  "cps_b": {
+   "change_count": 39,
+   "change_frames_sha256": "d6dce25b92668e8a02f0eb47d4d1743ff7112c9b971954fe48b90f1ab6e843fd",
+   "first_change": 1,
+   "last_change": 15193
+  },
+  "gfxram0": {
+   "change_count": 5583,
+   "change_frames_sha256": "698f39a8e818dee7c4344101c2732e0704c9c38c75b87718e13327deaf2b5995",
+   "first_change": 1,
+   "last_change": 17998
+  },
+  "gfxram1": {
+   "change_count": 104,
+   "change_frames_sha256": "c5b35b7fdf6b0e7a068fbe8dfee4fb9e2495a00c991d8cd3e3dc6abe77593330",
+   "first_change": 1,
+   "last_change": 13266
+  },
+  "gfxram2": {
+   "change_count": 9,
+   "change_frames_sha256": "887edf52ca65356289d876f89747c2f8779a0583fc857d9ad1d1dbf9d26e30ba",
+   "first_change": 1,
+   "last_change": 5566
+  },
+  "objram1": {
+   "change_count": 7137,
+   "change_frames_sha256": "533d18c0b09b93e37b1ad356f83f037719a9d8e390dd9eee6f441bac2baaa940",
+   "first_change": 1,
+   "last_change": 18000
+  },
+  "objram2": {
+   "change_count": 7130,
+   "change_frames_sha256": "f63f4091d14f6ca5c3bf32e29deae008a3c62783bc2617166f6a82b226575623",
+   "first_change": 1,
+   "last_change": 17997
+  },
+  "output": {
+   "change_count": 6,
+   "change_frames_sha256": "df7d7ca99e097226b68e67833ed47111f475493611ed1d24206097c46403da00",
+   "first_change": 1,
+   "last_change": 2074
+  },
+  "qsound": {
+   "change_count": 1169,
+   "change_frames_sha256": "640fb2986dda7b1d2c01e42845aa429ed8277cb832a135543ee489173146d502",
+   "first_change": 1,
+   "last_change": 17977
+  },
+  "workram": {
+   "change_count": 17930,
+   "change_frames_sha256": "26ca30e61126f600dc46fa083f565ef4663a49b52d3e0be70ebda4e270dea81c",
+   "first_change": 1,
+   "last_change": 18000,
+   "per_frame_hash_stream_sha256": "a6a4f7b266ba0c2c1df6f2ec457f867f5113c2a53a44f97af4318aae668fa041"
+  }
+ },
+ "route": {
+  "cadence": 1,
+  "first_frame": 1,
+  "frame_count": 18000,
+  "last_frame": 18000
+ },
+ "schema": "round1-route-census-v0",
+ "screenshots": {
+  "frames": 18000,
+  "held_runs": [
+   [
+    1,
+    3
+   ],
+   [
+    4,
+    82
+   ],
+   [
+    83,
+    115
+   ],
+   [
+    116,
+    235
+   ],
+   [
+    236,
+    237
+   ],
+   [
+    238,
+    417
+   ],
+   [
+    418,
+    455
+   ],
+   [
+    470,
+    647
+   ],
+   [
+    662,
+    665
+   ],
+   [
+    666,
+    697
+   ],
+   [
+    698,
+    953
+   ],
+   [
+    968,
+    971
+   ],
+   [
+    972,
+    987
+   ],
+   [
+    1002,
+    1086
+   ],
+   [
+    1102,
+    1105
+   ],
+   [
+    1106,
+    1115
+   ],
+   [
+    1130,
+    1136
+   ],
+   [
+    1187,
+    1206
+   ],
+   [
+    1207,
+    1209
+   ],
+   [
+    1213,
+    1232
+   ],
+   [
+    1233,
+    1234
+   ],
+   [
+    1248,
+    1251
+   ],
+   [
+    1252,
+    1253
+   ],
+   [
+    1254,
+    1271
+   ],
+   [
+    1272,
+    1273
+   ],
+   [
+    1332,
+    1333
+   ],
+   [
+    1533,
+    1534
+   ],
+   [
+    1538,
+    1541
+   ],
+   [
+    1629,
+    1635
+   ],
+   [
+    1636,
+    1645
+   ],
+   [
+    1666,
+    1686
+   ],
+   [
+    1687,
+    1694
+   ],
+   [
+    1714,
+    1715
+   ],
+   [
+    1805,
+    1807
+   ],
+   [
+    1813,
+    1815
+   ],
+   [
+    1821,
+    1823
+   ],
+   [
+    1829,
+    1831
+   ],
+   [
+    1832,
+    1835
+   ],
+   [
+    1836,
+    1839
+   ],
+   [
+    1840,
+    1843
+   ],
+   [
+    1844,
+    1847
+   ],
+   [
+    1848,
+    1851
+   ],
+   [
+    1852,
+    1885
+   ],
+   [
+    1908,
+    1953
+   ],
+   [
+    1955,
+    1958
+   ],
+   [
+    1959,
+    1971
+   ],
+   [
+    1986,
+    2001
+   ],
+   [
+    2002,
+    2033
+   ],
+   [
+    2034,
+    2065
+   ],
+   [
+    2066,
+    2071
+   ],
+   [
+    2073,
+    2074
+   ],
+   [
+    2087,
+    2089
+   ],
+   [
+    2090,
+    2091
+   ],
+   [
+    2092,
+    2097
+   ],
+   [
+    2098,
+    2100
+   ],
+   [
+    2101,
+    2105
+   ],
+   [
+    2106,
+    2109
+   ],
+   [
+    2110,
+    2113
+   ],
+   [
+    2114,
+    2118
+   ],
+   [
+    2119,
+    2121
+   ],
+   [
+    2122,
+    2127
+   ],
+   [
+    2128,
+    2129
+   ],
+   [
+    2130,
+    2136
+   ],
+   [
+    2138,
+    2145
+   ],
+   [
+    2146,
+    2153
+   ],
+   [
+    2155,
+    2161
+   ],
+   [
+    2162,
+    2163
+   ],
+   [
+    2164,
+    2168
+   ],
+   [
+    2170,
+    2174
+   ],
+   [
+    2175,
+    2178
+   ],
+   [
+    2179,
+    2182
+   ],
+   [
+    2183,
+    2187
+   ],
+   [
+    2188,
+    2190
+   ],
+   [
+    2191,
+    2193
+   ],
+   [
+    2194,
+    2195
+   ],
+   [
+    2197,
+    2198
+   ],
+   [
+    2199,
+    2201
+   ],
+   [
+    2202,
+    2203
+   ],
+   [
+    2204,
+    2205
+   ],
+   [
+    2207,
+    2208
+   ],
+   [
+    2256,
+    2257
+   ],
+   [
+    2259,
+    2260
+   ],
+   [
+    2262,
+    2263
+   ],
+   [
+    2267,
+    2268
+   ],
+   [
+    2318,
+    2319
+   ],
+   [
+    2519,
+    2520
+   ],
+   [
+    2521,
+    2522
+   ],
+   [
+    2539,
+    2540
+   ],
+   [
+    2551,
+    2552
+   ],
+   [
+    2556,
+    2557
+   ],
+   [
+    2572,
+    2573
+   ],
+   [
+    2692,
+    2693
+   ],
+   [
+    2700,
+    2701
+   ],
+   [
+    2787,
+    2788
+   ],
+   [
+    2796,
+    2797
+   ],
+   [
+    2989,
+    2990
+   ],
+   [
+    3017,
+    3018
+   ],
+   [
+    3027,
+    3028
+   ],
+   [
+    3043,
+    3045
+   ],
+   [
+    3051,
+    3052
+   ],
+   [
+    3060,
+    3061
+   ],
+   [
+    3141,
+    3142
+   ],
+   [
+    3151,
+    3152
+   ],
+   [
+    3169,
+    3170
+   ],
+   [
+    3173,
+    3174
+   ],
+   [
+    3363,
+    3364
+   ],
+   [
+    3411,
+    3412
+   ],
+   [
+    3420,
+    3421
+   ],
+   [
+    3436,
+    3437
+   ],
+   [
+    3492,
+    3493
+   ],
+   [
+    3495,
+    3496
+   ],
+   [
+    3507,
+    3508
+   ],
+   [
+    3663,
+    3664
+   ],
+   [
+    3675,
+    3676
+   ],
+   [
+    3691,
+    3692
+   ],
+   [
+    3713,
+    3714
+   ],
+   [
+    3733,
+    3734
+   ],
+   [
+    3745,
+    3746
+   ],
+   [
+    5312,
+    5313
+   ],
+   [
+    5447,
+    5448
+   ],
+   [
+    5539,
+    5542
+   ],
+   [
+    5543,
+    5544
+   ],
+   [
+    5545,
+    5565
+   ],
+   [
+    5570,
+    5572
+   ],
+   [
+    5573,
+    5574
+   ],
+   [
+    5575,
+    5576
+   ],
+   [
+    5577,
+    5578
+   ],
+   [
+    5581,
+    5582
+   ],
+   [
+    5593,
+    5594
+   ],
+   [
+    5598,
+    5599
+   ],
+   [
+    5602,
+    5603
+   ],
+   [
+    5606,
+    5607
+   ],
+   [
+    5615,
+    5616
+   ],
+   [
+    5619,
+    5620
+   ],
+   [
+    5624,
+    5625
+   ],
+   [
+    5629,
+    5630
+   ],
+   [
+    5645,
+    5646
+   ],
+   [
+    5650,
+    5651
+   ],
+   [
+    5655,
+    5656
+   ],
+   [
+    5678,
+    5679
+   ],
+   [
+    5696,
+    5697
+   ],
+   [
+    5702,
+    5703
+   ],
+   [
+    5705,
+    5706
+   ],
+   [
+    5711,
+    5712
+   ],
+   [
+    5718,
+    5719
+   ],
+   [
+    5994,
+    5996
+   ],
+   [
+    5998,
+    5999
+   ],
+   [
+    6002,
+    6003
+   ],
+   [
+    6013,
+    6014
+   ],
+   [
+    6016,
+    6017
+   ],
+   [
+    6018,
+    6020
+   ],
+   [
+    6024,
+    6025
+   ],
+   [
+    6026,
+    6028
+   ],
+   [
+    6032,
+    6033
+   ],
+   [
+    6035,
+    6036
+   ],
+   [
+    6202,
+    6225
+   ],
+   [
+    6226,
+    6227
+   ],
+   [
+    6228,
+    6257
+   ],
+   [
+    6258,
+    6272
+   ],
+   [
+    6273,
+    6289
+   ],
+   [
+    6290,
+    6317
+   ],
+   [
+    6318,
+    6321
+   ],
+   [
+    6322,
+    6353
+   ],
+   [
+    6354,
+    6362
+   ],
+   [
+    6363,
+    6385
+   ],
+   [
+    6386,
+    6407
+   ],
+   [
+    6408,
+    6417
+   ],
+   [
+    6418,
+    6449
+   ],
+   [
+    6450,
+    6452
+   ],
+   [
+    6453,
+    6481
+   ],
+   [
+    6482,
+    6497
+   ],
+   [
+    6498,
+    6513
+   ],
+   [
+    6514,
+    6542
+   ],
+   [
+    6543,
+    6545
+   ],
+   [
+    6546,
+    6577
+   ],
+   [
+    6578,
+    6587
+   ],
+   [
+    6588,
+    6602
+   ],
+   [
+    6603,
+    6609
+   ],
+   [
+    6610,
+    6632
+   ],
+   [
+    6634,
+    6641
+   ],
+   [
+    6642,
+    6673
+   ],
+   [
+    6674,
+    6677
+   ],
+   [
+    6679,
+    6692
+   ],
+   [
+    7373,
+    7374
+   ],
+   [
+    7924,
+    7925
+   ],
+   [
+    7975,
+    7976
+   ],
+   [
+    8759,
+    8760
+   ],
+   [
+    8808,
+    8809
+   ],
+   [
+    8853,
+    8854
+   ],
+   [
+    9886,
+    9887
+   ],
+   [
+    10131,
+    10132
+   ],
+   [
+    10227,
+    10228
+   ],
+   [
+    10411,
+    10412
+   ],
+   [
+    10423,
+    10424
+   ],
+   [
+    10460,
+    10461
+   ],
+   [
+    11146,
+    11147
+   ],
+   [
+    11352,
+    11353
+   ],
+   [
+    11391,
+    11392
+   ],
+   [
+    11403,
+    11404
+   ],
+   [
+    11538,
+    11539
+   ],
+   [
+    11552,
+    11553
+   ],
+   [
+    11587,
+    11588
+   ],
+   [
+    12091,
+    12092
+   ],
+   [
+    12420,
+    12421
+   ],
+   [
+    12430,
+    12431
+   ],
+   [
+    12432,
+    12433
+   ],
+   [
+    12434,
+    12435
+   ],
+   [
+    12469,
+    12470
+   ],
+   [
+    12481,
+    12482
+   ],
+   [
+    12518,
+    12519
+   ],
+   [
+    12528,
+    12529
+   ],
+   [
+    12567,
+    12568
+   ],
+   [
+    12801,
+    12817
+   ],
+   [
+    12818,
+    12842
+   ],
+   [
+    12843,
+    12849
+   ],
+   [
+    12850,
+    12881
+   ],
+   [
+    12882,
+    12887
+   ],
+   [
+    12888,
+    12913
+   ],
+   [
+    12914,
+    12932
+   ],
+   [
+    12933,
+    12945
+   ],
+   [
+    12946,
+    12977
+   ],
+   [
+    12978,
+    13009
+   ],
+   [
+    13010,
+    13022
+   ],
+   [
+    13023,
+    13041
+   ],
+   [
+    13042,
+    13067
+   ],
+   [
+    13068,
+    13073
+   ],
+   [
+    13074,
+    13082
+   ],
+   [
+    13083,
+    13105
+   ],
+   [
+    13106,
+    13112
+   ],
+   [
+    13113,
+    13137
+   ],
+   [
+    13138,
+    13157
+   ],
+   [
+    13158,
+    13169
+   ],
+   [
+    13170,
+    13201
+   ],
+   [
+    13203,
+    13233
+   ],
+   [
+    13234,
+    13247
+   ],
+   [
+    13249,
+    13265
+   ],
+   [
+    13266,
+    13292
+   ],
+   [
+    13698,
+    13699
+   ],
+   [
+    13712,
+    13713
+   ],
+   [
+    13747,
+    13748
+   ],
+   [
+    13845,
+    13846
+   ],
+   [
+    13894,
+    13895
+   ],
+   [
+    13939,
+    13946
+   ],
+   [
+    13947,
+    13954
+   ],
+   [
+    13955,
+    13962
+   ],
+   [
+    13963,
+    13969
+   ],
+   [
+    13971,
+    13978
+   ],
+   [
+    13979,
+    13986
+   ],
+   [
+    13987,
+    13994
+   ],
+   [
+    13995,
+    14001
+   ],
+   [
+    14003,
+    14010
+   ],
+   [
+    14011,
+    14018
+   ],
+   [
+    14019,
+    14026
+   ],
+   [
+    14027,
+    14033
+   ],
+   [
+    14035,
+    14041
+   ],
+   [
+    14043,
+    14050
+   ],
+   [
+    14051,
+    14058
+   ],
+   [
+    14059,
+    14065
+   ],
+   [
+    14067,
+    14074
+   ],
+   [
+    14075,
+    14082
+   ],
+   [
+    14083,
+    14090
+   ],
+   [
+    14091,
+    14097
+   ],
+   [
+    14099,
+    14106
+   ],
+   [
+    14107,
+    14114
+   ],
+   [
+    14115,
+    14122
+   ],
+   [
+    14123,
+    14129
+   ],
+   [
+    14190,
+    14191
+   ],
+   [
+    14218,
+    14219
+   ],
+   [
+    14220,
+    14221
+   ],
+   [
+    14224,
+    14225
+   ],
+   [
+    14226,
+    14227
+   ],
+   [
+    14232,
+    14233
+   ],
+   [
+    14236,
+    14237
+   ],
+   [
+    14238,
+    14239
+   ],
+   [
+    14259,
+    14262
+   ],
+   [
+    14263,
+    14265
+   ],
+   [
+    14268,
+    14270
+   ],
+   [
+    14271,
+    14273
+   ],
+   [
+    14275,
+    14278
+   ],
+   [
+    14280,
+    14281
+   ],
+   [
+    14283,
+    14284
+   ],
+   [
+    14285,
+    14288
+   ],
+   [
+    14290,
+    14292
+   ],
+   [
+    14293,
+    14294
+   ],
+   [
+    14343,
+    14345
+   ],
+   [
+    14346,
+    14353
+   ],
+   [
+    14354,
+    14355
+   ],
+   [
+    14357,
+    14358
+   ],
+   [
+    14359,
+    14361
+   ],
+   [
+    14362,
+    14363
+   ],
+   [
+    14364,
+    14369
+   ],
+   [
+    14370,
+    14374
+   ],
+   [
+    14376,
+    14377
+   ],
+   [
+    14378,
+    14385
+   ],
+   [
+    14386,
+    14390
+   ],
+   [
+    14391,
+    14393
+   ],
+   [
+    14394,
+    14398
+   ],
+   [
+    14400,
+    14405
+   ],
+   [
+    14415,
+    14417
+   ],
+   [
+    14418,
+    14422
+   ],
+   [
+    14423,
+    14425
+   ],
+   [
+    14426,
+    14429
+   ],
+   [
+    14430,
+    14435
+   ],
+   [
+    14436,
+    14438
+   ],
+   [
+    14439,
+    14441
+   ],
+   [
+    14442,
+    14446
+   ],
+   [
+    14447,
+    14449
+   ],
+   [
+    14451,
+    14454
+   ],
+   [
+    14455,
+    14457
+   ],
+   [
+    14458,
+    14459
+   ],
+   [
+    14460,
+    14465
+   ],
+   [
+    14466,
+    14470
+   ],
+   [
+    14472,
+    14473
+   ],
+   [
+    14474,
+    14481
+   ],
+   [
+    14482,
+    14486
+   ],
+   [
+    14487,
+    14489
+   ],
+   [
+    14490,
+    14495
+   ],
+   [
+    14496,
+    14501
+   ],
+   [
+    14503,
+    14505
+   ],
+   [
+    14506,
+    14513
+   ],
+   [
+    14514,
+    14518
+   ],
+   [
+    14519,
+    14521
+   ],
+   [
+    14522,
+    14525
+   ],
+   [
+    14526,
+    14531
+   ],
+   [
+    14532,
+    14534
+   ],
+   [
+    14535,
+    14537
+   ],
+   [
+    14538,
+    14545
+   ],
+   [
+    14546,
+    14550
+   ],
+   [
+    14551,
+    14553
+   ],
+   [
+    14554,
+    14555
+   ],
+   [
+    14556,
+    14561
+   ],
+   [
+    14562,
+    14566
+   ],
+   [
+    14568,
+    14569
+   ],
+   [
+    14570,
+    14577
+   ],
+   [
+    14578,
+    14582
+   ],
+   [
+    14583,
+    14585
+   ],
+   [
+    14587,
+    14591
+   ],
+   [
+    14592,
+    14597
+   ],
+   [
+    14599,
+    14601
+   ],
+   [
+    14602,
+    14609
+   ],
+   [
+    14610,
+    14614
+   ],
+   [
+    14615,
+    14617
+   ],
+   [
+    14618,
+    14621
+   ],
+   [
+    14622,
+    14627
+   ],
+   [
+    14629,
+    14630
+   ],
+   [
+    14631,
+    14641
+   ],
+   [
+    14642,
+    14646
+   ],
+   [
+    14647,
+    14648
+   ],
+   [
+    14649,
+    14659
+   ],
+   [
+    14660,
+    14662
+   ],
+   [
+    14663,
+    14673
+   ],
+   [
+    14674,
+    14678
+   ],
+   [
+    14679,
+    14680
+   ],
+   [
+    14681,
+    14694
+   ],
+   [
+    14695,
+    14705
+   ],
+   [
+    14706,
+    14710
+   ],
+   [
+    14711,
+    14721
+   ],
+   [
+    14722,
+    14726
+   ],
+   [
+    14727,
+    14737
+   ],
+   [
+    14738,
+    14742
+   ],
+   [
+    14743,
+    14758
+   ],
+   [
+    14759,
+    14769
+   ],
+   [
+    14770,
+    14774
+   ],
+   [
+    14775,
+    14783
+   ],
+   [
+    14784,
+    14790
+   ],
+   [
+    14791,
+    14801
+   ],
+   [
+    14802,
+    14804
+   ],
+   [
+    14805,
+    14806
+   ],
+   [
+    14807,
+    14822
+   ],
+   [
+    14823,
+    14833
+   ],
+   [
+    14834,
+    14838
+   ],
+   [
+    14839,
+    14845
+   ],
+   [
+    14846,
+    14854
+   ],
+   [
+    14855,
+    14865
+   ],
+   [
+    14867,
+    14870
+   ],
+   [
+    14871,
+    14882
+   ],
+   [
+    14883,
+    14886
+   ],
+   [
+    14887,
+    14889
+   ],
+   [
+    14890,
+    14893
+   ],
+   [
+    14894,
+    14897
+   ],
+   [
+    14899,
+    14901
+   ],
+   [
+    14903,
+    14905
+   ],
+   [
+    14906,
+    14909
+   ],
+   [
+    14910,
+    14911
+   ],
+   [
+    14912,
+    14913
+   ],
+   [
+    14916,
+    14917
+   ],
+   [
+    14919,
+    14921
+   ],
+   [
+    14922,
+    14925
+   ],
+   [
+    14927,
+    14929
+   ],
+   [
+    14930,
+    14934
+   ],
+   [
+    14935,
+    14950
+   ],
+   [
+    14951,
+    14961
+   ],
+   [
+    14962,
+    14966
+   ],
+   [
+    14967,
+    14982
+   ],
+   [
+    14983,
+    14986
+   ],
+   [
+    14987,
+    14993
+   ],
+   [
+    14994,
+    14998
+   ],
+   [
+    14999,
+    15014
+   ],
+   [
+    15015,
+    15019
+   ],
+   [
+    15020,
+    15021
+   ],
+   [
+    15036,
+    15039
+   ],
+   [
+    15040,
+    15059
+   ],
+   [
+    15077,
+    15080
+   ],
+   [
+    15081,
+    15082
+   ],
+   [
+    15083,
+    15091
+   ],
+   [
+    15106,
+    15121
+   ],
+   [
+    15122,
+    15153
+   ],
+   [
+    15154,
+    15185
+   ],
+   [
+    15186,
+    15192
+   ],
+   [
+    15193,
+    15194
+   ],
+   [
+    15201,
+    15207
+   ],
+   [
+    15209,
+    15210
+   ],
+   [
+    15231,
+    15232
+   ],
+   [
+    15236,
+    15238
+   ],
+   [
+    15241,
+    15246
+   ],
+   [
+    15250,
+    15271
+   ],
+   [
+    15272,
+    15273
+   ],
+   [
+    15284,
+    15285
+   ],
+   [
+    15312,
+    15313
+   ],
+   [
+    15314,
+    15333
+   ],
+   [
+    15543,
+    15544
+   ],
+   [
+    15545,
+    15547
+   ],
+   [
+    15551,
+    15552
+   ],
+   [
+    15553,
+    15554
+   ],
+   [
+    15603,
+    15604
+   ],
+   [
+    15605,
+    15606
+   ],
+   [
+    15608,
+    15610
+   ],
+   [
+    15611,
+    15613
+   ],
+   [
+    15649,
+    15650
+   ],
+   [
+    15657,
+    15658
+   ],
+   [
+    15664,
+    15665
+   ],
+   [
+    15666,
+    15667
+   ],
+   [
+    15670,
+    15671
+   ],
+   [
+    15672,
+    15673
+   ],
+   [
+    15676,
+    15677
+   ],
+   [
+    15689,
+    15690
+   ],
+   [
+    15878,
+    15879
+   ],
+   [
+    15882,
+    15883
+   ],
+   [
+    15886,
+    15887
+   ],
+   [
+    15905,
+    15906
+   ],
+   [
+    15911,
+    15912
+   ],
+   [
+    15964,
+    15965
+   ],
+   [
+    15967,
+    15968
+   ],
+   [
+    15971,
+    15972
+   ],
+   [
+    15979,
+    15980
+   ],
+   [
+    15983,
+    15985
+   ],
+   [
+    15987,
+    15989
+   ],
+   [
+    15991,
+    15992
+   ],
+   [
+    15993,
+    15994
+   ],
+   [
+    16009,
+    16010
+   ],
+   [
+    16014,
+    16015
+   ],
+   [
+    16018,
+    16019
+   ],
+   [
+    16020,
+    16021
+   ],
+   [
+    16026,
+    16027
+   ],
+   [
+    16030,
+    16031
+   ],
+   [
+    16222,
+    16223
+   ],
+   [
+    16224,
+    16225
+   ],
+   [
+    16248,
+    16249
+   ],
+   [
+    16386,
+    16387
+   ],
+   [
+    16388,
+    16389
+   ],
+   [
+    16392,
+    16395
+   ],
+   [
+    16429,
+    16430
+   ],
+   [
+    16515,
+    16516
+   ],
+   [
+    16995,
+    16996
+   ],
+   [
+    17022,
+    17023
+   ],
+   [
+    17283,
+    17285
+   ],
+   [
+    17286,
+    17287
+   ],
+   [
+    17288,
+    17290
+   ],
+   [
+    17292,
+    17293
+   ],
+   [
+    17295,
+    17297
+   ],
+   [
+    17308,
+    17309
+   ],
+   [
+    17310,
+    17311
+   ],
+   [
+    17313,
+    17314
+   ],
+   [
+    17323,
+    17324
+   ],
+   [
+    17326,
+    17327
+   ],
+   [
+    17334,
+    17336
+   ],
+   [
+    17348,
+    17351
+   ],
+   [
+    17355,
+    17356
+   ],
+   [
+    17495,
+    17497
+   ],
+   [
+    17538,
+    17541
+   ],
+   [
+    17692,
+    17693
+   ],
+   [
+    17703,
+    17704
+   ],
+   [
+    17714,
+    17715
+   ],
+   [
+    17742,
+    17743
+   ],
+   [
+    17746,
+    17747
+   ],
+   [
+    17748,
+    17749
+   ],
+   [
+    17758,
+    17761
+   ],
+   [
+    17763,
+    17765
+   ],
+   [
+    17826,
+    17827
+   ],
+   [
+    17829,
+    17830
+   ],
+   [
+    17832,
+    17833
+   ],
+   [
+    17836,
+    17837
+   ],
+   [
+    17848,
+    17849
+   ],
+   [
+    17850,
+    17853
+   ],
+   [
+    17863,
+    17864
+   ],
+   [
+    17866,
+    17867
+   ],
+   [
+    17874,
+    17875
+   ],
+   [
+    17877,
+    17878
+   ],
+   [
+    17882,
+    17884
+   ],
+   [
+    17895,
+    17897
+   ],
+   [
+    17898,
+    17900
+   ],
+   [
+    17906,
+    17908
+   ],
+   [
+    17910,
+    17912
+   ],
+   [
+    17971,
+    17973
+   ]
+  ],
+  "pixel_hash_stream_sha256": "1f8910e6835ba0668b78748ec05f7e5a7402ea07dada20fe332c67ebf92c646e",
+  "unique_frames": 14494
+ },
+ "unclassified_groups": []
+}

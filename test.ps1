@@ -296,6 +296,17 @@ if ($LASTEXITCODE -ne 0) {
     throw "Confirmation shutter verification failed with exit code $LASTEXITCODE."
 }
 
+# RP2 route census structural contract: the tracked census must tile the
+# complete captured route with unique provisional (bit-15) scene IDs and no
+# gaps, and the recorded negative controls must have passed. Offline check
+# against the tracked JSON only; the private capture is not required.
+if (Test-Path (Join-Path $PSScriptRoot 'data\round1_route_census.json')) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tools\verify_route_census.py')
+    if ($LASTEXITCODE -ne 0) {
+        throw "Route census verification failed with exit code $LASTEXITCODE."
+    }
+}
+
 # Sub-state dispatcher enumeration: decodes, from the validated opcode-space
 # image, every per-actor sub-state jump table (actor byte +0x04 indexes a
 # PC-relative word table). Self-tests against the three live-confirmed
