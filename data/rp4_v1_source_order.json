@@ -34,7 +34,7 @@
  },
  "inputs_sha256": {
   "layer_witnesses": "29a88be7615662149d8c67ac02ab083ad0872fe2179f9074d539064c2170b0b8",
-  "order_witnesses": "ac2a708721b3df0b360960891a20a223e689cd7b77d1af4eff526f8605d27e63"
+  "order_witnesses": "3e05b51f32b11f3f9d6d8a3a410d9a5c9b0743cd9f1b014d97cc3327f2650ad1"
  },
  "saturn_controls_note": "the three Saturn-side controls (CMDCOLR priority bits, command order, PRIS/PRIN) are executed against the StreetTest build, not here",
  "schema": "rp4-v1-source-order-v0",
@@ -46,7 +46,7 @@
   "rp4_v1_controls_passed": 5,
   "rp4_v1_controls_total": 8,
   "rp4_v1_object_layer_witnesses": 4,
-  "rp4_v1_object_order_witnesses": 11,
+  "rp4_v1_object_order_witnesses": 19,
   "rp4_v1_order_counterexamples": 0,
   "rp4_v1_saturn_controls_passed": 0,
   "rp4_v1_source_controls_passed": 5,

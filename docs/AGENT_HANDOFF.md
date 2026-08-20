@@ -10,6 +10,64 @@ git log --oneline -10
 Get-Process mame,yabasanshiro* -ErrorAction SilentlyContinue
 ```
 
+## Official 1.20.37 source: reference instrument only, 2026-08-20 (newest first)
+
+This supersedes the **scope**, not the factual record, of the prior
+`be24dbf` scanout-equivalence note. Branch
+`claude/rp4-priority-architecture` began this repair at `be24dbf`; the
+official archive/source/release hashes, wrong-base and corruption controls,
+fresh patch, apply script, build script, and standalone tests now form a
+reproducible **REFERENCE_INSTRUMENT_ONLY** checkpoint. Its ignored inputs are
+`.deps/source-archives/yabasanshiro-src-1.20.37.zip` and fresh extractions
+under `.deps/yb-official-*-20260820`; no source tree, build, executable,
+scanout, or raw guest data is tracked. Run its narrow checks with:
+
+```powershell
+$py = "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
+& $py tests\test_yabasanshiro_1_20_37_scanout.py
+& $py tests\test_yabasanshiro_1_20_37_equivalence.py
+```
+
+The recorded RED was
+`& $py tests\test_yabasanshiro_1_20_37_scanout.py`, exit 1:
+`official scanout verifier: FAIL: official patch hash mismatch`. The repaired
+GREEN reran that command twice from unchanged clean inputs, exit 0 both times,
+with corrupt archive, wrong-version, dirty/already-patched preimage, mutated
+patch, and historical Tico-source controls all rejected. The official archive
+is `102568341` bytes, SHA-256
+`c12a68e90d8f03001eff8c75790e0a221cb9b79c676cf5f3daf6c08ac9795557`;
+the clean generated patch is SHA-256
+`7751693a0e129521ed0ac265a545e0bdd093d5709c1dffa67a4ab7fb41ecd843`.
+The current RP4 generated manifest was also run twice, byte-identical,
+SHA-256 `1ecc95407ccdc4dec807a497c5d412db1bbfcad7ea2b00e77b7b279fb0691278`.
+
+The source provenance is `SOURCE_CORRESPONDENCE_PROVEN`. The existing
+software-Titan runner boot/callback and its AvP fixture stall are retained as
+historical diagnostics only; **AvP guest equivalence is no longer a
+prerequisite for this architecture study**. These tests are deliberately not
+part of `test.ps1`, cannot promote RP4, and do not provide an AvP final
+composite result.
+
+The next implementation body is the direct AvP mechanism: bypass equal-Z SGL
+sorting for the RP4 object schedule, emit an explicitly owned sequential VDP1
+command list, and prove from command memory that the earlier CPS2 object-RAM
+entry appears later in the final list. MSHvSF remains corroborating reference
+evidence only. A separate minimal Saturn fixture may measure object-versus-plane
+priority; neither route makes the optional Yaba source instrument an AvP
+acceptance dependency. MAME/ROM captures remain authoritative for AvP CPS2
+semantics.
+
+Independent correction verification passed the two official-source tests, the
+Saturn-control/provenance/rejected-diagnostic tests, RP4 v1 status mutations,
+priority-decode tests, a fresh apply-script run, and two byte-identical RP4
+manifest generations. Full `test.ps1` passed every earlier check and stopped at
+the expected intentional RP4 v1 `FALSIFIED` result after the 201-frame composite
+check; it is not a green suite. No emulator process remained.
+
+Do not delete the historical 71c973f/Tico rejection or use its patch as an
+official-source patch. Do not alter `saturn_vdp2_scanout_status`, RP4 status,
+or Capability Gate counts in this repository from this checkpoint.
+
 ## RP4 exact-source scanout recovery: defined equivalence stop, 2026-08-20 (newest first)
 
 The old statement that corresponding source was unavailable is
@@ -64,7 +122,7 @@ remain historical **REJECTED** evidence and must not be deleted or repurposed.
    at host surface dimensions after presentation. None is a deterministic,
    pre-OSD, native 352x224 final-composite witness.
 
-### Current ruling and next authorised work
+### Current ruling and superseded runner direction
 
 `saturn_vdp2_scanout_status` remains **UNREADABLE**;
 `saturn_output_order_status` and `saturn_vdp1_command_status` remain
@@ -72,15 +130,14 @@ remain historical **REJECTED** evidence and must not be deleted or repurposed.
 remains **FALSIFIED**, and Capability Gate 1 remains **0/7**. Calibration and
 RP4 promotion are not authorised.
 
-The next agent may proceed only with a bounded, failing-first
-guest-equivalence investigation that identifies the remaining official-runner
-execution divergence (disc/core/BIOS/interrupt timing) *or* obtains the
-officially matching UI dependency set without changing emulation semantics.
-Do not model a composite, automate a screenshot, treat VDP1-only or host
-swapchain pixels as VDP2 scanout, or implement Saturn ordering changes while
-this status remains open. Preserve the ignored official archive, extracted
-source, runner builds, Qt/SDL attempts, logs and scanouts. Kill all emulator
-processes before handoff.
+The former executable instruction to pursue official-runner guest-equivalence
+archaeology is **SUPERSEDED**. The reference-only package is complete and must
+not be extended, wired into `test.ps1`, or used to change any AvP acceptance
+status. MSHvSF owns generic Saturn priority/order measurement; later AvP
+runtime work consumes that transfer contract and validates the AvP final
+composite separately. Preserve the ignored official archive, extracted source,
+runner builds, Qt/SDL attempts, logs and scanouts. Do not model a composite or
+treat VDP1-only/host-swapchain output as VDP2 scanout.
 
 ## RP4 correction: reproducible rejected scanout diagnostic, 2026-08-20 (newest first)
 
@@ -243,18 +300,13 @@ required guest behavior**.
 - No emulator binary, patched source, raw scanout, build output, or log is
   tracked. The source-tree experiment remains under ignored `.deps` only.
 
-### Exact next work
+### Historical next work (superseded)
 
-1. Obtain a source revision demonstrably matching the pinned release, or a
-   different emulator with a reproducible native post-composite readback and
-   a proven 32-Mbit-cart AvP boot.
-2. **SUPERSEDED_BY_1259091.** The tracked source-hash manifest,
-   verify/apply/build scripts, patch, and corruption/wrong-base controls now
-   exist. Do not redo them; retain their rejected-diagnostic classification.
-3. Run the custom/pinned equivalence comparison (guest ready, fixture-relative
-   frame, VDP1 list/count, VDP1/VDP2 VRAM and CRAM canaries) before calibration.
-4. Only after that passes, execute scanout calibration and the three controls
-   in the existing RP4 book. Do not change Saturn ordering yet.
+These instructions record the original stop condition only. Do not resume the
+custom/pinned equivalence comparison, scanout calibration, or UI/runner build
+archaeology on this branch. The official reference instrument is optional and
+complete; generic Saturn priority/order evidence belongs to MSHvSF, while a
+later AvP runtime validation must consume its transfer contract.
 
 ### Process state
 
