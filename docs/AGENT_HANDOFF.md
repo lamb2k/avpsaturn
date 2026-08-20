@@ -1,395 +1,254 @@
 # Agent handoff
 
-Current-only restart state. Git history contains superseded investigations;
-this file contains only accepted evidence, live ownership, and ordered next
-work. Always verify it with a fresh `git status --short --branch`,
-`git log --oneline -10`, and process check.
+Current-only restart state. Historical investigations belong in Git history and
+archived diagnostics, not in this file. Verify this document before relying on
+it with:
+
+```powershell
+git status --short --branch
+git log --oneline -10
+Get-Process mame,yabasanshiro* -ErrorAction SilentlyContinue
+```
 
 ## Repository state
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `codex/avp-master-plan`
-- HEAD: `a28f5df` (`Implement the minimal v0 scene player behind platform
-  seams (RP3)`), on top of `348e8fc`, `82bb47e` (RP2 census), `402a540`,
-  `dddd19a` (AvspSceneDef v0 contracts), `2802e2c`, `e728c9b`, `aa0d671`,
-  the Codex-reviewed `5bf237e`/`b681c04`, and Codex base `885f6bc`.
-- Recent frontend commits:
-  - `b681c04` - obey Jo's one-based palette contract (Codex-reviewed);
-  - `5bf237e` - prove every held frontend VDP1 object (Codex-reviewed);
-  - `aa0d671` - replace R1TITLE.RLE with ROM-derived title text over the
-    native street (awaiting Codex review);
-  - `e728c9b` - prove the confirmation shutter across the complete source
-    interval (awaiting Codex review).
-- Acceptance: Capability Gate 1 **0/7**; full game **0/9**.
-- Active work: RP0-RP3 **PASSED**; next is RP4 or RP5 in
-  `docs/ROUND1_EXECUTION_PLAN.md`. `aa0d671`/`e728c9b` were implemented and
-  self-reviewed under the user's autonomous interim-supervisor
-  authorization recorded in this session; Codex review remains the
-  authoritative acceptance.
+- HEAD: `18c781f` (`Prove the two-plane street renderer with fixture
+  separation (RP4)`), on top of the Codex base
+  `8fd75b31c1ed6708de5fbd32ccaa2b98042d9654`.
+- No remote publication is authorized.
+- Capability Gate 1: **0/7**.
+- Full-game acceptance: **0/9**.
+- RP0-RP3 are committed package checkpoints. RP4 is **IN PROGRESS**, not
+  accepted and not a parity claim.
 
-The worktree is intentionally and heavily dirty. It contains earlier actor,
-collision, frontend, staged-loader, plan, test, analyzer, and private diagnostic
-work plus an active frontend integration loop. Do not reset, clean, stash,
-switch branch, bulk-stage, or assume any uncommitted path is disposable.
+The worktree is intentionally and heavily dirty. It contains shared actor,
+collision, frontend, staged-loader, test, analyzer, documentation, and private
+diagnostic work. Do not reset, clean, stash, switch branch, bulk-stage, or
+assume any uncommitted path is disposable. Re-run Git status for the exact
+inventory before every commit and stage explicit paths only.
 
-At this checkpoint, modified tracked paths include:
+Current tracked modifications include the repo/agent instructions,
+`README.md`, actor/collision/runtime files, `build.ps1`, `main.c`, `makefile`,
+data manifests, plans/tests, Jo Engine patch, host tests, and analysis tools.
+Untracked work includes `.claude/`, `.codex/`, `loader/`, `tools/diag_*`, MAME
+trace probes, and local logs/TSVs. ROMs, raw captures, generated copyrighted
+payloads, audio, opcode dumps, save states, logs, and ISO/cue files must never
+be committed.
 
-```text
-AGENTS.md, CLAUDE.md, QWEN.md, README.md
-avsp_collision.h, avsp_emit.c, avsp_frontend.c, avsp_frontend.h
-build.ps1, capability_model.h, capture_frontend_rom.ps1, main.c
-data/avsp_actor_class_model.json, data/avsp_actor_layout.json
-data/avsp_animation_scripts.json, data/avsp_frontend_assets.json
-data/avsp_table_set_gate.json, data/round1_debug_overlays.json
-data/round1_hitbox_brackets.json, data/round1_hitbox_geometry.json
-docs/AGENT_HANDOFF.md, docs/ARCHITECTURE.md, docs/GOAL.md
-docs/HARDWARE_TEST.md, docs/NEXT_AGENT_PROMPT.md, docs/PARITY_PLAN.md
-docs/TEST_PLAN.md, engine-patches/joengine-4bpp-sprites.patch
-tests/avsp_anim_walk_test.c, tests/avsp_runtime_collision_test.c
-tests/capability_model_test.c
-tools/analyze_frontend_segments.py, tools/analyze_hitbox_brackets.py
-tools/analyze_hitbox_geometry.py, tools/analyze_round1_debug_overlays.py
-tools/analyze_street_alien_object_emission.py, tools/capture_frontend_cram.py
-tools/check_layout_anchor.py, tools/decode_avsp_animation_scripts.py
-tools/extract_avspu_stage1.py, tools/gate_avsp_table_set.py
-tools/gen_avsp_frontend.py, tools/generate_stage1_route.py
-tools/mame_capture_frontend_rom.lua, tools/measure_avsp_sprite_demand.py
-tools/test_boss_rom_data.py, tools/verify_avsp_actor_classes.py
-tools/verify_boss_rom_poses.py, tools/verify_frontend_cram.py
-tools/verify_frontend_objects.py, tools/verify_pose_gate.py
-tools/verify_position_gate.py
-```
+## Process ownership snapshot
 
-Untracked work includes `.claude/`, `.codex/`, `loader/`,
-`docs/ROUND1_EXECUTION_PLAN.md`, frontend/screenshot helpers, the
-`tools/diag_*` investigation set, MAME trace/dump probes, and local logs/TSVs.
-Re-run Git status for the exact current inventory before staging. ROMs, raw
-captures, generated copyrighted payloads, logs, and ISO/cue files remain
-uncommittable even when they appear in the worktree.
-
-The concurrent frontend loop was actively restarting pinned Yaba Sanshiro
-during the plan refresh. The observed PID changed from 13484 to 44108, so the
-PID below is only the latest snapshot, not a stable owner token:
+At the latest verified snapshot:
 
 ```text
-yabasanshiro PID 44108
+(2026-08-20 03:00) no mame, yabasanshiro, or kronos processes running
 ```
 
-It may belong to the concurrent frontend loop. Do not launch a second emulator
-against the same profile. Confirm ownership before stopping it; the owning agent
-must terminate all emulator/MAME processes before its checkpoint finishes.
+Every emulator started during the RP4 supervised validation was terminated at
+the checkpoint. Treat PIDs as snapshots, not stable tokens.
 
-## Implementation report: RP3 - minimal v0 scene player
+## Accepted presentation checkpoints
 
-- Base: `348e8fc`; implementation commit `a28f5df` on
-  `codex/avp-master-plan`.
-- Changed files: `avsp_scene_runtime.h` (new), `avsp_scene_runtime.c`
-  (new), `tests/avsp_scene_runtime_test.c` (new), `test.ps1` (host test
-  wired in), `makefile` (SRCS + avsp_scene_runtime.c).
-- Behavior: AvspSceneRuntime implements the AvspScenePlayer interface over
-  an AvspSceneBackend seam table (load/release scene, layer page, scroll,
-  palette ref, map patch, audio event, draw object) so identical
-  interpreter logic runs in WSL host tests and on the SH-2. Fixed 16
-  object slots; OBJECT_ADD to a claimed slot, UPDATE/REMOVE of an
-  unclaimed slot, MAP_PATCH count/length disagreement, a zero-duration
-  unskippable HOLD, and running off the end without TRANSITION are hard
-  reported diagnostics, never skips. HOLD consumes frames until its
-  duration elapses or a masked input bit arrives (duration 0 = until
-  input); TRANSITION reports scene_finished and the next scene ID for the
-  existing route controller. No scripting language, no dynamic allocator,
-  no asset cache.
-- Checks, all PASS:
-  1. WSL host test `tests/avsp_scene_runtime_test.c`: 3 positive blocks
-     (every v0 opcode with an exact recorded side-effect log and hold
-     timing; input-gated hold releases only on the masked bit; two-scene
-     route end to end through AvspRouteController with lifecycle at the
-     transition) and 9 negative controls, one per diagnostic path;
-  2. full SH-2 build links the player: `__bend = 0x060bfd90`,
-     `_avsp_scene_runtime_init` at `0x0600b2d8`. NOTE: only 624 bytes
-     remain below the 0x060C0000 ceiling; RP5 must treat the high-work-RAM
-     margin as nearly exhausted;
-  3. `test.ps1` exit 0 (both new gates included);
-  4. no stray emulators beyond the still-running user-requested
-     whole-game capture (see below).
-- GAP: the Saturn-side AvspSceneBackend binding (Jo/SGL) is not yet
-  implemented; RP4/RP8 bind the seams to the proven frontend primitives.
-- UNRUN: the user-requested whole-game cadence-1 capture
-  (`.deps/mame/full_game`, frames 1-180000) was still recording at this
-  checkpoint; stop/verify it and terminate MAME when it completes.
+- RP0: frontend palette/object primitives, confirmation shutter, and
+  ROM-derived Round 1 title are committed. `R1TITLE.RLE` is no longer the
+  runtime title path. Capability Gate progress remains unchanged.
+- RP1: `AvspSceneDef v0`, route/player/diagnostic interfaces, host controls, and
+  SH-2 link are committed.
+- RP2: full-route cadence-1 capture grouping and the tracked machine census are
+  committed. Private capture material remains ignored.
+- RP3: the minimal v0 scene player and explicit route controller are committed
+  behind platform seams.
 
-## Implementation report: RP2 - full-route cadence-1 capture and census
+The previous accepted RP0 verification included deterministic host checks,
+`test.ps1`, frontend and encounter profiles, and a clean release boot. RP3 also
+passed its focused host and SH-2 checks. Those results do **not** validate the
+current uncommitted RP4 runtime prototype; all affected lanes must be rerun.
 
-- Base: `402a540`; implementation commit `82bb47e` on
-  `codex/avp-master-plan`.
-- Changed files: `tools/mame_capture_full_route.lua` (new),
-  `capture_full_route.ps1` (new), `tools/census_full_route.py` (new),
-  `tools/verify_route_census.py` (new), `test.ps1` (census gate),
-  `data/round1_route_census.json` (new, tracked semantics only),
-  `data/round1_route_census_controls.json` (new).
-- Capture: deterministic cold-boot cadence-1 run, frames 1-18000, composite
-  of the two proven input schedules (`mame_capture_stage1.lua` frames
-  0-4200 verbatim, `mame_capture_stage1_full.lua` re-based to
-  relative = frame - 4200). NVRAM baseline snapshotted to
-  `.deps/mame/full_route_nvram_baseline` and restored before every run.
-  Regions per frame, delta-encoded: gfxram in 64 KiB thirds, work RAM
-  0xFF0000-0xFFFFFF, QSound RAM 0x618000-0x619FFF (program-space
-  read_range); CPS-A, CPS-B, objram1, objram2, output from their named
-  MAME shares because those are MEASURED write-only through the 68000
-  read map (program reads return zero). Per-frame screenshots. Raw
-  capture private at `.deps/mame/full_route` (~2.0 GiB).
-- Route coverage MEASURED from the capture: boss defeat and 1P RESULTS at
-  ~14760, Round 2 interior gameplay by 16200, so the held Round 2 title is
-  inside the window; the heuristic route dies and continues during street
-  and boss combat (continue loops visible as the paired 1501/901-frame
-  groups), recorded as played, per the existing stage1 timing policy.
-- Census (`data/round1_route_census.json`, 122 groups): frame signature =
-  CPS-A layer bases + video-control word + CPS-B block hash + palette
-  population bitmap; additional full-frame-rewrite cut when a frame
-  rewrites two or more gfxram thirds (measured p99.9 of per-frame gfx
-  delta is one third). Groups carry provisional bit-15 AvspSceneDef v0
-  IDs, scroll ranges, object-count ranges, input-word runs, per-layer map
-  hash counts, row-scroll hash counts, QSound change counts, and review
-  flags; region timelines carry change counts and stream hashes only.
-  Known landmarks align: character-select shutter group `0x801a`
-  (1693-1958, object max 362), Round 1 title `0x801c` (1972-2073), street
-  gameplay `0x801d` (2074-5542), results `0x8078`, Round 2 `0x8079`. The
-  Round 2 title shares group `0x8079` with Round 2 gameplay - same
-  signature because the title text is scroll1 over the already-loaded
-  interior scene, consistent with the proven Round 1 title mechanism;
-  splitting it is RP6 semantic-ID work.
-- Checks, all PASS:
-  1. deterministic re-run: an independent cold-boot capture
-     (`full_route_rerun`) produced a byte-identical census;
-  2. census regenerated twice from the same capture: byte-identical;
-  3. negative controls (one-frame boundary shift, perturbed group
-     boundary): both detected, recorded in
-     `data/round1_route_census_controls.json`;
-  4. `test.ps1` exit 0 including the new `tools/verify_route_census.py`
-     structural gate (groups tile the route exactly, unique bit-15 IDs);
-  5. every MAME process terminated (count 0 verified before commit).
-- Review flags: 3 groups flagged `unexplained-full-frame-rewrite`
-  (boundaries at 80, 5566/6200-region, 12799); human review scope for RP6.
-- GAP: the census groups the Round 2 title with Round 2 gameplay (RP6
-  splits by semantic evidence). GAP: audio grouping uses QSound RAM change
-  counts only; no audio payload is captured or tracked.
-- UNRUN: physical Saturn conditions; audible CDDA/PCM; the separately
-  user-requested whole-game capture (`.deps/mame/full_game`, frames
-  1-180000 via `capture_full_route.ps1 -CaptureName full_game
-  -FinalFrame 180000`) was still recording at handoff time and is
-  evidence-only for later rounds.
+## RP4 committed evidence and bundle checkpoint
 
-## Implementation report: RP1 - AvspSceneDef v0 shared contracts
+The current five-commit RP4 chain is:
 
-Commit `dddd19a`. New files `avsp_scene.h`, `avsp_scene.c`,
-`avsp_scene_player.h`, `avsp_route.c`, `tests/avsp_scene_test.c`; the test
-is wired into `test.ps1` and both sources link into the SH-2 image
-(`__bend` 0x060bf6d0, 2,352 bytes below the Jo/SGL boundary).
+```text
+aee8cc5 Select and measure RP4 interval
+e4086a9 Generate pre-scaled street plane strips
+72f62eb Pack strips as VDP2 cells with PNT map patches
+4f86c43 Merge interval object tiles into street archive
+8fd75b3 Serialize strip schedules in runtime form
+```
 
-- AvspSceneDef v0 envelope: big-endian words, magic/version/scene-id/
-  source-anchor/count/payload header; ten evidence-backed operations with
-  length-prefixed records (additive within v0; incompatible changes bump
-  the version).
-- Scene-ID namespace: 16-bit, bit 15 provisional (RP6 retires), zero
-  invalid. Unknown scenes fail diagnostically via one lookup policy.
-- AvspScenePlayer lifetime (load/activate/step/draw/release; loads illegal
-  after the CDDA late-read lock) and AvspRouteController explicit
-  state-machine tables whose edges are validated at init.
-- Checks: host contract test (2 positive, 11 negative controls) PASS;
-  `test.ps1` exit 0; full build exit 0. Scene content, capture and
-  rendering remain RP2-RP4.
+Measured facts for the selected source interval:
 
-## Implementation report: RP0 complete - shutter and Round 1 title
+- source frames: `3474..3674`, inclusive, 201 frames;
+- horizontal transform: `source_x = (out_x * 383 + 175) // 351`;
+- strip bundle (regenerated at 18c781f): `STRIPS.BIN`, 269,654 bytes,
+  SHA-256
+  `7c28617351ec2bb2099d10e28de561f0ef64feb2fbb1784c5dae11d29c7f1c22`;
+- scroll2/NBG0: 527x240, 1,596 unique 8x8 cells, 102,144 character bytes,
+  197 colours;
+- scroll3/NBG1: 528x256, 879 unique 8x8 cells, 56,256 character bytes,
+  15 colours;
+- two map patches;
+- palette cycle: 14 entries, period 4, first flip at rel 4;
+- selected interval scroll2 span 176 and scroll3 span 154, ratio `0.875`;
+- source row scroll is enabled, but the normalized visible rows in this chosen
+  interval are constant zero. Line scroll is unnecessary for this interval
+  only; the wider route remains unclassified;
+- source object priorities observed: 1 and 4;
+- the captured validation schedule contains 12,118 object entries over 201
+  frames with complete interval tile coverage.
 
-Commits `aa0d671` and `e728c9b`, implementing `docs/NEXT_AGENT_PROMPT.md`
-(RP0 Parts A and B).
+The captured 12,118-entry object schedule is a **focused validation fixture**.
+It may prove geometry, colour, order, paging, and priority for this interval. It
+must never become the production whole-route object source or a substitute for
+translated actor/object logic.
 
-### Part B - Round 1 title (`aa0d671`)
+The last linked RP3 map left only 624 bytes below the high-work-RAM boundary.
+RP4 must not add large static/BSS buffers. All map, bundle, and runtime bounds
+must be measured again after the current integration links.
 
-- Measured composition: the title text is NOT objects - it is 48 scroll1
-  glyph tiles (colour bank 0x26, no flips) forming "ROUND 1" and "CITY OF
-  DESPAIR". Tilemap written at source 1971 (confirm input + 171); the bank
-  fades dim-to-full over sixteen measured per-frame palette rows
-  (1971-1986); the HUD tilemap appears at title + 32; the street scene
-  layers pop at + 35 with no fade; the glyph tiles are replaced with blank
-  glyphs at + 90; the window ends at + 120.
-- `tools/gen_avsp_frontend.py round1_text_cels()` extracts the two lines as
-  4bpp cels (`R1TXT0/1.BIN`, 1,472 VDP1 bytes) plus the sixteen measured
-  fade rows (`R1TF.PAL`, 512 bytes), verifies tilemap identity across the
-  interval and absence outside it, and records the `round1_title` timing
-  block, `round1_title_text` schedule, and evidence hashes in the manifest.
-- Runtime: text drawn as VDP1 objects in select-block sub-bank 13 (loaded
-  with the select bundle, before the CDDA disc-read lock), fade by row
-  lookup during late confirm, native street scene activated at + 35, HUD
-  gated at + 32, select-bundle release deferred to + 90. `R1TITLE.RLE` is
-  no longer generated, shipped, or selectable; the sequence table
-  regenerates with twelve scenes.
+## RP4 implementation report (supervised, awaiting Codex review)
 
-### Part A - confirmation shutter (`e728c9b`)
+- Mode: `SUPERVISED_IMPLEMENTATION`, `PACKAGE: RP4`, implementor.
+- Base SHA: `8fd75b31c1ed6708de5fbd32ccaa2b98042d9654`.
+- Implementation commit: `18c781f` (single coherent checkpoint).
+- Changed files: `main.c`, `build.ps1`, `makefile`, `test.ps1`,
+  `tools/gen_avsp_street_planes.py`, `tools/verify_street_planes.py` (new),
+  `tools/verify_fixture_separation.py` (new),
+  `tools/capture_street_readback.py` (new), `data/rp4_street_planes.json`,
+  `data/rp4_street_readback.json` (new),
+  `data/rp4_street_live_readback.json` (new).
 
-- `tools/verify_confirm_shutter.py` replays every cadence-1 frame
-  1860-1970: content rows 40..223 must be baseline-identical inside
-  `cap_confirm_shutter_band()` and pure black outside. First masked frame
-  pinned to source 1886 (frames-since-input 86), closure 1908; controls
-  for start shift, band shift, and two wrong rates all fail. Report:
-  `data/avsp_confirm_shutter_readback.json`.
-- Two runtime phase defects fixed: the shutter consumed the leading
-  encounter timer directly (one frame early; now converts to
-  frames-since-input), and the confirm markers blinked forever (the
-  source retires them permanently at frames-since-input 27).
-- Live proof: confirm holds at 40/90/100/110; the capture samples fourteen
-  NBG1 rows including both rows around each held band edge; sampled rows
-  inside the band hash-match the open-band baseline, outside rows are
-  zero, and a one-row band shift fails as a live control.
-- ADAPTED on record: the source implements the shutter as 360 sliding
-  0x3700 mask objects; the Saturn NBG1 row blackout reproduces the same
-  pixels, proven per-frame across the complete interval.
+### Root causes fixed to reach the offline proof
 
-### Checks (this session)
+1. The generator's patch packing mutated the base pattern grid
+   (`pack["pnt"][...] = index`), so the serialized base held the LAST patch
+   state; a base-PNT snapshot before patch processing restores first-seen
+   semantics. This alone collapsed NBG0 from 108,286 mismatched pixels to
+   1,122.
+2. The palette cycle is serialized and replayed with first-flip semantics
+   (state A until the first observed flip at rel 4, then alternate per
+   period 4) in generator, runtime, and verifier; the old
+   `(rel+phase)/period` formula was phase-inverted.
+3. The verifier's expected window now marks plane columns whose world pixel
+   is outside the 384-wide capture window as unobservable (sentinel), never
+   clamping to the neighbouring column; those columns are compared at the
+   scroll phases that bring them into view.
 
-| Command | Result |
-|---|---|
-| `test.ps1` | Exit 0 (includes the new shutter verifier) |
-| `py tools/verify_frontend_cram.py` | PASS - 25 holds, 22 surfaces exact, zero boundary writes |
-| `py tools/verify_frontend_objects.py` | PASS - 25 holds, 25 schedules / 44 objects exact, live shutter rows proved |
-| `py tools/verify_confirm_shutter.py` | PASS - 111 frames (26 open / 22 moving / 63 closed), 4 controls fail |
-| manifest regeneration twice | byte-identical `data/avsp_frontend_assets.json` |
-| `build.ps1 -FrontendShotTest` + capture | Exit 0; 25 holds from cold boot |
-| `build.ps1 -EncounterTest` + live route | COMPLETE (state 18) at frame 3349, all states in order |
-| `build.ps1 -Release` + boot | Exit 0; clean boot from the exact cue to `runtime_ready=1`, title state, frame 8 |
+### Offline proof (tools/verify_street_planes.py, gate in test.ps1)
 
-Physical Saturn validation, audible CDDA/PCM, and the live sprite
-high-water ledger remain **UNRUN**. Capability Gate 1 remains **0/7**.
+- All 201 frames structurally checked (scroll equality, object schedule
+  byte-equality against the active CPS bank, tile coverage); 124 frames
+  pixel-compared (every 8th, patch frames, endpoints, all 113 page-boundary
+  crossing frames).
+- Result: **0 mismatched pixels on NBG0 and NBG1**, 12,118/12,118 objects
+  exact, 0 missing tiles, priority split {1: 402, 4: 11,716}.
+- Negative controls, all detecting: wrong transform (window-anchored fit),
+  aliased second page, one scroll record, one cycle entry, one dropped
+  patch, one object coordinate, one object priority, one VDP2 priority
+  register. Zero-mismatch and control detection are hard failures.
 
-### Remaining `GAP`/`ADAPTED` in RP0 scope
+### Required issues A-D
 
-- ADAPTED: shutter as NBG1 row blackout (pixel-proven) instead of 360 mask
-  objects.
-- GAP (moved to RP4/RP9): ambient street-actor animation (flames, caged
-  aliens, robots) behind the Round 1 title; the native street scene is the
-  flattened TILES bitmap plus gameplay actors.
-- GAP: the 2P "PRESS START" attract prompt and the bottom-left credit line
-  on scroll1 during confirm/title are not reproduced (1P capability test).
+- **A (NBG0 ownership).** MEASURED by live write watchpoint: the writer of
+  the street NBG0 PNT area was `jo_clear_screen` -> `jo_clear_screen_line`
+  -> SGL `prnt_0`, proving the SGL ASCII text map lives at `VDP2_VRAM_B0`
+  (0x25E40000), not offset 0 as previously noted. The street profile
+  compiles out `frame_callback`'s `jo_clear_screen` and redirects
+  `jo_printf` into `avsp_diag_print_buffer`; after the fix the char and
+  PNT canaries for both planes match `STRIPS.BIN` live.
+- **B (two-page mapping).** Live SGL shadow readback: `CHCTLA=0x1010`,
+  `PNCN0=0xc000`, `PNCN1=0xc004`, `PLSZ=0x0005`, `MPOFN=0x0044`,
+  `MPABN0=0x2020`, `MPABN1=0x2222`. Offline: 113 boundary-crossing frames
+  all exact; the aliased-page negative control detects.
+- **C (per-object priority).** `SPCTL=0x0023` (sprite type 3); classes in
+  CMDCOLR bits 13-14: default 0 (Jo/HUD), actor `0x2000` (CPS pri 1),
+  foreground `0x4000` (CPS pri 4); `PRISA=0x0406`, `PRISB=0x0606`,
+  `PRINA=0x0203` (NBG1=2 < NBG0=3 < actors 4 < default/foreground 6). Live
+  VDP1 command walk: classes {0: 1, 1: 2, 2: 446}. Both priority negative
+  controls (object class bit, VDP2 register) detect offline.
+- **D (fixture separation).** `STRIPS.BIN` is generated to
+  `build/rp4_fixture/`, staged into the ISO only by `-StreetTest`, removed
+  otherwise; `data/rp4_street_planes.json` carries `fixture_role`
+  ("VALIDATION FIXTURE ONLY"); `tools/verify_fixture_separation.py` gates
+  test.ps1 (fixture references outside `AVSP_STREET_TEST`, lost
+  classification, or wrong-profile staging all fail).
 
-## Planning hierarchy
+### Runtime hardening
 
-Read in this order:
+- STRIPS header, plane, and object-schedule offsets/counts bounds-checked
+  against the file size; malformed counts fail with a named asset.
+- Object frame offsets indexed once (O(1) per-frame lookup); map patches
+  record overwritten PNT words and revert on loop wrap; chars/PNT uploaded
+  once at activation; per-frame writes are the measured scroll registers,
+  cycle colours, and patch words only.
+- Street arrays live only in the StreetTest link (no street symbols in
+  other profiles' ELFs).
 
-1. `AGENTS.md` - canonical behavior and ownership;
-2. `docs/GOAL.md` - full-game destination;
-3. this handoff - volatile restart state;
-4. `docs/PARITY_PLAN.md` - overall S1-S6/full-game route;
-5. `docs/ROUND1_EXECUTION_PLAN.md` - RP0-RP12 dependencies and status;
-6. `docs/NEXT_AGENT_PROMPT.md` - first executable package only;
-7. architecture/test/hardware documents required by that prompt.
+### Memory and live measurements
 
-Only Capability Gate 1 and full-game conditions affect acceptance counts. Work
-packages, batches, the shared-primitives check, and the continuous-route and
-presentation-parity checks are internal scheduling and validation instruments.
+- StreetTest link: `__bend=0x0608a8f0` (218,896 bytes below 0x060C0000).
+- Encounter profile BSS had crossed the limit by 0x5a0 after the RP3 carve
+  rework (pre-existing, exposed on rebuild); reclaimed by shrinking the FS
+  staging burst 32->31 sectors (2 KiB); encounter link now
+  `BSS end 0x060bfda0`, release link `0x060bf590`.
+- `STRIPS.BIN`: 269,654 bytes, SHA-256
+  `7c28617351ec2bb2099d10e28de561f0ef64feb2fbb1784c5dae11d29c7f1c22`,
+  verified byte-identical inside the StreetTest ISO at 0x54e000.
+- Tile archive 297,764 bytes (90.87% of the 0x50000 cart carve); STRIPS
+  carve 0x48000 at DRAM1+0x50000, street profile only.
+- Live diagnostics matched the offline table exactly (scx 161/148 at the
+  hold segment, SCXIN0 tracking, s2y 512/513 jitter visible as SCYIN0 0/1).
+  Full register list in `data/rp4_street_live_readback.json`; visual
+  anchors captured at pre-movement, during movement, hold, and patch phases
+  (private scratchpad, not committed).
 
-## Accepted frontend evidence
+### Checks
 
-### One-based palette contract - `b681c04`
+- `test.ps1`: exit 0 (includes the new fixture-separation and street plane
+  gates; the plane gate requires the private full-route capture).
+- Offline street proof: PASS (0 px, 8/8 controls).
+- StreetTest live readback: registers as above, char+PNT canaries all
+  match, loop advancing.
+- EncounterTest: reached `COMPLETE` (state 18) self-driven.
+- Clean normal-release boot: `runtime_ready=1`, world frame advancing at
+  full rate (132->253 over 2 s).
+- All emulators terminated.
+- `UNRUN`: FrontendTest driven through Round 1 in this session (the release
+  boot only proves the title path); physical Saturn hardware; audible
+  CDDA/PCM confirmation; full-game route beyond captured frame 300,000.
 
-- Jo palette index zero is reserved; opaque fitted surfaces use `1..255`.
-- Bounded helpers copy at most 255 colours through `jo_palette::data`.
-- Surface/subpalette canaries prove both adjacent 256-entry block boundaries.
-- Nineteen live held observations contain eighteen exact surface comparisons,
-  zero adjacent-boundary writes, and expected failures for the rejected
-  zero-based payload and one-bank perturbation.
+### Remaining ADAPTED/GAP
 
-### Held VDP1 objects - `5bf237e`
+- `ADAPTED`: the world-anchored anamorphic pre-scale realizes the endpoint
+  384->352 mapping at plane level; VDP1 object placement uses `fit_352`
+  (352/384 ratio) while the planes use the endpoint rule (351/383), a
+  <=1 px variance flagged for Codex review.
+- `GAP`: scroll1/HUD layer and row-scroll classification outside this
+  interval remain unmodelled; production object sourcing still requires
+  translated actor logic (the fixture must never ship in production).
+- Capability Gate 1 remains **0/7**; RP4 is implemented and verified but
+  NOT self-accepted.
 
-- Eighteen schedules containing forty objects pass exact geometry, colour,
-  order, 352x224 clipping, (176,112) origin, cursor-cycle, and timing checks.
-- Four deliberate object perturbations fail.
-- Select state has a live animation clock.
-- Confirmation blink latency is corrected to the measured source timing.
-- Character select remains a non-wrapping 2x2 grid with three-frame direction
-  response, A/B/C confirm, no source-measured cancel, and selected ID
-  propagation.
+### Suggested next body (for Codex, not enacted)
 
-### Last accepted checks
+After RP4 acceptance, RP5 (pessimistic G0/CDDA residency) and RP6 (semantic
+scene IDs over the RP2 census) are dependency-ready in isolated lanes, per
+the existing plan. The evidence here adds one input to RP5 sizing: the
+street scene's full working set (tile archive + strips) fits the current
+cart carves with 9% headroom, so per-scene archive swap at loading
+boundaries remains the preferred residency shape.
 
-| Command | Accepted result at `5bf237e` |
-|---|---|
-| `test.ps1` | Exit 0 |
-| WSL `capability_model_test` | Route reaches Round 2 boundary in 4,485 frames |
-| `tools/verify_frontend_cram.py` | 19 holds, 18 exact, controls fail |
-| `tools/verify_frontend_objects.py` | 18 schedules / 40 objects exact, 4 controls fail |
-| `build.ps1 -FrontendShotTest -SkipHostTests` | Exit 0 |
+## Handoff discipline
 
-Those results validate the committed frontend checkpoint only. The current
-dirty tree must rerun its applicable checks. At the accepted checkpoint, the
-normal no-skip route, `-EncounterTest`, normal-release boot, audible CDDA/PCM,
-live sprite high-water, and physical Saturn validation were `UNRUN`. Any active
-emulator observation made after that commit is unaccepted until recorded with
-the exact build/member hashes and reviewed.
+Before stopping:
 
-## Current RP0 gaps
-
-SP1 palette ownership and SP2 held VDP1 objects pass. The immediate work is:
-
-1. **SP3 confirmation shutter:** prove the VDP2/NBG1 row blackout across the
-   complete cadence-1 interval, including start, centre, row rate, termination,
-   and negative controls. The VDP1 object check proves the marker blink, not the
-   shutter bands.
-2. **SP4 Round 1 title:** capture the complete source interval, determine
-   whether its composition is tilemap, object, palette, or mixed, then replace
-   runtime `R1TITLE.RLE` with ROM-derived content over the native street scene.
-3. Rerun focused/live/full regression checks and record resource/hash results.
-
-The exact RP0 contract is `docs/NEXT_AGENT_PROMPT.md`. Its implementation owner
-does not widen into scene runtime, parallax, row-scroll, G0/CDDA residency, S5,
-or stage work. A separately assigned evidence-only RP2 probe may begin after
-the current state is preserved, as allowed by the execution plan; it must not
-edit RP0/shared runtime paths or reuse the active emulator profile concurrently.
-
-## Round 1 go-forward order
-
-After RP0:
-
-1. RP1 commits versioned scene/runtime and ownership interfaces.
-2. RP2-RP5 proceed in isolated worktrees: full-route capture/grouping, minimal
-   scene runtime, representative two-plane renderer, and G0/CDDA residency.
-3. RP6 finalizes stable scene IDs from the grouped source route.
-4. RP7 passes every shared primitive required by dependent content.
-5. Batches A-C integrate frontend/opening, street/interior, and boss/results to
-   the Round 2 title.
-6. RP11 passes a controller-driven continuous route with every mismatch in the
-   variance ledger.
-7. RP12 closes every presentation variance, including physical presentation
-   evidence, then the project resumes S5/S3/S4/S6.
-
-Only the integration owner edits shared runtime/build surfaces and the
-execution-plan status table. Other agents start from an exact committed SHA,
-claim one package and owned file set, work in a separate clean worktree, commit
-coherent results, and return explicit SHAs/checks/`UNRUN` items for integration.
-
-## Established evidence not to re-derive without a failing check
-
-- reconstructed 16 MiB graphics region equals MAME's graphics region;
-- pose records are 16 bytes and negative-flags jumps are 4 bytes;
-- 732-frame animation free-run is exact;
-- street-alien assembly/emission path is checked;
-- 28/28 listed boss assemblies pass 29 oracle-pose comparisons;
-- exact HIT 36/36 and KO 140/140 anchors;
-- 25,104 street actor-frames have zero checked per-class constant mismatch;
-- source-derived street defender collision runs with unknowns counted `GAP`;
-- street scroll2 and scroll3 move at unequal measured rates, so final gameplay
-  presentation requires independent planes/parallax;
-- per-object actor emission is the default measured cost winner over per-tile.
-
-## Before the next stop
-
-- Update this file newest-first with exact commits, owned/overlapping paths,
-  hashes, memory totals, checks, failures, `UNRUN` work, processes, and remaining
-  `MEASURED`/`ADAPTED`/`GAP` items.
-- The integration owner updates `docs/ROUND1_EXECUTION_PLAN.md` package/SP
-  status only from accepted evidence.
-- Replace `docs/NEXT_AGENT_PROMPT.md` only when its package passes or new
-  evidence falsifies it. Do not append historical prompts.
-- Under autonomous execution, rotate the prompt and continue to the next
-  dependency-ready package without a planning pause. Under the
-  Codex/Claude-review workflow, stop at candidate completion and emit the
-  required `CODEX_REVIEW_INVOCATION`.
-- Kill all emulator/MAME processes owned by the finishing agent.
+- update this file newest-first with branch, full HEAD, exact check commands and
+  results, hashes, memory totals, live readbacks, and remaining `ADAPTED`/`GAP`;
+- update `docs/ROUND1_EXECUTION_PLAN.md` only for evidence actually accepted;
+- update `docs/NEXT_AGENT_PROMPT.md` only after supervisor acceptance, or emit a
+  proposed next prompt separately for review;
+- include a `CODEX_REVIEW_INVOCATION` block when operating as the implementor;
+- stage explicit paths and commit coherent checkpoints only;
+- label every unrun check `UNRUN`;
+- never change Capability Gate counts without satisfying the complete gate.
