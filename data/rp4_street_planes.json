@@ -9,8 +9,8 @@
  "object_schedule": {
   "entries": 12118,
   "frames": 201,
-  "tiles_bin_covered": 0,
-  "tiles_bin_uncovered": 12118
+  "tiles_bin_covered": 12118,
+  "tiles_bin_uncovered": 0
  },
  "palette_cycle": {
   "bank": 1,

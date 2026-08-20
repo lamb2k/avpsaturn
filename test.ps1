@@ -400,7 +400,7 @@ if ($LASTEXITCODE -ne 0) {
 
 # Manifest paths must stay lexical repository-relative even when reached
 # through an NTFS junction (correction-worktree .deps/avspu junctions).
-& $PythonPath (Join-Path $PSScriptRoot 'tests	est_anim_manifest_paths.py')
+& $PythonPath (Join-Path $PSScriptRoot 'tests\test_anim_manifest_paths.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Manifest junction-path test failed with exit code $LASTEXITCODE."
 }

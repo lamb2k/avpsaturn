@@ -23,8 +23,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-REQUIRED_PROFILES = ("debug-normal-release", "debug-street-test",
-                     "debug-encounter-test", "debug-frontend-test")
+# v1 ledger: profiles are keyed by the measurement-file names, with the
+# compile stamp (debug-*) recorded inside each entry.
+REQUIRED_PROFILES = ("normal-release", "street-test",
+                     "encounter-test", "frontend-test")
 
 
 def check(budget: dict) -> list[str]:
@@ -40,6 +42,9 @@ def check(budget: dict) -> list[str]:
     for required in REQUIRED_PROFILES:
         if required not in profiles:
             errors.append(f"profile {required}: not measured")
+        elif profiles[required].get("build_profile_stamp") !=                 f"debug-{required}":
+            errors.append(f"profile {required}: unexpected compile stamp "
+                          f"{profiles[required].get('build_profile_stamp')}")
 
     cart = budget["cartridge"]
     if cart["tile_archive_bytes"] is not None:

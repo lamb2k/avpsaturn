@@ -24,26 +24,21 @@
     "0x1D"
    ],
    "distinct_banks_referenced": 15,
-   "drawn_objects_in_shipped_banks": 5901,
-   "drawn_objects_outside_shipped_banks": 6167,
+   "drawn_objects_in_shipped_banks": 11588,
+   "drawn_objects_outside_shipped_banks": 480,
    "drawn_objects_total": 12068,
    "frames_available": 2121,
-   "frames_containing_outside_bank_object": 211,
+   "frames_containing_outside_bank_object": 173,
    "frames_sampled": 213,
    "peak_concurrent_banks_per_frame": 13,
    "route": "enemy_actions",
    "sample_stride": 10,
    "uncovered_banks": [
-    "0x00",
     "0x04",
-    "0x05",
-    "0x07",
     "0x0B",
     "0x0C",
     "0x0D",
-    "0x0E",
-    "0x0F",
-    "0x1D"
+    "0x0F"
    ]
   },
   {
@@ -58,33 +53,35 @@
     "0x1B"
    ],
    "distinct_banks_referenced": 8,
-   "drawn_objects_in_shipped_banks": 2440,
-   "drawn_objects_outside_shipped_banks": 4822,
+   "drawn_objects_in_shipped_banks": 6944,
+   "drawn_objects_outside_shipped_banks": 318,
    "drawn_objects_total": 7262,
    "frames_available": 2281,
-   "frames_containing_outside_bank_object": 229,
+   "frames_containing_outside_bank_object": 104,
    "frames_sampled": 229,
    "peak_concurrent_banks_per_frame": 6,
    "route": "stalker_actions",
    "sample_stride": 10,
    "uncovered_banks": [
-    "0x00",
-    "0x07",
     "0x0B",
     "0x0C",
-    "0x0E",
     "0x0F"
    ]
   }
  ],
  "schema": 1,
- "shipped_bank_count": 5,
+ "shipped_bank_count": 10,
  "shipped_banks": [
+  "0x00",
+  "0x05",
+  "0x07",
+  "0x0E",
   "0x10",
   "0x11",
   "0x12",
   "0x13",
-  "0x1B"
+  "0x1B",
+  "0x1D"
  ],
  "shipped_palette_label": "ADAPTED single-frame palette"
 }
