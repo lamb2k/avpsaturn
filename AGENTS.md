@@ -41,6 +41,51 @@ holds the route, `docs/GOAL.md` holds the destination.
    executable body and never supersedes `GOAL.md`, `PARITY_PLAN.md` or the
    handoff.
 
+## Supervisor and implementor protocol
+
+Work is sequential. Only one role owns the repository at a time.
+
+- **Codex is the supervisor, systems architect, reverse-engineering
+  strategist, plan owner and acceptance authority.** Codex defines the real
+  technical question, leading hypotheses, distinguishing evidence, preferred
+  solution, decision branches, TDD contract, negative controls, Saturn
+  constraints, ordered chapters and acceptance criteria. Codex does not
+  delegate parity definitions, architecture ownership, acceptance thresholds
+  or overall sequencing.
+- **Claude is the directed investigator and implementor.** Claude runs the
+  prescribed traces and experiments, writes the failing tests, implements the
+  evidence-supported branch, debugs ordinary build/runtime failures, executes
+  the verification ladder and commits coherent checkpoints. Claude may report
+  contradicting evidence and recommend a change, but may not silently redesign
+  the system, weaken acceptance, replace ROM translation with approximation or
+  accept its own recommendation.
+
+Every unknown source fact must receive a bounded contract in
+`docs/NEXT_AGENT_PROMPT.md`: exact question, hypotheses, settled evidence,
+prescribed instruments, distinguishing evidence, negative controls, decision
+table, implementation boundary, tests and regressions. Claude continues into
+the matching implementation branch; investigation completion alone is not a
+handoff condition.
+
+An architectural hard stop exists only when evidence falsifies every
+prescribed branch, materially different designs remain equally supported, a
+memory/fidelity/rights/scope boundary would be crossed, required private
+evidence or tooling is unavailable after the bounded recovery procedure, or
+user-owned work cannot be isolated safely. A failed test, wrong local
+hypothesis, compiler/linker error, emulator crash or implementation debugging
+problem is not by itself a hard stop.
+
+Codex reviews a committed result and returns exactly one disposition:
+`ACCEPTED`, `CORRECTIONS REQUIRED`, or `NOT REVIEWABLE`. Every review verifies
+the evidence, falsifying control, failing-first RED, non-weakened GREEN,
+prescribed architecture, reported divergences and cumulative Saturn routes,
+then ends with a complete `CLAUDE_INVOCATION`. Acceptance also records the
+accepted range/evidence in the handoff, updates canonical status only where
+evidence changed it, selects the next dependency-ready body, replaces
+`docs/NEXT_AGENT_PROMPT.md`, and commits the supervisor documentation
+checkpoint when appropriate. Do not ask whether to continue when the plan
+already orders the next body.
+
 ## Current direction: functional parity by ROM translation
 
 The target is a **functionally parity-accurate complete game**. Round 1 is the

@@ -10,6 +10,65 @@ git log --oneline -10
 Get-Process mame,yabasanshiro* -ErrorAction SilentlyContinue
 ```
 
+## RP4 direct-order supervisor checkpoint, 2026-08-20 (newest first)
+
+Branch `claude/rp4-priority-architecture` was clean at `1cd021b` before this
+supervisor documentation checkpoint. The accepted evidence remains:
+
+- CPS2 source order and object identity are measured;
+- final VDP1 command memory is readable;
+- the old reverse/forward equal-Z `slDispSprite` experiment emitted 528
+  commands in the same final order (510 comparable sprite commands and
+  129,795/129,795 order-preserving pairs), so that mechanism is refuted;
+- object-versus-plane composite controls remain blocked and may not be
+  promoted from command-table evidence;
+- RP4 v1 remains `FALSIFIED`; Capability Gate 1 remains `0/7`.
+
+Codex inspected Jo/SGL and selected the lowest-risk first candidate:
+`jo_sprite_draw(..., billboard=true, screen_doors=true)` reaches
+`slPutSprite`, whereas `jo_sprite_draw3D` reaches the measured sorted
+`slDispSprite` path. A three-file candidate (`build.ps1`, `makefile`, `main.c`)
+was compiled successfully with an old-sorted feature control, but it was not
+accepted or committed. The edits were reverted exactly after the bounded run.
+The candidate artifacts remain ignored at
+`private-evidence/rp4-owned-order/owned-reverse/`:
+
+```text
+game.iso sha256 bd874666def117a4583533c68b3a68fcba381dadfb3256cb52b60c57ce19c104
+game.elf sha256 cbdbc236708c92def6f505d0d25e6935309b3a2162a3dca347e74624dadb3ee1
+```
+
+The candidate was **UNRUN**, not failed. Two hidden pinned-release launches
+never reached the StreetTest readiness predicate within 600 seconds:
+`avsp_diag_runtime_ready=0`, `avsp_diag_street_objects=0`,
+`avsp_diag_street_frame=0`, empty print buffer. The second command line was
+verified as:
+
+```text
+yabasanshiro.exe -nb -a -i "C:\Users\lambd\AppData\Local\Temp\AvPSaturnCapabilityTest\game.yaba.cue"
+```
+
+The master SH-2 was executing at `PC=0x06002E00` (`bra 0x06002E20`), with
+`SP=0x06002000` and `VBR=0x06000000`; the slave SH-2 remained all zero. The
+first launch also exposed a real PowerShell defect: an unquoted cue path was
+flattened by `Start-Process`. Quoting fixed the command line but not the guest
+readiness failure. Because the candidate draw call cannot execute before the
+street renderer is live, this does not distinguish a candidate defect from a
+stale disc/config/boot-harness failure. No command capture was produced. All
+Yaba/MAME processes were stopped.
+
+The next body must begin with a known-good unchanged `1cd021b` StreetTest boot
+and an intentional invalid-disc negative control before rebuilding the
+`slPutSprite` candidate. Do not spend another 600 seconds on a candidate until
+the base control reaches `runtime_ready=1`, `street_objects>0`, and an advancing
+fixture frame with the exact ISO/ELF hashes recorded. The complete decision
+book is `docs/NEXT_AGENT_PROMPT.md`.
+
+Work is now governed by the sequential Codex-supervisor/Claude-implementor
+protocol in `AGENTS.md`. Codex owns the architecture and disposition; Claude
+executes the bounded book and may stop only at its named architectural hard
+stop.
+
 ## Official 1.20.37 source: reference instrument only, 2026-08-20 (newest first)
 
 This supersedes the **scope**, not the factual record, of the prior

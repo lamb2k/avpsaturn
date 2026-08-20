@@ -16,10 +16,13 @@ This is a private native-port plan. It does not authorize publication or
 distribution. Capability Gate 1 remains **0/7** and the full-game conditions
 remain **0/9**.
 
-Current evidence baseline: branch `codex/avp-master-plan`, committed HEAD
-`8fd75b31c1ed6708de5fbd32ccaa2b98042d9654`. RP0-RP3 are committed package
-checkpoints. RP4 has committed evidence and bundle-generation steps through
-this SHA, but its live Saturn renderer remains **IN PROGRESS** and unaccepted.
+Current evidence baseline: branch `claude/rp4-priority-architecture`, committed
+HEAD `1cd021b` before the next supervisor documentation checkpoint. RP0-RP3 are
+committed package checkpoints. RP4's CPS2 source semantics and two-plane data
+path are measured, but the prior equal-Z SGL submission mechanism was refuted
+by final VDP1 command-memory evidence. RP4 remains **FALSIFIED** until a
+deterministic Saturn command-order mechanism passes its correction book. RP8
+may not widen presentation content across that unresolved renderer.
 
 ## Delivery checks
 
@@ -72,7 +75,7 @@ item below is green. A defect here invalidates all dependent batch checks.
 | SP6 | Input/state propagation | **PASS for frontend** | Non-wrapping 2x2, three-frame response, A/B/C confirm, no cancel, selected ID persists |
 | SP7 | Memory bounds and diagnostics | **PASS (interim review)** at `6ac45b3` | Four-profile __bend ledger under 0x060C0000, carve arithmetic, VDP1/VDP2/CRAM usage recorded and gated in test.ps1; route-wide VDP1 command and allocator/SCSP high-water instruments remain GAP entries inside the ledger |
 | SP8 | Late-read enforcement | **PASS (interim review)** at `6ac45b3` | Guard on every avsp_fs_read_into; host test with negative controls; live EncounterTest COMPLETE with one declared windowed read and zero late reads; live CDDA playback still disabled (ADAPTED skeleton) |
-| SP9 | Two-plane scrolling/priority | **PASS (interim review)** at `671eca8` | Offline reconstruction exact (0 px both planes, 12,118 objects, 8 controls); NBG0 ownership root-caused (SGL ASCII map at VDP2_VRAM_B0) and resolved; live PNCN/MPABN/PRIS/SPCTL readback; VDP1 command classes present |
+| SP9 | Two-plane scrolling/priority | **OPEN — source model measured, Saturn ordering correction required** | Offline reconstruction is exact and the VDP2 plane path is live. Final command-memory measurement proved that reversing equal-Z SGL submissions does not change VDP1 draw order. Replace that mechanism and prove final command order before presentation widening. Composite sprite-versus-plane controls remain separately blocked. |
 | SP10 | Row-scroll requirement | **PASS (interim review)** at classification | Complete-route classification over the private capture: 6 scenes require line scroll (0x8012, 0x8013, 0x8015, 0x8016, 0x8019, 0x801a - all opening/character-select), no gameplay scene does, street group constant-zero route-wide; implementing line scroll for those six scenes is Batch A (RP8) scope |
 
 SP1-SP4 must pass before Batch A expands. SP5-SP10 must pass before Batch B
@@ -86,11 +89,11 @@ expands beyond its representative street fixture.
 | RP1 | Preserve baseline and commit shared contracts | **PASSED** at `dddd19a` | RP0 | AvspSceneDef v0, scene-ID policy, player/route/diagnostic interfaces, 11 negative controls, SH-2 link |
 | RP2 | Full-route cadence-1 capture and automatic grouping | **PASSED** at `82bb47e` | preserved baseline | Raw private capture plus tracked machine manifest |
 | RP3 | Minimal scene runtime and route controller | **PASSED** at `a28f5df` | RP1 | `AvspSceneDef v0`, player, synthetic host fixtures |
-| RP4 | Representative two-plane renderer | **PASS (interim review)** at `671eca8` | RP1, capture fixture | Offline reconstruction exact (0 px both planes, 12,118 objects, 8 controls); live registers/canaries/priority classes proven; fixture StreetTest-only with test.ps1 gate; Codex ratification pending |
+| RP4 | Representative two-plane renderer | **FALSIFIED — correction body active** | RP1, capture fixture | Source ordering and two-plane reconstruction are measured. Equal-Z SGL submission reversal is refuted by the final VDP1 list; implement and prove a deterministic unsorted/owned command path. |
 | RP5 | Pessimistic G0/CDDA residency experiment | **PASS (interim review)** at `6ac45b3` | RP1 | Four-profile work-RAM ledger (release 2368 / street 220784 / encounter 320 / frontend 2016 bytes headroom), carve/VDP1/VDP2/CRAM/PCM ledger, disc-read guard host-tested and live-proven (one windowed read, zero late reads over EncounterTest COMPLETE); live CDDA playback itself still disabled (ADAPTED) |
 | RP6 | Finalize semantic scene IDs | **PASS (interim review)** at `254719b` | RP1, RP2 | 122-scene manifest with content-addressed stable IDs, transition chain, 23 evidence-bound labels (99 flagged needs-label), test.ps1 gate with 4 controls |
-| RP7 | Shared-primitives check | **PASS (interim review)** | RP0, RP3-RP6 | SP1-SP10 green on interim review (SP7/SP8 carry explicit GAP ledger entries for route-wide high-water instruments; SP10 defers line-scroll implementation for six frontend scenes to RP8) |
-| RP8 | Batch A: frontend and Round 1 title | **PENDING** | RP7 frontend subset | Controller-driven legal/opening/story/title/select/R1 title |
+| RP7 | Shared-primitives check | **OPEN — blocked by SP9/RP4 correction** | RP0, RP3-RP6 | All other interim primitives retain their evidence; RP7 cannot pass while the representative Saturn ordering mechanism is falsified. |
+| RP8 | Batch A: frontend and Round 1 title | **BLOCKED on RP4 correction** | RP7 frontend subset | Controller-driven legal/opening/story/title/select/R1 title |
 | RP9 | Batch B: street and interior presentation | **PENDING** | RP7 | Barricade through interior transition |
 | RP10 | Batch C: boss ending and Round 2 title | **PENDING** | RP7 | Boss presentation through held Round 2 title |
 | RP11 | Continuous-route integration check | **PENDING** | RP8-RP10 | Clean normal route plus bounded variance ledger |

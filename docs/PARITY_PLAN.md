@@ -143,9 +143,11 @@ lists in the handoff and refines the broad phases below. The order was rebuilt
 around the actor spine on 2026-08-18; the rationale and the current step table
 follow. **S1 is passed. S2 Bodies D/E are live for the street path, the enemy
 emission-family surface is corpus-proven, and the bounded S4 class-map and
-same-frame defender integration is complete. The immediate body is the real
-ROM-derived frontend in `docs/NEXT_AGENT_PROMPT.md`; the user-locked queue after
-that is S5 Room 1 behavior, remaining S3/S4 Round 1 widening, then
+same-frame defender integration is complete. Before the frontend widens, RP4
+must replace its refuted equal-Z SGL ordering mechanism with a deterministic
+path proven from final VDP1 command memory. That immediate correction body is
+in `docs/NEXT_AGENT_PROMPT.md`; afterward the user-locked queue resumes with
+the ROM-derived frontend, S5 Room 1 behavior, remaining S3/S4 Round 1 widening,
 traversal and S6.** Historical milestone results remain evidence, not the
 forward work vocabulary.
 
@@ -158,21 +160,27 @@ S-step vocabulary it lives in:
 1. **Bounded S4 integration — COMPLETE 2026-08-19.** Generated and consumed the
    per-class `table_set` map, extended canonical actor fields, proved HIT/KO
    require external state writers, and removed the collision-view one-frame lag.
-2. **Real frontend — IN PROGRESS (user priority).** Cadence-1 interaction is
+2. **RP4 Saturn ordering correction — ACTIVE PREREQUISITE.** CPS2 source order
+   and the final VDP1 command list are measurable. Equal-Z `slDispSprite`
+   sorting erased caller submission order in StreetTest. Prove an immediate
+   unsorted SGL seam or an explicitly owned sequential VDP1 path, with the old
+   sorted route as a real negative control. Do not promote the separately
+   blocked object-versus-plane composite controls.
+3. **Real frontend — BLOCKED on RP4 correction (user priority).** Cadence-1 interaction is
    resolved: four non-wrapping positions, three-frame cursor response, all
    three gameplay buttons confirm, no source cancel, and selection index
    `0xFF8452` persists into gameplay. Next allocate CRAM from AvP's measured
    17/19/32 live-bank demand, convert the CPS tilemaps/cursor from original ROM
    assets, and carry that measured selection state into gameplay at 352x224.
-3. **Game logic — S5 Room 1 (the long pole).** PRNG, enemy decisions, player state
+4. **Game logic — S5 Room 1 (the long pole).** PRNG, enemy decisions, player state
    machine, wave/spawn scheduling, the stage script interpreter,
    health/score/items/continues, translated per routine by differential
    replay. This is the irreducible bulk of the remaining wall-clock.
-4. **Finish S3/S4 across Round 1.** Complete player/tag-0 and full-cast ROM
+5. **Finish S3/S4 across Round 1.** Complete player/tag-0 and full-cast ROM
    selection/emission, phase-load PCM so the full tile set fits, then connect
    attacker collision, reactions, projectiles, broadcast hits, boss/Stalker
    schedules, and stage collision.
-5. **Traversal and full-game content widening.** Decode stage scripts, camera,
+6. **Traversal and full-game content widening.** Decode stage scripts, camera,
    triggers and Round 2 transition, then add Rounds 2-7 backgrounds,
    stage scripts, per-round cast and bosses, audio generalization (per-stage
    QSound capture pipeline or a sequence player), disc layout/streaming for
