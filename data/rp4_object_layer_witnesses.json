@@ -1,0 +1,377 @@
+{
+ "inputs_sha256": {
+  "route_census": "2ee346bad2973198863a3a1f7cec188459c458681373fc86d9625100040ede30",
+  "scene_manifest": "f776ba219d203f6685e182a0971fe6daefd51f2326b1295cc0f1430cb1975527"
+ },
+ "object_priority_code": 4,
+ "registers_by_frame": {
+  "2074": {
+   "draw_order_back_to_front": [
+    3,
+    2,
+    0,
+    1
+   ],
+   "layer_control": "0x12cf",
+   "layer_priority_nibbles": {
+    "1": 7,
+    "2": 3,
+    "3": 2
+   },
+   "obj_pri": "0x2377",
+   "object_code_draws_above": [
+    2,
+    3
+   ],
+   "object_code_hidden_under": [
+    1
+   ],
+   "tile_pen_masks": [
+    "0x0000",
+    "0x0000",
+    "0x0000",
+    "0x0000"
+   ]
+  },
+  "2345": {
+   "draw_order_back_to_front": [
+    3,
+    2,
+    0,
+    1
+   ],
+   "layer_control": "0x12cf",
+   "layer_priority_nibbles": {
+    "1": 7,
+    "2": 3,
+    "3": 2
+   },
+   "obj_pri": "0x2377",
+   "object_code_draws_above": [
+    2,
+    3
+   ],
+   "object_code_hidden_under": [
+    1
+   ],
+   "tile_pen_masks": [
+    "0x0000",
+    "0x0000",
+    "0x0000",
+    "0x0000"
+   ]
+  },
+  "2616": {
+   "draw_order_back_to_front": [
+    3,
+    2,
+    0,
+    1
+   ],
+   "layer_control": "0x12cf",
+   "layer_priority_nibbles": {
+    "1": 7,
+    "2": 3,
+    "3": 2
+   },
+   "obj_pri": "0x2377",
+   "object_code_draws_above": [
+    2,
+    3
+   ],
+   "object_code_hidden_under": [
+    1
+   ],
+   "tile_pen_masks": [
+    "0x0000",
+    "0x0000",
+    "0x0000",
+    "0x0000"
+   ]
+  },
+  "2887": {
+   "draw_order_back_to_front": [
+    3,
+    2,
+    0,
+    1
+   ],
+   "layer_control": "0x12cf",
+   "layer_priority_nibbles": {
+    "1": 7,
+    "2": 3,
+    "3": 2
+   },
+   "obj_pri": "0x2377",
+   "object_code_draws_above": [
+    2,
+    3
+   ],
+   "object_code_hidden_under": [
+    1
+   ],
+   "tile_pen_masks": [
+    "0x0000",
+    "0x0000",
+    "0x0000",
+    "0x0000"
+   ]
+  },
+  "3158": {
+   "draw_order_back_to_front": [
+    3,
+    2,
+    0,
+    1
+   ],
+   "layer_control": "0x12cf",
+   "layer_priority_nibbles": {
+    "1": 7,
+    "2": 3,
+    "3": 2
+   },
+   "obj_pri": "0x2377",
+   "object_code_draws_above": [
+    2,
+    3
+   ],
+   "object_code_hidden_under": [
+    1
+   ],
+   "tile_pen_masks": [
+    "0x0000",
+    "0x0000",
+    "0x0000",
+    "0x0000"
+   ]
+  }
+ },
+ "requirements_met": true,
+ "rule": "object priority code i is hidden under layer L exactly when i <= pri(L) from OBJ_PRI, composited in the CPS-B layer-control draw order (MAME 0.289 cps2.cpp render_layers)",
+ "schema": "rp4-object-layer-witnesses-v0",
+ "witness_count": 4,
+ "witness_frames": [
+  2345,
+  2616,
+  2887,
+  3158
+ ],
+ "witnesses": [
+  {
+   "beaten_layer": 2,
+   "controls": {
+    "inapplicable_layer": 1,
+    "inapplicable_pri_unchanged": true,
+    "layer_order_detected": true,
+    "obj_pri_nibble_detected": true
+   },
+   "fitted_x": 39,
+   "frame": 2345,
+   "layer_rgb": [
+    68,
+    68,
+    51
+   ],
+   "object_rgb": [
+    221,
+    187,
+    187
+   ],
+   "registers": {
+    "draw_order_back_to_front": [
+     3,
+     2,
+     0,
+     1
+    ],
+    "layer_control": "0x12cf",
+    "layer_priority_nibbles": {
+     "1": 7,
+     "2": 3,
+     "3": 2
+    },
+    "obj_pri": "0x2377",
+    "object_code_draws_above": [
+     2,
+     3
+    ],
+    "object_code_hidden_under": [
+     1
+    ],
+    "tile_pen_masks": [
+     "0x0000",
+     "0x0000",
+     "0x0000",
+     "0x0000"
+    ]
+   },
+   "source_xy": [
+    43,
+    3
+   ],
+   "truth_matches_object": true
+  },
+  {
+   "beaten_layer": 2,
+   "controls": {
+    "inapplicable_layer": 1,
+    "inapplicable_pri_unchanged": true,
+    "layer_order_detected": true,
+    "obj_pri_nibble_detected": true
+   },
+   "fitted_x": 13,
+   "frame": 2616,
+   "layer_rgb": [
+    85,
+    85,
+    68
+   ],
+   "object_rgb": [
+    68,
+    102,
+    119
+   ],
+   "registers": {
+    "draw_order_back_to_front": [
+     3,
+     2,
+     0,
+     1
+    ],
+    "layer_control": "0x12cf",
+    "layer_priority_nibbles": {
+     "1": 7,
+     "2": 3,
+     "3": 2
+    },
+    "obj_pri": "0x2377",
+    "object_code_draws_above": [
+     2,
+     3
+    ],
+    "object_code_hidden_under": [
+     1
+    ],
+    "tile_pen_masks": [
+     "0x0000",
+     "0x0000",
+     "0x0000",
+     "0x0000"
+    ]
+   },
+   "source_xy": [
+    14,
+    29
+   ],
+   "truth_matches_object": true
+  },
+  {
+   "beaten_layer": 2,
+   "controls": {
+    "inapplicable_layer": 1,
+    "inapplicable_pri_unchanged": true,
+    "layer_order_detected": true,
+    "obj_pri_nibble_detected": true
+   },
+   "fitted_x": 313,
+   "frame": 2887,
+   "layer_rgb": [
+    68,
+    68,
+    51
+   ],
+   "object_rgb": [
+    187,
+    136,
+    102
+   ],
+   "registers": {
+    "draw_order_back_to_front": [
+     3,
+     2,
+     0,
+     1
+    ],
+    "layer_control": "0x12cf",
+    "layer_priority_nibbles": {
+     "1": 7,
+     "2": 3,
+     "3": 2
+    },
+    "obj_pri": "0x2377",
+    "object_code_draws_above": [
+     2,
+     3
+    ],
+    "object_code_hidden_under": [
+     1
+    ],
+    "tile_pen_masks": [
+     "0x0000",
+     "0x0000",
+     "0x0000",
+     "0x0000"
+    ]
+   },
+   "source_xy": [
+    341,
+    81
+   ],
+   "truth_matches_object": true
+  },
+  {
+   "beaten_layer": 2,
+   "controls": {
+    "inapplicable_layer": 1,
+    "inapplicable_pri_unchanged": true,
+    "layer_order_detected": true,
+    "obj_pri_nibble_detected": true
+   },
+   "fitted_x": 309,
+   "frame": 3158,
+   "layer_rgb": [
+    68,
+    68,
+    51
+   ],
+   "object_rgb": [
+    187,
+    255,
+    85
+   ],
+   "registers": {
+    "draw_order_back_to_front": [
+     3,
+     2,
+     0,
+     1
+    ],
+    "layer_control": "0x12cf",
+    "layer_priority_nibbles": {
+     "1": 7,
+     "2": 3,
+     "3": 2
+    },
+    "obj_pri": "0x2377",
+    "object_code_draws_above": [
+     2,
+     3
+    ],
+    "object_code_hidden_under": [
+     1
+    ],
+    "tile_pen_masks": [
+     "0x0000",
+     "0x0000",
+     "0x0000",
+     "0x0000"
+    ]
+   },
+   "source_xy": [
+    337,
+    76
+   ],
+   "truth_matches_object": true
+  }
+ ]
+}
