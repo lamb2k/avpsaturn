@@ -96,11 +96,26 @@ def rgb555_to_rgb(value: int) -> tuple[int, int, int]:
 
 
 def index_surface(image: Image.Image, transparent: bool) -> tuple[bytes, bytes, int, int]:
+    """Index a fitted surface under Jo Engine's one-based palette contract.
+
+    Jo allocates colour RAM in 256-entry blocks but returns jo_palette::data
+    one entry above the block base and documents a 255-colour maximum, because
+    Saturn pixel value zero is transparent: pixel p reads data[p - 1].  Jo's
+    own 8bpp TGA reader follows the same rule by adding one to every decoded
+    pixel.  Index zero is therefore reserved on every surface, opaque or not,
+    and the live colours occupy 1..255.  Emitting a zero-based surface would
+    make each pixel render the colour of index - 1 and make index zero read a
+    neighbouring allocation's last entry.
+
+    The palette file keeps all 256 entries so it stays indexed by pixel value:
+    entry zero is the reserved transparent slot and entry p is the colour of
+    pixel value p.  avsp_cram_copy_surface() copies entries 1..255 into the Jo
+    data range.
+    """
     rgba = image.convert("RGBA")
     colours: list[tuple[int, int, int]] = []
     indices: dict[tuple[int, int, int], int] = {}
     pixels = bytearray(WIDTH * HEIGHT)
-    first_index = 1 if transparent else 0
     for y in range(HEIGHT):
         for x in range(WIDTH):
             r, g, b, a = rgba.getpixel((x, y))
@@ -110,12 +125,16 @@ def index_surface(image: Image.Image, transparent: bool) -> tuple[bytes, bytes, 
                 rgb = (r, g, b)
                 index = indices.get(rgb, -1)
                 if index < 0:
-                    index = first_index + len(colours)
-                    if index >= 256:
-                        raise ValueError("frontend surface exceeds one exact 8bpp palette")
+                    index = 1 + len(colours)
+                    if index > 255:
+                        raise ValueError(
+                            "frontend surface needs more than the 255 live "
+                            "colours a Jo palette block can hold")
                     indices[rgb] = index
                     colours.append(rgb)
             pixels[y * WIDTH + x] = index
+    if not transparent and 0 in pixels:
+        raise ValueError("opaque frontend surface still references index zero")
     palette = [0] * 256
     changed_colours = 0
     for rgb, index in indices.items():
@@ -178,7 +197,7 @@ def compare(name: str, actual: Image.Image, reference: Image.Image) -> int:
     differing = [
         (index % a.width, index // a.width, left, right)
         for index, (left, right) in enumerate(
-            zip(a.get_flattened_data(), b.get_flattened_data()))
+            zip(a.getdata(), b.getdata()))
         if left != right
     ]
     differences = len(differing)
@@ -255,9 +274,77 @@ def object_command(entry: dict[str, int], asset: str) -> dict[str, object]:
     }
 
 
+def covered_row_ranges(entries: list[dict[str, int]]) -> list[list[int]]:
+    """Return rows covered across the complete 384-pixel CPS field."""
+    covered = []
+    for y in range(HEIGHT):
+        spans = sorted(
+            (max(0, entry["screen_x"]),
+             min(384, entry["screen_x"] + entry["width"]))
+            for entry in entries
+            if entry["screen_y"] <= y < entry["screen_y"] + entry["height"]
+            and entry["screen_x"] < 384
+            and entry["screen_x"] + entry["width"] > 0)
+        cursor = 0
+        for left, right in spans:
+            if left > cursor:
+                break
+            cursor = max(cursor, right)
+        covered.append(cursor >= 384)
+    ranges: list[list[int]] = []
+    first = -1
+    for row, present in enumerate(covered + [False]):
+        if present and first < 0:
+            first = row
+        elif not present and first >= 0:
+            ranges.append([first, row - 1])
+            first = -1
+    return ranges
+
+
 def asset_record(path: str, data: bytes, kind: str, **extra: object) -> dict[str, object]:
     return {"path": path, "kind": kind, "bytes": len(data),
             "sha256": sha256(data), **extra}
+
+
+def interaction_evidence() -> dict[str, object]:
+    return json.loads(
+        (ROOT / "data" / "frontend_interaction.json").read_text(encoding="ascii"))
+
+
+def cursor_source_offsets(
+        manifest: dict[str, object]) -> dict[tuple[int, int], tuple[int, int]]:
+    """Offset of each cursor cel size from its position's measured anchor.
+
+    The label cel sits on the anchor and the border cel is drawn eight source
+    pixels up and left of it. Every position is checked rather than assumed, so
+    a future capture that moves one of them fails here instead of silently
+    misplacing the cursor.
+    """
+    offsets: dict[tuple[int, int], tuple[int, int]] = {}
+    for position in interaction_evidence()["cursor_positions"]:
+        anchor_x = int(position["cursor_anchor_x"])
+        anchor_y = int(position["cursor_anchor_y"])
+        for marker in position["marker_objects"]:
+            size = (int(marker["width"]), int(marker["height"]))
+            offset = (int(marker["x"]) - anchor_x, int(marker["y"]) - anchor_y)
+            if offsets.setdefault(size, offset) != offset:
+                raise ValueError(
+                    f"cursor cel {size} offset differs between positions")
+    settled = manifest["object_schedules"]["settled_select_cursor_draw_order"]
+    for command in settled:
+        size = (int(command["source_width"]), int(command["source_height"]))
+        if size not in offsets:
+            raise ValueError(f"cursor cel {size} has no measured offset")
+    return offsets
+
+
+def cursor_anchor_table() -> list[str]:
+    positions = sorted(interaction_evidence()["cursor_positions"],
+                       key=lambda position: int(position["index"]))
+    return ['    {%d, %d},' % (int(position["cursor_anchor_x"]),
+                               int(position["cursor_anchor_y"]))
+            for position in positions]
 
 
 def runtime_header(manifest: dict[str, object]) -> bytes:
@@ -270,35 +357,58 @@ def runtime_header(manifest: dict[str, object]) -> bytes:
         key=lambda asset: str(asset["path"]))
     cursor_index = {str(asset["path"]): index
                     for index, asset in enumerate(cursor_assets)}
+    transition_assets = sorted(
+        (asset for asset in manifest["assets"]
+         if str(asset["path"]).startswith("FRONT/TRN") and
+         str(asset["path"]).endswith(".BIN")),
+        key=lambda asset: str(asset["path"]))
     source_to_subbank = {26: 14, 27: 15}
     title_lines = []
     for command in title_commands:
         asset = assets[str(command["asset"])]
         title_lines.append(
-            '    {"%s", %d, %d, %d, %d, %d, %d},' % (
+            '    {"%s", %d, %d, %d, %d, %d, %d, %d, %d},' % (
                 Path(str(command["asset"])).name,
                 asset["bytes"], command["source_width"],
                 command["source_height"], command["saturn_centre_x"],
                 command["saturn_centre_y"],
+                command["source_x"], command["source_y"],
                 source_to_subbank[int(command["palette_bank"])]))
+    cursor_offsets = cursor_source_offsets(manifest)
     cursor_lines = []
     for asset in cursor_assets:
+        offset = cursor_offsets[(int(asset["width"]), int(asset["height"]))]
         cursor_lines.append(
-            '    {"%s", %d, %d, %d},' % (
+            '    {"%s", %d, %d, %d, %d, %d},' % (
                 Path(str(asset["path"])).name, asset["bytes"],
-                asset["width"], asset["height"]))
+                asset["width"], asset["height"], offset[0], offset[1]))
+    cursor_anchor_lines = cursor_anchor_table()
+    transition_lines = []
+    for command in manifest["object_schedules"]["start_transition_intro"]:
+        asset = assets[str(command["asset"])]
+        transition_lines.append(
+            '    {"%s", %d, %d, %d, %d, %d, %d, %d},' % (
+                Path(str(command["asset"])).name, asset["bytes"],
+                command["source_width"], command["source_height"],
+                command["saturn_centre_x"], command["saturn_centre_y"],
+                command["source_x"], command["source_y"]))
+    mask_frame_count = len(
+        manifest["object_schedules"]["start_transition_mask"])
     cycle = manifest["cursor_animation"]["border_assets_in_display_order"]
     cycle_indices = ", ".join(str(cursor_index[str(path)]) for path in cycle)
     label_index = cursor_index[str(manifest["cursor_animation"]["label_asset"])]
     title_vdp1_bytes = sum(int(assets[str(command["asset"])]["bytes"])
                            for command in title_commands)
     cursor_vdp1_bytes = sum(int(asset["bytes"]) for asset in cursor_assets)
+    transition_vdp1_bytes = sum(int(asset["bytes"])
+                                for asset in transition_assets) + 32
     text = f"""/* Generated by tools/gen_avsp_frontend.py; metadata only. */
 #ifndef GENERATED_AVSP_FRONTEND_H
 #define GENERATED_AVSP_FRONTEND_H
 
 #define AVSP_FRONTEND_WIDTH 352
 #define AVSP_FRONTEND_HEIGHT 224
+#define AVSP_FRONTEND_SOURCE_WIDTH 384
 #define AVSP_FRONTEND_DECODED_BYTES 78848
 #define AVSP_FRONTEND_TITLE_RLE_FILE "TITLE.RLE"
 #define AVSP_FRONTEND_TITLE_RLE_BYTES {assets['FRONT/TITLE.RLE']['bytes']}
@@ -312,6 +422,13 @@ def runtime_header(manifest: dict[str, object]) -> bytes:
 #define AVSP_FRONTEND_CURSOR_PERIOD {len(cycle)}
 #define AVSP_FRONTEND_CURSOR_LABEL_CEL {label_index}
 #define AVSP_FRONTEND_CURSOR_PALETTE_SUBBANK 15
+#define AVSP_FRONTEND_MASK_FILE "MASK.BIN"
+#define AVSP_FRONTEND_MASK_PALETTE_FILE "MASK.PAL"
+#define AVSP_FRONTEND_MASK_PALETTE_SUBBANK 14
+#define AVSP_FRONTEND_MASK_BYTES 32
+#define AVSP_FRONTEND_START_TRANSITION_FRAMES {mask_frame_count + len(transition_lines)}
+#define AVSP_FRONTEND_START_MASK_FRAMES {mask_frame_count}
+#define AVSP_FRONTEND_START_INTRO_COUNT {len(transition_lines)}
 #define AVSP_FRONTEND_TITLE_PALETTE_A_FILE "TP1A.PAL"
 #define AVSP_FRONTEND_TITLE_PALETTE_B_FILE "TP1B.PAL"
 #define AVSP_FRONTEND_TITLE_PALETTE_A_SUBBANK 14
@@ -319,7 +436,8 @@ def runtime_header(manifest: dict[str, object]) -> bytes:
 #define AVSP_FRONTEND_SUBPALETTE_BYTES 32
 #define AVSP_FRONTEND_TITLE_VDP1_BYTES {title_vdp1_bytes}
 #define AVSP_FRONTEND_CURSOR_VDP1_BYTES {cursor_vdp1_bytes}
-#define AVSP_FRONTEND_VDP1_MAX_BYTES {max(title_vdp1_bytes, cursor_vdp1_bytes)}
+#define AVSP_FRONTEND_TRANSITION_VDP1_BYTES {transition_vdp1_bytes}
+#define AVSP_FRONTEND_VDP1_MAX_BYTES {max(title_vdp1_bytes, cursor_vdp1_bytes + transition_vdp1_bytes)}
 
 typedef struct {{
     const char *filename;
@@ -328,6 +446,8 @@ typedef struct {{
     unsigned short height;
     short centre_x;
     short centre_y;
+    unsigned short source_x;
+    unsigned short source_y;
     unsigned char palette_subbank;
 }} AvspFrontendTitleObject;
 
@@ -336,7 +456,20 @@ typedef struct {{
     unsigned int bytes;
     unsigned short width;
     unsigned short height;
+    short source_offset_x;
+    short source_offset_y;
 }} AvspFrontendCursorCel;
+
+typedef struct {{
+    const char *filename;
+    unsigned int bytes;
+    unsigned short width;
+    unsigned short height;
+    short centre_x;
+    short centre_y;
+    unsigned short source_x;
+    unsigned short source_y;
+}} AvspFrontendTransitionObject;
 
 #ifdef AVSP_FRONTEND_IMPLEMENTATION
 static const AvspFrontendTitleObject avsp_frontend_title_objects[
@@ -349,12 +482,22 @@ static const AvspFrontendCursorCel avsp_frontend_cursor_cels[
 {chr(10).join(cursor_lines)}
 }};
 
+static const AvspFrontendTransitionObject avsp_frontend_transition_objects[
+    AVSP_FRONTEND_START_INTRO_COUNT] = {{
+{chr(10).join(transition_lines)}
+}};
+
 static const unsigned char avsp_frontend_cursor_cycle[
     AVSP_FRONTEND_CURSOR_PERIOD] = {{{cycle_indices}}};
 
 /* Source indices 0 Warrior, 1 Schaefer, 2 Hunter, 3 Linn. */
 static const short avsp_frontend_cursor_centres[4][2] = {{
     {{-118, -37}}, {{117, -37}}, {{117, 67}}, {{-118, 67}}
+}};
+
+/* Measured CPS anchor of each cursor label cel, in 384x224 source pixels. */
+static const unsigned short avsp_frontend_cursor_anchors[4][2] = {{
+{chr(10).join(cursor_anchor_lines)}
 }};
 #endif
 
@@ -390,6 +533,36 @@ def generate() -> tuple[dict[str, object], dict[str, bytes]]:
     gfx = load_gfx_region()
     title = frame_state(FRONTEND_ROM, 1620, "objram1_1620.tsv")
     select = frame_state(INTERACTION, 2695, "objram_active_2694.tsv")
+
+    transition_mask = []
+    for frame in range(1689, 1716):
+        entries = [entry for entry in decode_object_entries(load_words(
+            FRONTEND_ROM / f"objram_active_{frame:04d}.tsv"))
+                   if entry["tile_code"]]
+        if frame <= 1714:
+            if len(entries) != 360 or any(
+                    entry["tile_code"] != 0x3700 or
+                    entry["colour"] != 5 or
+                    entry["width"] != 16 or entry["height"] != 16
+                    for entry in entries):
+                raise ValueError(
+                    f"frame {frame}: start mask is not the proven 360-tile grid")
+        elif entries:
+            raise ValueError("frame 1715: start mask did not retire")
+        ranges = covered_row_ranges(entries)
+        if not ranges:
+            top_end, bottom_start = -1, HEIGHT
+        elif len(ranges) == 1 and ranges[0] == [0, HEIGHT - 1]:
+            top_end, bottom_start = HEIGHT - 1, HEIGHT
+        elif (len(ranges) == 2 and ranges[0][0] == 0 and
+              ranges[1][1] == HEIGHT - 1):
+            top_end, bottom_start = ranges[0][1], ranges[1][0]
+        else:
+            raise ValueError(f"frame {frame}: unexpected mask rows {ranges}")
+        transition_mask.append({"source_frame": frame,
+                                "top_mask_end": top_end,
+                                "bottom_mask_start": bottom_start,
+                                "covered_row_ranges": ranges})
 
     title_back = render_layers(gfx, title, (3, 2), False)
     title_front = render_layers(gfx, title, (1,), True)
@@ -434,13 +607,18 @@ def generate() -> tuple[dict[str, object], dict[str, bytes]]:
         palette_name = filename.replace(".RLE", ".PAL")
         files[filename] = encoded
         files[palette_name] = palette
+        live = sorted(set(pixels))
         assets.append(asset_record(f"FRONT/{filename}", encoded, "vdp2-rle-8bpp",
                                    decoded_bytes=len(pixels), colours=colours,
                                    rgb555_changed_colours=changed_colours,
                                    width=WIDTH, height=HEIGHT, bundle=bundle,
-                                   transparent=transparent))
+                                   transparent=transparent,
+                                   first_live_index=live[0],
+                                   last_live_index=live[-1]))
         assets.append(asset_record(f"FRONT/{palette_name}", palette,
-                                   "cram-rgb555", entries=256, bundle=bundle))
+                                   "cram-rgb555", entries=256,
+                                   reserved_entries=1, live_colours=colours,
+                                   bundle=bundle))
 
     cursor_entries: dict[tuple[int, int, int, int], dict[str, int]] = {}
     for frame in range(2677, 3351):
@@ -480,6 +658,42 @@ def generate() -> tuple[dict[str, object], dict[str, bytes]]:
                                "vdp1-cram-rgb555", entries=16,
                                rgb555_changed_colours=cursor_changed_colours,
                                bundle="select"))
+
+    mask_tile = decode_tile(gfx, 0x3700, 16)
+    if set(mask_tile.getdata()) != {0} or \
+            select["palette"][5 * 16][:3] != (0, 0, 0):
+        raise ValueError("start-transition tile 0x3700 is not solid black")
+    mask_data = bytes([0x11] * 32)
+    mask_palette = b"".join(
+        struct.pack(">H", value)
+        for value in ([0, rgb555((0, 0, 0))] + [0] * 14))
+    files["MASK.BIN"] = mask_data
+    files["MASK.PAL"] = mask_palette
+    assets.append(asset_record("FRONT/MASK.BIN", mask_data,
+                               "vdp1-4bpp-solid-mask", width=8, height=8,
+                               source_tile_code="0x3700", bundle="select"))
+    assets.append(asset_record("FRONT/MASK.PAL", mask_palette,
+                               "vdp1-cram-rgb555", entries=16,
+                               source_palette_bank=5, bundle="select"))
+
+    transition_intro = []
+    for index, frame in enumerate(range(1716, 1719)):
+        state = frame_state(FRONTEND_ROM, frame,
+                            f"objram_active_{frame:04d}.tsv")
+        entries = [entry for entry in decode_object_entries(state["objects"])
+                   if entry["tile_code"]]
+        if len(entries) != 1 or entries[0]["colour"] != 15:
+            raise ValueError(f"frame {frame}: unexpected cursor-intro objects")
+        entry = entries[0]
+        data = pack_object_cel(gfx, entry)
+        filename = f"TRN{index:02d}.BIN"
+        files[filename] = data
+        assets.append(asset_record(
+            f"FRONT/{filename}", data, "vdp1-4bpp-cel",
+            tile_code=f"0x{entry['tile_code']:04X}", width=entry["width"],
+            height=entry["height"], palette_bank=entry["colour"],
+            source_frame=frame, bundle="select"))
+        transition_intro.append(object_command(entry, f"FRONT/{filename}"))
 
     title_commands = []
     title_palette_banks = sorted({entry["colour"] for entry in title_entries
@@ -552,6 +766,19 @@ def generate() -> tuple[dict[str, object], dict[str, bytes]]:
             "saturn_format": "RGB555",
             "changed_live_palette_entries": changed_live_colours,
         },
+        "palette_contract": {
+            "rule": "Jo Engine one-based palette: colour RAM is allocated in "
+                    "256-entry blocks, jo_palette::data is the entry after the "
+                    "block base, and pixel or pen value p reads data[p - 1]",
+            "reserved_index": 0,
+            "live_index_range": [1, 255],
+            "max_live_colours": 255,
+            "surface_palette_file_indexing": "by pixel value; entry 0 reserved",
+            "object_palette_file_indexing": "by pen value; entry 0 reserved",
+            "runtime_copy": "avsp_cram_copy_surface / avsp_cram_copy_subbank "
+                            "write only data[0..254], so neither hardware "
+                            "block boundary 256*id nor 256*(id+1) is touched",
+        },
         "source_evidence": {
             "reconstructed_gfx_region_sha256": sha256(bytes(gfx)),
             "title": {
@@ -568,11 +795,18 @@ def generate() -> tuple[dict[str, object], dict[str, bytes]]:
                     "cps_b_regs_2695.tsv", "palette_2695.tsv",
                     "objram_active_2694.tsv", "reference_2695.png")
             },
+            "start_transition": {
+                f"objram_active_{frame:04d}.tsv": file_sha256(
+                    FRONTEND_ROM / f"objram_active_{frame:04d}.tsv")
+                for frame in range(1689, 1719)
+            },
         },
         "source_objects": {"title": len(title_drawn), "select": len(select_drawn)},
         "object_schedules": {
             "title_draw_order": title_commands,
             "settled_select_cursor_draw_order": cursor_commands,
+            "start_transition_mask": transition_mask,
+            "start_transition_intro": transition_intro,
         },
         "cursor_unique_cels": len(cursor_entries),
         "cursor_animation": {

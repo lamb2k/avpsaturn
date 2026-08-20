@@ -19,6 +19,8 @@ typedef struct
     jo_palette *select_palette;
     int title_sprites[AVSP_FRONTEND_TITLE_OBJECT_COUNT];
     int cursor_sprites[AVSP_FRONTEND_CURSOR_CEL_COUNT];
+    int transition_sprites[AVSP_FRONTEND_START_INTRO_COUNT];
+    int mask_sprite;
     int title_surface_ready;
     int title_objects_ready;
     int select_surface_ready;
@@ -27,6 +29,9 @@ typedef struct
     int late_disc_reads;
     int missing_assets;
     int palette_errors;
+    /* Live counterpart of tests/avsp_cram_test.c's canaries: a load that
+       reached hardware entry 256*id or 256*(id+1) is counted here. */
+    int palette_boundary_writes;
     int rle_errors;
     int vdp1_commands_last_frame;
 } AvspFrontend;
@@ -42,6 +47,8 @@ int avsp_frontend_enter_select(AvspFrontend *frontend);
 void avsp_frontend_activate_title(AvspFrontend *frontend);
 void avsp_frontend_activate_select(AvspFrontend *frontend);
 void avsp_frontend_draw_title(AvspFrontend *frontend);
+void avsp_frontend_draw_start_transition(AvspFrontend *frontend,
+                                         int transition_frame);
 void avsp_frontend_draw_cursor(AvspFrontend *frontend, int cursor,
                                int animation_frame, int visible);
 void avsp_frontend_release_title_objects(AvspFrontend *frontend);

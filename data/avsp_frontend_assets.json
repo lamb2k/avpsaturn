@@ -88,22 +88,45 @@
   },
   {
    "bundle": "select",
+   "bytes": 32,
+   "height": 8,
+   "kind": "vdp1-4bpp-solid-mask",
+   "path": "FRONT/MASK.BIN",
+   "sha256": "02d449a31fbb267c8f352e9968a79e3e5fc95c1bbeaa502fd6454ebde5a4bedc",
+   "source_tile_code": "0x3700",
+   "width": 8
+  },
+  {
+   "bundle": "select",
+   "bytes": 32,
+   "entries": 16,
+   "kind": "vdp1-cram-rgb555",
+   "path": "FRONT/MASK.PAL",
+   "sha256": "9b885490f45e3558384e94fe2c64773323ae14bcb8f9e8e02b3fed18eb930a30",
+   "source_palette_bank": 5
+  },
+  {
+   "bundle": "select",
    "bytes": 512,
    "entries": 256,
    "kind": "cram-rgb555",
+   "live_colours": 106,
    "path": "FRONT/SELBACK.PAL",
-   "sha256": "53cedfbc735874ac0166cd2e4ab1aadc3970b3fe43ff7c7c8d39d912bc628953"
+   "reserved_entries": 1,
+   "sha256": "5d8bea80b2866ab9e9742645e04eff8e60f8c27fffae5b931823edbae401d316"
   },
   {
    "bundle": "select",
    "bytes": 34402,
    "colours": 106,
    "decoded_bytes": 78848,
+   "first_live_index": 1,
    "height": 224,
    "kind": "vdp2-rle-8bpp",
+   "last_live_index": 106,
    "path": "FRONT/SELBACK.RLE",
    "rgb555_changed_colours": 104,
-   "sha256": "bfadee2cec546687acd905be87886c4c4a5863d682dde398894248a030f61aeb",
+   "sha256": "a4cdd4b5de92e4a88afafbf38fea6606ca7a00eee04e3bbebead20393e940158",
    "transparent": false,
    "width": 352
   },
@@ -244,19 +267,23 @@
    "bytes": 512,
    "entries": 256,
    "kind": "cram-rgb555",
+   "live_colours": 75,
    "path": "FRONT/TITLE.PAL",
-   "sha256": "ad7d3ece5eb5b3c177cab8e93f48ea0541daf6b7be529f4513bfcfd625378fec"
+   "reserved_entries": 1,
+   "sha256": "c42b5718c6fd3d4b48d6455830aa24589c046da200ee9e149949dc1f82d4a294"
   },
   {
    "bundle": "title",
    "bytes": 41036,
    "colours": 75,
    "decoded_bytes": 78848,
+   "first_live_index": 1,
    "height": 224,
    "kind": "vdp2-rle-8bpp",
+   "last_live_index": 75,
    "path": "FRONT/TITLE.RLE",
    "rgb555_changed_colours": 73,
-   "sha256": "5341a451be5b9ee52e79b949e83cb300be62081e51bc4cde649ab1b961c3dec2",
+   "sha256": "f5599ccc86698ae727f81d74b0f8eea411bb798fdd7e4c631acd07e09f88b6c7",
    "transparent": false,
    "width": 352
   },
@@ -279,11 +306,47 @@
    "rgb555_changed_colours": 14,
    "sha256": "464db33f339f27f57b705a84539a253dd758cc72bf1142a592c9ce3a620d0d2f",
    "source_palette_bank": 27
+  },
+  {
+   "bundle": "select",
+   "bytes": 2560,
+   "height": 64,
+   "kind": "vdp1-4bpp-cel",
+   "palette_bank": 15,
+   "path": "FRONT/TRN00.BIN",
+   "sha256": "c15386a1c642c2ed36fba8a1a58c7ddd0d872bf21f2a4c38c38af32c778b6557",
+   "source_frame": 1716,
+   "tile_code": "0x89C0",
+   "width": 80
+  },
+  {
+   "bundle": "select",
+   "bytes": 1536,
+   "height": 48,
+   "kind": "vdp1-4bpp-cel",
+   "palette_bank": 15,
+   "path": "FRONT/TRN01.BIN",
+   "sha256": "1ec26d47f4c1565071b5031954e4baa8ff9b85d5a647b2e9f6bacddbace39126",
+   "source_frame": 1717,
+   "tile_code": "0x8976",
+   "width": 64
+  },
+  {
+   "bundle": "select",
+   "bytes": 1152,
+   "height": 48,
+   "kind": "vdp1-4bpp-cel",
+   "palette_bank": 15,
+   "path": "FRONT/TRN02.BIN",
+   "sha256": "c3fad909ac0489e0f5ba330db9708155733e2b455d5e8c12f492f43175580e3a",
+   "source_frame": 1718,
+   "tile_code": "0x880D",
+   "width": 48
   }
  ],
  "bundle_budget_bytes": 78848,
  "bundle_bytes": {
-  "select": 39810,
+  "select": 45122,
   "title": 55692
  },
  "classification": "Saturn frontend assets derived from ROM graphics + CPS tilemap/object/palette state; no captured pixels",
@@ -491,6 +554,425 @@
     "source_y": 67
    }
   ],
+  "start_transition_intro": [
+   {
+    "asset": "FRONT/TRN00.BIN",
+    "palette_bank": 15,
+    "saturn_centre_x": -118,
+    "saturn_centre_y": -36,
+    "saturn_scale_x_denominator": 384,
+    "saturn_scale_x_numerator": 352,
+    "source_height": 64,
+    "source_slot_word": 8,
+    "source_width": 80,
+    "source_x": 24,
+    "source_y": 44
+   },
+   {
+    "asset": "FRONT/TRN01.BIN",
+    "palette_bank": 15,
+    "saturn_centre_x": -118,
+    "saturn_centre_y": -37,
+    "saturn_scale_x_denominator": 384,
+    "saturn_scale_x_numerator": 352,
+    "source_height": 48,
+    "source_slot_word": 8,
+    "source_width": 64,
+    "source_x": 32,
+    "source_y": 51
+   },
+   {
+    "asset": "FRONT/TRN02.BIN",
+    "palette_bank": 15,
+    "saturn_centre_x": -118,
+    "saturn_centre_y": -44,
+    "saturn_scale_x_denominator": 384,
+    "saturn_scale_x_numerator": 352,
+    "source_height": 48,
+    "source_slot_word": 8,
+    "source_width": 48,
+    "source_x": 40,
+    "source_y": 44
+   }
+  ],
+  "start_transition_mask": [
+   {
+    "bottom_mask_start": 224,
+    "covered_row_ranges": [
+     [
+      0,
+      223
+     ]
+    ],
+    "source_frame": 1689,
+    "top_mask_end": 223
+   },
+   {
+    "bottom_mask_start": 224,
+    "covered_row_ranges": [
+     [
+      0,
+      223
+     ]
+    ],
+    "source_frame": 1690,
+    "top_mask_end": 223
+   },
+   {
+    "bottom_mask_start": 224,
+    "covered_row_ranges": [
+     [
+      0,
+      223
+     ]
+    ],
+    "source_frame": 1691,
+    "top_mask_end": 223
+   },
+   {
+    "bottom_mask_start": 224,
+    "covered_row_ranges": [
+     [
+      0,
+      223
+     ]
+    ],
+    "source_frame": 1692,
+    "top_mask_end": 223
+   },
+   {
+    "bottom_mask_start": 224,
+    "covered_row_ranges": [
+     [
+      0,
+      223
+     ]
+    ],
+    "source_frame": 1693,
+    "top_mask_end": 223
+   },
+   {
+    "bottom_mask_start": 136,
+    "covered_row_ranges": [
+     [
+      0,
+      127
+     ],
+     [
+      136,
+      223
+     ]
+    ],
+    "source_frame": 1694,
+    "top_mask_end": 127
+   },
+   {
+    "bottom_mask_start": 140,
+    "covered_row_ranges": [
+     [
+      0,
+      123
+     ],
+     [
+      140,
+      223
+     ]
+    ],
+    "source_frame": 1695,
+    "top_mask_end": 123
+   },
+   {
+    "bottom_mask_start": 144,
+    "covered_row_ranges": [
+     [
+      0,
+      119
+     ],
+     [
+      144,
+      223
+     ]
+    ],
+    "source_frame": 1696,
+    "top_mask_end": 119
+   },
+   {
+    "bottom_mask_start": 148,
+    "covered_row_ranges": [
+     [
+      0,
+      115
+     ],
+     [
+      148,
+      223
+     ]
+    ],
+    "source_frame": 1697,
+    "top_mask_end": 115
+   },
+   {
+    "bottom_mask_start": 152,
+    "covered_row_ranges": [
+     [
+      0,
+      111
+     ],
+     [
+      152,
+      223
+     ]
+    ],
+    "source_frame": 1698,
+    "top_mask_end": 111
+   },
+   {
+    "bottom_mask_start": 156,
+    "covered_row_ranges": [
+     [
+      0,
+      107
+     ],
+     [
+      156,
+      223
+     ]
+    ],
+    "source_frame": 1699,
+    "top_mask_end": 107
+   },
+   {
+    "bottom_mask_start": 160,
+    "covered_row_ranges": [
+     [
+      0,
+      103
+     ],
+     [
+      160,
+      223
+     ]
+    ],
+    "source_frame": 1700,
+    "top_mask_end": 103
+   },
+   {
+    "bottom_mask_start": 164,
+    "covered_row_ranges": [
+     [
+      0,
+      99
+     ],
+     [
+      164,
+      223
+     ]
+    ],
+    "source_frame": 1701,
+    "top_mask_end": 99
+   },
+   {
+    "bottom_mask_start": 168,
+    "covered_row_ranges": [
+     [
+      0,
+      95
+     ],
+     [
+      168,
+      223
+     ]
+    ],
+    "source_frame": 1702,
+    "top_mask_end": 95
+   },
+   {
+    "bottom_mask_start": 172,
+    "covered_row_ranges": [
+     [
+      0,
+      91
+     ],
+     [
+      172,
+      223
+     ]
+    ],
+    "source_frame": 1703,
+    "top_mask_end": 91
+   },
+   {
+    "bottom_mask_start": 176,
+    "covered_row_ranges": [
+     [
+      0,
+      87
+     ],
+     [
+      176,
+      223
+     ]
+    ],
+    "source_frame": 1704,
+    "top_mask_end": 87
+   },
+   {
+    "bottom_mask_start": 180,
+    "covered_row_ranges": [
+     [
+      0,
+      83
+     ],
+     [
+      180,
+      223
+     ]
+    ],
+    "source_frame": 1705,
+    "top_mask_end": 83
+   },
+   {
+    "bottom_mask_start": 184,
+    "covered_row_ranges": [
+     [
+      0,
+      79
+     ],
+     [
+      184,
+      223
+     ]
+    ],
+    "source_frame": 1706,
+    "top_mask_end": 79
+   },
+   {
+    "bottom_mask_start": 188,
+    "covered_row_ranges": [
+     [
+      0,
+      75
+     ],
+     [
+      188,
+      223
+     ]
+    ],
+    "source_frame": 1707,
+    "top_mask_end": 75
+   },
+   {
+    "bottom_mask_start": 192,
+    "covered_row_ranges": [
+     [
+      0,
+      71
+     ],
+     [
+      192,
+      223
+     ]
+    ],
+    "source_frame": 1708,
+    "top_mask_end": 71
+   },
+   {
+    "bottom_mask_start": 196,
+    "covered_row_ranges": [
+     [
+      0,
+      67
+     ],
+     [
+      196,
+      223
+     ]
+    ],
+    "source_frame": 1709,
+    "top_mask_end": 67
+   },
+   {
+    "bottom_mask_start": 200,
+    "covered_row_ranges": [
+     [
+      0,
+      63
+     ],
+     [
+      200,
+      223
+     ]
+    ],
+    "source_frame": 1710,
+    "top_mask_end": 63
+   },
+   {
+    "bottom_mask_start": 204,
+    "covered_row_ranges": [
+     [
+      0,
+      59
+     ],
+     [
+      204,
+      223
+     ]
+    ],
+    "source_frame": 1711,
+    "top_mask_end": 59
+   },
+   {
+    "bottom_mask_start": 208,
+    "covered_row_ranges": [
+     [
+      0,
+      55
+     ],
+     [
+      208,
+      223
+     ]
+    ],
+    "source_frame": 1712,
+    "top_mask_end": 55
+   },
+   {
+    "bottom_mask_start": 212,
+    "covered_row_ranges": [
+     [
+      0,
+      51
+     ],
+     [
+      212,
+      223
+     ]
+    ],
+    "source_frame": 1713,
+    "top_mask_end": 51
+   },
+   {
+    "bottom_mask_start": 212,
+    "covered_row_ranges": [
+     [
+      0,
+      51
+     ],
+     [
+      212,
+      223
+     ]
+    ],
+    "source_frame": 1714,
+    "top_mask_end": 51
+   },
+   {
+    "bottom_mask_start": 224,
+    "covered_row_ranges": [],
+    "source_frame": 1715,
+    "top_mask_end": -1
+   }
+  ],
   "title_draw_order": [
    {
     "asset": "FRONT/TIT00.BIN",
@@ -650,6 +1132,18 @@
    }
   ]
  },
+ "palette_contract": {
+  "live_index_range": [
+   1,
+   255
+  ],
+  "max_live_colours": 255,
+  "object_palette_file_indexing": "by pen value; entry 0 reserved",
+  "reserved_index": 0,
+  "rule": "Jo Engine one-based palette: colour RAM is allocated in 256-entry blocks, jo_palette::data is the entry after the block base, and pixel or pen value p reads data[p - 1]",
+  "runtime_copy": "avsp_cram_copy_surface / avsp_cram_copy_subbank write only data[0..254], so neither hardware block boundary 256*id nor 256*(id+1) is touched",
+  "surface_palette_file_indexing": "by pixel value; entry 0 reserved"
+ },
  "pixel_checks": {
   "select_differences": 0,
   "title_differences": 0,
@@ -669,6 +1163,38 @@
    "objram_active_2694.tsv": "e71d976cb52756f3605f54fff40adeffca1f2aa6c849483d49be65c4553cd2ae",
    "palette_2695.tsv": "41360ad28ad2c4dd8a03b3db65603abe2b55d1c27d0a29e066f18a08a615ef8f",
    "reference_2695.png": "989f7f8cd6a9f76ebcdd719085958506f9c6cd5463d068be9427f492019eb606"
+  },
+  "start_transition": {
+   "objram_active_1689.tsv": "7ea870ab9e6442cdd104a7086a2d63770e104d18408c6af06ea559e12e091f33",
+   "objram_active_1690.tsv": "7ea870ab9e6442cdd104a7086a2d63770e104d18408c6af06ea559e12e091f33",
+   "objram_active_1691.tsv": "7ea870ab9e6442cdd104a7086a2d63770e104d18408c6af06ea559e12e091f33",
+   "objram_active_1692.tsv": "7ea870ab9e6442cdd104a7086a2d63770e104d18408c6af06ea559e12e091f33",
+   "objram_active_1693.tsv": "7ea870ab9e6442cdd104a7086a2d63770e104d18408c6af06ea559e12e091f33",
+   "objram_active_1694.tsv": "20aff34958f71781bcac3e28076443b6e4881c05f3c0a3873a263e0415959e20",
+   "objram_active_1695.tsv": "3c96c30d94e60907084b233d73178dde5573333d154dc537e9d3ddfc151edbb2",
+   "objram_active_1696.tsv": "5963623de22a2af99ed63259343413d40bfb0817f86bb17694b973f22a7f9e30",
+   "objram_active_1697.tsv": "4686d4ff4928383817b5c0f54e73d1df3e8b56414dde760668605a32277f1de9",
+   "objram_active_1698.tsv": "6e52084d9c8317ba010f442f8da8d95a1dd57696bc1283011cdabe694e7aea56",
+   "objram_active_1699.tsv": "5c06429cff4c35aae1c2cab555aae68a24f8345bed0b73e8ab460d35e442c18c",
+   "objram_active_1700.tsv": "4ed0a6db11d281173422622e07838c148960d873d3a4dd715e83ba9d782429eb",
+   "objram_active_1701.tsv": "6b9dd89ab16717415d136bd6782510aff990368408dec886bf3ed6962742e2ab",
+   "objram_active_1702.tsv": "1b96b3b907ce3d2dc79ca81a04304c6ea121d0e3781d0e29ac91dad6ebea656b",
+   "objram_active_1703.tsv": "825f4d989c90b633edd7e6108dd555872125662b53a97acd6e41d9119e5f3942",
+   "objram_active_1704.tsv": "d47102ee78baf89088e5fe11b757478fb1a499ebc3633a412214838a5b793deb",
+   "objram_active_1705.tsv": "16784c33b9b57bf780331c09bb033be899014f0dc7453311ec6b16ec588e1ef0",
+   "objram_active_1706.tsv": "a98ae972c154d7b90ba9d81d33802ddbc4b69166b698695c05a5ae14a376d013",
+   "objram_active_1707.tsv": "98ba66c8b02cf5a40d09c2db596946018a9832c6e59baa8a2b547f116114f612",
+   "objram_active_1708.tsv": "66ae681dc033418b52eba490f959f193075641e87db3a17d4faaa074d94900c1",
+   "objram_active_1709.tsv": "fd1a06e74ee9419e9a4153e146168d2384707aa1c3513feac16c96d5203542d6",
+   "objram_active_1710.tsv": "fc6d92913658b9bb01211cf2ba2dcc0117bb3064e11971cb20e0e8d203d56cda",
+   "objram_active_1711.tsv": "665b01b93c16eef07091128420052b2601b8c63474986ba6ae8fd7402882d787",
+   "objram_active_1712.tsv": "123a58feef83ffa97f3aade1ea78931e48d00be2e53273023a9a24e048837b0d",
+   "objram_active_1713.tsv": "ee95a323ba307242d093a2668c1ec26e6c09a3c19654ccbe54440df691a0033d",
+   "objram_active_1714.tsv": "ee95a323ba307242d093a2668c1ec26e6c09a3c19654ccbe54440df691a0033d",
+   "objram_active_1715.tsv": "c44830965f0d80d0e65f48e5da4c1fdac1e231f784c7be4297a86e5dbc6c2e6c",
+   "objram_active_1716.tsv": "e8bdc604cbb2fd65300cb5df976a0cd2391b1a8ba45ec08c81b9ea55b7e5c9f9",
+   "objram_active_1717.tsv": "e0b8648ed0018992b37b481eb8c68e1ec6391de1ffad741dd2c7d3bc2df5c717",
+   "objram_active_1718.tsv": "e13649ba8ef0e82fbb3207f1b5b63e846dd06b3350ec1ae051db362ce4d8c390"
   },
   "title": {
    "cps_a_regs_1620.tsv": "d53e84eefc71aad6d41be1df3bd6f095e43d9d154929698960366ab54a0c90e5",

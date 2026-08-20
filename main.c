@@ -3,6 +3,7 @@
 #include "capability_model.h"
 #include "avsp_tiles.h"
 #include "avsp_collision.h"
+#include "avsp_cram.h"
 #include "avsp_frontend.h"
 
 #include "generated/avsp_anim_records.h"
@@ -78,6 +79,9 @@
 
 #if JO_TV_WIDTH != CAP_VIEW_WIDTH || JO_TV_HEIGHT != 224
 #error "The AvP fidelity build requires Saturn TV_352x224"
+#endif
+#if AVSP_FRONTEND_START_TRANSITION_FRAMES != CAP_START_TRANSITION_FRAMES
+#error "Frontend model and generated source transition schedules differ"
 #endif
 #if AVSP_STALKER_DECODED_BYTES != AVSP_ENEMY_DECODED_BYTES || \
     AVSP_STALKER_CEL_WIDTH != AVSP_ENEMY_CEL_WIDTH || \
@@ -204,7 +208,70 @@ volatile int avsp_diag_frontend_late_reads;
 volatile int avsp_diag_frontend_missing_assets;
 volatile int avsp_diag_frontend_rle_errors;
 volatile int avsp_diag_frontend_palette_errors;
+volatile int avsp_diag_frontend_palette_boundary_writes;
 volatile int avsp_diag_frontend_commands;
+#ifdef AVSP_FRONTEND_SHOT_TEST
+/* Visual-verification profile. The frontend surfaces this pass must compare
+ * are short-lived - the ROM's cursor intro is three source frames - so a
+ * wall-clock screenshot cannot land on them. Instead the route stops the
+ * world at a listed (encounter state, encounter timer) point while rendering
+ * continues, so the VDP1 command table and colour RAM can be read at an
+ * exact frame. Holds are visited in listed order and never re-armed. */
+#define AVSP_SHOT_HOLD_TICKS 300
+typedef struct
+{
+    int state;
+    int timer;
+} AvspShotHold;
+static const AvspShotHold avsp_shot_holds[] = {
+    { CAP_ENCOUNTER_MAIN_MENU,        60 },  /* settled title             */
+    { CAP_ENCOUNTER_START_TRANSITION,  1 },  /* Start mask, first frame   */
+    { CAP_ENCOUNTER_START_TRANSITION, 10 },
+    { CAP_ENCOUNTER_START_TRANSITION, 20 },
+    { CAP_ENCOUNTER_START_TRANSITION, 29 },  /* Start mask, last frame    */
+    { CAP_ENCOUNTER_CHARACTER_SELECT,  1 },  /* cursor intro cel 0        */
+    { CAP_ENCOUNTER_CHARACTER_SELECT,  2 },  /* cursor intro cel 1        */
+    { CAP_ENCOUNTER_CHARACTER_SELECT,  3 },  /* cursor intro cel 2        */
+    { CAP_ENCOUNTER_CHARACTER_SELECT, 30 },  /* settled cursor 0 Warrior  */
+    { CAP_ENCOUNTER_CHARACTER_SELECT, 60 },  /* settled cursor 1 Schaefer */
+    { CAP_ENCOUNTER_CHARACTER_SELECT,100 },  /* settled cursor 2 Hunter   */
+    { CAP_ENCOUNTER_CHARACTER_SELECT,140 },  /* settled cursor 3 Linn     */
+    { CAP_ENCOUNTER_CHARACTER_CONFIRM, 1 },  /* confirmation shutter      */
+    { CAP_ENCOUNTER_CHARACTER_CONFIRM,10 },
+    { CAP_ENCOUNTER_CHARACTER_CONFIRM,20 },
+    { CAP_ENCOUNTER_ROUND_TITLE,      20 }   /* Round 1 title             */
+};
+#define AVSP_SHOT_HOLD_COUNT ((int)(sizeof(avsp_shot_holds) / sizeof(avsp_shot_holds[0])))
+static int avsp_shot_hold_index;
+static int avsp_shot_hold_ticks;
+/* cap_update_encounter() does not advance encounter_timer in every state,
+ * so the shot route counts frames spent in the current state itself. The
+ * counter only advances on frames the world actually stepped, which is what
+ * makes a hold frame-exact. */
+static int avsp_shot_state = -1;
+static int avsp_shot_state_frames;
+volatile int avsp_diag_hold_index = -1;
+volatile int avsp_diag_hold_active;
+volatile int avsp_diag_hold_timer = -1;
+static int avsp_shot_should_hold(void)
+{
+    if (avsp_shot_hold_index >= AVSP_SHOT_HOLD_COUNT) return 0;
+    if ((int)world.encounter_state !=
+            avsp_shot_holds[avsp_shot_hold_index].state ||
+        avsp_shot_state_frames !=
+            avsp_shot_holds[avsp_shot_hold_index].timer)
+        return 0;
+    avsp_diag_hold_index = avsp_shot_hold_index;
+    avsp_diag_hold_timer = avsp_shot_state_frames;
+    avsp_diag_hold_active = 1;
+    if (++avsp_shot_hold_ticks < AVSP_SHOT_HOLD_TICKS) return 1;
+    avsp_shot_hold_ticks = 0;
+    avsp_diag_hold_active = 0;
+    ++avsp_shot_hold_index;
+    return 0;
+}
+#endif
+
 #ifdef AVSP_VISUAL_TEST
 static int visual_action_index;
 static int visual_walk_frames;
@@ -790,7 +857,7 @@ static void set_actor_palette(void)
                 avsp_exact_palettes[bank][index][2]);
     }
 
-    jo_create_palette_from(&actor_palette, colors, 256);
+    jo_create_palette_from(&actor_palette, colors, AVSP_CRAM_MAX_COLOURS);
 }
 
 static void set_frontend_palettes(void)
@@ -803,7 +870,8 @@ static void set_frontend_palettes(void)
     {
         for (index = 0; index < 256; ++index)
             colors[index] = JO_COLOR_Black;
-        jo_create_palette_from(&frontend_palettes[scene], colors, 256);
+        jo_create_palette_from(&frontend_palettes[scene], colors,
+                               AVSP_CRAM_MAX_COLOURS);
     }
 }
 
@@ -815,7 +883,7 @@ static void set_hud_palette(void)
         colors[index] = JO_COLOR_RGB(
             avsp_hud_palette[index][0], avsp_hud_palette[index][1],
             avsp_hud_palette[index][2]);
-    jo_create_palette_from(&hud_palette, colors, 256);
+    jo_create_palette_from(&hud_palette, colors, AVSP_CRAM_MAX_COLOURS);
 }
 
 static int load_hud_image(jo_img_8bits *image, const char *filename,
@@ -993,7 +1061,18 @@ static int activate_route_sequence(const int scene)
             avsp_sequence_palettes[scene][index][0],
             avsp_sequence_palettes[scene][index][1],
             avsp_sequence_palettes[scene][index][2]);
-    jo_palette_to_cram(colors, frontend_palettes[0].data, 256);
+    /* The route-sequence RLE pixels are already one-based (measured minimum 1
+       across all thirteen holds), and avsp_sequence_palettes is indexed by
+       source colour, so entry k is the colour of pixel k + 1 and transcribes
+       straight into the Jo data range. 255 entries, not 256: the 256th would
+       land on the next allocation's block boundary. */
+    if (!avsp_cram_copy_source_indexed(
+            (unsigned short *)frontend_palettes[0].data,
+            (const unsigned short *)colors, AVSP_CRAM_MAX_COLOURS))
+    {
+        failed_asset = "SEQUENCE PALETTE COPY";
+        return 0;
+    }
     copy_snapshot_to_background(sequence_pixels);
     slBMPaletteNbg1((unsigned short)frontend_palettes[0].id);
     jo_move_background(0, 0);
@@ -1764,7 +1843,7 @@ static int load_tile_archive(void)
         for (index = 0; index < 15; ++index)
             colors[slot * 16 + index] = (jo_color)
                 avsp_tiles_cram_color(&tile_archive, slot, index);
-    jo_create_palette_from(&tile_palette, colors, 256);
+    jo_create_palette_from(&tile_palette, colors, AVSP_CRAM_MAX_COLOURS);
     tile_pool_used = 0;
     tile_pool_clock = 0;
     tile_archive_ready = 1;
@@ -1891,7 +1970,12 @@ static void draw_world(void)
     int background_scroll = cap_background_fit_scroll_x(
         world.camera_x, world.stage_area);
 
+    /* Per-frame evidence: states that draw no frontend objects must report
+     * zero rather than the previous state's count. */
+    frontend_runtime.vdp1_commands_last_frame = 0;
+
     if (world.encounter_state == CAP_ENCOUNTER_MAIN_MENU ||
+        world.encounter_state == CAP_ENCOUNTER_START_TRANSITION ||
         world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT ||
         world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM)
     {
@@ -1900,6 +1984,9 @@ static void draw_world(void)
         if (!activate_frontend_scene(scene)) runtime_ready = 0;
         if (world.encounter_state == CAP_ENCOUNTER_MAIN_MENU)
             avsp_frontend_draw_title(&frontend_runtime);
+        else if (world.encounter_state == CAP_ENCOUNTER_START_TRANSITION)
+            avsp_frontend_draw_start_transition(
+                &frontend_runtime, world.encounter_timer);
         else
         {
             /* The source begins a four-frame-off/four-frame-on cursor blink
@@ -1987,7 +2074,12 @@ static void update_hud_textures(void)
 
 static void draw_arcade_hud(void)
 {
+    /* Every frontend state, including the Start transition. The transition
+     * is drawn by the frontend over the title surface and the ROM shows no
+     * gameplay HUD across it; reading the live VDP1 list at held transition
+     * frames caught the arcade HUD emitting two to three sprites there. */
     if (world.encounter_state == CAP_ENCOUNTER_MAIN_MENU ||
+        world.encounter_state == CAP_ENCOUNTER_START_TRANSITION ||
         world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT ||
         world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM ||
         sequence_scene_for_world() >= 0)
@@ -2134,6 +2226,30 @@ static CapInput frontend_test_input(void)
 }
 #endif
 
+#ifdef AVSP_FRONTEND_SHOT_TEST
+/* Same source semantics as the focused frontend route, but keyed to the
+ * encounter timer and extended to settle on every one of the four cursor
+ * positions. The source has no cancel action, so the walk is right, down,
+ * left, which visits Warrior, Schaefer, Hunter and Linn in turn. */
+static CapInput frontend_shot_input(void)
+{
+    CapInput input;
+    memset(&input, 0, sizeof(input));
+    if (world.encounter_state == CAP_ENCOUNTER_MAIN_MENU)
+    {
+        if (avsp_shot_state_frames == 120) input.start_pressed = 1;
+    }
+    else if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT)
+    {
+        if (avsp_shot_state_frames == 40) input.right = 1;
+        if (avsp_shot_state_frames == 80) input.down = 1;
+        if (avsp_shot_state_frames == 120) input.left = 1;
+        if (avsp_shot_state_frames == 160) input.jump_pressed = 1;
+    }
+    return input;
+}
+#endif
+
 static void draw_hud(void)
 {
     if (!debug_hud_enabled) return;
@@ -2200,6 +2316,9 @@ static void frame_callback(void)
 #ifdef AVSP_FRONTEND_TEST
     input = frontend_test_input();
 #endif
+#ifdef AVSP_FRONTEND_SHOT_TEST
+    input = frontend_shot_input();
+#endif
 #ifdef AVSP_BOSS_HIT_TEST
     /* Repeat the 40-frame reaction every two seconds so visual inspection is
        not timing-sensitive after the emulator's long CD preload. */
@@ -2241,13 +2360,32 @@ static void frame_callback(void)
 #endif
     /* Prepare one canonical ROM record before gameplay. cap_world_step() and
      * draw_world() therefore consume the same collision/render frame. */
-    rom_actor_prepare();
-    clip_request = cap_world_step(&world, &input);
+#ifdef AVSP_FRONTEND_SHOT_TEST
+    if (avsp_shot_should_hold())
+    {
+        /* Held: render the same frame again without advancing the world. */
+        memset(&clip_request, 0, sizeof(clip_request));
+    }
+    else
+#endif
+    {
+        rom_actor_prepare();
+        clip_request = cap_world_step(&world, &input);
+#ifdef AVSP_FRONTEND_SHOT_TEST
+        if ((int)world.encounter_state != avsp_shot_state)
+        {
+            avsp_shot_state = (int)world.encounter_state;
+            avsp_shot_state_frames = 0;
+        }
+        else
+            ++avsp_shot_state_frames;
+#endif
+    }
     /* Start permanently leaves the title scene. Reuse its 78,848-byte RAM
        block for the 64,118-byte Stalker archive before character confirmation
        starts CDDA. This keeps the cold-boot working set unchanged and avoids
        any data-disc seek while Stage 1 music is playing. */
-    if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT &&
+    if (world.encounter_state == CAP_ENCOUNTER_START_TRANSITION &&
         !frontend_runtime.select_surface_ready)
     {
         if (!avsp_frontend_enter_select(&frontend_runtime))
@@ -2545,14 +2683,18 @@ static void frame_callback(void)
     }
 #endif
     if (jo_is_pad1_key_down(JO_KEY_X)) debug_hud_enabled = !debug_hud_enabled;
-    /* Boot-bringup breadcrumb: encounter state + timer heartbeat, always
-     * on until the first verified boot into WAVE_ONE. If the timer stops
-     * counting, the main loop is stuck inside a draw/load call; if it
-     * counts but the state never changes, the model's transition is the
-     * bug. Remove after boot bringup. */
-    jo_printf(0, 0, "ST %d T %d F %d   ",
-              (int)world.encounter_state, (int)world.encounter_timer,
-              (int)world.frame);
+    /* Boot-bringup breadcrumb: encounter state + timer heartbeat. The
+     * staged boot into WAVE_ONE is now verified, so this no longer runs
+     * unconditionally - it drew over the frontend surfaces the visual
+     * comparison pass captures. Kept behind the debug HUD toggle because
+     * it still distinguishes "stuck inside a draw/load call" from "state
+     * machine never transitions". */
+    if (debug_hud_enabled)
+    {
+        jo_printf(0, 0, "ST %d T %d F %d   ",
+                  (int)world.encounter_state, (int)world.encounter_timer,
+                  (int)world.frame);
+    }
     /* Rows 24/25: draw_hud() runs after this and rewrites rows 0-7, so a
      * diagnostic printed on row 2 was overwritten in the same frame - it could
      * never be read back. These two rows are clear of every overlay. */
@@ -2640,6 +2782,8 @@ static void frame_callback(void)
     avsp_diag_frontend_late_reads = frontend_runtime.late_disc_reads;
     avsp_diag_frontend_missing_assets = frontend_runtime.missing_assets;
     avsp_diag_frontend_rle_errors = frontend_runtime.rle_errors;
+    avsp_diag_frontend_palette_boundary_writes =
+        frontend_runtime.palette_boundary_writes;
     avsp_diag_frontend_palette_errors = frontend_runtime.palette_errors;
     avsp_diag_frontend_commands = frontend_runtime.vdp1_commands_last_frame;
 }
@@ -2694,6 +2838,10 @@ void jo_main(void)
 #endif
 #ifdef AVSP_FRONTEND_TEST
     debug_hud_enabled = 1;
+#endif
+#ifdef AVSP_FRONTEND_SHOT_TEST
+    /* The visual pass compares frontend surfaces; keep the debug text off. */
+    debug_hud_enabled = 0;
 #endif
     sequence_pixels = JO_NULL;
     for (index = 0; index < AVSP_SEQUENCE_SCENES; ++index)
@@ -2760,7 +2908,7 @@ void jo_main(void)
     {
         /* Focused boss diagnostics bypass the frontend, so the main loop's
            CHARACTER_SELECT/CONFIRM scene releases are skipped; free those
-           phase assets here to leave room for the stage working set. The
+           lifetime assets here to leave room for the stage working set. The
            boss itself is composed from ROM tables and needs no archive. */
         release_frontend_scene(0);
         release_frontend_scene(1);

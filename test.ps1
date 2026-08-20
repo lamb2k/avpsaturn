@@ -83,6 +83,19 @@ if ($LASTEXITCODE -ne 0) {
     throw "Gameplay-model tests failed with exit code $LASTEXITCODE."
 }
 
+# Bounded CRAM palette writes. Jo allocates colour RAM in 256-entry blocks but
+# returns jo_palette::data one entry above the block base and documents a
+# 255-colour maximum, because Saturn pixel/pen value zero is transparent and
+# pixel p reads data[p - 1]. The test copies a full 255-colour surface, both
+# extreme 4bpp sub-banks, and a source-indexed payload with canaries on the two
+# hardware block boundaries, proves the canaries are live, and requires seven
+# out-of-contract requests to be refused rather than clamped. No private inputs.
+$cramCommand = "cd '$linuxRoot' && mkdir -p build && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_cram.c tests/avsp_cram_test.c -o build/avsp_cram_test && ./build/avsp_cram_test"
+& $wsl.Source sh '-lc' $cramCommand
+if ($LASTEXITCODE -ne 0) {
+    throw "Bounded CRAM palette-write test failed with exit code $LASTEXITCODE."
+}
+
 $animCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_anim_script.c tests/avsp_anim_script_test.c -o build/avsp_anim_script_test && ./build/avsp_anim_script_test"
 & $wsl.Source sh '-lc' $animCommand
 if ($LASTEXITCODE -ne 0) {
@@ -208,7 +221,7 @@ if ($LASTEXITCODE -ne 0) {
 # committed manifest records the run where inputs were present).
 & $PythonPath (Join-Path $PSScriptRoot 'tools\gate_avsp_table_set.py')
 if ($LASTEXITCODE -ne 0) {
-    throw "table_set street-alien gate failed with exit code $LASTEXITCODE."
+    throw "table_set street-alien check failed with exit code $LASTEXITCODE."
 }
 
 # Frontend screen composition: derives, from the ROM-truth frontend capture
@@ -232,12 +245,22 @@ if ($LASTEXITCODE -ne 0) {
 
 # ROM-derived Saturn frontend converter: exact title/select composition from
 # tilemaps + object lists, endpoint-aligned 384-to-352 fitting, palette/RLE
-# round trips, live cursor cels, per-phase budgets and byte stability. Private
+# round trips, live cursor cels, per-lifetime budgets and byte stability. Private
 # captures and ROMs remain ignored; a checkout without them skips cleanly.
 & $PythonPath (Join-Path $PSScriptRoot 'tools\gen_avsp_frontend.py') `
     '--verify-deterministic'
 if ($LASTEXITCODE -ne 0) {
     throw "ROM-derived frontend generation failed with exit code $LASTEXITCODE."
+}
+
+# Live frontend palette-to-CRAM alignment under Jo's one-based contract, from
+# the untracked -FrontendShotTest hold capture. Requires every live surface
+# index in 1..255, an exact match at hardware entry 256*id + index, no write to
+# either 256-entry block boundary, and failure of both the rejected zero-based
+# payload and a one-bank perturbation. Skips cleanly with no live capture.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\verify_frontend_cram.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Frontend CRAM readback verification failed with exit code $LASTEXITCODE."
 }
 
 # Sub-state dispatcher enumeration: decodes, from the validated opcode-space

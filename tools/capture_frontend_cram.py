@@ -2,6 +2,8 @@
 
 The frontend provenance chain is converter output -> ISO member -> decoded
 work RAM -> NBG1 VRAM -> palette payload -> CRAM -> active VDP2 registers.
+Payloads follow Jo Engine's one-based palette contract, so pixel value p is
+expected at hardware colour entry 256 * palette_id + p.
 The last two links can only be measured on the running machine, so this tool
 drives the pinned Yaba Sanshiro MCP debug server while a `-FrontendShotTest`
 build walks its sixteen exact (state, frame) holds, and records for each hold:
@@ -56,6 +58,7 @@ DIAGNOSTIC_SYMBOLS = (
     "avsp_diag_hold_active", "avsp_diag_frontend_palette_errors",
     "avsp_diag_frontend_rle_errors", "avsp_diag_frontend_missing_assets",
     "avsp_diag_frontend_late_reads", "avsp_diag_frontend_commands",
+    "avsp_diag_frontend_palette_boundary_writes",
 )
 REQUIRED_SYMBOLS = DIAGNOSTIC_SYMBOLS + ("frontend_palettes", "slBMPalette")
 
@@ -155,6 +158,9 @@ def capture_hold(mcp: Mcp, shadow: int, symbols: dict[str, int]) -> dict:
                  for name, offset in SHADOW_REGISTERS}
     base_entry = ((registers["BMPNA"] & 0x700) >> 8) * 256
     start_entry = base_entry - 1
+    # The window spans base - 1 through base + 256 so both hardware block
+    # boundaries, 256 * id and 256 * (id + 1), are captured alongside the
+    # 255 entries the palette owns.
     raw = mcp.read(CRAM + start_entry * 2, CRAM_WINDOW_ENTRIES * 2)
     cram = [int.from_bytes(raw[i * 2:i * 2 + 2], "big")
             for i in range(CRAM_WINDOW_ENTRIES)]
