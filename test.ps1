@@ -474,6 +474,21 @@ if ($LASTEXITCODE -ne 0) {
     throw "Saturn control schema tests failed with exit code $LASTEXITCODE."
 }
 
+# RP4 Saturn evidence input identity: ignored raw captures must stay pinned by
+# their absolute replay path and SHA-256 when a bounded manifest is regenerated.
+& $PythonPath (Join-Path $PSScriptRoot 'tests\test_rp4_saturn_capture_provenance.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Saturn capture provenance tests failed with exit code $LASTEXITCODE."
+}
+
+# The Yaba Sanshiro hook is deliberately a rejected diagnostic build.  When
+# its ignored source checkout exists, prove the patch's clean/wrong/corrupt
+# controls; an ordinary fresh checkout records the source as absent instead.
+& $PythonPath (Join-Path $PSScriptRoot 'tests\test_yabasanshiro_scanout_diagnostic.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Rejected scanout diagnostic patch tests failed with exit code $LASTEXITCODE."
+}
+
 # RP4 v1 source-order acceptance controls (capture-free): the v0
 # verdict stays preserved, and blocked, missing or undetecting
 # controls can never reach PASS.

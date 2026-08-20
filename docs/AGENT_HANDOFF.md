@@ -10,12 +10,109 @@ git log --oneline -10
 Get-Process mame,yabasanshiro* -ErrorAction SilentlyContinue
 ```
 
-## RP4 Saturn visual-control body, 2026-08-20 (newest first)
+## RP4 correction: reproducible rejected scanout diagnostic, 2026-08-20 (newest first)
+
+Read the actual current commit with `git rev-parse HEAD`; this document must
+not be used as a self-referential HEAD assertion. The starting base for the
+Saturn-control evidence body was `bb06c0c6b595170d7ff2178f0538a7b4365d0d29`.
+The prior hard-stop evidence commit is `9cb3ccb`. The correction commits after
+that preserve the experiment, but do **not** reopen RP4 Chapters 3-6 or alter
+Saturn runtime code.
+
+### Chapter 0 provenance check: PASS, equal-Z result unchanged
+
+The ignored raw inputs are exactly:
+
+```text
+C:\Users\lambd\AppData\Local\Temp\claude\C--Game-Dev-BrooklynBangoutX-AvPSaturnCapabilityTest\6191dc0f-92e4-47d5-97ba-a258e026f1ec\scratchpad\builds\cap_baseline.json
+  791b22ecb5c7904cc9acc084536fb2776d0d83b4e86ea55e4bc5b542b2a19077
+C:\Users\lambd\AppData\Local\Temp\claude\C--Game-Dev-BrooklynBangoutX-AvPSaturnCapabilityTest\6191dc0f-92e4-47d5-97ba-a258e026f1ec\scratchpad\builds\cap_forward.json
+  df56fd35f25a7bf816b430440511d5232ee1fccf29af21845de1a5ab583cf4fa
+```
+
+`tools/verify_rp4_saturn_controls.py` now records their exact resolved paths,
+SHA-256 values, schema and requested fixture frame under `input_captures`; it
+does not track their raw object lists. Reproduction command:
+
+```powershell
+$py = "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
+& $py tools\verify_rp4_saturn_controls.py --baseline-capture <cap_baseline.json> --forward-capture <cap_forward.json> --baseline-build-sha256 3F5F2DB9D504FBC77BF26A3B3A12D74CD90237D42B9369F6B08150BFB568EF18 --forward-build-sha256 AD7651A8412EBA832561C1C44F16D8B06DCB3A17BA7DCE6E3FC3B683AEDAE320
+```
+
+Two regenerations produced SHA-256
+`de771aa013d3cdc306e29e22ed4a1c35f7f080369a184086314a44eae946b90d`
+both times. The manifest remains `FAIL` (one executed/refuted equal-Z control,
+two blocked visual controls), exactly as before. `tests/test_rp4_saturn_capture_provenance.py`
+was written failing-first and passes after the provenance implementation.
+
+### Rejected custom diagnostic build: reproducible, not acceptance
+
+`emulator-patches/yabasanshiro-vdp2-scanout.patch` is the actual dirty-source
+diff against source `71c973f92966d33de464c1ba4dac1953af6ec462`, SHA-256
+`29905bf77e2ee4c29cb4d71111da66e40d52fe35c1a4be6fc972ae1dac989120`.
+`data/yabasanshiro_scanout_diagnostic_manifest.json` pins every pre-patch
+Git-blob SHA-256, the release SHA-256, CMake/MSVC/dependency versions and the
+previous custom runner SHA-256. It is explicitly classified
+`REPRODUCES_A_REJECTED_CUSTOM_DIAGNOSTIC_BUILD`.
+
+The clean-base verifier uses `git apply --ignore-space-change` solely because
+the upstream checkout has `core.autocrlf=true`; it separately validates
+byte-exact Git blobs before allowing that EOL-tolerant patch application.
+It proves all of the following: exact base + patch applies; `HEAD~1` is
+rejected; an appended byte in `vidsoft.c` is rejected. Run:
+
+```powershell
+$py = "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
+& $py tests\test_yabasanshiro_scanout_diagnostic.py
+```
+
+The full manual apply/build/smoke recipe is in the manifest and the tracked
+`tools/apply_yabasanshiro_scanout_patch.ps1` and
+`tools/build_yabasanshiro_scanout.ps1` scripts. Their output roots are ignored.
+The known smoke result remains exit `0xC0000005` with zero scanout bytes; it
+therefore remains a hard stop, not a usable visual witness.
+
+Correction validation: `tests/test_rp4_saturn_capture_provenance.py` exit 0;
+`tests/test_saturn_control_status.py` exit 0;
+`tests/test_yabasanshiro_scanout_diagnostic.py` exit 0; and a separate clean
+clone passed `apply_yabasanshiro_scanout_patch.ps1` plus `git diff --check`.
+`test.ps1` was started and passed its normal host checks through fixture
+separation, but its pre-existing private `verify_street_planes.py` stage did
+not complete within the bounded run and was terminated; it did not reach a
+new correction failure or the intentionally red RP4 result. It must be rerun
+to completion in a persistent environment before this is called a full-suite
+pass. No MAME, Yaba Sanshiro, compiler, linker, CMake, or correction-owned
+Python process remains running.
+
+### Prescriptive next agent prompt
+
+```text
+CODEX_REVIEW_INVOCATION
+REPOSITORY: C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-ClaudePriorityArchitecture
+Read AGENTS.md, then this newest handoff section. Run git rev-parse HEAD,
+git status --short --branch, git diff --check, the two RP4 provenance/patch
+tests, and inspect data/yabasanshiro_scanout_diagnostic_manifest.json.
+Confirm that the rejected custom diagnostic workflow is labelled correctly,
+that no Saturn runtime file changed, and that the raw captures, source, build,
+runner, logs and scanouts remain ignored. Do not resume RP4 Chapters 3-6.
+Return whether the correction is accepted and a separately authorised proposal
+for obtaining a guest-equivalent post-composite visual instrument.
+```
+
+### Dirty/ignored inventory at the correction boundary
+
+The Git worktree must be clean after the correction commit. Ignored local
+inputs remain: the two capture JSON files above; `.deps/yabasanshiro-source`
+(patched/untracked `runner/lodepng`); the disposable patched
+`.deps/yb-apply-check` validation clone; `.deps` build logs and scanout smoke
+files; and `C:\yb5` diagnostic output. None is staged or tracked.
+
+## RP4 Saturn visual-control body, 2026-08-20 (historical evidence)
 
 ## RP4 native-scanout diagnostic emulator: defined hard stop, 2026-08-20 (newest first)
 
-Branch `claude/rp4-priority-architecture`, baseline and current committed
-HEAD `bb06c0c6b595170d7ff2178f0538a7b4365d0d29`. This checkpoint does **not**
+Branch `claude/rp4-priority-architecture`, starting evidence base
+`bb06c0c6b595170d7ff2178f0538a7b4365d0d29` (not current HEAD). This checkpoint does **not**
 promote RP4 and does not alter the refuted equal-Z result.
 
 ### Result
@@ -88,11 +185,13 @@ required guest behavior**.
 ### Process state
 
 No MAME, Yaba Sanshiro, NMake, compiler, linker, or CMake process is running.
-The only tracked modification at this stop is this handoff update; all source
-and build experiment files are ignored under `.deps` or `C:\\yb5`.
+At the original hard-stop evidence commit, the only tracked modification was
+the handoff update; all source and build experiment files were ignored under
+`.deps` or `C:\\yb5`. The current correction adds only the tracked patch,
+manifest, reproducibility tools/tests and revised documentation named above.
 
-Branch `claude/rp4-priority-architecture`, starting HEAD `2e0d36e`,
-ending HEAD `d330a92`. Commits: `fd80e38` Saturn-control evidence schema
+Historical evidence sub-body: starting HEAD `2e0d36e`, ending evidence HEAD
+`d330a92`. Commits: `fd80e38` Saturn-control evidence schema
 (failing-first), `d330a92` StreetTest command-order measurement.
 
 ### Outcome: the primary objective is ANSWERED, and the answer is no

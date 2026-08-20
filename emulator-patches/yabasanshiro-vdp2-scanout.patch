@@ -1,0 +1,275 @@
+diff --git a/yabause/src/runner/CMakeLists.txt b/yabause/src/runner/CMakeLists.txt
+index 316d1bc4..ebd14da2 100644
+--- a/yabause/src/runner/CMakeLists.txt
++++ b/yabause/src/runner/CMakeLists.txt
+@@ -13,6 +13,18 @@ include_directories(${PORT_INCLUDE_DIRS})
+ find_package(Threads)
+ 
+ add_executable(yabause-runner yui.cpp)
+-target_link_libraries(yabause-runner yabause ${YABAUSE_LIBRARIES} ${PORT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
++target_link_libraries(yabause-runner yabause ${YABAUSE_LIBRARIES} ${PORT_LIBRARIES} ${zlib_STATIC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
++if (WIN32)
++    # libchdr's upstream external-project expression uses
++    # $<CONFIGURATION>, which NMake does not substitute.  The runner is
++    # deliberately NMake-built to avoid a system-wide Visual Studio install.
++    target_link_libraries(yabause-runner
++        ${LIBCHDR_LIB_DIR}/chdr-static.lib
++        ${LIBCHDR_LIB_DIR}/deps/lzma-24.05/lzma.lib
++        ${LIBCHDR_LIB_DIR}/deps/zstd-1.5.6/build/cmake/lib/zstd_static.lib)
++else()
++    target_link_libraries(yabause-runner ${LIBCHDR_LIBRARIES})
++endif()
++add_dependencies(yabause-runner libchdr zlib)
+ 
+-yab_port_success(yabause-runner)
+\ No newline at end of file
++yab_port_success(yabause-runner)
+diff --git a/yabause/src/runner/yui.cpp b/yabause/src/runner/yui.cpp
+index 1ccc5ef0..4d1591cc 100644
+--- a/yabause/src/runner/yui.cpp
++++ b/yabause/src/runner/yui.cpp
+@@ -28,6 +28,7 @@ extern "C"
+ #include "../m68kc68k.h"
+ #include "../vidsoft.h"
+ #include "../vdp2.h"
++#include "../osdcore.h"
+ #include "../titan/titan.h"
+ #ifdef _MSC_VER
+ #include <Windows.h>
+@@ -55,6 +56,10 @@ extern u8 *vdp1backframebuffer;
+ 
+ extern "C"
+ {
++   /* The runner is a single-threaded headless port.  The current core
++      expects every port to own its OSD and GL-thread hooks. */
++   OSD_struct *OSDCoreList[] = { &OSDDummy, NULL };
++
+    SH2Interface_struct *SH2CoreList[] = {
+       &SH2Interpreter,
+       NULL
+@@ -331,7 +336,7 @@ int go_to_next_test(int &current_test, std::string filename, yabauseinit_struct
+       return -1;
+ 
+    MappedMemoryLoadExec(filename.c_str(), 0);
+-   MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_SELECT_ADDRESS, current_test);
++   MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_SELECT_ADDRESS, current_test, NULL);
+ 
+    return 1;
+ }
+@@ -547,7 +552,7 @@ namespace game_testing
+       yinit.m68kcoretype = M68KCORE_C68K;
+       yinit.sndcoretype = SNDCORE_DUMMY;
+       yinit.cdcoretype = CDCORE_ISO;
+-      yinit.carttype = CART_NONE;
++      yinit.carttype = CART_DRAM32MBIT;
+       yinit.regionid = REGION_AUTODETECT;
+       yinit.biospath = emulate_bios ? NULL : bios;
+       yinit.cdpath = full_path.c_str();
+@@ -811,7 +816,7 @@ namespace yabauseut
+          return -1;
+ 
+       MappedMemoryLoadExec(yabause_ut_filename.c_str(), 0);
+-      MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_SELECT_ADDRESS, current_test);
++      MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_SELECT_ADDRESS, current_test, NULL);
+ 
+       bool write_images = false;
+ 
+@@ -829,7 +834,7 @@ namespace yabauseut
+          //emulate a frame
+          PERCore->HandleEvents();
+ 
+-         status = MappedMemoryReadByteNoCache(VDP2_VRAM + AUTO_TEST_STATUS_ADDRESS);
++         status = MappedMemoryReadByteNocache(VDP2_VRAM + AUTO_TEST_STATUS_ADDRESS, NULL);
+ 
+          if (status == AUTO_TEST_MESSAGE_SENT)
+          {
+@@ -898,7 +903,7 @@ namespace yabauseut
+                   return -1;
+ 
+                MappedMemoryLoadExec(yabause_ut_filename.c_str() , 0);
+-               MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_SELECT_ADDRESS, current_test);
++               MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_SELECT_ADDRESS, current_test, NULL);
+ 
+                go_to_next_test(current_test, yabause_ut_filename, yinit);
+ 
+@@ -974,19 +979,68 @@ namespace yabauseut
+                printf("Unrecognized message type: %s\n", message);
+             }
+ 
+-            MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_STATUS_ADDRESS, AUTO_TEST_MESSAGE_RECEIVED);
++            MappedMemoryWriteByte(VDP2_VRAM + AUTO_TEST_STATUS_ADDRESS, AUTO_TEST_MESSAGE_RECEIVED, NULL);
+          }
+       }
+       return stats.regressions || stats.screenshot.diffs;
+    }
+ }
+ 
++namespace game_testing
++{
++   struct ScanoutLog {
++      FILE *file;
++      unsigned int samples;
++   };
++
++   static void runner_scanout_callback(const pixel_t *pixels, int width,
++                                       int height, int interlace, u64 frame,
++                                       void *user)
++   {
++      ScanoutLog *log = (ScanoutLog *)user;
++      const unsigned char *bytes = (const unsigned char *)pixels;
++      size_t count = (size_t)width * (size_t)height * sizeof(pixel_t);
++      u64 hash = 1469598103934665603ULL;
++      size_t i;
++      for (i = 0; i < count; i++)
++         hash = (hash ^ bytes[i]) * 1099511628211ULL;
++      fprintf(log->file,
++              "frame=%llu width=%d height=%d interlace=%d fnv1a64=%016llx\\n",
++              (unsigned long long)frame, width, height, interlace,
++              (unsigned long long)hash);
++      log->samples++;
++   }
++
++   int run_scanout(const std::string &disc, unsigned int frames,
++                   const std::string &report_path)
++   {
++      ScanoutLog log = { fopen(report_path.c_str(), "wb"), 0 };
++      if (log.file == NULL) {
++         fprintf(stderr, "could not open scanout report: %s\\n", report_path.c_str());
++         return 2;
++      }
++      if (init_game(disc) < 0) {
++         fclose(log.file);
++         return 3;
++      }
++      VIDSoftSetScanoutCallback(runner_scanout_callback, &log);
++      for (unsigned int i = 0; i < frames; i++) {
++         PERCore->HandleEvents();
++      }
++      VIDSoftSetScanoutCallback(NULL, NULL);
++      fclose(log.file);
++      printf("scanout samples=%u\\n", log.samples);
++      return log.samples == frames ? 0 : 4;
++   }
++}
++
+ //usage
+ //no spaces in paths allowed, include final / on directories
+ //yabause game check game_data_file path_file screenshot_path fail_path
+ //yabause game dump game_data_file path_file output_path
+ //yabause yabauseut check yabause_ut_binary_path screenshot_path framebuffer_path
+ //yabause yabauseut dump yabause_ut_binary_path output_path
++//yabause scanout game_cue frame_count report_path
+ int main(int argc, char *argv[])
+ {
+    int i = 0;
+@@ -1011,7 +1065,17 @@ int main(int argc, char *argv[])
+       return false;
+    }
+ 
+-   if (args.at(1) == "game")
++   if (args.at(1) == "scanout")
++   {
++      if (args.size() != 5) {
++         std::cout << "scanout requires game cue, frame count, and report path." << std::endl;
++         return false;
++      }
++      return game_testing::run_scanout(args.at(2),
++                                        (unsigned int)string_to_int(args.at(3)),
++                                        args.at(4));
++   }
++   else if (args.at(1) == "game")
+    {
+       //game mode
+       if (args.at(2) == "check")
+@@ -1109,4 +1173,21 @@ int main(int argc, char *argv[])
+       std::cout << "Unknown mode argument." << std::endl;
+       return false;
+    }
+-}
+\ No newline at end of file
++}
++
++extern "C" int YuiUseOGLOnThisThread(void) { return 0; }
++extern "C" int YuiRevokeOGLOnThisThread(void) { return 0; }
++
++static int runner_use_bios = 0;
++static std::string runner_backup_path;
++
++extern "C" int YabauseThread_IsUseBios(void) { return runner_use_bios; }
++extern "C" const char *YabauseThread_getBackupPath(void) {
++   return runner_backup_path.c_str();
++}
++extern "C" void YabauseThread_setUseBios(int use) { runner_use_bios = use; }
++extern "C" void YabauseThread_setBackupPath(const char *path) {
++   runner_backup_path = path ? path : "";
++}
++extern "C" void YabauseThread_coldBoot(void) {}
++extern "C" void YabauseThread_resetPlaymode(void) {}
+diff --git a/yabause/src/vidsoft.c b/yabause/src/vidsoft.c
+index 4a61d8ff..e32fd5aa 100644
+--- a/yabause/src/vidsoft.c
++++ b/yabause/src/vidsoft.c
+@@ -3862,6 +3862,10 @@ void VidsoftDrawSprite(Vdp2 * vdp2_regs, u8 * spr_window_mask, u8* vdp1_front_fr
+    }
+ }
+ 
++static u64 vidsoft_scanout_frame = 0;
++static VIDSoftScanoutCallback vidsoft_scanout_callback = NULL;
++static void *vidsoft_scanout_user = NULL;
++
+ void VIDSoftVdp2DrawEnd(void)
+ {
+    if (vidsoft_num_layer_threads > 0)
+@@ -3876,6 +3880,18 @@ void VIDSoftVdp2DrawEnd(void)
+ 
+    TitanRender(dispbuffer);
+ 
++   /* This is the final native VDP2 composite, before VDP1 buffer swapping,
++      OSD drawing, OpenGL upload, host scaling, and presentation. */
++   if (vidsoft_scanout_callback != NULL) {
++      int start_line = 0;
++      int line_increment = 1;
++      Vdp2GetInterlaceInfo(&start_line, &line_increment);
++      vidsoft_scanout_callback(dispbuffer, vdp2width, vdp2height,
++                               line_increment != 1, vidsoft_scanout_frame,
++                               vidsoft_scanout_user);
++   }
++   vidsoft_scanout_frame++;
++
+    VIDSoftVdp1SwapFrameBuffer();
+ 
+    if (OSDUseBuffer())
+@@ -3895,6 +3911,12 @@ void VIDSoftVdp2DrawEnd(void)
+    YuiSwapBuffers();
+ }
+ 
++void VIDSoftSetScanoutCallback(VIDSoftScanoutCallback callback, void *user)
++{
++   vidsoft_scanout_callback = callback;
++   vidsoft_scanout_user = user;
++}
++
+ //////////////////////////////////////////////////////////////////////////////
+ 
+ void VidsoftStartLayerThread(int * layer_priority, int * draw_priority_0, int * num_threads_dispatched, int which_layer, void(*layer_func) (Vdp2* lines, Vdp2* regs, u8* ram, u8* color_ram, struct CellScrollData * cell_data))
+diff --git a/yabause/src/vidsoft.h b/yabause/src/vidsoft.h
+index 9ec519d5..239ec8fe 100644
+--- a/yabause/src/vidsoft.h
++++ b/yabause/src/vidsoft.h
+@@ -31,6 +31,16 @@ extern "C" {
+ 
+ extern pixel_t *dispbuffer;
+ 
++/* A diagnostic observation point for the native, software-rendered VDP2
++   composite.  It is called immediately after TitanRender and before OSD,
++   presentation, or framebuffer swapping.  The callback must copy pixels it
++   retains: dispbuffer belongs to the renderer and is reused next frame. */
++typedef void (*VIDSoftScanoutCallback)(const pixel_t *pixels, int width,
++                                       int height, int interlace,
++                                       u64 frame, void *user);
++
++void VIDSoftSetScanoutCallback(VIDSoftScanoutCallback callback, void *user);
++
+ extern VideoInterface_struct VIDSoft;
+ 
+ void VIDSoftVdp2DrawScreen(int screen);

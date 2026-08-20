@@ -91,6 +91,20 @@
    "witness_sha256": "3e05b51f32b11f3f9d6d8a3a410d9a5c9b0743cd9f1b014d97cc3327f2650ad1"
   }
  },
+ "input_captures": {
+  "baseline": {
+   "path": "C:\\Users\\lambd\\AppData\\Local\\Temp\\claude\\C--Game-Dev-BrooklynBangoutX-AvPSaturnCapabilityTest\\6191dc0f-92e4-47d5-97ba-a258e026f1ec\\scratchpad\\builds\\cap_baseline.json",
+   "requested_rel": 0,
+   "schema": "rp4-street-command-order-capture-v0",
+   "sha256": "791b22ecb5c7904cc9acc084536fb2776d0d83b4e86ea55e4bc5b542b2a19077"
+  },
+  "forward_order": {
+   "path": "C:\\Users\\lambd\\AppData\\Local\\Temp\\claude\\C--Game-Dev-BrooklynBangoutX-AvPSaturnCapabilityTest\\6191dc0f-92e4-47d5-97ba-a258e026f1ec\\scratchpad\\builds\\cap_forward.json",
+   "requested_rel": 0,
+   "schema": "rp4-street-command-order-capture-v0",
+   "sha256": "df56fd35f25a7bf816b430440511d5232ee1fccf29af21845de1a5ab583cf4fa"
+  }
+ },
  "instrument_limits": {
   "emulator_screenshot": "UNAVAILABLE",
   "vdp1_command_table": "READABLE",

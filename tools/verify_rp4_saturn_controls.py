@@ -78,6 +78,27 @@ def sha256_of(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def capture_provenance(path: Path) -> dict:
+    """Return only the reproducible identity of one ignored capture.
+
+    The raw command list stays ignored.  Its absolute replay location is
+    deliberately retained here because this diagnostic has no tracked input
+    substitute; the hash makes an accidental replacement detectable.
+    """
+    resolved = path.resolve()
+    captured = json.loads(resolved.read_text(encoding="utf-8"))
+    if captured.get("schema") != "rp4-street-command-order-capture-v0":
+        raise ValueError(f"not an RP4 command capture: {resolved}")
+    if "requested_rel" not in captured or "commands" not in captured:
+        raise ValueError(f"incomplete RP4 command capture: {resolved}")
+    return {
+        "path": str(resolved),
+        "sha256": sha256_of(resolved),
+        "schema": captured["schema"],
+        "requested_rel": captured["requested_rel"],
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--baseline-capture", type=Path, required=True)
@@ -88,6 +109,8 @@ def main() -> int:
 
     baseline = json.loads(args.baseline_capture.read_text())
     forward = json.loads(args.forward_capture.read_text())
+    baseline_provenance = capture_provenance(args.baseline_capture)
+    forward_provenance = capture_provenance(args.forward_capture)
     witnesses = json.loads(WITNESSES.read_text())
     witness = next(w for w in witnesses["witnesses"]
                    if w.get("streettest_rel") == baseline["requested_rel"])
@@ -182,6 +205,10 @@ def main() -> int:
                 "street_objects": forward["street_objects"],
                 "vdp2_shadow_values": forward["vdp2_shadow_values"],
             },
+        },
+        "input_captures": {
+            "baseline": baseline_provenance,
+            "forward_order": forward_provenance,
         },
         "shadow_values_note":
             "SGL work-RAM shadow of what the program programmed; this is "
