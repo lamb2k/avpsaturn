@@ -10,6 +10,90 @@ git log --oneline -10
 Get-Process mame,yabasanshiro* -ErrorAction SilentlyContinue
 ```
 
+## Implementation report: RP4 overlap-proof corrections - HARD STOP (2026-08-20)
+
+- Worktree: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-ClaudeOverlapCorrections`,
+  branch `claude/rp4-overlap-proof-corrections`, base
+  `6bee037031d5416dd47719b75421cd725ce34b74`. Primary worktree untouched.
+- Commits: `c6751a9` (Chapter 1: acceptance instrument), `c66f7a8`
+  (Chapter 2: full-street + route scans, hard-stop evidence), plus this
+  handoff commit. Chapters 3-4 were NOT started: the book's hard-stop
+  condition fired.
+
+### Baseline (recorded before changes)
+
+- `verify_street_planes.py` exit 0 (201/201 frames, 0 mismatches,
+  after regenerating STRIPS.BIN `7c286173...` and TILES.BIN in the
+  fresh worktree); `verify_street_composite.py` exit 3 (6 executed,
+  2 blocked); `test.ps1` previously exited 0 despite the FALSIFIED
+  tracked result - confirmed and fixed.
+
+### Chapter 1 - acceptance instrument (commit c6751a9)
+
+- `tools/rp4_status.py`: required_controls_total/executed/passed/
+  blocked, `rp4_contract_status` PASS|FALSIFIED|FAIL,
+  `actor_foreground_overlap_status` separated from the independently
+  MEASURED `generic_object_plane_order_status`, live-register readback
+  explicitly not a substitute, stale-evidence rejection, exit map
+  0/1/3.
+- `tests/test_rp4_status.py` written failing-first; all behaviours now
+  hold (blocked/missing controls can never pass, null overlap =>
+  FALSIFIED, synthetic 8/8 fixture passes, corrupt hashes rejected,
+  tracked evidence recomputes).
+- `test.ps1` runs `verify_street_composite.py` under the same
+  private-input gate as the plane verifier; exit 3 FAILS the suite.
+  The suite is intentionally red on this branch.
+
+### Chapter 2 - full-street and route scans (commit c66f7a8) - HARD STOP
+
+- `tools/scan_street_overlaps.py` swept the complete street range
+  2074-5542 (bounds from the scene manifest): 3469/3469 frames reject
+  as `actors_offscreen`. The street scene carries exactly TWO
+  priority-1 objram entries, both parked at (-64,240) on every frame -
+  sentinels, never content.
+- `tools/scan_route_object_priorities.py` extended the falsification to
+  the whole 18000-frame route: priority 1 NEVER draws a visible object
+  anywhere. Visible content: priority 4 (406,858 onscreen objects,
+  15,282 frames) and priority 7 (16,324 objects, 1,045 frames) - a
+  third class the current model does not map.
+- Conclusion: the RP4 contract's actor-class-is-priority-1 premise is
+  falsified route-wide. There is no actor/foreground priority-class
+  overlap to measure in this game's street scene; visible actors and
+  foreground both live in priority 4, ordered by objram slot, and the
+  Saturn STREET_SPR_CLASS_ACTOR (class 1) design maps a class the
+  source never uses for content (live class counts {1: 2} are the two
+  parked sentinels).
+- Evidence: `data/rp4_overlap_candidates.json`,
+  `data/route_object_priority_sweep.json`,
+  `data/rp4_street_readback.json` (composite.status FALSIFIED, 6/8
+  executed, 2 blocked).
+
+### Status
+
+- rp4_contract_status: **FALSIFIED** (intentionally red suite).
+- No substitute fixture manufactured; RP8/S5 not started; Capability
+  Gate 1 unchanged (0/7); NEXT_AGENT_PROMPT untouched.
+- Independently valid work at 6bee037 retained unchanged.
+
+### Architectural ruling requested from Codex
+
+The contract requirement "actor-class (priority 1) object overlapped by
+foreground-class (priority 4) content" cannot be satisfied by this
+title's data. Options for the ruling:
+
+1. Redefine the RP4 overlap proof in terms the source actually uses:
+   object-vs-object ordering WITHIN priority 4 (objram slot order,
+   player/enemy sprites vs foreground props - candidates exist wherever
+   two pri-4 objects overlap), plus the already-MEASURED object-over-
+   plane ordering; retire the class-1 actor lane or repurpose it after
+   measuring what priority 7 carries.
+2. Investigate priority 7 (1,045 frames) and the cps_b priority masks
+   before ruling, in case the actor/foreground split is expressed
+   there.
+3. Keep the FALSIFIED verdict as the permanent RP4 record and move the
+   ordering obligation into RP8 gameplay rendering with a new
+   contract-level definition.
+
 ## Implementation report: RP4-RP7 acceptance corrections (2026-08-20)
 
 - Worktree: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-ClaudeCorrections`,
