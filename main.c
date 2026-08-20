@@ -204,6 +204,7 @@ volatile int avsp_diag_encounter_state;
 volatile int avsp_diag_world_frame;
 volatile int avsp_diag_selected_character;
 volatile int avsp_diag_selection_cursor;
+volatile int avsp_diag_encounter_timer;
 volatile int avsp_diag_frontend_late_reads;
 volatile int avsp_diag_frontend_missing_assets;
 volatile int avsp_diag_frontend_rle_errors;
@@ -225,13 +226,16 @@ typedef struct
 } AvspShotHold;
 static const AvspShotHold avsp_shot_holds[] = {
     { CAP_ENCOUNTER_MAIN_MENU,        60 },  /* settled title             */
-    { CAP_ENCOUNTER_START_TRANSITION,  1 },  /* Start mask, first frame   */
-    { CAP_ENCOUNTER_START_TRANSITION, 10 },
-    { CAP_ENCOUNTER_START_TRANSITION, 20 },
-    { CAP_ENCOUNTER_START_TRANSITION, 29 },  /* Start mask, last frame    */
-    { CAP_ENCOUNTER_CHARACTER_SELECT,  1 },  /* cursor intro cel 0        */
-    { CAP_ENCOUNTER_CHARACTER_SELECT,  2 },  /* cursor intro cel 1        */
-    { CAP_ENCOUNTER_CHARACTER_SELECT,  3 },  /* cursor intro cel 2        */
+    { CAP_ENCOUNTER_START_TRANSITION,  1 },  /* mask plate, first frame   */
+    { CAP_ENCOUNTER_START_TRANSITION, 10 },  /* mask bars, intermediate   */
+    { CAP_ENCOUNTER_START_TRANSITION, 20 },  /* mask bars, intermediate   */
+    { CAP_ENCOUNTER_START_TRANSITION, 25 },  /* mask bars, last drawn     */
+    { CAP_ENCOUNTER_START_TRANSITION, 27 },  /* cursor intro cel 0        */
+    { CAP_ENCOUNTER_START_TRANSITION, 28 },  /* cursor intro cel 1        */
+    { CAP_ENCOUNTER_START_TRANSITION, 29 },  /* cursor intro cel 2        */
+    { CAP_ENCOUNTER_CHARACTER_SELECT,  1 },  /* cursor cycle phase 1      */
+    { CAP_ENCOUNTER_CHARACTER_SELECT,  2 },  /* cursor cycle phase 2      */
+    { CAP_ENCOUNTER_CHARACTER_SELECT,  3 },  /* cursor cycle phase 3      */
     { CAP_ENCOUNTER_CHARACTER_SELECT, 30 },  /* settled cursor 0 Warrior  */
     { CAP_ENCOUNTER_CHARACTER_SELECT, 60 },  /* settled cursor 1 Schaefer */
     { CAP_ENCOUNTER_CHARACTER_SELECT,100 },  /* settled cursor 2 Hunter   */
@@ -1989,12 +1993,16 @@ static void draw_world(void)
                 &frontend_runtime, world.encounter_timer);
         else
         {
-            /* The source begins a four-frame-off/four-frame-on cursor blink
-             * three frames after confirmation. Selection itself is a steady
-             * live two-object marker. */
+            /* The measured blink: the markers first vanish three frames
+             * after the confirm input and alternate every four frames.
+             * cap_confirm_character() zeroes encounter_timer on the confirm
+             * step and cap_update_encounter() increments it in that same
+             * step, so the rendered timer leads frames-since-input by one:
+             * frames since input is encounter_timer - 1. */
             if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM &&
-                world.encounter_timer >= 3)
-                cursor_visible = (((world.encounter_timer - 3) / 4) & 1) != 0;
+                world.encounter_timer - 1 >= 3)
+                cursor_visible =
+                    (((world.encounter_timer - 1 - 3) / 4) & 1) != 0;
             avsp_frontend_draw_cursor(
                 &frontend_runtime, world.selection_cursor,
                 world.encounter_timer, cursor_visible);
@@ -2779,6 +2787,7 @@ static void frame_callback(void)
     avsp_diag_world_frame = world.frame;
     avsp_diag_selected_character = (int)world.selected_character;
     avsp_diag_selection_cursor = world.selection_cursor;
+    avsp_diag_encounter_timer = (int)world.encounter_timer;
     avsp_diag_frontend_late_reads = frontend_runtime.late_disc_reads;
     avsp_diag_frontend_missing_assets = frontend_runtime.missing_assets;
     avsp_diag_frontend_rle_errors = frontend_runtime.rle_errors;

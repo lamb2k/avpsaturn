@@ -105,6 +105,78 @@
    "encounter_state": 1,
    "exact_one_based": 106,
    "hold": 4,
+   "hold_timer": 25,
+   "live_index_range": [
+    1,
+    106
+   ],
+   "live_indices": 106,
+   "matches_old_zero_based_payload": 0,
+   "nbg1_bitmap_enabled": true,
+   "nbg1_bitmap_palette_number": 3,
+   "nbg1_colour_base_entry": 768,
+   "nbg1_colour_number": 1,
+   "palette_boundary_writes": 0,
+   "palette_errors": 0,
+   "rle_errors": 0,
+   "surface": "select",
+   "vdp1_commands": 2
+  },
+  {
+   "bmpna": "0x0300",
+   "chctla": "0x1210",
+   "craofa": "0x0000",
+   "encounter_state": 1,
+   "exact_one_based": 106,
+   "hold": 5,
+   "hold_timer": 27,
+   "live_index_range": [
+    1,
+    106
+   ],
+   "live_indices": 106,
+   "matches_old_zero_based_payload": 0,
+   "nbg1_bitmap_enabled": true,
+   "nbg1_bitmap_palette_number": 3,
+   "nbg1_colour_base_entry": 768,
+   "nbg1_colour_number": 1,
+   "palette_boundary_writes": 0,
+   "palette_errors": 0,
+   "rle_errors": 0,
+   "surface": "select",
+   "vdp1_commands": 1
+  },
+  {
+   "bmpna": "0x0300",
+   "chctla": "0x1210",
+   "craofa": "0x0000",
+   "encounter_state": 1,
+   "exact_one_based": 106,
+   "hold": 6,
+   "hold_timer": 28,
+   "live_index_range": [
+    1,
+    106
+   ],
+   "live_indices": 106,
+   "matches_old_zero_based_payload": 0,
+   "nbg1_bitmap_enabled": true,
+   "nbg1_bitmap_palette_number": 3,
+   "nbg1_colour_base_entry": 768,
+   "nbg1_colour_number": 1,
+   "palette_boundary_writes": 0,
+   "palette_errors": 0,
+   "rle_errors": 0,
+   "surface": "select",
+   "vdp1_commands": 1
+  },
+  {
+   "bmpna": "0x0300",
+   "chctla": "0x1210",
+   "craofa": "0x0000",
+   "encounter_state": 1,
+   "exact_one_based": 106,
+   "hold": 7,
    "hold_timer": 29,
    "live_index_range": [
     1,
@@ -128,80 +200,8 @@
    "craofa": "0x0000",
    "encounter_state": 2,
    "exact_one_based": 106,
-   "hold": 5,
-   "hold_timer": 1,
-   "live_index_range": [
-    1,
-    106
-   ],
-   "live_indices": 106,
-   "matches_old_zero_based_payload": 0,
-   "nbg1_bitmap_enabled": true,
-   "nbg1_bitmap_palette_number": 3,
-   "nbg1_colour_base_entry": 768,
-   "nbg1_colour_number": 1,
-   "palette_boundary_writes": 0,
-   "palette_errors": 0,
-   "rle_errors": 0,
-   "surface": "select",
-   "vdp1_commands": 2
-  },
-  {
-   "bmpna": "0x0300",
-   "chctla": "0x1210",
-   "craofa": "0x0000",
-   "encounter_state": 2,
-   "exact_one_based": 106,
-   "hold": 6,
-   "hold_timer": 2,
-   "live_index_range": [
-    1,
-    106
-   ],
-   "live_indices": 106,
-   "matches_old_zero_based_payload": 0,
-   "nbg1_bitmap_enabled": true,
-   "nbg1_bitmap_palette_number": 3,
-   "nbg1_colour_base_entry": 768,
-   "nbg1_colour_number": 1,
-   "palette_boundary_writes": 0,
-   "palette_errors": 0,
-   "rle_errors": 0,
-   "surface": "select",
-   "vdp1_commands": 2
-  },
-  {
-   "bmpna": "0x0300",
-   "chctla": "0x1210",
-   "craofa": "0x0000",
-   "encounter_state": 2,
-   "exact_one_based": 106,
-   "hold": 7,
-   "hold_timer": 3,
-   "live_index_range": [
-    1,
-    106
-   ],
-   "live_indices": 106,
-   "matches_old_zero_based_payload": 0,
-   "nbg1_bitmap_enabled": true,
-   "nbg1_bitmap_palette_number": 3,
-   "nbg1_colour_base_entry": 768,
-   "nbg1_colour_number": 1,
-   "palette_boundary_writes": 0,
-   "palette_errors": 0,
-   "rle_errors": 0,
-   "surface": "select",
-   "vdp1_commands": 2
-  },
-  {
-   "bmpna": "0x0300",
-   "chctla": "0x1210",
-   "craofa": "0x0000",
-   "encounter_state": 2,
-   "exact_one_based": 106,
    "hold": 8,
-   "hold_timer": 30,
+   "hold_timer": 1,
    "live_index_range": [
     1,
     106
@@ -225,7 +225,7 @@
    "encounter_state": 2,
    "exact_one_based": 106,
    "hold": 9,
-   "hold_timer": 60,
+   "hold_timer": 2,
    "live_index_range": [
     1,
     106
@@ -249,7 +249,7 @@
    "encounter_state": 2,
    "exact_one_based": 106,
    "hold": 10,
-   "hold_timer": 100,
+   "hold_timer": 3,
    "live_index_range": [
     1,
     106
@@ -273,6 +273,78 @@
    "encounter_state": 2,
    "exact_one_based": 106,
    "hold": 11,
+   "hold_timer": 30,
+   "live_index_range": [
+    1,
+    106
+   ],
+   "live_indices": 106,
+   "matches_old_zero_based_payload": 0,
+   "nbg1_bitmap_enabled": true,
+   "nbg1_bitmap_palette_number": 3,
+   "nbg1_colour_base_entry": 768,
+   "nbg1_colour_number": 1,
+   "palette_boundary_writes": 0,
+   "palette_errors": 0,
+   "rle_errors": 0,
+   "surface": "select",
+   "vdp1_commands": 2
+  },
+  {
+   "bmpna": "0x0300",
+   "chctla": "0x1210",
+   "craofa": "0x0000",
+   "encounter_state": 2,
+   "exact_one_based": 106,
+   "hold": 12,
+   "hold_timer": 60,
+   "live_index_range": [
+    1,
+    106
+   ],
+   "live_indices": 106,
+   "matches_old_zero_based_payload": 0,
+   "nbg1_bitmap_enabled": true,
+   "nbg1_bitmap_palette_number": 3,
+   "nbg1_colour_base_entry": 768,
+   "nbg1_colour_number": 1,
+   "palette_boundary_writes": 0,
+   "palette_errors": 0,
+   "rle_errors": 0,
+   "surface": "select",
+   "vdp1_commands": 2
+  },
+  {
+   "bmpna": "0x0300",
+   "chctla": "0x1210",
+   "craofa": "0x0000",
+   "encounter_state": 2,
+   "exact_one_based": 106,
+   "hold": 13,
+   "hold_timer": 100,
+   "live_index_range": [
+    1,
+    106
+   ],
+   "live_indices": 106,
+   "matches_old_zero_based_payload": 0,
+   "nbg1_bitmap_enabled": true,
+   "nbg1_bitmap_palette_number": 3,
+   "nbg1_colour_base_entry": 768,
+   "nbg1_colour_number": 1,
+   "palette_boundary_writes": 0,
+   "palette_errors": 0,
+   "rle_errors": 0,
+   "surface": "select",
+   "vdp1_commands": 2
+  },
+  {
+   "bmpna": "0x0300",
+   "chctla": "0x1210",
+   "craofa": "0x0000",
+   "encounter_state": 2,
+   "exact_one_based": 106,
+   "hold": 14,
    "hold_timer": 140,
    "live_index_range": [
     1,
@@ -296,7 +368,7 @@
    "craofa": "0x0000",
    "encounter_state": 3,
    "exact_one_based": 106,
-   "hold": 12,
+   "hold": 15,
    "hold_timer": 1,
    "live_index_range": [
     1,
@@ -320,7 +392,7 @@
    "craofa": "0x0000",
    "encounter_state": 3,
    "exact_one_based": 106,
-   "hold": 13,
+   "hold": 16,
    "hold_timer": 10,
    "live_index_range": [
     1,
@@ -336,7 +408,7 @@
    "palette_errors": 0,
    "rle_errors": 0,
    "surface": "select",
-   "vdp1_commands": 0
+   "vdp1_commands": 2
   },
   {
    "bmpna": "0x0300",
@@ -344,7 +416,7 @@
    "craofa": "0x0000",
    "encounter_state": 3,
    "exact_one_based": 106,
-   "hold": 14,
+   "hold": 17,
    "hold_timer": 20,
    "live_index_range": [
     1,
@@ -367,7 +439,7 @@
    "chctla": "0x1210",
    "craofa": "0x0000",
    "encounter_state": 4,
-   "hold": 15,
+   "hold": 18,
    "hold_timer": 20,
    "nbg1_bitmap_enabled": true,
    "nbg1_bitmap_palette_number": 2,
@@ -384,6 +456,9 @@
   "perturbed_bank_exact_matches": 63,
   "perturbed_palette_bank": 4,
   "rejected_zero_based_payload_matches": [
+   0,
+   0,
+   0,
    0,
    0,
    0,

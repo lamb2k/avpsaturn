@@ -263,6 +263,17 @@ if ($LASTEXITCODE -ne 0) {
     throw "Frontend CRAM readback verification failed with exit code $LASTEXITCODE."
 }
 
+# Live frontend VDP1 object proof from the same hold capture: every held
+# frame is compared against the ROM-derived converter manifest and the
+# MAME-measured interaction evidence, reporting geometry, colour, order and
+# timing as independent results, with four negative controls. Declared gaps
+# (the VDP2 confirmation shutter and the Round 1 title) are printed, not
+# normalised.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\verify_frontend_objects.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Frontend VDP1 object verification failed with exit code $LASTEXITCODE."
+}
+
 # Sub-state dispatcher enumeration: decodes, from the validated opcode-space
 # image, every per-actor sub-state jump table (actor byte +0x04 indexes a
 # PC-relative word table). Self-tests against the three live-confirmed

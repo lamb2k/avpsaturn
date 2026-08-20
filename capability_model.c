@@ -958,11 +958,27 @@ CapClipRequest cap_world_step(CapWorld *world, const CapInput *input)
 
     if (world->encounter_state == CAP_ENCOUNTER_MAIN_MENU && input->start_pressed)
     {
-        world->encounter_state = CAP_ENCOUNTER_CHARACTER_SELECT;
+        world->encounter_state = CAP_ENCOUNTER_START_TRANSITION;
         world->encounter_timer = 0;
     }
+    else if (world->encounter_state == CAP_ENCOUNTER_START_TRANSITION)
+    {
+        ++world->encounter_timer;
+        if (world->encounter_timer >= CAP_START_TRANSITION_FRAMES)
+        {
+            world->encounter_state = CAP_ENCOUNTER_CHARACTER_SELECT;
+            world->encounter_timer = 0;
+        }
+    }
     else if (world->encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT)
+    {
+        /* The select screen's own frame clock. The source cursor border
+         * cycles through six cels for as long as the screen is up, so the
+         * state needs a timer even though nothing expires on it. Confirming
+         * resets it via cap_confirm_character() exactly as before. */
+        ++world->encounter_timer;
         cap_update_character_select(world, input);
+    }
     if (world->encounter_state != CAP_ENCOUNTER_WAVE_ONE &&
         world->encounter_state != CAP_ENCOUNTER_WAVE_TWO &&
         world->encounter_state != CAP_ENCOUNTER_CLEAR &&

@@ -1,0 +1,430 @@
+{
+ "classification": "Live Saturn VDP1 command-table evidence for the frontend objects; command words, counts and verdicts only, no ROM-derived graphics payload",
+ "colour_rule": "CMDCOLR is Jo's colour-table index, 256 * palette_id + 16 * subbank",
+ "cursor_cycle_phases_proved": [
+  0,
+  1,
+  2,
+  3,
+  4
+ ],
+ "declared_gaps": [
+  "hold 15: the confirmation shutter is a VDP2 bitmap row blackout, so this VDP1 instrument proves only the marker blink at this hold, not the shutter band",
+  "hold 16: the confirmation shutter is a VDP2 bitmap row blackout, so this VDP1 instrument proves only the marker blink at this hold, not the shutter band",
+  "hold 17: the confirmation shutter is a VDP2 bitmap row blackout, so this VDP1 instrument proves only the marker blink at this hold, not the shutter band",
+  "hold 18: Round 1 title still plays R1TITLE.RLE and emits no ROM-derived VDP1 objects"
+ ],
+ "geometry_rule": "each object is an inclusive four-point quad over the fitted source rectangle, left = (x * 352) / 384",
+ "holds": [
+  {
+   "commands_total": 17,
+   "comparison": {
+    "colour": 12,
+    "expected": 12,
+    "failures": [],
+    "geometry": 12,
+    "label": "title",
+    "observed": 12,
+    "order_exact": true
+   },
+   "encounter_state": 0,
+   "encounter_timer": 0,
+   "hold": 0,
+   "hold_timer": 60,
+   "objects": 12,
+   "runtime_command_counter": 12,
+   "selection_cursor": 0,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 6,
+   "comparison": {
+    "colour": 1,
+    "expected": 1,
+    "failures": [],
+    "geometry": 1,
+    "label": "start mask frame 1",
+    "observed": 1,
+    "order_exact": true
+   },
+   "encounter_state": 1,
+   "encounter_timer": 1,
+   "hold": 1,
+   "hold_timer": 1,
+   "objects": 1,
+   "runtime_command_counter": 1,
+   "selection_cursor": 0,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 7,
+   "comparison": {
+    "colour": 2,
+    "expected": 2,
+    "failures": [],
+    "geometry": 2,
+    "label": "start mask frame 10",
+    "observed": 2,
+    "order_exact": true
+   },
+   "encounter_state": 1,
+   "encounter_timer": 10,
+   "hold": 2,
+   "hold_timer": 10,
+   "objects": 2,
+   "runtime_command_counter": 2,
+   "selection_cursor": 0,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 7,
+   "comparison": {
+    "colour": 2,
+    "expected": 2,
+    "failures": [],
+    "geometry": 2,
+    "label": "start mask frame 20",
+    "observed": 2,
+    "order_exact": true
+   },
+   "encounter_state": 1,
+   "encounter_timer": 20,
+   "hold": 3,
+   "hold_timer": 20,
+   "objects": 2,
+   "runtime_command_counter": 2,
+   "selection_cursor": 0,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 7,
+   "comparison": {
+    "colour": 2,
+    "expected": 2,
+    "failures": [],
+    "geometry": 2,
+    "label": "start mask frame 25",
+    "observed": 2,
+    "order_exact": true
+   },
+   "encounter_state": 1,
+   "encounter_timer": 25,
+   "hold": 4,
+   "hold_timer": 25,
+   "objects": 2,
+   "runtime_command_counter": 2,
+   "selection_cursor": 0,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 6,
+   "comparison": {
+    "colour": 1,
+    "expected": 1,
+    "failures": [],
+    "geometry": 1,
+    "label": "cursor intro cel 0",
+    "observed": 1,
+    "order_exact": true
+   },
+   "encounter_state": 1,
+   "encounter_timer": 27,
+   "hold": 5,
+   "hold_timer": 27,
+   "objects": 1,
+   "runtime_command_counter": 1,
+   "selection_cursor": 0,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 6,
+   "comparison": {
+    "colour": 1,
+    "expected": 1,
+    "failures": [],
+    "geometry": 1,
+    "label": "cursor intro cel 1",
+    "observed": 1,
+    "order_exact": true
+   },
+   "encounter_state": 1,
+   "encounter_timer": 28,
+   "hold": 6,
+   "hold_timer": 28,
+   "objects": 1,
+   "runtime_command_counter": 1,
+   "selection_cursor": 0,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 6,
+   "comparison": {
+    "colour": 1,
+    "expected": 1,
+    "failures": [],
+    "geometry": 1,
+    "label": "cursor intro cel 2",
+    "observed": 1,
+    "order_exact": true
+   },
+   "encounter_state": 1,
+   "encounter_timer": 29,
+   "hold": 7,
+   "hold_timer": 29,
+   "objects": 1,
+   "runtime_command_counter": 1,
+   "selection_cursor": 0,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 7,
+   "comparison": {
+    "colour": 2,
+    "expected": 2,
+    "failures": [],
+    "geometry": 2,
+    "label": "select cursor 0 frame 1",
+    "observed": 2,
+    "order_exact": true
+   },
+   "encounter_state": 2,
+   "encounter_timer": 1,
+   "hold": 8,
+   "hold_timer": 1,
+   "objects": 2,
+   "runtime_command_counter": 2,
+   "selection_cursor": 0,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 7,
+   "comparison": {
+    "colour": 2,
+    "expected": 2,
+    "failures": [],
+    "geometry": 2,
+    "label": "select cursor 0 frame 2",
+    "observed": 2,
+    "order_exact": true
+   },
+   "encounter_state": 2,
+   "encounter_timer": 2,
+   "hold": 9,
+   "hold_timer": 2,
+   "objects": 2,
+   "runtime_command_counter": 2,
+   "selection_cursor": 0,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 7,
+   "comparison": {
+    "colour": 2,
+    "expected": 2,
+    "failures": [],
+    "geometry": 2,
+    "label": "select cursor 0 frame 3",
+    "observed": 2,
+    "order_exact": true
+   },
+   "encounter_state": 2,
+   "encounter_timer": 3,
+   "hold": 10,
+   "hold_timer": 3,
+   "objects": 2,
+   "runtime_command_counter": 2,
+   "selection_cursor": 0,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 7,
+   "comparison": {
+    "colour": 2,
+    "expected": 2,
+    "failures": [],
+    "geometry": 2,
+    "label": "select cursor 0 frame 30",
+    "observed": 2,
+    "order_exact": true
+   },
+   "encounter_state": 2,
+   "encounter_timer": 30,
+   "hold": 11,
+   "hold_timer": 30,
+   "objects": 2,
+   "runtime_command_counter": 2,
+   "selection_cursor": 0,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 7,
+   "comparison": {
+    "colour": 2,
+    "expected": 2,
+    "failures": [],
+    "geometry": 2,
+    "label": "select cursor 1 frame 60",
+    "observed": 2,
+    "order_exact": true
+   },
+   "encounter_state": 2,
+   "encounter_timer": 60,
+   "hold": 12,
+   "hold_timer": 60,
+   "objects": 2,
+   "runtime_command_counter": 2,
+   "selection_cursor": 1,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 7,
+   "comparison": {
+    "colour": 2,
+    "expected": 2,
+    "failures": [],
+    "geometry": 2,
+    "label": "select cursor 2 frame 100",
+    "observed": 2,
+    "order_exact": true
+   },
+   "encounter_state": 2,
+   "encounter_timer": 100,
+   "hold": 13,
+   "hold_timer": 100,
+   "objects": 2,
+   "runtime_command_counter": 2,
+   "selection_cursor": 2,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 7,
+   "comparison": {
+    "colour": 2,
+    "expected": 2,
+    "failures": [],
+    "geometry": 2,
+    "label": "select cursor 3 frame 140",
+    "observed": 2,
+    "order_exact": true
+   },
+   "encounter_state": 2,
+   "encounter_timer": 140,
+   "hold": 14,
+   "hold_timer": 140,
+   "objects": 2,
+   "runtime_command_counter": 2,
+   "selection_cursor": 3,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 7,
+   "comparison": {
+    "colour": 2,
+    "expected": 2,
+    "failures": [],
+    "geometry": 2,
+    "label": "confirm blink visible frame 1",
+    "observed": 2,
+    "order_exact": true
+   },
+   "encounter_state": 3,
+   "encounter_timer": 2,
+   "hold": 15,
+   "hold_timer": 1,
+   "objects": 2,
+   "runtime_command_counter": 2,
+   "selection_cursor": 3,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 7,
+   "comparison": {
+    "colour": 2,
+    "expected": 2,
+    "failures": [],
+    "geometry": 2,
+    "label": "confirm blink visible frame 10",
+    "observed": 2,
+    "order_exact": true
+   },
+   "encounter_state": 3,
+   "encounter_timer": 11,
+   "hold": 16,
+   "hold_timer": 10,
+   "objects": 2,
+   "runtime_command_counter": 2,
+   "selection_cursor": 3,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 5,
+   "comparison": {
+    "colour": 0,
+    "expected": 0,
+    "failures": [],
+    "geometry": 0,
+    "label": "confirm blink blank frame 20",
+    "observed": 0,
+    "order_exact": true
+   },
+   "encounter_state": 3,
+   "encounter_timer": 21,
+   "hold": 17,
+   "hold_timer": 20,
+   "objects": 0,
+   "runtime_command_counter": 0,
+   "selection_cursor": 3,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 5,
+   "encounter_state": 4,
+   "encounter_timer": 20,
+   "gap": "Round 1 title still plays R1TITLE.RLE and emits no ROM-derived VDP1 objects",
+   "hold": 18,
+   "hold_timer": 20,
+   "objects": 0,
+   "runtime_command_counter": 0,
+   "selection_cursor": 3,
+   "timing_exact": true
+  }
+ ],
+ "instrument": "pinned Yaba Sanshiro MCP debug server, -FrontendShotTest holds",
+ "negative_controls": {
+  "perturbed_colour_bank_colour_matches": 11,
+  "perturbed_timing_rejected": true,
+  "perturbed_vertex_geometry_matches": 11,
+  "required": "each control must fail",
+  "transposed_order_exact": false
+ },
+ "oracles": [
+  "data/avsp_frontend_assets.json",
+  "data/frontend_interaction.json"
+ ],
+ "order_rule": "VDP1 draws in address order while the runtime emits increasing depth, so frontend objects appear reversed with respect to the schedule",
+ "proven_holds": 18,
+ "proven_objects": 40,
+ "proven_schedules": [
+  "title",
+  "start mask frame 1",
+  "start mask frame 10",
+  "start mask frame 20",
+  "start mask frame 25",
+  "cursor intro cel 0",
+  "cursor intro cel 1",
+  "cursor intro cel 2",
+  "select cursor 0 frame 1",
+  "select cursor 0 frame 2",
+  "select cursor 0 frame 3",
+  "select cursor 0 frame 30",
+  "select cursor 1 frame 60",
+  "select cursor 2 frame 100",
+  "select cursor 3 frame 140",
+  "confirm blink visible frame 1",
+  "confirm blink visible frame 10",
+  "confirm blink blank frame 20"
+ ],
+ "schema": 2,
+ "timing_rule": "the live encounter timer, the route's in-state frame count and the schedule frame must be the same number, and the six-frame cursor border cycle is proved by texture address",
+ "verdict": "PASS WITH DECLARED GAPS"
+}

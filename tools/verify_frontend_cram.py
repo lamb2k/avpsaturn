@@ -40,11 +40,11 @@ CAPTURE = ROOT / "build" / "frontend_cram_readback.json"
 FRONT = ROOT / "build" / "avsp_cd" / "FRONT"
 REPORT = ROOT / "data" / "avsp_frontend_cram_readback.json"
 
-# Hold order is fixed by avsp_shot_holds[] in main.c.  Hold 15 is the Round 1
+# Hold order is fixed by avsp_shot_holds[] in main.c.  Hold 18 is the Round 1
 # title, which still runs through the legacy sequence-hold palette rather than
 # a FRONT payload, so it carries register and counter evidence only.
 SURFACE_BY_HOLD = {0: "title"}
-SURFACE_BY_HOLD.update({index: "select" for index in range(1, 15)})
+SURFACE_BY_HOLD.update({index: "select" for index in range(1, 18)})
 SURFACES = {
     "title": ("TITLE.PAL", "TITLE.RLE"),
     "select": ("SELBACK.PAL", "SELBACK.RLE"),
