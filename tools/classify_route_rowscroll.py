@@ -30,6 +30,7 @@ from census_full_route import RouteState  # noqa: E402
 
 CAPTURE = ROOT / ".deps" / "mame" / "full_route"
 CENSUS = ROOT / "data" / "round1_route_census.json"
+MANIFEST = ROOT / "data" / "avsp_scene_manifest.json"
 OUTPUT = ROOT / "data" / "round1_rowscroll_classification.json"
 
 VIS_TOP = 16
@@ -39,6 +40,15 @@ VIS_H = 224
 def main() -> None:
     census = json.loads(CENSUS.read_text())
     groups = census["groups"]
+    manifest = json.loads(MANIFEST.read_text())
+    runtime_by_provisional = {
+        scene["provisional_scene_id"]: scene["runtime_scene_id"]
+        for scene in manifest["scenes"]}
+    missing = [g["provisional_scene_id"] for g in groups
+               if g["provisional_scene_id"] not in runtime_by_provisional]
+    if missing:
+        raise SystemExit(f"census groups absent from the scene manifest: "
+                         f"{missing[:5]}")
     state = RouteState(CAPTURE)
 
     results = {g["provisional_scene_id"]: {
@@ -86,16 +96,25 @@ def main() -> None:
         entry = results[sid]
         requires = entry["distinct_visible_frames"] > 0
         entry["requires_line_scroll"] = requires
+        entry["provisional_scene_id"] = sid
+        rid = runtime_by_provisional[sid]
         if requires:
-            line_scroll_scenes.append(sid)
-        scenes[sid] = entry
+            line_scroll_scenes.append(rid)
+        # Keyed by the 16-bit runtime_scene_id (the one identity the
+        # runtime interface accepts); the provisional 0x80xx value stays
+        # inside the entry as census provenance.
+        scenes[str(rid)] = entry
 
     # Cross-check: the RP4 street interval (3474..3674) sits inside the
     # street group and was measured constant-zero at selection time.
-    street = next(sid for sid in order
-                  if bounds[sid][0] <= 3474 <= bounds[sid][1])
+    street = runtime_by_provisional[next(
+        sid for sid in order if bounds[sid][0] <= 3474 <= bounds[sid][1])]
     report = {
-        "schema": "round1-rowscroll-classification-v0",
+        "schema": "round1-rowscroll-classification-v1",
+        "scene_id_namespace": "runtime_scene_id (see "
+                              "data/avsp_scene_manifest.json); "
+                              "provisional IDs kept as provenance",
+        "source_census_sha256": manifest["source_census_sha256"],
         "classification": "per-scene row-scroll verdicts; counts and "
                           "spreads only",
         "route": census["route"],
@@ -103,14 +122,14 @@ def main() -> None:
         "line_scroll_scenes": line_scroll_scenes,
         "rp4_street_group": street,
         "rp4_street_requires_line_scroll":
-            scenes[street]["requires_line_scroll"],
+            scenes[str(street)]["requires_line_scroll"],
     }
     OUTPUT.write_text(json.dumps(report, indent=1, sort_keys=True) + "\n",
                       encoding="ascii", newline="\n")
     print(f"rowscroll classification: {len(order)} scenes, "
           f"{len(line_scroll_scenes)} require line scroll: "
           f"{line_scroll_scenes}; street group {street} requires: "
-          f"{scenes[street]['requires_line_scroll']}")
+          f"{scenes[str(street)]['requires_line_scroll']}")
 
 
 if __name__ == "__main__":

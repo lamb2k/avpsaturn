@@ -296,6 +296,11 @@ try {
         if ($BossKoTest) {
             $makeArguments += 'AVSP_BOSS_KO_TEST=1'
         }
+        Invoke-Generator -Name 'Scene runtime-ID header generation' `
+            -Command @($PythonPath, (Join-Path $projectRoot 'tools\gen_avsp_scene_ids.py')) `
+            -RequiredInputs @((Join-Path $projectRoot 'data\avsp_scene_manifest.json')) `
+            -DeclaredOutputs @((Join-Path $projectRoot 'generated\avsp_scene_ids.h'))
+
         # Clean-checkout preflight: every generated header main.c compiles
         # against must exist by now (the prepare stages above produce most);
         # missing ones with runnable deterministic producers are generated

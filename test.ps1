@@ -357,7 +357,14 @@ if ((Test-Path (Join-Path $PSScriptRoot '.deps\mame\full_route\region_index.tsv'
 # chain, and evidence-bound labels (unlabeled scenes need review flags).
 # Offline check against tracked JSON only.
 if (Test-Path (Join-Path $PSScriptRoot 'data\avsp_scene_manifest.json')) {
-    & $PythonPath (Join-Path $PSScriptRoot 'tools\verify_scene_manifest.py')
+    # Scene runtime-ID bridge: regenerate the ignored header from the tracked
+# manifest (capture-free, deterministic) so its invariants are enforced on
+# every test run.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\gen_avsp_scene_ids.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Scene runtime-ID header generation failed with exit code $LASTEXITCODE."
+}
+& $PythonPath (Join-Path $PSScriptRoot 'tools\verify_scene_manifest.py')
     if ($LASTEXITCODE -ne 0) {
         throw "Scene manifest verification failed with exit code $LASTEXITCODE."
     }

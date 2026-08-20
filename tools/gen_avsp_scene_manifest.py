@@ -4,10 +4,13 @@ census.
 
 Every census group becomes one manifest scene carrying:
 
-- the MEASURED source frame range and provisional bit-15 ID;
-- a final stable ID content-addressed from the group signature (CPS-B hash,
-  layer bases, video control, palette population), so it survives
-  re-capture and re-grouping instead of depending on group order;
+- the MEASURED source frame range and provisional bit-15 ID (census
+  provenance only; provisional IDs never reach AvspSceneDef);
+- a content-addressed SIGNATURE ID kept as provenance (CPS-B hash, layer
+  bases, video control, palette population);
+- a runtime_scene_id: group index + 1, range 1..0x7FFF, zero invalid,
+  stable for the pinned census hash recorded in the manifest; a changed
+  census hash requires regeneration under a revised manifest;
 - input dependency derived from the composite input schedule runs;
 - layer/object composition (layer bases, video control, object count range,
   scroll spans, row-scroll variety);
@@ -102,8 +105,8 @@ LABELS: dict[tuple[int, int], dict[str, str]] = {
 # character dies twice); recorded so route-quality work can target them.
 
 
-def stable_id(group: dict) -> str:
-    """Content-addressed stable ID from the group signature."""
+def signature_id(group: dict) -> str:
+    """Content-addressed provenance ID from the group signature."""
     payload = json.dumps({
         "cps_b": group["cps_b_sha256"],
         "layer_bases": group["layer_bases"],
@@ -114,13 +117,20 @@ def stable_id(group: dict) -> str:
     return "S" + hashlib.sha256(payload).hexdigest()[:12]
 
 
+RUNTIME_ID_MAX = 0x7FFF
+
+
 def main() -> None:
-    census = json.loads(CENSUS.read_text())
+    census_bytes = CENSUS.read_bytes()
+    census = json.loads(census_bytes.decode())
     groups = census["groups"]
+    if len(groups) + 1 > RUNTIME_ID_MAX:
+        raise SystemExit(
+            f"runtime_scene_id would exceed 0x7FFF for {len(groups)} groups")
     scenes = []
     seen_ids: dict[str, int] = {}
     for index, group in enumerate(groups):
-        sid = stable_id(group)
+        sid = signature_id(group)
         # Two groups may share a visual signature (e.g. a scene revisited);
         # keep IDs unique by suffixing the occurrence ordinal, which is
         # stable because groups are route-ordered by frame.
@@ -134,7 +144,8 @@ def main() -> None:
         label = LABELS.get(key)
         scene = {
             "index": index,
-            "stable_id": sid,
+            "runtime_scene_id": index + 1,
+            "signature_id": sid,
             "provisional_scene_id": group["provisional_scene_id"],
             "first_frame": group["first_frame"],
             "last_frame": group["last_frame"],
@@ -160,12 +171,15 @@ def main() -> None:
     for index, scene in enumerate(scenes):
         if index + 1 < len(scenes):
             scene["transition"] = {
-                "target_stable_id": scenes[index + 1]["stable_id"],
+                "target_runtime_scene_id":
+                    scenes[index + 1]["runtime_scene_id"],
+                "target_signature_id": scenes[index + 1]["signature_id"],
                 "boundary_reason": scenes[index + 1]["boundary_reason"],
             }
         else:
             scene["transition"] = {
-                "target_stable_id": None,
+                "target_runtime_scene_id": None,
+                "target_signature_id": None,
                 "boundary_reason": "route-end-of-capture",
             }
 
@@ -176,6 +190,11 @@ def main() -> None:
                           "stable IDs, ranges, counts, labels and evidence "
                           "strings only - no ROM bytes or payloads",
         "source_census_schema": census["schema"],
+        "source_census_sha256": hashlib.sha256(census_bytes).hexdigest(),
+        "runtime_id_policy": "runtime_scene_id = group index + 1, range "
+                             "1..0x7FFF, zero invalid, stable for the "
+                             "pinned source_census_sha256; provisional "
+                             "0x80xx IDs are census provenance only",
         "route": census["route"],
         "scene_count": len(scenes),
         "labelled_scenes": labelled,

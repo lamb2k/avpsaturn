@@ -92,6 +92,10 @@ PRODUCERS: dict[str, dict] = {
         "stage": "build.ps1 gen_avsp_table_set_classes.py step",
         "inputs": [".deps/mame"],
     },
+    "avsp_scene_ids.h": {
+        "command": PY + ["tools/gen_avsp_scene_ids.py"],
+        "inputs": ["data/avsp_scene_manifest.json"],
+    },
     "avsp_stage1_route.h": {
         "stage": "prepare_avsp_port.ps1 generate_stage1_route.py step",
         "inputs": ["data/stage1_route.json", ".deps/mame"],
