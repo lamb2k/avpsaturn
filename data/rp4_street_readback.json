@@ -1,0 +1,182 @@
+{
+ "frames_pixel_checked": 124,
+ "frames_structural": 201,
+ "interval": [
+  3474,
+  3674
+ ],
+ "negative_controls": {
+  "aliased_page": {
+   "detail": "aliased 201 vs correct 0 at rel 88",
+   "failed": true
+  },
+  "cycle_colour": {
+   "detail": "14 cycle entries; recolouring any changes the CRAM stream",
+   "failed": true
+  },
+  "object_priority": {
+   "detail": "priority classes {1: 402, 4: 11716}; flipping one moves an entry between the two class counters",
+   "failed": true
+  },
+  "object_x": {
+   "detail": "12118 schedule entries byte-verified against the capture; any x perturbation breaks the equality assert",
+   "failed": true
+  },
+  "patch_dropped": {
+   "detail": "dropping either patch leaves stale pattern names at its 16 cells",
+   "failed": true
+  },
+  "priority_register": {
+   "detail": "class order inverted (actor 6 / foreground 4) breaks the required actor<foreground register order 4<6",
+   "failed": true
+  },
+  "scroll_shift": {
+   "detail": "one-frame shift changes the scroll comparison stream",
+   "failed": true
+  },
+  "wrong_transform": {
+   "detail": "18175 vs 0",
+   "failed": true
+  }
+ },
+ "object_tiles_missing": 0,
+ "objects_verified": 12118,
+ "page_boundary_frames": [
+  88,
+  89,
+  90,
+  91,
+  92,
+  93,
+  94,
+  95,
+  96,
+  97,
+  98,
+  99,
+  100,
+  101,
+  102,
+  103,
+  104,
+  105,
+  106,
+  107,
+  108,
+  109,
+  110,
+  111,
+  112,
+  113,
+  114,
+  115,
+  116,
+  117,
+  118,
+  119,
+  120,
+  121,
+  122,
+  123,
+  124,
+  125,
+  126,
+  127,
+  128,
+  129,
+  130,
+  131,
+  132,
+  133,
+  134,
+  135,
+  136,
+  137,
+  138,
+  139,
+  140,
+  141,
+  142,
+  143,
+  144,
+  145,
+  146,
+  147,
+  148,
+  149,
+  150,
+  151,
+  152,
+  153,
+  154,
+  155,
+  156,
+  157,
+  158,
+  159,
+  160,
+  161,
+  162,
+  163,
+  164,
+  165,
+  166,
+  167,
+  168,
+  169,
+  170,
+  171,
+  172,
+  173,
+  174,
+  175,
+  176,
+  177,
+  178,
+  179,
+  180,
+  181,
+  182,
+  183,
+  184,
+  185,
+  186,
+  187,
+  188,
+  189,
+  190,
+  191,
+  192,
+  193,
+  194,
+  195,
+  196,
+  197,
+  198,
+  199,
+  200
+ ],
+ "plane_mismatch_columns": {
+  "nbg0": [],
+  "nbg1": []
+ },
+ "plane_pixels_mismatched": {
+  "nbg0": 0,
+  "nbg1": 0
+ },
+ "priority_split": {
+  "1": 402,
+  "4": 11716
+ },
+ "schema": "rp4-street-readback-v0",
+ "worst_frame": {
+  "nbg0": [
+   0,
+   -1
+  ],
+  "nbg1": [
+   0,
+   -1
+  ]
+ }
+}

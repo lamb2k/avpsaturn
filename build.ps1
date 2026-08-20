@@ -6,7 +6,9 @@ param(
     [switch]$Release,
     [switch]$VisualTest,
     [switch]$FrontendTest,
+    [switch]$FrontendShotTest,
     [switch]$EncounterTest,
+    [switch]$StreetTest,
     [switch]$BossHitTest,
     [switch]$BossKoTest,
     [switch]$SkipHostTests
@@ -105,7 +107,7 @@ try {
         # Rebuild the private ROM-derived frontend payload after the general
         # asset extractor. The converter owns build\avsp_cd\FRONT and enforces
         # exact source composition, deterministic hashes and both 78,848-byte
-        # phase budgets before the ISO is assembled.
+        # lifetime budgets before the ISO is assembled.
         & $PythonPath (Join-Path $projectRoot 'tools\gen_avsp_frontend.py') `
             '--verify-deterministic'
         if ($LASTEXITCODE -ne 0) {
@@ -160,6 +162,20 @@ try {
         Write-Host "Tile archive: $tileArchiveBytes bytes, scope=street, budget $($tileManifestData.tile_region_budget_used_pct)% used"
 
         $contentRoot = Join-Path $projectRoot 'build\avsp_cd'
+        # RP4 fixture separation: the captured street strips are a
+        # validation fixture and ship only in the StreetTest profile.
+        $fixtureSource = Join-Path $projectRoot 'build\rp4_fixture\STRIPS.BIN'
+        $fixtureStaged = Join-Path $contentRoot 'ST1\STRIPS.BIN'
+        if ($StreetTest) {
+            if (-not (Test-Path -LiteralPath $fixtureSource)) {
+                throw 'StreetTest requires build\rp4_fixture\STRIPS.BIN (run tools\gen_avsp_street_planes.py).'
+            }
+            New-Item -ItemType Directory -Force -Path (Join-Path $contentRoot 'ST1') | Out-Null
+            Copy-Item -LiteralPath $fixtureSource -Destination $fixtureStaged -Force
+        }
+        elseif (Test-Path -LiteralPath $fixtureStaged) {
+            Remove-Item -LiteralPath $fixtureStaged -Force
+        }
         foreach ($metadataName in @('ABS.TXT', 'BIB.TXT', 'CPY.TXT')) {
             Copy-Item -LiteralPath (Join-Path $projectRoot "cd\$metadataName") `
                 -Destination (Join-Path $contentRoot $metadataName) -Force
@@ -168,7 +184,9 @@ try {
         $buildProfile = if ($BossKoTest) { 'boss-ko-test' }
             elseif ($BossHitTest) { 'boss-hit-test' }
             elseif ($EncounterTest) { 'encounter-test' }
+            elseif ($StreetTest) { 'street-test' }
             elseif ($FrontendTest) { 'frontend-test' }
+            elseif ($FrontendShotTest) { 'frontend-shot-test' }
             elseif ($VisualTest) { 'visual-test' }
             else { 'normal-release' }
         $optimizationProfile = if ($Release) { 'release' } else { 'debug' }
@@ -195,7 +213,11 @@ try {
             foreach ($generatedName in @(
                 'main.o', 'capability_model.o', 'game.elf', 'game.raw',
                 'game.iso', 'game.cue', 'game.map', 'stage1_audio.wav',
-                'cd\0.bin', 'build\avsp_cd\0.bin'
+                'cd\0.bin', 'build\avsp_cd\0.bin',
+                'build\avsp_cd\GAME.BIN', 'loader\loader.o',
+                'loader\trampoline.o',
+                'build\loader\loader.elf', 'build\loader\loader.raw',
+                'build\loader\loader.map', 'build\loader\IP.BIN'
             )) {
                 $generatedPath = Join-Path $projectRoot $generatedName
                 if (Test-Path -LiteralPath $generatedPath) {
@@ -216,8 +238,14 @@ try {
         if ($EncounterTest) {
             $makeArguments += 'AVSP_ENCOUNTER_TEST=1'
         }
+        if ($StreetTest) {
+            $makeArguments += 'AVSP_STREET_TEST=1'
+        }
         if ($FrontendTest) {
             $makeArguments += 'AVSP_FRONTEND_TEST=1'
+        }
+        if ($FrontendShotTest) {
+            $makeArguments += 'AVSP_FRONTEND_SHOT_TEST=1'
         }
         if ($BossHitTest) {
             $makeArguments += 'AVSP_BOSS_HIT_TEST=1'
@@ -225,34 +253,97 @@ try {
         if ($BossKoTest) {
             $makeArguments += 'AVSP_BOSS_KO_TEST=1'
         }
+        $loaderBuildRoot = Join-Path $projectRoot 'build\loader'
+        New-Item -ItemType Directory -Path $loaderBuildRoot -Force | Out-Null
         $makeArguments += 'game.raw'
         & $make @makeArguments
         if ($LASTEXITCODE -ne 0) {
             throw "Saturn compilation failed with exit code $LASTEXITCODE."
         }
-        # This is not a Sega Saturn executable-size limit.  A controlled A/B
-        # on the pinned Yaba Sanshiro build boots a 407,280-byte first-read
-        # program and stalls in IP.BIN once the monolithic Jo binary crosses
-        # 400 KiB.  Keep that measured emulator compatibility envelope visible
-        # until this project adopts a small first-stage loader like the
-        # commercial MSHvSF disc.  The legal hardware destination range is
-        # documented separately in the handoff.
-        $firstReadEnvelopeBytes = 400KB
-        $firstReadBinary = Get-Item -LiteralPath `
-            (Join-Path $projectRoot 'game.raw')
-        if ($firstReadBinary.Length -gt $firstReadEnvelopeBytes) {
-            throw "Saturn first-read program is $($firstReadBinary.Length) bytes; " +
-                "the pinned-Yaba monolithic boot envelope is " +
-                "$firstReadEnvelopeBytes bytes. Add a first-stage loader " +
-                "instead of treating this emulator check as a hardware limit."
+        $gameMapText = Get-Content -LiteralPath `
+            (Join-Path $projectRoot 'game.map') -Raw
+        $loaderMakeArguments = @(
+            $makeArguments | Where-Object { $_ -ne 'game.raw' })
+        $loaderMakeArguments += 'build/loader/loader.raw'
+        & $make @loaderMakeArguments
+        if ($LASTEXITCODE -ne 0) {
+            throw "Saturn loader compilation failed with exit code $LASTEXITCODE."
         }
-        $firstReadHeadroom = $firstReadEnvelopeBytes - $firstReadBinary.Length
-        Write-Host "First-read program: $($firstReadBinary.Length) bytes ($firstReadHeadroom bytes below the pinned-Yaba compatibility envelope)"
+        # The pinned Yaba path has a measured 400 KiB monolithic first-read
+        # envelope. The staged architecture keeps only this loader in the BIOS
+        # first read at Jo Engine's proven 0x06004000 destination. It stages
+        # GAME.BIN in 1 MiB low work RAM, then overwrites the loader through a
+        # tiny trampoline at 0x060d0000 and transfers control to GAME.BIN's own
+        # Jo startup at 0x06004000. Attempts to move Jo's AIP first-read
+        # target to 0x060f0000 and 0x060d0000 both left pinned Yaba in its IP
+        # wait loop, even though readback proved the file had transferred.
+        $loaderBinary = Get-Item -LiteralPath `
+            (Join-Path $loaderBuildRoot 'loader.raw')
+        $loaderReadEnvelopeBytes = 400KB
+        if ($loaderBinary.Length -gt $loaderReadEnvelopeBytes) {
+            throw "Saturn first-stage loader is $($loaderBinary.Length) bytes; " +
+                "the measured pinned-Yaba first-read envelope is " +
+                "$loaderReadEnvelopeBytes bytes."
+        }
+        $loaderMapText = Get-Content -LiteralPath `
+            (Join-Path $loaderBuildRoot 'loader.map') -Raw
+        $loaderBssMatch = [regex]::Match(
+            $loaderMapText, '0x([0-9a-fA-F]{8})\s+__bend\s*=')
+        if (-not $loaderBssMatch.Success) {
+            throw 'Could not locate __bend in the first-stage loader map.'
+        }
+        $loaderBssEnd = [Convert]::ToUInt32($loaderBssMatch.Groups[1].Value, 16)
+        if ($loaderBssEnd -gt 0x060CFFF0) {
+            throw ('First-stage loader BSS ends at 0x{0:x8}; it overlaps ' +
+                'the loader diagnostic/trampoline handoff area.') -f $loaderBssEnd
+        }
+        $gamePayload = Get-Item -LiteralPath (Join-Path $projectRoot 'game.raw')
+        if ($gamePayload.Length -gt 1MB) {
+            throw "GAME.BIN exceeds the 1 MiB low-work-RAM staging area."
+        }
+        $gameBssMatch = [regex]::Match(
+            $gameMapText, '0x([0-9a-fA-F]{8})\s+__bend\s*=')
+        if (-not $gameBssMatch.Success) {
+            throw 'Could not locate __bend in the GAME.BIN map.'
+        }
+        $gameBssEnd = [Convert]::ToUInt32($gameBssMatch.Groups[1].Value, 16)
+        # Hard bound: JO_WORK_RAM_SORT_LIST / JO_WORK_RAM_USER_PROGRAM_AND_DATA_END.
+        # Anything at or past 0x060c0000 is outside Jo's user work-RAM area and
+        # inside SGL's sort-list region. Jo's own jo_sprite_init() bounds-checks
+        # __jo_sprite_def/__jo_sprite_pic against this limit and, when it fails,
+        # reports the MISLEADING message 'Please reduce
+        # JO_GLOBAL_MEMORY_SIZE_FOR_MALLOC' before jo_core_suspend() waits
+        # forever for START - which presents as a nondeterministic boot hang,
+        # not as a memory error. This check exists so that failure is caught at
+        # build time instead. The older 0x060d0000 trampoline bound was too
+        # permissive to catch it.
+        if ($gameBssEnd -gt 0x060C0000) {
+            throw ('GAME.BIN BSS ends at 0x{0:x8}, past the 0x060c0000 ' +
+                'user work-RAM limit (SGL sort list). Jo''s jo_sprite_init() ' +
+                'will fail its bounds check and suspend at its error screen. ' +
+                'Reclaim BSS (e.g. JO_MAX_SPRITE) rather than shrinking the ' +
+                'malloc arena or disabling JO_DEBUG.') -f $gameBssEnd
+        }
+        $loaderSummary = ("First-stage loader: {0} bytes, " +
+            "BSS end 0x{1:x8}, {2} bytes below its file envelope") -f `
+            $loaderBinary.Length, $loaderBssEnd, `
+            ($loaderReadEnvelopeBytes - $loaderBinary.Length)
+        Write-Host $loaderSummary
+        $gameSummary = ("Staged GAME.BIN: {0} bytes via low work RAM, " +
+            "BSS end 0x{1:x8}, final entry 0x06004000") -f `
+            $gamePayload.Length, $gameBssEnd
+        Write-Host $gameSummary
         [IO.File]::WriteAllText($profileStamp, $compileProfile)
 
-        & $objcopy '-O' 'binary' 'game.elf' (Join-Path $contentRoot '0.bin')
+        Copy-Item -LiteralPath $loaderBinary.FullName `
+            -Destination (Join-Path $contentRoot '0.bin') -Force
+        Copy-Item -LiteralPath $gamePayload.FullName `
+            -Destination (Join-Path $contentRoot 'GAME.BIN') -Force
+        $loaderIp = Join-Path $loaderBuildRoot 'IP.BIN'
+        & $PythonPath (Join-Path $projectRoot 'tools\build_loader_ip.py') `
+            (Join-Path $resolvedEngine 'Compiler\COMMON\IP.BIN') $loaderIp
         if ($LASTEXITCODE -ne 0) {
-            throw "Could not create the Saturn boot binary (exit code $LASTEXITCODE)."
+            throw "Could not build the staged-loader IP.BIN (exit code $LASTEXITCODE)."
         }
 
         $mkisofsArguments = @(
@@ -267,13 +358,23 @@ try {
             '-abstract', '.\cd\ABS.TXT',
             '-copyright', '.\cd\CPY.TXT',
             '-biblio', '.\cd\BIB.TXT',
-            '-generic-boot', (Join-Path $resolvedEngine 'Compiler\COMMON\IP.BIN'),
+            '-generic-boot', $loaderIp,
             '-full-iso9660-filenames',
             '-o', 'game.iso', $contentRoot
         )
         & $mkisofs @mkisofsArguments
         if ($LASTEXITCODE -ne 0) {
             throw "Could not create game.iso (exit code $LASTEXITCODE)."
+        }
+        foreach ($bootMember in @(
+            @{ Iso = '/0.bin'; Local = (Join-Path $contentRoot '0.bin') },
+            @{ Iso = '/GAME.BIN'; Local = (Join-Path $contentRoot 'GAME.BIN') }
+        )) {
+            & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+                'game.iso' $bootMember.Iso '--equals' $bootMember.Local
+            if ($LASTEXITCODE -ne 0) {
+                throw "Staged boot ISO verification failed for $($bootMember.Iso)."
+            }
         }
         $frontendManifest = Get-Content -LiteralPath `
             (Join-Path $projectRoot 'data\avsp_frontend_assets.json') -Raw |

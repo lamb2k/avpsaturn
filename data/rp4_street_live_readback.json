@@ -1,0 +1,107 @@
+{
+ "cram_offsets": {
+  "nbg0_palette": "colour-ram offset 2",
+  "nbg1_palette": "colour-ram offset 3"
+ },
+ "print_buffer": "",
+ "runtime_ready": 1,
+ "schema": "rp4-street-live-readback-v0",
+ "street_frame": 178,
+ "street_objects": 568,
+ "street_rel_frame": 178,
+ "street_scx": [
+  161,
+  148
+ ],
+ "symbols": {
+  "__bend": "0x0608a8f0",
+  "_avsp_diag_print_buffer": "0x060367c8",
+  "_avsp_diag_runtime_ready": "0x060367c4",
+  "_avsp_diag_street_frame": "0x0603677c",
+  "_avsp_diag_street_objects": "0x06036770",
+  "_avsp_diag_street_scx": "0x06036774"
+ },
+ "vdp1_command_classes": {
+  "0": 1,
+  "1": 2,
+  "2": 446
+ },
+ "vdp2_shadow_registers": {
+  "BGON": "0x0043",
+  "CHCTLA": "0x1010",
+  "CHCTLB": "0x1000",
+  "CRAOFA": "0x0032",
+  "CRAOFB": "0x0000",
+  "MPABN0": "0x2020",
+  "MPABN1": "0x2222",
+  "MPCDN0": "0x2020",
+  "MPCDN1": "0x2222",
+  "MPOFN": "0x0044",
+  "PLSZ": "0x0005",
+  "PNCN0": "0xc000",
+  "PNCN1": "0xc004",
+  "PRINA": "0x0203",
+  "PRINB": "0x0102",
+  "PRISA": "0x0406",
+  "PRISB": "0x0606",
+  "PRISC": "0x0606",
+  "PRISD": "0x0606",
+  "SCXIN0": "0x00a1",
+  "SCXIN1": "0x0094",
+  "SCYIN0": "0x0001",
+  "SCYIN1": "0x0011",
+  "SPCTL": "0x0023",
+  "TVMD": "0x8101"
+ },
+ "vram_canaries": [
+  {
+   "kind": "char_first64",
+   "match": true,
+   "plane": 0,
+   "vram": "0x00000"
+  },
+  {
+   "kind": "char_mid64",
+   "match": true,
+   "plane": 0,
+   "vram": "0x0cc00"
+  },
+  {
+   "kind": "char_last64",
+   "match": true,
+   "plane": 0,
+   "vram": "0x197c0"
+  },
+  {
+   "kind": "pnt_first32",
+   "match": true,
+   "plane": 0,
+   "vram": "0x40000"
+  },
+  {
+   "kind": "char_first64",
+   "match": true,
+   "plane": 1,
+   "vram": "0x20000"
+  },
+  {
+   "kind": "char_mid64",
+   "match": true,
+   "plane": 1,
+   "vram": "0x26dc0"
+  },
+  {
+   "kind": "char_last64",
+   "match": true,
+   "plane": 1,
+   "vram": "0x2db80"
+  },
+  {
+   "kind": "pnt_first32",
+   "match": true,
+   "plane": 1,
+   "vram": "0x44000"
+  }
+ ],
+ "vram_canaries_all_match": true
+}

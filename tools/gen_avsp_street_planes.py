@@ -13,7 +13,7 @@ tools/select_rp4_interval.py (source frames 3474-3674). Produces:
       u16 out_width, u16 height, u16 world_x0, u16 row0,
       u32 pixel_offset (8bpp, row-major, out_width x height)
     2 x 256 u16 Saturn RGB555|0x8000 palettes (index 0 unused/transparent)
-    palette-cycle block: u16 bank_index, u16 period_frames, u16 phase,
+    palette-cycle block: u16 bank_index, u16 period_frames, u16 first_flip,
       2 x 15 u16 alternate colours for the cycling bank
     scroll table: per frame u16 s2x u16 s2y u16 s3x u16 s3y (source regs)
     map-patch schedule: u16 count, then per patch u16 frame_rel, u16 plane,
@@ -53,7 +53,7 @@ from select_rp4_interval import (tile_index, FIRST_FRAME, LAST_FRAME,
                                  VISIBLE_HEIGHT)        # noqa: E402
 
 CAPTURE = ROOT / ".deps" / "mame" / "full_route"
-OUTPUT_BIN = ROOT / "build" / "avsp_cd" / "ST1" / "STRIPS.BIN"
+OUTPUT_BIN = ROOT / "build" / "rp4_fixture" / "STRIPS.BIN"
 OUTPUT_MANIFEST = ROOT / "data" / "rp4_street_planes.json"
 TILES_BIN = ROOT / "build" / "avsp_cd" / "SPR4" / "TILES.BIN"
 
@@ -88,6 +88,7 @@ def main() -> None:
     frames = []
     plane_cells: dict[str, dict] = {n: {} for n in PLANES}
     patches: dict[str, list] = {n: [] for n in PLANES}
+    patch_last: dict[str, dict] = {}
     palette_states: list[bytes] = []
     palette_frames: list[int] = []
     objects_by_frame = []
@@ -146,9 +147,18 @@ def main() -> None:
                     known = plane_cells[name].get(key)
                     if known is None:
                         plane_cells[name][key] = value
-                    elif known != value:
-                        patches[name].append((frame, unwrapped, row, value))
-                        plane_cells[name][key] = value
+                        patch_state = patch_last.setdefault(name, {})
+                        patch_state[key] = value
+                    else:
+                        # The BASE strip keeps the FIRST-seen content; every
+                        # later change becomes a replayable patch event (the
+                        # runtime starts from the base and applies patches
+                        # in frame order).
+                        patch_state = patch_last.setdefault(name, {})
+                        if patch_state.get(key, known) != value:
+                            patches[name].append((frame, unwrapped, row,
+                                                  value))
+                            patch_state[key] = value
     state.close()
 
     # --- colour LUTs: lazily assigned from pens actually rendered ---------
@@ -264,6 +274,11 @@ def main() -> None:
                 "out_w": out_w, "height": height}
 
     packed = {name: pack_cells(name) for name in PLANES}
+    # The serialized pattern-name grid must stay the FIRST-seen base;
+    # patch processing below keeps mutating pack["pnt"] as its working
+    # current-state copy while the snapshot is what ships in the file.
+    for pack in packed.values():
+        pack["base_pnt"] = list(pack["pnt"])
 
     # Map patches: update strip pixels, recompute affected cells, emit
     # pattern-name updates (new characters appended to the pool).
@@ -359,9 +374,10 @@ def main() -> None:
                               colours_ab[1]))
     period = (palette_frames[2] - palette_frames[1]) \
         if len(palette_frames) > 2 else 4
-    phase = (palette_frames[1] - FIRST_FRAME) % (period * 2) \
+    first_flip = (palette_frames[1] - FIRST_FRAME) \
         if len(palette_frames) > 1 else 0
-    blob += struct.pack(">HHH", period, phase, len(cycle_entries))
+    blob += struct.pack(">HHH", period, first_flip,
+                       len(cycle_entries))
     for index, colour_a, colour_b in cycle_entries:
         blob += struct.pack(">HHH", index, colour_a, colour_b)
 
@@ -401,7 +417,7 @@ def main() -> None:
         char_offset = len(blob)
         blob += pack["char_pool"]
         pnt_offset = len(blob)
-        blob += b"".join(struct.pack(">H", i) for i in pack["pnt"])
+        blob += b"".join(struct.pack(">H", i) for i in pack["base_pnt"])
         struct.pack_into(">HHHHHHII", blob, header_pos[name],
                          pack["cell_cols"], pack["cell_rows"],
                          pack["world_x0"], pack["row0"],
@@ -414,6 +430,10 @@ def main() -> None:
         "schema": "rp4-street-planes-v0",
         "classification": "tracked manifest of the private STRIPS.BIN; "
                           "dimensions, counts and hashes only",
+        "fixture_role": "VALIDATION FIXTURE ONLY: the captured object "
+                        "schedule and strips ship solely in the "
+                        "AVSP_STREET_TEST profile and must never become "
+                        "a production scene or gameplay payload",
         "interval": {"first_frame": FIRST_FRAME, "last_frame": LAST_FRAME},
         "strips_bin_sha256": hashlib.sha256(blob).hexdigest(),
         "strips_bin_bytes": len(blob),
@@ -432,7 +452,7 @@ def main() -> None:
             } for name in PLANES
         },
         "palette_cycle": {"bank": cycle_bank, "period_frames": period,
-                          "phase": phase,
+                          "first_flip": first_flip,
                           "lut_entries": len(cycle_entries),
                           "states": len(palette_states)},
         "map_patches": len(patch_serial),

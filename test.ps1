@@ -313,6 +313,28 @@ if (Test-Path (Join-Path $PSScriptRoot 'data\round1_route_census.json')) {
     }
 }
 
+# RP4 fixture/production separation: the captured street strips and object
+# schedule are a validation fixture; this gate fails if main.c references
+# them outside AVSP_STREET_TEST, if the tracked manifest loses its
+# fixture_role classification, or if a non-StreetTest build left the fixture
+# staged in the ISO content root.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\verify_fixture_separation.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Fixture separation gate failed with exit code $LASTEXITCODE."
+}
+
+# RP4 street plane proof: full offline reconstruction of the representative
+# interval (structural checks on all 201 frames, pixel comparison on the
+# sampled set, eight negative controls). Requires the private full-route
+# capture and the generated fixture; skipped when either is absent.
+if ((Test-Path (Join-Path $PSScriptRoot '.deps\mame\full_route\region_index.tsv')) -and
+        (Test-Path (Join-Path $PSScriptRoot 'build\rp4_fixture\STRIPS.BIN'))) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tools\verify_street_planes.py')
+    if ($LASTEXITCODE -ne 0) {
+        throw "Street plane verification failed with exit code $LASTEXITCODE."
+    }
+}
+
 # Sub-state dispatcher enumeration: decodes, from the validated opcode-space
 # image, every per-actor sub-state jump table (actor byte +0x04 indexes a
 # PC-relative word table). Self-tests against the three live-confirmed

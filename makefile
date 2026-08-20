@@ -25,6 +25,9 @@ CCFLAGS += -include avsp_video_config.h
 ifneq ($(AVSP_VISUAL_TEST),)
 CCFLAGS += -DAVSP_VISUAL_TEST=1
 endif
+ifneq ($(AVSP_STREET_TEST),)
+CCFLAGS += -DAVSP_STREET_TEST=1
+endif
 ifneq ($(AVSP_ENCOUNTER_TEST),)
 CCFLAGS += -DAVSP_ENCOUNTER_TEST=1
 endif

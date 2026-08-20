@@ -1,5 +1,6 @@
 {
  "classification": "tracked manifest of the private STRIPS.BIN; dimensions, counts and hashes only",
+ "fixture_role": "VALIDATION FIXTURE ONLY: the captured object schedule and strips ship solely in the AVSP_STREET_TEST profile and must never become a production scene or gameplay payload",
  "interval": {
   "first_frame": 3474,
   "last_frame": 3674
@@ -13,22 +14,22 @@
  },
  "palette_cycle": {
   "bank": 1,
+  "first_flip": 4,
   "lut_entries": 14,
   "period_frames": 4,
-  "phase": 4,
   "states": 51
  },
  "planes": {
   "scroll2": {
    "cell_cols": 66,
    "cell_rows": 30,
-   "char_pool_bytes": 102144,
+   "char_pool_bytes": 104448,
    "colours_used": 197,
    "height": 240,
    "out_width": 527,
    "pixel_sha256": "0fbd6d436fea117d59da75281bca8eae9b5b7a291179a7dd38a20946ef6c63c9",
    "row0": 33,
-   "unique_chars": 1596,
+   "unique_chars": 1632,
    "world_x0": 832
   },
   "scroll3": {
@@ -45,7 +46,7 @@
   }
  },
  "schema": "rp4-street-planes-v0",
- "strips_bin_bytes": 267350,
- "strips_bin_sha256": "be4b3210383a28d18d70b00df0b0abfa9e5cf41fc38112ce94dcfd9b91fe5fbf",
+ "strips_bin_bytes": 269654,
+ "strips_bin_sha256": "7c28617351ec2bb2099d10e28de561f0ef64feb2fbb1784c5dae11d29c7f1c22",
  "transform": "source_x = (out_x*383+175)//351, unwrapped world space, shared by strips, patches and scroll"
 }
