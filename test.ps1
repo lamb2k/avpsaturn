@@ -119,6 +119,17 @@ if ($LASTEXITCODE -ne 0) {
     throw "Disc-read guard test failed with exit code $LASTEXITCODE."
 }
 
+# STRIPS.BIN bundle validator: a synthetic valid bundle plus corrupt magic,
+# version, short-read, offset, count, truncated-patch and truncated-object
+# controls. AddressSanitizer + exact-size heap copies prove no rejected case
+# reads outside the declared length. The module itself stays C90 for the
+# Saturn build; the sanitizer harness is host-only.
+$streetBundleCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O1 -g -fsanitize=address,undefined avsp_street_bundle.c tests/avsp_street_bundle_test.c -o build/avsp_street_bundle_test && ./build/avsp_street_bundle_test"
+& $wsl.Source sh '-lc' $streetBundleCommand
+if ($LASTEXITCODE -ne 0) {
+    throw "Street bundle validator test failed with exit code $LASTEXITCODE."
+}
+
 $animCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_anim_script.c tests/avsp_anim_script_test.c -o build/avsp_anim_script_test && ./build/avsp_anim_script_test"
 & $wsl.Source sh '-lc' $animCommand
 if ($LASTEXITCODE -ne 0) {
@@ -370,6 +381,21 @@ if (Test-Path (Join-Path $PSScriptRoot 'data\round1_rowscroll_classification.jso
     if ($LASTEXITCODE -ne 0) {
         throw "Row-scroll classification verification failed with exit code $LASTEXITCODE."
     }
+}
+
+# Clean-checkout coverage: every generated header included by tracked
+# sources must have a producer mapping, and the staged-loader sources
+# must be tracked. Capture-free.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\preflight_generated_inputs.py') --check-mapping
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated-input mapping check failed with exit code $LASTEXITCODE."
+}
+
+# Manifest paths must stay lexical repository-relative even when reached
+# through an NTFS junction (correction-worktree .deps/avspu junctions).
+& $PythonPath (Join-Path $PSScriptRoot 'tests	est_anim_manifest_paths.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Manifest junction-path test failed with exit code $LASTEXITCODE."
 }
 
 # Sub-state dispatcher enumeration: decodes, from the validated opcode-space

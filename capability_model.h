@@ -64,6 +64,7 @@ typedef enum
 typedef enum
 {
     CAP_ENCOUNTER_MAIN_MENU = 0,
+    CAP_ENCOUNTER_START_TRANSITION,
     CAP_ENCOUNTER_CHARACTER_SELECT,
     CAP_ENCOUNTER_CHARACTER_CONFIRM,
     CAP_ENCOUNTER_ROUND_TITLE,
@@ -175,6 +176,10 @@ typedef struct
 /* A direction write becomes visible three source frames after its input edge.
  * A held direction cannot generate another move until released. */
 #define CAP_SELECTION_MOVE_LATENCY_FRAMES 3
+
+/* Source frames 1689-1718: five-frame full mask, measured centre-out reveal,
+ * one empty hold, then three cursor-intro objects. */
+#define CAP_START_TRANSITION_FRAMES 30
 
 /* Diagnostics: how many landed player hits each defender geometry resolved.
  * cap_rom_box_hits counts contacts decided by a ROM-driven actor's MEASURED

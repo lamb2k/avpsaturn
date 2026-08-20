@@ -58,6 +58,36 @@ if (-not $PythonPath -or -not (Test-Path -LiteralPath $PythonPath)) {
     throw 'Python 3 with Pillow is required. Pass its executable with -PythonPath.'
 }
 
+# One shared generator harness (clean-checkout correction): runs a
+# generator, checks its exit code, confirms every declared output exists
+# and is nonzero, and names the exact missing private input when the
+# generation cannot run at all.
+function Invoke-Generator {
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][string[]]$Command,
+        [string[]]$RequiredInputs = @(),
+        [string[]]$DeclaredOutputs = @()
+    )
+    foreach ($required in $RequiredInputs) {
+        if (-not (Test-Path -LiteralPath $required)) {
+            throw "$Name cannot run: required private input is missing: $required"
+        }
+    }
+    & $Command[0] @($Command[1..($Command.Count - 1)])
+    if ($LASTEXITCODE -ne 0) {
+        throw "$Name failed with exit code $LASTEXITCODE."
+    }
+    foreach ($output in $DeclaredOutputs) {
+        if (-not (Test-Path -LiteralPath $output)) {
+            throw "$Name exited 0 but did not produce $output."
+        }
+        if ((Get-Item -LiteralPath $output).Length -eq 0) {
+            throw "$Name produced an empty $output."
+        }
+    }
+}
+
 $projectUri = [Uri]($projectRoot.TrimEnd('\') + '\')
 $engineUri = [Uri]($resolvedEngine.TrimEnd('\') + '\')
 $relativeEngine = [Uri]::UnescapeDataString($projectUri.MakeRelativeUri($engineUri).ToString()).TrimEnd('/')
@@ -103,6 +133,19 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "AvP Stage 1 asset preparation failed with exit code $LASTEXITCODE."
         }
+
+        # ROM-derived actor emission windows and boss pose tables: explicit
+        # build steps (not preflight side effects), each through the shared
+        # generator harness so a missing private input is named exactly.
+        Invoke-Generator -Name 'Actor emission-window generation' `
+            -Command @($PythonPath, (Join-Path $projectRoot 'tools\gen_avsp_emit_windows.py')) `
+            -RequiredInputs @((Join-Path $projectRoot '.deps\mame\actorprobe\decrypted_program_2m.bin')) `
+            -DeclaredOutputs @((Join-Path $projectRoot 'generated\avsp_emit_windows.h'))
+        Invoke-Generator -Name 'Boss ROM pose-table generation' `
+            -Command @($PythonPath, (Join-Path $projectRoot 'tools\gen_boss_rom_data.py')) `
+            -RequiredInputs @((Join-Path $projectRoot '.deps\mame\actorprobe'),
+                              (Join-Path $projectRoot 'generated\avsp_boss_animation.h')) `
+            -DeclaredOutputs @((Join-Path $projectRoot 'generated\avsp_boss_rom.h'))
 
         # Rebuild the private ROM-derived frontend payload after the general
         # asset extractor. The converter owns build\avsp_cd\FRONT and enforces
@@ -253,6 +296,16 @@ try {
         if ($BossKoTest) {
             $makeArguments += 'AVSP_BOSS_KO_TEST=1'
         }
+        # Clean-checkout preflight: every generated header main.c compiles
+        # against must exist by now (the prepare stages above produce most);
+        # missing ones with runnable deterministic producers are generated
+        # here, and anything else fails with the exact missing generator or
+        # private input instead of a bare missing-include error mid-make.
+        & $PythonPath (Join-Path $projectRoot 'tools\preflight_generated_inputs.py')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Generated-input preflight failed with exit code $LASTEXITCODE."
+        }
+
         $loaderBuildRoot = Join-Path $projectRoot 'build\loader'
         New-Item -ItemType Directory -Path $loaderBuildRoot -Force | Out-Null
         $makeArguments += 'game.raw'

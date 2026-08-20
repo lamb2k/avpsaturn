@@ -44,6 +44,10 @@ static void test_character_selection_semantics(void)
     memset(&input, 0, sizeof(input));
     input.start_pressed = 1;
     (void)cap_world_step(&world, &input);
+    assert(world.encounter_state == CAP_ENCOUNTER_START_TRANSITION);
+    step_empty(&world, CAP_START_TRANSITION_FRAMES - 1);
+    assert(world.encounter_state == CAP_ENCOUNTER_START_TRANSITION);
+    step_empty(&world, 1);
     assert(world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT);
 
     memset(&input, 0, sizeof(input));
@@ -114,6 +118,8 @@ static void start_encounter(CapWorld *world)
     memset(&input, 0, sizeof(input));
     input.start_pressed = 1;
     (void)cap_world_step(world, &input);
+    assert(world->encounter_state == CAP_ENCOUNTER_START_TRANSITION);
+    step_empty(world, CAP_START_TRANSITION_FRAMES);
     assert(world->encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT);
     assert(world->encounter_started == 0);
     memset(&input, 0, sizeof(input));

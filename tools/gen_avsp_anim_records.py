@@ -34,6 +34,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -51,11 +52,17 @@ SPAN_JOIN_GAP = 8   # runs closer than this are merged rather than split
 
 
 def manifest_path(path: Path) -> str:
-    resolved = path.resolve()
-    try:
-        return str(resolved.relative_to(ROOT)).replace("\\", "/")
-    except ValueError:
-        return str(resolved).replace("\\", "/")
+    """Repo-relative POSIX path, never absolute.
+
+    os.path.abspath instead of Path.resolve(): resolve() follows the
+    private .deps/avspu directory junctions, which made the tracked
+    manifest serialize the junction TARGET's absolute path and become
+    checkout-location-dependent.
+    """
+    relative = os.path.relpath(os.path.abspath(str(path)), str(ROOT))
+    if relative.startswith(".."):
+        raise SystemExit(f"manifest path escapes the repository: {path}")
+    return relative.replace("\\", "/")
 
 
 def u16(b: bytes, o: int) -> int:
