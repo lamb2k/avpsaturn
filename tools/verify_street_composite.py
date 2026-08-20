@@ -36,6 +36,7 @@ Results merge into data/rp4_street_readback.json under "composite".
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -47,6 +48,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 import extract_avspu_stage1 as avsp                     # noqa: E402
 from census_full_route import RouteState                # noqa: E402
 from select_rp4_interval import FIRST_FRAME, LAST_FRAME  # noqa: E402
+from rp4_status import build_status, check_evidence, exit_code  # noqa: E402
 
 CAPTURE = ROOT / ".deps" / "mame" / "full_route"
 READBACK = ROOT / "data" / "rp4_street_readback.json"
@@ -163,12 +165,93 @@ def diff_count(a: Image.Image, b: Image.Image) -> int:
                if pa[x, y][:3] != pb[x, y][:3])
 
 
+def rgb555(rgb: tuple) -> int:
+    r, g, b = rgb
+    return ((b >> 3) << 10) | ((g >> 3) << 5) | (r >> 3)
+
+
+def find_overlap(gfx, frame, f):
+    """First qualifying actor/foreground overlap in one frame.
+
+    Qualifying: both surfaces opaque at the pixel, and at least one such
+    pixel where the two colours DIFFER (the witness), so the priority
+    perturbations are observable. Records identity, coordinates, pixel
+    counts and the baseline RGB555 the truth shows."""
+    actor_words = words_for_priority(frame.words, ACTOR_PRIORITY)
+    actor_img, actor_entries = avsp.decode_objects(
+        gfx, actor_words, frame.palette)
+    if not actor_entries:
+        return None
+    fore_img, fore_entries = avsp.decode_objects(
+        gfx, words_for_priority(frame.words, FOREGROUND_PRIORITY),
+        frame.palette)
+    pa, pf = actor_img.load(), fore_img.load()
+    pixels = []
+    witness = None
+    for y in range(224):
+        for x in range(384):
+            if pa[x, y][3] and pf[x, y][3]:
+                pixels.append([x, y])
+                if witness is None and pa[x, y][:3] != pf[x, y][:3]:
+                    witness = (x, y)
+    if not pixels or witness is None:
+        return None
+    wx, wy = witness
+
+    def entry_at(entries, x, y):
+        for index, e in enumerate(entries):
+            if (e["screen_x"] <= x < e["screen_x"] + e["width"] and
+                    e["screen_y"] <= y < e["screen_y"] + e["height"]):
+                return index, e
+        return None, None
+
+    actor_i, actor = entry_at(actor_entries, wx, wy)
+    fore_i, fore = entry_at(fore_entries, wx, wy)
+    truth = Image.open(
+        CAPTURE / f"reference_{f:05d}.png").convert("RGBA").load()
+    return {
+        "frame": f,
+        "overlap_pixel_count": len(pixels),
+        "overlap_pixels_sample": pixels[:16],
+        "witness_source_xy": [wx, wy],
+        "fitted_xy": [(wx * 351 - 175 + 382) // 383, wy],
+        "actor_entry_index": actor_i,
+        "actor_slot_offset": actor["offset"],
+        "actor_tile_code": actor["tile_code"],
+        "actor_colour": actor["colour"],
+        "actor_priority": ACTOR_PRIORITY,
+        "foreground_entry_index": fore_i,
+        "foreground_slot_offset": fore["offset"],
+        "foreground_tile_code": fore["tile_code"],
+        "foreground_colour": fore["colour"],
+        "foreground_priority": FOREGROUND_PRIORITY,
+        "expected_winner": "foreground-class VDP1",
+        "witness_baseline_rgb555": rgb555(truth[wx, wy][:3]),
+        "source_xy": [wx, wy],
+    }
+
+
+def evidence_hashes(overlap) -> dict:
+    """Input hashes pinning this evidence to its sources."""
+    strips = ROOT / "build" / "rp4_fixture" / "STRIPS.BIN"
+    census = ROOT / "data" / "round1_route_census.json"
+    frame = overlap["frame"] if overlap else FIRST_FRAME
+    png = CAPTURE / f"reference_{frame:05d}.png"
+    return {
+        "strips_bin": hashlib.sha256(strips.read_bytes()).hexdigest(),
+        "route_census": hashlib.sha256(census.read_bytes()).hexdigest(),
+        "witness_frame_png":
+            hashlib.sha256(png.read_bytes()).hexdigest(),
+    }
+
+
 def main() -> None:
     state = RouteState(CAPTURE)
     gfx = avsp.load_gfx_region()
 
     frames: dict[int, Frame] = {}
     overlap = None
+    overlap_frame = None
     mismatch_total = 0
     mismatch_max = 0
     frames_checked = 0
@@ -192,40 +275,15 @@ def main() -> None:
         mismatch_max = max(mismatch_max, mism)
         frames_checked += 1
 
-        # Deliberate-overlap search: first pixel where actor-class and
-        # foreground-class objects are both opaque.
+        # Deliberate-overlap search: pixels where actor-class and
+        # foreground-class objects are both opaque. The witness pixel
+        # must have DIFFERING actor/foreground colours so the priority
+        # perturbations are observable in the composite.
         if overlap is None:
-            actor_img, actor_entries = avsp.decode_objects(
-                gfx, words_for_priority(frame.words, ACTOR_PRIORITY),
-                frame.palette)
-            if actor_entries:
-                fore_img, _ = avsp.decode_objects(
-                    gfx, words_for_priority(frame.words,
-                                            FOREGROUND_PRIORITY),
-                    frame.palette)
-                pa, pf = actor_img.load(), fore_img.load()
-                for y in range(224):
-                    for x in range(384):
-                        if pa[x, y][3] and pf[x, y][3]:
-                            entry = next(
-                                e for e in actor_entries
-                                if e["screen_x"] <= x <
-                                e["screen_x"] + e["width"] and
-                                e["screen_y"] <= y <
-                                e["screen_y"] + e["height"])
-                            overlap = {
-                                "frame": f,
-                                "source_xy": [x, y],
-                                "fitted_x": (x * 351 - 175 + 382) // 383,
-                                "object_offset": entry["offset"],
-                                "tile_code": entry["tile_code"],
-                                "colour": entry["colour"],
-                                "expected_winner":
-                                    "foreground-class VDP1",
-                            }
-                            break
-                    if overlap:
-                        break
+            found = find_overlap(gfx, frame, f)
+            if found is not None:
+                overlap = found
+                overlap_frame = frame
         if f % 25 == 0:
             print(f"frame {f}: composite mismatch {mism}")
 
@@ -303,13 +361,47 @@ def main() -> None:
         "detected": d > 0, "pixels": d,
         "detail": "foreground class composited below NBG0"}
 
-    for name in ("overlap_object_shift", "overlap_priority_swap"):
-        controls[name] = {
-            "detected": None,
-            "detail": "BLOCKED: requires the measured overlap; the "
-                      "interval is falsified (no actor-class pixel is "
-                      "onscreen in frames "
-                      f"{FIRST_FRAME}-{LAST_FRAME})"}
+    if overlap is not None and overlap_frame is not None:
+        obase = compose(gfx, overlap_frame)
+        # words_for_priority indexes RAW objram slots (offset // 4);
+        # decoder entry lists are reverse-ordered, so use the recorded
+        # raw slot offsets, never the decoder indices.
+        actor_i = overlap["actor_slot_offset"] // 4
+        fore_i = overlap["foreground_slot_offset"] // 4
+        wx, wy = overlap["witness_source_xy"]
+
+        shifted = words_for_priority(
+            overlap_frame.words, None, shift_x={actor_i: 1})
+        d = diff_count(compose(gfx, overlap_frame, words=shifted), obase)
+        controls["overlap_object_shift"] = {
+            "detected": d > 0, "pixels": d,
+            "detail": f"measured overlap actor (entry {actor_i}) "
+                      f"shifted +1px at frame {overlap['frame']}"}
+
+        swapped = words_for_priority(
+            overlap_frame.words, None,
+            swap_priority={actor_i: FOREGROUND_PRIORITY,
+                           fore_i: ACTOR_PRIORITY})
+        perturbed = compose(gfx, overlap_frame, words=swapped)
+        d = diff_count(perturbed, obase)
+        witness_changed = (perturbed.load()[wx, wy][:3] !=
+                           obase.load()[wx, wy][:3])
+        overlap["baseline_rgb555"] = overlap["witness_baseline_rgb555"]
+        overlap["perturbed_rgb555"] = rgb555(
+            perturbed.load()[wx, wy][:3])
+        controls["overlap_priority_swap"] = {
+            "detected": d > 0 and witness_changed, "pixels": d,
+            "detail": f"actor entry {actor_i} and foreground entry "
+                      f"{fore_i} classes swapped; witness pixel "
+                      f"({wx},{wy}) changed: {witness_changed}"}
+    else:
+        for name in ("overlap_object_shift", "overlap_priority_swap"):
+            controls[name] = {
+                "detected": None,
+                "detail": "BLOCKED: requires the measured overlap; the "
+                          "interval is falsified (no qualifying "
+                          "actor/foreground overlap in frames "
+                          f"{FIRST_FRAME}-{LAST_FRAME})"}
 
     executed = {k: v for k, v in controls.items()
                 if v["detected"] is not None}
@@ -328,25 +420,36 @@ def main() -> None:
                             "RP4 interval falsified: no deliberate "
                             "overlap"),
         "controls": controls,
-        "controls_executed": len(executed),
-        "controls_all_detected": all_detected,
     }
 
     readback = json.loads(READBACK.read_text())
+    planes_mismatched = sum(
+        readback.get("plane_pixels_mismatched", {}).values())
+    status = build_status(controls, overlap, planes_mismatched)
+    report["status"] = status
+    # Ambiguous aggregate kept only as a strict alias of the status
+    # block so stale consumers cannot read a softer answer.
+    report["controls_all_detected"] = status["controls_all_detected"]
+
+    hashes = evidence_hashes(overlap)
+    report["evidence_sha256"] = hashes
+    check_evidence(report["evidence_sha256"], evidence_hashes(overlap))
+
     readback["composite"] = report
     READBACK.write_text(
         json.dumps(readback, indent=1, sort_keys=True) + "\n",
         encoding="ascii", newline="\n")
 
+    blocked = status["required_controls_blocked"]
     print(f"composite: {frames_checked} frames, mismatch total "
-          f"{mismatch_total} (max {mismatch_max}/frame), controls "
-          f"{'PASS' if all_detected else 'FAIL'} "
-          f"({len(executed)} executed, 2 blocked)")
-    if overlap is None:
+          f"{mismatch_total} (max {mismatch_max}/frame), "
+          f"{status['required_controls_passed']}/"
+          f"{status['required_controls_total']} controls passed, "
+          f"{blocked} blocked, rp4_contract_status="
+          f"{status['rp4_contract_status']}")
+    if status["rp4_contract_status"] == "FALSIFIED":
         print("RP4 interval falsified: no deliberate overlap")
-        raise SystemExit(3)
-    if not all_detected:
-        raise SystemExit(1)
+    raise SystemExit(exit_code(status))
 
 
 if __name__ == "__main__":

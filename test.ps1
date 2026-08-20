@@ -350,6 +350,18 @@ if ((Test-Path (Join-Path $PSScriptRoot '.deps\mame\full_route\region_index.tsv'
     if ($LASTEXITCODE -ne 0) {
         throw "Street plane verification failed with exit code $LASTEXITCODE."
     }
+
+    # RP4 composite/priority proof under the SAME private-input gate.
+    # Exit 0 is required; exit 1 is a failed control; exit 3 means the
+    # fixture is FALSIFIED (no measured actor/foreground overlap) and
+    # MUST fail the suite - a falsified acceptance is never a skip.
+    & $PythonPath (Join-Path $PSScriptRoot 'tools\verify_street_composite.py')
+    if ($LASTEXITCODE -eq 3) {
+        throw 'RP4 composite proof is FALSIFIED (no measured actor/foreground overlap); the suite cannot pass.'
+    }
+    if ($LASTEXITCODE -ne 0) {
+        throw "Street composite verification failed with exit code $LASTEXITCODE."
+    }
 }
 
 # RP6 semantic scene manifest: must tile the census route exactly, carry
@@ -396,6 +408,14 @@ if (Test-Path (Join-Path $PSScriptRoot 'data\round1_rowscroll_classification.jso
 & $PythonPath (Join-Path $PSScriptRoot 'tools\preflight_generated_inputs.py') --check-mapping
 if ($LASTEXITCODE -ne 0) {
     throw "Generated-input mapping check failed with exit code $LASTEXITCODE."
+}
+
+# RP4 acceptance-instrument unit controls (capture-free): blocked or
+# missing required controls can never report success; a null overlap is
+# FALSIFIED; stale evidence hashes are rejected.
+& $PythonPath (Join-Path $PSScriptRoot 'tests\test_rp4_status.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "RP4 status instrument tests failed with exit code $LASTEXITCODE."
 }
 
 # Manifest paths must stay lexical repository-relative even when reached

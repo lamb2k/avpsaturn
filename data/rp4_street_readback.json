@@ -5,11 +5,11 @@
   "composite_mismatch_total": 2181334,
   "controls": {
    "overlap_object_shift": {
-    "detail": "BLOCKED: requires the measured overlap; the interval is falsified (no actor-class pixel is onscreen in frames 3474-3674)",
+    "detail": "BLOCKED: requires the measured overlap; the interval is falsified (no qualifying actor/foreground overlap in frames 3474-3674)",
     "detected": null
    },
    "overlap_priority_swap": {
-    "detail": "BLOCKED: requires the measured overlap; the interval is falsified (no actor-class pixel is onscreen in frames 3474-3674)",
+    "detail": "BLOCKED: requires the measured overlap; the interval is falsified (no qualifying actor/foreground overlap in frames 3474-3674)",
     "detected": null
    },
    "palette_cycle": {
@@ -43,11 +43,27 @@
     "pixels": 17095
    }
   },
-  "controls_all_detected": true,
-  "controls_executed": 6,
+  "controls_all_detected": false,
+  "evidence_sha256": {
+   "route_census": "2ee346bad2973198863a3a1f7cec188459c458681373fc86d9625100040ede30",
+   "strips_bin": "7c28617351ec2bb2099d10e28de561f0ef64feb2fbb1784c5dae11d29c7f1c22",
+   "witness_frame_png": "f675f0128c5e416a5c62a7edca3945c07c3b617dc9f0d92490c7fa194ce1ce21"
+  },
   "frames_composited": 201,
   "overlap": null,
-  "overlap_verdict": "RP4 interval falsified: no deliberate overlap"
+  "overlap_verdict": "RP4 interval falsified: no deliberate overlap",
+  "status": {
+   "actor_foreground_overlap_status": "FALSIFIED",
+   "composite_residue_status": "GAP",
+   "controls_all_detected": false,
+   "generic_object_plane_order_status": "MEASURED",
+   "live_register_readback_note": "live Saturn priority-register readback is MEASURED separately and is not a substitute for the deliberate overlap",
+   "required_controls_blocked": 2,
+   "required_controls_executed": 6,
+   "required_controls_passed": 6,
+   "required_controls_total": 8,
+   "rp4_contract_status": "FALSIFIED"
+  }
  },
  "frames_pixel_checked": 201,
  "frames_structural": 201,
