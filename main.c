@@ -6,6 +6,7 @@
 #include "avsp_cram.h"
 #include "avsp_frontend.h"
 #include "avsp_disc_guard.h"
+#include "avsp_street_bundle.h"
 
 #include "generated/avsp_anim_records.h"
 #include "generated/avsp_emit_windows.h"
@@ -2051,22 +2052,11 @@ extern void slColRAMOffsetNbg1(Uint16);
 #define scnSPR2 (-5)
 #endif
 
-typedef struct
-{
-    int cell_cols;
-    int cell_rows;
-    int world_x0;
-    int row0;
-    int char_count;
-    unsigned long char_offset;
-    unsigned long pnt_offset;
-} StreetPlane;
-
 static unsigned char *street_data;
 static long street_bytes;
 static int street_ready;
 static int street_frames;
-static StreetPlane street_plane[2];
+static AvspStreetPlaneInfo street_plane[2];
 static unsigned long street_scroll_offset;
 static unsigned long street_patch_offset;
 static unsigned long street_objects_offset;
@@ -2111,12 +2101,6 @@ static unsigned int street_u16(const unsigned long offset)
            street_data[offset + 1];
 }
 
-static unsigned long street_u32(const unsigned long offset)
-{
-    return ((unsigned long)street_u16(offset) << 16) |
-           street_u16(offset + 2);
-}
-
 /* Runtime inverse of the generator's out_of(): the smallest output column
  * whose endpoint-aligned source is at least world_x. */
 static int street_out_of(const int world_x)
@@ -2133,47 +2117,31 @@ static int street_setup(void)
     street_data = AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES;
     read_bytes = avsp_fs_read_into("STRIPS.BIN", "ST1", street_data,
                                    AVSP_STRIPS_REGION_BYTES);
-    if (read_bytes <= 0 || street_u32(0) != 0x41565353UL ||
-        street_u16(4) != 1)
+    /* Full bounds validation of every section (header, planes, palettes,
+       cycle, scroll, patches, objects) happens in avsp_street_bundle.c
+       BEFORE anything below dereferences the buffer; the same code is
+       host-tested against corrupt and truncated bundles. */
     {
-        failed_asset = "STRIPS.BIN";
-        return 0;
-    }
-    street_bytes = read_bytes;
-    street_frames = (int)street_u16(6);
-    if (street_frames <= 0 || street_frames > STREET_MAX_FRAMES)
-    {
-        failed_asset = "STRIPS FRAMES";
-        return 0;
-    }
-    /* Each plane header is 20 bytes: six u16 fields then two u32s. */
-    for (plane = 0; plane < 2; ++plane)
-    {
-        const unsigned long at = 8 + (unsigned long)plane * 20;
-        street_plane[plane].cell_cols = (int)street_u16(at);
-        street_plane[plane].cell_rows = (int)street_u16(at + 2);
-        street_plane[plane].world_x0 = (int)street_u16(at + 4);
-        street_plane[plane].row0 = (int)street_u16(at + 6);
-        street_plane[plane].char_count = (int)street_u16(at + 8);
-        street_plane[plane].char_offset = street_u32(at + 12);
-        street_plane[plane].pnt_offset = street_u32(at + 16);
-        if (street_plane[plane].cell_cols <= 0 ||
-            street_plane[plane].cell_cols > 128 ||
-            street_plane[plane].cell_rows <= 0 ||
-            street_plane[plane].cell_rows > 64 ||
-            street_plane[plane].char_count <= 0 ||
-            street_plane[plane].char_count > 2048 ||
-            street_plane[plane].char_offset +
-                (unsigned long)street_plane[plane].char_count * 64 >
-                (unsigned long)street_bytes ||
-            street_plane[plane].pnt_offset +
-                (unsigned long)street_plane[plane].cell_cols *
-                street_plane[plane].cell_rows * 2 >
-                (unsigned long)street_bytes)
+        AvspStreetBundle bundle;
+        const char *bad = (const char *)0;
+        if (!avsp_street_bundle_parse(street_data, read_bytes, &bundle,
+                                      street_object_frame_offset,
+                                      STREET_MAX_FRAMES, &bad))
         {
-            failed_asset = "STRIPS PLANE";
+            failed_asset = bad;
             return 0;
         }
+        street_bytes = bundle.bytes;
+        street_frames = bundle.frames;
+        for (plane = 0; plane < 2; ++plane)
+            street_plane[plane] = bundle.plane[plane];
+        street_cycle_period = bundle.cycle_period;
+        street_cycle_first_flip = bundle.cycle_first_flip;
+        street_cycle_entries = bundle.cycle_entries;
+        street_cycle_offset = bundle.cycle_offset;
+        street_scroll_offset = bundle.scroll_offset;
+        street_patch_offset = bundle.patch_offset;
+        street_objects_offset = bundle.objects_offset;
     }
 
     /* Palettes: two 256-entry blocks; strip pixel i reads block[i], with
@@ -2190,50 +2158,6 @@ static int street_setup(void)
             street_palette[plane].data[index - 1] =
                 (jo_color)street_u16(at + (unsigned long)index * 2);
     }
-    street_cycle_period = (int)street_u16(48 + 1024);
-    street_cycle_first_flip = (int)street_u16(48 + 1026);
-    street_cycle_entries = (int)street_u16(48 + 1028);
-    street_cycle_offset = 48 + 1030;
-    street_scroll_offset = street_cycle_offset +
-        (unsigned long)street_cycle_entries * 6;
-    street_patch_offset = street_scroll_offset +
-        (unsigned long)street_frames * 8;
-    street_objects_offset = street_patch_offset + 2;
-    {
-        int patch;
-        const int patch_count = (int)street_u16(street_patch_offset);
-        unsigned long cursor = street_patch_offset + 2;
-        for (patch = 0; patch < patch_count; ++patch)
-        {
-            const int updates = (int)street_u16(cursor + 4);
-            cursor += 6 + (unsigned long)updates * 6;
-        }
-        street_objects_offset = cursor;
-    }
-    /* Index every frame's object list once so per-frame lookup is O(1),
-       and bounds-check the whole schedule against the file size. */
-    {
-        unsigned long cursor = street_objects_offset;
-        int frame;
-        for (frame = 0; frame < street_frames; ++frame)
-        {
-            int count;
-            if (cursor + 2 > (unsigned long)street_bytes)
-            {
-                failed_asset = "STRIPS OBJECTS";
-                return 0;
-            }
-            street_object_frame_offset[frame] = cursor;
-            count = (int)street_u16(cursor);
-            cursor += 2 + (unsigned long)count * 8;
-        }
-        if (cursor > (unsigned long)street_bytes)
-        {
-            failed_asset = "STRIPS OBJECTS";
-            return 0;
-        }
-    }
-
     /* Character data and base pattern grids. */
     street_load_planes();
 
@@ -2267,7 +2191,7 @@ static void street_load_planes(void)
     int plane;
     for (plane = 0; plane < 2; ++plane)
     {
-        const StreetPlane *sp = &street_plane[plane];
+        const AvspStreetPlaneInfo *sp = &street_plane[plane];
         unsigned short *cel = plane == 0 ?
             (unsigned short *)STREET_NBG0_CEL :
             (unsigned short *)STREET_NBG1_CEL;
