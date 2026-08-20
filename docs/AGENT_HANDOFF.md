@@ -10,6 +10,153 @@ git log --oneline -10
 Get-Process mame,yabasanshiro* -ErrorAction SilentlyContinue
 ```
 
+## Priority-architecture book, 2026-08-20 (newest first)
+
+Worktree `AvPSaturnCapabilityTest-ClaudePriorityArchitecture`, branch
+`claude/rp4-priority-architecture`, base `a57f368`.
+Companion lane: `AvPSaturnCapabilityTest-MSHvSF-PriorityProbe`, branch
+`claude/mshvsf-vdp2-priority-probe`, base `dc5d3ea`.
+
+### Implementation report
+
+Commits (AvP): `413b4ab` Chapter 0 test bootstrap, `b3835a5` fixture
+tile coverage, `a6cd6d1` per-scene priority semantics, `6a24c8e`
+object-versus-tile priority, `981c7e7` within-priority ordering,
+`0b9c15e` identity join, `e8c32bf` v1 contract and source controls,
+`1292368` port onto the v1 model. That is eight commits against the
+book's suggested five; the extra separation was to keep each falsifiable
+claim independently reviewable. Commit (MSHvSF): `b3df75c`.
+
+**Chapter 0 (done).** `tools/preflight_generated_inputs.py` gains
+`--ensure`; `test.ps1` ensures `generated/avsp_collision.h` before the
+first host compile and regenerates the RP4 fixture archives instead of
+skipping. Proven: a clean worktree now fails for the explicit RP4 reason
+rather than on a missing header.
+
+**Chapter 1 (done).** Four results, each with executed controls:
+
+- Per-scene sweep of all 122 scenes: visible objects carry ONLY code 4
+  (406,858) and code 7 (16,324); code 7 appears solely in
+  character-select, its unlabeled transition and the two continue
+  countdowns. `data/source_priority_semantics.json`.
+- Object-versus-tile priority decoded from the registers that program
+  it (OBJ_PRI nibbles, CPS-B layer-control draw order, tile-pen masks
+  read and measured ZERO, hence inert). Four street witnesses agree with
+  MAME's framebuffer, each with three executed controls including a
+  negative one. `data/rp4_object_layer_witnesses.json`.
+- Within-priority ordering: the EARLIER object-RAM entry wins. 11
+  witnesses over 11 frames, four semantic pair types, ZERO
+  counterexamples, every reversed-entry control detected. Witnesses are
+  taken only where the composite already agrees with the capture, so
+  they are validated pixels rather than selected agreements.
+  `data/rp4_object_order_witnesses.json`.
+- Identity join by EXACT RE-EMISSION: 12,736 of 15,074 eligible entities
+  (84.49%) matched verbatim, joining 32,829 of 68,020 objects (48.26%),
+  against a 2.95% shuffled-frame control.
+  `data/rp4_object_identity_join.json`.
+
+**A HARD STOP was nearly invoked here and would have been WRONG.** The
+first join reached 19.6% and the actor grid looked empty apart from the
+player, which reads exactly like the contract's "actor identity cannot
+be joined" stop condition. The cause was a defect in the new tool: the
+capture's `workram` region is based at **0xFF0000**
+(`tools/mame_capture_full_route.lua`), not 0xFF8000, so it scanned the
+wrong half of RAM. At the correct base one street frame carries 43 live
+records including 8 class-0x1F street aliens, and every one of the 3,469
+street frames carries 6 to 11 of them. Nearest-X proximity was then
+falsified properly (its shuffled control stayed within ~15 points) and
+replaced by exact re-emission. `decode_actor_entries` gained optional
+state and pose-region parameters that default to its original gates.
+
+**Chapter 2 (done, negative).** Both paths to the official port's VDP2
+priority programming are closed, each with its own control:
+
+- Reads: the register block is all zeros through the cached view
+  `0x05F80000` AND the uncached mirror `0x25F80000` at all four anchors,
+  while a colour-RAM positive control reads nonzero every time.
+- Writes: watchpoints on SPCTL/PRISA-D/PRINA-B/PRIR on both CPUs with
+  the debug interpreter core give zero hits, but so do BOTH controls: a
+  write watchpoint on a work-RAM long observed changing across a frame,
+  and a code breakpoint at the master CPU's own PC. **The breakpoint
+  mechanism is inert in this Yaba build**, so the run is reported as
+  proving nothing rather than as a measurement.
+- "List order is the only priority" therefore stays **ADAPTED**.
+
+**Chapter 3 (source half done, Saturn half BLOCKED).** `rp4_status.py`
+gains the v1 contract: eight controls split five source / three Saturn,
+with `rp4_v0_status` preserved as the constant
+`FALSIFIED_BY_SOURCE_PREMISE`. All five source controls agree with the
+model, including the mask-bit control which PREDICTS no change and
+observes none, confirming the masks inert. `test.ps1` now keeps the v0
+verifier as a regression assertion that must report exactly FALSIFIED
+and takes acceptance from v1, so the suite is green only when v1 passes.
+
+`main.c` is ported onto the v1 model: the actor/foreground class split
+is gone (no priority-1 object is ever visible), every street object
+takes one sprite class above NBG0/NBG1, and the emission loop now walks
+the object schedule IN REVERSE, because CPS2 draws the earlier entry on
+top while VDP1 draws the later command on top. Front-to-back emission
+had been inverting every overlap inside the class. StreetTest builds
+clean.
+
+### Blocking obstacle for the remaining work
+
+The three Saturn-side v1 controls and the Chapter 4 acceptance step
+"visible StreetTest boot with SPCTL/PRIS/PRIN readback matching the v1
+manifest" both require reading Saturn VDP2 registers from a running
+build. Chapter 2 measured, with controls, that this instrument CANNOT
+read those registers and CANNOT set breakpoints. The acceptance
+requirement as written is therefore not satisfiable on this rig.
+
+The available substitute, not yet executed and NOT self-accepted: run
+the Saturn controls as VISUAL DIFFERENTIALS. Rebuild StreetTest with
+exactly one perturbation (reversed command order; a changed CMDCOLR
+priority-class bit; a perturbed `slPriority` class value), capture the
+same frame, and require the framebuffer to differ in the direction the
+model predicts. That tests the same programming through the only output
+this instrument can observe. **Codex should rule on whether that
+substitution is acceptable before it is treated as satisfying the
+contract.**
+
+### Resume point
+
+1. Rule on the visual-differential substitution above.
+2. Execute the three Saturn controls, feed them into `build_v1_status`,
+   and confirm `rp4_v1_status` reaches PASS.
+3. Then the Chapter 4 ladder: full `test.ps1` exit 0, manifests twice
+   byte-identical (the three Chapter 1 manifests already rerun
+   byte-identical), clean StreetTest build with host tests, ISO member
+   hashes, visible boot, EncounterTest (shared code changed:
+   `main.c` street path only), normal-release title boot, emulators
+   stopped.
+
+### Checks and results
+
+- `tests/test_priority_decode.py`: 8 tests, PASS.
+- `tests/test_rp4_v1_status.py`: PASS; mutation-checked (ignoring
+  blocked controls, the witness floor, or counterexamples fails 16, 2
+  and 1 controls respectively).
+- `tests/test_rp4_status.py`: PASS (v0 instrument unchanged).
+- `tests/reference_engine/test_vdp2_priority_decode.py`: 8 tests, PASS.
+- `build.ps1 -StreetTest -SkipHostTests`: PASS (clean build attempted
+  first and also reached the compile stage; the full-suite build is
+  expected to fail while v1 is FALSIFIED).
+- Full `test.ps1`: **UNRUN to completion.** It fails by design at the
+  v1 gate while the Saturn controls are blocked.
+- Live AvP boots, ISO member hashes, EncounterTest, title boot: **UNRUN.**
+- All three Chapter 1 manifest reruns: byte-identical.
+
+### Remaining ADAPTED / GAP
+
+- `ADAPTED`: MSHvSF "list order is the only priority" (instrument cannot
+  decide it).
+- `GAP`: animation-script jump-record decode, which bounds the identity
+  join at 48.26% of objects (45,725 jump-record exclusions). Named and
+  counted, not hidden.
+- `GAP`: Saturn-side v1 controls and all live validation.
+
+Capability Gate 1 remains 0/7. Nothing here is self-accepted.
+
 ## Implementation report: RP4 overlap-proof corrections - HARD STOP (2026-08-20)
 
 - Worktree: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-ClaudeOverlapCorrections`,
