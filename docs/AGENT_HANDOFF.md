@@ -9,10 +9,10 @@ work. Always verify it with a fresh `git status --short --branch`,
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `codex/avp-master-plan`
-- HEAD: `82bb47e` (`Capture and census the full route at cadence 1 (RP2)`),
-  on top of `402a540` (RP1 docs rotation), `dddd19a` (AvspSceneDef v0
-  contracts), `2802e2c`, `e728c9b`, `aa0d671`, the Codex-reviewed
-  `5bf237e`/`b681c04`, and Codex base `885f6bc`.
+- HEAD: `a28f5df` (`Implement the minimal v0 scene player behind platform
+  seams (RP3)`), on top of `348e8fc`, `82bb47e` (RP2 census), `402a540`,
+  `dddd19a` (AvspSceneDef v0 contracts), `2802e2c`, `e728c9b`, `aa0d671`,
+  the Codex-reviewed `5bf237e`/`b681c04`, and Codex base `885f6bc`.
 - Recent frontend commits:
   - `b681c04` - obey Jo's one-based palette contract (Codex-reviewed);
   - `5bf237e` - prove every held frontend VDP1 object (Codex-reviewed);
@@ -21,7 +21,7 @@ work. Always verify it with a fresh `git status --short --branch`,
   - `e728c9b` - prove the confirmation shutter across the complete source
     interval (awaiting Codex review).
 - Acceptance: Capability Gate 1 **0/7**; full game **0/9**.
-- Active work: RP0, RP1 and RP2 **PASSED**; next is RP3 in
+- Active work: RP0-RP3 **PASSED**; next is RP4 or RP5 in
   `docs/ROUND1_EXECUTION_PLAN.md`. `aa0d671`/`e728c9b` were implemented and
   self-reviewed under the user's autonomous interim-supervisor
   authorization recorded in this session; Codex review remains the
@@ -78,6 +78,44 @@ yabasanshiro PID 44108
 It may belong to the concurrent frontend loop. Do not launch a second emulator
 against the same profile. Confirm ownership before stopping it; the owning agent
 must terminate all emulator/MAME processes before its checkpoint finishes.
+
+## Implementation report: RP3 - minimal v0 scene player
+
+- Base: `348e8fc`; implementation commit `a28f5df` on
+  `codex/avp-master-plan`.
+- Changed files: `avsp_scene_runtime.h` (new), `avsp_scene_runtime.c`
+  (new), `tests/avsp_scene_runtime_test.c` (new), `test.ps1` (host test
+  wired in), `makefile` (SRCS + avsp_scene_runtime.c).
+- Behavior: AvspSceneRuntime implements the AvspScenePlayer interface over
+  an AvspSceneBackend seam table (load/release scene, layer page, scroll,
+  palette ref, map patch, audio event, draw object) so identical
+  interpreter logic runs in WSL host tests and on the SH-2. Fixed 16
+  object slots; OBJECT_ADD to a claimed slot, UPDATE/REMOVE of an
+  unclaimed slot, MAP_PATCH count/length disagreement, a zero-duration
+  unskippable HOLD, and running off the end without TRANSITION are hard
+  reported diagnostics, never skips. HOLD consumes frames until its
+  duration elapses or a masked input bit arrives (duration 0 = until
+  input); TRANSITION reports scene_finished and the next scene ID for the
+  existing route controller. No scripting language, no dynamic allocator,
+  no asset cache.
+- Checks, all PASS:
+  1. WSL host test `tests/avsp_scene_runtime_test.c`: 3 positive blocks
+     (every v0 opcode with an exact recorded side-effect log and hold
+     timing; input-gated hold releases only on the masked bit; two-scene
+     route end to end through AvspRouteController with lifecycle at the
+     transition) and 9 negative controls, one per diagnostic path;
+  2. full SH-2 build links the player: `__bend = 0x060bfd90`,
+     `_avsp_scene_runtime_init` at `0x0600b2d8`. NOTE: only 624 bytes
+     remain below the 0x060C0000 ceiling; RP5 must treat the high-work-RAM
+     margin as nearly exhausted;
+  3. `test.ps1` exit 0 (both new gates included);
+  4. no stray emulators beyond the still-running user-requested
+     whole-game capture (see below).
+- GAP: the Saturn-side AvspSceneBackend binding (Jo/SGL) is not yet
+  implemented; RP4/RP8 bind the seams to the proven frontend primitives.
+- UNRUN: the user-requested whole-game cadence-1 capture
+  (`.deps/mame/full_game`, frames 1-180000) was still recording at this
+  checkpoint; stop/verify it and terminate MAME when it completes.
 
 ## Implementation report: RP2 - full-route cadence-1 capture and census
 

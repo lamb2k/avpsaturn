@@ -84,7 +84,7 @@ expands beyond its representative street fixture.
 | RP0 | Finish frontend shared primitives | **PASSED** at `e728c9b` | none | SP1-SP4 passed; see docs/AGENT_HANDOFF.md |
 | RP1 | Preserve baseline and commit shared contracts | **PASSED** at `dddd19a` | RP0 | AvspSceneDef v0, scene-ID policy, player/route/diagnostic interfaces, 11 negative controls, SH-2 link |
 | RP2 | Full-route cadence-1 capture and automatic grouping | **PASSED** at `82bb47e` | preserved baseline | Raw private capture plus tracked machine manifest |
-| RP3 | Minimal scene runtime and route controller | **PENDING** | RP1 | `AvspSceneDef v0`, player, synthetic host fixtures |
+| RP3 | Minimal scene runtime and route controller | **PASSED** at `a28f5df` | RP1 | `AvspSceneDef v0`, player, synthetic host fixtures |
 | RP4 | Representative two-plane renderer | **PENDING** | RP1, capture fixture | NBG1/NBG0/VDP1 prototype, row-scroll decision |
 | RP5 | Pessimistic G0/CDDA residency experiment | **PENDING** | RP1 | Exact resource ledger and late-read/CDDA result |
 | RP6 | Finalize semantic scene IDs | **PENDING** | RP1, RP2 | Authoritative source-state to runtime-ID manifest |
