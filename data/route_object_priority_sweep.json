@@ -1,0 +1,24 @@
+{
+ "classification": "counts only; no ROM bytes or pixels",
+ "finding": "priority 1 never draws a visible object anywhere in the route; visible content is priority 4 plus a priority-7 population the current class model does not map. The actor-class-is-priority-1 premise is falsified route-wide.",
+ "frames_scanned": 18000,
+ "frames_with_visible_objects_by_priority": {
+  "4": 15282,
+  "7": 1045
+ },
+ "inputs_sha256": {
+  "route_census": "2ee346bad2973198863a3a1f7cec188459c458681373fc86d9625100040ede30"
+ },
+ "offscreen_parked_by_priority": {
+  "0": 2012,
+  "1": 33988,
+  "3": 2088,
+  "4": 104133,
+  "7": 10944
+ },
+ "onscreen_objects_by_priority": {
+  "4": 406858,
+  "7": 16324
+ },
+ "schema": "route-object-priority-sweep-v0"
+}

@@ -1,0 +1,27 @@
+{
+ "best_example": null,
+ "classification": "semantic scan results: counts, coordinates, identities and rejection reasons only - no pixel buffers or captured frames",
+ "frames_scanned": 3469,
+ "inputs_sha256": {
+  "route_census": "2ee346bad2973198863a3a1f7cec188459c458681373fc86d9625100040ede30",
+  "scene_manifest": "f776ba219d203f6685e182a0971fe6daefd51f2326b1295cc0f1430cb1975527"
+ },
+ "per_frame_verdicts_sample": {},
+ "qualifying_frame_count": 0,
+ "qualifying_frames_sample": [],
+ "rejections": {
+  "actors_offscreen": 3469,
+  "no_actor_entries": 0,
+  "no_bbox_overlap": 0,
+  "no_differing_witness": 0,
+  "no_foreground_onscreen": 0,
+  "no_pixel_overlap": 0
+ },
+ "schema": "rp4-overlap-candidates-v0",
+ "selected_interval": null,
+ "street_bounds": {
+  "first_frame": 2074,
+  "last_frame": 5542,
+  "source": "scene manifest round1-street-gameplay"
+ }
+}
