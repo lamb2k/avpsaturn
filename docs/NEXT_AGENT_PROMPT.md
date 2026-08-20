@@ -1,18 +1,29 @@
-# CLAUDE_INVOCATION — RP4 deterministic VDP1 command order
+# IMPLEMENTOR_INVOCATION — RP4 deterministic VDP1 command order
+
+Compatible alias: `CLAUDE_INVOCATION`. This exact prompt may be given to
+Claude or to a separately invoked Codex model.
 
 ## Assignment identity
 
 ```text
 MODE: DIRECTED_BOOK_IMPLEMENTATION
-IMPLEMENTOR: Claude
+IMPLEMENTOR: Claude or a separately invoked Codex model
+ROLE_LOCK: IMPLEMENTOR_ONLY
 SUPERVISOR_AND_ACCEPTANCE_AUTHORITY: Codex
 REPOSITORY: C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest
 SUPERVISOR_WORKTREE: C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-ClaudePriorityArchitecture
-IMPLEMENTATION_WORKTREE: C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-ClaudeRp4DirectOrder
-IMPLEMENTATION_BRANCH: claude/rp4-direct-command-order
-BASE_SHA: 2762d99ac65bc871b201c39f4ebc830f7cbd27e8
+IMPLEMENTATION_WORKTREE: C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-Rp4DirectOrder
+IMPLEMENTATION_BRANCH: codex/rp4-direct-command-order
+BASE_SHA: 3903cc303f51cc0cc5bcaf0889c50f24be061a6b
 SCOPE: RP4 deterministic final VDP1 command order only
 ```
+
+Regardless of model vendor, you are the implementor session, not the
+supervisor session. Do not issue `ACCEPTED`, `CORRECTIONS REQUIRED`, or
+`NOT REVIEWABLE`; do not select or draft the next tranche; do not rewrite the
+master architecture. Execute this bounded book and return its evidence package
+to the separate Codex supervisor session. A Codex implementor must not
+self-review merely because it is a Codex model.
 
 Create the implementation worktree and branch from exactly `BASE_SHA`. Do not
 modify the primary repository or the supervisor worktree. Do not reuse a dirty
