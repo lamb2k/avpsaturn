@@ -214,9 +214,15 @@ must be measured again after the current integration links.
 - Clean normal-release boot: `runtime_ready=1`, world frame advancing at
   full rate (132->253 over 2 s).
 - All emulators terminated.
-- `UNRUN`: FrontendTest driven through Round 1 in this session (the release
-  boot only proves the title path); physical Saturn hardware; audible
-  CDDA/PCM confirmation; full-game route beyond captured frame 300,000.
+- FrontendTest: self-driven through main menu, character select, and
+  intro into Round 1 gameplay (encounter states 0->6, world frame
+  advancing). Observation, out of RP4 scope: Round 1 gameplay ran at
+  ~16 fps in this Yaba instance (frontend/title states run at full
+  rate); the street renderer profile is unaffected and prior encounter
+  timings show similar sub-60 model rates under the emulator, so this
+  is recorded as an observation, not a claimed regression.
+- `UNRUN`: physical Saturn hardware; audible CDDA/PCM confirmation;
+  full-game route beyond captured frame 300,000.
 
 ### Remaining ADAPTED/GAP
 
