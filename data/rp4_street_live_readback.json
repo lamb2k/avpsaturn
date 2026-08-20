@@ -6,25 +6,25 @@
  "print_buffer": "",
  "runtime_ready": 1,
  "schema": "rp4-street-live-readback-v0",
- "street_frame": 178,
- "street_objects": 568,
- "street_rel_frame": 178,
+ "street_frame": 109,
+ "street_objects": 523,
+ "street_rel_frame": 109,
  "street_scx": [
   161,
   148
  ],
  "symbols": {
-  "__bend": "0x0608a8f0",
-  "_avsp_diag_print_buffer": "0x060367c8",
-  "_avsp_diag_runtime_ready": "0x060367c4",
-  "_avsp_diag_street_frame": "0x0603677c",
-  "_avsp_diag_street_objects": "0x06036770",
-  "_avsp_diag_street_scx": "0x06036774"
+  "__bend": "0x0608a3a0",
+  "_avsp_diag_print_buffer": "0x06036a80",
+  "_avsp_diag_runtime_ready": "0x06036a7c",
+  "_avsp_diag_street_frame": "0x06036a1c",
+  "_avsp_diag_street_objects": "0x06036a10",
+  "_avsp_diag_street_scx": "0x06036a14"
  },
  "vdp1_command_classes": {
   "0": 1,
   "1": 2,
-  "2": 446
+  "2": 308
  },
  "vdp2_shadow_registers": {
   "BGON": "0x0043",
