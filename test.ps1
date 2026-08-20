@@ -335,6 +335,17 @@ if ((Test-Path (Join-Path $PSScriptRoot '.deps\mame\full_route\region_index.tsv'
     }
 }
 
+# RP6 semantic scene manifest: must tile the census route exactly, carry
+# recomputable content-addressed stable IDs, a consistent transition
+# chain, and evidence-bound labels (unlabeled scenes need review flags).
+# Offline check against tracked JSON only.
+if (Test-Path (Join-Path $PSScriptRoot 'data\avsp_scene_manifest.json')) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tools\verify_scene_manifest.py')
+    if ($LASTEXITCODE -ne 0) {
+        throw "Scene manifest verification failed with exit code $LASTEXITCODE."
+    }
+}
+
 # Sub-state dispatcher enumeration: decodes, from the validated opcode-space
 # image, every per-actor sub-state jump table (actor byte +0x04 indexes a
 # PC-relative word table). Self-tests against the three live-confirmed
