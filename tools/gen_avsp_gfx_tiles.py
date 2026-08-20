@@ -57,7 +57,7 @@ MAIN_C = ROOT / "main.c"
 # docs/AGENT_HANDOFF.md "Item 1 continued"). --scope is REQUIRED, not
 # defaulted, so a caller must say which budget it is asking for.
 ROUTES_BY_SCOPE = {
-    "street": ("enemy_actions",),
+    "street": ("enemy_actions", "full_route:3474:3674"),
     "round1": ("enemy_actions", "stalker_actions", "boss_actions", "boss_ko"),
 }
 # "street" (1,533 tiles, 202,564 bytes) is the archive MEASURED to fit the
@@ -96,12 +96,51 @@ def entry_tile_codes(code: int, y: int, attr: int) -> set[int]:
     return codes
 
 
+def collect_full_route_entries(spec, tiles, banks):
+    """Object-list truth from the RP2 delta capture for a frame interval.
+
+    Spec is "full_route:first:last". Unlike the workram actor decode, this
+    reads the recorded active object banks directly, so it covers every
+    transient the interval actually drew (projectiles, shadows, effects)."""
+    from census_full_route import RouteState
+    name, first, last = spec.split(":")
+    first, last = int(first), int(last)
+    state = RouteState(ROOT / ".deps" / "mame" / name)
+    n_entries = 0
+    n_frames = 0
+    for rec in state.frames():
+        if rec["frame"] < first:
+            continue
+        if rec["frame"] > last:
+            break
+        n_frames += 1
+        active = state.current["objram2" if rec["active_bank"]
+                               else "objram1"]
+        for offset in range(0, len(active) - 7, 8):
+            y = int.from_bytes(active[offset + 2:offset + 4], "big")
+            code = int.from_bytes(active[offset + 4:offset + 6], "big")
+            attr = int.from_bytes(active[offset + 6:offset + 8], "big")
+            if y >= 0x8000 or attr >= 0xFF00:
+                break
+            tiles |= entry_tile_codes(code, y, attr)
+            banks.add(attr & 0x1F)
+            n_entries += 1
+    state.close()
+    print("%s: %d frames, %d entries -> %d tiles"
+          % (spec, n_frames, n_entries, len(tiles)))
+    return {"frames_sampled": n_frames, "entries": n_entries}
+
+
 def collect_entries(rom: Rom, routes):
     """Decode every eligible actor instance across the corpus routes."""
     per_route = {}
     tiles = set()
     banks = set()
     for route in routes:
+        if route.startswith("full_route:"):
+            per_route[route] = collect_full_route_entries(route, tiles,
+                                                          banks)
+            continue
         root = ROOT / ".deps" / "mame" / route
         frames = sorted(root.glob("workram_*.bin"))[::SAMPLE_STRIDE]
         n_entries = 0

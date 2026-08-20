@@ -50,7 +50,11 @@
    (202,564 bytes) is what currently fits; widening to stalkers/boss
    needs more PCM moved to phase-boundary loads first (S3 enabler,
    tracked in the handoff), not a bigger carve alone. */
-#define AVSP_TILE_REGION_BYTES 0x40000
+/* Widened from 0x40000 for the RP4 street archive (297,764 bytes with the
+ * representative-interval object tiles). Scene loading boundaries are the
+ * residency lever: the carve holds one scene-scope archive at a time and is
+ * reloaded during transitions, when data-track reads are legal. */
+#define AVSP_TILE_REGION_BYTES 0x50000
 #define AVSP_PCM_CHANNEL_WEAPON 0
 #define AVSP_PCM_CHANNEL_MELEE 1
 #define AVSP_PCM_CHANNEL_CONTACT 2
