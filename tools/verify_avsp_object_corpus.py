@@ -115,13 +115,21 @@ def read_anchors(work: bytes) -> tuple:
 
 
 def decode_actor_entries(rom: Rom, work: bytes, slot_off: int,
-                         anchor_x: int, anchor_y: int):
-    """Returns (entries_flat_words, meta) or (None, exclusion_reason)."""
+                         anchor_x: int, anchor_y: int,
+                         states: tuple = (0x01,),
+                         pose_region: tuple = POSE_REGION):
+    """Returns (entries_flat_words, meta) or (None, exclusion_reason).
+
+    `states` and `pose_region` default to the corpus run's original
+    gates: only state 0x01 records, and pose pointers inside the
+    street-alien window. The identity join widens both, because it must
+    reach every live class, not just the corpus population.
+    """
     rec = work[slot_off:slot_off + ACTOR_STRIDE]
-    if rec[0] != 0x01:
+    if rec[0] not in states:
         return None, "inactive"
     pose_ptr = u32(rec, 0x1C)
-    if not (POSE_REGION[0] <= pose_ptr < POSE_REGION[1]):
+    if not (pose_region[0] <= pose_ptr < pose_region[1]):
         return None, "pose-outside-declared-region"
     mode_positive = 1 <= rec[0x0D] <= 0x7F
     flags = rom.u16(pose_ptr + 2)

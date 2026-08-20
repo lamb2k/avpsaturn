@@ -39,6 +39,10 @@ from census_full_route import RouteState                  # noqa: E402
 from verify_street_composite import Frame, in_of          # noqa: E402
 from pin_object_layer_priority import (                   # noqa: E402
     OBJECT_CODE, compose_from_registers, read_registers)
+from join_street_object_identities import (               # noqa: E402
+    ROM_PATH, class_name, decode_entities, find_run_offset,
+    object_words)
+from decode_avsp_object_stream import Rom                 # noqa: E402
 
 CAPTURE = ROOT / ".deps" / "mame" / "full_route"
 MANIFEST = ROOT / "data" / "avsp_scene_manifest.json"
@@ -81,9 +85,59 @@ def swap_entries(words: list[int], a_slot: int, b_slot: int) -> list[int]:
     return out
 
 
-def shape_label(entry) -> str:
-    """Structural label: block size and palette bank, never appearance."""
-    return (f"{entry['w']}x{entry['h']}-pal{entry['attr'] & 0x1F:02d}")
+def identity_map(rom, previous_workram: bytes,
+                 words: list[int]) -> dict[int, str]:
+    """Object slot -> semantic actor class, by exact re-emission.
+
+    Each live actor record's ROM-decoded emission run is located
+    verbatim in this frame's object stream; every slot of that run
+    carries the record's class. Slots no entity claims stay unlabelled
+    rather than being guessed at.
+    """
+    labels: dict[int, str] = {}
+    for entity in decode_entities(rom, previous_workram):
+        if not entity["words"]:
+            continue
+        offset = find_run_offset(words, entity["words"])
+        if offset is None:
+            continue
+        name = class_name(entity["class_id"])
+        for part in range(len(entity["words"]) // 4):
+            labels[offset // 4 + part] = name
+    return labels
+
+
+SCENE_EMITTER_PREFIX = "scene-emitter"
+
+
+def shape_label(entry, labels: dict[int, str]) -> str:
+    """The object's semantic identity.
+
+    When the exact re-emission join claims the slot, the label is the
+    emitting actor's class. When no live actor emits it, the object came
+    from the scene/HUD emitter rather than the actor loop, and it is
+    labelled as such and carried with its structural block size and
+    palette bank. The label never comes from rendered appearance.
+    """
+    identity = labels.get(entry["slot"])
+    if identity:
+        return identity
+    return (f"{SCENE_EMITTER_PREFIX}-{entry['w']}x{entry['h']}-"
+            f"pal{entry['attr'] & 0x1F:02d}")
+
+
+def is_actor_label(label: str) -> bool:
+    return not label.startswith(SCENE_EMITTER_PREFIX)
+
+
+def is_semantic_pair(pair_type: str) -> bool:
+    """A pair is semantic when at least one side is an identified actor.
+
+    An actor against a scene-emitter object is precisely the
+    actor-versus-foreground pairing this proof needs; two scene-emitter
+    objects are not, and are recorded but not counted.
+    """
+    return any(is_actor_label(side) for side in pair_type.split("/"))
 
 
 def overlaps(a, b) -> bool:
@@ -97,8 +151,12 @@ def main() -> None:
                   if s["label"] == "round1-street-gameplay")
     first, last = street["first_frame"], street["last_frame"]
 
+    if not ROM_PATH.exists():
+        raise SystemExit(f"private program image missing: {ROM_PATH}")
+    rom = Rom(ROM_PATH.read_bytes())
     state = RouteState(CAPTURE)
     gfx = avsp.load_gfx_region()
+    previous_workram: bytes | None = None
     witnesses = []
     pair_types = set()
     frames_with = set()
@@ -109,7 +167,13 @@ def main() -> None:
         f = rec["frame"]
         if f > last or frames_examined >= MAX_FRAMES:
             break
+        workram = bytes(state.current["workram"])
         if f < first or (f - first) % FRAME_STEP:
+            previous_workram = workram
+            continue
+        prior = previous_workram
+        previous_workram = workram
+        if prior is None:
             continue
         frames_examined += 1
         frame = Frame(state, rec)
@@ -177,8 +241,9 @@ def main() -> None:
         swapped_frame.__dict__ = dict(frame.__dict__)
         swapped_frame.words = swapped_words
         swapped = compose_from_registers(gfx, swapped_frame, regs).load()
-        pair_type = "/".join(sorted((shape_label(earlier),
-                                     shape_label(later))))
+        labels = identity_map(rom, prior, frame.words)
+        pair_type = "/".join(sorted((shape_label(earlier, labels),
+                                     shape_label(later, labels))))
         witnesses.append({
             "frame": f,
             "source_xy": [x, y],
@@ -203,8 +268,9 @@ def main() -> None:
         frames_with.add(f)
     state.close()
 
+    semantic_types = {t for t in pair_types if is_semantic_pair(t)}
     ok = (len(frames_with) >= NEEDED_FRAMES and
-          len(pair_types) >= NEEDED_PAIR_TYPES and
+          len(semantic_types) >= NEEDED_PAIR_TYPES and
           counterexamples == 0 and
           bool(witnesses) and
           all(w["reversed_entries_control_detected"] for w in witnesses))
@@ -214,13 +280,20 @@ def main() -> None:
                 "object-RAM entry wins, because MAME 0.289 "
                 "cps2_render_sprites draws the list last-to-first",
         "object_priority_code": OBJECT_CODE,
-        "pair_type_basis": "structural: object block size and palette "
-                           "bank, never rendered appearance",
+        "pair_type_basis": "semantic actor class from the exact "
+                           "re-emission identity join; objects no live "
+                           "actor emits are labelled scene-emitter with "
+                           "their block size and palette bank. A pair "
+                           "counts as semantic when at least one side is "
+                           "an identified actor. Never rendered "
+                           "appearance.",
         "frames_examined": frames_examined,
         "witness_count": len(witnesses),
         "distinct_frames": sorted(frames_with),
         "pair_types": sorted(pair_types),
         "counterexamples": counterexamples,
+        "semantic_pair_types": sorted(
+            t for t in pair_types if is_semantic_pair(t)),
         "witnesses": witnesses,
         "requirements_met": ok,
         "inputs_sha256": {

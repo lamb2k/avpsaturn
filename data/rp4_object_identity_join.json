@@ -1,0 +1,117 @@
+{
+ "class_slot_examples": [
+  {
+   "actor_address": "0xff9d00",
+   "class": "street-alien-band",
+   "object_slot": 34,
+   "parts": 2,
+   "type": 12
+  },
+  {
+   "actor_address": "0xff9dc0",
+   "class": "street-alien-band",
+   "object_slot": 27,
+   "parts": 2,
+   "type": 12
+  },
+  {
+   "actor_address": "0xff9e80",
+   "class": "street-alien-band",
+   "object_slot": 44,
+   "parts": 2,
+   "type": 12
+  },
+  {
+   "actor_address": "0xff9f40",
+   "class": "street-alien-band",
+   "object_slot": 41,
+   "parts": 3,
+   "type": 12
+  },
+  {
+   "actor_address": "0xffa000",
+   "class": "street-alien-band",
+   "object_slot": 29,
+   "parts": 3,
+   "type": 12
+  },
+  {
+   "actor_address": "0xffa0c0",
+   "class": "street-alien-band",
+   "object_slot": 38,
+   "parts": 3,
+   "type": 12
+  },
+  {
+   "actor_address": "0xffa180",
+   "class": "street-alien-band",
+   "object_slot": 15,
+   "parts": 3,
+   "type": 12
+  },
+  {
+   "actor_address": "0xffa240",
+   "class": "street-alien-band",
+   "object_slot": 36,
+   "parts": 2,
+   "type": 12
+  }
+ ],
+ "decode_exclusions": {
+  "assembly-outside-rom": 24,
+  "decode-past-image-end": 1,
+  "jump-record": 45725,
+  "unknown-top-word": 1118
+ },
+ "entities_absent_from_list": 2338,
+ "entities_eligible": 15074,
+ "entities_matched_exactly": 12736,
+ "entity_match_rate": 0.8449,
+ "falsified_predecessor": "nearest-raw-X proximity, whose shuffled-frame control stayed within about fifteen points of the true rate",
+ "frames_used": 1157,
+ "inputs_sha256": {
+  "route_census": "2ee346bad2973198863a3a1f7cec188459c458681373fc86d9625100040ede30",
+  "scene_manifest": "f776ba219d203f6685e182a0971fe6daefd51f2326b1295cc0f1430cb1975527"
+ },
+ "joined_objects_by_class": {
+  "auxiliary-band": 166,
+  "class-0x03": 5,
+  "class-0x05": 614,
+  "class-0x08": 3,
+  "class-0x09": 5466,
+  "class-0x0a": 6,
+  "class-0x0e": 865,
+  "class-0x10": 1835,
+  "class-0x20": 14,
+  "class-0x3d": 1120,
+  "class-0x43": 168,
+  "class-0x49": 245,
+  "class-0x4b": 233,
+  "class-0x4e": 72,
+  "player-auxiliary-band": 474,
+  "player-band": 2154,
+  "street-alien-band": 19389
+ },
+ "match_confidence": {
+  "confident": 9811,
+  "single-part-flagged": 2925
+ },
+ "negative_control": {
+  "collapsed": true,
+  "eligible": 14103,
+  "matched": 416,
+  "method": "entities from frame F-312 joined against frame F objects",
+  "rate": 0.0295
+ },
+ "object_join_rate": 0.4826,
+ "objects_joined": 32829,
+ "objects_total": 68020,
+ "objects_visible": 51944,
+ "rule": "an actor record joins the object list at the 8-byte-aligned offset where its ROM-decoded emission run appears verbatim in the NEXT frame's active bank",
+ "schema": "rp4-object-identity-join-v1",
+ "street_frames": [
+  2074,
+  5542
+ ],
+ "workram_base_note": "the capture's workram region is based at 0xFF0000; the 0xFF8000-based emitter view is workram[0x8000:]"
+}

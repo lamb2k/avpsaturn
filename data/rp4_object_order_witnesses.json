@@ -19,21 +19,24 @@
   "scene_manifest": "f776ba219d203f6685e182a0971fe6daefd51f2326b1295cc0f1430cb1975527"
  },
  "object_priority_code": 4,
- "pair_type_basis": "structural: object block size and palette bank, never rendered appearance",
+ "pair_type_basis": "semantic actor class from the exact re-emission identity join; objects no live actor emits are labelled scene-emitter with their block size and palette bank. A pair counts as semantic when at least one side is an identified actor. Never rendered appearance.",
  "pair_types": [
-  "112x32-pal00/48x48-pal18",
-  "32x16-pal16/80x16-pal00",
-  "64x160-pal29/64x32-pal17",
-  "64x160-pal29/80x48-pal17",
-  "64x48-pal17/80x16-pal00",
-  "64x64-pal00/80x16-pal00",
-  "64x96-pal00/80x16-pal00",
-  "80x16-pal00/80x32-pal00",
-  "80x16-pal00/80x64-pal00"
+  "player-band/scene-emitter-80x16-pal00",
+  "scene-emitter-112x32-pal00/street-alien-band",
+  "scene-emitter-32x16-pal16/scene-emitter-80x16-pal00",
+  "scene-emitter-64x160-pal29/street-alien-band",
+  "scene-emitter-80x16-pal00/scene-emitter-80x64-pal00",
+  "scene-emitter-80x16-pal00/street-alien-band"
  ],
  "requirements_met": true,
  "rule": "within one source object priority code the EARLIER object-RAM entry wins, because MAME 0.289 cps2_render_sprites draws the list last-to-first",
  "schema": "rp4-object-order-witnesses-v0",
+ "semantic_pair_types": [
+  "player-band/scene-emitter-80x16-pal00",
+  "scene-emitter-112x32-pal00/street-alien-band",
+  "scene-emitter-64x160-pal29/street-alien-band",
+  "scene-emitter-80x16-pal00/street-alien-band"
+ ],
  "witness_count": 11,
  "witnesses": [
   {
@@ -68,7 +71,7 @@
     0,
     51
    ],
-   "pair_type": "64x160-pal29/80x48-pal17",
+   "pair_type": "scene-emitter-64x160-pal29/street-alien-band",
    "reversed_entries_control_detected": true,
    "source_xy": [
     6,
@@ -108,7 +111,7 @@
     0,
     51
    ],
-   "pair_type": "64x160-pal29/64x32-pal17",
+   "pair_type": "scene-emitter-64x160-pal29/street-alien-band",
    "reversed_entries_control_detected": true,
    "source_xy": [
     5,
@@ -148,7 +151,7 @@
     136,
     68
    ],
-   "pair_type": "80x16-pal00/80x64-pal00",
+   "pair_type": "player-band/scene-emitter-80x16-pal00",
    "reversed_entries_control_detected": true,
    "source_xy": [
     295,
@@ -188,7 +191,7 @@
     187,
     170
    ],
-   "pair_type": "32x16-pal16/80x16-pal00",
+   "pair_type": "scene-emitter-32x16-pal16/scene-emitter-80x16-pal00",
    "reversed_entries_control_detected": true,
    "source_xy": [
     197,
@@ -228,7 +231,7 @@
     0,
     68
    ],
-   "pair_type": "64x48-pal17/80x16-pal00",
+   "pair_type": "scene-emitter-80x16-pal00/street-alien-band",
    "reversed_entries_control_detected": true,
    "source_xy": [
     374,
@@ -268,7 +271,7 @@
     102,
     34
    ],
-   "pair_type": "64x96-pal00/80x16-pal00",
+   "pair_type": "player-band/scene-emitter-80x16-pal00",
    "reversed_entries_control_detected": true,
    "source_xy": [
     360,
@@ -308,7 +311,7 @@
     136,
     68
    ],
-   "pair_type": "80x16-pal00/80x64-pal00",
+   "pair_type": "scene-emitter-80x16-pal00/scene-emitter-80x64-pal00",
    "reversed_entries_control_detected": true,
    "source_xy": [
     372,
@@ -348,7 +351,7 @@
     170,
     102
    ],
-   "pair_type": "64x64-pal00/80x16-pal00",
+   "pair_type": "player-band/scene-emitter-80x16-pal00",
    "reversed_entries_control_detected": true,
    "source_xy": [
     341,
@@ -388,7 +391,7 @@
     34,
     51
    ],
-   "pair_type": "112x32-pal00/48x48-pal18",
+   "pair_type": "scene-emitter-112x32-pal00/street-alien-band",
    "reversed_entries_control_detected": true,
    "source_xy": [
     209,
@@ -428,7 +431,7 @@
     170,
     102
    ],
-   "pair_type": "64x64-pal00/80x16-pal00",
+   "pair_type": "player-band/scene-emitter-80x16-pal00",
    "reversed_entries_control_detected": true,
    "source_xy": [
     341,
@@ -468,7 +471,7 @@
     119,
     102
    ],
-   "pair_type": "80x16-pal00/80x32-pal00",
+   "pair_type": "player-band/scene-emitter-80x16-pal00",
    "reversed_entries_control_detected": true,
    "source_xy": [
     376,
