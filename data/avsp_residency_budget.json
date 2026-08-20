@@ -31,7 +31,8 @@
   "reader_guarded": "avsp_fs_read_into rejects reads with FS CDDA LOCK when CDDA owns the drive and no measured window is open",
   "status": "ADAPTED"
  },
- "schema": "avsp-residency-budget-v0",
+ "inputs": "four explicit build/residency_profiles/*.json measurements plus tracked manifests; previous output is never read",
+ "schema": "avsp-residency-budget-v1",
  "scsp": {
   "iso_members": {
    "BOSSCLR.PCM": 637084,
@@ -59,10 +60,10 @@
   "command_classes": {
    "0": 1,
    "1": 2,
-   "2": 268
+   "2": 446
   },
   "headroom_bytes": 226524,
-  "live_command_sample": 271,
+  "live_command_sample": 449,
   "note": "command sample from one paused street frame; a route-wide command high-water is a GAP until a soak instrument runs",
   "status": "MEASURED",
   "texture_archive_bytes": 297764
@@ -78,32 +79,48 @@
  },
  "work_ram_limit": "0x060c0000",
  "work_ram_profiles": {
-  "debug-encounter-test": {
+  "encounter-test": {
    "bend": "0x060bfec0",
+   "build_profile_stamp": "debug-encounter-test",
+   "game_elf_sha256": "f9f266118112b1e519f1cf93269dcb2db89748640e1330bf759131ad41b6f718",
+   "hardware_manifest_sha256": "0fb898cac978b38a636a2d6a6e6c7989fee579343b66f94e0d8df6e356d87637",
    "headroom_bytes": 320,
+   "iso_sha256": "e44a760d322d3ea526c3a7db5c8a29285490dba54abbd19492dc6c178d2b4ce7",
    "limit": "0x060c0000",
-   "profile": "debug-encounter-test",
+   "profile": "encounter-test",
    "status": "MEASURED"
   },
-  "debug-frontend-test": {
+  "frontend-test": {
    "bend": "0x060bf820",
+   "build_profile_stamp": "debug-frontend-test",
+   "game_elf_sha256": "08e483f5b1e09abb8406385ff6f7023c92927e85a85ed70ff815551604d8377e",
+   "hardware_manifest_sha256": "bc0675cfed5c9155d51d93ca88e805b71ad26b1973fec715b81d2b893495f674",
    "headroom_bytes": 2016,
+   "iso_sha256": "0e23fcb0f9c87ce62adc189fa502149761784dab6415dac83803c88f9dfb575c",
    "limit": "0x060c0000",
-   "profile": "debug-frontend-test",
+   "profile": "frontend-test",
    "status": "MEASURED"
   },
-  "debug-normal-release": {
+  "normal-release": {
    "bend": "0x060bf6c0",
+   "build_profile_stamp": "debug-normal-release",
+   "game_elf_sha256": "04ce327515e9ce044a42fc66a08d5d42dc7e7dbd5e3d5433dee7544252cb1b82",
+   "hardware_manifest_sha256": "2c48ae7d16de9e84340146daf0403fa0084b32ba87be69f654711e74a335839d",
    "headroom_bytes": 2368,
+   "iso_sha256": "a4c5ef2e3c39a985d322118909a6fef20018dfca7c9626fa67b63bbd11a3ab74",
    "limit": "0x060c0000",
-   "profile": "debug-normal-release",
+   "profile": "normal-release",
    "status": "MEASURED"
   },
-  "debug-street-test": {
-   "bend": "0x0608a190",
-   "headroom_bytes": 220784,
+  "street-test": {
+   "bend": "0x0608a3a0",
+   "build_profile_stamp": "debug-street-test",
+   "game_elf_sha256": "c487105e472f56fddd510e4c5eea7f05bede291022900b05214446f891febf89",
+   "hardware_manifest_sha256": "442e9100f477b5a2135e170c9c6123acd6d159df2d4034b3fd5efd5588018200",
+   "headroom_bytes": 220256,
+   "iso_sha256": "555c2cc4c57bf1a915d905d21397f4b262aabc5a675be0297c1fd646609ab68b",
    "limit": "0x060c0000",
-   "profile": "debug-street-test",
+   "profile": "street-test",
    "status": "MEASURED"
   }
  }

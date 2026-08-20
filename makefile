@@ -47,7 +47,13 @@ JO_DEBUG ?= 1
 JO_NTSC = 1
 JO_COMPILE_USING_SGL = 1
 
-SRCS = main.c capability_model.c avsp_actor.c avsp_anim_script.c avsp_emit.c avsp_tiles.c avsp_collision.c avsp_cram.c avsp_frontend.c avsp_scene.c avsp_route.c avsp_scene_runtime.c avsp_disc_guard.c avsp_street_bundle.c
+SRCS = main.c capability_model.c avsp_actor.c avsp_anim_script.c avsp_emit.c avsp_tiles.c avsp_collision.c avsp_cram.c avsp_frontend.c avsp_scene.c avsp_route.c avsp_scene_runtime.c avsp_disc_guard.c
+ifneq ($(AVSP_STREET_TEST),)
+# The STRIPS bundle parser is only referenced by the street-test profile;
+# linking it everywhere pushed the encounter profile past its 0x060C0000
+# BSS bound (704 bytes over with only 320 bytes of prior headroom).
+SRCS += avsp_street_bundle.c
+endif
 
 # The pinned Yaba Sanshiro boot path stalls when Jo Engine's monolithic first-
 # read executable crosses 400 KiB. Keep the integration shell and frontend

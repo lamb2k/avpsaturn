@@ -3,11 +3,13 @@
 
 Measures, from the current build products and tracked manifests:
 
-- high work RAM per build profile (nm __bend against the 0x060C0000 SGL
-  sort-list limit) - the current game.elf is measured under the profile
-  stamp in build/last_compile_profile.txt and MERGED into any previously
-  recorded profiles, so running the generator after each profile build
-  accumulates the complete table;
+- high work RAM per build profile: the four explicit measurement files
+  written by tools/measure_avsp_profile.ps1 under
+  build/residency_profiles/ (normal-release, street-test, frontend-test,
+  encounter-test). This generator NEVER reads its previous output;
+  duplicate, missing or unknown profile files are rejected, and the
+  ledger derives only from those inputs plus tracked manifests, so two
+  runs over the same inputs are byte-identical;
 - cartridge DRAM1 carves parsed from main.c constants plus the measured
   archive/fixture file sizes that live in them;
 - VDP2 character/pattern usage of the street scene from the tracked RP4
@@ -29,7 +31,6 @@ from __future__ import annotations
 
 import json
 import re
-import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -43,27 +44,47 @@ SOUND_RAM_BYTES = 0x80000
 CRAM_BYTES = 0x1000
 
 
-def measure_work_ram() -> dict:
-    profile = "unknown"
-    stamp = ROOT / "build" / "last_compile_profile.txt"
-    if stamp.exists():
-        profile = stamp.read_text().strip()
-    out = subprocess.run(
-        [str(NM), "--target=coff-sh", str(ROOT / "game.elf")],
-        capture_output=True, text=True, check=True).stdout
-    bend = None
-    for line in out.splitlines():
-        parts = line.split()
-        if len(parts) == 3 and parts[2] == "__bend":
-            bend = int(parts[0], 16)
-    assert bend is not None, "__bend not found"
-    return {
-        "profile": profile,
-        "bend": f"0x{bend:08x}",
-        "limit": f"0x{WORK_RAM_LIMIT:08x}",
-        "headroom_bytes": WORK_RAM_LIMIT - bend,
-        "status": "MEASURED",
-    }
+PROFILE_ORDER = ("normal-release", "street-test", "frontend-test",
+                 "encounter-test")
+PROFILE_DIR = ROOT / "build" / "residency_profiles"
+
+
+def load_work_ram_profiles() -> dict:
+    """The four explicit measurement files, validated and fixed-ordered."""
+    if not PROFILE_DIR.exists():
+        raise SystemExit(
+            f"missing {PROFILE_DIR.relative_to(ROOT)}: run "
+            f"tools/measure_avsp_profile.ps1 for each of {PROFILE_ORDER}")
+    present = sorted(f.stem for f in PROFILE_DIR.glob("*.json"))
+    unknown = [name for name in present if name not in PROFILE_ORDER]
+    if unknown:
+        raise SystemExit(f"unknown profile measurement files: {unknown}")
+    missing = [name for name in PROFILE_ORDER if name not in present]
+    if missing:
+        raise SystemExit(
+            f"missing profile measurements: {missing} (run "
+            f"tools/measure_avsp_profile.ps1 for each)")
+    profiles = {}
+    for name in PROFILE_ORDER:
+        record = json.loads((PROFILE_DIR / f"{name}.json").read_text())
+        if record.get("profile") != name:
+            raise SystemExit(
+                f"{name}.json names profile {record.get('profile')!r}; "
+                f"file/profile mismatch")
+        bend = int(record["bend"], 16)
+        profiles[name] = {
+            "profile": name,
+            "build_profile_stamp": record["build_profile_stamp"],
+            "game_elf_sha256": record["game_elf_sha256"],
+            "bend": record["bend"],
+            "limit": f"0x{WORK_RAM_LIMIT:08x}",
+            "headroom_bytes": WORK_RAM_LIMIT - bend,
+            "iso_sha256": record.get("iso_sha256"),
+            "hardware_manifest_sha256":
+                record.get("hardware_manifest_sha256"),
+            "status": "MEASURED",
+        }
+    return profiles
 
 
 def parse_carves() -> dict:
@@ -193,15 +214,13 @@ def disc_guard() -> dict:
 
 
 def main() -> None:
-    existing = {}
-    if OUTPUT.exists():
-        existing = json.loads(OUTPUT.read_text())
-    profiles = existing.get("work_ram_profiles", {})
-    measurement = measure_work_ram()
-    profiles[measurement["profile"]] = measurement
+    profiles = load_work_ram_profiles()
 
     budget = {
-        "schema": "avsp-residency-budget-v0",
+        "schema": "avsp-residency-budget-v1",
+        "inputs": "four explicit build/residency_profiles/*.json "
+                  "measurements plus tracked manifests; previous output "
+                  "is never read",
         "classification": "pessimistic residency ledger; sizes, addresses "
                           "and counts only",
         "work_ram_limit": f"0x{WORK_RAM_LIMIT:08x}",
@@ -215,9 +234,9 @@ def main() -> None:
     }
     OUTPUT.write_text(json.dumps(budget, indent=1, sort_keys=True) + "\n",
                       encoding="ascii", newline="\n")
-    print(f"residency budget: profiles={sorted(profiles)}, "
-          f"work RAM headroom this profile "
-          f"{measurement['headroom_bytes']} bytes")
+    print("residency budget: " + ", ".join(
+        f"{name} headroom {profiles[name]['headroom_bytes']}"
+        for name in profiles))
 
 
 if __name__ == "__main__":
