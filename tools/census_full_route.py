@@ -152,6 +152,7 @@ class RouteState:
             active = self.current["objram2" if bank else "objram1"]
             yield {
                 "frame": frame,
+                "active_bank": bank,
                 "input_word": input_word,
                 "changed": changed,
                 "cps_a": cps_a,
