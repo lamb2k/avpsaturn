@@ -9,9 +9,10 @@ work. Always verify it with a fresh `git status --short --branch`,
 
 - Repository: `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 - Branch: `codex/avp-master-plan`
-- HEAD: `e728c9b` (`Prove the confirmation shutter across the complete
-  source interval`), on top of `aa0d671` (ROM-derived Round 1 title),
-  the Codex-reviewed `5bf237e`/`b681c04`, and Codex base `885f6bc`.
+- HEAD: `82bb47e` (`Capture and census the full route at cadence 1 (RP2)`),
+  on top of `402a540` (RP1 docs rotation), `dddd19a` (AvspSceneDef v0
+  contracts), `2802e2c`, `e728c9b`, `aa0d671`, the Codex-reviewed
+  `5bf237e`/`b681c04`, and Codex base `885f6bc`.
 - Recent frontend commits:
   - `b681c04` - obey Jo's one-based palette contract (Codex-reviewed);
   - `5bf237e` - prove every held frontend VDP1 object (Codex-reviewed);
@@ -20,7 +21,7 @@ work. Always verify it with a fresh `git status --short --branch`,
   - `e728c9b` - prove the confirmation shutter across the complete source
     interval (awaiting Codex review).
 - Acceptance: Capability Gate 1 **0/7**; full game **0/9**.
-- Active work: RP0 and RP1 **PASSED**; next is RP2 in
+- Active work: RP0, RP1 and RP2 **PASSED**; next is RP3 in
   `docs/ROUND1_EXECUTION_PLAN.md`. `aa0d671`/`e728c9b` were implemented and
   self-reviewed under the user's autonomous interim-supervisor
   authorization recorded in this session; Codex review remains the
@@ -77,6 +78,67 @@ yabasanshiro PID 44108
 It may belong to the concurrent frontend loop. Do not launch a second emulator
 against the same profile. Confirm ownership before stopping it; the owning agent
 must terminate all emulator/MAME processes before its checkpoint finishes.
+
+## Implementation report: RP2 - full-route cadence-1 capture and census
+
+- Base: `402a540`; implementation commit `82bb47e` on
+  `codex/avp-master-plan`.
+- Changed files: `tools/mame_capture_full_route.lua` (new),
+  `capture_full_route.ps1` (new), `tools/census_full_route.py` (new),
+  `tools/verify_route_census.py` (new), `test.ps1` (census gate),
+  `data/round1_route_census.json` (new, tracked semantics only),
+  `data/round1_route_census_controls.json` (new).
+- Capture: deterministic cold-boot cadence-1 run, frames 1-18000, composite
+  of the two proven input schedules (`mame_capture_stage1.lua` frames
+  0-4200 verbatim, `mame_capture_stage1_full.lua` re-based to
+  relative = frame - 4200). NVRAM baseline snapshotted to
+  `.deps/mame/full_route_nvram_baseline` and restored before every run.
+  Regions per frame, delta-encoded: gfxram in 64 KiB thirds, work RAM
+  0xFF0000-0xFFFFFF, QSound RAM 0x618000-0x619FFF (program-space
+  read_range); CPS-A, CPS-B, objram1, objram2, output from their named
+  MAME shares because those are MEASURED write-only through the 68000
+  read map (program reads return zero). Per-frame screenshots. Raw
+  capture private at `.deps/mame/full_route` (~2.0 GiB).
+- Route coverage MEASURED from the capture: boss defeat and 1P RESULTS at
+  ~14760, Round 2 interior gameplay by 16200, so the held Round 2 title is
+  inside the window; the heuristic route dies and continues during street
+  and boss combat (continue loops visible as the paired 1501/901-frame
+  groups), recorded as played, per the existing stage1 timing policy.
+- Census (`data/round1_route_census.json`, 122 groups): frame signature =
+  CPS-A layer bases + video-control word + CPS-B block hash + palette
+  population bitmap; additional full-frame-rewrite cut when a frame
+  rewrites two or more gfxram thirds (measured p99.9 of per-frame gfx
+  delta is one third). Groups carry provisional bit-15 AvspSceneDef v0
+  IDs, scroll ranges, object-count ranges, input-word runs, per-layer map
+  hash counts, row-scroll hash counts, QSound change counts, and review
+  flags; region timelines carry change counts and stream hashes only.
+  Known landmarks align: character-select shutter group `0x801a`
+  (1693-1958, object max 362), Round 1 title `0x801c` (1972-2073), street
+  gameplay `0x801d` (2074-5542), results `0x8078`, Round 2 `0x8079`. The
+  Round 2 title shares group `0x8079` with Round 2 gameplay - same
+  signature because the title text is scroll1 over the already-loaded
+  interior scene, consistent with the proven Round 1 title mechanism;
+  splitting it is RP6 semantic-ID work.
+- Checks, all PASS:
+  1. deterministic re-run: an independent cold-boot capture
+     (`full_route_rerun`) produced a byte-identical census;
+  2. census regenerated twice from the same capture: byte-identical;
+  3. negative controls (one-frame boundary shift, perturbed group
+     boundary): both detected, recorded in
+     `data/round1_route_census_controls.json`;
+  4. `test.ps1` exit 0 including the new `tools/verify_route_census.py`
+     structural gate (groups tile the route exactly, unique bit-15 IDs);
+  5. every MAME process terminated (count 0 verified before commit).
+- Review flags: 3 groups flagged `unexplained-full-frame-rewrite`
+  (boundaries at 80, 5566/6200-region, 12799); human review scope for RP6.
+- GAP: the census groups the Round 2 title with Round 2 gameplay (RP6
+  splits by semantic evidence). GAP: audio grouping uses QSound RAM change
+  counts only; no audio payload is captured or tracked.
+- UNRUN: physical Saturn conditions; audible CDDA/PCM; the separately
+  user-requested whole-game capture (`.deps/mame/full_game`, frames
+  1-180000 via `capture_full_route.ps1 -CaptureName full_game
+  -FinalFrame 180000`) was still recording at handoff time and is
+  evidence-only for later rounds.
 
 ## Implementation report: RP1 - AvspSceneDef v0 shared contracts
 
