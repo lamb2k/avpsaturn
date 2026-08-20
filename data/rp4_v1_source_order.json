@@ -1,0 +1,61 @@
+{
+ "contract": "within one source object priority code the earlier object-RAM entry wins; the code's relationship to each tile layer is set by OBJ_PRI under the CPS-B layer-control draw order; zero tile-pen masks are inert",
+ "controls": {
+  "change_layer_order_field": {
+   "detected": true,
+   "note": "moving the beaten layer to the front of the draw order must change the composite",
+   "pixels_changed": 36550,
+   "predicted_change": true
+  },
+  "change_source_priority_code": {
+   "detected": true,
+   "note": "code 1 is hidden under every tile layer, so the object must leave the visible composite",
+   "pixels_changed": 1685,
+   "predicted_change": true
+  },
+  "flip_cps_b_mask_bit": {
+   "detected": true,
+   "note": "the measured masks are zero and the CPS2 render path does not draw front pens, so the split is inert: the model predicts NO change, and any change would falsify it",
+   "pixels_changed": 0,
+   "predicted_change": false
+  },
+  "reverse_same_code_entries": {
+   "detected": true,
+   "note": "the earlier entry wins, so exchanging the pair must move the witness pixel",
+   "pixels_changed": 185,
+   "predicted_change": true
+  },
+  "shift_object_one_fitted_pixel": {
+   "detected": true,
+   "note": "a one-pixel source shift must survive the endpoint-aligned 384-to-352 map at the witness column",
+   "pixels_changed": 1555,
+   "predicted_change": true
+  }
+ },
+ "inputs_sha256": {
+  "layer_witnesses": "29a88be7615662149d8c67ac02ab083ad0872fe2179f9074d539064c2170b0b8",
+  "order_witnesses": "ac2a708721b3df0b360960891a20a223e689cd7b77d1af4eff526f8605d27e63"
+ },
+ "saturn_controls_note": "the three Saturn-side controls (CMDCOLR priority bits, command order, PRIS/PRIN) are executed against the StreetTest build, not here",
+ "schema": "rp4-v1-source-order-v0",
+ "status": {
+  "rp4_v0_status": "FALSIFIED_BY_SOURCE_PREMISE",
+  "rp4_v1_composite_mismatches": 0,
+  "rp4_v1_controls_blocked": 3,
+  "rp4_v1_controls_executed": 5,
+  "rp4_v1_controls_passed": 5,
+  "rp4_v1_controls_total": 8,
+  "rp4_v1_object_layer_witnesses": 4,
+  "rp4_v1_object_order_witnesses": 11,
+  "rp4_v1_order_counterexamples": 0,
+  "rp4_v1_saturn_controls_passed": 0,
+  "rp4_v1_source_controls_passed": 5,
+  "rp4_v1_status": "FALSIFIED",
+  "rp4_v1_witness_status": "MEASURED"
+ },
+ "witness_frame": 2345,
+ "witness_source_xy": [
+  6,
+  154
+ ]
+}

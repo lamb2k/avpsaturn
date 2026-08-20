@@ -108,3 +108,99 @@ def exit_code(status: dict) -> int:
     if verdict == "FALSIFIED":
         return 3
     return 1
+
+
+# --- RP4 v1: the source-order contract -------------------------------
+#
+# v0 asserted that the CPS2 object priority code names an actor class and
+# that Round 1 contains a deliberate actor-over-foreground overlap. Both
+# were falsified route-wide, and that verdict is preserved rather than
+# rewritten: V0_STATUS is a constant, not a computed field.
+#
+# v1 asserts what the registers and the object list actually program:
+# within one source object priority code the earlier object-RAM entry
+# wins, and the code's relationship to each tile layer is set by the
+# OBJ_PRI nibbles under the CPS-B layer-control draw order. The Saturn
+# side must reproduce that order, so half the controls perturb the
+# source and half perturb the port.
+
+V0_STATUS = "FALSIFIED_BY_SOURCE_PREMISE"
+
+REQUIRED_V1_SOURCE_CONTROLS = (
+    "reverse_same_code_entries",
+    "change_source_priority_code",
+    "flip_cps_b_mask_bit",
+    "change_layer_order_field",
+    "shift_object_one_fitted_pixel",
+)
+
+REQUIRED_V1_SATURN_CONTROLS = (
+    "change_cmdcolr_priority_bits",
+    "reverse_saturn_command_order",
+    "perturb_pris_prin",
+)
+
+REQUIRED_V1_CONTROLS = (REQUIRED_V1_SOURCE_CONTROLS +
+                        REQUIRED_V1_SATURN_CONTROLS)
+
+
+def build_v1_status(controls: dict, witnesses: dict,
+                    composite_mismatches: int) -> dict:
+    """The RP4 v1 source-order status block.
+
+    controls: name -> {"detected": True | False | None}; None is BLOCKED.
+    witnesses: {"object_order": n, "object_layer": n, "counterexamples":
+    n} from the Chapter 1 evidence.
+    """
+    missing = [n for n in REQUIRED_V1_CONTROLS if n not in controls]
+    executed = [n for n in REQUIRED_V1_CONTROLS
+                if controls.get(n, {}).get("detected") is not None]
+    passed = [n for n in executed if controls[n]["detected"] is True]
+    blocked = [n for n in REQUIRED_V1_CONTROLS
+               if n in controls and controls[n].get("detected") is None]
+
+    order_witnesses = witnesses.get("object_order", 0)
+    layer_witnesses = witnesses.get("object_layer", 0)
+    counterexamples = witnesses.get("counterexamples", 0)
+    witnessed = (order_witnesses >= 3 and layer_witnesses >= 3 and
+                 counterexamples == 0)
+
+    if (len(executed) != len(passed) or composite_mismatches > 0 or
+            counterexamples > 0):
+        contract = "FAIL"
+    elif blocked or missing or not witnessed:
+        contract = "FALSIFIED"
+    elif len(passed) == len(REQUIRED_V1_CONTROLS):
+        contract = "PASS"
+    else:
+        contract = "FAIL"
+
+    return {
+        "rp4_v0_status": V0_STATUS,
+        "rp4_v1_status": contract,
+        "rp4_v1_controls_total": len(REQUIRED_V1_CONTROLS),
+        "rp4_v1_controls_executed": len(executed),
+        "rp4_v1_controls_passed": len(passed),
+        "rp4_v1_controls_blocked": len(blocked) + len(missing),
+        "rp4_v1_source_controls_passed":
+            sum(1 for n in REQUIRED_V1_SOURCE_CONTROLS
+                if controls.get(n, {}).get("detected") is True),
+        "rp4_v1_saturn_controls_passed":
+            sum(1 for n in REQUIRED_V1_SATURN_CONTROLS
+                if controls.get(n, {}).get("detected") is True),
+        "rp4_v1_object_order_witnesses": order_witnesses,
+        "rp4_v1_object_layer_witnesses": layer_witnesses,
+        "rp4_v1_order_counterexamples": counterexamples,
+        "rp4_v1_witness_status": "MEASURED" if witnessed else "FALSIFIED",
+        "rp4_v1_composite_mismatches": composite_mismatches,
+    }
+
+
+def v1_exit_code(status: dict) -> int:
+    """0 = PASS, 3 = FALSIFIED evidence, 1 = failed control/mismatch."""
+    verdict = status["rp4_v1_status"]
+    if verdict == "PASS":
+        return 0
+    if verdict == "FALSIFIED":
+        return 3
+    return 1

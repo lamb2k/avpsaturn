@@ -437,12 +437,27 @@ if ($LASTEXITCODE -ne 0) {
     throw "Preflight ensure tests failed with exit code $LASTEXITCODE."
 }
 
+# CPS2 object/layer priority register decode (capture-free): draw
+# order, per-layer priority nibbles and the hidden-under rule.
+& $PythonPath (Join-Path $PSScriptRoot 'tests\test_priority_decode.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Priority decode tests failed with exit code $LASTEXITCODE."
+}
+
 # RP4 acceptance-instrument unit controls (capture-free): blocked or
 # missing required controls can never report success; a null overlap is
 # FALSIFIED; stale evidence hashes are rejected.
 & $PythonPath (Join-Path $PSScriptRoot 'tests\test_rp4_status.py')
 if ($LASTEXITCODE -ne 0) {
     throw "RP4 status instrument tests failed with exit code $LASTEXITCODE."
+}
+
+# RP4 v1 source-order acceptance controls (capture-free): the v0
+# verdict stays preserved, and blocked, missing or undetecting
+# controls can never reach PASS.
+& $PythonPath (Join-Path $PSScriptRoot 'tests\test_rp4_v1_status.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "RP4 v1 status instrument tests failed with exit code $LASTEXITCODE."
 }
 
 # Manifest paths must stay lexical repository-relative even when reached
