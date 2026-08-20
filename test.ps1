@@ -107,6 +107,12 @@ if ($LASTEXITCODE -ne 0) {
     throw "AvspSceneDef v0 contract test failed with exit code $LASTEXITCODE."
 }
 
+$sceneRuntimeCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_scene.c avsp_route.c avsp_scene_runtime.c tests/avsp_scene_runtime_test.c -o build/avsp_scene_runtime_test && ./build/avsp_scene_runtime_test"
+& $wsl.Source sh '-lc' $sceneRuntimeCommand
+if ($LASTEXITCODE -ne 0) {
+    throw "AvspSceneRuntime player test failed with exit code $LASTEXITCODE."
+}
+
 $animCommand = "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 avsp_anim_script.c tests/avsp_anim_script_test.c -o build/avsp_anim_script_test && ./build/avsp_anim_script_test"
 & $wsl.Source sh '-lc' $animCommand
 if ($LASTEXITCODE -ne 0) {
