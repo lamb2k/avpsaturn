@@ -243,7 +243,9 @@ static const AvspShotHold avsp_shot_holds[] = {
     { CAP_ENCOUNTER_CHARACTER_CONFIRM, 1 },  /* confirmation shutter      */
     { CAP_ENCOUNTER_CHARACTER_CONFIRM,10 },
     { CAP_ENCOUNTER_CHARACTER_CONFIRM,20 },
-    { CAP_ENCOUNTER_ROUND_TITLE,      20 }   /* Round 1 title             */
+    { CAP_ENCOUNTER_ROUND_TITLE,      20 },  /* title text over black     */
+    { CAP_ENCOUNTER_ROUND_TITLE,      60 },  /* title text over street    */
+    { CAP_ENCOUNTER_ROUND_TITLE,     100 }   /* street after text clear   */
 };
 #define AVSP_SHOT_HOLD_COUNT ((int)(sizeof(avsp_shot_holds) / sizeof(avsp_shot_holds[0])))
 static int avsp_shot_hold_index;
@@ -1004,8 +1006,6 @@ static int load_route_sequences(void)
 
 static int sequence_scene_for_world(void)
 {
-    if (world.encounter_state == CAP_ENCOUNTER_ROUND_TITLE)
-        return AVSP_SEQUENCE_ROUND_1_TITLE;
     if (world.encounter_state == CAP_ENCOUNTER_BARRICADE_INTRO)
     {
         if (world.encounter_timer < 120) return AVSP_SEQUENCE_BARRICADE_INTRO;
@@ -2006,10 +2006,32 @@ static void draw_world(void)
             avsp_frontend_draw_cursor(
                 &frontend_runtime, world.selection_cursor,
                 world.encounter_timer, cursor_visible);
+            /* The Round 1 title text appears over the shutter-blacked
+             * screen 171 frames after the confirm input and fades in
+             * through the source's own sixteen measured palette rows. */
+            if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM &&
+                world.encounter_timer - 1 >= AVSP_FRONTEND_R1TEXT_CONFIRM_FRAME)
+            {
+                avsp_frontend_set_r1text_fade(
+                    &frontend_runtime, world.encounter_timer - 1 -
+                        AVSP_FRONTEND_R1TEXT_CONFIRM_FRAME);
+                avsp_frontend_draw_round1_text(&frontend_runtime);
+            }
         }
         if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM)
             apply_confirm_shutter();
         return;
+    }
+    if (world.encounter_state == CAP_ENCOUNTER_ROUND_TITLE)
+    {
+        /* Measured Round 1 title: the text stays over the shutter-blacked
+         * bitmap until the street scene pops in at frame 35, and clears
+         * instantly at frame 90. The scene itself is the native street
+         * renderer below, not a captured picture. */
+        if (world.encounter_timer < AVSP_FRONTEND_R1TEXT_CLEAR_FRAME)
+            avsp_frontend_draw_round1_text(&frontend_runtime);
+        if (world.encounter_timer < AVSP_FRONTEND_R1SCENE_POP_FRAME)
+            return;
     }
     if (sequence_scene_for_world() >= 0)
         return;
@@ -2091,6 +2113,11 @@ static void draw_arcade_hud(void)
         world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT ||
         world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM ||
         sequence_scene_for_world() >= 0)
+        return;
+    /* The source writes the gameplay HUD tilemap 32 frames into the Round 1
+       title, three frames before the street scene pops in. */
+    if (world.encounter_state == CAP_ENCOUNTER_ROUND_TITLE &&
+        world.encounter_timer < AVSP_FRONTEND_R1HUD_FRAME)
         return;
     update_hud_textures();
     jo_sprite_set_palette(hud_palette.id);
@@ -2461,7 +2488,8 @@ static void frame_callback(void)
        the stage. The Chrysalis boss is composed from ROM tables and needs no
        archive, so nothing is loaded here (release_frontend_scene is
        idempotent). */
-    if (world.encounter_state == CAP_ENCOUNTER_ROUND_TITLE)
+    if (world.encounter_state == CAP_ENCOUNTER_ROUND_TITLE &&
+        world.encounter_timer >= AVSP_FRONTEND_R1TEXT_CLEAR_FRAME)
         release_frontend_scene(1);
     if (clip_request == CAP_CLIP_SHOOT)
         weapon_audio_pending_shot = world.shots_fired;

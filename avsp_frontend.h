@@ -20,6 +20,12 @@ typedef struct
     int title_sprites[AVSP_FRONTEND_TITLE_OBJECT_COUNT];
     int cursor_sprites[AVSP_FRONTEND_CURSOR_CEL_COUNT];
     int transition_sprites[AVSP_FRONTEND_START_INTRO_COUNT];
+    int r1text_sprites[AVSP_FRONTEND_R1TEXT_OBJECT_COUNT];
+    /* All sixteen measured fade rows of the text bank, resident so the
+       per-frame fade never reads the disc while CDDA owns it. */
+    unsigned short *r1text_fade;
+    int r1text_fade_row;
+    int r1text_ready;
     int mask_sprite;
     int title_surface_ready;
     int title_objects_ready;
@@ -51,6 +57,8 @@ void avsp_frontend_draw_start_transition(AvspFrontend *frontend,
                                          int transition_frame);
 void avsp_frontend_draw_cursor(AvspFrontend *frontend, int cursor,
                                int animation_frame, int visible);
+void avsp_frontend_set_r1text_fade(AvspFrontend *frontend, int row);
+void avsp_frontend_draw_round1_text(AvspFrontend *frontend);
 void avsp_frontend_release_title_objects(AvspFrontend *frontend);
 void avsp_frontend_release_select_objects(AvspFrontend *frontend);
 void avsp_frontend_lock_disc_reads(AvspFrontend *frontend);

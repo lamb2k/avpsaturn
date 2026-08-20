@@ -40,9 +40,10 @@ CAPTURE = ROOT / "build" / "frontend_cram_readback.json"
 FRONT = ROOT / "build" / "avsp_cd" / "FRONT"
 REPORT = ROOT / "data" / "avsp_frontend_cram_readback.json"
 
-# Hold order is fixed by avsp_shot_holds[] in main.c.  Hold 18 is the Round 1
-# title, which still runs through the legacy sequence-hold palette rather than
-# a FRONT payload, so it carries register and counter evidence only.
+# Hold order is fixed by avsp_shot_holds[] in main.c.  Holds 18-20 are the
+# Round 1 title over the shutter-blacked bitmap and then the native street
+# scene, whose NBG1 palette is the gameplay background block rather than a
+# FRONT payload, so they carry register and counter evidence only.
 SURFACE_BY_HOLD = {0: "title"}
 SURFACE_BY_HOLD.update({index: "select" for index in range(1, 18)})
 SURFACES = {

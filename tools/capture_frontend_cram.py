@@ -6,7 +6,7 @@ Payloads follow Jo Engine's one-based palette contract, so pixel value p is
 expected at hardware colour entry 256 * palette_id + p.
 The last two links can only be measured on the running machine, so this tool
 drives the pinned Yaba Sanshiro MCP debug server while a `-FrontendShotTest`
-build walks its nineteen exact (state, frame) holds, and records for each hold:
+build walks its twenty-one exact (state, frame) holds, and records for each hold:
 
 * the SGL VDP2 register shadow (TVMD/CHCTLA/BMPNA/CRAOFA/... in work RAM,
   because the CPU-side VDP2 register reads return zero);
@@ -52,7 +52,7 @@ SHADOW_REGISTERS = (
 )
 CRAM = 0x25F00000
 CRAM_WINDOW_ENTRIES = 258      # one entry below the base through base + 256
-HOLD_COUNT = 19
+HOLD_COUNT = 21
 
 # VDP1 draws from a command table at the base of its VRAM.  Each command is
 # sixteen words; CMDCTRL bit 15 ends the list and its JP field says how to
@@ -246,7 +246,20 @@ def main() -> int:
     symbols = load_symbols(args.elf, args.nm)
     mcp = Mcp(args.url)
     mcp.initialize()
-    shadow = mcp.u32(symbols["slBMPalette"] + 0x10) - BMPNA_OFFSET
+    # The staged loader copies GAME.BIN into work RAM after the emulator's
+    # debug server is already up, so wait until slBMPalette's literal pool
+    # holds a plausible work-RAM shadow address before dereferencing it.
+    deadline = time.time() + args.timeout
+    while True:
+        literal = mcp.u32(symbols["slBMPalette"] + 0x10)
+        if 0x06000000 <= literal < 0x06100000:
+            break
+        if time.time() >= deadline:
+            print("slBMPalette literal never became a work-RAM address",
+                  file=sys.stderr)
+            return 1
+        time.sleep(1.0)
+    shadow = literal - BMPNA_OFFSET
 
     records: dict[int, dict] = {}
     deadline = time.time() + args.timeout

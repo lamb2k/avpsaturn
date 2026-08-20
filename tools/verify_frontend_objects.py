@@ -46,10 +46,11 @@ Four negative controls run against a hold that has just passed exactly: one
 perturbed vertex, one perturbed colour bank, one transposed command order, and
 one perturbed timing anchor.  All four must fail.
 
-Two conditions are reported as declared GAPs rather than normalised into a
+One condition is reported as a declared GAP rather than normalised into a
 pass: the confirmation shutter is a VDP2 bitmap row blackout and therefore
-emits no VDP1 objects, so this instrument cannot prove it; and the Round 1
-title hold still plays R1TITLE.RLE and emits no ROM-derived objects at all.
+emits no VDP1 objects, so this instrument cannot prove it.  The Round 1
+title holds now compare the two ROM-derived text-line objects (and their
+measured retirement) over the native street scene.
 
 Skips cleanly when the private capture or converter payloads are absent.
 """
@@ -94,7 +95,7 @@ HOLDS = (
     (CHARACTER_SELECT, 30), (CHARACTER_SELECT, 60), (CHARACTER_SELECT, 100),
     (CHARACTER_SELECT, 140),
     (CHARACTER_CONFIRM, 1), (CHARACTER_CONFIRM, 10), (CHARACTER_CONFIRM, 20),
-    (ROUND_TITLE, 20),
+    (ROUND_TITLE, 20), (ROUND_TITLE, 60), (ROUND_TITLE, 100),
 )
 # Palette slots: frontend_palettes[0] is the title scene, [1] the select scene.
 TITLE_SCENE = 0
@@ -103,8 +104,10 @@ SELECT_SCENE = 1
 # and the title's two source banks map onto 14 and 15 in sorted order.
 MASK_SUBBANK = 14
 CURSOR_SUBBANK = 15
+R1TEXT_SUBBANK = 13
 CURSOR_PERIOD = 6
 START_MASK_FRAMES = 27
+R1TEXT_CLEAR_FRAME = 90
 
 
 def fit_source_x(source_x: int) -> int:
@@ -192,6 +195,20 @@ def intro_schedule(manifest, index: int):
              "source_width": entry["source_width"],
              "source_height": entry["source_height"],
              "palette_subbank": CURSOR_SUBBANK, "scene": SELECT_SCENE}]
+
+
+def round1_text_schedule(manifest):
+    """Both measured Round 1 title text lines, from the converter manifest.
+
+    The runtime draws the first line at the lower depth, so the live command
+    table holds the second line first; the shared reversal in
+    compare_schedule expresses that.
+    """
+    return [{"source_x": entry["source_x"], "source_y": entry["source_y"],
+             "source_width": entry["source_width"],
+             "source_height": entry["source_height"],
+             "palette_subbank": R1TEXT_SUBBANK, "scene": SELECT_SCENE}
+            for entry in manifest["object_schedules"]["round1_title_text"]]
 
 
 def cursor_schedule(interaction, cursor: int):
@@ -291,6 +308,14 @@ def schedule_for(state: int, timer: int, cursor: int, manifest, interaction):
             return (f"confirm blink visible frame {frames_since_input}",
                     cursor_schedule(interaction, cursor))
         return f"confirm blink blank frame {frames_since_input}", []
+    if state == ROUND_TITLE:
+        # The measured text lines stay up until the instant tilemap clear at
+        # frame 90; the street scene behind them is the native renderer, not
+        # a frontend object schedule.
+        if timer < R1TEXT_CLEAR_FRAME:
+            return (f"round 1 title text frame {timer}",
+                    round1_text_schedule(manifest))
+        return f"round 1 title cleared frame {timer}", []
     return None, None
 
 
@@ -329,6 +354,15 @@ def main() -> int:
         diagnostics = record["diagnostics"]
         objects = objects_of(commands)
         state = diagnostics["encounter_state"]
+        if state == ROUND_TITLE:
+            # Once the native street scene pops in, the gameplay renderer
+            # shares the frame: its unequal-scale sprites also draw as
+            # distorted commands, but in their own palette blocks. The
+            # frontend's text objects are the ones in the select block.
+            select_id = diagnostics[f"frontend_palette_{SELECT_SCENE}_id"]
+            objects = [command for command in objects
+                       if select_id * 256 <= command["colour"]
+                       < (select_id + 1) * 256]
         timer = diagnostics["encounter_timer"]
         cursor = diagnostics["selection_cursor"]
         palette_ids = {
@@ -375,9 +409,7 @@ def main() -> int:
         label, schedule = schedule_for(state, timer, cursor, manifest,
                                        interaction)
         if schedule is None:
-            entry["gap"] = ("Round 1 title still plays R1TITLE.RLE and emits "
-                            "no ROM-derived VDP1 objects")
-            gaps.append(f"hold {hold}: {entry['gap']}")
+            failures.append(f"hold {hold}: no schedule for state {state}")
         else:
             result = compare_schedule(hold, objects, schedule, palette_ids,
                                       label)

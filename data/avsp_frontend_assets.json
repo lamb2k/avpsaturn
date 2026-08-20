@@ -109,6 +109,42 @@
    "bundle": "select",
    "bytes": 512,
    "entries": 256,
+   "kind": "vdp1-cram-rgb555-fade",
+   "path": "FRONT/R1TF.PAL",
+   "rows": 16,
+   "sha256": "74d3a0dd8399cf401a855c3e51dffaab0041a5e245d4e9b2b5e8ab0b33399b4a",
+   "source_frames": [
+    1971,
+    1986
+   ],
+   "source_palette_bank": 38
+  },
+  {
+   "bundle": "select",
+   "bytes": 512,
+   "height": 16,
+   "kind": "vdp1-4bpp-cel",
+   "path": "FRONT/R1TXT0.BIN",
+   "sha256": "9a0e44dcb2b4fc4b6d2bf72d42bd35d873599db5cbce063ca2820a1ee4e87e60",
+   "source_frame": 2100,
+   "source_palette_bank": 38,
+   "width": 64
+  },
+  {
+   "bundle": "select",
+   "bytes": 960,
+   "height": 16,
+   "kind": "vdp1-4bpp-cel",
+   "path": "FRONT/R1TXT1.BIN",
+   "sha256": "cf8715a286157eb043c8ced28a900a08d42f486d4a607fe3bac05ea2011ba810",
+   "source_frame": 2100,
+   "source_palette_bank": 38,
+   "width": 120
+  },
+  {
+   "bundle": "select",
+   "bytes": 512,
+   "entries": 256,
    "kind": "cram-rgb555",
    "live_colours": 106,
    "path": "FRONT/SELBACK.PAL",
@@ -346,7 +382,7 @@
  ],
  "bundle_budget_bytes": 78848,
  "bundle_bytes": {
-  "select": 45122,
+  "select": 47106,
   "title": 55692
  },
  "classification": "Saturn frontend assets derived from ROM graphics + CPS tilemap/object/palette state; no captured pixels",
@@ -526,6 +562,32 @@
   "source_width": 384
  },
  "object_schedules": {
+  "round1_title_text": [
+   {
+    "asset": "FRONT/R1TXT0.BIN",
+    "saturn_centre_x": 14,
+    "saturn_centre_y": -16,
+    "saturn_scale_x_denominator": 384,
+    "saturn_scale_x_numerator": 352,
+    "source_height": 16,
+    "source_palette_bank": 38,
+    "source_width": 64,
+    "source_x": 176,
+    "source_y": 88
+   },
+   {
+    "asset": "FRONT/R1TXT1.BIN",
+    "saturn_centre_x": 11,
+    "saturn_centre_y": 8,
+    "saturn_scale_x_denominator": 384,
+    "saturn_scale_x_numerator": 352,
+    "source_height": 16,
+    "source_palette_bank": 38,
+    "source_width": 120,
+    "source_x": 144,
+    "source_y": 112
+   }
+  ],
   "settled_select_cursor_draw_order": [
    {
     "asset": "FRONT/CUR04.BIN",
@@ -1153,9 +1215,48 @@
   "select": "NBG1 fitted scroll2+scroll3+scroll1 without cursor; live two-object VDP1 cursor",
   "title": "NBG1 fitted scroll3+scroll2+scroll1 surface plus VDP1 objects; flattening is valid only because the measured title hold has zero front-layer/object overlap"
  },
+ "round1_title": {
+  "confirm_input_frame": 1800,
+  "fade_frames": 16,
+  "hud_frame": 32,
+  "scene_pop_frame": 35,
+  "state_first_frame": 2040,
+  "text_appear_confirm_frame": 171,
+  "text_clear_frame": 90,
+  "text_layer": "scroll1 tilemap, colour bank 0x26, no flips; the appearance is a measured sixteen-step palette fade and the retirement is an instant tilemap clear"
+ },
  "schema": 1,
  "source_evidence": {
   "reconstructed_gfx_region_sha256": "ed6afd62ecbc3defddf4d8001b9dbe8735db1112fc7d38c9e21d77383cbd7671",
+  "round1_title": {
+   "cps_a_regs_2100.tsv": "2d63d04669f5c832a879555e75a088fd2a98d65881f5d54812d3065e8777bba5",
+   "gfxram_1970.tsv": "7e671f9429d17f4b51945292ead6e97c744b0e64993090d7f2a69d1d948928b5",
+   "gfxram_1971.tsv": "28f59285282125080b23e1ee85c17e59d276ce77b26463b623a09020affc998b",
+   "gfxram_2040.tsv": "aecc68a0e8afe83dc9d85d22dd860010369ebfd645bc4cd0058d6940227abe31",
+   "gfxram_2072.tsv": "c6a478ea6a74b4051abdb59be819826d6b02c4746b4441b6d8aa230cd517dfae",
+   "gfxram_2100.tsv": "c17fc6070a5a5cbf5be98b0ed43effbe7060664696ed4cdf7b37eddbe3c9f282",
+   "gfxram_2129.tsv": "fcc5398838c87317aa3f1c358583ae02f12fe1a18353d652e9296fef10ded8d4",
+   "gfxram_2130.tsv": "162c298263d81541ad7f4a55b7ba816c9489b70a1a78f639883bc9994273b1c5",
+   "palette_1971.tsv": "877e556473c7ffd4f8778de17ce8f6276ef16f9501ffb5e3ba36b4854a65899d",
+   "palette_1972.tsv": "40e8e451e506151af648ae5fa0e3eaa75a3a77756678e5ab48601f7d8c8ad230",
+   "palette_1973.tsv": "8af450db1ee793d88989e7e04369947ea2bbd9205e6c95e21ddb19239092f477",
+   "palette_1974.tsv": "a37fd613f6bfe893dc847845097d0ee64f2abe87593e36d5664ca75dd93f67ec",
+   "palette_1975.tsv": "a49e5e35c21f2413c3303e30e91b9c9189c3a55afd3c53d0bf48044c381e13de",
+   "palette_1976.tsv": "e1f71be14263fefa7060dc64559936194b760ab6cc24e6bae3dc2e88aba709cf",
+   "palette_1977.tsv": "d2b8d2ad1c30c9d9ce83f67463f5631dfc8d14562651017ec56d72d92aa0b8b3",
+   "palette_1978.tsv": "55235d89de97674deab49bcba72ce6243c1be8ae2193bb5ceb3c32aeccec7b24",
+   "palette_1979.tsv": "190417c3e783e367c9ebe9204e4eb0f07133569423dec5354bc8e052157b562f",
+   "palette_1980.tsv": "25c0d97483cae3c89c1849423142a9d7a551132b89d367f949a414dd3bcad1a2",
+   "palette_1981.tsv": "c4a5bff4a5a75683eb8fb82e8afe5efaa8b86bc6ce33399567762d2e571407c3",
+   "palette_1982.tsv": "2586095c34f9e144af781e31c94b5b2dbbffdae081f8293c74c15a1725508865",
+   "palette_1983.tsv": "2fef93520da441758298df131faeb1693c069671e4c0e12d9502ef69d127a34d",
+   "palette_1984.tsv": "be855f52b80522ab4b277eb8e23121ec0b8f4f0b2ac758034663c6b357e370e3",
+   "palette_1985.tsv": "5a4a4329943d5b17784268be06f7b5240793c9210eb1031ea9d26fadf4b0b400",
+   "palette_1986.tsv": "c8c5ce4c83039986ef51bf52b9b77381d1654a05f475e7e41fd16f0641b15ac8",
+   "palette_2100.tsv": "296a307c2c02c682bbcfda8a1ad9d307cd74ba03913e8ddd0638419894b563dc",
+   "reference_2076.png": "b58f4a9c18126e39c5a3fd31abd3c9321da3715bf3747249aed616094bb9b782",
+   "reference_2100.png": "53440fb386d4d9ee815b6a1253f75a29c278c8fa2317cb083c8175d515aa92e7"
+  },
   "select": {
    "cps_a_regs_2695.tsv": "e7d5be57cc63ec0125f4ce8a404a6e4f6559e58752df9b83ed6be25fc2aa22a0",
    "cps_b_regs_2695.tsv": "13caa8433f11f5bd1bd2ff05e58c8ebe0709838224673a499cc56299e05600ec",

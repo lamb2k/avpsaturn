@@ -1173,8 +1173,11 @@ static const unsigned char avsp_frontend_palettes[AVSP_FRONTEND_SCENES][256][3] 
 
 def write_route_sequence_assets(sprite_dir: Path) -> list[dict[str, object]]:
     """Emit capture-exact key states for one replaceable VDP1 sequence slot."""
+    # The Round 1 title is no longer a captured-picture scene: its text is
+    # ROM-derived VDP1 objects over the native street scene (see
+    # tools/gen_avsp_frontend.py round1_text_cels), so R1TITLE.RLE is not
+    # generated or shipped.
     scene_events = (
-        ("R1TITLE.RLE", "round_1_title"),
         ("BARRIN.RLE", "barricade_intro"),
         ("WITHDRAW.RLE", "withdraw_dialogue"),
         ("BREACH.RLE", "barricade_breach"),

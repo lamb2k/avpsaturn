@@ -347,6 +347,132 @@ def cursor_anchor_table() -> list[str]:
             for position in positions]
 
 
+# The Round 1 title text is scroll1 tilemap state, not CPS objects: 48 8x8
+# glyph tiles in colour bank 6 form "ROUND 1" and "CITY OF DESPAIR". The
+# tilemap is written at source frame 1971 (confirm input frame 1800 + 171),
+# the bank fades from the settled dim level to full over sixteen measured
+# per-frame palette steps, the gameplay HUD tilemap appears at 2072 and the
+# street scene layers pop in at 2075 (round-title entry 2040 + 32 and + 35),
+# and the glyph tiles are overwritten with blank glyphs at 2130 (+ 90).
+R1TEXT_LINES = ((88, 104), (112, 128))
+R1TEXT_BANK = 0x26
+R1CONFIRM_INPUT_FRAME = 1800
+R1TITLE_FIRST_FRAME = 2040
+R1TEXT_APPEAR_FRAME = 1971
+R1TEXT_FADE_FRAMES = 16
+R1HUD_FRAME = 2072
+R1SCENE_POP_FRAME = 2075
+R1TEXT_CLEAR_FRAME = 2130
+
+
+def scroll1_window(frame: int, y0: int,
+                   y1: int) -> dict[tuple[int, int], tuple[int, int, int]]:
+    """(vram index, code, attribute) for each visible 8x8 scroll1 cell."""
+    cps_a = load_words(FRONTEND_ROM / f"cps_a_regs_{frame:04d}.tsv")
+    gfxram = load_words(FRONTEND_ROM / f"gfxram_{frame:04d}.tsv")
+    base = (((cps_a[1] * 256) & 0x3FFFF) & ~(0x4000 - 1)) // 2
+    scroll_x, scroll_y = cps_a[6], cps_a[7]
+    cells = {}
+    for row_y in range(y0, y1, 8):
+        world_y = (row_y + 16 + scroll_y) % 512
+        row = world_y // 8
+        for col_x in range(0, 384, 8):
+            world_x = (col_x + 64 + scroll_x) % 512
+            column = world_x // 8
+            index = (row & 0x1F) + ((column & 0x3F) << 5) + ((row & 0x20) << 6)
+            cells[(col_x, row_y)] = (index, gfxram[base + index * 2],
+                                     gfxram[base + index * 2 + 1])
+    return cells
+
+
+def round1_text_cels(gfx: bytearray) -> tuple[
+        list[dict[str, object]], list[bytes], bytes]:
+    """Extract the two text lines as 4bpp cels plus the measured fade rows."""
+
+    def line_tiles(frame: int, y0: int, y1: int):
+        drawn = {}
+        for (col_x, row_y), (index, code, attribute) in \
+                scroll1_window(frame, y0, y1).items():
+            tile = decode_tile(gfx, 0x20000 + code, 8,
+                               right_half=bool(index & 0x20))
+            if set(tile.getdata()) == {15}:
+                continue
+            if attribute & 0xFFE0:
+                raise ValueError("round 1 text tile uses flips")
+            if (attribute & 0x1F) + 0x20 != R1TEXT_BANK:
+                raise ValueError("round 1 text tile is outside bank 0x26")
+            drawn[(col_x, row_y)] = tile
+        return drawn
+
+    reference = {}
+    for y0, y1 in R1TEXT_LINES:
+        reference.update(line_tiles(R1TEXT_APPEAR_FRAME, y0, y1))
+    for frame in (R1TITLE_FIRST_FRAME, 2100, R1TEXT_CLEAR_FRAME - 1):
+        current = {}
+        for y0, y1 in R1TEXT_LINES:
+            current.update(line_tiles(frame, y0, y1))
+        if sorted(current) != sorted(reference) or any(
+                list(current[key].getdata()) != list(reference[key].getdata())
+                for key in reference):
+            raise ValueError(f"round 1 text tilemap changed at frame {frame}")
+    for frame, expect in ((R1TEXT_APPEAR_FRAME - 1, "absent"),
+                          (R1TEXT_CLEAR_FRAME, "cleared")):
+        for y0, y1 in R1TEXT_LINES:
+            if line_tiles(frame, y0, y1):
+                raise ValueError(f"round 1 text not {expect} at frame {frame}")
+
+    cels = []
+    payloads = []
+    for line, (y0, y1) in enumerate(R1TEXT_LINES):
+        columns = sorted(x for x, y in reference if y0 <= y < y1)
+        left, right = columns[0], columns[-1] + 8
+        width, height = right - left, y1 - y0
+        pixels = bytearray(width * height)
+        for (col_x, row_y), tile in reference.items():
+            if not y0 <= row_y < y1:
+                continue
+            for y in range(8):
+                for x in range(8):
+                    pen = tile.getpixel((x, y))
+                    pixels[(row_y - y0 + y) * width + col_x - left + x] = (
+                        0 if pen == 15 else pen + 1)
+        packed = bytearray(len(pixels) // 2)
+        for index, pen in enumerate(pixels):
+            if index & 1:
+                packed[index // 2] |= pen
+            else:
+                packed[index // 2] = pen << 4
+        centre_x = left + width // 2
+        payloads.append(bytes(packed))
+        cels.append({
+            "asset": f"FRONT/R1TXT{line}.BIN",
+            "source_x": left, "source_y": y0,
+            "source_width": width, "source_height": height,
+            "saturn_centre_x": (centre_x * WIDTH) // 384 - WIDTH // 2,
+            "saturn_centre_y": y0 + height // 2 - HEIGHT // 2,
+            "saturn_scale_x_numerator": WIDTH,
+            "saturn_scale_x_denominator": 384,
+            "source_palette_bank": R1TEXT_BANK,
+        })
+
+    fade = bytearray()
+    final = load_palette(FRONTEND_ROM / "palette_2100.tsv")
+    for step in range(R1TEXT_FADE_FRAMES):
+        palette = load_palette(
+            FRONTEND_ROM / f"palette_{R1TEXT_APPEAR_FRAME + step:04d}.tsv")
+        fade += struct.pack(">H", 0)
+        for pen in range(15):
+            fade += struct.pack(
+                ">H", rgb555(palette[R1TEXT_BANK * 16 + pen][:3]))
+    expected_final = struct.pack(">H", 0) + b"".join(
+        struct.pack(">H", rgb555(final[R1TEXT_BANK * 16 + pen][:3]))
+        for pen in range(15))
+    if bytes(fade[-32:]) != expected_final:
+        raise ValueError("round 1 text fade does not settle at the full bank")
+    return cels, payloads, bytes(fade)
+
+
+
 def runtime_header(manifest: dict[str, object]) -> bytes:
     assets = {str(asset["path"]): asset for asset in manifest["assets"]}
     title_commands = manifest["object_schedules"]["title_draw_order"]
@@ -402,6 +528,19 @@ def runtime_header(manifest: dict[str, object]) -> bytes:
     cursor_vdp1_bytes = sum(int(asset["bytes"]) for asset in cursor_assets)
     transition_vdp1_bytes = sum(int(asset["bytes"])
                                 for asset in transition_assets) + 32
+    r1text_commands = manifest["object_schedules"]["round1_title_text"]
+    r1text_lines = []
+    for command in r1text_commands:
+        asset = assets[str(command["asset"])]
+        r1text_lines.append(
+            '    {"%s", %d, %d, %d, %d, %d, %d, %d},' % (
+                Path(str(command["asset"])).name, asset["bytes"],
+                command["source_width"], command["source_height"],
+                command["saturn_centre_x"], command["saturn_centre_y"],
+                command["source_x"], command["source_y"]))
+    r1text_vdp1_bytes = sum(int(assets[str(command["asset"])]["bytes"])
+                            for command in r1text_commands)
+    round1 = manifest["round1_title"]
     text = f"""/* Generated by tools/gen_avsp_frontend.py; metadata only. */
 #ifndef GENERATED_AVSP_FRONTEND_H
 #define GENERATED_AVSP_FRONTEND_H
@@ -437,7 +576,17 @@ def runtime_header(manifest: dict[str, object]) -> bytes:
 #define AVSP_FRONTEND_TITLE_VDP1_BYTES {title_vdp1_bytes}
 #define AVSP_FRONTEND_CURSOR_VDP1_BYTES {cursor_vdp1_bytes}
 #define AVSP_FRONTEND_TRANSITION_VDP1_BYTES {transition_vdp1_bytes}
-#define AVSP_FRONTEND_VDP1_MAX_BYTES {max(title_vdp1_bytes, cursor_vdp1_bytes + transition_vdp1_bytes)}
+#define AVSP_FRONTEND_R1TEXT_VDP1_BYTES {r1text_vdp1_bytes}
+#define AVSP_FRONTEND_VDP1_MAX_BYTES {max(title_vdp1_bytes, cursor_vdp1_bytes + transition_vdp1_bytes + r1text_vdp1_bytes)}
+#define AVSP_FRONTEND_R1TEXT_OBJECT_COUNT {len(r1text_commands)}
+#define AVSP_FRONTEND_R1TEXT_PALETTE_FILE "R1TF.PAL"
+#define AVSP_FRONTEND_R1TEXT_PALETTE_SUBBANK 13
+#define AVSP_FRONTEND_R1TEXT_FADE_ROWS {round1["fade_frames"]}
+#define AVSP_FRONTEND_R1TEXT_FADE_ROW_BYTES 32
+#define AVSP_FRONTEND_R1TEXT_CONFIRM_FRAME {round1["text_appear_confirm_frame"]}
+#define AVSP_FRONTEND_R1HUD_FRAME {round1["hud_frame"]}
+#define AVSP_FRONTEND_R1SCENE_POP_FRAME {round1["scene_pop_frame"]}
+#define AVSP_FRONTEND_R1TEXT_CLEAR_FRAME {round1["text_clear_frame"]}
 
 typedef struct {{
     const char *filename;
@@ -485,6 +634,13 @@ static const AvspFrontendCursorCel avsp_frontend_cursor_cels[
 static const AvspFrontendTransitionObject avsp_frontend_transition_objects[
     AVSP_FRONTEND_START_INTRO_COUNT] = {{
 {chr(10).join(transition_lines)}
+}};
+
+/* The Round 1 title text lines, extracted from the scroll1 tilemap the
+ * source draws them on (48 glyph tiles, colour bank 0x26). */
+static const AvspFrontendTransitionObject avsp_frontend_r1text_objects[
+    AVSP_FRONTEND_R1TEXT_OBJECT_COUNT] = {{
+{chr(10).join(r1text_lines)}
 }};
 
 static const unsigned char avsp_frontend_cursor_cycle[
@@ -719,6 +875,24 @@ def generate() -> tuple[dict[str, object], dict[str, bytes]]:
             bundle="title"))
         title_commands.append(object_command(entry, f"FRONT/{filename}"))
 
+    r1text_commands, r1text_payloads, r1text_fade = round1_text_cels(gfx)
+    for command, data in zip(r1text_commands, r1text_payloads):
+        filename = Path(str(command["asset"])).name
+        files[filename] = data
+        assets.append(asset_record(
+            str(command["asset"]), data, "vdp1-4bpp-cel",
+            width=command["source_width"], height=command["source_height"],
+            source_palette_bank=command["source_palette_bank"],
+            source_frame=2100, bundle="select"))
+    files["R1TF.PAL"] = r1text_fade
+    assets.append(asset_record(
+        "FRONT/R1TF.PAL", r1text_fade, "vdp1-cram-rgb555-fade",
+        entries=16 * R1TEXT_FADE_FRAMES, rows=R1TEXT_FADE_FRAMES,
+        source_palette_bank=R1TEXT_BANK,
+        source_frames=[R1TEXT_APPEAR_FRAME,
+                       R1TEXT_APPEAR_FRAME + R1TEXT_FADE_FRAMES - 1],
+        bundle="select"))
+
     cursor_commands = [
         object_command(entry, cursor_asset_by_code[entry["tile_code"]])
         for entry in select_entries if entry["tile_code"]
@@ -800,6 +974,17 @@ def generate() -> tuple[dict[str, object], dict[str, bytes]]:
                     FRONTEND_ROM / f"objram_active_{frame:04d}.tsv")
                 for frame in range(1689, 1719)
             },
+            "round1_title": {
+                name: file_sha256(FRONTEND_ROM / name)
+                for name in [f"palette_{frame:04d}.tsv" for frame in range(
+                    R1TEXT_APPEAR_FRAME,
+                    R1TEXT_APPEAR_FRAME + R1TEXT_FADE_FRAMES)] + [
+                    "gfxram_1970.tsv", "gfxram_1971.tsv", "gfxram_2040.tsv",
+                    "gfxram_2100.tsv", "gfxram_2129.tsv", "gfxram_2130.tsv",
+                    "gfxram_2072.tsv", "cps_a_regs_2100.tsv",
+                    "palette_2100.tsv", "reference_2076.png",
+                    "reference_2100.png"]
+            },
         },
         "source_objects": {"title": len(title_drawn), "select": len(select_drawn)},
         "object_schedules": {
@@ -807,6 +992,20 @@ def generate() -> tuple[dict[str, object], dict[str, bytes]]:
             "settled_select_cursor_draw_order": cursor_commands,
             "start_transition_mask": transition_mask,
             "start_transition_intro": transition_intro,
+            "round1_title_text": r1text_commands,
+        },
+        "round1_title": {
+            "confirm_input_frame": R1CONFIRM_INPUT_FRAME,
+            "state_first_frame": R1TITLE_FIRST_FRAME,
+            "text_appear_confirm_frame":
+                R1TEXT_APPEAR_FRAME - R1CONFIRM_INPUT_FRAME,
+            "fade_frames": R1TEXT_FADE_FRAMES,
+            "hud_frame": R1HUD_FRAME - R1TITLE_FIRST_FRAME,
+            "scene_pop_frame": R1SCENE_POP_FRAME - R1TITLE_FIRST_FRAME,
+            "text_clear_frame": R1TEXT_CLEAR_FRAME - R1TITLE_FIRST_FRAME,
+            "text_layer": "scroll1 tilemap, colour bank 0x26, no flips; the "
+                          "appearance is a measured sixteen-step palette fade "
+                          "and the retirement is an instant tilemap clear",
         },
         "cursor_unique_cels": len(cursor_entries),
         "cursor_animation": {

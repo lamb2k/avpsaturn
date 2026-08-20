@@ -228,6 +228,9 @@ void avsp_frontend_init(AvspFrontend *frontend,
         frontend->cursor_sprites[index] = -1;
     for (index = 0; index < AVSP_FRONTEND_START_INTRO_COUNT; ++index)
         frontend->transition_sprites[index] = -1;
+    for (index = 0; index < AVSP_FRONTEND_R1TEXT_OBJECT_COUNT; ++index)
+        frontend->r1text_sprites[index] = -1;
+    frontend->r1text_fade_row = -1;
     frontend->mask_sprite = -1;
     if (title_palette == JO_NULL || select_palette == JO_NULL ||
         title_palette->data == JO_NULL || select_palette->data == JO_NULL ||
@@ -313,6 +316,25 @@ int avsp_frontend_enter_select(AvspFrontend *frontend)
             object->width, object->height);
         if (frontend->transition_sprites[index] < 0) return 0;
     }
+    for (index = 0; index < AVSP_FRONTEND_R1TEXT_OBJECT_COUNT; ++index)
+    {
+        const AvspFrontendTransitionObject *object =
+            &avsp_frontend_r1text_objects[index];
+        frontend->r1text_sprites[index] = add_sprite(
+            frontend, object->filename, object->bytes,
+            object->width, object->height);
+        if (frontend->r1text_sprites[index] < 0) return 0;
+    }
+    if (frontend->r1text_fade == JO_NULL)
+    {
+        frontend->r1text_fade = (unsigned short *)frontend_read(
+            frontend, AVSP_FRONTEND_R1TEXT_PALETTE_FILE,
+            AVSP_FRONTEND_R1TEXT_FADE_ROWS *
+                AVSP_FRONTEND_R1TEXT_FADE_ROW_BYTES);
+        if (frontend->r1text_fade == JO_NULL) return 0;
+    }
+    frontend->r1text_fade_row = -1;
+    frontend->r1text_ready = 1;
     frontend->select_surface_ready = 1;
     frontend->cursor_objects_ready = 1;
     return 1;
@@ -487,11 +509,59 @@ void avsp_frontend_draw_cursor(AvspFrontend *frontend, int cursor,
     draw_cursor_cel(frontend, AVSP_FRONTEND_CURSOR_LABEL_CEL, cursor, 61);
 }
 
+/* Copy one measured fade row of the Round 1 text bank into its sub-bank.
+ * The rows are the source's own sixteen per-frame palette states, so the
+ * fade is reproduced by lookup rather than by modelling the ramp. */
+void avsp_frontend_set_r1text_fade(AvspFrontend *frontend, int row)
+{
+    jo_color *block;
+    jo_color low;
+    jo_color high;
+    if (!frontend->r1text_ready || frontend->r1text_fade == JO_NULL) return;
+    if (row < 0) row = 0;
+    if (row >= AVSP_FRONTEND_R1TEXT_FADE_ROWS)
+        row = AVSP_FRONTEND_R1TEXT_FADE_ROWS - 1;
+    if (row == frontend->r1text_fade_row) return;
+    if (!palette_layout_ok(frontend, frontend->select_palette)) return;
+    block = palette_block(frontend->select_palette);
+    low = block[0];
+    high = block[AVSP_CRAM_BLOCK_ENTRIES];
+    if (!avsp_cram_copy_subbank(
+            (unsigned short *)frontend->select_palette->data,
+            frontend->r1text_fade + row *
+                (AVSP_FRONTEND_R1TEXT_FADE_ROW_BYTES / 2),
+            AVSP_FRONTEND_R1TEXT_PALETTE_SUBBANK))
+        ++frontend->palette_errors;
+    if (block[0] != low || block[AVSP_CRAM_BLOCK_ENTRIES] != high)
+        ++frontend->palette_boundary_writes;
+    frontend->r1text_fade_row = row;
+}
+
+/* Both measured text lines. Callers zero vdp1_commands_last_frame at the
+ * start of the frame, so this only accumulates and can follow the cursor
+ * draw inside the confirm state. */
+void avsp_frontend_draw_round1_text(AvspFrontend *frontend)
+{
+    int index;
+    if (!frontend->r1text_ready) return;
+    jo_sprite_set_palette_4bits(frontend->select_palette->id,
+                                AVSP_FRONTEND_R1TEXT_PALETTE_SUBBANK);
+    for (index = 0; index < AVSP_FRONTEND_R1TEXT_OBJECT_COUNT; ++index)
+    {
+        const AvspFrontendTransitionObject *object =
+            &avsp_frontend_r1text_objects[index];
+        draw_source_rect(frontend, frontend->r1text_sprites[index],
+                         object->source_x, object->source_y,
+                         object->width, object->height, 60 + index);
+    }
+}
+
 void avsp_frontend_release_select_objects(AvspFrontend *frontend)
 {
     if (!frontend->cursor_objects_ready) return;
     jo_sprite_free_from(frontend->cursor_sprites[0]);
     frontend->cursor_objects_ready = 0;
+    frontend->r1text_ready = 0;
 }
 
 void avsp_frontend_lock_disc_reads(AvspFrontend *frontend)

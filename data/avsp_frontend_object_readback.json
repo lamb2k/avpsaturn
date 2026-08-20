@@ -11,8 +11,7 @@
  "declared_gaps": [
   "hold 15: the confirmation shutter is a VDP2 bitmap row blackout, so this VDP1 instrument proves only the marker blink at this hold, not the shutter band",
   "hold 16: the confirmation shutter is a VDP2 bitmap row blackout, so this VDP1 instrument proves only the marker blink at this hold, not the shutter band",
-  "hold 17: the confirmation shutter is a VDP2 bitmap row blackout, so this VDP1 instrument proves only the marker blink at this hold, not the shutter band",
-  "hold 18: Round 1 title still plays R1TITLE.RLE and emits no ROM-derived VDP1 objects"
+  "hold 17: the confirmation shutter is a VDP2 bitmap row blackout, so this VDP1 instrument proves only the marker blink at this hold, not the shutter band"
  ],
  "geometry_rule": "each object is an inclusive four-point quad over the fitted source rectangle, left = (x * 352) / 384",
  "holds": [
@@ -377,12 +376,60 @@
    "timing_exact": true
   },
   {
-   "commands_total": 5,
+   "commands_total": 7,
+   "comparison": {
+    "colour": 2,
+    "expected": 2,
+    "failures": [],
+    "geometry": 2,
+    "label": "round 1 title text frame 20",
+    "observed": 2,
+    "order_exact": true
+   },
    "encounter_state": 4,
    "encounter_timer": 20,
-   "gap": "Round 1 title still plays R1TITLE.RLE and emits no ROM-derived VDP1 objects",
    "hold": 18,
    "hold_timer": 20,
+   "objects": 2,
+   "runtime_command_counter": 2,
+   "selection_cursor": 3,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 11,
+   "comparison": {
+    "colour": 2,
+    "expected": 2,
+    "failures": [],
+    "geometry": 2,
+    "label": "round 1 title text frame 60",
+    "observed": 2,
+    "order_exact": true
+   },
+   "encounter_state": 4,
+   "encounter_timer": 60,
+   "hold": 19,
+   "hold_timer": 60,
+   "objects": 2,
+   "runtime_command_counter": 2,
+   "selection_cursor": 3,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 10,
+   "comparison": {
+    "colour": 0,
+    "expected": 0,
+    "failures": [],
+    "geometry": 0,
+    "label": "round 1 title cleared frame 100",
+    "observed": 0,
+    "order_exact": true
+   },
+   "encounter_state": 4,
+   "encounter_timer": 100,
+   "hold": 20,
+   "hold_timer": 100,
    "objects": 0,
    "runtime_command_counter": 0,
    "selection_cursor": 3,
@@ -402,8 +449,8 @@
   "data/frontend_interaction.json"
  ],
  "order_rule": "VDP1 draws in address order while the runtime emits increasing depth, so frontend objects appear reversed with respect to the schedule",
- "proven_holds": 18,
- "proven_objects": 40,
+ "proven_holds": 21,
+ "proven_objects": 44,
  "proven_schedules": [
   "title",
   "start mask frame 1",
@@ -422,7 +469,10 @@
   "select cursor 3 frame 140",
   "confirm blink visible frame 1",
   "confirm blink visible frame 10",
-  "confirm blink blank frame 20"
+  "confirm blink blank frame 20",
+  "round 1 title text frame 20",
+  "round 1 title text frame 60",
+  "round 1 title cleared frame 100"
  ],
  "schema": 2,
  "timing_rule": "the live encounter timer, the route's in-state frame count and the schedule frame must be the same number, and the six-frame cursor border cycle is proved by texture address",
