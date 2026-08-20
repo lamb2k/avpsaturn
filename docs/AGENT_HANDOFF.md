@@ -12,6 +12,85 @@ Get-Process mame,yabasanshiro* -ErrorAction SilentlyContinue
 
 ## RP4 Saturn visual-control body, 2026-08-20 (newest first)
 
+## RP4 native-scanout diagnostic emulator: defined hard stop, 2026-08-20 (newest first)
+
+Branch `claude/rp4-priority-architecture`, baseline and current committed
+HEAD `bb06c0c6b595170d7ff2178f0538a7b4365d0d29`. This checkpoint does **not**
+promote RP4 and does not alter the refuted equal-Z result.
+
+### Result
+
+The exact source corresponding to the pinned Windows release could not be
+located. The release binary is
+`.deps/emulators/yabasanshiro-1.20.37-2986eb/yabasanshiro-1.20.37-2986eb/yabasanshiro.exe`,
+SHA-256 `016112708fc77ec53b8a36c4ef52e300a78b3fb079e815f60b1a51fa1661999c`.
+
+The only available source was fetched fully at
+`.deps/yabasanshiro-source`, commit
+`71c973f92966d33de464c1ba4dac1953af6ec462` from
+`https://github.com/ticohq/tico-yabasanshiro.git`. It is a
+**CUSTOM_DIAGNOSTIC_EMULATOR**, never a patched copy of the pinned release.
+
+Three bounded setup/build paths were attempted:
+
+1. NMake output under the long worktree path: libchdr/zstd failed at Windows
+   generated-object path limits.
+2. Clean short output root with OpenGL disabled: the source's VDP2 code does
+   not compile with `VIDCORE_OGL` removed.
+3. Clean short output root (`C:\\yb5`) with OpenGL enabled: after repairing
+   stale runner API calls, port-owned stubs, and NMake libchdr link paths, the
+   headless software-Titan runner built successfully. Portable CMake was
+   `3.30.5` SHA-256
+   `5ab6e1faf20256ee4f04886597e8b6c3b1bd1297b58a68a58511af013710004b`;
+   MSVC reported `19.44.35228.0` via the existing Build Tools install.
+
+The third path includes the required hook immediately after `TitanRender` and
+before VDP1 swap, OSD, GL upload, and presentation. Its callback API carries
+pixels, width, height, interlace, monotonic renderer frame, and user data.
+It compiled into `C:\\yb5\\src\\runner\\yabasanshiro.exe`, but is not evidence:
+
+```powershell
+& C:\yb5\src\runner\yabasanshiro.exe scanout `
+  C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-ClaudePriorityArchitecture\game.cue `
+  5 C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-ClaudePriorityArchitecture\.deps\scanout-smoke.txt
+```
+
+exited `-1073741819` (`0xC0000005`) before producing any scanout record. The
+pinned release reaches `runtime_ready=1` for this disc. The custom source
+therefore fails the book's required guest-equivalence check before calibration:
+command order, command count, VDP/CRAM canaries, and fixture state cannot be
+compared. This is the explicit stop condition **custom source diverges from
+required guest behavior**.
+
+### Consequences
+
+- `saturn_vdp2_scanout_status` remains **UNREADABLE**, not MEASURED.
+- All three Saturn controls remain unexecuted/blocked; `rp4_v1_status` stays
+  **FALSIFIED** and Capability Gate 1 stays **0/7**.
+- Do not use the custom executable, its hook, or a modelled composite as an
+  acceptance substitute.
+- No emulator binary, patched source, raw scanout, build output, or log is
+  tracked. The source-tree experiment remains under ignored `.deps` only.
+
+### Exact next work
+
+1. Obtain a source revision demonstrably matching the pinned release, or a
+   different emulator with a reproducible native post-composite readback and
+   a proven 32-Mbit-cart AvP boot.
+2. Before reusing any hook, add a tracked source-hash manifest, verify/apply
+   script, build script, patch, and corruption/wrong-base controls. The
+   untracked 71c973f prototype is reference-only and must not be promoted.
+3. Run the custom/pinned equivalence comparison (guest ready, fixture-relative
+   frame, VDP1 list/count, VDP1/VDP2 VRAM and CRAM canaries) before calibration.
+4. Only after that passes, execute scanout calibration and the three controls
+   in the existing RP4 book. Do not change Saturn ordering yet.
+
+### Process state
+
+No MAME, Yaba Sanshiro, NMake, compiler, linker, or CMake process is running.
+The only tracked modification at this stop is this handoff update; all source
+and build experiment files are ignored under `.deps` or `C:\\yb5`.
+
 Branch `claude/rp4-priority-architecture`, starting HEAD `2e0d36e`,
 ending HEAD `d330a92`. Commits: `fd80e38` Saturn-control evidence schema
 (failing-first), `d330a92` StreetTest command-order measurement.
