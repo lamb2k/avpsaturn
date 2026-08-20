@@ -21,26 +21,28 @@ Saturn runtime code.
 
 ### Chapter 0 provenance check: PASS, equal-Z result unchanged
 
-The ignored raw inputs are exactly:
+The ignored raw inputs are stable repository-local private evidence:
 
 ```text
-C:\Users\lambd\AppData\Local\Temp\claude\C--Game-Dev-BrooklynBangoutX-AvPSaturnCapabilityTest\6191dc0f-92e4-47d5-97ba-a258e026f1ec\scratchpad\builds\cap_baseline.json
+private-evidence/rp4-saturn-controls/cap_baseline.json
   791b22ecb5c7904cc9acc084536fb2776d0d83b4e86ea55e4bc5b542b2a19077
-C:\Users\lambd\AppData\Local\Temp\claude\C--Game-Dev-BrooklynBangoutX-AvPSaturnCapabilityTest\6191dc0f-92e4-47d5-97ba-a258e026f1ec\scratchpad\builds\cap_forward.json
+private-evidence/rp4-saturn-controls/cap_forward.json
   df56fd35f25a7bf816b430440511d5232ee1fccf29af21845de1a5ab583cf4fa
 ```
 
-`tools/verify_rp4_saturn_controls.py` now records their exact resolved paths,
-SHA-256 values, schema and requested fixture frame under `input_captures`; it
-does not track their raw object lists. Reproduction command:
+`tools/verify_rp4_saturn_controls.py` requires the stable private-evidence
+root and records portable repository-relative paths, SHA-256 values, schema
+and requested fixture frame under `input_captures`; it does not track raw
+object lists or refer to the old Temp location. Reproduction command:
 
 ```powershell
 $py = "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
-& $py tools\verify_rp4_saturn_controls.py --baseline-capture <cap_baseline.json> --forward-capture <cap_forward.json> --baseline-build-sha256 3F5F2DB9D504FBC77BF26A3B3A12D74CD90237D42B9369F6B08150BFB568EF18 --forward-build-sha256 AD7651A8412EBA832561C1C44F16D8B06DCB3A17BA7DCE6E3FC3B683AEDAE320
+$evidence = Join-Path (Get-Location) 'private-evidence\rp4-saturn-controls'
+& $py tools\verify_rp4_saturn_controls.py --baseline-capture (Join-Path $evidence cap_baseline.json) --forward-capture (Join-Path $evidence cap_forward.json) --baseline-build-sha256 3F5F2DB9D504FBC77BF26A3B3A12D74CD90237D42B9369F6B08150BFB568EF18 --forward-build-sha256 AD7651A8412EBA832561C1C44F16D8B06DCB3A17BA7DCE6E3FC3B683AEDAE320
 ```
 
-Two regenerations produced SHA-256
-`de771aa013d3cdc306e29e22ed4a1c35f7f080369a184086314a44eae946b90d`
+Two stable-evidence regenerations produced SHA-256
+`5ac9e83ec56fa4c78dccef5f4a7c39c20556417cc3c583a70387beab0f7245d5`
 both times. The manifest remains `FAIL` (one executed/refuted equal-Z control,
 two blocked visual controls), exactly as before. `tests/test_rp4_saturn_capture_provenance.py`
 was written failing-first and passes after the provenance implementation.
@@ -174,9 +176,9 @@ required guest behavior**.
 1. Obtain a source revision demonstrably matching the pinned release, or a
    different emulator with a reproducible native post-composite readback and
    a proven 32-Mbit-cart AvP boot.
-2. Before reusing any hook, add a tracked source-hash manifest, verify/apply
-   script, build script, patch, and corruption/wrong-base controls. The
-   untracked 71c973f prototype is reference-only and must not be promoted.
+2. **SUPERSEDED_BY_1259091.** The tracked source-hash manifest,
+   verify/apply/build scripts, patch, and corruption/wrong-base controls now
+   exist. Do not redo them; retain their rejected-diagnostic classification.
 3. Run the custom/pinned equivalence comparison (guest ready, fixture-relative
    frame, VDP1 list/count, VDP1/VDP2 VRAM and CRAM canaries) before calibration.
 4. Only after that passes, execute scanout calibration and the three controls

@@ -81,18 +81,25 @@ def sha256_of(path: Path) -> str:
 def capture_provenance(path: Path) -> dict:
     """Return only the reproducible identity of one ignored capture.
 
-    The raw command list stays ignored.  Its absolute replay location is
-    deliberately retained here because this diagnostic has no tracked input
-    substitute; the hash makes an accidental replacement detectable.
+    The raw command list stays ignored.  It must live below this repository's
+    stable `private-evidence` root; the tracked manifest stores a
+    portable repository-relative path and hash, never an ephemeral Temp path.
     """
     resolved = path.resolve()
+    evidence_root = (ROOT / "private-evidence").resolve()
+    try:
+        relative = resolved.relative_to(ROOT).as_posix()
+    except ValueError as error:
+        raise ValueError(f"capture must be below repository root: {resolved}") from error
+    if evidence_root not in (resolved, *resolved.parents):
+        raise ValueError(f"capture must be under stable private evidence: {resolved}")
     captured = json.loads(resolved.read_text(encoding="utf-8"))
     if captured.get("schema") != "rp4-street-command-order-capture-v0":
         raise ValueError(f"not an RP4 command capture: {resolved}")
     if "requested_rel" not in captured or "commands" not in captured:
         raise ValueError(f"incomplete RP4 command capture: {resolved}")
     return {
-        "path": str(resolved),
+        "path": relative,
         "sha256": sha256_of(resolved),
         "schema": captured["schema"],
         "requested_rel": captured["requested_rel"],
