@@ -335,30 +335,35 @@ def main() -> None:
     for name in ("scroll2", "scroll3"):
         blob += b"".join(struct.pack(">H", c) for c in palettes_out[name])
 
-    # palette cycle: bank 1 of scroll2 alternates between two states.
+    # Palette cycle: scroll2 bank 1 alternates between two measured states.
+    # The strips store packed LUT indices, so the cycle is serialized as
+    # (lut_index, state_a_colour, state_b_colour) for every bank-1 pen the
+    # strip actually uses; the runtime rewrites those CRAM entries.
     cycle_bank = 1
-    cycle_states = []
-    for state_bytes in palette_states[:2]:
-        row = []
-        for pen in range(15):
+    cycle_entries = []
+    for pen in range(15):
+        key = (cycle_bank, pen)
+        if key not in luts["scroll2"]:
+            continue
+        colours_ab = []
+        for state_bytes in (palette_states + palette_states)[:2]:
             argb = int.from_bytes(
                 state_bytes[cycle_bank * 32 + pen * 2:
                             cycle_bank * 32 + pen * 2 + 2], "big")
             r = ((argb >> 8) & 0xF) * 17
             g = ((argb >> 4) & 0xF) * 17
             b = (argb & 0xF) * 17
-            row.append(0x8000 | ((b >> 3) << 10) | ((g >> 3) << 5) |
-                       (r >> 3))
-        cycle_states.append(row)
-    if len(cycle_states) == 1:
-        cycle_states.append(cycle_states[0])
+            colours_ab.append(0x8000 | ((b >> 3) << 10) | ((g >> 3) << 5) |
+                              (r >> 3))
+        cycle_entries.append((luts["scroll2"][key], colours_ab[0],
+                              colours_ab[1]))
     period = (palette_frames[2] - palette_frames[1]) \
         if len(palette_frames) > 2 else 4
-    blob += struct.pack(">HHH", cycle_bank, period,
-                        (palette_frames[1] - FIRST_FRAME) % (period * 2)
-                        if len(palette_frames) > 1 else 0)
-    for row in cycle_states:
-        blob += b"".join(struct.pack(">H", c) for c in row)
+    phase = (palette_frames[1] - FIRST_FRAME) % (period * 2) \
+        if len(palette_frames) > 1 else 0
+    blob += struct.pack(">HHH", period, phase, len(cycle_entries))
+    for index, colour_a, colour_b in cycle_entries:
+        blob += struct.pack(">HHH", index, colour_a, colour_b)
 
     for frame, s2x, s2y, s3x, s3y in frames:
         blob += struct.pack(">HHHH", s2x, s2y, s3x, s3y)
@@ -369,31 +374,27 @@ def main() -> None:
         for cx, cy, index in updates:
             blob += struct.pack(">HHH", cx, cy, index)
 
-    # object schedule with TILES.BIN coverage.
-    tile_codes = []
+    # Object schedule: raw CPS2 entry words, so the runtime expands tiles
+    # with avsp_entry_tiles exactly as gameplay does. Coverage against
+    # TILES.BIN is measured offline for the manifest only.
+    tile_codes = set()
     if TILES_BIN.exists():
         tiles = TILES_BIN.read_bytes()
         count = int.from_bytes(tiles[4:8], "big")
         codes_offset = int.from_bytes(tiles[12:16], "big")
-        tile_codes = [int.from_bytes(
+        tile_codes = {int.from_bytes(
             tiles[codes_offset + i * 4:codes_offset + i * 4 + 4], "big")
-            for i in range(count)]
-    code_rank = {code: rank for rank, code in enumerate(tile_codes)}
+            for i in range(count)}
     covered = 0
     uncovered = 0
     for entries in objects_by_frame:
         blob += struct.pack(">H", len(entries))
         for x, y, code, attribute in entries:
-            tile_code = code + ((y & 0x6000) << 3)
-            rank = code_rank.get(tile_code, 0xFFFF)
-            if rank == 0xFFFF:
-                uncovered += 1
-            else:
+            if code + ((y & 0x6000) << 3) in tile_codes:
                 covered += 1
-            blob += struct.pack(">HhhHH", rank,
-                                (x & 0x3FF) - VISIBLE_LEFT,
-                                (y & 0x3FF) - VISIBLE_TOP,
-                                attribute, (x >> 13) & 7)
+            else:
+                uncovered += 1
+            blob += struct.pack(">HHHH", x, y, code, attribute)
 
     for name in ("scroll2", "scroll3"):
         pack = packed[name]
@@ -431,6 +432,8 @@ def main() -> None:
             } for name in PLANES
         },
         "palette_cycle": {"bank": cycle_bank, "period_frames": period,
+                          "phase": phase,
+                          "lut_entries": len(cycle_entries),
                           "states": len(palette_states)},
         "map_patches": len(patch_serial),
         "object_schedule": {

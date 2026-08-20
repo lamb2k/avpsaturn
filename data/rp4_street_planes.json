@@ -8,12 +8,14 @@
  "object_schedule": {
   "entries": 12118,
   "frames": 201,
-  "tiles_bin_covered": 4889,
-  "tiles_bin_uncovered": 7229
+  "tiles_bin_covered": 12118,
+  "tiles_bin_uncovered": 0
  },
  "palette_cycle": {
   "bank": 1,
+  "lut_entries": 14,
   "period_frames": 4,
+  "phase": 4,
   "states": 51
  },
  "planes": {
@@ -43,7 +45,7 @@
   }
  },
  "schema": "rp4-street-planes-v0",
- "strips_bin_bytes": 291562,
- "strips_bin_sha256": "ddb5cbc427323063e2902b9bb0c94d8f68c6fc6faa6aa403bd1d162b63e4dc3c",
+ "strips_bin_bytes": 267350,
+ "strips_bin_sha256": "be4b3210383a28d18d70b00df0b0abfa9e5cf41fc38112ce94dcfd9b91fe5fbf",
  "transform": "source_x = (out_x*383+175)//351, unwrapped world space, shared by strips, patches and scroll"
 }
