@@ -10,6 +10,118 @@ git log --oneline -10
 Get-Process mame,yabasanshiro* -ErrorAction SilentlyContinue
 ```
 
+## RP4 Saturn visual-control body, 2026-08-20 (newest first)
+
+Branch `claude/rp4-priority-architecture`, starting HEAD `2e0d36e`,
+ending HEAD `d330a92`. Commits: `fd80e38` Saturn-control evidence schema
+(failing-first), `d330a92` StreetTest command-order measurement.
+
+### Outcome: the primary objective is ANSWERED, and the answer is no
+
+Option 1 of the ruling ("prove that the current reversed equal-Z SGL
+submissions become the required final VDP1 order") is **REFUTED BY
+MEASUREMENT**. Option 2, replacing the mechanism, is now the required
+work and has NOT been done.
+
+Evidence, from two real builds captured at the same StreetTest fixture
+frame:
+
+| | baseline (reverse emission) | forward-order control |
+|---|---|---|
+| ISO sha256 | `3F5F2DB9...B568EF18` | `AD7651A8...AEDAE320` |
+| command count | 528 | 528 |
+| command table sha256 | `0273ca8dda048a47...` | `51bf42ba5d013e73...` |
+| street objects drawn | 464 | 464 |
+
+- 510 of the 528 commands are sprite commands, ALL with jump mode 0, so
+  the table is sequential and its index order IS the VDP1 draw order.
+  The traversal was verified before the conclusion was drawn.
+- Every one of the 510 comparable commands sits at the SAME index in
+  both builds: 129,795 of 129,795 order-preserving pairs, 100%.
+- The command multiset is identical once texture address is excluded.
+  Only `srca` differs, because tile upload order follows emission order.
+
+So SGL does not preserve submission order for equal-Z sprites, and
+reversing the emission loop does not decide what VDP1 draws on top. The
+main.c comment that claimed it did now states the measurement instead.
+The loop is left reversed (it matches the source's intent and is inert
+for ordering), but it must NOT be read as the fix.
+
+### Stop condition reached: no observable witness pixel
+
+The other two controls are BLOCKED, not failed and not assumed:
+
+- VDP1 framebuffer at 0x05C80000 / 0x25C80000 reads all zeros under the
+  OpenGL core (VideoCore=4) and is UNMAPPED under the software core
+  (VideoCore=2, memory_read returns 0 bytes). The ini was restored to
+  VideoCore=4 afterwards.
+- `yabasanshiro.exe` contains no "screenshot" string at all; this build
+  has no screenshot facility.
+- VDP1 command table, VDP1/VDP2 VRAM and CRAM all read fine, so this is
+  specific to the framebuffer, not a broken reader.
+
+`sprite_priority_register_effect` in particular can NEVER be executed
+this way: the ruling itself requires its VDP1 command table to stay
+byte-identical, so the composite is the only possible observable.
+
+### Result labels
+
+- `saturn_output_order_status` = **FAIL** (1 executed, 0 passed, 2
+  blocked). Not MEASURED.
+- `saturn_vdp1_command_status` = MEASURED (the table is readable and was
+  compared between builds).
+- `saturn_vdp2_register_readback` = UNREADABLE.
+- `mshvsf_priority_architecture` = ADAPTED.
+- `animation_jump_record_coverage` = GAP.
+- `rp4_v1_status` stays FALSIFIED; `rp4_v0_status` stays
+  FALSIFIED_BY_SOURCE_PREMISE. Nothing was promoted to PASS.
+
+### Commands run and exit codes
+
+- `git status --short --branch`, `git log --oneline -12`,
+  `git diff --check`: clean, HEAD confirmed `2e0d36e` at start.
+- `py tests/test_saturn_control_status.py`: 0. Mutating the verifier to
+  promote blocked controls, ignore the observed winner, ignore
+  negative-control leakage, ignore the command table, or allow a build
+  compared against itself fails 4, 2, 1, 1 and 1 controls respectively.
+- `py tests/test_priority_decode.py`: 0 (8 tests).
+- `py tests/test_rp4_v1_status.py`: 0.
+- `py tools/pin_street_object_order.py`: 0. Nineteen witnesses, nine
+  pair types, zero counterexamples, fourteen StreetTest-mappable.
+- `build.ps1 -StreetTest -SkipHostTests` (baseline): 0.
+- `build.ps1 -StreetTest -Rp4ForwardOrder -SkipHostTests`: 0.
+- `py tools/capture_street_command_order.py` (both builds): 0.
+- `py tools/verify_rp4_saturn_controls.py`: 3 (FAIL, as it must be).
+  Manifest regenerated twice, byte-identical
+  (`300571bfbdc72b67...`).
+- Full `test.ps1`: **UNRUN to completion**, and it must stay red.
+- Visible boot verification, EncounterTest, title boot, ISO member
+  hashes, CDDA/PCM regression: **UNRUN**.
+- Emulator processes: stopped and verified none running.
+
+### Exact next ordered work
+
+1. Decide the deterministic emission mechanism. The measurement rules
+   out submission order; the remaining candidates are an explicitly
+   owned VDP1 command path, or an SGL sort key that is proven to order
+   equal-Z sprites deterministically. Arbitrary Z separation stays
+   barred until a 352x224 geometry comparison proves it changes neither
+   scale nor position.
+2. Prove the replacement with the command table alone, which IS
+   readable: the earlier CPS entry must end up LATER in the final VDP1
+   list. This does not need a framebuffer.
+3. Rule on the two pixel-blocked controls. They cannot be executed in
+   this emulator. Either a different instrument is authorised (a Saturn
+   emulator that exposes the framebuffer or a screenshot), or the
+   controls are respecified against observables that exist here.
+4. Only then: manifest promotion, full `test.ps1`, and the live ladder.
+
+### Repository state
+
+`git status --short --branch` reports the AvP worktree clean at
+`d330a92`. The MSHvSF probe worktree is clean apart from the untracked
+`history.txt`, which was preserved and never staged.
+
 ## Priority-architecture book, 2026-08-20 (newest first)
 
 Worktree `AvPSaturnCapabilityTest-ClaudePriorityArchitecture`, branch
