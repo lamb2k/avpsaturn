@@ -40,12 +40,14 @@ CAPTURE = ROOT / "build" / "frontend_cram_readback.json"
 FRONT = ROOT / "build" / "avsp_cd" / "FRONT"
 REPORT = ROOT / "data" / "avsp_frontend_cram_readback.json"
 
-# Hold order is fixed by avsp_shot_holds[] in main.c.  Holds 18-20 are the
+# Hold order is fixed by avsp_shot_holds[] in main.c.  Holds 22-24 are the
 # Round 1 title over the shutter-blacked bitmap and then the native street
 # scene, whose NBG1 palette is the gameplay background block rather than a
-# FRONT payload, so they carry register and counter evidence only.
+# FRONT payload, so they carry register and counter evidence only. The
+# confirm shutter zeroes bitmap rows but never touches the palette, so the
+# confirm holds still compare the select surface's CRAM exactly.
 SURFACE_BY_HOLD = {0: "title"}
-SURFACE_BY_HOLD.update({index: "select" for index in range(1, 18)})
+SURFACE_BY_HOLD.update({index: "select" for index in range(1, 22)})
 SURFACES = {
     "title": ("TITLE.PAL", "TITLE.RLE"),
     "select": ("SELBACK.PAL", "SELBACK.RLE"),

@@ -274,6 +274,17 @@ if ($LASTEXITCODE -ne 0) {
     throw "Frontend VDP1 object verification failed with exit code $LASTEXITCODE."
 }
 
+# Complete-interval confirmation-shutter proof: every cadence-1 source frame
+# from the last marker activity to the Round 1 text appearance must be
+# explained by cap_confirm_shutter_band() - rows inside the band identical to
+# the pre-shutter baseline, rows outside pure black - with four negative
+# controls (start shift, band shift, two wrong rates). Skips cleanly without
+# the private capture.
+& $PythonPath (Join-Path $PSScriptRoot 'tools\verify_confirm_shutter.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Confirmation shutter verification failed with exit code $LASTEXITCODE."
+}
+
 # Sub-state dispatcher enumeration: decodes, from the validated opcode-space
 # image, every per-actor sub-state jump table (actor byte +0x04 indexes a
 # PC-relative word table). Self-tests against the three live-confirmed

@@ -6,7 +6,7 @@ Payloads follow Jo Engine's one-based palette contract, so pixel value p is
 expected at hardware colour entry 256 * palette_id + p.
 The last two links can only be measured on the running machine, so this tool
 drives the pinned Yaba Sanshiro MCP debug server while a `-FrontendShotTest`
-build walks its twenty-one exact (state, frame) holds, and records for each hold:
+build walks its twenty-five exact (state, frame) holds, and records for each hold:
 
 * the SGL VDP2 register shadow (TVMD/CHCTLA/BMPNA/CRAOFA/... in work RAM,
   because the CPU-side VDP2 register reads return zero);
@@ -26,6 +26,7 @@ Symbol addresses move on every link.  Pass them from
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
@@ -52,7 +53,7 @@ SHADOW_REGISTERS = (
 )
 CRAM = 0x25F00000
 CRAM_WINDOW_ENTRIES = 258      # one entry below the base through base + 256
-HOLD_COUNT = 21
+HOLD_COUNT = 25
 
 # VDP1 draws from a command table at the base of its VRAM.  Each command is
 # sixteen words; CMDCTRL bit 15 ends the list and its JP field says how to
@@ -60,6 +61,18 @@ HOLD_COUNT = 21
 # to prove object geometry, colour bank, and draw order rather than infer them
 # from a screenshot.
 VDP1_VRAM = 0x25C00000
+# The confirmation shutter is a VDP2/NBG1 bitmap row operation. Sampling a
+# fixed set of rows (both content edges, the centre, quarter points, and the
+# row above the content band) at every hold lets the verifier prove the live
+# band against the same model the complete source interval passed, without
+# reading the whole 512x224 bitmap over the debug link.
+BITMAP_STRIDE = 512
+# Includes both rows around each band edge at the held moving frames
+# (frames-since-input 90 and 100 give edges 60/203 and 100/163), so a
+# one-row band shift is distinguishable and can serve as a live negative
+# control rather than sampling only interior rows.
+SAMPLED_ROWS = (39, 40, 59, 60, 86, 99, 100, 131, 163, 164, 176, 203, 204,
+                223)
 VDP1_COMMAND_WORDS = 16
 VDP1_COMMAND_BYTES = VDP1_COMMAND_WORDS * 2
 VDP1_MAX_COMMANDS = 128
@@ -72,6 +85,7 @@ DIAGNOSTIC_SYMBOLS = (
     "avsp_diag_frontend_late_reads", "avsp_diag_frontend_commands",
     "avsp_diag_frontend_palette_boundary_writes",
     "avsp_diag_selection_cursor", "avsp_diag_encounter_timer",
+    "avsp_diag_background_bitmap",
 )
 REQUIRED_SYMBOLS = DIAGNOSTIC_SYMBOLS + ("frontend_palettes", "slBMPalette")
 
@@ -213,6 +227,7 @@ def capture_vdp1(mcp: Mcp) -> list[dict]:
 
 
 def capture_hold(mcp: Mcp, shadow: int, symbols: dict[str, int]) -> dict:
+    diagnostics_values = diagnostics(mcp, symbols)
     registers = {name: mcp.u16(shadow + offset)
                  for name, offset in SHADOW_REGISTERS}
     base_entry = ((registers["BMPNA"] & 0x700) >> 8) * 256
@@ -223,6 +238,15 @@ def capture_hold(mcp: Mcp, shadow: int, symbols: dict[str, int]) -> dict:
     raw = mcp.read(CRAM + start_entry * 2, CRAM_WINDOW_ENTRIES * 2)
     cram = [int.from_bytes(raw[i * 2:i * 2 + 2], "big")
             for i in range(CRAM_WINDOW_ENTRIES)]
+    bitmap = diagnostics_values["background_bitmap"]
+    rows = {}
+    if 0x25E00000 <= bitmap < 0x25E80000:
+        for row in SAMPLED_ROWS:
+            data = mcp.read(bitmap + row * BITMAP_STRIDE, BITMAP_STRIDE)
+            rows[str(row)] = {
+                "sha256": hashlib.sha256(data).hexdigest(),
+                "all_zero": not any(data),
+            }
     return {
         "registers": registers,
         "nbg1_bitmap_palette_number": (registers["BMPNA"] >> 8) & 0x7F,
@@ -230,7 +254,8 @@ def capture_hold(mcp: Mcp, shadow: int, symbols: dict[str, int]) -> dict:
         "cram_start_entry": start_entry,
         "cram": cram,
         "vdp1": capture_vdp1(mcp),
-        "diagnostics": diagnostics(mcp, symbols),
+        "nbg1_rows": rows,
+        "diagnostics": diagnostics_values,
     }
 
 

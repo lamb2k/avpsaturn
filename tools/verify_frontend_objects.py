@@ -46,11 +46,15 @@ Four negative controls run against a hold that has just passed exactly: one
 perturbed vertex, one perturbed colour bank, one transposed command order, and
 one perturbed timing anchor.  All four must fail.
 
-One condition is reported as a declared GAP rather than normalised into a
-pass: the confirmation shutter is a VDP2 bitmap row blackout and therefore
-emits no VDP1 objects, so this instrument cannot prove it.  The Round 1
-title holds now compare the two ROM-derived text-line objects (and their
-measured retirement) over the native street scene.
+The confirmation shutter is proved live from sampled NBG1 bitmap rows:
+inside the model band the sampled rows hash identically to the open-band
+baseline, outside it they are entirely zero, and a one-row band shift fails
+as a live negative control.  The source implements the same pixels as 360
+sliding mask objects; the Saturn NBG1 row blackout is a deliberate bounded
+substitution whose pixel behaviour tools/verify_confirm_shutter.py proves
+against every source frame of the complete interval.  The Round 1 title
+holds compare the two ROM-derived text-line objects (and their measured
+retirement) over the native street scene.
 
 Skips cleanly when the private capture or converter payloads are absent.
 """
@@ -95,6 +99,8 @@ HOLDS = (
     (CHARACTER_SELECT, 30), (CHARACTER_SELECT, 60), (CHARACTER_SELECT, 100),
     (CHARACTER_SELECT, 140),
     (CHARACTER_CONFIRM, 1), (CHARACTER_CONFIRM, 10), (CHARACTER_CONFIRM, 20),
+    (CHARACTER_CONFIRM, 40), (CHARACTER_CONFIRM, 90), (CHARACTER_CONFIRM, 100),
+    (CHARACTER_CONFIRM, 110),
     (ROUND_TITLE, 20), (ROUND_TITLE, 60), (ROUND_TITLE, 100),
 )
 # Palette slots: frontend_palettes[0] is the title scene, [1] the select scene.
@@ -108,6 +114,17 @@ R1TEXT_SUBBANK = 13
 CURSOR_PERIOD = 6
 START_MASK_FRAMES = 27
 R1TEXT_CLEAR_FRAME = 90
+# The complete captured confirm interval: the markers retire permanently
+# after their fourth visible window, and the shutter band (content rows
+# 40..223, four rows per edge per frame) first moves at frames-since-input
+# 86 and closes at 108. tools/verify_confirm_shutter.py proves this against
+# every source frame; the sampled live NBG1 rows below prove the runtime
+# reproduces the same band.
+MARKER_RETIRE_FRAME = 27
+SHUTTER_CONTENT_TOP = 40
+SHUTTER_CONTENT_BOTTOM = 223
+SHUTTER_START = 85
+SHUTTER_ROWS_PER_FRAME = 4
 
 
 def fit_source_x(source_x: int) -> int:
@@ -237,9 +254,45 @@ def confirm_cursor_visible(interaction, frames_since_input: int) -> bool:
     anchored to the input edge rather than to a state counter.
     """
     latency = int(interaction["confirmation"]["input_to_first_blink_frames"])
+    if frames_since_input >= MARKER_RETIRE_FRAME:
+        return False
     if frames_since_input < latency:
         return True
     return (((frames_since_input - latency) // 4) % 2) == 1
+
+
+def shutter_band(frames_since_input: int, shift: int = 0):
+    """cap_confirm_shutter_band(), for the live NBG1 row comparison."""
+    top, bottom = SHUTTER_CONTENT_TOP, SHUTTER_CONTENT_BOTTOM
+    if frames_since_input > SHUTTER_START:
+        moved = (frames_since_input - SHUTTER_START) * SHUTTER_ROWS_PER_FRAME
+        top += moved
+        bottom -= moved
+    return top + shift, bottom + shift
+
+
+def shutter_row_failures(hold: int, frames_since_input: int, rows,
+                         baseline, shift: int = 0):
+    """Sampled live NBG1 rows against the proven band model.
+
+    Rows inside the band (and the row above the content band) must hash
+    identically to the same rows at the first confirm hold, where the band
+    is fully open; rows outside the band must be entirely zero.
+    """
+    failures = []
+    top, bottom = shutter_band(frames_since_input, shift)
+    for key, record in rows.items():
+        row = int(key)
+        if row < SHUTTER_CONTENT_TOP or top <= row <= bottom:
+            if record["sha256"] != baseline[key]["sha256"]:
+                failures.append(
+                    f"hold {hold}: NBG1 row {row} inside the shutter band "
+                    "does not match the open-band baseline")
+        elif not record["all_zero"]:
+            failures.append(
+                f"hold {hold}: NBG1 row {row} outside the shutter band is "
+                "not blacked")
+    return failures
 
 
 def compare_schedule(hold: int, objects, schedule, palette_ids, label: str,
@@ -416,10 +469,26 @@ def main() -> int:
             entry["comparison"] = result
             failures.extend(result["failures"])
         if state == CHARACTER_CONFIRM:
-            gaps.append(
-                f"hold {hold}: the confirmation shutter is a VDP2 bitmap row "
-                "blackout, so this VDP1 instrument proves only the marker "
-                "blink at this hold, not the shutter band")
+            rows = record.get("nbg1_rows") or {}
+            baseline_rows = (capture["holds"].get("15") or {}).get(
+                "nbg1_rows") or {}
+            if rows and baseline_rows:
+                shutter = shutter_row_failures(hold, timer - 1, rows,
+                                               baseline_rows)
+                failures.extend(shutter)
+                entry["shutter_rows_checked"] = len(rows)
+                # One live negative control at a moving-band hold: a
+                # one-row band shift must break a comparison that passed.
+                if not shutter and SHUTTER_START < timer - 1 <= 107:
+                    if not shutter_row_failures(hold, timer - 1, rows,
+                                                baseline_rows, shift=1):
+                        failures.append(
+                            f"hold {hold}: shutter negative control (one-row "
+                            "band shift) still matched")
+            else:
+                gaps.append(
+                    f"hold {hold}: capture predates NBG1 row sampling, so "
+                    "the live shutter band is unproven at this hold")
         # The border cel cycles with period six; equal phases must reuse the
         # same texture and different phases must not.
         if state == CHARACTER_SELECT and len(objects) == 2:

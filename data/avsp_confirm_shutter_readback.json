@@ -1,0 +1,31 @@
+{
+ "baseline_frame": 1884,
+ "classification": "Complete-interval confirmation-shutter proof; frame ranges, row indices, counts and verdicts only, no captured pixels",
+ "closed_frames": 63,
+ "frames_checked": 111,
+ "instrument": "MAME 0.289 cadence-1 reference frames 1860..1970",
+ "model": "cap_confirm_shutter_band(): content rows 40..223, 4 rows per edge per frame after confirm timer 85 (first masked source frame 1886), centre 131.5",
+ "moving_frames": 22,
+ "negative_controls": {
+  "band_shifted_one_row": {
+   "failed_as_required": true,
+   "first_failure": "frame 1860 row 40: outside the band but not black"
+  },
+  "rate_five_rows": {
+   "failed_as_required": true,
+   "first_failure": "frame 1886 row 44: outside the band but not black"
+  },
+  "rate_three_rows": {
+   "failed_as_required": true,
+   "first_failure": "frame 1886 row 43: inside the band but not byte-identical to the pre-shutter baseline"
+  },
+  "start_shifted_one_frame": {
+   "failed_as_required": true,
+   "first_failure": "frame 1886 row 40: inside the band but not byte-identical to the pre-shutter baseline"
+  }
+ },
+ "open_frames": 26,
+ "schema": 1,
+ "unexplained_rows": 0,
+ "verdict": "PASS"
+}

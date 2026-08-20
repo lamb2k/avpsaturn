@@ -8,11 +8,7 @@
   3,
   4
  ],
- "declared_gaps": [
-  "hold 15: the confirmation shutter is a VDP2 bitmap row blackout, so this VDP1 instrument proves only the marker blink at this hold, not the shutter band",
-  "hold 16: the confirmation shutter is a VDP2 bitmap row blackout, so this VDP1 instrument proves only the marker blink at this hold, not the shutter band",
-  "hold 17: the confirmation shutter is a VDP2 bitmap row blackout, so this VDP1 instrument proves only the marker blink at this hold, not the shutter band"
- ],
+ "declared_gaps": [],
  "geometry_rule": "each object is an inclusive four-point quad over the fitted source rectangle, left = (x * 352) / 384",
  "holds": [
   {
@@ -333,6 +329,7 @@
    "objects": 2,
    "runtime_command_counter": 2,
    "selection_cursor": 3,
+   "shutter_rows_checked": 14,
    "timing_exact": true
   },
   {
@@ -353,6 +350,7 @@
    "objects": 2,
    "runtime_command_counter": 2,
    "selection_cursor": 3,
+   "shutter_rows_checked": 14,
    "timing_exact": true
   },
   {
@@ -373,6 +371,91 @@
    "objects": 0,
    "runtime_command_counter": 0,
    "selection_cursor": 3,
+   "shutter_rows_checked": 14,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 5,
+   "comparison": {
+    "colour": 0,
+    "expected": 0,
+    "failures": [],
+    "geometry": 0,
+    "label": "confirm blink blank frame 40",
+    "observed": 0,
+    "order_exact": true
+   },
+   "encounter_state": 3,
+   "encounter_timer": 41,
+   "hold": 18,
+   "hold_timer": 40,
+   "objects": 0,
+   "runtime_command_counter": 0,
+   "selection_cursor": 3,
+   "shutter_rows_checked": 14,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 5,
+   "comparison": {
+    "colour": 0,
+    "expected": 0,
+    "failures": [],
+    "geometry": 0,
+    "label": "confirm blink blank frame 90",
+    "observed": 0,
+    "order_exact": true
+   },
+   "encounter_state": 3,
+   "encounter_timer": 91,
+   "hold": 19,
+   "hold_timer": 90,
+   "objects": 0,
+   "runtime_command_counter": 0,
+   "selection_cursor": 3,
+   "shutter_rows_checked": 14,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 5,
+   "comparison": {
+    "colour": 0,
+    "expected": 0,
+    "failures": [],
+    "geometry": 0,
+    "label": "confirm blink blank frame 100",
+    "observed": 0,
+    "order_exact": true
+   },
+   "encounter_state": 3,
+   "encounter_timer": 101,
+   "hold": 20,
+   "hold_timer": 100,
+   "objects": 0,
+   "runtime_command_counter": 0,
+   "selection_cursor": 3,
+   "shutter_rows_checked": 14,
+   "timing_exact": true
+  },
+  {
+   "commands_total": 5,
+   "comparison": {
+    "colour": 0,
+    "expected": 0,
+    "failures": [],
+    "geometry": 0,
+    "label": "confirm blink blank frame 110",
+    "observed": 0,
+    "order_exact": true
+   },
+   "encounter_state": 3,
+   "encounter_timer": 111,
+   "hold": 21,
+   "hold_timer": 110,
+   "objects": 0,
+   "runtime_command_counter": 0,
+   "selection_cursor": 3,
+   "shutter_rows_checked": 14,
    "timing_exact": true
   },
   {
@@ -388,7 +471,7 @@
    },
    "encounter_state": 4,
    "encounter_timer": 20,
-   "hold": 18,
+   "hold": 22,
    "hold_timer": 20,
    "objects": 2,
    "runtime_command_counter": 2,
@@ -408,7 +491,7 @@
    },
    "encounter_state": 4,
    "encounter_timer": 60,
-   "hold": 19,
+   "hold": 23,
    "hold_timer": 60,
    "objects": 2,
    "runtime_command_counter": 2,
@@ -428,7 +511,7 @@
    },
    "encounter_state": 4,
    "encounter_timer": 100,
-   "hold": 20,
+   "hold": 24,
    "hold_timer": 100,
    "objects": 0,
    "runtime_command_counter": 0,
@@ -449,7 +532,7 @@
   "data/frontend_interaction.json"
  ],
  "order_rule": "VDP1 draws in address order while the runtime emits increasing depth, so frontend objects appear reversed with respect to the schedule",
- "proven_holds": 21,
+ "proven_holds": 25,
  "proven_objects": 44,
  "proven_schedules": [
   "title",
@@ -470,11 +553,15 @@
   "confirm blink visible frame 1",
   "confirm blink visible frame 10",
   "confirm blink blank frame 20",
+  "confirm blink blank frame 40",
+  "confirm blink blank frame 90",
+  "confirm blink blank frame 100",
+  "confirm blink blank frame 110",
   "round 1 title text frame 20",
   "round 1 title text frame 60",
   "round 1 title cleared frame 100"
  ],
  "schema": 2,
  "timing_rule": "the live encounter timer, the route's in-state frame count and the schedule frame must be the same number, and the six-frame cursor border cycle is proved by texture address",
- "verdict": "PASS WITH DECLARED GAPS"
+ "verdict": "PASS"
 }

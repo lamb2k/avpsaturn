@@ -205,6 +205,7 @@ volatile int avsp_diag_world_frame;
 volatile int avsp_diag_selected_character;
 volatile int avsp_diag_selection_cursor;
 volatile int avsp_diag_encounter_timer;
+volatile int avsp_diag_background_bitmap;
 volatile int avsp_diag_frontend_late_reads;
 volatile int avsp_diag_frontend_missing_assets;
 volatile int avsp_diag_frontend_rle_errors;
@@ -240,9 +241,13 @@ static const AvspShotHold avsp_shot_holds[] = {
     { CAP_ENCOUNTER_CHARACTER_SELECT, 60 },  /* settled cursor 1 Schaefer */
     { CAP_ENCOUNTER_CHARACTER_SELECT,100 },  /* settled cursor 2 Hunter   */
     { CAP_ENCOUNTER_CHARACTER_SELECT,140 },  /* settled cursor 3 Linn     */
-    { CAP_ENCOUNTER_CHARACTER_CONFIRM, 1 },  /* confirmation shutter      */
-    { CAP_ENCOUNTER_CHARACTER_CONFIRM,10 },
-    { CAP_ENCOUNTER_CHARACTER_CONFIRM,20 },
+    { CAP_ENCOUNTER_CHARACTER_CONFIRM, 1 },  /* marker blink visible      */
+    { CAP_ENCOUNTER_CHARACTER_CONFIRM,10 },  /* marker blink visible      */
+    { CAP_ENCOUNTER_CHARACTER_CONFIRM,20 },  /* marker blink blank        */
+    { CAP_ENCOUNTER_CHARACTER_CONFIRM,40 },  /* markers retired           */
+    { CAP_ENCOUNTER_CHARACTER_CONFIRM,90 },  /* shutter moving            */
+    { CAP_ENCOUNTER_CHARACTER_CONFIRM,100 }, /* shutter moving            */
+    { CAP_ENCOUNTER_CHARACTER_CONFIRM,110 }, /* shutter closed            */
     { CAP_ENCOUNTER_ROUND_TITLE,      20 },  /* title text over black     */
     { CAP_ENCOUNTER_ROUND_TITLE,      60 },  /* title text over street    */
     { CAP_ENCOUNTER_ROUND_TITLE,     100 }   /* street after text clear   */
@@ -1528,9 +1533,14 @@ static void apply_confirm_shutter(void)
     int previous_bottom = 0;
     int row;
 
-    if (world.encounter_timer <= CAP_CONFIRM_SHUTTER_START_TIMER) return;
-    (void)cap_confirm_shutter_band(world.encounter_timer, &top, &bottom);
-    (void)cap_confirm_shutter_band(world.encounter_timer - 1, &previous_top,
+    /* The band is a function of frames since the confirm input. The
+       rendered encounter timer leads that count by one (the confirm step
+       both zeroes and increments it), and the complete-interval proof in
+       tools/verify_confirm_shutter.py pins the first masked source frame
+       to input + 86, so the timer is converted back before the lookup. */
+    if (world.encounter_timer - 1 <= CAP_CONFIRM_SHUTTER_START_TIMER) return;
+    (void)cap_confirm_shutter_band(world.encounter_timer - 1, &top, &bottom);
+    (void)cap_confirm_shutter_band(world.encounter_timer - 2, &previous_top,
                                    &previous_bottom);
     if (previous_top > previous_bottom) return;
     if (top > bottom)
@@ -1994,14 +2004,16 @@ static void draw_world(void)
         else
         {
             /* The measured blink: the markers first vanish three frames
-             * after the confirm input and alternate every four frames.
-             * cap_confirm_character() zeroes encounter_timer on the confirm
-             * step and cap_update_encounter() increments it in that same
-             * step, so the rendered timer leads frames-since-input by one:
+             * after the confirm input, alternate every four frames, and
+             * retire permanently after their fourth visible window - the
+             * complete captured confirm interval shows no marker from
+             * frames-since-input 27 onward. cap_confirm_character() zeroes
+             * encounter_timer on the confirm step and
+             * cap_update_encounter() increments it in that same step, so
              * frames since input is encounter_timer - 1. */
             if (world.encounter_state == CAP_ENCOUNTER_CHARACTER_CONFIRM &&
                 world.encounter_timer - 1 >= 3)
-                cursor_visible =
+                cursor_visible = world.encounter_timer - 1 < 27 &&
                     (((world.encounter_timer - 1 - 3) / 4) & 1) != 0;
             avsp_frontend_draw_cursor(
                 &frontend_runtime, world.selection_cursor,
@@ -2816,6 +2828,7 @@ static void frame_callback(void)
     avsp_diag_selected_character = (int)world.selected_character;
     avsp_diag_selection_cursor = world.selection_cursor;
     avsp_diag_encounter_timer = (int)world.encounter_timer;
+    avsp_diag_background_bitmap = (int)background_bitmap;
     avsp_diag_frontend_late_reads = frontend_runtime.late_disc_reads;
     avsp_diag_frontend_missing_assets = frontend_runtime.missing_assets;
     avsp_diag_frontend_rle_errors = frontend_runtime.rle_errors;
