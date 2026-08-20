@@ -16,9 +16,10 @@ This is a private native-port plan. It does not authorize publication or
 distribution. Capability Gate 1 remains **0/7** and the full-game conditions
 remain **0/9**.
 
-Accepted evidence baseline: branch `codex/avp-master-plan`, committed HEAD
-`5bf237ec67cad2a2622736886f7b66537aba3371`. A package agent must use the exact
-integration-owner-provided base SHA if it is newer than this recorded baseline.
+Current evidence baseline: branch `codex/avp-master-plan`, committed HEAD
+`8fd75b31c1ed6708de5fbd32ccaa2b98042d9654`. RP0-RP3 are committed package
+checkpoints. RP4 has committed evidence and bundle-generation steps through
+this SHA, but its live Saturn renderer remains **IN PROGRESS** and unaccepted.
 
 ## Delivery checks
 
@@ -64,15 +65,15 @@ item below is green. A defect here invalidates all dependent batch checks.
 | ID | Primitive | Current status | Required evidence |
 |---|---|---|---|
 | SP1 | Frontend palette ownership | **PASS** at `b681c04` | One-based 1..255 indices, canaries, live CRAM, zero adjacent-boundary writes |
-| SP2 | Frontend VDP1 geometry/colour/order | **PASS** at `5bf237e` | 18 schedules/40 objects exact; four negative controls fail |
+| SP2 | Frontend VDP1 geometry/colour/order | **PASS** through RP0 | 25 schedules/44 objects exact; four negative controls fail |
 | SP3 | Confirmation shutter | **PASS** at `e728c9b` | Complete source interval 1860-1970 explained by the band model (first mask 1886, closure 1908); live NBG1 rows match the band at held frames with a one-row-shift live control; 4 offline controls fail |
 | SP4 | Round 1 title composition | **PASS** at `aa0d671` | Text is scroll1 tilemap (48 tiles, bank 0x26) with a 16-step measured fade; ROM-derived cels drawn as VDP1 objects over the native street; R1TITLE.RLE removed; held text/street/cleared holds exact |
-| SP5 | Resolution transform | **PARTIAL** | Shared endpoint-aligned 384-to-352 mapping passes static and two-plane samples |
+| SP5 | Resolution transform | **PASS** at `671eca8` | Endpoint 384->352 rule shared by both planes and street VDP1 objects; 113 page-boundary frames exact offline; live MPABN0/1, PNCN0/1, PLSZ readback; aliased-page control detects |
 | SP6 | Input/state propagation | **PASS for frontend** | Non-wrapping 2x2, three-frame response, A/B/C confirm, no cancel, selected ID persists |
 | SP7 | Memory bounds and diagnostics | **PARTIAL** | BSS checks active; cart/VDP1/VDP2/CRAM/PCM high-water and live sprite <128 remain |
 | SP8 | Late-read enforcement | **PARTIAL** | Counter active; pessimistic G0/CDDA experiment remains |
-| SP9 | Two-plane scrolling/priority | **OPEN** | Representative NBG1+NBG0+VDP1 overlap passes live readback and controls |
-| SP10 | Row-scroll requirement | **OPEN** | Normalize the 1,024-word source table and classify constant/nonconstant intervals |
+| SP9 | Two-plane scrolling/priority | **IN PROGRESS** at `8fd75b3` | Evidence/bundle committed; NBG0 ownership, two-page PNT mapping, and per-object priority readback remain |
+| SP10 | Row-scroll requirement | **PARTIAL** | RP4 interval MEASURED constant-zero visible rows (no line scroll needed there); wider route intervals remain unclassified (RP6+) |
 
 SP1-SP4 must pass before Batch A expands. SP5-SP10 must pass before Batch B
 expands beyond its representative street fixture.
@@ -85,7 +86,7 @@ expands beyond its representative street fixture.
 | RP1 | Preserve baseline and commit shared contracts | **PASSED** at `dddd19a` | RP0 | AvspSceneDef v0, scene-ID policy, player/route/diagnostic interfaces, 11 negative controls, SH-2 link |
 | RP2 | Full-route cadence-1 capture and automatic grouping | **PASSED** at `82bb47e` | preserved baseline | Raw private capture plus tracked machine manifest |
 | RP3 | Minimal scene runtime and route controller | **PASSED** at `a28f5df` | RP1 | `AvspSceneDef v0`, player, synthetic host fixtures |
-| RP4 | Representative two-plane renderer | **PENDING** | RP1, capture fixture | NBG1/NBG0/VDP1 prototype, row-scroll decision |
+| RP4 | Representative two-plane renderer | **PASS (interim review)** at `671eca8` | RP1, capture fixture | Offline reconstruction exact (0 px both planes, 12,118 objects, 8 controls); live registers/canaries/priority classes proven; fixture StreetTest-only with test.ps1 gate; Codex ratification pending |
 | RP5 | Pessimistic G0/CDDA residency experiment | **PENDING** | RP1 | Exact resource ledger and late-read/CDDA result |
 | RP6 | Finalize semantic scene IDs | **PENDING** | RP1, RP2 | Authoritative source-state to runtime-ID manifest |
 | RP7 | Shared-primitives check | **PENDING** | RP0, RP3-RP6 | All SP items green |
@@ -110,22 +111,13 @@ behind the Round 1 title remains RP4/RP9 scope.
 Completed:
 
 - one-based Jo palette contract and bounded-copy canaries;
-- nineteen-hold live CRAM/register chain;
-- eighteen VDP1 schedules and forty objects exact;
+- 25-hold live CRAM/register chain with 22 exact surface comparisons;
+- 25 VDP1 schedules and 44 objects exact;
 - select animation clock and confirmation blink latency corrections.
 
-Remaining:
-
-1. Capture the confirmation shutter as a VDP2/NBG1 operation and compare its
-   row bands, start, centre, rate, and termination against the source.
-2. Capture the complete Round 1 title interval and determine its real source
-   composition. Do not assume VDP1 if the title is a tilemap or mixed layer.
-3. Generate its ROM-derived layers/objects/palettes and integrate them over the
-   native street scene.
-4. Remove `R1TITLE.RLE` from the runtime decision only after the held
-   comparison passes.
-
-The exact executable contract is `docs/NEXT_AGENT_PROMPT.md`.
+RP0 has no remaining executable work. Complete story scenes and ambient street
+animation are later content/renderer packages, not unfinished RP0 primitives.
+The exact executable contract now targets RP4 in `docs/NEXT_AGENT_PROMPT.md`.
 
 ## RP1: shared contracts and ownership boundary
 
@@ -203,6 +195,37 @@ Prove:
 - priority at deliberate overlaps;
 - exact VRAM/CRAM/register state and bounded command cost;
 - zoom, row, palette, and priority negative controls.
+
+Current checkpoint at `8fd75b3`:
+
+- selected source interval is frames 3474-3674 (201 frames);
+- both complete planes use the endpoint-aligned 384-to-352 transform;
+- scroll2/NBG0 is 527x240 with 1,596 cells and 197 colours;
+- scroll3/NBG1 is 528x256 with 879 cells and 15 colours;
+- `STRIPS.BIN` is 267,350 bytes with two map patches and a serialized 201-frame
+  strip/object schedule;
+- source scroll2 span is 176, scroll3 span is 154, proving unequal motion;
+- visible normalized row offsets are constant zero for this interval only;
+- captured source object priorities 1 and 4 are present.
+
+The captured 12,118-entry object schedule is a focused RP4 validation fixture,
+not a production gameplay data source. The live prototype must still:
+
+1. give NBG0 exclusively to the presentation manager instead of Jo printf;
+2. map both generated PNT pages explicitly and pass a boundary crossing;
+3. encode/read back real per-object sprite priority relative to NBG0/NBG1;
+4. keep the fixture absent from the normal production route;
+5. validate all bundle bounds, use checked frame offsets or a monotonic cursor,
+   upload immutable data only on activation/page changes, and remain within the
+   measured 624-byte high-work-RAM margin unless memory is deliberately moved.
+
+Latest dirty-prototype note: `build.ps1` now stages `STRIPS.BIN` only for
+StreetTest, `main.c` builds an O(1) object-frame index, and a candidate sprite
+priority encoding exists. These reduce implementation work but are not accepted
+until production-member exclusion, complete bounds, SH-2 map, register readback,
+and deliberate overlap controls pass. The candidate index/revert arrays exceed
+the previous 624-byte margin unless relocated or proven safe in the focused
+link.
 
 ### RP5: memory, CDDA, and residency
 
@@ -377,7 +400,7 @@ green. Focused success never substitutes for the normal route.
 
 ## Status and handoff automation
 
-RP3 should add a deterministic status generator whose canonical structured
+Before RP7, add a deterministic status generator whose canonical structured
 output contains HEAD, package states, manifest/member hashes, memory peaks,
 scene coverage, checks, variances, and `ADAPTED`/`GAP` items. Recommended
 tracked outputs:
@@ -391,16 +414,17 @@ checks without editing the shared status table.
 
 ## Ordered critical path
 
-1. Finish RP0: shutter proof and ROM-derived Round 1 title.
-2. Preserve the current tree and commit RP1 interfaces/ownership boundary.
-3. Start RP2-RP5 independently.
-4. Finalize scene IDs in RP6 from the first grouped complete capture.
-5. Pass RP7 shared-primitives check.
-6. Integrate Batches A, B, and C.
-7. Pass the continuous-route integration check and populate the variance
+1. Finish and supervisor-accept RP4: NBG0 ownership, explicit PNT paging,
+   per-object priority, fixture isolation, bounds, resource readback, and
+   regression lanes.
+2. Run RP5 G0/CDDA residency and RP6 semantic-scene finalization in isolated
+   ownership lanes after RP4 acceptance.
+3. Pass RP7 shared-primitives check.
+4. Integrate Batches A, B, and C.
+5. Pass the continuous-route integration check and populate the variance
    ledger.
-8. Close every presentation variance and pass the Round 1 presentation parity
+6. Close every presentation variance and pass the Round 1 presentation parity
    check.
-9. Resume S5 Room 1 behavior, complete S3/S4 stage/gameplay work, then S6
+7. Resume S5 Room 1 behavior, complete S3/S4 stage/gameplay work, then S6
    complete Capability Gate 1 validation.
-10. Continue stage by stage through the complete game plan.
+8. Continue stage by stage through the complete game plan.

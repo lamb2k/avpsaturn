@@ -1,91 +1,79 @@
-# Next agent prompt: RP4 - representative stage renderer
+# Next implementor prompt: RP6 semantic scene manifest
 
-## Invocation
+## Invocation request
 
-Work in:
+Continue implementation in:
 
 `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest`
 
-Use the `port-cps2-to-sega-saturn` skill. Read, in order:
+Execute the bounded RP6 body below. RP4 passed interim review at `671eca8`
+(offline reconstruction exact, live contract proven, fixture isolated); Codex
+ratification of that acceptance is still pending and may reopen it.
+
+Use the `port-cps2-to-sega-saturn` skill. Read completely, in order:
 
 1. `AGENTS.md`;
 2. `docs/GOAL.md`;
-3. `docs/AGENT_HANDOFF.md` completely;
+3. `docs/AGENT_HANDOFF.md`;
 4. `docs/PARITY_PLAN.md`;
 5. `docs/ROUND1_EXECUTION_PLAN.md`;
 6. `docs/ARCHITECTURE.md`;
-7. `docs/TEST_PLAN.md` and `docs/HARDWARE_TEST.md`;
+7. `docs/TEST_PLAN.md`;
 8. this file.
 
-Then run `git status --short --branch` and `git log --oneline -10`. Verify
-every handoff claim against the worktree before relying on it. Preserve all
-unrelated tracked and untracked work. Run Git only from this independent
-repository.
+Then run from this independent repository:
 
-RP0 passed at `aa0d671`/`e728c9b`, RP1 at `dddd19a`, RP2 at `82bb47e`,
-and RP3 at `a28f5df` on `codex/avp-master-plan`, implemented under the
-user's autonomous interim-supervisor authorization; Codex review remains
-the authoritative acceptance and may reopen any of them with corrections.
-If HEAD differs, reconcile the newer commits and update the handoff
-before implementing.
+```powershell
+git status --short --branch
+git log --oneline -10
+Get-Process mame,yabasanshiro* -ErrorAction SilentlyContinue
+```
 
-## Scope: RP4 only
+Expected branch is `codex/avp-master-plan`. Preserve all unrelated dirty and
+untracked work. Do not reset, clean, stash, switch branch, or bulk-stage.
 
-Prove the representative two-plane stage renderer on one street interval,
-per `docs/ROUND1_EXECUTION_PLAN.md` RP4. Select the interval from the RP2
-census (`data/round1_route_census.json`, street group `0x801d`,
-source frames 2074-5542) so it contains independent scroll2/scroll3
-motion, a moving actor, a foreground insertion, a priority change, and
-source-enabled row scroll (census `rowscroll_unique_hashes` > 1 marks
-candidates). Prove, with measured evidence:
+## Scope lock: RP6 only
 
-1. scroll3 -> NBG1 and scroll2 -> NBG0;
-2. objects -> VDP1 and only source-proven foreground -> NBG2 or bounded
-   VDP1;
-3. the common plane-level endpoint-aligned 384-to-352 transform with
-   independent per-plane scroll;
-4. a normalized source row table, using VDP2 line scroll only if the
-   source rows are nonconstant;
-5. priority at deliberate overlaps;
-6. exact VRAM/CRAM/register state and bounded command cost;
-7. zoom, row, palette, and priority negative controls.
+Use RP2's grouped full route (`data/round1_route_census.json`, 122 groups over
+frames 1..18000, plus the private cadence-1 capture) to produce the
+authoritative semantic scene manifest. For every group record:
 
-## Constraints
+- source state/frame range (from the census, MEASURED);
+- provisional bit-15 ID (from the census);
+- final stable ID: content-addressed from the group signature so it survives
+  re-capture and re-grouping, not order-derived;
+- input dependency: whether and when the composite input schedule was active
+  during the group (census `input_word_runs`);
+- layer/object composition: layer bases, video control, object count range,
+  scroll spans, row-scroll usage;
+- audio events: QSound change count (audio payloads stay private);
+- transition target: the next group's final stable ID plus the boundary
+  reason.
 
-- Native SH-2 end goal; no CPS2 or 68000 interpreter.
-- Do not modify the RP1 header contracts except by explicit versioned
-  extension recorded in the handoff.
-- Never commit ROMs, raw captures, generated copyrighted assets, audio,
-  opcode dumps, logs, save states, disc images, or emulator state.
-- The user-requested whole-game capture may still be recording under
-  `.deps/mame/full_game`; do not start a second MAME instance while it
-  runs, and stop every MAME process after it completes.
+Semantic labels are evidence-bound: label a scene only from measured anchors
+(prior committed measurements or reviewed private screenshots); every other
+group keeps `label: null` with a review flag. Unknown IDs remain hard
+diagnostic errors in the runtime; do not coerce or skip.
 
-## Required checks
+Deliverables:
 
-1. Offline verifiers prove the renderer's plane assignment, transform,
-   row table, and priority against the private capture, each with its
-   negative controls.
-2. Full SH-2 build links (`__bend` recorded; only 624 bytes of high work
-   RAM remained after RP3 - treat the margin as a hard constraint).
-3. `test.ps1` exit 0.
-4. Live Saturn-emulator validation of the rendered interval, then no
-   emulator processes left running.
+1. `tools/gen_avsp_scene_manifest.py` — deterministic generator from the
+   tracked census (private capture optional for enrichment);
+2. `data/avsp_scene_manifest.json` — tracked manifest (hashes, counts, ranges
+   and labels only; no ROM bytes, no payloads);
+3. `tools/verify_scene_manifest.py` — structural gate: complete route tiling,
+   unique stable IDs, consistent transition chain, census cross-check, and
+   negative controls; wire into `test.ps1`;
+4. handoff update with evidence and label coverage.
 
-## Checkpoint and continuation discipline
+## Do not
 
-Commit coherent explicit-path checkpoints only after their checks pass.
-Update `docs/AGENT_HANDOFF.md` newest-first with exact commits, checks,
-hashes, `UNRUN` items, and remaining `ADAPTED`/`GAP` items.
+- Do not implement RP5 residency, RP7, or content batches in this body.
+- Do not advance Capability Gate counts.
+- Do not commit ROMs, captures, screenshots, audio, or payload bytes.
+- Do not invent semantic labels without measured evidence.
 
-When invoked for autonomous execution and RP4 passes, rotate this file to
-the next dependency-ready package (RP5 residency experiment or RP6
-semantic scene IDs per the execution plan), update the plan status with
-evidence, and continue. Stop only for a falsified contract, unsafe or
-unauthorized action, cross-package architectural conflict, missing private
-evidence, or an unrecoverable required-check failure.
+## After RP6
 
-If operating under the Codex-supervisor/Claude-implementor workflow, stop
-at the candidate completion boundary and emit the required
-`CODEX_REVIEW_INVOCATION` instead. Do not self-accept or change Capability
-Gate progress.
+RP5 (pessimistic G0/CDDA residency measurement) is the next dependency-ready
+package, then RP7 per `docs/ROUND1_EXECUTION_PLAN.md`.

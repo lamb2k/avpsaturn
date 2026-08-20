@@ -108,6 +108,16 @@ The last linked RP3 map left only 624 bytes below the high-work-RAM boundary.
 RP4 must not add large static/BSS buffers. All map, bundle, and runtime bounds
 must be measured again after the current integration links.
 
+## RP4 interim acceptance (autonomous session)
+
+Under the user's `RESUME_AUTONOMOUS_IMPLEMENTATION` authority this session
+acted as interim technical reviewer: the RP4 end state in the previous
+`docs/NEXT_AGENT_PROMPT.md` (both planes, endpoint transform, independent
+motion, page crossing, interleaved priorities, exact palette timing, no
+crop/seam/stretch) is fully evidenced by the report below, so RP4 is marked
+**PASS (interim review)** in `docs/ROUND1_EXECUTION_PLAN.md` and the prompt
+was rotated to RP6. Codex ratification is pending and may reopen RP4.
+
 ## RP4 implementation report (supervised, awaiting Codex review)
 
 - Mode: `SUPERVISED_IMPLEMENTATION`, `PACKAGE: RP4`, implementor.
