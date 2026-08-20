@@ -82,7 +82,7 @@ expands beyond its representative street fixture.
 | ID | Work package | Status | Depends on | Primary output |
 |---|---|---|---|---|
 | RP0 | Finish frontend shared primitives | **PASSED** at `e728c9b` | none | SP1-SP4 passed; see docs/AGENT_HANDOFF.md |
-| RP1 | Preserve baseline and commit shared contracts | **PENDING** | RP0 | Clean integration baseline and versioned interfaces |
+| RP1 | Preserve baseline and commit shared contracts | **PASSED** at `dddd19a` | RP0 | AvspSceneDef v0, scene-ID policy, player/route/diagnostic interfaces, 11 negative controls, SH-2 link |
 | RP2 | Full-route cadence-1 capture and automatic grouping | **PENDING** | preserved baseline | Raw private capture plus tracked machine manifest |
 | RP3 | Minimal scene runtime and route controller | **PENDING** | RP1 | `AvspSceneDef v0`, player, synthetic host fixtures |
 | RP4 | Representative two-plane renderer | **PENDING** | RP1, capture fixture | NBG1/NBG0/VDP1 prototype, row-scroll decision |

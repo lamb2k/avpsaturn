@@ -20,7 +20,7 @@ work. Always verify it with a fresh `git status --short --branch`,
   - `e728c9b` - prove the confirmation shutter across the complete source
     interval (awaiting Codex review).
 - Acceptance: Capability Gate 1 **0/7**; full game **0/9**.
-- Active work: RP0 **PASSED**; next is RP1 in
+- Active work: RP0 and RP1 **PASSED**; next is RP2 in
   `docs/ROUND1_EXECUTION_PLAN.md`. `aa0d671`/`e728c9b` were implemented and
   self-reviewed under the user's autonomous interim-supervisor
   authorization recorded in this session; Codex review remains the
@@ -77,6 +77,26 @@ yabasanshiro PID 44108
 It may belong to the concurrent frontend loop. Do not launch a second emulator
 against the same profile. Confirm ownership before stopping it; the owning agent
 must terminate all emulator/MAME processes before its checkpoint finishes.
+
+## Implementation report: RP1 - AvspSceneDef v0 shared contracts
+
+Commit `dddd19a`. New files `avsp_scene.h`, `avsp_scene.c`,
+`avsp_scene_player.h`, `avsp_route.c`, `tests/avsp_scene_test.c`; the test
+is wired into `test.ps1` and both sources link into the SH-2 image
+(`__bend` 0x060bf6d0, 2,352 bytes below the Jo/SGL boundary).
+
+- AvspSceneDef v0 envelope: big-endian words, magic/version/scene-id/
+  source-anchor/count/payload header; ten evidence-backed operations with
+  length-prefixed records (additive within v0; incompatible changes bump
+  the version).
+- Scene-ID namespace: 16-bit, bit 15 provisional (RP6 retires), zero
+  invalid. Unknown scenes fail diagnostically via one lookup policy.
+- AvspScenePlayer lifetime (load/activate/step/draw/release; loads illegal
+  after the CDDA late-read lock) and AvspRouteController explicit
+  state-machine tables whose edges are validated at init.
+- Checks: host contract test (2 positive, 11 negative controls) PASS;
+  `test.ps1` exit 0; full build exit 0. Scene content, capture and
+  rendering remain RP2-RP4.
 
 ## Implementation report: RP0 complete - shutter and Round 1 title
 
