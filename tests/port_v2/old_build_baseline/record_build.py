@@ -97,6 +97,17 @@ def main() -> None:
                 "sha256": sha256(path),
             }
 
+    ignored_build_inputs: dict[str, dict[str, object]] = {}
+    for relative in ("loader/loader.c", "loader/loader.linker",
+                     "loader/trampoline.s"):
+        path = ROOT / relative
+        if not path.is_file():
+            raise ValueError(f"required local build input is missing: {relative}")
+        ignored_build_inputs[relative] = {
+            "bytes": path.stat().st_size,
+            "sha256": sha256(path),
+        }
+
     status = git("status", "--porcelain", "--untracked-files=no")
     report = {
         "schema": 1,
@@ -111,6 +122,7 @@ def main() -> None:
         "inventory_sha256": sha256(inventory_path),
         "artifacts": artifacts,
         "generated_inputs": dict(sorted(generated_inputs.items())),
+        "ignored_build_inputs": ignored_build_inputs,
         "required_iso_members": members,
         "result": "PASS",
         "evidence_tier": "BUILD_ONLY",

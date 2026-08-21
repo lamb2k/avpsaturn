@@ -73,6 +73,13 @@ def validate_build(report: dict, inventory: dict) -> None:
         require(name.startswith("generated/"), f"generated input escapes root: {name}")
         require(entry.get("bytes", 0) > 0 and len(entry.get("sha256", "")) == 64,
                 f"generated input identity is incomplete: {name}")
+    local = report.get("ignored_build_inputs", {})
+    require(set(local) == {"loader/loader.c", "loader/loader.linker",
+                           "loader/trampoline.s"},
+            "local staged-loader input inventory is incomplete")
+    for name, entry in local.items():
+        require(entry.get("bytes", 0) > 0 and len(entry.get("sha256", "")) == 64,
+                f"local build input identity is incomplete: {name}")
 
 
 def validate_readback(report: dict, build: dict) -> None:
@@ -131,6 +138,7 @@ def stable_build(report: dict) -> dict:
         "manifest_profile": report["manifest_profile"],
         "artifacts": report["artifacts"],
         "generated_inputs": report["generated_inputs"],
+        "ignored_build_inputs": report["ignored_build_inputs"],
         "required_iso_members": report["required_iso_members"],
     }
 
