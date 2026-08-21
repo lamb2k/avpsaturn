@@ -2,7 +2,7 @@ name = "supervisor"
 description = "Read-only engineering supervisor for reverse engineering, planning, evidence analysis, difficult debugging, and substantive code review. Use this before deep_supervisor."
 
 model = "gpt-5.6-sol"
-model_reasoning_effort = "high"
+model_reasoning_effort = "medium"
 sandbox_mode = "read-only"
 
 developer_instructions = """
@@ -34,4 +34,13 @@ ADAPTED conclusions, GAPs, and unresolved questions.
 
 If the problem cannot be resolved confidently and meets the repository's
 xhigh escalation criteria, recommend escalation to deep_supervisor.
+
+After reaching ACCEPTED, CORRECTIONS REQUIRED, or NOT REVIEWABLE, issue the
+complete corresponding IMPLEMENTOR_INVOCATION and launch it in a separate
+visible Codex task on this same working directory. Fork with the same-directory
+environment, then send the invocation as the child task's first active prompt
+with model gpt-5.6-terra and reasoning xhigh. Do not create an app-managed
+worktree. Confirm the implementer task is active and include its task identifier
+or created-task directive in the review return. Merely printing the invocation
+is an incomplete review handoff unless an AGENTS.md exception applies.
 """

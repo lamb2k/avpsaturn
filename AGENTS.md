@@ -45,6 +45,31 @@ Only execute the bounded tranche in `docs/NEXT_AGENT_PROMPT.md`. The first tranc
 
 When the harness launches a separate implementor task from an `IMPLEMENTOR_INVOCATION`, it must explicitly set model `gpt-5.6-terra` and reasoning effort `xhigh`. For the Codex task launcher, pass `model: "gpt-5.6-terra"`, `thinking: "xhigh"`, and the saved project's local environment; never request an app-created task worktree. The task must operate only in the exact existing implementation worktree named by the invocation. Never omit these fields or rely on the project, app, or account default. This policy applies only to the separate write-enabled implementor task. Supervisor and review tasks retain their own configured reasoning levels.
 
+### Mandatory same-worktree task loop
+
+Implementation and review are separate visible Codex tasks, but they remain on
+the tranche's current working directory. Do not leave a parent orchestration
+turn open merely to poll for completion. The task that completes a phase owns
+the next dispatch before it returns:
+
+- After implementation, fork a new task with the same-directory environment.
+  Send the complete `CODEX_REVIEW_INVOCATION` as that child task's first active
+  prompt with model `gpt-5.6-sol` and reasoning `medium`.
+- After review, if the continuation contract requires more work, fork a new
+  task with the same-directory environment. Send the complete selected
+  `IMPLEMENTOR_INVOCATION` as that child task's first active prompt with model
+  `gpt-5.6-terra` and reasoning `xhigh`.
+- Never rely on an inherited/default model. Never create an app-managed
+  worktree for either relay. The invocation controls the Git branch/worktree
+  contract inside the existing tranche directory.
+- Confirm the new task is active before returning and include its task ID or
+  created-task directive. Printing an invocation without dispatch is a failed
+  handoff.
+
+The only exceptions are: the complete project is accepted; no dependency-ready
+work exists; continuing requires new user authority or physical interaction;
+or a documented hard stop leaves no safe in-scope work.
+
 The first accepted slice must contain real gameplay: deterministic startup, controller input, one player, one class `0x1F` enemy, movement, animation, attack/contact, collision/hit/KO, camera/stage movement, representative layers and palettes, PCM, CDDA, residency/transfer, final scanout, and physical timing. Title/menu work cannot substitute for any item.
 
 ## Evidence rules
@@ -132,12 +157,12 @@ or a documented hard stop leaves no safe in-scope work.
 
 After completing the disposition and next `IMPLEMENTOR_INVOCATION`, the
 supervisor must immediately launch that complete invocation in a separate
-Codex task in the saved project's local environment. Use model
+Codex task by forking the current task with the same-directory environment.
+Send the invocation as the child task's first active prompt using model
 `gpt-5.6-terra` with reasoning `xhigh`, preserve the exact existing
 base/branch/worktree contract, and report the created task identifier or app
-directive. The launcher must not create a task worktree; the implementor works
-only in the invocation's already-provisioned implementation worktree. Merely
-printing an invocation without dispatching it is an incomplete review handoff.
+directive. The launcher must not create a task worktree. Merely printing an
+invocation without dispatching it is an incomplete review handoff.
 This dispatch is omitted only under the same four exceptions listed above.
 
 Review-branch remote synchronization is final-only. After every authorized
@@ -164,5 +189,6 @@ ON_ACCEPTED: review, update accepted status, and issue the next dependency-ready
 ON_CORRECTIONS_REQUIRED: issue one consolidated correction IMPLEMENTOR_INVOCATION
 ON_NOT_REVIEWABLE: issue the minimum evidence/isolation IMPLEMENTOR_INVOCATION
 NEW_TASK_DISPATCH_REQUIRED: true
+SAME_WORKTREE_RELAY_REQUIRED: true
 FINAL_REMOTE_SYNC_REQUIRED: true
 ```
