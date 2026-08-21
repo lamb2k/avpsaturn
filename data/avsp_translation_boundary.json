@@ -45,6 +45,13 @@
       "sites": 126,
       "unresolved_sites": []
     },
+    "data_space": {
+      "hardware_exits": 4,
+      "out_of_bounds": [],
+      "rom_data_span_sha256": "d71d6acb1660bfe17bacbb4ab2044c46b63c499c2440f95b0ffa513b9b25b1de",
+      "rom_data_spans_validated": 2,
+      "work_ram_addresses": 1
+    },
     "direct_transfers": {
       "contradictions": [],
       "opcode_and_dynamic_validated": 1833,
@@ -56,7 +63,13 @@
       "rom_last": "0x1fffff",
       "violations": []
     },
-    "opcode_image_target_mismatches": []
+    "opcode_image_target_mismatches": [],
+    "opcode_program_separation": {
+      "data_space": "program",
+      "divergent_pcs": 7314,
+      "executed_pcs_compared": 7314,
+      "instruction_space": "opcodes"
+    }
   },
   "window": {
     "crop_policy": "PLANNED: retain source coordinates in the oracle; choose and prove a 16-pixel-per-side crop/camera policy before runtime integration. No runtime framing changes occur in tranche 1.",

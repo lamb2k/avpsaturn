@@ -22,6 +22,7 @@ The completeness proof is auditable rather than asserted:
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 import re
@@ -66,6 +67,12 @@ HARDWARE_RANGES = (
 # are legal; the hardware ranges above are event-replacement exits.
 ROM_LAST = 0x1fffff
 WORK_RAM = (0xff0000, 0xffffff)
+
+# Pinned CPS-2 image identities (source ledger).  The committed-artifact
+# validator requires these so a replaced program/opcode image is rejected.
+EXPECTED_OPCODES_SHA = "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501"
+EXPECTED_PROGRAM_SHA = "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9"
+PROGRAM_IMAGE_BYTES = 2097152
 
 
 def sha(path: Path) -> str:
@@ -258,7 +265,7 @@ def targets_by_pc(edges: Counter) -> dict[int, Counter]:
 
 
 def validate_boundary(pc_info: dict[int, dict], edges: Counter,
-                      image: bytes) -> dict:
+                      image: bytes, program: bytes) -> dict:
     """Production completeness validator.
 
     Raises ValueError on any incompleteness: an unclassified PC, an edge that
@@ -360,12 +367,17 @@ def validate_boundary(pc_info: dict[int, dict], edges: Counter,
             continue
         direct_validated += 1
 
-    # 5. Attribute every absolute data operand to a declared data address space.
+    # 5. Attribute every absolute data operand to a declared address space and
+    #    enforce the boundary against the actual program/data image bytes: a ROM
+    #    data span must resolve in-bounds (and is read from the image); a work-RAM
+    #    or hardware address must lie OUTSIDE the ROM image.
     field_refs: Counter = Counter()
     rom_data_refs: Counter = Counter()
     work_ram_refs: Counter = Counter()
     hardware_refs: Counter = Counter()
     unattributed_refs: list[str] = []
+    data_space_out_of_bounds: list[str] = []
+    rom_span_words: dict[int, int] = {}
     for pc, info in pc_info.items():
         operand = info["operand"]
         for match in ACTOR_OFFSET.finditer(operand):
@@ -381,15 +393,41 @@ def validate_boundary(pc_info: dict[int, dict], edges: Counter,
             space = data_space(address)
             key = "0x%06x" % address
             if space == "rom_data":
-                rom_data_refs[key] += info["count"]
+                if address + 2 > len(program):
+                    data_space_out_of_bounds.append("rom_data 0x%06x beyond program image" % address)
+                else:
+                    rom_data_refs[key] += info["count"]
+                    rom_span_words[address] = int.from_bytes(program[address:address + 2], "big")
             elif space == "work_ram":
-                work_ram_refs[key] += info["count"]
+                if address < len(program):
+                    data_space_out_of_bounds.append("work_ram 0x%06x inside rom image" % address)
+                else:
+                    work_ram_refs[key] += info["count"]
             elif space.startswith("hardware:"):
-                hardware_refs[space.split(":", 1)[1]] += info["count"]
+                if address < len(program):
+                    data_space_out_of_bounds.append("hardware 0x%06x inside rom image" % address)
+                else:
+                    hardware_refs[space.split(":", 1)[1]] += info["count"]
             elif space in ("cps_io", "qsound_io", "cps_object_gfx_io"):
-                hardware_refs[space] += info["count"]
+                if address < len(program):
+                    data_space_out_of_bounds.append("hardware 0x%06x inside rom image" % address)
+                else:
+                    hardware_refs[space] += info["count"]
             else:
                 unattributed_refs.append("0x%06x@0x%06x" % (address, pc))
+
+    # 6. Prove the opcode-fetch and program/data images are genuinely different
+    #    CPS-2 address spaces by counting executed PCs whose two-byte image bytes
+    #    differ.  If they never diverged, decoding from the opcode space would be
+    #    unnecessary and the instruction/data boundary would be unproven.
+    compared_pcs = 0
+    divergent_pcs = 0
+    for pc in pc_info:
+        if pc % 2 or pc + 2 > len(image) or pc + 2 > len(program):
+            continue
+        compared_pcs += 1
+        if image[pc:pc + 2] != program[pc:pc + 2]:
+            divergent_pcs += 1
 
     if instruction_space_violations:
         raise ValueError("instruction/data-space violations: %s"
@@ -408,6 +446,16 @@ def validate_boundary(pc_info: dict[int, dict], edges: Counter,
     if unattributed_refs:
         raise ValueError("unattributed absolute data operands: %s"
                          % ", ".join(unattributed_refs[:8]))
+    if data_space_out_of_bounds:
+        raise ValueError("data operands outside their declared address space: %s"
+                         % ", ".join(data_space_out_of_bounds[:8]))
+    if compared_pcs and divergent_pcs == 0:
+        raise ValueError("opcode and program images are identical at every executed PC; "
+                         "the opcode/program boundary is unproven")
+
+    rom_blob = b"".join(address.to_bytes(4, "big") + rom_span_words[address].to_bytes(2, "big")
+                        for address in sorted(rom_span_words))
+    rom_span_sha = hashlib.sha256(rom_blob).hexdigest() if rom_span_words else ""
 
     return {
         "target_validation": {
@@ -429,6 +477,19 @@ def validate_boundary(pc_info: dict[int, dict], edges: Counter,
                 "unresolved_sites": [],
             },
             "opcode_image_target_mismatches": [],
+            "data_space": {
+                "rom_data_spans_validated": len(rom_span_words),
+                "rom_data_span_sha256": rom_span_sha,
+                "work_ram_addresses": len(work_ram_refs),
+                "hardware_exits": len(hardware_refs),
+                "out_of_bounds": [],
+            },
+            "opcode_program_separation": {
+                "instruction_space": "opcodes",
+                "data_space": "program",
+                "executed_pcs_compared": compared_pcs,
+                "divergent_pcs": divergent_pcs,
+            },
         },
         "attribution": {
             "actor_field_reference_counts": dict(sorted(field_refs.items())),
@@ -436,6 +497,7 @@ def validate_boundary(pc_info: dict[int, dict], edges: Counter,
             "work_ram_reference_counts": dict(sorted(work_ram_refs.items())),
             "hardware_exit_reference_counts": dict(sorted(hardware_refs.items())),
         },
+        "program_image_bytes": len(program),
     }
 
 
@@ -447,11 +509,12 @@ def build() -> dict:
     if not oracle.get("cold_runs", {}).get("byte_identical"):
         raise ValueError("translation boundary requires a passing oracle")
     image = OPCODES.read_bytes()
-    program_len = PROGRAM.stat().st_size
+    program = PROGRAM.read_bytes()
     pc_info, edges, interrupt_entries = parse_trace(TRACE)
-    validated = validate_boundary(pc_info, edges, image)
+    validated = validate_boundary(pc_info, edges, image, program)
     target_validation = validated["target_validation"]
     attribution = validated["attribution"]
+    program_len = validated["program_image_bytes"]
 
     # Writer-boundary classification (address-space attribution was validated).
     classified: Counter = Counter()
@@ -562,8 +625,44 @@ def validate_committed(report: dict) -> None:
     if report["writer_boundary"]["manual_semantic_pc_percent"] > 50.0:
         raise ValueError("committed manual portion exceeds 50%")
 
+    # Direct transfers must all be opcode+dynamic validated (and there must be
+    # some); computed transfers must actually have observed targets.
+    direct = tv["direct_transfers"]
+    if direct["sites"] <= 0 or direct["opcode_and_dynamic_validated"] != direct["sites"]:
+        raise ValueError("committed direct transfers are not all opcode/dynamic validated")
+    computed = tv["computed_transfers"]
+    if computed["observed_target_total"] <= 0 or \
+            computed["observed_target_total"] < computed["resolved_sites"]:
+        raise ValueError("committed computed transfers record no observed targets")
 
-def _synthetic_model() -> tuple[dict[int, dict], Counter, bytearray]:
+    # Program/data image identity and the enforced instruction/data boundary.
+    inputs = report["inputs"]
+    if inputs.get("instruction_address_space") != "opcodes" or \
+            inputs.get("data_address_space") != "program":
+        raise ValueError("committed artifact lost its declared address-space attribution")
+    if inputs.get("opcodes_sha256") != EXPECTED_OPCODES_SHA:
+        raise ValueError("committed artifact has the wrong opcode image identity")
+    if inputs.get("program_sha256") != EXPECTED_PROGRAM_SHA:
+        raise ValueError("committed artifact has the wrong program image identity")
+    if report.get("program_image_bytes") != PROGRAM_IMAGE_BYTES:
+        raise ValueError("committed artifact has the wrong program image size")
+    data = tv["data_space"]
+    if data["out_of_bounds"]:
+        raise ValueError("committed artifact has out-of-bounds data operands")
+    if data["rom_data_spans_validated"] <= 0 or not data["rom_data_span_sha256"]:
+        raise ValueError("committed artifact validated no ROM data spans from the program image")
+    separation = tv["opcode_program_separation"]
+    if separation["executed_pcs_compared"] <= 0 or separation["divergent_pcs"] <= 0:
+        raise ValueError("committed artifact does not prove opcode/program separation")
+
+    # ROM/work-RAM/hardware attribution must be present.
+    wb = report["writer_boundary"]
+    if not wb["rom_data_reference_counts"] or not wb["work_ram_reference_counts"] \
+            or not wb["hardware_exit_reference_counts"]:
+        raise ValueError("committed artifact lost ROM/work-RAM/hardware attribution")
+
+
+def _synthetic_model() -> tuple[dict[int, dict], Counter, bytearray, bytearray]:
     """Build a tiny but realistic model that passes the validator.
 
     Contiguous layout in the opcode image:
@@ -572,9 +671,13 @@ def _synthetic_model() -> tuple[dict[int, dict], Counter, bytearray]:
       0x108 jsr  (d,PC,Xn)  (computed call -> observed 0x0200)
       0x10c rts
       0x110 jmp  $0108.l    (unconditional absolute jump)
+      0x11c move.w $1000.l  (ROM data span read from the program image)
       0x200 rts
+    The program/data image is a distinct byte pattern so every executed PC
+    diverges from the opcode image (proving the two spaces are different).
     """
     image = bytearray(0x400)
+    program = bytearray(b"\xaa" * 0x2000)
 
     def put(addr, word):
         image[addr:addr + 2] = word.to_bytes(2, "big")
@@ -603,6 +706,7 @@ def _synthetic_model() -> tuple[dict[int, dict], Counter, bytearray]:
         0x110: {"count": 5, "mnemonic": "jmp", "operand": "$108.l", "kind": "direct_jump"},
         0x116: {"count": 5, "mnemonic": "move.w", "operand": "D0, $ff8380.l", "kind": "fallthrough"},
         0x118: {"count": 5, "mnemonic": "jmp", "operand": "(A0)", "kind": "computed_jump"},
+        0x11c: {"count": 5, "mnemonic": "move.w", "operand": "$1000.l, D0", "kind": "fallthrough"},
         0x120: {"count": 5, "mnemonic": "rts", "operand": "", "kind": "return"},
         0x200: {"count": 5, "mnemonic": "rts", "operand": "", "kind": "return"},
     }
@@ -616,7 +720,44 @@ def _synthetic_model() -> tuple[dict[int, dict], Counter, bytearray]:
     edges[(0x118, 0x120, "computed_jump")] = 5        # resolved computed target B
     edges[(0x120, 0x116, "return")] = 5
     edges[(0x200, 0x10c, "return")] = 5
-    return pc_info, edges, image
+    return pc_info, edges, image, program
+
+
+def _synthetic_report() -> dict:
+    """A minimal report dict that passes validate_committed, for mutation tests."""
+    return {
+        "schema": 2,
+        "inputs": {
+            "opcodes_sha256": EXPECTED_OPCODES_SHA,
+            "program_sha256": EXPECTED_PROGRAM_SHA,
+            "instruction_address_space": "opcodes",
+            "data_address_space": "program",
+        },
+        "coverage": {
+            "all_executed_pcs_classified": True,
+            "unresolved_indirect_targets": [],
+            "edge_kinds": {"direct_call": 1, "return": 1, "direct_branch": 1},
+            "executed_pc_count": 2,
+        },
+        "target_validation": {
+            "instruction_space": {"violations": []},
+            "direct_transfers": {"sites": 3, "opcode_and_dynamic_validated": 3, "contradictions": []},
+            "computed_transfers": {"sites": 2, "resolved_sites": 2,
+                                   "observed_target_total": 5, "unresolved_sites": []},
+            "opcode_image_target_mismatches": [],
+            "data_space": {"rom_data_spans_validated": 1, "rom_data_span_sha256": "abcd",
+                           "out_of_bounds": []},
+            "opcode_program_separation": {"executed_pcs_compared": 2, "divergent_pcs": 2},
+        },
+        "writer_boundary": {
+            "units": [{"executed_pc_count": 1}, {"executed_pc_count": 1}],
+            "manual_semantic_pc_percent": 9.0,
+            "rom_data_reference_counts": {"0x001000": 1},
+            "work_ram_reference_counts": {"0xff8380": 1},
+            "hardware_exit_reference_counts": {"cps_a_cps_b_object_control": 1},
+        },
+        "program_image_bytes": PROGRAM_IMAGE_BYTES,
+    }
 
 
 def self_test() -> None:
@@ -630,56 +771,95 @@ def self_test() -> None:
     assert unit_class("move.w D0, $8040e0.l") == "hardware_facing_event_replacement"
     assert unit_class("addq.w #1, D0") == "mechanically_liftable"
 
-    pc_info, edges, image = _synthetic_model()
-    baseline = validate_boundary(pc_info, edges, bytes(image))
-    assert baseline["target_validation"]["computed_transfers"]["unresolved_sites"] == []
-    assert baseline["target_validation"]["computed_transfers"]["resolved_sites"] == 2
-    assert baseline["target_validation"]["direct_transfers"]["contradictions"] == []
+    pc_info, edges, image, program = _synthetic_model()
+    baseline = validate_boundary(pc_info, edges, bytes(image), bytes(program))
+    tv = baseline["target_validation"]
+    assert tv["computed_transfers"]["unresolved_sites"] == []
+    assert tv["computed_transfers"]["resolved_sites"] == 2
+    assert tv["direct_transfers"]["contradictions"] == []
     assert baseline["attribution"]["work_ram_reference_counts"] == {"0xff8380": 5}
+    assert tv["data_space"]["rom_data_spans_validated"] == 1 and tv["data_space"]["rom_data_span_sha256"]
+    assert tv["opcode_program_separation"]["divergent_pcs"] > 0
+    assert baseline["program_image_bytes"] == len(program)
 
-    # Real mutation controls: each removes/corrupts one modelled element and
-    # must make the production validator fail.
+    # Model-level mutation controls: each removes/corrupts one element of the
+    # parsed model and must make the production validator fail.
     def expect_fail(name: str, mutate) -> None:
         info = {pc: dict(v) for pc, v in pc_info.items()}
         edge = Counter(edges)
         img = bytearray(image)
-        mutate(info, edge, img)
+        prog = bytearray(program)
+        mutate(info, edge, img, prog)
         try:
-            validate_boundary(info, edge, bytes(img))
+            validate_boundary(info, edge, bytes(img), bytes(prog))
         except ValueError:
             return
         raise AssertionError("mutation control did not fail: %s" % name)
 
-    def remove_pc(info, edge, img):
+    def remove_pc(info, edge, img, prog):
         del info[0x200]                             # PC that is still an edge endpoint
 
-    def remove_edge(info, edge, img):
+    def remove_edge(info, edge, img, prog):
         del edge[(0x108, 0x200, "computed_call")]   # computed call loses its only target
 
-    def remove_computed_target(info, edge, img):
+    def remove_computed_target(info, edge, img, prog):
         del edge[(0x118, 0x120, "computed_jump")]   # computed jump becomes unresolved
 
-    def remove_global_attribution(info, edge, img):
+    def remove_global_attribution(info, edge, img, prog):
         info[0x116]["operand"] = "D0, $300000.l"    # data operand with no declared space
 
-    def corrupt_address_space(info, edge, img):
+    def corrupt_address_space(info, edge, img, prog):
         # Misalign an executed PC so it leaves the word-aligned instruction space.
         info[0x103] = info.pop(0x102)
         edge[(0x103, 0x110, "direct_branch")] = edge.pop((0x102, 0x110, "direct_branch"))
         edge[(0x100, 0x103, "conditional_branch")] = edge.pop((0x100, 0x102, "conditional_branch"))
+
+    def rom_span_out_of_bounds(info, edge, img, prog):
+        del prog[0x1000:]                           # ROM data span no longer resolves in the image
+
+    def identical_images(info, edge, img, prog):
+        prog[:len(img)] = img                       # opcode/program spaces no longer diverge
 
     expect_fail("remove_pc", remove_pc)
     expect_fail("remove_edge", remove_edge)
     expect_fail("remove_computed_target", remove_computed_target)
     expect_fail("remove_global_attribution", remove_global_attribution)
     expect_fail("corrupt_address_space", corrupt_address_space)
+    expect_fail("rom_span_out_of_bounds", rom_span_out_of_bounds)
+    expect_fail("identical_images", identical_images)
+
+    # Committed-artifact mutation controls: each removes one required piece of
+    # target/address-space evidence and must make validate_committed fail.
+    def expect_committed_fail(name: str, mutate) -> None:
+        report = copy.deepcopy(_synthetic_report())
+        mutate(report)
+        try:
+            validate_committed(report)
+        except ValueError:
+            return
+        raise AssertionError("committed control did not fail: %s" % name)
+
+    validate_committed(_synthetic_report())
+    expect_committed_fail("opcode_and_dynamic_validated_zero",
+                          lambda r: r["target_validation"]["direct_transfers"].__setitem__("opcode_and_dynamic_validated", 0))
+    expect_committed_fail("observed_target_total_zero",
+                          lambda r: r["target_validation"]["computed_transfers"].__setitem__("observed_target_total", 0))
+    expect_committed_fail("program_bytes_zero_wrong_hash",
+                          lambda r: (r.__setitem__("program_image_bytes", 0),
+                                     r["inputs"].__setitem__("program_sha256", "0" * 64)))
+    expect_committed_fail("removed_global_attribution",
+                          lambda r: (r["writer_boundary"].__setitem__("rom_data_reference_counts", {}),
+                                     r["writer_boundary"].__setitem__("work_ram_reference_counts", {})))
+    expect_committed_fail("removed_address_space_attribution",
+                          lambda r: r["inputs"].__setitem__("data_address_space", ""))
 
     # If the committed artifact exists, validate it too.
     if OUT.is_file():
         validate_committed(json.loads(OUT.read_text(encoding="utf-8")))
 
-    print("translation-boundary self-test: decoders, five mutation controls "
-          "and committed-artifact validation pass")
+    print("translation-boundary self-test: decoders, seven model mutation "
+          "controls, five committed-artifact controls and committed-artifact "
+          "validation pass")
 
 
 def main() -> int:

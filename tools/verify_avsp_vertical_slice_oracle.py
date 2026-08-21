@@ -62,18 +62,26 @@ def validate_provenance(contract: dict, inputs: dict) -> None:
     baseline_config = inputs.get("config_sha256")
     if not baseline_config or not inputs.get("nvram_baseline_sha256"):
         fail("missing config or NVRAM identity")
+    # Correction 1: require exactly the three unique expected runs, each with its
+    # expected perturbation frame and the identical pinned config identity.  A
+    # missing run, a duplicate run, or a per-run config/perturbation mismatch is
+    # rejected rather than silently accepting whatever records are present.
+    perturb_frame = contract["route"]["one_frame_perturbation"]["frame"]
+    expected_runs = {"cold_run_1": 0, "cold_run_2": 0, "one_frame_perturbation": perturb_frame}
     runs = inputs.get("runs", [])
-    if not runs:
-        fail("missing per-run provenance")
-    # Correction 1: every cold run must start from the identical pinned config
-    # (or the identical declared absence).  Reject any per-run mismatch.
+    observed_names = [run.get("name") for run in runs]
+    if sorted(observed_names) != sorted(expected_runs):
+        fail("run set must be exactly %s (no missing or duplicate runs)"
+             % ", ".join(sorted(expected_runs)))
     for run in runs:
+        name = run["name"]
+        if run.get("perturb_frame") != expected_runs[name]:
+            fail("run %s has the wrong perturbation frame" % name)
         start = run.get("config_start_sha256")
         if start is None:
-            fail("run %s has no starting config identity" % run.get("name"))
+            fail("run %s has no starting config identity" % name)
         if start != baseline_config:
-            fail("run %s started from a different config than the pinned baseline"
-                 % run.get("name"))
+            fail("run %s started from a different config than the pinned baseline" % name)
 
 
 def parse_samples(path: Path, contract: dict) -> list[dict[str, str]]:
@@ -335,9 +343,11 @@ def self_test() -> None:
                      [{"name": name, "sha256": value}
                       for name, value in contract.get("noncanonical_local_dependencies", {}).items()]),
             "config_sha256": "a", "nvram_baseline_sha256": "b",
-            "runs": [{"name": "cold_run_1", "config_start_sha256": "a"},
-                     {"name": "cold_run_2", "config_start_sha256": "a"},
-                     {"name": "one_frame_perturbation", "config_start_sha256": "a"}]}
+            "runs": [{"name": "cold_run_1", "perturb_frame": 0, "config_start_sha256": "a"},
+                     {"name": "cold_run_2", "perturb_frame": 0, "config_start_sha256": "a"},
+                     {"name": "one_frame_perturbation",
+                      "perturb_frame": contract["route"]["one_frame_perturbation"]["frame"],
+                      "config_start_sha256": "a"}]}
     validate_provenance(contract, good)
     controls = {
         "wrong_set": (lambda value: value["roms"].pop()),
@@ -345,6 +355,9 @@ def self_test() -> None:
         "wrong_schema": (lambda value: value.__setitem__("schema", 999)),
         "per_run_config_mismatch": (lambda value: value["runs"][1].__setitem__("config_start_sha256", "z")),
         "missing_run_config": (lambda value: value["runs"][0].pop("config_start_sha256")),
+        "missing_run": (lambda value: value["runs"].pop(1)),
+        "duplicate_run": (lambda value: value["runs"].__setitem__(1, copy.deepcopy(value["runs"][0]))),
+        "wrong_perturb_frame": (lambda value: value["runs"][2].__setitem__("perturb_frame", 1)),
     }
     for name, mutate in controls.items():
         candidate_contract = copy.deepcopy(contract)
