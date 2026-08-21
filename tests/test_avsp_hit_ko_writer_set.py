@@ -55,14 +55,8 @@ def mutation_is_rejected(module, report, mutate):
     return mutation_rejection_text(module, report, mutate) is not None
 
 
-def recompute_integrity(report):
-    report["integrity"] = {
-        "semantic_sha256": module_hash(
-            {key: report["correlations"][key]["semantic_changes"] for key in ("hit", "ko")}
-        ),
-        "routine_sha256": module_hash(report["closure"]["selected_routines"]),
-        "edge_sha256": module_hash(report["closure"]["selected_edges"]),
-    }
+def recompute_integrity(module, report):
+    module.refresh_report_bindings(report)
     return report["integrity"]
 
 
@@ -118,7 +112,7 @@ def main() -> int:
     failures = []
 
     helper_probe = copy.deepcopy(report)
-    if recompute_integrity(helper_probe) != module.integrity(report):
+    if recompute_integrity(module, helper_probe) != module.integrity(report):
         failures.append("focused integrity recomputation omits production hashes")
 
     # The correction must derive each field and bind the health/hit semantic
@@ -179,19 +173,19 @@ def main() -> int:
     )
     def non_observed_edge(candidate):
         candidate["closure"]["selected_edges"][0]["target"] = candidate["closure"]["selected_pcs"][-1]
-        recompute_integrity(candidate)
+        recompute_integrity(module, candidate)
 
     def union_drift(candidate):
         candidate["closure"]["selected_pcs"].append(outside_selected_boundary_pc(candidate))
-        recompute_integrity(candidate)
+        recompute_integrity(module, candidate)
 
     def caller_drift(candidate):
         selected_routine(candidate, "0x01f6c6")["observed_callers"][0] = outside_selected_boundary_pc(candidate)
-        recompute_integrity(candidate)
+        recompute_integrity(module, candidate)
 
     def callee_drift(candidate):
         selected_routine(candidate, "0x01f6c6")["observed_callees"][0] = outside_selected_boundary_pc(candidate)
-        recompute_integrity(candidate)
+        recompute_integrity(module, candidate)
 
     require_rejection(module, report, non_observed_edge, "accepted non-observed internal edge", "immutable PC/edge/routine binding", failures)
     require_rejection(module, report, union_drift, "accepted routine/selected-PC union drift", "routine/selected-PC union", failures)
@@ -200,7 +194,7 @@ def main() -> int:
 
     def integrity_preserving_anchor_mutation(candidate):
         candidate["window"]["first_source_frame"] += 1
-        recompute_integrity(candidate)
+        recompute_integrity(module, candidate)
 
     require_rejection(
         module,
@@ -213,10 +207,7 @@ def main() -> int:
 
     def preserved(candidate, mutate):
         mutate(candidate)
-        candidate["integrity"] = module.integrity(candidate)
-        candidate["accepted_boundary_binding"] = module.binding(
-            candidate, module.accepted_pcs()
-        )
+        recompute_integrity(module, candidate)
 
     invariant_controls = [
         (
@@ -301,67 +292,75 @@ def main() -> int:
         raise AssertionError("writer dispatch lacks derived caller/callee closure")
 
     controls = [
-        ("remove observed health writer", lambda d: d["writer_observations"]["health"].pop()),
-        ("remove observed hit writer", lambda d: d["writer_observations"]["hit_value"].pop()),
-        ("remove health dependency writer PC", lambda d: d["dependencies"]
+        ("remove observed health writer", "writer observation counts", lambda d: d["writer_observations"]["health"].pop()),
+        ("remove observed hit writer", "writer observation counts", lambda d: d["writer_observations"]["hit_value"].pop()),
+        ("remove health dependency writer PC", "health/hit dependency closure", lambda d: d["dependencies"]
          ["health_hit_writer_dependencies"][0]["writer_pcs"].pop()),
-        ("corrupt health before value", lambda d: d["field_transitions"]["health"][0]
+        ("corrupt health before value", "immutable PC/edge/routine binding", lambda d: d["field_transitions"]["health"][0]
          .__setitem__("before_value", -999)),
-        ("health writer destination", lambda d: d["writer_observations"]["health"][2]
+        ("health writer destination", "health effective address", lambda d: d["writer_observations"]["health"][2]
          .__setitem__("destination", "0xffa044")),
-        ("hit writer width", lambda d: d["writer_observations"]["hit_value"][2]
+        ("hit writer width", "hit_value effective address", lambda d: d["writer_observations"]["hit_value"][2]
          .__setitem__("write_width_bytes", 2)),
-        ("health actual PC", lambda d: d["writer_observations"]["health"][2]
+        ("health actual PC", "health effective address", lambda d: d["writer_observations"]["health"][2]
          .__setitem__("instruction_pc", "0xfffffe")),
-        ("health register binding", lambda d: d["writer_observations"]["health"][2]
+        ("health register binding", "health live registers", lambda d: d["writer_observations"]["health"][2]
          ["dynamic_register_binding"].pop("a1")),
-        ("remove HIT anim writer", lambda d: d["correlations"]["hit"]["writer_instances"].pop()),
-        ("remove KO anim writer", lambda d: d["correlations"]["ko"]["writer_instances"].pop()),
-        ("remove selected edge", lambda d: d["closure"]["selected_edges"].pop()),
-        ("unresolved computed target", lambda d: d["closure"]["unresolved_computed_targets"].append("0x000002")),
-        ("unattributed dependency", lambda d: d["closure"]["unattributed_dependencies"].append("0x000002")),
-        ("PC outside boundary", lambda d: d["closure"]["selected_pcs"].__setitem__(0, "0xfffffe")),
-        ("ROM dependency relabel", lambda d: d["dependencies"]["rom_data"][0].__setitem__("address_space", "opcodes")),
-        ("remove actor field", lambda d: d["coverage"]["actor_fields"].remove("action")),
-        ("shift HIT frame", lambda d: d["correlations"]["hit"]["writer_instances"][0].__setitem__("semantic_sample_after", 5192)),
-        ("forbidden raw field", lambda d: d.__setitem__("disassembly_text", "forbidden")),
-        ("writer PC outside selected boundary", lambda d: d["correlations"]["hit"]
+        ("remove HIT anim writer", "hit semantic binding", lambda d: d["correlations"]["hit"]["writer_instances"].pop()),
+        ("remove KO anim writer", "ko semantic binding", lambda d: d["correlations"]["ko"]["writer_instances"].pop()),
+        ("remove selected edge", "selected closure counts", lambda d: d["closure"]["selected_edges"].pop()),
+        ("unresolved computed target", "unresolved dependency", lambda d: d["closure"]["unresolved_computed_targets"].append("0x000002")),
+        ("unattributed dependency", "unresolved dependency", lambda d: d["closure"]["unattributed_dependencies"].append("0x000002")),
+        ("PC outside boundary", "accepted boundary PC membership", lambda d: d["closure"]["selected_pcs"].__setitem__(0, "0xfffffe")),
+        ("ROM dependency relabel", "ROM dependency schema", lambda d: d["dependencies"]["rom_data"][0].__setitem__("address_space", "opcodes")),
+        ("remove actor field", "actor-field enumeration", lambda d: d["coverage"]["actor_fields"].remove("action")),
+        ("shift HIT frame", "hit animation writer", lambda d: d["correlations"]["hit"]["writer_instances"][0].__setitem__("semantic_sample_after", 5192)),
+        ("forbidden raw field", "unknown top-level key", lambda d: d.__setitem__("disassembly_text", "forbidden")),
+        ("writer PC outside selected boundary", "hit animation writer", lambda d: d["correlations"]["hit"]
          ["writer_instances"][0].__setitem__("instruction_pc", "0xfffffe")),
-        ("missing semantic before/after", lambda d: d["correlations"]["hit"]
+        ("missing semantic before/after", "immutable integrity binding", lambda d: d["correlations"]["hit"]
          ["semantic_changes"][0].__setitem__("after", changed_value(d["correlations"]["hit"]
          ["semantic_changes"][0]["after"]))),
-        ("corrupted routine entry", lambda d: selected_routine(d, "0x01f6c6")
+        ("corrupted routine entry", "routine membership", lambda d: selected_routine(d, "0x01f6c6")
          .__setitem__("entry_pc", "0x01651a")),
-        ("corrupted routine member count", lambda d: selected_routine(d, "0x01f6c6")
+        ("corrupted routine member count", "routine membership", lambda d: selected_routine(d, "0x01f6c6")
          .__setitem__("member_pc_count", 1)),
-        ("corrupted routine member hash", lambda d: selected_routine(d, "0x01f6c6")
+        ("corrupted routine member hash", "routine membership", lambda d: selected_routine(d, "0x01f6c6")
          .__setitem__("member_pc_sha256", "0" * 64)),
-        ("disconnected routine member", lambda d: selected_routine(d, "0x01f6c6")
+        ("disconnected routine member", "routine membership", lambda d: selected_routine(d, "0x01f6c6")
          ["member_pcs"].append("0x01d0ac")),
-        ("missing observed caller", lambda d: selected_routine(d, "0x01f6c6")
+        ("missing observed caller", "immutable PC/edge/routine binding", lambda d: selected_routine(d, "0x01f6c6")
          ["observed_callers"].pop()),
-        ("missing observed callee", lambda d: selected_routine(d, "0x01f6c6")
+        ("missing observed callee", "immutable PC/edge/routine binding", lambda d: selected_routine(d, "0x01f6c6")
          ["observed_callees"].pop()),
-        ("missing routine field write", lambda d: selected_routine(d, "0x016518")
+        ("missing routine field write", "immutable PC/edge/routine binding", lambda d: selected_routine(d, "0x016518")
          ["actor_field_writes"].remove("anim_record")),
-        ("changed target actor binding", lambda d: d["dependencies"]["work_ram"][0]
+        ("changed target actor binding", "work-RAM dependency schema", lambda d: d["dependencies"]["work_ram"][0]
          .__setitem__("address", "0xffa0c0")),
-        ("out-of-span HIT ROM address", lambda d: d["dependencies"]["rom_data"][0]
+        ("out-of-span HIT ROM address", "program dependencies", lambda d: d["dependencies"]["rom_data"][0]
          .__setitem__("address", "0x1ffffe")),
-        ("changed typed event exit", lambda d: d["dependencies"]["typed_event_exits"]
-         .__setitem__(0, "enemy_walk_event")),
-        ("changed edge kind", lambda d: d["closure"]["selected_edges"][0]
-         .__setitem__("kind", "call")),
-        ("edge absent from dynamic trace", lambda d: d["closure"]["selected_edges"][0]
+        ("changed typed event exit", "HIT typed event exit", lambda d: d["dependencies"]["typed_event_exits"][0]
+         .__setitem__("event", "enemy_walk_event")),
+        ("changed edge kind", "edge kind", lambda d: d["closure"]["selected_edges"][0]
+         .__setitem__("kind", "not_an_edge")),
+        ("edge absent from dynamic trace", "edge shape", lambda d: d["closure"]["selected_edges"][0]
          .__setitem__("target", "0x000002")),
-        ("in-window writer exclusion", lambda d: d["exclusions"].append({
+        ("in-window writer exclusion", "exclusions", lambda d: d["exclusions"].append({
             "kind": "in_window_target_writer", "pc": "0x016526", "interval_start_frame": 5190})),
-        ("sample execution alignment shifted", lambda d: d["correlations"]["hit"]
+        ("sample execution alignment shifted", "hit animation writer", lambda d: d["correlations"]["hit"]
          ["writer_instances"][0].__setitem__("interval_start_frame", 5191)),
     ]
-    for name, mutate in controls:
-        if not mutation_is_rejected(module, report, mutate):
-            raise AssertionError("production validator accepted mutation: " + name)
+    for name, invariant, mutate in controls:
+        require_rejection(
+            module,
+            report,
+            lambda candidate, local=mutate: preserved(candidate, local),
+            "production validator accepted mutation: " + name,
+            invariant,
+            failures,
+        )
+    if failures:
+        raise AssertionError("writer-set correction findings: " + "; ".join(failures))
     if any(report["window"].get(key) != value for key, value in EXACT_WINDOW.items()):
         raise AssertionError("committed writer-set anchors differ from accepted window")
     print("HIT/KO writer-set committed artifact and correction controls passed")

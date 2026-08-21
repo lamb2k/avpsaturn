@@ -35,7 +35,31 @@ EXPECTED = {
     "opcodes": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
     "program": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9",
 }
-# Filled after one successful private-evidence generation, then frozen.
+IMMUTABLE_CLAIMS = {
+    "evidence_tiers": ("MAME_TRACE", "STATIC_ANALYSIS", "MEASURED"),
+    "private_capture": {
+        "watchpoint_log_sha256": "ab3955f11b0d8c9ca7947d014162412232f233ef3a20e6383a6d5cce613b7827",
+        "sample_sha256": "4a68d6f5e955711365f2a197ee0b6dac6527f4d4d1ef7519c7809239622a5cab",
+        "watchpoint_event_count": 1446,
+    },
+    "address_spaces": {
+        "instructions_and_code_targets": "opcodes",
+        "rom_operands_and_animation_records": "program",
+    },
+    "typed_event_exits": (
+        ("enemy_hit_event", 5190, "0x01e888"),
+        ("enemy_ko_event", 5329, "0x01f250"),
+    ),
+}
+# Filled after one successful private-evidence generation, then frozen.  These
+# bind the public closure rather than carrying any private raw evidence.
+IMMUTABLE_INTEGRITY = {
+    "semantic_sha256": "5dddd30ff1d356ec11fd55679882923f1a85f4499d6a907828cecf1d47f69361",
+    "routine_sha256": "63c35753fabd8d833c469b8737cace5df06a42668babe8e2d2382924491e25cf",
+    "edge_sha256": "14727b9d183fef87b2eeb6916f192c421d3cc57d06583ae875e82c50d98ce822",
+    "field_transition_sha256": "415ef74b56a7e2e0324ca3ad06e5796c7f3b0bde192249dcfba79765e0f80e36",
+    "writer_observation_sha256": "5568b8b83c8281dad5dd791f535367c190e4eed88984ef42d54199a6de035895",
+}
 IMMUTABLE_BINDING = {
     "accepted_boundary_pc_count": 7314,
     "field_transition_sha256": "415ef74b56a7e2e0324ca3ad06e5796c7f3b0bde192249dcfba79765e0f80e36",
@@ -49,6 +73,9 @@ IRQ = re.compile(r"^\(interrupted at [0-9a-fA-F]{4,8}, IRQ \d+\)$")
 MARK = re.compile(r"AVP_HIT_KO_INTERVAL_START (\d+)")
 WP = re.compile(r"AVP_HIT_KO_WP .* field=(\w+) addr=([0-9A-F]+) data=([0-9A-F]+) pc=([0-9A-F]+) d0=([0-9A-F]+) d1=([0-9A-F]+) a0=([0-9A-F]+) a1=([0-9A-F]+) a2=([0-9A-F]+) a3=([0-9A-F]+) a4=([0-9A-F]+) a5=([0-9A-F]+) a6=([0-9A-F]+) a7=([0-9A-F]+)")
 FORBIDDEN = {"raw", "bytes", "opcode_words", "disassembly", "disassembly_text", "trace_text", "trace_lines", "state_dump", "screenshot"}
+HEX64 = re.compile(r"^[0-9a-f]{64}$")
+HEX6 = re.compile(r"^0x[0-9a-f]{6}$")
+HEX8 = re.compile(r"^0x[0-9a-f]{8}$")
 
 
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -251,15 +278,36 @@ def build():
     edges = [{"source": h(source), "target": h(target), "kind": edge_kind(image, source)} for source, target in sorted(pairs) if h(source) in set(selected) and h(target) in set(selected)]
     counts = {field: len(deltas(sample_rows, field)) for field in FIELDS}
     if counts != EXPECTED_COUNTS: raise ValueError("seven-field transition count differs")
-    report = {"schema": 3, "artifact": "avsp_hit_ko_writer_set", "target": {"set": "avspu", "revision": "USA 940520", "class": 31, "type": 12}, "evidence_tiers": ["MAME_TRACE", "STATIC_ANALYSIS", "MEASURED"], "inputs": {key + "_sha256": value for key, value in identities.items()}, "private_capture": {"watchpoint_log_sha256": sha(LOG), "sample_sha256": sha(SAMPLES), "watchpoint_event_count": sum(len(value) for value in watched.values())}, "address_spaces": {"instructions_and_code_targets": "opcodes", "rom_operands_and_animation_records": "program"}, "window": {"first_source_frame": FIRST, "last_source_frame": LAST, "semantic_sample_count": 1390, "execution_interval_count": 1389, "hit_semantic_sample_after": HIT, "ko_semantic_sample_after": KO, "alignment": "interval N executes from semantic sample N to N+1", "synthetic_final_epoch": False}, "correlations": {"hit": {"semantic_changes": [{"field": "action", "before": sample_rows[HIT - 1]["action"], "after": sample_rows[HIT]["action"]}, {"field": "anim", "before": sample_rows[HIT - 1]["anim_record"], "after": sample_rows[HIT]["anim_record"]}, {"field": "timer", "before": sample_rows[HIT - 1]["anim_timer"], "after": sample_rows[HIT]["anim_timer"]}], "writer_instances": [hit], "closes_gap_external_repoint_ownership": True}, "ko": {"semantic_changes": [{"field": "state", "before": sample_rows[KO - 1]["state"], "after": sample_rows[KO]["state"]}, {"field": "sub", "before": sample_rows[KO - 1]["sub_state"], "after": sample_rows[KO]["sub_state"]}, {"field": "anim", "before": sample_rows[KO - 1]["anim_record"], "after": sample_rows[KO]["anim_record"]}, {"field": "timer", "before": sample_rows[KO - 1]["anim_timer"], "after": sample_rows[KO]["anim_timer"]}], "writer_instances": [ko], "closes_gap_external_repoint_ownership": True}}, "field_transitions": transitions, "writer_observations": observations, "coverage": {"actor_fields": list(FIELDS), "field_transition_counts": counts, "writer_observation_counts": {field: len(items) for field, items in observations.items()}, "computed_target_count": sum(edge["kind"] == "computed_jump" for edge in edges), "event_exit_count": 2, "selected_pc_count": len(selected), "selected_edge_count": len(edges), "selected_routine_count": len(routines)}, "closure": {"selected_pcs": selected, "selected_edges": edges, "selected_routines": routines, "unresolved_computed_targets": [], "unattributed_dependencies": []}, "dependencies": {"rom_data": [{"purpose": "HIT animation record", "address": h(hit["after_value"]), "address_space": "program", "span": ["0x120000", "0x130000"]}, {"purpose": "KO animation record", "address": h(ko["after_value"]), "address_space": "program", "span": ["0x120000", "0x130000"]}], "work_ram": [{"purpose": "class_1f_type_0c_enemy_actor", "address": "0xffa000", "class": 31, "type": 12}], "typed_event_exits": [{"event": "enemy_hit_event", "interval_start_frame": HIT - 1, "writer_pc": "0x01e888"}, {"event": "enemy_ko_event", "interval_start_frame": KO - 1, "writer_pc": "0x01f250"}], "health_hit_writer_dependencies": [{"field": "health", "instruction_space": "opcodes", "required_register_bindings": ["a1", "a6", "d1"], "writer_pcs": sorted(role_pcs["health"])}, {"field": "hit_value", "instruction_space": "opcodes", "required_register_bindings": ["a1", "a6", "d0"], "writer_pcs": sorted(role_pcs["hit_value"])}]}, "exclusions": ["out_of_window_routes", "other_actor_classes", "production_lifted_c"], "forbidden_content_present": False}
-    report["integrity"] = integrity(report)
-    report["accepted_boundary_binding"] = binding(report, boundary)
+    report = {"schema": 3, "artifact": "avsp_hit_ko_writer_set", "target": {"set": "avspu", "revision": "USA 940520", "class": 31, "type": 12}, "evidence_tiers": list(IMMUTABLE_CLAIMS["evidence_tiers"]), "inputs": {key + "_sha256": value for key, value in identities.items()}, "private_capture": private_capture_provenance(watched), "address_spaces": dict(IMMUTABLE_CLAIMS["address_spaces"]), "window": {"first_source_frame": FIRST, "last_source_frame": LAST, "semantic_sample_count": 1390, "execution_interval_count": 1389, "hit_semantic_sample_after": HIT, "ko_semantic_sample_after": KO, "alignment": "interval N executes from semantic sample N to N+1", "synthetic_final_epoch": False}, "correlations": {"hit": {"semantic_changes": [{"field": "action", "before": sample_rows[HIT - 1]["action"], "after": sample_rows[HIT]["action"]}, {"field": "anim", "before": sample_rows[HIT - 1]["anim_record"], "after": sample_rows[HIT]["anim_record"]}, {"field": "timer", "before": sample_rows[HIT - 1]["anim_timer"], "after": sample_rows[HIT]["anim_timer"]}], "writer_instances": [hit], "closes_gap_external_repoint_ownership": True}, "ko": {"semantic_changes": [{"field": "state", "before": sample_rows[KO - 1]["state"], "after": sample_rows[KO]["state"]}, {"field": "sub", "before": sample_rows[KO - 1]["sub_state"], "after": sample_rows[KO]["sub_state"]}, {"field": "anim", "before": sample_rows[KO - 1]["anim_record"], "after": sample_rows[KO]["anim_record"]}, {"field": "timer", "before": sample_rows[KO - 1]["anim_timer"], "after": sample_rows[KO]["anim_timer"]}], "writer_instances": [ko], "closes_gap_external_repoint_ownership": True}}, "field_transitions": transitions, "writer_observations": observations, "coverage": {"actor_fields": list(FIELDS), "field_transition_counts": counts, "writer_observation_counts": {field: len(items) for field, items in observations.items()}, "computed_target_count": sum(edge["kind"] == "computed_jump" for edge in edges), "event_exit_count": 2, "selected_pc_count": len(selected), "selected_edge_count": len(edges), "selected_routine_count": len(routines)}, "closure": {"selected_pcs": selected, "selected_edges": edges, "selected_routines": routines, "unresolved_computed_targets": [], "unattributed_dependencies": []}, "dependencies": {"rom_data": [{"purpose": "HIT animation record", "address": h(hit["after_value"]), "address_space": "program", "span": ["0x120000", "0x130000"]}, {"purpose": "KO animation record", "address": h(ko["after_value"]), "address_space": "program", "span": ["0x120000", "0x130000"]}], "work_ram": [{"purpose": "class_1f_type_0c_enemy_actor", "address": "0xffa000", "class": 31, "type": 12}], "typed_event_exits": typed_event_exit_bindings(), "health_hit_writer_dependencies": [{"field": "health", "instruction_space": "opcodes", "required_register_bindings": ["a1", "a6", "d1"], "writer_pcs": sorted(role_pcs["health"])}, {"field": "hit_value", "instruction_space": "opcodes", "required_register_bindings": ["a1", "a6", "d0"], "writer_pcs": sorted(role_pcs["hit_value"])}]}, "exclusions": ["out_of_window_routes", "other_actor_classes", "production_lifted_c"], "forbidden_content_present": False}
+    refresh_report_bindings(report, boundary)
     validate_committed(report)
     return report
 
 
 def integrity(report): return {"semantic_sha256": jhash({key: report["correlations"][key]["semantic_changes"] for key in ("hit", "ko")}), "routine_sha256": jhash(report["closure"]["selected_routines"]), "edge_sha256": jhash(report["closure"]["selected_edges"]), "field_transition_sha256": jhash(report["field_transitions"]), "writer_observation_sha256": jhash(report["writer_observations"])}
 def binding(report, boundary): return {"accepted_boundary_pc_count": len(boundary), "selected_pc_sha256": phash(report["closure"]["selected_pcs"]), "selected_edge_sha256": jhash(report["closure"]["selected_edges"]), "selected_routine_sha256": jhash(report["closure"]["selected_routines"]), "field_transition_sha256": report["integrity"]["field_transition_sha256"], "writer_observation_sha256": report["integrity"]["writer_observation_sha256"]}
+
+
+def refresh_report_bindings(report, boundary=None):
+    if boundary is None: boundary = accepted_pcs()
+    report["integrity"] = integrity(report)
+    report["accepted_boundary_binding"] = binding(report, boundary)
+    return report
+
+
+def private_capture_provenance(watched):
+    return {
+        "watchpoint_log_sha256": sha(LOG),
+        "sample_sha256": sha(SAMPLES),
+        "watchpoint_event_count": sum(len(value) for value in watched.values()),
+    }
+
+
+def typed_event_exit_bindings():
+    return [
+        {"event": event, "interval_start_frame": interval, "writer_pc": writer_pc}
+        for event, interval, writer_pc in IMMUTABLE_CLAIMS["typed_event_exits"]
+    ]
 
 
 def walk(value):
@@ -269,10 +317,150 @@ def walk(value):
         for item in value: yield from walk(item)
 
 
+def exact_keys(value, keys, path):
+    if not isinstance(value, dict): raise ValueError("object required at " + path)
+    unknown = set(value) - set(keys)
+    if unknown:
+        label = "unknown top-level key" if not path else "unknown key at " + path
+        raise ValueError(label + ": " + sorted(unknown)[0])
+    missing = set(keys) - set(value)
+    if missing: raise ValueError("missing required key at " + path + ": " + sorted(missing)[0])
+
+
+def exact_hash(value, path):
+    if not isinstance(value, str) or not HEX64.fullmatch(value): raise ValueError("SHA-256 format at " + path)
+
+
+def exact_pc(value, path):
+    if not isinstance(value, str) or not HEX6.fullmatch(value): raise ValueError("PC/address format at " + path)
+
+
+def exact_int(value, path):
+    if not isinstance(value, int) or isinstance(value, bool): raise ValueError("integer required at " + path)
+
+
+def register_bindings(value, path):
+    if not isinstance(value, dict) or not set(value) <= {"d0", "d1", "a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7"}:
+        raise ValueError("register binding schema at " + path)
+    for register, address in value.items():
+        if not isinstance(register, str) or not isinstance(address, str) or not (HEX6.fullmatch(address) or HEX8.fullmatch(address)):
+            raise ValueError("register binding format at " + path)
+
+
+def observation_instance(item, path, expected_field=None):
+    keys = {"interval_start_frame", "instruction_pc", "watchpoint_reported_pc", "destination", "field", "write_width_bytes", "write_value", "effective_address_register", "effective_address_displacement", "dynamic_register_binding"}
+    exact_keys(item, keys, path)
+    exact_pc(item["instruction_pc"], path + ".instruction_pc")
+    exact_pc(item["watchpoint_reported_pc"], path + ".watchpoint_reported_pc")
+    exact_pc(item["destination"], path + ".destination")
+    if item["field"] not in {"health", "hit_value"} or expected_field is not None and item["field"] != expected_field:
+        raise ValueError("writer observation field at " + path)
+    exact_int(item["interval_start_frame"], path + ".interval_start_frame")
+    exact_int(item["write_width_bytes"], path + ".write_width_bytes")
+    exact_int(item["write_value"], path + ".write_value")
+    if item["effective_address_register"] not in {"a1", "a6"}: raise ValueError("effective-address register at " + path)
+    exact_int(item["effective_address_displacement"], path + ".effective_address_displacement")
+    register_bindings(item["dynamic_register_binding"], path + ".dynamic_register_binding")
+
+
+def event_writer_instance(item, path):
+    keys = {"interval_start_frame", "semantic_sample_after", "instruction_pc", "watchpoint_reported_pc", "target_actor_base", "destination", "field", "write_width_bytes", "write_mask", "before_value", "after_value", "watchpoint_bus_event_count", "dynamic_register_binding"}
+    exact_keys(item, keys, path)
+    for name in ("instruction_pc", "watchpoint_reported_pc", "target_actor_base", "destination"):
+        exact_pc(item[name], path + "." + name)
+    for name in ("interval_start_frame", "semantic_sample_after", "write_width_bytes", "before_value", "after_value", "watchpoint_bus_event_count"):
+        exact_int(item[name], path + "." + name)
+    if item["field"] != "anim_record" or item["write_mask"] != "0xffffffff": raise ValueError("typed event writer schema at " + path)
+    register_bindings(item["dynamic_register_binding"], path + ".dynamic_register_binding")
+
+
+def validate_report_structure(report):
+    top = {"schema", "artifact", "target", "evidence_tiers", "inputs", "private_capture", "address_spaces", "window", "correlations", "field_transitions", "writer_observations", "coverage", "closure", "dependencies", "exclusions", "forbidden_content_present", "integrity", "accepted_boundary_binding"}
+    exact_keys(report, top, "")
+    exact_keys(report["target"], {"set", "revision", "class", "type"}, "target")
+    exact_keys(report["inputs"], {key + "_sha256" for key in EXPECTED}, "inputs")
+    exact_keys(report["private_capture"], set(IMMUTABLE_CLAIMS["private_capture"]), "private_capture")
+    exact_keys(report["address_spaces"], set(IMMUTABLE_CLAIMS["address_spaces"]), "address_spaces")
+    exact_keys(report["window"], {"first_source_frame", "last_source_frame", "semantic_sample_count", "execution_interval_count", "hit_semantic_sample_after", "ko_semantic_sample_after", "alignment", "synthetic_final_epoch"}, "window")
+    exact_keys(report["correlations"], {"hit", "ko"}, "correlations")
+    for name, allowed_fields in (("hit", {"action", "anim", "timer"}), ("ko", {"state", "sub", "anim", "timer"})):
+        correlation = report["correlations"][name]
+        exact_keys(correlation, {"semantic_changes", "writer_instances", "closes_gap_external_repoint_ownership"}, "correlations." + name)
+        if not isinstance(correlation["semantic_changes"], list) or not isinstance(correlation["writer_instances"], list): raise ValueError("correlation list schema at " + name)
+        for index, change in enumerate(correlation["semantic_changes"]):
+            exact_keys(change, {"field", "before", "after"}, "correlations." + name + ".semantic_changes")
+            if change["field"] not in allowed_fields: raise ValueError("semantic field at correlations." + name)
+            exact_int(change["before"], "correlations." + name + ".before")
+            exact_int(change["after"], "correlations." + name + ".after")
+        for index, writer in enumerate(correlation["writer_instances"]): event_writer_instance(writer, "correlations." + name + ".writer_instances[" + str(index) + "]")
+    exact_keys(report["field_transitions"], {"health", "hit_value"}, "field_transitions")
+    exact_keys(report["writer_observations"], {"health", "hit_value"}, "writer_observations")
+    for field in ("health", "hit_value"):
+        for index, transition in enumerate(report["field_transitions"][field]):
+            exact_keys(transition, {"field", "interval_start_frame", "semantic_sample_after", "before_value", "after_value", "writer_instances"}, "field_transitions." + field)
+            if transition["field"] != field or not isinstance(transition["writer_instances"], list): raise ValueError("transition schema at " + field)
+            for name in ("interval_start_frame", "semantic_sample_after", "before_value", "after_value"): exact_int(transition[name], "field_transitions." + field + "." + name)
+            for writer_index, writer in enumerate(transition["writer_instances"]): observation_instance(writer, "field_transitions." + field + ".writer_instances[" + str(writer_index) + "]", field)
+        for index, observation in enumerate(report["writer_observations"][field]): observation_instance(observation, "writer_observations." + field + "[" + str(index) + "]", field)
+    exact_keys(report["coverage"], {"actor_fields", "field_transition_counts", "writer_observation_counts", "computed_target_count", "event_exit_count", "selected_pc_count", "selected_edge_count", "selected_routine_count"}, "coverage")
+    if report["coverage"]["actor_fields"] != list(FIELDS): raise ValueError("actor-field enumeration")
+    exact_keys(report["coverage"]["field_transition_counts"], set(FIELDS), "coverage.field_transition_counts")
+    exact_keys(report["coverage"]["writer_observation_counts"], {"health", "hit_value"}, "coverage.writer_observation_counts")
+    for mapping in (report["coverage"]["field_transition_counts"], report["coverage"]["writer_observation_counts"]):
+        for value in mapping.values(): exact_int(value, "coverage count")
+    for name in ("computed_target_count", "event_exit_count", "selected_pc_count", "selected_edge_count", "selected_routine_count"): exact_int(report["coverage"][name], "coverage." + name)
+    exact_keys(report["closure"], {"selected_pcs", "selected_edges", "selected_routines", "unresolved_computed_targets", "unattributed_dependencies"}, "closure")
+    for index, pc in enumerate(report["closure"]["selected_pcs"]): exact_pc(pc, "closure.selected_pcs[" + str(index) + "]")
+    for name in ("unresolved_computed_targets", "unattributed_dependencies"):
+        for index, pc in enumerate(report["closure"][name]): exact_pc(pc, "closure." + name + "[" + str(index) + "]")
+    for edge in report["closure"]["selected_edges"]:
+        exact_keys(edge, {"source", "target", "kind"}, "closure.selected_edges")
+        exact_pc(edge["source"], "closure.selected_edges.source"); exact_pc(edge["target"], "closure.selected_edges.target")
+        if edge["kind"] not in {"fallthrough", "call", "return", "computed_jump", "conditional_branch"}: raise ValueError("edge kind")
+    routine_keys = {"entry_pc", "member_pc_count", "member_pc_sha256", "member_pcs", "observed_callers", "observed_callees", "actor_field_reads", "actor_field_writes", "rom_data_reads", "work_ram_references", "event_exits", "closure_role"}
+    allowed_roles = {"hit_transition", "ko_transition", "animation_dispatch", "animation_pointer_selection", "health_writer_context", "hit_value_writer_context"}
+    for routine_item in report["closure"]["selected_routines"]:
+        exact_keys(routine_item, routine_keys, "closure.selected_routines")
+        exact_pc(routine_item["entry_pc"], "routine.entry_pc"); exact_int(routine_item["member_pc_count"], "routine.member_pc_count"); exact_hash(routine_item["member_pc_sha256"], "routine.member_pc_sha256")
+        if routine_item["closure_role"] not in allowed_roles: raise ValueError("routine role")
+        for name in ("member_pcs", "observed_callers", "observed_callees"):
+            for pc in routine_item[name]: exact_pc(pc, "routine." + name)
+        if any(field not in FIELDS for field in routine_item["actor_field_reads"] + routine_item["actor_field_writes"]): raise ValueError("routine actor-field attribution")
+        if routine_item["rom_data_reads"] != [] or routine_item["work_ram_references"] != ["0xffa000"]: raise ValueError("routine dependency attribution")
+        if any(event not in {item[0] for item in IMMUTABLE_CLAIMS["typed_event_exits"]} for event in routine_item["event_exits"]): raise ValueError("routine event attribution")
+    exact_keys(report["dependencies"], {"rom_data", "work_ram", "typed_event_exits", "health_hit_writer_dependencies"}, "dependencies")
+    for item in report["dependencies"]["rom_data"]:
+        exact_keys(item, {"purpose", "address", "address_space", "span"}, "dependencies.rom_data")
+        if item["purpose"] not in {"HIT animation record", "KO animation record"} or item["address_space"] != "program" or item["span"] != ["0x120000", "0x130000"]: raise ValueError("ROM dependency schema")
+        exact_pc(item["address"], "dependencies.rom_data.address")
+    for item in report["dependencies"]["work_ram"]:
+        exact_keys(item, {"purpose", "address", "class", "type"}, "dependencies.work_ram")
+        if item != {"purpose": "class_1f_type_0c_enemy_actor", "address": "0xffa000", "class": 31, "type": 12}: raise ValueError("work-RAM dependency schema")
+    for item in report["dependencies"]["typed_event_exits"]:
+        exact_keys(item, {"event", "interval_start_frame", "writer_pc"}, "dependencies.typed_event_exits")
+        exact_int(item["interval_start_frame"], "dependencies.typed_event_exits.interval_start_frame"); exact_pc(item["writer_pc"], "dependencies.typed_event_exits.writer_pc")
+    for item in report["dependencies"]["health_hit_writer_dependencies"]:
+        exact_keys(item, {"field", "instruction_space", "required_register_bindings", "writer_pcs"}, "dependencies.health_hit_writer_dependencies")
+        if item["field"] not in {"health", "hit_value"} or item["instruction_space"] != "opcodes" or any(register not in {"a1", "a6", "d0", "d1"} for register in item["required_register_bindings"]): raise ValueError("health/hit dependency schema")
+        for pc in item["writer_pcs"]: exact_pc(pc, "health/hit dependency PC")
+    exact_keys(report["integrity"], set(IMMUTABLE_INTEGRITY), "integrity")
+    exact_keys(report["accepted_boundary_binding"], set(IMMUTABLE_BINDING), "accepted_boundary_binding")
+    for mapping, path in ((report["integrity"], "integrity"), (report["accepted_boundary_binding"], "accepted_boundary_binding")):
+        for name, value in mapping.items():
+            if name != "accepted_boundary_pc_count": exact_hash(value, path + "." + name)
+            else: exact_int(value, path + "." + name)
+    if report["exclusions"] != ["out_of_window_routes", "other_actor_classes", "production_lifted_c"]: raise ValueError("exclusions")
+    if report["forbidden_content_present"] is not False: raise ValueError("forbidden content")
+
+
 def validate_committed(report):
+    validate_report_structure(report)
     if report.get("schema") != 3 or report.get("artifact") != "avsp_hit_ko_writer_set": raise ValueError("schema")
     if report.get("target") != {"set": "avspu", "revision": "USA 940520", "class": 31, "type": 12}: raise ValueError("target")
     if report.get("inputs") != {key + "_sha256": value for key, value in EXPECTED.items()}: raise ValueError("settled inputs")
+    if tuple(report.get("evidence_tiers", ())) != IMMUTABLE_CLAIMS["evidence_tiers"]: raise ValueError("evidence tiers")
+    if report.get("private_capture") != IMMUTABLE_CLAIMS["private_capture"]: raise ValueError("private capture provenance")
+    if report.get("address_spaces") != IMMUTABLE_CLAIMS["address_spaces"]: raise ValueError("address-space attribution")
     window = {"first_source_frame": FIRST, "last_source_frame": LAST, "semantic_sample_count": 1390, "execution_interval_count": 1389, "hit_semantic_sample_after": HIT, "ko_semantic_sample_after": KO, "alignment": "interval N executes from semantic sample N to N+1", "synthetic_final_epoch": False}
     if report.get("window") != window: raise ValueError("exact accepted anchors")
     coverage, transitions, observed = report.get("coverage", {}), report.get("field_transitions", {}), report.get("writer_observations", {})
@@ -316,7 +504,16 @@ def validate_committed(report):
     dependencies = report.get("dependencies", {}); rom = dependencies.get("rom_data", [])
     if len(rom) != 2 or any(item.get("address_space") != "program" or not int(item["span"][0], 16) <= int(item["address"], 16) < int(item["span"][1], 16) for item in rom): raise ValueError("program dependencies")
     if dependencies.get("work_ram") != [{"purpose": "class_1f_type_0c_enemy_actor", "address": "0xffa000", "class": 31, "type": 12}]: raise ValueError("actor dependency")
-    if {item.get("event") for item in dependencies.get("typed_event_exits", [])} != {"enemy_hit_event", "enemy_ko_event"} or len(dependencies.get("typed_event_exits", [])) != 2: raise ValueError("event exits")
+    typed_exits = dependencies.get("typed_event_exits", [])
+    expected_typed_exits = typed_event_exit_bindings()
+    for index, expected_exit in enumerate(expected_typed_exits):
+        label = "HIT typed event exit" if expected_exit["event"] == "enemy_hit_event" else "KO typed event exit"
+        if index >= len(typed_exits) or typed_exits[index] != expected_exit: raise ValueError(label)
+        routine_item = next((item for item in routines if item["entry_pc"] == expected_exit["writer_pc"]), None)
+        correlation = report["correlations"]["hit" if expected_exit["event"] == "enemy_hit_event" else "ko"]
+        if routine_item is None or expected_exit["event"] not in routine_item["event_exits"] or expected_exit["interval_start_frame"] != correlation["writer_instances"][0]["interval_start_frame"]:
+            raise ValueError(label + " binding")
+    if len(typed_exits) != len(expected_typed_exits): raise ValueError("typed event exit count")
     writer_dependencies = {item.get("field"): item for item in dependencies.get("health_hit_writer_dependencies", [])}
     if set(writer_dependencies) != {"health", "hit_value"} or len(writer_dependencies) != 2: raise ValueError("health/hit dependencies")
     expected_dependency_registers = {"health": ["a1", "a6", "d1"], "hit_value": ["a1", "a6", "d0"]}
@@ -329,6 +526,7 @@ def validate_committed(report):
     expected_binding = binding(report, boundary)
     if report.get("accepted_boundary_binding") != expected_binding: raise ValueError("accepted-boundary binding")
     if IMMUTABLE_BINDING is not None and expected_binding != IMMUTABLE_BINDING: raise ValueError("immutable PC/edge/routine binding")
+    if report["integrity"] != IMMUTABLE_INTEGRITY: raise ValueError("immutable integrity binding")
     if any(isinstance(item, dict) and item.get("kind") == "in_window_target_writer" for item in report.get("exclusions", [])): raise ValueError("in-window writer exclusion")
     if report.get("forbidden_content_present") is not False or FORBIDDEN & set(walk(report)): raise ValueError("forbidden content")
 
@@ -336,13 +534,35 @@ def validate_committed(report):
 def self_test():
     report = build()
     health_a1 = next(item for item in report["writer_observations"]["health"] if item["instruction_pc"] == "0x01d58a")
-    mutations = [lambda x: x["correlations"]["hit"]["writer_instances"].pop(), lambda x: x["correlations"]["ko"]["writer_instances"].pop(), lambda x: x["field_transitions"]["health"].pop(), lambda x: x["writer_observations"]["hit_value"].pop(), lambda x: x["field_transitions"]["health"][0].__setitem__("after_value", -999), lambda x: x["writer_observations"]["health"][0].__setitem__("destination", "0xffa044"), lambda x: x["writer_observations"]["hit_value"][0].__setitem__("write_width_bytes", 2), lambda x: x["writer_observations"]["health"][0].__setitem__("instruction_pc", "0xfffffe"), lambda x: next(item for item in x["writer_observations"]["health"] if item["instruction_pc"] == health_a1["instruction_pc"])["dynamic_register_binding"].pop("a1"), lambda x: x["dependencies"]["health_hit_writer_dependencies"][0]["writer_pcs"].pop(), lambda x: x["window"].__setitem__("hit_semantic_sample_after", HIT + 1), lambda x: x["closure"]["selected_pcs"].append("0xfffffe"), lambda x: x["closure"]["selected_edges"].pop(), lambda x: x["closure"]["selected_routines"][2].__setitem__("member_pc_count", 1), lambda x: x["coverage"].__setitem__("event_exit_count", 999), lambda x: x["exclusions"].append({"kind": "in_window_target_writer"}), lambda x: x.__setitem__("trace_text", "forbidden")]
-    for mutate in mutations:
-        candidate = copy.deepcopy(report); mutate(candidate)
+    mutations = [
+        ("missing HIT writer", "hit semantic binding", lambda x: x["correlations"]["hit"]["writer_instances"].pop()),
+        ("missing KO writer", "ko semantic binding", lambda x: x["correlations"]["ko"]["writer_instances"].pop()),
+        ("missing health transition", "health transition coverage", lambda x: x["field_transitions"]["health"].pop()),
+        ("missing hit observation", "writer observation counts", lambda x: x["writer_observations"]["hit_value"].pop()),
+        ("changed health after", "immutable PC/edge/routine binding", lambda x: x["field_transitions"]["health"][0].__setitem__("after_value", -999)),
+        ("health destination", "health effective address", lambda x: x["writer_observations"]["health"][0].__setitem__("destination", "0xffa044")),
+        ("hit width", "hit_value effective address", lambda x: x["writer_observations"]["hit_value"][0].__setitem__("write_width_bytes", 2)),
+        ("health writer PC", "health effective address", lambda x: x["writer_observations"]["health"][0].__setitem__("instruction_pc", "0xfffffe")),
+        ("health live register", "health live registers", lambda x: next(item for item in x["writer_observations"]["health"] if item["instruction_pc"] == health_a1["instruction_pc"])["dynamic_register_binding"].pop("a1")),
+        ("health dependency", "health/hit dependency closure", lambda x: x["dependencies"]["health_hit_writer_dependencies"][0]["writer_pcs"].pop()),
+        ("HIT anchor", "exact accepted anchors", lambda x: x["window"].__setitem__("hit_semantic_sample_after", HIT + 1)),
+        ("selected PC", "accepted boundary PC membership", lambda x: x["closure"]["selected_pcs"].append("0xfffffe")),
+        ("selected edge", "selected closure counts", lambda x: x["closure"]["selected_edges"].pop()),
+        ("routine count", "routine membership", lambda x: x["closure"]["selected_routines"][2].__setitem__("member_pc_count", 1)),
+        ("event count", "derived counts", lambda x: x["coverage"].__setitem__("event_exit_count", 999)),
+        ("in-window exclusion", "exclusions", lambda x: x["exclusions"].append({"kind": "in_window_target_writer"})),
+        ("raw key", "unknown top-level key", lambda x: x.__setitem__("trace_text", "forbidden")),
+    ]
+    for name, invariant, mutate in mutations:
+        candidate = copy.deepcopy(report)
+        mutate(candidate)
+        refresh_report_bindings(candidate)
         try: validate_committed(candidate)
-        except (AttributeError, KeyError, TypeError, ValueError): continue
-        raise AssertionError("production validator accepted committed-artifact control")
-    print("HIT/KO writer-set self-test and committed-artifact controls passed")
+        except (AttributeError, KeyError, TypeError, ValueError) as error:
+            if invariant in str(error): continue
+            raise AssertionError(name + " rejected by " + repr(str(error)) + ", not " + repr(invariant))
+        raise AssertionError("production validator accepted committed-artifact control: " + name)
+    print("HIT/KO writer-set self-test and invariant-specific committed-artifact controls passed")
 
 
 def scratch_mutation_test():
