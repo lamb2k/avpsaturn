@@ -101,3 +101,39 @@ The shared-primitives check, presentation/stage parity check, and capability sli
 ## Handoff
 
 Every implementation handoff must include branch, immutable base and final SHA, commits oldest first, explicit files changed, commands and exit codes, RED/GREEN/negative-control results, build/profile/artifact hashes, evidence tiers, remaining gaps, worktree status, and a ready review invocation. If incomplete, state the exact stop condition that fired.
+
+### Mandatory review-to-next-work relay
+
+The implementor's final `CODEX_REVIEW_INVOCATION` is a request for both an
+acceptance ruling and continued assignment. It must explicitly require the
+supervisor to return one of these three dispositions and the corresponding
+next invocation:
+
+- `ACCEPTED`: reconcile the accepted commit range with the active ledgers and
+  plan, then issue the next dependency-ready `IMPLEMENTOR_INVOCATION`;
+- `CORRECTIONS REQUIRED`: issue one consolidated correction
+  `IMPLEMENTOR_INVOCATION` against the reviewed candidate HEAD;
+- `NOT REVIEWABLE`: issue the minimum evidence/isolation
+  `IMPLEMENTOR_INVOCATION` needed to make the candidate reviewable.
+
+The implementor does not accept its own work, change capability status, select
+the next tranche, or edit the supervisor's plan of record. It supplies a
+suggested next dependency only as evidence for the supervisor. The supervisor
+owns the ruling and assignment.
+
+A supervisor review is incomplete if it returns findings without a ready-to-
+paste next `IMPLEMENTOR_INVOCATION`. Do not ask the user whether to continue
+when the active plan already supplies dependency-ready work. Omit a new
+assignment only when the complete project is accepted, no dependency-ready
+work exists, continuing requires new user authority or physical interaction,
+or a documented hard stop leaves no safe in-scope work.
+
+Every final `CODEX_REVIEW_INVOCATION` must therefore contain this machine-
+readable continuation contract:
+
+```text
+SUPERVISOR_CONTINUATION_REQUIRED: true
+ON_ACCEPTED: review, update accepted status, and issue the next dependency-ready IMPLEMENTOR_INVOCATION
+ON_CORRECTIONS_REQUIRED: issue one consolidated correction IMPLEMENTOR_INVOCATION
+ON_NOT_REVIEWABLE: issue the minimum evidence/isolation IMPLEMENTOR_INVOCATION
+```

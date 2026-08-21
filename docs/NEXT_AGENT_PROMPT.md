@@ -98,4 +98,16 @@ Return:
 7. exact commands and exit codes;
 8. updated evidence tiers and all remaining gaps;
 9. worktree status including unrelated/untracked files;
-10. a ready-to-paste `CODEX_REVIEW_INVOCATION`.
+10. a ready-to-paste `CODEX_REVIEW_INVOCATION` that requests both the
+    supervisor's disposition and continued assignment. Include exactly:
+
+```text
+SUPERVISOR_CONTINUATION_REQUIRED: true
+ON_ACCEPTED: review, update accepted status, and issue the next dependency-ready IMPLEMENTOR_INVOCATION
+ON_CORRECTIONS_REQUIRED: issue one consolidated correction IMPLEMENTOR_INVOCATION
+ON_NOT_REVIEWABLE: issue the minimum evidence/isolation IMPLEMENTOR_INVOCATION
+```
+
+The implementor may suggest the next dependency but must not accept its own
+work, alter the plan of record, or select the next tranche on the supervisor's
+behalf.

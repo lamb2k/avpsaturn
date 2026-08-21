@@ -73,7 +73,11 @@ Follow the RED/GREEN/negative-control, stop, commit, and return contracts in
 docs/NEXT_AGENT_PROMPT.md. Make coherent explicit-path commits on the
 implementation branch. Return the complete consolidated report and a ready
 CODEX_REVIEW_INVOCATION only when the tranche passes or a declared stop
-condition actually fires.
+condition actually fires. That review invocation must request both the
+supervisor disposition and continued assignment, include the continuation
+fields required by AGENTS.md, and require Codex to return the next bounded
+IMPLEMENTOR_INVOCATION appropriate to ACCEPTED, CORRECTIONS REQUIRED, or NOT
+REVIEWABLE. Do not self-accept or choose the next tranche.
 ```
 
 ## Launch note

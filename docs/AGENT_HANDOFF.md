@@ -33,3 +33,10 @@ Expected implementation branch: `codex/avp-hybrid-tranche-1`. The supervisor lau
 ## Required return
 
 Return branch/base/final SHA, commits, explicit files, target/tool/input hashes, RED/GREEN/negative controls, exact commands and exits, generated schema/manifest hashes, unresolved executed edges/globals/hardware exits, evidence-tier changes, dirty status, and a review invocation. Stop on the conditions in the tranche rather than broadening architecture.
+
+The final `CODEX_REVIEW_INVOCATION` must request both the supervisor ruling and
+the corresponding next `IMPLEMENTOR_INVOCATION`, using the continuation fields
+defined in `AGENTS.md`. Acceptance requests the next dependency-ready tranche;
+corrections request one consolidated correction body; not-reviewable requests
+only the missing evidence or isolation work. The implementor does not self-
+accept or rotate the plan.
