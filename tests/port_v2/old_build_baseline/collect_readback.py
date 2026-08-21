@@ -20,11 +20,23 @@ from PIL import ImageGrab
 ROOT = Path(__file__).resolve().parents[3]
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "tools"))
-from capture_frontend_cram import Mcp, load_symbols  # noqa: E402
+from capture_frontend_cram import Mcp  # noqa: E402
 
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def load_symbols(elf: Path, nm: Path) -> dict[str, int]:
+    output = subprocess.run(
+        [str(nm), "--target=coff-sh", str(elf)], check=True,
+        capture_output=True, text=True).stdout
+    symbols: dict[str, int] = {}
+    for line in output.splitlines():
+        parts = line.split()
+        if len(parts) == 3 and parts[2].startswith("_"):
+            symbols.setdefault(parts[2][1:], int(parts[0], 16))
+    return symbols
 
 
 def process_record(pid: int) -> dict[str, str | int]:
