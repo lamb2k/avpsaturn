@@ -220,7 +220,8 @@ remain open. Supervisor review and continuation selection are required.
   callers/callees, typed HIT/KO exits, program-space pointer dependencies, and
   zero unresolved/unattributed dependencies. No production C/H changed.
 - `--self-test`, deterministic double `--generate`, focused writer/oracle/
-  boundary tests, the private HIT mutation, and `-verifyroms avspu` pass. The
+  boundary tests, isolated private HIT/KO value and event removal, destination,
+  required-edge, and alignment controls, and `-verifyroms avspu` pass. The
   manifest SHA-256 is `fd13d824a4858906584a949a4f02c87ea1ac76a17bc52504945e40fcba485796`.
   Full `test.ps1` remains unrun in this worktree because it lacks the staged
   ignored ROM/dependency tree; no Saturn/emulator/release/hardware claim moves.
