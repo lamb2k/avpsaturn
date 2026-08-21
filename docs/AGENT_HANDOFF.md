@@ -95,3 +95,52 @@ unrelated loader/build/generator changes.
 The Tranche 2A implementor must return through
 `docs/CODEX_REVIEW_TEMPLATE.md`. The supervisor alone accepts the result and
 selects V2 or a correction body.
+
+## Tranche 2A result — strict host-suite baseline restored
+
+Branch `codex/avp-host-baseline-tranche-2a` from immutable base
+`c9d6dc420df999dae9b8bedaea4bf0f735214ea2`. Two owned production/test files
+changed; no other production source, and no oracle/boundary/contract artifact,
+was altered.
+
+- **Defect.** `capability_model.c` already enters `CAP_ENCOUNTER_START_TRANSITION`,
+  advances its timer, and leaves it at `CAP_START_TRANSITION_FRAMES`, but
+  `capability_model.h` declared neither symbol, so the strict C90 host build
+  failed at `capability_model.c:961` and `:967`.
+- **RED** (`e42224a`): `tests/capability_model_test.c` gained
+  `test_start_transition_boundary`, which pins the literal
+  `CAP_START_TRANSITION_FRAMES == 30` independently and, with literal step counts
+  (29 then one more), the actual state/timer boundary: start moves MAIN_MENU to
+  START_TRANSITION at timer 0; 29 no-input steps hold START_TRANSITION at timer
+  29; the 30th step advances to CHARACTER_SELECT and resets the timer. The shared
+  `start_encounter` helper and `test_character_selection_semantics` now traverse
+  the transition before character select. At base this fails strict compilation
+  with the two settled undeclared symbols.
+- **GREEN** (`7f7453d`): `capability_model.h` adds `CAP_ENCOUNTER_START_TRANSITION`
+  immediately after `CAP_ENCOUNTER_MAIN_MENU` and defines
+  `CAP_START_TRANSITION_FRAMES` as `30` (CPS2 source frames 1689-1718) beside the
+  frontend selection timing constants. Strict
+  `gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2` of
+  `capability_model.c tests/capability_model_test.c` links and the binary exits 0
+  (12,000 deterministic frames).
+- **Negative controls** (isolated scratch copies, production test unchanged):
+  duration `30`→`29` aborts on `CAP_START_TRANSITION_FRAMES == 30`
+  (`capability_model_test.c:45`, exit 134); MAIN_MENU start assignment
+  `START_TRANSITION`→`CHARACTER_SELECT` aborts on
+  `world.encounter_state == CAP_ENCOUNTER_START_TRANSITION`
+  (`capability_model_test.c:54`, exit 134).
+- **Cumulative regression.** The complete `test.ps1` reaches and passes the
+  formerly blocked gameplay-model compile and exits 0 through the full suite.
+  Focused oracle/boundary tests pass; deterministic regeneration keeps the oracle
+  ledger `f6e813169a05388ce265d6406382efaa1801fe8c838beb0fdab03bda7725d1a1`, the
+  boundary artifact `95e002b7f6d48e8aafbe5e201a370b6dc7c3c5559e7d2253901d0473c0c7b0f4`,
+  and the contract `74016fb2e73c2ae00144fa062662b37e0f575a3ee3ff3b7a420b1ed0f55a4638`
+  byte-identical; `avspu` verifies good. The fresh worktree required private
+  inputs (`.deps`, `avspu` ROMs junctioned read-only to the live cache) and the
+  git-ignored `generated/avsp_collision.h` prerequisite, regenerated
+  deterministically to its committed report identity
+  (`e1e41ea1f1a3666342e8b17e7c42f54e24437af181ccea141d6400019547cc5a`).
+
+Evidence tier: `MEASURED` host only. Saturn target build, emulator, release,
+audio, and physical-hardware lanes remain `UNRUN` and unchanged; Capability Gate
+stays 0/12. No resource layout or runtime package changed.
