@@ -200,3 +200,27 @@ Evidence is limited to `MAME_TRACE`, `STATIC_ANALYSIS`, and `MEASURED` host
 results. Behavioral zero-diff lifting, Saturn target/emulator/release/audio,
 memory/video timing, physical hardware, and every Capability Gate condition
 remain open. Supervisor review and continuation selection are required.
+
+## Tranche 2B correction — target-actor-derived writer closure
+
+- RED `7bba0cf`: the expanded focused test failed at the candidate because
+  routine `0x016526` had no derived caller/callee closure. The original nine
+  shape mutations already rejected; the new derivation controls exposed the
+  missing target-write, semantic, routine, dependency, and alignment binding.
+- GREEN derives from a private MAME 0.289 target-actor watchpoint capture:
+  1,390 semantic samples create 1,389 execution intervals (no synthetic final
+  epoch). HIT sample 5191 binds the exact `0xffa01c` long write in interval
+  5190; KO sample 5330 binds its own instance in interval 5329. Both resolve
+  actual store PC `0x016526` from watchpoint successor `0x01652a`, the opcode
+  effective address, and live `A6=0xffa000`; the former ambiguous KO repeat at
+  interval 5342 is not selected.
+- The manifest now contains two connected dynamic transition paths (152 HIT,
+  178 KO executed PCs), the 11-PC dispatch and the complete eight-PC
+  `0x016518..0x016534` animation pointer-selection routine. It records dynamic
+  callers/callees, typed HIT/KO exits, program-space pointer dependencies, and
+  zero unresolved/unattributed dependencies. No production C/H changed.
+- `--self-test`, deterministic double `--generate`, focused writer/oracle/
+  boundary tests, the private HIT mutation, and `-verifyroms avspu` pass. The
+  manifest SHA-256 is `fd13d824a4858906584a949a4f02c87ea1ac76a17bc52504945e40fcba485796`.
+  Full `test.ps1` remains unrun in this worktree because it lacks the staged
+  ignored ROM/dependency tree; no Saturn/emulator/release/hardware claim moves.

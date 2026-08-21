@@ -26,7 +26,7 @@ def must_reject(module, report, mutate, name):
     mutate(candidate)
     try:
         module.validate_committed(candidate)
-    except (AssertionError, KeyError, TypeError, ValueError):
+    except (AssertionError, IndexError, KeyError, TypeError, ValueError):
         return
     raise AssertionError("production validator accepted mutation: " + name)
 
@@ -49,38 +49,38 @@ def main() -> int:
     report = json.loads(REPORT.read_text(encoding="utf-8"))
     module.validate_committed(report)
 
-    anim_routine = selected_routine(report, "0x016526")
-    if not anim_routine["observed_callers"] or not anim_routine["observed_callees"]:
-        raise AssertionError("writer routine lacks derived caller/callee closure")
+    dispatch_routine = selected_routine(report, "0x01f6c6")
+    if not dispatch_routine["observed_callers"] or not dispatch_routine["observed_callees"]:
+        raise AssertionError("writer dispatch lacks derived caller/callee closure")
 
     controls = [
-        ("remove HIT anim writer", lambda d: d["correlations"]["hit"]["anim_record_writer_pcs"].pop()),
-        ("remove KO anim writer", lambda d: d["correlations"]["ko"]["anim_record_writer_pcs"].pop()),
+        ("remove HIT anim writer", lambda d: d["correlations"]["hit"]["writer_instances"].pop()),
+        ("remove KO anim writer", lambda d: d["correlations"]["ko"]["writer_instances"].pop()),
         ("remove selected edge", lambda d: d["closure"]["selected_edges"].pop()),
         ("unresolved computed target", lambda d: d["closure"]["unresolved_computed_targets"].append("0x000002")),
         ("PC outside boundary", lambda d: d["closure"]["selected_pcs"].__setitem__(0, "0xfffffe")),
         ("ROM dependency relabel", lambda d: d["dependencies"]["rom_data"][0].__setitem__("address_space", "opcodes")),
-        ("remove actor field", lambda d: d["coverage"]["actor_fields"].remove("health")),
-        ("shift HIT frame", lambda d: d["correlations"]["hit"].__setitem__("source_frame", 5192)),
+        ("remove actor field", lambda d: d["coverage"]["actor_fields"].remove("action")),
+        ("shift HIT frame", lambda d: d["correlations"]["hit"]["writer_instances"][0].__setitem__("semantic_sample_after", 5192)),
         ("forbidden raw field", lambda d: d.__setitem__("disassembly_text", "forbidden")),
         ("writer PC outside selected boundary", lambda d: d["correlations"]["hit"]
-         ["writer_instances"][0].__setitem__("pc", "0xfffffe")),
+         ["writer_instances"][0].__setitem__("instruction_pc", "0xfffffe")),
         ("missing semantic before/after", lambda d: d["correlations"]["hit"]
          ["semantic_changes"][0].__setitem__("after", changed_value(d["correlations"]["hit"]
          ["semantic_changes"][0]["after"]))),
-        ("corrupted routine entry", lambda d: selected_routine(d, "0x016526")
+        ("corrupted routine entry", lambda d: selected_routine(d, "0x01f6c6")
          .__setitem__("entry_pc", "0x01651a")),
-        ("corrupted routine member count", lambda d: selected_routine(d, "0x016526")
+        ("corrupted routine member count", lambda d: selected_routine(d, "0x01f6c6")
          .__setitem__("member_pc_count", 1)),
-        ("corrupted routine member hash", lambda d: selected_routine(d, "0x016526")
+        ("corrupted routine member hash", lambda d: selected_routine(d, "0x01f6c6")
          .__setitem__("member_pc_sha256", "0" * 64)),
-        ("disconnected routine member", lambda d: selected_routine(d, "0x016526")
+        ("disconnected routine member", lambda d: selected_routine(d, "0x01f6c6")
          ["member_pcs"].append("0x01d0ac")),
-        ("missing observed caller", lambda d: selected_routine(d, "0x016526")
+        ("missing observed caller", lambda d: selected_routine(d, "0x01f6c6")
          ["observed_callers"].pop()),
-        ("missing observed callee", lambda d: selected_routine(d, "0x016526")
+        ("missing observed callee", lambda d: selected_routine(d, "0x01f6c6")
          ["observed_callees"].pop()),
-        ("missing routine field write", lambda d: selected_routine(d, "0x016526")
+        ("missing routine field write", lambda d: selected_routine(d, "0x016518")
          ["actor_field_writes"].remove("anim_record")),
         ("changed target actor binding", lambda d: d["dependencies"]["work_ram"][0]
          .__setitem__("address", "0xffa0c0")),
