@@ -130,6 +130,21 @@ assignment only when the complete project is accepted, no dependency-ready
 work exists, continuing requires new user authority or physical interaction,
 or a documented hard stop leaves no safe in-scope work.
 
+After completing the disposition and next `IMPLEMENTOR_INVOCATION`, the
+supervisor must immediately launch that complete invocation in a separate
+Codex task. Use model `gpt-5.6-sol` with reasoning `low`, preserve the exact
+base/branch/worktree contract, and report the created task identifier or app
+directive. Merely printing an invocation without dispatching it is an
+incomplete review handoff. This dispatch is omitted only under the same four
+exceptions listed above.
+
+Review-branch remote synchronization is final-only. After every authorized
+review/status commit is complete, and immediately before the final review
+report, push the current review branch once to `private-origin` without force
+and verify the exact remote branch SHA. If the review created no commit,
+perform one final no-op push/status check and remote-SHA verification instead.
+Do not push after intermediate review turns.
+
 Use `docs/CODEX_REVIEW_TEMPLATE.md` verbatim as the envelope for every review
 request. The supervisor reads that template from its own canonical planning
 repository; the candidate worktree's review block is evidence payload, not an
@@ -146,4 +161,6 @@ SUPERVISOR_CONTINUATION_REQUIRED: true
 ON_ACCEPTED: review, update accepted status, and issue the next dependency-ready IMPLEMENTOR_INVOCATION
 ON_CORRECTIONS_REQUIRED: issue one consolidated correction IMPLEMENTOR_INVOCATION
 ON_NOT_REVIEWABLE: issue the minimum evidence/isolation IMPLEMENTOR_INVOCATION
+NEW_TASK_DISPATCH_REQUIRED: true
+FINAL_REMOTE_SYNC_REQUIRED: true
 ```

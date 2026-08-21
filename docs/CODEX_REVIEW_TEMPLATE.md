@@ -48,10 +48,18 @@ NEXT_ASSIGNMENT_REQUIREMENTS:
   and return contracts;
 - require the next implementor to return through this same canonical template.
 
-The supervisor response is incomplete without the disposition and a complete
-next IMPLEMENTOR_INVOCATION, except when the project is complete, no
-dependency-ready work exists, new user authority or physical interaction is
-required, or a documented hard stop leaves no safe in-scope work.
+NEW_TASK_DISPATCH_REQUIRED: true
+NEW_TASK_DISPATCH: after completing the disposition and next IMPLEMENTOR_INVOCATION, immediately launch that complete invocation in a separate Codex task using model gpt-5.6-sol with reasoning low; report the created task identifier/directive
+
+FINAL_REMOTE_SYNC_REQUIRED: true
+FINAL_REMOTE_SYNC: after all authorized review/status commits and immediately before the final review report, push once to private-origin without force and verify the exact remote branch SHA; when no commit was created, perform one final no-op remote-status verification instead
+
+The supervisor response is incomplete without the disposition, a complete next
+`IMPLEMENTOR_INVOCATION`, the corresponding separate Codex task dispatch, and
+the final `private-origin` SHA verification, except when the project is
+complete, no dependency-ready work exists, new user authority or physical
+interaction is required, or a documented hard stop leaves no safe in-scope
+work.
 ```
 
 The implementor may include a `SUGGESTED_NEXT_DEPENDENCY` field, but it is
