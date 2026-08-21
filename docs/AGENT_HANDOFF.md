@@ -26,10 +26,19 @@ reuse candidates, not production gameplay authority or parity gates.
 
 ## Current task and next action
 
-The active card is `SALVAGE-01-PLAYER-LOAD-RENDER-INPUT`. Use its dedicated
-card-scoped branch, run only its player loading/input/assets/rendering/animation
-bench, keep enemy and camera behavior disabled, and retain the SALVAGE-00
-pinned-emulator readback as a regression lock.
+`SALVAGE-01-PLAYER-LOAD-RENDER-INPUT` is accepted at
+`fc9f46746d082e4ccfe800304f49c55bec3e3800`: two clean PlayerSalvageBench
+builds normalize to the same disc identity, exact player package members
+match, and pinned Yaba readback recorded runtime-ready, zero asset failures,
+zero late reads, intact canaries, VDP1 commands, and right/down/left player
+input edges. Physical Saturn remains `UNRUN`.
 
-The first human checkpoint is `USER-01-PLAYER-BASELINE-REVIEW`, after the
-player loading/rendering/input bench has passed AI emulator self-review.
+The active card is now `USER-01-PLAYER-BASELINE-REVIEW` and must perform no
+implementation. The ignored package is
+`build/feedback/USER-01-PLAYER-BASELINE-REVIEW/`. Ask exactly the card's
+question, record the exact response, and never infer approval from silence.
+While that feedback is pending, only predeclared `SALVAGE-02-ENEMY-RENDER-ANIMATION`
+may proceed independently; it must not alter this player package.
+
+The user's observed distorted enemy pixels remain unaccepted and are deferred
+to SALVAGE-02. V2-2B remains paused and does not block player salvage.

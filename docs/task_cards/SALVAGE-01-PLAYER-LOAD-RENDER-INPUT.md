@@ -2,7 +2,7 @@
 
 TASK: SALVAGE-01-PLAYER-LOAD-RENDER-INPUT
 KIND: SALVAGE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: salvage-player-baseline
 BASE: project_state.accepted_head
 BRANCH: codex/avp-salvage-01-player-pipeline

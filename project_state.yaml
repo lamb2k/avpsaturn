@@ -6,7 +6,7 @@ migration_map: data/port_v2_migration_map.yaml
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
 review_candidate_status: CORRECTIONS_REQUIRED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT]
 accepted_implementation_history:
   - id: tranche-2a-foundation
     status: ACCEPTED
@@ -17,6 +17,9 @@ accepted_implementation_history:
   - id: SALVAGE-00-OLD-BUILD-BASELINE
     status: ACCEPTED
     head: fcb7eaf0c3e6af28394908c251056daca7fb62c2
+  - id: SALVAGE-01-PLAYER-LOAD-RENDER-INPUT
+    status: ACCEPTED
+    head: fc9f46746d082e4ccfe800304f49c55bec3e3800
 paused_work:
   - id: V2-2B
     status: CORRECTIONS_REQUIRED
@@ -48,13 +51,13 @@ worktree_safety:
     head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
     dirty: true
     preserve: true
-current_checkpoint: salvage-player-baseline
-active_task_card: docs/task_cards/SALVAGE-01-PLAYER-LOAD-RENDER-INPUT.md
-active_task_id: SALVAGE-01-PLAYER-LOAD-RENDER-INPUT
-active_task_kind: SALVAGE
-task_status: READY
-active_write_owner: SALVAGE-01-PLAYER-LOAD-RENDER-INPUT
-awaiting_user_feedback: []
+current_checkpoint: review-player-baseline
+active_task_card: docs/task_cards/USER-01-PLAYER-BASELINE-REVIEW.md
+active_task_id: USER-01-PLAYER-BASELINE-REVIEW
+active_task_kind: USER_REVIEW
+task_status: AWAITING_USER_FEEDBACK
+active_write_owner: USER-01-PLAYER-BASELINE-REVIEW
+awaiting_user_feedback: [USER-01-PLAYER-BASELINE-REVIEW]
 open_blockers: []
 completed_dispositions:
   - task: SALVAGE-00-OLD-BUILD-BASELINE
@@ -68,6 +71,18 @@ completed_dispositions:
       - Automated emulator-window captures are black and cannot support visual acceptance.
       - The user screenshot exposes distorted enemy pixels; that condition remains unaccepted and deferred to SALVAGE-02.
     exact_next_experiment: Execute only SALVAGE-01 player loading, input, assets, rendering, and animation checks; retain the SALVAGE-00 MCP baseline as a regression lock.
+  - task: SALVAGE-01-PLAYER-LOAD-RENDER-INPUT
+    evaluated_head: fc9f46746d082e4ccfe800304f49c55bec3e3800
+    technical_status: PASS
+    fidelity_status: MEASURED
+    user_status: AWAITING_USER_FEEDBACK
+    salvage_decision: SALVAGE_WITH_ADAPTER
+    successor_activation: USER-01-PLAYER-BASELINE-REVIEW
+    blockers:
+      - Exact USER-01 feedback is required before player promotion.
+      - The observed distorted enemy pixels remain deferred to SALVAGE-02 and are not accepted by this player-only result.
+      - Physical Saturn remains UNRUN.
+    exact_next_experiment: Present the ignored USER-01 player package and record the exact response; only SALVAGE-02 may proceed independently while that response is pending.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR

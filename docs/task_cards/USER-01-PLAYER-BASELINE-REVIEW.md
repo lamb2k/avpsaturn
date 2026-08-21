@@ -2,7 +2,7 @@
 
 TASK: USER-01-PLAYER-BASELINE-REVIEW
 KIND: USER_REVIEW
-STATUS: BLOCKED
+STATUS: AWAITING_USER_FEEDBACK
 CHECKPOINT: review-player-baseline
 BASE: project_state.accepted_head
 BRANCH: codex/avp-user-01-player-review
