@@ -130,8 +130,10 @@ def validate_readback(report: dict, build: dict) -> None:
                 f"sample {index} rendered no objects")
         require(sample.get("street_frame", -1) % period == target,
                 f"sample {index} is not at the target fixture frame")
-    require(samples[1]["street_frame"] > samples[0]["street_frame"],
+    require(samples[1]["emulator_frame"] > samples[0]["emulator_frame"],
             "bounded stability did not advance")
+    require(report.get("bounded_stability_frames", 0) >= period,
+            "bounded stability did not cover a fixture loop")
     require(samples[0]["street_scx"] == samples[1]["street_scx"],
             "scroll readback is unstable at the repeated fixture frame")
     require(samples[0]["street_objects"] == samples[1]["street_objects"],

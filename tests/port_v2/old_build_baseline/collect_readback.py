@@ -84,7 +84,12 @@ def find_window(pid: int) -> tuple[int, int, int, int]:
 
 def sample(mcp: Mcp, symbols: dict[str, int]) -> dict[str, object]:
     scx = mcp.read(symbols["avsp_diag_street_scx"], 8)
+    status = mcp.call("debug_status")
+    emulator_frame = re.search(r"^frame:\s+(\d+)$", status, re.MULTILINE)
+    if not emulator_frame:
+        raise RuntimeError("debug status has no emulator frame")
     values = {
+        "emulator_frame": int(emulator_frame.group(1)),
         "runtime_ready": mcp.u32(symbols["avsp_diag_runtime_ready"]),
         "world_frame": mcp.u32(symbols["avsp_diag_world_frame"]),
         "street_frame": mcp.u32(symbols["avsp_diag_street_frame"]),
@@ -119,10 +124,11 @@ def wait_for_relative_frame(mcp: Mcp, symbols: dict[str, int], period: int,
         if ready == 1 and objects > 0:
             mcp.call("pause")
             frame = mcp.u32(symbols["avsp_diag_street_frame"])
-            floor = max(frame, after)
-            exact = (floor // period) * period + target
-            if exact <= floor:
-                exact += period
+            # StreetTest exposes a fixture-relative counter that wraps at
+            # `period`; the same value is therefore written once per loop.
+            # A value-conditioned write breakpoint proves the exact repeated
+            # phase without assuming this counter is absolute.
+            exact = target
             address = hex(symbols["avsp_diag_street_frame"])
             mcp.call("breakpoint_add", cpu="master", type="memory",
                      address=address, write=True, value=hex(exact))
@@ -215,7 +221,8 @@ def main() -> None:
         "target_relative_frame": target,
         "phase_lock": "conditional-memory-write-breakpoint",
         "samples": [first, second],
-        "bounded_stability_frames": int(second["street_frame"]) - int(first["street_frame"]),
+        "bounded_stability_frames": (
+            int(second["emulator_frame"]) - int(first["emulator_frame"])),
         "emulator": {
             "identity": "Yaba Sanshiro 1.20.37-2986eb",
             "evidence_tier": "ONE_EMULATOR",
