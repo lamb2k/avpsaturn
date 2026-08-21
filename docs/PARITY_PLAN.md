@@ -49,7 +49,7 @@ dependency for exact HIT/KO production promotion, not for loading, controller
 input, actor assets, actor rendering, actor animation, palette, stage, HUD, PCM,
 or diagnostic salvage benches.
 
-CURRENT_TASK: SALVAGE-00-OLD-BUILD-BASELINE
+CURRENT_TASK: SALVAGE-01-PLAYER-LOAD-RENDER-INPUT
 
 ## 4. Dependency-ordered active backlog
 
@@ -85,7 +85,8 @@ machine-checked; abbreviations in this table are descriptive.
 
 Record reproducible old-build identity, compile state, profiles, assets,
 diagnostics, emulator readback, and worktree safety without changing production
-behavior. Populate the migration ledger with neutral initial decisions.
+behavior. Retain neutral initial decisions for unexercised subsystems and record
+SALVAGE-00 evidence only for the subsystems it exercised.
 
 **Exit:** baseline evidence and inventory are reproducible; no dirty worktree or
 private artifact was altered.

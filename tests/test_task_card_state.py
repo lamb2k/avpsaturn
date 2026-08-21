@@ -64,6 +64,48 @@ def normalized_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
+def activation_is_legal(task: str, kind: str, dependencies: set[str],
+                        accepted: set[str],
+                        awaiting_feedback: set[str]) -> bool:
+    """Return whether a card can become active without crossing a review gate."""
+    if not dependencies <= accepted:
+        return False
+    if kind == "PROMOTE" and dependencies & awaiting_feedback:
+        return False
+    return True
+
+
+def validate_transition_fixtures() -> None:
+    """Keep the initial, salvage, and review transitions independently covered."""
+    accepted = {"WF-1", "SALVAGE-00-OLD-BUILD-BASELINE"}
+    require(activation_is_legal(
+        "SALVAGE-01-PLAYER-LOAD-RENDER-INPUT", "SALVAGE",
+        {"SALVAGE-00-OLD-BUILD-BASELINE"}, accepted, set()),
+        "SALVAGE-00 completion must allow SALVAGE-01")
+    require(not activation_is_legal(
+        "SALVAGE-01-PLAYER-LOAD-RENDER-INPUT", "SALVAGE",
+        {"SALVAGE-00-OLD-BUILD-BASELINE"}, {"WF-1"}, set()),
+        "SALVAGE-01 activated without its accepted dependency")
+
+    accepted.add("SALVAGE-01-PLAYER-LOAD-RENDER-INPUT")
+    require(activation_is_legal(
+        "USER-01-PLAYER-BASELINE-REVIEW", "USER_REVIEW",
+        {"SALVAGE-01-PLAYER-LOAD-RENDER-INPUT"}, accepted, set()),
+        "SALVAGE-01 completion must allow USER-01")
+    require(not activation_is_legal(
+        "PROMOTE-01-PLAYER-PIPELINE", "PROMOTE",
+        {"SALVAGE-01-PLAYER-LOAD-RENDER-INPUT",
+         "USER-01-PLAYER-BASELINE-REVIEW"},
+        accepted | {"USER-01-PLAYER-BASELINE-REVIEW"},
+        {"USER-01-PLAYER-BASELINE-REVIEW"}),
+        "pending user feedback must prevent dependent promotion")
+    require(activation_is_legal(
+        "SALVAGE-02-ENEMY-RENDER-ANIMATION", "SALVAGE",
+        {"SALVAGE-00-OLD-BUILD-BASELINE"}, accepted,
+        {"USER-01-PLAYER-BASELINE-REVIEW"}),
+        "independent salvage must remain legal while feedback is pending")
+
+
 def main() -> None:
     state = (ROOT / "project_state.yaml").read_text(encoding="utf-8")
     require(scalar(state, "schema") == "2", "unexpected state schema")
@@ -79,10 +121,9 @@ def main() -> None:
     card_paths = sorted((ROOT / "docs/task_cards").glob("*.md"))
     cards = {path.stem: path.read_text(encoding="utf-8")
              for path in card_paths}
-    require(len(cards) == 19, "task-card set is incomplete")
     queue = yaml_block_list(state, "task_queue")
-    require(len(queue) == 18 and len(set(queue)) == 18,
-            "task queue must contain 18 unique ordered cards")
+    require(len(queue) == len(set(queue)),
+            "task queue contains duplicate cards")
     require(set(queue) == set(cards) - {"WF-1"},
             "task queue and card files disagree")
 
@@ -155,11 +196,21 @@ def main() -> None:
                          active_relative) is not None,
             "active card path escapes queue")
     active_id = Path(active_relative).stem
+    require(active_id in cards, "active card does not exist")
+    require(active_id in queue, "active card is not in the task queue")
     active = cards[active_id]
-    require(ready_implementation == [active_id],
-            "exactly one implementation card must be READY")
-    require(active_id == "SALVAGE-00-OLD-BUILD-BASELINE",
-            "first salvage card is not active")
+    active_cards = [
+        task for task, text in cards.items()
+        if (scalar(text, "KIND") in IMPLEMENTATION_KINDS and
+            scalar(text, "STATUS") == "READY") or
+           (scalar(text, "KIND") == "USER_REVIEW" and
+            scalar(text, "STATUS") in {"READY", "AWAITING_USER_FEEDBACK"})
+    ]
+    require(active_cards == [active_id],
+            "exactly one implementation or review card must be active")
+    require(ready_implementation == [active_id] or
+            scalar(active, "KIND") == "USER_REVIEW",
+            "active implementation readiness disagrees with active card")
     require(scalar(state, "active_task_id") == active_id,
             "active task id mismatch")
     require(scalar(state, "active_task_kind") == scalar(active, "KIND"),
@@ -170,12 +221,25 @@ def main() -> None:
             scalar(active, "CHECKPOINT"), "active checkpoint mismatch")
     require(scalar(state, "active_write_owner") == active_id,
             "active write owner mismatch")
-    require(set(inline_list(active, "DEPENDENCIES")) <= accepted,
-            "active card has unaccepted dependencies")
-    require(scalar(state, "awaiting_user_feedback") == "[]",
-            "initial activation unexpectedly awaits feedback")
+    awaiting_feedback = set(inline_list(state, "awaiting_user_feedback"))
+    require(activation_is_legal(
+        active_id, scalar(active, "KIND"),
+        set(inline_list(active, "DEPENDENCIES")), accepted, awaiting_feedback),
+        "active card has unaccepted dependencies or crosses feedback gate")
+    if scalar(active, "KIND") == "USER_REVIEW" and \
+            scalar(active, "STATUS") == "AWAITING_USER_FEEDBACK":
+        require(awaiting_feedback == {active_id},
+                "awaiting review state does not name its active review card")
+    else:
+        require(not awaiting_feedback,
+                "non-review activation unexpectedly awaits feedback")
     require(scalar(state, "open_blockers") == "[]",
-            "active salvage card retains blockers")
+            "active task retains blockers")
+
+    require(accepted <= set(cards), "accepted task is absent from task cards")
+    for accepted_task in accepted:
+        require(scalar(cards[accepted_task], "STATUS") == "ACCEPTED",
+                f"accepted task {accepted_task} is not recorded as accepted")
 
     require(scalar(state, "review_candidate_status") ==
             "CORRECTIONS_REQUIRED", "V2-2B disposition was lost")
@@ -197,6 +261,7 @@ def main() -> None:
     closed = sum(status == "CLOSED" for _, status in conditions)
     require(scalar(state, "capability_gate") == f"{closed}/12",
             "capability gate count drifted")
+    require(closed == 0, "salvage evidence cannot advance capability status")
 
     for key in ("accepted_head", "review_candidate_head"):
         value = scalar(state, key)
@@ -219,6 +284,8 @@ def main() -> None:
     roadmap = (ROOT / "docs/PARITY_PLAN.md").read_text(encoding="utf-8")
     require(scalar(roadmap, "CURRENT_TASK") == active_id,
             "roadmap and state active cards disagree")
+
+    validate_transition_fixtures()
 
     print("task-card/state consistency: PASS")
 

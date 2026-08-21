@@ -6,7 +6,7 @@ migration_map: data/port_v2_migration_map.yaml
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
 review_candidate_status: CORRECTIONS_REQUIRED
-accepted_tasks: [WF-1]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR]
 accepted_implementation_history:
   - id: tranche-2a-foundation
     status: ACCEPTED
@@ -14,6 +14,9 @@ accepted_implementation_history:
   - id: WF-1
     status: ACCEPTED
     head: 24ebe4615079a690edf8725113911d569ed2d9c5
+  - id: SALVAGE-00-OLD-BUILD-BASELINE
+    status: ACCEPTED
+    head: fcb7eaf0c3e6af28394908c251056daca7fb62c2
 paused_work:
   - id: V2-2B
     status: CORRECTIONS_REQUIRED
@@ -45,30 +48,29 @@ worktree_safety:
     head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
     dirty: true
     preserve: true
-current_checkpoint: salvage-old-build-baseline
-active_task_card: docs/task_cards/SALVAGE-00-OLD-BUILD-BASELINE.md
-active_task_id: SALVAGE-00-OLD-BUILD-BASELINE
+current_checkpoint: salvage-player-baseline
+active_task_card: docs/task_cards/SALVAGE-01-PLAYER-LOAD-RENDER-INPUT.md
+active_task_id: SALVAGE-01-PLAYER-LOAD-RENDER-INPUT
 active_task_kind: SALVAGE
 task_status: READY
-active_write_owner: SALVAGE-00-OLD-BUILD-BASELINE
+active_write_owner: SALVAGE-01-PLAYER-LOAD-RENDER-INPUT
 awaiting_user_feedback: []
 open_blockers: []
-pending_disposition:
-  task: SALVAGE-00-OLD-BUILD-BASELINE
-  evaluated_head: fcb7eaf0c3e6af28394908c251056daca7fb62c2
-  technical_status: PASS
-  fidelity_status: MEASURED_NOT_ACCEPTED
-  user_status: NOT_REVIEWED
-  salvage_decision: SALVAGE_WITH_ADAPTER
-  successor_activation: BLOCKED
-  blockers:
-    - Subjective enemy-render corruption was exposed, but every matching USER_REVIEW card has an unmet salvage dependency.
-    - The global ledger validator requires all subsystem results to remain neutral.
-    - The global task-state validator hard-codes SALVAGE-00 as the first and only active card.
-    - Updating those validators and docs/PARITY_PLAN.md is outside SALVAGE-00 owned paths.
-  exact_next_experiment: Resolve the workflow ownership/validator transition, then activate one dependency-safe predeclared successor without changing the reviewed result.
+completed_dispositions:
+  - task: SALVAGE-00-OLD-BUILD-BASELINE
+    evaluated_head: fcb7eaf0c3e6af28394908c251056daca7fb62c2
+    technical_status: PASS
+    fidelity_status: MEASURED_NOT_ACCEPTED
+    user_status: NOT_REVIEWED
+    salvage_decision: SALVAGE_WITH_ADAPTER
+    successor_activation: SALVAGE-01-PLAYER-LOAD-RENDER-INPUT
+    blockers:
+      - Automated emulator-window captures are black and cannot support visual acceptance.
+      - The user screenshot exposes distorted enemy pixels; that condition remains unaccepted and deferred to SALVAGE-02.
+    exact_next_experiment: Execute only SALVAGE-01 player loading, input, assets, rendering, and animation checks; retain the SALVAGE-00 MCP baseline as a regression lock.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
+  - WF-2-SALVAGE-TRANSITION-REPAIR
   - SALVAGE-01-PLAYER-LOAD-RENDER-INPUT
   - USER-01-PLAYER-BASELINE-REVIEW
   - PROMOTE-01-PLAYER-PIPELINE

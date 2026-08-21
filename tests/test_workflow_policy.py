@@ -107,9 +107,9 @@ def main() -> None:
         "physical capability slice",
     ):
         require(token in roadmap, f"roadmap missing {token}")
-    require(scalar(roadmap, "CURRENT_TASK") ==
-            "SALVAGE-00-OLD-BUILD-BASELINE",
-            "roadmap does not route to first salvage card")
+    state = (ROOT / "project_state.yaml").read_text(encoding="utf-8")
+    require(scalar(roadmap, "CURRENT_TASK") == scalar(state, "active_task_id"),
+            "roadmap and machine-readable active task disagree")
     require(not re.search(r"\b[0-9a-f]{40}\b", roadmap),
             "roadmap repeats volatile commit SHAs")
 

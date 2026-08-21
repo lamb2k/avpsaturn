@@ -20,15 +20,16 @@ reuse candidates, not production gameplay authority or parity gates.
   correction worktree. Its four recorded blockers remain unresolved. It is a
   dependency for exact HIT/KO promotion, not for early loading, input,
   rendering, animation, stage, palette, or diagnostic salvage.
-- No gameplay, rendering, audio, loading, build, emulator, or physical result
-  changed during this governance update.
+- `SALVAGE-00-OLD-BUILD-BASELINE` is accepted only as a technical build/emulator
+  baseline: its physical Saturn state remains `UNRUN`, automatic window captures
+  remain black, and the observed distorted enemy pixels are not visually accepted.
 
 ## Current task and next action
 
-The active card is `SALVAGE-00-OLD-BUILD-BASELINE`. In a new card-scoped branch,
-read that card, inventory the old build without changing production behavior,
-run its focused checks and dedicated baseline diagnostic, record the migration
-ledger result, and stop at its predeclared next-card boundary.
+The active card is `SALVAGE-01-PLAYER-LOAD-RENDER-INPUT`. Use its dedicated
+card-scoped branch, run only its player loading/input/assets/rendering/animation
+bench, keep enemy and camera behavior disabled, and retain the SALVAGE-00
+pinned-emulator readback as a regression lock.
 
 The first human checkpoint is `USER-01-PLAYER-BASELINE-REVIEW`, after the
 player loading/rendering/input bench has passed AI emulator self-review.

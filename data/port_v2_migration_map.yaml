@@ -47,12 +47,11 @@
       "production_interface": null,
       "diagnostic_interface": "tests/port_v2/old_build_baseline/run_baseline.ps1",
       "blockers": [
-        "Automated pinned-emulator window captures are black and cannot support visual acceptance.",
-        "The user screenshot shows visibly distorted enemy pixels; enemy-render fidelity is not accepted by this baseline result.",
-        "No dependency-safe USER_REVIEW card is eligible from SALVAGE-00, while the card requires a USER_REVIEW activation after subjective output.",
-        "Global workflow validators hard-code neutral ledger state and SALVAGE-00 activation but are outside this card's owned paths."
+        "Unblock: repair automated window capture before using it as visual-acceptance evidence.",
+        "Unblock: run the SALVAGE-02 enemy-render bench before deciding enemy-pixel fidelity.",
+        "Unblock: collect formal visual feedback through the relevant eligible review card; SALVAGE-01 cannot alter the observed enemy or camera result."
       ],
-      "exact_next_experiment": "Resolve the workflow ownership/validator transition, then activate only a dependency-safe predeclared review or salvage successor; preserve the MCP baseline as the regression lock and route enemy-pixel corruption to the enemy-render bench.",
+      "exact_next_experiment": "Run SALVAGE-01's player-only bench, preserve the MCP baseline as a regression lock, and route enemy-pixel corruption to the SALVAGE-02 enemy-render bench.",
       "evidence": {
         "build_profile": "OldBuildBaseline diagnostic wrapper over unchanged StreetTest",
         "build_repeat": "PASS",
@@ -88,14 +87,15 @@
       "existing_dependencies": ["Jo Engine toolchain", "generated assets", "existing build profiles"],
       "authored_controller_coupling": "Mixed runtime startup and mode selection in main.c.",
       "proposed_isolated_bench": "SALVAGE-00 reproducible old-build compile, profile, manifest, diagnostic, and emulator baseline.",
-      "technical_status": "UNRUN",
-      "fidelity_status": "UNKNOWN",
+      "technical_status": "PASS",
+      "fidelity_status": "MEASURED",
       "user_status": "NOT_REVIEWED",
-      "salvage_decision": "UNTESTED",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
-      "blockers": [],
-      "exact_next_experiment": "Run SALVAGE-00 without modifying production behavior and record exact artifacts and readback.",
+      "evidence_commit": "fcb7eaf0c3e6af28394908c251056daca7fb62c2",
+      "blockers": ["Unblock: repair automatic capture or obtain a formal eligible review before claiming visual fidelity."],
+      "exact_next_experiment": "Use the pinned SALVAGE-00 diagnostic baseline as a regression lock while SALVAGE-01 exercises only player scope.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {
@@ -104,14 +104,15 @@
       "existing_dependencies": ["Jo Engine compiler", "ISO/cue packaging", "profile selection"],
       "authored_controller_coupling": "Build profiles select mixed-runtime entry paths and assets.",
       "proposed_isolated_bench": "Build one minimal diagnostic twice and compare manifests, ISO members, and hashes.",
-      "technical_status": "UNRUN",
-      "fidelity_status": "UNKNOWN",
+      "technical_status": "PASS",
+      "fidelity_status": "ADAPTED",
       "user_status": "NOT_REVIEWED",
-      "salvage_decision": "UNTESTED",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
-      "blockers": [],
-      "exact_next_experiment": "Inventory profile-to-source and profile-to-asset ownership during SALVAGE-00.",
+      "evidence_commit": "fcb7eaf0c3e6af28394908c251056daca7fb62c2",
+      "blockers": ["Unblock: isolate the metadata-normalizing diagnostic adapter before considering production packaging."],
+      "exact_next_experiment": "Retain the exact normalized ISO hash as the SALVAGE-01 build regression lock.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {
@@ -254,7 +255,7 @@
       "salvage_decision": "UNTESTED",
       "production_interface": null,
       "promoted_commit": null,
-      "blockers": ["Exact HIT/KO promotion remains blocked by paused V2-2B corrections; collision salvage itself is not blocked."],
+      "blockers": ["Unblock: retain V2-2B corrections as the gate for exact HIT/KO promotion; collision salvage itself may continue."],
       "exact_next_experiment": "Run source collision selectors with separated overlap/no-overlap negative controls in SALVAGE-03.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
@@ -360,14 +361,15 @@
       "existing_dependencies": ["dedicated diagnostic profiles", "pinned emulator", "runtime-ready symbols", "artifact hashes"],
       "authored_controller_coupling": "Some diagnostics are tied to mixed-runtime globals and profile-specific fixtures.",
       "proposed_isolated_bench": "Boot the unchanged old diagnostic twice, read runtime-ready/asset failure/counters, then reject an invalid disc.",
-      "technical_status": "UNRUN",
-      "fidelity_status": "UNKNOWN",
+      "technical_status": "PASS",
+      "fidelity_status": "MEASURED",
       "user_status": "NOT_REVIEWED",
-      "salvage_decision": "UNTESTED",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
-      "blockers": [],
-      "exact_next_experiment": "Pin emulator identity and capture reproducible old-build baseline readback in SALVAGE-00.",
+      "evidence_commit": "fcb7eaf0c3e6af28394908c251056daca7fb62c2",
+      "blockers": ["Unblock: repair black automatic window capture before using the repeatable readback as visual proof."],
+      "exact_next_experiment": "Reuse the pinned emulator identity and phase-20 MCP readback as the SALVAGE-01 regression lock.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {
@@ -382,7 +384,7 @@
       "salvage_decision": "UNTESTED",
       "production_interface": null,
       "promoted_commit": null,
-      "blockers": ["Prototype worktree is deliberately dirty and read-only to salvage tasks unless a future card explicitly owns it."],
+      "blockers": ["Unblock: a future card must explicitly own a bounded prototype extraction before that dirty worktree can be modified."],
       "exact_next_experiment": "Classify prototype build, input, player rendering, and diagnostic deltas during relevant salvage cards.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     }

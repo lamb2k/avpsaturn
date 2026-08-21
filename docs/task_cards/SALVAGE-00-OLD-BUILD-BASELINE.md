@@ -2,7 +2,7 @@
 
 TASK: SALVAGE-00-OLD-BUILD-BASELINE
 KIND: SALVAGE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: salvage-old-build-baseline
 BASE: project_state.accepted_head
 BRANCH: codex/avp-salvage-00-old-build-baseline
@@ -62,7 +62,7 @@ None for this card. If the bench exposes subjective output, stop and activate a 
 
 - Any protected-worktree mutation, non-reproducible baseline, missing pinned emulator/input, material build architecture decision, or exhausted bounded correction cycle.
 
-## Pending disposition evidence
+## Disposition evidence
 
 - Evaluated commit: fcb7eaf0c3e6af28394908c251056daca7fb62c2
 - Technical: PASS
@@ -81,13 +81,11 @@ None for this card. If the bench exposes subjective output, stop and activate a 
 - Visual blocker: automated window captures are black; the user's
   contemporaneous emulator screenshot shows distorted enemy pixels and does
   not grant visual acceptance.
-- Activation blocker: the subjective-output rule requires a predeclared
-  USER_REVIEW, but none is dependency-safe from this card. The global
-  workflow validators also hard-code neutral ledger state and SALVAGE-00
-  activation while lying outside this card's owned paths.
-- Exact next experiment: resolve that ownership/validator transition, then
-  activate only a dependency-safe predeclared successor and route the enemy
-  corruption to the enemy-render bench.
+- Activation: accepted as a technical baseline; SALVAGE-01 is active because
+  its declared scope cannot alter the observed enemy or camera result.
+- Exact next experiment: run SALVAGE-01's isolated player bench while retaining
+  this MCP readback as a regression lock and deferring enemy-pixel corruption
+  to SALVAGE-02.
 
 ## Next eligible cards
 
