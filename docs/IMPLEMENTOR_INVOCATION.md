@@ -13,6 +13,8 @@ Generated: 2026-08-20, America/New_York
 | Implementation branch | `codex/avp-hybrid-tranche-1` |
 | Implementation worktree | `C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-hybrid-tranche1` |
 | Implementation initial HEAD | `b3c95d810ba76d287ca8fdcefb594c42cae0cdb3` |
+| Separate-task model | `gpt-5.6-sol` |
+| Separate-task reasoning | `low` |
 | Exact target | MAME set `avspu`, `Alien vs. Predator (USA 940520)`, clone/romof `avsp` |
 | MAME | `.deps\mame\mame0289\mame.exe`, 0.289, SHA-256 `af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3` |
 | Jo Engine | commit `556d081146211b6a1cfa6591d70f9487d406758b` |
@@ -23,6 +25,8 @@ Generated: 2026-08-20, America/New_York
 The implementation worktree was created clean at the supervisor decision commit. Its `.deps` and `avspu` paths are junctions to the authorized private dependency and ROM stores in the supervisor repository. Do not modify or commit through those junctions. The intentionally dirty supervisor worktree is not the implementation worktree and must not be cleaned, reset, or used for implementation commits.
 
 ## IMPLEMENTOR_INVOCATION
+
+Launch this invocation as a separate Codex task with explicit launcher fields `model: "gpt-5.6-sol"` and `thinking: "low"`. Do not rely on an inherited default.
 
 ```text
 Work only in:
@@ -74,4 +78,4 @@ condition actually fires.
 
 ## Launch note
 
-Launch the separate implementation task with the invocation block above and the implementation worktree as its working directory. Do not ask it to merge or pull the later administrative commit that records this invocation; its immutable base is the supervisor decision commit shown above.
+Launch the separate implementation task with the invocation block above and the implementation worktree as its working directory. Explicitly select `gpt-5.6-sol` with `low` reasoning in the task-launch call. Do not ask it to merge or pull the later administrative commit that records this invocation; its immutable base is the supervisor decision commit shown above.

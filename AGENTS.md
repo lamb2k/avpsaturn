@@ -39,6 +39,10 @@ Do not build a CPS-2 emulator, runtime 68000 interpreter, generalized Capcom eng
 
 Only execute the bounded tranche in `docs/NEXT_AGENT_PROMPT.md`. The first tranche freezes the vertical-slice contract, creates one unified deterministic MAME gameplay oracle, and maps the transitive executable writer boundary. It does not broadly replace the runtime.
 
+### Separate implementor task launch policy
+
+When the harness launches a separate implementor task from an `IMPLEMENTOR_INVOCATION`, it must explicitly set model `gpt-5.6-sol` and reasoning effort `low`. For the Codex task launcher, pass `model: "gpt-5.6-sol"` and `thinking: "low"`; never omit these fields or rely on the project, app, or account default. This policy applies only to the separate write-enabled implementor task. Supervisor and review tasks retain their own configured reasoning levels.
+
 The first accepted slice must contain real gameplay: deterministic startup, controller input, one player, one class `0x1F` enemy, movement, animation, attack/contact, collision/hit/KO, camera/stage movement, representative layers and palettes, PCM, CDDA, residency/transfer, final scanout, and physical timing. Title/menu work cannot substitute for any item.
 
 ## Evidence rules
