@@ -29,6 +29,7 @@ REVIEW_SCOPE:
 - Do not implement production changes during review.
 
 SUPERVISOR_CONTINUATION_REQUIRED: true
+AUTOMATIC_SUPERVISOR_LAUNCH: After the candidate is committed, clean, and pushed to the verified private remote, create a new Codex task using model gpt-5.6-sol with medium reasoning. Pass this complete CODEX_REVIEW_INVOCATION verbatim, direct it to the supervisor repository and selection branch, and request exactly ACCEPTED, CORRECTIONS REQUIRED, or NOT REVIEWABLE plus the corresponding next IMPLEMENTOR_INVOCATION. Return the created task identifier to the user; do not self-accept in the implementor task.
 ON_ACCEPTED: reconcile accepted evidence with the active ledgers and plan, update canonical status, select the next dependency-ready tranche, and issue a complete IMPLEMENTOR_INVOCATION
 ON_CORRECTIONS_REQUIRED: issue one consolidated correction IMPLEMENTOR_INVOCATION against the reviewed candidate HEAD
 ON_NOT_REVIEWABLE: issue the minimum evidence/isolation IMPLEMENTOR_INVOCATION needed to make the candidate reviewable
