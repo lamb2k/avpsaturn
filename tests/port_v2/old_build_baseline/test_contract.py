@@ -75,7 +75,7 @@ def validate_build(report: dict, inventory: dict) -> None:
                 f"generated input identity is incomplete: {name}")
     local = report.get("ignored_build_inputs", {})
     require(set(local) == {"loader/loader.c", "loader/loader.linker",
-                           "loader/trampoline.s"},
+                           "loader/trampoline.s", "tools/build_loader_ip.py"},
             "local staged-loader input inventory is incomplete")
     for name, entry in local.items():
         require(entry.get("bytes", 0) > 0 and len(entry.get("sha256", "")) == 64,

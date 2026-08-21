@@ -99,7 +99,7 @@ def main() -> None:
 
     ignored_build_inputs: dict[str, dict[str, object]] = {}
     for relative in ("loader/loader.c", "loader/loader.linker",
-                     "loader/trampoline.s"):
+                     "loader/trampoline.s", "tools/build_loader_ip.py"):
         path = ROOT / relative
         if not path.is_file():
             raise ValueError(f"required local build input is missing: {relative}")
