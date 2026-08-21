@@ -43,9 +43,10 @@ vertical-slice contract, deterministic MAME oracle, and executable boundary are
 accepted at `a11527a18c6ec02d3bc3f3421674755a3102c6c5`. Tranche 2A's strict-host
 baseline repair is accepted at `eef350a3de6e44d1648a861ab98215c3d61ce20c`;
 the complete host/generator suite is reviewable again. The active body is the
-first V2 subtranche: close the exact class `0x1F` enemy HIT/KO writer set and
-its routine/data/event dependencies as a deterministic, falsifiable manifest.
-It does not yet emit or integrate production lifted C.
+first V2 subtranche: correct the candidate class `0x1F` enemy HIT/KO writer-set
+proof so actor identity, writer/routine/edge closure, data/event dependencies,
+and every committed relationship are derived and falsifiable rather than
+hard-coded. It does not yet emit or integrate production lifted C.
 
 The first accepted slice must contain real gameplay: deterministic startup, controller input, one player, one class `0x1F` enemy, movement, animation, attack/contact, collision/hit/KO, camera/stage movement, representative layers and palettes, PCM, CDDA, residency/transfer, final scanout, and physical timing. Title/menu work cannot substitute for any item.
 
@@ -112,5 +113,14 @@ requests the supervisor ruling and the corresponding next
 `IMPLEMENTOR_INVOCATION` for acceptance, corrections, or missing evidence.
 
 When a separate Codex implementor task is created, explicitly use model
-`gpt-5.6-sol` with reasoning/thinking `low`. Supervisor and review reasoning
+`gpt-5.6-terra` with reasoning/thinking `xhigh`. Supervisor and review reasoning
 levels are separate from this implementor launch policy.
+
+Before creating or resuming that implementor task, the supervisor must verify
+the configured destination repository is private, push the reviewed candidate
+branch, the supervisor selection/invocation branch, and the new implementation
+start branch, and confirm their remote SHAs. The implementation task may begin
+write work only after its immutable base is recoverable on that private remote.
+Record the remote name, URL, branch, and verified SHA in
+`docs/IMPLEMENTOR_INVOCATION.md`. Never push ROMs, `.deps`, raw evidence, or
+other ignored/private inputs.
