@@ -167,3 +167,36 @@ not production lifted C. It must bind every selected PC/edge to the accepted
 translation boundary, correlate the HIT/KO semantic changes to executed writer
 sites, close calls/data/event exits, and prove zero unresolved or unattributed
 selected dependencies. Capability Gate remains 0/12.
+
+## Tranche 2B candidate — class 0x1F HIT/KO writer-set closure
+
+Branch `codex/avp-writer-map-tranche-2b` began at immutable base
+`065ddfdb586184074973c2bccad55a45007f5f32`. The candidate adds only the owned
+focused test, mapper/validator, bounded metadata manifest, and two evidence
+documents. No production C/H, accepted oracle/boundary/contract, build/package
+path, `.deps`, or ROM input changed.
+
+- RED commit `5e823a3`: `python tests/test_avsp_hit_ko_writer_set.py` exited 1
+  because the production mapper did not exist.
+- GREEN commit `1483137`: mapper self-test, deterministic generation, and the
+  focused artifact test exit 0. The manifest contains 3 routine units, 13
+  selected PCs, 3 selected dynamic edges, zero selected computed targets,
+  zero unresolved/unattributed dependencies, and 2 typed HIT/KO event exits.
+  HIT frame 5191 and KO frame 5330 both correlate exact `anim_record` writer
+  `0x016526`; this closes `GAP_EXTERNAL_REPOINT` as ownership only.
+- Both validator paths reject all nine required deep-copy mutations. The
+  isolated private-input control changes the HIT animation pointer in memory
+  and is rejected; canonical private evidence remains read-only.
+- Two `--generate` runs are byte-identical at SHA-256
+  `d2f000c01555ef10b1db83fc13d8217fc536bcc579dfd17991e832ed54005430`.
+- Focused writer-set, oracle, and boundary tests exit 0. The first cumulative
+  run stopped because the known ignored `generated/avsp_collision.h`
+  prerequisite was absent. It was regenerated from read-only junctioned
+  inputs (report identity `e1e41ea1...`), after which complete `test.ps1`
+  exited 0. Five regenerated pre-existing provenance drifts were inspected and
+  explicitly restored; accepted artifacts remain byte-identical.
+
+Evidence is limited to `MAME_TRACE`, `STATIC_ANALYSIS`, and `MEASURED` host
+results. Behavioral zero-diff lifting, Saturn target/emulator/release/audio,
+memory/video timing, physical hardware, and every Capability Gate condition
+remain open. Supervisor review and continuation selection are required.

@@ -128,3 +128,10 @@ The initial shadow attempt under the Windows temp directory failed before host c
 3. **Capability slice gate:** one normal release from cold boot through controlled gameplay, hit/KO, camera/stage, PCM, CDDA, load ownership, and ten-minute physical timing. Only this can advance the new capability gate.
 
 No screenshot, host test, fixture, or old RP package may be counted as the capability slice by substitution.
+
+## Tranche 2B candidate evidence (pending supervisor disposition)
+
+| Claim | Current status | Evidence | Limits |
+|---|---|---|---|
+| The bounded class `0x1F`, type `0x0C` HIT/KO external animation-repoint writer ownership is closed. | `MAME_TRACE` + `STATIC_ANALYSIS` candidate | Frames 5191 and 5330 both correlate to exact writer PC `0x016526`; 3 routines / 13 PCs / 3 edges bind to the accepted boundary; program-space HIT/KO animation records are explicit; zero selected computed, unresolved, or unattributed dependencies. Manifest SHA-256 `d2f000c01555ef10b1db83fc13d8217fc536bcc579dfd17991e832ed54005430`. | Ownership/mapping only. It does not prove lifted behavioral equivalence or any Saturn result. |
+| The writer-set artifact validator is non-vacuous and deterministic. | `MEASURED` host candidate | Self-test and focused test each reject all nine required deep-copy mutations; an in-memory private HIT-pointer mutation is rejected; two generations are byte-identical; complete `test.ps1` exits 0 after provisioning the known ignored collision header. | No production gameplay C was emitted; no Capability Gate condition closes. |
