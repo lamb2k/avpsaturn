@@ -1,45 +1,34 @@
 # Active checkpoint
 
-`project_state.yaml` is the machine-readable source of truth. The active task
-card is the only current control body. Historical implementation and correction
-narrative remains recoverable in Git and in the evidence ledger; do not append
-it here.
+`project_state.yaml` is the machine-readable source of truth and
+`docs/PARITY_PLAN.md` is the only roadmap.
 
-## Current disposition boundary
+## Workflow pivot
 
-- Tranche 2A is the last accepted implementation foundation.
-- The V2-2B writer-map candidate is at the `review_candidate_head` recorded in
-  `project_state.yaml`.
-- The candidate records a 301-PC, 302-edge, 12-routine, nine-computed-target
-  class `0x1F` HIT/KO closure over seven semantic fields, with two typed event
-  exits and zero unresolved or unattributed selected dependencies.
-- The committed writer manifest identity is recorded in `project_state.yaml`.
-- Focused writer/oracle/boundary controls and an isolated complete host suite
-  were reported passing. This is host/MAME evidence only.
-- No native lifted HIT/KO routine, Saturn target result, emulator result,
-  release result, audio result, or physical-hardware result is claimed.
+The project now advances through isolated salvage benches, focused validation,
+Saturn emulator self-review, explicit human checkpoints, bounded salvage
+decisions, promotion behind `port_v2` interfaces, and one-dependency
+integration. The old mixed runtime and the playable-skeleton prototype are
+reuse candidates, not production gameplay authority or parity gates.
 
-The consolidated Tier 2 disposition is `CORRECTIONS REQUIRED`. Semantic and
-provenance review found that the candidate does not retain exact writer evidence
-for every selected field, constructs window-selected rather than call-rooted
-control closure, and asserts rather than derives outgoing-edge, actor-field,
-ROM-data, work-RAM, and exclusion dependencies. Saturn-scope review also found
-two committed capture helpers outside the exhaustive owned-path contract.
+## Preserved paused work
 
-Corrections stay on the existing candidate branch/worktree. The next card,
-`docs/task_cards/V2-B1.md`, remains blocked until the corrected candidate is
-re-reviewed and accepted; it produces executable native behavior rather than
-more mapping.
+- The dirty primary canonical worktree remains untouched.
+- The dirty `prototype/avp-clean-playable-skeleton` worktree remains intact and
+  is classified as reusable state pending bench results.
+- V2-2B remains `CORRECTIONS_REQUIRED` in its existing dirty validator-
+  correction worktree. Its four recorded blockers remain unresolved. It is a
+  dependency for exact HIT/KO promotion, not for early loading, input,
+  rendering, animation, stage, palette, or diagnostic salvage.
+- No gameplay, rendering, audio, loading, build, emulator, or physical result
+  changed during this governance update.
 
-## Operating commands
+## Current task and next action
 
-```powershell
-.\verify.ps1 -Lane Fast
-.\verify.ps1 -Lane Oracle
-.\tools\New-ReviewBundle.ps1 -Base f2c9a4725dffdcb2e5689c70914511674fb3c9ef -Task workflow-simplification
-```
+The active card is `SALVAGE-00-OLD-BUILD-BASELINE`. In a new card-scoped branch,
+read that card, inventory the old build without changing production behavior,
+run its focused checks and dedicated baseline diagnostic, record the migration
+ledger result, and stop at its predeclared next-card boundary.
 
-Keep corrections on the current checkpoint branch/worktree. After re-review and acceptance,
-activate the next task by updating `project_state.yaml` and the card status,
-then use `tools/start-agent-task.ps1`. Launch and review renderings live under
-ignored `build/` paths and are never committed as source history.
+The first human checkpoint is `USER-01-PLAYER-BASELINE-REVIEW`, after the
+player loading/rendering/input bench has passed AI emulator self-review.

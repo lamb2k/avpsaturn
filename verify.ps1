@@ -136,6 +136,8 @@ function Invoke-FastLane {
             'tests\test_workflow_policy.py')) {
         Invoke-PythonTest 'tests\test_workflow_policy.py'
     }
+    Invoke-PythonTest 'tests\test_task_card_state.py'
+    Invoke-PythonTest 'tests\test_port_v2_migration_map.py'
     Invoke-PythonTest 'tests\test_avsp_hit_ko_writer_set.py'
     Invoke-PythonTest 'tests\test_avsp_vertical_slice_oracle.py'
     Invoke-PythonTest 'tests\test_avsp_translation_boundary.py'

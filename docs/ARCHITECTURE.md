@@ -2,6 +2,14 @@
 
 This is a concise operational view. The complete authoritative decision, alternatives, evidence, and stop conditions are in `docs/research/CPS2_TO_SATURN_RESET.md`.
 
+## Development boundary
+
+The architecture is reached through the interactive salvage-and-promotion loop
+in `docs/PARITY_PLAN.md`. Existing mixed-runtime systems are isolated and
+tested before replacement, then promoted behind `port_v2` interfaces. Lab and
+prototype results inform reuse decisions but do not advance production parity
+or physical capability gates.
+
 ```mermaid
 flowchart LR
     R["Exact avspu ROMs"] --> E["Offline extraction and provenance"]

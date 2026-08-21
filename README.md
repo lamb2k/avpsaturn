@@ -17,9 +17,9 @@ The complete decision is [docs/research/CPS2_TO_SATURN_RESET.md](docs/research/C
 
 ## Current state
 
-The repository has strong MAME extraction, actor/collision/animation/object analyzers, deterministic manifests, palette/bounds checks, and a bounded Saturn render fixture. The current playable runtime is not yet a translated game core: most gameplay remains authored, ROM actor coverage is narrow, and stage CDDA is disabled.
+The repository has strong MAME extraction, actor/collision/animation/object analyzers, deterministic manifests, palette/bounds checks, and bounded Saturn render fixtures. The old mixed runtime and playable-skeleton prototype now enter subsystem salvage benches; neither is production gameplay authority or a parity gate.
 
-The former RP presentation roadmap is archived under `docs/archive/pre-reset-2026-08-20/`. It is not active guidance. Current status lives in [project_state.yaml](project_state.yaml), and the active bounded body is the task card named there.
+The former RP presentation roadmap is archived under `docs/archive/pre-reset-2026-08-20/`. It is not active guidance. [docs/PARITY_PLAN.md](docs/PARITY_PLAN.md) is the only roadmap, [project_state.yaml](project_state.yaml) is machine-readable state, [data/port_v2_migration_map.yaml](data/port_v2_migration_map.yaml) is the subsystem ledger, and the active bounded body is the task card named by project state.
 
 ## Active documents
 
@@ -45,7 +45,7 @@ Use `setup_engine.ps1` and `setup_emulator.ps1` only in a disposable or dedicate
 
 ## Checks and builds
 
-Run the split verification lanes instead of the monolithic suite during ordinary iteration:
+Use DEV, BENCH, and CHECKPOINT verification from [docs/TEST_PLAN.md](docs/TEST_PLAN.md). Run split repository lanes only at the risk boundaries named by the active card:
 
 ```powershell
 .\verify.ps1 -Lane Fast

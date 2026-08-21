@@ -1,91 +1,103 @@
-# Verification lanes
+# Verification model
 
-Tests retire one claim at one evidence tier. They do not promote themselves.
-Use `verify.ps1` for routine work and keep `test.ps1` as the complete legacy
-regression implementation.
+Tests retire one claim at one evidence tier. Machine validation, fidelity
+evidence, emulator self-review, user approval, and physical proof remain
+independent.
 
-## Fast
+## DEV inner loop
+
+For every implementation iteration run:
+
+- strict compile for touched code;
+- directly relevant focused tests;
+- a deterministic repeat;
+- one non-vacuous negative control that fails when the tested behavior or
+  artifact is deliberately perturbed.
+
+DEV is scoped to the active task card. Do not run the complete writer boundary,
+Oracle lane, or Full suite on every input, animation, rendering, asset, or
+integration edit.
+
+## BENCH self-review
+
+Before a subsystem can receive a salvage decision, run:
+
+- its isolated subsystem test;
+- its dedicated Saturn diagnostic build;
+- a pinned-emulator boot of the exact image;
+- automated runtime-ready and asset-failure readback;
+- actor position and render-count diagnostics where relevant;
+- a bounded stability run;
+- a screenshot or short clip when visible or audible;
+- comparison with the old-build baseline and existing source evidence.
+
+A BENCH result can establish technical viability and measured fidelity. It
+cannot self-approve subjective scale, pivot, cadence, feel, palette,
+composition, camera, or audio qualities.
+
+## CHECKPOINT integration and review
+
+For combined promoted systems run:
+
+- focused regression checks for every previously approved component at risk;
+- the combined diagnostic build and emulator readback;
+- deterministic repeat and negative control;
+- a human-review package under ignored `build/feedback/<task-id>/` whenever
+  appearance or feel is subjective.
+
+The package records screenshot/clip, readback, build profile and commit, active
+and disabled systems, adaptations, stability/frame-pacing notes, and exact
+questions. Approval is explicit and component-scoped; silence is not approval.
+
+## Fast workflow lane
 
 ```powershell
 .\verify.ps1 -Lane Fast
 ```
 
-Runs workflow-policy checks plus the direct V2 writer/oracle/boundary tests. A
-task can add focused Python tests with `-Test` or portable C commands with
-`-Command`. Fast never regenerates private capture evidence.
+Fast runs workflow-policy, task-card/state, migration-map schema, and existing
+focused deterministic checks without regenerating private captures. Run it for
+this governance update and as the ordinary repository-level smoke lane.
 
-Required during iteration. Behavioral work needs a failing-first fixture and a
-real mutation or negative control.
-
-## Oracle
+## Oracle lane
 
 ```powershell
 .\verify.ps1 -Lane Oracle
 ```
 
-Runs target identity, writer-map self-tests and scratch mutations, committed
-writer/oracle/boundary validators, and provenance bindings. If a pinned private
-input is absent, the lane is `INCOMPLETE` and exits nonzero; it cannot report an
-unqualified pass. Pass `-Regenerate` only in an assigned clean worktree that
-owns the generated artifacts and has the pinned private inputs.
+Oracle verifies MAME provenance, deterministic oracle artifacts,
+translation/writer boundaries, validators, and mutation controls. Use it when
+the active task changes evidence, lifted behavior, source identity, or a trust
+boundary. Missing pinned private inputs makes the lane `INCOMPLETE`, never an
+unqualified pass.
 
-Required for oracle, translator, evidence schema, validator, writer-boundary,
-or lifted-behavior changes.
+## Target and normal-release lanes
 
-## Target
-
-Build-only iteration must be requested explicitly:
+Build-only iteration is explicit:
 
 ```powershell
 .\verify.ps1 -Lane Target -TargetProfile EncounterTest -BuildOnly
 ```
 
-Saturn-facing acceptance requires the exact normal image and profile-specific
-semantic/render/final-scanout readback:
+Saturn-facing acceptance requires the exact `release-normal-release` image and
+profile-specific semantic, resource, render, and final-scanout emulator
+readback. A build or emulator launch alone is not acceptance. Use focused
+diagnostic profiles for BENCH work; reserve normal release for checkpoint risk
+boundaries and acceptance.
 
-```powershell
-.\verify.ps1 -Lane Target -TargetProfile Release -Emulator `
-  -EmulatorCheck <checked-in-profile-readback-collector.ps1>
-```
-
-Builds Saturn-facing code with host tests skipped because Fast/Oracle are
-separate. `Release` requests and verifies the exact `release-normal-release`
-profile. Required artifacts must exist and are hashed. `-Emulator` is invalid
-without at least one executable profile-specific collector/check; launching
-alone is not evidence. The lane then automatically runs the checked-in
-`tests/target/verify_release_readback.py`, which binds the ignored report to the
-exact ISO/profile, accepted oracle, emulator identity, and semantic, resource,
-render, and final-scanout domains. `-BuildOnly` returns the distinct status
-`BUILD_ONLY` and is explicitly insufficient for Saturn-facing acceptance.
-
-Required when Saturn-facing code, packaging, resources, or device behavior
-changes. Before acceptance, the release profile must cold-boot and its relevant
-semantic state, device resources, render state, and final scanout must pass
-bounded emulator checks. Record the compile profile and artifact hashes; never
-relabel this as physical evidence.
-
-## Full
+## Full lane
 
 ```powershell
 .\verify.ps1 -Lane Full
 ```
 
-Runs the complete `test.ps1` legacy/generator chain. It can rewrite tracked
-evidence, so run it only in the checkpoint's clean worktree when those paths are
-owned, or in an isolated shadow copy. Review every generated diff.
+Full runs the complete legacy and generator chain in `test.ps1` and may rewrite
+tracked evidence. Run it only at acceptance, before merge, after foundational
+tooling changes, or when a task card names it. Use a clean owned worktree or
+isolated shadow copy and review every generated diff.
 
-Required at acceptance, before merge, and after foundational tooling changes.
-For Saturn-facing acceptance, Full never substitutes for the separate exact
-`release-normal-release` Target plus emulator-readback gate.
+## Physical lane
 
-## Risk mapping
-
-| Tier | Typical change | Minimum lanes |
-|---|---|---|
-| 0 | Mechanical or documentation-only | Fast |
-| 1 | Translated behavior or bounded runtime feature | Fast + Oracle; release Target + emulator readback if Saturn-facing |
-| 2 | Oracle, validator, memory/device ownership, physical timing, architecture | Fast + Oracle + Full; release Target + emulator readback when Saturn-facing |
-
-Physical Saturn testing is outside these host lanes. Follow
-`docs/HARDWARE_TEST.md`; only that procedure may create `PHYSICAL_SATURN`
-evidence.
+Physical Saturn testing is separate and follows `docs/HARDWARE_TEST.md`. Only
+that procedure may create `PHYSICAL_SATURN` evidence. Oracle, Full, Target,
+normal-release emulator, and human-review results do not substitute for it.

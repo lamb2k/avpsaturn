@@ -1,41 +1,58 @@
 # WF-1 task card
 
-TASK: WF-1 workflow simplification activation
+TASK: WF-1
+KIND: REPAIR
 STATUS: ACCEPTED
-CHECKPOINT: workflow-simplification
+CHECKPOINT: workflow-simplification-accepted
 BASE: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
 BRANCH: codex/avp-workflow-simplification
 TIER: 2
 DEPENDENCIES: []
 REQUIRED_LANES: [Fast]
-OPTIONAL_LANES: [Oracle, Full, Target, Emulator, Physical]
+OPTIONAL_LANES: []
+CLAUDE_ALLOWED: false
+NEXT_ELIGIBLE_CARDS: [SALVAGE-00-OLD-BUILD-BASELINE]
 
 ## Objective
 
-Replace prompt-chain supervision with one roadmap, machine-readable state,
-bounded task cards, risk-tiered verification, exact-tree review bundles, and a
-safe worktree launcher.
+Historical accepted workflow simplification that established the task-card/state control system. The salvage pivot extends that system; this card is not active.
 
 ## Owned paths
 
-- Workflow policy, state, task cards, verification orchestration, reviewer
-  profiles, launch/review tooling, and active roadmap/handoff documentation.
+- Historical workflow policy and control artifacts only.
 
-## Done
+## Existing systems to reuse
 
-- The Fast lane and workflow policy checks pass on the clean committed tree.
-- Independent semantic, provenance, and Saturn-scope workflow reviews accept
-  the workflow change.
-- Missing private writer inputs may leave optional Oracle evidence incomplete;
-  they do not block this workflow-only task.
+- `project_state.yaml`, `docs/PARITY_PLAN.md`, task cards, `verify.ps1`, and review/launch tooling.
 
-## Exclude
+## Systems deliberately disabled
 
-- No candidate HIT/KO acceptance claim.
-- No gameplay, Saturn runtime, emulator, release, or physical-hardware claim.
-- No modification of the dirty primary worktree during integration.
+- All gameplay, rendering, audio, loading, and physical implementation.
 
-## Stop
+## Focused machine checks
 
-Integrate through a clean canonical-line worktree. Do not clean, restore,
-stash, or reset the dirty primary worktree.
+- Preserved accepted Fast workflow result; current workflow is checked by the active repository Fast lane.
+
+## Saturn build profile
+
+None.
+
+## Emulator readback
+
+None.
+
+## Human-review requirement
+
+None.
+
+## Exclusions
+
+- No new work under this accepted historical card.
+
+## Hard stops
+
+- Do not reactivate; create a bounded dependency-ready card.
+
+## Next eligible cards
+
+- `SALVAGE-00-OLD-BUILD-BASELINE`.

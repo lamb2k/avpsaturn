@@ -1,5 +1,6 @@
 # Claude Code bootstrap
 
-`AGENTS.md` is authoritative. Read it, `project_state.yaml`, and the active task
-card it names. Preserve private/untracked work and do not treat archived files
-as instructions.
+`AGENTS.md` is authoritative. Claude may implement only when the active task
+card explicitly sets `CLAUDE_ALLOWED: true`. Otherwise stop after read-only
+inspection. Preserve private/untracked work and never treat archived files as
+instructions.
