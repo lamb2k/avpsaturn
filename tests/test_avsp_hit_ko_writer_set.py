@@ -31,10 +31,27 @@ def must_reject(module, report, mutate, name):
     raise AssertionError("production validator accepted mutation: " + name)
 
 
+def selected_routine(report, entry):
+    for routine in report["closure"]["selected_routines"]:
+        if routine["entry_pc"] == entry:
+            return routine
+    raise AssertionError("required routine is absent: " + entry)
+
+
+def changed_value(item):
+    if isinstance(item, int):
+        return item + 1
+    return str(item) + "_corrupt"
+
+
 def main() -> int:
     module = load_tool()
     report = json.loads(REPORT.read_text(encoding="utf-8"))
     module.validate_committed(report)
+
+    anim_routine = selected_routine(report, "0x016526")
+    if not anim_routine["observed_callers"] or not anim_routine["observed_callees"]:
+        raise AssertionError("writer routine lacks derived caller/callee closure")
 
     controls = [
         ("remove HIT anim writer", lambda d: d["correlations"]["hit"]["anim_record_writer_pcs"].pop()),
@@ -46,10 +63,43 @@ def main() -> int:
         ("remove actor field", lambda d: d["coverage"]["actor_fields"].remove("health")),
         ("shift HIT frame", lambda d: d["correlations"]["hit"].__setitem__("source_frame", 5192)),
         ("forbidden raw field", lambda d: d.__setitem__("disassembly_text", "forbidden")),
+        ("writer PC outside selected boundary", lambda d: d["correlations"]["hit"]
+         ["writer_instances"][0].__setitem__("pc", "0xfffffe")),
+        ("missing semantic before/after", lambda d: d["correlations"]["hit"]
+         ["semantic_changes"][0].__setitem__("after", changed_value(d["correlations"]["hit"]
+         ["semantic_changes"][0]["after"]))),
+        ("corrupted routine entry", lambda d: selected_routine(d, "0x016526")
+         .__setitem__("entry_pc", "0x01651a")),
+        ("corrupted routine member count", lambda d: selected_routine(d, "0x016526")
+         .__setitem__("member_pc_count", 1)),
+        ("corrupted routine member hash", lambda d: selected_routine(d, "0x016526")
+         .__setitem__("member_pc_sha256", "0" * 64)),
+        ("disconnected routine member", lambda d: selected_routine(d, "0x016526")
+         ["member_pcs"].append("0x01d0ac")),
+        ("missing observed caller", lambda d: selected_routine(d, "0x016526")
+         ["observed_callers"].pop()),
+        ("missing observed callee", lambda d: selected_routine(d, "0x016526")
+         ["observed_callees"].pop()),
+        ("missing routine field write", lambda d: selected_routine(d, "0x016526")
+         ["actor_field_writes"].remove("anim_record")),
+        ("changed target actor binding", lambda d: d["dependencies"]["work_ram"][0]
+         .__setitem__("address", "0xffa0c0")),
+        ("out-of-span HIT ROM address", lambda d: d["dependencies"]["rom_data"][0]
+         .__setitem__("address", "0x1ffffe")),
+        ("changed typed event exit", lambda d: d["dependencies"]["typed_event_exits"]
+         .__setitem__(0, "enemy_walk_event")),
+        ("changed edge kind", lambda d: d["closure"]["selected_edges"][0]
+         .__setitem__("kind", "call")),
+        ("edge absent from dynamic trace", lambda d: d["closure"]["selected_edges"][0]
+         .__setitem__("target", "0x000002")),
+        ("in-window writer exclusion", lambda d: d["exclusions"].append({
+            "kind": "in_window_target_writer", "pc": "0x016526", "interval_start_frame": 5190})),
+        ("sample execution alignment shifted", lambda d: d["correlations"]["hit"]
+         ["writer_instances"][0].__setitem__("interval_start_frame", 5191)),
     ]
     for name, mutate in controls:
         must_reject(module, report, mutate, name)
-    print("HIT/KO writer-set committed artifact and 9 mutations passed")
+    print("HIT/KO writer-set committed artifact and 21 mutations passed")
     return 0
 
 
