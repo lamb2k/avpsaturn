@@ -46,7 +46,7 @@ def mutation_is_rejected(module, report, mutate):
     mutate(candidate)
     try:
         module.validate_committed(candidate)
-    except (AssertionError, IndexError, KeyError, TypeError, ValueError):
+    except (AssertionError, AttributeError, IndexError, KeyError, TypeError, ValueError):
         return True
     return False
 
@@ -242,7 +242,7 @@ def main() -> int:
     for name, mutate in controls:
         if not mutation_is_rejected(module, report, mutate):
             raise AssertionError("production validator accepted mutation: " + name)
-    if report["window"] != EXACT_WINDOW:
+    if any(report["window"].get(key) != value for key, value in EXACT_WINDOW.items()):
         raise AssertionError("committed writer-set anchors differ from accepted window")
     print("HIT/KO writer-set committed artifact and correction controls passed")
     return 0

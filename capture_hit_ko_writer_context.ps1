@@ -7,10 +7,10 @@ param(
 $ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
 $mame = Join-Path $projectRoot $MamePath
-$contextRoot = Join-Path $projectRoot '.deps\mame\vertical_slice\hit_ko_writer_context_watchpoint_4'
+$contextRoot = Join-Path $projectRoot '.deps\mame\vertical_slice\hit_ko_writer_context_watchpoint_5'
 $nvramBaseline = Join-Path $projectRoot '.deps\mame\full_route_nvram_baseline\eeprom'
-$cfgRoot = Join-Path $projectRoot '.deps\mame\hit_ko_writer_context_cfg'
-$nvramRoot = Join-Path $projectRoot '.deps\mame\hit_ko_writer_context_nvram'
+$cfgRoot = Join-Path $projectRoot '.deps\mame\hit_ko_writer_context_cfg_5'
+$nvramRoot = Join-Path $projectRoot '.deps\mame\hit_ko_writer_context_nvram_5'
 
 if (-not (Test-Path -LiteralPath $mame)) { throw "MAME is missing: $mame" }
 if (-not (Test-Path -LiteralPath $RomPath)) { throw "ROM root is missing: $RomPath" }

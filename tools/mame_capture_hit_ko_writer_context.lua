@@ -87,7 +87,7 @@ local function watch_action(field)
     -- `pc`, and the live address registers describe an individual executed
     -- store, rather than a PC merely observed somewhere in the epoch.
     return string.format(
-        "logerror \"AVP_HIT_KO_WP capture_start=%%d field=%s addr=%%08X data=%%08X pc=%%08X a0=%%08X a1=%%08X a2=%%08X a6=%%08X a7=%%08X\\n\",%d,wpaddr,wpdata,pc,a0,a1,a2,a6,a7 ; g",
+        "logerror \"AVP_HIT_KO_WP capture_start=%%d field=%s addr=%%08X data=%%08X pc=%%08X d0=%%08X d1=%%08X a0=%%08X a1=%%08X a2=%%08X a3=%%08X a4=%%08X a5=%%08X a6=%%08X a7=%%08X\\n\",%d,wpaddr,wpdata,pc,d0,d1,a0,a1,a2,a3,a4,a5,a6,a7 ; g",
         field, first_frame)
 end
 
