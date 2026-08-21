@@ -67,6 +67,12 @@ def validate_build(report: dict, inventory: dict) -> None:
     require(report.get("manifest_iso_sha256") ==
             artifacts.get("game_iso", {}).get("sha256"),
             "manifest and ISO identities disagree")
+    generated = report.get("generated_inputs", {})
+    require(len(generated) >= 20, "ignored generated-input inventory is incomplete")
+    for name, entry in generated.items():
+        require(name.startswith("generated/"), f"generated input escapes root: {name}")
+        require(entry.get("bytes", 0) > 0 and len(entry.get("sha256", "")) == 64,
+                f"generated input identity is incomplete: {name}")
 
 
 def validate_readback(report: dict, build: dict) -> None:
@@ -124,6 +130,7 @@ def stable_build(report: dict) -> dict:
         "compile_profile": report["compile_profile"],
         "manifest_profile": report["manifest_profile"],
         "artifacts": report["artifacts"],
+        "generated_inputs": report["generated_inputs"],
         "required_iso_members": report["required_iso_members"],
     }
 

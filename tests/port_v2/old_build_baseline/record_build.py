@@ -85,6 +85,18 @@ def main() -> None:
             "sha256": sha256(path),
         }
 
+    generated_inputs: dict[str, dict[str, object]] = {}
+    include_pattern = re.compile(r'^#include "(generated/[^"]+)"', re.MULTILINE)
+    for source in sorted(ROOT.glob("*.c")):
+        for relative in include_pattern.findall(source.read_text(encoding="ascii")):
+            path = ROOT / relative
+            if not path.is_file():
+                raise ValueError(f"required ignored generated input is missing: {relative}")
+            generated_inputs[relative] = {
+                "bytes": path.stat().st_size,
+                "sha256": sha256(path),
+            }
+
     status = git("status", "--porcelain", "--untracked-files=no")
     report = {
         "schema": 1,
@@ -98,6 +110,7 @@ def main() -> None:
         "manifest_iso_sha256": release_manifest["iso_sha256"],
         "inventory_sha256": sha256(inventory_path),
         "artifacts": artifacts,
+        "generated_inputs": dict(sorted(generated_inputs.items())),
         "required_iso_members": members,
         "result": "PASS",
         "evidence_tier": "BUILD_ONLY",
