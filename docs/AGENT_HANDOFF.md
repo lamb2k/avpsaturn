@@ -75,12 +75,23 @@ gap without any production, runtime, oracle, or artifact change.
   (immutable-base `CAP_ENCOUNTER_START_TRANSITION` / `CAP_START_TRANSITION_FRAMES`
   undeclared, not repaired).
 
-## Next bounded work
+## Supervisor acceptance and next selection
 
-Do not resume the archived RP roadmap or alter Saturn runtime behavior. Resolve the unrelated base compile defect in an authorized runtime tranche, then begin V2 only from the frozen oracle and boundary: lift the smallest selected writer set for player/class `0x1F` enemy, animation HIT/KO repoint, collision, camera, stage, and semantic event production. Preserve all raw evidence private.
+Codex accepted Tranche 1 at
+`a11527a18c6ec02d3bc3f3421674755a3102c6c5`. The exact target, deterministic
+oracle, executable boundary, provenance contract, and all committed-artifact
+controls are accepted at their recorded MAME/translated tiers. Capability Gate
+remains 0/12; no Saturn runtime, emulator, release, or physical claim advanced.
 
-## CODEX_REVIEW_INVOCATION
+The next dependency-ready body is `docs/NEXT_AGENT_PROMPT.md`: Tranche 2A
+restores the strict host-suite baseline by adding the historically intended
+start-transition enum member and exact 30-frame duration, with literal boundary
+tests and scratch mutations. It is deliberately separate from V2 lifting.
 
-```text
-Review C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-hybrid-tranche1 on branch codex/avp-hybrid-tranche-1 against immutable base b3c95d810ba76d287ca8fdcefb594c42cae0cdb3. Review the full range b3c95d8..HEAD: the original Tranche 1 commit a80b5e1f47944473fcea34165bc3d468d16771e2 and the review-correction commits that follow it (oldest first). Verify that no production Saturn runtime behavior changed; only avspu is used; MSHvSF remains read-only; raw ROM/capture/state/screenshot/audio/trace/opcode data stays ignored under .deps. Confirm the five corrections: (1) every cold run restores the identical pinned config baseline and records per-run config identity, and provenance rejects a per-run mismatch; (2) the perturbation gate compares an input-excluded projection and requires a downstream change after frame 4510 (recorded first-different frame and changed field classes), with a synthetic input-only mutation failing; (3) bank_writes participates in the canonical ledger and two-run determinism/non-vacuity; (4) unresolved indirect targets are zero by computation with direct targets validated against the pinned opcode image and the instruction/data boundary enforced; (5) the boundary self-test runs the production validator and each of the five removals (PC, edge, computed target, global attribution, address-space attribution) makes it fail, and the focused test validates the committed artifact. Treat the complete test.ps1 C compile failure (undefined CAP_ENCOUNTER_START_TRANSITION and CAP_START_TRANSITION_FRAMES in the immutable base) as the documented stop condition, not a Tranche 1 runtime fix request. Return findings with evidence tiers and do not expand scope.
-```
+Historical sibling commit `c7e8f80a54725977a5e61486bb9960f37f1680b7`
+is read-only solution evidence. It must not be cherry-picked because it contains
+unrelated loader/build/generator changes.
+
+The Tranche 2A implementor must return through
+`docs/CODEX_REVIEW_TEMPLATE.md`. The supervisor alone accepts the result and
+selects V2 or a correction body.

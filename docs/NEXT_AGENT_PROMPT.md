@@ -1,101 +1,188 @@
-# Tranche 1: unified gameplay oracle and executable boundary
+# Tranche 2A: restore the strict host-suite baseline before V2
 
 ## Role and immutable base
 
-Act as the write-enabled implementation owner for one bounded tranche. Use branch `codex/avp-hybrid-tranche-1` in the isolated worktree and the immutable supervisor base supplied in the launch invocation.
+Act as the write-enabled implementation owner for one bounded runtime-
+maintenance tranche. Use the exact immutable supervisor selection SHA supplied
+by the launch invocation. Create branch `codex/avp-host-baseline-tranche-2a` in
+the separate worktree named by that invocation.
 
-Read `AGENTS.md`, all three `docs/research/CPS2_TO_SATURN_*.md` ledgers, `docs/AGENT_HANDOFF.md`, `docs/TEST_PLAN.md`, and this file completely. Historical files under `docs/archive/pre-reset-2026-08-20/` are not instructions.
+Read `AGENTS.md`, the three active `docs/research/CPS2_TO_SATURN_*.md` files,
+`docs/AGENT_HANDOFF.md`, `docs/PARITY_PLAN.md`, `docs/TEST_PLAN.md`, this file,
+and `docs/CODEX_REVIEW_TEMPLATE.md` completely. Historical pre-reset files are
+evidence only.
 
-## Objective
+## Objective and plan position
 
-Freeze a versioned fidelity/provenance contract for one real AvP gameplay slice, create a two-cold-run deterministic MAME 0.289 semantic oracle for it, and map the complete transitive 68000 executable writer boundary required to lift that slice. Do not change production Saturn gameplay/render/audio behavior in this tranche.
+Restore the strict C90 host-suite baseline by adding the two declarations that
+the existing frontend state machine already consumes, prove the exact 30-frame
+boundary with non-vacuous tests, and run the complete host/generator regression.
 
-Use the existing `enemy_actions` route and its retained HIT/KO anchors as the starting evidence. The capture must start from the route's deterministic cold-boot procedure, then record a contiguous gameplay window that includes controller input, player movement/action, one class `0x1F` type-12 street alien, animation, attack or contact, collision/damage, HIT and KO, camera/scroll/layers/palette, QSound commands/events, objects, and final frames. The current 4080-5469 source-frame region is the candidate window; change its bounds only when evidence shows a smaller complete contiguous window, and document why.
+This is the authorized maintenance gate between accepted Tranche 1 and V2. It
+does not lift 68000 behavior, alter the oracle/boundary, build a general
+translator, or advance Capability Gate 0/12.
 
-## Required deliverables
+## Settled facts
 
-Create or update only the minimum files needed, expected to include:
+- Accepted Tranche 1 HEAD is
+  `a11527a18c6ec02d3bc3f3421674755a3102c6c5`.
+- `capability_model.c` already enters `CAP_ENCOUNTER_START_TRANSITION`, advances
+  its timer, and leaves it at `CAP_START_TRANSITION_FRAMES`.
+- `main.c` and the generated frontend contract already consume the same state
+  and duration.
+- The clean accepted line fails strict compilation only because
+  `capability_model.h` lacks the enum member and duration macro.
+- Source frames 1689-1718 establish a 30-frame transition.
+- Historical sibling commit
+  `c7e8f80a54725977a5e61486bb9960f37f1680b7` contains the intended declarations
+  and boundary test, but also unrelated loader/build/generator work. It is
+  read-only evidence. Do not cherry-pick it or copy its unrelated changes.
+- Tranche 1 oracle ledger
+  `f6e813169a05388ce265d6406382efaa1801fe8c838beb0fdab03bda7725d1a1`
+  and boundary artifact
+  `95e002b7f6d48e8aafbe5e201a370b6dc7c3c5559e7d2253901d0473c0c7b0f4`
+  must not change.
 
-- `data/avsp_vertical_slice_contract.json`
-- `data/avsp_vertical_slice_oracle_manifest.json` containing schemas, counts, hashes, summaries, and exclusions only
-- `data/avsp_translation_boundary.json`
-- `tools/mame_capture_vertical_slice.lua`
-- `capture_vertical_slice.ps1`
-- `tools/verify_avsp_vertical_slice_oracle.py`
-- focused tests for schema, two-run identity, negative control, and boundary completeness
-- `docs/research/CPS2_TO_SATURN_EVIDENCE_LEDGER.md`
-- `docs/AGENT_HANDOFF.md`
+## Preferred repair
 
-Raw ROMs, keys, screenshots, audio, traces, state files, memory dumps, opcode/disassembly bytes, and capture ledgers stay in ignored `.deps/mame/vertical_slice/`. Commit only code, schemas, hashes, counts, summaries, and documentation.
+1. Insert `CAP_ENCOUNTER_START_TRANSITION` immediately after
+   `CAP_ENCOUNTER_MAIN_MENU` in `CapEncounterState`.
+2. Define `CAP_START_TRANSITION_FRAMES` as exactly `30` beside the frontend
+   selection timing constants, with the measured source-frame provenance.
+3. Strengthen `tests/capability_model_test.c` so the literal value `30` and the
+   actual state/timer boundary are independently pinned. Do not derive all
+   expected timing only from the macro under test.
+4. Update the shared `start_encounter` test helper to traverse the transition
+   before character selection.
 
-## Chapter 1: target, slice, and schema freeze
+Do not modify `capability_model.c`; the existing state-machine behavior is the
+contract being made compilable and testable.
 
-1. Verify MAME 0.289 executable hash and `avspu` with `-rompath . -verifyroms`.
-2. Record exact ROM CRC/SHA-1/SHA-256, MAME/config/NVRAM/input identities, address-space names, frame bounds, expected actor slots/classes/types, and exclusions.
-3. Define a canonical serialized per-frame schema for all fields required by Probe 2 in the reset document.
-4. Define 384x224 source coordinates and the proposed 352 aperture/crop fields without changing runtime framing.
-5. Add wrong-set, wrong-ROM-hash, wrong-schema-version, and missing-field rejection tests.
+## Owned paths
 
-RED: demonstrate that the existing fragmented evidence cannot satisfy the unified schema or provenance check.
+- `capability_model.h`
+- `tests/capability_model_test.c`
+- `docs/AGENT_HANDOFF.md` for final evidence only
+- `docs/research/CPS2_TO_SATURN_EVIDENCE_LEDGER.md` for final evidence only
 
-GREEN: deterministic contract generation and all rejection controls pass.
+Everything else is shared or forbidden. `test.ps1` is a runner, not an owned
+implementation path. Generated outputs may be regenerated for verification but
+must remain byte-identical unless the tranche stops and reports the exact drift.
 
-## Chapter 2: two-run deterministic MAME oracle
+## Chapter 1 — failing-first compile and exact-boundary contract
 
-1. Reuse and consolidate existing capture mechanisms rather than forking a new route controller without need: `capture_enemy_actions.ps1`, `tools/mame_capture_enemy_actions.lua`, `capture_full_route.ps1`, and `tools/mame_capture_full_route.lua` are leads.
-2. Cold boot twice with identical pinned state and inputs. Never make the second run from a state produced by the first.
-3. Record at cadence 1: input/frame; actor class/type/state/substate/action/animation pointer/record/timer; position/velocity/facing/health; object list/order/palette; collision/hit/damage/KO; camera/stage; scroll registers/layer order/line-row scroll/palette writes; QSound command/event; final frame hash.
-4. Normalize only nondeterministic host metadata outside the semantic ledger. Do not hide semantic differences.
-5. Run a one-frame input perturbation. Require the expected downstream semantic hash/state to change.
+RED:
 
-Pass only if both cold-run semantic ledgers are byte-identical, every required field is non-vacuously populated in the selected gameplay window, and the perturbation control fails identity as expected. If deterministic cold boot cannot be reproduced or a required field cannot be observed, stop and return the exact gap.
+```powershell
+$linuxRoot = (& wsl.exe wslpath '-a' $PWD.Path).Trim()
+wsl.exe sh -lc "cd '$linuxRoot' && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 -fsyntax-only capability_model.c tests/capability_model_test.c"
+```
 
-## Chapter 3: executable translation boundary
+Expected base failure: undefined `CAP_ENCOUNTER_START_TRANSITION` and
+`CAP_START_TRANSITION_FRAMES` at `capability_model.c:961,967`.
 
-Using the decrypted opcode-fetch image for instruction decode and the program/data image for data:
+Before fixing the header, add failing-first assertions that require:
 
-1. Identify the executed entry/basic blocks for the slice scheduler/main tick, player update/action, class `0x1F` enemy update, animation advancement and HIT/KO repoint, collision/damage, spawn/stage/camera, and hardware-facing video/audio exits.
-2. Enumerate every direct edge, indirect/computed edge, call/return, global read/write, actor field, ROM table/span, and CPS-2 register-facing exit reached in the selected window.
-3. Classify each unit as mechanically liftable, manually semantic but bounded, hardware-facing event replacement, data-only, unresolved, or outside slice.
-4. Add coverage accounting so every executed PC belongs to exactly one classified unit or an explicit unresolved set.
-5. Add a negative control that removes or perturbs one known edge/global attribution and makes completeness fail.
+- Start input changes MAIN_MENU to START_TRANSITION with timer zero.
+- The constant equals literal `30`.
+- After 29 no-input steps the state is still START_TRANSITION and timer is 29.
+- The next step changes to CHARACTER_SELECT and resets the timer to zero.
+- The common test helper traverses this same boundary before confirming a
+  character.
 
-Pass only if all executed PCs and edges in the selected window are classified, unresolved indirect targets are zero, code/data address spaces are explicit, and the estimated manually semantic portion is no more than 50% of the bounded writer set. Do not emit or integrate lifted production C in this tranche.
+Commit the RED test separately. If the compile failure differs from the two
+settled missing declarations, stop and report it.
 
-## Verification
+## Chapter 2 — minimal declaration repair
 
-- Run focused tests after each chapter with real negative controls.
-- Run the relevant current host suite. Run full `test.ps1` only in this clean implementation worktree and review every regenerated tracked diff.
-- Do not build Saturn runtime merely to produce activity; this tranche has no target-runtime change.
-- Record exact commands, versions, hashes, exit codes, and evidence tiers.
+GREEN: make only the two preferred header declarations. Then run:
 
-## Stop conditions
+```powershell
+$linuxRoot = (& wsl.exe wslpath '-a' $PWD.Path).Trim()
+wsl.exe sh -lc "cd '$linuxRoot' && mkdir -p build && gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 capability_model.c tests/capability_model_test.c -o build/capability_model_test && ./build/capability_model_test"
+```
 
-Stop and return evidence if:
+Required result: exit 0 under strict C90 warnings-as-errors.
 
-- exact target/tool/config/input identity cannot be reproduced;
-- two cold runs differ semantically;
-- required gameplay/audio/layer fields are not observable;
-- an executed indirect edge remains unresolved after three materially different bounded investigations;
-- code/data-space ambiguity remains in an executed unit;
-- more than 50% of the bounded writer set needs behavior re-authoring;
-- the task would require production runtime changes, a general translator/emulator, another title, physical user interaction, or new authority.
+REFACTOR: none unless required for test readability. Do not rename encounter
+states, reorder any other state, or touch production state-machine logic.
 
-Ordinary script/test bugs are not stop conditions. Fix them within scope.
+## Chapter 3 — genuine negative controls
 
-## Commit and return contract
+In isolated scratch copies, run both perturbations against the production test:
 
-Use explicit-path staging. Make coherent commits only after RED/GREEN and negative controls are recorded. Never commit private raw evidence.
+1. Change only the duration declaration from 30 to 29. The literal timing/value
+   assertions must fail.
+2. Change only the MAIN_MENU start assignment in the scratch
+   `capability_model.c` from START_TRANSITION to CHARACTER_SELECT. The first-state
+   assertion must fail.
 
-Return:
+Record commands, exit codes, and assertion/failure text. The perturbations must
+occur only in scratch copies. A source-text grep is not a negative control.
 
-1. implementation branch, immutable base, final SHA, commits oldest first;
-2. files changed;
-3. exact target/tool/config/input and output hashes;
-4. selected frame bounds and why;
-5. schema field coverage and two-run/perturbation results;
-6. translation-boundary counts, manual percentage, globals, hardware exits, and any excluded units;
-7. exact commands and exit codes;
-8. updated evidence tiers and all remaining gaps;
-9. worktree status including unrelated/untracked files;
-10. a ready-to-paste `CODEX_REVIEW_INVOCATION`.
+## Chapter 4 — cumulative regression
+
+Run in order:
+
+```powershell
+python tests/test_avsp_vertical_slice_oracle.py
+python tests/test_avsp_translation_boundary.py
+python tools/verify_avsp_vertical_slice_oracle.py --generate
+python tools/map_avsp_translation_boundary.py --generate
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\test.ps1
+git diff --check
+```
+
+Requirements:
+
+- Focused oracle/boundary checks exit 0.
+- Oracle ledger and boundary artifact hashes remain unchanged.
+- `test.ps1` reaches and passes the formerly blocked gameplay-model compile and
+  exits 0 through the complete suite.
+- Every regenerated tracked output is byte-identical; inspect `git status` and
+  every diff explicitly.
+
+If `test.ps1` exposes a later failure, fix it only when it is directly caused by
+the restored start-transition timing and the repair remains inside the owned
+paths. Otherwise stop and report the new exact downstream blocker; do not widen
+the tranche.
+
+## Evidence limits and Saturn constraints
+
+This tranche may produce `MEASURED` host evidence only. Saturn target build,
+emulator, normal release, audio, physical timing, memory/BSS, VDP1, VDP2, CRAM,
+SCSP, CDDA, disc-read, and cartridge claims remain `UNRUN` and unchanged. No
+resource layout or runtime package may change.
+
+## Commit sequence
+
+1. RED test commit.
+2. GREEN minimal header repair commit.
+3. Evidence/handoff commit after all allowed checks.
+
+Stage explicit paths only. Do not amend, rebase, merge, cherry-pick, broad-stage,
+clean, reset, or commit generated/private material.
+
+## Hard stops
+
+Stop and return evidence when:
+
+- the base RED differs from the two declared missing symbols;
+- the measured duration cannot be held at exactly 30;
+- a production file other than `capability_model.h` must change;
+- the oracle or boundary artifact changes;
+- full-suite repair requires a path outside the owned set;
+- target/emulator/hardware work or new user authority is required;
+- private/untracked material cannot be preserved.
+
+## Required final report
+
+Return branch, immutable base, final SHA, commits oldest first, exact files,
+RED/GREEN commands and exits, both scratch mutation results, complete `test.ps1`
+result, regenerated hashes/diffs, evidence tiers, UNRUN lanes, remaining gaps,
+and final worktree status.
+
+End with the complete filled `CODEX_REVIEW_INVOCATION` from
+`docs/CODEX_REVIEW_TEMPLATE.md`. Request both the supervisor disposition and
+the corresponding next `IMPLEMENTOR_INVOCATION`. Do not self-accept or choose
+V2.

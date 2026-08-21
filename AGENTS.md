@@ -16,7 +16,8 @@ Read these files completely before acting:
 4. `docs/research/CPS2_TO_SATURN_EVIDENCE_LEDGER.md`
 5. `docs/AGENT_HANDOFF.md`
 6. `docs/NEXT_AGENT_PROMPT.md`
-7. `docs/TEST_PLAN.md` and `docs/HARDWARE_TEST.md` when verification is in scope
+7. `docs/CODEX_REVIEW_TEMPLATE.md` when preparing or consuming a handoff
+8. `docs/TEST_PLAN.md` and `docs/HARDWARE_TEST.md` when verification is in scope
 
 Files under `docs/archive/pre-reset-2026-08-20/` are historical evidence only. They must not be treated as instructions or a plan of record.
 
@@ -37,7 +38,12 @@ Do not build a CPS-2 emulator, runtime 68000 interpreter, generalized Capcom eng
 
 ## Current execution body
 
-Only execute the bounded tranche in `docs/NEXT_AGENT_PROMPT.md`. The first tranche freezes the vertical-slice contract, creates one unified deterministic MAME gameplay oracle, and maps the transitive executable writer boundary. It does not broadly replace the runtime.
+Only execute the bounded tranche in `docs/NEXT_AGENT_PROMPT.md`. Tranche 1's
+vertical-slice contract, deterministic MAME oracle, and executable boundary are
+accepted at `a11527a18c6ec02d3bc3f3421674755a3102c6c5`. The active body is the
+narrow Tranche 2A host-baseline repair that restores the historically intended
+30-frame frontend start transition and makes the complete host suite reviewable
+before V2 lifting begins.
 
 The first accepted slice must contain real gameplay: deterministic startup, controller input, one player, one class `0x1F` enemy, movement, animation, attack/contact, collision/hit/KO, camera/stage movement, representative layers and palettes, PCM, CDDA, residency/transfer, final scanout, and physical timing. Title/menu work cannot substitute for any item.
 
@@ -97,3 +103,12 @@ The shared-primitives check, presentation/stage parity check, and capability sli
 ## Handoff
 
 Every implementation handoff must include branch, immutable base and final SHA, commits oldest first, explicit files changed, commands and exit codes, RED/GREEN/negative-control results, build/profile/artifact hashes, evidence tiers, remaining gaps, worktree status, and a ready review invocation. If incomplete, state the exact stop condition that fired.
+
+Use `docs/CODEX_REVIEW_TEMPLATE.md` verbatim as the envelope for every review
+request. The implementor never self-accepts or rotates the plan. A valid return
+requests the supervisor ruling and the corresponding next
+`IMPLEMENTOR_INVOCATION` for acceptance, corrections, or missing evidence.
+
+When a separate Codex implementor task is created, explicitly use model
+`gpt-5.6-sol` with reasoning/thinking `low`. Supervisor and review reasoning
+levels are separate from this implementor launch policy.
