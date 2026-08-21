@@ -10,7 +10,10 @@ $mame = Join-Path $projectRoot '.deps\mame\mame0289\mame.exe'
 $rawRoot = Join-Path $projectRoot '.deps\mame\vertical_slice'
 $baseline = Join-Path $projectRoot '.deps\mame\full_route_nvram_baseline'
 $liveNvram = Join-Path $projectRoot 'nvram\avspu'
-$config = Join-Path $projectRoot 'cfg\avspu.cfg'
+$cfgDir = Join-Path $projectRoot 'cfg'
+$cfgFile = Join-Path $cfgDir 'avspu.cfg'
+$cfgDefault = Join-Path $cfgDir 'default.cfg'
+$configBaselineDir = Join-Path $projectRoot '.deps\mame\vertical_slice_config_baseline'
 
 if (-not (Test-Path -LiteralPath $mame)) { throw "MAME is missing: $mame" }
 if (-not (Test-Path -LiteralPath $baseline)) { throw "NVRAM baseline is missing: $baseline" }
@@ -18,6 +21,34 @@ if (-not (Test-Path -LiteralPath $PythonPath)) { throw "Python is missing: $Pyth
 
 & $mame '-rompath' $projectRoot '-verifyroms' 'avspu'
 if ($LASTEXITCODE -ne 0) { throw "avspu verification failed: $LASTEXITCODE" }
+
+# Stage the intended private config baseline once.  The pinned baseline is the
+# deterministic default configuration, represented as a declared absence: no
+# machine cfg is supplied.  Dropping a pinned avspu.cfg into the baseline dir
+# makes every run restore those exact bytes instead.  Either way each cold boot
+# starts from the identical config, and per-run identity is recorded below so a
+# mismatch is rejected downstream.
+if (-not (Test-Path -LiteralPath $configBaselineDir)) {
+    New-Item -ItemType Directory -Force -Path $configBaselineDir | Out-Null
+}
+$baselineCfg = Join-Path $configBaselineDir 'avspu.cfg'
+$configBaselineSha = if (Test-Path -LiteralPath $baselineCfg) {
+    (Get-FileHash -LiteralPath $baselineCfg -Algorithm SHA256).Hash.ToLowerInvariant()
+} else { 'absent' }
+
+function Restore-ConfigBaseline {
+    # Remove any cfg MAME wrote on a prior exit, then restore the pinned
+    # baseline (bytes or declared absence).  Returns the starting config identity.
+    foreach ($stale in @($cfgFile, $cfgDefault)) {
+        if (Test-Path -LiteralPath $stale) { Remove-Item -LiteralPath $stale -Force }
+    }
+    if (Test-Path -LiteralPath $baselineCfg) {
+        New-Item -ItemType Directory -Force -Path $cfgDir | Out-Null
+        Copy-Item -LiteralPath $baselineCfg -Destination $cfgFile -Force
+        return (Get-FileHash -LiteralPath $cfgFile -Algorithm SHA256).Hash.ToLowerInvariant()
+    }
+    return 'absent'
+}
 
 function Assert-PrivateChild([string]$Path, [string]$Parent) {
     $resolvedParent = (Resolve-Path -LiteralPath $Parent).Path
@@ -42,7 +73,7 @@ New-Item -ItemType Directory -Force -Path $rawRoot | Out-Null
 $inputManifest = [ordered]@{
     schema = 1
     mame = [ordered]@{ version = (& $mame -version).Trim(); sha256 = (Get-FileHash -LiteralPath $mame -Algorithm SHA256).Hash.ToLowerInvariant() }
-    config_sha256 = if (Test-Path -LiteralPath $config) { (Get-FileHash -LiteralPath $config -Algorithm SHA256).Hash.ToLowerInvariant() } else { 'absent' }
+    config_sha256 = $configBaselineSha
     nvram_baseline_sha256 = (Get-FileHash -LiteralPath (Join-Path $baseline 'eeprom') -Algorithm SHA256).Hash.ToLowerInvariant()
     runs = @()
     roms = @()
@@ -58,6 +89,7 @@ function Invoke-VerticalSliceRun([string]$Name, [int]$PerturbFrame) {
         (Join-Path $runRoot 'palette') | Out-Null
     if (Test-Path -LiteralPath $liveNvram) { Remove-Item -LiteralPath $liveNvram -Recurse -Force }
     Copy-Item -LiteralPath $baseline -Destination $liveNvram -Recurse
+    $configStart = Restore-ConfigBaseline
     $env:AVSP_VSLICE_CAPTURE_ROOT = (Resolve-Path -LiteralPath $runRoot).Path.Replace('\', '/')
     $env:AVSP_VSLICE_FIRST = '4080'
     $env:AVSP_VSLICE_LAST = '5469'
@@ -68,7 +100,7 @@ function Invoke-VerticalSliceRun([string]$Name, [int]$PerturbFrame) {
         if ($LASTEXITCODE -ne 0) { throw "MAME $Name capture failed: $LASTEXITCODE" }
     }
     finally { Pop-Location }
-    $inputManifest.runs += [ordered]@{ name = $Name; perturb_frame = $PerturbFrame; samples_sha256 = (Get-FileHash -LiteralPath (Join-Path $runRoot 'samples.tsv') -Algorithm SHA256).Hash.ToLowerInvariant() }
+    $inputManifest.runs += [ordered]@{ name = $Name; perturb_frame = $PerturbFrame; config_start_sha256 = $configStart; samples_sha256 = (Get-FileHash -LiteralPath (Join-Path $runRoot 'samples.tsv') -Algorithm SHA256).Hash.ToLowerInvariant() }
 }
 
 Invoke-VerticalSliceRun 'cold_run_1' 0

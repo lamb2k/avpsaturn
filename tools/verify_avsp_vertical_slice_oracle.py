@@ -59,8 +59,21 @@ def validate_provenance(contract: dict, inputs: dict) -> None:
                        if name not in expected}
     if observed_canonical != expected or observed_extras != allowed_extras:
         fail("wrong set or ROM hash inventory")
-    if not inputs.get("config_sha256") or not inputs.get("nvram_baseline_sha256"):
+    baseline_config = inputs.get("config_sha256")
+    if not baseline_config or not inputs.get("nvram_baseline_sha256"):
         fail("missing config or NVRAM identity")
+    runs = inputs.get("runs", [])
+    if not runs:
+        fail("missing per-run provenance")
+    # Correction 1: every cold run must start from the identical pinned config
+    # (or the identical declared absence).  Reject any per-run mismatch.
+    for run in runs:
+        start = run.get("config_start_sha256")
+        if start is None:
+            fail("run %s has no starting config identity" % run.get("name"))
+        if start != baseline_config:
+            fail("run %s started from a different config than the pinned baseline"
+                 % run.get("name"))
 
 
 def parse_samples(path: Path, contract: dict) -> list[dict[str, str]]:
@@ -156,6 +169,7 @@ def build_ledger(contract: dict, run: Path) -> tuple[bytes, dict]:
             "frame": frame,
             "input": int_field(row, "input_word"),
             "object_bank": int_field(row, "active_bank"),
+            "object_bank_writes": int_field(row, "bank_writes"),
             "player": player,
             "enemy": enemy,
             "objects": {
@@ -176,6 +190,7 @@ def build_ledger(contract: dict, run: Path) -> tuple[bytes, dict]:
     active_enemy = [entry["enemy"] for entry in entries if entry["enemy"]["state"] != 0]
     nonvacuous = {
         "input_changes": len(field_values["input_word"]) > 1,
+        "object_bank_writes_advance": len(field_values["bank_writes"]) > 1,
         "player_action_changes": len(field_values["p_action"]) > 1,
         "enemy_identity": bool(active_enemy) and all(
             value["class"] == 31 and value["type"] == 12 for value in active_enemy),
@@ -200,6 +215,8 @@ def build_ledger(contract: dict, run: Path) -> tuple[bytes, dict]:
         "last_final_scanout_sha256": entries[-1]["final_scanout_sha256"],
         "qsound_bus_events": qsound_events,
         "enemy_health_changes": health_changes,
+        "object_bank_writes_first": entries[0]["object_bank_writes"],
+        "object_bank_writes_last": entries[-1]["object_bank_writes"],
         "nonvacuous": nonvacuous,
         "unique": {
             "object_lists": len({entry["objects"]["ordered_list_sha256"] for entry in entries}),
@@ -207,7 +224,39 @@ def build_ledger(contract: dict, run: Path) -> tuple[bytes, dict]:
             "scanouts": len({entry["final_scanout_sha256"] for entry in entries}),
         },
     }
-    return ledger, summary
+    return ledger, summary, entries
+
+
+DOWNSTREAM_FIELD_CLASSES = ("object_bank", "object_bank_writes", "player", "enemy",
+                            "objects", "stage", "audio", "final_scanout_sha256")
+
+
+def project_no_input(entry: dict) -> dict:
+    """Input-excluded semantic projection.
+
+    The injected input field is allowed to remain in the canonical ledger, but a
+    perturbation must be judged by its effect on everything else: actor state,
+    objects, stage, audio and scanout.  A synthetic input-only mutation has an
+    empty projection difference and therefore cannot satisfy this control.
+    """
+    return {key: value for key, value in entry.items() if key != "input"}
+
+
+def changed_field_classes(left: dict, right: dict) -> list[str]:
+    left_proj = project_no_input(left)
+    right_proj = project_no_input(right)
+    return [name for name in DOWNSTREAM_FIELD_CLASSES
+            if left_proj.get(name) != right_proj.get(name)]
+
+
+def first_downstream_difference(base: list[dict], perturbed: list[dict],
+                                after_frame: int) -> tuple[int, list[str]] | None:
+    for base_entry, perturbed_entry in zip(base, perturbed):
+        if base_entry["frame"] <= after_frame:
+            continue
+        if project_no_input(base_entry) != project_no_input(perturbed_entry):
+            return base_entry["frame"], changed_field_classes(base_entry, perturbed_entry)
+    return None
 
 
 def generate() -> dict:
@@ -216,21 +265,33 @@ def generate() -> dict:
     validate_provenance(contract, inputs)
     ledgers = {}
     summaries = {}
+    entries = {}
     for name in ("cold_run_1", "cold_run_2", "one_frame_perturbation"):
-        ledger, summary = build_ledger(contract, RAW_ROOT / name)
+        ledger, summary, run_entries = build_ledger(contract, RAW_ROOT / name)
         (RAW_ROOT / name / "semantic_ledger.jsonl").write_bytes(ledger)
         ledgers[name] = ledger
         summaries[name] = summary
+        entries[name] = run_entries
     if ledgers["cold_run_1"] != ledgers["cold_run_2"]:
         fail("two cold-run semantic ledgers differ")
+
+    perturb_frame = contract["route"]["one_frame_perturbation"]["frame"]
+    # The full ledger must differ (the injected input is present), but that alone
+    # is a vacuous input-only change.  The gate requires an input-excluded
+    # downstream difference strictly after the perturbed frame.
     if ledgers["cold_run_1"] == ledgers["one_frame_perturbation"]:
-        fail("one-frame perturbation did not alter semantic identity")
-    first_difference = next(
-        index for index, (left, right) in enumerate(zip(ledgers["cold_run_1"].splitlines(),
-                                                         ledgers["one_frame_perturbation"].splitlines()))
-        if left != right)
+        fail("one-frame perturbation did not alter the ledger at all")
+    downstream = first_downstream_difference(
+        entries["cold_run_1"], entries["one_frame_perturbation"], perturb_frame)
+    if downstream is None:
+        fail("perturbation has no downstream semantic effect after frame %d "
+             "independent of its input field" % perturb_frame)
+    first_downstream_frame, field_classes = downstream
+    if not field_classes:
+        fail("perturbation changed no declared downstream field class")
+
     manifest = {
-        "schema": 1,
+        "schema": 2,
         "artifact": "avsp_vertical_slice_oracle_manifest",
         "evidence_tier": "MAME_TRACE",
         "contract_sha256": digest(CONTRACT_PATH),
@@ -239,7 +300,9 @@ def generate() -> dict:
         "route": {"name": contract["route"]["name"], "anchors": contract["route"]["anchors"]},
         "input_provenance": {
             "mame": inputs["mame"],
-            "config_sha256": inputs["config_sha256"],
+            "config_baseline_sha256": inputs["config_sha256"],
+            "per_run_config_sha256": {run["name"]: run["config_start_sha256"]
+                                      for run in inputs["runs"]},
             "nvram_baseline_sha256": inputs["nvram_baseline_sha256"],
             "rom_count": len(contract["canonical_rom_sha256"]),
             "rom_sha256": {entry["name"]: entry["sha256"] for entry in inputs["roms"]
@@ -250,9 +313,12 @@ def generate() -> dict:
         "cold_runs": {"byte_identical": True, "summary": summaries["cold_run_1"]},
         "negative_control": {
             "kind": "one_frame_input_perturbation",
-            "frame": contract["route"]["one_frame_perturbation"]["frame"],
+            "frame": perturb_frame,
+            "input_excluded_projection": True,
             "identity_changed": True,
-            "first_different_source_frame": contract["window"]["first_source_frame"] + first_difference,
+            "downstream_effect_confirmed": True,
+            "first_downstream_different_source_frame": first_downstream_frame,
+            "changed_field_classes": field_classes,
             "perturbed_ledger_sha256": summaries["one_frame_perturbation"]["semantic_ledger_sha256"],
         },
         "exclusions": contract["exclusions"],
@@ -268,12 +334,17 @@ def self_test() -> None:
                       for name, value in contract["canonical_rom_sha256"].items()] +
                      [{"name": name, "sha256": value}
                       for name, value in contract.get("noncanonical_local_dependencies", {}).items()]),
-            "config_sha256": "a", "nvram_baseline_sha256": "b"}
+            "config_sha256": "a", "nvram_baseline_sha256": "b",
+            "runs": [{"name": "cold_run_1", "config_start_sha256": "a"},
+                     {"name": "cold_run_2", "config_start_sha256": "a"},
+                     {"name": "one_frame_perturbation", "config_start_sha256": "a"}]}
     validate_provenance(contract, good)
     controls = {
         "wrong_set": (lambda value: value["roms"].pop()),
         "wrong_rom_hash": (lambda value: value["roms"].__setitem__(0, {"name": value["roms"][0]["name"], "sha256": "0" * 64})),
         "wrong_schema": (lambda value: value.__setitem__("schema", 999)),
+        "per_run_config_mismatch": (lambda value: value["runs"][1].__setitem__("config_start_sha256", "z")),
+        "missing_run_config": (lambda value: value["runs"][0].pop("config_start_sha256")),
     }
     for name, mutate in controls.items():
         candidate_contract = copy.deepcopy(contract)
@@ -285,10 +356,30 @@ def self_test() -> None:
         except ValueError:
             continue
         raise AssertionError("negative control did not reject %s" % name)
+
+    # Perturbation gate control: a synthetic input-only mutation must NOT satisfy
+    # the downstream requirement, and a real downstream change must satisfy it.
+    base = [{"frame": 4508 + i, "input": 1, "object_bank": 0, "object_bank_writes": i,
+             "player": {"action": 0}, "enemy": {"state": 1}, "objects": {"o": 0},
+             "stage": {"s": 0}, "audio": [], "final_scanout_sha256": "x"} for i in range(6)]
+    input_only = copy.deepcopy(base)
+    input_only[2]["input"] = 999           # differs only in the excluded field
+    if first_downstream_difference(base, input_only, 4510) is not None:
+        raise AssertionError("input-only mutation must not register a downstream effect")
+    real = copy.deepcopy(base)
+    real[4]["player"]["action"] = 7        # a real downstream change at frame 4512
+    downstream = first_downstream_difference(base, real, 4510)
+    assert downstream is not None and downstream[0] == 4512 and "player" in downstream[1]
+    # A downstream change at or before the perturbed frame does not count.
+    at_frame = copy.deepcopy(base)
+    at_frame[2]["player"]["action"] = 7    # frame 4510 == perturb frame, excluded
+    assert first_downstream_difference(base, at_frame, 4510) is None
+
     header = expected_header(contract)
     assert len(header) > 10
-    assert "e_attack" in header
-    print("vertical-slice oracle self-test: schema and rejection controls pass")
+    assert "e_attack" in header and "bank_writes" in header
+    print("vertical-slice oracle self-test: schema, config and perturbation "
+          "rejection controls pass")
 
 
 def main() -> int:
