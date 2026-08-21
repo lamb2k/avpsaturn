@@ -19,9 +19,17 @@ it here.
 - No native lifted HIT/KO routine, Saturn target result, emulator result,
   release result, audio result, or physical-hardware result is claimed.
 
-The candidate still requires one consolidated Tier 2 disposition. The next
-card, `docs/task_cards/V2-B1.md`, is intentionally blocked until that verdict is
-`ACCEPTED`; it produces executable native behavior rather than more mapping.
+The consolidated Tier 2 disposition is `CORRECTIONS REQUIRED`. Semantic and
+provenance review found that the candidate does not retain exact writer evidence
+for every selected field, constructs window-selected rather than call-rooted
+control closure, and asserts rather than derives outgoing-edge, actor-field,
+ROM-data, work-RAM, and exclusion dependencies. Saturn-scope review also found
+two committed capture helpers outside the exhaustive owned-path contract.
+
+Corrections stay on the existing candidate branch/worktree. The next card,
+`docs/task_cards/V2-B1.md`, remains blocked until the corrected candidate is
+re-reviewed and accepted; it produces executable native behavior rather than
+more mapping.
 
 ## Operating commands
 
@@ -31,7 +39,7 @@ card, `docs/task_cards/V2-B1.md`, is intentionally blocked until that verdict is
 .\tools\New-ReviewBundle.ps1 -Base f2c9a4725dffdcb2e5689c70914511674fb3c9ef -Task workflow-simplification
 ```
 
-Keep corrections on the current checkpoint branch/worktree. After acceptance,
+Keep corrections on the current checkpoint branch/worktree. After re-review and acceptance,
 activate the next task by updating `project_state.yaml` and the card status,
 then use `tools/start-agent-task.ps1`. Launch and review renderings live under
 ignored `build/` paths and are never committed as source history.

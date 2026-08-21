@@ -41,6 +41,16 @@ def blockers(text: str) -> list[str]:
     return [match.group(1)]
 
 
+def inline_list(text: str, name: str) -> list[str]:
+    value = scalar(text, name)
+    require(value.startswith("[") and value.endswith("]"),
+            f"{name} must be an inline list")
+    body = value[1:-1].strip()
+    if not body:
+        return []
+    return [item.strip() for item in body.split(",")]
+
+
 def git(*args: str) -> str:
     return subprocess.run(
         ["git", "-C", str(ROOT), *args], check=True,
@@ -51,7 +61,7 @@ def normalized_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
-def validate_relationship(state: str, card: str) -> None:
+def validate_relationship(state: str, card: str, accepted_tasks: set[str]) -> None:
     status = scalar(state, "task_status")
     require(status in {"BLOCKED", "REVIEW", "READY", "CORRECTIONS"},
             f"unsupported task status: {status}")
@@ -59,11 +69,16 @@ def validate_relationship(state: str, card: str) -> None:
             "task-card status and project state disagree")
     require(scalar(state, "current_checkpoint") == scalar(card, "CHECKPOINT"),
             "task-card checkpoint and project state disagree")
+    dependencies = set(inline_list(card, "DEPENDENCIES"))
+    require(dependencies <= accepted_tasks,
+            "active task has an unaccepted dependency")
     if status == "READY":
         require(not blockers(state), "READY state retains an open blocker")
         require(scalar(state, "accepted_head") ==
                 scalar(state, "review_candidate_head"),
                 "READY state has not pinned the reviewed candidate")
+        require(scalar(state, "review_candidate_status") == "ACCEPTED",
+                "READY state does not record an accepted disposition")
 
 
 def main() -> None:
@@ -78,8 +93,22 @@ def main() -> None:
     state = state_path.read_text(encoding="utf-8")
     require(scalar(state, "architecture") == "avp-hybrid-native-v2",
             "architecture drifted")
-    require(scalar(state, "capability_gate") == "0/12",
-            "capability count advanced without physical evidence")
+    candidate_status = scalar(state, "review_candidate_status")
+    require(candidate_status in {"REVIEW", "ACCEPTED", "CORRECTIONS_REQUIRED",
+                                 "NOT_REVIEWABLE"},
+            "unsupported candidate disposition")
+
+    conditions = re.findall(
+        r"(?m)^\s+- id:\s*([a-z0-9_]+)\s*\r?\n\s+status:\s*([A-Z_]+)\s*$",
+        state)
+    require(len(conditions) == 12, "project state must record 12 conditions")
+    require(len({name for name, _ in conditions}) == 12,
+            "capability condition ids are not unique")
+    require(all(status in {"OPEN", "CLOSED"} for _, status in conditions),
+            "unsupported capability condition status")
+    closed_count = sum(status == "CLOSED" for _, status in conditions)
+    require(scalar(state, "capability_gate") == f"{closed_count}/12",
+            "capability count disagrees with condition statuses")
 
     for key in ("accepted_head", "review_candidate_head"):
         value = scalar(state, key)
@@ -88,6 +117,10 @@ def main() -> None:
         git("cat-file", "-e", f"{value}^{{commit}}")
     git("merge-base", "--is-ancestor", scalar(state, "accepted_head"),
         scalar(state, "review_candidate_head"))
+    if candidate_status == "ACCEPTED":
+        require(scalar(state, "accepted_head") ==
+                scalar(state, "review_candidate_head"),
+                "accepted candidate is not the accepted head")
 
     artifact_bindings = {
         "contract_sha256": ROOT / "data/avsp_vertical_slice_contract.json",
@@ -108,17 +141,48 @@ def main() -> None:
                               active_relative)),
             "active task card escapes docs/task_cards")
     active_card = (ROOT / active_relative).read_text(encoding="utf-8")
-    for field in ("TASK", "STATUS", "CHECKPOINT", "BASE", "BRANCH", "TIER"):
+    for field in ("TASK", "STATUS", "CHECKPOINT", "BASE", "BRANCH", "TIER",
+                  "DEPENDENCIES", "REQUIRED_LANES", "OPTIONAL_LANES"):
         scalar(active_card, field)
-    validate_relationship(state, active_card)
+
+    accepted_tasks = set(inline_list(state, "accepted_tasks"))
+    card_ids = {path.stem for path in (ROOT / "docs/task_cards").glob("*.md")}
+    require(accepted_tasks <= card_ids, "accepted_tasks names an unknown card")
+    validate_relationship(state, active_card, accepted_tasks)
 
     for card_path in sorted((ROOT / "docs/task_cards").glob("*.md")):
         card = card_path.read_text(encoding="utf-8")
-        for field in ("TASK", "STATUS", "CHECKPOINT", "BASE", "BRANCH", "TIER"):
+        for field in ("TASK", "STATUS", "CHECKPOINT", "BASE", "BRANCH", "TIER",
+                      "DEPENDENCIES", "REQUIRED_LANES", "OPTIONAL_LANES"):
             scalar(card, field)
+        dependencies = set(inline_list(card, "DEPENDENCIES"))
+        require(dependencies <= card_ids,
+                f"{card_path.name} names an unknown dependency")
+        required_lanes = inline_list(card, "REQUIRED_LANES")
+        optional_lanes = inline_list(card, "OPTIONAL_LANES")
+        allowed_lanes = {"Fast", "Oracle", "Full", "Target", "Emulator",
+                         "Physical"}
+        require(bool(required_lanes), f"{card_path.name} has no required lane")
+        require(set(required_lanes + optional_lanes) <= allowed_lanes,
+                f"{card_path.name} names an unsupported lane")
+        require(not (set(required_lanes) & set(optional_lanes)),
+                f"{card_path.name} repeats a required lane as optional")
+        if dependencies <= accepted_tasks:
+            require(scalar(card, "STATUS") != "BLOCKED",
+                    f"{card_path.name} remains blocked after all dependencies accepted")
         for section in ("## Objective", "## Owned paths", "## Done",
                         "## Exclude", "## Stop"):
             require(section in card, f"{card_path.name} missing {section}")
+
+    require(inline_list((ROOT / "docs/task_cards/V2-2B.md").read_text(
+                encoding="utf-8"), "REQUIRED_LANES") == ["Fast", "Oracle", "Full"],
+            "writer-map trust boundary lacks Fast, Oracle, Full")
+    require(inline_list((ROOT / "docs/task_cards/WF-1.md").read_text(
+                encoding="utf-8"), "REQUIRED_LANES") == ["Fast"],
+            "workflow-only task requires more than Fast")
+    require(inline_list((ROOT / "docs/task_cards/V2-B1.md").read_text(
+                encoding="utf-8"), "REQUIRED_LANES") == ["Fast", "Oracle"],
+            "native host HIT/KO task lacks Fast and Oracle")
 
     next_card_path = ROOT / "docs/task_cards/V2-B1.md"
     next_card = next_card_path.read_text(encoding="utf-8")
@@ -134,10 +198,15 @@ def main() -> None:
         r"(?m)^accepted_head:.*$",
         "accepted_head: " + scalar(state, "review_candidate_head"), simulated_state)
     simulated_state = re.sub(
+        r"(?m)^review_candidate_status:.*$",
+        "review_candidate_status: ACCEPTED", simulated_state)
+    simulated_state = re.sub(
+        r"(?m)^accepted_tasks:.*$", "accepted_tasks: [V2-2B]", simulated_state)
+    simulated_state = re.sub(
         r"(?m)^open_blockers:[ \t]*\r?\n(?:^[ \t]+[^\r\n]*(?:\r?\n|$))*",
         "open_blockers: []\n", simulated_state)
     simulated_card = re.sub(r"(?m)^STATUS:.*$", "STATUS: READY", next_card)
-    validate_relationship(simulated_state, simulated_card)
+    validate_relationship(simulated_state, simulated_card, {"V2-2B"})
 
     writer = json.loads(
         (ROOT / "data/avsp_hit_ko_writer_set.json").read_text(encoding="utf-8"))
@@ -184,7 +253,8 @@ def main() -> None:
                   "tests\\target\\verify_release_readback.py", "BUILD_ONLY",
                   "Emulator readback check is not committed",
                   "LastWriteTimeUtc",
-                  "tracked_dirty_before_count", "git_tree"):
+                  "tracked_dirty_before_count", "git_tree",
+                  "full-shadow-diff.json", "git worktree add --detach"):
         require(token in verify, f"verify.ps1 lacks {token}")
     require("test.ps1" in verify, "Full lane is not connected to test.ps1")
 
@@ -193,13 +263,14 @@ def main() -> None:
                   "open_blockers", "acceptedHead -ne $candidateHead",
                   "inlineBlockers", "--is-ancestor $acceptedHead $base",
                   "--untracked-files=no", "repository.HEAD", "gpt-5.6-sol",
-                  "xhigh"):
+                  "xhigh", "REQUIRED_LANES", "DEPENDENCIES"):
         require(token in launcher, f"launcher lacks invariant: {token}")
 
     bundle = (ROOT / "tools/New-ReviewBundle.ps1").read_text(encoding="utf-8")
     for token in ("clean committed candidate", "HEAD^{tree}",
                   "Patch SHA-256", "## Exact patch", "summary.checks",
                   "STALE/EXCLUDED", "build\\review",
+                  "TaskCard", "CandidateRoot",
                   "VERDICT: ACCEPTED | CORRECTIONS REQUIRED | NOT REVIEWABLE"):
         require(token in bundle, f"review bundle lacks {token}")
 
@@ -221,7 +292,7 @@ def main() -> None:
     for heading in ("## 1. Goal", "## 2. AvP performance contract",
                     "## 3. Accepted baseline and current checkpoint",
                     "## 4. Active backlog", "## 5. Delivery roadmap",
-                    "## 6. Capability slice: 0/12",
+                    "## 6. Capability slice conditions",
                     "## 7. Full-port completion conditions",
                     "## 8. Parked work", "## 9. Update rules"):
         require(heading in roadmap, f"roadmap missing {heading}")
@@ -236,6 +307,11 @@ def main() -> None:
     priorities = re.findall(r"(?m)^\|\s*([1-8])\s*\|", backlog)
     require(priorities == [str(value) for value in range(1, 9)],
             "active backlog is not exactly priorities 1 through 8")
+    roadmap_task = scalar(roadmap, "CURRENT_TASK")
+    require(roadmap_task == Path(active_relative).stem,
+            "roadmap current task disagrees with project state")
+    require(not re.search(r"\b[0-9a-f]{40}\b", roadmap),
+            "roadmap repeats volatile full Git SHAs")
 
     print("workflow policy: PASS")
 

@@ -7,21 +7,29 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Task,
 
-    [string]$OutputPath
+    [string]$OutputPath,
+    [string]$CandidateRoot,
+    [string]$TaskCard
 )
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
-$head = (git -C $projectRoot rev-parse HEAD).Trim()
-$tree = (git -C $projectRoot rev-parse 'HEAD^{tree}').Trim()
-$branch = (git -C $projectRoot branch --show-current).Trim()
-$trackedStatus = @(git -C $projectRoot status --porcelain --untracked-files=no)
+if ($CandidateRoot) {
+    $candidateRoot = (Resolve-Path -LiteralPath $CandidateRoot).Path
+}
+else {
+    $candidateRoot = $projectRoot
+}
+$head = (git -C $candidateRoot rev-parse HEAD).Trim()
+$tree = (git -C $candidateRoot rev-parse 'HEAD^{tree}').Trim()
+$branch = (git -C $candidateRoot branch --show-current).Trim()
+$trackedStatus = @(git -C $candidateRoot status --porcelain --untracked-files=no)
 
 if ($trackedStatus.Count -ne 0) {
     throw 'Review bundles require a clean committed candidate; tracked staged or working-tree changes remain.'
 }
 
-git -C $projectRoot merge-base --is-ancestor $Base $head
+git -C $candidateRoot merge-base --is-ancestor $Base $head
 if ($LASTEXITCODE -ne 0) {
     throw "Base $Base is not an ancestor of HEAD $head."
 }
@@ -44,10 +52,10 @@ else {
         -Force | Out-Null
 }
 
-$commits = @(git -C $projectRoot log --reverse --format='- `%H` %s' "$Base..$head")
-$paths = @(git -C $projectRoot diff --name-status "$Base..$head" |
+$commits = @(git -C $candidateRoot log --reverse --format='- `%H` %s' "$Base..$head")
+$paths = @(git -C $candidateRoot diff --name-status "$Base..$head" |
     ForEach-Object { '- `' + $_ + '`' })
-$patchLines = @(git -C $projectRoot diff --full-index --binary --no-ext-diff `
+$patchLines = @(git -C $candidateRoot diff --full-index --binary --no-ext-diff `
     "$Base..$head")
 $patchText = ($patchLines -join "`n") + "`n"
 $sha = [Security.Cryptography.SHA256]::Create()
@@ -60,13 +68,17 @@ finally {
 }
 
 $verification = New-Object System.Collections.ArrayList
-$verificationRoot = Join-Path $projectRoot 'build\verification'
+$verificationRoot = Join-Path $candidateRoot 'build\verification'
+$exactVerification = @{}
 if (Test-Path -LiteralPath $verificationRoot) {
     Get-ChildItem -LiteralPath $verificationRoot -Filter '*.json' -File |
         Sort-Object Name | ForEach-Object {
             try {
                 $summary = Get-Content -LiteralPath $_.FullName -Raw |
                     ConvertFrom-Json
+                if (-not $summary.lane) {
+                    return
+                }
                 $exact = ($summary.git_head -eq $head -and
                     $summary.git_tree -eq $tree -and
                     [int]$summary.tracked_dirty_before_count -eq 0 -and
@@ -76,6 +88,7 @@ if (Test-Path -LiteralPath $verificationRoot) {
                         '`: **STALE/EXCLUDED**; summary is not bound to this clean tree.')
                 }
                 else {
+                    $exactVerification[$summary.lane] = $summary.status
                     [void]$verification.Add('- `' + $summary.lane + '`: **' +
                         $summary.status + '**; started `' + $summary.started_utc +
                         '`; finished `' + $summary.finished_utc +
@@ -112,14 +125,40 @@ $statePath = Join-Path $projectRoot 'project_state.yaml'
 $stateText = Get-Content -LiteralPath $statePath -Raw
 $cardMatch = [regex]::Match($stateText,
     '(?m)^active_task_card:\s*(.+?)\s*$')
-if (-not $cardMatch.Success) {
+if ($TaskCard) {
+    if ($TaskCard -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]*$') {
+        throw 'TaskCard must be a task-card id without a path.'
+    }
+    $cardRelative = "docs/task_cards/$TaskCard.md"
+}
+elseif ($cardMatch.Success) {
+    $cardRelative = $cardMatch.Groups[1].Value.Trim()
+}
+else {
     throw 'project_state.yaml does not name an active task card.'
 }
-$cardPath = Join-Path $projectRoot $cardMatch.Groups[1].Value.Trim()
+$cardPath = Join-Path $projectRoot $cardRelative
 if (-not (Test-Path -LiteralPath $cardPath)) {
     throw "Active task card is missing: $cardPath"
 }
 $cardText = Get-Content -LiteralPath $cardPath -Raw
+$requiredMatch = [regex]::Match($cardText,
+    '(?m)^REQUIRED_LANES:\s*\[(?<body>[^\]]*)\]\s*$')
+$optionalMatch = [regex]::Match($cardText,
+    '(?m)^OPTIONAL_LANES:\s*\[(?<body>[^\]]*)\]\s*$')
+if (-not $requiredMatch.Success -or -not $optionalMatch.Success) {
+    throw 'Active task card must declare REQUIRED_LANES and OPTIONAL_LANES.'
+}
+$requiredLanes = @($requiredMatch.Groups['body'].Value.Split(',') |
+    ForEach-Object { $_.Trim() } | Where-Object { $_ })
+$optionalLanes = @($optionalMatch.Groups['body'].Value.Split(',') |
+    ForEach-Object { $_.Trim() } | Where-Object { $_ })
+foreach ($lane in $requiredLanes) {
+    if (-not $exactVerification.ContainsKey($lane)) {
+        [void]$verification.Add('- `' + $lane +
+            '`: **MISSING REQUIRED**; no exact-tree summary was found.')
+    }
+}
 
 $bundle = @(
     '# Generated review bundle',
@@ -130,6 +169,8 @@ $bundle = @(
     ('Head: `' + $head + '`'),
     ('Tree: `' + $tree + '`'),
     ('Patch SHA-256: `' + $patchSha256 + '`'),
+    ('Required lanes: `' + ($requiredLanes -join ', ') + '`'),
+    ('Optional lanes: `' + ($optionalLanes -join ', ') + '`'),
     "Generated UTC: $((Get-Date).ToUniversalTime().ToString('o'))",
     'Tracked candidate state: clean',
     '',

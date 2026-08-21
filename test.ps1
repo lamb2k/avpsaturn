@@ -69,7 +69,8 @@ if (-not $wsl) {
     throw 'WSL with GCC is required for the strict host-side gameplay-model test.'
 }
 
-$linuxRoot = (& $wsl.Source wslpath '-a' $PSScriptRoot).Trim()
+$wslCompatibleRoot = $PSScriptRoot.Replace('\', '/')
+$linuxRoot = (& $wsl.Source wslpath '-a' $wslCompatibleRoot).Trim()
 if ($LASTEXITCODE -ne 0 -or -not $linuxRoot) {
     throw 'Could not translate the project path for WSL.'
 }

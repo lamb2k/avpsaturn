@@ -18,11 +18,17 @@ param(
     [switch]$BuildOnly,
     [switch]$Emulator,
     [string]$EmulatorPath,
-    [string[]]$EmulatorCheck = @()
+    [string[]]$EmulatorCheck = @(),
+    [string]$ProjectRoot
 )
 
 $ErrorActionPreference = 'Stop'
-$projectRoot = $PSScriptRoot
+if ($ProjectRoot) {
+    $projectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
+}
+else {
+    $projectRoot = $PSScriptRoot
+}
 $results = New-Object System.Collections.ArrayList
 $laneStarted = Get-Date
 $laneStatus = 'PASS'
@@ -98,7 +104,14 @@ function Invoke-PowerShellCheck {
         [string[]]$Arguments
     )
 
-    $hostPath = (Get-Process -Id $PID).Path
+    $windowsPowerShell = Join-Path $env:SystemRoot `
+        'System32\WindowsPowerShell\v1.0\powershell.exe'
+    if (Test-Path -LiteralPath $windowsPowerShell) {
+        $hostPath = $windowsPowerShell
+    }
+    else {
+        $hostPath = (Get-Process -Id $PID).Path
+    }
     if (-not $hostPath -or -not (Test-Path -LiteralPath $hostPath)) {
         throw 'Could not resolve the current PowerShell host.'
     }
@@ -119,7 +132,10 @@ function Invoke-PythonTest {
 }
 
 function Invoke-FastLane {
-    Invoke-PythonTest 'tests\test_workflow_policy.py'
+    if (Test-Path -LiteralPath (Join-Path $projectRoot `
+            'tests\test_workflow_policy.py')) {
+        Invoke-PythonTest 'tests\test_workflow_policy.py'
+    }
     Invoke-PythonTest 'tests\test_avsp_hit_ko_writer_set.py'
     Invoke-PythonTest 'tests\test_avsp_vertical_slice_oracle.py'
     Invoke-PythonTest 'tests\test_avsp_translation_boundary.py'
@@ -324,17 +340,152 @@ function Invoke-TargetLane {
     }
 }
 
+function Invoke-FullLane {
+    $temporaryRoot = Join-Path ([IO.Path]::GetTempPath()) `
+        ('avp-full-' + [Guid]::NewGuid().ToString('N'))
+    $shadowRoot = Join-Path $temporaryRoot 'worktree'
+    $linkedInputs = New-Object System.Collections.ArrayList
+    $testFailure = $null
+    $diffReport = $null
+
+    New-Item -ItemType Directory -Path $temporaryRoot -Force | Out-Null
+    try {
+        Write-Host "[$Lane] create detached shadow worktree"
+        # Equivalent command: git worktree add --detach <shadow> HEAD
+        git -C $projectRoot worktree add --detach $shadowRoot HEAD
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Could not create the Full-lane shadow worktree.'
+        }
+
+        foreach ($relative in @('.deps', 'avspu')) {
+            $source = Join-Path $projectRoot $relative
+            $destination = Join-Path $shadowRoot $relative
+            if ((Test-Path -LiteralPath $source) -and
+                -not (Test-Path -LiteralPath $destination)) {
+                New-Item -ItemType Junction -Path $destination -Target $source |
+                    Out-Null
+                [void]$linkedInputs.Add($destination)
+            }
+        }
+        $ignoredGenerated = @(git -C $projectRoot ls-files --others --ignored `
+            --exclude-standard -- 'generated')
+        foreach ($relative in $ignoredGenerated) {
+            $source = Join-Path $projectRoot $relative
+            if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
+                continue
+            }
+            $destination = Join-Path $shadowRoot $relative
+            New-Item -ItemType Directory -Path (Split-Path -Parent $destination) `
+                -Force | Out-Null
+            Copy-Item -LiteralPath $source -Destination $destination -Force
+        }
+
+        try {
+            Invoke-PowerShellCheck -Name 'complete legacy/generator regression' `
+                -ScriptPath (Join-Path $shadowRoot 'test.ps1') `
+                -Arguments @('-PythonPath', $script:resolvedPython)
+        }
+        catch {
+            $testFailure = $_.Exception.Message
+        }
+
+        $changes = @(git -C $shadowRoot diff --name-status --)
+        $entries = New-Object System.Collections.ArrayList
+        foreach ($change in $changes) {
+            $parts = $change -split "`t", 2
+            $relative = $parts[-1]
+            $committedPath = Join-Path $projectRoot $relative
+            $generatedPath = Join-Path $shadowRoot $relative
+            $committedHash = $null
+            $generatedHash = $null
+            if (Test-Path -LiteralPath $committedPath -PathType Leaf) {
+                $committedHash = (Get-FileHash -LiteralPath $committedPath `
+                    -Algorithm SHA256).Hash.ToLowerInvariant()
+            }
+            if (Test-Path -LiteralPath $generatedPath -PathType Leaf) {
+                $generatedHash = (Get-FileHash -LiteralPath $generatedPath `
+                    -Algorithm SHA256).Hash.ToLowerInvariant()
+            }
+            [void]$entries.Add([ordered]@{
+                status = $parts[0]
+                path = $relative.Replace('\', '/')
+                committed_sha256 = $committedHash
+                generated_sha256 = $generatedHash
+            })
+        }
+        $patchText = (@(git -C $shadowRoot diff --full-index --binary `
+            --no-ext-diff --) -join "`n") + "`n"
+        $sha = [Security.Cryptography.SHA256]::Create()
+        try {
+            $patchBytes = [Text.Encoding]::UTF8.GetBytes($patchText)
+            $patchHash = [BitConverter]::ToString(
+                $sha.ComputeHash($patchBytes)).Replace('-', '').ToLowerInvariant()
+        }
+        finally {
+            $sha.Dispose()
+        }
+
+        $reportRoot = Join-Path $projectRoot 'build\verification'
+        New-Item -ItemType Directory -Path $reportRoot -Force | Out-Null
+        $diffReport = Join-Path $reportRoot 'full-shadow-diff.json'
+        [ordered]@{
+            schema = 1
+            candidate_head = (git -C $projectRoot rev-parse HEAD).Trim()
+            candidate_tree = (git -C $projectRoot rev-parse 'HEAD^{tree}').Trim()
+            changed_tracked_count = $changes.Count
+            patch_sha256 = $patchHash
+            entries = @($entries)
+        } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $diffReport `
+            -Encoding UTF8
+
+        if ($changes.Count -ne 0) {
+            Add-Result -Name 'Full generated-artifact byte comparison' `
+                -Status 'FAIL' -ExitCode 1 `
+                -Command "tracked drift recorded in $diffReport"
+            throw "Full changed $($changes.Count) tracked artifact(s) in the shadow worktree."
+        }
+        Add-Result -Name 'Full generated-artifact byte comparison' `
+            -Status 'PASS' -ExitCode 0 `
+            -Command "no tracked drift; report=$diffReport"
+        if ($testFailure) {
+            throw $testFailure
+        }
+    }
+    finally {
+        foreach ($link in @($linkedInputs)) {
+            if (Test-Path -LiteralPath $link) {
+                Remove-Item -LiteralPath $link -Force
+            }
+        }
+        if (Test-Path -LiteralPath $shadowRoot) {
+            $resolvedShadow = [IO.Path]::GetFullPath($shadowRoot)
+            $temporaryPrefix = [IO.Path]::GetFullPath($temporaryRoot).TrimEnd('\') + '\'
+            if (-not $resolvedShadow.StartsWith($temporaryPrefix,
+                    [StringComparison]::OrdinalIgnoreCase)) {
+                throw 'Refusing to remove a shadow path outside the lane temporary root.'
+            }
+            git -C $projectRoot worktree remove --force $resolvedShadow
+        }
+        if (Test-Path -LiteralPath $temporaryRoot) {
+            $resolvedTemporary = [IO.Path]::GetFullPath($temporaryRoot)
+            $systemTemporary = [IO.Path]::GetFullPath(
+                [IO.Path]::GetTempPath()).TrimEnd('\') + '\'
+            if (-not $resolvedTemporary.StartsWith($systemTemporary,
+                    [StringComparison]::OrdinalIgnoreCase)) {
+                throw 'Refusing to remove a Full-lane path outside the system temp root.'
+            }
+            Remove-Item -LiteralPath $resolvedTemporary -Recurse -Force
+        }
+    }
+}
+
 try {
     $resolvedPython = Resolve-Python
     switch ($Lane) {
         'Fast' { Invoke-FastLane }
         'Oracle' { Invoke-OracleLane }
         'Target' { Invoke-TargetLane }
-        'Full' {
-            Invoke-PowerShellCheck -Name 'complete legacy/generator regression' `
-                -ScriptPath (Join-Path $projectRoot 'test.ps1') `
-                -Arguments @('-PythonPath', $resolvedPython)
-        }
+        'Full' { Invoke-FullLane }
     }
     if ($laneIncomplete) {
         $laneStatus = 'INCOMPLETE'

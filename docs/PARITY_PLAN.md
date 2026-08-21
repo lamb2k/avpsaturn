@@ -1,8 +1,8 @@
 # AvP operational roadmap and parity gates
 
 This is the project's single active roadmap and backlog. `project_state.yaml`
-is the machine-readable source of truth for the current checkpoint, hashes,
-blockers, and active task card. Evidence history belongs in
+is the machine-readable source of truth for current hashes, dispositions,
+blockers, capability-condition status, and the active task card. Evidence history belongs in
 `docs/AGENT_HANDOFF.md` and the evidence ledger, not in a second roadmap.
 
 ## 1. Goal
@@ -51,39 +51,35 @@ per-tile VDP1 path only after an AvP measurement fails this contract.
 
 ## 3. Accepted baseline and current checkpoint
 
-`project_state.yaml` owns the authoritative values. At this roadmap revision:
+CURRENT_TASK: V2-2B
 
-| Item | State |
-|---|---|
-| Architecture | `avp-hybrid-native-v2` |
-| Accepted foundation | Tranche 2A at `eef350a3de6e44d1648a861ab98215c3d61ce20c` |
-| Candidate under review | Tranche 2B writer closure at `f2c9a4725dffdcb2e5689c70914511674fb3c9ef` |
-| Current checkpoint | `V2-2B-final-tier2-review` |
-| Active task card | `docs/task_cards/V2-2B.md`, `REVIEW`; `V2-B1` remains blocked pending disposition |
-| Physical capability gate | **0/12** |
+`project_state.yaml` owns the authoritative SHAs, disposition, checkpoint,
+active-card status, blockers, and capability count. `CURRENT_TASK` is the only
+mutable routing value repeated here, and the Fast lane rejects disagreement
+between it and the active task card.
 
 The accepted foundation provides exact `avspu` identity, a deterministic
 1,390-frame MAME gameplay oracle and perturbation control, the complete
 7,314-PC translation boundary, and the restored strict host suite. The
-candidate writer closure reports 301 PCs, 302 edges, 12 routines, nine computed
+The candidate writer closure reports 301 PCs, 302 edges, 12 routines, nine computed
 targets, seven semantic fields, and no unresolved or unattributed selected
-dependencies. Those candidate facts remain under Tier 2 review; they are not
-accepted merely because they are recorded here.
+dependencies. Those recorded counts are not accepted closure until the
+corrections on the active task card pass bounded Tier 2 re-review.
 
 ## 4. Active backlog
 
 Only the next eight dependency-ready outcomes belong here.
 
-| Priority | Work | State |
+| Priority | Work | Dependency |
 |---:|---|---|
-| 1 | Final consolidated Tier 2 review and acceptance disposition for the Tranche 2B HIT/KO writer closure | In review |
-| 2 | Implement the accepted HIT/KO writer set in the isolated native host differential core | Blocked only by #1 |
-| 3 | Define stable native actor-state and semantic event interfaces shared by host and Saturn | Ready as part of #2 |
-| 4 | Build exact before/after and multi-frame HIT/KO differential fixtures | Ready as part of #2 |
-| 5 | Extend the native core through the bounded host gameplay loop | After #2 |
-| 6 | Build the exact slice asset inventory/package and close missing palette coverage | After #5 |
-| 7 | Integrate the host-proven core and available assets into a thin Saturn diagnostic runner | After #5/#6 |
-| 8 | Build and run the representative, 909-tile, and overload physical replay proof | After asset representation and runner stabilize |
+| 1 | Final consolidated Tier 2 review and acceptance disposition for the Tranche 2B HIT/KO writer closure | None |
+| 2 | Implement the accepted HIT/KO writer set in the isolated native host differential core | #1 |
+| 3 | Define stable native actor-state and semantic event interfaces shared by host and Saturn | #2 |
+| 4 | Build exact before/after and multi-frame HIT/KO differential fixtures | #2 |
+| 5 | Extend the native core through the bounded host gameplay loop | #2 |
+| 6 | Build the exact slice asset inventory/package and close missing palette coverage | #5 |
+| 7 | Integrate the host-proven core and available assets into a thin Saturn diagnostic runner | #5 and #6 |
+| 8 | Build and run the representative, 909-tile, and overload physical replay proof | #6 and #7 |
 
 ## 5. Delivery roadmap
 
@@ -257,22 +253,22 @@ hashes, commands, environment, captures, and provenance.
 **Exit:** the release scope is reproducible, evidence-complete, physically
 stable, and all declared release conditions are closed.
 
-## 6. Capability slice: 0/12
+## 6. Capability slice conditions
 
-| # | Condition | Status |
-|---:|---|---|
-| 1 | Exact `avspu` identity and deterministic package provenance | OPEN for new slice artifacts |
-| 2 | Two identical cold-boot MAME gameplay oracle runs plus perturbation control | OPEN |
-| 3 | Controller input and one playable actor match semantic oracle | OPEN |
-| 4 | One class `0x1F` enemy update/animation matches, including HIT/KO repoints | OPEN |
-| 5 | Source collision, damage, hit response, and KO match | OPEN |
-| 6 | Camera/stage progression and 352 crop/framing contract match | OPEN |
-| 7 | VDP1 objects and VDP2 layers/priority/palette/final scanout match | OPEN |
-| 8 | SCSP PCM event path is audible and correctly timed | OPEN |
-| 9 | CDDA music is audible with no illegal data-read overlap | OPEN |
-| 10 | Live work-RAM/cart/VDP1/VDP2/SCSP high-water and canaries pass | OPEN |
-| 11 | Physical VDP1 draw-end, CPU/transfer timing, and input latency pass | OPEN |
-| 12 | Normal-release cold boot and ten-minute physical soak pass with no missed frame, corruption, or fallback | OPEN |
+| # | Condition |
+|---:|---|
+| 1 | Exact `avspu` identity and deterministic package provenance |
+| 2 | Two identical cold-boot MAME gameplay oracle runs plus perturbation control |
+| 3 | Controller input and one playable actor match semantic oracle |
+| 4 | One class `0x1F` enemy update/animation matches, including HIT/KO repoints |
+| 5 | Source collision, damage, hit response, and KO match |
+| 6 | Camera/stage progression and 352 crop/framing contract match |
+| 7 | VDP1 objects and VDP2 layers/priority/palette/final scanout match |
+| 8 | SCSP PCM event path is audible and correctly timed |
+| 9 | CDDA music is audible with no illegal data-read overlap |
+| 10 | Live work-RAM/cart/VDP1/VDP2/SCSP high-water and canaries pass |
+| 11 | Physical VDP1 draw-end, CPU/transfer timing, and input latency pass |
+| 12 | Normal-release cold boot and ten-minute physical soak pass with no missed frame, corruption, or fallback |
 
 No partial condition advances the count. Close a condition only when the exact
 binary/profile hash, command, environment, tier, and evidence artifact are
@@ -313,7 +309,8 @@ requires them:
 ## 9. Update rules
 
 1. `project_state.yaml` is the machine-readable truth for accepted/candidate
-   SHAs, hashes, blockers, gate count, and active task card.
+   SHAs, disposition, hashes, blockers, condition statuses, gate count, accepted
+   dependencies, and active task card.
 2. This file is the only active roadmap. Do not create another plan of record.
 3. The task card named by `project_state.yaml` contains only the first
    executable backlog body. Its status controls launch.

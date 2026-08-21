@@ -2,13 +2,43 @@ schema: 1
 architecture: avp-hybrid-native-v2
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
+review_candidate_status: CORRECTIONS_REQUIRED
 current_checkpoint: V2-2B-final-tier2-review
 active_task_card: docs/task_cards/V2-2B.md
-task_status: REVIEW
+task_status: CORRECTIONS
 capability_gate: 0/12
+accepted_tasks: [WF-1]
 contract_sha256: 74016fb2e73c2ae00144fa062662b37e0f575a3ee3ff3b7a420b1ed0f55a4638
 oracle_manifest_sha256: 106fffb92cc5a14acf5fdae7eb14d33b7d9206b9f9ecffcbac67a6fc326696d2
 translation_boundary_sha256: 95e002b7f6d48e8aafbe5e201a370b6dc7c3c5559e7d2253901d0473c0c7b0f4
 writer_set_manifest_sha256: 6be81db48baad4327f2ef53a879cba0c9f67bed610127494f16f3c6deab9ae28
 open_blockers:
-  - V2-2B requires one final consolidated Tier 2 disposition before V2-B1 can launch.
+  - V2-2B does not bind exact writer ownership for every selected seven-field transition.
+  - V2-2B control flow is not a call-rooted closure through returns or explicit typed exits.
+  - V2-2B actor-field, ROM-data, work-RAM, outgoing-edge, and exclusion dependencies are asserted rather than derived.
+  - V2-2B committed two capture helpers outside its exhaustive owned-path contract.
+capability_conditions:
+  - id: source_identity
+    status: OPEN
+  - id: deterministic_oracle
+    status: OPEN
+  - id: controller_player
+    status: OPEN
+  - id: enemy_hit_ko
+    status: OPEN
+  - id: collision_damage
+    status: OPEN
+  - id: camera_stage
+    status: OPEN
+  - id: video_scanout
+    status: OPEN
+  - id: scsp_pcm
+    status: OPEN
+  - id: cdda
+    status: OPEN
+  - id: memory_canaries
+    status: OPEN
+  - id: physical_timing
+    status: OPEN
+  - id: normal_release_soak
+    status: OPEN

@@ -26,6 +26,19 @@ function Read-Field {
     return $match.Groups[1].Value.Trim()
 }
 
+function Read-InlineList {
+    param([string]$Text, [string]$Name)
+    $value = Read-Field -Text $Text -Name $Name
+    if ($value -notmatch '^\[(?<body>.*)\]$') {
+        throw "$Name must be an inline list."
+    }
+    $body = $Matches['body'].Trim()
+    if (-not $body) {
+        return @()
+    }
+    return @($body.Split(',') | ForEach-Object { $_.Trim() })
+}
+
 if (-not (Test-Path -LiteralPath $statePath)) {
     throw "Missing project state: $statePath"
 }
@@ -52,6 +65,19 @@ if ($checkpoint -ne $stateCheckpoint) {
 }
 if ($status -ne 'READY') {
     throw "Task $Task is $status. Update the accepted disposition before launch."
+}
+
+$dependencies = @(Read-InlineList -Text $card -Name 'DEPENDENCIES')
+$acceptedTasks = @(Read-InlineList -Text $state -Name 'accepted_tasks')
+foreach ($dependency in $dependencies) {
+    if ($dependency -notin $acceptedTasks) {
+        throw "Task $Task depends on unaccepted task $dependency."
+    }
+}
+$requiredLanes = @(Read-InlineList -Text $card -Name 'REQUIRED_LANES')
+$optionalLanes = @(Read-InlineList -Text $card -Name 'OPTIONAL_LANES')
+if ($requiredLanes.Count -eq 0) {
+    throw "Task $Task does not declare any required verification lane."
 }
 
 $blockSection = [regex]::Match($state,
@@ -180,6 +206,8 @@ $prompt = @(
     "BASE: $base",
     "BRANCH: $branch",
     "WORKTREE: $WorktreePath",
+    "REQUIRED_LANES: $($requiredLanes -join ', ')",
+    "OPTIONAL_LANES: $($optionalLanes -join ', ')",
     '',
     'Read AGENTS.md and project_state.yaml, then execute this task card:',
     '',
@@ -196,6 +224,9 @@ $prompt | Set-Content -LiteralPath $launchPath -Encoding UTF8
     base = $base
     branch = $branch
     worktree = $WorktreePath
+    dependencies = @($dependencies)
+    required_lanes = @($requiredLanes)
+    optional_lanes = @($optionalLanes)
     prepared = [bool]$Prepare
     launch_prompt = $launchPath
 } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $metadataPath -Encoding UTF8
