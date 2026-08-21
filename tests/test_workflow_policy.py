@@ -63,7 +63,8 @@ def normalized_sha256(path: Path) -> str:
 
 def validate_relationship(state: str, card: str, accepted_tasks: set[str]) -> None:
     status = scalar(state, "task_status")
-    require(status in {"BLOCKED", "REVIEW", "READY", "CORRECTIONS"},
+    require(status in {"BLOCKED", "REVIEW", "READY", "CORRECTIONS",
+                       "EVIDENCE_REPAIR", "NOT_REVIEWABLE", "ACCEPTED"},
             f"unsupported task status: {status}")
     require(status == scalar(card, "STATUS"),
             "task-card status and project state disagree")
@@ -261,10 +262,35 @@ def main() -> None:
     launcher = (ROOT / "tools/start-agent-task.ps1").read_text(encoding="utf-8")
     for token in ("active_task_card", "task_status", "current_checkpoint",
                   "open_blockers", "acceptedHead -ne $candidateHead",
-                  "inlineBlockers", "--is-ancestor $acceptedHead $base",
+                  "Read-Blockers", "TaskKind", "Correction",
+                  "existing branch/worktree", "preexisting_changes",
+                  "--is-ancestor $acceptedHead $base",
                   "--untracked-files=no", "repository.HEAD", "gpt-5.6-sol",
                   "xhigh", "REQUIRED_LANES", "DEPENDENCIES"):
         require(token in launcher, f"launcher lacks invariant: {token}")
+
+    executor = (ROOT / "tools/Invoke-TaskExecutor.ps1").read_text(
+        encoding="utf-8")
+    for token in ("EXECUTOR_POLICY", "PREFERRED_EXECUTOR", "CLAUDE_MODEL",
+                  "CLAUDE_EFFORT", "ResumeSessionId", "FeedbackPath",
+                  "READY_FOR_REVIEW", "VERIFICATION_FAILED",
+                  "Invoke-VerificationLane", "New-ReviewBundle.ps1"):
+        require(token in executor, f"task executor lacks {token}")
+    require("for ($attempt" not in executor,
+            "task executor contains an autonomous repair loop")
+
+    disposition = (ROOT / "tools/Apply-ReviewDisposition.ps1").read_text(
+        encoding="utf-8")
+    for token in ("review_bundle_sha256", "output_sha256", "semantic",
+                  "provenance", "saturn", "conservatively resolve",
+                  "automatic selection is forbidden",
+                  "must be integrated into controller HEAD"):
+        require(token in disposition,
+                f"disposition helper lacks invariant: {token}")
+    require(not (ROOT / "tools/Invoke-AvpControlLoop.ps1").exists(),
+            "repository contains a second autonomous planning loop")
+    require(not (ROOT / ".codex/hooks.json").exists(),
+            "repository contains a self-advancing Stop hook")
 
     bundle = (ROOT / "tools/New-ReviewBundle.ps1").read_text(encoding="utf-8")
     for token in ("clean committed candidate", "HEAD^{tree}",

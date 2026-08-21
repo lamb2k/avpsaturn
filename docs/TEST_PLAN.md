@@ -10,7 +10,8 @@ regression implementation.
 .\verify.ps1 -Lane Fast
 ```
 
-Runs workflow-policy checks plus the direct V2 writer/oracle/boundary tests. A
+Runs workflow-policy and deterministic workflow-helper fixture checks plus the
+direct V2 writer/oracle/boundary tests. A
 task can add focused Python tests with `-Test` or portable C commands with
 `-Command`. Fast never regenerates private capture evidence.
 

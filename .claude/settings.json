@@ -1,5 +1,30 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "model": "claude-opus-5",
-  "effortLevel": "medium"
+  "effortLevel": "medium",
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "deny": [
+      "Edit(/project_state.yaml)",
+      "Edit(/docs/task_cards/**)",
+      "Bash(git reset *)",
+      "Bash(git clean *)",
+      "Bash(git stash *)",
+      "Bash(git rebase *)",
+      "Bash(git push --force *)",
+      "Bash(git add -A)",
+      "Bash(git add .)",
+      "Bash(git checkout -- .)",
+      "Bash(git restore . *)",
+      "PowerShell(git reset *)",
+      "PowerShell(git clean *)",
+      "PowerShell(git stash *)",
+      "PowerShell(git rebase *)",
+      "PowerShell(git push --force *)",
+      "PowerShell(git add -A)",
+      "PowerShell(git add .)",
+      "PowerShell(git checkout -- .)",
+      "PowerShell(git restore . *)"
+    ]
+  }
 }

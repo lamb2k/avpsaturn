@@ -34,12 +34,26 @@ more mapping.
 ## Operating commands
 
 ```powershell
-.\verify.ps1 -Lane Fast
-.\verify.ps1 -Lane Oracle
-.\tools\New-ReviewBundle.ps1 -Base f2c9a4725dffdcb2e5689c70914511674fb3c9ef -Task workflow-simplification
+.\tools\Invoke-TaskExecutor.ps1 -Task V2-2B -Executor Auto -TaskKind Correction -PlanOnly
+.\tools\Invoke-TaskExecutor.ps1 -Task V2-2B -Executor Auto -TaskKind Correction
 ```
 
-Keep corrections on the current checkpoint branch/worktree. After re-review and acceptance,
-activate the next task by updating `project_state.yaml` and the card status,
-then use `tools/start-agent-task.ps1`. Launch and review renderings live under
-ignored `build/` paths and are never committed as source history.
+The executor performs one bounded provider invocation, then runs every required
+lane and generates the candidate-bound bundle only when all lanes pass. It does
+not retry or interpret failures. Codex Goal Mode inspects its ignored JSON
+result, may explicitly resume the same session with `-ResumeSessionId` and a
+bounded `-FeedbackPath`, and owns all reviewer invocation and consolidation.
+
+After external semantic, provenance, and Saturn review, Goal Mode writes one
+hashed disposition under ignored `build/`, integrates an accepted candidate
+into the controller branch when applicable, and invokes:
+
+```powershell
+.\tools\Apply-ReviewDisposition.ps1 -DispositionPath <ignored-json-path>
+```
+
+The disposition helper validates and applies only the declared result. On
+V2-2B acceptance it may mark V2-2B accepted and the explicitly named V2-B1 card
+READY, but it never launches or implements V2-B1. Goal Mode inspects and commits
+the resulting explicit state/card diff. No repository Stop hook or autonomous
+control loop is installed.

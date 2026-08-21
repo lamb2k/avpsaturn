@@ -65,6 +65,22 @@ commit launch prompts or reviewer invocations. Use
 `tools/start-agent-task.ps1` to create ignored launch metadata and
 `tools/New-ReviewBundle.ps1` to create the ignored review bundle.
 
+Codex Goal Mode is the only reasoning and orchestration layer. Repository
+scripts do not interpret review findings, select roadmap work, make
+architecture decisions, or run autonomous retry loops. Use
+`tools/Invoke-TaskExecutor.ps1` for exactly one explicitly active
+implementation, correction, or evidence-repair invocation. It may invoke the
+card-authorized Codex or Claude provider, run every required lane, and generate
+a candidate-bound bundle; Goal Mode decides whether any further invocation is
+warranted.
+
+After Goal Mode obtains independent external review results, use
+`tools/Apply-ReviewDisposition.ps1` to validate their hashes, candidate binding,
+three required roles, and conservative verdict. The script may apply only the
+predeclared mechanical transition. It never launches reviewers, chooses an
+unlisted next card, commits, pushes, or begins the next task. An accepted
+candidate must already be integrated into the controller HEAD before promotion.
+
 ## Evidence rules
 
 Use the existing vocabulary exactly: `PHYSICAL_SATURN`, `MULTI_EMULATOR`,
