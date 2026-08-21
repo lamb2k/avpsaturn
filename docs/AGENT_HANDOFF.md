@@ -36,7 +36,9 @@ Return branch/base/final SHA, commits, explicit files, target/tool/input hashes,
 
 The final `CODEX_REVIEW_INVOCATION` must request both the supervisor ruling and
 the corresponding next `IMPLEMENTOR_INVOCATION`, using the continuation fields
-defined in `AGENTS.md`. Acceptance requests the next dependency-ready tranche;
+defined in `AGENTS.md` and the complete envelope in
+`docs/CODEX_REVIEW_TEMPLATE.md`. A bare heading or review-only paragraph is not
+a valid return. Acceptance requests the next dependency-ready tranche;
 corrections request one consolidated correction body; not-reviewable requests
 only the missing evidence or isolation work. The implementor does not self-
 accept or rotate the plan.

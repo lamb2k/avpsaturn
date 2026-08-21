@@ -9,7 +9,8 @@ Execute only `docs/NEXT_AGENT_PROMPT.md`. Do not resume the archived RP presenta
 Use the project agent definitions under `.claude/agents/` only within the boundaries in `AGENTS.md`. Preserve the dirty tree and stage explicit paths.
 
 At completion or a declared hard stop, end with the complete
-`CODEX_REVIEW_INVOCATION` required by `AGENTS.md`. It must request a supervisor
-ruling and a follow-on `IMPLEMENTOR_INVOCATION` for acceptance, corrections,
-or missing evidence as applicable. Do not self-accept, rotate the plan, or
-choose the next tranche.
+`CODEX_REVIEW_INVOCATION` required by `AGENTS.md`, copied from and filled using
+`docs/CODEX_REVIEW_TEMPLATE.md`. A bare heading or review-only paragraph is not
+a valid handoff. It must request a supervisor ruling and a follow-on
+`IMPLEMENTOR_INVOCATION` for acceptance, corrections, or missing evidence as
+applicable. Do not self-accept, rotate the plan, or choose the next tranche.

@@ -58,7 +58,9 @@ hardware status; remaining ADAPTED/GAP/MISSING work; dirty and untracked files;
 the exact blocker if incomplete; and a ready-to-paste CODEX_REVIEW_INVOCATION.
 
 The CODEX_REVIEW_INVOCATION must request both review and continued assignment.
-Include the exact machine-readable fields required by AGENTS.md:
+Copy the complete envelope from docs/CODEX_REVIEW_TEMPLATE.md and fill every
+field. Do not emit only a heading or a review-only paragraph. Include the exact
+machine-readable fields required by AGENTS.md:
 SUPERVISOR_CONTINUATION_REQUIRED, ON_ACCEPTED, ON_CORRECTIONS_REQUIRED, and
 ON_NOT_REVIEWABLE. If the candidate is accepted, request that Codex reconcile
 the plan and return the next dependency-ready IMPLEMENTOR_INVOCATION. If it

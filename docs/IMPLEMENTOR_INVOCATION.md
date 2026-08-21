@@ -75,9 +75,11 @@ implementation branch. Return the complete consolidated report and a ready
 CODEX_REVIEW_INVOCATION only when the tranche passes or a declared stop
 condition actually fires. That review invocation must request both the
 supervisor disposition and continued assignment, include the continuation
-fields required by AGENTS.md, and require Codex to return the next bounded
-IMPLEMENTOR_INVOCATION appropriate to ACCEPTED, CORRECTIONS REQUIRED, or NOT
-REVIEWABLE. Do not self-accept or choose the next tranche.
+fields required by AGENTS.md, copy and fill the complete
+docs/CODEX_REVIEW_TEMPLATE.md envelope, and require Codex to return the next
+bounded IMPLEMENTOR_INVOCATION appropriate to ACCEPTED, CORRECTIONS REQUIRED,
+or NOT REVIEWABLE. A bare heading or review-only paragraph is not acceptable.
+Do not self-accept or choose the next tranche.
 ```
 
 ## Launch note

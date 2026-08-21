@@ -98,8 +98,10 @@ Return:
 7. exact commands and exit codes;
 8. updated evidence tiers and all remaining gaps;
 9. worktree status including unrelated/untracked files;
-10. a ready-to-paste `CODEX_REVIEW_INVOCATION` that requests both the
-    supervisor's disposition and continued assignment. Include exactly:
+10. a ready-to-paste `CODEX_REVIEW_INVOCATION`, copied from
+    `docs/CODEX_REVIEW_TEMPLATE.md` with every field filled, that requests both
+    the supervisor's disposition and continued assignment. A bare heading or
+    review-only paragraph is a failed handoff. Include exactly:
 
 ```text
 SUPERVISOR_CONTINUATION_REQUIRED: true
