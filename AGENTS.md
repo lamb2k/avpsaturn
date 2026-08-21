@@ -40,10 +40,12 @@ Do not build a CPS-2 emulator, runtime 68000 interpreter, generalized Capcom eng
 
 Only execute the bounded tranche in `docs/NEXT_AGENT_PROMPT.md`. Tranche 1's
 vertical-slice contract, deterministic MAME oracle, and executable boundary are
-accepted at `a11527a18c6ec02d3bc3f3421674755a3102c6c5`. The active body is the
-narrow Tranche 2A host-baseline repair that restores the historically intended
-30-frame frontend start transition and makes the complete host suite reviewable
-before V2 lifting begins.
+accepted at `a11527a18c6ec02d3bc3f3421674755a3102c6c5`. Tranche 2A's strict-host
+baseline repair is accepted at `eef350a3de6e44d1648a861ab98215c3d61ce20c`;
+the complete host/generator suite is reviewable again. The active body is the
+first V2 subtranche: close the exact class `0x1F` enemy HIT/KO writer set and
+its routine/data/event dependencies as a deterministic, falsifiable manifest.
+It does not yet emit or integrate production lifted C.
 
 The first accepted slice must contain real gameplay: deterministic startup, controller input, one player, one class `0x1F` enemy, movement, animation, attack/contact, collision/hit/KO, camera/stage movement, representative layers and palettes, PCM, CDDA, residency/transfer, final scanout, and physical timing. Title/menu work cannot substitute for any item.
 

@@ -6,7 +6,7 @@ The 2026-08-20 reset invalidated the old RP sequence as a plan of record. Existi
 
 | Track | Purpose | Current status |
 |---|---|---|
-| Shared primitives | Prove byte readers, sparse spans, animation, collision predicate, object/tile emission, palette bounds, scene parsing, and package budgets. | Strong retained host/MAME evidence; complete suite blocked by the pre-existing start-transition declarations until Tranche 2A. |
+| Shared primitives | Prove byte readers, sparse spans, animation, collision predicate, object/tile emission, palette bounds, scene parsing, and package budgets. | Strong retained host/MAME evidence; complete host/generator suite restored and accepted in Tranche 2A. |
 | Presentation/stage parity | Prove VDP1/VDP2 semantic composition and final output for a bounded scene. | One-emulator RP4 fixture evidence; production cell-map scene and hardware scanout open. |
 | Capability slice | Prove integrated gameplay and timing from cold boot on physical Saturn. | 0/12. |
 
@@ -15,6 +15,12 @@ two-cold-run oracle plus perturbation control, and classified the complete
 executed boundary at accepted HEAD
 `a11527a18c6ec02d3bc3f3421674755a3102c6c5`. This is MAME/translated evidence;
 it does not close an integrated physical capability condition or change 0/12.
+
+Accepted maintenance gate: Tranche 2A restored the intended 30-frame
+start-transition declarations and literal boundary tests at accepted HEAD
+`eef350a3de6e44d1648a861ab98215c3d61ce20c`. The strict C90 model, complete
+host/generator suite, oracle/boundary controls, and two mutations pass. This is
+`MEASURED` host evidence only and does not change 0/12.
 
 ## Capability slice: 0/12
 
@@ -39,8 +45,9 @@ No partial condition advances the count. A condition closes only when its eviden
 
 1. Freeze target/fidelity/provenance schema. **Accepted foundation.**
 2. Build unified MAME gameplay oracle and executable boundary. **Accepted foundation.**
-2A. Restore the strict host-suite baseline with the bounded start-transition declaration/test repair. **Current.**
-3. Lift the required executable writer set on host (V2).
+2A. Restore the strict host-suite baseline with the bounded start-transition declaration/test repair. **Accepted.**
+3A. Close the class `0x1F` HIT/KO executable writer/routine set and lift contract (V2A / Tranche 2B). **Current.**
+3B. Implement the accepted bounded writer set in the host differential harness (V2B).
 4. Build traceable slice packages.
 5. Integrate deterministic native runtime.
 6. Run VDP1 budget and VDP2 final-composition probes.

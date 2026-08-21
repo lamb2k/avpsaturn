@@ -144,3 +144,26 @@ was altered.
 Evidence tier: `MEASURED` host only. Saturn target build, emulator, release,
 audio, and physical-hardware lanes remain `UNRUN` and unchanged; Capability Gate
 stays 0/12. No resource layout or runtime package changed.
+
+## Supervisor acceptance and V2A selection
+
+Codex reviewed the complete
+`c9d6dc420df999dae9b8bedaea4bf0f735214ea2..eef350a3de6e44d1648a861ab98215c3d61ce20c`
+range and accepted Tranche 2A at
+`eef350a3de6e44d1648a861ab98215c3d61ce20c`. The range changes only
+`capability_model.h`, `tests/capability_model_test.c`, this handoff, and the
+evidence ledger. Strict C90 GREEN and the complete focused oracle/boundary
+controls pass; the immutable-line RED reproduces exactly the two missing
+declarations; independent duration and transition-state mutations abort at the
+intended assertions. The accepted contract, oracle, and boundary Git blobs
+remain `74016fb2...`, `106fffb9...`, and `95e002b7...`; `avspu` verifies good.
+
+The next dependency-ready body is Tranche 2B / V2A in
+`docs/NEXT_AGENT_PROMPT.md`: derive and validate the smallest closed executable
+writer/routine set responsible for the class `0x1F` enemy HIT and KO animation
+repoints in source frames 5191-5469. The committed result is a provenance-rich
+manifest and its generator/tests, not raw trace/disassembly/opcode material and
+not production lifted C. It must bind every selected PC/edge to the accepted
+translation boundary, correlate the HIT/KO semantic changes to executed writer
+sites, close calls/data/event exits, and prove zero unresolved or unattributed
+selected dependencies. Capability Gate remains 0/12.
