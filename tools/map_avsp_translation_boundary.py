@@ -652,8 +652,20 @@ def validate_committed(report: dict) -> None:
     if data["rom_data_spans_validated"] <= 0 or not data["rom_data_span_sha256"]:
         raise ValueError("committed artifact validated no ROM data spans from the program image")
     separation = tv["opcode_program_separation"]
-    if separation["executed_pcs_compared"] <= 0 or separation["divergent_pcs"] <= 0:
+    compared = separation["executed_pcs_compared"]
+    divergent = separation["divergent_pcs"]
+    if compared <= 0 or divergent <= 0:
         raise ValueError("committed artifact does not prove opcode/program separation")
+    # Bind the divergence proof to the full executed-PC set: the opcode/program
+    # comparison must cover every executed PC, and every compared PC must have
+    # diverged.  Otherwise a single divergent PC could stand in for a whole-image
+    # separation proof.
+    if compared != coverage["executed_pc_count"]:
+        raise ValueError("committed separation compared %d of %d executed PCs"
+                         % (compared, coverage["executed_pc_count"]))
+    if divergent != compared:
+        raise ValueError("committed separation has %d non-divergent of %d compared PCs"
+                         % (compared - divergent, compared))
 
     # ROM/work-RAM/hardware attribution must be present.
     wb = report["writer_boundary"]
@@ -840,25 +852,32 @@ def self_test() -> None:
         raise AssertionError("committed control did not fail: %s" % name)
 
     validate_committed(_synthetic_report())
+    expect_committed_fail("direct_sites_zero",
+                          lambda r: r["target_validation"]["direct_transfers"].__setitem__("sites", 0))
     expect_committed_fail("opcode_and_dynamic_validated_zero",
                           lambda r: r["target_validation"]["direct_transfers"].__setitem__("opcode_and_dynamic_validated", 0))
     expect_committed_fail("observed_target_total_zero",
                           lambda r: r["target_validation"]["computed_transfers"].__setitem__("observed_target_total", 0))
-    expect_committed_fail("program_bytes_zero_wrong_hash",
-                          lambda r: (r.__setitem__("program_image_bytes", 0),
-                                     r["inputs"].__setitem__("program_sha256", "0" * 64)))
+    expect_committed_fail("program_bytes_zero_hash_retained",
+                          lambda r: r.__setitem__("program_image_bytes", 0))
+    expect_committed_fail("program_sha_wrong_bytes_retained",
+                          lambda r: r["inputs"].__setitem__("program_sha256", "0" * 64))
     expect_committed_fail("removed_global_attribution",
                           lambda r: (r["writer_boundary"].__setitem__("rom_data_reference_counts", {}),
                                      r["writer_boundary"].__setitem__("work_ram_reference_counts", {})))
     expect_committed_fail("removed_address_space_attribution",
                           lambda r: r["inputs"].__setitem__("data_address_space", ""))
+    expect_committed_fail("separation_compared_reduced",
+                          lambda r: r["target_validation"]["opcode_program_separation"].__setitem__("executed_pcs_compared", 1))
+    expect_committed_fail("separation_divergent_reduced",
+                          lambda r: r["target_validation"]["opcode_program_separation"].__setitem__("divergent_pcs", 1))
 
     # If the committed artifact exists, validate it too.
     if OUT.is_file():
         validate_committed(json.loads(OUT.read_text(encoding="utf-8")))
 
     print("translation-boundary self-test: decoders, seven model mutation "
-          "controls, five committed-artifact controls and committed-artifact "
+          "controls, nine committed-artifact controls and committed-artifact "
           "validation pass")
 
 
