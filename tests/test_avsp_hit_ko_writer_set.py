@@ -196,10 +196,25 @@ def main() -> int:
         raise AssertionError("writer dispatch lacks derived caller/callee closure")
 
     controls = [
+        ("remove observed health writer", lambda d: d["writer_observations"]["health"].pop()),
+        ("remove observed hit writer", lambda d: d["writer_observations"]["hit_value"].pop()),
+        ("remove health dependency writer PC", lambda d: d["dependencies"]
+         ["health_hit_writer_dependencies"][0]["writer_pcs"].pop()),
+        ("corrupt health before value", lambda d: d["field_transitions"]["health"][0]
+         .__setitem__("before_value", -999)),
+        ("health writer destination", lambda d: d["writer_observations"]["health"][2]
+         .__setitem__("destination", "0xffa044")),
+        ("hit writer width", lambda d: d["writer_observations"]["hit_value"][2]
+         .__setitem__("write_width_bytes", 2)),
+        ("health actual PC", lambda d: d["writer_observations"]["health"][2]
+         .__setitem__("instruction_pc", "0xfffffe")),
+        ("health register binding", lambda d: d["writer_observations"]["health"][2]
+         ["dynamic_register_binding"].pop("a1")),
         ("remove HIT anim writer", lambda d: d["correlations"]["hit"]["writer_instances"].pop()),
         ("remove KO anim writer", lambda d: d["correlations"]["ko"]["writer_instances"].pop()),
         ("remove selected edge", lambda d: d["closure"]["selected_edges"].pop()),
         ("unresolved computed target", lambda d: d["closure"]["unresolved_computed_targets"].append("0x000002")),
+        ("unattributed dependency", lambda d: d["closure"]["unattributed_dependencies"].append("0x000002")),
         ("PC outside boundary", lambda d: d["closure"]["selected_pcs"].__setitem__(0, "0xfffffe")),
         ("ROM dependency relabel", lambda d: d["dependencies"]["rom_data"][0].__setitem__("address_space", "opcodes")),
         ("remove actor field", lambda d: d["coverage"]["actor_fields"].remove("action")),
