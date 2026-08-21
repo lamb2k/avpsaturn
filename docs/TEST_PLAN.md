@@ -1,78 +1,91 @@
-# Active test plan
+# Verification lanes
 
 Tests retire one claim at one evidence tier. They do not promote themselves.
+Use `verify.ps1` for routine work and keep `test.ps1` as the complete legacy
+regression implementation.
 
-## T0: identity and provenance
+## Fast
 
-- Verify MAME executable version/hash.
-- Run `mame.exe -rompath . -verifyroms avspu`.
-- Parse list XML and compare set/parent/display/ROM inventory with the source ledger.
-- Reject any generated artifact missing set, ROM hashes, source address space/offset, extractor pin/parameters, output hash, schema, consumer lifetime, tier, or exclusions.
+```powershell
+.\verify.ps1 -Lane Fast
+```
 
-Acceptance: exact identity, deterministic manifests, and non-vacuous wrong-set/wrong-hash controls.
+Runs workflow-policy checks plus the direct V2 writer/oracle/boundary tests. A
+task can add focused Python tests with `-Test` or portable C commands with
+`-Command`. Fast never regenerates private capture evidence.
 
-## T1: focused host tests
+Required during iteration. Behavioral work needs a failing-first fixture and a
+real mutation or negative control.
 
-Run the narrowest test for the changed subsystem first. Preserve strict C90/warnings-as-errors for portable runtime models. Every behavioral test needs at least one mutation/negative control that would fail if the asserted rule were removed or perturbed.
+## Oracle
 
-Key retained areas: actor fields, animation walk, table-set/class attribution, collision predicate, object emission, tile archive, CRAM bounds, scene parser/runtime, disc guard, palette coverage, scene census, residency calculations, VDP1 command model.
+```powershell
+.\verify.ps1 -Lane Oracle
+```
 
-Acceptance: RED is recorded before a behavior correction; GREEN and negative control both pass afterward.
+Runs target identity, writer-map self-tests and scratch mutations, committed
+writer/oracle/boundary validators, and provenance bindings. If a pinned private
+input is absent, the lane is `INCOMPLETE` and exits nonzero; it cannot report an
+unqualified pass. Pass `-Regenerate` only in an assigned clean worktree that
+owns the generated artifacts and has the pinned private inputs.
 
-## T2: complete host/generator regression
+Required for oracle, translator, evidence schema, validator, writer-boundary,
+or lifted-behavior changes.
 
-`test.ps1` regenerates tracked evidence. Run it only in the assigned clean implementation worktree when all outputs are owned, or in an isolated shadow copy. Record Python and WSL GCC versions, exact command, exit code, and generated diffs.
+## Target
 
-Acceptance: exit 0, no weakened assertions, deterministic regeneration, and explicit review of every changed manifest.
+Build-only iteration must be requested explicitly:
 
-## T3: unified MAME gameplay oracle
+```powershell
+.\verify.ps1 -Lane Target -TargetProfile EncounterTest -BuildOnly
+```
 
-From cold boot with fixed config/NVRAM/input, record cadence-1:
+Saturn-facing acceptance requires the exact normal image and profile-specific
+semantic/render/final-scanout readback:
 
-- input and frame;
-- actor class/type/state/substate/action/animation record;
-- positions, velocities, facing, health;
-- object list and palette;
-- collision/hit/damage/KO events;
-- camera and stage state;
-- scroll registers, layer order, line/row scroll, and palette writes;
-- QSound commands/events;
-- final-frame hash.
+```powershell
+.\verify.ps1 -Lane Target -TargetProfile Release -Emulator `
+  -EmulatorCheck <checked-in-profile-readback-collector.ps1>
+```
 
-Run twice from cold boot. A one-frame input perturbation must change the expected downstream state. Raw private traces stay ignored; committed manifests contain schemas, hashes, counts, and bounded evidence only.
+Builds Saturn-facing code with host tests skipped because Fast/Oracle are
+separate. `Release` requests and verifies the exact `release-normal-release`
+profile. Required artifacts must exist and are hashed. `-Emulator` is invalid
+without at least one executable profile-specific collector/check; launching
+alone is not evidence. The lane then automatically runs the checked-in
+`tests/target/verify_release_readback.py`, which binds the ignored report to the
+exact ISO/profile, accepted oracle, emulator identity, and semantic, resource,
+render, and final-scanout domains. `-BuildOnly` returns the distinct status
+`BUILD_ONLY` and is explicitly insufficient for Saturn-facing acceptance.
 
-Acceptance: two byte-identical ledgers, complete required fields, non-vacuous control, exact tool/ROM/config provenance.
+Required when Saturn-facing code, packaging, resources, or device behavior
+changes. Before acceptance, the release profile must cold-boot and its relevant
+semantic state, device resources, render state, and final scanout must pass
+bounded emulator checks. Record the compile profile and artifact hashes; never
+relabel this as physical evidence.
 
-## T4: target build and bounded emulator checks
+## Full
 
-- Build the assigned diagnostic profile only after T0-T3.
-- Read back compile profile, ISO members, and artifact hashes.
-- Compare semantic state first, then VDP1 command/texture/palette, VDP2 register/VRAM/CRAM, and final scanout.
-- One emulator remains `ONE_EMULATOR`; use a second independent emulator only when the claim benefits from it.
+```powershell
+.\verify.ps1 -Lane Full
+```
 
-Acceptance: no adapted fallback in the accepted slice and no mismatch hidden by screenshot plausibility.
+Runs the complete `test.ps1` legacy/generator chain. It can rewrite tracked
+evidence, so run it only in the checkpoint's clean worktree when those paths are
+owned, or in an isolated shadow copy. Review every generated diff.
 
-## T5: normal release
+Required at acceptance, before merge, and after foundational tooling changes.
+For Saturn-facing acceptance, Full never substitutes for the separate exact
+`release-normal-release` Target plus emulator-readback gate.
 
-Run `.\build.ps1 -Clean -Release` in the clean implementation worktree. Require `release-normal-release` and a manifest that identifies every phase asset/audio member. Re-run the complete emulator semantic and final-scanout route on this exact ISO.
+## Risk mapping
 
-Acceptance: normal profile, deterministic rebuild/hash or documented build nondeterminism, no diagnostic-only fixtures/markers, and zero required semantic mismatches.
+| Tier | Typical change | Minimum lanes |
+|---|---|---|
+| 0 | Mechanical or documentation-only | Fast |
+| 1 | Translated behavior or bounded runtime feature | Fast + Oracle; release Target + emulator readback if Saturn-facing |
+| 2 | Oracle, validator, memory/device ownership, physical timing, architecture | Fast + Oracle + Full; release Target + emulator readback when Saturn-facing |
 
-## T6: physical Saturn
-
-Follow `docs/HARDWARE_TEST.md`. First run the render/transfer budget probe; later run the integrated capability slice. Record console/cart/loader, ISO hash, input device, capture method, draw-end/timer/high-water counters, audio, latency, final scanout, and soak.
-
-Acceptance: only the hardware checklist can produce `PHYSICAL_SATURN` evidence.
-
-## Stop rules
-
-Stop the tranche and return evidence when:
-
-- target/tool/input identity cannot be pinned;
-- the oracle is nondeterministic or lacks a required semantic field;
-- executed control flow remains unresolved beyond the tranche threshold;
-- a physical draw/transfer deadline fails;
-- memory/audio ownership overlaps or canaries fail;
-- continuing requires a different architecture, new authority, unavailable private evidence, or user physical interaction.
-
-Do not “fix” a stop by expanding into a general engine or weakening acceptance.
+Physical Saturn testing is outside these host lanes. Follow
+`docs/HARDWARE_TEST.md`; only that procedure may create `PHYSICAL_SATURN`
+evidence.

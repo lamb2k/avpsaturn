@@ -1,44 +1,45 @@
-# Active agent handoff
+# Active checkpoint
 
-## Supervisor decision
+`project_state.yaml` is the machine-readable source of truth. The active task
+card is the only current control body. Historical implementation and correction
+narrative remains recoverable in Git and in the evidence ledger; do not append
+it here.
 
-The 2026-08-20 audit selected approach E, a title-specific hybrid native port, and made `docs/research/CPS2_TO_SATURN_RESET.md` authoritative. The exact immutable supervisor commit is supplied by `docs/IMPLEMENTOR_INVOCATION.md`; this file intentionally does not attempt to self-reference its own commit hash.
+## Current disposition boundary
 
-Audit input baseline was `codex/avp-master-plan` at `e79f666c865b096192aa102137db1cfdfad6c321`. No runtime implementation was performed during the audit. The complete existing host suite passed in an isolated shadow copy; no new target build, emulator session, or physical Saturn run was claimed.
+- Tranche 2A is the last accepted implementation foundation.
+- The V2-2B writer-map candidate is at the `review_candidate_head` recorded in
+  `project_state.yaml`.
+- The candidate records a 301-PC, 302-edge, 12-routine, nine-computed-target
+  class `0x1F` HIT/KO closure over seven semantic fields, with two typed event
+  exits and zero unresolved or unattributed selected dependencies.
+- The committed writer manifest identity is recorded in `project_state.yaml`.
+- Focused writer/oracle/boundary controls and an isolated complete host suite
+  were reported passing. This is host/MAME evidence only.
+- No native lifted HIT/KO routine, Saturn target result, emulator result,
+  release result, audio result, or physical-hardware result is claimed.
 
-## Truth at handoff
+The consolidated Tier 2 disposition is `CORRECTIONS REQUIRED`. Semantic and
+provenance review found that the candidate does not retain exact writer evidence
+for every selected field, constructs window-selected rather than call-rooted
+control closure, and asserts rather than derives outgoing-edge, actor-field,
+ROM-data, work-RAM, and exclusion dependencies. Saturn-scope review also found
+two committed capture helpers outside the exhaustive owned-path contract.
 
-- Target is exactly `avspu`, USA 940520, clone of `avsp`; local ROM verification passes under MAME 0.289.
-- Existing extraction/oracle infrastructure is valuable and should be reused.
-- Current gameplay remains predominantly authored C behavior.
-- Runtime ROM actor coverage is limited to a street-alien WALK/ATTACK subset.
-- HIT/KO has an explicit external animation-pointer-writer gap.
-- Runtime rendering is per 16x16 tile, not per CPS object.
-- Static demand peaks at 909 tiles; physical VDP1 performance is unknown.
-- RP4 is a one-emulator bounded fixture, not a production stage or hardware proof.
-- Shipped palette content covers 10 banks while measured routes reference 15.
-- Stage CDDA is disabled in code.
-- Capability slice is 0/12.
+Corrections stay on the existing candidate branch/worktree. The next card,
+`docs/task_cards/V2-B1.md`, remains blocked until the corrected candidate is
+re-reviewed and accepted; it produces executable native behavior rather than
+more mapping.
 
-## Repository reorganization
+## Operating commands
 
-The live agent and execution documents now point to the reset architecture. The exact pre-reset dirty planning state is preserved under `docs/archive/pre-reset-2026-08-20/` as historical evidence only. Runtime fallbacks and fixtures remain in source until replacements pass; they were not deleted for cosmetic cleanup.
+```powershell
+.\verify.ps1 -Lane Fast
+.\verify.ps1 -Lane Oracle
+.\tools\New-ReviewBundle.ps1 -Base f2c9a4725dffdcb2e5689c70914511674fb3c9ef -Task workflow-simplification
+```
 
-## Next bounded tranche
-
-Execute only `docs/NEXT_AGENT_PROMPT.md`: freeze the vertical-slice contract/provenance, build the unified deterministic MAME gameplay oracle, and produce the transitive executable writer boundary for the selected slice. Do not modify production runtime behavior in this tranche.
-
-Expected implementation branch: `codex/avp-hybrid-tranche-1`. The supervisor launch invocation supplies the isolated worktree and exact immutable base.
-
-## Required return
-
-Return branch/base/final SHA, commits, explicit files, target/tool/input hashes, RED/GREEN/negative controls, exact commands and exits, generated schema/manifest hashes, unresolved executed edges/globals/hardware exits, evidence-tier changes, dirty status, and a review invocation. Stop on the conditions in the tranche rather than broadening architecture.
-
-The final `CODEX_REVIEW_INVOCATION` must request both the supervisor ruling and
-the corresponding next `IMPLEMENTOR_INVOCATION`, using the continuation fields
-defined in `AGENTS.md` and the complete envelope in
-`docs/CODEX_REVIEW_TEMPLATE.md`. A bare heading or review-only paragraph is not
-a valid return. Acceptance requests the next dependency-ready tranche;
-corrections request one consolidated correction body; not-reviewable requests
-only the missing evidence or isolation work. The implementor does not self-
-accept or rotate the plan.
+Keep corrections on the current checkpoint branch/worktree. After re-review and acceptance,
+activate the next task by updating `project_state.yaml` and the card status,
+then use `tools/start-agent-task.ps1`. Launch and review renderings live under
+ignored `build/` paths and are never committed as source history.

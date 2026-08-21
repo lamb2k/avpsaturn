@@ -79,7 +79,7 @@ budget, count, selector, the A2-table lookup, every part's code/attr/advance,
 every dx/dy - matches independently, and the resulting ten object entries
 (5 per frame) are exact.
 
-Not yet resolved (see docs/AGENT_HANDOFF.md and NEXT_AGENT_PROMPT.md):
+Not yet resolved (see project_state.yaml and its active task card):
 - how a pose's ANIMATION RECORD (`avsp_anim_read_pose`'s `assembly` field)
   maps to the list of group header addresses for that pose (n=2, both from
   this one street-alien actor - `group1_header = pose.assembly + 4`, then a

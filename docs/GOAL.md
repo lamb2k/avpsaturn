@@ -8,4 +8,4 @@ The authoritative architecture is `docs/research/CPS2_TO_SATURN_RESET.md`: offli
 
 The project explicitly does not require or authorize a general CPS-2 emulator, whole-program decompilation/recompiler, generalized Capcom porting engine, or captured gameplay substitution before the first slice.
 
-Current active body: `docs/NEXT_AGENT_PROMPT.md`.
+Current status and active body: `project_state.yaml` and the task card it names.

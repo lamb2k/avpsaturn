@@ -1721,7 +1721,7 @@ static void rom_actor_prepare(void)
              * pose is not a measurement that it cannot be hit, and inventing a
              * 36-frame hitstun invulnerability out of missing data would be a
              * fabricated rule. Per-state ROM coverage needs the state-dispatch
-             * decode first (docs/NEXT_AGENT_PROMPT.md). */
+             * decode first (see the active task card in project_state.yaml). */
             rom_actor_seeded[index] = 0;
             ++rom_collision_gap;
             ++rom_collision_gap_frame;

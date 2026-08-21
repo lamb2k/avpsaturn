@@ -19,7 +19,7 @@ The complete decision is [docs/research/CPS2_TO_SATURN_RESET.md](docs/research/C
 
 The repository has strong MAME extraction, actor/collision/animation/object analyzers, deterministic manifests, palette/bounds checks, and a bounded Saturn render fixture. The current playable runtime is not yet a translated game core: most gameplay remains authored, ROM actor coverage is narrow, and stage CDDA is disabled.
 
-The former RP presentation roadmap is archived under `docs/archive/pre-reset-2026-08-20/`. It is not active guidance. The current work body is [docs/NEXT_AGENT_PROMPT.md](docs/NEXT_AGENT_PROMPT.md).
+The former RP presentation roadmap is archived under `docs/archive/pre-reset-2026-08-20/`. It is not active guidance. Current status lives in [project_state.yaml](project_state.yaml), and the active bounded body is the task card named there.
 
 ## Active documents
 
@@ -30,7 +30,8 @@ The former RP presentation roadmap is archived under `docs/archive/pre-reset-202
 - [docs/TEST_PLAN.md](docs/TEST_PLAN.md)
 - [docs/HARDWARE_TEST.md](docs/HARDWARE_TEST.md)
 - [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md)
-- [docs/NEXT_AGENT_PROMPT.md](docs/NEXT_AGENT_PROMPT.md)
+- [project_state.yaml](project_state.yaml)
+- the task card named by [project_state.yaml](project_state.yaml)
 
 ## Toolchain
 
@@ -44,13 +45,22 @@ Use `setup_engine.ps1` and `setup_emulator.ps1` only in a disposable or dedicate
 
 ## Checks and builds
 
-Run focused tests first. `test.ps1` regenerates tracked evidence, so use an isolated copy unless the assigned tranche explicitly owns every resulting file. A normal target build is:
+Run the split verification lanes instead of the monolithic suite during ordinary iteration:
+
+```powershell
+.\verify.ps1 -Lane Fast
+.\verify.ps1 -Lane Oracle
+.\verify.ps1 -Lane Target -TargetProfile EncounterTest -BuildOnly
+.\verify.ps1 -Lane Full
+```
+
+`Full` calls `test.ps1`, which regenerates tracked evidence, so use an isolated copy unless the checkpoint explicitly owns every resulting file. A normal target build is:
 
 ```powershell
 .\build.ps1 -Clean -Release
 ```
 
-Read back `build/last_compile_profile.txt` and `build/hardware_release_manifest.txt`; only `release-normal-release` is a release candidate. Emulator output is not a substitute for the physical checks in [docs/HARDWARE_TEST.md](docs/HARDWARE_TEST.md).
+Read back `build/last_compile_profile.txt` and `build/hardware_release_manifest.txt`; only `release-normal-release` plus the required semantic/render/final-scanout emulator readback can satisfy Saturn-facing acceptance. Emulator output is not a substitute for the physical checks in [docs/HARDWARE_TEST.md](docs/HARDWARE_TEST.md).
 
 ## Content boundary
 
