@@ -33,3 +33,9 @@ Both references are present at the immutable base while the enum/header does not
 ## Next bounded work
 
 Do not resume the archived RP roadmap or alter Saturn runtime behavior. Resolve the unrelated base compile defect in an authorized runtime tranche, then begin V2 only from the frozen oracle and boundary: lift the smallest selected writer set for player/class `0x1F` enemy, animation HIT/KO repoint, collision, camera, stage, and semantic event production. Preserve all raw evidence private.
+
+## CODEX_REVIEW_INVOCATION
+
+```text
+Review C:\Game Dev\BrooklynBangoutX\AvPSaturnCapabilityTest-hybrid-tranche1 on branch codex/avp-hybrid-tranche-1 against immutable base b3c95d810ba76d287ca8fdcefb594c42cae0cdb3. Review the Tranche 1 commits oldest first: a80b5e1f47944473fcea34165bc3d468d16771e2 and the current handoff commit. Verify that no production Saturn runtime behavior changed; only avspu is used; MSHvSF remains read-only; raw ROM/capture/state/screenshot/audio/trace data stays ignored under .deps; the vertical-slice contract, two-cold-run oracle, one-frame perturbation, and opcode/program writer-boundary counts agree; every executed PC is classified with zero unresolved indirect targets; and focused controls pass. Treat the complete test.ps1 C compile failure (undefined CAP_ENCOUNTER_START_TRANSITION and CAP_START_TRANSITION_FRAMES in the immutable base) as the documented stop condition, not as a Tranche 1 runtime fix request. Return findings with evidence tiers and do not expand scope.
+```
