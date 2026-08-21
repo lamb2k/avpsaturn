@@ -6,7 +6,7 @@ param(
     [string]$Executor = 'Auto',
     [ValidateSet('Auto', 'Implementation', 'Correction', 'EvidenceRepair')]
     [string]$TaskKind = 'Auto',
-    [ValidateSet('Auto', 'low', 'medium', 'high', 'xhigh', 'max')]
+    [ValidateSet('Auto', 'low', 'medium')]
     [string]$Effort = 'Auto',
     [string]$ResumeSessionId,
     [string]$FeedbackPath,
@@ -77,33 +77,39 @@ function Resolve-ClaudeCommand {
 }
 
 function Resolve-Executor {
-    param([string]$Requested, [string]$Policy, [string]$Preferred)
+    param(
+        [string]$Requested,
+        [string]$Policy,
+        [string]$Preferred,
+        [bool]$RequireCommand
+    )
     $claudeCommand = Resolve-ClaudeCommand
     if ($Requested -eq 'Claude') {
-        if ($Policy -eq 'CODEX_ONLY') { throw "Task $Task is CODEX_ONLY." }
-        if (-not $claudeCommand) {
+        if ($Policy -eq 'CODEX') { throw "Task $Task permits only Codex." }
+        if ($RequireCommand -and -not $claudeCommand) {
             throw ('Claude was requested, but no working local Claude CLI was found. ' +
                 'The installed Windows launcher currently reports an incompatible executable.')
         }
         return [ordered]@{ name = 'Claude'; command = $claudeCommand }
     }
     if ($Requested -eq 'Codex') {
-        if ($Policy -eq 'CLAUDE_ONLY') { throw "Task $Task is CLAUDE_ONLY." }
+        if ($Policy -eq 'CLAUDE') { throw "Task $Task permits only Claude." }
         $codex = Get-Command codex.exe -ErrorAction SilentlyContinue
         if (-not $codex) { $codex = Get-Command codex -ErrorAction SilentlyContinue }
-        if (-not $codex) { throw 'Codex CLI is not installed.' }
-        return [ordered]@{ name = 'Codex'; command = $codex.Source }
+        if ($RequireCommand -and -not $codex) { throw 'Codex CLI is not installed.' }
+        return [ordered]@{ name = 'Codex'; command = if ($codex) { $codex.Source } else { $null } }
     }
-    if ($Preferred -eq 'CLAUDE' -and $Policy -ne 'CODEX_ONLY' -and $claudeCommand) {
+    if ($Policy -eq 'CLAUDE' -or
+        ($Preferred -eq 'CLAUDE' -and (-not $RequireCommand -or $claudeCommand))) {
+        if ($RequireCommand -and -not $claudeCommand) {
+            throw 'Task requires Claude, but no working local Claude CLI was found.'
+        }
         return [ordered]@{ name = 'Claude'; command = $claudeCommand }
-    }
-    if ($Policy -eq 'CLAUDE_ONLY') {
-        throw 'Task requires Claude, but no working local Claude CLI was found.'
     }
     $codex = Get-Command codex.exe -ErrorAction SilentlyContinue
     if (-not $codex) { $codex = Get-Command codex -ErrorAction SilentlyContinue }
-    if (-not $codex) { throw 'Auto could not find a working Codex or Claude CLI.' }
-    return [ordered]@{ name = 'Codex'; command = $codex.Source }
+    if ($RequireCommand -and -not $codex) { throw 'Auto could not find a working Codex or Claude CLI.' }
+    return [ordered]@{ name = 'Codex'; command = if ($codex) { $codex.Source } else { $null } }
 }
 
 function Invoke-AgentTurn {
@@ -204,7 +210,7 @@ if (-not (Test-Path -LiteralPath $cardPath)) { throw "Missing task card: $cardPa
 $card = Get-Content -LiteralPath $cardPath -Raw
 $policy = Read-Field -Text $card -Name 'EXECUTOR_POLICY' -Optional
 if (-not $policy) { $policy = 'EITHER' }
-if ($policy -notin @('CODEX_ONLY', 'CLAUDE_ONLY', 'EITHER')) {
+if ($policy -notin @('CODEX', 'CLAUDE', 'EITHER')) {
     throw "Unsupported EXECUTOR_POLICY: $policy"
 }
 $correctionPaths = @(Read-InlineList -Text $card -Name 'CORRECTION_PATHS' -Optional)
@@ -212,12 +218,21 @@ $preferred = Read-Field -Text $card -Name 'PREFERRED_EXECUTOR' -Optional
 if (-not $preferred) { $preferred = 'CODEX' }
 if ($preferred -notin @('CODEX', 'CLAUDE')) { throw "Unsupported PREFERRED_EXECUTOR: $preferred" }
 $claudeModel = Read-Field -Text $card -Name 'CLAUDE_MODEL' -Optional
-if (-not $claudeModel) { $claudeModel = 'sonnet' }
+if (-not $claudeModel) { $claudeModel = 'fable' }
 $claudeEffort = Read-Field -Text $card -Name 'CLAUDE_EFFORT' -Optional
 if (-not $claudeEffort) { $claudeEffort = 'medium' }
 if ($Effort -ne 'Auto') { $claudeEffort = $Effort }
-if ($claudeEffort -notin @('low', 'medium', 'high', 'xhigh', 'max')) {
+if ($claudeEffort -notin @('low', 'medium')) {
     throw "Unsupported CLAUDE_EFFORT: $claudeEffort"
+}
+if ($TaskKind -eq 'Auto') {
+    $cardStatus = Read-Field -Text $card -Name 'STATUS'
+    switch ($cardStatus) {
+        'READY' { $TaskKind = 'Implementation' }
+        'CORRECTIONS' { $TaskKind = 'Correction' }
+        'EVIDENCE_REPAIR' { $TaskKind = 'EvidenceRepair' }
+        default { throw "Task $Task status $cardStatus is not executable by this adapter." }
+    }
 }
 $launchArguments = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File',
     $launcher, '-Task', $Task, '-TaskKind', $TaskKind)
@@ -229,7 +244,6 @@ $metadataLine = $launchOutput | Where-Object { $_ -like 'Metadata: *' } |
 if (-not $metadataLine) { throw 'Launcher did not return a metadata path.' }
 $metadataPath = $metadataLine.Substring(10).Trim()
 $metadata = Get-Content -LiteralPath $metadataPath -Raw | ConvertFrom-Json
-if ($TaskKind -eq 'Auto') { $TaskKind = $metadata.task_kind }
 $worktree = $metadata.worktree
 if ($TaskKind -in @('Correction', 'EvidenceRepair')) {
     if ($correctionPaths.Count -eq 0) { throw "$TaskKind must declare CORRECTION_PATHS." }
@@ -237,7 +251,10 @@ if ($TaskKind -in @('Correction', 'EvidenceRepair')) {
         -Allowed $correctionPaths -Phase 'Initial worktree'
 }
 
-$provider = Resolve-Executor -Requested $Executor -Policy $policy -Preferred $preferred
+$provider = Resolve-Executor -Requested $Executor -Policy $policy `
+    -Preferred $preferred -RequireCommand:(-not $PlanOnly)
+$resolvedModel = if ($provider.name -eq 'Claude') { $claudeModel } else { $metadata.model }
+$resolvedEffort = if ($provider.name -eq 'Claude') { $claudeEffort } else { $metadata.reasoning_effort }
 $plan = [ordered]@{
     schema = 1
     task = $Task
@@ -247,6 +264,9 @@ $plan = [ordered]@{
     preferred_executor = $preferred
     claude_model = $claudeModel
     claude_effort = $claudeEffort
+    model = $resolvedModel
+    effort = $resolvedEffort
+    base = $metadata.base
     branch = $metadata.branch
     worktree = $worktree
     candidate_head = $metadata.candidate_head
@@ -333,8 +353,11 @@ $result = [ordered]@{
     task = $Task
     task_kind = $TaskKind
     executor = $provider.name
+    model = $resolvedModel
+    effort = $resolvedEffort
     session_id = $turn.session_id
     executor_exit_code = $turn.exit_code
+    base = $metadata.base
     branch = $metadata.branch
     worktree = $worktree
     prior_candidate_head = $metadata.candidate_head

@@ -278,6 +278,12 @@ def main() -> None:
         require(token in executor, f"task executor lacks {token}")
     require("for ($attempt" not in executor,
             "task executor contains an autonomous repair loop")
+    require("if (-not $claudeModel) { $claudeModel = 'fable' }" in executor,
+            "Claude executor does not default to fable")
+    require("@('CODEX', 'CLAUDE', 'EITHER')" in executor,
+            "Claude executor policy vocabulary drifted")
+    require("@('low', 'medium')" in executor,
+            "Claude executor effort exceeds the bounded contract")
 
     disposition = (ROOT / "tools/Apply-ReviewDisposition.ps1").read_text(
         encoding="utf-8")

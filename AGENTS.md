@@ -74,6 +74,19 @@ card-authorized Codex or Claude provider, run every required lane, and generate
 a candidate-bound bundle; Goal Mode decides whether any further invocation is
 warranted.
 
+To start the explicitly active task, first inspect a no-execution plan, then
+run the same command without `-PlanOnly`:
+
+```powershell
+.\tools\Invoke-TaskExecutor.ps1 -Task <active-card-id> -Executor Auto -PlanOnly
+.\tools\Invoke-TaskExecutor.ps1 -Task <active-card-id> -Executor Auto
+```
+
+`Auto` follows the active card's `PREFERRED_EXECUTOR`. A card declaring
+`PREFERRED_EXECUTOR: CLAUDE` and `CLAUDE_MODEL: fable` therefore launches one
+local Fable implementation turn. Codex Goal Mode still owns review,
+acceptance, state promotion, and selection of any later task.
+
 After Goal Mode obtains independent external review results, use
 `tools/Apply-ReviewDisposition.ps1` to validate their hashes, candidate binding,
 three required roles, and conservative verdict. The script may apply only the
