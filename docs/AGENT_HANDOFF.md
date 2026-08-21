@@ -281,3 +281,50 @@ There is no production lift, behavioral-differential result, Saturn build,
 emulator, release, audio, timing, memory, scanout, or physical-hardware claim.
 Capability Gate remains 0/12. Supervisor disposition is required before any
 later tranche is selected.
+
+## Tranche 2B validator correction — committed writer-set trust boundary
+
+Branch `codex/avp-writer-map-tranche-2b-validator-corrections` is a
+validator-only correction from immutable base
+`4289b72c6c0e5ba86ead0cf71e43c3f088090eb5`. It changes only the owned mapper,
+focused writer-set test, this handoff, and the evidence ledger. The committed
+writer-set manifest stays byte-identical at 119,800 bytes and SHA-256
+`6be81db48baad4327f2ef53a879cba0c9f67bed610127494f16f3c6deab9ae28`; no raw
+private evidence, ROM, accepted contract/oracle/boundary, production C/H,
+build/package, runtime, or MSHvSF file changes.
+
+- **RED** (`5c068d5`): focused controls showed that `validate_committed`
+  accepted changed private watchpoint-log/sample hashes and event count;
+  promoted, reordered, and missing tiers; reversed opcode/program roles;
+  changed HIT/KO typed-exit writer PCs and interval frames; and raw-like text
+  under unknown top-level/nested keys. The focused integrity helper also
+  omitted the transition and writer-observation hashes, so recomputed controls
+  could fail at generic `integrity` before their intended invariant.
+- **GREEN** (`7a26540`): immutable public claims now bind the private-capture
+  identities (`ab3955f...b7827`, `4a68d6f...5cab`, count `1446`), ordered tiers
+  `MAME_TRACE`, `STATIC_ANALYSIS`, `MEASURED`, opcode/program roles, and the
+  HIT (`5190`, `0x01e888`) and KO (`5329`, `0x01f250`) typed exits. The
+  committed validator is a strict recursive schema allowlist: unknown
+  top-level key -> `unknown top-level key`; unknown HIT-correlation key ->
+  `unknown key at correlations.hit`; known strings are exact enumerations or
+  validated SHA-256/PC/register formats. Typed exits are additionally bound to
+  their selected routine event declarations and correlation intervals.
+- **REFACTOR** (`ba9cc3b`): report integrity/binding refresh is production
+  owned and used by the focused helper; self-test and focused controls capture
+  the actual exception and require the designated invariant. The new controls
+  reject private provenance -> `private capture provenance`; each tier change
+  -> `evidence tiers`; each address-space reversal -> `address-space
+  attribution`; HIT/KO PC or interval changes -> the matching `HIT typed event
+  exit`/`KO typed event exit`; and hidden text -> the matching unknown-key
+  invariant. Existing seven-field, transition/observation, PC/edge/routine,
+  dependency, alignment, exclusion, and scratch controls remain active.
+
+`--self-test`, `--scratch-mutation-test`, two `--generate` runs, the focused
+writer/oracle/boundary tests all exit 0. The accepted contract, oracle, and
+translation-boundary blobs are byte-identical to the immutable base. An
+isolated-copy `test.ps1` run with private `.deps` and `avspu` prerequisites
+junctioned from the local cache exited 0; the unrelated tile-budget control
+passed by rejecting `--scope round1` at 612,720 bytes against the 327,680-byte
+carve. This is host/MAME evidence only. Capability Gate remains 0/12 and all
+Saturn/emulator/release/audio/timing/memory/scanout/physical-hardware claims
+remain open. Supervisor review is required; do not select the next tranche.
