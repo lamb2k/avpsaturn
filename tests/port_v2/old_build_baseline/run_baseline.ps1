@@ -85,7 +85,9 @@ foreach ($run in 1, 2) {
     Get-CimInstance Win32_Process | Where-Object {
         $_.Name -eq 'yabasanshiro.exe' -and
         $_.ExecutablePath -eq $resolvedEmulator
-    } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
+    } | ForEach-Object {
+        Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
+    }
 
     $before = @(Get-Process yabasanshiro -ErrorAction SilentlyContinue |
         Select-Object -ExpandProperty Id)
