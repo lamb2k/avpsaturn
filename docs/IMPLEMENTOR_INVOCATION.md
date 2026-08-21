@@ -15,6 +15,11 @@ IMPLEMENTATION_BRANCH: codex/avp-writer-map-tranche-2b
 IMMUTABLE_BASE_SHA: 065ddfdb586184074973c2bccad55a45007f5f32
 REMOTE: private-origin
 REMOTE_URL: https://github.com/stevedamnvan/AvPSaturnCapabilityTest-private.git
+REMOTE_VISIBILITY: PRIVATE (verified before implementation resume)
+REMOTE_ACCEPTED_BRANCH_SHA: codex/avp-host-baseline-tranche-2a=eef350a3de6e44d1648a861ab98215c3d61ce20c
+REMOTE_SUPERVISOR_INVOCATION_RECORD_SHA: codex/avp-v2-writer-map-selection contains dad3bdeedf0cab9e2f31fa3b491fe50830f0ec1e
+REMOTE_IMPLEMENTATION_START_SHA: codex/avp-writer-map-tranche-2b=065ddfdb586184074973c2bccad55a45007f5f32
+REMOTE_PUSH_GATE: SATISFIED before implementation resume; re-verify with git ls-remote
 
 MODEL: gpt-5.6-sol
 THINKING: low
@@ -52,7 +57,7 @@ PRIVATE_PROVISIONING:
 
 REQUIRED_SEQUENCE:
 1. Read AGENTS.md and every active file named by its read order, including the complete docs/NEXT_AGENT_PROMPT.md.
-2. Verify branch codex/avp-writer-map-tranche-2b and exact base 065ddfdb586184074973c2bccad55a45007f5f32 before edits.
+2. Verify the private remote and the three recorded remote SHAs, then verify branch codex/avp-writer-map-tranche-2b and exact base 065ddfdb586184074973c2bccad55a45007f5f32 before edits.
 3. Commit the focused production-validator contract test RED before the mapper/artifact exists.
 4. Implement the bounded mapper, validator, and deterministic committed manifest; run GREEN.
 5. Run all nine committed-artifact mutation controls and the end-to-end private-correlation scratch mutation.

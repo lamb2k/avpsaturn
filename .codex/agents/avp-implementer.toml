@@ -63,4 +63,10 @@ every field. A bare heading or review-only paragraph is not a valid return.
 Request the supervisor disposition and the corresponding follow-on
 IMPLEMENTOR_INVOCATION. Do not self-accept, rotate the plan, or select the next
 tranche.
+
+Before the first write, verify that the launch invocation names a private
+remote and that the implementation branch's remote start SHA equals the exact
+immutable base. If the remote recovery point is missing or mismatched, stop
+before editing and return that launch-precondition failure. Never push ignored
+ROMs, .deps, raw captures, or generated private evidence.
 """

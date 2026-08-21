@@ -12,3 +12,9 @@ At completion or a declared hard stop, copy and fill the complete
 `CODEX_REVIEW_INVOCATION` envelope in `docs/CODEX_REVIEW_TEMPLATE.md`. A bare
 heading is not a handoff. Request the supervisor ruling and continued
 assignment; do not self-accept, rotate the plan, or choose the next tranche.
+
+For any supervisor-driven implementation rotation, verify the configured
+remote is private and push/SHA-verify the accepted candidate, supervisor
+selection/invocation, and implementation-start branches before launching or
+resuming the implementor. Record that remote recovery point in the invocation;
+never push ignored ROMs or raw evidence.

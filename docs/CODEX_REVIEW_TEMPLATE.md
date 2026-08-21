@@ -29,12 +29,15 @@ REVIEW_SCOPE:
 - Do not implement production changes during review.
 
 SUPERVISOR_CONTINUATION_REQUIRED: true
-ON_ACCEPTED: reconcile accepted evidence with the active ledgers and plan, update canonical status, select the next dependency-ready tranche, and issue a complete IMPLEMENTOR_INVOCATION
+ON_ACCEPTED: reconcile accepted evidence with the active ledgers and plan, update canonical status, select the next dependency-ready tranche, issue a complete IMPLEMENTOR_INVOCATION, verify the destination repository is private, push and SHA-verify the accepted candidate plus supervisor selection/invocation plus implementation-start branches, then and only then launch or resume the implementor
 ON_CORRECTIONS_REQUIRED: issue one consolidated correction IMPLEMENTOR_INVOCATION against the reviewed candidate HEAD
 ON_NOT_REVIEWABLE: issue the minimum evidence/isolation IMPLEMENTOR_INVOCATION needed to make the candidate reviewable
 
 NEXT_ASSIGNMENT_REQUIREMENTS:
 - exact 40-character base SHA and separate branch/worktree;
+- private remote name/URL plus verified remote SHAs for the accepted,
+  supervisor-selection/invocation, and implementation-start branches before
+  launch;
 - Codex-authored architecture and bounded investigation decision table;
 - ordered RED/GREEN/refactor chapters and real negative controls;
 - explicit owned paths, constraints, exclusions, verification, stop, commit,

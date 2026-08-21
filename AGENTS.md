@@ -114,3 +114,12 @@ requests the supervisor ruling and the corresponding next
 When a separate Codex implementor task is created, explicitly use model
 `gpt-5.6-sol` with reasoning/thinking `low`. Supervisor and review reasoning
 levels are separate from this implementor launch policy.
+
+Before creating or resuming that implementor task, the supervisor must verify
+the configured destination repository is private, push the accepted candidate
+branch, the supervisor selection/invocation branch, and the new implementation
+start branch, and confirm their remote SHAs. The implementation task may begin
+write work only after its immutable base is recoverable on that private remote.
+Record the remote name, URL, branch, and verified SHA in
+`docs/IMPLEMENTOR_INVOCATION.md`. Never push ROMs, `.deps`, raw evidence, or
+other ignored/private inputs.
