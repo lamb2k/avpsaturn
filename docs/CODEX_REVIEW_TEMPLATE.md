@@ -41,7 +41,7 @@ ON_CORRECTIONS_REQUIRED: issue one consolidated correction IMPLEMENTOR_INVOCATIO
 ON_NOT_REVIEWABLE: issue the minimum evidence/isolation IMPLEMENTOR_INVOCATION needed to make the candidate reviewable
 
 NEXT_ASSIGNMENT_REQUIREMENTS:
-- exact 40-character base SHA and separate branch/worktree;
+- exact 40-character base SHA and explicitly named existing branch/worktree;
 - Codex-authored architecture and bounded investigation decision table;
 - ordered RED/GREEN/refactor chapters and real negative controls;
 - explicit owned paths, constraints, exclusions, verification, stop, commit,
@@ -49,7 +49,7 @@ NEXT_ASSIGNMENT_REQUIREMENTS:
 - require the next implementor to return through this same canonical template.
 
 NEW_TASK_DISPATCH_REQUIRED: true
-NEW_TASK_DISPATCH: after completing the disposition and next IMPLEMENTOR_INVOCATION, immediately launch that complete invocation in a separate Codex task using model gpt-5.6-terra with reasoning xhigh; report the created task identifier/directive
+NEW_TASK_DISPATCH: after completing the disposition and next IMPLEMENTOR_INVOCATION, immediately launch that complete invocation in a separate Codex task using model gpt-5.6-terra with reasoning xhigh and the saved project's local environment; do not create an app-managed task worktree, and report the created task identifier/directive
 
 FINAL_REMOTE_SYNC_REQUIRED: true
 FINAL_REMOTE_SYNC: after all authorized review/status commits and immediately before the final review report, push once to private-origin without force and verify the exact remote branch SHA; when no commit was created, perform one final no-op remote-status verification instead
