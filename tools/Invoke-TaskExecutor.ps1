@@ -130,7 +130,7 @@ function Invoke-AgentTurn {
                     '--json', '--output-last-message', $lastPath, '-')
             } else {
                 $arguments = @('exec', '--cd', $Worktree, '--model', $Model,
-                    '--sandbox', 'workspace-write', '--approve-for-me', '--json',
+                    '--sandbox', 'workspace-write', '--json',
                     '--output-last-message', $lastPath, '-')
             }
             $Prompt | & $Provider.command @arguments 1> $stdoutPath 2> $stderrPath
