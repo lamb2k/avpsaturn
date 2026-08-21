@@ -41,14 +41,18 @@ def load_tool():
     return module
 
 
-def mutation_is_rejected(module, report, mutate):
+def mutation_rejection_text(module, report, mutate):
     candidate = copy.deepcopy(report)
     mutate(candidate)
     try:
         module.validate_committed(candidate)
-    except (AssertionError, AttributeError, IndexError, KeyError, TypeError, ValueError):
-        return True
-    return False
+    except (AssertionError, AttributeError, IndexError, KeyError, TypeError, ValueError) as error:
+        return str(error)
+    return None
+
+
+def mutation_is_rejected(module, report, mutate):
+    return mutation_rejection_text(module, report, mutate) is not None
 
 
 def recompute_integrity(report):
@@ -59,6 +63,7 @@ def recompute_integrity(report):
         "routine_sha256": module_hash(report["closure"]["selected_routines"]),
         "edge_sha256": module_hash(report["closure"]["selected_edges"]),
     }
+    return report["integrity"]
 
 
 def module_hash(value):
@@ -92,9 +97,18 @@ def outside_selected_boundary_pc(report):
     raise AssertionError("accepted boundary has no non-selected PC")
 
 
-def require_rejection(module, report, mutate, name, failures):
-    if not mutation_is_rejected(module, report, mutate):
-        failures.append(name)
+def require_rejection(module, report, mutate, name, expected_invariant, failures):
+    rejection = mutation_rejection_text(module, report, mutate)
+    if rejection is None:
+        failures.append(name + ": ACCEPTED")
+    elif expected_invariant not in rejection:
+        failures.append(
+            name
+            + ": rejected by "
+            + repr(rejection)
+            + ", not "
+            + repr(expected_invariant)
+        )
 
 
 def main() -> int:
@@ -102,6 +116,10 @@ def main() -> int:
     report = json.loads(REPORT.read_text(encoding="utf-8"))
     module.validate_committed(report)
     failures = []
+
+    helper_probe = copy.deepcopy(report)
+    if recompute_integrity(helper_probe) != module.integrity(report):
+        failures.append("focused integrity recomputation omits production hashes")
 
     # The correction must derive each field and bind the health/hit semantic
     # deltas to the executed writer instances, not merely list the field names.
@@ -131,6 +149,7 @@ def main() -> int:
         report,
         lambda d: d["closure"]["selected_pcs"].append("0xfffffe"),
         "accepted selected PC outside accepted boundary",
+        "accepted boundary PC membership",
         failures,
     )
     for anchor in ("first_source_frame", "last_source_frame", "hit_semantic_sample_after", "ko_semantic_sample_after"):
@@ -139,6 +158,7 @@ def main() -> int:
             report,
             lambda d, key=anchor: d["window"].__setitem__(key, d["window"][key] + 1),
             "accepted corrupted window anchor: " + anchor,
+            "exact accepted anchors",
             failures,
         )
     require_rejection(
@@ -146,6 +166,7 @@ def main() -> int:
         report,
         lambda d: d["coverage"].__setitem__("computed_target_count", 999),
         "accepted fabricated computed-target count",
+        "derived counts",
         failures,
     )
     require_rejection(
@@ -153,6 +174,7 @@ def main() -> int:
         report,
         lambda d: d["coverage"].__setitem__("event_exit_count", 999),
         "accepted fabricated event-exit count",
+        "derived counts",
         failures,
     )
     def non_observed_edge(candidate):
@@ -171,10 +193,10 @@ def main() -> int:
         selected_routine(candidate, "0x01f6c6")["observed_callees"][0] = outside_selected_boundary_pc(candidate)
         recompute_integrity(candidate)
 
-    require_rejection(module, report, non_observed_edge, "accepted non-observed internal edge", failures)
-    require_rejection(module, report, union_drift, "accepted routine/selected-PC union drift", failures)
-    require_rejection(module, report, caller_drift, "accepted caller relationship drift", failures)
-    require_rejection(module, report, callee_drift, "accepted callee relationship drift", failures)
+    require_rejection(module, report, non_observed_edge, "accepted non-observed internal edge", "immutable PC/edge/routine binding", failures)
+    require_rejection(module, report, union_drift, "accepted routine/selected-PC union drift", "routine/selected-PC union", failures)
+    require_rejection(module, report, caller_drift, "accepted caller relationship drift", "caller relationship", failures)
+    require_rejection(module, report, callee_drift, "accepted callee relationship drift", "callee relationship", failures)
 
     def integrity_preserving_anchor_mutation(candidate):
         candidate["window"]["first_source_frame"] += 1
@@ -185,8 +207,91 @@ def main() -> int:
         report,
         integrity_preserving_anchor_mutation,
         "accepted synchronized integrity/hash anchor mutation",
+        "exact accepted anchors",
         failures,
     )
+
+    def preserved(candidate, mutate):
+        mutate(candidate)
+        candidate["integrity"] = module.integrity(candidate)
+        candidate["accepted_boundary_binding"] = module.binding(
+            candidate, module.accepted_pcs()
+        )
+
+    invariant_controls = [
+        (
+            "changed private watchpoint-log hash",
+            "private capture provenance",
+            lambda d: preserved(d, lambda x: x["private_capture"].__setitem__("watchpoint_log_sha256", "0" * 64)),
+        ),
+        (
+            "changed private sample hash",
+            "private capture provenance",
+            lambda d: preserved(d, lambda x: x["private_capture"].__setitem__("sample_sha256", "1" * 64)),
+        ),
+        (
+            "changed private watchpoint-event count",
+            "private capture provenance",
+            lambda d: preserved(d, lambda x: x["private_capture"].__setitem__("watchpoint_event_count", x["private_capture"]["watchpoint_event_count"] + 1)),
+        ),
+        (
+            "promoted evidence tier",
+            "evidence tiers",
+            lambda d: preserved(d, lambda x: x.__setitem__("evidence_tiers", ["PHYSICAL_SATURN", "STATIC_ANALYSIS", "MEASURED"])),
+        ),
+        (
+            "reordered evidence tiers",
+            "evidence tiers",
+            lambda d: preserved(d, lambda x: x.__setitem__("evidence_tiers", ["STATIC_ANALYSIS", "MAME_TRACE", "MEASURED"])),
+        ),
+        (
+            "missing evidence tier",
+            "evidence tiers",
+            lambda d: preserved(d, lambda x: x.__setitem__("evidence_tiers", ["MAME_TRACE", "STATIC_ANALYSIS"])),
+        ),
+        (
+            "reversed instruction address space",
+            "address-space attribution",
+            lambda d: preserved(d, lambda x: x["address_spaces"].__setitem__("instructions_and_code_targets", "program")),
+        ),
+        (
+            "reversed program address space",
+            "address-space attribution",
+            lambda d: preserved(d, lambda x: x["address_spaces"].__setitem__("rom_operands_and_animation_records", "opcodes")),
+        ),
+        (
+            "changed HIT typed-exit writer PC",
+            "HIT typed event exit",
+            lambda d: preserved(d, lambda x: x["dependencies"]["typed_event_exits"][0].__setitem__("writer_pc", "0x01e88a")),
+        ),
+        (
+            "changed HIT typed-exit interval",
+            "HIT typed event exit",
+            lambda d: preserved(d, lambda x: x["dependencies"]["typed_event_exits"][0].__setitem__("interval_start_frame", 5191)),
+        ),
+        (
+            "changed KO typed-exit writer PC",
+            "KO typed event exit",
+            lambda d: preserved(d, lambda x: x["dependencies"]["typed_event_exits"][1].__setitem__("writer_pc", "0x01f254")),
+        ),
+        (
+            "changed KO typed-exit interval",
+            "KO typed event exit",
+            lambda d: preserved(d, lambda x: x["dependencies"]["typed_event_exits"][1].__setitem__("interval_start_frame", 5330)),
+        ),
+        (
+            "hidden top-level trace text",
+            "unknown top-level key",
+            lambda d: preserved(d, lambda x: x.__setitem__("auxiliary_evidence", "016526: move.l d0,(28,a6)")),
+        ),
+        (
+            "hidden nested disassembly text",
+            "unknown key at correlations.hit",
+            lambda d: preserved(d, lambda x: x["correlations"]["hit"].__setitem__("operator_note", "016526: move.l d0,(28,a6)")),
+        ),
+    ]
+    for name, invariant, mutate in invariant_controls:
+        require_rejection(module, report, mutate, "accepted " + name, invariant, failures)
 
     if failures:
         raise AssertionError("writer-set correction RED findings: " + "; ".join(failures))
