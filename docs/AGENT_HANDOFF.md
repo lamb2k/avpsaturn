@@ -43,6 +43,38 @@ capability_model.c:967:39: error: CAP_START_TRANSITION_FRAMES undeclared
 
 Both references are present at the immutable base while the enum/header does not define them. Repair requires a production-runtime change, prohibited in Tranche 1; this is the declared stop condition for the complete legacy host suite. It does not alter the passing MAME-only oracle or boundary evidence.
 
+## Tranche 1 correction — round 3 (separation binding)
+
+A validator-only correction closed the last committed-boundary falsification
+gap without any production, runtime, oracle, or artifact change.
+
+- **Defect.** `validate_committed` accepted the opcode/program separation proof
+  whenever `executed_pcs_compared > 0` and `divergent_pcs > 0`. A weakened
+  artifact claiming a single-PC divergence (`executed_pcs_compared=1`,
+  `divergent_pcs=1`) therefore passed the completeness proof even though the
+  real artifact compares and diverges over all 7,314 executed PCs.
+- **RED** (`0ce0efe`): the focused test gained a committed-artifact
+  negative-control battery — nine controls, each deep-copies the real committed
+  artifact, mutates one field, and requires the production `validate_committed`
+  to reject it. At base the two separation controls were ACCEPTED, so
+  `python tests/test_avsp_translation_boundary.py` exited 1 on exactly those two.
+- **GREEN** (`c353772`): `validate_committed` now additionally requires
+  `opcode_program_separation.executed_pcs_compared == coverage.executed_pc_count`
+  and `divergent_pcs == executed_pcs_compared`. The self-test committed-artifact
+  controls grew from five to nine (adding zeroed direct sites, byte-count-only
+  and hash-only program corruptions, and both separation reductions). All nine
+  now reject; the unmodified artifact still validates.
+- **Determinism.** `tools/map_avsp_translation_boundary.py --generate` twice
+  reproduces `data/avsp_translation_boundary.json` byte-for-byte at SHA-256
+  `95e002b7f6d48e8aafbe5e201a370b6dc7c3c5559e7d2253901d0473c0c7b0f4`
+  (7,314 compared / 7,314 divergent over 7,314 executed PCs; unchanged). The
+  oracle ledger (`f6e81316…`) and `avspu` `-verifyroms` are unaffected. Only
+  `tools/map_avsp_translation_boundary.py` and
+  `tests/test_avsp_translation_boundary.py` changed; no C/H/runtime/build/`.deps`
+  file was touched. The complete `test.ps1` stop condition is unchanged
+  (immutable-base `CAP_ENCOUNTER_START_TRANSITION` / `CAP_START_TRANSITION_FRAMES`
+  undeclared, not repaired).
+
 ## Next bounded work
 
 Do not resume the archived RP roadmap or alter Saturn runtime behavior. Resolve the unrelated base compile defect in an authorized runtime tranche, then begin V2 only from the frozen oracle and boundary: lift the smallest selected writer set for player/class `0x1F` enemy, animation HIT/KO repoint, collision, camera, stage, and semantic event production. Preserve all raw evidence private.
