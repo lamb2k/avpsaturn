@@ -1,116 +1,152 @@
-# AvP Saturn port agent instructions
+# AvP Saturn port agent policy
 
 ## Authority and target
 
-The authoritative architecture is the title-specific hybrid native port selected in `docs/research/CPS2_TO_SATURN_RESET.md`. The implementation target is only MAME set `avspu`, `Alien vs. Predator (USA 940520)`, clone of `avsp`.
+The authoritative architecture is the title-specific hybrid native port in
+`docs/research/CPS2_TO_SATURN_RESET.md`. The only implementation target is MAME
+set `avspu`, `Alien vs. Predator (USA 940520)`, clone of `avsp`.
 
-Do not reopen the architecture by inertia. A change to the selected approach requires a bounded falsification result, an evidence-led impact analysis, and supervisor approval. MSHvSF is an isolated research lane; it is never an AvP specification and no finding becomes a general Capcom rule until a second official port confirms it.
+Do not reopen that architecture without a bounded falsification result and an
+evidence-led impact analysis. MSHvSF is an isolated research lane, never an AvP
+specification, and cannot establish a general Capcom rule by itself.
 
-## Read order for every session
+## Start of work
 
-Read these files completely before acting:
+For every task, read completely:
 
-1. `AGENTS.md`
-2. `docs/research/CPS2_TO_SATURN_RESET.md`
-3. `docs/research/CPS2_TO_SATURN_SOURCE_LEDGER.md`
-4. `docs/research/CPS2_TO_SATURN_EVIDENCE_LEDGER.md`
-5. `docs/AGENT_HANDOFF.md`
-6. `docs/NEXT_AGENT_PROMPT.md`
-7. `docs/CODEX_REVIEW_TEMPLATE.md` when preparing or consuming a handoff
-8. `docs/TEST_PLAN.md` and `docs/HARDWARE_TEST.md` when verification is in scope
+1. `AGENTS.md`;
+2. `project_state.yaml`;
+3. the task card named by `project_state.yaml` or supplied at launch.
 
-Files under `docs/archive/pre-reset-2026-08-20/` are historical evidence only. They must not be treated as instructions or a plan of record.
+Read `docs/research/CPS2_TO_SATURN_RESET.md` for behavioral, runtime, device, or
+architecture work. Read the source/evidence ledgers when changing an evidence
+claim or generated artifact. Read `docs/TEST_PLAN.md` for verification and
+`docs/HARDWARE_TEST.md` for physical work. Files under
+`docs/archive/pre-reset-2026-08-20/` are historical evidence only.
+
+The task card owns the current objective, base, branch, paths, acceptance
+criteria, exclusions, and stop condition. `project_state.yaml` owns volatile
+project status. Do not duplicate either in durable policy files.
 
 ## Selected architecture
 
 - Offline extraction and normalization from the exact authorized ROM set.
-- Original data retained only as address-traceable sparse spans where that reduces risk.
-- Selective lifting of bounded 68000 state writers and behavior routines; no whole-program recompiler.
-- Native SH-2 simulation, input, collision, rendering, stage, audio, loading, and telemetry.
+- Address-traceable sparse spans for retained original data.
+- Selective lifting of bounded 68000 behavior into native C; no runtime
+  interpreter or whole-program recompiler.
+- Native SH-2 input, simulation, collision, stage, render, audio, loading, and
+  telemetry.
 - MAME 0.289 as the deterministic semantic oracle.
-- VDP1 per emitted 16x16 4bpp tile in a flat ordered command list as the first hardware baseline.
-- VDP2 scroll3/scroll2/HUD composition, with line-scroll only where traces require it.
-- Fixed phase arenas in the 32 Mbit cartridge; all G0 assets resident before CDDA.
+- A flat VDP1 command list with one 16x16 4bpp tile per command as the first
+  hardware baseline.
+- VDP2 scroll3/scroll2/HUD composition, with line scroll only where measured.
+- Fixed phase arenas in the 32 Mbit cartridge; G0 resident before CDDA.
 - SCSP PCM for short events and CDDA for long music.
-- One master-SH-2 loop initially. Slave SH-2 and composite caches require measured need.
+- One master-SH-2 loop until profiling justifies more.
 
-Do not build a CPS-2 emulator, runtime 68000 interpreter, generalized Capcom engine, generalized streamer, dynamic composite cache, or presentation-first roadmap.
-
-## Current execution body
-
-Only execute the bounded tranche in `docs/NEXT_AGENT_PROMPT.md`. Tranche 1's
-vertical-slice contract, deterministic MAME oracle, and executable boundary are
-accepted at `a11527a18c6ec02d3bc3f3421674755a3102c6c5`. Tranche 2A's strict-host
-baseline repair is accepted at `eef350a3de6e44d1648a861ab98215c3d61ce20c`;
-the complete host/generator suite is reviewable again. The active body is the
-first V2 subtranche: close the exact class `0x1F` enemy HIT/KO writer set and
-its routine/data/event dependencies as a deterministic, falsifiable manifest.
-It does not yet emit or integrate production lifted C.
-
-The first accepted slice must contain real gameplay: deterministic startup, controller input, one player, one class `0x1F` enemy, movement, animation, attack/contact, collision/hit/KO, camera/stage movement, representative layers and palettes, PCM, CDDA, residency/transfer, final scanout, and physical timing. Title/menu work cannot substitute for any item.
-
-## Evidence rules
-
-Use these exact labels:
-
-- `PHYSICAL_SATURN`
-- `MULTI_EMULATOR`
-- `ONE_EMULATOR`
-- `MAME_TRACE`
-- `STATIC_ANALYSIS`
-- `VISUALLY_PLAUSIBLE`
-- `PLANNED`
-- `IMPLEMENTED_UNEXERCISED`
-- `CONTRADICTED`
-- `UNKNOWN`
-
-Also preserve `MEASURED`, `ADAPTED`, `GAP`, `UNRUN`, and `MISSING` where existing tools use them. Never promote one evidence tier into another. A screenshot is not semantic parity; an emulator pass is not hardware timing; a static budget is not live high-water.
-
-Every generated artifact must identify set/revision, contributing ROM hashes, address space and offsets, MAME/tool/extractor pin, command parameters, schema version, output hash, consumer lifetime, evidence tier, and exclusions.
+Do not build a generalized CPS-2 emulator, Capcom engine, streamer, dynamic
+composite cache, or presentation-first roadmap.
 
 ## Implementation contract
 
-For every behavioral change:
+For behavioral work:
 
 1. Pin the exact base, inputs, and expected failing evidence.
-2. Add or preserve a failing-first test or differential check.
+2. Add or preserve a failing-first test or differential fixture.
 3. Implement the smallest change inside the selected architecture.
-4. Run focused tests and a real negative control or mutation.
-5. Run the broader safe regression set.
-6. Record what is host-, MAME-, emulator-, or hardware-proven.
-7. Update the handoff and evidence ledger.
+4. Run the focused check and a real mutation or negative control.
+5. Run the broader lane required by the task risk.
+6. Record precisely what is host-, MAME-, emulator-, or hardware-proven.
 
-Do not weaken tests, replace missing behavior with a capture, or call an adapted fallback faithful. If a premise fails, stop at its declared probe boundary and return evidence rather than expanding scope.
+Keep all corrections for one substantive checkpoint on its existing branch and
+worktree. A review creates one consolidated blocking list; one re-review is the
+default. Start a fresh branch only for a genuinely new checkpoint. Do not
+commit launch prompts or reviewer invocations. Use
+`tools/start-agent-task.ps1` to create ignored launch metadata and
+`tools/New-ReviewBundle.ps1` to create the ignored review bundle.
+
+## Evidence rules
+
+Use the existing vocabulary exactly: `PHYSICAL_SATURN`, `MULTI_EMULATOR`,
+`ONE_EMULATOR`, `MAME_TRACE`, `STATIC_ANALYSIS`, `VISUALLY_PLAUSIBLE`,
+`PLANNED`, `IMPLEMENTED_UNEXERCISED`, `CONTRADICTED`, `UNKNOWN`, plus
+`MEASURED`, `ADAPTED`, `GAP`, `UNRUN`, and `MISSING` where already used.
+
+Never promote evidence tiers. A screenshot is not semantic parity, an emulator
+pass is not hardware timing, and a static budget is not live high-water.
+Generated evidence must carry target/revision, contributing ROM hashes, address
+space and offsets, tool/extractor identity, command parameters, schema, output
+hash, consumer lifetime, evidence tier, and exclusions.
+
+## Verification lanes
+
+Use `verify.ps1`:
+
+- `Fast`: direct unit tests, focused differential fixtures, strict portable C,
+  and no private capture regeneration.
+- `Oracle`: MAME provenance, deterministic artifacts, boundary/writer-map
+  validators, and mutation controls.
+- `Target`: explicit build-only iteration, or an exact
+  `release-normal-release` build plus profile-specific emulator semantic,
+  resource, render, and final-scanout checks for Saturn-facing acceptance.
+- `Full`: the complete legacy and generated regression in `test.ps1`.
+
+Run `Fast` during iteration. Add `Oracle` for evidence or lifted-behavior work,
+the release `Target` with emulator readback when Saturn-facing code changes,
+and `Full` at acceptance, before merge, or after foundational tooling changes.
+A Target launch or build alone is not an acceptance pass. Physical validation
+remains a separate gate under `docs/HARDWARE_TEST.md`.
+
+## Review tiers
+
+- **Tier 0 - mechanical:** documentation, a settled declaration, formatting,
+  or a deterministic hash refresh with no semantic change. Automated checks
+  and path-scope review are sufficient unless an evidence claim changes.
+- **Tier 1 - translated behavior:** native routines, state transitions,
+  collision, animation, or bounded SH-2 features. One high-reasoning read-only
+  review blocks only on semantic mismatch, missing dependency, nondeterminism,
+  unsafe scope, unsupported behavior, or an unproved evidence claim.
+- **Tier 2 - trust boundary:** oracle, translation/writer boundary, evidence
+  schema/validator, memory architecture, VDP ownership, audio residency,
+  physical timing, or material architecture change. Review semantic closure,
+  validator/provenance integrity, and Saturn constraints independently, then
+  consolidate all blockers once.
+
+The first Tier 2 pass must exercise, where applicable: provenance mutation
+with recomputed integrity; missing/reordered/promoted evidence tiers;
+opcode/program reversal; unknown or raw-like schema fields; reduced PC, edge,
+routine, caller/callee, or computed-target closure; changed event frame/writer
+PC; missing actor field/observation; boundary completeness reduction; and the
+declared Saturn resource/timing claim.
+
+Every review returns only:
+
+```text
+VERDICT: ACCEPTED | CORRECTIONS REQUIRED | NOT REVIEWABLE
+BLOCKING:
+NONBLOCKING:
+EVIDENCE:
+NEXT ACTION:
+```
+
+The reviewer does not author the next implementation architecture. The current
+task card stays active for corrections; after acceptance, update
+`project_state.yaml` and activate the next dependency-ready card.
 
 ## Repository and content safety
 
-The worktree may contain unrelated private and untracked evidence. Never use reset, clean, stash, rebase, broad checkout/restore, force operations, `git add -A`, or broad diagnostics that overwrite captures. Stage explicit paths only.
+The repository may contain unrelated private and untracked evidence. Never use
+reset, clean, stash, rebase, broad checkout/restore, force operations,
+`git add -A`, or diagnostics that overwrite captures. Stage explicit paths.
 
-Never commit ROMs, keys, original disc data, generated copyrighted graphics/audio, raw captures, memory dumps, screenshots, ISO/cue files, disassembly bytes, or logs containing them. Committed outputs must be code, schemas, hashes, counts, provenance, tests, and documentation.
+Never commit ROMs, keys, original disc data, generated copyrighted
+graphics/audio, raw captures, memory dumps, screenshots, ISO/cue files,
+disassembly bytes, or logs containing them. Preserve legacy fallbacks and
+fixtures until their replacements pass retained regression plus the semantic
+oracle; do not delete recoverability for cosmetic cleanup.
 
-Legacy authored behavior, capture-derived holds, RP4 fixtures, and the disabled CDDA path are parked. Remove them only after their replacement passes the same retained regression plus the new semantic oracle. Do not delete recoverability to make the tree look clean.
-
-## Build and verification order
-
-1. Target identity and provenance checks.
-2. Focused host unit/differential tests.
-3. Complete `test.ps1` in an isolated copy when it would rewrite tracked data.
-4. Target build in the implementation worktree.
-5. Focused emulator semantic/readback checks.
-6. Normal-release rebuild and manifest readback.
-7. Physical Saturn timing, scanout, audio, input-latency, and soak.
-
-The shared-primitives check, presentation/stage parity check, and capability slice gate are separate. Only the final integrated physical slice advances capability.
-
-## Handoff
-
-Every implementation handoff must include branch, immutable base and final SHA, commits oldest first, explicit files changed, commands and exit codes, RED/GREEN/negative-control results, build/profile/artifact hashes, evidence tiers, remaining gaps, worktree status, and a ready review invocation. If incomplete, state the exact stop condition that fired.
-
-Use `docs/CODEX_REVIEW_TEMPLATE.md` verbatim as the envelope for every review
-request. The implementor never self-accepts or rotates the plan. A valid return
-requests the supervisor ruling and the corresponding next
-`IMPLEMENTOR_INVOCATION` for acceptance, corrections, or missing evidence.
-
-When a separate Codex implementor task is created, explicitly use model
-`gpt-5.6-sol` with reasoning/thinking `low`. Supervisor and review reasoning
-levels are separate from this implementor launch policy.
+The first accepted capability slice still requires deterministic gameplay,
+input, one player, one class `0x1F` enemy, movement, animation, contact/HIT/KO,
+camera/stage, layers/palettes, PCM, CDDA, residency/transfer, final scanout, and
+physical timing. No host, mapping, presentation, or emulator result substitutes
+for that integrated physical gate.

@@ -1,6 +1,6 @@
 """Falsify the ROM-only object-stream decoder against the full captured corpus.
 
-This is NEXT_AGENT_PROMPT.md Body B item 6: run the decoder against every
+Retained object-corpus gate: run the decoder against every
 paired (workram, objram_active) capture frame on disk, with the eligible
 population DECLARED before results are computed, and report every exclusion
 by named reason. No live MAME needed - the captures already hold both the
