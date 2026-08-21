@@ -24,10 +24,11 @@ def sha(data: bytes | bytearray) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def normalize(image: bytearray) -> tuple[int, int, int]:
+def normalize(image: bytearray) -> tuple[int, int, int, int]:
     before = bytes(image)
     descriptor_count = 0
     root_directories: list[tuple[int, int]] = []
+    generator_sectors = 0
     sector = 16
     while True:
         base = sector * SECTOR
@@ -44,6 +45,10 @@ def normalize(image: bytearray) -> tuple[int, int, int]:
             image[base + 156 + 18:base + 156 + 25] = RECORD_TIME
             root_directories.append((extent, size))
         if kind == 255:
+            generator_base = base + SECTOR
+            if image[generator_base:generator_base + 4] == b"MKI ":
+                image[generator_base:generator_base + SECTOR] = bytes(SECTOR)
+                generator_sectors += 1
             break
         sector += 1
 
@@ -77,7 +82,7 @@ def normalize(image: bytearray) -> tuple[int, int, int]:
     for root in root_directories:
         walk(*root)
     changed = sum(a != b for a, b in zip(before, image))
-    return descriptor_count, record_count, changed
+    return descriptor_count, record_count, generator_sectors, changed
 
 
 def main() -> None:
@@ -92,7 +97,7 @@ def main() -> None:
         for name in inventory["required_iso_members"]
     }
     normalized = bytearray(raw)
-    descriptors, records, changed = normalize(normalized)
+    descriptors, records, generator_sectors, changed = normalize(normalized)
     payloads_after = {
         name: sha(read_iso_path(normalized, name))
         for name in inventory["required_iso_members"]
@@ -125,6 +130,7 @@ def main() -> None:
         "changed_byte_count": changed,
         "volume_descriptor_count": descriptors,
         "directory_record_count": records,
+        "generator_metadata_sector_count": generator_sectors,
         "required_payload_sha256": payloads_after,
         "production_payload_changed": False,
         "physical_saturn": "UNRUN",
