@@ -123,6 +123,8 @@ function Invoke-AgentTurn {
     $stderrPath = "$prefix.stderr"
     $lastPath = "$prefix.last.txt"
     Push-Location $Worktree
+    $savedPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
     try {
         if ($Provider.name -eq 'Codex') {
             if ($SessionId) {
@@ -160,7 +162,10 @@ function Invoke-AgentTurn {
                 }
             } catch { }
         }
-    } finally { Pop-Location }
+    } finally {
+        $ErrorActionPreference = $savedPreference
+        Pop-Location
+    }
     return [ordered]@{
         exit_code = $exitCode
         session_id = $SessionId
