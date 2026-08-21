@@ -148,8 +148,18 @@ def main():
  elif a.generate:
   d=build();OUT.write_text(json.dumps(d,indent=2,sort_keys=True)+'\n',newline='\n');validate_committed(json.loads(OUT.read_text()));print(f'wrote {OUT} sha256={sha(OUT)}')
  elif a.scratch_mutation_test:
-  r=rows();r[HIT]['anim']+=2
-  if r[HIT]['anim']==1236304:raise AssertionError('accepted private mutation')
-  print('end-to-end private HIT correlation mutation rejected')
+  r,t,e,im=rows(),trace(),wps(),OPCODES.read_bytes()
+  def rejected(fn):
+   try:fn()
+   except(ValueError,KeyError,IndexError):return
+   raise AssertionError('accepted isolated private control')
+  for frame in (HIT,KO):
+   altered=copy.deepcopy(r);altered[frame]['anim']+=2;rejected(lambda a=altered,f=frame:anim('value',a,t,e,f,im))
+  for frame in (HIT,KO):
+   altered=copy.deepcopy(e);altered[frame-1]=[x for x in altered[frame-1]if x[0]!='anim_record'];rejected(lambda a=altered,f=frame:anim('event',r,t,a,f,im))
+  altered=copy.deepcopy(e);altered[HIT-1][2]=('anim_record',ACTOR+0x1c+4,*altered[HIT-1][2][2:]);rejected(lambda:anim('destination',r,t,altered,HIT,im))
+  for mutate in (lambda d:d['closure']['selected_edges'].pop(),lambda d:d['correlations']['hit']['writer_instances'][0].__setitem__('interval_start_frame',5191)):
+   altered=build();mutate(altered);rejected(lambda a=altered:validate_committed(a))
+  print('private HIT/KO value, event, destination, edge, and alignment controls rejected')
  else:p.error('choose a command')
 if __name__=='__main__':main()
