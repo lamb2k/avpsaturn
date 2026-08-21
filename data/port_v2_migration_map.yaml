@@ -36,6 +36,51 @@
     "approval_from_silence": false,
     "exact_response_required": true
   },
+  "card_results": [
+    {
+      "task_id": "SALVAGE-00-OLD-BUILD-BASELINE",
+      "evaluated_commit": "fcb7eaf0c3e6af28394908c251056daca7fb62c2",
+      "technical_status": "PASS",
+      "fidelity_status": "MEASURED",
+      "user_status": "NOT_REVIEWED",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
+      "production_interface": null,
+      "diagnostic_interface": "tests/port_v2/old_build_baseline/run_baseline.ps1",
+      "blockers": [
+        "Automated pinned-emulator window captures are black and cannot support visual acceptance.",
+        "The user screenshot shows visibly distorted enemy pixels; enemy-render fidelity is not accepted by this baseline result.",
+        "No dependency-safe USER_REVIEW card is eligible from SALVAGE-00, while the card requires a USER_REVIEW activation after subjective output.",
+        "Global workflow validators hard-code neutral ledger state and SALVAGE-00 activation but are outside this card's owned paths."
+      ],
+      "exact_next_experiment": "Resolve the workflow ownership/validator transition, then activate only a dependency-safe predeclared review or salvage successor; preserve the MCP baseline as the regression lock and route enemy-pixel corruption to the enemy-render bench.",
+      "evidence": {
+        "build_profile": "OldBuildBaseline diagnostic wrapper over unchanged StreetTest",
+        "build_repeat": "PASS",
+        "invalid_disc_negative_control": "PASS",
+        "pinned_emulator_repeat": "PASS",
+        "iso_sha256": "3649d96db8c4c46ba07af07c20754c60f70b441afde637d14590f1a18b5b45e7",
+        "fixture_relative_frame": 20,
+        "boot_1_emulator_frames": [3551, 4768],
+        "boot_2_emulator_frames": [3551, 4768],
+        "street_scx": [0, 7],
+        "street_objects": 477,
+        "asset_failure_count": 0,
+        "frontend_late_reads": 0,
+        "physical_saturn": "UNRUN"
+      },
+      "user_observation_state": {
+        "formal_review_question_asked": false,
+        "exact_observations": [
+          "so far it looks like the level loaded enemeis are also doing things like breaking out of windows in scheduled events. all enemey pixels are discorted . not sure if that matters at this point. camera also seems to be working.",
+          "runtime seems stable but you should be able to read all of that from the emulator mcp",
+          "are you instruemnted to confirm it deterministically?"
+        ],
+        "approved_components": [],
+        "requested_changes": [],
+        "priority": null
+      }
+    }
+  ],
   "subsystems": [
     {
       "id": "old-build-baseline",

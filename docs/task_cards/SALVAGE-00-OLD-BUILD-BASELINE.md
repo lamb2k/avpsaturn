@@ -62,6 +62,33 @@ None for this card. If the bench exposes subjective output, stop and activate a 
 
 - Any protected-worktree mutation, non-reproducible baseline, missing pinned emulator/input, material build architecture decision, or exhausted bounded correction cycle.
 
+## Pending disposition evidence
+
+- Evaluated commit: fcb7eaf0c3e6af28394908c251056daca7fb62c2
+- Technical: PASS
+- Fidelity: MEASURED, not accepted
+- User: NOT_REVIEWED; unsolicited observations are preserved verbatim in
+  build/feedback/SALVAGE-00-OLD-BUILD-BASELINE/observation.json
+- Salvage: SALVAGE_WITH_ADAPTER
+- Deterministic build repeat: PASS
+- Invalid-disc negative control: PASS
+- Pinned-emulator MCP repeat: PASS
+- Physical Saturn: UNRUN
+- Regression lock: ISO
+  3649d96db8c4c46ba07af07c20754c60f70b441afde637d14590f1a18b5b45e7,
+  phase 20, frames 3551/4768, SCX [0, 7], objects 477, asset
+  failures 0, late reads 0 on both fresh boots.
+- Visual blocker: automated window captures are black; the user's
+  contemporaneous emulator screenshot shows distorted enemy pixels and does
+  not grant visual acceptance.
+- Activation blocker: the subjective-output rule requires a predeclared
+  USER_REVIEW, but none is dependency-safe from this card. The global
+  workflow validators also hard-code neutral ledger state and SALVAGE-00
+  activation while lying outside this card's owned paths.
+- Exact next experiment: resolve that ownership/validator transition, then
+  activate only a dependency-safe predeclared successor and route the enemy
+  corruption to the enemy-render bench.
+
 ## Next eligible cards
 
 - `SALVAGE-01-PLAYER-LOAD-RENDER-INPUT`

@@ -53,6 +53,20 @@ task_status: READY
 active_write_owner: SALVAGE-00-OLD-BUILD-BASELINE
 awaiting_user_feedback: []
 open_blockers: []
+pending_disposition:
+  task: SALVAGE-00-OLD-BUILD-BASELINE
+  evaluated_head: fcb7eaf0c3e6af28394908c251056daca7fb62c2
+  technical_status: PASS
+  fidelity_status: MEASURED_NOT_ACCEPTED
+  user_status: NOT_REVIEWED
+  salvage_decision: SALVAGE_WITH_ADAPTER
+  successor_activation: BLOCKED
+  blockers:
+    - Subjective enemy-render corruption was exposed, but every matching USER_REVIEW card has an unmet salvage dependency.
+    - The global ledger validator requires all subsystem results to remain neutral.
+    - The global task-state validator hard-codes SALVAGE-00 as the first and only active card.
+    - Updating those validators and docs/PARITY_PLAN.md is outside SALVAGE-00 owned paths.
+  exact_next_experiment: Resolve the workflow ownership/validator transition, then activate one dependency-safe predeclared successor without changing the reviewed result.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - SALVAGE-01-PLAYER-LOAD-RENDER-INPUT
