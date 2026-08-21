@@ -457,3 +457,27 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "VDP1 command-model test failed with exit code $LASTEXITCODE."
 }
+
+# Tranche 1 unified cold-boot semantic oracle and executable writer boundary.
+# The self-tests always prove schema/classification rejection controls.  The
+# private MAME runs are present only in the implementation worktree; when they
+# are available, regenerate the public hash/count manifests and require their
+# complete two-run/perturbation and PC/edge coverage gates to pass.
+& $PythonPath (Join-Path $PSScriptRoot 'tests\test_avsp_vertical_slice_oracle.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Vertical-slice oracle schema/control test failed with exit code $LASTEXITCODE."
+}
+& $PythonPath (Join-Path $PSScriptRoot 'tests\test_avsp_translation_boundary.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Translation-boundary classification/control test failed with exit code $LASTEXITCODE."
+}
+if (Test-Path -LiteralPath (Join-Path $PSScriptRoot '.deps\mame\vertical_slice\input_manifest.json')) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tools\verify_avsp_vertical_slice_oracle.py') '--generate'
+    if ($LASTEXITCODE -ne 0) {
+        throw "Vertical-slice oracle generation failed with exit code $LASTEXITCODE."
+    }
+    & $PythonPath (Join-Path $PSScriptRoot 'tools\map_avsp_translation_boundary.py') '--generate'
+    if ($LASTEXITCODE -ne 0) {
+        throw "Translation-boundary generation failed with exit code $LASTEXITCODE."
+    }
+}
