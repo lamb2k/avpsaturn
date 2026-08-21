@@ -33,6 +33,46 @@ static void release_selection_input(CapWorld *world)
     (void)cap_world_step(world, &input);
 }
 
+static void test_start_transition_boundary(void)
+{
+    CapWorld world;
+    CapInput input;
+    int step;
+
+    /* The measured start transition is exactly 30 source frames (CPS2 source
+       frames 1689-1718). Pin the literal value independently of the traversal
+       below so a changed macro cannot silently move the boundary. */
+    assert(CAP_START_TRANSITION_FRAMES == 30);
+
+    cap_world_init(&world);
+    assert(world.encounter_state == CAP_ENCOUNTER_MAIN_MENU);
+
+    /* Start leaves MAIN_MENU for START_TRANSITION with the timer at zero. */
+    memset(&input, 0, sizeof(input));
+    input.start_pressed = 1;
+    (void)cap_world_step(&world, &input);
+    assert(world.encounter_state == CAP_ENCOUNTER_START_TRANSITION);
+    assert(world.encounter_timer == 0);
+    assert(world.encounter_started == 0);
+
+    /* 29 no-input steps hold START_TRANSITION with the timer reaching 29. The
+       count is a literal, never derived from CAP_START_TRANSITION_FRAMES. */
+    for (step = 0; step < 29; ++step)
+    {
+        memset(&input, 0, sizeof(input));
+        (void)cap_world_step(&world, &input);
+    }
+    assert(world.encounter_state == CAP_ENCOUNTER_START_TRANSITION);
+    assert(world.encounter_timer == 29);
+
+    /* The 30th step advances to CHARACTER_SELECT and resets the timer. */
+    memset(&input, 0, sizeof(input));
+    (void)cap_world_step(&world, &input);
+    assert(world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT);
+    assert(world.encounter_timer == 0);
+    assert(world.encounter_started == 0);
+}
+
 static void test_character_selection_semantics(void)
 {
     CapWorld world;
@@ -44,6 +84,9 @@ static void test_character_selection_semantics(void)
     memset(&input, 0, sizeof(input));
     input.start_pressed = 1;
     (void)cap_world_step(&world, &input);
+    assert(world.encounter_state == CAP_ENCOUNTER_START_TRANSITION);
+    /* Traverse the start transition before the character-select screen. */
+    step_empty(&world, CAP_START_TRANSITION_FRAMES);
     assert(world.encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT);
 
     memset(&input, 0, sizeof(input));
@@ -114,6 +157,10 @@ static void start_encounter(CapWorld *world)
     memset(&input, 0, sizeof(input));
     input.start_pressed = 1;
     (void)cap_world_step(world, &input);
+    assert(world->encounter_state == CAP_ENCOUNTER_START_TRANSITION);
+    assert(world->encounter_started == 0);
+    /* Traverse the 30-frame start transition before character select. */
+    step_empty(world, CAP_START_TRANSITION_FRAMES);
     assert(world->encounter_state == CAP_ENCOUNTER_CHARACTER_SELECT);
     assert(world->encounter_started == 0);
     memset(&input, 0, sizeof(input));
@@ -880,6 +927,7 @@ static void test_capture_exact_confirm_shutter(void)
 
 int main(void)
 {
+    test_start_transition_boundary();
     test_character_selection_semantics();
     test_attack_requests_and_damage();
     test_jump_dash_and_captured_special_chord();
