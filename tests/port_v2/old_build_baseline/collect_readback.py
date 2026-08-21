@@ -116,12 +116,32 @@ def wait_for_relative_frame(mcp: Mcp, symbols: dict[str, int], period: int,
         frame = mcp.u32(symbols["avsp_diag_street_frame"])
         ready = mcp.u32(symbols["avsp_diag_runtime_ready"])
         objects = mcp.u32(symbols["avsp_diag_street_objects"])
-        if ready == 1 and objects > 0 and frame > after and frame % period == target:
+        if ready == 1 and objects > 0:
             mcp.call("pause")
-            state = sample(mcp, symbols)
-            if int(state["street_frame"]) % period == target:
-                return state
-            mcp.call("resume")
+            frame = mcp.u32(symbols["avsp_diag_street_frame"])
+            floor = max(frame, after)
+            exact = (floor // period) * period + target
+            if exact <= floor:
+                exact += period
+            address = hex(symbols["avsp_diag_street_frame"])
+            mcp.call("breakpoint_add", cpu="master", type="memory",
+                     address=address, write=True, value=hex(exact))
+            try:
+                mcp.call("resume")
+                while time.time() < deadline:
+                    remaining = max(1, int((deadline - time.time()) * 1000))
+                    stopped = mcp.call("wait_for_stop",
+                                       timeout_ms=min(20_000, remaining))
+                    if "stopped: true" in stopped:
+                        state = sample(mcp, symbols)
+                        if int(state["street_frame"]) != exact:
+                            raise RuntimeError(
+                                f"phase breakpoint stopped at {state['street_frame']}, "
+                                f"expected {exact}")
+                        return state
+            finally:
+                mcp.call("breakpoint_remove", cpu="master", type="memory",
+                         address=address)
         time.sleep(0.01)
     raise TimeoutError(f"did not reach fixture-relative frame {target}")
 
@@ -193,6 +213,7 @@ def main() -> None:
         "iso_sha256": build["artifacts"]["game_iso"]["sha256"],
         "fixture_period": period,
         "target_relative_frame": target,
+        "phase_lock": "conditional-memory-write-breakpoint",
         "samples": [first, second],
         "bounded_stability_frames": int(second["street_frame"]) - int(first["street_frame"]),
         "emulator": {
