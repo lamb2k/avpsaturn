@@ -20,12 +20,37 @@ if (-not $PythonPath) {
 $recorder = Join-Path $PSScriptRoot 'record_build.py'
 $collector = Join-Path $PSScriptRoot 'collect_readback.py'
 $validator = Join-Path $PSScriptRoot 'test_contract.py'
+$preservedManifest = Join-Path $projectRoot 'data\avsp_anim_records.json'
+$preservedManifestBytes = [IO.File]::ReadAllBytes($preservedManifest)
+if ((git -C $projectRoot status --porcelain --untracked-files=no).Count -ne 0) {
+    throw 'OldBuildBaseline requires a tracked-clean card worktree.'
+}
 
 foreach ($run in 1, 2) {
-    & (Join-Path $projectRoot 'build.ps1') -Clean -StreetTest -SkipHostTests `
-        -PythonPath $PythonPath
-    if ($LASTEXITCODE -ne 0) {
-        throw "OldBuildBaseline build $run failed."
+    try {
+        & (Join-Path $projectRoot 'build.ps1') -Clean -StreetTest -SkipHostTests `
+            -PythonPath $PythonPath
+        if ($LASTEXITCODE -ne 0) {
+            throw "OldBuildBaseline build $run failed."
+        }
+    }
+    finally {
+        # The private .deps junction resolves outside this checkout, so the
+        # unchanged generator spells five provenance paths as absolute paths.
+        # Preserve the checked manifest byte-for-byte; generated runtime data
+        # remains ignored and every other tracked change is a hard failure.
+        [IO.File]::WriteAllBytes($preservedManifest, $preservedManifestBytes)
+        # Refresh only this explicitly preserved path. Its clean-filtered blob
+        # is unchanged; this clears Git's Windows line-ending/stat marker.
+        git -C $projectRoot add -- data/avsp_anim_records.json
+        if ($LASTEXITCODE -ne 0 -or
+            (git -C $projectRoot diff --cached --name-only).Count -ne 0) {
+            throw 'Preserved animation manifest no longer matches HEAD.'
+        }
+    }
+    $tracked = @(git -C $projectRoot status --porcelain --untracked-files=no)
+    if ($tracked.Count -ne 0) {
+        throw "OldBuildBaseline build $run changed tracked paths: $($tracked -join ', ')"
     }
     & $PythonPath -B $recorder --run $run
     if ($LASTEXITCODE -ne 0) {
