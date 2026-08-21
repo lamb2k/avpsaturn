@@ -1,0 +1,278 @@
+{
+  "address_spaces": {
+    "instructions_and_code_targets": "opcodes",
+    "rom_operands_and_animation_records": "program"
+  },
+  "artifact": "avsp_hit_ko_writer_set",
+  "closure": {
+    "selected_edges": [
+      {
+        "kind": "fallthrough",
+        "source": "0x016526",
+        "target": "0x01652a"
+      },
+      {
+        "kind": "fallthrough",
+        "source": "0x01652a",
+        "target": "0x01652e"
+      },
+      {
+        "kind": "fallthrough",
+        "source": "0x01652e",
+        "target": "0x016534"
+      }
+    ],
+    "selected_pcs": [
+      "0x016526",
+      "0x01652a",
+      "0x01652e",
+      "0x016534",
+      "0x01d0ac",
+      "0x01d4a2",
+      "0x01d58a",
+      "0x01d592",
+      "0x01d638",
+      "0x01f254",
+      "0x09d3e0",
+      "0x09d454",
+      "0x09d46a"
+    ],
+    "selected_routines": [
+      {
+        "actor_field_reads": [],
+        "actor_field_writes": [
+          "anim_record",
+          "anim_timer"
+        ],
+        "entry_pc": "0x016526",
+        "event_exits": [],
+        "member_pc_count": 4,
+        "member_pc_sha256": "02fb922c37332e54aadb7bbeafa075c81c2229f3ccaf84cfdacbd48253985159",
+        "member_pcs": [
+          "0x016526",
+          "0x01652a",
+          "0x01652e",
+          "0x016534"
+        ],
+        "observed_callees": [],
+        "observed_callers": [],
+        "rom_data_reads": [],
+        "work_ram_references": []
+      },
+      {
+        "actor_field_reads": [
+          "health"
+        ],
+        "actor_field_writes": [
+          "action",
+          "health",
+          "hit_value",
+          "state",
+          "sub_state"
+        ],
+        "entry_pc": "0x01d0ac",
+        "event_exits": [],
+        "member_pc_count": 5,
+        "member_pc_sha256": "998644b89a879625a113370079e96e7332c4a08a4bb14ffaf987de104158b75f",
+        "member_pcs": [
+          "0x01d0ac",
+          "0x01d4a2",
+          "0x01d58a",
+          "0x01d592",
+          "0x01d638"
+        ],
+        "observed_callees": [],
+        "observed_callers": [],
+        "rom_data_reads": [],
+        "work_ram_references": []
+      },
+      {
+        "actor_field_reads": [
+          "state",
+          "sub_state"
+        ],
+        "actor_field_writes": [
+          "anim_timer",
+          "state",
+          "sub_state"
+        ],
+        "entry_pc": "0x09d3e0",
+        "event_exits": [],
+        "member_pc_count": 4,
+        "member_pc_sha256": "297b54d673b3a5e9edc8bfdeafaa5349059a0159521921e8b14a125a52434acc",
+        "member_pcs": [
+          "0x01f254",
+          "0x09d3e0",
+          "0x09d454",
+          "0x09d46a"
+        ],
+        "observed_callees": [],
+        "observed_callers": [],
+        "rom_data_reads": [],
+        "work_ram_references": []
+      }
+    ],
+    "unattributed_dependencies": [],
+    "unresolved_computed_targets": []
+  },
+  "correlations": {
+    "damage_epochs": [
+      {
+        "health": [
+          87,
+          63
+        ],
+        "hit_value": [
+          0,
+          8
+        ],
+        "source_frame": 5190,
+        "writer_pcs": [
+          "0x01d0ac",
+          "0x01d58a"
+        ]
+      },
+      {
+        "health": [
+          8,
+          -1
+        ],
+        "hit_value": [
+          0,
+          12
+        ],
+        "source_frame": 5329,
+        "writer_pcs": [
+          "0x01d0ac",
+          "0x01d58a",
+          "0x01d592"
+        ]
+      }
+    ],
+    "hit": {
+      "anim_record_writer_pcs": [
+        "0x016526"
+      ],
+      "closes_gap_external_repoint_ownership": true,
+      "semantic_changes": [
+        {
+          "after": 2,
+          "before": 0,
+          "field": "action"
+        },
+        {
+          "after": 1236304,
+          "before": 1239884,
+          "field": "anim"
+        },
+        {
+          "after": 1024,
+          "before": 0,
+          "field": "timer"
+        }
+      ],
+      "source_frame": 5191
+    },
+    "ko": {
+      "anim_record_writer_pcs": [
+        "0x016526"
+      ],
+      "closes_gap_external_repoint_ownership": true,
+      "semantic_changes": [
+        {
+          "after": 2,
+          "before": 1,
+          "field": "state"
+        },
+        {
+          "after": 1026,
+          "before": 1024,
+          "field": "sub"
+        },
+        {
+          "after": 1237524,
+          "before": 1239836,
+          "field": "anim"
+        },
+        {
+          "after": 1030,
+          "before": 1024,
+          "field": "timer"
+        }
+      ],
+      "source_frame": 5330
+    }
+  },
+  "coverage": {
+    "actor_fields": [
+      "action",
+      "anim_record",
+      "anim_timer",
+      "health",
+      "hit_value",
+      "state",
+      "sub_state"
+    ],
+    "computed_target_count": 0,
+    "event_exit_count": 2
+  },
+  "dependencies": {
+    "rom_data": [
+      {
+        "address": "0x12dd50",
+        "address_space": "program",
+        "purpose": "HIT animation record"
+      },
+      {
+        "address": "0x12e214",
+        "address_space": "program",
+        "purpose": "KO animation record"
+      }
+    ],
+    "typed_event_exits": [
+      "enemy_hit_event",
+      "enemy_ko_event"
+    ],
+    "work_ram": [
+      {
+        "address": "0xffa000",
+        "purpose": "class_1f_type_0c_enemy_actor"
+      }
+    ]
+  },
+  "evidence_tiers": [
+    "MAME_TRACE",
+    "STATIC_ANALYSIS",
+    "MEASURED"
+  ],
+  "exclusions": [
+    "out_of_window_routes",
+    "other_actor_classes",
+    "production_lifted_c"
+  ],
+  "forbidden_content_present": false,
+  "inputs": {
+    "boundary_sha256": "95e002b7f6d48e8aafbe5e201a370b6dc7c3c5559e7d2253901d0473c0c7b0f4",
+    "contract_sha256": "74016fb2e73c2ae00144fa062662b37e0f575a3ee3ff3b7a420b1ed0f55a4638",
+    "ledger_sha256": "f6e813169a05388ce265d6406382efaa1801fe8c838beb0fdab03bda7725d1a1",
+    "opcodes_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
+    "oracle_sha256": "106fffb92cc5a14acf5fdae7eb14d33b7d9206b9f9ecffcbac67a6fc326696d2",
+    "program_sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9",
+    "trace_sha256": "9bbbc28715668348aeb4d206b7381073123c5b22ec9e2f2557bda1622e142f5f"
+  },
+  "schema": 1,
+  "target": {
+    "class": 31,
+    "revision": "USA 940520",
+    "set": "avspu",
+    "type": 12
+  },
+  "window": {
+    "first_source_frame": 4080,
+    "hit_source_frame": 5191,
+    "interrupt_boundary_count": 1389,
+    "ko_source_frame": 5330,
+    "last_source_frame": 5469,
+    "semantic_epoch_count": 1390
+  }
+}
