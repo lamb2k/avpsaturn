@@ -221,6 +221,23 @@ static int enemy_runtime_ready;
 static int boss_runtime_ready;
 static int current_bitmap_scene;
 
+#ifdef AVSP_PLAYER_SALVAGE_BENCH
+/* This is a presentation view only.  It deliberately does not own a
+ * CapWorld, collision, camera, encounter timer, or combat action.  The
+ * canaries make the view's bounded input update observable over MCP. */
+#define PLAYER_BENCH_CANARY_HEAD 0x50564248UL
+#define PLAYER_BENCH_CANARY_TAIL 0x50564254UL
+typedef struct
+{
+    unsigned long head_canary;
+    CapActor actor;
+    unsigned long tail_canary;
+} PlayerBenchView;
+static PlayerBenchView player_bench;
+static int player_bench_frame;
+static int player_bench_previous_input;
+#endif
+
 /* Stable headless readback surface. These are intentionally global and
  * volatile so stock emulator debugger memory reads can verify the focused
  * frontend profile without relying on a GUI screenshot. */
@@ -237,6 +254,20 @@ volatile int avsp_diag_frontend_rle_errors;
 volatile int avsp_diag_frontend_palette_errors;
 volatile int avsp_diag_frontend_palette_boundary_writes;
 volatile int avsp_diag_frontend_commands;
+#ifdef AVSP_PLAYER_SALVAGE_BENCH
+volatile int avsp_diag_player_frame;
+volatile int avsp_diag_player_input_mask;
+volatile int avsp_diag_player_input_edges;
+volatile int avsp_diag_player_x;
+volatile int avsp_diag_player_lane;
+volatile int avsp_diag_player_facing;
+volatile int avsp_diag_player_pose;
+volatile int avsp_diag_player_pivot_y;
+volatile int avsp_diag_player_render_count;
+volatile int avsp_diag_player_canary_ok;
+volatile int avsp_diag_player_asset_failures;
+volatile int avsp_diag_player_disc_late_reads;
+#endif
 #ifdef AVSP_FRONTEND_SHOT_TEST
 /* Visual-verification profile. The frontend surfaces this pass must compare
  * are short-lived - the ROM's cursor intro is three source frames - so a
@@ -1239,6 +1270,28 @@ static int create_sprite_working_set(void)
     displayed_hud_energy = -1;
     return failed_asset == JO_NULL;
 }
+
+#ifdef AVSP_PLAYER_SALVAGE_BENCH
+static int create_player_sprite_working_set(void)
+{
+    int layer;
+    player_idle_sprites[0] = add_sprite_for_asset(CEL_PLAYER_IDLE_0);
+    player_idle_sprites[1] = add_sprite_for_asset(CEL_PLAYER_IDLE_1);
+    if (!decode_player_action_pose(0)) return 0;
+    for (layer = 0; layer < AVSP_PLAYER_ACTION_LAYERS; ++layer)
+    {
+        player_action_sprites[layer] = jo_sprite_add_4bits_image(
+            &player_action_images[layer]);
+        if (player_action_sprites[layer] < 0)
+        {
+            failed_asset = "PLAYER ACTION VDP1";
+            return 0;
+        }
+    }
+    current_player_action_pose = 0;
+    return 1;
+}
+#endif
 
 static int prepare_enemy_runtime(void)
 {
@@ -2647,6 +2700,135 @@ static CapInput read_input(void)
     return input;
 }
 
+#ifdef AVSP_PLAYER_SALVAGE_BENCH
+/* The prototype's pure player-only limits are retained as a deliberately
+ * fixed-camera presentation window, translated around the 384px source
+ * centre.  This is an adapter for exercising the existing presentation path,
+ * not a replacement gameplay input or movement system. */
+#define PLAYER_BENCH_MIN_X 48
+#define PLAYER_BENCH_MAX_X 304
+#define PLAYER_BENCH_MIN_LANE 138
+#define PLAYER_BENCH_MAX_LANE 218
+
+static int player_bench_input_mask(const CapInput *input)
+{
+    return (input->left ? 1 : 0) |
+           (input->right ? 2 : 0) |
+           (input->up ? 4 : 0) |
+           (input->down ? 8 : 0) |
+           (input->shoot_pressed ? 16 : 0) |
+           (input->attack_pressed ? 32 : 0) |
+           (input->jump_pressed ? 64 : 0) |
+           (input->start_pressed ? 128 : 0);
+}
+
+static void player_bench_init(void)
+{
+    memset(&player_bench, 0, sizeof(player_bench));
+    player_bench.head_canary = PLAYER_BENCH_CANARY_HEAD;
+    player_bench.tail_canary = PLAYER_BENCH_CANARY_TAIL;
+    player_bench.actor.x = 192;
+    player_bench.actor.lane = 178;
+    player_bench.actor.facing = 1;
+    player_bench.actor.action = CAP_ACT_IDLE;
+    player_bench.actor.active = 1;
+    player_bench.actor.kind = CAP_ACTOR_PLAYER;
+    player_bench_frame = 0;
+    player_bench_previous_input = 0;
+}
+
+static void player_bench_step(const CapInput *input)
+{
+    CapActor *actor = &player_bench.actor;
+    int moving = 0;
+    int mask = player_bench_input_mask(input);
+
+    if (input->left && !input->right)
+    {
+        actor->x -= 2;
+        actor->facing = -1;
+        moving = 1;
+    }
+    else if (input->right && !input->left)
+    {
+        actor->x += 2;
+        actor->facing = 1;
+        moving = 1;
+    }
+    if (input->up && !input->down)
+    {
+        --actor->lane;
+        moving = 1;
+    }
+    else if (input->down && !input->up)
+    {
+        ++actor->lane;
+        moving = 1;
+    }
+    if (actor->x < PLAYER_BENCH_MIN_X) actor->x = PLAYER_BENCH_MIN_X;
+    if (actor->x > PLAYER_BENCH_MAX_X) actor->x = PLAYER_BENCH_MAX_X;
+    if (actor->lane < PLAYER_BENCH_MIN_LANE) actor->lane = PLAYER_BENCH_MIN_LANE;
+    if (actor->lane > PLAYER_BENCH_MAX_LANE) actor->lane = PLAYER_BENCH_MAX_LANE;
+    actor->action = moving ? CAP_ACT_WALK : CAP_ACT_IDLE;
+    actor->action_frame = 0;
+    if (moving) ++actor->locomotion_frame;
+
+    avsp_diag_player_input_mask = mask;
+    /* Hold a newly seen edge through the active press so MCP sampling cannot
+     * lose a one-frame event between debugger requests.  Releasing returns
+     * the diagnostic to zero before the next input case. */
+    if (mask == 0)
+        avsp_diag_player_input_edges = 0;
+    else
+        avsp_diag_player_input_edges |= mask & ~player_bench_previous_input;
+    player_bench_previous_input = mask;
+}
+
+static void player_bench_frame_callback(void)
+{
+    CapInput input;
+    CapActor *actor = &player_bench.actor;
+    int pose = -1;
+
+    if (!runtime_ready)
+    {
+        avsp_diag_runtime_ready = 0;
+        avsp_diag_player_asset_failures = 1;
+        jo_printf(1, 12, "PLAYER BENCH FAILED: %s",
+                  failed_asset == JO_NULL ? "UNKNOWN" : failed_asset);
+        return;
+    }
+    input = read_input();
+    player_bench_step(&input);
+    jo_move_background(0, 0);
+    jo_sprite_change_sprite_scale_xy(
+        (float)CAP_VIEW_WIDTH / (float)CAP_CPS2_VIEW_WIDTH, 1.0f);
+    draw_player(actor, cap_actor_screen_x(actor->x, 0, 1));
+    jo_sprite_restore_sprite_scale();
+    if (actor->action == CAP_ACT_WALK)
+    {
+        int frame = actor->locomotion_frame %
+            avsp_player_action_total_frames[AVSP_PLAYER_CLIP_WALK];
+        pose = player_pose_for_frame(AVSP_PLAYER_CLIP_WALK, frame);
+    }
+    ++player_bench_frame;
+    avsp_diag_runtime_ready = 1;
+    avsp_diag_player_frame = player_bench_frame;
+    avsp_diag_player_x = actor->x;
+    avsp_diag_player_lane = actor->lane;
+    avsp_diag_player_facing = actor->facing;
+    avsp_diag_player_pose = pose;
+    avsp_diag_player_pivot_y = actor->lane - 200 - actor->height;
+    avsp_diag_player_render_count = actor->action == CAP_ACT_WALK ?
+        AVSP_PLAYER_ACTION_LAYERS : 2;
+    avsp_diag_player_canary_ok =
+        player_bench.head_canary == PLAYER_BENCH_CANARY_HEAD &&
+        player_bench.tail_canary == PLAYER_BENCH_CANARY_TAIL;
+    avsp_diag_player_asset_failures = failed_asset == JO_NULL ? 0 : 1;
+    avsp_diag_player_disc_late_reads = avsp_disc_guard_state.late_read_attempts;
+}
+#endif
+
 #ifdef AVSP_ENCOUNTER_TEST
 static int active_enemy_count(void)
 {
@@ -2823,6 +3005,10 @@ static void frame_callback(void)
      * screen every frame would space-fill the street map, so the street
      * profile never touches the SGL ASCII layer. */
     jo_clear_screen();
+#endif
+#ifdef AVSP_PLAYER_SALVAGE_BENCH
+    player_bench_frame_callback();
+    return;
 #endif
     avsp_diag_runtime_ready = runtime_ready;
     avsp_diag_encounter_state = (int)world.encounter_state;
@@ -3432,6 +3618,24 @@ void jo_main(void)
                                AVSP_STRIPS_REGION_BYTES);
     }
     set_actor_palette();
+#ifdef AVSP_PLAYER_SALVAGE_BENCH
+    if (!cart_available)
+    {
+        failed_asset = "4MB RAM CART REQUIRED";
+        runtime_ready = 0;
+    }
+    else
+    {
+        /* Player-only resident set: fixed background, two idle layers, action
+         * archive/decode buffers, actor palette, and VDP1 sprites.  No stage
+         * route, enemy archive, collision model, HUD, PCM, or CDDA loads. */
+        runtime_ready = load_background() && load_all_cels() &&
+                        load_player_action_sequences() &&
+                        create_player_sprite_working_set();
+    }
+    if (runtime_ready) player_bench_init();
+    JO_UNUSED_ARG(index);
+#else
     set_frontend_palettes();
     set_hud_palette();
     if (!cart_available)
@@ -3543,6 +3747,7 @@ void jo_main(void)
         world.enemies[index].x = 900;
 #else
     JO_UNUSED_ARG(index);
+#endif
 #endif
     jo_core_set_screens_order(JO_NBG0_SCREEN, JO_SPRITE_SCREEN, JO_NBG1_SCREEN);
     jo_core_add_callback(frame_callback);

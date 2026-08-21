@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "task_id": "SALVAGE-01-PLAYER-LOAD-RENDER-INPUT",
+  "card_profile": "PlayerSalvageBench",
+  "compile_profile": "debug-player-salvage-bench",
+  "manifest_profile": "player-salvage-bench",
+  "required_readback_symbols": [
+    "avsp_diag_runtime_ready",
+    "avsp_diag_player_frame",
+    "avsp_diag_player_input_mask",
+    "avsp_diag_player_input_edges",
+    "avsp_diag_player_x",
+    "avsp_diag_player_lane",
+    "avsp_diag_player_facing",
+    "avsp_diag_player_pose",
+    "avsp_diag_player_pivot_y",
+    "avsp_diag_player_render_count",
+    "avsp_diag_player_canary_ok",
+    "avsp_diag_player_asset_failures",
+    "avsp_diag_player_disc_late_reads"
+  ],
+  "required_iso_members": ["/BG/CORRIDOR.TGA", "/SPR4/PXI0.BIN", "/SPR4/PXI1.BIN", "/SPR4/PACT.RLE"],
+  "disabled_systems": ["enemy", "collision", "damage", "HIT/KO", "camera", "HUD", "PCM", "CDDA"],
+  "physical_saturn": "UNRUN"
+}

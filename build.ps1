@@ -11,6 +11,7 @@ param(
     [switch]$StreetTest,
     [switch]$BossHitTest,
     [switch]$BossKoTest,
+    [switch]$PlayerSalvageBench,
     [switch]$SkipHostTests
 )
 
@@ -181,7 +182,8 @@ try {
                 -Destination (Join-Path $contentRoot $metadataName) -Force
         }
 
-        $buildProfile = if ($BossKoTest) { 'boss-ko-test' }
+        $buildProfile = if ($PlayerSalvageBench) { 'player-salvage-bench' }
+            elseif ($BossKoTest) { 'boss-ko-test' }
             elseif ($BossHitTest) { 'boss-hit-test' }
             elseif ($EncounterTest) { 'encounter-test' }
             elseif ($StreetTest) { 'street-test' }
@@ -252,6 +254,9 @@ try {
         }
         if ($BossKoTest) {
             $makeArguments += 'AVSP_BOSS_KO_TEST=1'
+        }
+        if ($PlayerSalvageBench) {
+            $makeArguments += 'AVSP_PLAYER_SALVAGE_BENCH=1'
         }
         $loaderBuildRoot = Join-Path $projectRoot 'build\loader'
         New-Item -ItemType Directory -Path $loaderBuildRoot -Force | Out-Null
