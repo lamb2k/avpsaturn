@@ -31,6 +31,10 @@ def manifest() -> dict[str, str]:
     values: dict[str, str] = {}
     for line in (ROOT / "build/hardware_release_manifest.txt").read_text(
             encoding="ascii").splitlines():
+        if not line:
+            continue
+        if "=" not in line:
+            raise ValueError(f"malformed manifest line: {line!r}")
         key, value = line.split("=", 1)
         if key in values:
             raise ValueError(f"duplicate manifest key: {key}")
