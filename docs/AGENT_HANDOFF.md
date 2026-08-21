@@ -225,3 +225,59 @@ remain open. Supervisor review and continuation selection are required.
   manifest SHA-256 is `fd13d824a4858906584a949a4f02c87ea1ac76a17bc52504945e40fcba485796`.
   Full `test.ps1` remains unrun in this worktree because it lacks the staged
   ignored ROM/dependency tree; no Saturn/emulator/release/hardware claim moves.
+
+## Tranche 2B correction — full seven-field health/hit closure
+
+Branch `codex/avp-writer-map-tranche-2b-corrections` began clean at immutable
+base `308143a687190a2f9be2b60ada669e907592a5b3`. It supersedes only the
+preceding candidate correction above. The correction changes the owned mapper,
+focused test, bounded manifest, and private-capture *tool* configuration; it
+does not commit capture output, raw trace/opcodes/program data, ROMs, production
+C/H, or any accepted contract/oracle/translation-boundary artifact.
+
+- **RED** (`e54035f`): `python -B tests/test_avsp_hit_ko_writer_set.py` exited
+  1 at the immutable base. It specifically exposed absent health/hit coverage,
+  transitions, and writer instances; an out-of-bound selected PC; corrupt
+  anchors and derived counts; an internally shaped but unobserved edge;
+  routine/PC-union and caller/callee drift; and a synchronized integrity-hash
+  anchor mutation.
+- **GREEN** (`e203b7c`): the seven semantic fields are parsed from 1,390
+  target-actor samples, with interval N aligned to semantic sample N+1. The
+  private MAME 0.289 watchpoint parser retains `D0/D1` and `A0..A7`; actual
+  68000 effective addresses and live bindings resolve health and hit writes.
+  Health transitions are `87→63`, `63→39`, `39→8`, and `8→-1` at intervals
+  5189, 5235, 5282, and 5328; selected health writer PCs are `0x01d58a`,
+  `0x01d592`, and `0x0605a6`. There are 42 hit-value transitions and 50
+  in-window hit observations at `0x0176c0`, `0x01d0ac`, `0x01e9ce`,
+  `0x01e9dc`, and `0x01f31c`.
+- The closed manifest records all seven fields with transition counts
+  state/substate/action/animation-record/animation-timer/health/hit-value of
+  `7/16/57/274/704/4/42`, 7 health and 50 hit observations, 301 selected PCs,
+  302 selected dynamic edges, 12 routines, 9 computed targets, 2 typed event
+  exits, and zero unresolved or unattributed dependencies. Its routine entries
+  are `0x01e888`, `0x01f250`, `0x01f6c6`, `0x016518`, and the eight local
+  health/hit writer contexts. Exact selected-PC, edge, routine,
+  field-transition, and writer-observation hashes bind the result to the
+  7,314-PC accepted translation boundary.
+- **REFACTOR** (`fe375c6`): focused deep-copy controls additionally reject
+  removal of health/hit observations or dependency PCs, health before-value,
+  destination, width, actual-PC, and live-register corruption, plus an
+  unattributed dependency. Mapper self-tests also reject HIT/KO writer removal,
+  semantic/alignment/edge/routine/count/exclusion/raw-content changes. An
+  in-memory private-input scratch control independently changes a health sample
+  and removes a hit watchpoint; both fail end-to-end without altering canonical
+  evidence.
+- Two post-GREEN generations are byte-identical (119,800 bytes) at SHA-256
+  `6be81db48baad4327f2ef53a879cba0c9f67bed610127494f16f3c6deab9ae28`.
+  Mapper self-test, scratch mutation test, focused writer/oracle/boundary
+  tests, and `mame.exe -rompath ..\\AvPSaturnCapabilityTest -verifyroms avspu`
+  exit 0. An isolated-copy `test.ps1` run passed all preceding stages but
+  stopped at the unrelated tile-budget control: `--scope round1 was accepted`
+  against the current `AVSP_TILE_REGION_BYTES` carve. This correction neither
+  changes nor claims that legacy-suite result.
+
+Evidence remains `MAME_TRACE`, `STATIC_ANALYSIS`, and `MEASURED` host only.
+There is no production lift, behavioral-differential result, Saturn build,
+emulator, release, audio, timing, memory, scanout, or physical-hardware claim.
+Capability Gate remains 0/12. Supervisor disposition is required before any
+later tranche is selected.
