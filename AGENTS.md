@@ -43,7 +43,7 @@ Only execute the bounded tranche in `docs/NEXT_AGENT_PROMPT.md`. The first tranc
 
 ### Separate implementor task launch policy
 
-When the harness launches a separate implementor task from an `IMPLEMENTOR_INVOCATION`, it must explicitly set model `gpt-5.6-sol` and reasoning effort `low`. For the Codex task launcher, pass `model: "gpt-5.6-sol"` and `thinking: "low"`; never omit these fields or rely on the project, app, or account default. This policy applies only to the separate write-enabled implementor task. Supervisor and review tasks retain their own configured reasoning levels.
+When the harness launches a separate implementor task from an `IMPLEMENTOR_INVOCATION`, it must explicitly set model `gpt-5.6-terra` and reasoning effort `xhigh`. For the Codex task launcher, pass `model: "gpt-5.6-terra"` and `thinking: "xhigh"`; never omit these fields or rely on the project, app, or account default. This policy applies only to the separate write-enabled implementor task. Supervisor and review tasks retain their own configured reasoning levels.
 
 The first accepted slice must contain real gameplay: deterministic startup, controller input, one player, one class `0x1F` enemy, movement, animation, attack/contact, collision/hit/KO, camera/stage movement, representative layers and palettes, PCM, CDDA, residency/transfer, final scanout, and physical timing. Title/menu work cannot substitute for any item.
 
@@ -132,7 +132,7 @@ or a documented hard stop leaves no safe in-scope work.
 
 After completing the disposition and next `IMPLEMENTOR_INVOCATION`, the
 supervisor must immediately launch that complete invocation in a separate
-Codex task. Use model `gpt-5.6-sol` with reasoning `low`, preserve the exact
+Codex task. Use model `gpt-5.6-terra` with reasoning `xhigh`, preserve the exact
 base/branch/worktree contract, and report the created task identifier or app
 directive. Merely printing an invocation without dispatching it is an
 incomplete review handoff. This dispatch is omitted only under the same four

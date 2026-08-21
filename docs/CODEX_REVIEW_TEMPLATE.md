@@ -49,7 +49,7 @@ NEXT_ASSIGNMENT_REQUIREMENTS:
 - require the next implementor to return through this same canonical template.
 
 NEW_TASK_DISPATCH_REQUIRED: true
-NEW_TASK_DISPATCH: after completing the disposition and next IMPLEMENTOR_INVOCATION, immediately launch that complete invocation in a separate Codex task using model gpt-5.6-sol with reasoning low; report the created task identifier/directive
+NEW_TASK_DISPATCH: after completing the disposition and next IMPLEMENTOR_INVOCATION, immediately launch that complete invocation in a separate Codex task using model gpt-5.6-terra with reasoning xhigh; report the created task identifier/directive
 
 FINAL_REMOTE_SYNC_REQUIRED: true
 FINAL_REMOTE_SYNC: after all authorized review/status commits and immediately before the final review report, push once to private-origin without force and verify the exact remote branch SHA; when no commit was created, perform one final no-op remote-status verification instead
