@@ -18,6 +18,7 @@ if (-not $PythonPath) {
     $PythonPath = $python.Source
 }
 $recorder = Join-Path $PSScriptRoot 'record_build.py'
+$normalizer = Join-Path $PSScriptRoot 'normalize_iso.py'
 $collector = Join-Path $PSScriptRoot 'collect_readback.py'
 $validator = Join-Path $PSScriptRoot 'test_contract.py'
 $preservedManifest = Join-Path $projectRoot 'data\avsp_anim_records.json'
@@ -51,6 +52,10 @@ foreach ($run in 1, 2) {
     $tracked = @(git -C $projectRoot status --porcelain --untracked-files=no)
     if ($tracked.Count -ne 0) {
         throw "OldBuildBaseline build $run changed tracked paths: $($tracked -join ', ')"
+    }
+    & $PythonPath -B $normalizer --run $run
+    if ($LASTEXITCODE -ne 0) {
+        throw "OldBuildBaseline ISO normalization $run failed."
     }
     & $PythonPath -B $recorder --run $run
     if ($LASTEXITCODE -ne 0) {

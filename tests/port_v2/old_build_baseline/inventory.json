@@ -6,6 +6,7 @@
   "underlying_compile_profile": "debug-street-test",
   "underlying_manifest_profile": "street-test",
   "production_behavior_changed": false,
+  "diagnostic_adapter": "Normalize ISO-9660 volume and directory timestamps after the unchanged build; payload bytes remain unchanged.",
   "required_iso_members": {
     "/0.bin": "build/avsp_cd/0.bin",
     "/GAME.BIN": "build/avsp_cd/GAME.BIN",

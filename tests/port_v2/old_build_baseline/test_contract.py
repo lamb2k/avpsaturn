@@ -34,6 +34,8 @@ def validate_inventory(inventory: dict) -> None:
             "baseline no longer reuses StreetTest")
     require(inventory.get("production_behavior_changed") is False,
             "baseline claims production behavior changed")
+    require("payload bytes remain unchanged" in inventory.get("diagnostic_adapter", ""),
+            "diagnostic timestamp adapter is not declared")
     require(len(inventory.get("subsystems", [])) >= 8,
             "major subsystem inventory is incomplete")
     required = {"/0.bin", "/GAME.BIN", "/ST1/STRIPS.BIN"}
@@ -67,6 +69,17 @@ def validate_build(report: dict, inventory: dict) -> None:
     require(report.get("manifest_iso_sha256") ==
             artifacts.get("game_iso", {}).get("sha256"),
             "manifest and ISO identities disagree")
+    normalization = report.get("iso_normalization", {})
+    require(normalization.get("classification") ==
+            "diagnostic-container-metadata-adapter",
+            "ISO normalization classification drifted")
+    require(normalization.get("normalized_iso_sha256") ==
+            artifacts.get("game_iso", {}).get("sha256"),
+            "normalized ISO identity disagrees with build")
+    require(normalization.get("changed_byte_count", 0) > 0,
+            "ISO metadata adapter changed no bytes")
+    require(normalization.get("production_payload_changed") is False,
+            "ISO adapter changed production payload")
     generated = report.get("generated_inputs", {})
     require(len(generated) >= 20, "ignored generated-input inventory is incomplete")
     for name, entry in generated.items():
@@ -140,6 +153,12 @@ def stable_build(report: dict) -> dict:
         "generated_inputs": report["generated_inputs"],
         "ignored_build_inputs": report["ignored_build_inputs"],
         "required_iso_members": report["required_iso_members"],
+        "iso_normalization": {
+            key: report["iso_normalization"][key] for key in (
+                "normalized_iso_sha256", "volume_descriptor_count",
+                "directory_record_count", "required_payload_sha256",
+                "production_payload_changed")
+        },
     }
 
 

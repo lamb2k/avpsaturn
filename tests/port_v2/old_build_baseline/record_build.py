@@ -48,6 +48,9 @@ def main() -> None:
     compile_profile = (ROOT / "build/last_compile_profile.txt").read_text(
         encoding="ascii").strip()
     release_manifest = manifest()
+    normalization_path = (
+        ROOT / f"build/port_v2/old_build_baseline/run-{args.run}/iso-normalization.json")
+    normalization = json.loads(normalization_path.read_text(encoding="ascii"))
     if compile_profile != inventory["underlying_compile_profile"]:
         raise ValueError(f"unexpected compile profile: {compile_profile}")
     if release_manifest.get("profile") != inventory["underlying_manifest_profile"]:
@@ -120,6 +123,7 @@ def main() -> None:
         "manifest_profile": release_manifest["profile"],
         "manifest_iso_sha256": release_manifest["iso_sha256"],
         "inventory_sha256": sha256(inventory_path),
+        "iso_normalization": normalization,
         "artifacts": artifacts,
         "generated_inputs": dict(sorted(generated_inputs.items())),
         "ignored_build_inputs": ignored_build_inputs,
