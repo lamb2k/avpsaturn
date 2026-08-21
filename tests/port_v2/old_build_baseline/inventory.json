@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "task_id": "SALVAGE-00-OLD-BUILD-BASELINE",
+  "card_profile": "OldBuildBaseline",
+  "underlying_build_switch": "StreetTest",
+  "underlying_compile_profile": "debug-street-test",
+  "underlying_manifest_profile": "street-test",
+  "production_behavior_changed": false,
+  "required_iso_members": {
+    "/0.bin": "build/avsp_cd/0.bin",
+    "/GAME.BIN": "build/avsp_cd/GAME.BIN",
+    "/ST1/STRIPS.BIN": "build/avsp_cd/ST1/STRIPS.BIN"
+  },
+  "required_readback_symbols": [
+    "avsp_diag_runtime_ready",
+    "avsp_diag_world_frame",
+    "avsp_diag_frontend_late_reads",
+    "avsp_diag_frontend_missing_assets",
+    "avsp_diag_frontend_rle_errors",
+    "avsp_diag_frontend_palette_errors",
+    "avsp_diag_street_frame",
+    "avsp_diag_street_scx",
+    "avsp_diag_street_objects"
+  ],
+  "subsystems": [
+    {
+      "id": "build-iso-pipeline",
+      "owner": "build.ps1, makefile, loader/**, cd/**",
+      "baseline_experiment": "two clean StreetTest builds and exact required-member hashes"
+    },
+    {
+      "id": "loading-memory-ownership",
+      "owner": "main.c, avsp_disc_guard.*, data/avsp_residency_budget.json",
+      "baseline_experiment": "runtime-ready plus missing-asset and late-read readback"
+    },
+    {
+      "id": "controller-input",
+      "owner": "main.c, capability_model.*",
+      "baseline_experiment": "inventoried only; SALVAGE-01 owns controller exercise"
+    },
+    {
+      "id": "actor-assets-animation-rendering",
+      "owner": "avsp_actor.*, avsp_anim_script.*, avsp_emit.*, avsp_tiles.*",
+      "baseline_experiment": "inventoried only; player and enemy cards own actor benches"
+    },
+    {
+      "id": "collision-combat",
+      "owner": "avsp_collision.*, capability_model.*",
+      "baseline_experiment": "inventoried only; SALVAGE-03 owns collision and V2-2B remains paused"
+    },
+    {
+      "id": "palette-cram",
+      "owner": "avsp_cram.*, main.c",
+      "baseline_experiment": "palette-error readback only; no subjective approval"
+    },
+    {
+      "id": "vdp2-stage-camera-framing",
+      "owner": "avsp_scene.*, avsp_scene_runtime.*, avsp_route.*, avsp_video_config.h",
+      "baseline_experiment": "fixed StreetTest fixture frame, scroll pair, and screenshot"
+    },
+    {
+      "id": "hud-audio",
+      "owner": "main.c, prepare_*audio.ps1, generated frontend data",
+      "baseline_experiment": "inventoried only; SALVAGE-05 owns HUD and PCM"
+    },
+    {
+      "id": "diagnostics-emulator-readback",
+      "owner": "main.c diagnostic symbols, run.ps1, pinned Yaba Sanshiro MCP",
+      "baseline_experiment": "two cold emulator boots at the same fixture-relative frame"
+    }
+  ]
+}
