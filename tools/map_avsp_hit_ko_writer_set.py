@@ -531,6 +531,18 @@ def validate_committed(report):
     if report.get("forbidden_content_present") is not False or FORBIDDEN & set(walk(report)): raise ValueError("forbidden content")
 
 
+def require_invariant_rejection(report, name, invariant, mutate):
+    candidate = copy.deepcopy(report)
+    mutate(candidate)
+    refresh_report_bindings(candidate)
+    try:
+        validate_committed(candidate)
+    except (AttributeError, KeyError, TypeError, ValueError) as error:
+        if invariant in str(error): return
+        raise AssertionError(name + " rejected by " + repr(str(error)) + ", not " + repr(invariant))
+    raise AssertionError("production validator accepted committed-artifact control: " + name)
+
+
 def self_test():
     report = build()
     health_a1 = next(item for item in report["writer_observations"]["health"] if item["instruction_pc"] == "0x01d58a")
@@ -554,14 +566,7 @@ def self_test():
         ("raw key", "unknown top-level key", lambda x: x.__setitem__("trace_text", "forbidden")),
     ]
     for name, invariant, mutate in mutations:
-        candidate = copy.deepcopy(report)
-        mutate(candidate)
-        refresh_report_bindings(candidate)
-        try: validate_committed(candidate)
-        except (AttributeError, KeyError, TypeError, ValueError) as error:
-            if invariant in str(error): continue
-            raise AssertionError(name + " rejected by " + repr(str(error)) + ", not " + repr(invariant))
-        raise AssertionError("production validator accepted committed-artifact control: " + name)
+        require_invariant_rejection(report, name, invariant, mutate)
     print("HIT/KO writer-set self-test and invariant-specific committed-artifact controls passed")
 
 

@@ -60,14 +60,6 @@ def recompute_integrity(module, report):
     return report["integrity"]
 
 
-def module_hash(value):
-    import hashlib
-
-    return hashlib.sha256(
-        json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    ).hexdigest()
-
-
 def selected_routine(report, entry):
     for routine in report["closure"]["selected_routines"]:
         if routine["entry_pc"] == entry:
