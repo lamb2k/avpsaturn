@@ -70,6 +70,27 @@ The only exceptions are: the complete project is accepted; no dependency-ready
 work exists; continuing requires new user authority or physical interaction;
 or a documented hard stop leaves no safe in-scope work.
 
+### Branch and remote continuity policy
+
+- Every completed implementation branch is synchronized exactly once at the
+  end: after all authorized commits and immediately before reviewer dispatch,
+  push to `private-origin` without force and verify the exact remote branch SHA.
+  Do not push intermediate implementation chapters.
+- Every review/status branch follows the same final-only push and exact remote
+  SHA verification rule already defined below.
+- When `ACCEPTED` opens genuinely new implementation work, the supervisor must
+  create a fresh `codex/` branch at the exact accepted/canonical base before
+  dispatch. Never reuse the reviewed implementation or correction branch for a
+  new tranche.
+- When the disposition is `CORRECTIONS REQUIRED` or `NOT REVIEWABLE`, the next
+  assignment is a revision: its exact base is the reviewed candidate HEAD and
+  it uses an explicitly named correction/evidence branch. It must not be
+  presented as a fresh tranche.
+- Every `IMPLEMENTOR_INVOCATION` must declare `ASSIGNMENT_KIND` as
+  `NEW_TRANCHE`, `CORRECTION`, or `EVIDENCE_RECOVERY`, plus the exact base,
+  branch, and current worktree. The launcher verifies those values before the
+  new task begins.
+
 The first accepted slice must contain real gameplay: deterministic startup, controller input, one player, one class `0x1F` enemy, movement, animation, attack/contact, collision/hit/KO, camera/stage movement, representative layers and palettes, PCM, CDDA, residency/transfer, final scanout, and physical timing. Title/menu work cannot substitute for any item.
 
 ## Evidence rules
@@ -127,7 +148,7 @@ The shared-primitives check, presentation/stage parity check, and capability sli
 
 ## Handoff
 
-Every implementation handoff must include branch, immutable base and final SHA, commits oldest first, explicit files changed, commands and exit codes, RED/GREEN/negative-control results, build/profile/artifact hashes, evidence tiers, remaining gaps, worktree status, and a ready review invocation. If incomplete, state the exact stop condition that fired.
+Every implementation handoff must include branch, immutable base and final SHA, commits oldest first, explicit files changed, commands and exit codes, RED/GREEN/negative-control results, build/profile/artifact hashes, evidence tiers, remaining gaps, worktree status, verified `private-origin` SHA, and a ready review invocation. If incomplete, state the exact stop condition that fired.
 
 ### Mandatory review-to-next-work relay
 
@@ -190,5 +211,7 @@ ON_CORRECTIONS_REQUIRED: issue one consolidated correction IMPLEMENTOR_INVOCATIO
 ON_NOT_REVIEWABLE: issue the minimum evidence/isolation IMPLEMENTOR_INVOCATION
 NEW_TASK_DISPATCH_REQUIRED: true
 SAME_WORKTREE_RELAY_REQUIRED: true
+ASSIGNMENT_KIND_REQUIRED: true
+IMPLEMENTATION_REMOTE_SYNC_REQUIRED: true
 FINAL_REMOTE_SYNC_REQUIRED: true
 ```

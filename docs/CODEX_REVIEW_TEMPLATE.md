@@ -16,6 +16,7 @@ IMPLEMENTATION_WORKTREE: [absolute path]
 IMPLEMENTATION_BRANCH: [branch]
 IMMUTABLE_BASE_SHA: [40 hex]
 CANDIDATE_HEAD_SHA: [40 hex]
+PRIVATE_ORIGIN_SHA: [40 hex exact remote branch tip]
 COMMITS_OLDEST_FIRST: [ordered full SHAs]
 OBJECTIVE: [bounded tranche objective]
 OWNED_PATHS: [explicit paths]
@@ -41,7 +42,12 @@ ON_CORRECTIONS_REQUIRED: issue one consolidated correction IMPLEMENTOR_INVOCATIO
 ON_NOT_REVIEWABLE: issue the minimum evidence/isolation IMPLEMENTOR_INVOCATION needed to make the candidate reviewable
 
 NEXT_ASSIGNMENT_REQUIREMENTS:
-- exact 40-character base SHA and explicitly named existing branch/worktree;
+- declare ASSIGNMENT_KIND as NEW_TRANCHE, CORRECTION, or EVIDENCE_RECOVERY;
+- exact 40-character base SHA and explicitly named branch/current worktree;
+- NEW_TRANCHE must use a fresh codex/ branch created at the exact accepted or
+  canonical base and must not reuse the reviewed implementation branch;
+- CORRECTION or EVIDENCE_RECOVERY must use an explicitly named revision branch
+  based exactly on the reviewed candidate HEAD;
 - Codex-authored architecture and bounded investigation decision table;
 - ordered RED/GREEN/refactor chapters and real negative controls;
 - explicit owned paths, constraints, exclusions, verification, stop, commit,
@@ -49,7 +55,11 @@ NEXT_ASSIGNMENT_REQUIREMENTS:
 - require the next implementor to return through this same canonical template.
 
 NEW_TASK_DISPATCH_REQUIRED: true
-NEW_TASK_DISPATCH: after completing the disposition and next IMPLEMENTOR_INVOCATION, immediately launch that complete invocation in a separate Codex task using model gpt-5.6-terra with reasoning xhigh and the saved project's local environment; do not create an app-managed task worktree, and report the created task identifier/directive
+NEW_TASK_DISPATCH: after completing the disposition and next IMPLEMENTOR_INVOCATION, immediately fork a separate same-directory Codex task, send the complete invocation as its first active prompt using model gpt-5.6-terra with reasoning xhigh, do not create an app-managed task worktree, and report the created task identifier/directive
+
+ASSIGNMENT_KIND_REQUIRED: true
+IMPLEMENTATION_REMOTE_SYNC_REQUIRED: true
+IMPLEMENTATION_REMOTE_SYNC: after all authorized implementation commits and immediately before reviewer dispatch, push once to private-origin without force and verify the exact remote implementation-branch SHA
 
 FINAL_REMOTE_SYNC_REQUIRED: true
 FINAL_REMOTE_SYNC: after all authorized review/status commits and immediately before the final review report, push once to private-origin without force and verify the exact remote branch SHA; when no commit was created, perform one final no-op remote-status verification instead

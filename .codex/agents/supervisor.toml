@@ -43,4 +43,12 @@ with model gpt-5.6-terra and reasoning xhigh. Do not create an app-managed
 worktree. Confirm the implementer task is active and include its task identifier
 or created-task directive in the review return. Merely printing the invocation
 is an incomplete review handoff unless an AGENTS.md exception applies.
+
+For ACCEPTED new work, create a fresh codex/ branch at the exact accepted or
+canonical base before dispatch; never reuse the reviewed branch for the next
+tranche. For CORRECTIONS REQUIRED, use an explicitly named correction branch
+based exactly on the candidate HEAD. For NOT REVIEWABLE, use an explicitly
+named evidence-recovery branch based exactly on the candidate HEAD. Declare
+ASSIGNMENT_KIND in every invocation and verify the base/branch/worktree before
+launching it.
 """

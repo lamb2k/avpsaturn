@@ -57,6 +57,12 @@ evidence; exact tests and exit codes; build and ISO hashes; emulator and
 hardware status; remaining ADAPTED/GAP/MISSING work; dirty and untracked files;
 the exact blocker if incomplete; and a ready-to-paste CODEX_REVIEW_INVOCATION.
 
+After all authorized implementation commits and immediately before reviewer
+dispatch, push the implementation branch once to private-origin without force
+and verify that the exact remote branch SHA equals local HEAD. Do not push
+intermediate RED/GREEN/refactor chapters. Record the verified remote SHA in the
+review invocation and final report.
+
 The CODEX_REVIEW_INVOCATION must request both review and continued assignment.
 Copy the complete envelope from docs/CODEX_REVIEW_TEMPLATE.md and fill every
 field. Do not emit only a heading or a review-only paragraph. Include the exact
