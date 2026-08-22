@@ -11,6 +11,7 @@
   },
   "tile_archive_sha256": "43d9707f2bcdb0d23f82db7169052bf21d29627d966a9990706ccc472eb3c1c3",
   "source_actor": {"class_id": 31, "palette_bank": 17, "lane": 200, "facing": -1},
+  "animation": {"clip": "walk", "source_frame_count": 39, "unique_poses": 19},
   "samples": {"stationary": {"frame": 20, "phase": 0, "x": 192}, "translated": {"frame": 140, "phase": 1, "x": 240}, "repeat_stationary": {"frame": 20, "phase": 0, "x": 192}},
   "negative_controls": ["missing class-0x1F tile bank", "unknown class-0x1F tile rank"],
   "approved_lock_sha256": {
