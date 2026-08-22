@@ -21,29 +21,21 @@ The interactive salvage/promotion workflow remains authoritative.
 
 ## Current task and next action
 
-PROMOTE-01 remains accepted at `602ec4f0e26f169e45684f031f805c4b2aed278f`
-after `USER-01-PLAYER-BASELINE-REVIEW` returned the exact response
-`Looks good keep going`; all approved-player locks remain intact.
+PROMOTE-01 and its `USER-01-PLAYER-BASELINE-REVIEW` locks remain accepted. USER-04 exact response
+was `pass for camera and stage`; the reviewed adapted camera/stage presentation
+is locked, while uncaptured row-scroll prevents full source-faithful promotion.
 
-SALVAGE-04 is technically accepted at
-`a89a87b843a65388dae294b84519d115e6cf8f41`. Paired target builds and pinned
-Yaba readbacks reproduce fixed frame 20 at scroll `(0,7)`/477 objects and the
-frame 45-to-46 step `(0,7)` to `(10,15)`. Both VDP2 planes, PNT canaries, CRAM
-payloads, priority `2<3<4<6`, and NTSC 352x224 framing pass. Normalized ISO is
-`6523ba9302cef304179e43c56207396c16537c5c139b3d274b04cf8d68bf7850`.
-The result remains ADAPTED because the enabled scroll2 row-scroll table is
-uncaptured. Enemy distortion remains excluded for SALVAGE-02; physical Saturn
-is `UNRUN`; V2-2B remains paused.
+SALVAGE-05 is technically accepted at
+`89ef72b86f394f26fc63536f9d9f95f581673c18`. Paired clean target builds and
+pinned Yaba interpreter runs reproduce normalized ISO
+`60691d3df7dd4a0076896309e17448df4f23f95cd9d788e0dec9740ff9db3983`.
+HUD states, PCM timing `147/150/200`, three descriptor rejections, zero failure/
+underrun/late-read counters, canaries, and prior regression locks pass.
 
-`USER-04-STAGE-REVIEW` returned the exact response `pass for camera and stage`.
-The shown camera movement/scroll/framing, fixed-checkpoint presentation, and
-adapted two-plane stage composition/palette/priority/final 352x224 presentation
-are approved and locked. Enemy sprite loading/corruption remains routed to
-SALVAGE-02. The uncaptured CPS scroll2 row-scroll table still prevents a
-complete source-faithful stage-scanout claim; physical Saturn remains `UNRUN`.
+The cue remains an ADAPTED QSound-to-SCSP result. Enemy corruption stays routed
+to SALVAGE-02. CDDA, combat, normal release, a second emulator, and physical
+Saturn remain `UNRUN`; V2-2B remains paused.
 
-The active card is `SALVAGE-05-HUD-PCM`, status `READY`. Execute only its HUD
-and one-short-PCM-cue bench in the declared clean card-scoped branch/worktree.
-Keep camera movement disabled, preserve the approved stage/player regression
-locks, and do not add CDDA, combat, or physical-proof claims. V2-2B remains
-paused.
+`USER-05-HUD-PCM-REVIEW` is `AWAITING_USER_FEEDBACK`. Present only ignored
+`build/feedback/USER-05-HUD-PCM-REVIEW/`, ask the exact required question,
+record the exact response, and perform no implementation or inferred approval.

@@ -2,7 +2,7 @@
 
 TASK: SALVAGE-05-HUD-PCM
 KIND: SALVAGE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: salvage-hud-pcm
 BASE: project_state.accepted_head
 BRANCH: codex/avp-salvage-05-hud-pcm

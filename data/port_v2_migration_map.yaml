@@ -257,6 +257,59 @@
         "requested_changes": [],
         "priority": null
       }
+    },
+    {
+      "task_id": "SALVAGE-05-HUD-PCM",
+      "evaluated_commit": "89ef72b86f394f26fc63536f9d9f95f581673c18",
+      "technical_status": "PASS",
+      "fidelity_status": "ADAPTED",
+      "user_status": "AWAITING_USER_FEEDBACK",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
+      "production_interface": null,
+      "diagnostic_interface": "tests/port_v2/hud_pcm_bench/run_pinned_emulator.ps1",
+      "blockers": [
+        "Unblock: obtain exact USER-05 visual and audio feedback on the ignored HUD/PCM package before accepting presentation or sound.",
+        "Unblock: keep the observed distorted enemy pixels isolated for SALVAGE-02; this HUD/PCM bench neither accepts nor alters them.",
+        "Unblock: CDDA, combat, normal release, a second emulator, and physical Saturn remain unrun."
+      ],
+      "exact_next_experiment": "Present build/feedback/USER-05-HUD-PCM-REVIEW/ and record the exact response without implementing or inferring approval.",
+      "evidence": {
+        "build_profile": "HudPcmSalvageBench / debug-hud-pcm-salvage-bench",
+        "fast_lane": "PASS",
+        "target_clean_build_repeat": "PASS",
+        "paired_pinned_emulator_readback": "PASS",
+        "descriptor_and_contract_negative_controls": "PASS",
+        "normalized_iso_sha256": "60691d3df7dd4a0076896309e17448df4f23f95cd9d788e0dec9740ff9db3983",
+        "melee_pcm_sha256": "e2f2870251cf28c5cf52d0d074c3b426cc6db5afb4cde2eebf4838ffa296f125",
+        "hud_asset_sha256": {
+          "/SPR8/HUDHEAT.BIN": "92785debbe19d2221200f205f880cfac875c1e34f880a37189ae75fa393d71e6",
+          "/SPR8/HUDP2.BIN": "930784c345b9049f7b1f0c733648933d0b27be9aa9ff7c7f90df392dba25e847",
+          "/SPR8/HUDTOP.BIN": "334d3cd39eab1730800f3134e224d355c914581426d83d5760a8f0038a42a1fa"
+        },
+        "hud_states": {
+          "zero": {"health": 0, "energy": 0, "fills": [0, 0], "relative_frame": 20},
+          "mid": {"health": 50, "energy": 32, "fills": [57, 30], "relative_frame": 140},
+          "full": {"health": 101, "energy": 64, "fills": [116, 59], "relative_frame": 260}
+        },
+        "pcm_timing": {"event": 147, "start": 150, "end": 200},
+        "negative_rejections": 3,
+        "asset_audio_failures": 0,
+        "pcm_underruns": 0,
+        "disc_late_reads": 0,
+        "canary": "PASS",
+        "bounded_stability_frames": 486,
+        "final_scanout": "NTSC 352x224",
+        "approved_stage_player_regression_locks": "PASS",
+        "review_package": "build/feedback/USER-05-HUD-PCM-REVIEW/",
+        "physical_saturn": "UNRUN"
+      },
+      "user_observation_state": {
+        "formal_review_question_asked": false,
+        "exact_observations": [],
+        "approved_components": [],
+        "requested_changes": [],
+        "priority": null
+      }
     }
   ],
   "subsystems": [
@@ -508,14 +561,16 @@
       "existing_dependencies": ["HUD assets", "palette/CRAM", "semantic player state", "VDP1 priority"],
       "authored_controller_coupling": "HUD values and visibility are fed by authored mixed-runtime world state.",
       "proposed_isolated_bench": "Render fixed health/energy/prompt states over one promoted background with readback.",
-      "technical_status": "UNRUN",
-      "fidelity_status": "UNKNOWN",
-      "user_status": "NOT_REVIEWED",
-      "salvage_decision": "UNTESTED",
+      "technical_status": "PASS",
+      "fidelity_status": "MEASURED",
+      "user_status": "AWAITING_USER_FEEDBACK",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
-      "blockers": [],
-      "exact_next_experiment": "Render zero/mid/full values and a missing-HUD-asset control in SALVAGE-05.",
+      "evidence_commit": "89ef72b86f394f26fc63536f9d9f95f581673c18",
+      "diagnostic_interface": "tests/port_v2/hud_pcm_bench/collect_readback.py",
+      "blockers": ["Unblock: obtain exact USER-05 feedback before accepting HUD presentation; production integration and simultaneous full-stage CRAM ownership remain untested."],
+      "exact_next_experiment": "Review the exact zero/mid/full HUD payload and combined checkpoint in build/feedback/USER-05-HUD-PCM-REVIEW/.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {
@@ -524,14 +579,16 @@
       "existing_dependencies": ["source audio evidence", "SCSP RAM", "event queue", "build packaging"],
       "authored_controller_coupling": "PCM event triggers are coupled to authored mixed-runtime events.",
       "proposed_isolated_bench": "Load and trigger one short PCM cue from a fixed semantic event with timing/readback diagnostics.",
-      "technical_status": "UNRUN",
-      "fidelity_status": "UNKNOWN",
-      "user_status": "NOT_REVIEWED",
-      "salvage_decision": "UNTESTED",
+      "technical_status": "PASS",
+      "fidelity_status": "ADAPTED",
+      "user_status": "AWAITING_USER_FEEDBACK",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
-      "blockers": [],
-      "exact_next_experiment": "Run one expected cue and one invalid cue/missing-buffer negative control in SALVAGE-05.",
+      "evidence_commit": "89ef72b86f394f26fc63536f9d9f95f581673c18",
+      "diagnostic_interface": "tests/port_v2/hud_pcm_bench/collect_readback.py",
+      "blockers": ["Unblock: obtain exact USER-05 feedback before accepting the QSound-to-SCSP adaptation; CDDA, combat mixing, normal release, and physical Saturn remain unrun."],
+      "exact_next_experiment": "Review predator-melee-cue.wav and the combined HUD/PCM checkpoint without changing the capture-exact PCM payload.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {
