@@ -791,7 +791,7 @@ def writer_instance_schema(item, path):
     if item["effective_address_register"] not in {f"a{i}" for i in range(8)}: raise ValueError("effective-address register at " + path)
     register_bindings(item["dynamic_register_binding"], path + ".dynamic_register_binding")
     if item["owner_entered_by_call"] is not True: raise ValueError("writer owner is not call-rooted at " + path)
-    if item["owner_exit"] not in {"return", "context_switch", "interval_end", "context_return"}: raise ValueError("owner exit kind at " + path)
+    if item["owner_exit"] not in {"return", "context_switch"}: raise ValueError("owner exit kind at " + path)
 
 
 def validate_report_structure(report):
@@ -1172,7 +1172,10 @@ def self_test():
         ("corrupted written byte", "hit_value transition reconstruction", lambda x: x["writer_instances"][x["field_transitions"]["hit_value"][0]["writer_instance_indices"][0]]["written_bytes"].__setitem__("0x2c", 0xAB)),
         ("writer instance interval shift", "transition writer binding", lambda x: x["writer_instances"][0].__setitem__("interval_start_frame", x["writer_instances"][0]["interval_start_frame"] + 1)),
         ("owner not call-rooted", "writer owner is not call-rooted", lambda x: x["writer_instances"][0].__setitem__("owner_entered_by_call", False)),
-        ("owner exit relabel", "owner exit kind", lambda x: x["writer_instances"][0].__setitem__("owner_exit", "fallthrough")),
+        ("owner exit relabel", "owner exit kind", lambda x: x["writer_instances"][0].__setitem__("owner_exit", "interval_end")),
+        ("successor PC drift", "immutable PC/edge/routine binding", lambda x: x["writer_instances"][0].__setitem__("watchpoint_reported_pc", "0xfffffe")),
+        ("HIT bus-event count drift", "hit animation writer", lambda x: x["writer_instances"][x["correlations"]["hit"]["anim_writer_instance_index"]].__setitem__("bus_event_count", 1)),
+        ("live register binding removed", "immutable PC/edge/routine binding", lambda x: x["writer_instances"][0].__setitem__("dynamic_register_binding", {})),
         ("owner outside routines", "writer owner selection", lambda x: x["writer_instances"][0].__setitem__("owner_entry_pc", "0x0080b4")),
         ("HIT anchor", "exact accepted anchors", lambda x: x["window"].__setitem__("hit_semantic_sample_after", HIT + 1)),
         ("field layout corruption", "field layout", lambda x: x["actor_field_layout"]["state"].__setitem__("byte_width", 2)),
@@ -1183,6 +1186,7 @@ def self_test():
         ("task root corruption", "task root binding", lambda x: x["closure"]["task_root"].__setitem__("entry_pc", "0x0080b6")),
         ("event count", "derived counts", lambda x: x["coverage"].__setitem__("event_exit_count", 999)),
         ("ROM dependency relabel", "ROM dependency schema", lambda x: x["dependencies"]["rom_data"][1].__setitem__("address_space", "opcodes")),
+        ("ROM dependency purpose drift", "ROM dependency schema", lambda x: x["dependencies"]["rom_data"][1].__setitem__("purpose", "asserted_hit_record")),
         ("actor reference removal", "actor-field dependency derivation", lambda x: x["dependencies"]["actor_field_references"].pop("state")),
         ("outgoing edge removal", "derived counts", lambda x: x["dependencies"]["outgoing_control_edges"].pop()),
         ("outgoing edge retarget", "outgoing edge derivation", lambda x: x["dependencies"]["outgoing_control_edges"][0].__setitem__("target", x["closure"]["selected_pcs"][0])),

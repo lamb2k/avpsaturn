@@ -124,7 +124,7 @@ def main() -> int:
         if item.get("owner_entered_by_call") is not True:
             failures.append("writer instance is not call-rooted: " + str(item.get("index")))
             break
-        if item.get("owner_exit") not in {"return", "context_switch", "interval_end"}:
+        if item.get("owner_exit") not in {"return", "context_switch"}:
             failures.append("writer instance lacks derived return/typed exit: " + str(item.get("index")))
             break
     closure = report.get("closure", {})
@@ -305,7 +305,13 @@ def main() -> int:
         # call-rooted closure controls
         ("owner not call-rooted", "writer owner is not call-rooted",
          lambda d: d["writer_instances"][0].__setitem__("owner_entered_by_call", False)),
-        ("owner exit relabel", "owner exit kind", lambda d: d["writer_instances"][0].__setitem__("owner_exit", "fallthrough")),
+        ("owner exit relabel", "owner exit kind", lambda d: d["writer_instances"][0].__setitem__("owner_exit", "interval_end")),
+        ("successor PC drift", "immutable PC/edge/routine binding",
+         lambda d: d["writer_instances"][0].__setitem__("watchpoint_reported_pc", "0xfffffe")),
+        ("HIT bus-event count drift", "hit animation writer",
+         lambda d: d["writer_instances"][d["correlations"]["hit"]["anim_writer_instance_index"]].__setitem__("bus_event_count", 1)),
+        ("live register binding removed", "immutable PC/edge/routine binding",
+         lambda d: d["writer_instances"][0].__setitem__("dynamic_register_binding", {})),
         ("owner outside writer_owner role", "writer owner selection",
          lambda d: d["writer_instances"][0].__setitem__("owner_entry_pc", d["closure"]["task_root"]["entry_pc"])),
         ("writer PC outside owner members", "writer owner membership",
@@ -330,6 +336,8 @@ def main() -> int:
          lambda d: d["dependencies"]["work_ram"][0]["written_byte_offsets"]["anim_timer"].pop()),
         ("out-of-set HIT ROM address", "program dependencies",
          lambda d: d["dependencies"]["rom_data"][1].__setitem__("address", "0x1ffffe")),
+        ("ROM dependency purpose drift", "ROM dependency schema",
+         lambda d: d["dependencies"]["rom_data"][1].__setitem__("purpose", "asserted_hit_record")),
         ("forged ROM pointer count", "program dependencies",
          lambda d: d["dependencies"]["rom_data"][0].__setitem__("pointer_count", 1)),
         ("changed typed event exit", "HIT typed event exit",
