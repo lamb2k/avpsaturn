@@ -84,16 +84,15 @@
       "evaluated_commit": "fc9f46746d082e4ccfe800304f49c55bec3e3800",
       "technical_status": "PASS",
       "fidelity_status": "MEASURED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "APPROVED",
       "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "diagnostic_interface": "tests/port_v2/player_bench/run_pinned_emulator.ps1",
       "blockers": [
-        "Unblock: record the exact USER-01 component-scoped response before any player promotion.",
         "Unblock: keep the user's observed enemy-pixel distortion isolated for SALVAGE-02; this player bench does not alter it.",
         "Unblock: physical Saturn validation remains required before any physical claim."
       ],
-      "exact_next_experiment": "Present build/feedback/USER-01-PLAYER-BASELINE-REVIEW/ and record the exact user response; only SALVAGE-02 may proceed independently while that review is pending.",
+      "exact_next_experiment": "Promote the approved player package behind narrow port_v2 interfaces while preserving exact asset, pivot, palette, cadence, movement, input-edge, canary, and zero-late-read locks.",
       "evidence": {
         "build_profile": "PlayerSalvageBench / debug-player-salvage-bench",
         "fast_lane": "PASS",
@@ -128,16 +127,15 @@
       "evaluated_commit": "76e497b1bcadc2b4ff8326bc855f7cef1bc7d336",
       "technical_status": "PASS",
       "fidelity_status": "MEASURED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "APPROVED",
       "salvage_decision": "REPAIR",
       "production_interface": null,
       "diagnostic_interface": "tests/port_v2/player_bench/run_pinned_emulator.ps1",
       "blockers": [
-        "Unblock: obtain a new exact USER-01 response to the corrected full-character package before player promotion.",
         "Unblock: keep the distorted-enemy-pixel observation isolated for SALVAGE-02; this repair does not alter or accept it.",
         "Unblock: physical Saturn validation remains required before any physical claim."
       ],
-      "exact_next_experiment": "Present build/feedback/USER-01-PLAYER-BASELINE-REVIEW/ and record the exact response to the corrected idle/walk bounds; only SALVAGE-02 may proceed independently while feedback is pending.",
+      "exact_next_experiment": "Run PROMOTE-01 and reject any interface adapter that changes the approved player package byte identities or reviewed idle/walk/input behavior.",
       "evidence": {
         "build_profile": "PlayerSalvageBench / debug-player-salvage-bench",
         "fast_lane": "PASS",
@@ -215,15 +213,15 @@
       "proposed_isolated_bench": "Load only player bank plus canaries, retire it, reuse the arena, and prove ownership/read boundaries.",
       "technical_status": "PASS",
       "fidelity_status": "MEASURED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "APPROVED",
       "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
       "evidence_commit": "fc9f46746d082e4ccfe800304f49c55bec3e3800",
       "diagnostic_interface": "tests/port_v2/player_bench/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: record exact USER-01 feedback before exposing this isolated ownership path to promotion."],
-      "exact_next_experiment": "Review the paired PlayerSalvageBench canary, zero-late-read, and package evidence through USER-01.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
+      "blockers": ["Unblock: PROMOTE-01 must expose this accepted ownership behavior through a narrow player loading interface without changing canary or late-read results."],
+      "exact_next_experiment": "Promote the accepted player loading ownership path and mutation-reject any adapter that changes package identity, canaries, or zero-late-read behavior.",
+      "user_feedback": {"exact_response": "Looks good keep going", "approved_components": ["Corrected reviewed player package and its stable loading result."], "requested_changes": [], "priority": "continue-player-promotion"}
     },
     {
       "id": "controller-input",
@@ -233,15 +231,15 @@
       "proposed_isolated_bench": "Sample digital pad once per tick, emit neutral semantic input state, and compare deterministic edge readback.",
       "technical_status": "PASS",
       "fidelity_status": "MEASURED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "APPROVED",
       "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
       "evidence_commit": "fc9f46746d082e4ccfe800304f49c55bec3e3800",
       "diagnostic_interface": "tests/port_v2/player_bench/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: user-review directional movement and facing before any interface promotion; A/B/C/Start stay outside this card's player baseline."],
-      "exact_next_experiment": "Review sampled right/down/left input edges and the resulting position, lane, and facing evidence through USER-01.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
+      "blockers": ["Unblock: PROMOTE-01 must retain the approved right/down-lane/left movement and facing behavior; A/B/C/Start remain outside this promotion."],
+      "exact_next_experiment": "Promote the accepted directional input semantics and reject an adapter mutation that changes edge, position, lane, or facing results.",
+      "user_feedback": {"exact_response": "Looks good keep going", "approved_components": ["Demonstrated right, down-lane, left, and facing behavior."], "requested_changes": [], "priority": "continue-player-promotion"}
     },
     {
       "id": "player-assets",
@@ -251,15 +249,15 @@
       "proposed_isolated_bench": "Load one source-traceable player pose bank with manifest and missing-asset negative control.",
       "technical_status": "PASS",
       "fidelity_status": "MEASURED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "APPROVED",
       "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
       "evidence_commit": "fc9f46746d082e4ccfe800304f49c55bec3e3800",
       "diagnostic_interface": "tests/port_v2/player_bench/record_build.py",
-      "blockers": ["Unblock: obtain exact USER-01 component feedback on the player image and palette before promotion."],
-      "exact_next_experiment": "Review the exact PXI0, PXI1, PACT, and CORRIDOR package identities and their emulator image through USER-01.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
+      "blockers": ["Unblock: PROMOTE-01 must bind the approved player assets and palette without changing the reviewed package identities."],
+      "exact_next_experiment": "Promote exact PXI0, PXI1, PACT, and CORRIDOR identities through a narrow player asset interface and reject any hash mutation.",
+      "user_feedback": {"exact_response": "Looks good keep going", "approved_components": ["Corrected full-visible player image, palette, and fixed-background presentation."], "requested_changes": [], "priority": "continue-player-promotion"}
     },
     {
       "id": "player-rendering",
@@ -269,15 +267,15 @@
       "proposed_isolated_bench": "Render one player at fixed positions and flips with command-count, position, pivot, and asset-failure readback.",
       "technical_status": "PASS",
       "fidelity_status": "MEASURED",
-      "user_status": "CHANGES_REQUESTED",
+      "user_status": "APPROVED",
       "salvage_decision": "REPAIR",
       "production_interface": null,
       "promoted_commit": null,
       "evidence_commit": "76e497b1bcadc2b4ff8326bc855f7cef1bc7d336",
       "diagnostic_interface": "tests/port_v2/player_bench/collect_readback.py",
-      "blockers": ["Unblock: obtain renewed USER-01 approval of the corrected full-character idle/walk package before promotion."],
-      "exact_next_experiment": "Present the corrected USER-01 package, retain full visible idle/walk bounds and the seven-command VDP1 regression lock, and record the exact response without inferring approval from silence.",
-      "user_feedback": {"exact_response": "the character sprite is cropped but moving.", "approved_components": [], "requested_changes": ["Restore the full visible character sprite; it is currently cropped."], "priority": "player-sprite-crop"}
+      "blockers": ["Unblock: PROMOTE-01 must preserve the approved full-visible idle/walk bounds, pivot, palette, composition, and seven-command VDP1 lock."],
+      "exact_next_experiment": "Promote corrected rendering through a narrow interface and reject the original bottom-232 pivot plus any approved-bound or command-count mutation.",
+      "user_feedback": {"exact_response": "Looks good keep going", "approved_components": ["Corrected full-visible player image, pivot, palette, and fixed-background presentation."], "requested_changes": [], "priority": "continue-player-promotion"}
     },
     {
       "id": "player-animation",
@@ -287,15 +285,15 @@
       "proposed_isolated_bench": "Advance one idle/walk sequence from a neutral semantic state and record pose-run timing.",
       "technical_status": "PASS",
       "fidelity_status": "MEASURED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "APPROVED",
       "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
       "evidence_commit": "fc9f46746d082e4ccfe800304f49c55bec3e3800",
       "diagnostic_interface": "tests/port_v2/player_bench/collect_readback.py",
-      "blockers": ["Unblock: record exact USER-01 feedback on the captured idle/walk animation before promotion."],
-      "exact_next_experiment": "Review the captured idle and walk pose evidence; retain the mutated-duration negative control as the animation regression lock.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
+      "blockers": ["Unblock: PROMOTE-01 must preserve the approved shown idle/walk animation presentation and measured cadence."],
+      "exact_next_experiment": "Promote idle/walk animation selection behind a narrow interface and retain the mutated-duration rejection control.",
+      "user_feedback": {"exact_response": "Looks good keep going", "approved_components": ["Shown idle and walk animation presentation."], "requested_changes": [], "priority": "continue-player-promotion"}
     },
     {
       "id": "enemy-assets",

@@ -26,10 +26,6 @@ reuse candidates, not production gameplay authority or parity gates.
 
 ## Current task and next action
 
-`SALVAGE-01-PLAYER-LOAD-RENDER-INPUT` is accepted at `fc9f46746d082e4ccfe800304f49c55bec3e3800`:
-paired clean builds and pinned Yaba readback passed exact package, normalized-disc,
-runtime-ready, asset, late-read, canary, VDP1-command, and input-edge checks. Physical Saturn remains `UNRUN`.
-
 USER-01 returned `the character sprite is cropped but moving.` Motion remains an
 observation, not approval. REPAIR-01 corrected the grounded player pivot at
 `76e497b1bcadc2b4ff8326bc855f7cef1bc7d336`: paired clean builds and pinned Yaba
@@ -39,10 +35,15 @@ and normalized ISO `7a9326d08607813fb88fb969de5f8f92b233649575e694b742e87141c6f2
 The real negative control restores the rejected idle bottom `232` and fails the
 full-visible-cel invariant. Physical Saturn remains `UNRUN`.
 
-The active card is `USER-01-PLAYER-BASELINE-REVIEW`, status
-`AWAITING_USER_FEEDBACK`. Perform no implementation. Present ignored
-`build/feedback/USER-01-PLAYER-BASELINE-REVIEW/` and record the exact response.
-The old response is retained as `prior-response.json` and does not approve the
-corrected output. `PROMOTE-01` remains blocked. `SALVAGE-02` is the only
-independent eligible implementation while feedback is pending and must not
-alter the player package.
+`USER-01-PLAYER-BASELINE-REVIEW` exact response is `Looks good keep going`.
+The corrected full-visible player image/pivot/palette and fixed-background
+presentation, shown idle/walk animation, and demonstrated movement/facing are
+approved and locked. Enemy pixels, combat, camera, HUD, audio, normal release,
+and physical Saturn remain outside this approval.
+
+The active card is `PROMOTE-01-PLAYER-PIPELINE`, status `READY`. Promote only
+the approved loading, input, player asset, animation, and rendering decisions
+behind narrow `src/port_v2/player/**` interfaces in its declared clean branch/
+worktree. Preserve the approved package byte/behavior locks and require renewed
+USER_REVIEW if any approved invariant is at risk. Physical Saturn remains
+`UNRUN`; V2-2B remains paused and does not block player promotion.

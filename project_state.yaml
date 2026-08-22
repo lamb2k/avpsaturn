@@ -6,7 +6,7 @@ migration_map: data/port_v2_migration_map.yaml
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
 review_candidate_status: CORRECTIONS_REQUIRED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW]
 accepted_implementation_history:
   - id: tranche-2a-foundation
     status: ACCEPTED
@@ -54,13 +54,13 @@ worktree_safety:
     head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
     dirty: true
     preserve: true
-current_checkpoint: review-player-baseline
-active_task_card: docs/task_cards/USER-01-PLAYER-BASELINE-REVIEW.md
-active_task_id: USER-01-PLAYER-BASELINE-REVIEW
-active_task_kind: USER_REVIEW
-task_status: AWAITING_USER_FEEDBACK
-active_write_owner: USER-01-PLAYER-BASELINE-REVIEW
-awaiting_user_feedback: [USER-01-PLAYER-BASELINE-REVIEW]
+current_checkpoint: promote-player-pipeline
+active_task_card: docs/task_cards/PROMOTE-01-PLAYER-PIPELINE.md
+active_task_id: PROMOTE-01-PLAYER-PIPELINE
+active_task_kind: PROMOTE
+task_status: READY
+active_write_owner: PROMOTE-01-PLAYER-PIPELINE
+awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
   - task: SALVAGE-00-OLD-BUILD-BASELINE
@@ -91,15 +91,28 @@ completed_dispositions:
     evaluated_head: 76e497b1bcadc2b4ff8326bc855f7cef1bc7d336
     technical_status: PASS
     fidelity_status: MEASURED
-    user_status: AWAITING_USER_FEEDBACK
+    user_status: APPROVED
     salvage_decision: REPAIR
-    successor_activation: USER-01-PLAYER-BASELINE-REVIEW
+    successor_activation: PROMOTE-01-PLAYER-PIPELINE
     blockers:
-      - The corrected full-character package requires a new exact USER-01 response before promotion.
-      - Movement was observed previously but remains unapproved.
       - The distorted enemy pixels remain deferred to SALVAGE-02 and are not accepted by this player-only repair.
       - Physical Saturn remains UNRUN.
-    exact_next_experiment: Present the corrected ignored USER-01 package, record the exact response, and infer no approval from silence; only SALVAGE-02 may proceed independently while feedback is pending.
+    exact_next_experiment: Promote only the approved player package behind narrow port_v2 interfaces while retaining exact asset, pivot, palette, cadence, input, movement, canary, and zero-late-read locks.
+  - task: USER-01-PLAYER-BASELINE-REVIEW
+    evaluated_head: 76e497b1bcadc2b4ff8326bc855f7cef1bc7d336
+    technical_status: PASS
+    fidelity_status: MEASURED
+    user_status: APPROVED
+    salvage_decision: SALVAGE_WITH_ADAPTER
+    successor_activation: PROMOTE-01-PLAYER-PIPELINE
+    exact_response: Looks good keep going
+    approved_components:
+      - Corrected full-visible player image, pivot, palette, and fixed-background presentation.
+      - Shown idle and walk animation presentation.
+      - Demonstrated right, down-lane, left, and facing behavior.
+    blockers:
+      - Enemy pixels, combat, camera, HUD, audio, normal release, and physical Saturn remain outside this approval.
+    exact_next_experiment: Promote the approved player package without changing its reviewed output; require renewed USER_REVIEW for any approved invariant at risk.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR
