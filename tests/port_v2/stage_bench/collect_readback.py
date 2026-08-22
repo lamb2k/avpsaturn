@@ -257,6 +257,12 @@ def main() -> None:
                 raise
             time.sleep(0.25)
     bounds = window_bounds(args.emulator_pid, args.timeout)
+    while time.time() < deadline:
+        if mcp.u32(syms["avsp_diag_runtime_ready"]) == 1:
+            break
+        time.sleep(0.05)
+    else:
+        raise TimeoutError("stage bench did not become runtime-ready")
     literal = mcp.u32(syms["slBMPalette"] + 0x10)
     if not 0x06000000 <= literal < 0x06100000:
         raise RuntimeError(f"invalid SGL shadow anchor: 0x{literal:08x}")
