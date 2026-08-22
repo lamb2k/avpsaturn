@@ -1,0 +1,145 @@
+{
+  "schema": 1,
+  "artifact": "full_game_content_coverage",
+  "source_set": "avspu",
+  "scope": "cold_boot_through_credits",
+  "status_vocabulary": [
+    "MEASURED",
+    "ADAPTED",
+    "PARTIAL",
+    "UNKNOWN",
+    "UNRUN"
+  ],
+  "evidence_rule": "A component result does not complete its enclosing route body, and no non-physical result is physical Saturn proof.",
+  "known_evidence": {
+    "scene_manifest": {
+      "path": "data/avsp_scene_manifest.json",
+      "capture_last_frame": 18000,
+      "scene_count": 122,
+      "labeled_scene_count": 23,
+      "unlabeled_scene_count": 99,
+      "last_labeled_body": "round2-underpass"
+    },
+    "frontend_interaction": {
+      "path": "data/frontend_interaction.json",
+      "scope": "measured character-select identities and interaction semantics only"
+    }
+  },
+  "route_bodies": [
+    {
+      "id": "frontend",
+      "captured": "PARTIAL",
+      "labeled": "PARTIAL",
+      "packaged": "UNKNOWN",
+      "host_parity": "PARTIAL",
+      "emulator": "UNRUN",
+      "human_review": "UNRUN",
+      "physical_workload": "UNRUN",
+      "blockers": [
+        "No complete cold-boot-to-character-confirm production route is accepted.",
+        "Frontend line-scroll requirements are measured only for the captured scenes that need them."
+      ],
+      "next_experiment": "Execute SALVAGE-08 after the playable capability slice; isolate title and four-character select without adding gameplay to scene bytecode."
+    },
+    {
+      "id": "round1",
+      "captured": "PARTIAL",
+      "labeled": "PARTIAL",
+      "packaged": "UNKNOWN",
+      "host_parity": "PARTIAL",
+      "emulator": "PARTIAL",
+      "human_review": "PARTIAL",
+      "physical_workload": "UNRUN",
+      "blockers": [
+        "Approved player, class 0x1F enemy, camera/stage, HUD, and PCM components do not establish complete Round 1 behavior.",
+        "Collision, combat, encounters, boss, route transitions, CDDA, residency, and physical Saturn remain incomplete."
+      ],
+      "next_experiment": "Finish the active salvage/combat/capability sequence, then integrate cold boot through Round 1 under INTEGRATE-04."
+    },
+    {
+      "id": "round2_underpass_through_frame_18000",
+      "captured": "PARTIAL",
+      "labeled": "PARTIAL",
+      "packaged": "UNKNOWN",
+      "host_parity": "UNKNOWN",
+      "emulator": "UNRUN",
+      "human_review": "UNRUN",
+      "physical_workload": "UNRUN",
+      "blockers": [
+        "The current source route ends at frame 18000.",
+        "Scene labels and gameplay semantics are incomplete."
+      ],
+      "next_experiment": "ORACLE-01 must continue the deterministic source route past frame 18000 and label transitions from evidence."
+    },
+    {
+      "id": "route_after_frame_18000",
+      "captured": "UNKNOWN",
+      "labeled": "UNKNOWN",
+      "packaged": "UNKNOWN",
+      "host_parity": "UNRUN",
+      "emulator": "UNRUN",
+      "human_review": "UNRUN",
+      "physical_workload": "UNRUN",
+      "blockers": [
+        "No complete deterministic source capture is recorded after frame 18000."
+      ],
+      "next_experiment": "Run ORACLE-01 twice with the pinned input ledger and once with the declared perturbation control."
+    },
+    {
+      "id": "bosses",
+      "captured": "UNKNOWN",
+      "labeled": "UNKNOWN",
+      "packaged": "UNKNOWN",
+      "host_parity": "UNRUN",
+      "emulator": "UNRUN",
+      "human_review": "UNRUN",
+      "physical_workload": "UNRUN",
+      "blockers": [
+        "Complete boss identities, behaviors, transitions, and workload classes are not yet captured."
+      ],
+      "next_experiment": "Label each boss body from ORACLE-01 before instantiating its stage-segment cards."
+    },
+    {
+      "id": "continue_and_game_over",
+      "captured": "UNKNOWN",
+      "labeled": "UNKNOWN",
+      "packaged": "UNKNOWN",
+      "host_parity": "UNRUN",
+      "emulator": "UNRUN",
+      "human_review": "UNRUN",
+      "physical_workload": "UNRUN",
+      "blockers": [
+        "Continue, credit, failure, and game-over route semantics are not yet captured completely."
+      ],
+      "next_experiment": "ORACLE-01 must capture continue and game-over branches with explicit input, route, audio, and transition state."
+    },
+    {
+      "id": "endings",
+      "captured": "UNKNOWN",
+      "labeled": "UNKNOWN",
+      "packaged": "UNKNOWN",
+      "host_parity": "UNRUN",
+      "emulator": "UNRUN",
+      "human_review": "UNRUN",
+      "physical_workload": "UNRUN",
+      "blockers": [
+        "Common, lineage-shared, and character-specific ending content is unmeasured."
+      ],
+      "next_experiment": "Run ORACLE-03 from final boss through ending for each of the four characters."
+    },
+    {
+      "id": "credits",
+      "captured": "UNKNOWN",
+      "labeled": "UNKNOWN",
+      "packaged": "UNKNOWN",
+      "host_parity": "UNRUN",
+      "emulator": "UNRUN",
+      "human_review": "UNRUN",
+      "physical_workload": "UNRUN",
+      "blockers": [
+        "Credits route, presentation, audio, and character deltas are unmeasured."
+      ],
+      "next_experiment": "ORACLE-03 must carry each character run through the final credits transition."
+    }
+  ]
+}

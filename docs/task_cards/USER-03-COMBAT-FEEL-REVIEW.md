@@ -4,14 +4,14 @@ TASK: USER-03-COMBAT-FEEL-REVIEW
 KIND: USER_REVIEW
 STATUS: BLOCKED
 CHECKPOINT: review-combat-feel
-BASE: project_state.accepted_head
-BRANCH: codex/avp-user-03-combat-review
+BASE: project_state.production_head
+BRANCH: project_state.production_branch
 TIER: 0
 DEPENDENCIES: [INTEGRATE-02-COMBAT]
 REQUIRED_LANES: [Fast]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [SALVAGE-04-CAMERA-STAGE-LAYERS, INTEGRATE-03-PLAYABLE-SLICE]
+NEXT_ELIGIBLE_CARDS: [PROMOTE-04-CAMERA-STAGE, ORACLE-01-FULL-REFERENCE-ROUTE, ORACLE-02-FOUR-CHARACTER-ACTION-MATRIX, ORACLE-03-ENDING-CREDITS-DELTAS]
 
 ## Objective
 
@@ -56,5 +56,7 @@ Ask exactly: "What should remain unchanged, what looks or feels wrong, and which
 
 ## Next eligible cards
 
-- A bounded combat `REPAIR` card if requested, otherwise later slice integration.
-- `SALVAGE-04-CAMERA-STAGE-LAYERS` may proceed while pending.
+- A bounded combat `REPAIR` card if requested; otherwise
+  `PROMOTE-04-CAMERA-STAGE`.
+- The three read-only Oracle cards may proceed while pending because they cannot
+  alter the reviewed combat result.

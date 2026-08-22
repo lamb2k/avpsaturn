@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "artifact": "ending_credits_matrix",
+  "source_set": "avspu",
+  "claim_vocabulary": [
+    "MEASURED",
+    "UNKNOWN",
+    "UNRUN"
+  ],
+  "classification": {
+    "common_content": "UNKNOWN",
+    "predator_shared_content": "UNKNOWN",
+    "human_shared_content": "UNKNOWN",
+    "character_specific_content": "UNKNOWN"
+  },
+  "characters": [
+    {
+      "character_id": "predator_warrior",
+      "display_name": "Predator Warrior",
+      "final_boss_to_ending": "UNRUN",
+      "ending_route": "UNKNOWN",
+      "credits_route": "UNKNOWN",
+      "shared_classification": "UNKNOWN",
+      "source_anchors": []
+    },
+    {
+      "character_id": "major_schaefer",
+      "display_name": "Major Schaefer",
+      "final_boss_to_ending": "UNRUN",
+      "ending_route": "UNKNOWN",
+      "credits_route": "UNKNOWN",
+      "shared_classification": "UNKNOWN",
+      "source_anchors": []
+    },
+    {
+      "character_id": "predator_hunter",
+      "display_name": "Predator Hunter",
+      "final_boss_to_ending": "UNRUN",
+      "ending_route": "UNKNOWN",
+      "credits_route": "UNKNOWN",
+      "shared_classification": "UNKNOWN",
+      "source_anchors": []
+    },
+    {
+      "character_id": "linn_kurosawa",
+      "display_name": "Linn Kurosawa",
+      "final_boss_to_ending": "UNRUN",
+      "ending_route": "UNKNOWN",
+      "credits_route": "UNKNOWN",
+      "shared_classification": "UNKNOWN",
+      "source_anchors": []
+    }
+  ],
+  "blockers": [
+    "No complete final-boss-through-credits capture is recorded for any character.",
+    "No common, Predator-shared, human-shared, or character-specific topology may be inferred."
+  ],
+  "next_experiment": "ORACLE-03 must capture and compare final boss through credits for all four characters before assigning any ending classification."
+}

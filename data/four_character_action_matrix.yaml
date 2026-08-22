@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "artifact": "four_character_action_matrix",
+  "source_set": "avspu",
+  "claim_vocabulary": [
+    "MEASURED",
+    "ADAPTED",
+    "UNKNOWN",
+    "UNRUN"
+  ],
+  "selection_contract": {
+    "evidence": "data/frontend_interaction.json",
+    "status": "MEASURED",
+    "grid": "2x2",
+    "directional_response_frames": 3,
+    "boundary_wrap_observed": false,
+    "confirm_buttons": [
+      "A-equivalent",
+      "B-equivalent",
+      "C-equivalent"
+    ],
+    "cancel_observed": false,
+    "identity_order": [
+      "predator_warrior",
+      "major_schaefer",
+      "predator_hunter",
+      "linn_kurosawa"
+    ]
+  },
+  "promoted_player_subset": {
+    "character_binding": "UNKNOWN",
+    "idle": "ADAPTED",
+    "horizontal_movement": "ADAPTED",
+    "lane_movement": "ADAPTED",
+    "facing": "ADAPTED",
+    "approved_visual_scope": "full-visible idle/walk player presentation and demonstrated right/down-lane/left movement",
+    "not_proven_for_all_characters": true,
+    "physical_saturn": "UNRUN"
+  },
+  "characters": [
+    {
+      "character_id": "predator_warrior",
+      "display_name": "Predator Warrior",
+      "select_identity": "MEASURED",
+      "idle": "UNKNOWN",
+      "movement": "UNKNOWN",
+      "lane_movement": "UNKNOWN",
+      "all_attacks": "UNKNOWN",
+      "weapons_and_projectiles": "UNKNOWN",
+      "jump_dash_special": "UNKNOWN",
+      "pickups_use_throw": "UNKNOWN",
+      "grab_throw": "UNKNOWN",
+      "hit": "UNKNOWN",
+      "ko": "UNKNOWN",
+      "continue": "UNKNOWN",
+      "character_specific_state_and_resources": "UNKNOWN",
+      "ending_route": "UNKNOWN",
+      "full_route": "UNRUN",
+      "physical_saturn": "UNRUN"
+    },
+    {
+      "character_id": "major_schaefer",
+      "display_name": "Major Schaefer",
+      "select_identity": "MEASURED",
+      "idle": "UNKNOWN",
+      "movement": "UNKNOWN",
+      "lane_movement": "UNKNOWN",
+      "all_attacks": "UNKNOWN",
+      "weapons_and_projectiles": "UNKNOWN",
+      "jump_dash_special": "UNKNOWN",
+      "pickups_use_throw": "UNKNOWN",
+      "grab_throw": "UNKNOWN",
+      "hit": "UNKNOWN",
+      "ko": "UNKNOWN",
+      "continue": "UNKNOWN",
+      "character_specific_state_and_resources": "UNKNOWN",
+      "ending_route": "UNKNOWN",
+      "full_route": "UNRUN",
+      "physical_saturn": "UNRUN"
+    },
+    {
+      "character_id": "predator_hunter",
+      "display_name": "Predator Hunter",
+      "select_identity": "MEASURED",
+      "idle": "UNKNOWN",
+      "movement": "UNKNOWN",
+      "lane_movement": "UNKNOWN",
+      "all_attacks": "UNKNOWN",
+      "weapons_and_projectiles": "UNKNOWN",
+      "jump_dash_special": "UNKNOWN",
+      "pickups_use_throw": "UNKNOWN",
+      "grab_throw": "UNKNOWN",
+      "hit": "UNKNOWN",
+      "ko": "UNKNOWN",
+      "continue": "UNKNOWN",
+      "character_specific_state_and_resources": "UNKNOWN",
+      "ending_route": "UNKNOWN",
+      "full_route": "UNRUN",
+      "physical_saturn": "UNRUN"
+    },
+    {
+      "character_id": "linn_kurosawa",
+      "display_name": "Linn Kurosawa",
+      "select_identity": "MEASURED",
+      "idle": "UNKNOWN",
+      "movement": "UNKNOWN",
+      "lane_movement": "UNKNOWN",
+      "all_attacks": "UNKNOWN",
+      "weapons_and_projectiles": "UNKNOWN",
+      "jump_dash_special": "UNKNOWN",
+      "pickups_use_throw": "UNKNOWN",
+      "grab_throw": "UNKNOWN",
+      "hit": "UNKNOWN",
+      "ko": "UNKNOWN",
+      "continue": "UNKNOWN",
+      "character_specific_state_and_resources": "UNKNOWN",
+      "ending_route": "UNKNOWN",
+      "full_route": "UNRUN",
+      "physical_saturn": "UNRUN"
+    }
+  ],
+  "next_experiment": "ORACLE-02 must bind the promoted subset and every action/resource delta to explicit character identities before character runtime expansion."
+}

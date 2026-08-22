@@ -3,10 +3,30 @@ architecture: avp-hybrid-native-v2
 workflow_model: interactive-salvage-promotion-integration
 roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
+foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
+production_head: 33d7f90424b548238d5d8185d88cb21f05248c54
+candidate_head: 4067765ed9f398223ad7c75127f91ad3d80f65c4
+evidence_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
+production_branch: codex/avp-user-02-enemy-review
+# Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
 review_candidate_status: CORRECTIONS_REQUIRED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN]
+target_scope:
+  source_set: avspu
+  route: cold-boot-through-title-select-all-stages-ending-credits
+  playable_characters:
+    - predator_warrior
+    - major_schaefer
+    - predator_hunter
+    - linn_kurosawa
+  maximum_simultaneous_local_players: 3
+  controller_and_multitap_topology: UNRUN
+coverage_ledgers:
+  full_game: data/full_game_content_coverage.yaml
+  four_character_actions: data/four_character_action_matrix.yaml
+  ending_credits: data/ending_credits_matrix.yaml
 accepted_implementation_history:
   - id: tranche-2a-foundation
     status: ACCEPTED
@@ -44,6 +64,11 @@ accepted_implementation_history:
   - id: PROMOTE-02-ENEMY-PIPELINE
     status: ACCEPTED
     head: 33d7f90424b548238d5d8185d88cb21f05248c54
+accepted_control_plane_history:
+  - id: ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN
+    status: ACCEPTED
+    base_head: 4067765ed9f398223ad7c75127f91ad3d80f65c4
+    result: title-to-credits-production-plan-initialized
 paused_work:
   - id: V2-2B
     status: CORRECTIONS_REQUIRED
@@ -97,6 +122,46 @@ worktree_routing_policy:
   preserve_other_transition_validation_approval_and_push_requirements: true
   current_continuity_worktree: C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review
   current_continuity_branch: codex/avp-user-02-enemy-review
+architecture_enforcement:
+  mode: staged
+  accepted_legacy_paths_are_grandfathered: true
+  rules:
+    - id: core-no-jo-sgl
+      status: STAGED
+      activates_when: src/port_v2/core-is-created
+    - id: gameplay-no-direct-asset-load
+      status: STAGED
+      activates_when: new-production-gameplay-path-is-created
+    - id: render-no-gameplay-outcomes
+      status: STAGED
+      activates_when: production-render-adapter-is-created
+    - id: audio-no-route-progression
+      status: STAGED
+      activates_when: production-audio-adapter-is-created
+    - id: deterministic-state-input-content
+      status: STAGED
+      activates_when: avsp_game_step-is-created
+    - id: phase-manifest-required
+      status: STAGED
+      activates_when: first-release-gameplay-phase-is-created
+    - id: no-active-phase-dynamic-allocation
+      status: STAGED
+      activates_when: avsp_game_step-is-created
+    - id: legacy-adapter-deletion-condition
+      status: ACTIVE_FOR_NEW_ADAPTERS
+      activates_when: new-legacy-adapter-is-declared
+    - id: behavioral-claim-label
+      status: ACTIVE_FOR_NEW_CLAIMS
+      activates_when: new-behavioral-claim-is-added
+    - id: character-matrix-required
+      status: ACTIVE_FOR_NEW_CHARACTER_DIFFERENCES
+      activates_when: new-character-difference-is-added
+    - id: coverage-ledger-required
+      status: ACTIVE_FOR_NEW_ROUTE_BODIES
+      activates_when: new-route-body-is-added
+    - id: evidence-tier-separation
+      status: ACTIVE
+      activates_when: always
 current_checkpoint: integrate-player-enemy
 active_task_card: docs/task_cards/INTEGRATE-01-PLAYER-AND-ENEMY.md
 active_task_id: INTEGRATE-01-PLAYER-AND-ENEMY
@@ -321,6 +386,7 @@ task_queue:
   - USER-02-ENEMY-BASELINE-REVIEW
   - PROMOTE-02-ENEMY-PIPELINE
   - INTEGRATE-01-PLAYER-AND-ENEMY
+  - ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN
   - SALVAGE-03-COLLISION
   - V2-2B
   - V2-B1
@@ -332,7 +398,25 @@ task_queue:
   - USER-05-HUD-PCM-REVIEW
   - REPAIR-05-HUD-COLORS
   - SALVAGE-05B-PLAYER-2-HUD
+  - PROMOTE-04-CAMERA-STAGE
+  - PROMOTE-05-HUD
+  - PROMOTE-06-PCM
+  - SALVAGE-07-CDDA-RESIDENCY
+  - PROMOTE-07-CDDA-RESIDENCY
   - INTEGRATE-03-PLAYABLE-SLICE
+  - SALVAGE-08-FRONTEND
+  - QA-08-FRONTEND
+  - USER-08-FRONTEND
+  - PROMOTE-08-FRONTEND
+  - INTEGRATE-04-COLD-BOOT-TO-ROUND1
+  - ORACLE-01-FULL-REFERENCE-ROUTE
+  - ORACLE-02-FOUR-CHARACTER-ACTION-MATRIX
+  - ORACLE-03-ENDING-CREDITS-DELTAS
+  - INTEGRATE-05-REFERENCE-CHARACTER-FULL-GAME
+  - INTEGRATE-06-FOUR-CHARACTER-ROSTER
+  - INTEGRATE-07-THREE-PLAYER-MULTIPLAYER
+  - QA-09-RELEASE-HARDENING
+  - QA-10-FINAL-TITLE-TO-CREDITS-ACCEPTANCE
 contract_sha256: 74016fb2e73c2ae00144fa062662b37e0f575a3ee3ff3b7a420b1ed0f55a4638
 oracle_manifest_sha256: 106fffb92cc5a14acf5fdae7eb14d33b7d9206b9f9ecffcbac67a6fc326696d2
 translation_boundary_sha256: 95e002b7f6d48e8aafbe5e201a370b6dc7c3c5559e7d2253901d0473c0c7b0f4

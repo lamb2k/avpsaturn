@@ -11,7 +11,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 IMPLEMENTATION_KINDS = {"SALVAGE", "REPAIR", "PROMOTE", "INTEGRATE"}
-ALLOWED_KINDS = IMPLEMENTATION_KINDS | {"USER_REVIEW"}
+CONTROL_KINDS = {"ARCHITECTURE", "ORACLE", "QA"}
+EXECUTABLE_KINDS = IMPLEMENTATION_KINDS | CONTROL_KINDS
+ALLOWED_KINDS = EXECUTABLE_KINDS | {"USER_REVIEW"}
 ALLOWED_STATUSES = {
     "ACCEPTED", "READY", "BLOCKED", "PAUSED", "AWAITING_USER_FEEDBACK",
     "CHANGES_REQUESTED",
@@ -141,7 +143,7 @@ def main() -> None:
         "## Next eligible cards",
     )
     queue_index = {task: index for index, task in enumerate(queue)}
-    ready_implementation = []
+    ready_executable = []
     accepted = set(inline_list(state, "accepted_tasks"))
 
     for task, text in cards.items():
@@ -164,7 +166,11 @@ def main() -> None:
         next_eligible = inline_list(text, "NEXT_ELIGIBLE_CARDS")
         require(set(next_eligible) <= set(cards),
                 f"{task} names an unknown next eligible card")
-        if task != "INTEGRATE-03-PLAYABLE-SLICE":
+        terminal = re.search(r"(?m)^TERMINAL:\s*true\s*$", text) is not None
+        if terminal:
+            require(not next_eligible,
+                    f"{task} is terminal but names a successor")
+        else:
             require(next_eligible, f"{task} has no predeclared successor")
         for section in required_sections:
             require(section in text, f"{task} missing {section}")
@@ -178,8 +184,8 @@ def main() -> None:
                     require(dependency in queue_index and
                             queue_index[dependency] < queue_index[task],
                             f"{task} is not dependency ordered")
-        if kind in IMPLEMENTATION_KINDS and status == "READY":
-            ready_implementation.append(task)
+        if kind in EXECUTABLE_KINDS and status == "READY":
+            ready_executable.append(task)
         if kind == "USER_REVIEW":
             require("Perform no implementation" in text,
                     f"{task} permits implementation")
@@ -201,16 +207,16 @@ def main() -> None:
     active = cards[active_id]
     active_cards = [
         task for task, text in cards.items()
-        if (scalar(text, "KIND") in IMPLEMENTATION_KINDS and
+        if (scalar(text, "KIND") in EXECUTABLE_KINDS and
             scalar(text, "STATUS") == "READY") or
            (scalar(text, "KIND") == "USER_REVIEW" and
             scalar(text, "STATUS") in {"READY", "AWAITING_USER_FEEDBACK"})
     ]
     require(active_cards == [active_id],
             "exactly one implementation or review card must be active")
-    require(ready_implementation == [active_id] or
+    require(ready_executable == [active_id] or
             scalar(active, "KIND") == "USER_REVIEW",
-            "active implementation readiness disagrees with active card")
+            "active executable readiness disagrees with active card")
     require(scalar(state, "active_task_id") == active_id,
             "active task id mismatch")
     require(scalar(state, "active_task_kind") == scalar(active, "KIND"),
@@ -263,13 +269,55 @@ def main() -> None:
             "capability gate count drifted")
     require(closed == 0, "salvage evidence cannot advance capability status")
 
-    for key in ("accepted_head", "review_candidate_head"):
+    head_keys = (
+        "foundation_head",
+        "production_head",
+        "candidate_head",
+        "evidence_candidate_head",
+        "accepted_head",
+        "review_candidate_head",
+    )
+    for key in head_keys:
         value = scalar(state, key)
         require(re.fullmatch(r"[0-9a-f]{40}", value) is not None,
                 f"{key} is not pinned")
         git("cat-file", "-e", f"{value}^{{commit}}")
-    git("merge-base", "--is-ancestor", scalar(state, "accepted_head"),
-        scalar(state, "review_candidate_head"))
+    require(scalar(state, "accepted_head") == scalar(state, "foundation_head"),
+            "deprecated accepted_head alias drifted from foundation_head")
+    require(scalar(state, "review_candidate_head") ==
+            scalar(state, "evidence_candidate_head"),
+            "deprecated review candidate alias drifted")
+    foundation = scalar(state, "foundation_head")
+    production = scalar(state, "production_head")
+    candidate = scalar(state, "candidate_head")
+    evidence = scalar(state, "evidence_candidate_head")
+    for descendant in (production, candidate, evidence):
+        git("merge-base", "--is-ancestor", foundation, descendant)
+    git("merge-base", "--is-ancestor", production, candidate)
+    require(
+        re.search(
+            rf"(?ms)^  - id: PROMOTE-02-ENEMY-PIPELINE\s+"
+            rf"status: ACCEPTED\s+head: {production}$",
+            state,
+        ) is not None,
+        "production_head is not the latest accepted production implementation",
+    )
+    require(
+        f"current_continuity_branch: {scalar(state, 'production_branch')}"
+        in state,
+        "production branch drifted from the preserved continuity line",
+    )
+
+    for task, text in cards.items():
+        kind = scalar(text, "KIND")
+        status = scalar(text, "STATUS")
+        if status == "BLOCKED" and kind in (
+                IMPLEMENTATION_KINDS | {"QA", "USER_REVIEW"}):
+            require(scalar(text, "BASE") == "project_state.production_head",
+                    f"{task} is a future production card on the wrong base")
+            require(scalar(text, "BRANCH") ==
+                    "project_state.production_branch",
+                    f"{task} invents a per-card production branch")
 
     bindings = {
         "contract_sha256": "data/avsp_vertical_slice_contract.json",

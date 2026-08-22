@@ -4,18 +4,20 @@ TASK: INTEGRATE-03-PLAYABLE-SLICE
 KIND: INTEGRATE
 STATUS: BLOCKED
 CHECKPOINT: integrate-playable-slice
-BASE: project_state.accepted_head
-BRANCH: codex/avp-integrate-03-playable-slice
+BASE: project_state.production_head
+BRANCH: project_state.production_branch
 TIER: 2
-DEPENDENCIES: [INTEGRATE-02-COMBAT, USER-03-COMBAT-FEEL-REVIEW, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, USER-05-HUD-PCM-REVIEW]
-REQUIRED_LANES: [Fast, Oracle, Target, Emulator, Full]
-OPTIONAL_LANES: [Physical]
+DEPENDENCIES: [INTEGRATE-02-COMBAT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, PROMOTE-07-CDDA-RESIDENCY]
+REQUIRED_LANES: [Fast, Oracle, Target, Emulator, Full, Physical]
+OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: []
+NEXT_ELIGIBLE_CARDS: [SALVAGE-08-FRONTEND]
 
 ## Objective
 
-Integrate approved player, enemy, combat, camera/stage, HUD, and PCM components, then add loading phases, CDDA ownership, residency, and canaries one component at a time.
+Integrate promoted player, enemy, combat, camera/stage, HUD, PCM, CDDA, and
+phase residency into the exact playable capability slice and close the required
+physical Saturn capability conditions.
 
 ## Owned paths
 
@@ -25,15 +27,17 @@ Integrate approved player, enemy, combat, camera/stage, HUD, and PCM components,
 
 ## Existing systems to reuse
 
-- Only promoted or explicitly approved components and exact source evidence.
+- Only promoted components, exact source evidence, and accepted phase manifests.
 
 ## Systems deliberately disabled
 
-- Full-route content, roster, multiplayer, generalized engine work, and physical acceptance until prerequisites pass.
+- Frontend/full-route content, roster, multiplayer, and generalized engine work.
 
 ## Focused machine checks
 
-- Strict compile; all approved regression locks; deterministic slice replay; illegal CDDA data-read and canary/asset perturbation controls; Oracle, exact normal-release Target/emulator, and Full at acceptance.
+- Strict compile; all approved locks; deterministic replay; illegal CDDA read,
+  canary/asset, and dependency-order controls; Oracle, exact normal-release
+  Target/emulator, Full, and the declared physical procedure.
 
 ## Saturn build profile
 
@@ -45,7 +49,8 @@ Require semantic, resource, render, final-scanout, PCM/CDDA ownership, high-wate
 
 ## Human-review requirement
 
-Renew review for any approved component at risk. A final integrated subjective checkpoint precedes physical testing.
+Renew review for any approved component at risk. A final integrated subjective
+checkpoint precedes physical testing; explicit user approval is not physical proof.
 
 ## Exclusions
 
@@ -57,4 +62,4 @@ Renew review for any approved component at risk. A final integrated subjective c
 
 ## Next eligible cards
 
-- R8 physical capability-slice card only after exact normal-release checkpoint acceptance.
+- `SALVAGE-08-FRONTEND` only after the physical capability slice is accepted.

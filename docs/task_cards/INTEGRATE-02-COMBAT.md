@@ -4,14 +4,14 @@ TASK: INTEGRATE-02-COMBAT
 KIND: INTEGRATE
 STATUS: BLOCKED
 CHECKPOINT: integrate-combat
-BASE: project_state.accepted_head
-BRANCH: codex/avp-integrate-02-combat
+BASE: project_state.production_head
+BRANCH: project_state.production_branch
 TIER: 1
 DEPENDENCIES: [INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-B1]
 REQUIRED_LANES: [Fast, Oracle, Target, Emulator]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [USER-03-COMBAT-FEEL-REVIEW, SALVAGE-04-CAMERA-STAGE-LAYERS]
+NEXT_ELIGIBLE_CARDS: [USER-03-COMBAT-FEEL-REVIEW]
 
 ## Objective
 
@@ -57,5 +57,4 @@ Required after AI self-review through `USER-03-COMBAT-FEEL-REVIEW`.
 
 ## Next eligible cards
 
-- `USER-03-COMBAT-FEEL-REVIEW`
-- `SALVAGE-04-CAMERA-STAGE-LAYERS` may proceed while feedback is pending.
+- `USER-03-COMBAT-FEEL-REVIEW`.

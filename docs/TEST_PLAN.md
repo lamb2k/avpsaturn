@@ -59,6 +59,23 @@ Fast runs workflow-policy, task-card/state, migration-map schema, and existing
 focused deterministic checks without regenerating private captures. Run it for
 this governance update and as the ordinary repository-level smoke lane.
 
+## ARCH-01 control-plane lane
+
+`ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN` runs control-plane checks only:
+
+- task-card, dependency, active-state, and head-role consistency;
+- JSON-compatible YAML/schema validation for the three coverage ledgers;
+- four-character and three-player target consistency;
+- ADR presence and required-section validation;
+- staged architecture-rule declarations and activation conditions;
+- workflow policy tests, Fast workflow checks, and `git diff --check`.
+
+ARCH-01 does not run Oracle capture, Target, emulator, Full, or physical Saturn
+lanes. It does not compile or modify runtime code. The architecture boundary
+checks are staged: rules for `src/port_v2/core/**`, production adapters, and
+phase manifests activate only when those paths/cards are introduced, so
+accepted legacy code is not failed retroactively.
+
 ## Oracle lane
 
 ```powershell
@@ -70,6 +87,12 @@ translation/writer boundaries, validators, and mutation controls. Use it when
 the active task changes evidence, lifted behavior, source identity, or a trust
 boundary. Missing pinned private inputs makes the lane `INCOMPLETE`, never an
 unqualified pass.
+
+The future full-game Oracle cards require two identical source runs and one
+non-vacuous perturbation control. ORACLE-01 covers cold boot through credits,
+ORACLE-02 covers all four character action matrices, and ORACLE-03 covers ending
+and credits deltas. Unknown or uncaptured behavior remains `UNKNOWN`; partial
+route evidence is never reported as complete.
 
 ## Target and normal-release lanes
 

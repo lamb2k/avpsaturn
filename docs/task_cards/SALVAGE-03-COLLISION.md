@@ -4,8 +4,8 @@ TASK: SALVAGE-03-COLLISION
 KIND: SALVAGE
 STATUS: BLOCKED
 CHECKPOINT: salvage-collision
-BASE: project_state.accepted_head
-BRANCH: codex/avp-salvage-03-collision
+BASE: project_state.production_head
+BRANCH: project_state.production_branch
 TIER: 1
 DEPENDENCIES: [SALVAGE-00-OLD-BUILD-BASELINE]
 REQUIRED_LANES: [Fast, Oracle]

@@ -4,46 +4,36 @@
 `docs/PARITY_PLAN.md` is the only roadmap.
 
 ## Workflow pivot
+
+`ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN` initializes the four-character,
+three-player, cold-boot-to-credits target without changing runtime behavior.
+Future production cards use `production_head`; the already-active card keeps
+its historical metadata and existing continuity branch.
+
 ## Preserved paused work
 
-- The dirty primary canonical worktree remains untouched.
-- The dirty `prototype/avp-clean-playable-skeleton` worktree remains intact.
-- V2-2B remains `CORRECTIONS_REQUIRED` in its dirty correction worktree. Its
-  blockers affect exact HIT/KO promotion, not this diagnostic salvage.
-- `SALVAGE-00-OLD-BUILD-BASELINE` is accepted only as a technical build/emulator
-  baseline: its physical Saturn state remains `UNRUN`, automatic window captures
-  remain black, and the observed distorted enemy pixels are not visually accepted.
+- The dirty canonical and `prototype/avp-clean-playable-skeleton` worktrees
+  remain untouched.
+- V2-2B remains `CORRECTIONS_REQUIRED` at its preserved evidence candidate.
+  It blocks exact HIT/KO promotion only.
+- `SALVAGE-00-OLD-BUILD-BASELINE` remains a technical baseline, not physical
+  proof.
+- `USER-01-PLAYER-BASELINE-REVIEW` and later explicit approvals remain
+  component-scoped regression locks.
 
 ## Current task and next action
 
-PROMOTE-01/USER-01-PLAYER-BASELINE-REVIEW locks remain accepted. USER-04 exact response was `pass for
-camera and stage`; that presentation is locked, but row-scroll is uncaptured.
+The active runtime card remains `INTEGRATE-01-PLAYER-AND-ENEMY`, status
+`READY`, on existing branch `codex/avp-user-02-enemy-review`. Its candidate
+is `4067765ed9f398223ad7c75127f91ad3d80f65c4`. Approved player and class
+`0x1F` enemy presentation must coexist on one fixed background; collision,
+attack, damage, HIT/KO, AI, camera motion, HUD, PCM, and CDDA stay disabled for
+this card. Renew human review only if an approved visible result changes.
 
-USER-05 final exact response is `keep going`. The corrected P1 HUD colors,
-active P2 HUD presentation, and short Predator melee PCM cue are approved and
-locked. P2 gameplay/input, joins, multiplayer, CDDA, normal release, a second
-emulator, and physical Saturn remain `UNRUN`.
+The accepted camera/stage, corrected P1/P2 HUD, and short PCM cue remain locked.
+Physical Saturn is still `0/12`; no host, MAME, emulator, or user evidence
+changes that fact.
 
-SALVAGE-05B remains technically accepted at
-`6127957eee7ca419d39fe4b716dd41df2c255fb0`: active-P2 MAME routes repeat,
-reject the P1-only `PRESS START` control, and paired clean builds/pinned Yaba
-runs reproduce normalized ISO `127c2f04...a1035b34`. The P1/P2 HUD and PCM
-locks must not change without renewed review.
+Resume prompt:
 
-SALVAGE-02 is technically accepted at
-`17da61f6d647577fc19ac29e30bcbe624ff4d248`. Paired clean builds and pinned
-Yaba runs reproduce normalized ISO `dbbb2678...3ea8c4` and screenshot
-`c175ab98...acdae8`. Readback repeats class `0x1F`, palette `0x11`, stationary
-`x=192`, translated `x=240`, five source objects, 32 rendered VDP1 tiles,
-zero asset/late-read/tile misses, intact canaries, and two rejected missing
-bank/rank controls. The tracked perturbation also rejects a 39-to-38-frame
-walk-duration mutation. This is one-emulator evidence; physical Saturn is
-`UNRUN`.
-
-USER-02 exact response is `looks great proceed`. The reviewed class `0x1F`
-asset, palette, complete tile composition, scale, pivot/grounding, facing, and
-39-frame/19-pose walk presentation are approved and locked.
-The active card is `PROMOTE-02-ENEMY-PIPELINE`, status `READY`, on the existing
-`codex/avp-user-02-enemy-review` continuity branch. Promote only the approved
-baseline behind `src/port_v2/enemy/**`; collision, damage, HIT/KO, AI, camera,
-HUD, PCM, CDDA, and renewed visual changes remain disabled. V2-2B stays paused.
+> Resume the AvP salvage Goal from INTEGRATE-01-PLAYER-AND-ENEMY on the existing codex/avp-user-02-enemy-review continuity branch; read the required control files, preserve all protected worktrees and approved locks, execute only the active card, then commit, push to private-origin, and verify the remote SHA.
