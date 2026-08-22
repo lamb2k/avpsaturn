@@ -662,6 +662,57 @@
         "requested_changes": [],
         "priority": null
       }
+    },
+    {
+      "task_id": "REPAIR-03-COMBAT-ACTOR-ALIGNMENT",
+      "evaluated_commit": "4abbc86f596c27d7873a96016c3e52c2d777edb4",
+      "technical_status": "PASS",
+      "fidelity_status": "ADAPTED",
+      "user_status": "AWAITING_USER_FEEDBACK",
+      "salvage_decision": "REPAIR",
+      "production_interface": null,
+      "diagnostic_interface": "tests/port_v2/integration/combat/run_pinned_emulator.ps1",
+      "blockers": [
+        "Unblock: renewed USER-03 subjective review of the corrected position, facing, lane baseline, scale, palette, and readability.",
+        "Unblock: second and third HIT reaction timing, general attack/damage rules, AI, a second emulator, normal release, and physical Saturn remain unpromoted or UNRUN."
+      ],
+      "exact_next_experiment": "Present the corrected ignored USER-03 package, ask the exact required question, record the exact response, and perform no implementation while review is pending.",
+      "evidence": {
+        "source_samples": [5190, 5236, 5283, 5329],
+        "retained_workram_identity": "PASS / four exact SHA-256 identities",
+        "fresh_mame_capture": "NOT_REQUIRED",
+        "source_fields": "MEASURED / player and enemy X, Y, Z, facing",
+        "presentation_transform": "ADAPTED / source-relative 384-to-352 horizontal deltas, Z-lane delta, Y-minus-Z height",
+        "hit_alignment": {"player_x": 211, "enemy_x": 160, "baseline_delta": 8, "attack_toward_target": 1},
+        "ko_alignment": {"player_x": 278, "enemy_x": 160, "baseline_delta": -5, "attack_toward_target": 1},
+        "strict_c90_compile": "PASS",
+        "focused_deterministic_repeat": "PASS / byte-identical host trace",
+        "real_negative_controls": "PASS / legacy coincident-X and 22-pixel baseline placement rejected; facing-byte mutation rejected; prior combat controls preserved",
+        "fast_lane": "PASS",
+        "oracle_wrapper": "INCOMPLETE / active worktree lacks ignored private V2-2B writer inputs",
+        "oracle_committed_and_mame_checks": "PASS",
+        "target_profile": "CombatIntegrationBench / debug-combat-integration-bench",
+        "paired_target_repeat": "PASS / committed implementation SHA",
+        "normalized_iso_sha256": "3c4096835741882f7a815483c47e37c9bcf2bfbb0ef3fb846ee2c20e67526b7b",
+        "paired_pinned_emulator_readback": "PASS / exact semantic equality",
+        "alignment_ok": 1,
+        "negative_rejections": 2,
+        "diagnostic_failures": 0,
+        "canaries_and_approved_locks": "PASS",
+        "visual_self_review": "PASS / corrected run-1 HIT and KO match retained source-relative geometry",
+        "review_package": "build/feedback/USER-03-COMBAT-FEEL-REVIEW/",
+        "emulator": "Yaba Sanshiro 1.20.37-2986eb",
+        "emulator_evidence_tier": "ONE_EMULATOR",
+        "normal_release": "UNRUN",
+        "physical_saturn": "UNRUN"
+      },
+      "user_observation_state": {
+        "formal_review_question_asked": false,
+        "exact_observations": [],
+        "approved_components": [],
+        "requested_changes": [],
+        "priority": null
+      }
     }
   ],
   "subsystems": [
@@ -850,16 +901,16 @@
       "authored_controller_coupling": "Collision selectors and outcomes are partly bound to authored capability_model state.",
       "proposed_isolated_bench": "Evaluate source hitboxes and deterministic contact selectors without applying authored damage behavior.",
       "technical_status": "PASS",
-      "fidelity_status": "MEASURED",
-      "user_status": "CHANGES_REQUESTED",
+      "fidelity_status": "ADAPTED",
+      "user_status": "AWAITING_USER_FEEDBACK",
       "salvage_decision": "REPAIR",
       "production_interface": null,
       "promoted_commit": null,
-      "evidence_commit": "cc5f6999e8dd15146b739285db264b4b2ea45bfb",
+      "evidence_commit": "4abbc86f596c27d7873a96016c3e52c2d777edb4",
       "diagnostic_interface": "tests/port_v2/integration/combat/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: correct the USER-03-observed player/enemy position, shared lane/ground, and attack-facing misalignment.", "Unblock: second and third reaction timing, general attack/damage rules, AI, a second emulator, normal release, and physical Saturn remain unpromoted or UNRUN."],
-      "exact_next_experiment": "Execute REPAIR-03 from retained MAME frames 5190 and 5329, then return corrected evidence to renewed USER-03 review.",
-      "user_feedback": {"exact_response": "Does it seem like the positioning of of the player and enemy is incorrect it misaligned? | ok let’s do that since it is a durable requirement unless it would be best to defer once other dependencies are satisfied that would rectify the misalignment", "approved_components": [], "requested_changes": ["Correct player/enemy relative position and shared lane/ground alignment.", "Ensure the player attack faces toward the contacted enemy."], "priority": "combat-actor-alignment-first"}
+      "blockers": ["Unblock: obtain renewed USER-03 review of the corrected source-relative actor placement.", "Unblock: second and third reaction timing, general attack/damage rules, AI, a second emulator, normal release, and physical Saturn remain unpromoted or UNRUN."],
+      "exact_next_experiment": "Present the corrected ignored USER-03 package and record the exact response; perform no implementation while feedback is pending.",
+      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": ["Prior USER-03 requested player/enemy relative position, shared lane/ground, and attack-facing correction; renewed review is pending."], "priority": "renewed-combat-alignment-review"}
     },
     {
       "id": "palette-cram",

@@ -2,7 +2,7 @@
 
 TASK: REPAIR-03-COMBAT-ACTOR-ALIGNMENT
 KIND: REPAIR
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: repair-combat-actor-alignment
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

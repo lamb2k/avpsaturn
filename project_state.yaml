@@ -4,15 +4,15 @@ workflow_model: interactive-salvage-promotion-integration
 roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
-production_head: cc5f6999e8dd15146b739285db264b4b2ea45bfb
-candidate_head: cc5f6999e8dd15146b739285db264b4b2ea45bfb
+production_head: 4abbc86f596c27d7873a96016c3e52c2d777edb4
+candidate_head: 4abbc86f596c27d7873a96016c3e52c2d777edb4
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-user-02-enemy-review
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 review_candidate_status: ACCEPTED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT]
 target_scope:
   source_set: avspu
   route: cold-boot-through-title-select-all-stages-ending-credits
@@ -80,6 +80,9 @@ accepted_implementation_history:
   - id: INTEGRATE-02-COMBAT
     status: ACCEPTED
     head: cc5f6999e8dd15146b739285db264b4b2ea45bfb
+  - id: REPAIR-03-COMBAT-ACTOR-ALIGNMENT
+    status: ACCEPTED
+    head: 4abbc86f596c27d7873a96016c3e52c2d777edb4
 accepted_control_plane_history:
   - id: ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN
     status: ACCEPTED
@@ -175,13 +178,13 @@ architecture_enforcement:
     - id: evidence-tier-separation
       status: ACTIVE
       activates_when: always
-current_checkpoint: repair-combat-actor-alignment
-active_task_card: docs/task_cards/REPAIR-03-COMBAT-ACTOR-ALIGNMENT.md
-active_task_id: REPAIR-03-COMBAT-ACTOR-ALIGNMENT
-active_task_kind: REPAIR
-task_status: READY
-active_write_owner: REPAIR-03-COMBAT-ACTOR-ALIGNMENT
-awaiting_user_feedback: []
+current_checkpoint: review-combat-feel
+active_task_card: docs/task_cards/USER-03-COMBAT-FEEL-REVIEW.md
+active_task_id: USER-03-COMBAT-FEEL-REVIEW
+active_task_kind: USER_REVIEW
+task_status: AWAITING_USER_FEEDBACK
+active_write_owner: USER-03-COMBAT-FEEL-REVIEW
+awaiting_user_feedback: [USER-03-COMBAT-FEEL-REVIEW]
 open_blockers: []
 completed_dispositions:
   - task: SALVAGE-00-OLD-BUILD-BASELINE
@@ -532,6 +535,34 @@ completed_dispositions:
       - No subjective combat presentation is approved until renewed USER-03 review.
       - Physical Saturn remains UNRUN.
     exact_next_experiment: Execute only REPAIR-03 combat actor alignment, then regenerate the ignored USER-03 package and request renewed exact feedback.
+  - task: REPAIR-03-COMBAT-ACTOR-ALIGNMENT
+    evaluated_head: 4abbc86f596c27d7873a96016c3e52c2d777edb4
+    technical_status: PASS
+    fidelity_status: ADAPTED
+    user_status: AWAITING_USER_FEEDBACK
+    salvage_decision: REPAIR
+    successor_activation: USER-03-COMBAT-FEEL-REVIEW
+    production_interface: src/port_v2/integration/combat/combat.h
+    approved_component_locks:
+      - Promoted player contract d0e6d835...fedf612.
+      - Approved enemy contract 35d6274c...142da.
+      - Salvaged collision report 49ce678b...bd78c and generated table b3e5a29c...f3ea2.
+      - Promoted exact class 0x1F HIT/KO interface remains unchanged.
+      - Approved camera/stage, corrected P1/P2 HUD, PCM, tile archive, and combat semantics remain unchanged.
+    evidence:
+      - Retained deterministic MAME work RAM at samples 5190, 5236, 5283, and 5329 proves exact player/enemy X, Y, Z, and facing fields; no fresh MAME capture was required.
+      - The 384-to-352 adapter preserves measured horizontal deltas, Z-lane deltas, Y-minus-Z height, actor order, and attack-toward-target facing; the old coincident-X, 22-pixel baseline placement rejects.
+      - Strict C90 host differential, deterministic repeat, retained-RAM identity check, facing-byte mutation, no-contact, wrong-selector, and mutated-writer controls PASS.
+      - Fast PASS. Oracle committed/focused checks and MAME avspu identity PASS; the wrapper remains INCOMPLETE only for ignored private V2-2B writer inputs absent from this continuity worktree.
+      - CombatIntegrationBench target build PASS. Two committed-SHA builds normalize to ISO SHA-256 3c4096835741882f7a815483c47e37c9bcf2bfbb0ef3fb846ee2c20e67526b7b.
+      - Paired pinned Yaba Sanshiro 1.20.37-2986eb readback PASS with identical event, HIT, and final semantic state; HIT alignment is player/enemy X 211/160 and baseline delta 8, KO is 278/160 and -5.
+      - Both readbacks report attack_toward_target=1, alignment_ok=1, two negative rejections, zero failures, and intact canaries/approved locks.
+      - Visual self-review against retained source screenshots PASS; ignored package build/feedback/USER-03-COMBAT-FEEL-REVIEW/ is pinned to the implementation commit.
+      - No user approval is inferred. Normal release, a second emulator, and physical Saturn remain UNRUN; Capability Gate remains 0/12.
+    blockers:
+      - Renewed USER-03 subjective review is required before dependent presentation promotion.
+      - Second and third HIT reaction timing, general attack/damage rules, enemy AI, combat audio, normal release, a second emulator, and physical Saturn remain unpromoted or UNRUN.
+    exact_next_experiment: Present the corrected ignored USER-03 package and record the exact response to the required review question; perform no implementation while review is pending.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR

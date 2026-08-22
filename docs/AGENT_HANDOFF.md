@@ -25,18 +25,19 @@ its historical metadata and existing continuity branch.
 
 ## Current task and next action
 
-`INTEGRATE-02-COMBAT` is accepted at
-`cc5f6999e8dd15146b739285db264b4b2ea45bfb`. It integrates four exact
-source-measured contacts through the accepted player/enemy, collision, and
-HIT/KO interfaces; strict host tests, the CombatIntegrationBench target build,
-and paired pinned Yaba semantic readback pass. The active card is now
-`REPAIR-03-COMBAT-ACTOR-ALIGNMENT`, status `READY`, in the existing continuity
-worktree
+`REPAIR-03-COMBAT-ACTOR-ALIGNMENT` is accepted at
+`4abbc86f596c27d7873a96016c3e52c2d777edb4`. The retained MAME actor fields now
+drive a durable source-relative 384-to-352 placement adapter; the old
+coincident-X/misaligned baseline rejects, strict host/negative controls pass,
+and two committed-SHA CombatIntegrationBench builds and pinned Yaba readbacks
+agree at normalized ISO
+`3c4096835741882f7a815483c47e37c9bcf2bfbb0ef3fb846ee2c20e67526b7b`. The
+active card is renewed `USER-03-COMBAT-FEEL-REVIEW`, status
+`AWAITING_USER_FEEDBACK`, in the existing continuity worktree
 `C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review` on
-branch `codex/avp-user-02-enemy-review`. USER-03 requested a durable correction
-for player/enemy positioning, shared lane/ground alignment, and attack-facing
-direction. Retained MAME frames 5190 and 5329 are sufficient for the bounded
-source-relative transform; no fresh capture is currently required.
+branch `codex/avp-user-02-enemy-review`. The ignored corrected package is
+`build/feedback/USER-03-COMBAT-FEEL-REVIEW/`. No successor implementation is
+active and no user approval is inferred.
 
 The accepted camera/stage, corrected P1/P2 HUD, and short PCM cue remain locked.
 Physical Saturn is still `0/12`; no host, MAME, emulator, or user evidence
@@ -44,4 +45,4 @@ changes that fact.
 
 Resume prompt:
 
-> Resume the AvP salvage Goal from REPAIR-03-COMBAT-ACTOR-ALIGNMENT in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve every protected worktree and approved lock, derive the source-relative combat placement from retained MAME frames 5190 and 5329, reject the mixed generic/source transform, run the focused and pinned-emulator checks, then return corrected evidence to renewed USER-03 review.
+> Resume the AvP salvage Goal at USER-03-COMBAT-FEEL-REVIEW in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; present the ignored corrected combat package, perform no implementation, record the exact response to the required review question, and activate only a predeclared dependency-safe successor after explicit feedback.
