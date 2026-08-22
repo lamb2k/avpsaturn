@@ -101,6 +101,13 @@ def snapshot(mcp: Mcp, syms: dict[str, int]) -> dict[str, int]:
         "health_fill": "avsp_diag_hud_health_fill",
         "energy_fill": "avsp_diag_hud_energy_fill",
         "hud_render_count": "avsp_diag_hud_render_count",
+        "p2_hud_state": "avsp_diag_hud_p2_state",
+        "p2_health": "avsp_diag_hud_p2_health",
+        "p2_energy": "avsp_diag_hud_p2_energy",
+        "p2_health_fill": "avsp_diag_hud_p2_health_fill",
+        "p2_energy_fill": "avsp_diag_hud_p2_energy_fill",
+        "p2_hud_render_count": "avsp_diag_hud_p2_render_count",
+        "p2_hud_binding_ok": "avsp_diag_hud_p2_binding_ok",
         "hud_asset_failures": "avsp_diag_hud_asset_failures",
         "pcm_audio_failures": "avsp_diag_pcm_audio_failures",
         "pcm_event_count": "avsp_diag_pcm_event_count",
@@ -214,6 +221,7 @@ def main() -> None:
                 state["hud_asset_failures"] == 0 and
                 state["pcm_audio_failures"] == 0 and
                 state["pcm_underruns"] == 0 and
+                state["p2_hud_binding_ok"] == 1 and
                 state["canary_ok"] == 1 and
                 state["disc_late_reads"] == 0 and
                 all(state[name] == value

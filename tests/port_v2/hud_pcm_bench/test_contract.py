@@ -55,9 +55,9 @@ def validate(contract: dict[str, object]) -> None:
     require(set(states) == {"zero", "mid", "full", "pcm_only"},
             "zero/mid/full/PCM-only coverage drifted")
     expected = {
-        "zero": (20, 0, 0, 0, 0, 0, 3),
-        "mid": (140, 1, 50, 32, 57, 30, 3),
-        "full": (260, 2, 101, 64, 116, 59, 3),
+        "zero": (20, 0, 0, 0, 0, 0, 4),
+        "mid": (140, 1, 50, 32, 57, 30, 4),
+        "full": (260, 2, 101, 64, 116, 59, 4),
         "pcm_only": (420, -1, 50, 32, 57, 30, 0),
     }
     for name, values in expected.items():
@@ -66,6 +66,18 @@ def validate(contract: dict[str, object]) -> None:
             "frame", "state", "health", "energy", "health_fill",
             "energy_fill", "render_count"))
         require(actual == values, f"{name} HUD state drifted")
+    p2_states = contract["player2_hud_states"]
+    for name, values in {
+            "zero": (20, 0, 0, 0, 0, 0, 2),
+            "mid": (140, 1, 50, 32, 57, 30, 2),
+            "full": (260, 2, 101, 64, 116, 59, 2),
+            "pcm_only": (420, -1, 50, 32, 57, 30, 0),
+    }.items():
+        state = p2_states[name]
+        require(tuple(state[key] for key in (
+            "frame", "state", "health", "energy", "health_fill",
+            "energy_fill", "render_count")) == values,
+            f"{name} P2 HUD state drifted")
     pcm = contract["pcm"]
     require(pcm["semantic_event_frames"] == [147, 387] and
             pcm["start_frames"] == [150, 390] and
@@ -77,7 +89,8 @@ def validate(contract: dict[str, object]) -> None:
             (44100, 2, 16), "PCM source timing/format drifted")
     require(set(contract["negative_controls"]) == {
         "missing HUD asset", "invalid PCM metadata", "missing PCM asset",
-        "rejected zero-based HUD palette binding"},
+        "rejected zero-based HUD palette binding",
+        "rejected PRESS START as active P2 HUD"},
         "required negative controls drifted")
     require(contract["disabled_systems"] ==
             ["CDDA", "combat", "camera movement", "stage expansion"],
@@ -109,6 +122,9 @@ def static_wiring(contract: dict[str, object]) -> None:
         ("avsp_hud_palette[index + 1]", "source"),
         ("hud_palette_binding_valid(rejected_zero_based, 1)", "source"),
         ("hud_pcm_bench_frame_callback", "source"),
+        ("HUD2TOP.BIN", "source"),
+        ("hud_pcm_player2_binding_valid", "source"),
+        ("avsp_diag_hud_p2_binding_ok", "source"),
     ):
         require(token in files[name], f"missing HUD/PCM wiring: {token}")
     callback = files["source"].split(

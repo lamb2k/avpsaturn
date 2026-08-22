@@ -37,6 +37,7 @@ def check_common(state: dict[str, object], contract: dict[str, object]) -> None:
         "pcm_underruns": 0,
         "canary_ok": 1,
         "disc_late_reads": 0,
+        "p2_hud_binding_ok": 1,
         "hud_palette_binding_ok": palette["binding_ok"],
         **{f"hud_palette_{name}": value["saturn_cram"]
            for name, value in palette["semantic_colors"].items()},
@@ -59,6 +60,22 @@ def check_hud(state: dict[str, object], expected: dict[str, object]) -> None:
     for actual_name, expected_name in mapping.items():
         require(state[actual_name] == expected[expected_name],
                 f"HUD {actual_name} drifted at {expected['frame']}")
+
+
+def check_player2_hud(state: dict[str, object],
+                      expected: dict[str, object]) -> None:
+    mapping = {
+        "relative_frame": "frame",
+        "p2_hud_state": "state",
+        "p2_health": "health",
+        "p2_energy": "energy",
+        "p2_health_fill": "health_fill",
+        "p2_energy_fill": "energy_fill",
+        "p2_hud_render_count": "render_count",
+    }
+    for actual_name, expected_name in mapping.items():
+        require(state[actual_name] == expected[expected_name],
+                f"P2 HUD {actual_name} drifted at {expected['frame']}")
 
 
 def main() -> None:
@@ -115,6 +132,8 @@ def main() -> None:
             check_common(state, contract)
         for label in ("zero", "mid", "full", "pcm_only"):
             check_hud(states[label], contract["hud_states"][label])
+            check_player2_hud(
+                states[label], contract["player2_hud_states"][label])
 
         together = states["together"]
         require((together["relative_frame"], together["phase"],

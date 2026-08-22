@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "task_id": "SALVAGE-05B-PLAYER-2-HUD",
+  "target": {
+    "set": "avspu",
+    "revision": "USA 940520",
+    "mame_version": "0.289 (mame0289)",
+    "mame_sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3"
+  },
+  "capture": {
+    "tool": "tools/mame_capture_player2_hud.lua",
+    "tool_sha256": "74c7bb1ae2b81aacc17facad76db5223110f1f33642d97902fe3c82ba906063d",
+    "frame": 3000,
+    "active_routes": ["active_bind_1", "active_bind_2"],
+    "active_file_count": 182,
+    "active_repeat_byte_identical": true,
+    "fresh_cfg_sha256": {
+      "avspu.cfg": "15affd466c01e59afe22b0723bf59d85b776e7ba026d35b3850eeb031183bfa9",
+      "default.cfg": "ce6f92d4260cfa730a9cda509e6b19e58813b279f1d85a3408cccb2abb49f236"
+    },
+    "fresh_nvram_sha256": "b76a3b4702c98c023b376560d3dd8ebbed080312bda7b56e79b729d55bd3c758",
+    "active_evidence_sha256": {
+      "frame_3000.png": "f2e022d203804df6415a808801943b168267c8a13cd4b9d9f65e16a082d632c6",
+      "objram_3000.tsv": "b192b7c0d8e0e43c0568ab5a774f4dac811dbbc687324d2791ffa4004a784183",
+      "palette_3000.tsv": "fd2b1a848a59ad457c54b51f25f34f830e1929de7d60c523a1d7717a687dfc8a",
+      "workram_3000.bin": "9b0dedfaadcb0675c501f56a83bf57b4d9be519bb518e9fca3c70f6b37d79314",
+      "gfxram_3000.tsv": "88b7383e6a2d7ac939e8279d2ec3fc645ac692a1b7b8818a58332a9d28561385",
+      "cps_a_regs_3000.tsv": "7659fbfb48433678aa55b4714350636c67391f8ec347566d9918fa66fbe1988f",
+      "cps_b_regs_3000.tsv": "4fe33fe8ed7c3d3482ddc7f1a2cfcbadfeb0bca92714d8552d27220a81bf5b2f"
+    }
+  },
+  "active_player2_hud": {
+    "character_label": "Maj.Schaefer",
+    "source_surface": [384, 224],
+    "saturn_surface": [352, 224],
+    "top_asset": {
+      "path": "/SPR8/HUD2TOP.BIN",
+      "placement": [176, 0],
+      "size": [176, 40],
+      "sha256": "9a0f75fe881b1cb569d914cdaeba5157bf40a22b4d743bf25af2f33837e1d807"
+    },
+    "weapon_asset": {
+      "path": "/SPR8/HUD2HEAT.BIN",
+      "placement": [220, 208],
+      "size": [120, 16],
+      "sha256": "578b668fe4414ea92f149e7bfa244f0cd92047a4adbb36b8176861b634d5871a"
+    },
+    "health_field": {"rect": [213, 18, 132, 4], "yellow_pixels_at_frame": 64, "red_pixels_at_frame": 68},
+    "weapon_field": {"rect": [264, 218, 59, 4], "energy_pixels_per_row_at_frame": 59},
+    "palette_source_indices": {"yellow": 1, "red": 2, "energy": 3, "empty": 4}
+  },
+  "conversion": {
+    "tool": "tools/extract_avspu_stage1.py",
+    "tool_sha256": "6d7fd899ab91ea490c169747d8b71570aed57e1eb33f1e717b23787c76779569",
+    "method": "Reconstruct captured CPS tilemap state with and without scroll1, retain only the source-fixed HUD difference, then nearest-neighbor fit 384 to 352."
+  },
+  "negative_control": {
+    "mode": "prompt_control",
+    "route": "prompt_bind",
+    "frame_3000_sha256": "4e4281a5143846a719819c5287890e66bb381097961f07d425abfb62a5fe2c34",
+    "workram_3000_sha256": "53f02748070eb654d828bbb353bf9b3f3203ba68ea43ab0eb67663cb029e0cbb",
+    "gfxram_3000_sha256": "1a46544665260262a76508560c64f2da2c4536ef602161f94cced34f204bbc4e",
+    "rejected_binding": "/SPR8/HUDP2.BIN",
+    "rejected_binding_sha256": "930784c345b9049f7b1f0c733648933d0b27be9aa9ff7c7f90df392dba25e847",
+    "reason": "The control is the blinking PRESS START prompt and lacks active P2 identity, health, and weapon fields."
+  },
+  "regression_locks": {
+    "/SPR8/HUDTOP.BIN": "334d3cd39eab1730800f3134e224d355c914581426d83d5760a8f0038a42a1fa",
+    "/SPR8/HUDP2.BIN": "930784c345b9049f7b1f0c733648933d0b27be9aa9ff7c7f90df392dba25e847",
+    "/SPR8/HUDHEAT.BIN": "92785debbe19d2221200f205f880cfac875c1e34f880a37189ae75fa393d71e6",
+    "/AUDIO/MELEE.PCM": "e2f2870251cf28c5cf52d0d074c3b426cc6db5afb4cde2eebf4838ffa296f125"
+  },
+  "evidence_tier": "MAME_ORACLE",
+  "physical_saturn": "UNRUN",
+  "exclusions": ["Player 2 input", "Player 2 gameplay", "join state", "multiplayer integration", "multitap topology"]
+}

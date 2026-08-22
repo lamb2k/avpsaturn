@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ROM_ROOT = ROOT / "avspu"
 CAPTURE_ROOT = ROOT / ".deps" / "mame" / "captures"
 PLAYER_ACTION_ROOT = ROOT / ".deps" / "mame" / "player_actions"
+PLAYER2_HUD_ROOT = ROOT / ".deps" / "mame" / "player2_hud"
 ENEMY_ACTION_ROOT = ROOT / ".deps" / "mame" / "enemy_actions"
 STALKER_ACTION_ROOT = ROOT / ".deps" / "mame" / "stalker_actions"
 OUTPUT_ROOT = ROOT / "build" / "rom_extract"
@@ -34,6 +35,14 @@ HUD_PROMPT_HEIGHT = 32
 HUD_HEAT_WIDTH = 120
 HUD_HEAT_Y = 208
 HUD_HEAT_HEIGHT = 16
+HUD_P2_TOP_X = 176
+HUD_P2_TOP_WIDTH = 176
+HUD_P2_TOP_HEIGHT = 40
+HUD_P2_HEAT_X = 220
+HUD_P2_HEAT_WIDTH = 120
+HUD_P2_HEAT_Y = 208
+HUD_P2_HEAT_HEIGHT = 16
+HUD_P2_SOURCE_FRAME = 3000
 STAGE1_ACTIVE_OBJECT_RAM = "objram2.tsv"
 ANIMATION_SAMPLE_ACTIVE_BANK = {2880: 2, 2940: 2}
 STAGE1_ENCOUNTER_ANCHORS = (2760, 3000, 3240, 3480, 3600, 3720,
@@ -134,6 +143,11 @@ def verify_loaded_gfx_region(region: bytearray) -> None:
 
 def load_words(name: str) -> list[int]:
     lines = (CAPTURE_ROOT / name).read_text(encoding="utf-8").splitlines()[1:]
+    return [int(line.split("\t")[1], 16) for line in lines if line]
+
+
+def load_words_path(path: Path) -> list[int]:
+    lines = path.read_text(encoding="utf-8").splitlines()[1:]
     return [int(line.split("\t")[1], 16) for line in lines if line]
 
 
@@ -1347,13 +1361,49 @@ def fit_background_for_saturn(stage: Image.Image) -> Image.Image:
     return canvas
 
 
+def verify_player2_hud_capture() -> Path:
+    expected = {
+        "frame_3000.png": "f2e022d203804df6415a808801943b168267c8a13cd4b9d9f65e16a082d632c6",
+        "gfxram_3000.tsv": "88b7383e6a2d7ac939e8279d2ec3fc645ac692a1b7b8818a58332a9d28561385",
+        "cps_a_regs_3000.tsv": "7659fbfb48433678aa55b4714350636c67391f8ec347566d9918fa66fbe1988f",
+        "cps_b_regs_3000.tsv": "4fe33fe8ed7c3d3482ddc7f1a2cfcbadfeb0bca92714d8552d27220a81bf5b2f",
+        "palette_3000.tsv": "fd2b1a848a59ad457c54b51f25f34f830e1929de7d60c523a1d7717a687dfc8a",
+        "workram_3000.bin": "9b0dedfaadcb0675c501f56a83bf57b4d9be519bb518e9fca3c70f6b37d79314",
+    }
+    active = PLAYER2_HUD_ROOT / "active_bind_1"
+    repeat = PLAYER2_HUD_ROOT / "active_bind_2"
+    for filename, digest in expected.items():
+        active_bytes = (active / filename).read_bytes()
+        repeat_bytes = (repeat / filename).read_bytes()
+        if hashlib.sha256(active_bytes).hexdigest() != digest:
+            raise ValueError(f"Player 2 HUD source identity drifted: {filename}")
+        if active_bytes != repeat_bytes:
+            raise ValueError(f"Player 2 HUD repeat differs: {filename}")
+    prompt = PLAYER2_HUD_ROOT / "prompt_bind"
+    if hashlib.sha256((prompt / "frame_3000.png").read_bytes()).hexdigest() != \
+            "4e4281a5143846a719819c5287890e66bb381097961f07d425abfb62a5fe2c34":
+        raise ValueError("Player 2 HUD prompt-control identity drifted")
+    if (active / "frame_3000.png").read_bytes() == \
+            (prompt / "frame_3000.png").read_bytes():
+        raise ValueError("active Player 2 HUD did not reject PRESS START control")
+    return active
+
+
 def write_hud_assets(full_stage: Image.Image, stage_without_scroll1: Image.Image,
+                     player2_full_stage: Image.Image,
+                     player2_stage_without_scroll1: Image.Image,
                      sprite_dir: Path) -> list[dict[str, object]]:
     """Split the screen-fixed CPS2 HUD from the scrolling street surface."""
     full = full_stage.convert("RGB").crop(
         (0, 0, VISIBLE_WIDTH, VISIBLE_HEIGHT)).resize(
             (SATURN_VIEW_WIDTH, VISIBLE_HEIGHT), Image.Resampling.NEAREST)
     clean = stage_without_scroll1.convert("RGB").crop(
+        (0, 0, VISIBLE_WIDTH, VISIBLE_HEIGHT)).resize(
+            (SATURN_VIEW_WIDTH, VISIBLE_HEIGHT), Image.Resampling.NEAREST)
+    player2_full = player2_full_stage.convert("RGB").crop(
+        (0, 0, VISIBLE_WIDTH, VISIBLE_HEIGHT)).resize(
+            (SATURN_VIEW_WIDTH, VISIBLE_HEIGHT), Image.Resampling.NEAREST)
+    player2_clean = player2_stage_without_scroll1.convert("RGB").crop(
         (0, 0, VISIBLE_WIDTH, VISIBLE_HEIGHT)).resize(
             (SATURN_VIEW_WIDTH, VISIBLE_HEIGHT), Image.Resampling.NEAREST)
 
@@ -1381,12 +1431,41 @@ def write_hud_assets(full_stage: Image.Image, stage_without_scroll1: Image.Image
             if pixel != clean.getpixel((x, screen_y)):
                 heat.putpixel((x, y), (*pixel, 255))
 
+    player2_top = Image.new(
+        "RGBA", (HUD_P2_TOP_WIDTH, HUD_P2_TOP_HEIGHT), (0, 0, 0, 0))
+    for y in range(HUD_P2_TOP_HEIGHT):
+        for x in range(HUD_P2_TOP_WIDTH):
+            screen_x = HUD_P2_TOP_X + x
+            pixel = player2_full.getpixel((screen_x, y))
+            if pixel != player2_clean.getpixel((screen_x, y)):
+                player2_top.putpixel((x, y), (*pixel, 255))
+
+    player2_heat = Image.new(
+        "RGBA", (HUD_P2_HEAT_WIDTH, HUD_P2_HEAT_HEIGHT), (0, 0, 0, 0))
+    for y in range(HUD_P2_HEAT_HEIGHT):
+        for x in range(HUD_P2_HEAT_WIDTH):
+            screen_x = HUD_P2_HEAT_X + x
+            screen_y = HUD_P2_HEAT_Y + y
+            pixel = player2_full.getpixel((screen_x, screen_y))
+            if pixel != player2_clean.getpixel((screen_x, screen_y)):
+                player2_heat.putpixel((x, y), (*pixel, 255))
+
+    p2_health = [player2_full.getpixel((x, 18))
+                 for x in range(213, 345)]
+    if len(p2_health) != 132 or not all(
+            pixel in ((255, 255, 0), (255, 0, 0)) for pixel in p2_health):
+        raise ValueError("active Player 2 health strip is not source-bound")
+    p2_energy = [player2_full.getpixel((x, 218))
+                 for x in range(264, 323)]
+    if p2_energy != [(187, 255, 119)] * 59:
+        raise ValueError("active Player 2 weapon strip is not source-bound")
+
     required_colours = ((255, 255, 0), (255, 0, 0),
                         (187, 255, 119), (136, 136, 136))
     colours: list[tuple[int, int, int]] = list(required_colours)
     colour_to_index = {colour: index + 1
                        for index, colour in enumerate(colours)}
-    for image in (top, prompt, heat):
+    for image in (top, prompt, heat, player2_top, player2_heat):
         for red, green, blue, alpha in image.getdata():
             if alpha == 0:
                 continue
@@ -1408,6 +1487,8 @@ def write_hud_assets(full_stage: Image.Image, stage_without_scroll1: Image.Image
         ("HUDTOP.BIN", top),
         ("HUDP2.BIN", prompt),
         ("HUDHEAT.BIN", heat),
+        ("HUD2TOP.BIN", player2_top),
+        ("HUD2HEAT.BIN", player2_heat),
     )
     manifest: list[dict[str, object]] = []
     for filename, image in assets:
@@ -1419,7 +1500,8 @@ def write_hud_assets(full_stage: Image.Image, stage_without_scroll1: Image.Image
             "path": f"SPR8/{filename}",
             "bytes": len(data),
             "sha256": hashlib.sha256(data).hexdigest(),
-            "source_frame": 4200,
+            "source_frame": (HUD_P2_SOURCE_FRAME
+                             if filename.startswith("HUD2") else 4200),
             "display": "capture-exact-fixed-hud-overlay",
         })
 
@@ -1438,6 +1520,21 @@ def write_hud_assets(full_stage: Image.Image, stage_without_scroll1: Image.Image
 #define AVSP_HUD_HEAT_WIDTH {HUD_HEAT_WIDTH}
 #define AVSP_HUD_HEAT_Y {HUD_HEAT_Y}
 #define AVSP_HUD_HEAT_HEIGHT {HUD_HEAT_HEIGHT}
+#define AVSP_HUD_P2_TOP_X {HUD_P2_TOP_X}
+#define AVSP_HUD_P2_TOP_WIDTH {HUD_P2_TOP_WIDTH}
+#define AVSP_HUD_P2_TOP_HEIGHT {HUD_P2_TOP_HEIGHT}
+#define AVSP_HUD_P2_HEALTH_X 37
+#define AVSP_HUD_P2_HEALTH_Y 18
+#define AVSP_HUD_P2_HEALTH_WIDTH 132
+#define AVSP_HUD_P2_HEALTH_HEIGHT 4
+#define AVSP_HUD_P2_HEAT_X {HUD_P2_HEAT_X}
+#define AVSP_HUD_P2_HEAT_WIDTH {HUD_P2_HEAT_WIDTH}
+#define AVSP_HUD_P2_HEAT_Y {HUD_P2_HEAT_Y}
+#define AVSP_HUD_P2_HEAT_HEIGHT {HUD_P2_HEAT_HEIGHT}
+#define AVSP_HUD_P2_HEAT_BAR_X 44
+#define AVSP_HUD_P2_HEAT_BAR_Y 10
+#define AVSP_HUD_P2_HEAT_BAR_WIDTH 59
+#define AVSP_HUD_P2_HEAT_BAR_HEIGHT 4
 #define AVSP_HUD_HEALTH_X 22
 #define AVSP_HUD_HEALTH_Y 18
 #define AVSP_HUD_HEALTH_WIDTH 132
@@ -2401,7 +2498,20 @@ def write_saturn_assets(gfx: bytearray, palette: list[tuple[int, int, int, int]]
         width=512, height=256, include_scroll1=False)
     stage_without_scroll1.save(
         OUTPUT_ROOT / "stage1_saturn_source_without_scroll1.png")
-    manifest.extend(write_hud_assets(stage, stage_without_scroll1, snapshot_dir))
+    player2_root = verify_player2_hud_capture()
+    player2_palette = load_palette_path(player2_root / "palette_3000.tsv")
+    player2_gfxram = load_words_path(player2_root / "gfxram_3000.tsv")
+    player2_cps_a = load_words_path(player2_root / "cps_a_regs_3000.tsv")
+    player2_cps_b = load_words_path(player2_root / "cps_b_regs_3000.tsv")
+    player2_stage = render_background(
+        gfx, player2_gfxram, player2_cps_a, player2_cps_b, player2_palette,
+        include_scroll1=True)
+    player2_stage_without_scroll1 = render_background(
+        gfx, player2_gfxram, player2_cps_a, player2_cps_b, player2_palette,
+        include_scroll1=False)
+    manifest.extend(write_hud_assets(
+        stage, stage_without_scroll1, player2_stage,
+        player2_stage_without_scroll1, snapshot_dir))
     stage = fit_background_for_saturn(stage_without_scroll1)
     stage.save(OUTPUT_ROOT / "stage1_saturn_background.png")
     stage = stage.quantize(colors=256, method=Image.Quantize.MAXCOVERAGE)

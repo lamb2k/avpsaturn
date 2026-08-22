@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "task_id": "SALVAGE-05B-PLAYER-2-HUD",
+  "card_profile": "HudPcmSalvageBench",
+  "interface_version": 3,
+  "source_evidence": "data/player2_hud_capture.json",
+  "source_evidence_sha256": "d9873bd92c13b7ea3d65270928db710ac54a645fd4412f8069b73c9d66f1d144",
+  "player2_payload_sha256": {
+    "/SPR8/HUD2TOP.BIN": "9a0f75fe881b1cb569d914cdaeba5157bf40a22b4d743bf25af2f33837e1d807",
+    "/SPR8/HUD2HEAT.BIN": "578b668fe4414ea92f149e7bfa244f0cd92047a4adbb36b8176861b634d5871a"
+  },
+  "regression_payload_sha256": {
+    "/SPR8/HUDTOP.BIN": "334d3cd39eab1730800f3134e224d355c914581426d83d5760a8f0038a42a1fa",
+    "/SPR8/HUDP2.BIN": "930784c345b9049f7b1f0c733648933d0b27be9aa9ff7c7f90df392dba25e847",
+    "/SPR8/HUDHEAT.BIN": "92785debbe19d2221200f205f880cfac875c1e34f880a37189ae75fa393d71e6",
+    "/AUDIO/MELEE.PCM": "e2f2870251cf28c5cf52d0d074c3b426cc6db5afb4cde2eebf4838ffa296f125"
+  },
+  "states": {
+    "zero": {"frame": 20, "state": 0, "health": 0, "energy": 0, "health_fill": 0, "energy_fill": 0, "render_count": 2},
+    "mid": {"frame": 140, "state": 1, "health": 50, "energy": 32, "health_fill": 57, "energy_fill": 30, "render_count": 2},
+    "full": {"frame": 260, "state": 2, "health": 101, "energy": 64, "health_fill": 116, "energy_fill": 59, "render_count": 2},
+    "pcm_only": {"frame": 420, "state": -1, "health": 50, "energy": 32, "health_fill": 57, "energy_fill": 30, "render_count": 0}
+  },
+  "negative_control": {
+    "name": "PRESS START substituted for active Player 2 HUD",
+    "rejected_asset": "/SPR8/HUDP2.BIN",
+    "required_runtime_rejections": 5
+  },
+  "locked_pcm_timing": {"event": 147, "start": 150, "end": 200},
+  "disabled_systems": ["Player 2 input", "Player 2 gameplay", "join state", "multiplayer integration", "multitap topology"],
+  "physical_saturn": "UNRUN"
+}

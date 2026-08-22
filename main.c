@@ -164,6 +164,10 @@ static jo_img_4bits boss_action_image;
 static jo_img_8bits hud_top_image;
 static jo_img_8bits hud_prompt_image;
 static jo_img_8bits hud_heat_image;
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+static jo_img_8bits hud_p2_top_image;
+static jo_img_8bits hud_p2_heat_image;
+#endif
 static jo_sound weapon_sound;
 static jo_sound melee_sound;
 static jo_sound contact_sound;
@@ -187,8 +191,16 @@ static int boss_action_sprite;
 static int hud_top_sprite;
 static int hud_prompt_sprite;
 static int hud_heat_sprite;
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+static int hud_p2_top_sprite;
+static int hud_p2_heat_sprite;
+#endif
 static int displayed_hud_health;
 static int displayed_hud_energy;
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+static int displayed_hud_p2_health;
+static int displayed_hud_p2_energy;
+#endif
 static int current_player_action_pose;
 static int current_enemy_action_poses[CAP_MAX_ENEMIES];
 static CapActorKind current_enemy_action_kinds[CAP_MAX_ENEMIES];
@@ -263,6 +275,8 @@ typedef struct
     int planned_end_frame;
     int underrun_reported_start;
     int negative_control_mask;
+    int p2_health;
+    int p2_energy;
     unsigned long tail_canary;
 } HudPcmBenchState;
 static HudPcmBenchState hud_pcm_bench;
@@ -305,6 +319,13 @@ volatile int avsp_diag_hud_energy;
 volatile int avsp_diag_hud_health_fill;
 volatile int avsp_diag_hud_energy_fill;
 volatile int avsp_diag_hud_render_count;
+volatile int avsp_diag_hud_p2_state;
+volatile int avsp_diag_hud_p2_health;
+volatile int avsp_diag_hud_p2_energy;
+volatile int avsp_diag_hud_p2_health_fill;
+volatile int avsp_diag_hud_p2_energy_fill;
+volatile int avsp_diag_hud_p2_render_count;
+volatile int avsp_diag_hud_p2_binding_ok;
 volatile int avsp_diag_hud_asset_failures;
 volatile int avsp_diag_pcm_audio_failures;
 volatile int avsp_diag_pcm_event_count;
@@ -1106,6 +1127,18 @@ static int load_hud_assets(void)
                           AVSP_HUD_HEAT_WIDTH, AVSP_HUD_HEAT_HEIGHT);
 }
 
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+static int load_player2_hud_assets(void)
+{
+    return load_hud_image(&hud_p2_top_image, "HUD2TOP.BIN",
+                          AVSP_HUD_P2_TOP_WIDTH,
+                          AVSP_HUD_P2_TOP_HEIGHT) &&
+           load_hud_image(&hud_p2_heat_image, "HUD2HEAT.BIN",
+                          AVSP_HUD_P2_HEAT_WIDTH,
+                          AVSP_HUD_P2_HEAT_HEIGHT);
+}
+#endif
+
 static int load_frontend_assets(void)
 {
     avsp_frontend_init(&frontend_runtime, avsp_fs_read_file_in_dir,
@@ -1389,13 +1422,18 @@ static int create_hud_sprite_working_set(void)
     hud_top_sprite = jo_sprite_add_8bits_image(&hud_top_image);
     hud_prompt_sprite = jo_sprite_add_8bits_image(&hud_prompt_image);
     hud_heat_sprite = jo_sprite_add_8bits_image(&hud_heat_image);
-    if (hud_top_sprite < 0 || hud_prompt_sprite < 0 || hud_heat_sprite < 0)
+    hud_p2_top_sprite = jo_sprite_add_8bits_image(&hud_p2_top_image);
+    hud_p2_heat_sprite = jo_sprite_add_8bits_image(&hud_p2_heat_image);
+    if (hud_top_sprite < 0 || hud_prompt_sprite < 0 || hud_heat_sprite < 0 ||
+        hud_p2_top_sprite < 0 || hud_p2_heat_sprite < 0)
     {
         failed_asset = "HUD VDP1";
         return 0;
     }
     displayed_hud_health = -1;
     displayed_hud_energy = -1;
+    displayed_hud_p2_health = -1;
+    displayed_hud_p2_energy = -1;
     return 1;
 }
 #endif
@@ -2811,6 +2849,47 @@ static void update_hud_textures(void)
     }
 }
 
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+static void update_player2_hud_textures(void)
+{
+    int x;
+    int y;
+    if (displayed_hud_p2_health != hud_pcm_bench.p2_health)
+    {
+        int source_fill = (hud_pcm_bench.p2_health * 5) / 4;
+        int fill = (source_fill * CAP_VIEW_WIDTH + CAP_CPS2_VIEW_WIDTH - 1) /
+                   CAP_CPS2_VIEW_WIDTH;
+        if (fill > AVSP_HUD_P2_HEALTH_WIDTH)
+            fill = AVSP_HUD_P2_HEALTH_WIDTH;
+        for (y = 0; y < AVSP_HUD_P2_HEALTH_HEIGHT; ++y)
+            for (x = 0; x < AVSP_HUD_P2_HEALTH_WIDTH; ++x)
+                hud_p2_top_image.data[
+                    (AVSP_HUD_P2_HEALTH_Y + y) * AVSP_HUD_P2_TOP_WIDTH +
+                    AVSP_HUD_P2_HEALTH_X + x] =
+                        x < fill ? AVSP_HUD_YELLOW_INDEX : AVSP_HUD_RED_INDEX;
+        jo_sprite_replace((const jo_img *)&hud_p2_top_image,
+                          hud_p2_top_sprite);
+        displayed_hud_p2_health = hud_pcm_bench.p2_health;
+    }
+    if (displayed_hud_p2_energy != hud_pcm_bench.p2_energy)
+    {
+        int fill = (hud_pcm_bench.p2_energy * AVSP_HUD_P2_HEAT_BAR_WIDTH +
+                    CAP_WEAPON_MAX_ENERGY - 1) / CAP_WEAPON_MAX_ENERGY;
+        for (y = 0; y < AVSP_HUD_P2_HEAT_BAR_HEIGHT; ++y)
+            for (x = 0; x < AVSP_HUD_P2_HEAT_BAR_WIDTH; ++x)
+                hud_p2_heat_image.data[
+                    (AVSP_HUD_P2_HEAT_BAR_Y + y) *
+                        AVSP_HUD_P2_HEAT_WIDTH +
+                    AVSP_HUD_P2_HEAT_BAR_X + x] =
+                        x < fill ? AVSP_HUD_ENERGY_INDEX :
+                                   AVSP_HUD_EMPTY_INDEX;
+        jo_sprite_replace((const jo_img *)&hud_p2_heat_image,
+                          hud_p2_heat_sprite);
+        displayed_hud_p2_energy = hud_pcm_bench.p2_energy;
+    }
+}
+#endif
+
 static void draw_arcade_hud(void)
 {
     /* Every frontend state, including the Start transition. The transition
@@ -2829,15 +2908,30 @@ static void draw_arcade_hud(void)
         world.encounter_timer < AVSP_FRONTEND_R1HUD_FRAME)
         return;
     update_hud_textures();
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+    update_player2_hud_textures();
+#endif
     jo_sprite_set_palette(hud_palette.id);
     jo_sprite_draw3D(hud_top_sprite,
                      -JO_TV_WIDTH_2 + AVSP_HUD_TOP_WIDTH / 2,
                      -JO_TV_HEIGHT_2 + AVSP_HUD_TOP_HEIGHT / 2, 100);
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+    jo_sprite_draw3D(hud_p2_top_sprite,
+                     -JO_TV_WIDTH_2 + AVSP_HUD_P2_TOP_X +
+                         AVSP_HUD_P2_TOP_WIDTH / 2,
+                     -JO_TV_HEIGHT_2 + AVSP_HUD_P2_TOP_HEIGHT / 2, 100);
+    jo_sprite_draw3D(hud_p2_heat_sprite,
+                     -JO_TV_WIDTH_2 + AVSP_HUD_P2_HEAT_X +
+                         AVSP_HUD_P2_HEAT_WIDTH / 2,
+                     -JO_TV_HEIGHT_2 + AVSP_HUD_P2_HEAT_Y +
+                         AVSP_HUD_P2_HEAT_HEIGHT / 2, 100);
+#else
     if ((world.frame & 63) < 32)
         jo_sprite_draw3D(hud_prompt_sprite,
                          -JO_TV_WIDTH_2 + AVSP_HUD_PROMPT_X +
                              AVSP_HUD_PROMPT_WIDTH / 2,
                          -JO_TV_HEIGHT_2 + AVSP_HUD_PROMPT_HEIGHT / 2, 100);
+#endif
     jo_sprite_draw3D(hud_heat_sprite,
                      -JO_TV_WIDTH_2 + AVSP_HUD_HEAT_WIDTH / 2,
                      -JO_TV_HEIGHT_2 + AVSP_HUD_HEAT_Y +
@@ -2856,6 +2950,18 @@ static int hud_pcm_sound_valid(const jo_sound *sound)
 static int hud_pcm_hud_valid(const jo_img_8bits *image, const int sprite)
 {
     return image != JO_NULL && image->data != JO_NULL && sprite >= 0;
+}
+
+static int hud_pcm_player2_binding_valid(const jo_img_8bits *top,
+                                         const jo_img_8bits *heat)
+{
+    return hud_pcm_hud_valid(top, hud_p2_top_sprite) &&
+           hud_pcm_hud_valid(heat, hud_p2_heat_sprite) &&
+           top->width == AVSP_HUD_P2_TOP_WIDTH &&
+           top->height == AVSP_HUD_P2_TOP_HEIGHT &&
+           heat->width == AVSP_HUD_P2_HEAT_WIDTH &&
+           heat->height == AVSP_HUD_P2_HEAT_HEIGHT &&
+           top->data != hud_prompt_image.data;
 }
 
 static int hud_pcm_health_fill(const int health)
@@ -2906,13 +3012,21 @@ static void hud_pcm_bench_negative_control(const int control)
         else
             ++avsp_diag_pcm_audio_failures;
     }
-    else
+    else if (control == 3)
     {
         for (index = 0; index < AVSP_CRAM_MAX_COLOURS; ++index)
             rejected_zero_based[index] = JO_COLOR_RGB(
                 avsp_hud_palette[index][0], avsp_hud_palette[index][1],
                 avsp_hud_palette[index][2]);
         if (!hud_palette_binding_valid(rejected_zero_based, 1))
+            ++avsp_diag_hud_pcm_negative_rejections;
+        else
+            ++avsp_diag_hud_asset_failures;
+    }
+    else
+    {
+        if (!hud_pcm_player2_binding_valid(&hud_prompt_image,
+                                           &hud_p2_heat_image))
             ++avsp_diag_hud_pcm_negative_rejections;
         else
             ++avsp_diag_hud_asset_failures;
@@ -2925,7 +3039,7 @@ static void hud_pcm_bench_init(void)
     hud_pcm_bench.head_canary = HUD_PCM_BENCH_CANARY_HEAD;
     hud_pcm_bench.tail_canary = HUD_PCM_BENCH_CANARY_TAIL;
     hud_pcm_bench.underrun_reported_start = -1;
-    avsp_diag_hud_pcm_interface_version = 2;
+    avsp_diag_hud_pcm_interface_version = 3;
     avsp_diag_pcm_event_frame = -1;
     avsp_diag_pcm_start_frame = -1;
     avsp_diag_pcm_end_frame = -1;
@@ -2934,6 +3048,8 @@ static void hud_pcm_bench_init(void)
     world.frame = 0;
     world.player.health = 0;
     world.weapon_energy = 0;
+    hud_pcm_bench.p2_health = 0;
+    hud_pcm_bench.p2_energy = 0;
 }
 
 static void hud_pcm_bench_frame_callback(void)
@@ -2972,21 +3088,29 @@ static void hud_pcm_bench_frame_callback(void)
     {
         world.player.health = 0;
         world.weapon_energy = 0;
+        hud_pcm_bench.p2_health = 0;
+        hud_pcm_bench.p2_energy = 0;
     }
     else if (phase == 1)
     {
         world.player.health = 50;
         world.weapon_energy = 32;
+        hud_pcm_bench.p2_health = 50;
+        hud_pcm_bench.p2_energy = 32;
     }
     else if (phase == 2)
     {
         world.player.health = 101;
         world.weapon_energy = CAP_WEAPON_MAX_ENERGY;
+        hud_pcm_bench.p2_health = 101;
+        hud_pcm_bench.p2_energy = CAP_WEAPON_MAX_ENERGY;
     }
     else
     {
         world.player.health = 50;
         world.weapon_energy = 32;
+        hud_pcm_bench.p2_health = 50;
+        hud_pcm_bench.p2_energy = 32;
     }
 
     if (relative == HUD_PCM_BENCH_FIRST_EVENT ||
@@ -3048,6 +3172,7 @@ static void hud_pcm_bench_frame_callback(void)
     if (relative == 451) hud_pcm_bench_negative_control(1);
     if (relative == 452) hud_pcm_bench_negative_control(2);
     if (relative == 453) hud_pcm_bench_negative_control(3);
+    if (relative == 454) hud_pcm_bench_negative_control(4);
 
     avsp_diag_hud_pcm_phase = phase;
     avsp_diag_hud_state = phase < 3 ? phase : -1;
@@ -3055,12 +3180,23 @@ static void hud_pcm_bench_frame_callback(void)
     avsp_diag_hud_energy = world.weapon_energy;
     avsp_diag_hud_health_fill = hud_pcm_health_fill(world.player.health);
     avsp_diag_hud_energy_fill = hud_pcm_energy_fill(world.weapon_energy);
+    avsp_diag_hud_p2_state = phase < 3 ? phase : -1;
+    avsp_diag_hud_p2_health = hud_pcm_bench.p2_health;
+    avsp_diag_hud_p2_energy = hud_pcm_bench.p2_energy;
+    avsp_diag_hud_p2_health_fill =
+        hud_pcm_health_fill(hud_pcm_bench.p2_health);
+    avsp_diag_hud_p2_energy_fill =
+        hud_pcm_energy_fill(hud_pcm_bench.p2_energy);
+    avsp_diag_hud_p2_binding_ok =
+        hud_pcm_player2_binding_valid(&hud_p2_top_image,
+                                      &hud_p2_heat_image);
     avsp_diag_hud_render_count = 0;
+    avsp_diag_hud_p2_render_count = 0;
     if (phase < 3)
     {
         draw_arcade_hud();
-        avsp_diag_hud_render_count = 2 +
-            (((world.frame & 63) < 32) ? 1 : 0);
+        avsp_diag_hud_render_count = 4;
+        avsp_diag_hud_p2_render_count = 2;
     }
     avsp_diag_pcm_active = hud_pcm_bench.pcm_active;
     avsp_diag_hud_pcm_canary_ok =
@@ -4012,6 +4148,10 @@ void jo_main(void)
     hud_top_image.data = JO_NULL;
     hud_prompt_image.data = JO_NULL;
     hud_heat_image.data = JO_NULL;
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+    hud_p2_top_image.data = JO_NULL;
+    hud_p2_heat_image.data = JO_NULL;
+#endif
     debug_hud_enabled = 0;
     stage_music_started = 0;
     weapon_audio_played_shots = 0;
@@ -4118,7 +4258,7 @@ void jo_main(void)
     {
         /* Isolated HUD/PCM resident set. No player/enemy archive, camera,
          * stage expansion, CDDA, combat, or loading-phase redesign. */
-        runtime_ready = load_hud_assets() &&
+        runtime_ready = load_hud_assets() && load_player2_hud_assets() &&
             load_pcm_audio(&melee_sound, AVSP_MELEE_PCM_FILE,
                            AVSP_MELEE_PCM_DIRECTORY,
                            AVSP_MELEE_PCM_BYTES,
