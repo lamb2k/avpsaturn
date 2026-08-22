@@ -20,6 +20,7 @@ param(
     [switch]$PlayerEnemyIntegration,
     [switch]$CollisionSalvageBench,
     [switch]$HitKoPromotionBench,
+    [switch]$CombatIntegrationBench,
     [switch]$SkipHostTests
 )
 
@@ -191,6 +192,22 @@ try {
         }
         Write-Host "Tile archive: $tileArchiveBytes bytes, scope=street, budget $($tileManifestData.tile_region_budget_used_pct)% used"
 
+        # INTEGRATE-02 keeps the approved street archive byte-identical and
+        # stages the exact jump-record HIT/KO tiles as a profile-only overlay.
+        $combatTileOverlay = Join-Path $projectRoot 'build\avsp_cd\SPR4\COMBAT.BIN'
+        if ($CombatIntegrationBench) {
+            & $PythonPath (Join-Path $projectRoot 'tests\port_v2\integration\combat\build_tile_overlay.py')
+            if ($LASTEXITCODE -ne 0) {
+                throw "Combat tile overlay generation failed with exit code $LASTEXITCODE."
+            }
+            if (-not (Test-Path -LiteralPath $combatTileOverlay)) {
+                throw 'CombatIntegrationBench requires build\avsp_cd\SPR4\COMBAT.BIN.'
+            }
+        }
+        elseif (Test-Path -LiteralPath $combatTileOverlay) {
+            Remove-Item -LiteralPath $combatTileOverlay -Force
+        }
+
         $contentRoot = Join-Path $projectRoot 'build\avsp_cd'
         # RP4 fixture separation: the captured street strips are a
         # validation fixture and ship only in the StreetTest profile.
@@ -211,7 +228,8 @@ try {
                 -Destination (Join-Path $contentRoot $metadataName) -Force
         }
 
-        $buildProfile = if ($HitKoPromotionBench) { 'hit-ko-promotion-bench' }
+        $buildProfile = if ($CombatIntegrationBench) { 'combat-integration-bench' }
+            elseif ($HitKoPromotionBench) { 'hit-ko-promotion-bench' }
             elseif ($CollisionSalvageBench) { 'collision-salvage-bench' }
             elseif ($PlayerEnemyIntegration) { 'player-enemy-integration' }
             elseif ($EnemyPromotionBench) { 'enemy-promotion-bench' }
@@ -306,6 +324,14 @@ try {
         }
         if ($HitKoPromotionBench) {
             $makeArguments += 'AVSP_HIT_KO_PROMOTION_BENCH=1'
+        }
+        if ($CombatIntegrationBench) {
+            $makeArguments += 'AVSP_PLAYER_SALVAGE_BENCH=1'
+            $makeArguments += 'AVSP_PLAYER_PROMOTION_BENCH=1'
+            $makeArguments += 'AVSP_ENEMY_SALVAGE_BENCH=1'
+            $makeArguments += 'AVSP_ENEMY_PROMOTION_BENCH=1'
+            $makeArguments += 'AVSP_PLAYER_ENEMY_INTEGRATION=1'
+            $makeArguments += 'AVSP_COMBAT_INTEGRATION_BENCH=1'
         }
         if ($FrontendTest) {
             $makeArguments += 'AVSP_FRONTEND_TEST=1'
@@ -485,6 +511,13 @@ try {
             (Join-Path $contentRoot 'SPR4\TILES.BIN')
         if ($LASTEXITCODE -ne 0) {
             throw "ROM tile archive ISO verification failed with exit code $LASTEXITCODE."
+        }
+        if ($CombatIntegrationBench) {
+            & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+                'game.iso' '/SPR4/COMBAT.BIN' '--equals' $combatTileOverlay
+            if ($LASTEXITCODE -ne 0) {
+                throw "Combat tile overlay ISO verification failed with exit code $LASTEXITCODE."
+            }
         }
         & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
             'game.iso' '/SPR4/SACT.RLE' '--equals' `

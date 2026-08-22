@@ -15,6 +15,10 @@
 #ifdef AVSP_HIT_KO_PROMOTION_BENCH
 #include "tests/port_v2/combat/hit_ko/diagnostic.h"
 #endif
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+#include "src/port_v2/integration/combat/combat.h"
+#include "tests/port_v2/integration/combat/diagnostic.h"
+#endif
 
 #include "generated/avsp_anim_records.h"
 #include "generated/avsp_emit_windows.h"
@@ -261,7 +265,13 @@ static int player_bench_previous_input;
 #endif
 #ifdef AVSP_PLAYER_PROMOTION_BENCH
 #ifdef AVSP_PLAYER_ENEMY_INTEGRATION
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+static AvspPortV2CombatRuntime combat_port_v2;
+static int combat_last_event_count;
+#define player_enemy_port_v2 combat_port_v2.presentation
+#else
 static AvspPortV2PlayerEnemyRuntime player_enemy_port_v2;
+#endif
 #else
 static AvspPortV2PlayerRuntime player_port_v2;
 #endif
@@ -1998,8 +2008,11 @@ static AvspAnimFrame rom_actor_frames[CAP_MAX_ENEMIES];
 static AvspActor rom_actor_collision_views[CAP_MAX_ENEMIES];
 static unsigned char rom_actor_seeded[CAP_MAX_ENEMIES];
 static int rom_actor_last_actions[CAP_MAX_ENEMIES];
+static unsigned long rom_actor_last_records[CAP_MAX_ENEMIES];
 static AvspObjectEntry rom_actor_entries_all[CAP_MAX_ENEMIES][16];
 static int rom_actor_entry_counts[CAP_MAX_ENEMIES];
+static unsigned short rom_actor_emit_world_x[CAP_MAX_ENEMIES];
+static unsigned short rom_actor_emit_world_y[CAP_MAX_ENEMIES];
 /* HUD/back-compat aggregates: total entries and the first live code. */
 static int rom_actor_entry_count = 0;
 static AvspObjectEntry rom_actor_entries[16];
@@ -2082,7 +2095,12 @@ static void rom_actor_prepare(void)
             continue;
         }
         if (enemy->action != CAP_ACT_WALK &&
-            enemy->action != CAP_ACT_ATTACK)
+            enemy->action != CAP_ACT_ATTACK
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+            && enemy->action != CAP_ACT_HIT &&
+            enemy->action != CAP_ACT_KO
+#endif
+            )
         {
             /* No ROM record is driven outside the two street loops (hit, KO,
              * idle, spawn), so this frame has NO measured hit geometry for the
@@ -2097,7 +2115,25 @@ static void rom_actor_prepare(void)
             continue;
         }
         /* ADAPTED action bridge: the two live-verified street-alien loops. */
-        seed = (enemy->action == CAP_ACT_ATTACK) ? 0x12D8A0u : 0x12EB4Cu;
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+        if (enemy->action == CAP_ACT_HIT || enemy->action == CAP_ACT_KO)
+            seed = avsp_diag_combat_transition_anim_record;
+        else
+#endif
+            seed = (enemy->action == CAP_ACT_ATTACK) ? 0x12D8A0u : 0x12EB4Cu;
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+        if ((enemy->action == CAP_ACT_HIT || enemy->action == CAP_ACT_KO) &&
+            (!rom_actor_seeded[index] ||
+             rom_actor_last_records[index] != seed))
+        {
+            avsp_anim_frame_start(&rom_actor_frames[index],
+                                  &rom_actor_script, seed);
+            rom_actor_seeded[index] = 1;
+            rom_actor_last_actions[index] = (int)enemy->action;
+            rom_actor_last_records[index] = seed;
+        }
+        else
+#endif
         if (!rom_actor_seeded[index] ||
             (int)enemy->action != rom_actor_last_actions[index])
         {
@@ -2105,14 +2141,40 @@ static void rom_actor_prepare(void)
                                   &rom_actor_script, seed);
             rom_actor_seeded[index] = 1;
             rom_actor_last_actions[index] = (int)enemy->action;
+            rom_actor_last_records[index] = seed;
         }
         if (!rom_actor_frames[index].pose.valid) continue;
         /* ADAPTED coordinate bridge: model-space camera as the anchor pair
          * so decoded X approximates screen position. */
-        state.world_x = (unsigned short)enemy->x;
-        state.world_y = (unsigned short)(200 + enemy->height);
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+        if (enemy->action == CAP_ACT_HIT || enemy->action == CAP_ACT_KO)
+        {
+            AvspPortV2CombatSourceEvent combat_source;
+            int combat_index = enemy->action == CAP_ACT_HIT ? 0 : 3;
+            if (!avsp_port_v2_combat_source_event(
+                    combat_index, &combat_source))
+            {
+                ++rom_collision_gap;
+                ++rom_collision_gap_frame;
+                continue;
+            }
+            state.world_x = (unsigned short)combat_source.enemy_x;
+            state.world_y = (unsigned short)combat_source.enemy_y;
+        }
+        else
+#endif
+        {
+            state.world_x = (unsigned short)enemy->x;
+            state.world_y = (unsigned short)(200 + enemy->height);
+        }
+        rom_actor_emit_world_x[index] = state.world_x;
+        rom_actor_emit_world_y[index] = state.world_y;
         state.facing = (unsigned char)(enemy->facing < 0 ? 1 : 0);
         state.palette = (unsigned char)(0x10 + (enemy->variant & 3));
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+        if (enemy->action == CAP_ACT_HIT || enemy->action == CAP_ACT_KO)
+            state.palette = 0x13;
+#endif
         state.mode = 1;
         state.or_value = 0x8000;
         state.anchor_x = (unsigned short)world.camera_x;
@@ -2227,10 +2289,15 @@ static void rom_actor_advance(void)
  * fixed VDP1 pool with in-place LRU replacement. */
 static unsigned char *tile_archive_data;
 static AvspTileArchive tile_archive;
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+static AvspTileArchive combat_tile_archive;
+static int combat_tile_archive_ready;
+#endif
 static jo_palette tile_palette;
 static int tile_archive_ready;
 static int tile_pool_sprite[AVSP_TILE_SPRITE_POOL];
 static long tile_pool_rank[AVSP_TILE_SPRITE_POOL];
+static const AvspTileArchive *tile_pool_archive[AVSP_TILE_SPRITE_POOL];
 static unsigned long tile_pool_stamp[AVSP_TILE_SPRITE_POOL];
 static unsigned long tile_pool_clock;
 static int tile_pool_used;
@@ -2240,6 +2307,11 @@ static int tile_pool_used;
 static volatile int tile_diag_no_bank;
 static volatile int tile_diag_no_rank;
 static volatile int tile_diag_no_sprite;
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+volatile int avsp_diag_combat_missing_code_count;
+volatile unsigned long avsp_diag_combat_missing_codes[16];
+volatile int avsp_diag_combat_presented_frame;
+#endif
 
 static int load_tile_archive(void)
 {
@@ -2259,6 +2331,22 @@ static int load_tile_archive(void)
         failed_asset = "TILES.BIN";
         return 0;
     }
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+    {
+        int overlay_bytes = avsp_fs_read_into(
+            "COMBAT.BIN", "SPR4", tile_archive_data + read_bytes,
+            AVSP_TILE_REGION_BYTES - read_bytes);
+        if (overlay_bytes <= 0 ||
+            !avsp_tiles_open(&combat_tile_archive,
+                             tile_archive_data + read_bytes,
+                             (unsigned long)overlay_bytes))
+        {
+            failed_asset = "COMBAT.BIN";
+            return 0;
+        }
+        combat_tile_archive_ready = 1;
+    }
+#endif
     /* Pixel value p+1 reads palette array entry p after Jo's CRAM base+1
        shift, so slot colours transcribe directly. */
     for (index = 0; index < 256; ++index) colors[index] = JO_COLOR_Black;
@@ -2273,7 +2361,8 @@ static int load_tile_archive(void)
     return 1;
 }
 
-static int tile_sprite_for_rank(const long rank)
+static int tile_sprite_for_archive_rank(const AvspTileArchive *archive,
+                                        const long rank)
 {
     int index;
     int victim = 0;
@@ -2281,7 +2370,8 @@ static int tile_sprite_for_rank(const long rank)
 
     for (index = 0; index < tile_pool_used; ++index)
     {
-        if (tile_pool_rank[index] == rank)
+        if (tile_pool_archive[index] == archive &&
+            tile_pool_rank[index] == rank)
         {
             tile_pool_stamp[index] = ++tile_pool_clock;
             return tile_pool_sprite[index];
@@ -2289,7 +2379,7 @@ static int tile_sprite_for_rank(const long rank)
     }
     img.width = 16;
     img.height = 16;
-    img.data = (unsigned char *)avsp_tiles_texture(&tile_archive, rank);
+    img.data = (unsigned char *)avsp_tiles_texture(archive, rank);
     if (img.data == JO_NULL) return -1;
     if (tile_pool_used < AVSP_TILE_SPRITE_POOL)
     {
@@ -2297,6 +2387,7 @@ static int tile_sprite_for_rank(const long rank)
         if (sprite_id < 0) return -1;
         tile_pool_sprite[tile_pool_used] = sprite_id;
         tile_pool_rank[tile_pool_used] = rank;
+        tile_pool_archive[tile_pool_used] = archive;
         tile_pool_stamp[tile_pool_used] = ++tile_pool_clock;
         return tile_pool_sprite[tile_pool_used++];
     }
@@ -2305,6 +2396,7 @@ static int tile_sprite_for_rank(const long rank)
     if (jo_sprite_replace_4bits_image(&img, tile_pool_sprite[victim]) < 0)
         return -1;
     tile_pool_rank[victim] = rank;
+    tile_pool_archive[victim] = archive;
     tile_pool_stamp[victim] = ++tile_pool_clock;
     return tile_pool_sprite[victim];
 }
@@ -2331,8 +2423,11 @@ static int draw_rom_actor_tiles(const CapActor *actor, const int slot)
        The cel pivot convention (pixel 184 of a 192px cel drawn centred at
        lane-200-height) puts the actor's CPS2 origin 88px below the cel
        centre. */
-    const int origin_cps_x = 0x40 + actor->x - world.camera_x;
-    const int origin_dec_y = (0x100 + 0xFF - (200 + actor->height)) & 0x3FF;
+    const int emit_origin_cps_x =
+        0x40 + rom_actor_emit_world_x[slot] - world.camera_x;
+    const int visual_origin_cps_x = 0x40 + actor->x - world.camera_x;
+    const int origin_dec_y =
+        (0x100 + 0xFF - rom_actor_emit_world_y[slot]) & 0x3FF;
     const int anchor_jo_y = actor->lane - 200 - actor->height + 88;
     const int depth = 330 - actor->lane;
     int index;
@@ -2344,7 +2439,7 @@ static int draw_rom_actor_tiles(const CapActor *actor, const int slot)
         const AvspObjectEntry *entry = &rom_actor_entries_all[slot][index];
         AvspEntryTile tiles[64];
         int offset_x = wrap_signed_10bit((int)(entry->x & 0x3FF) -
-                                         (origin_cps_x & 0x3FF));
+                                         (emit_origin_cps_x & 0x3FF));
         int offset_y = wrap_signed_10bit((int)(entry->y & 0x3FF) -
                                          origin_dec_y);
         int bank_slot = avsp_tiles_bank_slot(&tile_archive,
@@ -2360,22 +2455,36 @@ static int draw_rom_actor_tiles(const CapActor *actor, const int slot)
         jo_sprite_set_palette_4bits(tile_palette.id, bank_slot);
         for (tile = 0; tile < count; ++tile)
         {
+            const AvspTileArchive *source_archive = &tile_archive;
             long rank = avsp_tiles_find(&tile_archive, tiles[tile].code);
             int sprite_id;
             int jo_x;
             int jo_y;
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+            if (rank < 0 && combat_tile_archive_ready)
+            {
+                source_archive = &combat_tile_archive;
+                rank = avsp_tiles_find(source_archive, tiles[tile].code);
+            }
+#endif
             if (rank < 0)
             {
                 ++tile_diag_no_rank;
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+                if (avsp_diag_combat_missing_code_count < 16)
+                    avsp_diag_combat_missing_codes[
+                        avsp_diag_combat_missing_code_count++] =
+                        tiles[tile].code;
+#endif
                 continue;
             }
-            sprite_id = tile_sprite_for_rank(rank);
+            sprite_id = tile_sprite_for_archive_rank(source_archive, rank);
             if (sprite_id < 0)
             {
                 ++tile_diag_no_sprite;
                 continue;
             }
-            jo_x = fit_352(origin_cps_x - 256 + offset_x +
+            jo_x = fit_352(visual_origin_cps_x - 256 + offset_x +
                            tiles[tile].dx + 8);
             jo_y = anchor_jo_y + offset_y + tiles[tile].dy + 8;
             if (tiles[tile].flip_x) jo_sprite_enable_horizontal_flip();
@@ -2833,7 +2942,7 @@ static void street_test_frame(void)
                                               entry_tiles[tile].code);
             int sprite_id;
             if (rank < 0) continue;
-            sprite_id = tile_sprite_for_rank(rank);
+            sprite_id = tile_sprite_for_archive_rank(&tile_archive, rank);
             if (sprite_id < 0) continue;
             if (entry_tiles[tile].flip_x) jo_sprite_enable_horizontal_flip();
             if (entry_tiles[tile].flip_y) jo_sprite_enable_vertical_flip();
@@ -3440,6 +3549,16 @@ static void enemy_bench_frame_callback(void)
     enemy->lane = promoted_view.lane;
     enemy->facing = promoted_view.facing;
     enemy->locomotion_frame = promoted_view.locomotion_frame;
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+    enemy->health = combat_port_v2.enemy_health;
+    if (avsp_diag_combat_enemy_visual_action == 1)
+        enemy->action = CAP_ACT_HIT;
+    else if (avsp_diag_combat_enemy_visual_action == 2)
+        enemy->action = CAP_ACT_KO;
+    else
+        enemy->action = CAP_ACT_WALK;
+    enemy->action_frame = avsp_diag_combat_enemy_action_frame;
+#endif
 #else
     enemy->x = relative < ENEMY_BENCH_PHASE_FRAMES ? 192 : 240;
     enemy->locomotion_frame = relative;
@@ -3530,7 +3649,12 @@ static void player_bench_init(void)
     player_bench.tail_canary = PLAYER_BENCH_CANARY_TAIL;
 #ifdef AVSP_PLAYER_PROMOTION_BENCH
 #ifdef AVSP_PLAYER_ENEMY_INTEGRATION
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+    avsp_combat_diagnostic_init(&combat_port_v2);
+    combat_last_event_count = 0;
+#else
     avsp_port_v2_player_enemy_init(&player_enemy_port_v2);
+#endif
     player_bench.actor.x = player_enemy_port_v2.player.x;
     player_bench.actor.lane = player_enemy_port_v2.player.lane;
     player_bench.actor.facing = player_enemy_port_v2.player.facing;
@@ -3576,6 +3700,17 @@ static void player_bench_step(const CapInput *input)
             ENEMY_BENCH_PHASE_FRAMES;
         avsp_port_v2_player_enemy_step(&player_enemy_port_v2,
                                        &integration_input);
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+        avsp_combat_diagnostic_step(&combat_port_v2);
+        if (avsp_diag_combat_event_count != combat_last_event_count)
+        {
+            tile_diag_no_bank = 0;
+            tile_diag_no_rank = 0;
+            tile_diag_no_sprite = 0;
+            avsp_diag_combat_missing_code_count = 0;
+            combat_last_event_count = avsp_diag_combat_event_count;
+        }
+#endif
         avsp_port_v2_player_view(&player_enemy_port_v2.player,
                                  &promoted_view);
     }
@@ -3589,6 +3724,13 @@ static void player_bench_step(const CapInput *input)
     actor->action = promoted_view.action == AVSP_PORT_V2_PLAYER_ACTION_WALK ?
         CAP_ACT_WALK : CAP_ACT_IDLE;
     actor->action_frame = 0;
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+    if (avsp_diag_combat_player_attack_active)
+    {
+        actor->action = CAP_ACT_ATTACK;
+        actor->action_frame = avsp_diag_combat_player_action_frame;
+    }
+#endif
     actor->locomotion_frame = promoted_view.locomotion_frame;
 #ifdef AVSP_PLAYER_ENEMY_INTEGRATION
     avsp_diag_player_input_mask = player_enemy_port_v2.player.input_mask;
@@ -3806,6 +3948,21 @@ static void player_bench_frame_callback(void)
                 avsp_diag_integration_sample_count = sample_index + 1;
             }
         }
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+        jo_printf(0, 21, "COMBAT E%d S%d HP%d",
+                  avsp_diag_combat_event_kind,
+                  avsp_diag_combat_attack_selector,
+                  avsp_diag_combat_enemy_health);
+        jo_printf(0, 22, "CONTACT %d DAMAGE %d HIT %d KO %d",
+                  avsp_diag_combat_contact_count,
+                  avsp_diag_combat_damage_count,
+                  avsp_diag_combat_hit_count,
+                  avsp_diag_combat_ko_count);
+        jo_printf(0, 23, "NEG %d FAIL %d PHYSICAL UNRUN",
+                  avsp_diag_combat_negative_rejections,
+                  avsp_diag_combat_failures);
+        avsp_diag_combat_presented_frame = avsp_diag_combat_frame;
+#endif
         /* Publish last so MCP observes one complete integration snapshot. */
         avsp_diag_integration_frame[0] = avsp_diag_enemy_frame;
     }

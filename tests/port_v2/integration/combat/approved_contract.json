@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "task_id": "INTEGRATE-02-COMBAT",
+  "interface_version": 1,
+  "target": {"set": "avspu", "revision": "USA 940520", "player_type": 0, "enemy_type": 12, "enemy_class": 31},
+  "source_files": {
+    "collision": {"path": "data/avsp_collision.json", "normalized_sha256": "e1e41ea1f1a3666342e8b17e7c42f54e24437af181ccea141d6400019547cc5a"},
+    "damage": {"path": "data/enemy_action_capture.json", "normalized_sha256": "489681f31009e0d1e6ae714cd7d92eeed695427a077675edbc2004f9def360ee"},
+    "hit_ko": {"path": "data/avsp_hit_ko_writer_set.json", "normalized_sha256": "a13cffd40c6e44a1368b5edfa917af08c95644580d5384aaeddc0f9ef5e65aed"},
+    "presentation": {"path": "tests/port_v2/integration/player_enemy/approved_contract.json", "normalized_sha256": "cc1a3a3d02b15291815a0f0a9e4e9e06665ba14b0b298148814e1c2565c8a92c"}
+  },
+  "player_table_set": "0x11ae02",
+  "enemy_table_set": "0x130ac8",
+  "enemy_hurt_selector": 1,
+  "events": [
+    {"sample": 5190, "attack_selector": 1, "hit_value": 8, "health_before": 87, "health_after": 63, "kind": "HIT", "player": [1360, 319, 319], "enemy": [1304, 311, 311]},
+    {"sample": 5236, "attack_selector": 2, "hit_value": 8, "health_before": 63, "health_after": 39, "kind": "DAMAGE", "player": [1360, 319, 319], "enemy": [1286, 311, 311]},
+    {"sample": 5283, "attack_selector": 3, "hit_value": 10, "health_before": 39, "health_after": 8, "kind": "DAMAGE", "player": [1360, 319, 319], "enemy": [1248, 311, 311]},
+    {"sample": 5329, "attack_selector": 4, "hit_value": 12, "health_before": 8, "health_after": -1, "kind": "KO", "player": [1360, 332, 319], "enemy": [1231, 311, 311]}
+  ],
+  "promoted_transitions": {"hit": [5191, 5227], "ko": [5330, 5469]},
+  "unpromoted": ["second HIT reaction timing", "third HIT reaction timing", "general damage formula", "general attack state machine", "enemy AI"],
+  "disabled_systems": ["camera progression", "stage expansion", "HUD", "PCM", "CDDA", "enemy AI"],
+  "physical_saturn": "UNRUN"
+}

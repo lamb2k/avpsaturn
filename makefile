@@ -70,6 +70,9 @@ endif
 ifneq ($(AVSP_HIT_KO_PROMOTION_BENCH),)
 CCFLAGS += -DAVSP_HIT_KO_PROMOTION_BENCH=1
 endif
+ifneq ($(AVSP_COMBAT_INTEGRATION_BENCH),)
+CCFLAGS += -DAVSP_COMBAT_INTEGRATION_BENCH=1
+endif
 JO_DEBUG ?= 1
 JO_NTSC = 1
 JO_COMPILE_USING_SGL = 1
@@ -80,6 +83,9 @@ SRCS += tests/port_v2/collision_bench/collision_bench.c
 endif
 ifneq ($(AVSP_HIT_KO_PROMOTION_BENCH),)
 SRCS += src/port_v2/combat/hit_ko/hit_ko.c tests/port_v2/combat/hit_ko/diagnostic.c
+endif
+ifneq ($(AVSP_COMBAT_INTEGRATION_BENCH),)
+SRCS += src/port_v2/combat/hit_ko/hit_ko.c src/port_v2/integration/combat/combat.c tests/port_v2/integration/combat/diagnostic.c
 endif
 
 # The pinned Yaba Sanshiro boot path stalls when Jo Engine's monolithic first-
