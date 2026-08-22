@@ -8,6 +8,7 @@
 #include "avsp_disc_guard.h"
 #include "src/port_v2/player/player.h"
 #include "src/port_v2/enemy/enemy.h"
+#include "src/port_v2/integration/player_enemy/player_enemy.h"
 
 #include "generated/avsp_anim_records.h"
 #include "generated/avsp_emit_windows.h"
@@ -408,6 +409,11 @@ volatile int avsp_diag_enemy_tile_rank_misses;
 #ifdef AVSP_ENEMY_PROMOTION_BENCH
 volatile int avsp_diag_enemy_approval_lock_ok;
 volatile int avsp_diag_enemy_loader_adapter_ok;
+#endif
+#ifdef AVSP_PLAYER_ENEMY_INTEGRATION
+volatile int avsp_diag_integration_interface_version;
+volatile int avsp_diag_integration_approval_locks_ok;
+volatile int avsp_diag_integration_loader_order_ok;
 #endif
 #endif
 #ifdef AVSP_FRONTEND_SHOT_TEST
@@ -3431,6 +3437,9 @@ static void player_bench_init(void)
 #ifndef AVSP_PLAYER_PROMOTION_BENCH
     player_bench_previous_input = 0;
 #endif
+#ifdef AVSP_PLAYER_ENEMY_INTEGRATION
+    enemy_bench_init();
+#endif
 }
 
 static void player_bench_step(const CapInput *input)
@@ -3557,6 +3566,11 @@ static void player_bench_frame_callback(void)
         player_bench.tail_canary == PLAYER_BENCH_CANARY_TAIL;
     avsp_diag_player_asset_failures = failed_asset == JO_NULL ? 0 : 1;
     avsp_diag_player_disc_late_reads = avsp_disc_guard_state.late_read_attempts;
+#ifdef AVSP_PLAYER_ENEMY_INTEGRATION
+    enemy_bench_frame_callback();
+    avsp_diag_integration_interface_version = AVSP_PORT_V2_PLAYER_ENEMY_INTERFACE_VERSION;
+    avsp_diag_integration_approval_locks_ok = avsp_port_v2_player_enemy_approvals_valid();
+#endif
 #ifdef AVSP_PLAYER_PROMOTION_BENCH
     avsp_diag_player_interface_version = AVSP_PORT_V2_PLAYER_INTERFACE_VERSION;
     avsp_diag_player_approval_lock_ok =
@@ -4374,6 +4388,21 @@ void jo_main(void)
     }
     set_actor_palette();
 #if defined(AVSP_PLAYER_SALVAGE_BENCH)
+#ifdef AVSP_PLAYER_ENEMY_INTEGRATION
+    {
+        AvspPortV2PlayerEnemyLoadOps operations;
+        operations.load_tile_archive = load_tile_archive;
+        operations.load_background = load_background;
+        operations.load_player_idle = load_all_cels;
+        operations.load_player_actions = load_player_action_sequences;
+        operations.create_player_sprites = create_player_sprite_working_set;
+        runtime_ready = avsp_port_v2_player_enemy_load(cart_available, &operations);
+        avsp_diag_integration_loader_order_ok = runtime_ready;
+        avsp_diag_player_loader_adapter_ok = runtime_ready;
+        avsp_diag_enemy_loader_adapter_ok = runtime_ready;
+        if (!cart_available) failed_asset = "4MB RAM CART REQUIRED";
+    }
+#else
 #ifdef AVSP_PLAYER_PROMOTION_BENCH
     player_load_operations.load_background = load_background;
     player_load_operations.load_idle_cels = load_all_cels;
@@ -4400,6 +4429,7 @@ void jo_main(void)
                         load_player_action_sequences() &&
                         create_player_sprite_working_set();
     }
+#endif
 #endif
     if (runtime_ready) player_bench_init();
     JO_UNUSED_ARG(index);

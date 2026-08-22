@@ -13,7 +13,7 @@ param(
         'FrontendShotTest', 'EncounterTest', 'StreetTest', 'BossHitTest',
         'BossKoTest', 'PlayerSalvageBench', 'PlayerPromotionBench',
         'CameraStageSalvageBench', 'HudPcmSalvageBench', 'EnemySalvageBench',
-        'EnemyPromotionBench')]
+        'EnemyPromotionBench', 'PlayerEnemyIntegration')]
     [string]$TargetProfile = 'Default',
 
     [switch]$Regenerate,
@@ -261,6 +261,7 @@ function Invoke-TargetLane {
         HudPcmSalvageBench = 'debug-hud-pcm-salvage-bench'
         EnemySalvageBench = 'debug-enemy-salvage-bench'
         EnemyPromotionBench = 'debug-enemy-promotion-bench'
+        PlayerEnemyIntegration = 'debug-player-enemy-integration'
     }
     $expectedProfile = $profileNames[$TargetProfile]
     $profilePath = Join-Path $projectRoot 'build\last_compile_profile.txt'
