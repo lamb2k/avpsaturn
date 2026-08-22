@@ -282,6 +282,20 @@ typedef struct
 static HudPcmBenchState hud_pcm_bench;
 #endif
 
+#ifdef AVSP_ENEMY_SALVAGE_BENCH
+#define ENEMY_BENCH_CANARY_HEAD 0x454E4D48UL
+#define ENEMY_BENCH_CANARY_TAIL 0x454E4D54UL
+#define ENEMY_BENCH_PHASE_FRAMES 120
+typedef struct
+{
+    unsigned long head_canary;
+    int frame;
+    int negative_rejections;
+    unsigned long tail_canary;
+} EnemyBenchState;
+static EnemyBenchState enemy_bench;
+#endif
+
 /* Stable headless readback surface. These are intentionally global and
  * volatile so stock emulator debugger memory reads can verify the focused
  * frontend profile without relying on a GUI screenshot. */
@@ -366,6 +380,27 @@ volatile int avsp_diag_player_interface_version;
 volatile int avsp_diag_player_approval_lock_ok;
 volatile int avsp_diag_player_loader_adapter_ok;
 #endif
+#endif
+#ifdef AVSP_ENEMY_SALVAGE_BENCH
+volatile int avsp_diag_enemy_interface_version;
+volatile int avsp_diag_enemy_frame;
+volatile int avsp_diag_enemy_phase;
+volatile int avsp_diag_enemy_class_id;
+volatile int avsp_diag_enemy_x;
+volatile int avsp_diag_enemy_lane;
+volatile int avsp_diag_enemy_facing;
+volatile int avsp_diag_enemy_anim_record;
+volatile int avsp_diag_enemy_assembly;
+volatile int avsp_diag_enemy_object_count;
+volatile int avsp_diag_enemy_render_count;
+volatile int avsp_diag_enemy_command_code;
+volatile int avsp_diag_enemy_palette_bank;
+volatile int avsp_diag_enemy_asset_failures;
+volatile int avsp_diag_enemy_negative_rejections;
+volatile int avsp_diag_enemy_canary_ok;
+volatile int avsp_diag_enemy_disc_late_reads;
+volatile int avsp_diag_enemy_tile_bank_misses;
+volatile int avsp_diag_enemy_tile_rank_misses;
 #endif
 #ifdef AVSP_FRONTEND_SHOT_TEST
 /* Visual-verification profile. The frontend surfaces this pass must compare
@@ -2173,7 +2208,7 @@ static int fit_352(const int cps_x)
     return (cps_x * CAP_VIEW_WIDTH) / CAP_CPS2_VIEW_WIDTH;
 }
 
-static void draw_rom_actor_tiles(const CapActor *actor, const int slot)
+static int draw_rom_actor_tiles(const CapActor *actor, const int slot)
 {
     /* ADAPTED placement bridge: the emitter ran with model-space anchors
        (rom_actor_prepare), so entries are positioned as offsets from the
@@ -2187,6 +2222,7 @@ static void draw_rom_actor_tiles(const CapActor *actor, const int slot)
     const int anchor_jo_y = actor->lane - 200 - actor->height + 88;
     const int depth = 330 - actor->lane;
     int index;
+    int rendered = 0;
 
     jo_sprite_set_palette_4bits(tile_palette.id, 0);
     for (index = rom_actor_entry_counts[slot] - 1; index >= 0; --index)
@@ -2231,10 +2267,12 @@ static void draw_rom_actor_tiles(const CapActor *actor, const int slot)
             if (tiles[tile].flip_x) jo_sprite_enable_horizontal_flip();
             if (tiles[tile].flip_y) jo_sprite_enable_vertical_flip();
             jo_sprite_draw3D(sprite_id, jo_x, jo_y, depth);
+            ++rendered;
             if (tiles[tile].flip_x) jo_sprite_disable_horizontal_flip();
             if (tiles[tile].flip_y) jo_sprite_disable_vertical_flip();
         }
     }
+    return rendered;
 }
 
 
@@ -3219,6 +3257,91 @@ static void hud_pcm_bench_frame_callback(void)
 }
 #endif
 
+#ifdef AVSP_ENEMY_SALVAGE_BENCH
+/* One class-0x1F actor under fixed semantic state.  This bench deliberately
+ * advances the extracted animation record and emits its source-derived tile
+ * objects, but owns no AI, collision, damage, camera movement, HUD, PCM, or
+ * CDDA state. */
+static void enemy_bench_init(void)
+{
+    CapActor *enemy;
+
+    memset(&enemy_bench, 0, sizeof(enemy_bench));
+    enemy_bench.head_canary = ENEMY_BENCH_CANARY_HEAD;
+    enemy_bench.tail_canary = ENEMY_BENCH_CANARY_TAIL;
+    if (avsp_tiles_bank_slot(&tile_archive, 0x1Fu) < 0)
+        ++enemy_bench.negative_rejections;
+    if (avsp_tiles_find(&tile_archive, 0xFFFFu) < 0)
+        ++enemy_bench.negative_rejections;
+
+    cap_world_init(&world);
+    world.encounter_state = CAP_ENCOUNTER_WAVE_ONE;
+    world.camera_x = 0;
+    enemy = &world.enemies[0];
+    enemy->x = 192;
+    enemy->lane = 200;
+    enemy->height = 0;
+    enemy->facing = -1;
+    enemy->health = 87;
+    enemy->action = CAP_ACT_WALK;
+    enemy->action_frame = 0;
+    enemy->locomotion_frame = 0;
+    enemy->active = 1;
+    enemy->variant = 1; /* source palette bank 0x11 */
+    enemy->kind = CAP_ACTOR_ALIEN;
+}
+
+static void enemy_bench_frame_callback(void)
+{
+    CapActor *enemy = &world.enemies[0];
+    int relative = enemy_bench.frame % (ENEMY_BENCH_PHASE_FRAMES * 2);
+    int rendered = 0;
+
+    if (!runtime_ready)
+    {
+        avsp_diag_runtime_ready = 0;
+        avsp_diag_enemy_asset_failures = 1;
+        return;
+    }
+    enemy->x = relative < ENEMY_BENCH_PHASE_FRAMES ? 192 : 240;
+    enemy->locomotion_frame = relative;
+    world.frame = relative;
+    world.encounter_state = CAP_ENCOUNTER_WAVE_ONE;
+    rom_actor_prepare();
+    activate_gameplay_background(0);
+    jo_move_background(0, 0);
+    if (rom_actor_entry_counts[0] > 0 && tile_archive_ready)
+        rendered = draw_rom_actor_tiles(enemy, 0);
+    rom_actor_advance();
+
+    avsp_diag_runtime_ready = 1;
+    avsp_diag_enemy_interface_version = 1;
+    avsp_diag_enemy_phase = relative < ENEMY_BENCH_PHASE_FRAMES ? 0 : 1;
+    avsp_diag_enemy_class_id = rom_actor_collision_views[0].class_id;
+    avsp_diag_enemy_x = enemy->x;
+    avsp_diag_enemy_lane = enemy->lane;
+    avsp_diag_enemy_facing = enemy->facing;
+    avsp_diag_enemy_anim_record = (int)rom_actor_frames[0].addr;
+    avsp_diag_enemy_assembly = (int)rom_actor_frames[0].pose.assembly;
+    avsp_diag_enemy_object_count = rom_actor_entry_counts[0];
+    avsp_diag_enemy_render_count = rendered;
+    avsp_diag_enemy_command_code = rom_actor_entry_counts[0] > 0 ?
+        (int)rom_actor_entries_all[0][0].code : -1;
+    avsp_diag_enemy_palette_bank = 0x11;
+    avsp_diag_enemy_asset_failures = failed_asset == JO_NULL ? 0 : 1;
+    avsp_diag_enemy_negative_rejections = enemy_bench.negative_rejections;
+    avsp_diag_enemy_canary_ok =
+        enemy_bench.head_canary == ENEMY_BENCH_CANARY_HEAD &&
+        enemy_bench.tail_canary == ENEMY_BENCH_CANARY_TAIL;
+    avsp_diag_enemy_disc_late_reads = avsp_disc_guard_state.late_read_attempts;
+    avsp_diag_enemy_tile_bank_misses = tile_diag_no_bank;
+    avsp_diag_enemy_tile_rank_misses = tile_diag_no_rank;
+    /* Publish last so debugger breakpoints observe one coherent frame. */
+    avsp_diag_enemy_frame = relative;
+    ++enemy_bench.frame;
+}
+#endif
+
 static CapInput read_input(void)
 {
     CapInput input;
@@ -3600,6 +3723,10 @@ static void frame_callback(void)
 #endif
 #ifdef AVSP_HUD_PCM_SALVAGE_BENCH
     hud_pcm_bench_frame_callback();
+    return;
+#endif
+#ifdef AVSP_ENEMY_SALVAGE_BENCH
+    enemy_bench_frame_callback();
     return;
 #endif
     avsp_diag_runtime_ready = runtime_ready;
@@ -4268,6 +4395,20 @@ void jo_main(void)
     }
     cap_world_init(&world);
     if (runtime_ready) hud_pcm_bench_init();
+    JO_UNUSED_ARG(index);
+#elif defined(AVSP_ENEMY_SALVAGE_BENCH)
+    if (!cart_available)
+    {
+        failed_asset = "4MB RAM CART REQUIRED";
+        runtime_ready = 0;
+    }
+    else
+    {
+        /* Isolated class-0x1F ROM tile path. No capture-cel fallback,
+         * AI, collision, camera movement, HUD, PCM, CDDA, or stage route. */
+        runtime_ready = load_tile_archive() && load_background();
+    }
+    if (runtime_ready) enemy_bench_init();
     JO_UNUSED_ARG(index);
 #else
     set_frontend_palettes();

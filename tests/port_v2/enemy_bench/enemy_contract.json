@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "task_id": "SALVAGE-02-ENEMY-RENDER-ANIMATION",
+  "card_profile": "EnemySalvageBench",
+  "compile_profile": "debug-enemy-salvage-bench",
+  "manifest_profile": "enemy-salvage-bench",
+  "interface_version": 1,
+  "source_evidence_sha256": {
+    "data/enemy_action_capture.json": "3a4980d410c01534f1cd1e5a7452cbe9721efb9badf80ed2672c27fbec055e4d",
+    "data/street_alien_object_emission.json": "6fd2a22965f7398477e033fa51792740ada0ba842720f875a013b72e7eee8720"
+  },
+  "tile_archive_sha256": "43d9707f2bcdb0d23f82db7169052bf21d29627d966a9990706ccc472eb3c1c3",
+  "source_actor": {"class_id": 31, "palette_bank": 17, "lane": 200, "facing": -1},
+  "samples": {"stationary": {"frame": 20, "phase": 0, "x": 192}, "translated": {"frame": 140, "phase": 1, "x": 240}, "repeat_stationary": {"frame": 20, "phase": 0, "x": 192}},
+  "negative_controls": ["missing class-0x1F tile bank", "unknown class-0x1F tile rank"],
+  "approved_lock_sha256": {
+    "tests/port_v2/stage_bench/stage_contract.json": "dac93621e7ef290ee2465055076b856f1f10a73480654c86782fbb4e522af300",
+    "tests/port_v2/player/approved_contract.json": "d0e6d835aaa3f2bdcd1138d5eeedafcacf96080178feca0454789a942fedf612",
+    "tests/port_v2/hud_pcm_bench/hud_pcm_contract.json": "e6325b97864ec53d7171eaceff4ad070fcaa9276ca7c00ab022e260f5545cafe",
+    "tests/port_v2/player2_hud_bench/player2_hud_contract.json": "d907fba31c216e63717847851c4915fcb165421c5453152afb31d5d63d187e37"
+  },
+  "local_build_dependency_sha256": {"loader/loader.c": "77ac9637f5233ebbb16ed380896f6bbf6217e48d4788dddf0cf824c1cd4022d8", "loader/loader.linker": "a8d817b20eae7e09f1c9f62ea014efced8cea386f1640b0c4c8b00d2f5c2148c", "loader/trampoline.s": "d888d3299a27c47b9ad70b4b3685a42669f0e399cacc2dbaca91c3663609474e", "tools/build_loader_ip.py": "599f871f44f2cd5d5a9f8bee881aeb2a8a8f00bc830b7d93005d2d9ce307625a"},
+  "disabled_systems": ["player behavior", "collision/damage/HIT/KO", "camera movement", "HUD", "PCM", "CDDA"],
+  "physical_saturn": "UNRUN"
+}

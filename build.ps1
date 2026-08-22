@@ -15,6 +15,7 @@ param(
     [switch]$PlayerPromotionBench,
     [switch]$CameraStageSalvageBench,
     [switch]$HudPcmSalvageBench,
+    [switch]$EnemySalvageBench,
     [switch]$SkipHostTests
 )
 
@@ -206,7 +207,8 @@ try {
                 -Destination (Join-Path $contentRoot $metadataName) -Force
         }
 
-        $buildProfile = if ($HudPcmSalvageBench) { 'hud-pcm-salvage-bench' }
+        $buildProfile = if ($EnemySalvageBench) { 'enemy-salvage-bench' }
+            elseif ($HudPcmSalvageBench) { 'hud-pcm-salvage-bench' }
             elseif ($CameraStageSalvageBench) { 'camera-stage-salvage-bench' }
             elseif ($PlayerPromotionBench) { 'player-promotion-bench' }
             elseif ($PlayerSalvageBench) { 'player-salvage-bench' }
@@ -276,6 +278,9 @@ try {
         }
         if ($HudPcmSalvageBench) {
             $makeArguments += 'AVSP_HUD_PCM_SALVAGE_BENCH=1'
+        }
+        if ($EnemySalvageBench) {
+            $makeArguments += 'AVSP_ENEMY_SALVAGE_BENCH=1'
         }
         if ($FrontendTest) {
             $makeArguments += 'AVSP_FRONTEND_TEST=1'
