@@ -162,8 +162,13 @@ def validate_card_results(ledger: dict) -> None:
                 f"{result['task_id']} invalid salvage decision")
         require_relative_artifact(result["diagnostic_interface"],
                                   f"{result['task_id']} diagnostic interface")
-        require(result["production_interface"] is None,
-                f"{result['task_id']} claims a production interface without promotion")
+        if result["production_interface"] is not None:
+            require(result["salvage_decision"] == "PROMOTED",
+                    f"{result['task_id']} claims a production interface without promotion")
+            require_relative_artifact(
+                result["production_interface"],
+                f"{result['task_id']} production interface",
+            )
         for blocker in result["blockers"]:
             require(isinstance(blocker, str) and blocker.startswith("Unblock:"),
                     f"{result['task_id']} blocker lacks an unblock condition")

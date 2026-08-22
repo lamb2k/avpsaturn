@@ -412,6 +412,55 @@
         "requested_changes": [],
         "priority": null
       }
+    },
+    {
+      "task_id": "INTEGRATE-01-PLAYER-AND-ENEMY",
+      "evaluated_commit": "d8909642a0cfb7300e4f2f9a035a19e5197930b7",
+      "technical_status": "PASS",
+      "fidelity_status": "ADAPTED",
+      "user_status": "APPROVED",
+      "salvage_decision": "PROMOTED",
+      "production_interface": "src/port_v2/integration/player_enemy/player_enemy.h",
+      "diagnostic_interface": "tests/port_v2/integration/player_enemy/run_pinned_emulator.ps1",
+      "blockers": [
+        "Unblock: collision, attack, damage, HIT/KO, AI, camera motion, HUD, PCM, and CDDA remain disabled and outside this integration result.",
+        "Unblock: a second emulator, normal-release profile, and physical Saturn validation remain UNRUN."
+      ],
+      "exact_next_experiment": "Execute SALVAGE-03 collision selectors and overlap/no-overlap controls without applying authored damage, HIT, or KO behavior and without changing the approved player, enemy, camera/stage, HUD, or PCM locks.",
+      "evidence": {
+        "build_profile": "PlayerEnemyIntegration / debug-player-enemy-integration",
+        "fast_lane": "PASS",
+        "focused_host_deterministic_repeat": "PASS",
+        "missing_or_reordered_dependency_negative_control": "PASS / rejected",
+        "target_clean_build_repeat": "PASS",
+        "paired_pinned_emulator_readback": "PASS",
+        "normalized_iso_sha256": "b7fbc6cdc2caa1128265dd03bc1faefdda0053a00afe9adb576bf619d3ed3452",
+        "source_tree": "1fe7535ff893d9b58c04cae528cf01fa47eedc58",
+        "approved_player_contract_sha256": "d0e6d835aaa3f2bdcd1138d5eeedafcacf96080178feca0454789a942fedf612",
+        "approved_enemy_contract_sha256": "35d6274c88aa60d32a6594fa535cae0e0964ddcc7f4ec7989553848f361142da",
+        "stable_samples": [20, 140, 20],
+        "actor_count": 2,
+        "render_order": ["player", "enemy"],
+        "sample_render_command_count": 34,
+        "enemy_composition": "5 objects / 32 tiles",
+        "player_live_input_response": "PASS / RIGHT edge, movement, facing, and 3-command walk pose",
+        "asset_failures": 0,
+        "disc_late_reads": 0,
+        "canaries": "PASS",
+        "approved_component_regression_locks": "PASS",
+        "emulator": "Yaba Sanshiro 1.20.37-2986eb",
+        "emulator_evidence_tier": "ONE_EMULATOR",
+        "visual_self_review": "PASS / both approved actors co-resident over the approved fixed stage",
+        "bounded_correction": "Paused the final live readback before atomically validating actor and aggregate render counts.",
+        "physical_saturn": "UNRUN"
+      },
+      "user_observation_state": {
+        "formal_review_question_asked": false,
+        "exact_observations": [],
+        "approved_components": [],
+        "requested_changes": [],
+        "priority": null
+      }
     }
   ],
   "subsystems": [

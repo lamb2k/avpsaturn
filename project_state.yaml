@@ -4,15 +4,15 @@ workflow_model: interactive-salvage-promotion-integration
 roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
-production_head: 33d7f90424b548238d5d8185d88cb21f05248c54
-candidate_head: 4067765ed9f398223ad7c75127f91ad3d80f65c4
+production_head: d8909642a0cfb7300e4f2f9a035a19e5197930b7
+candidate_head: d8909642a0cfb7300e4f2f9a035a19e5197930b7
 evidence_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
 production_branch: codex/avp-user-02-enemy-review
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
 review_candidate_status: CORRECTIONS_REQUIRED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY]
 target_scope:
   source_set: avspu
   route: cold-boot-through-title-select-all-stages-ending-credits
@@ -64,6 +64,9 @@ accepted_implementation_history:
   - id: PROMOTE-02-ENEMY-PIPELINE
     status: ACCEPTED
     head: 33d7f90424b548238d5d8185d88cb21f05248c54
+  - id: INTEGRATE-01-PLAYER-AND-ENEMY
+    status: ACCEPTED
+    head: d8909642a0cfb7300e4f2f9a035a19e5197930b7
 accepted_control_plane_history:
   - id: ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN
     status: ACCEPTED
@@ -162,12 +165,12 @@ architecture_enforcement:
     - id: evidence-tier-separation
       status: ACTIVE
       activates_when: always
-current_checkpoint: integrate-player-enemy
-active_task_card: docs/task_cards/INTEGRATE-01-PLAYER-AND-ENEMY.md
-active_task_id: INTEGRATE-01-PLAYER-AND-ENEMY
-active_task_kind: INTEGRATE
+current_checkpoint: salvage-collision
+active_task_card: docs/task_cards/SALVAGE-03-COLLISION.md
+active_task_id: SALVAGE-03-COLLISION
+active_task_kind: SALVAGE
 task_status: READY
-active_write_owner: INTEGRATE-01-PLAYER-AND-ENEMY
+active_write_owner: SALVAGE-03-COLLISION
 awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
@@ -375,6 +378,30 @@ completed_dispositions:
     blockers:
       - Collision, damage, HIT/KO, AI, camera, HUD, PCM, CDDA, production co-residency, a second emulator, normal release, and physical Saturn remain outside this promotion result.
     exact_next_experiment: Combine promoted player and enemy interfaces on one fixed background; prove deterministic co-residency/render order and reject one missing or reordered dependency without changing either approved output.
+  - task: INTEGRATE-01-PLAYER-AND-ENEMY
+    evaluated_head: d8909642a0cfb7300e4f2f9a035a19e5197930b7
+    technical_status: PASS
+    fidelity_status: ADAPTED
+    user_status: APPROVED
+    salvage_decision: PROMOTED
+    successor_activation: SALVAGE-03-COLLISION
+    approved_component_locks:
+      - Promoted player contract d0e6d835...fedf612.
+      - Approved enemy contract 35d6274c...142da.
+      - Approved camera/stage contract dac93621...af300.
+      - Approved P1/P2 HUD and PCM contracts e6325b97...45cafe and d907fba3...187e37.
+    evidence:
+      - Fast lane, focused deterministic repeat, and real reordered-dependency negative control PASS.
+      - Target PlayerEnemyIntegration PASS on clean deterministic builds.
+      - Normalized ISO SHA-256 b7fbc6cdc2caa1128265dd03bc1faefdda0053a00afe9adb576bf619d3ed3452 repeated exactly.
+      - Pinned Yaba Sanshiro readback PASS twice with exact frame 20, frame 140, and repeated frame 20 samples; actor count 2; player-before-enemy ordering; 34 combined commands; and zero asset, disc-read, or canary failures.
+      - Live RIGHT input perturbation produced movement, right-facing state, and a three-command walk pose without changing the enemy contract.
+      - Visual self-review PASS; no renewed USER_REVIEW was required because both approved outputs remained unchanged.
+      - Physical Saturn remains UNRUN.
+    blockers:
+      - Collision, attack, damage, HIT/KO, AI, camera motion, HUD, PCM, and CDDA remain outside this integration result.
+      - A second emulator, normal release, and physical Saturn remain UNRUN.
+    exact_next_experiment: Execute SALVAGE-03 collision selectors and overlap/no-overlap controls without authored damage, HIT, or KO and without changing any approved component lock.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR

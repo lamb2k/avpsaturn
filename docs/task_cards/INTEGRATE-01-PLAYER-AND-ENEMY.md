@@ -2,7 +2,7 @@
 
 TASK: INTEGRATE-01-PLAYER-AND-ENEMY
 KIND: INTEGRATE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: integrate-player-enemy
 BASE: project_state.accepted_head
 BRANCH: codex/avp-user-02-enemy-review

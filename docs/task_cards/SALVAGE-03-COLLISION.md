@@ -2,7 +2,7 @@
 
 TASK: SALVAGE-03-COLLISION
 KIND: SALVAGE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: salvage-collision
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

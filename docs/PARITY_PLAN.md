@@ -61,7 +61,7 @@ V2-2B remains unresolved with disposition `CORRECTIONS_REQUIRED`. It blocks
 exact HIT/KO promotion only, not loading, controller input, actor rendering,
 animation, stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards.
 
-CURRENT_TASK: INTEGRATE-01-PLAYER-AND-ENEMY
+CURRENT_TASK: SALVAGE-03-COLLISION
 
 ## 4. Current salvage queue and production extension
 
@@ -70,7 +70,7 @@ regression locks. The current runtime body is not advanced by ARCH-01.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|
-| 1 | `INTEGRATE-01-PLAYER-AND-ENEMY` | Complete current player/enemy co-residency and ordering |
+| 1 | `INTEGRATE-01-PLAYER-AND-ENEMY` | Accepted player/enemy co-residency and ordering |
 | 2 | `SALVAGE-03-COLLISION` | Isolate and promote collision evidence |
 | 3 | `V2-2B` | Finish only the bounded writer-closure correction |
 | 4 | `V2-B1` | Promote exact class `0x1F` HIT/KO |

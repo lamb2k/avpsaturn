@@ -294,14 +294,22 @@ def main() -> None:
     for descendant in (production, candidate, evidence):
         git("merge-base", "--is-ancestor", foundation, descendant)
     git("merge-base", "--is-ancestor", production, candidate)
-    require(
-        re.search(
-            rf"(?ms)^  - id: PROMOTE-02-ENEMY-PIPELINE\s+"
-            rf"status: ACCEPTED\s+head: {production}$",
-            state,
-        ) is not None,
-        "production_head is not the latest accepted production implementation",
+    history = re.search(
+        r"(?ms)^accepted_implementation_history:\s*(.*?)"
+        r"^accepted_control_plane_history:",
+        state,
     )
+    require(history is not None, "accepted implementation history is missing")
+    accepted_implementation_heads = re.findall(
+        r"(?m)^  - id: .+\r?\n"
+        r"    status: ACCEPTED\r?\n"
+        r"    head: ([0-9a-f]{40})$",
+        history.group(1),
+    )
+    require(accepted_implementation_heads,
+            "accepted implementation history has no accepted heads")
+    require(accepted_implementation_heads[-1] == production,
+            "production_head is not the latest accepted production implementation")
     require(
         f"current_continuity_branch: {scalar(state, 'production_branch')}"
         in state,
