@@ -57,11 +57,13 @@ The dirty canonical worktree, dirty playable-skeleton prototype, dirty V2-2B
 validator-correction worktree, accepted commits, private evidence, recovery
 patches, and ignored feedback packages remain preserved.
 
-V2-2B remains unresolved with disposition `CORRECTIONS_REQUIRED`. It blocks
-exact HIT/KO promotion only, not loading, controller input, actor rendering,
-animation, stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards.
+V2-2B remains unresolved with disposition `CORRECTIONS_REQUIRED`, but Goal Mode
+has now explicitly activated its bounded correction body after collision
+salvage passed. It blocks exact HIT/KO promotion only, not loading, controller input,
+actor rendering, animation, stage, palette, HUD, PCM, diagnostics, or
+the read-only Oracle cards.
 
-CURRENT_TASK: SALVAGE-03-COLLISION
+CURRENT_TASK: V2-2B
 
 ## 4. Current salvage queue and production extension
 

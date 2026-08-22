@@ -4,15 +4,15 @@ workflow_model: interactive-salvage-promotion-integration
 roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
-production_head: d8909642a0cfb7300e4f2f9a035a19e5197930b7
-candidate_head: d8909642a0cfb7300e4f2f9a035a19e5197930b7
+production_head: cd31823d82024b6e33a25e8963ded5493c204772
+candidate_head: cd31823d82024b6e33a25e8963ded5493c204772
 evidence_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
 production_branch: codex/avp-user-02-enemy-review
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
 review_candidate_status: CORRECTIONS_REQUIRED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION]
 target_scope:
   source_set: avspu
   route: cold-boot-through-title-select-all-stages-ending-credits
@@ -67,6 +67,9 @@ accepted_implementation_history:
   - id: INTEGRATE-01-PLAYER-AND-ENEMY
     status: ACCEPTED
     head: d8909642a0cfb7300e4f2f9a035a19e5197930b7
+  - id: SALVAGE-03-COLLISION
+    status: ACCEPTED
+    head: cd31823d82024b6e33a25e8963ded5493c204772
 accepted_control_plane_history:
   - id: ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN
     status: ACCEPTED
@@ -74,7 +77,7 @@ accepted_control_plane_history:
     result: title-to-credits-production-plan-initialized
 paused_work:
   - id: V2-2B
-    status: CORRECTIONS_REQUIRED
+    status: ACTIVE_CORRECTIONS_REQUIRED
     worktree: C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-writer-map-tranche2b-validator-corrections
     branch: codex/avp-writer-map-tranche-2b-validator-corrections
     head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
@@ -102,6 +105,7 @@ worktree_safety:
     branch: codex/avp-writer-map-tranche-2b-validator-corrections
     head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
     dirty: true
+    activation_reason: SALVAGE-03 accepted; exact class 0x1F HIT/KO promotion now requires the bounded writer-closure correction.
     preserve: true
 worktree_routing_policy:
   mode: existing-worktree-first
@@ -165,12 +169,12 @@ architecture_enforcement:
     - id: evidence-tier-separation
       status: ACTIVE
       activates_when: always
-current_checkpoint: salvage-collision
-active_task_card: docs/task_cards/SALVAGE-03-COLLISION.md
-active_task_id: SALVAGE-03-COLLISION
-active_task_kind: SALVAGE
+current_checkpoint: v2-2b-writer-closure-corrections
+active_task_card: docs/task_cards/V2-2B.md
+active_task_id: V2-2B
+active_task_kind: REPAIR
 task_status: READY
-active_write_owner: SALVAGE-03-COLLISION
+active_write_owner: V2-2B
 awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
@@ -402,6 +406,32 @@ completed_dispositions:
       - Collision, attack, damage, HIT/KO, AI, camera motion, HUD, PCM, and CDDA remain outside this integration result.
       - A second emulator, normal release, and physical Saturn remain UNRUN.
     exact_next_experiment: Execute SALVAGE-03 collision selectors and overlap/no-overlap controls without authored damage, HIT, or KO and without changing any approved component lock.
+  - task: SALVAGE-03-COLLISION
+    evaluated_head: cd31823d82024b6e33a25e8963ded5493c204772
+    technical_status: PASS
+    fidelity_status: MEASURED
+    user_status: NOT_REVIEWED
+    salvage_decision: SALVAGE_WITH_ADAPTER
+    successor_activation: V2-2B
+    approved_component_locks:
+      - Promoted player contract d0e6d835...fedf612.
+      - Approved enemy contract 35d6274c...142da.
+      - Approved camera/stage contract dac93621...af300.
+      - Approved P1/P2 HUD and PCM contracts e6325b97...45cafe and d907fba3...187e37.
+    evidence:
+      - Strict C90 host compile and all 13 inside, inclusive-edge, outside, translated, empty-selector, state, suppress, and latch cases PASS twice.
+      - Real mutated outside-as-overlap harness control rejected.
+      - Collision report and generated table regenerated twice from pinned private inputs with exact semantic identity; source ROM and both capture hashes PASS.
+      - Both private collision captures replayed against the source predicate; 21,908 non-overlaps, 25 latched overlaps, 2,516 guarded overlaps, and 24 unguarded overlaps reproduced in aggregate.
+      - Fast and card-focused collision Oracle PASS; the global Oracle wrapper remained INCOMPLETE only for unrelated paused V2-2B writer inputs.
+      - CollisionSalvageBench Saturn build PASS twice with normalized ISO SHA-256 a99e1029c968f331ca5c7170d0070a22c8915f34aab9b5518d6721668de533dd.
+      - Pinned Yaba Sanshiro readback PASS twice through a full 13-case cycle with 8/8 negative rejections, zero diagnostic failures, zero damage/HIT/KO writes, and intact canaries.
+      - Diagnostic self-review PASS; no subjective production presentation changed and no USER_REVIEW was required.
+      - Physical Saturn remains UNRUN.
+    blockers:
+      - Exact HIT/KO remains blocked until active V2-2B is accepted and V2-B1 promotes it.
+      - Production collision integration, attack, damage, AI, a second emulator, normal release, and physical Saturn remain UNRUN.
+    exact_next_experiment: In the preserved dirty V2-2B correction worktree, close only exact writer binding, call-rooted closure, and derived dependency proofs with scratch mutations, Oracle, Full, and consolidated Tier 2 review; do not change production runtime or salvage paths.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR

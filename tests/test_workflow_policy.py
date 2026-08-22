@@ -202,11 +202,11 @@ def main() -> None:
             "handoff became a historical narrative")
     for token in (
         "Workflow pivot",
-        "Preserved paused work",
+        "Preserved evidence work",
         "SALVAGE-00-OLD-BUILD-BASELINE",
         "USER-01-PLAYER-BASELINE-REVIEW",
-        "INTEGRATE-01-PLAYER-AND-ENEMY",
-        "4067765ed9f398223ad7c75127f91ad3d80f65c4",
+        scalar(state, "active_task_id"),
+        scalar(state, "evidence_candidate_head"),
         "Resume the AvP salvage Goal",
     ):
         require(token in handoff, f"handoff missing {token}")

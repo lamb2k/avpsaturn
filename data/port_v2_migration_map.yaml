@@ -461,6 +461,55 @@
         "requested_changes": [],
         "priority": null
       }
+    },
+    {
+      "task_id": "SALVAGE-03-COLLISION",
+      "evaluated_commit": "cd31823d82024b6e33a25e8963ded5493c204772",
+      "technical_status": "PASS",
+      "fidelity_status": "MEASURED",
+      "user_status": "NOT_REVIEWED",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
+      "production_interface": null,
+      "diagnostic_interface": "tests/port_v2/collision_bench/run_pinned_emulator.ps1",
+      "blockers": [
+        "Unblock: accept the active bounded V2-2B correction before V2-B1 promotes exact HIT/KO.",
+        "Unblock: production collision integration, attack, damage, AI, a second emulator, normal release, and physical Saturn remain UNRUN."
+      ],
+      "exact_next_experiment": "In the preserved dirty V2-2B worktree, close only exact writer binding, call-rooted closure, and derived dependency proofs with scratch mutations, Oracle, Full, and consolidated Tier 2 re-review.",
+      "evidence": {
+        "build_profile": "CollisionSalvageBench / debug-collision-salvage-bench",
+        "strict_c90_compile": "PASS",
+        "focused_case_count": 13,
+        "focused_deterministic_repeat": "PASS",
+        "real_negative_control": "PASS / mutated outside-as-overlap expectation rejected",
+        "source_report_sha256": "49ce678bee49d331a3b9e6cee97708b7644c5b0727de477ffc89671bf64bd78c",
+        "generated_header_sha256": "b3e5a29ced44c5b112c599ef8fb7c65f879c4707bdadfc132f98a716e3df3ea2",
+        "private_program_sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9",
+        "private_capture_a_sha256": "52b710835e9fbcd279a04a9e1ea284ded9132bdc6ea0b9ce9cf0f845669d6f59",
+        "private_capture_b_sha256": "6896ab7feddb3e7b9f4638bab74794c14fd239be79cce78ce6ab80f829500246",
+        "source_capture_replay": "PASS / aggregate known contact set reproduced",
+        "fast_lane": "PASS",
+        "card_focused_oracle": "PASS",
+        "global_oracle_wrapper": "INCOMPLETE / unrelated paused V2-2B writer inputs only",
+        "target_clean_build_repeat": "PASS",
+        "paired_pinned_emulator_readback": "PASS",
+        "normalized_iso_sha256": "a99e1029c968f331ca5c7170d0070a22c8915f34aab9b5518d6721668de533dd",
+        "emulator_screenshot_sha256": "ec30d4677027401d9f543cc9a3ca3024844d4ab6487238fc07aa9cd4a02e3bde",
+        "negative_rejections": 8,
+        "diagnostic_failures": 0,
+        "damage_hit_ko_writes": 0,
+        "canary": "PASS",
+        "emulator": "Yaba Sanshiro 1.20.37-2986eb",
+        "emulator_evidence_tier": "ONE_EMULATOR",
+        "physical_saturn": "UNRUN"
+      },
+      "user_observation_state": {
+        "formal_review_question_asked": false,
+        "exact_observations": [],
+        "approved_components": [],
+        "requested_changes": [],
+        "priority": null
+      }
     }
   ],
   "subsystems": [
@@ -648,14 +697,16 @@
       "existing_dependencies": ["player/enemy semantic state", "source hitboxes", "V2-2B exact HIT/KO evidence for later promotion"],
       "authored_controller_coupling": "Collision selectors and outcomes are partly bound to authored capability_model state.",
       "proposed_isolated_bench": "Evaluate source hitboxes and deterministic contact selectors without applying authored damage behavior.",
-      "technical_status": "UNRUN",
-      "fidelity_status": "UNKNOWN",
+      "technical_status": "PASS",
+      "fidelity_status": "MEASURED",
       "user_status": "NOT_REVIEWED",
-      "salvage_decision": "UNTESTED",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
-      "blockers": ["Unblock: retain V2-2B corrections as the gate for exact HIT/KO promotion; collision salvage itself may continue."],
-      "exact_next_experiment": "Run source collision selectors with separated overlap/no-overlap negative controls in SALVAGE-03.",
+      "evidence_commit": "cd31823d82024b6e33a25e8963ded5493c204772",
+      "diagnostic_interface": "tests/port_v2/collision_bench/run_pinned_emulator.ps1",
+      "blockers": ["Unblock: accept the active V2-2B correction and then promote exact HIT/KO through V2-B1 before production combat integration.", "Unblock: production collision integration, attack, damage, AI, a second emulator, normal release, and physical Saturn remain UNRUN."],
+      "exact_next_experiment": "Close the bounded V2-2B writer-closure correction, then use V2-B1 to bind exact HIT/KO without changing the accepted collision adapter or approved presentation locks.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {
