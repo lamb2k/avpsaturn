@@ -85,16 +85,23 @@ def snapshot(mcp, syms):
 
 
 def wait_frame(mcp, syms, target, timeout):
-    # The enemy marker is the established exact-frame trigger used by the
-    # approved enemy profile. At that stop, the player snapshot for the same
-    # callback is complete and the integration aggregate is the immediately
-    # preceding complete callback; all three identities remain explicit in
-    # the report rather than being relabeled as an atomic hardware snapshot.
-    enemy_tools.wait_frame(mcp, syms, target, timeout)
-    state = snapshot(mcp, syms)
-    if state["enemy"]["relative_frame"] != target:
-        raise RuntimeError(f"enemy frame mismatch in integration: {state}")
-    return state
+    # Co-residency changes the BSS neighborhood, and this emulator's memory
+    # breakpoint backend can stop on a write to another word in the watched
+    # block. Poll the published source-frame counter, pause immediately, and
+    # accept only a pause that confirms the exact value is still current.
+    deadline = time.time() + timeout
+    mcp.call("resume")
+    while time.time() < deadline:
+        if enemy_tools.signed32(
+                mcp.u32(syms["avsp_diag_enemy_frame"])) == target:
+            mcp.call("pause")
+            if enemy_tools.signed32(
+                    mcp.u32(syms["avsp_diag_enemy_frame"])) == target:
+                state = snapshot(mcp, syms)
+                if state["enemy"]["relative_frame"] == target:
+                    return state
+            mcp.call("resume")
+    raise TimeoutError(f"enemy frame {target} was not confirmed")
 
 
 def validate(state, contract):
