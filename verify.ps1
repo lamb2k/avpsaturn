@@ -11,7 +11,8 @@ param(
 
     [ValidateSet('Default', 'Release', 'VisualTest', 'FrontendTest',
         'FrontendShotTest', 'EncounterTest', 'StreetTest', 'BossHitTest',
-        'BossKoTest', 'PlayerSalvageBench', 'PlayerPromotionBench')]
+        'BossKoTest', 'PlayerSalvageBench', 'PlayerPromotionBench',
+        'CameraStageSalvageBench')]
     [string]$TargetProfile = 'Default',
 
     [switch]$Regenerate,
@@ -255,6 +256,7 @@ function Invoke-TargetLane {
         BossKoTest = 'debug-boss-ko-test'
         PlayerSalvageBench = 'debug-player-salvage-bench'
         PlayerPromotionBench = 'debug-player-promotion-bench'
+        CameraStageSalvageBench = 'debug-camera-stage-salvage-bench'
     }
     $expectedProfile = $profileNames[$TargetProfile]
     $profilePath = Join-Path $projectRoot 'build\last_compile_profile.txt'

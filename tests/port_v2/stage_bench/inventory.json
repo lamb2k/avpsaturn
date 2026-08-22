@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "task_id": "SALVAGE-04-CAMERA-STAGE-LAYERS",
+  "card_profile": "CameraStageSalvageBench",
+  "compile_profile": "debug-camera-stage-salvage-bench",
+  "manifest_profile": "camera-stage-salvage-bench",
+  "required_iso_members": [
+    "/ST1/STRIPS.BIN",
+    "/BG/CORRIDOR.TGA",
+    "/SPR4/PACT.RLE",
+    "/SPR4/PXI0.BIN",
+    "/SPR4/PXI1.BIN"
+  ],
+  "required_readback_symbols": [
+    "avsp_diag_runtime_ready",
+    "avsp_diag_street_frame",
+    "avsp_diag_street_scx",
+    "avsp_diag_street_objects",
+    "avsp_diag_stage_interface_version",
+    "avsp_diag_stage_layer_count",
+    "avsp_diag_stage_source_width",
+    "avsp_diag_stage_output_width",
+    "avsp_diag_stage_priority_lock_ok",
+    "avsp_diag_stage_palette_cycle_state",
+    "avsp_diag_stage_scroll_steps",
+    "avsp_diag_stage_asset_failures",
+    "avsp_diag_stage_disc_late_reads"
+  ]
+}

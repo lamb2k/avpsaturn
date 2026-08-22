@@ -13,6 +13,7 @@ param(
     [switch]$BossKoTest,
     [switch]$PlayerSalvageBench,
     [switch]$PlayerPromotionBench,
+    [switch]$CameraStageSalvageBench,
     [switch]$SkipHostTests
 )
 
@@ -168,7 +169,7 @@ try {
         # validation fixture and ship only in the StreetTest profile.
         $fixtureSource = Join-Path $projectRoot 'build\rp4_fixture\STRIPS.BIN'
         $fixtureStaged = Join-Path $contentRoot 'ST1\STRIPS.BIN'
-        if ($StreetTest) {
+        if ($StreetTest -or $CameraStageSalvageBench) {
             if (-not (Test-Path -LiteralPath $fixtureSource)) {
                 throw 'StreetTest requires build\rp4_fixture\STRIPS.BIN (run tools\gen_avsp_street_planes.py).'
             }
@@ -183,7 +184,8 @@ try {
                 -Destination (Join-Path $contentRoot $metadataName) -Force
         }
 
-        $buildProfile = if ($PlayerPromotionBench) { 'player-promotion-bench' }
+        $buildProfile = if ($CameraStageSalvageBench) { 'camera-stage-salvage-bench' }
+            elseif ($PlayerPromotionBench) { 'player-promotion-bench' }
             elseif ($PlayerSalvageBench) { 'player-salvage-bench' }
             elseif ($BossKoTest) { 'boss-ko-test' }
             elseif ($BossHitTest) { 'boss-hit-test' }
@@ -244,6 +246,10 @@ try {
         }
         if ($StreetTest) {
             $makeArguments += 'AVSP_STREET_TEST=1'
+        }
+        if ($CameraStageSalvageBench) {
+            $makeArguments += 'AVSP_STREET_TEST=1'
+            $makeArguments += 'AVSP_CAMERA_STAGE_SALVAGE_BENCH=1'
         }
         if ($FrontendTest) {
             $makeArguments += 'AVSP_FRONTEND_TEST=1'

@@ -260,6 +260,17 @@ volatile int avsp_diag_frontend_rle_errors;
 volatile int avsp_diag_frontend_palette_errors;
 volatile int avsp_diag_frontend_palette_boundary_writes;
 volatile int avsp_diag_frontend_commands;
+#ifdef AVSP_CAMERA_STAGE_SALVAGE_BENCH
+volatile int avsp_diag_stage_interface_version;
+volatile int avsp_diag_stage_layer_count;
+volatile int avsp_diag_stage_source_width;
+volatile int avsp_diag_stage_output_width;
+volatile int avsp_diag_stage_priority_lock_ok;
+volatile int avsp_diag_stage_palette_cycle_state;
+volatile int avsp_diag_stage_scroll_steps;
+volatile int avsp_diag_stage_asset_failures;
+volatile int avsp_diag_stage_disc_late_reads;
+#endif
 #ifdef AVSP_PLAYER_SALVAGE_BENCH
 volatile int avsp_diag_player_frame;
 volatile int avsp_diag_player_input_mask;
@@ -2151,6 +2162,11 @@ static int street_patch_revert_count;
 volatile int avsp_diag_street_frame;
 volatile int avsp_diag_street_scx[2];
 volatile int avsp_diag_street_objects;
+#ifdef AVSP_CAMERA_STAGE_SALVAGE_BENCH
+static int stage_previous_scx0;
+static int stage_previous_scx1;
+static int stage_has_previous_scroll;
+#endif
 
 static void street_load_planes(void);
 
@@ -2326,6 +2342,15 @@ static int street_setup(void)
     slPriority(scnSPR2, 6);
     jo_set_displayed_screens(JO_NBG0_SCREEN | JO_NBG1_SCREEN |
                              JO_SPRITE_SCREEN);
+#ifdef AVSP_CAMERA_STAGE_SALVAGE_BENCH
+    avsp_diag_stage_interface_version = 1;
+    avsp_diag_stage_layer_count = 2;
+    avsp_diag_stage_source_width = 384;
+    avsp_diag_stage_output_width = 352;
+    avsp_diag_stage_priority_lock_ok = 1;
+    avsp_diag_stage_scroll_steps = 0;
+    stage_has_previous_scroll = 0;
+#endif
     street_ready = 1;
     return 1;
 }
@@ -2423,6 +2448,9 @@ static void street_apply_cycle(const int rel)
             street_u16(at + 2 + (unsigned long)step * 2);
         street_palette[0].data[index - 1] = colour;
     }
+#ifdef AVSP_CAMERA_STAGE_SALVAGE_BENCH
+    avsp_diag_stage_palette_cycle_state = step;
+#endif
 }
 
 static void street_test_frame(void)
@@ -2472,6 +2500,14 @@ static void street_test_frame(void)
         slScrPosNbg1(toFIXED(scx1), toFIXED(scy1));
         avsp_diag_street_scx[0] = scx0;
         avsp_diag_street_scx[1] = scx1;
+#ifdef AVSP_CAMERA_STAGE_SALVAGE_BENCH
+        if (stage_has_previous_scroll &&
+            (scx0 != stage_previous_scx0 || scx1 != stage_previous_scx1))
+            ++avsp_diag_stage_scroll_steps;
+        stage_previous_scx0 = scx0;
+        stage_previous_scx1 = scx1;
+        stage_has_previous_scroll = 1;
+#endif
     }
     street_apply_cycle(rel);
     street_apply_patches(rel);
@@ -2527,6 +2563,10 @@ static void street_test_frame(void)
     }
     avsp_diag_street_objects = drawn;
     avsp_diag_street_frame = rel;
+#ifdef AVSP_CAMERA_STAGE_SALVAGE_BENCH
+    avsp_diag_stage_asset_failures = failed_asset == JO_NULL ? 0 : 1;
+    avsp_diag_stage_disc_late_reads = avsp_disc_guard_state.late_read_attempts;
+#endif
     ++frame_counter;
 }
 #endif
