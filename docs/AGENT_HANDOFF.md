@@ -25,15 +25,16 @@ its historical metadata and existing continuity branch.
 
 ## Current task and next action
 
-`SALVAGE-03-COLLISION` is accepted at
-`cd31823d82024b6e33a25e8963ded5493c204772`. The active card is `V2-B1`, status
-`READY`, in the existing continuity worktree
+`V2-B1` is accepted at `893268e8039195d2db572030905fc5e468fcabb2`.
+It promotes only the exact class `0x1F` HIT/KO traces behind
+`src/port_v2/combat/hit_ko/hit_ko.h`; host, Saturn diagnostic, and paired pinned
+Yaba readback pass, while normal release and physical Saturn remain UNRUN.
+The active card is `INTEGRATE-02-COMBAT`, status `READY`, in the existing continuity worktree
 `C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review` on
 branch `codex/avp-user-02-enemy-review`, based on `project_state.production_head`
-`033be384bcc4e678408b465f102925841eab4333`. Promote only the accepted exact
-class `0x1F` HIT/KO behavior behind `src/port_v2/combat/hit_ko`, with strict host
-differentials and a real substitution negative control. Do not broaden into
-attack, damage, AI, route, camera/stage, HUD, PCM, or unrelated collision work.
+`893268e8039195d2db572030905fc5e468fcabb2`. Integrate attack, contact,
+collision, damage, HIT, and KO one bounded behavior at a time through the
+accepted interfaces. Do not add AI, stage expansion, HUD, PCM, or CDDA.
 
 The accepted camera/stage, corrected P1/P2 HUD, and short PCM cue remain locked.
 Physical Saturn is still `0/12`; no host, MAME, emulator, or user evidence
@@ -41,4 +42,4 @@ changes that fact.
 
 Resume prompt:
 
-> Resume the AvP salvage Goal from V2-B1 in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; read the required controls, preserve every protected worktree and approved lock, promote only the accepted exact class 0x1F HIT/KO behavior behind src/port_v2/combat/hit_ko with strict host differentials and a real substitution negative control, then commit, push to private-origin, and verify the remote SHA.
+> Resume the AvP salvage Goal from INTEGRATE-02-COMBAT in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; read the required controls, preserve every protected worktree and approved lock, integrate attack, contact, collision, damage, HIT, and KO one bounded behavior at a time through the accepted interfaces, run the required host, Oracle, Saturn diagnostic, and pinned-emulator checks, then stop at USER-03 for exact feedback.

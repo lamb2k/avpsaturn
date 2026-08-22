@@ -57,14 +57,15 @@ The dirty canonical worktree, dirty playable-skeleton prototype, accepted
 V2-2B evidence worktree, accepted commits, private evidence, recovery patches,
 and ignored feedback packages remain preserved.
 
-V2-2B is accepted at the bounded MAME/static/host evidence tiers and its exact
-writer-closure result is integrated into the production continuity line. It
-does not itself implement HIT/KO behavior or prove Saturn execution. Goal Mode
-has activated V2-B1 to promote only that accepted behavior. Exact HIT/KO remains
-the only V2-B1 scope, not loading, controller input, actor rendering, animation, stage,
-palette, HUD, PCM, diagnostics, and the read-only Oracle cards.
+V2-2B is accepted at the bounded MAME/static/host evidence tiers. V2-B1 has
+promoted only the accepted exact class `0x1F` HIT/KO traces behind a narrow
+production interface with host, Saturn diagnostic, and one-emulator evidence.
+It does not promote attack, contact, damage, AI, normal release, or physical
+Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
+stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
+has activated the dependency-safe combat integration.
 
-CURRENT_TASK: V2-B1
+CURRENT_TASK: INTEGRATE-02-COMBAT
 
 ## 4. Current salvage queue and production extension
 

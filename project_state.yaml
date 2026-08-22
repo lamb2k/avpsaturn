@@ -4,15 +4,15 @@ workflow_model: interactive-salvage-promotion-integration
 roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
-production_head: 033be384bcc4e678408b465f102925841eab4333
-candidate_head: 033be384bcc4e678408b465f102925841eab4333
+production_head: 893268e8039195d2db572030905fc5e468fcabb2
+candidate_head: 893268e8039195d2db572030905fc5e468fcabb2
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-user-02-enemy-review
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 review_candidate_status: ACCEPTED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1]
 target_scope:
   source_set: avspu
   route: cold-boot-through-title-select-all-stages-ending-credits
@@ -74,6 +74,9 @@ accepted_implementation_history:
     status: ACCEPTED
     head: 033be384bcc4e678408b465f102925841eab4333
     evidence_head: 597f4ed517d4e715d814ff841bd00d3977803f85
+  - id: V2-B1
+    status: ACCEPTED
+    head: 893268e8039195d2db572030905fc5e468fcabb2
 accepted_control_plane_history:
   - id: ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN
     status: ACCEPTED
@@ -169,12 +172,12 @@ architecture_enforcement:
     - id: evidence-tier-separation
       status: ACTIVE
       activates_when: always
-current_checkpoint: promote-exact-hit-ko
-active_task_card: docs/task_cards/V2-B1.md
-active_task_id: V2-B1
-active_task_kind: PROMOTE
+current_checkpoint: integrate-combat
+active_task_card: docs/task_cards/INTEGRATE-02-COMBAT.md
+active_task_id: INTEGRATE-02-COMBAT
+active_task_kind: INTEGRATE
 task_status: READY
-active_write_owner: V2-B1
+active_write_owner: INTEGRATE-02-COMBAT
 awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
@@ -454,6 +457,33 @@ completed_dispositions:
       - Behavioral equivalence remains unimplemented until V2-B1 promotes the accepted mapping into a host-differential production interface.
       - Saturn target, emulator, normal release, and physical Saturn remain UNRUN for HIT/KO behavior.
     exact_next_experiment: In V2-B1, implement only the accepted exact class 0x1F HIT/KO writer behavior behind src/port_v2/combat/hit_ko, prove strict host differentials and a real constant/lookup substitution control, and do not broaden into combat integration.
+  - task: V2-B1
+    evaluated_head: 893268e8039195d2db572030905fc5e468fcabb2
+    technical_status: PASS
+    fidelity_status: MEASURED
+    user_status: NOT_REVIEWED
+    salvage_decision: PROMOTED
+    successor_activation: INTEGRATE-02-COMBAT
+    production_interface: src/port_v2/combat/hit_ko/hit_ko.h
+    approved_component_locks:
+      - Promoted player contract d0e6d835...fedf612.
+      - Approved enemy contract 35d6274c...142da.
+      - Salvaged collision report 49ce678b...bd78c and generated table b3e5a29c...f3ea2.
+      - Approved camera/stage, P1/P2 HUD, and PCM results remain unchanged.
+    evidence:
+      - Strict portable C90 compile PASS with a narrow seven-field class 0x1F interface and no Jo, SGL, filesystem, emulator, or authored-gameplay dependency.
+      - Manifest-derived exact before/after and every-frame differentials PASS for HIT samples 5191-5227 and KO samples 5330-5469.
+      - Two host runs per trace are byte-identical; unsupported HIT and KO pre-states are rejected.
+      - Real constant-substitution mutation replaced the accepted HIT record with 0x12d2f8 and the manifest-derived differential rejected it.
+      - Fast PASS. Oracle PASS in an isolated detached shadow with mapper self-test, private scratch mutations, committed artifact checks, MAME avspu identity, and the V2-B1 host differential.
+      - HitKoPromotionBench target compile PASS twice from clean inputs; normalized ISO SHA-256 5ae377584e965a5a46f62643333291b36c08cc5c66947e2af93ce99e919cd00c is deterministic.
+      - Pinned Yaba Sanshiro 1.20.37-2986eb readback PASS twice at final state 0x0002/0x0600, animation record 0x12e268, timer 0x0006, health -1, hit value 0, 37 HIT samples, 140 KO samples, one negative rejection, zero failures, and intact canaries.
+      - Diagnostic screen self-review PASS; the profile is semantic diagnostics only and does not change approved presentation.
+      - No user approval was requested or inferred. Normal release, a second emulator, and physical Saturn remain UNRUN; Capability Gate remains 0/12.
+    blockers:
+      - Attack, contact, damage application, and collision/HIT/KO integration remain unimplemented until INTEGRATE-02-COMBAT.
+      - Normal release, a second emulator, human combat-feel review, and physical Saturn remain UNRUN.
+    exact_next_experiment: Execute INTEGRATE-02-COMBAT one bounded behavior at a time, joining the accepted player/enemy, collision, and HIT/KO interfaces while retaining all approved presentation and asset locks; then stop at USER-03 for exact feedback.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR

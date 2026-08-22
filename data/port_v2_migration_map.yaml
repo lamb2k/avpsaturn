@@ -558,6 +558,58 @@
         "requested_changes": [],
         "priority": null
       }
+    },
+    {
+      "task_id": "V2-B1",
+      "evaluated_commit": "893268e8039195d2db572030905fc5e468fcabb2",
+      "technical_status": "PASS",
+      "fidelity_status": "MEASURED",
+      "user_status": "NOT_REVIEWED",
+      "salvage_decision": "PROMOTED",
+      "production_interface": "src/port_v2/combat/hit_ko/hit_ko.h",
+      "diagnostic_interface": "tests/port_v2/combat/hit_ko/run_pinned_emulator.ps1",
+      "blockers": [
+        "Unblock: INTEGRATE-02-COMBAT must join attack, contact, collision, damage, HIT, and KO without bypassing the accepted interfaces.",
+        "Unblock: normal release, a second emulator, USER-03 combat-feel review, and physical Saturn remain UNRUN."
+      ],
+      "exact_next_experiment": "Execute INTEGRATE-02-COMBAT one bounded behavior at a time through the accepted player, enemy, collision, and HIT/KO interfaces, preserve every approved presentation lock, and then stop at USER-03 for exact feedback.",
+      "evidence": {
+        "source_manifest_sha256": "a13cffd40c6e44a1368b5edfa917af08c95644580d5384aaeddc0f9ef5e65aed",
+        "interface_version": 1,
+        "hit_source_samples": "5191-5227",
+        "ko_source_samples": "5330-5469",
+        "strict_c90_compile": "PASS",
+        "exact_before_after_differential": "PASS",
+        "exact_multiframe_differential": "PASS / every measured sample",
+        "focused_deterministic_repeat": "PASS / byte-identical host traces",
+        "real_negative_control": "PASS / substituted HIT recovery record rejected",
+        "unsupported_prestate_control": "PASS / HIT and KO mutations rejected",
+        "fast_lane": "PASS",
+        "oracle_lane": "PASS / isolated detached shadow with private writer controls and MAME avspu identity",
+        "target_profile": "HitKoPromotionBench / debug-hit-ko-promotion-bench",
+        "normalized_iso_sha256": "5ae377584e965a5a46f62643333291b36c08cc5c66947e2af93ce99e919cd00c",
+        "paired_target_repeat": "PASS",
+        "paired_pinned_emulator_readback": "PASS",
+        "final_state": "state=0x0002 sub_state=0x0600 action=0 anim_record=0x12e268 anim_timer=0x0006 health=-1 hit_value=0",
+        "hit_sample_count": 37,
+        "ko_sample_count": 140,
+        "negative_rejections": 1,
+        "diagnostic_failures": 0,
+        "canary": "PASS",
+        "emulator": "Yaba Sanshiro 1.20.37-2986eb",
+        "emulator_evidence_tier": "ONE_EMULATOR",
+        "diagnostic_self_review": "PASS / semantic diagnostic screen, no subjective production presentation changed",
+        "approved_component_regression_locks": "PASS",
+        "normal_release": "UNRUN",
+        "physical_saturn": "UNRUN"
+      },
+      "user_observation_state": {
+        "formal_review_question_asked": false,
+        "exact_observations": [],
+        "approved_components": [],
+        "requested_changes": [],
+        "priority": null
+      }
     }
   ],
   "subsystems": [
@@ -741,8 +793,8 @@
     },
     {
       "id": "collision-combat",
-      "existing_source_paths": ["avsp_collision.c", "avsp_collision.h", "capability_model.c", "data/avsp_collision.json", "tests/avsp_runtime_collision_test.c"],
-      "existing_dependencies": ["player/enemy semantic state", "source hitboxes", "V2-2B exact HIT/KO evidence for later promotion"],
+      "existing_source_paths": ["avsp_collision.c", "avsp_collision.h", "capability_model.c", "data/avsp_collision.json", "tests/avsp_runtime_collision_test.c", "src/port_v2/combat/hit_ko/**"],
+      "existing_dependencies": ["player/enemy semantic state", "source hitboxes", "promoted exact class 0x1F HIT/KO interface"],
       "authored_controller_coupling": "Collision selectors and outcomes are partly bound to authored capability_model state.",
       "proposed_isolated_bench": "Evaluate source hitboxes and deterministic contact selectors without applying authored damage behavior.",
       "technical_status": "PASS",
@@ -753,8 +805,8 @@
       "promoted_commit": null,
       "evidence_commit": "cd31823d82024b6e33a25e8963ded5493c204772",
       "diagnostic_interface": "tests/port_v2/collision_bench/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: V2-B1 must promote the accepted exact HIT/KO evidence before production combat integration.", "Unblock: production collision integration, attack, damage, AI, a second emulator, normal release, and physical Saturn remain UNRUN."],
-      "exact_next_experiment": "Execute V2-B1 to bind exact class 0x1F HIT/KO behind the narrow production interface without changing the accepted collision adapter or approved presentation locks.",
+      "blockers": ["Unblock: INTEGRATE-02-COMBAT must join the accepted collision and HIT/KO interfaces with attack, contact, and damage behavior.", "Unblock: AI, a second emulator, normal release, USER-03 combat-feel review, and physical Saturn remain UNRUN."],
+      "exact_next_experiment": "Execute INTEGRATE-02-COMBAT one bounded behavior at a time without changing the accepted collision adapter, promoted HIT/KO interface, or approved presentation locks.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {

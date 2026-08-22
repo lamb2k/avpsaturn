@@ -2,7 +2,7 @@
 
 TASK: INTEGRATE-02-COMBAT
 KIND: INTEGRATE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: integrate-combat
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
