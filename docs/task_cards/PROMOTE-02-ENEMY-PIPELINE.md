@@ -2,7 +2,7 @@
 
 TASK: PROMOTE-02-ENEMY-PIPELINE
 KIND: PROMOTE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: promote-enemy-pipeline
 BASE: project_state.accepted_head
 BRANCH: codex/avp-user-02-enemy-review

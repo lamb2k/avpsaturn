@@ -6,7 +6,7 @@ migration_map: data/port_v2_migration_map.yaml
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
 review_candidate_status: CORRECTIONS_REQUIRED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE]
 accepted_implementation_history:
   - id: tranche-2a-foundation
     status: ACCEPTED
@@ -41,6 +41,9 @@ accepted_implementation_history:
   - id: SALVAGE-02-ENEMY-RENDER-ANIMATION
     status: ACCEPTED
     head: 17da61f6d647577fc19ac29e30bcbe624ff4d248
+  - id: PROMOTE-02-ENEMY-PIPELINE
+    status: ACCEPTED
+    head: 33d7f90424b548238d5d8185d88cb21f05248c54
 paused_work:
   - id: V2-2B
     status: CORRECTIONS_REQUIRED
@@ -94,12 +97,12 @@ worktree_routing_policy:
   preserve_other_transition_validation_approval_and_push_requirements: true
   current_continuity_worktree: C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review
   current_continuity_branch: codex/avp-user-02-enemy-review
-current_checkpoint: promote-enemy-pipeline
-active_task_card: docs/task_cards/PROMOTE-02-ENEMY-PIPELINE.md
-active_task_id: PROMOTE-02-ENEMY-PIPELINE
-active_task_kind: PROMOTE
+current_checkpoint: integrate-player-enemy
+active_task_card: docs/task_cards/INTEGRATE-01-PLAYER-AND-ENEMY.md
+active_task_id: INTEGRATE-01-PLAYER-AND-ENEMY
+active_task_kind: INTEGRATE
 task_status: READY
-active_write_owner: PROMOTE-02-ENEMY-PIPELINE
+active_write_owner: INTEGRATE-01-PLAYER-AND-ENEMY
 awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
@@ -287,6 +290,26 @@ completed_dispositions:
     blockers:
       - Attack, hit, KO, AI, collision, production integration, normal release, a second emulator, and physical Saturn remain outside this approval.
     exact_next_experiment: Execute PROMOTE-02 on the current continuity line without changing the reviewed enemy presentation; require renewed USER_REVIEW for any approved invariant at risk.
+  - task: PROMOTE-02-ENEMY-PIPELINE
+    evaluated_head: 33d7f90424b548238d5d8185d88cb21f05248c54
+    technical_status: PASS
+    fidelity_status: ADAPTED
+    user_status: APPROVED
+    salvage_decision: PROMOTED
+    successor_activation: INTEGRATE-01-PLAYER-AND-ENEMY
+    approved_component_locks:
+      - Promoted player contract d0e6d835...fedf612.
+      - Approved camera/stage contract dac93621...af300.
+      - Approved P1/P2 HUD and PCM contracts e6325b97...45cafe and d907fba3...187e37.
+      - Approved enemy class 0x1F, palette 17, 5-object/32-tile composition, pivot, grounding, facing, and 39-frame/19-pose walk presentation.
+    evidence:
+      - Fast lane PASS, focused host repeat PASS, and three-field mutation control PASS.
+      - Target EnemyPromotionBench PASS on two clean builds.
+      - Normalized ISO SHA-256 23c499913f925ad0d6e04dcfbb5313aa69f33731aad896dce24ed61e60b8c811 repeated exactly.
+      - Pinned Yaba Sanshiro readback PASS twice with 242-frame stability, approval and loader locks 1, and zero asset, tile-bank, tile-rank, disc-read, or canary failures.
+    blockers:
+      - Collision, damage, HIT/KO, AI, camera, HUD, PCM, CDDA, production co-residency, a second emulator, normal release, and physical Saturn remain outside this promotion result.
+    exact_next_experiment: Combine promoted player and enemy interfaces on one fixed background; prove deterministic co-residency/render order and reject one missing or reordered dependency without changing either approved output.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR

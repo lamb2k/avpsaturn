@@ -49,7 +49,7 @@ dependency for exact HIT/KO production promotion, not for loading, controller
 input, actor assets, actor rendering, actor animation, palette, stage, HUD, PCM,
 or diagnostic salvage benches.
 
-CURRENT_TASK: PROMOTE-02-ENEMY-PIPELINE
+CURRENT_TASK: INTEGRATE-01-PLAYER-AND-ENEMY
 
 ## 4. Dependency-ordered active backlog
 

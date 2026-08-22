@@ -2,10 +2,10 @@
 
 TASK: INTEGRATE-01-PLAYER-AND-ENEMY
 KIND: INTEGRATE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: integrate-player-enemy
 BASE: project_state.accepted_head
-BRANCH: codex/avp-integrate-01-player-enemy
+BRANCH: codex/avp-user-02-enemy-review
 TIER: 1
 DEPENDENCIES: [PROMOTE-01-PLAYER-PIPELINE, PROMOTE-02-ENEMY-PIPELINE]
 REQUIRED_LANES: [Fast, Target, Emulator]
