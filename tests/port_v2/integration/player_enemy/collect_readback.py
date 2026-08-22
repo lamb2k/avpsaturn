@@ -85,23 +85,36 @@ def snapshot(mcp, syms):
 
 
 def wait_frame(mcp, syms, target, timeout):
-    # Co-residency changes the BSS neighborhood, and this emulator's memory
-    # breakpoint backend can stop on a write to another word in the watched
-    # block. Poll the published source-frame counter, pause immediately, and
-    # accept only a pause that confirms the exact value is still current.
+    # Co-residency changes the BSS neighborhood, so the integration marker is
+    # isolated in its own aligned debugger watch block. Stop on every write
+    # to that block. The stop occurs before the current marker store, after
+    # the exact player/enemy diagnostics are complete, so the prior aggregate
+    # is target-1 while the actor state is target. This avoids the pinned
+    # emulator's unreliable write-value filter and cannot skip a frame.
     deadline = time.time() + timeout
-    mcp.call("resume")
-    while time.time() < deadline:
-        if enemy_tools.signed32(
-                mcp.u32(syms["avsp_diag_enemy_frame"])) == target:
-            mcp.call("pause")
-            if enemy_tools.signed32(
-                    mcp.u32(syms["avsp_diag_enemy_frame"])) == target:
-                state = snapshot(mcp, syms)
-                if state["enemy"]["relative_frame"] == target:
-                    return state
+    address = hex(syms["avsp_diag_integration_frame"])
+    mcp.call("pause")
+    mcp.call("breakpoint_add", cpu="master", type="memory", address=address,
+             write=True)
+    try:
+        while time.time() < deadline:
             mcp.call("resume")
-    raise TimeoutError(f"enemy frame {target} was not confirmed")
+            stopped = mcp.call(
+                "wait_for_stop",
+                timeout_ms=min(5000, max(1, int((deadline - time.time()) * 1000))))
+            if "stopped: true" not in stopped:
+                continue
+            prior = (target - 1) % 240
+            if enemy_tools.signed32(
+                    mcp.u32(syms["avsp_diag_integration_frame"])) == prior:
+                state = snapshot(mcp, syms)
+                if (state["integration"]["frame"] == prior and
+                        state["enemy"]["relative_frame"] == target):
+                    return state
+        raise TimeoutError(f"integration frame {target} was not confirmed")
+    finally:
+        mcp.call("breakpoint_remove", cpu="master", type="memory",
+                 address=address)
 
 
 def validate(state, contract):
