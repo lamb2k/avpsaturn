@@ -7,6 +7,7 @@
 #include "avsp_frontend.h"
 #include "avsp_disc_guard.h"
 #include "src/port_v2/player/player.h"
+#include "src/port_v2/enemy/enemy.h"
 
 #include "generated/avsp_anim_records.h"
 #include "generated/avsp_emit_windows.h"
@@ -294,6 +295,9 @@ typedef struct
     unsigned long tail_canary;
 } EnemyBenchState;
 static EnemyBenchState enemy_bench;
+#ifdef AVSP_ENEMY_PROMOTION_BENCH
+static AvspPortV2EnemyRuntime enemy_port_v2;
+#endif
 #endif
 
 /* Stable headless readback surface. These are intentionally global and
@@ -401,6 +405,10 @@ volatile int avsp_diag_enemy_canary_ok;
 volatile int avsp_diag_enemy_disc_late_reads;
 volatile int avsp_diag_enemy_tile_bank_misses;
 volatile int avsp_diag_enemy_tile_rank_misses;
+#ifdef AVSP_ENEMY_PROMOTION_BENCH
+volatile int avsp_diag_enemy_approval_lock_ok;
+volatile int avsp_diag_enemy_loader_adapter_ok;
+#endif
 #endif
 #ifdef AVSP_FRONTEND_SHOT_TEST
 /* Visual-verification profile. The frontend surfaces this pass must compare
@@ -3273,6 +3281,9 @@ static void enemy_bench_init(void)
         ++enemy_bench.negative_rejections;
     if (avsp_tiles_find(&tile_archive, 0xFFFFu) < 0)
         ++enemy_bench.negative_rejections;
+#ifdef AVSP_ENEMY_PROMOTION_BENCH
+    avsp_port_v2_enemy_init(&enemy_port_v2);
+#endif
 
     cap_world_init(&world);
     world.encounter_state = CAP_ENCOUNTER_WAVE_ONE;
@@ -3296,6 +3307,10 @@ static void enemy_bench_frame_callback(void)
     CapActor *enemy = &world.enemies[0];
     int relative = enemy_bench.frame % (ENEMY_BENCH_PHASE_FRAMES * 2);
     int rendered = 0;
+#ifdef AVSP_ENEMY_PROMOTION_BENCH
+    AvspPortV2EnemyInput promoted_input;
+    AvspPortV2EnemyView promoted_view;
+#endif
 
     if (!runtime_ready)
     {
@@ -3303,8 +3318,18 @@ static void enemy_bench_frame_callback(void)
         avsp_diag_enemy_asset_failures = 1;
         return;
     }
+#ifdef AVSP_ENEMY_PROMOTION_BENCH
+    promoted_input.translated = relative >= ENEMY_BENCH_PHASE_FRAMES;
+    avsp_port_v2_enemy_step(&enemy_port_v2, &promoted_input);
+    avsp_port_v2_enemy_view(&enemy_port_v2, &promoted_view);
+    enemy->x = promoted_view.world_x;
+    enemy->lane = promoted_view.lane;
+    enemy->facing = promoted_view.facing;
+    enemy->locomotion_frame = promoted_view.locomotion_frame;
+#else
     enemy->x = relative < ENEMY_BENCH_PHASE_FRAMES ? 192 : 240;
     enemy->locomotion_frame = relative;
+#endif
     world.frame = relative;
     world.encounter_state = CAP_ENCOUNTER_WAVE_ONE;
     rom_actor_prepare();
@@ -3315,7 +3340,7 @@ static void enemy_bench_frame_callback(void)
     rom_actor_advance();
 
     avsp_diag_runtime_ready = 1;
-    avsp_diag_enemy_interface_version = 1;
+    avsp_diag_enemy_interface_version = AVSP_PORT_V2_ENEMY_INTERFACE_VERSION;
     avsp_diag_enemy_phase = relative < ENEMY_BENCH_PHASE_FRAMES ? 0 : 1;
     avsp_diag_enemy_class_id = rom_actor_collision_views[0].class_id;
     avsp_diag_enemy_x = enemy->x;
@@ -3336,6 +3361,10 @@ static void enemy_bench_frame_callback(void)
     avsp_diag_enemy_disc_late_reads = avsp_disc_guard_state.late_read_attempts;
     avsp_diag_enemy_tile_bank_misses = tile_diag_no_bank;
     avsp_diag_enemy_tile_rank_misses = tile_diag_no_rank;
+#ifdef AVSP_ENEMY_PROMOTION_BENCH
+    avsp_diag_enemy_approval_lock_ok = avsp_port_v2_enemy_validate_config(
+        &avsp_port_v2_enemy_approved_config);
+#endif
     /* Publish last so debugger breakpoints observe one coherent frame. */
     avsp_diag_enemy_frame = relative;
     ++enemy_bench.frame;
@@ -4406,7 +4435,15 @@ void jo_main(void)
     {
         /* Isolated class-0x1F ROM tile path. No capture-cel fallback,
          * AI, collision, camera movement, HUD, PCM, CDDA, or stage route. */
+#ifdef AVSP_ENEMY_PROMOTION_BENCH
+        AvspPortV2EnemyLoadOps operations;
+        operations.load_tile_archive = load_tile_archive;
+        operations.load_background = load_background;
+        runtime_ready = avsp_port_v2_enemy_load(cart_available, &operations);
+        avsp_diag_enemy_loader_adapter_ok = runtime_ready;
+#else
         runtime_ready = load_tile_archive() && load_background();
+#endif
     }
     if (runtime_ready) enemy_bench_init();
     JO_UNUSED_ARG(index);

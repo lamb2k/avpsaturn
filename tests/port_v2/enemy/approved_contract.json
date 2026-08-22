@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "task_id": "PROMOTE-02-ENEMY-PIPELINE",
+  "card_profile": "EnemyPromotionBench",
+  "compile_profile": "debug-enemy-promotion-bench",
+  "manifest_profile": "enemy-promotion-bench",
+  "interface_version": 1,
+  "approved_response": "looks great proceed",
+  "tile_archive_sha256": "43d9707f2bcdb0d23f82db7169052bf21d29627d966a9990706ccc472eb3c1c3",
+  "approved_lock_sha256": {
+    "tests/port_v2/stage_bench/stage_contract.json": "dac93621e7ef290ee2465055076b856f1f10a73480654c86782fbb4e522af300",
+    "tests/port_v2/player/approved_contract.json": "d0e6d835aaa3f2bdcd1138d5eeedafcacf96080178feca0454789a942fedf612",
+    "tests/port_v2/hud_pcm_bench/hud_pcm_contract.json": "e6325b97864ec53d7171eaceff4ad070fcaa9276ca7c00ab022e260f5545cafe",
+    "tests/port_v2/player2_hud_bench/player2_hud_contract.json": "d907fba31c216e63717847851c4915fcb165421c5453152afb31d5d63d187e37",
+    "tests/port_v2/enemy_bench/enemy_contract.json": "a040a1b7a946022a431a4a4483753e97cb9b551880050779ee6fb76253a17f34"
+  },
+  "source_actor": {"class_id": 31, "palette_bank": 17, "lane": 200, "facing": -1},
+  "animation": {"clip": "walk", "source_frame_count": 39, "unique_poses": 19},
+  "samples": {"stationary": {"frame": 20, "phase": 0, "x": 192}, "translated": {"frame": 140, "phase": 1, "x": 240}, "repeat_stationary": {"frame": 20, "phase": 0, "x": 192}},
+  "approved_composition": {"source_objects": 5, "rendered_tiles": 32, "palette_bank": 17},
+  "disabled_systems": ["collision", "damage", "HIT/KO", "AI", "camera", "HUD", "PCM", "CDDA"],
+  "physical_saturn": "UNRUN"
+}
