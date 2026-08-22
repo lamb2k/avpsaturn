@@ -51,6 +51,14 @@ SPAN_JOIN_GAP = 8   # runs closer than this are merged rather than split
 
 
 def manifest_path(path: Path) -> str:
+    # Preserve a caller-provided path inside this worktree lexically.  Calling
+    # resolve() first dereferences a shared private-capture junction and makes
+    # the tracked manifest depend on whichever protected worktree owns it.
+    lexical = path if path.is_absolute() else ROOT / path
+    try:
+        return str(lexical.relative_to(ROOT)).replace("\\", "/")
+    except ValueError:
+        pass
     resolved = path.resolve()
     try:
         return str(resolved.relative_to(ROOT)).replace("\\", "/")

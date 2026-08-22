@@ -14,6 +14,7 @@ param(
     [switch]$PlayerSalvageBench,
     [switch]$PlayerPromotionBench,
     [switch]$CameraStageSalvageBench,
+    [switch]$HudPcmSalvageBench,
     [switch]$SkipHostTests
 )
 
@@ -87,13 +88,34 @@ try {
             (Test-Path -LiteralPath (Join-Path $animAnchorRoot 'workram_05191.bin')) -and
             (Test-Path -LiteralPath (Join-Path $animAnchorRoot 'workram_05469.bin'))) {
             & $PythonPath (Join-Path $projectRoot 'tools\gen_avsp_anim_records.py') `
-                '--rom' $animRom '--capture' $animCaptureA '--capture' $animCaptureB `
-                '--capture-dir-range' "$animAnchorRoot`:5191`:5226" `
-                '--capture-dir-range' "$animAnchorRoot`:5330`:5469" `
+                '--rom' '.deps/mame/actorprobe/decrypted_program_2m.bin' `
+                '--capture' '.deps/mame/collision_probe/workram.bin' `
+                '--capture' '.deps/mame/collision_probe_boss/workram.bin' `
+                '--capture-dir-range' '.deps/mame/enemy_actions:5191:5226' `
+                '--capture-dir-range' '.deps/mame/enemy_actions:5330:5469' `
                 '--verify-deterministic'
             if ($LASTEXITCODE -ne 0) {
                 throw "Animation-record extraction failed with exit code $LASTEXITCODE."
             }
+        }
+        # The runtime includes private ROM windows that are intentionally
+        # git-ignored. Regenerate them from the verified local capture corpus
+        # so a clean card worktree cannot depend on another worktree's output.
+        & $PythonPath (Join-Path $projectRoot 'tools\gen_avsp_emit_windows.py')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Sparse ROM-window generation failed with exit code $LASTEXITCODE."
+        }
+        & $PythonPath (Join-Path $projectRoot 'tools\gen_boss_rom_data.py')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Boss ROM-data generation failed with exit code $LASTEXITCODE."
+        }
+        & $PythonPath (Join-Path $projectRoot 'tools\decode_avsp_collision.py') `
+            '--rom' '.deps/mame/actorprobe/decrypted_program_2m.bin' `
+            '--census-workram' '.deps/mame/collision_probe/workram.bin' `
+            '--census-workram' '.deps/mame/collision_probe_boss/workram.bin' `
+            '--verify-deterministic'
+        if ($LASTEXITCODE -ne 0) {
+            throw "Collision-table generation failed with exit code $LASTEXITCODE."
         }
         if (-not $SkipHostTests) {
             & '.\test.ps1' -PythonPath $PythonPath
@@ -184,7 +206,8 @@ try {
                 -Destination (Join-Path $contentRoot $metadataName) -Force
         }
 
-        $buildProfile = if ($CameraStageSalvageBench) { 'camera-stage-salvage-bench' }
+        $buildProfile = if ($HudPcmSalvageBench) { 'hud-pcm-salvage-bench' }
+            elseif ($CameraStageSalvageBench) { 'camera-stage-salvage-bench' }
             elseif ($PlayerPromotionBench) { 'player-promotion-bench' }
             elseif ($PlayerSalvageBench) { 'player-salvage-bench' }
             elseif ($BossKoTest) { 'boss-ko-test' }
@@ -250,6 +273,9 @@ try {
         if ($CameraStageSalvageBench) {
             $makeArguments += 'AVSP_STREET_TEST=1'
             $makeArguments += 'AVSP_CAMERA_STAGE_SALVAGE_BENCH=1'
+        }
+        if ($HudPcmSalvageBench) {
+            $makeArguments += 'AVSP_HUD_PCM_SALVAGE_BENCH=1'
         }
         if ($FrontendTest) {
             $makeArguments += 'AVSP_FRONTEND_TEST=1'

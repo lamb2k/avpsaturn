@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "task_id": "SALVAGE-05-HUD-PCM",
+  "card_profile": "HudPcmSalvageBench",
+  "compile_profile": "debug-hud-pcm-salvage-bench",
+  "manifest_profile": "hud-pcm-salvage-bench",
+  "interface_version": 1,
+  "source_evidence_sha256": {
+    "data/player_hud_capture.json": "fca59ca90fd8ca410cbea16e582da0aeb945016e16a033f05488f9e99922ad66",
+    "data/qsound_melee_capture.json": "53018772fda5d186a2fe75f9f5a7aaf3c355b4e9213717c15c9b299c8ce11da5"
+  },
+  "payload_sha256": {
+    "/SPR8/HUDTOP.BIN": "334d3cd39eab1730800f3134e224d355c914581426d83d5760a8f0038a42a1fa",
+    "/SPR8/HUDP2.BIN": "930784c345b9049f7b1f0c733648933d0b27be9aa9ff7c7f90df392dba25e847",
+    "/SPR8/HUDHEAT.BIN": "92785debbe19d2221200f205f880cfac875c1e34f880a37189ae75fa393d71e6",
+    "/AUDIO/MELEE.PCM": "e2f2870251cf28c5cf52d0d074c3b426cc6db5afb4cde2eebf4838ffa296f125"
+  },
+  "hud_states": {
+    "zero": {"frame": 20, "state": 0, "health": 0, "energy": 0, "health_fill": 0, "energy_fill": 0, "render_count": 3},
+    "mid": {"frame": 140, "state": 1, "health": 50, "energy": 32, "health_fill": 57, "energy_fill": 30, "render_count": 3},
+    "full": {"frame": 260, "state": 2, "health": 101, "energy": 64, "health_fill": 116, "energy_fill": 59, "render_count": 3},
+    "pcm_only": {"frame": 420, "state": -1, "health": 50, "energy": 32, "health_fill": 57, "energy_fill": 30, "render_count": 0}
+  },
+  "pcm": {
+    "semantic_event_frames": [147, 387],
+    "start_frames": [150, 390],
+    "end_frames": [200, 440],
+    "source_start_delay_frames": 3,
+    "duration_frames": 50,
+    "sample_rate": 44100,
+    "channels": 2,
+    "sample_bits": 16,
+    "channel": 1
+  },
+  "negative_controls": [
+    "missing HUD asset",
+    "invalid PCM metadata",
+    "missing PCM asset"
+  ],
+  "approved_stage_contract_sha256": "dac93621e7ef290ee2465055076b856f1f10a73480654c86782fbb4e522af300",
+  "local_build_dependency_sha256": {
+    "loader/loader.c": "77ac9637f5233ebbb16ed380896f6bbf6217e48d4788dddf0cf824c1cd4022d8",
+    "loader/loader.linker": "a8d817b20eae7e09f1c9f62ea014efced8cea386f1640b0c4c8b00d2f5c2148c",
+    "loader/trampoline.s": "d888d3299a27c47b9ad70b4b3685a42669f0e399cacc2dbaca91c3663609474e",
+    "tools/build_loader_ip.py": "599f871f44f2cd5d5a9f8bee881aeb2a8a8f00bc830b7d93005d2d9ce307625a"
+  },
+  "disabled_systems": ["CDDA", "combat", "camera movement", "stage expansion"],
+  "physical_saturn": "UNRUN"
+}

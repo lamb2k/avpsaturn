@@ -244,6 +244,30 @@ static AvspPortV2PlayerRuntime player_port_v2;
 #endif
 #endif
 
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+#define HUD_PCM_BENCH_CANARY_HEAD 0x48504348UL
+#define HUD_PCM_BENCH_CANARY_TAIL 0x48504354UL
+#define HUD_PCM_BENCH_CYCLE_FRAMES 480
+#define HUD_PCM_BENCH_FIRST_EVENT 147
+#define HUD_PCM_BENCH_SECOND_EVENT 387
+#define HUD_PCM_BENCH_START_DELAY 3
+#define HUD_PCM_BENCH_PCM_FRAMES \
+    ((((AVSP_MELEE_PCM_BYTES / 4) * 60) + \
+      AVSP_MELEE_PCM_SAMPLE_RATE - 1) / AVSP_MELEE_PCM_SAMPLE_RATE)
+typedef struct
+{
+    unsigned long head_canary;
+    int frame;
+    int pending;
+    int pcm_active;
+    int planned_end_frame;
+    int underrun_reported_start;
+    int negative_control_mask;
+    unsigned long tail_canary;
+} HudPcmBenchState;
+static HudPcmBenchState hud_pcm_bench;
+#endif
+
 /* Stable headless readback surface. These are intentionally global and
  * volatile so stock emulator debugger memory reads can verify the focused
  * frontend profile without relying on a GUI screenshot. */
@@ -270,6 +294,29 @@ volatile int avsp_diag_stage_palette_cycle_state;
 volatile int avsp_diag_stage_scroll_steps;
 volatile int avsp_diag_stage_asset_failures;
 volatile int avsp_diag_stage_disc_late_reads;
+#endif
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+volatile int avsp_diag_hud_pcm_interface_version;
+volatile int avsp_diag_hud_pcm_frame;
+volatile int avsp_diag_hud_pcm_phase;
+volatile int avsp_diag_hud_state;
+volatile int avsp_diag_hud_health;
+volatile int avsp_diag_hud_energy;
+volatile int avsp_diag_hud_health_fill;
+volatile int avsp_diag_hud_energy_fill;
+volatile int avsp_diag_hud_render_count;
+volatile int avsp_diag_hud_asset_failures;
+volatile int avsp_diag_pcm_audio_failures;
+volatile int avsp_diag_pcm_event_count;
+volatile int avsp_diag_pcm_event_frame;
+volatile int avsp_diag_pcm_start_frame;
+volatile int avsp_diag_pcm_end_frame;
+volatile int avsp_diag_pcm_active;
+volatile int avsp_diag_pcm_channel_observed;
+volatile int avsp_diag_pcm_underruns;
+volatile int avsp_diag_hud_pcm_negative_rejections;
+volatile int avsp_diag_hud_pcm_canary_ok;
+volatile int avsp_diag_hud_pcm_disc_late_reads;
 #endif
 #ifdef AVSP_PLAYER_SALVAGE_BENCH
 volatile int avsp_diag_player_frame;
@@ -1296,6 +1343,23 @@ static int create_sprite_working_set(void)
     displayed_hud_energy = -1;
     return failed_asset == JO_NULL;
 }
+
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+static int create_hud_sprite_working_set(void)
+{
+    hud_top_sprite = jo_sprite_add_8bits_image(&hud_top_image);
+    hud_prompt_sprite = jo_sprite_add_8bits_image(&hud_prompt_image);
+    hud_heat_sprite = jo_sprite_add_8bits_image(&hud_heat_image);
+    if (hud_top_sprite < 0 || hud_prompt_sprite < 0 || hud_heat_sprite < 0)
+    {
+        failed_asset = "HUD VDP1";
+        return 0;
+    }
+    displayed_hud_health = -1;
+    displayed_hud_energy = -1;
+    return 1;
+}
+#endif
 
 #ifdef AVSP_PLAYER_SALVAGE_BENCH
 static int create_player_sprite_working_set(void)
@@ -2741,6 +2805,231 @@ static void draw_arcade_hud(void)
                          AVSP_HUD_HEAT_HEIGHT / 2, 100);
 }
 
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+static int hud_pcm_sound_valid(const jo_sound *sound)
+{
+    return sound != JO_NULL && sound->data != JO_NULL &&
+           sound->data_length == AVSP_MELEE_PCM_BYTES &&
+           sound->sample_rate == AVSP_MELEE_PCM_SAMPLE_RATE &&
+           sound->mode == JoSoundStereo16Bit;
+}
+
+static int hud_pcm_hud_valid(const jo_img_8bits *image, const int sprite)
+{
+    return image != JO_NULL && image->data != JO_NULL && sprite >= 0;
+}
+
+static int hud_pcm_health_fill(const int health)
+{
+    int source_fill = (health * 5) / 4;
+    int fill = (source_fill * CAP_VIEW_WIDTH + CAP_CPS2_VIEW_WIDTH - 1) /
+               CAP_CPS2_VIEW_WIDTH;
+    if (fill > AVSP_HUD_HEALTH_WIDTH) fill = AVSP_HUD_HEALTH_WIDTH;
+    return fill;
+}
+
+static int hud_pcm_energy_fill(const int energy)
+{
+    return (energy * AVSP_HUD_HEAT_BAR_WIDTH + CAP_WEAPON_MAX_ENERGY - 1) /
+           CAP_WEAPON_MAX_ENERGY;
+}
+
+static void hud_pcm_bench_negative_control(const int control)
+{
+    if ((hud_pcm_bench.negative_control_mask & (1 << control)) != 0) return;
+    hud_pcm_bench.negative_control_mask |= 1 << control;
+    if (control == 0)
+    {
+        jo_img_8bits missing_hud = hud_top_image;
+        missing_hud.data = JO_NULL;
+        if (!hud_pcm_hud_valid(&missing_hud, hud_top_sprite))
+            ++avsp_diag_hud_pcm_negative_rejections;
+        else
+            ++avsp_diag_hud_asset_failures;
+    }
+    else if (control == 1)
+    {
+        jo_sound invalid_sound = melee_sound;
+        invalid_sound.sample_rate = 0;
+        if (!hud_pcm_sound_valid(&invalid_sound))
+            ++avsp_diag_hud_pcm_negative_rejections;
+        else
+            ++avsp_diag_pcm_audio_failures;
+    }
+    else
+    {
+        jo_sound missing_sound = melee_sound;
+        missing_sound.data = JO_NULL;
+        if (!hud_pcm_sound_valid(&missing_sound))
+            ++avsp_diag_hud_pcm_negative_rejections;
+        else
+            ++avsp_diag_pcm_audio_failures;
+    }
+}
+
+static void hud_pcm_bench_init(void)
+{
+    memset(&hud_pcm_bench, 0, sizeof(hud_pcm_bench));
+    hud_pcm_bench.head_canary = HUD_PCM_BENCH_CANARY_HEAD;
+    hud_pcm_bench.tail_canary = HUD_PCM_BENCH_CANARY_TAIL;
+    hud_pcm_bench.underrun_reported_start = -1;
+    avsp_diag_hud_pcm_interface_version = 1;
+    avsp_diag_pcm_event_frame = -1;
+    avsp_diag_pcm_start_frame = -1;
+    avsp_diag_pcm_end_frame = -1;
+    world.encounter_started = 1;
+    world.encounter_state = CAP_ENCOUNTER_WAVE_ONE;
+    world.frame = 0;
+    world.player.health = 0;
+    world.weapon_energy = 0;
+}
+
+static void hud_pcm_bench_frame_callback(void)
+{
+    int relative;
+    int phase;
+    int channel_playing;
+    jo_clear_screen();
+    avsp_diag_runtime_ready = runtime_ready;
+    if (!runtime_ready)
+    {
+        avsp_diag_hud_asset_failures = 1;
+        jo_printf(1, 12, "HUD PCM BENCH FAILED: %s",
+                  failed_asset == JO_NULL ? "UNKNOWN" : failed_asset);
+        return;
+    }
+    relative = hud_pcm_bench.frame % HUD_PCM_BENCH_CYCLE_FRAMES;
+    phase = relative / 120;
+    world.frame = relative;
+    if (relative == 0)
+    {
+        /* Every cycle is an independent readback experiment. This makes MCP
+         * attachment latency irrelevant without concealing persistent asset
+         * or audio failures. */
+        avsp_diag_pcm_event_count = 0;
+        avsp_diag_pcm_event_frame = -1;
+        avsp_diag_pcm_start_frame = -1;
+        avsp_diag_pcm_end_frame = -1;
+        avsp_diag_pcm_channel_observed = 0;
+        avsp_diag_pcm_underruns = 0;
+        avsp_diag_hud_pcm_negative_rejections = 0;
+        hud_pcm_bench.negative_control_mask = 0;
+        hud_pcm_bench.underrun_reported_start = -1;
+    }
+    if (phase == 0)
+    {
+        world.player.health = 0;
+        world.weapon_energy = 0;
+    }
+    else if (phase == 1)
+    {
+        world.player.health = 50;
+        world.weapon_energy = 32;
+    }
+    else if (phase == 2)
+    {
+        world.player.health = 101;
+        world.weapon_energy = CAP_WEAPON_MAX_ENERGY;
+    }
+    else
+    {
+        world.player.health = 50;
+        world.weapon_energy = 32;
+    }
+
+    if (relative == HUD_PCM_BENCH_FIRST_EVENT ||
+        relative == HUD_PCM_BENCH_SECOND_EVENT)
+    {
+        hud_pcm_bench.pending = 1;
+        ++avsp_diag_pcm_event_count;
+        avsp_diag_pcm_event_frame = relative;
+    }
+    if (hud_pcm_bench.pending &&
+        (relative == HUD_PCM_BENCH_FIRST_EVENT + HUD_PCM_BENCH_START_DELAY ||
+         relative == HUD_PCM_BENCH_SECOND_EVENT + HUD_PCM_BENCH_START_DELAY))
+    {
+        if (hud_pcm_sound_valid(&melee_sound))
+        {
+            play_pcm_committed(&melee_sound, &melee_sound,
+                               AVSP_PCM_CHANNEL_MELEE);
+            hud_pcm_bench.pcm_active = 1;
+            hud_pcm_bench.pending = 0;
+            hud_pcm_bench.planned_end_frame =
+                hud_pcm_bench.frame + HUD_PCM_BENCH_PCM_FRAMES;
+            hud_pcm_bench.underrun_reported_start = -1;
+            avsp_diag_pcm_start_frame = relative;
+        }
+        else
+        {
+            ++avsp_diag_pcm_audio_failures;
+            hud_pcm_bench.pending = 0;
+        }
+    }
+    channel_playing = jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_MELEE);
+    if (hud_pcm_bench.pcm_active && channel_playing)
+        avsp_diag_pcm_channel_observed = 1;
+    if (hud_pcm_bench.pcm_active &&
+        hud_pcm_bench.frame >
+            hud_pcm_bench.planned_end_frame - HUD_PCM_BENCH_PCM_FRAMES + 1 &&
+        hud_pcm_bench.frame < hud_pcm_bench.planned_end_frame &&
+        !channel_playing &&
+        hud_pcm_bench.underrun_reported_start !=
+            hud_pcm_bench.planned_end_frame)
+    {
+        ++avsp_diag_pcm_underruns;
+        hud_pcm_bench.underrun_reported_start =
+            hud_pcm_bench.planned_end_frame;
+    }
+    if (hud_pcm_bench.pcm_active &&
+        hud_pcm_bench.frame >= hud_pcm_bench.planned_end_frame)
+    {
+        if (channel_playing)
+        {
+            jo_audio_stop_sound(&melee_sound);
+            slSndFlush();
+        }
+        hud_pcm_bench.pcm_active = 0;
+        avsp_diag_pcm_end_frame = relative;
+    }
+
+    if (relative == 450) hud_pcm_bench_negative_control(0);
+    if (relative == 451) hud_pcm_bench_negative_control(1);
+    if (relative == 452) hud_pcm_bench_negative_control(2);
+
+    avsp_diag_hud_pcm_phase = phase;
+    avsp_diag_hud_state = phase < 3 ? phase : -1;
+    avsp_diag_hud_health = world.player.health;
+    avsp_diag_hud_energy = world.weapon_energy;
+    avsp_diag_hud_health_fill = hud_pcm_health_fill(world.player.health);
+    avsp_diag_hud_energy_fill = hud_pcm_energy_fill(world.weapon_energy);
+    avsp_diag_hud_render_count = 0;
+    if (phase < 3)
+    {
+        draw_arcade_hud();
+        avsp_diag_hud_render_count = 2 +
+            (((world.frame & 63) < 32) ? 1 : 0);
+    }
+    avsp_diag_pcm_active = hud_pcm_bench.pcm_active;
+    avsp_diag_hud_pcm_canary_ok =
+        hud_pcm_bench.head_canary == HUD_PCM_BENCH_CANARY_HEAD &&
+        hud_pcm_bench.tail_canary == HUD_PCM_BENCH_CANARY_TAIL;
+    avsp_diag_hud_pcm_disc_late_reads =
+        avsp_disc_guard_state.late_read_attempts;
+    jo_printf(0, 24, "HUDPCM P%d H%d E%d R%d",
+              phase, world.player.health, world.weapon_energy,
+              avsp_diag_hud_render_count);
+    jo_printf(0, 25, "PCM E%d S%d X%d A%d U%d N%d",
+              avsp_diag_pcm_event_count, avsp_diag_pcm_start_frame,
+              avsp_diag_pcm_end_frame, avsp_diag_pcm_active,
+              avsp_diag_pcm_underruns,
+              avsp_diag_hud_pcm_negative_rejections);
+    /* Publish the frame marker last so debugger-triggered readback observes a
+     * complete, internally consistent snapshot for this frame. */
+    avsp_diag_hud_pcm_frame = relative;
+    ++hud_pcm_bench.frame;
+}
+#endif
+
 static CapInput read_input(void)
 {
     CapInput input;
@@ -3118,6 +3407,10 @@ static void frame_callback(void)
 #endif
 #ifdef AVSP_PLAYER_SALVAGE_BENCH
     player_bench_frame_callback();
+    return;
+#endif
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+    hud_pcm_bench_frame_callback();
     return;
 #endif
     avsp_diag_runtime_ready = runtime_ready;
@@ -3731,7 +4024,7 @@ void jo_main(void)
                                AVSP_STRIPS_REGION_BYTES);
     }
     set_actor_palette();
-#ifdef AVSP_PLAYER_SALVAGE_BENCH
+#if defined(AVSP_PLAYER_SALVAGE_BENCH)
 #ifdef AVSP_PLAYER_PROMOTION_BENCH
     player_load_operations.load_background = load_background;
     player_load_operations.load_idle_cels = load_all_cels;
@@ -3760,6 +4053,28 @@ void jo_main(void)
     }
 #endif
     if (runtime_ready) player_bench_init();
+    JO_UNUSED_ARG(index);
+#elif defined(AVSP_HUD_PCM_SALVAGE_BENCH)
+    set_hud_palette();
+    if (!cart_available)
+    {
+        failed_asset = "4MB RAM CART REQUIRED";
+        runtime_ready = 0;
+    }
+    else
+    {
+        /* Isolated HUD/PCM resident set. No player/enemy archive, camera,
+         * stage expansion, CDDA, combat, or loading-phase redesign. */
+        runtime_ready = load_hud_assets() &&
+            load_pcm_audio(&melee_sound, AVSP_MELEE_PCM_FILE,
+                           AVSP_MELEE_PCM_DIRECTORY,
+                           AVSP_MELEE_PCM_BYTES,
+                           AVSP_MELEE_PCM_SAMPLE_RATE) &&
+            create_hud_sprite_working_set() &&
+            hud_pcm_sound_valid(&melee_sound);
+    }
+    cap_world_init(&world);
+    if (runtime_ready) hud_pcm_bench_init();
     JO_UNUSED_ARG(index);
 #else
     set_frontend_palettes();

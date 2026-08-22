@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "task_id": "SALVAGE-05-HUD-PCM",
+  "card_profile": "HudPcmSalvageBench",
+  "compile_profile": "debug-hud-pcm-salvage-bench",
+  "manifest_profile": "hud-pcm-salvage-bench",
+  "required_iso_members": [
+    "/SPR8/HUDTOP.BIN",
+    "/SPR8/HUDP2.BIN",
+    "/SPR8/HUDHEAT.BIN",
+    "/AUDIO/MELEE.PCM",
+    "/BG/CORRIDOR.TGA",
+    "/SPR4/PACT.RLE",
+    "/SPR4/PXI0.BIN",
+    "/SPR4/PXI1.BIN"
+  ],
+  "required_readback_symbols": [
+    "avsp_diag_runtime_ready",
+    "avsp_diag_hud_pcm_interface_version",
+    "avsp_diag_hud_pcm_frame",
+    "avsp_diag_hud_pcm_phase",
+    "avsp_diag_hud_state",
+    "avsp_diag_hud_health",
+    "avsp_diag_hud_energy",
+    "avsp_diag_hud_health_fill",
+    "avsp_diag_hud_energy_fill",
+    "avsp_diag_hud_render_count",
+    "avsp_diag_hud_asset_failures",
+    "avsp_diag_pcm_audio_failures",
+    "avsp_diag_pcm_event_count",
+    "avsp_diag_pcm_event_frame",
+    "avsp_diag_pcm_start_frame",
+    "avsp_diag_pcm_end_frame",
+    "avsp_diag_pcm_active",
+    "avsp_diag_pcm_channel_observed",
+    "avsp_diag_pcm_underruns",
+    "avsp_diag_hud_pcm_negative_rejections",
+    "avsp_diag_hud_pcm_canary_ok",
+    "avsp_diag_hud_pcm_disc_late_reads"
+  ]
+}

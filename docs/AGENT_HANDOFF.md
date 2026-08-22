@@ -4,7 +4,6 @@
 `docs/PARITY_PLAN.md` is the only roadmap.
 
 ## Workflow pivot
-
 The interactive salvage/promotion workflow remains authoritative.
 
 ## Preserved paused work
