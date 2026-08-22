@@ -2,7 +2,7 @@
 
 TASK: USER-05-HUD-PCM-REVIEW
 KIND: USER_REVIEW
-STATUS: AWAITING_USER_FEEDBACK
+STATUS: CHANGES_REQUESTED
 CHECKPOINT: review-hud-pcm
 BASE: project_state.accepted_head
 BRANCH: codex/avp-user-05-hud-pcm-review
@@ -11,7 +11,7 @@ DEPENDENCIES: [SALVAGE-05-HUD-PCM]
 REQUIRED_LANES: [Fast]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [INTEGRATE-03-PLAYABLE-SLICE]
+NEXT_ELIGIBLE_CARDS: [REPAIR-05-HUD-COLORS, INTEGRATE-03-PLAYABLE-SLICE]
 
 ## Objective
 
@@ -56,5 +56,15 @@ Ask exactly: "What should remain unchanged, what looks or feels wrong, and which
 
 ## Next eligible cards
 
+- `REPAIR-05-HUD-COLORS` is required by the exact HUD-color feedback.
 - A bounded HUD/PCM `REPAIR` or promotion card after feedback.
 - `INTEGRATE-03-PLAYABLE-SLICE` only after all its dependencies and approvals.
+
+## Review result
+
+- Exact response: `sound is great hud looks broken in terms of colors`
+- Disposition: PCM `APPROVED`; HUD presentation `CHANGES_REQUESTED`.
+- Approved component: the short Predator melee PCM cue presented in the USER-05 package.
+- Requested change and first priority: correct the broken HUD color/palette presentation.
+- The approved PCM payload, cue timing, and audible presentation are locked during repair.
+- Next bounded card: `REPAIR-05-HUD-COLORS`.

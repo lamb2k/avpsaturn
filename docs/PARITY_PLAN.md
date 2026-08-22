@@ -49,7 +49,7 @@ dependency for exact HIT/KO production promotion, not for loading, controller
 input, actor assets, actor rendering, actor animation, palette, stage, HUD, PCM,
 or diagnostic salvage benches.
 
-CURRENT_TASK: USER-05-HUD-PCM-REVIEW
+CURRENT_TASK: REPAIR-05-HUD-COLORS
 
 ## 4. Dependency-ordered active backlog
 
@@ -73,7 +73,8 @@ CURRENT_TASK: USER-05-HUD-PCM-REVIEW
 | 16 | USER-04-STAGE-REVIEW | USER_REVIEW | SALVAGE-04 |
 | 17 | SALVAGE-05-HUD-PCM | SALVAGE | SALVAGE-00 |
 | 18 | USER-05-HUD-PCM-REVIEW | USER_REVIEW | SALVAGE-05 |
-| 19 | INTEGRATE-03-PLAYABLE-SLICE | INTEGRATE | combat, stage, HUD/PCM reviews |
+| 19 | REPAIR-05-HUD-COLORS | REPAIR | SALVAGE-05, USER-05 feedback |
+| 20 | INTEGRATE-03-PLAYABLE-SLICE | INTEGRATE | combat, stage, HUD/PCM repairs and reviews |
 
 Only one implementation card is active. A pending `USER_REVIEW` card may be
 bypassed only by a card it predeclares as dependency-safe and incapable of

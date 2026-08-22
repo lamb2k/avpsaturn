@@ -263,16 +263,17 @@
       "evaluated_commit": "89ef72b86f394f26fc63536f9d9f95f581673c18",
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
-      "user_status": "AWAITING_USER_FEEDBACK",
-      "salvage_decision": "SALVAGE_WITH_ADAPTER",
+      "user_status": "CHANGES_REQUESTED",
+      "salvage_decision": "REPAIR",
       "production_interface": null,
       "diagnostic_interface": "tests/port_v2/hud_pcm_bench/run_pinned_emulator.ps1",
       "blockers": [
-        "Unblock: obtain exact USER-05 visual and audio feedback on the ignored HUD/PCM package before accepting presentation or sound.",
+        "Unblock: repair the user-observed broken HUD colors and obtain renewed USER-05 approval before HUD promotion.",
+        "Unblock: preserve the user-approved short Predator melee PCM cue byte-for-byte and at the accepted timing during HUD repair.",
         "Unblock: keep the observed distorted enemy pixels isolated for SALVAGE-02; this HUD/PCM bench neither accepts nor alters them.",
         "Unblock: CDDA, combat, normal release, a second emulator, and physical Saturn remain unrun."
       ],
-      "exact_next_experiment": "Present build/feedback/USER-05-HUD-PCM-REVIEW/ and record the exact response without implementing or inferring approval.",
+      "exact_next_experiment": "Run REPAIR-05 on HUD palette/CRAM/color binding only, reject the original broken-color condition, preserve the approved PCM cue, and return a corrected package to USER-05.",
       "evidence": {
         "build_profile": "HudPcmSalvageBench / debug-hud-pcm-salvage-bench",
         "fast_lane": "PASS",
@@ -563,15 +564,15 @@
       "proposed_isolated_bench": "Render fixed health/energy/prompt states over one promoted background with readback.",
       "technical_status": "PASS",
       "fidelity_status": "MEASURED",
-      "user_status": "AWAITING_USER_FEEDBACK",
-      "salvage_decision": "SALVAGE_WITH_ADAPTER",
+      "user_status": "CHANGES_REQUESTED",
+      "salvage_decision": "REPAIR",
       "production_interface": null,
       "promoted_commit": null,
       "evidence_commit": "89ef72b86f394f26fc63536f9d9f95f581673c18",
       "diagnostic_interface": "tests/port_v2/hud_pcm_bench/collect_readback.py",
-      "blockers": ["Unblock: obtain exact USER-05 feedback before accepting HUD presentation; production integration and simultaneous full-stage CRAM ownership remain untested."],
-      "exact_next_experiment": "Review the exact zero/mid/full HUD payload and combined checkpoint in build/feedback/USER-05-HUD-PCM-REVIEW/.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
+      "blockers": ["Unblock: repair the user-observed broken HUD colors and obtain renewed USER-05 approval; production integration and simultaneous full-stage CRAM ownership remain untested."],
+      "exact_next_experiment": "Run REPAIR-05 with capture-bound palette/CRAM assertions and a negative control that restores the rejected color binding.",
+      "user_feedback": {"exact_response": "sound is great hud looks broken in terms of colors", "approved_components": [], "requested_changes": ["Correct the broken HUD color and palette presentation."], "priority": "hud-colors"}
     },
     {
       "id": "pcm",
@@ -581,15 +582,15 @@
       "proposed_isolated_bench": "Load and trigger one short PCM cue from a fixed semantic event with timing/readback diagnostics.",
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "APPROVED",
       "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
       "evidence_commit": "89ef72b86f394f26fc63536f9d9f95f581673c18",
       "diagnostic_interface": "tests/port_v2/hud_pcm_bench/collect_readback.py",
-      "blockers": ["Unblock: obtain exact USER-05 feedback before accepting the QSound-to-SCSP adaptation; CDDA, combat mixing, normal release, and physical Saturn remain unrun."],
-      "exact_next_experiment": "Review predator-melee-cue.wav and the combined HUD/PCM checkpoint without changing the capture-exact PCM payload.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
+      "blockers": ["Unblock: later promotion and integration must preserve the approved capture-exact PCM payload, event timing, and audible presentation; CDDA, combat mixing, normal release, and physical Saturn remain unrun."],
+      "exact_next_experiment": "Lock the approved PCM payload SHA-256 and event/start/end timing while REPAIR-05 changes only HUD color binding.",
+      "user_feedback": {"exact_response": "sound is great hud looks broken in terms of colors", "approved_components": ["Short Predator melee PCM cue presented in the USER-05 package."], "requested_changes": [], "priority": "preserve-pcm-during-hud-repair"}
     },
     {
       "id": "cdda-residency",

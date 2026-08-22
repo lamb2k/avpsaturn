@@ -36,6 +36,12 @@ The cue remains an ADAPTED QSound-to-SCSP result. Enemy corruption stays routed
 to SALVAGE-02. CDDA, combat, normal release, a second emulator, and physical
 Saturn remain `UNRUN`; V2-2B remains paused.
 
-`USER-05-HUD-PCM-REVIEW` is `AWAITING_USER_FEEDBACK`. Present only ignored
-`build/feedback/USER-05-HUD-PCM-REVIEW/`, ask the exact required question,
-record the exact response, and perform no implementation or inferred approval.
+USER-05 exact response is `sound is great hud looks broken in terms of colors`.
+The short Predator melee PCM cue is approved and locked. HUD presentation is
+`CHANGES_REQUESTED`, with color/palette correction first priority.
+
+The active card is `REPAIR-05-HUD-COLORS`, status `READY`. In its declared clean
+card-scoped branch/worktree, correct only HUD palette/CRAM/color binding. Reuse
+the exact HUD/PCM bench, add a real rejected-color negative control, preserve
+PCM SHA-256 `e2f2870251cf28c5cf52d0d074c3b426cc6db5afb4cde2eebf4838ffa296f125`
+and timing `147/150/200`, then return a corrected ignored package to USER-05.

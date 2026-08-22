@@ -63,13 +63,13 @@ worktree_safety:
     head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
     dirty: true
     preserve: true
-current_checkpoint: review-hud-pcm
-active_task_card: docs/task_cards/USER-05-HUD-PCM-REVIEW.md
-active_task_id: USER-05-HUD-PCM-REVIEW
-active_task_kind: USER_REVIEW
-task_status: AWAITING_USER_FEEDBACK
-active_write_owner: USER-05-HUD-PCM-REVIEW
-awaiting_user_feedback: [USER-05-HUD-PCM-REVIEW]
+current_checkpoint: repair-hud-colors
+active_task_card: docs/task_cards/REPAIR-05-HUD-COLORS.md
+active_task_id: REPAIR-05-HUD-COLORS
+active_task_kind: REPAIR
+task_status: READY
+active_write_owner: REPAIR-05-HUD-COLORS
+awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
   - task: SALVAGE-00-OLD-BUILD-BASELINE
@@ -165,14 +165,33 @@ completed_dispositions:
     evaluated_head: 89ef72b86f394f26fc63536f9d9f95f581673c18
     technical_status: PASS
     fidelity_status: ADAPTED
-    user_status: AWAITING_USER_FEEDBACK
-    salvage_decision: SALVAGE_WITH_ADAPTER
-    successor_activation: USER-05-HUD-PCM-REVIEW
+    user_status: CHANGES_REQUESTED
+    salvage_decision: REPAIR
+    successor_activation: REPAIR-05-HUD-COLORS
     blockers:
-      - Exact USER-05 visual and audio feedback is required before accepting HUD presentation or PCM sound.
+      - The user reports that HUD colors look broken; HUD presentation cannot be promoted until a bounded palette/color repair passes renewed review.
+      - The short Predator melee PCM cue is approved and must remain unchanged during HUD repair.
       - Enemy sprite loading/corruption remains deferred to SALVAGE-02 and is outside this HUD/PCM result.
       - CDDA, combat mixing, normal release, a second emulator, and physical Saturn remain UNRUN.
-    exact_next_experiment: Present the ignored USER-05 package, ask the exact required question, and record the exact response without implementation or inferred approval.
+    exact_next_experiment: Correct only HUD palette/CRAM/color binding, reject the original broken-color condition with a real negative control, preserve the approved PCM cue, and return a corrected package to USER-05.
+  - task: USER-05-HUD-PCM-REVIEW
+    evaluated_head: 89ef72b86f394f26fc63536f9d9f95f581673c18
+    technical_status: PASS
+    fidelity_status: ADAPTED
+    user_status: CHANGES_REQUESTED
+    salvage_decision: REPAIR
+    successor_activation: REPAIR-05-HUD-COLORS
+    exact_response: sound is great hud looks broken in terms of colors
+    approved_components:
+      - Short Predator melee PCM cue presented in the USER-05 package.
+    requested_changes:
+      - Correct the broken HUD color and palette presentation.
+    priority: hud-colors
+    blockers:
+      - HUD presentation requires renewed USER-05 approval after bounded color repair.
+      - Approved PCM payload, timing, and audible presentation must remain unchanged.
+      - Physical Saturn remains UNRUN.
+    exact_next_experiment: Execute only REPAIR-05 HUD color correction with the approved PCM cue locked, then return the corrected ignored package to USER-05.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR
@@ -193,6 +212,7 @@ task_queue:
   - USER-04-STAGE-REVIEW
   - SALVAGE-05-HUD-PCM
   - USER-05-HUD-PCM-REVIEW
+  - REPAIR-05-HUD-COLORS
   - INTEGRATE-03-PLAYABLE-SLICE
 contract_sha256: 74016fb2e73c2ae00144fa062662b37e0f575a3ee3ff3b7a420b1ed0f55a4638
 oracle_manifest_sha256: 106fffb92cc5a14acf5fdae7eb14d33b7d9206b9f9ecffcbac67a6fc326696d2
