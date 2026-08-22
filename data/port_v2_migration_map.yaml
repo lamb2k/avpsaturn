@@ -367,16 +367,15 @@
       "evaluated_commit": "6127957eee7ca419d39fe4b716dd41df2c255fb0",
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "APPROVED",
       "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "diagnostic_interface": "tests/port_v2/player2_hud_bench/run_pinned_emulator.ps1",
       "blockers": [
-        "Unblock: obtain explicit renewed USER-05 approval for the active P2 HUD together with the corrected P1 HUD.",
         "Unblock: keep P2 gameplay/input, joins, multiplayer integration, and multitap topology outside this presentation-only result.",
         "Unblock: production HUD integration, simultaneous full-stage CRAM ownership, a second emulator, normal release, and physical Saturn remain unrun."
       ],
-      "exact_next_experiment": "Present build/feedback/USER-05-HUD-PCM-REVIEW, ask the exact review question, and record the exact response without inferring approval.",
+      "exact_next_experiment": "Retain the approved P1/P2 HUD and PCM locks while SALVAGE-02 isolates enemy asset, rendering, and animation salvage.",
       "evidence": {
         "build_profile": "HudPcmSalvageBench / debug-hud-pcm-salvage-bench",
         "mame_active_capture_repeat": "PASS / 182 byte-identical files",
@@ -666,15 +665,15 @@
       "proposed_isolated_bench": "Render fixed health/energy/prompt states over one promoted background with readback.",
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "APPROVED",
       "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
       "evidence_commit": "6127957eee7ca419d39fe4b716dd41df2c255fb0",
       "diagnostic_interface": "tests/port_v2/player2_hud_bench/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: obtain renewed USER-05 approval for the active P2 HUD together with the corrected P1 HUD; production integration and simultaneous full-stage CRAM ownership remain untested."],
-      "exact_next_experiment": "Present the ignored active-P2 USER-05 package, ask the exact review question, and record the exact response without inferring approval.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
+      "blockers": ["Unblock: preserve the approved P1/P2 HUD and PCM presentation until a later integration card has its own review; production integration and simultaneous full-stage CRAM ownership remain untested."],
+      "exact_next_experiment": "Retain the approved P1/P2 HUD and PCM locks while SALVAGE-02 isolates enemy asset, rendering, and animation salvage.",
+      "user_feedback": {"exact_response": "keep going", "approved_components": ["Corrected P1 HUD presentation.", "Active P2 Maj. Schaefer HUD, health, and weapon-field presentation."], "requested_changes": [], "priority": "continue-enemy-salvage"}
     },
     {
       "id": "pcm",

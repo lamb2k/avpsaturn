@@ -2,7 +2,7 @@
 
 TASK: USER-05-HUD-PCM-REVIEW
 KIND: USER_REVIEW
-STATUS: AWAITING_USER_FEEDBACK
+STATUS: ACCEPTED
 CHECKPOINT: review-hud-pcm
 BASE: project_state.accepted_head
 BRANCH: codex/avp-user-05-hud-pcm-review
@@ -11,7 +11,7 @@ DEPENDENCIES: [SALVAGE-05-HUD-PCM]
 REQUIRED_LANES: [Fast]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, INTEGRATE-03-PLAYABLE-SLICE]
+NEXT_ELIGIBLE_CARDS: [REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, SALVAGE-02-ENEMY-RENDER-ANIMATION, INTEGRATE-03-PLAYABLE-SLICE]
 
 ## Objective
 
@@ -88,3 +88,10 @@ Ask exactly: "What should remain unchanged, what looks or feels wrong, and which
 - Screenshot SHA-256: `2d028a3f8293d5cf218e3fc239a59fb38087f3f6d4f1b9625982795a3c2075c8`.
 - Approved cue WAV SHA-256 remains `db539742a1cb77e2364055a26781c7bf0f1499f24fae1191c8b3f693e7b987d0`.
 - Review status: `AWAITING_USER_FEEDBACK`; no P1/P2 HUD approval is inferred from machine or emulator evidence.
+
+## Final renewal result
+
+- Exact response: `keep going`.
+- Disposition: `APPROVED` for the corrected P1 HUD presentation, the active P2 HUD presentation, and the previously approved short Predator melee PCM cue.
+- No requested change was given. The approved P1/P2 HUD and PCM output are locked until renewed review identifies a risk.
+- `SALVAGE-02-ENEMY-RENDER-ANIMATION` is the next predeclared dependency-safe card. It isolates the observed enemy corruption and cannot alter the approved HUD/PCM result.

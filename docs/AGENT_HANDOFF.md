@@ -19,24 +19,20 @@
 PROMOTE-01/USER-01-PLAYER-BASELINE-REVIEW locks remain accepted. USER-04 exact response was `pass for
 camera and stage`; that presentation is locked, but row-scroll is uncaptured.
 
-USER-05 original exact response is
-`sound is great hud looks broken in terms of colors`. The short Predator melee
-PCM cue is approved and locked. Renewed exact responses are
-`what about player 2 hud?` and `Let’s do that before we move on`.
+USER-05 final exact response is `keep going`. The corrected P1 HUD colors,
+active P2 HUD presentation, and short Predator melee PCM cue are approved and
+locked. P2 gameplay/input, joins, multiplayer, CDDA, normal release, a second
+emulator, and physical Saturn remain `UNRUN`.
 
-SALVAGE-05B is technically accepted at
-`6127957eee7ca419d39fe4b716dd41df2c255fb0`. Two MAME active-P2 routes are
-byte-identical across 182 files and reject the P1-only `PRESS START` control.
-Two clean Saturn builds and pinned Yaba interpreter runs reproduce normalized
-ISO `127c2f04404ec4e85e08a3d95d59e5f01fbb2b4a475e343b5af58b56a1035b34`.
-P2 zero/mid/full states, binding, palette, five negative controls, canaries,
-zero late reads/failures/underruns, 352x224 scanout, and repeat stability pass.
+SALVAGE-05B remains technically accepted at
+`6127957eee7ca419d39fe4b716dd41df2c255fb0`: active-P2 MAME routes repeat,
+reject the P1-only `PRESS START` control, and paired clean builds/pinned Yaba
+runs reproduce normalized ISO `127c2f04...a1035b34`. The P1/P2 HUD and PCM
+locks must not change without renewed review.
 
-P1 HUD payloads and corrected CRAM values remain locked pending review. PCM
-SHA-256 `e2f28702...96f125` and timing `147/150/200` remain approved. Enemy
-corruption stays routed to SALVAGE-02. P2 gameplay/input, joins, multiplayer,
-CDDA, normal release, a second emulator, and physical Saturn remain `UNRUN`.
-
-The active card is `USER-05-HUD-PCM-REVIEW`, status `AWAITING_USER_FEEDBACK`.
-Present ignored `build/feedback/USER-05-HUD-PCM-REVIEW/`, ask the exact review
-question, record the exact response, and infer no approval from silence.
+The active card is `SALVAGE-02-ENEMY-RENDER-ANIMATION`, status `READY`, on
+clean branch `codex/avp-salvage-02-enemy-pipeline`. Isolate class `0x1F` enemy
+assets, rendering, and animation only; retain all approved player, stage,
+HUD, and PCM locks. The observed distorted enemy pixels are unaccepted until
+the card's source, negative-control, diagnostic, and pinned-emulator evidence
+passes. V2-2B remains paused and does not block this salvage.
