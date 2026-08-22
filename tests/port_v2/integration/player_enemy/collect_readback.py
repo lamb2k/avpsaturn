@@ -197,7 +197,7 @@ def main():
         enemy = samples[label]["enemy"]
         if ((samples[label]["requested_enemy_frame"], enemy["phase"],
              enemy["x"]) !=
-                (expected["frame"], expected["phase"], expected["x"]):
+                (expected["frame"], expected["phase"], expected["x"])):
             raise RuntimeError(f"enemy schedule drifted at {label}: {enemy}")
         validate(samples[label], contract)
         if label == "translated":
