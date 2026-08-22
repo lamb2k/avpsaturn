@@ -66,13 +66,13 @@ worktree_safety:
     head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
     dirty: true
     preserve: true
-current_checkpoint: review-hud-pcm
-active_task_card: docs/task_cards/USER-05-HUD-PCM-REVIEW.md
-active_task_id: USER-05-HUD-PCM-REVIEW
-active_task_kind: USER_REVIEW
-task_status: AWAITING_USER_FEEDBACK
-active_write_owner: USER-05-HUD-PCM-REVIEW
-awaiting_user_feedback: [USER-05-HUD-PCM-REVIEW]
+current_checkpoint: salvage-player-2-hud
+active_task_card: docs/task_cards/SALVAGE-05B-PLAYER-2-HUD.md
+active_task_id: SALVAGE-05B-PLAYER-2-HUD
+active_task_kind: SALVAGE
+task_status: READY
+active_write_owner: SALVAGE-05B-PLAYER-2-HUD
+awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
   - task: SALVAGE-00-OLD-BUILD-BASELINE
@@ -183,30 +183,34 @@ completed_dispositions:
     fidelity_status: ADAPTED
     user_status: CHANGES_REQUESTED
     salvage_decision: REPAIR
-    successor_activation: REPAIR-05-HUD-COLORS
+    successor_activation: SALVAGE-05B-PLAYER-2-HUD
     exact_response: sound is great hud looks broken in terms of colors
+    renewed_exact_response: what about player 2 hud?
+    priority_response: Let’s do that before we move on
     approved_components:
       - Short Predator melee PCM cue presented in the USER-05 package.
     requested_changes:
       - Correct the broken HUD color and palette presentation.
-    priority: hud-colors
+      - Salvage and present the active Player 2 HUD before continuing.
+    priority: player-2-hud-before-continue
     blockers:
-      - HUD presentation requires renewed USER-05 approval after bounded color repair.
+      - The corrected Player 1 HUD and active Player 2 HUD require renewed USER-05 approval together.
       - Approved PCM payload, timing, and audible presentation must remain unchanged.
       - Physical Saturn remains UNRUN.
-    exact_next_experiment: Execute only REPAIR-05 HUD color correction with the approved PCM cue locked, then return the corrected ignored package to USER-05.
+    exact_next_experiment: Execute only SALVAGE-05B active Player 2 HUD presentation and fixed semantic states with the corrected Player 1 HUD and approved PCM cue locked, then return the ignored package to USER-05.
   - task: REPAIR-05-HUD-COLORS
     evaluated_head: 949316331c7c12a9ae630ef5f5ebc846e4d2aef5
     technical_status: PASS
     fidelity_status: MEASURED
-    user_status: AWAITING_USER_FEEDBACK
+    user_status: CHANGES_REQUESTED
     salvage_decision: REPAIR
-    successor_activation: USER-05-HUD-PCM-REVIEW
+    successor_activation: SALVAGE-05B-PLAYER-2-HUD
     blockers:
-      - Corrected HUD colors require renewed explicit USER-05 approval; no approval is inferred from emulator evidence.
+      - Renewed USER-05 feedback requires active Player 2 HUD presentation before further HUD review or integration.
+      - Corrected Player 1 HUD colors remain unapproved; no approval is inferred from emulator evidence.
       - Enemy sprite loading/corruption remains deferred to SALVAGE-02 and is outside this HUD repair.
       - Production HUD integration, simultaneous full-stage CRAM ownership, a second emulator, normal release, and physical Saturn remain UNRUN.
-    exact_next_experiment: Present the corrected ignored USER-05 package with the approved PCM cue unchanged, ask the exact review question, and record the exact response before any further HUD work or promotion.
+    exact_next_experiment: Execute SALVAGE-05B active Player 2 HUD presentation only, retaining the corrected Player 1 palette contract and approved PCM cue byte-for-byte.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR
@@ -228,6 +232,7 @@ task_queue:
   - SALVAGE-05-HUD-PCM
   - USER-05-HUD-PCM-REVIEW
   - REPAIR-05-HUD-COLORS
+  - SALVAGE-05B-PLAYER-2-HUD
   - INTEGRATE-03-PLAYABLE-SLICE
 contract_sha256: 74016fb2e73c2ae00144fa062662b37e0f575a3ee3ff3b7a420b1ed0f55a4638
 oracle_manifest_sha256: 106fffb92cc5a14acf5fdae7eb14d33b7d9206b9f9ecffcbac67a6fc326696d2

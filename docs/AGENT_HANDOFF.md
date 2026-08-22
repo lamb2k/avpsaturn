@@ -4,29 +4,25 @@
 `docs/PARITY_PLAN.md` is the only roadmap.
 
 ## Workflow pivot
-The interactive salvage/promotion workflow remains authoritative.
-
 ## Preserved paused work
 
 - The dirty primary canonical worktree remains untouched.
-- The dirty `prototype/avp-clean-playable-skeleton` worktree remains intact and
-  is classified as reusable state pending bench results.
-- V2-2B remains `CORRECTIONS_REQUIRED` in its existing dirty validator-
-  correction worktree. Its four recorded blockers remain unresolved. It is a
-  dependency for exact HIT/KO promotion, not for early loading, input,
-  rendering, animation, stage, palette, or diagnostic salvage.
+- The dirty `prototype/avp-clean-playable-skeleton` worktree remains intact.
+- V2-2B remains `CORRECTIONS_REQUIRED` in its dirty correction worktree. Its
+  blockers affect exact HIT/KO promotion, not this diagnostic salvage.
 - `SALVAGE-00-OLD-BUILD-BASELINE` is accepted only as a technical build/emulator
   baseline: its physical Saturn state remains `UNRUN`, automatic window captures
   remain black, and the observed distorted enemy pixels are not visually accepted.
 
 ## Current task and next action
 
-PROMOTE-01 and its `USER-01-PLAYER-BASELINE-REVIEW` locks remain accepted. USER-04 exact response
-was `pass for camera and stage`; the reviewed adapted camera/stage presentation
-is locked, while uncaptured row-scroll prevents full source-faithful promotion.
+PROMOTE-01/USER-01-PLAYER-BASELINE-REVIEW locks remain accepted. USER-04 exact response was `pass for
+camera and stage`; that presentation is locked, but row-scroll is uncaptured.
 
-USER-05 exact response is `sound is great hud looks broken in terms of colors`.
-The short Predator melee PCM cue is approved and locked.
+USER-05 original exact response is
+`sound is great hud looks broken in terms of colors`. The short Predator melee
+PCM cue is approved and locked. Renewed exact responses are
+`what about player 2 hud?` and `Let’s do that before we move on`.
 
 REPAIR-05 is technically accepted at
 `949316331c7c12a9ae630ef5f5ebc846e4d2aef5`. It maps one-based HUD source
@@ -43,7 +39,10 @@ SCSP result. Enemy corruption stays routed to SALVAGE-02. CDDA, combat, normal
 release, a second emulator, and physical Saturn remain `UNRUN`; V2-2B remains
 paused.
 
-The active card is `USER-05-HUD-PCM-REVIEW`, status
-`AWAITING_USER_FEEDBACK`. Present ignored package
-`build/feedback/USER-05-HUD-PCM-REVIEW/` and ask the exact required question.
-Do no implementation and infer no approval while feedback is pending.
+The active card is `SALVAGE-05B-PLAYER-2-HUD`, status `READY`, for clean branch
+`codex/avp-salvage-05b-player-2-hud`. The existing `HUDP2.BIN` is only the
+blinking `PRESS START` prompt and is not active P2 HUD evidence. Bind and render
+the real active P2 HUD plus fixed semantic states in the HUD bench, preserve the
+corrected P1 palette and approved PCM locks, run the declared Oracle/Target/
+Emulator cycle, then return the ignored USER-05 package for renewed review.
+Do not implement P2 input, gameplay, joins, multiplayer, or multitap topology.
