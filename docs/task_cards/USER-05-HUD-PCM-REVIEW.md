@@ -2,7 +2,7 @@
 
 TASK: USER-05-HUD-PCM-REVIEW
 KIND: USER_REVIEW
-STATUS: CHANGES_REQUESTED
+STATUS: AWAITING_USER_FEEDBACK
 CHECKPOINT: review-hud-pcm
 BASE: project_state.accepted_head
 BRANCH: codex/avp-user-05-hud-pcm-review
@@ -81,3 +81,10 @@ Ask exactly: "What should remain unchanged, what looks or feels wrong, and which
 - Review status: `CHANGES_REQUESTED`; active Player 2 HUD presentation must be salvaged before continuing.
 - Next bounded card: `SALVAGE-05B-PLAYER-2-HUD`.
 - Corrected Player 1 HUD colors remain unapproved pending renewed review alongside the active Player 2 HUD; no approval is inferred.
+
+## Renewed review after SALVAGE-05B
+
+- Active P2 package source: `6127957eee7ca419d39fe4b716dd41df2c255fb0`.
+- Screenshot SHA-256: `2d028a3f8293d5cf218e3fc239a59fb38087f3f6d4f1b9625982795a3c2075c8`.
+- Approved cue WAV SHA-256 remains `db539742a1cb77e2364055a26781c7bf0f1499f24fae1191c8b3f693e7b987d0`.
+- Review status: `AWAITING_USER_FEEDBACK`; no P1/P2 HUD approval is inferred from machine or emulator evidence.

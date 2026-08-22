@@ -24,6 +24,9 @@ def sha256(path: Path) -> str:
 def main() -> None:
     contract = json.loads((HERE / "hud_pcm_contract.json").read_text(
         encoding="utf-8"))
+    player2_contract = json.loads((ROOT /
+        "tests/port_v2/player2_hud_bench/player2_hud_contract.json").read_text(
+            encoding="utf-8"))
     run_root = ROOT / "build/port_v2/hud_pcm_bench/run-2"
     readback = json.loads((run_root / "readback.json").read_text(
         encoding="ascii"))
@@ -53,12 +56,13 @@ def main() -> None:
     for name in ("build.json", "iso-normalization.json", "readback.json"):
         shutil.copy2(run_root / name, package / name)
     manifest = {
-        "schema": 1,
+        "schema": 2,
         "task_id": "USER-05-HUD-PCM-REVIEW",
-        "source_task": contract["task_id"],
+        "source_task": player2_contract["task_id"],
+        "source_commit": readback["source_commit"],
         "files": {
             screenshot.name: {"sha256": sha256(screenshot),
-                              "purpose": "corrected HUD colors with PCM together checkpoint"},
+                              "purpose": "active P2 HUD with corrected P1 colors and locked PCM together checkpoint"},
             wav_path.name: {"sha256": sha256(wav_path),
                             "purpose": "capture-exact short melee cue"},
         },
@@ -70,11 +74,13 @@ def main() -> None:
     (package / "README.md").write_text(
         "# USER-05 HUD/PCM review\n\n"
         "Open `hud-pcm-together.png` to inspect the corrected-color, mid-value "
-        "HUD state. "
+        "P1 HUD and the active Maj.Schaefer P2 HUD with its health and weapon "
+        "fields. "
         "Play `predator-melee-cue.wav` to review the one short PCM cue.\n\n"
         "This is pinned-emulator evidence only. Physical Saturn remains "
         "`UNRUN`. Camera movement, stage expansion, combat, and CDDA are "
-        "outside this review.\n",
+        "outside this review. P2 input, gameplay, joins, multiplayer, and "
+        "multitap topology are not implemented by this presentation bench.\n",
         encoding="ascii", newline="\n")
     print(f"prepared ignored feedback package: {package}")
 

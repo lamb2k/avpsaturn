@@ -361,6 +361,58 @@
         "requested_changes": [],
         "priority": null
       }
+    },
+    {
+      "task_id": "SALVAGE-05B-PLAYER-2-HUD",
+      "evaluated_commit": "6127957eee7ca419d39fe4b716dd41df2c255fb0",
+      "technical_status": "PASS",
+      "fidelity_status": "ADAPTED",
+      "user_status": "AWAITING_USER_FEEDBACK",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
+      "production_interface": null,
+      "diagnostic_interface": "tests/port_v2/player2_hud_bench/run_pinned_emulator.ps1",
+      "blockers": [
+        "Unblock: obtain explicit renewed USER-05 approval for the active P2 HUD together with the corrected P1 HUD.",
+        "Unblock: keep P2 gameplay/input, joins, multiplayer integration, and multitap topology outside this presentation-only result.",
+        "Unblock: production HUD integration, simultaneous full-stage CRAM ownership, a second emulator, normal release, and physical Saturn remain unrun."
+      ],
+      "exact_next_experiment": "Present build/feedback/USER-05-HUD-PCM-REVIEW, ask the exact review question, and record the exact response without inferring approval.",
+      "evidence": {
+        "build_profile": "HudPcmSalvageBench / debug-hud-pcm-salvage-bench",
+        "mame_active_capture_repeat": "PASS / 182 byte-identical files",
+        "mame_prompt_negative_control": "REJECTED",
+        "active_p2_top_sha256": "9a0f75fe881b1cb569d914cdaeba5157bf40a22b4d743bf25af2f33837e1d807",
+        "active_p2_weapon_sha256": "578b668fe4414ea92f149e7bfa244f0cd92047a4adbb36b8176861b634d5871a",
+        "p1_hud_payload_locks": "PASS",
+        "fast_and_focused_contract_checks": "PASS",
+        "target_clean_build_repeat": "PASS",
+        "paired_pinned_emulator_readback": "PASS",
+        "normalized_iso_sha256": "127c2f04404ec4e85e08a3d95d59e5f01fbb2b4a475e343b5af58b56a1035b34",
+        "p2_zero_mid_full_states": "PASS",
+        "p2_binding_ok": 1,
+        "live_cram": {"yellow": 33791, "red": 32799, "energy": 48119, "empty": 50737},
+        "negative_rejections": 5,
+        "rejected_binding": "HUDP2.BIN PRESS START prompt substituted for active P2 HUD",
+        "melee_pcm_sha256": "e2f2870251cf28c5cf52d0d074c3b426cc6db5afb4cde2eebf4838ffa296f125",
+        "pcm_timing": {"event": 147, "start": 150, "end": 200},
+        "asset_audio_failures": 0,
+        "pcm_underruns": 0,
+        "disc_late_reads": 0,
+        "canary": "PASS",
+        "bounded_stability_frames": 486,
+        "final_scanout": "NTSC 352x224",
+        "emulator_screenshot_sha256": "2d028a3f8293d5cf218e3fc239a59fb38087f3f6d4f1b9625982795a3c2075c8",
+        "approved_cue_wav_sha256": "db539742a1cb77e2364055a26781c7bf0f1499f24fae1191c8b3f693e7b987d0",
+        "review_package": "build/feedback/USER-05-HUD-PCM-REVIEW/",
+        "physical_saturn": "UNRUN"
+      },
+      "user_observation_state": {
+        "formal_review_question_asked": false,
+        "exact_observations": [],
+        "approved_components": [],
+        "requested_changes": [],
+        "priority": null
+      }
     }
   ],
   "subsystems": [
@@ -613,16 +665,16 @@
       "authored_controller_coupling": "HUD values and visibility are fed by authored mixed-runtime world state.",
       "proposed_isolated_bench": "Render fixed health/energy/prompt states over one promoted background with readback.",
       "technical_status": "PASS",
-      "fidelity_status": "MEASURED",
-      "user_status": "CHANGES_REQUESTED",
-      "salvage_decision": "REPAIR",
+      "fidelity_status": "ADAPTED",
+      "user_status": "AWAITING_USER_FEEDBACK",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
-      "evidence_commit": "949316331c7c12a9ae630ef5f5ebc846e4d2aef5",
-      "diagnostic_interface": "tests/port_v2/hud_pcm_bench/collect_readback.py",
-      "blockers": ["Unblock: salvage and present the active Player 2 HUD before renewed USER-05 review; production integration and simultaneous full-stage CRAM ownership remain untested."],
-      "exact_next_experiment": "Run SALVAGE-05B to bind and render active Player 2 HUD pixels and fixed semantic states while preserving the corrected Player 1 palette and approved PCM locks.",
-      "user_feedback": {"exact_response": "Let’s do that before we move on", "approved_components": [], "requested_changes": ["Salvage and present the active Player 2 HUD before continuing."], "priority": "player-2-hud-before-continue"}
+      "evidence_commit": "6127957eee7ca419d39fe4b716dd41df2c255fb0",
+      "diagnostic_interface": "tests/port_v2/player2_hud_bench/run_pinned_emulator.ps1",
+      "blockers": ["Unblock: obtain renewed USER-05 approval for the active P2 HUD together with the corrected P1 HUD; production integration and simultaneous full-stage CRAM ownership remain untested."],
+      "exact_next_experiment": "Present the ignored active-P2 USER-05 package, ask the exact review question, and record the exact response without inferring approval.",
+      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {
       "id": "pcm",
