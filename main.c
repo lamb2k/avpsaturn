@@ -426,7 +426,10 @@ volatile int avsp_diag_integration_render_command_count;
 volatile int avsp_diag_integration_canaries_ok;
 volatile int avsp_diag_integration_asset_failures;
 volatile int avsp_diag_integration_disc_late_reads;
-volatile int avsp_diag_integration_frame;
+/* The MCP backend watches a 16-byte block for memory breakpoints. Keep the
+ * integration frame marker in its own aligned block so adjacent diagnostic
+ * writes cannot satisfy a value-filtered frame breakpoint. */
+volatile int avsp_diag_integration_frame[4] __attribute__((aligned(16)));
 #endif
 #endif
 #ifdef AVSP_FRONTEND_SHOT_TEST
@@ -3635,7 +3638,7 @@ static void player_bench_frame_callback(void)
             avsp_diag_player_disc_late_reads +
             avsp_diag_enemy_disc_late_reads;
         /* Publish last so MCP observes one complete integration snapshot. */
-        avsp_diag_integration_frame = avsp_diag_enemy_frame;
+        avsp_diag_integration_frame[0] = avsp_diag_enemy_frame;
     }
 #endif
 #ifdef AVSP_PLAYER_PROMOTION_BENCH
