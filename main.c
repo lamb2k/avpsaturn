@@ -9,6 +9,9 @@
 #include "src/port_v2/player/player.h"
 #include "src/port_v2/enemy/enemy.h"
 #include "src/port_v2/integration/player_enemy/player_enemy.h"
+#ifdef AVSP_COLLISION_SALVAGE_BENCH
+#include "tests/port_v2/collision_bench/collision_bench.h"
+#endif
 
 #include "generated/avsp_anim_records.h"
 #include "generated/avsp_emit_windows.h"
@@ -480,6 +483,35 @@ typedef struct
 volatile AvspIntegrationDiagnosticSample avsp_diag_integration_samples[3];
 volatile int avsp_diag_integration_sample_count;
 #endif
+#endif
+#ifdef AVSP_COLLISION_SALVAGE_BENCH
+#define COLLISION_BENCH_CANARY_HEAD 0x434F4C48UL
+#define COLLISION_BENCH_CANARY_TAIL 0x434F4C54UL
+typedef struct
+{
+    unsigned long head_canary;
+    int frame;
+    int failures;
+    int negative_rejections;
+    unsigned long tail_canary;
+} AvspCollisionDiagnosticState;
+static AvspCollisionDiagnosticState collision_bench_state;
+volatile int avsp_diag_collision_interface_version;
+volatile int avsp_diag_collision_frame;
+volatile int avsp_diag_collision_case;
+volatile int avsp_diag_collision_overlap;
+volatile int avsp_diag_collision_expected_overlap;
+volatile int avsp_diag_collision_guarded;
+volatile int avsp_diag_collision_expected_guarded;
+volatile int avsp_diag_collision_hit_value;
+volatile int avsp_diag_collision_table_set_ok;
+volatile int avsp_diag_collision_negative_rejections;
+volatile int avsp_diag_collision_damage_writes;
+volatile int avsp_diag_collision_failures;
+volatile int avsp_diag_collision_canary_ok;
+volatile AvspCollisionBenchResult
+    avsp_diag_collision_samples[AVSP_COLLISION_CASE_COUNT];
+volatile int avsp_diag_collision_sample_count;
 #endif
 #ifdef AVSP_FRONTEND_SHOT_TEST
 /* Visual-verification profile. The frontend surfaces this pass must compare
@@ -3952,6 +3984,79 @@ static void draw_route_overlay(void)
         jo_printf(35, 12, "GO >>>");
 }
 
+#ifdef AVSP_COLLISION_SALVAGE_BENCH
+static int collision_bench_init(void)
+{
+    AvspCollisionBenchResult result;
+    int case_id;
+
+    memset(&collision_bench_state, 0, sizeof(collision_bench_state));
+    collision_bench_state.head_canary = COLLISION_BENCH_CANARY_HEAD;
+    collision_bench_state.tail_canary = COLLISION_BENCH_CANARY_TAIL;
+    avsp_diag_collision_sample_count = 0;
+    for (case_id = 0; case_id < AVSP_COLLISION_CASE_COUNT; ++case_id) {
+        if (!avsp_collision_bench_evaluate(case_id, &result) ||
+            !avsp_collision_bench_result_ok(&result)) {
+            ++collision_bench_state.failures;
+        }
+        else if (!result.expected_overlap || result.expected_guarded) {
+            ++collision_bench_state.negative_rejections;
+        }
+        avsp_diag_collision_samples[case_id] = result;
+        avsp_diag_collision_sample_count = case_id + 1;
+    }
+    return collision_bench_state.failures == 0 &&
+           collision_bench_state.negative_rejections == 8;
+}
+
+static void collision_bench_frame_callback(void)
+{
+    AvspCollisionBenchResult result;
+    int case_id;
+
+    case_id = (collision_bench_state.frame / 60) %
+              AVSP_COLLISION_CASE_COUNT;
+    if (!avsp_collision_bench_evaluate(case_id, &result) ||
+        !avsp_collision_bench_result_ok(&result)) {
+        ++collision_bench_state.failures;
+    }
+    ++collision_bench_state.frame;
+    avsp_diag_runtime_ready = runtime_ready;
+    avsp_diag_collision_interface_version = 1;
+    avsp_diag_collision_frame = collision_bench_state.frame;
+    avsp_diag_collision_case = result.case_id;
+    avsp_diag_collision_overlap = result.overlap;
+    avsp_diag_collision_expected_overlap = result.expected_overlap;
+    avsp_diag_collision_guarded = result.guarded;
+    avsp_diag_collision_expected_guarded = result.expected_guarded;
+    avsp_diag_collision_hit_value = result.hit_value;
+    avsp_diag_collision_table_set_ok = result.table_set_ok;
+    avsp_diag_collision_negative_rejections =
+        collision_bench_state.negative_rejections;
+    avsp_diag_collision_damage_writes = result.damage_write_count;
+    avsp_diag_collision_failures = collision_bench_state.failures;
+    avsp_diag_collision_canary_ok =
+        collision_bench_state.head_canary == COLLISION_BENCH_CANARY_HEAD &&
+        collision_bench_state.tail_canary == COLLISION_BENCH_CANARY_TAIL;
+    jo_printf(2, 3, "SALVAGE-03 COLLISION");
+    jo_printf(2, 5, "SOURCE 01D25E-01D312");
+    jo_printf(2, 7, "CASE %02d OVERLAP %d/%d", result.case_id,
+              result.overlap, result.expected_overlap);
+    jo_printf(2, 8, "GUARD %d/%d HIT %d", result.guarded,
+              result.expected_guarded, result.hit_value);
+    jo_printf(2, 10, "TABLE 130AC8 %s",
+              result.table_set_ok ? "PASS" : "FAIL");
+    jo_printf(2, 12, "NEGATIVE CONTROLS %d/8",
+              collision_bench_state.negative_rejections);
+    jo_printf(2, 14, "DAMAGE HIT KO WRITES %d",
+              result.damage_write_count);
+    jo_printf(2, 16, "CANARY %s FAILURES %d",
+              avsp_diag_collision_canary_ok ? "PASS" : "FAIL",
+              collision_bench_state.failures);
+    jo_printf(2, 18, "PHYSICAL SATURN UNRUN");
+}
+#endif
+
 static void frame_callback(void)
 {
     CapInput input;
@@ -3963,6 +4068,10 @@ static void frame_callback(void)
      * screen every frame would space-fill the street map, so the street
      * profile never touches the SGL ASCII layer. */
     jo_clear_screen();
+#endif
+#ifdef AVSP_COLLISION_SALVAGE_BENCH
+    collision_bench_frame_callback();
+    return;
 #endif
 #ifdef AVSP_PLAYER_SALVAGE_BENCH
     player_bench_frame_callback();
@@ -4592,7 +4701,11 @@ void jo_main(void)
                                AVSP_STRIPS_REGION_BYTES);
     }
     set_actor_palette();
-#if defined(AVSP_PLAYER_SALVAGE_BENCH)
+#if defined(AVSP_COLLISION_SALVAGE_BENCH)
+    runtime_ready = collision_bench_init();
+    if (!runtime_ready) failed_asset = "COLLISION BENCH FAILED";
+    JO_UNUSED_ARG(index);
+#elif defined(AVSP_PLAYER_SALVAGE_BENCH)
 #ifdef AVSP_PLAYER_ENEMY_INTEGRATION
     {
         AvspPortV2PlayerEnemyLoadOps operations;

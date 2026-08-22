@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "task_id": "SALVAGE-03-COLLISION",
+  "class_id": 31,
+  "table_set": "0x130ac8",
+  "source_report_sha256": "49ce678bee49d331a3b9e6cee97708b7644c5b0727de477ffc89671bf64bd78c",
+  "generated_header_sha256": "b3e5a29ced44c5b112c599ef8fb7c65f879c4707bdadfc132f98a716e3df3ea2",
+  "expected_case_count": 13,
+  "expected_negative_rejections": 8,
+  "expected_hit_value": 10,
+  "approved_lock_sha256": {
+    "tests/port_v2/player/approved_contract.json": "d0e6d835aaa3f2bdcd1138d5eeedafcacf96080178feca0454789a942fedf612",
+    "tests/port_v2/enemy/approved_contract.json": "35d6274c88aa60d32a6594fa535cae0e0964ddcc7f4ec7989553848f361142da"
+  },
+  "disabled_systems": [
+    "damage writes",
+    "HIT",
+    "KO",
+    "enemy AI",
+    "authored gameplay"
+  ]
+}

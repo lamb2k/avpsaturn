@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "task_id": "SALVAGE-03-COLLISION",
+  "card_profile": "CollisionSalvageBench",
+  "compile_profile": "debug-collision-salvage-bench",
+  "manifest_profile": "collision-salvage-bench",
+  "build_root": "build/port_v2/collision_bench",
+  "required_readback_symbols": [
+    "avsp_diag_runtime_ready",
+    "avsp_diag_collision_interface_version",
+    "avsp_diag_collision_frame",
+    "avsp_diag_collision_case",
+    "avsp_diag_collision_overlap",
+    "avsp_diag_collision_expected_overlap",
+    "avsp_diag_collision_guarded",
+    "avsp_diag_collision_expected_guarded",
+    "avsp_diag_collision_hit_value",
+    "avsp_diag_collision_table_set_ok",
+    "avsp_diag_collision_negative_rejections",
+    "avsp_diag_collision_damage_writes",
+    "avsp_diag_collision_failures",
+    "avsp_diag_collision_canary_ok",
+    "avsp_diag_collision_sample_count",
+    "avsp_diag_collision_samples"
+  ]
+}

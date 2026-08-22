@@ -18,6 +18,7 @@ param(
     [switch]$EnemySalvageBench,
     [switch]$EnemyPromotionBench,
     [switch]$PlayerEnemyIntegration,
+    [switch]$CollisionSalvageBench,
     [switch]$SkipHostTests
 )
 
@@ -209,7 +210,8 @@ try {
                 -Destination (Join-Path $contentRoot $metadataName) -Force
         }
 
-        $buildProfile = if ($PlayerEnemyIntegration) { 'player-enemy-integration' }
+        $buildProfile = if ($CollisionSalvageBench) { 'collision-salvage-bench' }
+            elseif ($PlayerEnemyIntegration) { 'player-enemy-integration' }
             elseif ($EnemyPromotionBench) { 'enemy-promotion-bench' }
             elseif ($EnemySalvageBench) { 'enemy-salvage-bench' }
             elseif ($HudPcmSalvageBench) { 'hud-pcm-salvage-bench' }
@@ -296,6 +298,9 @@ try {
             $makeArguments += 'AVSP_ENEMY_SALVAGE_BENCH=1'
             $makeArguments += 'AVSP_ENEMY_PROMOTION_BENCH=1'
             $makeArguments += 'AVSP_PLAYER_ENEMY_INTEGRATION=1'
+        }
+        if ($CollisionSalvageBench) {
+            $makeArguments += 'AVSP_COLLISION_SALVAGE_BENCH=1'
         }
         if ($FrontendTest) {
             $makeArguments += 'AVSP_FRONTEND_TEST=1'
