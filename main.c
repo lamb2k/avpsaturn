@@ -12,6 +12,9 @@
 #ifdef AVSP_COLLISION_SALVAGE_BENCH
 #include "tests/port_v2/collision_bench/collision_bench.h"
 #endif
+#ifdef AVSP_HIT_KO_PROMOTION_BENCH
+#include "tests/port_v2/combat/hit_ko/diagnostic.h"
+#endif
 
 #include "generated/avsp_anim_records.h"
 #include "generated/avsp_emit_windows.h"
@@ -4069,6 +4072,26 @@ static void frame_callback(void)
      * profile never touches the SGL ASCII layer. */
     jo_clear_screen();
 #endif
+#ifdef AVSP_HIT_KO_PROMOTION_BENCH
+    avsp_hit_ko_diagnostic_step();
+    avsp_diag_runtime_ready = runtime_ready;
+    jo_printf(2, 3, "V2-B1 EXACT HIT KO");
+    jo_printf(2, 5, "PHASE %d SAMPLE %d", avsp_diag_hit_ko_phase,
+              avsp_diag_hit_ko_sample);
+    jo_printf(2, 7, "STATE %04X SUB %04X", avsp_diag_hit_ko_state,
+              avsp_diag_hit_ko_sub_state);
+    jo_printf(2, 9, "ACTION %04X ANIM %08lX", avsp_diag_hit_ko_action,
+              avsp_diag_hit_ko_anim_record);
+    jo_printf(2, 11, "TIMER %04X HP %d HIT %d", avsp_diag_hit_ko_anim_timer,
+              avsp_diag_hit_ko_health, avsp_diag_hit_ko_hit_value);
+    jo_printf(2, 13, "SAMPLES %d/%d", avsp_diag_hit_ko_hit_sample_count,
+              avsp_diag_hit_ko_ko_sample_count);
+    jo_printf(2, 15, "NEG %d FAIL %d CANARY %d",
+              avsp_diag_hit_ko_negative_rejections,
+              avsp_diag_hit_ko_failures, avsp_diag_hit_ko_canary_ok);
+    jo_printf(2, 17, "PHYSICAL SATURN UNRUN");
+    return;
+#endif
 #ifdef AVSP_COLLISION_SALVAGE_BENCH
     collision_bench_frame_callback();
     return;
@@ -4701,7 +4724,11 @@ void jo_main(void)
                                AVSP_STRIPS_REGION_BYTES);
     }
     set_actor_palette();
-#if defined(AVSP_COLLISION_SALVAGE_BENCH)
+#if defined(AVSP_HIT_KO_PROMOTION_BENCH)
+    runtime_ready = avsp_hit_ko_diagnostic_init();
+    if (!runtime_ready) failed_asset = "HIT KO BENCH FAILED";
+    JO_UNUSED_ARG(index);
+#elif defined(AVSP_COLLISION_SALVAGE_BENCH)
     runtime_ready = collision_bench_init();
     if (!runtime_ready) failed_asset = "COLLISION BENCH FAILED";
     JO_UNUSED_ARG(index);

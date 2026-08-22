@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "task_id": "V2-B1",
+  "card_profile": "HitKoPromotionBench",
+  "compile_profile": "debug-hit-ko-promotion-bench",
+  "manifest_profile": "hit-ko-promotion-bench",
+  "build_root": "build/port_v2/combat/hit_ko",
+  "required_readback_symbols": [
+    "avsp_diag_runtime_ready",
+    "avsp_diag_hit_ko_interface_version",
+    "avsp_diag_hit_ko_frame",
+    "avsp_diag_hit_ko_phase",
+    "avsp_diag_hit_ko_sample",
+    "avsp_diag_hit_ko_state",
+    "avsp_diag_hit_ko_sub_state",
+    "avsp_diag_hit_ko_action",
+    "avsp_diag_hit_ko_anim_record",
+    "avsp_diag_hit_ko_anim_timer",
+    "avsp_diag_hit_ko_health",
+    "avsp_diag_hit_ko_hit_value",
+    "avsp_diag_hit_ko_hit_sample_count",
+    "avsp_diag_hit_ko_ko_sample_count",
+    "avsp_diag_hit_ko_negative_rejections",
+    "avsp_diag_hit_ko_failures",
+    "avsp_diag_hit_ko_complete",
+    "avsp_diag_hit_ko_canary_ok"
+  ]
+}

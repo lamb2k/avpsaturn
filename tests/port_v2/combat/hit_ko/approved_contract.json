@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "task_id": "V2-B1",
+  "interface_version": 1,
+  "source_manifest": "data/avsp_hit_ko_writer_set.json",
+  "source_manifest_schema": 4,
+  "source_manifest_sha256": "a13cffd40c6e44a1368b5edfa917af08c95644580d5384aaeddc0f9ef5e65aed",
+  "target": {"set": "avspu", "revision": "USA 940520", "type": 12, "class": 31},
+  "hit": {"before_sample": 5190, "first_sample": 5191, "last_sample": 5227, "writer_instance": 972, "anim_record": 1236304},
+  "ko": {"before_sample": 5329, "first_sample": 5330, "last_sample": 5469, "writer_instance": 1067, "anim_record": 1237524},
+  "writer_binding": {"instruction_pc": "0x016526", "successor_pc": "0x01652a", "bus_event_count": 2, "write_width_bytes": 4, "a6": "0xffa000"},
+  "accepted_binding_sha256": {
+    "field_transitions": "e3a7eedc0a770b99a4d4b5f36807f9d2e8113f0cadb078403b839e7502da1c8b",
+    "writer_instances": "25fe93fd2aa49a27c2a6626028671e99ab6702fc47d0d0419e7943388f3c692f"
+  },
+  "disabled_systems": ["attack", "damage", "collision application", "AI", "camera", "stage", "HUD", "PCM", "CDDA"],
+  "physical_saturn": "UNRUN"
+}

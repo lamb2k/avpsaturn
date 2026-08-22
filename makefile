@@ -67,6 +67,9 @@ endif
 ifneq ($(AVSP_COLLISION_SALVAGE_BENCH),)
 CCFLAGS += -DAVSP_COLLISION_SALVAGE_BENCH=1
 endif
+ifneq ($(AVSP_HIT_KO_PROMOTION_BENCH),)
+CCFLAGS += -DAVSP_HIT_KO_PROMOTION_BENCH=1
+endif
 JO_DEBUG ?= 1
 JO_NTSC = 1
 JO_COMPILE_USING_SGL = 1
@@ -74,6 +77,9 @@ JO_COMPILE_USING_SGL = 1
 SRCS = main.c capability_model.c avsp_actor.c avsp_anim_script.c avsp_emit.c avsp_tiles.c avsp_collision.c avsp_cram.c avsp_frontend.c avsp_scene.c avsp_route.c avsp_scene_runtime.c avsp_disc_guard.c src/port_v2/player/player.c src/port_v2/enemy/enemy.c src/port_v2/integration/player_enemy/player_enemy.c
 ifneq ($(AVSP_COLLISION_SALVAGE_BENCH),)
 SRCS += tests/port_v2/collision_bench/collision_bench.c
+endif
+ifneq ($(AVSP_HIT_KO_PROMOTION_BENCH),)
+SRCS += src/port_v2/combat/hit_ko/hit_ko.c tests/port_v2/combat/hit_ko/diagnostic.c
 endif
 
 # The pinned Yaba Sanshiro boot path stalls when Jo Engine's monolithic first-

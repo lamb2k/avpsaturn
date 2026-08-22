@@ -14,7 +14,7 @@ param(
         'BossKoTest', 'PlayerSalvageBench', 'PlayerPromotionBench',
         'CameraStageSalvageBench', 'HudPcmSalvageBench', 'EnemySalvageBench',
         'EnemyPromotionBench', 'PlayerEnemyIntegration',
-        'CollisionSalvageBench')]
+        'CollisionSalvageBench', 'HitKoPromotionBench')]
     [string]$TargetProfile = 'Default',
 
     [switch]$Regenerate,
@@ -142,6 +142,7 @@ function Invoke-FastLane {
     Invoke-PythonTest 'tests\test_task_card_state.py'
     Invoke-PythonTest 'tests\test_port_v2_migration_map.py'
     Invoke-PythonTest 'tests\test_avsp_hit_ko_writer_set.py'
+    Invoke-PythonTest 'tests\port_v2\combat\hit_ko\test_contract.py'
     Invoke-PythonTest 'tests\test_avsp_vertical_slice_oracle.py'
     Invoke-PythonTest 'tests\test_avsp_translation_boundary.py'
 
@@ -197,6 +198,7 @@ function Invoke-OracleLane {
             -Command 'ignored private writer inputs absent'
     }
     Invoke-PythonTest 'tests\test_avsp_hit_ko_writer_set.py'
+    Invoke-PythonTest 'tests\port_v2\combat\hit_ko\test_contract.py'
     Invoke-PythonTest 'tests\test_avsp_vertical_slice_oracle.py'
     Invoke-PythonTest 'tests\test_avsp_translation_boundary.py'
 
@@ -264,6 +266,7 @@ function Invoke-TargetLane {
         EnemyPromotionBench = 'debug-enemy-promotion-bench'
         PlayerEnemyIntegration = 'debug-player-enemy-integration'
         CollisionSalvageBench = 'debug-collision-salvage-bench'
+        HitKoPromotionBench = 'debug-hit-ko-promotion-bench'
     }
     $expectedProfile = $profileNames[$TargetProfile]
     $profilePath = Join-Path $projectRoot 'build\last_compile_profile.txt'
