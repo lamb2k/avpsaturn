@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "task_id": "INTEGRATE-01-PLAYER-AND-ENEMY",
+  "interface_version": 1,
+  "component_interfaces": {"player": 1, "enemy": 1},
+  "approved_lock_sha256": {
+    "tests/port_v2/player/approved_contract.json": "d0e6d835aaa3f2bdcd1138d5eeedafcacf96080178feca0454789a942fedf612",
+    "tests/port_v2/enemy/approved_contract.json": "35d6274c88aa60d32a6594fa535cae0e0964ddcc7f4ec7989553848f361142da",
+    "tests/port_v2/stage_bench/stage_contract.json": "dac93621e7ef290ee2465055076b856f1f10a73480654c86782fbb4e522af300",
+    "tests/port_v2/hud_pcm_bench/hud_pcm_contract.json": "e6325b97864ec53d7171eaceff4ad070fcaa9276ca7c00ab022e260f5545cafe",
+    "tests/port_v2/player2_hud_bench/player2_hud_contract.json": "d907fba31c216e63717847851c4915fcb165421c5453152afb31d5d63d187e37"
+  },
+  "load_order": ["enemy_tile_archive", "fixed_background", "player_idle", "player_actions", "player_sprite_working_set"],
+  "render_order": ["player", "enemy"],
+  "actor_count": 2,
+  "idle_render_commands": 34,
+  "walk_render_commands": 35,
+  "enemy": {
+    "class_id": 31,
+    "palette_bank": 17,
+    "lane": 200,
+    "facing": -1,
+    "walk_frames": 39,
+    "walk_poses": 19,
+    "samples": {
+      "stationary": {"frame": 20, "phase": 0, "x": 192},
+      "translated": {"frame": 140, "phase": 1, "x": 240},
+      "repeat_stationary": {"frame": 20, "phase": 0, "x": 192}
+    }
+  },
+  "disabled_systems": ["collision", "attack", "damage", "HIT/KO", "AI", "camera", "HUD", "PCM", "CDDA"],
+  "physical_saturn": "UNRUN"
+}

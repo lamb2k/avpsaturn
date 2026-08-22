@@ -254,7 +254,11 @@ static int player_bench_frame;
 static int player_bench_previous_input;
 #endif
 #ifdef AVSP_PLAYER_PROMOTION_BENCH
+#ifdef AVSP_PLAYER_ENEMY_INTEGRATION
+static AvspPortV2PlayerEnemyRuntime player_enemy_port_v2;
+#else
 static AvspPortV2PlayerRuntime player_port_v2;
+#endif
 #endif
 #endif
 
@@ -297,7 +301,9 @@ typedef struct
 } EnemyBenchState;
 static EnemyBenchState enemy_bench;
 #ifdef AVSP_ENEMY_PROMOTION_BENCH
+#ifndef AVSP_PLAYER_ENEMY_INTEGRATION
 static AvspPortV2EnemyRuntime enemy_port_v2;
+#endif
 #endif
 #endif
 
@@ -414,6 +420,13 @@ volatile int avsp_diag_enemy_loader_adapter_ok;
 volatile int avsp_diag_integration_interface_version;
 volatile int avsp_diag_integration_approval_locks_ok;
 volatile int avsp_diag_integration_loader_order_ok;
+volatile int avsp_diag_integration_actor_count;
+volatile int avsp_diag_integration_render_order_ok;
+volatile int avsp_diag_integration_render_command_count;
+volatile int avsp_diag_integration_canaries_ok;
+volatile int avsp_diag_integration_asset_failures;
+volatile int avsp_diag_integration_disc_late_reads;
+volatile int avsp_diag_integration_frame;
 #endif
 #endif
 #ifdef AVSP_FRONTEND_SHOT_TEST
@@ -3288,7 +3301,9 @@ static void enemy_bench_init(void)
     if (avsp_tiles_find(&tile_archive, 0xFFFFu) < 0)
         ++enemy_bench.negative_rejections;
 #ifdef AVSP_ENEMY_PROMOTION_BENCH
+#ifndef AVSP_PLAYER_ENEMY_INTEGRATION
     avsp_port_v2_enemy_init(&enemy_port_v2);
+#endif
 #endif
 
     cap_world_init(&world);
@@ -3314,7 +3329,9 @@ static void enemy_bench_frame_callback(void)
     int relative = enemy_bench.frame % (ENEMY_BENCH_PHASE_FRAMES * 2);
     int rendered = 0;
 #ifdef AVSP_ENEMY_PROMOTION_BENCH
+#ifndef AVSP_PLAYER_ENEMY_INTEGRATION
     AvspPortV2EnemyInput promoted_input;
+#endif
     AvspPortV2EnemyView promoted_view;
 #endif
 
@@ -3325,9 +3342,13 @@ static void enemy_bench_frame_callback(void)
         return;
     }
 #ifdef AVSP_ENEMY_PROMOTION_BENCH
+#ifdef AVSP_PLAYER_ENEMY_INTEGRATION
+    avsp_port_v2_enemy_view(&player_enemy_port_v2.enemy, &promoted_view);
+#else
     promoted_input.translated = relative >= ENEMY_BENCH_PHASE_FRAMES;
     avsp_port_v2_enemy_step(&enemy_port_v2, &promoted_input);
     avsp_port_v2_enemy_view(&enemy_port_v2, &promoted_view);
+#endif
     enemy->x = promoted_view.world_x;
     enemy->lane = promoted_view.lane;
     enemy->facing = promoted_view.facing;
@@ -3421,10 +3442,17 @@ static void player_bench_init(void)
     player_bench.head_canary = PLAYER_BENCH_CANARY_HEAD;
     player_bench.tail_canary = PLAYER_BENCH_CANARY_TAIL;
 #ifdef AVSP_PLAYER_PROMOTION_BENCH
+#ifdef AVSP_PLAYER_ENEMY_INTEGRATION
+    avsp_port_v2_player_enemy_init(&player_enemy_port_v2);
+    player_bench.actor.x = player_enemy_port_v2.player.x;
+    player_bench.actor.lane = player_enemy_port_v2.player.lane;
+    player_bench.actor.facing = player_enemy_port_v2.player.facing;
+#else
     avsp_port_v2_player_init(&player_port_v2);
     player_bench.actor.x = player_port_v2.x;
     player_bench.actor.lane = player_port_v2.lane;
     player_bench.actor.facing = player_port_v2.facing;
+#endif
 #else
     player_bench.actor.x = 192;
     player_bench.actor.lane = 178;
@@ -3452,8 +3480,22 @@ static void player_bench_step(const CapInput *input)
     promoted_input.right = input->right;
     promoted_input.up = input->up;
     promoted_input.down = input->down;
+#ifdef AVSP_PLAYER_ENEMY_INTEGRATION
+    {
+        AvspPortV2PlayerEnemyInput integration_input;
+        integration_input.player = promoted_input;
+        integration_input.enemy_translated =
+            enemy_bench.frame % (ENEMY_BENCH_PHASE_FRAMES * 2) >=
+            ENEMY_BENCH_PHASE_FRAMES;
+        avsp_port_v2_player_enemy_step(&player_enemy_port_v2,
+                                       &integration_input);
+        avsp_port_v2_player_view(&player_enemy_port_v2.player,
+                                 &promoted_view);
+    }
+#else
     avsp_port_v2_player_step(&player_port_v2, &promoted_input);
     avsp_port_v2_player_view(&player_port_v2, &promoted_view);
+#endif
     actor->x = promoted_view.world_x;
     actor->lane = promoted_view.lane;
     actor->facing = promoted_view.facing;
@@ -3461,8 +3503,13 @@ static void player_bench_step(const CapInput *input)
         CAP_ACT_WALK : CAP_ACT_IDLE;
     actor->action_frame = 0;
     actor->locomotion_frame = promoted_view.locomotion_frame;
+#ifdef AVSP_PLAYER_ENEMY_INTEGRATION
+    avsp_diag_player_input_mask = player_enemy_port_v2.player.input_mask;
+    avsp_diag_player_input_edges = player_enemy_port_v2.player.input_edges;
+#else
     avsp_diag_player_input_mask = player_port_v2.input_mask;
     avsp_diag_player_input_edges = player_port_v2.input_edges;
+#endif
 #else
     int moving = 0;
     int mask = player_bench_input_mask(input);
@@ -3567,9 +3614,29 @@ static void player_bench_frame_callback(void)
     avsp_diag_player_asset_failures = failed_asset == JO_NULL ? 0 : 1;
     avsp_diag_player_disc_late_reads = avsp_disc_guard_state.late_read_attempts;
 #ifdef AVSP_PLAYER_ENEMY_INTEGRATION
+    {
+        AvspPortV2PlayerEnemyView integration_view;
     enemy_bench_frame_callback();
+        avsp_port_v2_player_enemy_view(&player_enemy_port_v2,
+                                       &integration_view);
     avsp_diag_integration_interface_version = AVSP_PORT_V2_PLAYER_ENEMY_INTERFACE_VERSION;
     avsp_diag_integration_approval_locks_ok = avsp_port_v2_player_enemy_approvals_valid();
+        avsp_diag_integration_actor_count = integration_view.actor_count;
+        avsp_diag_integration_render_order_ok =
+            avsp_port_v2_player_enemy_render_order_valid(
+                integration_view.render_order, integration_view.actor_count);
+        avsp_diag_integration_render_command_count =
+            avsp_diag_player_render_count + avsp_diag_enemy_render_count;
+        avsp_diag_integration_canaries_ok =
+            avsp_diag_player_canary_ok && avsp_diag_enemy_canary_ok;
+        avsp_diag_integration_asset_failures =
+            avsp_diag_player_asset_failures + avsp_diag_enemy_asset_failures;
+        avsp_diag_integration_disc_late_reads =
+            avsp_diag_player_disc_late_reads +
+            avsp_diag_enemy_disc_late_reads;
+        /* Publish last so MCP observes one complete integration snapshot. */
+        avsp_diag_integration_frame = avsp_diag_enemy_frame;
+    }
 #endif
 #ifdef AVSP_PLAYER_PROMOTION_BENCH
     avsp_diag_player_interface_version = AVSP_PORT_V2_PLAYER_INTERFACE_VERSION;
@@ -4307,7 +4374,8 @@ static void frame_callback(void)
 void jo_main(void)
 {
     int index;
-#ifdef AVSP_PLAYER_PROMOTION_BENCH
+#if defined(AVSP_PLAYER_PROMOTION_BENCH) && \
+    !defined(AVSP_PLAYER_ENEMY_INTEGRATION)
     AvspPortV2PlayerLoadOps player_load_operations;
 #endif
     failed_asset = JO_NULL;
