@@ -113,6 +113,11 @@ def snapshot(mcp: Mcp, syms: dict[str, int]) -> dict[str, int]:
         "negative_rejections": "avsp_diag_hud_pcm_negative_rejections",
         "canary_ok": "avsp_diag_hud_pcm_canary_ok",
         "disc_late_reads": "avsp_diag_hud_pcm_disc_late_reads",
+        "hud_palette_binding_ok": "avsp_diag_hud_palette_binding_ok",
+        "hud_palette_yellow": "avsp_diag_hud_palette_yellow",
+        "hud_palette_red": "avsp_diag_hud_palette_red",
+        "hud_palette_energy": "avsp_diag_hud_palette_energy",
+        "hud_palette_empty": "avsp_diag_hud_palette_empty",
     }
     state = {name: signed32(mcp.u32(syms[symbol]))
              for name, symbol in names.items()}
@@ -197,6 +202,12 @@ def main() -> None:
             ImageGrab.grab(bbox=bounds, all_screens=True).save(screenshot)
     mcp.call("resume")
 
+    palette = contract["hud_palette"]
+    palette_expected = {
+        "hud_palette_binding_ok": palette["binding_ok"],
+        **{f"hud_palette_{name}": value["saturn_cram"]
+           for name, value in palette["semantic_colors"].items()},
+    }
     for state in samples.values():
         if not (state["runtime_ready"] == 1 and
                 state["interface_version"] == contract["interface_version"] and
@@ -204,7 +215,9 @@ def main() -> None:
                 state["pcm_audio_failures"] == 0 and
                 state["pcm_underruns"] == 0 and
                 state["canary_ok"] == 1 and
-                state["disc_late_reads"] == 0):
+                state["disc_late_reads"] == 0 and
+                all(state[name] == value
+                    for name, value in palette_expected.items())):
             raise RuntimeError(f"HUD/PCM readback invariant failed: {state}")
     if samples["together"]["pcm_active"] != 1 or \
             samples["together"]["pcm_channel_observed"] != 1:
@@ -212,7 +225,8 @@ def main() -> None:
     if samples["pcm_only"]["hud_render_count"] != 0 or \
             samples["pcm_only"]["pcm_active"] != 1:
         raise RuntimeError("PCM-only phase did not isolate the cue")
-    if samples["negative"]["negative_rejections"] != 3:
+    if samples["negative"]["negative_rejections"] != \
+            len(contract["negative_controls"]):
         raise RuntimeError("runtime missing/invalid asset controls did not reject")
 
     process = process_record(args.emulator_pid)

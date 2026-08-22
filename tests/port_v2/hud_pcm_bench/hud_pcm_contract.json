@@ -1,10 +1,11 @@
 {
   "schema": 1,
-  "task_id": "SALVAGE-05-HUD-PCM",
+  "task_id": "REPAIR-05-HUD-COLORS",
   "card_profile": "HudPcmSalvageBench",
   "compile_profile": "debug-hud-pcm-salvage-bench",
   "manifest_profile": "hud-pcm-salvage-bench",
-  "interface_version": 1,
+  "interface_version": 2,
+  "palette_evidence": "tests/port_v2/hud_pcm_bench/hud_palette_repair.json",
   "source_evidence_sha256": {
     "data/player_hud_capture.json": "fca59ca90fd8ca410cbea16e582da0aeb945016e16a033f05488f9e99922ad66",
     "data/qsound_melee_capture.json": "53018772fda5d186a2fe75f9f5a7aaf3c355b4e9213717c15c9b299c8ce11da5"
@@ -21,6 +22,16 @@
     "full": {"frame": 260, "state": 2, "health": 101, "energy": 64, "health_fill": 116, "energy_fill": 59, "render_count": 3},
     "pcm_only": {"frame": 420, "state": -1, "health": 50, "energy": 32, "health_fill": 57, "energy_fill": 30, "render_count": 0}
   },
+  "hud_palette": {
+    "source_offset": 1,
+    "binding_ok": 1,
+    "semantic_colors": {
+      "yellow": {"source_index": 1, "rgb888": [255, 255, 0], "saturn_cram": 33791},
+      "red": {"source_index": 2, "rgb888": [255, 0, 0], "saturn_cram": 32799},
+      "energy": {"source_index": 3, "rgb888": [187, 255, 119], "saturn_cram": 48119},
+      "empty": {"source_index": 4, "rgb888": [136, 136, 136], "saturn_cram": 50737}
+    }
+  },
   "pcm": {
     "semantic_event_frames": [147, 387],
     "start_frames": [150, 390],
@@ -35,7 +46,8 @@
   "negative_controls": [
     "missing HUD asset",
     "invalid PCM metadata",
-    "missing PCM asset"
+    "missing PCM asset",
+    "rejected zero-based HUD palette binding"
   ],
   "approved_stage_contract_sha256": "dac93621e7ef290ee2465055076b856f1f10a73480654c86782fbb4e522af300",
   "local_build_dependency_sha256": {

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "task_id": "SALVAGE-05-HUD-PCM",
+  "task_id": "REPAIR-05-HUD-COLORS",
   "card_profile": "HudPcmSalvageBench",
   "compile_profile": "debug-hud-pcm-salvage-bench",
   "manifest_profile": "hud-pcm-salvage-bench",
@@ -36,6 +36,11 @@
     "avsp_diag_pcm_underruns",
     "avsp_diag_hud_pcm_negative_rejections",
     "avsp_diag_hud_pcm_canary_ok",
-    "avsp_diag_hud_pcm_disc_late_reads"
+    "avsp_diag_hud_pcm_disc_late_reads",
+    "avsp_diag_hud_palette_binding_ok",
+    "avsp_diag_hud_palette_yellow",
+    "avsp_diag_hud_palette_red",
+    "avsp_diag_hud_palette_energy",
+    "avsp_diag_hud_palette_empty"
   ]
 }

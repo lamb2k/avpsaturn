@@ -28,6 +28,7 @@ def sha256(path: Path) -> str:
 
 
 def check_common(state: dict[str, object], contract: dict[str, object]) -> None:
+    palette = contract["hud_palette"]
     expected = {
         "runtime_ready": 1,
         "interface_version": contract["interface_version"],
@@ -36,6 +37,9 @@ def check_common(state: dict[str, object], contract: dict[str, object]) -> None:
         "pcm_underruns": 0,
         "canary_ok": 1,
         "disc_late_reads": 0,
+        "hud_palette_binding_ok": palette["binding_ok"],
+        **{f"hud_palette_{name}": value["saturn_cram"]
+           for name, value in palette["semantic_colors"].items()},
     }
     for name, value in expected.items():
         require(state[name] == value,

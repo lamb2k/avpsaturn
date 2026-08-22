@@ -24,8 +24,33 @@ def sha256(path: Path) -> str:
 
 
 def validate(contract: dict[str, object]) -> None:
-    require(contract["task_id"] == "SALVAGE-05-HUD-PCM",
+    require(contract["task_id"] == "REPAIR-05-HUD-COLORS",
             "task identity drifted")
+    palette = contract["hud_palette"]
+    require((palette["source_offset"], palette["binding_ok"]) == (1, 1),
+            "HUD palette binding drifted")
+    require(palette["semantic_colors"] == {
+        "yellow": {"source_index": 1, "rgb888": [255, 255, 0],
+                   "saturn_cram": 33791},
+        "red": {"source_index": 2, "rgb888": [255, 0, 0],
+                "saturn_cram": 32799},
+        "energy": {"source_index": 3, "rgb888": [187, 255, 119],
+                   "saturn_cram": 48119},
+        "empty": {"source_index": 4, "rgb888": [136, 136, 136],
+                  "saturn_cram": 50737},
+    }, "HUD semantic CRAM colors drifted")
+    evidence = json.loads((ROOT / contract["palette_evidence"]).read_text(
+        encoding="utf-8"))
+    require(evidence["task_id"] == contract["task_id"] and
+            evidence["binding"] == {
+                "source_offset": 1,
+                "jo_palette_entry": 0,
+                "first_visible_source_index": 1,
+                "first_visible_sprite_pen": 1,
+            } and
+            evidence["semantic_colors"] == palette["semantic_colors"] and
+            evidence["physical_saturn"] == "UNRUN",
+            "HUD palette repair evidence drifted")
     states = contract["hud_states"]
     require(set(states) == {"zero", "mid", "full", "pcm_only"},
             "zero/mid/full/PCM-only coverage drifted")
@@ -51,7 +76,8 @@ def validate(contract: dict[str, object]) -> None:
             (pcm["sample_rate"], pcm["channels"], pcm["sample_bits"]) ==
             (44100, 2, 16), "PCM source timing/format drifted")
     require(set(contract["negative_controls"]) == {
-        "missing HUD asset", "invalid PCM metadata", "missing PCM asset"},
+        "missing HUD asset", "invalid PCM metadata", "missing PCM asset",
+        "rejected zero-based HUD palette binding"},
         "required negative controls drifted")
     require(contract["disabled_systems"] ==
             ["CDDA", "combat", "camera movement", "stage expansion"],
@@ -79,6 +105,9 @@ def static_wiring(contract: dict[str, object]) -> None:
         ("HudPcmSalvageBench", "verify"),
         ("AVSP_HUD_PCM_SALVAGE_BENCH", "make"),
         ("avsp_diag_hud_pcm_negative_rejections", "source"),
+        ("avsp_diag_hud_palette_binding_ok", "source"),
+        ("avsp_hud_palette[index + 1]", "source"),
+        ("hud_palette_binding_valid(rejected_zero_based, 1)", "source"),
         ("hud_pcm_bench_frame_callback", "source"),
     ):
         require(token in files[name], f"missing HUD/PCM wiring: {token}")
@@ -94,6 +123,13 @@ def negative_controls(original: dict[str, object]) -> None:
     wrong_fill = copy.deepcopy(original)
     wrong_fill["hud_states"]["full"]["health_fill"] = 132
     mutations.append(("wrong HUD fill", wrong_fill))
+    wrong_palette_offset = copy.deepcopy(original)
+    wrong_palette_offset["hud_palette"]["source_offset"] = 0
+    mutations.append(("wrong HUD palette offset", wrong_palette_offset))
+    wrong_palette_color = copy.deepcopy(original)
+    wrong_palette_color["hud_palette"]["semantic_colors"]["yellow"][
+        "saturn_cram"] = 0
+    mutations.append(("wrong HUD palette color", wrong_palette_color))
     wrong_delay = copy.deepcopy(original)
     wrong_delay["pcm"]["start_frames"][0] = 149
     mutations.append(("wrong PCM delay", wrong_delay))
@@ -102,7 +138,7 @@ def negative_controls(original: dict[str, object]) -> None:
     mutations.append(("wrong PCM duration", wrong_duration))
     missing_control = copy.deepcopy(original)
     missing_control["negative_controls"].pop()
-    mutations.append(("missing PCM control", missing_control))
+    mutations.append(("missing palette control", missing_control))
     cdda = copy.deepcopy(original)
     cdda["disabled_systems"].remove("CDDA")
     mutations.append(("CDDA enabled", cdda))

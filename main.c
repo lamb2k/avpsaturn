@@ -317,6 +317,11 @@ volatile int avsp_diag_pcm_underruns;
 volatile int avsp_diag_hud_pcm_negative_rejections;
 volatile int avsp_diag_hud_pcm_canary_ok;
 volatile int avsp_diag_hud_pcm_disc_late_reads;
+volatile int avsp_diag_hud_palette_binding_ok;
+volatile int avsp_diag_hud_palette_yellow;
+volatile int avsp_diag_hud_palette_red;
+volatile int avsp_diag_hud_palette_energy;
+volatile int avsp_diag_hud_palette_empty;
 #endif
 #ifdef AVSP_PLAYER_SALVAGE_BENCH
 volatile int avsp_diag_player_frame;
@@ -1030,15 +1035,49 @@ static void set_frontend_palettes(void)
     }
 }
 
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+static int hud_palette_binding_valid(const jo_color *colors,
+                                     const int source_offset)
+{
+    int index;
+    for (index = 0; index < AVSP_CRAM_MAX_COLOURS; ++index)
+    {
+        if (colors[index] != JO_COLOR_RGB(
+                avsp_hud_palette[index + source_offset][0],
+                avsp_hud_palette[index + source_offset][1],
+                avsp_hud_palette[index + source_offset][2]))
+            return 0;
+    }
+    return 1;
+}
+#endif
+
 static void set_hud_palette(void)
 {
     static jo_color colors[256];
     int index;
-    for (index = 0; index < 256; ++index)
+
+    for (index = 0; index < 256; ++index) colors[index] = JO_COLOR_Black;
+    for (index = 0; index < AVSP_CRAM_MAX_COLOURS; ++index)
+        /* HUD texels are one-based: transparent is source index 0. Jo's
+           palette allocation already reserves sprite pen 0, so source index
+           1 must be copied into CRAM array entry 0. */
         colors[index] = JO_COLOR_RGB(
-            avsp_hud_palette[index][0], avsp_hud_palette[index][1],
-            avsp_hud_palette[index][2]);
+            avsp_hud_palette[index + 1][0], avsp_hud_palette[index + 1][1],
+            avsp_hud_palette[index + 1][2]);
     jo_create_palette_from(&hud_palette, colors, AVSP_CRAM_MAX_COLOURS);
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+    avsp_diag_hud_palette_binding_ok =
+        hud_palette_binding_valid(hud_palette.data, 1);
+    avsp_diag_hud_palette_yellow =
+        hud_palette.data[AVSP_HUD_YELLOW_INDEX - 1];
+    avsp_diag_hud_palette_red =
+        hud_palette.data[AVSP_HUD_RED_INDEX - 1];
+    avsp_diag_hud_palette_energy =
+        hud_palette.data[AVSP_HUD_ENERGY_INDEX - 1];
+    avsp_diag_hud_palette_empty =
+        hud_palette.data[AVSP_HUD_EMPTY_INDEX - 1];
+#endif
 }
 
 static int load_hud_image(jo_img_8bits *image, const char *filename,
@@ -2836,6 +2875,8 @@ static int hud_pcm_energy_fill(const int energy)
 
 static void hud_pcm_bench_negative_control(const int control)
 {
+    static jo_color rejected_zero_based[AVSP_CRAM_MAX_COLOURS];
+    int index;
     if ((hud_pcm_bench.negative_control_mask & (1 << control)) != 0) return;
     hud_pcm_bench.negative_control_mask |= 1 << control;
     if (control == 0)
@@ -2856,7 +2897,7 @@ static void hud_pcm_bench_negative_control(const int control)
         else
             ++avsp_diag_pcm_audio_failures;
     }
-    else
+    else if (control == 2)
     {
         jo_sound missing_sound = melee_sound;
         missing_sound.data = JO_NULL;
@@ -2864,6 +2905,17 @@ static void hud_pcm_bench_negative_control(const int control)
             ++avsp_diag_hud_pcm_negative_rejections;
         else
             ++avsp_diag_pcm_audio_failures;
+    }
+    else
+    {
+        for (index = 0; index < AVSP_CRAM_MAX_COLOURS; ++index)
+            rejected_zero_based[index] = JO_COLOR_RGB(
+                avsp_hud_palette[index][0], avsp_hud_palette[index][1],
+                avsp_hud_palette[index][2]);
+        if (!hud_palette_binding_valid(rejected_zero_based, 1))
+            ++avsp_diag_hud_pcm_negative_rejections;
+        else
+            ++avsp_diag_hud_asset_failures;
     }
 }
 
@@ -2873,7 +2925,7 @@ static void hud_pcm_bench_init(void)
     hud_pcm_bench.head_canary = HUD_PCM_BENCH_CANARY_HEAD;
     hud_pcm_bench.tail_canary = HUD_PCM_BENCH_CANARY_TAIL;
     hud_pcm_bench.underrun_reported_start = -1;
-    avsp_diag_hud_pcm_interface_version = 1;
+    avsp_diag_hud_pcm_interface_version = 2;
     avsp_diag_pcm_event_frame = -1;
     avsp_diag_pcm_start_frame = -1;
     avsp_diag_pcm_end_frame = -1;
@@ -2995,6 +3047,7 @@ static void hud_pcm_bench_frame_callback(void)
     if (relative == 450) hud_pcm_bench_negative_control(0);
     if (relative == 451) hud_pcm_bench_negative_control(1);
     if (relative == 452) hud_pcm_bench_negative_control(2);
+    if (relative == 453) hud_pcm_bench_negative_control(3);
 
     avsp_diag_hud_pcm_phase = phase;
     avsp_diag_hud_state = phase < 3 ? phase : -1;

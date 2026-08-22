@@ -58,7 +58,7 @@ def main() -> None:
         "source_task": contract["task_id"],
         "files": {
             screenshot.name: {"sha256": sha256(screenshot),
-                              "purpose": "HUD and PCM together checkpoint"},
+                              "purpose": "corrected HUD colors with PCM together checkpoint"},
             wav_path.name: {"sha256": sha256(wav_path),
                             "purpose": "capture-exact short melee cue"},
         },
@@ -69,7 +69,8 @@ def main() -> None:
         encoding="ascii", newline="\n")
     (package / "README.md").write_text(
         "# USER-05 HUD/PCM review\n\n"
-        "Open `hud-pcm-together.png` to inspect the mid-value HUD state. "
+        "Open `hud-pcm-together.png` to inspect the corrected-color, mid-value "
+        "HUD state. "
         "Play `predator-melee-cue.wav` to review the one short PCM cue.\n\n"
         "This is pinned-emulator evidence only. Physical Saturn remains "
         "`UNRUN`. Camera movement, stage expansion, combat, and CDDA are "
