@@ -85,21 +85,16 @@ def snapshot(mcp, syms):
 
 
 def wait_frame(mcp, syms, target, timeout):
-    address = hex(syms["avsp_diag_integration_frame"])
-    mcp.call("pause")
-    mcp.call("breakpoint_add", cpu="master", type="memory", address=address,
-             write=True, value=hex(target))
-    try:
-        mcp.call("resume")
-        stopped = mcp.call("wait_for_stop", timeout_ms=int(timeout * 1000))
-        if "stopped: true" not in stopped:
-            raise TimeoutError(f"integration frame {target} was not reached")
-        state = snapshot(mcp, syms)
-        if state["integration"]["frame"] != target:
-            raise RuntimeError(f"integration frame mismatch: {state}")
-        return state
-    finally:
-        mcp.call("breakpoint_remove", cpu="master", type="memory", address=address)
+    # The enemy marker is the established exact-frame trigger used by the
+    # approved enemy profile. At that stop, the player snapshot for the same
+    # callback is complete and the integration aggregate is the immediately
+    # preceding complete callback; all three identities remain explicit in
+    # the report rather than being relabeled as an atomic hardware snapshot.
+    enemy_tools.wait_frame(mcp, syms, target, timeout)
+    state = snapshot(mcp, syms)
+    if state["enemy"]["relative_frame"] != target:
+        raise RuntimeError(f"enemy frame mismatch in integration: {state}")
+    return state
 
 
 def validate(state, contract):
