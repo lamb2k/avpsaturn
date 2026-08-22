@@ -263,6 +263,10 @@ volatile int avsp_diag_player_lane;
 volatile int avsp_diag_player_facing;
 volatile int avsp_diag_player_pose;
 volatile int avsp_diag_player_pivot_y;
+volatile int avsp_diag_player_cel_left;
+volatile int avsp_diag_player_cel_top;
+volatile int avsp_diag_player_cel_right;
+volatile int avsp_diag_player_cel_bottom;
 volatile int avsp_diag_player_render_count;
 volatile int avsp_diag_player_canary_ok;
 volatile int avsp_diag_player_asset_failures;
@@ -2819,6 +2823,21 @@ static void player_bench_frame_callback(void)
     avsp_diag_player_facing = actor->facing;
     avsp_diag_player_pose = pose;
     avsp_diag_player_pivot_y = actor->lane - 200 - actor->height;
+    if (pose < 0)
+    {
+        /* Measured isolated idle frame 2525 selected-command extent. */
+        avsp_diag_player_cel_left = 56;
+        avsp_diag_player_cel_top = 74;
+        avsp_diag_player_cel_right = 136;
+        avsp_diag_player_cel_bottom = 184;
+    }
+    else
+    {
+        avsp_diag_player_cel_left = avsp_player_action_canvas_bounds[pose][0];
+        avsp_diag_player_cel_top = avsp_player_action_canvas_bounds[pose][1];
+        avsp_diag_player_cel_right = avsp_player_action_canvas_bounds[pose][2];
+        avsp_diag_player_cel_bottom = avsp_player_action_canvas_bounds[pose][3];
+    }
     avsp_diag_player_render_count = actor->action == CAP_ACT_WALK ?
         AVSP_PLAYER_ACTION_LAYERS : 2;
     avsp_diag_player_canary_ok =

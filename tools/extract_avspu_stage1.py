@@ -889,8 +889,43 @@ def load_player_action_sample_banks(action: str) -> dict[int, int]:
     return samples
 
 
+def player_presentation_pivot(
+        commands: list[dict[str, int]], grounded: bool) -> tuple[int, int]:
+    """Return the measured player anchor without clipping grounded cels.
+
+    The old bridge used the bottom of the widest palette-0 command for both
+    axes.  On the isolated idle pose that command ends at source Y=132 while
+    the complete selected player composite ends at Y=180, shifting the cel 48
+    pixels down and clipping its final 40 rows.  Grounded idle/walk poses keep
+    the same horizontal anchor but bind vertical placement to the complete
+    selected-command extent.  Airborne/action poses retain their captured
+    primary-command motion.
+    """
+    primary = max((entry for entry in commands if entry["colour"] == 0),
+                  key=lambda entry: entry["width"] * entry["height"])
+    pivot_y = (max(entry["screen_y"] + entry["height"] for entry in commands)
+               if grounded else primary["screen_y"] + primary["height"])
+    return primary["screen_x"] + primary["width"] // 2, pivot_y
+
+
+def player_canvas_bounds(
+        commands: list[dict[str, int]], pivot: tuple[int, int],
+        canvas_size: tuple[int, int] = (192, 192)) -> tuple[int, int, int, int]:
+    """Return selected-command bounds after the player's 8px bottom margin."""
+    canvas_width, canvas_height = canvas_size
+    canvas_x = canvas_width // 2 - pivot[0]
+    canvas_y = canvas_height - 8 - pivot[1]
+    return (
+        canvas_x + min(entry["screen_x"] for entry in commands),
+        canvas_y + min(entry["screen_y"] for entry in commands),
+        canvas_x + max(entry["screen_x"] + entry["width"] for entry in commands),
+        canvas_y + max(entry["screen_y"] + entry["height"] for entry in commands),
+    )
+
+
 def isolated_player_pose_capture(
-        action: str, frame: int) -> tuple[int, list[int], tuple[int, int], Path]:
+        action: str, frame: int
+        ) -> tuple[int, list[int], tuple[int, int], tuple[int, int, int, int], Path]:
     bank = load_player_action_sample_banks(action).get(frame)
     if bank not in (1, 2):
         raise ValueError(f"{action} frame {frame}: missing active object bank")
@@ -899,11 +934,16 @@ def isolated_player_pose_capture(
     words = [int(line.split("\t")[1], 16) for line in lines if line]
     entries = decode_object_entries(words)
     commands = isolated_player_animation_commands(entries)
-    primary = max((entry for entry in commands if entry["colour"] == 0),
-                  key=lambda entry: entry["width"] * entry["height"])
-    pivot = (primary["screen_x"] + primary["width"] // 2,
-             primary["screen_y"] + primary["height"])
-    return bank, sorted(entry["offset"] for entry in commands), pivot, object_path
+    grounded = action in ("idle", "walk")
+    pivot = player_presentation_pivot(commands, grounded)
+    bounds = player_canvas_bounds(commands, pivot)
+    if grounded:
+        if (bounds[0] < 0 or bounds[1] < 0 or
+                bounds[2] > 192 or bounds[3] > 192):
+            raise ValueError(
+                f"{action} frame {frame}: grounded player cel would crop at {bounds}")
+    return (bank, sorted(entry["offset"] for entry in commands), pivot,
+            bounds, object_path)
 
 
 def rightmost_blue_alien_capture(
@@ -1520,10 +1560,11 @@ def write_player_action_sequence_assets(
     archive_offsets: list[list[int]] = []
     compressed_lengths: list[list[int]] = []
     source_frames: list[int] = []
+    canvas_bounds: list[tuple[int, int, int, int]] = []
     manifest: list[dict[str, object]] = []
     for pose_index, pose_id in enumerate(pose_ids):
         action, frame = pose_sources[pose_id]
-        bank, offsets, pivot, object_path = isolated_player_pose_capture(
+        bank, offsets, pivot, bounds, object_path = isolated_player_pose_capture(
             action, frame)
         palette = load_palette_path(
             PLAYER_ACTION_ROOT / action / f"palette_{frame:05d}.tsv")
@@ -1548,6 +1589,7 @@ def write_player_action_sequence_assets(
         archive_offsets.append(pose_offsets)
         compressed_lengths.append(pose_lengths)
         source_frames.append(frame)
+        canvas_bounds.append(bounds)
 
     archive_filename = "PACT.RLE"
     (sprite_dir / archive_filename).write_bytes(archive)
@@ -1590,6 +1632,9 @@ def write_player_action_sequence_assets(
         frame_x_rows.append("    {" + ", ".join(map(str, x_values)) + "}")
         frame_y_rows.append("    {" + ", ".join(map(str, y_values)) + "}")
     frame_rows = ", ".join(str(frame) for frame in source_frames)
+    bounds_rows = ",\n".join(
+        "    {" + ", ".join(str(value) for value in bounds) + "}"
+        for bounds in canvas_bounds)
     action_constants = "\n".join(
         f"#define AVSP_PLAYER_CLIP_{str(clip['name']).upper()} {index}"
         for index, clip in enumerate(clip_specs))
@@ -1631,6 +1676,9 @@ static const signed short avsp_player_action_frame_y[AVSP_PLAYER_ACTION_CLIPS][A
 }};
 static const unsigned short avsp_player_action_source_frames[AVSP_PLAYER_ACTION_POSES] = {{
     {frame_rows}
+}};
+static const signed short avsp_player_action_canvas_bounds[AVSP_PLAYER_ACTION_POSES][4] = {{
+{bounds_rows}
 }};
 #endif
 """
@@ -2221,7 +2269,7 @@ static const unsigned short avsp_boss_source_frames[AVSP_BOSS_ACTION_POSES] = {{
 def write_exact_actor_assets(gfx: bytearray,
                              palette: list[tuple[int, int, int, int]],
                              sprite_dir: Path) -> list[dict[str, object]]:
-    idle_bank, idle_offsets, idle_pivot, idle_object_path = (
+    idle_bank, idle_offsets, idle_pivot, _, idle_object_path = (
         isolated_player_pose_capture("idle", 2525))
     isolated_idle_palette = load_palette_path(
         PLAYER_ACTION_ROOT / "idle" / "palette_02525.tsv")

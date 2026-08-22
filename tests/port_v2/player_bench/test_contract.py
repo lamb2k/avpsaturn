@@ -13,6 +13,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT))
+
+from tools.extract_avspu_stage1 import (  # noqa: E402
+    player_canvas_bounds,
+    player_presentation_pivot,
+)
 
 
 def require(condition: bool, message: str) -> None:
@@ -63,6 +69,33 @@ def replay(walk_duration: int = 19) -> list[dict[str, int]]:
     return result
 
 
+def visibility_contract(negative: bool) -> None:
+    # Exact selected-command geometry from isolated idle source frame 2525.
+    commands = [
+        {"colour": 0, "screen_x": 175, "screen_y": 84, "width": 80, "height": 48},
+        {"colour": 0, "screen_x": 191, "screen_y": 132, "width": 64, "height": 48},
+        {"colour": 0, "screen_x": 200, "screen_y": 96, "width": 32, "height": 32},
+        {"colour": 7, "screen_x": 226, "screen_y": 146, "width": 16, "height": 16},
+        {"colour": 7, "screen_x": 210, "screen_y": 114, "width": 32, "height": 32},
+        {"colour": 7, "screen_x": 196, "screen_y": 86, "width": 32, "height": 32},
+        {"colour": 7, "screen_x": 196, "screen_y": 70, "width": 16, "height": 16},
+    ]
+    pivot = player_presentation_pivot(commands, grounded=True)
+    bounds = player_canvas_bounds(commands, pivot)
+    require(pivot == (215, 180), f"grounded source pivot drifted: {pivot}")
+    require(bounds == (56, 74, 136, 184), f"grounded cel bounds drifted: {bounds}")
+    require(0 <= bounds[0] < bounds[2] <= 192 and
+            0 <= bounds[1] < bounds[3] <= 192,
+            "grounded player cel is not fully visible")
+    if negative:
+        rejected_pivot = player_presentation_pivot(commands, grounded=False)
+        rejected_bounds = player_canvas_bounds(commands, rejected_pivot)
+        require(rejected_pivot == (215, 132),
+                "negative control did not restore the rejected pivot")
+        require(rejected_bounds[3] == 232 and rejected_bounds[3] > 192,
+                "rejected pivot no longer reproduces the real crop")
+
+
 def static_contract(inventory: dict[str, object]) -> None:
     source = (ROOT / "main.c").read_text(encoding="utf-8")
     build = (ROOT / "build.ps1").read_text(encoding="utf-8")
@@ -108,6 +141,7 @@ def model_contract(negative: bool) -> None:
             capture_output=True, text=True)
         require(process.returncode != 0,
                 "missing-player-asset negative control was accepted")
+    visibility_contract(negative)
 
 
 def main() -> None:

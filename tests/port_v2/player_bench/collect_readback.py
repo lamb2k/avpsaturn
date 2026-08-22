@@ -33,6 +33,8 @@ SYMBOLS = (
     "avsp_diag_player_input_mask", "avsp_diag_player_input_edges",
     "avsp_diag_player_x", "avsp_diag_player_lane", "avsp_diag_player_facing",
     "avsp_diag_player_pose", "avsp_diag_player_pivot_y",
+    "avsp_diag_player_cel_left", "avsp_diag_player_cel_top",
+    "avsp_diag_player_cel_right", "avsp_diag_player_cel_bottom",
     "avsp_diag_player_render_count", "avsp_diag_player_canary_ok",
     "avsp_diag_player_asset_failures", "avsp_diag_player_disc_late_reads",
 )
@@ -201,7 +203,9 @@ def main() -> None:
         expected_layers = 3 if state["pose"] != 0xFFFFFFFF else 2
         if not (state["runtime_ready"] == 1 and state["asset_failures"] == 0 and
                 state["canary_ok"] == 1 and state["disc_late_reads"] == 0 and
-                state["render_count"] == expected_layers):
+                state["render_count"] == expected_layers and
+                0 <= state["cel_left"] < state["cel_right"] <= 192 and
+                0 <= state["cel_top"] < state["cel_bottom"] <= 192):
             raise RuntimeError(f"player diagnostic invariant failed: {state}")
     if right_live["pose"] == 0xFFFFFFFF:
         raise RuntimeError("walk input did not exercise a player animation pose")

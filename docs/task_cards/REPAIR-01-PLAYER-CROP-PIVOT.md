@@ -20,8 +20,10 @@ Repair only the user-observed cropped player sprite by correcting the player cel
 ## Owned paths
 
 - `main.c` player-bench draw/pivot path only
+- `tools/extract_avspu_stage1.py` grounded player idle/walk pivot and crop-rejection path only
 - `tests/port_v2/player_bench/**`
-- Card-scoped diagnostic/readback and ignored `build/feedback/REPAIR-01-PLAYER-CROP-PIVOT/**`
+- Regenerated player cel/archive payloads and card-scoped diagnostic/readback under ignored `build/**`
+- Ignored `build/feedback/REPAIR-01-PLAYER-CROP-PIVOT/**`
 - Player-rendering migration-ledger entry and card/state/handoff updates
 
 ## Existing systems to reuse

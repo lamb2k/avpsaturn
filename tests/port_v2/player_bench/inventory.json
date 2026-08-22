@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "task_id": "SALVAGE-01-PLAYER-LOAD-RENDER-INPUT",
+  "task_id": "REPAIR-01-PLAYER-CROP-PIVOT",
   "card_profile": "PlayerSalvageBench",
   "compile_profile": "debug-player-salvage-bench",
   "manifest_profile": "player-salvage-bench",
@@ -14,6 +14,10 @@
     "avsp_diag_player_facing",
     "avsp_diag_player_pose",
     "avsp_diag_player_pivot_y",
+    "avsp_diag_player_cel_left",
+    "avsp_diag_player_cel_top",
+    "avsp_diag_player_cel_right",
+    "avsp_diag_player_cel_bottom",
     "avsp_diag_player_render_count",
     "avsp_diag_player_canary_ok",
     "avsp_diag_player_asset_failures",

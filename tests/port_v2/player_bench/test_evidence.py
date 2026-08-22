@@ -34,7 +34,9 @@ def check_readback(report: dict[str, object], inventory: dict[str, object]) -> N
     initial = report["initial"]
     for key, expected in {"runtime_ready": 1, "asset_failures": 0,
                           "canary_ok": 1, "disc_late_reads": 0,
-                          "render_count": 2}.items():
+                          "render_count": 2, "cel_left": 56,
+                          "cel_top": 74, "cel_right": 136,
+                          "cel_bottom": 184}.items():
         require(initial[key] == expected, f"initial {key} was {initial[key]}")
     cases = report["input_cases"]
     expected_bits = {"right": 2, "down": 8, "left": 1}
@@ -48,6 +50,11 @@ def check_readback(report: dict[str, object], inventory: dict[str, object]) -> N
     require(cases["right"]["after"]["facing"] == 1, "right did not face right")
     require(cases["right"]["during"]["render_count"] == 3,
             "walk did not use all player action layers")
+    for direction in expected_bits:
+        state = cases[direction]["during"]
+        require(0 <= state["cel_left"] < state["cel_right"] <= 192 and
+                0 <= state["cel_top"] < state["cel_bottom"] <= 192,
+                f"{direction} walk pose exceeds the player cel")
     require(cases["down"]["after"]["lane"] > cases["down"]["before"]["lane"],
             "down did not move lane")
     require(cases["left"]["after"]["x"] < cases["left"]["before"]["x"],
