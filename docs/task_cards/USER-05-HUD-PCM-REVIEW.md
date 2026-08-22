@@ -74,4 +74,6 @@ Ask exactly: "What should remain unchanged, what looks or feels wrong, and which
 - Corrected package source: `949316331c7c12a9ae630ef5f5ebc846e4d2aef5`.
 - Corrected screenshot SHA-256: `14c280bfb70ec86566cb394e0395383d4f6aeba1167c8aec8bc8b13e372edd2c`.
 - Approved cue WAV SHA-256 remains `db539742a1cb77e2364055a26781c7bf0f1499f24fae1191c8b3f693e7b987d0`.
+- Exact renewed response: `what about player 2 hud?`
+- Recorded observation: `HUDP2.BIN` is only the blinking `PRESS START` prompt; the frame-180 package captures its blink-off phase and does not present an active Player 2 HUD for review.
 - Review status: `AWAITING_USER_FEEDBACK`; no renewed approval is inferred.
