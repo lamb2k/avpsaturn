@@ -65,7 +65,7 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has activated the dependency-safe combat integration.
 
-CURRENT_TASK: INTEGRATE-02-COMBAT
+CURRENT_TASK: USER-03-COMBAT-FEEL-REVIEW
 
 ## 4. Current salvage queue and production extension
 

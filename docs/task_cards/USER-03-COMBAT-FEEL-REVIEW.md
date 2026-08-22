@@ -2,7 +2,7 @@
 
 TASK: USER-03-COMBAT-FEEL-REVIEW
 KIND: USER_REVIEW
-STATUS: BLOCKED
+STATUS: AWAITING_USER_FEEDBACK
 CHECKPOINT: review-combat-feel
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

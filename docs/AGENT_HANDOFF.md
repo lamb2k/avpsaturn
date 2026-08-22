@@ -25,16 +25,16 @@ its historical metadata and existing continuity branch.
 
 ## Current task and next action
 
-`V2-B1` is accepted at `893268e8039195d2db572030905fc5e468fcabb2`.
-It promotes only the exact class `0x1F` HIT/KO traces behind
-`src/port_v2/combat/hit_ko/hit_ko.h`; host, Saturn diagnostic, and paired pinned
-Yaba readback pass, while normal release and physical Saturn remain UNRUN.
-The active card is `INTEGRATE-02-COMBAT`, status `READY`, in the existing continuity worktree
+`INTEGRATE-02-COMBAT` is accepted at
+`cc5f6999e8dd15146b739285db264b4b2ea45bfb`. It integrates four exact
+source-measured contacts through the accepted player/enemy, collision, and
+HIT/KO interfaces; strict host tests, the CombatIntegrationBench target build,
+and paired pinned Yaba semantic readback pass. The active card is now
+`USER-03-COMBAT-FEEL-REVIEW`, status `AWAITING_USER_FEEDBACK`, in the existing
+continuity worktree
 `C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review` on
-branch `codex/avp-user-02-enemy-review`, based on `project_state.production_head`
-`893268e8039195d2db572030905fc5e468fcabb2`. Integrate attack, contact,
-collision, damage, HIT, and KO one bounded behavior at a time through the
-accepted interfaces. Do not add AI, stage expansion, HUD, PCM, or CDDA.
+branch `codex/avp-user-02-enemy-review`. Perform no implementation. Present
+`build/feedback/USER-03-COMBAT-FEEL-REVIEW/` and record the exact response.
 
 The accepted camera/stage, corrected P1/P2 HUD, and short PCM cue remain locked.
 Physical Saturn is still `0/12`; no host, MAME, emulator, or user evidence
@@ -42,4 +42,4 @@ changes that fact.
 
 Resume prompt:
 
-> Resume the AvP salvage Goal from INTEGRATE-02-COMBAT in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; read the required controls, preserve every protected worktree and approved lock, integrate attack, contact, collision, damage, HIT, and KO one bounded behavior at a time through the accepted interfaces, run the required host, Oracle, Saturn diagnostic, and pinned-emulator checks, then stop at USER-03 for exact feedback.
+> Resume the AvP salvage Goal at USER-03-COMBAT-FEEL-REVIEW in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve every protected worktree and approved lock, perform no implementation, present build/feedback/USER-03-COMBAT-FEEL-REVIEW/, ask the exact required feedback question, and record the exact response before activating any successor.

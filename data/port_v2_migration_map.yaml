@@ -610,6 +610,58 @@
         "requested_changes": [],
         "priority": null
       }
+    },
+    {
+      "task_id": "INTEGRATE-02-COMBAT",
+      "evaluated_commit": "cc5f6999e8dd15146b739285db264b4b2ea45bfb",
+      "technical_status": "PASS",
+      "fidelity_status": "MEASURED",
+      "user_status": "AWAITING_USER_FEEDBACK",
+      "salvage_decision": "PROMOTED",
+      "production_interface": "src/port_v2/integration/combat/combat.h",
+      "diagnostic_interface": "tests/port_v2/integration/combat/run_pinned_emulator.ps1",
+      "blockers": [
+        "Unblock: record exact USER-03 combat-feel feedback before dependent promotion.",
+        "Unblock: second and third HIT reaction timing, general attack/damage rules, enemy AI, combat audio, normal release, a second emulator, and physical Saturn remain unpromoted or UNRUN."
+      ],
+      "exact_next_experiment": "Present build/feedback/USER-03-COMBAT-FEEL-REVIEW/, ask the exact required question, perform no implementation, and record the exact response before activating a repair or PROMOTE-04.",
+      "evidence": {
+        "source_samples": [5190, 5236, 5283, 5329],
+        "attack_selectors": [1, 2, 3, 4],
+        "hit_values": [8, 8, 10, 12],
+        "health_sequence": [87, 63, 39, 8, -1],
+        "strict_c90_compile": "PASS",
+        "focused_deterministic_repeat": "PASS / byte-identical host trace",
+        "real_negative_controls": "PASS / no-contact and wrong-selector rejected; mutated HIT/KO writer differential rejected",
+        "fast_lane": "PASS",
+        "oracle_wrapper": "INCOMPLETE / active worktree lacks ignored private V2-2B writer inputs",
+        "oracle_committed_and_mame_checks": "PASS",
+        "protected_v2_writer_controls": "PASS / read-only self-test and scratch mutation",
+        "target_profile": "CombatIntegrationBench / debug-combat-integration-bench",
+        "paired_target_repeat": "PASS",
+        "normalized_iso_sha256": "94c1e5bab162504ceee7914b14c2beee313c32bcdbfb8e4e0f56959ed4cf7f40",
+        "paired_pinned_emulator_readback": "PASS / exact semantic equality",
+        "exact_presented_frames": [185, 860],
+        "negative_rejections": 2,
+        "diagnostic_failures": 0,
+        "asset_or_late_read_failures": 0,
+        "tile_bank_or_rank_misses": 0,
+        "canaries_and_approved_locks": "PASS",
+        "combat_overlay_sha256": "070443fb8dd7c6791fd846fb95cce100e89eee301ba9ad6dffeea581f72cf40c",
+        "approved_base_archive_sha256": "43d9707f2bcdb0d23f82db7169052bf21d29627d966a9990706ccc472eb3c1c3",
+        "emulator": "Yaba Sanshiro 1.20.37-2986eb",
+        "emulator_evidence_tier": "ONE_EMULATOR",
+        "visual_self_review": "PASS / coherent run-1 HIT and KO frames",
+        "review_package": "build/feedback/USER-03-COMBAT-FEEL-REVIEW/",
+        "physical_saturn": "UNRUN"
+      },
+      "user_observation_state": {
+        "formal_review_question_asked": false,
+        "exact_observations": [],
+        "approved_components": [],
+        "requested_changes": [],
+        "priority": null
+      }
     }
   ],
   "subsystems": [
@@ -799,14 +851,14 @@
       "proposed_isolated_bench": "Evaluate source hitboxes and deterministic contact selectors without applying authored damage behavior.",
       "technical_status": "PASS",
       "fidelity_status": "MEASURED",
-      "user_status": "NOT_REVIEWED",
-      "salvage_decision": "SALVAGE_WITH_ADAPTER",
-      "production_interface": null,
-      "promoted_commit": null,
-      "evidence_commit": "cd31823d82024b6e33a25e8963ded5493c204772",
-      "diagnostic_interface": "tests/port_v2/collision_bench/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: INTEGRATE-02-COMBAT must join the accepted collision and HIT/KO interfaces with attack, contact, and damage behavior.", "Unblock: AI, a second emulator, normal release, USER-03 combat-feel review, and physical Saturn remain UNRUN."],
-      "exact_next_experiment": "Execute INTEGRATE-02-COMBAT one bounded behavior at a time without changing the accepted collision adapter, promoted HIT/KO interface, or approved presentation locks.",
+      "user_status": "AWAITING_USER_FEEDBACK",
+      "salvage_decision": "PROMOTED",
+      "production_interface": "src/port_v2/integration/combat/combat.h",
+      "promoted_commit": "cc5f6999e8dd15146b739285db264b4b2ea45bfb",
+      "evidence_commit": "cc5f6999e8dd15146b739285db264b4b2ea45bfb",
+      "diagnostic_interface": "tests/port_v2/integration/combat/run_pinned_emulator.ps1",
+      "blockers": ["Unblock: exact USER-03 combat-feel feedback remains pending.", "Unblock: second and third reaction timing, general attack/damage rules, AI, a second emulator, normal release, and physical Saturn remain unpromoted or UNRUN."],
+      "exact_next_experiment": "Present the ignored USER-03 package and record the exact response without implementing changes.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {
