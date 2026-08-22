@@ -175,13 +175,13 @@ architecture_enforcement:
     - id: evidence-tier-separation
       status: ACTIVE
       activates_when: always
-current_checkpoint: review-combat-feel
-active_task_card: docs/task_cards/USER-03-COMBAT-FEEL-REVIEW.md
-active_task_id: USER-03-COMBAT-FEEL-REVIEW
-active_task_kind: USER_REVIEW
-task_status: AWAITING_USER_FEEDBACK
-active_write_owner: USER-03-COMBAT-FEEL-REVIEW
-awaiting_user_feedback: [USER-03-COMBAT-FEEL-REVIEW]
+current_checkpoint: repair-combat-actor-alignment
+active_task_card: docs/task_cards/REPAIR-03-COMBAT-ACTOR-ALIGNMENT.md
+active_task_id: REPAIR-03-COMBAT-ACTOR-ALIGNMENT
+active_task_kind: REPAIR
+task_status: READY
+active_write_owner: REPAIR-03-COMBAT-ACTOR-ALIGNMENT
+awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
   - task: SALVAGE-00-OLD-BUILD-BASELINE
@@ -491,9 +491,9 @@ completed_dispositions:
     evaluated_head: cc5f6999e8dd15146b739285db264b4b2ea45bfb
     technical_status: PASS
     fidelity_status: MEASURED
-    user_status: AWAITING_USER_FEEDBACK
-    salvage_decision: PROMOTED
-    successor_activation: USER-03-COMBAT-FEEL-REVIEW
+    user_status: CHANGES_REQUESTED
+    salvage_decision: REPAIR
+    successor_activation: REPAIR-03-COMBAT-ACTOR-ALIGNMENT
     production_interface: src/port_v2/integration/combat/combat.h
     approved_component_locks:
       - Promoted player contract d0e6d835...fedf612.
@@ -511,9 +511,27 @@ completed_dispositions:
       - Visual self-review PASS for the coherent run-1 HIT and KO frames; the review package is build/feedback/USER-03-COMBAT-FEEL-REVIEW/.
       - No user approval is inferred. Normal release, a second emulator, and physical Saturn remain UNRUN; Capability Gate remains 0/12.
     blockers:
-      - Await exact USER-03 combat-feel feedback before dependent promotion.
+      - USER-03 reports misaligned player/enemy positioning; repair relative position, shared lane/ground alignment, and attack-facing relationship before dependent promotion.
       - Second and third HIT reaction timing, general attack/damage rules, enemy AI, combat audio, normal release, a second emulator, and physical Saturn remain unpromoted or UNRUN.
-    exact_next_experiment: Present the ignored USER-03 package and ask the exact required question; perform no implementation and record the exact response before activating a repair or PROMOTE-04.
+    exact_next_experiment: Execute REPAIR-03 using retained MAME frames 5190 and 5329, reject the mixed generic/source transform, preserve semantic and approved-component locks, and return corrected evidence to USER-03.
+  - task: USER-03-COMBAT-FEEL-REVIEW
+    evaluated_head: cc5f6999e8dd15146b739285db264b4b2ea45bfb
+    technical_status: PASS
+    fidelity_status: ADAPTED
+    user_status: CHANGES_REQUESTED
+    salvage_decision: REPAIR
+    successor_activation: REPAIR-03-COMBAT-ACTOR-ALIGNMENT
+    exact_response: Does it seem like the positioning of of the player and enemy is incorrect it misaligned?
+    priority_response: ok let’s do that since it is a durable requirement unless it would be best to defer once other dependencies are satisfied that would rectify the misalignment
+    approved_components: []
+    requested_changes:
+      - Correct player/enemy relative positioning and shared lane/ground alignment.
+      - Ensure the player attack faces toward the contacted enemy.
+    priority: combat-actor-alignment-first
+    blockers:
+      - No subjective combat presentation is approved until renewed USER-03 review.
+      - Physical Saturn remains UNRUN.
+    exact_next_experiment: Execute only REPAIR-03 combat actor alignment, then regenerate the ignored USER-03 package and request renewed exact feedback.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR
@@ -531,6 +549,7 @@ task_queue:
   - V2-B1
   - INTEGRATE-02-COMBAT
   - USER-03-COMBAT-FEEL-REVIEW
+  - REPAIR-03-COMBAT-ACTOR-ALIGNMENT
   - SALVAGE-04-CAMERA-STAGE-LAYERS
   - USER-04-STAGE-REVIEW
   - SALVAGE-05-HUD-PCM

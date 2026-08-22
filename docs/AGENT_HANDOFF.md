@@ -30,11 +30,13 @@ its historical metadata and existing continuity branch.
 source-measured contacts through the accepted player/enemy, collision, and
 HIT/KO interfaces; strict host tests, the CombatIntegrationBench target build,
 and paired pinned Yaba semantic readback pass. The active card is now
-`USER-03-COMBAT-FEEL-REVIEW`, status `AWAITING_USER_FEEDBACK`, in the existing
-continuity worktree
+`REPAIR-03-COMBAT-ACTOR-ALIGNMENT`, status `READY`, in the existing continuity
+worktree
 `C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review` on
-branch `codex/avp-user-02-enemy-review`. Perform no implementation. Present
-`build/feedback/USER-03-COMBAT-FEEL-REVIEW/` and record the exact response.
+branch `codex/avp-user-02-enemy-review`. USER-03 requested a durable correction
+for player/enemy positioning, shared lane/ground alignment, and attack-facing
+direction. Retained MAME frames 5190 and 5329 are sufficient for the bounded
+source-relative transform; no fresh capture is currently required.
 
 The accepted camera/stage, corrected P1/P2 HUD, and short PCM cue remain locked.
 Physical Saturn is still `0/12`; no host, MAME, emulator, or user evidence
@@ -42,4 +44,4 @@ changes that fact.
 
 Resume prompt:
 
-> Resume the AvP salvage Goal at USER-03-COMBAT-FEEL-REVIEW in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve every protected worktree and approved lock, perform no implementation, present build/feedback/USER-03-COMBAT-FEEL-REVIEW/, ask the exact required feedback question, and record the exact response before activating any successor.
+> Resume the AvP salvage Goal from REPAIR-03-COMBAT-ACTOR-ALIGNMENT in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve every protected worktree and approved lock, derive the source-relative combat placement from retained MAME frames 5190 and 5329, reject the mixed generic/source transform, run the focused and pinned-emulator checks, then return corrected evidence to renewed USER-03 review.

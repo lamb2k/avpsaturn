@@ -65,7 +65,7 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has activated the dependency-safe combat integration.
 
-CURRENT_TASK: USER-03-COMBAT-FEEL-REVIEW
+CURRENT_TASK: REPAIR-03-COMBAT-ACTOR-ALIGNMENT
 
 ## 4. Current salvage queue and production extension
 
@@ -79,7 +79,7 @@ regression locks. The current runtime body is not advanced by ARCH-01.
 | 3 | `V2-2B` | Finish only the bounded writer-closure correction |
 | 4 | `V2-B1` | Promote exact class `0x1F` HIT/KO |
 | 5 | `INTEGRATE-02-COMBAT` | Integrate attack, contact, damage, HIT, and KO |
-| 6 | `USER-03-COMBAT-FEEL-REVIEW` | Explicit human combat review |
+| 6 | `USER-03-COMBAT-FEEL-REVIEW` -> `REPAIR-03-COMBAT-ACTOR-ALIGNMENT` -> renewed `USER-03` | Correct the requested durable actor alignment before promotion |
 | 7 | `PROMOTE-04-CAMERA-STAGE` | Promote approved camera/stage presentation |
 | 8 | `PROMOTE-05-HUD` | Promote approved P1/P2 HUD presentation |
 | 9 | `PROMOTE-06-PCM` | Promote approved PCM cue path |

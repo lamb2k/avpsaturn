@@ -2,7 +2,7 @@
 
 TASK: USER-03-COMBAT-FEEL-REVIEW
 KIND: USER_REVIEW
-STATUS: AWAITING_USER_FEEDBACK
+STATUS: CHANGES_REQUESTED
 CHECKPOINT: review-combat-feel
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -11,7 +11,7 @@ DEPENDENCIES: [INTEGRATE-02-COMBAT]
 REQUIRED_LANES: [Fast]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [PROMOTE-04-CAMERA-STAGE, ORACLE-01-FULL-REFERENCE-ROUTE, ORACLE-02-FOUR-CHARACTER-ACTION-MATRIX, ORACLE-03-ENDING-CREDITS-DELTAS]
+NEXT_ELIGIBLE_CARDS: [REPAIR-03-COMBAT-ACTOR-ALIGNMENT, PROMOTE-04-CAMERA-STAGE, ORACLE-01-FULL-REFERENCE-ROUTE, ORACLE-02-FOUR-CHARACTER-ACTION-MATRIX, ORACLE-03-ENDING-CREDITS-DELTAS]
 
 ## Objective
 
@@ -60,3 +60,13 @@ Ask exactly: "What should remain unchanged, what looks or feels wrong, and which
   `PROMOTE-04-CAMERA-STAGE`.
 - The three read-only Oracle cards may proceed while pending because they cannot
   alter the reviewed combat result.
+
+## Recorded feedback
+
+- Exact observation: `Does it seem like the positioning of of the player and enemy is incorrect it misaligned?`
+- Exact priority response: `ok let’s do that since it is a durable requirement unless it would be best to defer once other dependencies are satisfied that would rectify the misalignment`
+- Derived requested change: correct player/enemy relative position, shared
+  lane/ground alignment, and attack-facing relationship before dependent
+  presentation promotion. No component approval is inferred.
+- Disposition: `CHANGES_REQUESTED`; activate only
+  `REPAIR-03-COMBAT-ACTOR-ALIGNMENT`.
