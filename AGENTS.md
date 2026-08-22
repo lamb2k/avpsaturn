@@ -23,11 +23,13 @@ scope, owned paths, checks, exclusions, hard stops, and next eligible cards.
 ## Branch and worktree continuity
 
 A new tranche, task card, milestone, or checkpoint does not by itself justify
-a new branch or worktree. Before activating a successor, inspect the existing
-branches and worktrees and select the dependency-continuous line that best
-matches the intended development path and can safely own the next bounded
-scope. Continue sequentially there and create explicit, clean commits at each
-meaningful milestone or checkpoint.
+a new branch or worktree. For each approved card, coherently commit the
+completed work, push it to `private-origin`, and verify that the remote branch
+SHA equals the local commit. Before activating its successor, inspect the
+current repository state and select the existing branch and worktree that best
+continue the dependency chain and intended development line. Continue there
+sequentially from the approved predecessor, using explicit, clean commits as
+meaningful milestone and checkpoint boundaries.
 
 Create a new branch or worktree only when required isolation, parallel
 development, incompatible dependencies, an unsafe dirty state, or a genuinely

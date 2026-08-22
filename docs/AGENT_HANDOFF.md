@@ -46,4 +46,4 @@ The active card is now `USER-02-ENEMY-BASELINE-REVIEW`, status
 ignored package at `build/feedback/USER-02-ENEMY-BASELINE-REVIEW/`, record the
 exact response, and infer no approval from silence. `SALVAGE-03-COLLISION`
 remains dependency-safe while feedback is pending, but cannot alter this
-reviewed enemy result. V2-2B remains paused. Existing-worktree-first routing is restored: this already-created USER-02 worktree is the current continuity line, and successors reuse the best existing line unless isolation, parallel development, incompatible dependencies, unsafe dirty state, or genuinely separate development requires a new one.
+reviewed enemy result. V2-2B remains paused. Existing-worktree-first routing is restored: close each approved card with a coherent commit, `private-origin` push, and verified remote SHA; inspect repository state; then continue its successor from the approved predecessor on the best existing line unless isolation, parallel development, incompatible dependencies, unsafe dirty state, or genuinely separate development requires a new one. This already-created USER-02 worktree is the current continuity line.

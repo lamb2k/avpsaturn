@@ -36,6 +36,11 @@ def main() -> None:
         "A passing emulator check is not human",
         "A user-approved component is locked",
         "build/feedback/<task-id>/",
+        "For each approved card, coherently commit",
+        "push it to `private-origin`",
+        "verify that the remote branch",
+        "select the existing branch and worktree",
+        "sequentially from the approved predecessor",
     ):
         require(token in agents, f"AGENTS.md missing policy: {token}")
     require(not re.search(r"\b[0-9a-f]{40}\b", agents),
@@ -108,6 +113,19 @@ def main() -> None:
     ):
         require(token in roadmap, f"roadmap missing {token}")
     state = (ROOT / "project_state.yaml").read_text(encoding="utf-8")
+    for token in (
+        "worktree_routing_policy:",
+        "mode: existing-worktree-first",
+        "approved_card_transition:",
+        "- push-to-private-origin",
+        "- verify-remote-sha-equals-local",
+        "- inspect-repository-state",
+        "- select-best-existing-worktree-and-branch",
+        "- continue-from-approved-predecessor",
+        "tranche_or_milestone_alone_requires_new_worktree: false",
+        "preserve_other_transition_validation_approval_and_push_requirements: true",
+    ):
+        require(token in state, f"state missing continuity policy: {token}")
     require(scalar(roadmap, "CURRENT_TASK") == scalar(state, "active_task_id"),
             "roadmap and machine-readable active task disagree")
     require(not re.search(r"\b[0-9a-f]{40}\b", roadmap),
