@@ -6,7 +6,7 @@ migration_map: data/port_v2_migration_map.yaml
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
 review_candidate_status: CORRECTIONS_REQUIRED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE]
 accepted_implementation_history:
   - id: tranche-2a-foundation
     status: ACCEPTED
@@ -23,6 +23,9 @@ accepted_implementation_history:
   - id: REPAIR-01-PLAYER-CROP-PIVOT
     status: ACCEPTED
     head: 76e497b1bcadc2b4ff8326bc855f7cef1bc7d336
+  - id: PROMOTE-01-PLAYER-PIPELINE
+    status: ACCEPTED
+    head: 602ec4f0e26f169e45684f031f805c4b2aed278f
 paused_work:
   - id: V2-2B
     status: CORRECTIONS_REQUIRED
@@ -54,12 +57,12 @@ worktree_safety:
     head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
     dirty: true
     preserve: true
-current_checkpoint: promote-player-pipeline
-active_task_card: docs/task_cards/PROMOTE-01-PLAYER-PIPELINE.md
-active_task_id: PROMOTE-01-PLAYER-PIPELINE
-active_task_kind: PROMOTE
+current_checkpoint: salvage-camera-stage
+active_task_card: docs/task_cards/SALVAGE-04-CAMERA-STAGE-LAYERS.md
+active_task_id: SALVAGE-04-CAMERA-STAGE-LAYERS
+active_task_kind: SALVAGE
 task_status: READY
-active_write_owner: PROMOTE-01-PLAYER-PIPELINE
+active_write_owner: SALVAGE-04-CAMERA-STAGE-LAYERS
 awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
@@ -113,6 +116,17 @@ completed_dispositions:
     blockers:
       - Enemy pixels, combat, camera, HUD, audio, normal release, and physical Saturn remain outside this approval.
     exact_next_experiment: Promote the approved player package without changing its reviewed output; require renewed USER_REVIEW for any approved invariant at risk.
+  - task: PROMOTE-01-PLAYER-PIPELINE
+    evaluated_head: 602ec4f0e26f169e45684f031f805c4b2aed278f
+    technical_status: PASS
+    fidelity_status: MEASURED
+    user_status: APPROVED
+    salvage_decision: PROMOTED
+    successor_activation: SALVAGE-04-CAMERA-STAGE-LAYERS
+    blockers:
+      - The observed distorted enemy pixels remain deferred to SALVAGE-02 and are not accepted by player promotion.
+      - Physical Saturn remains UNRUN.
+    exact_next_experiment: Bench fixed-checkpoint camera, VDP2 stage layers, palette ownership, framing, and one deterministic scroll step without changing the promoted player locks.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR

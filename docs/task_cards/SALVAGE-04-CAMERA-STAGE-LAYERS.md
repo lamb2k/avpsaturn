@@ -2,7 +2,7 @@
 
 TASK: SALVAGE-04-CAMERA-STAGE-LAYERS
 KIND: SALVAGE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: salvage-camera-stage
 BASE: project_state.accepted_head
 BRANCH: codex/avp-salvage-04-camera-stage

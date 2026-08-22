@@ -26,24 +26,18 @@ reuse candidates, not production gameplay authority or parity gates.
 
 ## Current task and next action
 
-USER-01 returned `the character sprite is cropped but moving.` Motion remains an
-observation, not approval. REPAIR-01 corrected the grounded player pivot at
-`76e497b1bcadc2b4ff8326bc855f7cef1bc7d336`: paired clean builds and pinned Yaba
-readback prove idle bounds `(56,74)-(136,184)`, sampled walk bounds
-`(28,88)-(152,184)`, the same seven-command/input/canary/zero-late-read locks,
-and normalized ISO `7a9326d08607813fb88fb969de5f8f92b233649575e694b742e87141c6f28ef6`.
-The real negative control restores the rejected idle bottom `232` and fails the
-full-visible-cel invariant. Physical Saturn remains `UNRUN`.
-
 `USER-01-PLAYER-BASELINE-REVIEW` exact response is `Looks good keep going`.
-The corrected full-visible player image/pivot/palette and fixed-background
-presentation, shown idle/walk animation, and demonstrated movement/facing are
-approved and locked. Enemy pixels, combat, camera, HUD, audio, normal release,
-and physical Saturn remain outside this approval.
+PROMOTE-01 is accepted at `602ec4f0e26f169e45684f031f805c4b2aed278f`.
+Strict C90 DEV/repeat/negative controls, paired target builds, and paired pinned
+Yaba readback pass with normalized ISO
+`b94d5cf9b262c7a82ee3bed217f7a499cfeda50809ee23f6a68f29cc9670b6f0`.
+The interface keeps the approved asset hashes, full-visible bounds, palette,
+idle/walk behavior, directional edges, seven VDP1 commands, canaries, and zero
+late reads. Physical Saturn remains `UNRUN`.
 
-The active card is `PROMOTE-01-PLAYER-PIPELINE`, status `READY`. Promote only
-the approved loading, input, player asset, animation, and rendering decisions
-behind narrow `src/port_v2/player/**` interfaces in its declared clean branch/
-worktree. Preserve the approved package byte/behavior locks and require renewed
-USER_REVIEW if any approved invariant is at risk. Physical Saturn remains
-`UNRUN`; V2-2B remains paused and does not block player promotion.
+The active card is `SALVAGE-04-CAMERA-STAGE-LAYERS`, status `READY`, the only
+dependency-safe successor predeclared by PROMOTE-01 while INTEGRATE-01 awaits
+PROMOTE-02. Bench only fixed-checkpoint camera, VDP2 stage layers, priority,
+palette ownership, 384-to-352 framing, and one deterministic scroll step.
+Preserve all promoted-player regression locks. Enemy distortion remains
+unaccepted for SALVAGE-02; V2-2B remains paused.

@@ -2,7 +2,7 @@
 
 TASK: PROMOTE-01-PLAYER-PIPELINE
 KIND: PROMOTE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: promote-player-pipeline
 BASE: project_state.accepted_head
 BRANCH: codex/avp-promote-01-player-pipeline
