@@ -430,6 +430,55 @@ volatile int avsp_diag_integration_disc_late_reads;
  * integration frame marker in its own aligned block so adjacent diagnostic
  * writes cannot satisfy a value-filtered frame breakpoint. */
 volatile int avsp_diag_integration_frame[4] __attribute__((aligned(16)));
+typedef struct
+{
+    int source_frame;
+    int player_x;
+    int player_lane;
+    int player_facing;
+    int player_pose;
+    int player_cel_left;
+    int player_cel_top;
+    int player_cel_right;
+    int player_cel_bottom;
+    int player_render_count;
+    int player_canary_ok;
+    int player_asset_failures;
+    int player_disc_late_reads;
+    int player_interface_version;
+    int player_approval_lock_ok;
+    int player_loader_adapter_ok;
+    int enemy_phase;
+    int enemy_class_id;
+    int enemy_x;
+    int enemy_lane;
+    int enemy_facing;
+    int enemy_anim_record;
+    int enemy_assembly;
+    int enemy_object_count;
+    int enemy_render_count;
+    int enemy_palette_bank;
+    int enemy_canary_ok;
+    int enemy_asset_failures;
+    int enemy_disc_late_reads;
+    int enemy_tile_bank_misses;
+    int enemy_tile_rank_misses;
+    int enemy_interface_version;
+    int enemy_negative_rejections;
+    int enemy_approval_lock_ok;
+    int enemy_loader_adapter_ok;
+    int integration_interface_version;
+    int integration_approval_locks_ok;
+    int integration_loader_order_ok;
+    int integration_actor_count;
+    int integration_render_order_ok;
+    int integration_render_command_count;
+    int integration_canaries_ok;
+    int integration_asset_failures;
+    int integration_disc_late_reads;
+} AvspIntegrationDiagnosticSample;
+volatile AvspIntegrationDiagnosticSample avsp_diag_integration_samples[3];
+volatile int avsp_diag_integration_sample_count;
 #endif
 #endif
 #ifdef AVSP_FRONTEND_SHOT_TEST
@@ -3637,6 +3686,91 @@ static void player_bench_frame_callback(void)
         avsp_diag_integration_disc_late_reads =
             avsp_diag_player_disc_late_reads +
             avsp_diag_enemy_disc_late_reads;
+        {
+            int sample_index = -1;
+            volatile AvspIntegrationDiagnosticSample *sample;
+            if (avsp_diag_integration_sample_count == 0 &&
+                avsp_diag_enemy_frame == 20)
+                sample_index = 0;
+            else if (avsp_diag_integration_sample_count == 1 &&
+                     avsp_diag_enemy_frame == 140)
+                sample_index = 1;
+            else if (avsp_diag_integration_sample_count == 2 &&
+                     avsp_diag_enemy_frame == 20)
+                sample_index = 2;
+            if (sample_index >= 0)
+            {
+                sample = &avsp_diag_integration_samples[sample_index];
+                sample->source_frame = avsp_diag_enemy_frame;
+                sample->player_x = avsp_diag_player_x;
+                sample->player_lane = avsp_diag_player_lane;
+                sample->player_facing = avsp_diag_player_facing;
+                sample->player_pose = avsp_diag_player_pose;
+                sample->player_cel_left = avsp_diag_player_cel_left;
+                sample->player_cel_top = avsp_diag_player_cel_top;
+                sample->player_cel_right = avsp_diag_player_cel_right;
+                sample->player_cel_bottom = avsp_diag_player_cel_bottom;
+                sample->player_render_count = avsp_diag_player_render_count;
+                sample->player_canary_ok = avsp_diag_player_canary_ok;
+                sample->player_asset_failures =
+                    avsp_diag_player_asset_failures;
+                sample->player_disc_late_reads =
+                    avsp_diag_player_disc_late_reads;
+                sample->player_interface_version =
+                    avsp_diag_player_interface_version;
+                sample->player_approval_lock_ok =
+                    avsp_diag_player_approval_lock_ok;
+                sample->player_loader_adapter_ok =
+                    avsp_diag_player_loader_adapter_ok;
+                sample->enemy_phase = avsp_diag_enemy_phase;
+                sample->enemy_class_id = avsp_diag_enemy_class_id;
+                sample->enemy_x = avsp_diag_enemy_x;
+                sample->enemy_lane = avsp_diag_enemy_lane;
+                sample->enemy_facing = avsp_diag_enemy_facing;
+                sample->enemy_anim_record = avsp_diag_enemy_anim_record;
+                sample->enemy_assembly = avsp_diag_enemy_assembly;
+                sample->enemy_object_count = avsp_diag_enemy_object_count;
+                sample->enemy_render_count = avsp_diag_enemy_render_count;
+                sample->enemy_palette_bank = avsp_diag_enemy_palette_bank;
+                sample->enemy_canary_ok = avsp_diag_enemy_canary_ok;
+                sample->enemy_asset_failures =
+                    avsp_diag_enemy_asset_failures;
+                sample->enemy_disc_late_reads =
+                    avsp_diag_enemy_disc_late_reads;
+                sample->enemy_tile_bank_misses =
+                    avsp_diag_enemy_tile_bank_misses;
+                sample->enemy_tile_rank_misses =
+                    avsp_diag_enemy_tile_rank_misses;
+                sample->enemy_interface_version =
+                    avsp_diag_enemy_interface_version;
+                sample->enemy_negative_rejections =
+                    avsp_diag_enemy_negative_rejections;
+                sample->enemy_approval_lock_ok =
+                    avsp_diag_enemy_approval_lock_ok;
+                sample->enemy_loader_adapter_ok =
+                    avsp_diag_enemy_loader_adapter_ok;
+                sample->integration_interface_version =
+                    avsp_diag_integration_interface_version;
+                sample->integration_approval_locks_ok =
+                    avsp_diag_integration_approval_locks_ok;
+                sample->integration_loader_order_ok =
+                    avsp_diag_integration_loader_order_ok;
+                sample->integration_actor_count =
+                    avsp_diag_integration_actor_count;
+                sample->integration_render_order_ok =
+                    avsp_diag_integration_render_order_ok;
+                sample->integration_render_command_count =
+                    avsp_diag_integration_render_command_count;
+                sample->integration_canaries_ok =
+                    avsp_diag_integration_canaries_ok;
+                sample->integration_asset_failures =
+                    avsp_diag_integration_asset_failures;
+                sample->integration_disc_late_reads =
+                    avsp_diag_integration_disc_late_reads;
+                /* Publish the count only after the complete sample. */
+                avsp_diag_integration_sample_count = sample_index + 1;
+            }
+        }
         /* Publish last so MCP observes one complete integration snapshot. */
         avsp_diag_integration_frame[0] = avsp_diag_enemy_frame;
     }

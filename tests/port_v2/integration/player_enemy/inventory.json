@@ -61,7 +61,9 @@
     "avsp_diag_integration_canaries_ok",
     "avsp_diag_integration_asset_failures",
     "avsp_diag_integration_disc_late_reads",
-    "avsp_diag_integration_frame"
+    "avsp_diag_integration_frame",
+    "avsp_diag_integration_samples",
+    "avsp_diag_integration_sample_count"
   ],
   "physical_saturn": "UNRUN"
 }

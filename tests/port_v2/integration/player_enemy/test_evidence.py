@@ -31,7 +31,7 @@ def check_state(state, contract, expected):
     require(state["runtime_ready"] == 1, "integration was not runtime-ready")
     require((state["requested_enemy_frame"], enemy["relative_frame"],
              enemy["phase"], enemy["x"]) ==
-            (expected["frame"], (expected["frame"] - 1) % 240,
+            (expected["frame"], expected["frame"],
              expected["phase"], expected["x"]),
             "enemy schedule drifted")
     require((enemy["class_id"], enemy["palette_bank"], enemy["lane"],
@@ -108,9 +108,10 @@ def main():
                 right["after"]["facing"] == 1 and
                 right["during"]["render_count"] == 3,
                 "player movement/walk layers drifted")
-        require(report["final"]["integration"]["render_command_count"] ==
-                contract["idle_render_commands"],
-                "idle combined render count drifted")
+        for state in report["samples"].values():
+            require(state["integration"]["render_command_count"] ==
+                    contract["idle_render_commands"],
+                    "sampled idle combined render count drifted")
         require(report["vdp1_command_count"] >= contract["idle_render_commands"],
                 "VDP1 command list is too short")
         screenshot = ROOT / report["screenshot"]["path"]
