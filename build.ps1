@@ -12,6 +12,7 @@ param(
     [switch]$BossHitTest,
     [switch]$BossKoTest,
     [switch]$PlayerSalvageBench,
+    [switch]$PlayerPromotionBench,
     [switch]$SkipHostTests
 )
 
@@ -182,7 +183,8 @@ try {
                 -Destination (Join-Path $contentRoot $metadataName) -Force
         }
 
-        $buildProfile = if ($PlayerSalvageBench) { 'player-salvage-bench' }
+        $buildProfile = if ($PlayerPromotionBench) { 'player-promotion-bench' }
+            elseif ($PlayerSalvageBench) { 'player-salvage-bench' }
             elseif ($BossKoTest) { 'boss-ko-test' }
             elseif ($BossHitTest) { 'boss-hit-test' }
             elseif ($EncounterTest) { 'encounter-test' }
@@ -257,6 +259,10 @@ try {
         }
         if ($PlayerSalvageBench) {
             $makeArguments += 'AVSP_PLAYER_SALVAGE_BENCH=1'
+        }
+        if ($PlayerPromotionBench) {
+            $makeArguments += 'AVSP_PLAYER_SALVAGE_BENCH=1'
+            $makeArguments += 'AVSP_PLAYER_PROMOTION_BENCH=1'
         }
         $loaderBuildRoot = Join-Path $projectRoot 'build\loader'
         New-Item -ItemType Directory -Path $loaderBuildRoot -Force | Out-Null

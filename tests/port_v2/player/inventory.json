@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "task_id": "PROMOTE-01-PLAYER-PIPELINE",
+  "card_profile": "PlayerPromotionBench",
+  "compile_profile": "debug-player-promotion-bench",
+  "manifest_profile": "player-promotion-bench",
+  "required_readback_symbols": [
+    "avsp_diag_runtime_ready",
+    "avsp_diag_player_frame",
+    "avsp_diag_player_input_mask",
+    "avsp_diag_player_input_edges",
+    "avsp_diag_player_x",
+    "avsp_diag_player_lane",
+    "avsp_diag_player_facing",
+    "avsp_diag_player_pose",
+    "avsp_diag_player_pivot_y",
+    "avsp_diag_player_cel_left",
+    "avsp_diag_player_cel_top",
+    "avsp_diag_player_cel_right",
+    "avsp_diag_player_cel_bottom",
+    "avsp_diag_player_render_count",
+    "avsp_diag_player_canary_ok",
+    "avsp_diag_player_asset_failures",
+    "avsp_diag_player_disc_late_reads",
+    "avsp_diag_player_interface_version",
+    "avsp_diag_player_approval_lock_ok",
+    "avsp_diag_player_loader_adapter_ok"
+  ],
+  "required_iso_members": ["/BG/CORRIDOR.TGA", "/SPR4/PXI0.BIN", "/SPR4/PXI1.BIN", "/SPR4/PACT.RLE"],
+  "disabled_systems": ["enemy", "collision", "damage", "HIT/KO", "camera", "HUD", "PCM", "CDDA"],
+  "physical_saturn": "UNRUN"
+}

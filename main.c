@@ -6,6 +6,7 @@
 #include "avsp_cram.h"
 #include "avsp_frontend.h"
 #include "avsp_disc_guard.h"
+#include "src/port_v2/player/player.h"
 
 #include "generated/avsp_anim_records.h"
 #include "generated/avsp_emit_windows.h"
@@ -235,7 +236,12 @@ typedef struct
 } PlayerBenchView;
 static PlayerBenchView player_bench;
 static int player_bench_frame;
+#ifndef AVSP_PLAYER_PROMOTION_BENCH
 static int player_bench_previous_input;
+#endif
+#ifdef AVSP_PLAYER_PROMOTION_BENCH
+static AvspPortV2PlayerRuntime player_port_v2;
+#endif
 #endif
 
 /* Stable headless readback surface. These are intentionally global and
@@ -271,6 +277,11 @@ volatile int avsp_diag_player_render_count;
 volatile int avsp_diag_player_canary_ok;
 volatile int avsp_diag_player_asset_failures;
 volatile int avsp_diag_player_disc_late_reads;
+#ifdef AVSP_PLAYER_PROMOTION_BENCH
+volatile int avsp_diag_player_interface_version;
+volatile int avsp_diag_player_approval_lock_ok;
+volatile int avsp_diag_player_loader_adapter_ok;
+#endif
 #endif
 #ifdef AVSP_FRONTEND_SHOT_TEST
 /* Visual-verification profile. The frontend surfaces this pass must compare
@@ -2714,6 +2725,7 @@ static CapInput read_input(void)
 #define PLAYER_BENCH_MIN_LANE 138
 #define PLAYER_BENCH_MAX_LANE 218
 
+#ifndef AVSP_PLAYER_PROMOTION_BENCH
 static int player_bench_input_mask(const CapInput *input)
 {
     return (input->left ? 1 : 0) |
@@ -2725,25 +2737,54 @@ static int player_bench_input_mask(const CapInput *input)
            (input->jump_pressed ? 64 : 0) |
            (input->start_pressed ? 128 : 0);
 }
+#endif
 
 static void player_bench_init(void)
 {
     memset(&player_bench, 0, sizeof(player_bench));
     player_bench.head_canary = PLAYER_BENCH_CANARY_HEAD;
     player_bench.tail_canary = PLAYER_BENCH_CANARY_TAIL;
+#ifdef AVSP_PLAYER_PROMOTION_BENCH
+    avsp_port_v2_player_init(&player_port_v2);
+    player_bench.actor.x = player_port_v2.x;
+    player_bench.actor.lane = player_port_v2.lane;
+    player_bench.actor.facing = player_port_v2.facing;
+#else
     player_bench.actor.x = 192;
     player_bench.actor.lane = 178;
     player_bench.actor.facing = 1;
+#endif
     player_bench.actor.action = CAP_ACT_IDLE;
     player_bench.actor.active = 1;
     player_bench.actor.kind = CAP_ACTOR_PLAYER;
     player_bench_frame = 0;
+#ifndef AVSP_PLAYER_PROMOTION_BENCH
     player_bench_previous_input = 0;
+#endif
 }
 
 static void player_bench_step(const CapInput *input)
 {
     CapActor *actor = &player_bench.actor;
+#ifdef AVSP_PLAYER_PROMOTION_BENCH
+    AvspPortV2PlayerInput promoted_input;
+    AvspPortV2PlayerView promoted_view;
+    promoted_input.left = input->left;
+    promoted_input.right = input->right;
+    promoted_input.up = input->up;
+    promoted_input.down = input->down;
+    avsp_port_v2_player_step(&player_port_v2, &promoted_input);
+    avsp_port_v2_player_view(&player_port_v2, &promoted_view);
+    actor->x = promoted_view.world_x;
+    actor->lane = promoted_view.lane;
+    actor->facing = promoted_view.facing;
+    actor->action = promoted_view.action == AVSP_PORT_V2_PLAYER_ACTION_WALK ?
+        CAP_ACT_WALK : CAP_ACT_IDLE;
+    actor->action_frame = 0;
+    actor->locomotion_frame = promoted_view.locomotion_frame;
+    avsp_diag_player_input_mask = player_port_v2.input_mask;
+    avsp_diag_player_input_edges = player_port_v2.input_edges;
+#else
     int moving = 0;
     int mask = player_bench_input_mask(input);
 
@@ -2786,6 +2827,7 @@ static void player_bench_step(const CapInput *input)
     else
         avsp_diag_player_input_edges |= mask & ~player_bench_previous_input;
     player_bench_previous_input = mask;
+#endif
 }
 
 static void player_bench_frame_callback(void)
@@ -2845,6 +2887,15 @@ static void player_bench_frame_callback(void)
         player_bench.tail_canary == PLAYER_BENCH_CANARY_TAIL;
     avsp_diag_player_asset_failures = failed_asset == JO_NULL ? 0 : 1;
     avsp_diag_player_disc_late_reads = avsp_disc_guard_state.late_read_attempts;
+#ifdef AVSP_PLAYER_PROMOTION_BENCH
+    avsp_diag_player_interface_version = AVSP_PORT_V2_PLAYER_INTERFACE_VERSION;
+    avsp_diag_player_approval_lock_ok =
+        avsp_port_v2_player_validate_config(
+            &avsp_port_v2_player_approved_config) &&
+        avsp_port_v2_player_bounds_valid(
+            avsp_diag_player_cel_left, avsp_diag_player_cel_top,
+            avsp_diag_player_cel_right, avsp_diag_player_cel_bottom);
+#endif
 }
 #endif
 
@@ -3564,6 +3615,9 @@ static void frame_callback(void)
 void jo_main(void)
 {
     int index;
+#ifdef AVSP_PLAYER_PROMOTION_BENCH
+    AvspPortV2PlayerLoadOps player_load_operations;
+#endif
     failed_asset = JO_NULL;
     avsp_disc_guard_init(&avsp_disc_guard_state);
     background_bitmap = JO_NULL;
@@ -3638,6 +3692,18 @@ void jo_main(void)
     }
     set_actor_palette();
 #ifdef AVSP_PLAYER_SALVAGE_BENCH
+#ifdef AVSP_PLAYER_PROMOTION_BENCH
+    player_load_operations.load_background = load_background;
+    player_load_operations.load_idle_cels = load_all_cels;
+    player_load_operations.load_action_sequences =
+        load_player_action_sequences;
+    player_load_operations.create_sprite_working_set =
+        create_player_sprite_working_set;
+    runtime_ready = avsp_port_v2_player_load(
+        cart_available, &player_load_operations);
+    avsp_diag_player_loader_adapter_ok = runtime_ready;
+    if (!cart_available) failed_asset = "4MB RAM CART REQUIRED";
+#else
     if (!cart_available)
     {
         failed_asset = "4MB RAM CART REQUIRED";
@@ -3652,6 +3718,7 @@ void jo_main(void)
                         load_player_action_sequences() &&
                         create_player_sprite_working_set();
     }
+#endif
     if (runtime_ready) player_bench_init();
     JO_UNUSED_ARG(index);
 #else

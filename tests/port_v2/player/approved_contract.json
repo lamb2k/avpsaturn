@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "task_id": "PROMOTE-01-PLAYER-PIPELINE",
+  "interface_version": 1,
+  "approved_response": "Looks good keep going",
+  "compile_profile": "debug-player-promotion-bench",
+  "manifest_profile": "player-promotion-bench",
+  "reviewed_package_normalized_iso_sha256": "7a9326d08607813fb88fb969de5f8f92b233649575e694b742e87141c6f28ef6",
+  "asset_sha256": {
+    "/BG/CORRIDOR.TGA": "a931c606875e0a6d9d71f01e9cc1579d39ce9911ac1574f1aa2312db018bccf8",
+    "/SPR4/PACT.RLE": "10d6e77394582ce3ce09018bce26d0389e39464ec85b00e920dada807049fe90",
+    "/SPR4/PXI0.BIN": "3fe466467e5f01cadfd3cd4e5263da9ff3c943fab0e3de4517840935c5eb91a8",
+    "/SPR4/PXI1.BIN": "c78b9e0676d903da8da846193706b51a07cf6daf567e884d647fa41fb583a14c"
+  },
+  "idle_canvas_bounds": [56, 74, 136, 184],
+  "sampled_walk_canvas_bounds": [28, 88, 152, 184],
+  "rejected_idle_canvas_bounds": [56, 122, 136, 232],
+  "movement": {
+    "minimum_x": 48,
+    "maximum_x": 304,
+    "minimum_lane": 138,
+    "maximum_lane": 218,
+    "horizontal_step": 2,
+    "vertical_step": 1
+  },
+  "render_layers": {"idle": 2, "walk": 3},
+  "sampled_input_edges": {"right": 2, "down": 8, "left": 1},
+  "physical_saturn": "UNRUN"
+}
