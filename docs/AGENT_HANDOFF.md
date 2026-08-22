@@ -40,10 +40,10 @@ bank/rank controls. The tracked perturbation also rejects a 39-to-38-frame
 walk-duration mutation. This is one-emulator evidence; physical Saturn is
 `UNRUN`.
 
-The active card is now `USER-02-ENEMY-BASELINE-REVIEW`, status
-`AWAITING_USER_FEEDBACK`, on predeclared branch
-`codex/avp-user-02-enemy-review`. Perform no implementation. Present the
-ignored package at `build/feedback/USER-02-ENEMY-BASELINE-REVIEW/`, record the
-exact response, and infer no approval from silence. `SALVAGE-03-COLLISION`
-remains dependency-safe while feedback is pending, but cannot alter this
-reviewed enemy result. V2-2B remains paused. Existing-worktree-first routing is restored: close each approved card with a coherent commit, `private-origin` push, and verified remote SHA; inspect repository state; then continue its successor from the approved predecessor on the best existing line unless isolation, parallel development, incompatible dependencies, unsafe dirty state, or genuinely separate development requires a new one. This already-created USER-02 worktree is the current continuity line.
+USER-02 exact response is `looks great proceed`. The reviewed class `0x1F`
+asset, palette, complete tile composition, scale, pivot/grounding, facing, and
+39-frame/19-pose walk presentation are approved and locked.
+The active card is `PROMOTE-02-ENEMY-PIPELINE`, status `READY`, on the existing
+`codex/avp-user-02-enemy-review` continuity branch. Promote only the approved
+baseline behind `src/port_v2/enemy/**`; collision, damage, HIT/KO, AI, camera,
+HUD, PCM, CDDA, and renewed visual changes remain disabled. V2-2B stays paused.

@@ -6,7 +6,7 @@ migration_map: data/port_v2_migration_map.yaml
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
 review_candidate_status: CORRECTIONS_REQUIRED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW]
 accepted_implementation_history:
   - id: tranche-2a-foundation
     status: ACCEPTED
@@ -94,13 +94,13 @@ worktree_routing_policy:
   preserve_other_transition_validation_approval_and_push_requirements: true
   current_continuity_worktree: C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review
   current_continuity_branch: codex/avp-user-02-enemy-review
-current_checkpoint: review-enemy-baseline
-active_task_card: docs/task_cards/USER-02-ENEMY-BASELINE-REVIEW.md
-active_task_id: USER-02-ENEMY-BASELINE-REVIEW
-active_task_kind: USER_REVIEW
-task_status: AWAITING_USER_FEEDBACK
-active_write_owner: USER-02-ENEMY-BASELINE-REVIEW
-awaiting_user_feedback: [USER-02-ENEMY-BASELINE-REVIEW]
+current_checkpoint: promote-enemy-pipeline
+active_task_card: docs/task_cards/PROMOTE-02-ENEMY-PIPELINE.md
+active_task_id: PROMOTE-02-ENEMY-PIPELINE
+active_task_kind: PROMOTE
+task_status: READY
+active_write_owner: PROMOTE-02-ENEMY-PIPELINE
+awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
   - task: SALVAGE-00-OLD-BUILD-BASELINE
@@ -259,17 +259,34 @@ completed_dispositions:
     evaluated_head: 17da61f6d647577fc19ac29e30bcbe624ff4d248
     technical_status: PASS
     fidelity_status: ADAPTED
-    user_status: AWAITING_REVIEW
+    user_status: APPROVED
     salvage_decision: SALVAGE_WITH_ADAPTER
     successor_activation: USER-02-ENEMY-BASELINE-REVIEW
     approved_component_locks:
       - Promoted player contract d0e6d835...fedf612.
       - Approved camera/stage contract dac93621...af300.
       - Approved P1/P2 HUD and PCM contracts e6325b97...45cafe and d907fba3...187e37.
+      - USER-02-approved enemy asset, palette, composition, pivot, grounding, facing, and walk presentation.
     blockers:
-      - USER-02 must explicitly review the enemy asset, palette, per-tile composition, pivot, and walk presentation.
       - Attack, hit, KO, AI, collision, production integration, normal release, a second emulator, and physical Saturn remain UNRUN.
-    exact_next_experiment: Present the ignored USER-02 package and ask the required exact feedback question; do no implementation while reviewing.
+    exact_next_experiment: Promote only the USER-02-approved enemy baseline behind narrow port_v2 interfaces while preserving every approved component lock.
+  - task: USER-02-ENEMY-BASELINE-REVIEW
+    evaluated_head: 17da61f6d647577fc19ac29e30bcbe624ff4d248
+    technical_status: PASS
+    fidelity_status: ADAPTED
+    user_status: APPROVED
+    salvage_decision: SALVAGE_WITH_ADAPTER
+    successor_activation: PROMOTE-02-ENEMY-PIPELINE
+    exact_response: looks great proceed
+    approved_components:
+      - Class 0x1F asset and purple palette presentation.
+      - Complete per-tile composition, scale, pivot, grounding, facing, and stationary/translated presentation.
+      - Deterministic 39-frame/19-pose walk cadence and movement presentation.
+    requested_changes: []
+    priority: continue-enemy-promotion
+    blockers:
+      - Attack, hit, KO, AI, collision, production integration, normal release, a second emulator, and physical Saturn remain outside this approval.
+    exact_next_experiment: Execute PROMOTE-02 on the current continuity line without changing the reviewed enemy presentation; require renewed USER_REVIEW for any approved invariant at risk.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR

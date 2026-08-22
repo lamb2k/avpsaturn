@@ -547,15 +547,15 @@
       "proposed_isolated_bench": "Load one class 0x1F enemy bank and prove tile, palette, assembly, and failure identities.",
       "technical_status": "PASS",
       "fidelity_status": "MEASURED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "APPROVED",
       "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
       "evidence_commit": "17da61f6d647577fc19ac29e30bcbe624ff4d248",
       "diagnostic_interface": "tests/port_v2/enemy_bench/collect_readback.py",
-      "blockers": ["Unblock: USER-02 must explicitly review the class-0x1F asset and palette presentation; physical Saturn remains UNRUN."],
-      "exact_next_experiment": "Present the ignored USER-02 package bound to tile archive 43d9707f...1c1c3 and normalized ISO dbbb2678...3ea8c4; do not infer approval.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
+      "blockers": ["Unblock: PROMOTE-02 must preserve the approved class-0x1F asset and palette presentation; physical Saturn remains UNRUN."],
+      "exact_next_experiment": "Promote the approved class-0x1F asset bank and palette identity behind the narrow port_v2 enemy interface without changing the reviewed presentation.",
+      "user_feedback": {"exact_response": "looks great proceed", "approved_components": ["Class 0x1F asset and purple palette presentation shown in USER-02."], "requested_changes": [], "priority": "continue-enemy-promotion"}
     },
     {
       "id": "enemy-rendering",
@@ -565,15 +565,15 @@
       "proposed_isolated_bench": "Render one stationary class 0x1F enemy, then one deterministic translated position.",
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "APPROVED",
       "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
       "evidence_commit": "17da61f6d647577fc19ac29e30bcbe624ff4d248",
       "diagnostic_interface": "tests/port_v2/enemy_bench/collect_readback.py",
-      "blockers": ["Unblock: USER-02 must review the adapted per-tile VDP1 composition at stationary x=192 and translated x=240; production integration and physical Saturn remain UNRUN."],
-      "exact_next_experiment": "Ask USER-02 to review the repeated 5-object/32-tile class-0x1F scanout and identify any palette, pivot, crop, or composition issue before promotion.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
+      "blockers": ["Unblock: PROMOTE-02 must preserve the approved complete per-tile composition, scale, pivot, grounding, facing, and stationary/translated presentation; production integration and physical Saturn remain UNRUN."],
+      "exact_next_experiment": "Promote the approved 5-object/32-tile stationary x=192 and translated x=240 rendering contract without changing its reviewed output.",
+      "user_feedback": {"exact_response": "looks great proceed", "approved_components": ["Complete per-tile composition, scale, pivot, grounding, facing, and stationary/translated presentation shown in USER-02."], "requested_changes": [], "priority": "continue-enemy-promotion"}
     },
     {
       "id": "enemy-animation",
@@ -583,15 +583,15 @@
       "proposed_isolated_bench": "Advance one stationary and one deterministic movement animation with fixed semantic inputs.",
       "technical_status": "PASS",
       "fidelity_status": "MEASURED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "APPROVED",
       "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
       "evidence_commit": "17da61f6d647577fc19ac29e30bcbe624ff4d248",
       "diagnostic_interface": "tests/port_v2/enemy_bench/collect_readback.py",
-      "blockers": ["Unblock: USER-02 must explicitly accept or correct the shown walk animation; attack, hit, KO, AI, collision, and physical Saturn are outside this result."],
-      "exact_next_experiment": "Review the deterministic 39-frame/19-pose source walk presentation; if accepted, PROMOTE-02 may bind only this approved enemy baseline.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
+      "blockers": ["Unblock: PROMOTE-02 must preserve the approved deterministic walk cadence and movement presentation; attack, hit, KO, AI, collision, and physical Saturn remain outside this result."],
+      "exact_next_experiment": "Promote only the approved deterministic 39-frame/19-pose walk baseline behind the port_v2 enemy action/view contract.",
+      "user_feedback": {"exact_response": "looks great proceed", "approved_components": ["Shown deterministic 39-frame/19-pose walk cadence and movement presentation."], "requested_changes": [], "priority": "continue-enemy-promotion"}
     },
     {
       "id": "collision-combat",

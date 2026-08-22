@@ -2,10 +2,10 @@
 
 TASK: PROMOTE-02-ENEMY-PIPELINE
 KIND: PROMOTE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: promote-enemy-pipeline
 BASE: project_state.accepted_head
-BRANCH: codex/avp-promote-02-enemy-pipeline
+BRANCH: codex/avp-user-02-enemy-review
 TIER: 1
 DEPENDENCIES: [SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW]
 REQUIRED_LANES: [Fast, Target, Emulator]
