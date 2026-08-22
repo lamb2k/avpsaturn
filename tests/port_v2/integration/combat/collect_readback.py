@@ -61,7 +61,12 @@ def scalar_state(mcp, syms):
         "combat_player_action_frame", "combat_enemy_visual_action",
         "combat_enemy_action_frame", "combat_negative_rejections",
         "combat_failures", "combat_complete", "combat_canary_ok"
-        , "combat_missing_code_count", "combat_presented_frame"
+        , "combat_missing_code_count", "combat_presented_frame",
+        "combat_player_x", "combat_player_lane", "combat_player_height",
+        "combat_player_facing", "combat_enemy_x", "combat_enemy_lane",
+        "combat_enemy_height", "combat_enemy_facing",
+        "combat_baseline_delta", "combat_attack_toward_target",
+        "combat_alignment_ok"
     ]
     result = {}
     for name in names:
@@ -132,6 +137,12 @@ def validate_hit(state):
         "player_disc_late_reads": 0, "enemy_canary_ok": 1,
         "enemy_asset_failures": 0, "enemy_disc_late_reads": 0,
         "enemy_tile_bank_misses": 0, "enemy_tile_rank_misses": 0
+        , "combat_player_x": 211, "combat_player_lane": 208,
+        "combat_player_height": 0, "combat_player_facing": 1,
+        "combat_enemy_x": 160, "combat_enemy_lane": 200,
+        "combat_enemy_height": 0, "combat_enemy_facing": -1,
+        "combat_baseline_delta": 8, "combat_attack_toward_target": 1,
+        "combat_alignment_ok": 1
     }
     for name, value in expected.items():
         if state[name] != value:
@@ -163,7 +174,13 @@ def validate_final(state):
         "player_asset_failures": 0, "player_disc_late_reads": 0,
         "enemy_canary_ok": 1, "enemy_asset_failures": 0,
         "enemy_disc_late_reads": 0, "enemy_tile_bank_misses": 0,
-        "enemy_tile_rank_misses": 0
+        "enemy_tile_rank_misses": 0,
+        "combat_player_x": 278, "combat_player_lane": 208,
+        "combat_player_height": 13, "combat_player_facing": 1,
+        "combat_enemy_x": 160, "combat_enemy_lane": 200,
+        "combat_enemy_height": 0, "combat_enemy_facing": -1,
+        "combat_baseline_delta": -5, "combat_attack_toward_target": 1,
+        "combat_alignment_ok": 1
     }
     for name, value in expected.items():
         if state[name] != value:

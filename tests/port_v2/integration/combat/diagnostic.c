@@ -56,6 +56,17 @@ volatile int avsp_diag_combat_negative_rejections;
 volatile int avsp_diag_combat_failures;
 volatile int avsp_diag_combat_complete;
 volatile int avsp_diag_combat_canary_ok;
+volatile int avsp_diag_combat_player_x;
+volatile int avsp_diag_combat_player_lane;
+volatile int avsp_diag_combat_player_height;
+volatile int avsp_diag_combat_player_facing;
+volatile int avsp_diag_combat_enemy_x;
+volatile int avsp_diag_combat_enemy_lane;
+volatile int avsp_diag_combat_enemy_height;
+volatile int avsp_diag_combat_enemy_facing;
+volatile int avsp_diag_combat_baseline_delta;
+volatile int avsp_diag_combat_attack_toward_target;
+volatile int avsp_diag_combat_alignment_ok;
 
 static void contact_input(const AvspPortV2CombatSourceEvent *source,
                           AvspPortV2CombatContactInput *input)
@@ -64,8 +75,8 @@ static void contact_input(const AvspPortV2CombatSourceEvent *source,
     input->source_sample = source->source_sample;
     input->attack_selector = source->attack_selector;
     input->enemy_hurt_selector = AVSP_PORT_V2_COMBAT_ENEMY_HURT_SELECTOR;
-    input->player_facing = 0u;
-    input->enemy_facing = 1u;
+    input->player_facing = source->player_facing;
+    input->enemy_facing = source->enemy_facing;
     input->player_x = source->player_x;
     input->player_y = source->player_y;
     input->player_z = source->player_z;
@@ -76,6 +87,10 @@ static void contact_input(const AvspPortV2CombatSourceEvent *source,
 
 static void publish(const AvspPortV2CombatRuntime *runtime)
 {
+    AvspPortV2CombatSourceEvent source;
+    AvspPortV2CombatPresentation presentation;
+    int source_index = diagnostic.event_index > 0 ?
+        diagnostic.event_index - 1 : 0;
     avsp_diag_combat_interface_version =
         AVSP_COMBAT_DIAGNOSTIC_INTERFACE_VERSION;
     avsp_diag_combat_source_sample = diagnostic.last_event.source_sample;
@@ -109,6 +124,30 @@ static void publish(const AvspPortV2CombatRuntime *runtime)
     avsp_diag_combat_canary_ok =
         diagnostic.head_canary == AVSP_COMBAT_CANARY_HEAD &&
         diagnostic.tail_canary == AVSP_COMBAT_CANARY_TAIL;
+    if (avsp_port_v2_combat_source_event(source_index, &source) &&
+        avsp_port_v2_combat_presentation(&source, &presentation))
+    {
+        int target_direction = presentation.enemy_x < presentation.player_x ?
+            -1 : 1;
+        avsp_diag_combat_player_x = presentation.player_x;
+        avsp_diag_combat_player_lane = presentation.player_lane;
+        avsp_diag_combat_player_height = presentation.player_height;
+        avsp_diag_combat_player_facing = presentation.player_facing;
+        avsp_diag_combat_enemy_x = presentation.enemy_x;
+        avsp_diag_combat_enemy_lane = presentation.enemy_lane;
+        avsp_diag_combat_enemy_height = presentation.enemy_height;
+        avsp_diag_combat_enemy_facing = presentation.enemy_facing;
+        avsp_diag_combat_baseline_delta = presentation.baseline_delta;
+        avsp_diag_combat_attack_toward_target =
+            presentation.player_attack_direction == target_direction;
+        avsp_diag_combat_alignment_ok =
+            avsp_port_v2_combat_alignment_valid(&presentation);
+    }
+    else
+    {
+        avsp_diag_combat_alignment_ok = 0;
+        ++diagnostic.failures;
+    }
     avsp_diag_combat_frame = diagnostic.frame;
 }
 

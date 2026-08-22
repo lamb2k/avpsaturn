@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "task_id": "REPAIR-03-COMBAT-ACTOR-ALIGNMENT",
+  "classification": "MEASURED source fields plus ADAPTED 384-to-352 relative placement",
+  "capture_root": ".deps/mame/enemy_actions",
+  "workram_base": "0xff8000",
+  "actors": {
+    "player": {"offset": "0x0380", "facing_offset": "0x0f", "x_offset": "0x10", "y_offset": "0x14", "z_offset": "0x18"},
+    "enemy": {"offset": "0x2000", "facing_offset": "0x0f", "x_offset": "0x10", "y_offset": "0x14", "z_offset": "0x18"}
+  },
+  "frames": [
+    {"frame": 5190, "workram_sha256": "4415a787cc1d736f0f4c17cdfc247ae1c8cdc5424069fa19b00041372f7173c2", "player": {"facing": 0, "x": 1360, "y": 319, "z": 319}, "enemy": {"facing": 1, "x": 1304, "y": 311, "z": 311}},
+    {"frame": 5236, "workram_sha256": "09029f993808ad58ecef08b52da178fbc9dcaffd8073a7917c7e2d7294dd0307", "player": {"facing": 0, "x": 1360, "y": 319, "z": 319}, "enemy": {"facing": 1, "x": 1286, "y": 311, "z": 311}},
+    {"frame": 5283, "workram_sha256": "964fa9c945a997c3beff30e3dabb122366fef0513a91301da07857ee89709138", "player": {"facing": 0, "x": 1360, "y": 319, "z": 319}, "enemy": {"facing": 1, "x": 1248, "y": 311, "z": 311}},
+    {"frame": 5329, "workram_sha256": "96381675830b5e9f610c7e25edba42b6851939fc54e1e57aea9bbed3b313af6e", "player": {"facing": 0, "x": 1360, "y": 332, "z": 319}, "enemy": {"facing": 1, "x": 1231, "y": 311, "z": 311}}
+  ],
+  "adapter": {"source_width": 384, "target_width": 352, "enemy_anchor_x": 160, "enemy_anchor_lane": 200, "baseline_delta_limit": 8},
+  "legacy_rejected": {"player": [192, 178, 0], "enemy": [192, 200, 0], "reason": "coincident X, inverted source order, and 22-pixel baseline separation"},
+  "fresh_mame_capture": "NOT_REQUIRED",
+  "physical_saturn": "UNRUN"
+}

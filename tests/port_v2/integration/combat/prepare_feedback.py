@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
+import subprocess
 from pathlib import Path
 
 
@@ -21,7 +22,7 @@ def sha256(path: Path) -> str:
 
 def main() -> None:
     readback = json.loads((RUN / "readback.json").read_text(encoding="ascii"))
-    contract = json.loads((HERE / "approved_contract.json").read_text())
+    contract = json.loads((HERE / "alignment_contract.json").read_text())
     if readback["result"] != "PASS" or readback["physical_saturn"] != "UNRUN":
         raise ValueError("combat readback is not reviewable at its declared tier")
     PACKAGE.mkdir(parents=True, exist_ok=True)
@@ -40,14 +41,16 @@ def main() -> None:
         "schema": 1,
         "task_id": "USER-03-COMBAT-FEEL-REVIEW",
         "source_task": contract["task_id"],
-        "implementation_commit": "cc5f6999e8dd15146b739285db264b4b2ea45bfb",
+        "implementation_commit": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "normalized_iso_sha256": readback["iso_sha256"],
         "files": files,
         "review_scope": [
             "player attack presentation",
             "alien HIT presentation",
             "alien terminal KO presentation",
-            "relative scale, grounding, palette, and readability"
+            "source-relative position, facing, shared lane baseline, scale, "
+            "palette, and readability"
         ],
         "excluded": [
             "general enemy AI",
@@ -64,8 +67,9 @@ def main() -> None:
     (PACKAGE / "README.md").write_text(
         "# USER-03 combat-feel review\n\n"
         "Open `combat-hit.png` and `combat-ko.png`. Review the attack/HIT/KO "
-        "presentation, relative actor scale, grounding, palette, and visual "
-        "readability. The package is pinned Yaba Sanshiro evidence from one "
+        "presentation, source-relative actor position and facing, shared lane "
+        "baseline, scale, palette, and visual readability. The package is "
+        "pinned Yaba Sanshiro evidence from one "
         "emulator only. Physical Saturn remains `UNRUN`.\n\n"
         "The second and third source damage events do not yet promote their "
         "reaction timing. General attack rules, damage rules, enemy AI, and "

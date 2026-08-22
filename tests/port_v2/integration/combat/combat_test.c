@@ -17,8 +17,8 @@ static void source_input(const AvspPortV2CombatSourceEvent *source,
     input->source_sample = source->source_sample;
     input->attack_selector = source->attack_selector;
     input->enemy_hurt_selector = AVSP_PORT_V2_COMBAT_ENEMY_HURT_SELECTOR;
-    input->player_facing = 0u;
-    input->enemy_facing = 1u;
+    input->player_facing = source->player_facing;
+    input->enemy_facing = source->enemy_facing;
     input->player_x = source->player_x;
     input->player_y = source->player_y;
     input->player_z = source->player_z;
@@ -133,6 +133,52 @@ static int test_wrong_selector(void)
            runtime.rejected_count == 1u;
 }
 
+static int test_source_alignment(void)
+{
+    static const int expected[4][7] =
+    {
+        {211, 208, 0, 160, 200, 0, 8},
+        {227, 208, 0, 160, 200, 0, 8},
+        {262, 208, 0, 160, 200, 0, 8},
+        {278, 208, 13, 160, 200, 0, -5}
+    };
+    AvspPortV2CombatSourceEvent source;
+    AvspPortV2CombatPresentation presentation;
+    int index;
+    for (index = 0; index < AVSP_PORT_V2_COMBAT_SOURCE_EVENT_COUNT; ++index)
+    {
+        if (!avsp_port_v2_combat_source_event(index, &source) ||
+            !avsp_port_v2_combat_presentation(&source, &presentation) ||
+            !avsp_port_v2_combat_alignment_valid(&presentation)) return 0;
+        if (presentation.player_x != expected[index][0] ||
+            presentation.player_lane != expected[index][1] ||
+            presentation.player_height != expected[index][2] ||
+            presentation.enemy_x != expected[index][3] ||
+            presentation.enemy_lane != expected[index][4] ||
+            presentation.enemy_height != expected[index][5] ||
+            presentation.baseline_delta != expected[index][6] ||
+            presentation.player_facing != 1 ||
+            presentation.enemy_facing != -1 ||
+            presentation.player_attack_direction != -1) return 0;
+    }
+    return 1;
+}
+
+static int test_legacy_alignment_rejected(void)
+{
+    AvspPortV2CombatPresentation legacy;
+    memset(&legacy, 0, sizeof(legacy));
+    legacy.player_x = 192;
+    legacy.player_lane = 178;
+    legacy.player_height = 0;
+    legacy.player_attack_direction = -1;
+    legacy.enemy_x = 192;
+    legacy.enemy_lane = 200;
+    legacy.enemy_height = 0;
+    legacy.baseline_delta = -22;
+    return !avsp_port_v2_combat_alignment_valid(&legacy);
+}
+
 int main(const int argc, char **argv)
 {
     AvspPortV2CombatRuntime first;
@@ -153,11 +199,15 @@ int main(const int argc, char **argv)
                       "combat final state drifted")) return 1;
     if (!require_true(test_presentation_lock(),
                       "approved actor presentation regressed")) return 1;
+    if (!require_true(test_source_alignment(),
+                      "source-relative combat alignment drifted")) return 1;
     if (negative &&
         (!require_true(test_no_contact(),
                        "no-contact control applied damage") ||
          !require_true(test_wrong_selector(),
-                       "wrong-selector control was accepted"))) return 1;
+                       "wrong-selector control was accepted") ||
+         !require_true(test_legacy_alignment_rejected(),
+                       "legacy mixed alignment was accepted"))) return 1;
     puts(negative ? "Combat integration negative controls: PASS" :
                     "Combat integration contract: PASS");
     return 0;

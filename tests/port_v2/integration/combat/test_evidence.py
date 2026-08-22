@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate paired INTEGRATE-02 build and pinned-emulator evidence."""
+"""Validate paired REPAIR-03 build and pinned-emulator evidence."""
 
 import hashlib
 import json
@@ -55,8 +55,12 @@ def main():
         for state in (report["hit_state"], report["final_state"]):
             require(state["enemy_tile_bank_misses"] == 0 and
                     state["enemy_tile_rank_misses"] == 0 and
-                    state["combat_missing_code_count"] == 0,
-                    "combat source tile coverage regressed")
+                    state["combat_missing_code_count"] == 0 and
+                    state["combat_alignment_ok"] == 1 and
+                    state["combat_attack_toward_target"] == 1 and
+                    abs(state["combat_baseline_delta"]) <= 8 and
+                    state["combat_player_x"] > state["combat_enemy_x"],
+                    "combat source-relative actor alignment regressed")
         for shot in report["screenshots"].values():
             path = ROOT / shot["path"]
             require(path.is_file() and sha(path) == shot["sha256"],
@@ -77,7 +81,7 @@ def main():
     require(builds[0]["asset_members"]["/SPR4/TILES.BIN"]["bytes"] +
             member["bytes"] <= 0x50000,
             "combat tile assets exceed the existing cartridge carve")
-    print("INTEGRATE-02 paired emulator evidence: PASS")
+    print("REPAIR-03 paired emulator alignment evidence: PASS")
 
 
 if __name__ == "__main__":

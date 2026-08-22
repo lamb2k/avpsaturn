@@ -7,13 +7,13 @@
 static const AvspPortV2CombatSourceEvent source_events[
     AVSP_PORT_V2_COMBAT_SOURCE_EVENT_COUNT] =
 {
-    {5190u, 1u, 8u, 87, 63, 1360, 319, 319, 1304, 311, 311,
+    {5190u, 1u, 8u, 87, 63, 1360, 319, 319, 1304, 311, 311, 0u, 1u,
      AVSP_PORT_V2_HIT_KO_HIT},
-    {5236u, 2u, 8u, 63, 39, 1360, 319, 319, 1286, 311, 311,
+    {5236u, 2u, 8u, 63, 39, 1360, 319, 319, 1286, 311, 311, 0u, 1u,
      AVSP_PORT_V2_HIT_KO_NONE},
-    {5283u, 3u, 10u, 39, 8, 1360, 319, 319, 1248, 311, 311,
+    {5283u, 3u, 10u, 39, 8, 1360, 319, 319, 1248, 311, 311, 0u, 1u,
      AVSP_PORT_V2_HIT_KO_NONE},
-    {5329u, 4u, 12u, 8, -1, 1360, 332, 319, 1231, 311, 311,
+    {5329u, 4u, 12u, 8, -1, 1360, 332, 319, 1231, 311, 311, 0u, 1u,
      AVSP_PORT_V2_HIT_KO_KO}
 };
 
@@ -32,6 +32,60 @@ int avsp_port_v2_combat_source_event(
         index >= AVSP_PORT_V2_COMBAT_SOURCE_EVENT_COUNT) return 0;
     *event = source_events[index];
     return 1;
+}
+
+static int scale_horizontal_delta(const int delta)
+{
+    if (delta < 0)
+        return -((-delta * AVSP_PORT_V2_COMBAT_TARGET_VIEW_WIDTH) /
+                 AVSP_PORT_V2_COMBAT_SOURCE_VIEW_WIDTH);
+    return (delta * AVSP_PORT_V2_COMBAT_TARGET_VIEW_WIDTH) /
+        AVSP_PORT_V2_COMBAT_SOURCE_VIEW_WIDTH;
+}
+
+int avsp_port_v2_combat_presentation(
+    const AvspPortV2CombatSourceEvent *source,
+    AvspPortV2CombatPresentation *presentation)
+{
+    int player_height;
+    int enemy_height;
+    if (source == 0 || presentation == 0) return 0;
+    player_height = source->player_y - source->player_z;
+    enemy_height = source->enemy_y - source->enemy_z;
+    if (player_height < 0 || enemy_height < 0) return 0;
+    memset(presentation, 0, sizeof(*presentation));
+    presentation->source_sample = source->source_sample;
+    presentation->enemy_x = AVSP_PORT_V2_COMBAT_ENEMY_ANCHOR_X;
+    presentation->player_x = presentation->enemy_x +
+        scale_horizontal_delta(source->player_x - source->enemy_x);
+    presentation->enemy_lane = AVSP_PORT_V2_COMBAT_ENEMY_ANCHOR_LANE;
+    presentation->player_lane = presentation->enemy_lane +
+        source->player_z - source->enemy_z;
+    presentation->player_height = player_height;
+    presentation->enemy_height = enemy_height;
+    /* The captured player base art faces left at source facing byte zero;
+     * CapActor's signed renderer convention uses +1 for that unflipped art. */
+    presentation->player_facing = source->player_facing ? -1 : 1;
+    presentation->enemy_facing = source->enemy_facing ? -1 : 1;
+    presentation->player_attack_direction = source->player_facing ? 1 : -1;
+    presentation->baseline_delta =
+        (presentation->player_lane - presentation->player_height) -
+        (presentation->enemy_lane - presentation->enemy_height);
+    return 1;
+}
+
+int avsp_port_v2_combat_alignment_valid(
+    const AvspPortV2CombatPresentation *presentation)
+{
+    int target_direction;
+    int baseline_delta;
+    if (presentation == 0 ||
+        presentation->player_x == presentation->enemy_x) return 0;
+    target_direction = presentation->enemy_x < presentation->player_x ? -1 : 1;
+    baseline_delta = presentation->baseline_delta < 0 ?
+        -presentation->baseline_delta : presentation->baseline_delta;
+    return presentation->player_attack_direction == target_direction &&
+        baseline_delta <= AVSP_PORT_V2_COMBAT_BASELINE_DELTA_LIMIT;
 }
 
 static const AvspPortV2CombatSourceEvent *find_source_event(

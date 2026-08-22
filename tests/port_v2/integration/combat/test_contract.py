@@ -92,6 +92,18 @@ def validate_sources(contract: dict) -> None:
             "combat Target verification profile is missing")
 
 
+def validate_alignment_analysis(negative: bool) -> None:
+    command = ["py.exe", "-3", "-B", str(HERE / "analyze_alignment.py")]
+    if negative:
+        command.append("--negative-control")
+    result = subprocess.run(command, check=True, capture_output=True, text=True)
+    require("REPAIR-03 retained-MAME actor alignment fields: PASS" in result.stdout,
+            "retained MAME alignment analysis failed")
+    if negative:
+        require("facing mutation: REJECTED" in result.stdout,
+                "retained MAME facing mutation was not rejected")
+
+
 def expected_lines(contract: dict) -> list[str]:
     kinds = {"DAMAGE": 2, "HIT": 3, "KO": 4}
     lines = []
@@ -113,6 +125,7 @@ def main() -> None:
     args = parser.parse_args()
     contract = json.loads((HERE / "approved_contract.json").read_text())
     validate_sources(contract)
+    validate_alignment_analysis(args.negative_control)
     root_wsl = subprocess.run(
         ["wsl.exe", "wslpath", "-a", str(ROOT)], check=True,
         capture_output=True, text=True).stdout.strip()

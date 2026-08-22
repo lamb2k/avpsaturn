@@ -3551,6 +3551,10 @@ static void enemy_bench_frame_callback(void)
     enemy->locomotion_frame = promoted_view.locomotion_frame;
 #ifdef AVSP_COMBAT_INTEGRATION_BENCH
     enemy->health = combat_port_v2.enemy_health;
+    enemy->x = avsp_diag_combat_enemy_x;
+    enemy->lane = avsp_diag_combat_enemy_lane;
+    enemy->height = avsp_diag_combat_enemy_height;
+    enemy->facing = avsp_diag_combat_enemy_facing;
     if (avsp_diag_combat_enemy_visual_action == 1)
         enemy->action = CAP_ACT_HIT;
     else if (avsp_diag_combat_enemy_visual_action == 2)
@@ -3725,6 +3729,10 @@ static void player_bench_step(const CapInput *input)
         CAP_ACT_WALK : CAP_ACT_IDLE;
     actor->action_frame = 0;
 #ifdef AVSP_COMBAT_INTEGRATION_BENCH
+    actor->x = avsp_diag_combat_player_x;
+    actor->lane = avsp_diag_combat_player_lane;
+    actor->height = avsp_diag_combat_player_height;
+    actor->facing = avsp_diag_combat_player_facing;
     if (avsp_diag_combat_player_attack_active)
     {
         actor->action = CAP_ACT_ATTACK;
@@ -3949,6 +3957,12 @@ static void player_bench_frame_callback(void)
             }
         }
 #ifdef AVSP_COMBAT_INTEGRATION_BENCH
+        jo_printf(0, 20, "ALIGN %d PX%d EX%d B%d T%d",
+                  avsp_diag_combat_alignment_ok,
+                  avsp_diag_combat_player_x,
+                  avsp_diag_combat_enemy_x,
+                  avsp_diag_combat_baseline_delta,
+                  avsp_diag_combat_attack_toward_target);
         jo_printf(0, 21, "COMBAT E%d S%d HP%d",
                   avsp_diag_combat_event_kind,
                   avsp_diag_combat_attack_selector,

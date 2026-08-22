@@ -13,11 +13,24 @@
   "enemy_table_set": "0x130ac8",
   "enemy_hurt_selector": 1,
   "events": [
-    {"sample": 5190, "attack_selector": 1, "hit_value": 8, "health_before": 87, "health_after": 63, "kind": "HIT", "player": [1360, 319, 319], "enemy": [1304, 311, 311]},
-    {"sample": 5236, "attack_selector": 2, "hit_value": 8, "health_before": 63, "health_after": 39, "kind": "DAMAGE", "player": [1360, 319, 319], "enemy": [1286, 311, 311]},
-    {"sample": 5283, "attack_selector": 3, "hit_value": 10, "health_before": 39, "health_after": 8, "kind": "DAMAGE", "player": [1360, 319, 319], "enemy": [1248, 311, 311]},
-    {"sample": 5329, "attack_selector": 4, "hit_value": 12, "health_before": 8, "health_after": -1, "kind": "KO", "player": [1360, 332, 319], "enemy": [1231, 311, 311]}
+    {"sample": 5190, "attack_selector": 1, "hit_value": 8, "health_before": 87, "health_after": 63, "kind": "HIT", "player": [1360, 319, 319], "enemy": [1304, 311, 311], "facing": [0, 1]},
+    {"sample": 5236, "attack_selector": 2, "hit_value": 8, "health_before": 63, "health_after": 39, "kind": "DAMAGE", "player": [1360, 319, 319], "enemy": [1286, 311, 311], "facing": [0, 1]},
+    {"sample": 5283, "attack_selector": 3, "hit_value": 10, "health_before": 39, "health_after": 8, "kind": "DAMAGE", "player": [1360, 319, 319], "enemy": [1248, 311, 311], "facing": [0, 1]},
+    {"sample": 5329, "attack_selector": 4, "hit_value": 12, "health_before": 8, "health_after": -1, "kind": "KO", "player": [1360, 332, 319], "enemy": [1231, 311, 311], "facing": [0, 1]}
   ],
+  "presentation_adapter": {
+    "classification": "ADAPTED from source-relative actor fields",
+    "source_width": 384,
+    "target_width": 352,
+    "enemy_anchor": [160, 200],
+    "baseline_delta_limit": 8,
+    "expected": [
+      {"sample": 5190, "player": [211, 208, 0, 1], "enemy": [160, 200, 0, -1], "baseline_delta": 8, "attack_direction": -1},
+      {"sample": 5236, "player": [227, 208, 0, 1], "enemy": [160, 200, 0, -1], "baseline_delta": 8, "attack_direction": -1},
+      {"sample": 5283, "player": [262, 208, 0, 1], "enemy": [160, 200, 0, -1], "baseline_delta": 8, "attack_direction": -1},
+      {"sample": 5329, "player": [278, 208, 13, 1], "enemy": [160, 200, 0, -1], "baseline_delta": -5, "attack_direction": -1}
+    ]
+  },
   "promoted_transitions": {"hit": [5191, 5227], "ko": [5330, 5469]},
   "unpromoted": ["second HIT reaction timing", "third HIT reaction timing", "general damage formula", "general attack state machine", "enemy AI"],
   "disabled_systems": ["camera progression", "stage expansion", "HUD", "PCM", "CDDA", "enemy AI"],

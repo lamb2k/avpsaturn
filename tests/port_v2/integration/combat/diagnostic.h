@@ -36,6 +36,17 @@ extern volatile int avsp_diag_combat_negative_rejections;
 extern volatile int avsp_diag_combat_failures;
 extern volatile int avsp_diag_combat_complete;
 extern volatile int avsp_diag_combat_canary_ok;
+extern volatile int avsp_diag_combat_player_x;
+extern volatile int avsp_diag_combat_player_lane;
+extern volatile int avsp_diag_combat_player_height;
+extern volatile int avsp_diag_combat_player_facing;
+extern volatile int avsp_diag_combat_enemy_x;
+extern volatile int avsp_diag_combat_enemy_lane;
+extern volatile int avsp_diag_combat_enemy_height;
+extern volatile int avsp_diag_combat_enemy_facing;
+extern volatile int avsp_diag_combat_baseline_delta;
+extern volatile int avsp_diag_combat_attack_toward_target;
+extern volatile int avsp_diag_combat_alignment_ok;
 
 int avsp_combat_diagnostic_init(AvspPortV2CombatRuntime *runtime);
 void avsp_combat_diagnostic_step(AvspPortV2CombatRuntime *runtime);

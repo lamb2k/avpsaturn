@@ -10,6 +10,11 @@
 #define AVSP_PORT_V2_COMBAT_PLAYER_TABLE_SET 0x0011AE02UL
 #define AVSP_PORT_V2_COMBAT_ENEMY_TABLE_SET 0x00130AC8UL
 #define AVSP_PORT_V2_COMBAT_ENEMY_HURT_SELECTOR 1
+#define AVSP_PORT_V2_COMBAT_SOURCE_VIEW_WIDTH 384
+#define AVSP_PORT_V2_COMBAT_TARGET_VIEW_WIDTH 352
+#define AVSP_PORT_V2_COMBAT_ENEMY_ANCHOR_X 160
+#define AVSP_PORT_V2_COMBAT_ENEMY_ANCHOR_LANE 200
+#define AVSP_PORT_V2_COMBAT_BASELINE_DELTA_LIMIT 8
 
 typedef enum
 {
@@ -33,8 +38,25 @@ typedef struct
     int enemy_x;
     int enemy_y;
     int enemy_z;
+    unsigned short player_facing;
+    unsigned short enemy_facing;
     unsigned short transition_kind;
 } AvspPortV2CombatSourceEvent;
+
+typedef struct
+{
+    unsigned short source_sample;
+    int player_x;
+    int player_lane;
+    int player_height;
+    int player_facing;
+    int player_attack_direction;
+    int enemy_x;
+    int enemy_lane;
+    int enemy_height;
+    int enemy_facing;
+    int baseline_delta;
+} AvspPortV2CombatPresentation;
 
 typedef struct
 {
@@ -78,6 +100,11 @@ typedef struct
 void avsp_port_v2_combat_init(AvspPortV2CombatRuntime *runtime);
 int avsp_port_v2_combat_source_event(
     int index, AvspPortV2CombatSourceEvent *event);
+int avsp_port_v2_combat_presentation(
+    const AvspPortV2CombatSourceEvent *source,
+    AvspPortV2CombatPresentation *presentation);
+int avsp_port_v2_combat_alignment_valid(
+    const AvspPortV2CombatPresentation *presentation);
 int avsp_port_v2_combat_apply_contact(
     AvspPortV2CombatRuntime *runtime,
     const AvspPortV2CombatContactInput *input,

@@ -65,6 +65,17 @@
     ,"avsp_diag_combat_missing_code_count"
     ,"avsp_diag_combat_missing_codes"
     ,"avsp_diag_combat_presented_frame"
+    ,"avsp_diag_combat_player_x"
+    ,"avsp_diag_combat_player_lane"
+    ,"avsp_diag_combat_player_height"
+    ,"avsp_diag_combat_player_facing"
+    ,"avsp_diag_combat_enemy_x"
+    ,"avsp_diag_combat_enemy_lane"
+    ,"avsp_diag_combat_enemy_height"
+    ,"avsp_diag_combat_enemy_facing"
+    ,"avsp_diag_combat_baseline_delta"
+    ,"avsp_diag_combat_attack_toward_target"
+    ,"avsp_diag_combat_alignment_ok"
   ],
   "physical_saturn": "UNRUN"
 }
