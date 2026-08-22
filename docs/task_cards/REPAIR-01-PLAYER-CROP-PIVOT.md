@@ -2,7 +2,7 @@
 
 TASK: REPAIR-01-PLAYER-CROP-PIVOT
 KIND: REPAIR
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: repair-player-crop-pivot
 BASE: project_state.accepted_head
 BRANCH: codex/avp-repair-01-player-crop-pivot
@@ -69,3 +69,11 @@ Return the corrected ignored package to `USER-01-PLAYER-BASELINE-REVIEW`; moveme
 
 - `USER-01-PLAYER-BASELINE-REVIEW` with a new ignored corrected package.
 - `SALVAGE-02-ENEMY-RENDER-ANIMATION` remains dependency-safe because it cannot alter the player result.
+
+## Accepted result
+
+- Evaluated commit: `76e497b1bcadc2b4ff8326bc855f7cef1bc7d336`.
+- Fast lane, focused contract, rejected-pivot negative control, two clean Target builds, paired pinned-emulator readback, and paired evidence validation: `PASS`.
+- Corrected idle bounds: `(56,74)-(136,184)`; sampled walk bounds: `(28,88)-(152,184)`; rejected idle bottom: `232`.
+- Normalized repeat ISO SHA-256: `7a9326d08607813fb88fb969de5f8f92b233649575e694b742e87141c6f28ef6`.
+- User status: `AWAITING_USER_FEEDBACK`; production interface: none; physical Saturn: `UNRUN`.

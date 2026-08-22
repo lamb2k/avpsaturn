@@ -2,12 +2,12 @@
 
 TASK: USER-01-PLAYER-BASELINE-REVIEW
 KIND: USER_REVIEW
-STATUS: CHANGES_REQUESTED
+STATUS: AWAITING_USER_FEEDBACK
 CHECKPOINT: review-player-baseline
 BASE: project_state.accepted_head
 BRANCH: codex/avp-user-01-player-review
 TIER: 0
-DEPENDENCIES: [SALVAGE-01-PLAYER-LOAD-RENDER-INPUT]
+DEPENDENCIES: [SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT]
 REQUIRED_LANES: [Fast]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
@@ -25,7 +25,7 @@ Present the self-reviewed player bench and wait for explicit component-scoped fe
 
 ## Existing systems to reuse
 
-- Exact SALVAGE-01 build, screenshot/clip, emulator readback, profile/commit, active/disabled systems, adaptations, and stability notes.
+- Exact corrected REPAIR-01 build, screenshot/clip, emulator readback, profile/commit, full idle/walk bounds, active/disabled systems, adaptations, and stability notes.
 
 ## Systems deliberately disabled
 
@@ -37,11 +37,11 @@ Present the self-reviewed player bench and wait for explicit component-scoped fe
 
 ## Saturn build profile
 
-Reuse the exact `PlayerSalvageBench` image; do not rebuild behavior.
+Reuse the exact corrected `PlayerSalvageBench` image; do not rebuild behavior.
 
 ## Emulator readback
 
-Reuse and verify SALVAGE-01 readback; do not manufacture new acceptance evidence.
+Reuse and verify REPAIR-01 readback; do not manufacture new acceptance evidence.
 
 ## Human-review requirement
 
@@ -61,7 +61,7 @@ Ask exactly: "What should remain unchanged, what looks or feels wrong, and which
 - `PROMOTE-01-PLAYER-PIPELINE` after approval.
 - `SALVAGE-02-ENEMY-RENDER-ANIMATION` may proceed while feedback is pending because it cannot alter the player package.
 
-## Review result
+## Prior review result
 
 - Exact response: `the character sprite is cropped but moving.`
 - Disposition: `CHANGES_REQUESTED` for player rendering.
@@ -69,3 +69,11 @@ Ask exactly: "What should remain unchanged, what looks or feels wrong, and which
 - The observed movement is recorded but is not inferred as approval of animation, input feel, or rendering.
 - Approved components: none.
 - Next bounded card: `REPAIR-01-PLAYER-CROP-PIVOT`.
+
+## Corrected package awaiting review
+
+- REPAIR-01 commit: `76e497b1bcadc2b4ff8326bc855f7cef1bc7d336`.
+- Paired normalized ISO SHA-256: `7a9326d08607813fb88fb969de5f8f92b233649575e694b742e87141c6f28ef6`.
+- Idle canvas bounds: `(56,74)-(136,184)`; sampled walk bounds: `(28,88)-(152,184)`.
+- The rejected pivot reproduces bottom `232` and is rejected by the negative control.
+- A new exact response is required; the prior response does not approve the corrected output.

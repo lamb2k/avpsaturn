@@ -122,6 +122,54 @@
         "requested_changes": [],
         "priority": null
       }
+    },
+    {
+      "task_id": "REPAIR-01-PLAYER-CROP-PIVOT",
+      "evaluated_commit": "76e497b1bcadc2b4ff8326bc855f7cef1bc7d336",
+      "technical_status": "PASS",
+      "fidelity_status": "MEASURED",
+      "user_status": "AWAITING_USER_FEEDBACK",
+      "salvage_decision": "REPAIR",
+      "production_interface": null,
+      "diagnostic_interface": "tests/port_v2/player_bench/run_pinned_emulator.ps1",
+      "blockers": [
+        "Unblock: obtain a new exact USER-01 response to the corrected full-character package before player promotion.",
+        "Unblock: keep the distorted-enemy-pixel observation isolated for SALVAGE-02; this repair does not alter or accept it.",
+        "Unblock: physical Saturn validation remains required before any physical claim."
+      ],
+      "exact_next_experiment": "Present build/feedback/USER-01-PLAYER-BASELINE-REVIEW/ and record the exact response to the corrected idle/walk bounds; only SALVAGE-02 may proceed independently while feedback is pending.",
+      "evidence": {
+        "build_profile": "PlayerSalvageBench / debug-player-salvage-bench",
+        "fast_lane": "PASS",
+        "target_clean_build_repeat": "PASS",
+        "paired_pinned_emulator_readback": "PASS",
+        "rejected_pivot_negative_control": "PASS",
+        "normalized_iso_sha256": "7a9326d08607813fb88fb969de5f8f92b233649575e694b742e87141c6f28ef6",
+        "player_asset_payload_sha256": {
+          "/BG/CORRIDOR.TGA": "a931c606875e0a6d9d71f01e9cc1579d39ce9911ac1574f1aa2312db018bccf8",
+          "/SPR4/PACT.RLE": "10d6e77394582ce3ce09018bce26d0389e39464ec85b00e920dada807049fe90",
+          "/SPR4/PXI0.BIN": "3fe466467e5f01cadfd3cd4e5263da9ff3c943fab0e3de4517840935c5eb91a8",
+          "/SPR4/PXI1.BIN": "c78b9e0676d903da8da846193706b51a07cf6daf567e884d647fa41fb583a14c"
+        },
+        "idle_canvas_bounds": [56, 74, 136, 184],
+        "sampled_walk_canvas_bounds": [28, 88, 152, 184],
+        "rejected_idle_canvas_bounds": [56, 122, 136, 232],
+        "runtime_ready": 1,
+        "asset_failure_count": 0,
+        "disc_late_reads": 0,
+        "canary": "PASS",
+        "vdp1_command_count": 7,
+        "sampled_input_edges": {"right": 2, "down": 8, "left": 1},
+        "physical_saturn": "UNRUN",
+        "review_package": "build/feedback/USER-01-PLAYER-BASELINE-REVIEW/"
+      },
+      "user_observation_state": {
+        "formal_review_question_asked": false,
+        "exact_observations": [],
+        "approved_components": [],
+        "requested_changes": [],
+        "priority": null
+      }
     }
   ],
   "subsystems": [
@@ -225,10 +273,10 @@
       "salvage_decision": "REPAIR",
       "production_interface": null,
       "promoted_commit": null,
-      "evidence_commit": "fc9f46746d082e4ccfe800304f49c55bec3e3800",
+      "evidence_commit": "76e497b1bcadc2b4ff8326bc855f7cef1bc7d336",
       "diagnostic_interface": "tests/port_v2/player_bench/collect_readback.py",
-      "blockers": ["Unblock: correct the user-observed cropped player cel/pivot and obtain renewed USER-01 approval before promotion."],
-      "exact_next_experiment": "Run REPAIR-01 with full visible idle/walk bounds, preserve movement and the seven-command VDP1 regression lock, and reject the original cropped pivot through a real negative control.",
+      "blockers": ["Unblock: obtain renewed USER-01 approval of the corrected full-character idle/walk package before promotion."],
+      "exact_next_experiment": "Present the corrected USER-01 package, retain full visible idle/walk bounds and the seven-command VDP1 regression lock, and record the exact response without inferring approval from silence.",
       "user_feedback": {"exact_response": "the character sprite is cropped but moving.", "approved_components": [], "requested_changes": ["Restore the full visible character sprite; it is currently cropped."], "priority": "player-sprite-crop"}
     },
     {
