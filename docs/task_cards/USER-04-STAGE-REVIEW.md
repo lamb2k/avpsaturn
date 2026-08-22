@@ -2,7 +2,7 @@
 
 TASK: USER-04-STAGE-REVIEW
 KIND: USER_REVIEW
-STATUS: AWAITING_USER_FEEDBACK
+STATUS: ACCEPTED
 CHECKPOINT: review-stage
 BASE: project_state.accepted_head
 BRANCH: codex/avp-user-04-stage-review
@@ -58,3 +58,12 @@ Ask exactly: "What should remain unchanged, what looks or feels wrong, and which
 
 - A bounded stage `REPAIR` or promotion card after feedback.
 - `SALVAGE-05-HUD-PCM` may proceed while pending.
+
+## Current review result
+
+- Exact response: `pass for camera and stage`
+- Disposition: `APPROVED` for the camera/stage presentation shown in the USER-04 package.
+- Approved components: camera movement/scroll/framing and fixed-checkpoint presentation; adapted two-plane stage composition, palette, priority, and final 352x224 presentation.
+- Requested camera/stage changes: none.
+- Evidence boundary: enemy sprite loading/corruption remains routed to `SALVAGE-02`; the uncaptured CPS scroll2 row-scroll table prevents a complete source-faithful scanout claim; HUD, PCM, CDDA, normal release, and physical Saturn remain outside this approval.
+- Next bounded card: `SALVAGE-05-HUD-PCM`.

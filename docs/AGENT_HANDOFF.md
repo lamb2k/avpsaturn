@@ -5,11 +5,7 @@
 
 ## Workflow pivot
 
-The project now advances through isolated salvage benches, focused validation,
-Saturn emulator self-review, explicit human checkpoints, bounded salvage
-decisions, promotion behind `port_v2` interfaces, and one-dependency
-integration. The old mixed runtime and the playable-skeleton prototype are
-reuse candidates, not production gameplay authority or parity gates.
+The interactive salvage/promotion workflow remains authoritative.
 
 ## Preserved paused work
 
@@ -40,6 +36,15 @@ The result remains ADAPTED because the enabled scroll2 row-scroll table is
 uncaptured. Enemy distortion remains excluded for SALVAGE-02; physical Saturn
 is `UNRUN`; V2-2B remains paused.
 
-`USER-04-STAGE-REVIEW` is `AWAITING_USER_FEEDBACK`. Present only the ignored
-`build/feedback/USER-04-STAGE-REVIEW/` package and ask the exact required
-question. Perform no implementation and never infer approval from silence.
+`USER-04-STAGE-REVIEW` returned the exact response `pass for camera and stage`.
+The shown camera movement/scroll/framing, fixed-checkpoint presentation, and
+adapted two-plane stage composition/palette/priority/final 352x224 presentation
+are approved and locked. Enemy sprite loading/corruption remains routed to
+SALVAGE-02. The uncaptured CPS scroll2 row-scroll table still prevents a
+complete source-faithful stage-scanout claim; physical Saturn remains `UNRUN`.
+
+The active card is `SALVAGE-05-HUD-PCM`, status `READY`. Execute only its HUD
+and one-short-PCM-cue bench in the declared clean card-scoped branch/worktree.
+Keep camera movement disabled, preserve the approved stage/player regression
+locks, and do not add CDDA, combat, or physical-proof claims. V2-2B remains
+paused.

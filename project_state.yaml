@@ -6,7 +6,7 @@ migration_map: data/port_v2_migration_map.yaml
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
 review_candidate_status: CORRECTIONS_REQUIRED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW]
 accepted_implementation_history:
   - id: tranche-2a-foundation
     status: ACCEPTED
@@ -60,13 +60,13 @@ worktree_safety:
     head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
     dirty: true
     preserve: true
-current_checkpoint: review-stage
-active_task_card: docs/task_cards/USER-04-STAGE-REVIEW.md
-active_task_id: USER-04-STAGE-REVIEW
-active_task_kind: USER_REVIEW
-task_status: AWAITING_USER_FEEDBACK
-active_write_owner: USER-04-STAGE-REVIEW
-awaiting_user_feedback: [USER-04-STAGE-REVIEW]
+current_checkpoint: salvage-hud-pcm
+active_task_card: docs/task_cards/SALVAGE-05-HUD-PCM.md
+active_task_id: SALVAGE-05-HUD-PCM
+active_task_kind: SALVAGE
+task_status: READY
+active_write_owner: SALVAGE-05-HUD-PCM
+awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
   - task: SALVAGE-00-OLD-BUILD-BASELINE
@@ -134,14 +134,30 @@ completed_dispositions:
     evaluated_head: a89a87b843a65388dae294b84519d115e6cf8f41
     technical_status: PASS
     fidelity_status: ADAPTED
-    user_status: AWAITING_USER_FEEDBACK
+    user_status: APPROVED
     salvage_decision: SALVAGE_WITH_ADAPTER
-    successor_activation: USER-04-STAGE-REVIEW
+    successor_activation: SALVAGE-05-HUD-PCM
     blockers:
       - The enabled CPS scroll2 row-scroll gfxram table remains uncaptured, so complete source-faithful stage scanout is not proven.
       - Distorted enemy pixels remain deferred to SALVAGE-02 and are excluded from this stage result.
       - Physical Saturn remains UNRUN.
-    exact_next_experiment: Present the ignored USER-04 package and record the exact response; while pending, only SALVAGE-05 may proceed as the declared independent successor.
+    exact_next_experiment: Bench HUD and one short PCM cue over fixed semantic state without changing the approved camera/stage presentation or promoted-player locks.
+  - task: USER-04-STAGE-REVIEW
+    evaluated_head: a89a87b843a65388dae294b84519d115e6cf8f41
+    technical_status: PASS
+    fidelity_status: ADAPTED
+    user_status: APPROVED
+    salvage_decision: SALVAGE_WITH_ADAPTER
+    successor_activation: SALVAGE-05-HUD-PCM
+    exact_response: pass for camera and stage
+    approved_components:
+      - Camera movement, scroll behavior, framing, and fixed-checkpoint presentation shown in the USER-04 package.
+      - Adapted two-plane stage composition, palette, priority, and final 352x224 presentation shown in the USER-04 package.
+    blockers:
+      - The enabled CPS scroll2 row-scroll gfxram table remains uncaptured, so approval does not prove complete source-faithful stage scanout.
+      - Enemy sprite loading and corruption remain deferred to SALVAGE-02 and are outside this camera/stage approval.
+      - HUD, PCM, CDDA, normal release, and physical Saturn remain outside this approval.
+    exact_next_experiment: Execute only SALVAGE-05 HUD/PCM salvage while preserving the approved camera/stage presentation and promoted-player regression locks.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR
