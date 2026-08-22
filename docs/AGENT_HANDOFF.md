@@ -26,18 +26,20 @@ reuse candidates, not production gameplay authority or parity gates.
 
 ## Current task and next action
 
-`USER-01-PLAYER-BASELINE-REVIEW` exact response is `Looks good keep going`.
-PROMOTE-01 is accepted at `602ec4f0e26f169e45684f031f805c4b2aed278f`.
-Strict C90 DEV/repeat/negative controls, paired target builds, and paired pinned
-Yaba readback pass with normalized ISO
-`b94d5cf9b262c7a82ee3bed217f7a499cfeda50809ee23f6a68f29cc9670b6f0`.
-The interface keeps the approved asset hashes, full-visible bounds, palette,
-idle/walk behavior, directional edges, seven VDP1 commands, canaries, and zero
-late reads. Physical Saturn remains `UNRUN`.
+PROMOTE-01 remains accepted at `602ec4f0e26f169e45684f031f805c4b2aed278f`
+after `USER-01-PLAYER-BASELINE-REVIEW` returned the exact response
+`Looks good keep going`; all approved-player locks remain intact.
 
-The active card is `SALVAGE-04-CAMERA-STAGE-LAYERS`, status `READY`, the only
-dependency-safe successor predeclared by PROMOTE-01 while INTEGRATE-01 awaits
-PROMOTE-02. Bench only fixed-checkpoint camera, VDP2 stage layers, priority,
-palette ownership, 384-to-352 framing, and one deterministic scroll step.
-Preserve all promoted-player regression locks. Enemy distortion remains
-unaccepted for SALVAGE-02; V2-2B remains paused.
+SALVAGE-04 is technically accepted at
+`a89a87b843a65388dae294b84519d115e6cf8f41`. Paired target builds and pinned
+Yaba readbacks reproduce fixed frame 20 at scroll `(0,7)`/477 objects and the
+frame 45-to-46 step `(0,7)` to `(10,15)`. Both VDP2 planes, PNT canaries, CRAM
+payloads, priority `2<3<4<6`, and NTSC 352x224 framing pass. Normalized ISO is
+`6523ba9302cef304179e43c56207396c16537c5c139b3d274b04cf8d68bf7850`.
+The result remains ADAPTED because the enabled scroll2 row-scroll table is
+uncaptured. Enemy distortion remains excluded for SALVAGE-02; physical Saturn
+is `UNRUN`; V2-2B remains paused.
+
+`USER-04-STAGE-REVIEW` is `AWAITING_USER_FEEDBACK`. Present only the ignored
+`build/feedback/USER-04-STAGE-REVIEW/` package and ask the exact required
+question. Perform no implementation and never infer approval from silence.

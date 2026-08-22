@@ -6,7 +6,7 @@ migration_map: data/port_v2_migration_map.yaml
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
 review_candidate_status: CORRECTIONS_REQUIRED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS]
 accepted_implementation_history:
   - id: tranche-2a-foundation
     status: ACCEPTED
@@ -26,6 +26,9 @@ accepted_implementation_history:
   - id: PROMOTE-01-PLAYER-PIPELINE
     status: ACCEPTED
     head: 602ec4f0e26f169e45684f031f805c4b2aed278f
+  - id: SALVAGE-04-CAMERA-STAGE-LAYERS
+    status: ACCEPTED
+    head: a89a87b843a65388dae294b84519d115e6cf8f41
 paused_work:
   - id: V2-2B
     status: CORRECTIONS_REQUIRED
@@ -57,13 +60,13 @@ worktree_safety:
     head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
     dirty: true
     preserve: true
-current_checkpoint: salvage-camera-stage
-active_task_card: docs/task_cards/SALVAGE-04-CAMERA-STAGE-LAYERS.md
-active_task_id: SALVAGE-04-CAMERA-STAGE-LAYERS
-active_task_kind: SALVAGE
-task_status: READY
-active_write_owner: SALVAGE-04-CAMERA-STAGE-LAYERS
-awaiting_user_feedback: []
+current_checkpoint: review-stage
+active_task_card: docs/task_cards/USER-04-STAGE-REVIEW.md
+active_task_id: USER-04-STAGE-REVIEW
+active_task_kind: USER_REVIEW
+task_status: AWAITING_USER_FEEDBACK
+active_write_owner: USER-04-STAGE-REVIEW
+awaiting_user_feedback: [USER-04-STAGE-REVIEW]
 open_blockers: []
 completed_dispositions:
   - task: SALVAGE-00-OLD-BUILD-BASELINE
@@ -127,6 +130,18 @@ completed_dispositions:
       - The observed distorted enemy pixels remain deferred to SALVAGE-02 and are not accepted by player promotion.
       - Physical Saturn remains UNRUN.
     exact_next_experiment: Bench fixed-checkpoint camera, VDP2 stage layers, palette ownership, framing, and one deterministic scroll step without changing the promoted player locks.
+  - task: SALVAGE-04-CAMERA-STAGE-LAYERS
+    evaluated_head: a89a87b843a65388dae294b84519d115e6cf8f41
+    technical_status: PASS
+    fidelity_status: ADAPTED
+    user_status: AWAITING_USER_FEEDBACK
+    salvage_decision: SALVAGE_WITH_ADAPTER
+    successor_activation: USER-04-STAGE-REVIEW
+    blockers:
+      - The enabled CPS scroll2 row-scroll gfxram table remains uncaptured, so complete source-faithful stage scanout is not proven.
+      - Distorted enemy pixels remain deferred to SALVAGE-02 and are excluded from this stage result.
+      - Physical Saturn remains UNRUN.
+    exact_next_experiment: Present the ignored USER-04 package and record the exact response; while pending, only SALVAGE-05 may proceed as the declared independent successor.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR

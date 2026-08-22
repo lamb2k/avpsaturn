@@ -2,7 +2,7 @@
 
 TASK: USER-04-STAGE-REVIEW
 KIND: USER_REVIEW
-STATUS: BLOCKED
+STATUS: AWAITING_USER_FEEDBACK
 CHECKPOINT: review-stage
 BASE: project_state.accepted_head
 BRANCH: codex/avp-user-04-stage-review

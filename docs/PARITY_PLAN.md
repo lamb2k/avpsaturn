@@ -49,7 +49,7 @@ dependency for exact HIT/KO production promotion, not for loading, controller
 input, actor assets, actor rendering, actor animation, palette, stage, HUD, PCM,
 or diagnostic salvage benches.
 
-CURRENT_TASK: SALVAGE-04-CAMERA-STAGE-LAYERS
+CURRENT_TASK: USER-04-STAGE-REVIEW
 
 ## 4. Dependency-ordered active backlog
 
