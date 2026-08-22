@@ -2,7 +2,7 @@
 
 TASK: REPAIR-05-HUD-COLORS
 KIND: REPAIR
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: repair-hud-colors
 BASE: project_state.accepted_head
 BRANCH: codex/avp-repair-05-hud-colors
@@ -68,3 +68,15 @@ Return the corrected ignored package to `USER-05-HUD-PCM-REVIEW`. The PCM cue is
 ## Next eligible cards
 
 - `USER-05-HUD-PCM-REVIEW` with a corrected ignored screenshot and the unchanged approved PCM cue.
+
+## Result
+
+- Technical result: `PASS` at `949316331c7c12a9ae630ef5f5ebc846e4d2aef5`.
+- Corrected the one-entry HUD palette shift: source index 1 now binds to Jo/CRAM palette entry 0 for one-based HUD texels.
+- Paired clean target builds produced identical normalized ISO SHA-256 `6218e3d1e745552f6c64ef16f7c66cc044abc04772634f36ebefa9888e45a10d`.
+- Both pinned-emulator runs read exact CRAM values yellow `0x83ff`, red `0x801f`, energy `0xbbf7`, and empty `0xc631`, with palette binding `PASS`.
+- Four runtime negative controls passed, including reconstruction and rejection of the original zero-based palette binding.
+- HUD assets, semantic values/fills, canaries, zero late reads, approved stage/player locks, and bounded 486-frame repeat remained stable.
+- Approved PCM payload SHA-256 `e2f2870251cf28c5cf52d0d074c3b426cc6db5afb4cde2eebf4838ffa296f125` and event/start/end timing `147/150/200` remained unchanged.
+- Corrected ignored package: `build/feedback/USER-05-HUD-PCM-REVIEW/`; physical Saturn remains `UNRUN`.
+- Successor: `USER-05-HUD-PCM-REVIEW`, awaiting renewed explicit feedback.

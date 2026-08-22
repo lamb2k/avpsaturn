@@ -49,7 +49,7 @@ dependency for exact HIT/KO production promotion, not for loading, controller
 input, actor assets, actor rendering, actor animation, palette, stage, HUD, PCM,
 or diagnostic salvage benches.
 
-CURRENT_TASK: REPAIR-05-HUD-COLORS
+CURRENT_TASK: USER-05-HUD-PCM-REVIEW
 
 ## 4. Dependency-ordered active backlog
 

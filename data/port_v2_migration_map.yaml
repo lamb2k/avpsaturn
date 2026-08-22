@@ -311,6 +311,55 @@
         "requested_changes": [],
         "priority": null
       }
+    },
+    {
+      "task_id": "REPAIR-05-HUD-COLORS",
+      "evaluated_commit": "949316331c7c12a9ae630ef5f5ebc846e4d2aef5",
+      "technical_status": "PASS",
+      "fidelity_status": "MEASURED",
+      "user_status": "AWAITING_USER_FEEDBACK",
+      "salvage_decision": "REPAIR",
+      "production_interface": null,
+      "diagnostic_interface": "tests/port_v2/hud_pcm_bench/run_pinned_emulator.ps1",
+      "blockers": [
+        "Unblock: obtain renewed explicit USER-05 approval for the corrected HUD colors before HUD promotion or integration.",
+        "Unblock: keep the observed enemy sprite corruption isolated for SALVAGE-02; this repair neither accepts nor alters it.",
+        "Unblock: production HUD integration, simultaneous full-stage CRAM ownership, a second emulator, normal release, and physical Saturn remain unrun."
+      ],
+      "exact_next_experiment": "Present build/feedback/USER-05-HUD-PCM-REVIEW, ask the exact review question, and record the exact response while preserving the approved PCM lock.",
+      "evidence": {
+        "build_profile": "HudPcmSalvageBench / debug-hud-pcm-salvage-bench",
+        "fast_and_focused_contract_checks": "PASS",
+        "target_clean_build_repeat": "PASS",
+        "paired_pinned_emulator_readback": "PASS",
+        "normalized_iso_sha256": "6218e3d1e745552f6c64ef16f7c66cc044abc04772634f36ebefa9888e45a10d",
+        "palette_source_offset": 1,
+        "live_cram": {"yellow": 33791, "red": 32799, "energy": 48119, "empty": 50737},
+        "palette_binding_ok": 1,
+        "negative_rejections": 4,
+        "rejected_mapping": "zero-based HUD palette binding",
+        "hud_asset_regression_locks": "PASS",
+        "melee_pcm_sha256": "e2f2870251cf28c5cf52d0d074c3b426cc6db5afb4cde2eebf4838ffa296f125",
+        "pcm_timing": {"event": 147, "start": 150, "end": 200},
+        "asset_audio_failures": 0,
+        "pcm_underruns": 0,
+        "disc_late_reads": 0,
+        "canary": "PASS",
+        "bounded_stability_frames": 486,
+        "final_scanout": "NTSC 352x224",
+        "approved_stage_player_regression_locks": "PASS",
+        "corrected_screenshot_sha256": "14c280bfb70ec86566cb394e0395383d4f6aeba1167c8aec8bc8b13e372edd2c",
+        "approved_cue_wav_sha256": "db539742a1cb77e2364055a26781c7bf0f1499f24fae1191c8b3f693e7b987d0",
+        "review_package": "build/feedback/USER-05-HUD-PCM-REVIEW/",
+        "physical_saturn": "UNRUN"
+      },
+      "user_observation_state": {
+        "formal_review_question_asked": false,
+        "exact_observations": [],
+        "approved_components": [],
+        "requested_changes": [],
+        "priority": null
+      }
     }
   ],
   "subsystems": [
@@ -564,15 +613,15 @@
       "proposed_isolated_bench": "Render fixed health/energy/prompt states over one promoted background with readback.",
       "technical_status": "PASS",
       "fidelity_status": "MEASURED",
-      "user_status": "CHANGES_REQUESTED",
+      "user_status": "AWAITING_USER_FEEDBACK",
       "salvage_decision": "REPAIR",
       "production_interface": null,
       "promoted_commit": null,
-      "evidence_commit": "89ef72b86f394f26fc63536f9d9f95f581673c18",
+      "evidence_commit": "949316331c7c12a9ae630ef5f5ebc846e4d2aef5",
       "diagnostic_interface": "tests/port_v2/hud_pcm_bench/collect_readback.py",
-      "blockers": ["Unblock: repair the user-observed broken HUD colors and obtain renewed USER-05 approval; production integration and simultaneous full-stage CRAM ownership remain untested."],
-      "exact_next_experiment": "Run REPAIR-05 with capture-bound palette/CRAM assertions and a negative control that restores the rejected color binding.",
-      "user_feedback": {"exact_response": "sound is great hud looks broken in terms of colors", "approved_components": [], "requested_changes": ["Correct the broken HUD color and palette presentation."], "priority": "hud-colors"}
+      "blockers": ["Unblock: obtain renewed USER-05 approval for the corrected color presentation; production integration and simultaneous full-stage CRAM ownership remain untested."],
+      "exact_next_experiment": "Present the corrected ignored USER-05 package, ask the exact review question, and record the exact response before HUD promotion.",
+      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {
       "id": "pcm",

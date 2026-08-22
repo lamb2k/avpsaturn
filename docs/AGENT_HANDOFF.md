@@ -25,23 +25,25 @@ PROMOTE-01 and its `USER-01-PLAYER-BASELINE-REVIEW` locks remain accepted. USER-
 was `pass for camera and stage`; the reviewed adapted camera/stage presentation
 is locked, while uncaptured row-scroll prevents full source-faithful promotion.
 
-SALVAGE-05 is technically accepted at
-`89ef72b86f394f26fc63536f9d9f95f581673c18`. Paired clean target builds and
-pinned Yaba interpreter runs reproduce normalized ISO
-`60691d3df7dd4a0076896309e17448df4f23f95cd9d788e0dec9740ff9db3983`.
-HUD states, PCM timing `147/150/200`, three descriptor rejections, zero failure/
-underrun/late-read counters, canaries, and prior regression locks pass.
-
-The cue remains an ADAPTED QSound-to-SCSP result. Enemy corruption stays routed
-to SALVAGE-02. CDDA, combat, normal release, a second emulator, and physical
-Saturn remain `UNRUN`; V2-2B remains paused.
-
 USER-05 exact response is `sound is great hud looks broken in terms of colors`.
-The short Predator melee PCM cue is approved and locked. HUD presentation is
-`CHANGES_REQUESTED`, with color/palette correction first priority.
+The short Predator melee PCM cue is approved and locked.
 
-The active card is `REPAIR-05-HUD-COLORS`, status `READY`. In its declared clean
-card-scoped branch/worktree, correct only HUD palette/CRAM/color binding. Reuse
-the exact HUD/PCM bench, add a real rejected-color negative control, preserve
+REPAIR-05 is technically accepted at
+`949316331c7c12a9ae630ef5f5ebc846e4d2aef5`. It maps one-based HUD source
+index 1 to Jo/CRAM entry 0. Paired clean builds and pinned Yaba interpreter
+runs reproduce normalized ISO
+`6218e3d1e745552f6c64ef16f7c66cc044abc04772634f36ebefa9888e45a10d`.
+Both runs read yellow/red/energy/empty CRAM values `0x83ff/0x801f/0xbbf7/
+0xc631`; the reconstructed old zero-based binding is rejected. HUD states,
+canaries, zero failures/underruns/late reads, and stage/player locks pass.
+
 PCM SHA-256 `e2f2870251cf28c5cf52d0d074c3b426cc6db5afb4cde2eebf4838ffa296f125`
-and timing `147/150/200`, then return a corrected ignored package to USER-05.
+and timing `147/150/200` are unchanged. The cue remains an ADAPTED QSound-to-
+SCSP result. Enemy corruption stays routed to SALVAGE-02. CDDA, combat, normal
+release, a second emulator, and physical Saturn remain `UNRUN`; V2-2B remains
+paused.
+
+The active card is `USER-05-HUD-PCM-REVIEW`, status
+`AWAITING_USER_FEEDBACK`. Present ignored package
+`build/feedback/USER-05-HUD-PCM-REVIEW/` and ask the exact required question.
+Do no implementation and infer no approval while feedback is pending.
