@@ -2,7 +2,7 @@
 
 TASK: SALVAGE-02-ENEMY-RENDER-ANIMATION
 KIND: SALVAGE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: salvage-enemy-baseline
 BASE: project_state.accepted_head
 BRANCH: codex/avp-salvage-02-enemy-pipeline

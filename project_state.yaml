@@ -6,7 +6,7 @@ migration_map: data/port_v2_migration_map.yaml
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
 review_candidate_status: CORRECTIONS_REQUIRED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION]
 accepted_implementation_history:
   - id: tranche-2a-foundation
     status: ACCEPTED
@@ -38,6 +38,9 @@ accepted_implementation_history:
   - id: SALVAGE-05B-PLAYER-2-HUD
     status: ACCEPTED
     head: 6127957eee7ca419d39fe4b716dd41df2c255fb0
+  - id: SALVAGE-02-ENEMY-RENDER-ANIMATION
+    status: ACCEPTED
+    head: 17da61f6d647577fc19ac29e30bcbe624ff4d248
 paused_work:
   - id: V2-2B
     status: CORRECTIONS_REQUIRED
@@ -69,13 +72,13 @@ worktree_safety:
     head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
     dirty: true
     preserve: true
-current_checkpoint: salvage-enemy-baseline
-active_task_card: docs/task_cards/SALVAGE-02-ENEMY-RENDER-ANIMATION.md
-active_task_id: SALVAGE-02-ENEMY-RENDER-ANIMATION
-active_task_kind: SALVAGE
-task_status: READY
-active_write_owner: SALVAGE-02-ENEMY-RENDER-ANIMATION
-awaiting_user_feedback: []
+current_checkpoint: review-enemy-baseline
+active_task_card: docs/task_cards/USER-02-ENEMY-BASELINE-REVIEW.md
+active_task_id: USER-02-ENEMY-BASELINE-REVIEW
+active_task_kind: USER_REVIEW
+task_status: AWAITING_USER_FEEDBACK
+active_write_owner: USER-02-ENEMY-BASELINE-REVIEW
+awaiting_user_feedback: [USER-02-ENEMY-BASELINE-REVIEW]
 open_blockers: []
 completed_dispositions:
   - task: SALVAGE-00-OLD-BUILD-BASELINE
@@ -230,6 +233,21 @@ completed_dispositions:
       - P2 gameplay/input, joins, multiplayer integration, and multitap topology are outside this presentation bench.
       - Production HUD integration, simultaneous full-stage CRAM ownership, a second emulator, normal release, and physical Saturn remain UNRUN.
     exact_next_experiment: Retain the approved P1/P2 HUD and PCM locks while SALVAGE-02 isolates enemy asset, rendering, and animation salvage.
+  - task: SALVAGE-02-ENEMY-RENDER-ANIMATION
+    evaluated_head: 17da61f6d647577fc19ac29e30bcbe624ff4d248
+    technical_status: PASS
+    fidelity_status: ADAPTED
+    user_status: AWAITING_REVIEW
+    salvage_decision: SALVAGE_WITH_ADAPTER
+    successor_activation: USER-02-ENEMY-BASELINE-REVIEW
+    approved_component_locks:
+      - Promoted player contract d0e6d835...fedf612.
+      - Approved camera/stage contract dac93621...af300.
+      - Approved P1/P2 HUD and PCM contracts e6325b97...45cafe and d907fba3...187e37.
+    blockers:
+      - USER-02 must explicitly review the enemy asset, palette, per-tile composition, pivot, and walk presentation.
+      - Attack, hit, KO, AI, collision, production integration, normal release, a second emulator, and physical Saturn remain UNRUN.
+    exact_next_experiment: Present the ignored USER-02 package and ask the required exact feedback question; do no implementation while reviewing.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR

@@ -30,9 +30,20 @@ reject the P1-only `PRESS START` control, and paired clean builds/pinned Yaba
 runs reproduce normalized ISO `127c2f04...a1035b34`. The P1/P2 HUD and PCM
 locks must not change without renewed review.
 
-The active card is `SALVAGE-02-ENEMY-RENDER-ANIMATION`, status `READY`, on
-clean branch `codex/avp-salvage-02-enemy-pipeline`. Isolate class `0x1F` enemy
-assets, rendering, and animation only; retain all approved player, stage,
-HUD, and PCM locks. The observed distorted enemy pixels are unaccepted until
-the card's source, negative-control, diagnostic, and pinned-emulator evidence
-passes. V2-2B remains paused and does not block this salvage.
+SALVAGE-02 is technically accepted at
+`17da61f6d647577fc19ac29e30bcbe624ff4d248`. Paired clean builds and pinned
+Yaba runs reproduce normalized ISO `dbbb2678...3ea8c4` and screenshot
+`c175ab98...acdae8`. Readback repeats class `0x1F`, palette `0x11`, stationary
+`x=192`, translated `x=240`, five source objects, 32 rendered VDP1 tiles,
+zero asset/late-read/tile misses, intact canaries, and two rejected missing
+bank/rank controls. The tracked perturbation also rejects a 39-to-38-frame
+walk-duration mutation. This is one-emulator evidence; physical Saturn is
+`UNRUN`.
+
+The active card is now `USER-02-ENEMY-BASELINE-REVIEW`, status
+`AWAITING_USER_FEEDBACK`, on predeclared branch
+`codex/avp-user-02-enemy-review`. Perform no implementation. Present the
+ignored package at `build/feedback/USER-02-ENEMY-BASELINE-REVIEW/`, record the
+exact response, and infer no approval from silence. `SALVAGE-03-COLLISION`
+remains dependency-safe while feedback is pending, but cannot alter this
+reviewed enemy result. V2-2B remains paused.
