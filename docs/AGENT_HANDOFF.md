@@ -26,19 +26,22 @@ reuse candidates, not production gameplay authority or parity gates.
 
 ## Current task and next action
 
-`SALVAGE-01-PLAYER-LOAD-RENDER-INPUT` is accepted at
-`fc9f46746d082e4ccfe800304f49c55bec3e3800`: two clean PlayerSalvageBench
-builds normalize to the same disc identity, exact player package members
-match, and pinned Yaba readback recorded runtime-ready, zero asset failures,
-zero late reads, intact canaries, VDP1 commands, and right/down/left player
-input edges. Physical Saturn remains `UNRUN`.
+`SALVAGE-01-PLAYER-LOAD-RENDER-INPUT` is accepted at `fc9f46746d082e4ccfe800304f49c55bec3e3800`:
+paired clean builds and pinned Yaba readback passed exact package, normalized-disc,
+runtime-ready, asset, late-read, canary, VDP1-command, and input-edge checks. Physical Saturn remains `UNRUN`.
 
-The active card is now `USER-01-PLAYER-BASELINE-REVIEW` and must perform no
-implementation. The ignored package is
-`build/feedback/USER-01-PLAYER-BASELINE-REVIEW/`. Ask exactly the card's
-question, record the exact response, and never infer approval from silence.
-While that feedback is pending, only predeclared `SALVAGE-02-ENEMY-RENDER-ANIMATION`
-may proceed independently; it must not alter this player package.
+USER-01 returned `the character sprite is cropped but moving.` Player rendering
+is `CHANGES_REQUESTED`; motion is an observation, not approval. The exact response
+is in ignored `build/feedback/USER-01-PLAYER-BASELINE-REVIEW/response.json`.
+
+The active card is `REPAIR-01-PLAYER-CROP-PIVOT`. Execute only its bounded
+player cel/pivot correction in the clean card-scoped worktree/branch. Preserve
+the SALVAGE-01 loading, input, movement, animation cadence, palette, command
+count, fixed background, canary, zero-late-read, normalized-disc, and pinned-
+emulator regression locks. Add a real negative control that restores the
+rejected crop/pivot condition, then return the corrected ignored package to
+USER-01. `PROMOTE-01` remains blocked. `SALVAGE-02` remains independent and
+must not alter the player package.
 
 The user's observed distorted enemy pixels remain unaccepted and are deferred
 to SALVAGE-02. V2-2B remains paused and does not block player salvage.

@@ -51,13 +51,13 @@ worktree_safety:
     head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
     dirty: true
     preserve: true
-current_checkpoint: review-player-baseline
-active_task_card: docs/task_cards/USER-01-PLAYER-BASELINE-REVIEW.md
-active_task_id: USER-01-PLAYER-BASELINE-REVIEW
-active_task_kind: USER_REVIEW
-task_status: AWAITING_USER_FEEDBACK
-active_write_owner: USER-01-PLAYER-BASELINE-REVIEW
-awaiting_user_feedback: [USER-01-PLAYER-BASELINE-REVIEW]
+current_checkpoint: repair-player-crop-pivot
+active_task_card: docs/task_cards/REPAIR-01-PLAYER-CROP-PIVOT.md
+active_task_id: REPAIR-01-PLAYER-CROP-PIVOT
+active_task_kind: REPAIR
+task_status: READY
+active_write_owner: REPAIR-01-PLAYER-CROP-PIVOT
+awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
   - task: SALVAGE-00-OLD-BUILD-BASELINE
@@ -75,19 +75,21 @@ completed_dispositions:
     evaluated_head: fc9f46746d082e4ccfe800304f49c55bec3e3800
     technical_status: PASS
     fidelity_status: MEASURED
-    user_status: AWAITING_USER_FEEDBACK
-    salvage_decision: SALVAGE_WITH_ADAPTER
-    successor_activation: USER-01-PLAYER-BASELINE-REVIEW
+    user_status: CHANGES_REQUESTED
+    salvage_decision: REPAIR
+    successor_activation: REPAIR-01-PLAYER-CROP-PIVOT
     blockers:
-      - Exact USER-01 feedback is required before player promotion.
+      - The user reports that the character sprite is cropped; player rendering cannot be promoted until the crop/pivot repair passes renewed review.
+      - Movement was observed but was not explicitly approved.
       - The observed distorted enemy pixels remain deferred to SALVAGE-02 and are not accepted by this player-only result.
       - Physical Saturn remains UNRUN.
-    exact_next_experiment: Present the ignored USER-01 player package and record the exact response; only SALVAGE-02 may proceed independently while that response is pending.
+    exact_next_experiment: Correct only the player cel/pivot placement, prove full visible idle/walk bounds with a rejected-pivot negative control, and return a new ignored package to USER-01.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR
   - SALVAGE-01-PLAYER-LOAD-RENDER-INPUT
   - USER-01-PLAYER-BASELINE-REVIEW
+  - REPAIR-01-PLAYER-CROP-PIVOT
   - PROMOTE-01-PLAYER-PIPELINE
   - SALVAGE-02-ENEMY-RENDER-ANIMATION
   - USER-02-ENEMY-BASELINE-REVIEW

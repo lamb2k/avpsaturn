@@ -2,7 +2,7 @@
 
 TASK: USER-01-PLAYER-BASELINE-REVIEW
 KIND: USER_REVIEW
-STATUS: AWAITING_USER_FEEDBACK
+STATUS: CHANGES_REQUESTED
 CHECKPOINT: review-player-baseline
 BASE: project_state.accepted_head
 BRANCH: codex/avp-user-01-player-review
@@ -11,7 +11,7 @@ DEPENDENCIES: [SALVAGE-01-PLAYER-LOAD-RENDER-INPUT]
 REQUIRED_LANES: [Fast]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [PROMOTE-01-PLAYER-PIPELINE, SALVAGE-02-ENEMY-RENDER-ANIMATION]
+NEXT_ELIGIBLE_CARDS: [REPAIR-01-PLAYER-CROP-PIVOT, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-02-ENEMY-RENDER-ANIMATION]
 
 ## Objective
 
@@ -57,5 +57,15 @@ Ask exactly: "What should remain unchanged, what looks or feels wrong, and which
 
 ## Next eligible cards
 
+- `REPAIR-01-PLAYER-CROP-PIVOT` is required by the exact crop feedback.
 - `PROMOTE-01-PLAYER-PIPELINE` after approval.
 - `SALVAGE-02-ENEMY-RENDER-ANIMATION` may proceed while feedback is pending because it cannot alter the player package.
+
+## Review result
+
+- Exact response: `the character sprite is cropped but moving.`
+- Disposition: `CHANGES_REQUESTED` for player rendering.
+- Requested change and first priority: restore the full visible player sprite by repairing its crop/pivot placement.
+- The observed movement is recorded but is not inferred as approval of animation, input feel, or rendering.
+- Approved components: none.
+- Next bounded card: `REPAIR-01-PLAYER-CROP-PIVOT`.

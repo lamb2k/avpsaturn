@@ -221,15 +221,15 @@
       "proposed_isolated_bench": "Render one player at fixed positions and flips with command-count, position, pivot, and asset-failure readback.",
       "technical_status": "PASS",
       "fidelity_status": "MEASURED",
-      "user_status": "AWAITING_USER_FEEDBACK",
-      "salvage_decision": "SALVAGE_WITH_ADAPTER",
+      "user_status": "CHANGES_REQUESTED",
+      "salvage_decision": "REPAIR",
       "production_interface": null,
       "promoted_commit": null,
       "evidence_commit": "fc9f46746d082e4ccfe800304f49c55bec3e3800",
       "diagnostic_interface": "tests/port_v2/player_bench/collect_readback.py",
-      "blockers": ["Unblock: record exact USER-01 visual feedback on player pivot, palette, and framing before promotion."],
-      "exact_next_experiment": "Review the Yaba screenshot/GIF plus seven-command VDP1 readback through USER-01; keep enemy rendering deferred to SALVAGE-02.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
+      "blockers": ["Unblock: correct the user-observed cropped player cel/pivot and obtain renewed USER-01 approval before promotion."],
+      "exact_next_experiment": "Run REPAIR-01 with full visible idle/walk bounds, preserve movement and the seven-command VDP1 regression lock, and reject the original cropped pivot through a real negative control.",
+      "user_feedback": {"exact_response": "the character sprite is cropped but moving.", "approved_components": [], "requested_changes": ["Restore the full visible character sprite; it is currently cropped."], "priority": "player-sprite-crop"}
     },
     {
       "id": "player-animation",
