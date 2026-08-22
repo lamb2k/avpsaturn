@@ -29,8 +29,10 @@ def check_state(state, contract, expected):
     enemy = state["enemy"]
     integration = state["integration"]
     require(state["runtime_ready"] == 1, "integration was not runtime-ready")
-    require((enemy["relative_frame"], enemy["phase"], enemy["x"]) ==
-            (expected["frame"], expected["phase"], expected["x"]),
+    require((state["requested_enemy_frame"], enemy["relative_frame"],
+             enemy["phase"], enemy["x"]) ==
+            (expected["frame"], (expected["frame"] - 1) % 240,
+             expected["phase"], expected["x"]),
             "enemy schedule drifted")
     require((enemy["class_id"], enemy["palette_bank"], enemy["lane"],
              enemy["facing"], enemy["object_count"], enemy["render_count"]) ==

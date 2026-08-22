@@ -84,15 +84,14 @@ def snapshot(mcp, syms):
     }
 
 
-def wait_frame(mcp, syms, target, timeout):
-    # Co-residency changes the BSS neighborhood, so the integration marker is
-    # isolated in its own aligned debugger watch block. Stop on every write
-    # to that block. The stop occurs before the current marker store, after
-    # the exact player/enemy diagnostics are complete, so the prior aggregate
-    # is target-1 while the actor state is target. This avoids the pinned
-    # emulator's unreliable write-value filter and cannot skip a frame.
+def wait_frame(mcp, syms, target, phase, world_x, timeout):
+    # The pinned emulator's memory watch covers neighboring diagnostic words
+    # and its write-value filter is unreliable in this larger binary. Stop on
+    # every write in the enemy marker block and accept only the pre-store stop
+    # whose prior marker is target-1 and whose complete target-frame payload
+    # has the measured phase, position, source-object and emitted-tile counts.
     deadline = time.time() + timeout
-    address = hex(syms["avsp_diag_integration_frame"])
+    address = hex(syms["avsp_diag_enemy_frame"])
     mcp.call("pause")
     mcp.call("breakpoint_add", cpu="master", type="memory", address=address,
              write=True)
@@ -106,12 +105,16 @@ def wait_frame(mcp, syms, target, timeout):
                 continue
             prior = (target - 1) % 240
             if enemy_tools.signed32(
-                    mcp.u32(syms["avsp_diag_integration_frame"])) == prior:
+                    mcp.u32(syms["avsp_diag_enemy_frame"])) == prior:
                 state = snapshot(mcp, syms)
-                if (state["integration"]["frame"] == prior and
-                        state["enemy"]["relative_frame"] == target):
+                enemy = state["enemy"]
+                if (enemy["relative_frame"] == prior and
+                        enemy["phase"] == phase and enemy["x"] == world_x and
+                        enemy["object_count"] == 5 and
+                        enemy["render_count"] == 32):
+                    state["requested_enemy_frame"] = target
                     return state
-        raise TimeoutError(f"integration frame {target} was not confirmed")
+        raise TimeoutError(f"enemy payload for frame {target} was not confirmed")
     finally:
         mcp.call("breakpoint_remove", cpu="master", type="memory",
                  address=address)
@@ -188,9 +191,13 @@ def main():
     vdp1_commands = None
     for label in ("stationary", "translated", "repeat_stationary"):
         expected = contract["enemy"]["samples"][label]
-        samples[label] = wait_frame(mcp, syms, expected["frame"], args.timeout)
+        samples[label] = wait_frame(
+            mcp, syms, expected["frame"], expected["phase"], expected["x"],
+            args.timeout)
         enemy = samples[label]["enemy"]
-        if (enemy["phase"], enemy["x"]) != (expected["phase"], expected["x"]):
+        if ((samples[label]["requested_enemy_frame"], enemy["phase"],
+             enemy["x"]) !=
+                (expected["frame"], expected["phase"], expected["x"]):
             raise RuntimeError(f"enemy schedule drifted at {label}: {enemy}")
         validate(samples[label], contract)
         if label == "translated":
