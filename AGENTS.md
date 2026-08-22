@@ -20,6 +20,21 @@ not used for ordinary implementation. Claude is an optional bounded provider
 only when the active task card explicitly permits it. The task card fixes the
 scope, owned paths, checks, exclusions, hard stops, and next eligible cards.
 
+## Branch and worktree continuity
+
+A new tranche, task card, milestone, or checkpoint does not by itself justify
+a new branch or worktree. Before activating a successor, inspect the existing
+branches and worktrees and select the dependency-continuous line that best
+matches the intended development path and can safely own the next bounded
+scope. Continue sequentially there and create explicit, clean commits at each
+meaningful milestone or checkpoint.
+
+Create a new branch or worktree only when required isolation, parallel
+development, incompatible dependencies, an unsafe dirty state, or a genuinely
+separate line of development makes reuse inappropriate. Preserve existing
+worktrees; do not remove, migrate, reset, or rewrite them merely to conform to
+this routing policy.
+
 ## Development loop
 
 Use this loop for each existing subsystem:

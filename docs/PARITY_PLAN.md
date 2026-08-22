@@ -262,3 +262,10 @@ long physical soaks, and deterministic release builds with archived provenance.
 7. Approved components are locked until renewed review identifies the risk.
 8. Structural, MAME, emulator, user, normal-release, and physical claims remain
    separately labeled.
+9. Successor activation reuses the best dependency-continuous existing
+   worktree and branch by default. A new branch or worktree requires actual
+   isolation, parallelism, incompatible dependencies, unsafe dirty state, or a
+   genuinely separate line of development; a new tranche or milestone alone
+   is not sufficient.
+10. Sequential work records explicit, clean commits at meaningful milestones
+    and preserves existing worktree continuity.

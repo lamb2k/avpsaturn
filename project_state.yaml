@@ -72,6 +72,20 @@ worktree_safety:
     head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
     dirty: true
     preserve: true
+worktree_routing_policy:
+  mode: existing-worktree-first
+  successor_action: select-best-dependency-continuous-existing-line
+  milestone_commit_policy: explicit-clean-incremental-commits
+  create_new_only_for:
+    - required-isolation
+    - parallel-development
+    - incompatible-dependencies
+    - unsafe-dirty-state
+    - genuinely-separate-development-line
+  tranche_or_milestone_alone_requires_new_worktree: false
+  preserve_existing_worktrees: true
+  current_continuity_worktree: C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review
+  current_continuity_branch: codex/avp-user-02-enemy-review
 current_checkpoint: review-enemy-baseline
 active_task_card: docs/task_cards/USER-02-ENEMY-BASELINE-REVIEW.md
 active_task_id: USER-02-ENEMY-BASELINE-REVIEW
