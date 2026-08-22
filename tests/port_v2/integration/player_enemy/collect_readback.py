@@ -268,6 +268,7 @@ def main():
     if not (right_after["x"] > right_before["x"] and
             right_after["facing"] == 1 and right_live["render_count"] == 3):
         raise RuntimeError("integrated player input/render response drifted")
+    mcp.call("pause")
     final = snapshot(mcp, syms)
     validate(final, contract, exact_composition=False)
     process = enemy_tools.process_record(args.emulator_pid)
