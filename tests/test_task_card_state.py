@@ -247,15 +247,30 @@ def main() -> None:
         require(scalar(cards[accepted_task], "STATUS") == "ACCEPTED",
                 f"accepted task {accepted_task} is not recorded as accepted")
 
-    require(scalar(state, "review_candidate_status") ==
-            "CORRECTIONS_REQUIRED", "V2-2B disposition was lost")
+    v2_status = scalar(cards["V2-2B"], "STATUS")
+    review_status = scalar(state, "review_candidate_status")
+    if v2_status == "ACCEPTED":
+        require(review_status == "ACCEPTED",
+                "accepted V2-2B retains a correction disposition")
+        require("V2-2B" in accepted,
+                "accepted V2-2B is absent from accepted_tasks")
+        for token in (
+            "evidence_work:",
+            "id: V2-2B",
+            "status: ACCEPTED",
+            "dirty: false",
+            "blockers: []",
+        ):
+            require(token in state,
+                    f"accepted V2-2B evidence state missing {token}")
+    else:
+        require(review_status == "CORRECTIONS_REQUIRED",
+                "unaccepted V2-2B lost its correction disposition")
+        require("V2-2B" not in accepted,
+                "unaccepted V2-2B appears in accepted_tasks")
     for token in (
-        "id: V2-2B",
-        "dirty: true",
         "playable-skeleton-prototype",
         "preserve: true",
-        "Exact writer ownership",
-        "Control flow is not a call-rooted closure",
     ):
         require(token in state, f"preserved state missing {token}")
 

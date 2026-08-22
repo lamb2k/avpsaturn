@@ -14,9 +14,10 @@ its historical metadata and existing continuity branch.
 
 - The dirty canonical and `prototype/avp-clean-playable-skeleton` worktrees
   remain untouched.
-- V2-2B remains `CORRECTIONS_REQUIRED` at its preserved evidence candidate and
-  is now explicitly active for its bounded writer-closure correction. It
-  blocks exact HIT/KO promotion only.
+- V2-2B is accepted at evidence commit
+  `597f4ed517d4e715d814ff841bd00d3977803f85`, merged into production continuity
+  by `033be384bcc4e678408b465f102925841eab4333`, and remotely verified. This is
+  host/static/MAME evidence only, not Saturn proof.
 - `SALVAGE-00-OLD-BUILD-BASELINE` remains a technical baseline, not physical
   proof.
 - `USER-01-PLAYER-BASELINE-REVIEW` and later explicit approvals remain
@@ -25,14 +26,14 @@ its historical metadata and existing continuity branch.
 ## Current task and next action
 
 `SALVAGE-03-COLLISION` is accepted at
-`cd31823d82024b6e33a25e8963ded5493c204772`. The active card is now `V2-2B`,
-status `READY`, in the existing dirty worktree
-`C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-writer-map-tranche2b-validator-corrections`
-on branch `codex/avp-writer-map-tranche-2b-validator-corrections`, evidence
-candidate `f2c9a4725dffdcb2e5689c70914511674fb3c9ef`. Execute only exact writer
-binding, call-rooted closure, derived-dependency proofs, scratch mutations,
-focused checks, Oracle, Full, and consolidated Tier 2 re-review. Do not change
-production gameplay, rendering, loading, audio, stage, or salvage-card paths.
+`cd31823d82024b6e33a25e8963ded5493c204772`. The active card is `V2-B1`, status
+`READY`, in the existing continuity worktree
+`C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review` on
+branch `codex/avp-user-02-enemy-review`, based on `project_state.production_head`
+`033be384bcc4e678408b465f102925841eab4333`. Promote only the accepted exact
+class `0x1F` HIT/KO behavior behind `src/port_v2/combat/hit_ko`, with strict host
+differentials and a real substitution negative control. Do not broaden into
+attack, damage, AI, route, camera/stage, HUD, PCM, or unrelated collision work.
 
 The accepted camera/stage, corrected P1/P2 HUD, and short PCM cue remain locked.
 Physical Saturn is still `0/12`; no host, MAME, emulator, or user evidence
@@ -40,4 +41,4 @@ changes that fact.
 
 Resume prompt:
 
-> Resume the AvP salvage Goal from V2-2B in the existing AvPSaturnCapabilityTest-writer-map-tranche2b-validator-corrections worktree on codex/avp-writer-map-tranche-2b-validator-corrections; preserve its dirty evidence and every protected worktree, execute only the bounded exact HIT/KO writer-closure correction and required Tier 2 review, then commit, push to private-origin, and verify the remote SHA.
+> Resume the AvP salvage Goal from V2-B1 in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; read the required controls, preserve every protected worktree and approved lock, promote only the accepted exact class 0x1F HIT/KO behavior behind src/port_v2/combat/hit_ko with strict host differentials and a real substitution negative control, then commit, push to private-origin, and verify the remote SHA.

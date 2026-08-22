@@ -472,10 +472,10 @@
       "production_interface": null,
       "diagnostic_interface": "tests/port_v2/collision_bench/run_pinned_emulator.ps1",
       "blockers": [
-        "Unblock: accept the active bounded V2-2B correction before V2-B1 promotes exact HIT/KO.",
+        "Unblock: execute active V2-B1 before claiming promoted exact HIT/KO behavior.",
         "Unblock: production collision integration, attack, damage, AI, a second emulator, normal release, and physical Saturn remain UNRUN."
       ],
-      "exact_next_experiment": "In the preserved dirty V2-2B worktree, close only exact writer binding, call-rooted closure, and derived dependency proofs with scratch mutations, Oracle, Full, and consolidated Tier 2 re-review.",
+      "exact_next_experiment": "Execute V2-B1 on the production continuity line, bind only the accepted exact HIT/KO evidence behind a narrow interface, and preserve collision and presentation locks.",
       "evidence": {
         "build_profile": "CollisionSalvageBench / debug-collision-salvage-bench",
         "strict_c90_compile": "PASS",
@@ -501,6 +501,54 @@
         "canary": "PASS",
         "emulator": "Yaba Sanshiro 1.20.37-2986eb",
         "emulator_evidence_tier": "ONE_EMULATOR",
+        "physical_saturn": "UNRUN"
+      },
+      "user_observation_state": {
+        "formal_review_question_asked": false,
+        "exact_observations": [],
+        "approved_components": [],
+        "requested_changes": [],
+        "priority": null
+      }
+    },
+    {
+      "task_id": "V2-2B",
+      "evaluated_commit": "597f4ed517d4e715d814ff841bd00d3977803f85",
+      "integrated_commit": "033be384bcc4e678408b465f102925841eab4333",
+      "technical_status": "PASS",
+      "fidelity_status": "MEASURED",
+      "user_status": "NOT_REVIEWED",
+      "salvage_decision": "REPAIR",
+      "production_interface": null,
+      "diagnostic_interface": "tools/map_avsp_hit_ko_writer_set.py",
+      "blockers": [
+        "Unblock: V2-B1 must implement and prove a narrow host behavioral differential before exact HIT/KO can be called production behavior.",
+        "Unblock: Saturn target, emulator, normal-release, and physical-Saturn evidence remain UNRUN for exact HIT/KO."
+      ],
+      "exact_next_experiment": "Execute V2-B1 on the production continuity line, bind the accepted exact class 0x1F HIT/KO state transition behind src/port_v2/combat/hit_ko, and reject a substituted authored transition through the host differential.",
+      "evidence": {
+        "manifest_sha256": "a13cffd40c6e44a1368b5edfa917af08c95644580d5384aaeddc0f9ef5e65aed",
+        "manifest_bytes": 1564141,
+        "decoded_writer_instances": 1159,
+        "transition_write_count": 1104,
+        "selected_boundary_pcs": 2102,
+        "selected_internal_edges": 2240,
+        "selected_routines": 48,
+        "computed_targets": 125,
+        "external_callees": 119,
+        "unresolved_dependencies": 0,
+        "owner_exit_returns": 1115,
+        "owner_exit_context_switches": 44,
+        "hit_animation_record": "0x12dd50",
+        "ko_animation_record": "0x12e214",
+        "hit_typed_exit_frame": 5190,
+        "ko_typed_exit_frame": 5329,
+        "focused_deterministic_repeat": "PASS / two independent generations byte-identical",
+        "real_negative_control": "PASS / private health mutation and HIT watchpoint removal rejected",
+        "oracle_lane": "PASS",
+        "full_lane": "PASS / isolated detached shadow with zero tracked drift",
+        "consolidated_tier_2_review": "ACCEPTED",
+        "remote_sha_verified": "597f4ed517d4e715d814ff841bd00d3977803f85",
         "physical_saturn": "UNRUN"
       },
       "user_observation_state": {
@@ -705,8 +753,8 @@
       "promoted_commit": null,
       "evidence_commit": "cd31823d82024b6e33a25e8963ded5493c204772",
       "diagnostic_interface": "tests/port_v2/collision_bench/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: accept the active V2-2B correction and then promote exact HIT/KO through V2-B1 before production combat integration.", "Unblock: production collision integration, attack, damage, AI, a second emulator, normal release, and physical Saturn remain UNRUN."],
-      "exact_next_experiment": "Close the bounded V2-2B writer-closure correction, then use V2-B1 to bind exact HIT/KO without changing the accepted collision adapter or approved presentation locks.",
+      "blockers": ["Unblock: V2-B1 must promote the accepted exact HIT/KO evidence before production combat integration.", "Unblock: production collision integration, attack, damage, AI, a second emulator, normal release, and physical Saturn remain UNRUN."],
+      "exact_next_experiment": "Execute V2-B1 to bind exact class 0x1F HIT/KO behind the narrow production interface without changing the accepted collision adapter or approved presentation locks.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {

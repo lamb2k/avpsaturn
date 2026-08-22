@@ -4,15 +4,15 @@ workflow_model: interactive-salvage-promotion-integration
 roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
-production_head: cd31823d82024b6e33a25e8963ded5493c204772
-candidate_head: cd31823d82024b6e33a25e8963ded5493c204772
-evidence_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
+production_head: 033be384bcc4e678408b465f102925841eab4333
+candidate_head: 033be384bcc4e678408b465f102925841eab4333
+evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-user-02-enemy-review
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
-review_candidate_head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
-review_candidate_status: CORRECTIONS_REQUIRED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION]
+review_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
+review_candidate_status: ACCEPTED
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B]
 target_scope:
   source_set: avspu
   route: cold-boot-through-title-select-all-stages-ending-credits
@@ -70,23 +70,23 @@ accepted_implementation_history:
   - id: SALVAGE-03-COLLISION
     status: ACCEPTED
     head: cd31823d82024b6e33a25e8963ded5493c204772
+  - id: V2-2B
+    status: ACCEPTED
+    head: 033be384bcc4e678408b465f102925841eab4333
+    evidence_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 accepted_control_plane_history:
   - id: ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN
     status: ACCEPTED
     base_head: 4067765ed9f398223ad7c75127f91ad3d80f65c4
     result: title-to-credits-production-plan-initialized
-paused_work:
+evidence_work:
   - id: V2-2B
-    status: ACTIVE_CORRECTIONS_REQUIRED
+    status: ACCEPTED
     worktree: C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-writer-map-tranche2b-validator-corrections
     branch: codex/avp-writer-map-tranche-2b-validator-corrections
-    head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
-    dirty: true
-    blockers:
-      - Exact writer ownership is not bound for every selected seven-field transition.
-      - Control flow is not a call-rooted closure through returns or explicit typed exits.
-      - Actor-field, ROM-data, work-RAM, outgoing-edge, and exclusion dependencies are asserted rather than derived.
-      - Two capture helpers were committed outside the exhaustive owned-path contract.
+    head: 597f4ed517d4e715d814ff841bd00d3977803f85
+    dirty: false
+    blockers: []
 worktree_safety:
   - id: canonical
     path: C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest
@@ -103,9 +103,9 @@ worktree_safety:
   - id: v2-2b-validator-corrections
     path: C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-writer-map-tranche2b-validator-corrections
     branch: codex/avp-writer-map-tranche-2b-validator-corrections
-    head: f2c9a4725dffdcb2e5689c70914511674fb3c9ef
-    dirty: true
-    activation_reason: SALVAGE-03 accepted; exact class 0x1F HIT/KO promotion now requires the bounded writer-closure correction.
+    head: 597f4ed517d4e715d814ff841bd00d3977803f85
+    dirty: false
+    activation_reason: V2-2B accepted; preserve the exact evidence branch while V2-B1 promotes only the bounded HIT/KO behavior on the production continuity line.
     preserve: true
 worktree_routing_policy:
   mode: existing-worktree-first
@@ -169,12 +169,12 @@ architecture_enforcement:
     - id: evidence-tier-separation
       status: ACTIVE
       activates_when: always
-current_checkpoint: v2-2b-writer-closure-corrections
-active_task_card: docs/task_cards/V2-2B.md
-active_task_id: V2-2B
-active_task_kind: REPAIR
+current_checkpoint: promote-exact-hit-ko
+active_task_card: docs/task_cards/V2-B1.md
+active_task_id: V2-B1
+active_task_kind: PROMOTE
 task_status: READY
-active_write_owner: V2-2B
+active_write_owner: V2-B1
 awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
@@ -423,15 +423,37 @@ completed_dispositions:
       - Real mutated outside-as-overlap harness control rejected.
       - Collision report and generated table regenerated twice from pinned private inputs with exact semantic identity; source ROM and both capture hashes PASS.
       - Both private collision captures replayed against the source predicate; 21,908 non-overlaps, 25 latched overlaps, 2,516 guarded overlaps, and 24 unguarded overlaps reproduced in aggregate.
-      - Fast and card-focused collision Oracle PASS; the global Oracle wrapper remained INCOMPLETE only for unrelated paused V2-2B writer inputs.
+      - Fast and card-focused collision Oracle PASS; the earlier global Oracle wrapper was INCOMPLETE only for then-paused V2-2B writer inputs.
       - CollisionSalvageBench Saturn build PASS twice with normalized ISO SHA-256 a99e1029c968f331ca5c7170d0070a22c8915f34aab9b5518d6721668de533dd.
       - Pinned Yaba Sanshiro readback PASS twice through a full 13-case cycle with 8/8 negative rejections, zero diagnostic failures, zero damage/HIT/KO writes, and intact canaries.
       - Diagnostic self-review PASS; no subjective production presentation changed and no USER_REVIEW was required.
       - Physical Saturn remains UNRUN.
     blockers:
-      - Exact HIT/KO remains blocked until active V2-2B is accepted and V2-B1 promotes it.
+      - Exact HIT/KO production behavior remains blocked until active V2-B1 promotes the accepted V2-2B evidence.
       - Production collision integration, attack, damage, AI, a second emulator, normal release, and physical Saturn remain UNRUN.
-    exact_next_experiment: In the preserved dirty V2-2B correction worktree, close only exact writer binding, call-rooted closure, and derived dependency proofs with scratch mutations, Oracle, Full, and consolidated Tier 2 review; do not change production runtime or salvage paths.
+    exact_next_experiment: Execute V2-B1 on the existing production continuity line, bind only the accepted exact HIT/KO evidence behind a narrow interface, and preserve collision and presentation locks.
+  - task: V2-2B
+    evaluated_head: 597f4ed517d4e715d814ff841bd00d3977803f85
+    integrated_head: 033be384bcc4e678408b465f102925841eab4333
+    technical_status: PASS
+    fidelity_status: MEASURED
+    user_status: NOT_REVIEWED
+    salvage_decision: REPAIR
+    successor_activation: V2-B1
+    evidence:
+      - Every 1,104 seven-field semantic transition binds same-interval decoded writer instances whose bytes reconstruct the exact before/after value.
+      - 1,159 decoded store instances are owned by call-rooted routines; 1,115 exit by return and 44 by typed context switch.
+      - The closure contains 2,102 accepted-boundary PCs, 2,240 internal edges, 48 routines, 125 computed targets, 119 external callees, 196 outgoing control edges, and zero unresolved or unattributed dependencies.
+      - HIT and KO animation repoints bind exact instruction 0x016526, successor 0x01652a, two bus events, A6=0xffa000, and program-image records 0x12dd50 and 0x12e214.
+      - The mapper self-test, focused committed-artifact controls, two genuine private-input scratch mutations, Oracle lane, MAME avspu verification, and isolated Full regression PASS.
+      - Two generations are byte-identical at 1,564,141 bytes and SHA-256 a13cffd40c6e44a1368b5edfa917af08c95644580d5384aaeddc0f9ef5e65aed.
+      - Consolidated Tier 2 review ACCEPTED after tightening writer exits to return or typed context switch and adding successor-PC, bus-event, register-binding, and ROM-purpose controls.
+      - The evidence branch was pushed to private-origin and remote SHA 597f4ed517d4e715d814ff841bd00d3977803f85 was verified.
+      - No production runtime, Saturn build, emulator, release, audio, or physical evidence was produced; Capability Gate remains 0/12.
+    blockers:
+      - Behavioral equivalence remains unimplemented until V2-B1 promotes the accepted mapping into a host-differential production interface.
+      - Saturn target, emulator, normal release, and physical Saturn remain UNRUN for HIT/KO behavior.
+    exact_next_experiment: In V2-B1, implement only the accepted exact class 0x1F HIT/KO writer behavior behind src/port_v2/combat/hit_ko, prove strict host differentials and a real constant/lookup substitution control, and do not broaden into combat integration.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR
@@ -477,7 +499,7 @@ task_queue:
 contract_sha256: 74016fb2e73c2ae00144fa062662b37e0f575a3ee3ff3b7a420b1ed0f55a4638
 oracle_manifest_sha256: 106fffb92cc5a14acf5fdae7eb14d33b7d9206b9f9ecffcbac67a6fc326696d2
 translation_boundary_sha256: 95e002b7f6d48e8aafbe5e201a370b6dc7c3c5559e7d2253901d0473c0c7b0f4
-writer_set_manifest_sha256: 6be81db48baad4327f2ef53a879cba0c9f67bed610127494f16f3c6deab9ae28
+writer_set_manifest_sha256: a13cffd40c6e44a1368b5edfa917af08c95644580d5384aaeddc0f9ef5e65aed
 capability_gate: 0/12
 capability_conditions:
   - id: source_identity

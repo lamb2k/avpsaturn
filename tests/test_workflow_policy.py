@@ -142,7 +142,7 @@ def main() -> None:
         "only roadmap",
         "Isolated salvage benches",
         "Define production interfaces",
-        "V2-2B remains unresolved",
+        "V2-2B is accepted",
         "not loading, controller input",
         "909-tile",
         "15%",

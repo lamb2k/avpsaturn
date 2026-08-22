@@ -53,17 +53,18 @@ retains its historical base metadata. The current existing continuity branch is
 designated as the production line; no branch or worktree is created merely
 because a tranche changes.
 
-The dirty canonical worktree, dirty playable-skeleton prototype, dirty V2-2B
-validator-correction worktree, accepted commits, private evidence, recovery
-patches, and ignored feedback packages remain preserved.
+The dirty canonical worktree, dirty playable-skeleton prototype, accepted
+V2-2B evidence worktree, accepted commits, private evidence, recovery patches,
+and ignored feedback packages remain preserved.
 
-V2-2B remains unresolved with disposition `CORRECTIONS_REQUIRED`, but Goal Mode
-has now explicitly activated its bounded correction body after collision
-salvage passed. It blocks exact HIT/KO promotion only, not loading, controller input,
-actor rendering, animation, stage, palette, HUD, PCM, diagnostics, or
-the read-only Oracle cards.
+V2-2B is accepted at the bounded MAME/static/host evidence tiers and its exact
+writer-closure result is integrated into the production continuity line. It
+does not itself implement HIT/KO behavior or prove Saturn execution. Goal Mode
+has activated V2-B1 to promote only that accepted behavior. Exact HIT/KO remains
+the only V2-B1 scope, not loading, controller input, actor rendering, animation, stage,
+palette, HUD, PCM, diagnostics, and the read-only Oracle cards.
 
-CURRENT_TASK: V2-2B
+CURRENT_TASK: V2-B1
 
 ## 4. Current salvage queue and production extension
 
