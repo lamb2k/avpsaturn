@@ -26,11 +26,22 @@ param(
     [switch]$CollisionSalvageBench,
     [switch]$HitKoPromotionBench,
     [switch]$CombatIntegrationBench,
+    [switch]$PlayableSlice,
     [switch]$SkipHostTests
 )
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
+$usePlayableSlice = $PlayableSlice -or ($Release -and
+    -not ($VisualTest -or $FrontendTest -or $FrontendShotTest -or
+          $EncounterTest -or $StreetTest -or $BossHitTest -or $BossKoTest -or
+          $PlayerSalvageBench -or $PlayerPromotionBench -or
+          $CameraStageSalvageBench -or $CameraStagePromotionBench -or
+          $HudPcmSalvageBench -or $HudPromotionBench -or $PcmPromotionBench -or
+          $CddaResidencySalvageBench -or $CddaResidencyPromotionBench -or
+          $EnemySalvageBench -or $EnemyPromotionBench -or
+          $PlayerEnemyIntegration -or $CollisionSalvageBench -or
+          $HitKoPromotionBench -or $CombatIntegrationBench))
 if (-not $JoEngineRoot) {
     $JoEngineRoot = Join-Path $projectRoot '.deps\joengine'
 }
@@ -200,7 +211,7 @@ try {
         # INTEGRATE-02 keeps the approved street archive byte-identical and
         # stages the exact jump-record HIT/KO tiles as a profile-only overlay.
         $combatTileOverlay = Join-Path $projectRoot 'build\avsp_cd\SPR4\COMBAT.BIN'
-        if ($CombatIntegrationBench) {
+        if ($CombatIntegrationBench -or $usePlayableSlice) {
             & $PythonPath (Join-Path $projectRoot 'tests\port_v2\integration\combat\build_tile_overlay.py')
             if ($LASTEXITCODE -ne 0) {
                 throw "Combat tile overlay generation failed with exit code $LASTEXITCODE."
@@ -217,7 +228,8 @@ try {
         $cddaFixtureSource = Join-Path $projectRoot `
             'tests\port_v2\cdda_residency_bench\RESCHK.BIN'
         $cddaFixtureStaged = Join-Path $contentRoot 'DIAG\RESCHK.BIN'
-        if ($CddaResidencySalvageBench -or $CddaResidencyPromotionBench) {
+        if ($CddaResidencySalvageBench -or $CddaResidencyPromotionBench -or
+            $usePlayableSlice) {
             New-Item -ItemType Directory -Force -Path `
                 (Split-Path -Parent $cddaFixtureStaged) | Out-Null
             Copy-Item -LiteralPath $cddaFixtureSource `
@@ -231,7 +243,7 @@ try {
         $fixtureSource = Join-Path $projectRoot 'build\rp4_fixture\STRIPS.BIN'
         $fixtureStaged = Join-Path $contentRoot 'ST1\STRIPS.BIN'
         if ($StreetTest -or $CameraStageSalvageBench -or
-            $CameraStagePromotionBench) {
+            $CameraStagePromotionBench -or $usePlayableSlice) {
             if (-not (Test-Path -LiteralPath $fixtureSource)) {
                 throw 'StreetTest requires build\rp4_fixture\STRIPS.BIN (run tools\gen_avsp_street_planes.py).'
             }
@@ -246,7 +258,8 @@ try {
                 -Destination (Join-Path $contentRoot $metadataName) -Force
         }
 
-        $buildProfile = if ($CombatIntegrationBench) { 'combat-integration-bench' }
+        $buildProfile = if ($PlayableSlice) { 'playable-slice' }
+            elseif ($CombatIntegrationBench) { 'combat-integration-bench' }
             elseif ($HitKoPromotionBench) { 'hit-ko-promotion-bench' }
             elseif ($CollisionSalvageBench) { 'collision-salvage-bench' }
             elseif ($PlayerEnemyIntegration) { 'player-enemy-integration' }
@@ -376,6 +389,20 @@ try {
             $makeArguments += 'AVSP_ENEMY_PROMOTION_BENCH=1'
             $makeArguments += 'AVSP_PLAYER_ENEMY_INTEGRATION=1'
             $makeArguments += 'AVSP_COMBAT_INTEGRATION_BENCH=1'
+        }
+        if ($usePlayableSlice) {
+            $makeArguments += 'AVSP_PLAYER_SALVAGE_BENCH=1'
+            $makeArguments += 'AVSP_ENEMY_SALVAGE_BENCH=1'
+            $makeArguments += 'AVSP_STREET_TEST=1'
+            $makeArguments += 'AVSP_CAMERA_STAGE_SALVAGE_BENCH=1'
+            $makeArguments += 'AVSP_CAMERA_STAGE_PROMOTION_BENCH=1'
+            $makeArguments += 'AVSP_HUD_PCM_SALVAGE_BENCH=1'
+            $makeArguments += 'AVSP_HUD_PROMOTION_BENCH=1'
+            $makeArguments += 'AVSP_PCM_PROMOTION_BENCH=1'
+            $makeArguments += 'AVSP_CDDA_RESIDENCY_SALVAGE_BENCH=1'
+            $makeArguments += 'AVSP_CDDA_RESIDENCY_PROMOTION_BENCH=1'
+            $makeArguments += 'AVSP_COMBAT_INTEGRATION_BENCH=1'
+            $makeArguments += 'AVSP_PLAYABLE_SLICE=1'
         }
         if ($FrontendTest) {
             $makeArguments += 'AVSP_FRONTEND_TEST=1'
@@ -556,7 +583,7 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "ROM tile archive ISO verification failed with exit code $LASTEXITCODE."
         }
-        if ($CombatIntegrationBench) {
+        if ($CombatIntegrationBench -or $usePlayableSlice) {
             & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
                 'game.iso' '/SPR4/COMBAT.BIN' '--equals' $combatTileOverlay
             if ($LASTEXITCODE -ne 0) {

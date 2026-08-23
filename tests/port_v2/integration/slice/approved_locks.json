@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "task_id": "INTEGRATE-03-PLAYABLE-SLICE",
+  "approved_contracts": [
+    {"path": "tests/port_v2/player/approved_contract.json", "sha256": "d0e6d835aaa3f2bdcd1138d5eeedafcacf96080178feca0454789a942fedf612"},
+    {"path": "tests/port_v2/enemy/approved_contract.json", "sha256": "35d6274c88aa60d32a6594fa535cae0e0964ddcc7f4ec7989553848f361142da"},
+    {"path": "tests/port_v2/integration/player_enemy/approved_contract.json", "sha256": "cc1a3a3d02b15291815a0f0a9e4e9e06665ba14b0b298148814e1c2565c8a92c"},
+    {"path": "tests/port_v2/integration/combat/approved_contract.json", "sha256": "06f9b1e9f401337d466b8d8adffff7d551b57ce4ea813facc4a642f0746b562d"},
+    {"path": "tests/port_v2/camera_stage/approved_contract.json", "sha256": "9b3b073d501691cdef5b59eb40b301c2c1dd6c88dd0eb01fc8b0ca36013c425a"},
+    {"path": "tests/port_v2/hud/approved_contract.json", "sha256": "fffd8b28576ebbc65e2e174cb9c5cc5af1ef9fa02919952d0d352743a3e407ca"},
+    {"path": "tests/port_v2/audio/pcm/approved_contract.json", "sha256": "b236a6a3ce490e42a48e1bfad69b36bc9128056e41f9fe8af6cf0778d79c7121"},
+    {"path": "tests/port_v2/cdda_residency/approved_contract.json", "sha256": "59cad89e40c5c82761f3dcc2927414c094e3ae9afebeb66bc5e5e16b3f6a1551"}
+  ],
+  "normal_release": "UNRUN",
+  "physical_saturn": "UNRUN"
+}

@@ -30,6 +30,9 @@
 #include "src/port_v2/integration/combat/combat.h"
 #include "tests/port_v2/integration/combat/diagnostic.h"
 #endif
+#ifdef AVSP_PLAYABLE_SLICE
+#include "src/port_v2/integration/slice/slice.h"
+#endif
 
 #include "generated/avsp_anim_records.h"
 #include "generated/avsp_emit_windows.h"
@@ -338,6 +341,36 @@ static int cdda_residency_frame;
 static AvspCddaResidencyRuntime cdda_residency_runtime;
 #endif
 static CddaResidencyReadBuffer cdda_residency_read_buffer;
+#endif
+
+#ifdef AVSP_PLAYABLE_SLICE
+static AvspPortV2SliceRuntime playable_slice_runtime;
+static AvspPortV2SliceFrame playable_slice_frame;
+static int playable_slice_player_attack_frame;
+static int playable_slice_enemy_action_frame;
+volatile int avsp_diag_slice_interface_version;
+volatile int avsp_diag_slice_frame;
+volatile int avsp_diag_slice_ready;
+volatile int avsp_diag_slice_actor_count;
+volatile int avsp_diag_slice_render_commands;
+volatile int avsp_diag_slice_combat_events;
+volatile int avsp_diag_slice_enemy_health;
+volatile int avsp_diag_slice_hit_count;
+volatile int avsp_diag_slice_ko_count;
+volatile int avsp_diag_slice_stage_submissions;
+volatile int avsp_diag_slice_hud_render_count;
+volatile int avsp_diag_slice_pcm_events;
+volatile int avsp_diag_slice_pcm_active;
+volatile int avsp_diag_slice_cdda_active;
+volatile int avsp_diag_slice_cdda_transitions;
+volatile int avsp_diag_slice_late_reads;
+volatile int avsp_diag_slice_asset_failures;
+volatile int avsp_diag_slice_fallback_used;
+volatile int avsp_diag_slice_canaries_ok;
+volatile int avsp_diag_slice_stability_frames;
+volatile int avsp_diag_slice_physical_saturn;
+volatile int avsp_diag_slice_init_stage;
+volatile int avsp_diag_slice_frame_stage;
 #endif
 
 #ifdef AVSP_ENEMY_SALVAGE_BENCH
@@ -3002,9 +3035,11 @@ static void street_test_frame(void)
     static int frame_counter = 0;
     const int rel = frame_counter % street_frames;
     unsigned long at;
+#ifndef AVSP_PLAYABLE_SLICE
     unsigned long objects;
     int entry_count;
     int entry;
+#endif
     int drawn = 0;
 
     if (!street_ready)
@@ -3079,7 +3114,11 @@ static void street_test_frame(void)
     street_apply_cycle(rel);
     street_apply_patches(rel);
 
-    /* Recorded object schedule through the gameplay tile path. */
+    /* The stage/card benchmark replays its captured foreground object stream
+       to prove the VDP1/VDP2 composition.  The production playable slice must
+       not replay those authored actors: its promoted player/enemy pipeline is
+       the sole gameplay-actor owner. */
+#ifndef AVSP_PLAYABLE_SLICE
     objects = street_object_frame_offset[rel];
     entry_count = (int)street_u16(objects);
     objects += 2;
@@ -3128,6 +3167,7 @@ static void street_test_frame(void)
             ++drawn;
         }
     }
+#endif
     avsp_diag_street_objects = drawn;
     avsp_diag_street_frame = rel;
 #ifdef AVSP_CAMERA_STAGE_SALVAGE_BENCH
@@ -4982,6 +5022,379 @@ static void cdda_residency_bench_frame_callback(void)
 #endif
 #endif
 
+#ifdef AVSP_PLAYABLE_SLICE
+static int playable_slice_load_residency(const int region_id,
+                                         unsigned char *destination,
+                                         const int capacity)
+{
+    int result;
+    avsp_diag_slice_init_stage = 1;
+    result = residency_port_read(region_id, destination, capacity);
+    avsp_diag_slice_init_stage = result == capacity ? 2 : -1;
+    return result;
+}
+
+static int playable_slice_load_tiles(void)
+{
+    avsp_diag_slice_init_stage = 3;
+    if (!load_tile_archive())
+    {
+        avsp_diag_slice_init_stage = -3;
+        return 0;
+    }
+    avsp_diag_slice_init_stage = 4;
+    return 1;
+}
+
+static int playable_slice_load_stage(void)
+{
+    avsp_diag_slice_init_stage = 5;
+    if (!load_background() || !street_setup())
+    {
+        avsp_diag_slice_init_stage = -5;
+        return 0;
+    }
+    avsp_diag_slice_init_stage = 6;
+    return 1;
+}
+
+static int playable_slice_load_player_idle(void)
+{
+    avsp_diag_slice_init_stage = 7;
+    if (!load_all_cels())
+    {
+        avsp_diag_slice_init_stage = -7;
+        return 0;
+    }
+    avsp_diag_slice_init_stage = 8;
+    return 1;
+}
+
+static int playable_slice_load_player_actions(void)
+{
+    avsp_diag_slice_init_stage = 9;
+    if (!load_player_action_sequences())
+    {
+        avsp_diag_slice_init_stage = -9;
+        return 0;
+    }
+    avsp_diag_slice_init_stage = 10;
+    return 1;
+}
+
+static int playable_slice_create_player_sprites(void)
+{
+    avsp_diag_slice_init_stage = 11;
+    if (!create_player_sprite_working_set())
+    {
+        avsp_diag_slice_init_stage = -11;
+        return 0;
+    }
+    avsp_diag_slice_init_stage = 12;
+    return 1;
+}
+
+static int playable_slice_load_hud(void)
+{
+    avsp_diag_slice_init_stage = 13;
+    if (!load_hud_assets() || !load_player2_hud_assets() ||
+        !create_hud_sprite_working_set())
+    {
+        avsp_diag_slice_init_stage = -13;
+        return 0;
+    }
+    avsp_diag_slice_init_stage = 14;
+    return 1;
+}
+
+static int playable_slice_load_pcm(void)
+{
+    avsp_diag_slice_init_stage = 15;
+    if (!load_pcm_audio(&melee_sound, AVSP_MELEE_PCM_FILE,
+                        AVSP_MELEE_PCM_DIRECTORY, AVSP_MELEE_PCM_BYTES,
+                        AVSP_MELEE_PCM_SAMPLE_RATE) ||
+        !hud_pcm_sound_valid(&melee_sound))
+    {
+        avsp_diag_slice_init_stage = -15;
+        return 0;
+    }
+    avsp_diag_slice_init_stage = 16;
+    return 1;
+}
+
+static int playable_slice_init(void)
+{
+    AvspPortV2SliceLoadOps operations;
+    memset(&operations, 0, sizeof(operations));
+    avsp_diag_slice_init_stage = 0;
+    avsp_diag_slice_frame_stage = 0;
+    operations.residency_assets.read = playable_slice_load_residency;
+    operations.actor_assets.load_tile_archive = playable_slice_load_tiles;
+    operations.actor_assets.load_background = playable_slice_load_stage;
+    operations.actor_assets.load_player_idle = playable_slice_load_player_idle;
+    operations.actor_assets.load_player_actions =
+        playable_slice_load_player_actions;
+    operations.actor_assets.create_player_sprites =
+        playable_slice_create_player_sprites;
+    operations.load_hud = playable_slice_load_hud;
+    operations.load_pcm = playable_slice_load_pcm;
+    avsp_port_v2_slice_init(&playable_slice_runtime);
+    if (!avsp_port_v2_slice_load(
+            &playable_slice_runtime, cart_available, &operations))
+        return 0;
+    avsp_diag_slice_init_stage = 17;
+    playable_slice_player_attack_frame = -1;
+    playable_slice_enemy_action_frame = 0;
+    avsp_diag_slice_interface_version = AVSP_PORT_V2_SLICE_INTERFACE_VERSION;
+    avsp_diag_slice_frame = 0;
+    avsp_diag_slice_ready = 1;
+    avsp_diag_slice_physical_saturn = 0;
+    avsp_diag_hud_port_lock_ok = avsp_port_v2_hud_validate_config(
+        &avsp_port_v2_hud_approved_config);
+    avsp_diag_pcm_port_lock_ok = avsp_port_v2_pcm_validate_config(
+        &avsp_port_v2_pcm_predator_melee_config);
+    avsp_diag_cdda_port_lock_ok = avsp_port_v2_cdda_validate_config(
+        &avsp_port_v2_cdda_stage1_config);
+    return 1;
+}
+
+static int playable_slice_contact_index(const int frame)
+{
+    if (frame == 180) return 0;
+    if (frame == 360) return 1;
+    if (frame == 540) return 2;
+    if (frame == 720) return 3;
+    return -1;
+}
+
+static int playable_slice_attack_lead_index(const int frame)
+{
+    if (frame == 176) return 0;
+    if (frame == 356) return 1;
+    if (frame == 536) return 2;
+    if (frame == 716) return 3;
+    return -1;
+}
+
+static void playable_slice_publish_combat(void)
+{
+    avsp_diag_combat_transition_state =
+        playable_slice_runtime.combat.transition.actor.state;
+    avsp_diag_combat_transition_sub_state =
+        playable_slice_runtime.combat.transition.actor.sub_state;
+    avsp_diag_combat_transition_action =
+        playable_slice_runtime.combat.transition.actor.action;
+    avsp_diag_combat_transition_anim_record =
+        playable_slice_runtime.combat.transition.actor.anim_record;
+    avsp_diag_combat_transition_timer =
+        playable_slice_runtime.combat.transition.actor.anim_timer;
+    avsp_diag_combat_transition_hit_value =
+        playable_slice_runtime.combat.transition.actor.hit_value;
+    avsp_diag_combat_contact_count =
+        playable_slice_runtime.combat.contact_count;
+    avsp_diag_combat_damage_count =
+        playable_slice_runtime.combat.damage_count;
+    avsp_diag_combat_hit_count = playable_slice_runtime.combat.hit_count;
+    avsp_diag_combat_ko_count = playable_slice_runtime.combat.ko_count;
+    avsp_diag_combat_enemy_health =
+        playable_slice_runtime.combat.enemy_health;
+}
+
+static void playable_slice_draw_actors(void)
+{
+    CapActor player;
+    CapActor *enemy = &world.enemies[0];
+    AvspPortV2CombatSourceEvent source;
+    AvspPortV2CombatPresentation presentation;
+    int source_index = playable_slice_frame.combat_event_count > 0 ?
+        playable_slice_frame.combat_event_count - 1 : 0;
+    int rendered = 0;
+    memset(&player, 0, sizeof(player));
+    player.active = 1;
+    player.kind = CAP_ACTOR_PLAYER;
+    player.x = playable_slice_frame.actors.player.world_x;
+    player.lane = playable_slice_frame.actors.player.lane;
+    player.facing = playable_slice_frame.actors.player.facing;
+    player.locomotion_frame =
+        playable_slice_frame.actors.player.locomotion_frame;
+    player.action = playable_slice_frame.actors.player.action ==
+        AVSP_PORT_V2_PLAYER_ACTION_WALK ? CAP_ACT_WALK : CAP_ACT_IDLE;
+    memset(enemy, 0, sizeof(*enemy));
+    enemy->active = 1;
+    enemy->kind = CAP_ACTOR_ALIEN;
+    enemy->variant = 1;
+    enemy->health = playable_slice_runtime.combat.enemy_health;
+    enemy->x = playable_slice_frame.actors.enemy.world_x;
+    enemy->lane = playable_slice_frame.actors.enemy.lane;
+    enemy->facing = playable_slice_frame.actors.enemy.facing;
+    enemy->locomotion_frame =
+        playable_slice_frame.actors.enemy.locomotion_frame;
+    enemy->action = CAP_ACT_WALK;
+    if (avsp_port_v2_combat_source_event(source_index, &source) &&
+        avsp_port_v2_combat_presentation(&source, &presentation) &&
+        playable_slice_frame.combat_event_count > 0)
+    {
+        player.x = presentation.player_x;
+        player.lane = presentation.player_lane;
+        player.height = presentation.player_height;
+        player.facing = presentation.player_facing;
+        enemy->x = presentation.enemy_x;
+        enemy->lane = presentation.enemy_lane;
+        enemy->height = presentation.enemy_height;
+        enemy->facing = presentation.enemy_facing;
+    }
+    if (playable_slice_player_attack_frame >= 0)
+    {
+        player.action = CAP_ACT_ATTACK;
+        player.action_frame = playable_slice_player_attack_frame;
+    }
+    if (playable_slice_runtime.combat.transition.active &&
+        playable_slice_runtime.last_combat.kind ==
+            AVSP_PORT_V2_COMBAT_EVENT_HIT)
+        enemy->action = CAP_ACT_HIT;
+    else if (playable_slice_runtime.last_combat.kind ==
+             AVSP_PORT_V2_COMBAT_EVENT_KO)
+        enemy->action = CAP_ACT_KO;
+    enemy->action_frame = playable_slice_enemy_action_frame;
+    world.encounter_started = 1;
+    world.encounter_state = CAP_ENCOUNTER_WAVE_ONE;
+    world.camera_x = 0;
+    rom_actor_prepare();
+    jo_sprite_change_sprite_scale_xy(
+        (float)CAP_VIEW_WIDTH / (float)CAP_CPS2_VIEW_WIDTH, 1.0f);
+    draw_player(&player, cap_actor_screen_x(player.x, 0, 1));
+    if (rom_actor_entry_counts[0] > 0 && tile_archive_ready)
+        rendered = draw_rom_actor_tiles(enemy, 0);
+    jo_sprite_restore_sprite_scale();
+    rom_actor_advance();
+    avsp_diag_player_x = player.x;
+    avsp_diag_player_lane = player.lane;
+    avsp_diag_player_facing = player.facing;
+    avsp_diag_enemy_x = enemy->x;
+    avsp_diag_enemy_lane = enemy->lane;
+    avsp_diag_enemy_facing = enemy->facing;
+    avsp_diag_enemy_render_count = rendered;
+}
+
+static void playable_slice_frame_callback(void)
+{
+    AvspPortV2SliceInput input;
+    AvspPortV2PcmAudioOps pcm_operations;
+    AvspPortV2CddaAudioOps cdda_operations;
+    CapInput pad;
+    int contact_index;
+    int lead_index;
+    if (!runtime_ready)
+    {
+        avsp_diag_runtime_ready = 0;
+        return;
+    }
+    avsp_diag_slice_frame_stage = 1;
+    street_test_frame();
+    avsp_diag_slice_frame_stage = 2;
+    memset(&input, 0, sizeof(input));
+    input.frame = playable_slice_runtime.frame;
+    pad = read_input();
+    input.player.left = pad.left;
+    input.player.right = pad.right;
+    input.player.up = pad.up;
+    input.player.down = pad.down;
+    input.enemy_translated = (input.frame % 240) >= 120;
+    input.camera.scroll_x[0] = avsp_diag_street_scx[0];
+    input.camera.scroll_x[1] = avsp_diag_street_scx[1];
+    input.player_health = 101;
+    input.player_energy = 64;
+    input.player2_visible = 1;
+    input.player2_health = 50;
+    input.player2_energy = 32;
+    lead_index = playable_slice_attack_lead_index(input.frame);
+    if (lead_index >= 0) playable_slice_player_attack_frame = 0;
+    contact_index = playable_slice_contact_index(input.frame);
+    if (contact_index >= 0)
+    {
+        input.contact_event = 1;
+        input.contact_index = contact_index;
+        playable_slice_enemy_action_frame = 0;
+    }
+    input.pcm_cue_event = input.frame == 180;
+    if (input.frame == 0) input.cdda_command = AVSP_PORT_V2_CDDA_START;
+    if (input.frame == 900) input.cdda_command = AVSP_PORT_V2_CDDA_STOP;
+    if (!avsp_port_v2_slice_step(
+            &playable_slice_runtime, &input, &playable_slice_frame))
+    {
+        ++playable_slice_runtime.asset_failures;
+        runtime_ready = 0;
+        return;
+    }
+    avsp_diag_slice_frame_stage = 3;
+    pcm_operations.start = pcm_port_start;
+    pcm_operations.stop = pcm_port_stop;
+    cdda_operations.start = cdda_port_start;
+    cdda_operations.stop = cdda_port_stop;
+    hud_pcm_bench.frame = input.frame;
+    if (!avsp_port_v2_pcm_submit(&playable_slice_frame.pcm,
+                                 &pcm_operations) ||
+        !avsp_port_v2_cdda_submit(&playable_slice_frame.cdda,
+                                  &cdda_operations))
+    {
+        ++playable_slice_runtime.asset_failures;
+        runtime_ready = 0;
+        return;
+    }
+    avsp_diag_slice_frame_stage = 4;
+    playable_slice_publish_combat();
+    playable_slice_draw_actors();
+    avsp_diag_slice_frame_stage = 5;
+    {
+        AvspPortV2HudRenderOps hud_operations;
+        hud_operations.submit_frame = hud_port_submit_frame;
+        if (!avsp_port_v2_hud_submit(&playable_slice_frame.hud,
+                                     &hud_operations))
+        {
+            ++playable_slice_runtime.asset_failures;
+            runtime_ready = 0;
+            return;
+        }
+    }
+    avsp_diag_slice_frame_stage = 6;
+    if (playable_slice_player_attack_frame >= 0 &&
+        ++playable_slice_player_attack_frame >= 24)
+        playable_slice_player_attack_frame = -1;
+    if (playable_slice_runtime.combat.transition.active ||
+        playable_slice_runtime.last_combat.kind ==
+            AVSP_PORT_V2_COMBAT_EVENT_KO)
+        ++playable_slice_enemy_action_frame;
+    avsp_diag_runtime_ready = 1;
+    avsp_diag_slice_ready = playable_slice_frame.ready;
+    avsp_diag_slice_actor_count = playable_slice_frame.actors.actor_count;
+    avsp_diag_slice_render_commands =
+        playable_slice_frame.actors.render_command_count;
+    avsp_diag_slice_combat_events =
+        playable_slice_frame.combat_event_count;
+    avsp_diag_slice_enemy_health =
+        playable_slice_runtime.combat.enemy_health;
+    avsp_diag_slice_hit_count = playable_slice_runtime.combat.hit_count;
+    avsp_diag_slice_ko_count = playable_slice_runtime.combat.ko_count;
+    avsp_diag_slice_stage_submissions = avsp_diag_stage_render_submissions;
+    avsp_diag_slice_hud_render_count = playable_slice_frame.hud.render_count;
+    avsp_diag_slice_pcm_events = playable_slice_frame.pcm.event_count;
+    avsp_diag_slice_pcm_active = playable_slice_frame.pcm.active;
+    avsp_diag_slice_cdda_active = playable_slice_frame.cdda.active;
+    avsp_diag_slice_cdda_transitions =
+        playable_slice_frame.cdda.ownership_transitions;
+    avsp_diag_slice_late_reads =
+        playable_slice_runtime.residency.late_read_attempts;
+    avsp_diag_slice_asset_failures = playable_slice_runtime.asset_failures;
+    avsp_diag_slice_fallback_used = playable_slice_runtime.fallback_used;
+    avsp_diag_slice_canaries_ok =
+        avsp_port_v2_slice_canaries_ok(&playable_slice_runtime);
+    ++avsp_diag_slice_stability_frames;
+    /* Publish last so debugger readback sees a complete semantic frame. */
+    avsp_diag_slice_frame = playable_slice_frame.frame;
+    avsp_diag_slice_frame_stage = 7;
+}
+#endif
+
 static void frame_callback(void)
 {
     CapInput input;
@@ -4993,6 +5406,10 @@ static void frame_callback(void)
      * screen every frame would space-fill the street map, so the street
      * profile never touches the SGL ASCII layer. */
     jo_clear_screen();
+#endif
+#ifdef AVSP_PLAYABLE_SLICE
+    playable_slice_frame_callback();
+    return;
 #endif
 #ifdef AVSP_HIT_KO_PROMOTION_BENCH
     avsp_hit_ko_diagnostic_step();
@@ -5650,7 +6067,15 @@ void jo_main(void)
                                AVSP_STRIPS_REGION_BYTES);
     }
     set_actor_palette();
-#if defined(AVSP_HIT_KO_PROMOTION_BENCH)
+#if defined(AVSP_PLAYABLE_SLICE)
+    set_frontend_palettes();
+    set_hud_palette();
+    cap_world_init(&world);
+    hud_pcm_bench_init();
+    runtime_ready = playable_slice_init();
+    if (!runtime_ready) failed_asset = "PLAYABLE SLICE FAILED";
+    JO_UNUSED_ARG(index);
+#elif defined(AVSP_HIT_KO_PROMOTION_BENCH)
     runtime_ready = avsp_hit_ko_diagnostic_init();
     if (!runtime_ready) failed_asset = "HIT KO BENCH FAILED";
     JO_UNUSED_ARG(index);
