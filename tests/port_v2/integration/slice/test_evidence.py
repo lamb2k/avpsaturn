@@ -31,6 +31,8 @@ def stable_state(report, name):
     state.pop("slice_frame", None)
     state.pop("slice_stability_frames", None)
     state.pop("slice_stage_submissions", None)
+    state.pop("slice_player_action_frame", None)
+    state.pop("slice_enemy_action_frame", None)
     return state
 
 

@@ -8,11 +8,13 @@ import json
 import shutil
 from pathlib import Path
 
+from PIL import Image
+
 
 ROOT = Path(__file__).resolve().parents[4]
 TASK_ID = "INTEGRATE-03-PLAYABLE-SLICE"
 EXPECTED_ISO_SHA256 = (
-    "f1be594e8ceab37473333c46ff80b11a9a110c6969b7fc6c863638d042b2ba2b"
+    "8699d5c642f7e3732de1d00c884ba4cd620e4e35bd036d8bacca8a74030ee8c4"
 )
 SOURCE = ROOT / "build" / "port_v2" / "integration" / "slice"
 DESTINATION = ROOT / "build" / "feedback" / TASK_ID
@@ -40,6 +42,8 @@ def stable_state(report: dict, name: str) -> dict:
     state.pop("slice_frame", None)
     state.pop("slice_stability_frames", None)
     state.pop("slice_stage_submissions", None)
+    state.pop("slice_player_action_frame", None)
+    state.pop("slice_enemy_action_frame", None)
     return state
 
 
@@ -50,6 +54,8 @@ def main() -> int:
     build_2 = read_json(run_2 / "build.json")
     readback_1 = read_json(run_1 / "readback.json")
     readback_2 = read_json(run_2 / "readback.json")
+    trace_1 = read_json(run_1 / "scene-trace.json")
+    trace_2 = read_json(run_2 / "scene-trace.json")
 
     for build in (build_1, build_2):
         assert build["task_id"] == TASK_ID
@@ -67,8 +73,26 @@ def main() -> int:
         assert stable_state(readback_1, state_name) == stable_state(
             readback_2, state_name
         )
+    assert trace_1["result"] == trace_2["result"] == "PASS"
+    assert trace_1["samples"] == trace_2["samples"]
+    assert trace_1["contacts"] == [600, 1200, 1800, 2400]
 
     DESTINATION.mkdir(parents=True, exist_ok=True)
+    before_clip = DESTINATION / "review-correction-2-before.gif"
+    before_sources = [
+        DESTINATION / "run-1-hit.png",
+        DESTINATION / "run-1-ko.png",
+        DESTINATION / "run-2-hit.png",
+        DESTINATION / "run-2-ko.png",
+    ]
+    if not before_clip.exists():
+        assert all(path.is_file() for path in before_sources)
+        images = [Image.open(path).convert(
+            "P", palette=Image.Palette.ADAPTIVE, colors=256)
+                  for path in before_sources]
+        images[0].save(before_clip, save_all=True, append_images=images[1:],
+                       duration=900, loop=0, optimize=False, disposal=2)
+
     copied = []
     for run_name in ("run-1", "run-2"):
         run_source = SOURCE / run_name
@@ -76,6 +100,7 @@ def main() -> int:
             "build.json",
             "iso-normalization.json",
             "readback.json",
+            "scene-trace.json",
             "hit.png",
             "ko.png",
         ):
@@ -85,6 +110,26 @@ def main() -> int:
             copied.append(
                 {"path": target.name, "bytes": target.stat().st_size, "sha256": sha256(target)}
             )
+    after_clip = DESTINATION / "review-correction-2-after.gif"
+    shutil.copy2(run_1 / "scene-after.gif", after_clip)
+    copied.append({"path": after_clip.name, "bytes": after_clip.stat().st_size,
+                   "sha256": sha256(after_clip)})
+    copied.append({"path": before_clip.name, "bytes": before_clip.stat().st_size,
+                   "sha256": sha256(before_clip)})
+    for frame in (45, 46, 320, 588, 599, 600, 601, 620, 637,
+                  1200, 1800, 2400, 2420, 2480):
+        source = run_1 / f"scene-{frame:04d}.png"
+        target = DESTINATION / source.name
+        shutil.copy2(source, target)
+        copied.append({"path": target.name, "bytes": target.stat().st_size,
+                       "sha256": sha256(target)})
+    visual_qa = run_1 / "visual-qa.json"
+    assert visual_qa.is_file()
+    target_visual_qa = DESTINATION / "visual-qa.json"
+    shutil.copy2(visual_qa, target_visual_qa)
+    copied.append({"path": target_visual_qa.name,
+                   "bytes": target_visual_qa.stat().st_size,
+                   "sha256": sha256(target_visual_qa)})
 
     summary = {
         "schema": 1,
@@ -94,16 +139,21 @@ def main() -> int:
         "manifest_profile": build_1["manifest_profile"],
         "normalized_iso_sha256": EXPECTED_ISO_SHA256,
         "paired_emulator_result": "PASS",
+        "paired_synchronized_trace_result": "PASS / 271 exact samples",
+        "ai_visual_qa": "PASS / correlated with synchronized trace",
         "review_focus": [
-            "visible player attack, alien contact reaction, and final KO",
+            "continuous camera pan, approach, attack, contact, HIT/recovery, later contacts, and KO",
+            "no camera reset after the first contact",
+            "continuous class 0x1F street-alien identity across walk, HIT, and KO",
             "player and class 0x1F enemy alignment at HIT and KO",
             "camera and two-plane stage presentation",
             "P1 and P2 HUD color and placement",
             "PCM cue and CDDA playback",
         ],
         "full_lane": {
-            "status": "FAIL",
-            "scope": "out-of-card generated-artifact drift",
+            "status": "NOT_RERUN_BY_REVIEW_CORRECTION_2",
+            "prior_status": "FAIL",
+            "prior_scope": "out-of-card generated-artifact drift",
             "artifacts": [
                 "data/avsp_palette_coverage.json",
                 "data/avsp_translation_boundary.json",
@@ -119,12 +169,15 @@ def main() -> int:
     )
     (DESTINATION / "README.md").write_text(
         "# INTEGRATE-03 exact-release review\n\n"
-        "Review the paired HIT and KO screenshots and the running exact release. "
-        "Focus first on visible combat engagement, then actor alignment, "
+        "Review the preserved rejected-candidate checkpoint montage, continuous "
+        "corrected after clip, "
+        "paired exact trace, and the running exact release. Focus first on "
+        "camera/actor coherence and visible combat engagement, then actor identity, "
         "camera/stage, both HUDs, and audio.\n\n"
         f"ISO SHA-256: `{EXPECTED_ISO_SHA256}`\n\n"
-        "This is emulator/user evidence only. Physical Saturn is UNRUN. The Full "
-        "lane separately reports three out-of-card generated-artifact drifts.\n\n"
+        "This is emulator/user evidence only. Physical Saturn is UNRUN. Full was "
+        "not rerun for Review correction 2; its prior result separately reports "
+        "three out-of-card generated-artifact drifts.\n\n"
         f"{QUESTION}\n",
         encoding="utf-8",
     )

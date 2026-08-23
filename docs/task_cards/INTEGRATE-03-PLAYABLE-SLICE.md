@@ -127,3 +127,36 @@ negative controls. If the source evidence does not bind the current HIT/KO
 record/object/tile chain to the approved street-alien visual family, or if a
 promoted interface outside this card's owned paths must change, stop at that
 evidence or ownership boundary and propose one bounded repair card.
+
+Correction candidate: `0d612401c874755acce62c25164ab9494dc967bd`.
+The correction stayed inside INTEGRATE-03 ownership. Player and enemy now use
+the declared shared transform `screen_x = world_x - camera_world_x +
+aperture_origin_x`; the slice trace records both actor world/screen positions,
+camera position, deltas, and both VDP2 scrolls on every sampled frame. At the
+measured camera step from frame 45 to 46, both stationary actors move ten pixels
+opposite the ten-pixel camera change. Omitted- and reversed-camera-term
+controls fail as required.
+
+The identity trace binds actor 31 to the class-`0x1F` street-alien
+archetype/asset/animation family throughout walk, HIT, recovery, and KO. The
+source actor slot `0xffa000` and table set `0x00130ac8` bind the observed walk
+record `0x0012eb4c`, HIT record `0x0012dd50`, and KO records beginning at
+`0x0012e214` to that actor. No stalker asset or animation set is selected; the
+stalker-binding negative control fails.
+
+Combat is now causal rather than presentation-time injected. Deterministic
+attacks become active at frames 600, 1200, 1800, and 2400, use current on-screen
+actor state, route damage from player 1 to enemy 31 exactly once per contact,
+and produce health `87 -> 63 -> 39 -> 8 -> -1`, source-bound HIT, recovery,
+and KO. No-overlap, pre-active, swapped-role, wrong-defender, enemy-versus-
+enemy, damage-without-contact, and visual-HIT-without-semantic controls all
+fail as required.
+
+Paired pinned-emulator runs reproduce the normalized ISO SHA-256
+`8699d5c642f7e3732de1d00c884ba4cd620e4e35bd036d8bacca8a74030ee8c4`
+and an identical 271-sample synchronized semantic trace. Codex visual QA
+correlated the continuous clip with the trace and found no camera reset,
+identity substitution, unexpected actor, disconnected contact, wrong reactor,
+or semantic/visual mismatch. This is emulator evidence only. Physical Saturn
+is `UNRUN`; Full was not rerun under Review correction 2 as explicitly
+directed. Renewed human review is pending, and INTEGRATE-03 remains unaccepted.
