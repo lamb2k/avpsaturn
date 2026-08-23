@@ -66,9 +66,9 @@ checkpoint precedes physical testing; explicit user approval is not physical pro
 
 ## Current candidate checkpoint
 
-- Candidate implementation: `3273779516051a6b6f62719bc0bdceef07655310`.
+- Candidate implementation: `dcd5daf12c4464e5f7982d87b18289519d357691`.
 - Exact `release-normal-release` ISO repeat:
-  `8a3cecba96d5fbe2b891bb8abe2d2df36b4f26e3d8c3f8a4dc64998244586129`.
+  `f1be594e8ceab37473333c46ff80b11a9a110c6969b7fc6c863638d042b2ba2b`.
 - Host deterministic repeat, real negative controls, Fast, exact release build,
   and paired pinned-emulator semantic/readback review pass.
 - Clean integrated HIT and KO frames retain the approved player/enemy alignment,
@@ -95,3 +95,13 @@ human-review presentation exposed each attack for only about 0.4 seconds and
 then held the final KO indefinitely. Correct the Saturn review timeline to give
 the approach, attack, HIT reaction, and KO durable visible holds without
 changing the measured combat events or approved presentation/audio locks.
+
+Correction candidate: `dcd5daf12c4464e5f7982d87b18289519d357691`.
+The deterministic source events remain at the same four logical contacts, while
+the review timeline now exposes the first approach/attack, a held alien HIT
+reaction, three later contacts, and a durable KO. Paired exact-release emulator
+sampling passed in the durable HIT (`605-839`), KO (`2480-2999`), and final
+ownership (`3000-3059`) windows. The actual run-1 samples were `606`, `2481`,
+and `3003`; run 2 sampled `607`, `2483`, and `3002`. Every sample preserved
+three stage submissions per stability frame, zero fallback, zero late reads,
+and intact canaries. Renewed integrated subjective review is pending.

@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[4]
 TASK_ID = "INTEGRATE-03-PLAYABLE-SLICE"
 EXPECTED_ISO_SHA256 = (
-    "8a3cecba96d5fbe2b891bb8abe2d2df36b4f26e3d8c3f8a4dc64998244586129"
+    "f1be594e8ceab37473333c46ff80b11a9a110c6969b7fc6c863638d042b2ba2b"
 )
 SOURCE = ROOT / "build" / "port_v2" / "integration" / "slice"
 DESTINATION = ROOT / "build" / "feedback" / TASK_ID
@@ -37,6 +37,9 @@ def sha256(path: Path) -> str:
 def stable_state(report: dict, name: str) -> dict:
     state = dict(report[name])
     state.pop("slice_frame_stage", None)
+    state.pop("slice_frame", None)
+    state.pop("slice_stability_frames", None)
+    state.pop("slice_stage_submissions", None)
     return state
 
 
@@ -57,6 +60,10 @@ def main() -> int:
         assert build["physical_saturn"] == "UNRUN"
 
     for state_name in ("hit_state", "ko_state", "final_state"):
+        for report in (readback_1, readback_2):
+            state = report[state_name]
+            assert state["slice_stage_submissions"] == \
+                state["slice_stability_frames"] * 3
         assert stable_state(readback_1, state_name) == stable_state(
             readback_2, state_name
         )
@@ -88,6 +95,7 @@ def main() -> int:
         "normalized_iso_sha256": EXPECTED_ISO_SHA256,
         "paired_emulator_result": "PASS",
         "review_focus": [
+            "visible player attack, alien contact reaction, and final KO",
             "player and class 0x1F enemy alignment at HIT and KO",
             "camera and two-plane stage presentation",
             "P1 and P2 HUD color and placement",
@@ -112,7 +120,8 @@ def main() -> int:
     (DESTINATION / "README.md").write_text(
         "# INTEGRATE-03 exact-release review\n\n"
         "Review the paired HIT and KO screenshots and the running exact release. "
-        "Focus on actor alignment, camera/stage, both HUDs, and audio.\n\n"
+        "Focus first on visible combat engagement, then actor alignment, "
+        "camera/stage, both HUDs, and audio.\n\n"
         f"ISO SHA-256: `{EXPECTED_ISO_SHA256}`\n\n"
         "This is emulator/user evidence only. Physical Saturn is UNRUN. The Full "
         "lane separately reports three out-of-card generated-artifact drifts.\n\n"
