@@ -13,7 +13,7 @@ param(
         'FrontendShotTest', 'EncounterTest', 'StreetTest', 'BossHitTest',
         'BossKoTest', 'PlayerSalvageBench', 'PlayerPromotionBench',
         'CameraStageSalvageBench', 'CameraStagePromotionBench',
-        'HudPcmSalvageBench', 'EnemySalvageBench',
+        'HudPcmSalvageBench', 'HudPromotionBench', 'EnemySalvageBench',
         'EnemyPromotionBench', 'PlayerEnemyIntegration',
         'CollisionSalvageBench', 'HitKoPromotionBench',
         'CombatIntegrationBench')]
@@ -268,6 +268,7 @@ function Invoke-TargetLane {
         CameraStageSalvageBench = 'debug-camera-stage-salvage-bench'
         CameraStagePromotionBench = 'debug-camera-stage-promotion-bench'
         HudPcmSalvageBench = 'debug-hud-pcm-salvage-bench'
+        HudPromotionBench = 'debug-hud-promotion-bench'
         EnemySalvageBench = 'debug-enemy-salvage-bench'
         EnemyPromotionBench = 'debug-enemy-promotion-bench'
         PlayerEnemyIntegration = 'debug-player-enemy-integration'

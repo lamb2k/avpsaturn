@@ -10,6 +10,7 @@
 #include "src/port_v2/enemy/enemy.h"
 #include "src/port_v2/camera/camera.h"
 #include "src/port_v2/stage/stage.h"
+#include "src/port_v2/hud/hud.h"
 #include "src/port_v2/integration/player_enemy/player_enemy.h"
 #ifdef AVSP_COLLISION_SALVAGE_BENCH
 #include "tests/port_v2/collision_bench/collision_bench.h"
@@ -391,6 +392,11 @@ volatile int avsp_diag_hud_palette_yellow;
 volatile int avsp_diag_hud_palette_red;
 volatile int avsp_diag_hud_palette_energy;
 volatile int avsp_diag_hud_palette_empty;
+#ifdef AVSP_HUD_PROMOTION_BENCH
+volatile int avsp_diag_hud_production_interface_version;
+volatile int avsp_diag_hud_port_lock_ok;
+volatile int avsp_diag_hud_submit_count;
+#endif
 #endif
 #ifdef AVSP_PLAYER_SALVAGE_BENCH
 volatile int avsp_diag_player_frame;
@@ -3285,6 +3291,27 @@ static void draw_arcade_hud(void)
                          AVSP_HUD_HEAT_HEIGHT / 2, 100);
 }
 
+#ifdef AVSP_HUD_PROMOTION_BENCH
+/* Temporary legacy render adapter. The production HUD emits only semantic
+ * state; this bounded adapter applies it to the already-approved Jo textures
+ * and draw order until the Saturn presentation adapter displaces main.c. */
+static int hud_port_submit_frame(const AvspPortV2HudFrame *frame)
+{
+    if (frame == JO_NULL || frame->player_count != AVSP_PORT_V2_HUD_PLAYER_COUNT)
+        return 0;
+    if (!frame->players[AVSP_PORT_V2_HUD_P1].visible ||
+        !frame->players[AVSP_PORT_V2_HUD_P2].visible)
+        return frame->render_count == 0;
+    world.player.health = frame->players[AVSP_PORT_V2_HUD_P1].health;
+    world.weapon_energy = frame->players[AVSP_PORT_V2_HUD_P1].energy;
+    hud_pcm_bench.p2_health = frame->players[AVSP_PORT_V2_HUD_P2].health;
+    hud_pcm_bench.p2_energy = frame->players[AVSP_PORT_V2_HUD_P2].energy;
+    draw_arcade_hud();
+    ++avsp_diag_hud_submit_count;
+    return 1;
+}
+#endif
+
 #ifdef AVSP_HUD_PCM_SALVAGE_BENCH
 static int hud_pcm_sound_valid(const jo_sound *sound)
 {
@@ -3311,6 +3338,7 @@ static int hud_pcm_player2_binding_valid(const jo_img_8bits *top,
            top->data != hud_prompt_image.data;
 }
 
+#ifndef AVSP_HUD_PROMOTION_BENCH
 static int hud_pcm_health_fill(const int health)
 {
     int source_fill = (health * 5) / 4;
@@ -3325,6 +3353,7 @@ static int hud_pcm_energy_fill(const int energy)
     return (energy * AVSP_HUD_HEAT_BAR_WIDTH + CAP_WEAPON_MAX_ENERGY - 1) /
            CAP_WEAPON_MAX_ENERGY;
 }
+#endif
 
 static void hud_pcm_bench_negative_control(const int control)
 {
@@ -3390,6 +3419,11 @@ static void hud_pcm_bench_init(void)
     avsp_diag_pcm_event_frame = -1;
     avsp_diag_pcm_start_frame = -1;
     avsp_diag_pcm_end_frame = -1;
+#ifdef AVSP_HUD_PROMOTION_BENCH
+    avsp_diag_hud_production_interface_version =
+        AVSP_PORT_V2_HUD_INTERFACE_VERSION;
+    avsp_diag_hud_submit_count = 0;
+#endif
     world.encounter_started = 1;
     world.encounter_state = CAP_ENCOUNTER_WAVE_ONE;
     world.frame = 0;
@@ -3404,6 +3438,11 @@ static void hud_pcm_bench_frame_callback(void)
     int relative;
     int phase;
     int channel_playing;
+#ifdef AVSP_HUD_PROMOTION_BENCH
+    AvspPortV2HudInput hud_input;
+    AvspPortV2HudFrame hud_frame;
+    AvspPortV2HudRenderOps hud_operations;
+#endif
     jo_clear_screen();
     avsp_diag_runtime_ready = runtime_ready;
     if (!runtime_ready)
@@ -3430,6 +3469,9 @@ static void hud_pcm_bench_frame_callback(void)
         avsp_diag_hud_pcm_negative_rejections = 0;
         hud_pcm_bench.negative_control_mask = 0;
         hud_pcm_bench.underrun_reported_start = -1;
+#ifdef AVSP_HUD_PROMOTION_BENCH
+        avsp_diag_hud_submit_count = 0;
+#endif
     }
     if (phase == 0)
     {
@@ -3523,20 +3565,67 @@ static void hud_pcm_bench_frame_callback(void)
 
     avsp_diag_hud_pcm_phase = phase;
     avsp_diag_hud_state = phase < 3 ? phase : -1;
+    avsp_diag_hud_p2_state = phase < 3 ? phase : -1;
+#ifdef AVSP_HUD_PROMOTION_BENCH
+    memset(&hud_input, 0, sizeof(hud_input));
+    hud_input.players[AVSP_PORT_V2_HUD_P1].visible = phase < 3;
+    hud_input.players[AVSP_PORT_V2_HUD_P1].character_id =
+        AVSP_PORT_V2_CHARACTER_PREDATOR_WARRIOR;
+    hud_input.players[AVSP_PORT_V2_HUD_P1].health = world.player.health;
+    hud_input.players[AVSP_PORT_V2_HUD_P1].energy = world.weapon_energy;
+    hud_input.players[AVSP_PORT_V2_HUD_P2].visible = phase < 3;
+    hud_input.players[AVSP_PORT_V2_HUD_P2].character_id =
+        AVSP_PORT_V2_CHARACTER_MAJOR_SCHAEFER;
+    hud_input.players[AVSP_PORT_V2_HUD_P2].health = hud_pcm_bench.p2_health;
+    hud_input.players[AVSP_PORT_V2_HUD_P2].energy = hud_pcm_bench.p2_energy;
+    if (!avsp_port_v2_hud_build_frame(&hud_input, &hud_frame))
+    {
+        ++avsp_diag_hud_asset_failures;
+        memset(&hud_frame, 0, sizeof(hud_frame));
+    }
+    avsp_diag_hud_health = hud_frame.players[AVSP_PORT_V2_HUD_P1].health;
+    avsp_diag_hud_energy = hud_frame.players[AVSP_PORT_V2_HUD_P1].energy;
+    avsp_diag_hud_health_fill =
+        hud_frame.players[AVSP_PORT_V2_HUD_P1].health_fill;
+    avsp_diag_hud_energy_fill =
+        hud_frame.players[AVSP_PORT_V2_HUD_P1].energy_fill;
+    avsp_diag_hud_p2_health = hud_frame.players[AVSP_PORT_V2_HUD_P2].health;
+    avsp_diag_hud_p2_energy = hud_frame.players[AVSP_PORT_V2_HUD_P2].energy;
+    avsp_diag_hud_p2_health_fill =
+        hud_frame.players[AVSP_PORT_V2_HUD_P2].health_fill;
+    avsp_diag_hud_p2_energy_fill =
+        hud_frame.players[AVSP_PORT_V2_HUD_P2].energy_fill;
+#else
     avsp_diag_hud_health = world.player.health;
     avsp_diag_hud_energy = world.weapon_energy;
     avsp_diag_hud_health_fill = hud_pcm_health_fill(world.player.health);
     avsp_diag_hud_energy_fill = hud_pcm_energy_fill(world.weapon_energy);
-    avsp_diag_hud_p2_state = phase < 3 ? phase : -1;
     avsp_diag_hud_p2_health = hud_pcm_bench.p2_health;
     avsp_diag_hud_p2_energy = hud_pcm_bench.p2_energy;
     avsp_diag_hud_p2_health_fill =
         hud_pcm_health_fill(hud_pcm_bench.p2_health);
     avsp_diag_hud_p2_energy_fill =
         hud_pcm_energy_fill(hud_pcm_bench.p2_energy);
+#endif
     avsp_diag_hud_p2_binding_ok =
         hud_pcm_player2_binding_valid(&hud_p2_top_image,
                                       &hud_p2_heat_image);
+#ifdef AVSP_HUD_PROMOTION_BENCH
+    avsp_diag_hud_render_count = hud_frame.render_count;
+    avsp_diag_hud_p2_render_count =
+        hud_frame.players[AVSP_PORT_V2_HUD_P2].render_count;
+    avsp_diag_hud_port_lock_ok =
+        avsp_port_v2_hud_validate_config(&avsp_port_v2_hud_approved_config) &&
+        hud_frame.players[AVSP_PORT_V2_HUD_P1].character_id ==
+            AVSP_PORT_V2_CHARACTER_PREDATOR_WARRIOR &&
+        hud_frame.players[AVSP_PORT_V2_HUD_P2].character_id ==
+            AVSP_PORT_V2_CHARACTER_MAJOR_SCHAEFER &&
+        (phase >= 3 || (hud_frame.render_count == 4 &&
+         hud_frame.players[AVSP_PORT_V2_HUD_P2].render_count == 2));
+    hud_operations.submit_frame = hud_port_submit_frame;
+    if (!avsp_port_v2_hud_submit(&hud_frame, &hud_operations))
+        ++avsp_diag_hud_asset_failures;
+#else
     avsp_diag_hud_render_count = 0;
     avsp_diag_hud_p2_render_count = 0;
     if (phase < 3)
@@ -3545,6 +3634,7 @@ static void hud_pcm_bench_frame_callback(void)
         avsp_diag_hud_render_count = 4;
         avsp_diag_hud_p2_render_count = 2;
     }
+#endif
     avsp_diag_pcm_active = hud_pcm_bench.pcm_active;
     avsp_diag_hud_pcm_canary_ok =
         hud_pcm_bench.head_canary == HUD_PCM_BENCH_CANARY_HEAD &&

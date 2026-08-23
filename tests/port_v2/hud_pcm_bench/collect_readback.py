@@ -89,7 +89,7 @@ def signed32(value: int) -> int:
     return value - (1 << 32) if value & 0x80000000 else value
 
 
-def snapshot(mcp: Mcp, syms: dict[str, int]) -> dict[str, int]:
+def snapshot(mcp: Mcp, syms: dict[str, int], promotion: bool) -> dict[str, int]:
     names = {
         "relative_frame": "avsp_diag_hud_pcm_frame",
         "runtime_ready": "avsp_diag_runtime_ready",
@@ -128,6 +128,14 @@ def snapshot(mcp: Mcp, syms: dict[str, int]) -> dict[str, int]:
     }
     state = {name: signed32(mcp.u32(syms[symbol]))
              for name, symbol in names.items()}
+    if promotion:
+        for name, symbol in {
+            "hud_production_interface_version":
+                "avsp_diag_hud_production_interface_version",
+            "hud_port_lock_ok": "avsp_diag_hud_port_lock_ok",
+            "hud_submit_count": "avsp_diag_hud_submit_count",
+        }.items():
+            state[name] = signed32(mcp.u32(syms[symbol]))
     status = mcp.call("debug_status")
     match = re.search(r"^frame:\s+(\d+)$", status, re.MULTILINE)
     state["emulator_frame"] = int(match.group(1)) if match else -1
@@ -135,7 +143,7 @@ def snapshot(mcp: Mcp, syms: dict[str, int]) -> dict[str, int]:
 
 
 def wait_for_frame(mcp: Mcp, syms: dict[str, int], target: int,
-                   timeout: float) -> dict[str, int]:
+                   timeout: float, promotion: bool) -> dict[str, int]:
     address = hex(syms["avsp_diag_hud_pcm_frame"])
     mcp.call("pause")
     mcp.call("breakpoint_add", cpu="master", type="memory", address=address,
@@ -145,7 +153,7 @@ def wait_for_frame(mcp: Mcp, syms: dict[str, int], target: int,
         stopped = mcp.call("wait_for_stop", timeout_ms=int(timeout * 1000))
         if "stopped: true" not in stopped:
             raise TimeoutError(f"HUD/PCM frame {target} was not reached")
-        state = snapshot(mcp, syms)
+        state = snapshot(mcp, syms, promotion)
         if state["relative_frame"] != target:
             raise RuntimeError(
                 f"HUD/PCM stopped at {state['relative_frame']}, expected {target}")
@@ -160,11 +168,17 @@ def main() -> None:
     parser.add_argument("--run", type=int, choices=(1, 2), required=True)
     parser.add_argument("--emulator-pid", type=int, required=True)
     parser.add_argument("--timeout", type=float, default=180.0)
+    parser.add_argument("--suite", choices=("hud_pcm_bench", "hud"),
+                        default="hud_pcm_bench")
     args = parser.parse_args()
-    inventory = json.loads((HERE / "inventory.json").read_text(encoding="utf-8"))
-    contract = json.loads((HERE / "hud_pcm_contract.json").read_text(
+    suite_here = ROOT / "tests/port_v2" / args.suite
+    contract_name = ("hud_pcm_contract.json" if
+                     args.suite == "hud_pcm_bench" else
+                     "approved_contract.json")
+    inventory = json.loads((suite_here / "inventory.json").read_text(encoding="utf-8"))
+    contract = json.loads((suite_here / contract_name).read_text(
         encoding="utf-8"))
-    build = json.loads((ROOT / f"build/port_v2/hud_pcm_bench/run-{args.run}/build.json").read_text(encoding="ascii"))
+    build = json.loads((ROOT / f"build/port_v2/{args.suite}/run-{args.run}/build.json").read_text(encoding="ascii"))
     syms = symbols(ROOT / "game.elf",
                    ROOT / ".deps/joengine/Compiler/WINDOWS/sh-elf/bin/nm.exe",
                    inventory["required_readback_symbols"])
@@ -201,9 +215,10 @@ def main() -> None:
         ("full", 260), ("pcm_only", 420), ("negative", 460),
         ("repeat_zero", 20),
     ):
-        samples[label] = wait_for_frame(mcp, syms, target, args.timeout)
+        samples[label] = wait_for_frame(
+            mcp, syms, target, args.timeout, args.suite == "hud")
         if label == "together":
-            run_root = ROOT / f"build/port_v2/hud_pcm_bench/run-{args.run}"
+            run_root = ROOT / f"build/port_v2/{args.suite}/run-{args.run}"
             run_root.mkdir(parents=True, exist_ok=True)
             screenshot = run_root / "emulator.png"
             ImageGrab.grab(bbox=bounds, all_screens=True).save(screenshot)
@@ -227,6 +242,11 @@ def main() -> None:
                 all(state[name] == value
                     for name, value in palette_expected.items())):
             raise RuntimeError(f"HUD/PCM readback invariant failed: {state}")
+        if args.suite == "hud" and not (
+                state["hud_production_interface_version"] ==
+                    contract["production_interface_version"] and
+                state["hud_port_lock_ok"] == 1):
+            raise RuntimeError(f"HUD promotion port invariant failed: {state}")
     if samples["together"]["pcm_active"] != 1 or \
             samples["together"]["pcm_channel_observed"] != 1:
         raise RuntimeError("combined HUD/PCM phase did not start its SCSP channel")
@@ -274,7 +294,7 @@ def main() -> None:
         "physical_saturn": "UNRUN",
         "result": "PASS",
     }
-    output = ROOT / f"build/port_v2/hud_pcm_bench/run-{args.run}/readback.json"
+    output = ROOT / f"build/port_v2/{args.suite}/run-{args.run}/readback.json"
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",
                       encoding="ascii", newline="\n")
     print(f"recorded {output.relative_to(ROOT)}")

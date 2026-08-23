@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -79,15 +80,23 @@ def check_player2_hud(state: dict[str, object],
 
 
 def main() -> None:
-    inventory = json.loads((HERE / "inventory.json").read_text(
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--suite", choices=("hud_pcm_bench", "hud"),
+                        default="hud_pcm_bench")
+    args = parser.parse_args()
+    suite_here = ROOT / "tests/port_v2" / args.suite
+    contract_name = ("hud_pcm_contract.json" if
+                     args.suite == "hud_pcm_bench" else
+                     "approved_contract.json")
+    inventory = json.loads((suite_here / "inventory.json").read_text(
         encoding="utf-8"))
-    contract = json.loads((HERE / "hud_pcm_contract.json").read_text(
+    contract = json.loads((suite_here / contract_name).read_text(
         encoding="utf-8"))
-    builds = [load(f"build/port_v2/hud_pcm_bench/run-{run}/build.json")
+    builds = [load(f"build/port_v2/{args.suite}/run-{run}/build.json")
               for run in (1, 2)]
-    normals = [load(f"build/port_v2/hud_pcm_bench/run-{run}/iso-normalization.json")
+    normals = [load(f"build/port_v2/{args.suite}/run-{run}/iso-normalization.json")
                for run in (1, 2)]
-    reads = [load(f"build/port_v2/hud_pcm_bench/run-{run}/readback.json")
+    reads = [load(f"build/port_v2/{args.suite}/run-{run}/readback.json")
              for run in (1, 2)]
 
     require(builds[0]["source_commit"] == builds[1]["source_commit"],
@@ -161,6 +170,13 @@ def main() -> None:
                 "bounded repeat checkpoint drifted")
         require(report["bounded_stability_frames"] > 0,
                 "bounded stability interval was not observed")
+        if args.suite == "hud":
+            for state in states.values():
+                require(state["hud_production_interface_version"] ==
+                        contract["production_interface_version"],
+                        "HUD production interface version drifted")
+                require(state["hud_port_lock_ok"] == 1,
+                        "HUD semantic port lock failed")
 
         screenshot = ROOT / report["final_scanout"]["screenshot"]["path"]
         require(screenshot.is_file() and sha256(screenshot) ==
@@ -171,7 +187,21 @@ def main() -> None:
                 maxcolors=image.width * image.height)
         require(colours is not None and len(colours) >= 8,
                 "HUD/PCM screenshot has no rendered HUD")
-    print("HudPcmSalvageBench evidence: PASS")
+    if args.suite == "hud":
+        for label in reads[0]["samples"]:
+            left = {key: value for key, value in
+                    reads[0]["samples"][label].items()
+                    if key != "emulator_frame"}
+            right = {key: value for key, value in
+                     reads[1]["samples"][label].items()
+                     if key != "emulator_frame"}
+            require(left == right,
+                    f"paired semantic HUD state drifted at {label}")
+        left_image = ROOT / reads[0]["final_scanout"]["screenshot"]["path"]
+        right_image = ROOT / reads[1]["final_scanout"]["screenshot"]["path"]
+        require(sha256(left_image) == sha256(right_image),
+                "paired HUD screenshots differ")
+    print(f"{inventory['card_profile']} evidence: PASS")
 
 
 if __name__ == "__main__":

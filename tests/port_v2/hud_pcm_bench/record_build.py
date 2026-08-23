@@ -47,10 +47,16 @@ def manifest() -> dict[str, str]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=int, choices=(1, 2), required=True)
+    parser.add_argument("--suite", choices=("hud_pcm_bench", "hud"),
+                        default="hud_pcm_bench")
     args = parser.parse_args()
-    inventory = json.loads((HERE / "inventory.json").read_text(
+    suite_here = ROOT / "tests/port_v2" / args.suite
+    contract_name = ("hud_pcm_contract.json" if
+                     args.suite == "hud_pcm_bench" else
+                     "approved_contract.json")
+    inventory = json.loads((suite_here / "inventory.json").read_text(
         encoding="utf-8"))
-    contract = json.loads((HERE / "hud_pcm_contract.json").read_text(
+    contract = json.loads((suite_here / contract_name).read_text(
         encoding="utf-8"))
     profile = (ROOT / "build/last_compile_profile.txt").read_text(
         encoding="ascii").strip()
@@ -112,7 +118,15 @@ def main() -> None:
     if report["approved_stage_contract_sha256"] != \
             contract["approved_stage_contract_sha256"]:
         raise ValueError("approved stage contract changed")
-    output = ROOT / f"build/port_v2/hud_pcm_bench/run-{args.run}/build.json"
+    if args.suite == "hud":
+        approved = {}
+        for lock in contract["approved_contracts"]:
+            actual = sha256(ROOT / lock["path"])
+            if actual != lock["sha256"]:
+                raise ValueError(f"approved HUD contract changed: {lock['path']}")
+            approved[lock["path"]] = actual
+        report["approved_contract_sha256"] = approved
+    output = ROOT / f"build/port_v2/{args.suite}/run-{args.run}/build.json"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",
                       encoding="ascii", newline="\n")

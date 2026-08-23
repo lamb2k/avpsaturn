@@ -16,6 +16,7 @@ param(
     [switch]$CameraStageSalvageBench,
     [switch]$CameraStagePromotionBench,
     [switch]$HudPcmSalvageBench,
+    [switch]$HudPromotionBench,
     [switch]$EnemySalvageBench,
     [switch]$EnemyPromotionBench,
     [switch]$PlayerEnemyIntegration,
@@ -236,6 +237,7 @@ try {
             elseif ($PlayerEnemyIntegration) { 'player-enemy-integration' }
             elseif ($EnemyPromotionBench) { 'enemy-promotion-bench' }
             elseif ($EnemySalvageBench) { 'enemy-salvage-bench' }
+            elseif ($HudPromotionBench) { 'hud-promotion-bench' }
             elseif ($HudPcmSalvageBench) { 'hud-pcm-salvage-bench' }
             elseif ($CameraStagePromotionBench) { 'camera-stage-promotion-bench' }
             elseif ($CameraStageSalvageBench) { 'camera-stage-salvage-bench' }
@@ -312,6 +314,10 @@ try {
         }
         if ($HudPcmSalvageBench) {
             $makeArguments += 'AVSP_HUD_PCM_SALVAGE_BENCH=1'
+        }
+        if ($HudPromotionBench) {
+            $makeArguments += 'AVSP_HUD_PCM_SALVAGE_BENCH=1'
+            $makeArguments += 'AVSP_HUD_PROMOTION_BENCH=1'
         }
         if ($EnemySalvageBench) {
             $makeArguments += 'AVSP_ENEMY_SALVAGE_BENCH=1'
