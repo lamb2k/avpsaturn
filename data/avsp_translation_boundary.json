@@ -25,7 +25,7 @@
     "data_address_space": "program",
     "instruction_address_space": "opcodes",
     "opcodes_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
-    "oracle_manifest_sha256": "106fffb92cc5a14acf5fdae7eb14d33b7d9206b9f9ecffcbac67a6fc326696d2",
+    "oracle_manifest_sha256": "24b6eae1247e59169fa4afde65cbb40be6b72b7ed57c7acfef505b7fc24dcfe6",
     "program_sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9",
     "trace_sha256": "9bbbc28715668348aeb4d206b7381073123c5b22ec9e2f2557bda1622e142f5f"
   },
