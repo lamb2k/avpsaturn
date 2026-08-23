@@ -204,7 +204,14 @@ def main() -> None:
             samples["window_open"]["window_open"] == 1 and
             samples["legal_read_complete"]["legal_reads"] == 1 and
             samples["window_closed"]["window_open"] == 0):
-        raise RuntimeError("CDDA ownership/window sequence drifted")
+        raise RuntimeError(
+            "CDDA ownership/window sequence drifted: "
+            f"cdda={samples['cdda_owned']}, "
+            f"illegal_read={samples['illegal_read_rejected']}, "
+            f"illegal_window={samples['illegal_window_rejected']}, "
+            f"window_open={samples['window_open']}, "
+            f"legal_read={samples['legal_read_complete']}, "
+            f"window_closed={samples['window_closed']}")
     repeat = samples["repeat_idle"]
     if not (repeat["relative_frame"] == contract["checkpoints"]["idle"] and
             repeat["ownership"] == 0 and repeat["track_events"] == 0 and

@@ -30,9 +30,9 @@
     "illegal_read_rejected": 70,
     "illegal_window_rejected": 100,
     "data_owned": 130,
-    "window_open": 150,
-    "legal_read_complete": 151,
-    "window_closed": 152,
+    "window_open": 151,
+    "legal_read_complete": 152,
+    "window_closed": 153,
     "stable": 240
   },
   "expected_final": {
