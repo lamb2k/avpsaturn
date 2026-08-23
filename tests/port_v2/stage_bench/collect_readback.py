@@ -186,7 +186,7 @@ def snapshot(mcp: Mcp, syms: dict[str, int], shadow: int,
     canaries = vram_canaries(mcp, fixture)
     status = mcp.call("debug_status")
     match = re.search(r"^frame:\s+(\d+)$", status, re.MULTILINE)
-    return {
+    state = {
         "emulator_frame": int(match.group(1)) if match else -1,
         "relative_frame": frame,
         "scroll_x": [int.from_bytes(scroll[:4], "big"),
@@ -212,6 +212,14 @@ def snapshot(mcp: Mcp, syms: dict[str, int], shadow: int,
         "vram_canaries_all_match": all(item["match"] for item in canaries),
         "vdp1_command_classes": vdp1_classes(mcp),
     }
+    if "avsp_diag_stage_row_scroll_status" in syms:
+        state["row_scroll_status"] = mcp.u32(
+            syms["avsp_diag_stage_row_scroll_status"])
+        state["render_submissions"] = mcp.u32(
+            syms["avsp_diag_stage_render_submissions"])
+        state["port_lock_ok"] = mcp.u32(
+            syms["avsp_diag_stage_port_lock_ok"])
+    return state
 
 
 def wait_for_frame(mcp: Mcp, syms: dict[str, int], shadow: int,
@@ -236,12 +244,17 @@ def wait_for_frame(mcp: Mcp, syms: dict[str, int], shadow: int,
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=int, choices=(1, 2), required=True)
+    parser.add_argument("--suite", choices=("stage_bench", "camera_stage"),
+                        default="stage_bench")
     parser.add_argument("--emulator-pid", type=int, required=True)
     parser.add_argument("--timeout", type=float, default=180.0)
     args = parser.parse_args()
-    inventory = json.loads((HERE / "inventory.json").read_text(encoding="utf-8"))
-    contract = json.loads((HERE / "stage_contract.json").read_text(encoding="utf-8"))
-    build = json.loads((ROOT / f"build/port_v2/stage_bench/run-{args.run}/build.json").read_text(encoding="ascii"))
+    suite_here = ROOT / "tests/port_v2" / args.suite
+    contract_name = ("stage_contract.json" if args.suite == "stage_bench" else
+                     "approved_contract.json")
+    inventory = json.loads((suite_here / "inventory.json").read_text(encoding="utf-8"))
+    contract = json.loads((suite_here / contract_name).read_text(encoding="utf-8"))
+    build = json.loads((ROOT / f"build/port_v2/{args.suite}/run-{args.run}/build.json").read_text(encoding="ascii"))
     fixture = (ROOT / "build/rp4_fixture/STRIPS.BIN").read_bytes()
     syms = symbols(ROOT / "game.elf",
                    ROOT / ".deps/joengine/Compiler/WINDOWS/sh-elf/bin/nm.exe",
@@ -270,7 +283,7 @@ def main() -> None:
     fixed_first = wait_for_frame(mcp, syms, shadow, fixture, 20, args.timeout)
     before = wait_for_frame(mcp, syms, shadow, fixture, 45, args.timeout)
     after = wait_for_frame(mcp, syms, shadow, fixture, 46, args.timeout)
-    run_root = ROOT / f"build/port_v2/stage_bench/run-{args.run}"
+    run_root = ROOT / f"build/port_v2/{args.suite}/run-{args.run}"
     screenshot = run_root / "emulator.png"
     ImageGrab.grab(bbox=bounds, all_screens=True).save(screenshot)
     fixed_repeat = wait_for_frame(mcp, syms, shadow, fixture, 20, args.timeout)
@@ -291,6 +304,11 @@ def main() -> None:
                 state["vram_canaries_all_match"] and
                 all(value["match"] for value in state["cram"].values())):
             raise RuntimeError(f"stage readback invariant failed: {state}")
+        if args.suite == "camera_stage" and not (
+                state["row_scroll_status"] == 1 and
+                state["port_lock_ok"] == 1 and
+                state["render_submissions"] > 0):
+            raise RuntimeError(f"camera/stage port invariant failed: {state}")
     process = process_record(args.emulator_pid)
     executable = Path(str(process["executable"]))
     settings = Path(os.environ["APPDATA"]) / "YabaSanshiro/yabause.ini"
@@ -315,6 +333,9 @@ def main() -> None:
                      "command_line": process["command_line"]},
         "promoted_player_output": {"status": "REGRESSION_LOCK_ONLY",
                                    "reason": "stage bench does not render or alter the approved player"},
+        "row_scroll_status": ("ADAPTED_UNCAPTURED" if
+                              args.suite == "camera_stage" else
+                              "SALVAGE_CONTRACT_UNCHANGED"),
         "physical_saturn": "UNRUN", "result": "PASS",
     }
     output = run_root / "readback.json"

@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "task_id": "PROMOTE-04-CAMERA-STAGE",
+  "card_profile": "CameraStagePromotionBench",
+  "compile_profile": "debug-camera-stage-promotion-bench",
+  "manifest_profile": "camera-stage-promotion-bench",
+  "camera_interface_version": 1,
+  "stage_interface_version": 1,
+  "approved_response": "pass for camera and stage",
+  "approved_salvage_contract": {
+    "path": "tests/port_v2/stage_bench/stage_contract.json",
+    "sha256": "dac93621e7ef290ee2465055076b856f1f10a73480654c86782fbb4e522af300"
+  },
+  "fixture": {
+    "strips_bin_sha256": "7c28617351ec2bb2099d10e28de561f0ef64feb2fbb1784c5dae11d29c7f1c22"
+  },
+  "fixed_frame": {"relative_frame": 20, "scroll_x": [0, 7], "objects": 477},
+  "scroll_threshold": {
+    "before_frame": 45,
+    "before_scroll_x": [0, 7],
+    "after_frame": 46,
+    "after_scroll_x": [10, 15]
+  },
+  "framing": {"source_width": 384, "output_width": 352, "output_height": 224},
+  "priority": {"nbg0": 3, "nbg1": 2, "actor": 4, "foreground": 6},
+  "cram_offsets": {"nbg0": 2, "nbg1": 3},
+  "row_scroll_status": "ADAPTED_UNCAPTURED",
+  "approved_player_asset_sha256": {
+    "/BG/CORRIDOR.TGA": "a931c606875e0a6d9d71f01e9cc1579d39ce9911ac1574f1aa2312db018bccf8",
+    "/SPR4/PACT.RLE": "10d6e77394582ce3ce09018bce26d0389e39464ec85b00e920dada807049fe90",
+    "/SPR4/PXI0.BIN": "3fe466467e5f01cadfd3cd4e5263da9ff3c943fab0e3de4517840935c5eb91a8",
+    "/SPR4/PXI1.BIN": "c78b9e0676d903da8da846193706b51a07cf6daf567e884d647fa41fb583a14c"
+  },
+  "disabled_systems": ["new stage content", "source-faithful row scroll", "route progression", "gameplay", "HUD", "PCM", "CDDA"],
+  "physical_saturn": "UNRUN"
+}

@@ -52,6 +52,9 @@ endif
 ifneq ($(AVSP_CAMERA_STAGE_SALVAGE_BENCH),)
 CCFLAGS += -DAVSP_CAMERA_STAGE_SALVAGE_BENCH=1
 endif
+ifneq ($(AVSP_CAMERA_STAGE_PROMOTION_BENCH),)
+CCFLAGS += -DAVSP_CAMERA_STAGE_PROMOTION_BENCH=1
+endif
 ifneq ($(AVSP_HUD_PCM_SALVAGE_BENCH),)
 CCFLAGS += -DAVSP_HUD_PCM_SALVAGE_BENCH=1
 endif
@@ -77,7 +80,7 @@ JO_DEBUG ?= 1
 JO_NTSC = 1
 JO_COMPILE_USING_SGL = 1
 
-SRCS = main.c capability_model.c avsp_actor.c avsp_anim_script.c avsp_emit.c avsp_tiles.c avsp_collision.c avsp_cram.c avsp_frontend.c avsp_scene.c avsp_route.c avsp_scene_runtime.c avsp_disc_guard.c src/port_v2/player/player.c src/port_v2/enemy/enemy.c src/port_v2/integration/player_enemy/player_enemy.c
+SRCS = main.c capability_model.c avsp_actor.c avsp_anim_script.c avsp_emit.c avsp_tiles.c avsp_collision.c avsp_cram.c avsp_frontend.c avsp_scene.c avsp_route.c avsp_scene_runtime.c avsp_disc_guard.c src/port_v2/player/player.c src/port_v2/enemy/enemy.c src/port_v2/camera/camera.c src/port_v2/stage/stage.c src/port_v2/integration/player_enemy/player_enemy.c
 ifneq ($(AVSP_COLLISION_SALVAGE_BENCH),)
 SRCS += tests/port_v2/collision_bench/collision_bench.c
 endif

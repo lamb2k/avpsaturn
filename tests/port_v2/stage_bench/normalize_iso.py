@@ -89,8 +89,11 @@ def normalize(image: bytearray) -> tuple[int, int, int, int]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=int, choices=(1, 2), required=True)
+    parser.add_argument("--suite", choices=("stage_bench", "camera_stage"),
+                        default="stage_bench")
     args = parser.parse_args()
-    inventory = json.loads((HERE / "inventory.json").read_text(
+    suite_here = ROOT / "tests/port_v2" / args.suite
+    inventory = json.loads((suite_here / "inventory.json").read_text(
         encoding="utf-8"))
     image_path = ROOT / "game.iso"
     raw = image_path.read_bytes()
@@ -126,7 +129,7 @@ def main() -> None:
         "production_payload_changed": False,
         "physical_saturn": "UNRUN",
     }
-    output = ROOT / f"build/port_v2/stage_bench/run-{args.run}/iso-normalization.json"
+    output = ROOT / f"build/port_v2/{args.suite}/run-{args.run}/iso-normalization.json"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",
                       encoding="ascii", newline="\n")

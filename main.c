@@ -8,6 +8,8 @@
 #include "avsp_disc_guard.h"
 #include "src/port_v2/player/player.h"
 #include "src/port_v2/enemy/enemy.h"
+#include "src/port_v2/camera/camera.h"
+#include "src/port_v2/stage/stage.h"
 #include "src/port_v2/integration/player_enemy/player_enemy.h"
 #ifdef AVSP_COLLISION_SALVAGE_BENCH
 #include "tests/port_v2/collision_bench/collision_bench.h"
@@ -349,6 +351,11 @@ volatile int avsp_diag_stage_palette_cycle_state;
 volatile int avsp_diag_stage_scroll_steps;
 volatile int avsp_diag_stage_asset_failures;
 volatile int avsp_diag_stage_disc_late_reads;
+#ifdef AVSP_CAMERA_STAGE_PROMOTION_BENCH
+volatile int avsp_diag_stage_row_scroll_status;
+volatile int avsp_diag_stage_render_submissions;
+volatile int avsp_diag_stage_port_lock_ok;
+#endif
 #endif
 #ifdef AVSP_HUD_PCM_SALVAGE_BENCH
 volatile int avsp_diag_hud_pcm_interface_version;
@@ -2564,10 +2571,45 @@ static int street_patch_revert_count;
 volatile int avsp_diag_street_frame;
 volatile int avsp_diag_street_scx[2];
 volatile int avsp_diag_street_objects;
-#ifdef AVSP_CAMERA_STAGE_SALVAGE_BENCH
+#if defined(AVSP_CAMERA_STAGE_SALVAGE_BENCH) && \
+    !defined(AVSP_CAMERA_STAGE_PROMOTION_BENCH)
 static int stage_previous_scx0;
 static int stage_previous_scx1;
 static int stage_has_previous_scroll;
+#endif
+#ifdef AVSP_CAMERA_STAGE_PROMOTION_BENCH
+static AvspPortV2CameraRuntime stage_camera_runtime;
+static AvspPortV2StageRenderOps stage_render_operations;
+
+static int stage_submit_layer(
+    const AvspPortV2StageLayerEvent *event)
+{
+    if (event == 0) return 0;
+    if (event->layer_id == 0)
+    {
+        slColRAMOffsetNbg0((Uint16)event->palette_bank);
+        slPriority(scnNBG0, event->priority);
+        slScrPosNbg0(toFIXED(event->scroll_x), toFIXED(event->scroll_y));
+    }
+    else if (event->layer_id == 1)
+    {
+        slColRAMOffsetNbg1((Uint16)event->palette_bank);
+        slPriority(scnNBG1, event->priority);
+        slScrPosNbg1(toFIXED(event->scroll_x), toFIXED(event->scroll_y));
+    }
+    else return 0;
+    ++avsp_diag_stage_render_submissions;
+    return 1;
+}
+
+static int stage_submit_sprite_priorities(const int actor_priority,
+                                          const int foreground_priority)
+{
+    slPriority(scnSPR1, actor_priority);
+    slPriority(scnSPR2, foreground_priority);
+    ++avsp_diag_stage_render_submissions;
+    return 1;
+}
 #endif
 
 static void street_load_planes(void);
@@ -2607,7 +2649,7 @@ static unsigned long street_u32(const unsigned long offset)
  * whose endpoint-aligned source is at least world_x. */
 static int street_out_of(const int world_x)
 {
-    return (world_x * 351 - 175 + 382) / 383;
+    return avsp_port_v2_camera_source_to_output(world_x);
 }
 
 static int street_setup(void)
@@ -2751,7 +2793,28 @@ static int street_setup(void)
     avsp_diag_stage_output_width = 352;
     avsp_diag_stage_priority_lock_ok = 1;
     avsp_diag_stage_scroll_steps = 0;
+#ifndef AVSP_CAMERA_STAGE_PROMOTION_BENCH
     stage_has_previous_scroll = 0;
+#endif
+#endif
+#ifdef AVSP_CAMERA_STAGE_PROMOTION_BENCH
+    avsp_port_v2_camera_init(&stage_camera_runtime);
+    stage_render_operations.submit_layer = stage_submit_layer;
+    stage_render_operations.submit_sprite_priorities =
+        stage_submit_sprite_priorities;
+    avsp_diag_stage_row_scroll_status =
+        AVSP_PORT_V2_STAGE_ROW_SCROLL_ADAPTED_UNCAPTURED;
+    avsp_diag_stage_render_submissions = 0;
+    avsp_diag_stage_port_lock_ok =
+        avsp_port_v2_camera_validate_config(
+            &avsp_port_v2_camera_approved_config) &&
+        avsp_port_v2_stage_validate_config(
+            &avsp_port_v2_stage_approved_config);
+    if (!avsp_diag_stage_port_lock_ok)
+    {
+        failed_asset = "CAMERA STAGE PORT";
+        return 0;
+    }
 #endif
     street_ready = 1;
     return 1;
@@ -2898,11 +2961,34 @@ static void street_test_frame(void)
         const int scx1 = street_out_of(s3x + 64) -
             street_out_of(street_plane[1].world_x0);
         const int scy1 = s3y + 16 - street_plane[1].row0 * 32;
+#ifdef AVSP_CAMERA_STAGE_PROMOTION_BENCH
+        AvspPortV2CameraInput camera_input;
+        AvspPortV2CameraView camera_view;
+        AvspPortV2StageFrame stage_frame;
+        camera_input.scroll_x[0] = scx0;
+        camera_input.scroll_y[0] = scy0;
+        camera_input.scroll_x[1] = scx1;
+        camera_input.scroll_y[1] = scy1;
+        avsp_port_v2_camera_step(&stage_camera_runtime, &camera_input);
+        avsp_port_v2_camera_view(&stage_camera_runtime, &camera_view);
+        if (!avsp_port_v2_stage_build_frame(&camera_view, &stage_frame) ||
+            !avsp_port_v2_stage_submit(&stage_frame,
+                                       &stage_render_operations))
+        {
+            avsp_diag_stage_port_lock_ok = 0;
+            failed_asset = "CAMERA STAGE SUBMIT";
+            return;
+        }
+        avsp_diag_stage_scroll_steps = camera_view.scroll_steps;
+        avsp_diag_stage_row_scroll_status = stage_frame.row_scroll_status;
+#else
         slScrPosNbg0(toFIXED(scx0), toFIXED(scy0));
         slScrPosNbg1(toFIXED(scx1), toFIXED(scy1));
+#endif
         avsp_diag_street_scx[0] = scx0;
         avsp_diag_street_scx[1] = scx1;
-#ifdef AVSP_CAMERA_STAGE_SALVAGE_BENCH
+#if defined(AVSP_CAMERA_STAGE_SALVAGE_BENCH) && \
+    !defined(AVSP_CAMERA_STAGE_PROMOTION_BENCH)
         if (stage_has_previous_scroll &&
             (scx0 != stage_previous_scx0 || scx1 != stage_previous_scx1))
             ++avsp_diag_stage_scroll_steps;

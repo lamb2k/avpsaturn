@@ -14,6 +14,7 @@ param(
     [switch]$PlayerSalvageBench,
     [switch]$PlayerPromotionBench,
     [switch]$CameraStageSalvageBench,
+    [switch]$CameraStagePromotionBench,
     [switch]$HudPcmSalvageBench,
     [switch]$EnemySalvageBench,
     [switch]$EnemyPromotionBench,
@@ -213,7 +214,8 @@ try {
         # validation fixture and ship only in the StreetTest profile.
         $fixtureSource = Join-Path $projectRoot 'build\rp4_fixture\STRIPS.BIN'
         $fixtureStaged = Join-Path $contentRoot 'ST1\STRIPS.BIN'
-        if ($StreetTest -or $CameraStageSalvageBench) {
+        if ($StreetTest -or $CameraStageSalvageBench -or
+            $CameraStagePromotionBench) {
             if (-not (Test-Path -LiteralPath $fixtureSource)) {
                 throw 'StreetTest requires build\rp4_fixture\STRIPS.BIN (run tools\gen_avsp_street_planes.py).'
             }
@@ -235,6 +237,7 @@ try {
             elseif ($EnemyPromotionBench) { 'enemy-promotion-bench' }
             elseif ($EnemySalvageBench) { 'enemy-salvage-bench' }
             elseif ($HudPcmSalvageBench) { 'hud-pcm-salvage-bench' }
+            elseif ($CameraStagePromotionBench) { 'camera-stage-promotion-bench' }
             elseif ($CameraStageSalvageBench) { 'camera-stage-salvage-bench' }
             elseif ($PlayerPromotionBench) { 'player-promotion-bench' }
             elseif ($PlayerSalvageBench) { 'player-salvage-bench' }
@@ -301,6 +304,11 @@ try {
         if ($CameraStageSalvageBench) {
             $makeArguments += 'AVSP_STREET_TEST=1'
             $makeArguments += 'AVSP_CAMERA_STAGE_SALVAGE_BENCH=1'
+        }
+        if ($CameraStagePromotionBench) {
+            $makeArguments += 'AVSP_STREET_TEST=1'
+            $makeArguments += 'AVSP_CAMERA_STAGE_SALVAGE_BENCH=1'
+            $makeArguments += 'AVSP_CAMERA_STAGE_PROMOTION_BENCH=1'
         }
         if ($HudPcmSalvageBench) {
             $makeArguments += 'AVSP_HUD_PCM_SALVAGE_BENCH=1'

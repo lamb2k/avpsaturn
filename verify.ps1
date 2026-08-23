@@ -12,7 +12,8 @@ param(
     [ValidateSet('Default', 'Release', 'VisualTest', 'FrontendTest',
         'FrontendShotTest', 'EncounterTest', 'StreetTest', 'BossHitTest',
         'BossKoTest', 'PlayerSalvageBench', 'PlayerPromotionBench',
-        'CameraStageSalvageBench', 'HudPcmSalvageBench', 'EnemySalvageBench',
+        'CameraStageSalvageBench', 'CameraStagePromotionBench',
+        'HudPcmSalvageBench', 'EnemySalvageBench',
         'EnemyPromotionBench', 'PlayerEnemyIntegration',
         'CollisionSalvageBench', 'HitKoPromotionBench',
         'CombatIntegrationBench')]
@@ -145,6 +146,7 @@ function Invoke-FastLane {
     Invoke-PythonTest 'tests\test_avsp_hit_ko_writer_set.py'
     Invoke-PythonTest 'tests\port_v2\combat\hit_ko\test_contract.py'
     Invoke-PythonTest 'tests\port_v2\integration\combat\test_contract.py'
+    Invoke-PythonTest 'tests\port_v2\camera_stage\test_contract.py'
     Invoke-PythonTest 'tests\test_avsp_vertical_slice_oracle.py'
     Invoke-PythonTest 'tests\test_avsp_translation_boundary.py'
 
@@ -264,6 +266,7 @@ function Invoke-TargetLane {
         PlayerSalvageBench = 'debug-player-salvage-bench'
         PlayerPromotionBench = 'debug-player-promotion-bench'
         CameraStageSalvageBench = 'debug-camera-stage-salvage-bench'
+        CameraStagePromotionBench = 'debug-camera-stage-promotion-bench'
         HudPcmSalvageBench = 'debug-hud-pcm-salvage-bench'
         EnemySalvageBench = 'debug-enemy-salvage-bench'
         EnemyPromotionBench = 'debug-enemy-promotion-bench'
