@@ -30,6 +30,7 @@ def stable_state(report, name):
     state.pop("slice_frame_stage", None)
     state.pop("slice_frame", None)
     state.pop("slice_stability_frames", None)
+    state.pop("slice_stage_submissions", None)
     return state
 
 
@@ -71,7 +72,9 @@ def main():
                     state["hud_port_lock_ok"] == 1 and
                     state["pcm_port_lock_ok"] == 1 and
                     state["cdda_port_lock_ok"] == 1 and
-                    state["enemy_render_count"] > 0,
+                    state["enemy_render_count"] > 0 and
+                    state["slice_stage_submissions"] ==
+                    state["slice_stability_frames"] * 3,
                     f"{name} lost a promoted subsystem or safety invariant")
         require(605 <= report["hit_state"]["slice_frame"] <= 839 and
                 report["hit_state"]["slice_combat_events"] == 1 and
