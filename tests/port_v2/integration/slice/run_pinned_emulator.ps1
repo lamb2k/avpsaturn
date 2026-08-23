@@ -39,7 +39,7 @@ foreach ($checkpoint in @('hit', 'ko', 'final')) {
     $priorIds = @(Get-Process -Name 'yabasanshiro' -ErrorAction SilentlyContinue |
         ForEach-Object { $_.Id })
     & (Join-Path $root 'run.ps1') -EmulatorPath $emulator
-    if ($LASTEXITCODE -ne 0) { throw 'Pinned Yaba launch failed.' }
+    if (-not $?) { throw 'Pinned Yaba launch failed.' }
     $deadline = (Get-Date).AddSeconds(45)
     $player = $null
     while ((Get-Date) -lt $deadline) {
@@ -68,7 +68,7 @@ foreach ($checkpoint in @('hit', 'ko', 'final')) {
 $priorIds = @(Get-Process -Name 'yabasanshiro' -ErrorAction SilentlyContinue |
     ForEach-Object { $_.Id })
 & (Join-Path $root 'run.ps1') -EmulatorPath $emulator
-if ($LASTEXITCODE -ne 0) { throw 'Pinned Yaba scene-trace launch failed.' }
+if (-not $?) { throw 'Pinned Yaba scene-trace launch failed.' }
 $deadline = (Get-Date).AddSeconds(45)
 $player = $null
 while ((Get-Date) -lt $deadline) {

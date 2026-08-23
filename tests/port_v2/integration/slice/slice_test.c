@@ -131,8 +131,8 @@ static int replay(AvspPortV2SliceFrame *final_frame,
         memset(&input, 0, sizeof(input));
         input.frame = tick;
         input.player.down = tick >= 30 && tick < 60;
-        input.player.left = tick >= 300 && tick < 340;
-        input.enemy_move = tick >= 300 && tick < 340;
+        input.player.right = tick >= 300 && tick < 335;
+        input.enemy_move = tick >= 300 && tick < 490;
         if ((tick >= 900 && tick < 909) ||
             (tick >= 1500 && tick < 1519) ||
             (tick >= 2100 && tick < 2108))
@@ -188,11 +188,11 @@ static int replay(AvspPortV2SliceFrame *final_frame,
            runtime.residency.negative_rejections == 1 &&
            frame.camera.scroll_steps == 1 && !frame.fallback_used &&
            frame.canaries_ok && stage_submits == 9003 && hud_submits == 3001 &&
-           frame.scene.player_world_x == 296 &&
-           frame.scene.enemy_world_x == 167 &&
+           frame.scene.player_world_x == 446 &&
+           frame.scene.enemy_world_x == 317 &&
            frame.scene.camera_world_x == 10 &&
-           frame.scene.player_screen_x == 110 &&
-           frame.scene.enemy_screen_x == -19 &&
+           frame.scene.player_screen_x == 260 &&
+           frame.scene.enemy_screen_x == 131 &&
            frame.scene.enemy_identity.archetype_id ==
                AVSP_PORT_V2_SLICE_ARCHETYPE_STREET_ALIEN &&
            frame.scene.enemy_identity.palette_bank == 16 &&

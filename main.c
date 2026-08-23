@@ -3110,7 +3110,12 @@ static void street_apply_cycle(const int rel)
 static void street_test_frame(void)
 {
     static int frame_counter = 0;
+#ifdef AVSP_PLAYABLE_SLICE
+    const int rel = frame_counter < street_frames ?
+        frame_counter : street_frames - 1;
+#else
     const int rel = frame_counter % street_frames;
+#endif
     unsigned long at;
 #ifndef AVSP_PLAYABLE_SLICE
     unsigned long objects;
@@ -5243,8 +5248,8 @@ static void playable_slice_scripted_movement(AvspPortV2SliceInput *input)
 {
     const int frame = input->frame;
     input->player.down = frame >= 30 && frame < 60;
-    input->player.left = frame >= 300 && frame < 340;
-    input->enemy_move = frame >= 300 && frame < 340;
+    input->player.right = frame >= 300 && frame < 335;
+    input->enemy_move = frame >= 300 && frame < 490;
     if ((frame >= 900 && frame < 909) ||
         (frame >= 1500 && frame < 1519) ||
         (frame >= 2100 && frame < 2108))

@@ -56,11 +56,15 @@ def validate_approved_locks() -> None:
             "physical Saturn evidence was overstated")
     header = (ROOT / "src/port_v2/integration/slice/slice.h").read_text()
     source = (ROOT / "src/port_v2/integration/slice/slice.c").read_text()
+    main_source = (ROOT / "main.c").read_text()
     require("jo/" not in header.lower() + source.lower() and
             "sgl" not in header.lower() + source.lower(),
             "slice core depends on Jo/SGL")
     require("fallback_used" in header and "fallback_used" in source,
             "fallback readback is missing")
+    require("frame_counter < street_frames" in main_source and
+            "frame_counter : street_frames - 1" in main_source,
+            "playable slice permits the captured stage loop to reset mid-scene")
 
 
 def main() -> None:

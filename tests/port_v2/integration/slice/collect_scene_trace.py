@@ -154,7 +154,7 @@ def main():
             if time.time() >= deadline:
                 raise
             time.sleep(0.25)
-    mcp.call("set_debug_option", cpu_core="interpreter")
+    mcp.call("set_debug_option", cpu_core="dynarec")
     mcp.call("pause")
     bounds = tools.window_bounds(args.emulator_pid, args.timeout)
 
@@ -177,7 +177,8 @@ def main():
         samples.append(sample)
         if not args.no_clip:
             image = ImageGrab.grab(bbox=bounds, all_screens=True).convert("RGB")
-            images.append(image)
+            images.append(image.convert(
+                "P", palette=Image.Palette.ADAPTIVE, colors=256))
             if target in key_frames:
                 path = build_root / f"scene-{target:04d}.png"
                 image.save(path)
@@ -191,12 +192,25 @@ def main():
             "trace frames are not continuous and ordered")
     contacts = [sample for sample in samples
                 if sample["slice_collision_result"]]
+    camera_values = [sample["slice_camera_world_x"] for sample in samples]
+    require(camera_values == sorted(camera_values),
+            "gameplay camera reset or reversed during the coherent scene")
+    by_frame = {sample["slice_frame"]: sample for sample in samples}
+    require(by_frame[45]["slice_player_world_x"] ==
+            by_frame[46]["slice_player_world_x"] and
+            by_frame[46]["slice_player_screen_x"] <
+            by_frame[45]["slice_player_screen_x"],
+            "stationary world actor did not move opposite the camera pan")
     require([sample["slice_frame"] for sample in contacts] ==
             [600, 1200, 1800, 2400],
             "trace does not contain the four causal contacts exactly once")
     require([sample["slice_health_after"] for sample in contacts] ==
-            [63, 42, 21, -1],
+            [63, 39, 8, -1],
             "trace contact damage sequence drifted")
+    require(all(-176 <= sample["slice_player_screen_x"] <= 175 and
+                -176 <= sample["slice_enemy_screen_x"] <= 175
+                for sample in contacts),
+            "a causal contact has a participant outside the visible aperture")
     require(any(sample["slice_semantic_hit"] for sample in samples) and
             any(sample["slice_semantic_ko"] for sample in samples),
             "trace does not span semantic HIT and KO")
@@ -204,10 +218,8 @@ def main():
     clip = None
     if images:
         clip_path = build_root / "scene-after.gif"
-        palette_images = [image.convert("P", palette=Image.Palette.ADAPTIVE,
-                                        colors=256) for image in images]
-        palette_images[0].save(
-            clip_path, save_all=True, append_images=palette_images[1:],
+        images[0].save(
+            clip_path, save_all=True, append_images=images[1:],
             duration=167, loop=0, optimize=False, disposal=2)
         clip = {
             "path": clip_path.relative_to(ROOT).as_posix(),
