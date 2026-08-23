@@ -89,7 +89,8 @@ def signed32(value: int) -> int:
     return value - (1 << 32) if value & 0x80000000 else value
 
 
-def snapshot(mcp: Mcp, syms: dict[str, int], promotion: bool) -> dict[str, int]:
+def snapshot(mcp: Mcp, syms: dict[str, int], promotion: bool,
+             pcm_promotion: bool) -> dict[str, int]:
     names = {
         "relative_frame": "avsp_diag_hud_pcm_frame",
         "runtime_ready": "avsp_diag_runtime_ready",
@@ -136,6 +137,16 @@ def snapshot(mcp: Mcp, syms: dict[str, int], promotion: bool) -> dict[str, int]:
             "hud_submit_count": "avsp_diag_hud_submit_count",
         }.items():
             state[name] = signed32(mcp.u32(syms[symbol]))
+    if pcm_promotion:
+        for name, symbol in {
+            "pcm_production_interface_version":
+                "avsp_diag_pcm_production_interface_version",
+            "pcm_port_lock_ok": "avsp_diag_pcm_port_lock_ok",
+            "pcm_allocation_ok": "avsp_diag_pcm_allocation_ok",
+            "pcm_submit_count": "avsp_diag_pcm_submit_count",
+            "pcm_semantic_active": "avsp_diag_pcm_semantic_active",
+        }.items():
+            state[name] = signed32(mcp.u32(syms[symbol]))
     status = mcp.call("debug_status")
     match = re.search(r"^frame:\s+(\d+)$", status, re.MULTILINE)
     state["emulator_frame"] = int(match.group(1)) if match else -1
@@ -143,7 +154,8 @@ def snapshot(mcp: Mcp, syms: dict[str, int], promotion: bool) -> dict[str, int]:
 
 
 def wait_for_frame(mcp: Mcp, syms: dict[str, int], target: int,
-                   timeout: float, promotion: bool) -> dict[str, int]:
+                   timeout: float, promotion: bool,
+                   pcm_promotion: bool) -> dict[str, int]:
     address = hex(syms["avsp_diag_hud_pcm_frame"])
     mcp.call("pause")
     mcp.call("breakpoint_add", cpu="master", type="memory", address=address,
@@ -153,7 +165,7 @@ def wait_for_frame(mcp: Mcp, syms: dict[str, int], target: int,
         stopped = mcp.call("wait_for_stop", timeout_ms=int(timeout * 1000))
         if "stopped: true" not in stopped:
             raise TimeoutError(f"HUD/PCM frame {target} was not reached")
-        state = snapshot(mcp, syms, promotion)
+        state = snapshot(mcp, syms, promotion, pcm_promotion)
         if state["relative_frame"] != target:
             raise RuntimeError(
                 f"HUD/PCM stopped at {state['relative_frame']}, expected {target}")
@@ -168,7 +180,7 @@ def main() -> None:
     parser.add_argument("--run", type=int, choices=(1, 2), required=True)
     parser.add_argument("--emulator-pid", type=int, required=True)
     parser.add_argument("--timeout", type=float, default=180.0)
-    parser.add_argument("--suite", choices=("hud_pcm_bench", "hud"),
+    parser.add_argument("--suite", choices=("hud_pcm_bench", "hud", "pcm"),
                         default="hud_pcm_bench")
     args = parser.parse_args()
     suite_here = ROOT / "tests/port_v2" / args.suite
@@ -216,7 +228,8 @@ def main() -> None:
         ("repeat_zero", 20),
     ):
         samples[label] = wait_for_frame(
-            mcp, syms, target, args.timeout, args.suite == "hud")
+            mcp, syms, target, args.timeout,
+            args.suite in ("hud", "pcm"), args.suite == "pcm")
         if label == "together":
             run_root = ROOT / f"build/port_v2/{args.suite}/run-{args.run}"
             run_root.mkdir(parents=True, exist_ok=True)
@@ -242,11 +255,17 @@ def main() -> None:
                 all(state[name] == value
                     for name, value in palette_expected.items())):
             raise RuntimeError(f"HUD/PCM readback invariant failed: {state}")
-        if args.suite == "hud" and not (
+        if args.suite in ("hud", "pcm") and not (
                 state["hud_production_interface_version"] ==
                     contract["production_interface_version"] and
                 state["hud_port_lock_ok"] == 1):
             raise RuntimeError(f"HUD promotion port invariant failed: {state}")
+        if args.suite == "pcm" and not (
+                state["pcm_production_interface_version"] ==
+                    contract["production_interface_version"] and
+                state["pcm_port_lock_ok"] == 1 and
+                state["pcm_allocation_ok"] == 1):
+            raise RuntimeError(f"PCM promotion port invariant failed: {state}")
     if samples["together"]["pcm_active"] != 1 or \
             samples["together"]["pcm_channel_observed"] != 1:
         raise RuntimeError("combined HUD/PCM phase did not start its SCSP channel")

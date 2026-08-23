@@ -34,7 +34,7 @@ def sha(data: bytes | bytearray) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=int, choices=(1, 2), required=True)
-    parser.add_argument("--suite", choices=("hud_pcm_bench", "hud"),
+    parser.add_argument("--suite", choices=("hud_pcm_bench", "hud", "pcm"),
                         default="hud_pcm_bench")
     args = parser.parse_args()
     suite_here = ROOT / "tests/port_v2" / args.suite

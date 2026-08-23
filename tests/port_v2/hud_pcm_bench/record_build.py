@@ -47,7 +47,7 @@ def manifest() -> dict[str, str]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=int, choices=(1, 2), required=True)
-    parser.add_argument("--suite", choices=("hud_pcm_bench", "hud"),
+    parser.add_argument("--suite", choices=("hud_pcm_bench", "hud", "pcm"),
                         default="hud_pcm_bench")
     args = parser.parse_args()
     suite_here = ROOT / "tests/port_v2" / args.suite
@@ -118,7 +118,7 @@ def main() -> None:
     if report["approved_stage_contract_sha256"] != \
             contract["approved_stage_contract_sha256"]:
         raise ValueError("approved stage contract changed")
-    if args.suite == "hud":
+    if args.suite != "hud_pcm_bench":
         approved = {}
         for lock in contract["approved_contracts"]:
             actual = sha256(ROOT / lock["path"])

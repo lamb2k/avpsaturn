@@ -81,7 +81,7 @@ def check_player2_hud(state: dict[str, object],
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--suite", choices=("hud_pcm_bench", "hud"),
+    parser.add_argument("--suite", choices=("hud_pcm_bench", "hud", "pcm"),
                         default="hud_pcm_bench")
     args = parser.parse_args()
     suite_here = ROOT / "tests/port_v2" / args.suite
@@ -170,7 +170,7 @@ def main() -> None:
                 "bounded repeat checkpoint drifted")
         require(report["bounded_stability_frames"] > 0,
                 "bounded stability interval was not observed")
-        if args.suite == "hud":
+        if args.suite in ("hud", "pcm"):
             for state in states.values():
                 require(state["hud_production_interface_version"] ==
                         contract["production_interface_version"],
@@ -187,7 +187,27 @@ def main() -> None:
                 maxcolors=image.width * image.height)
         require(colours is not None and len(colours) >= 8,
                 "HUD/PCM screenshot has no rendered HUD")
-    if args.suite == "hud":
+        if args.suite == "pcm":
+            for state in states.values():
+                require(state["pcm_production_interface_version"] ==
+                        contract["production_interface_version"],
+                        "PCM production interface version drifted")
+                require(state["pcm_port_lock_ok"] == 1 and
+                        state["pcm_allocation_ok"] == 1,
+                        "PCM port or SCSP allocation lock failed")
+            require(states["together"]["pcm_semantic_active"] == 1 and
+                    states["together"]["pcm_submit_count"] == 1,
+                    "first semantic PCM start did not submit")
+            require(states["full"]["pcm_semantic_active"] == 0 and
+                    states["full"]["pcm_submit_count"] == 2,
+                    "first semantic PCM stop did not submit")
+            require(states["pcm_only"]["pcm_semantic_active"] == 1 and
+                    states["pcm_only"]["pcm_submit_count"] == 3,
+                    "second semantic PCM start did not submit")
+            require(states["negative"]["pcm_semantic_active"] == 0 and
+                    states["negative"]["pcm_submit_count"] == 4,
+                    "second semantic PCM stop did not submit")
+    if args.suite in ("hud", "pcm"):
         for label in reads[0]["samples"]:
             left = {key: value for key, value in
                     reads[0]["samples"][label].items()

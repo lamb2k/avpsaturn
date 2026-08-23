@@ -11,6 +11,7 @@
 #include "src/port_v2/camera/camera.h"
 #include "src/port_v2/stage/stage.h"
 #include "src/port_v2/hud/hud.h"
+#include "src/port_v2/audio/pcm/pcm.h"
 #include "src/port_v2/integration/player_enemy/player_enemy.h"
 #ifdef AVSP_COLLISION_SALVAGE_BENCH
 #include "tests/port_v2/collision_bench/collision_bench.h"
@@ -305,6 +306,9 @@ typedef struct
     unsigned long tail_canary;
 } HudPcmBenchState;
 static HudPcmBenchState hud_pcm_bench;
+#ifdef AVSP_PCM_PROMOTION_BENCH
+static AvspPortV2PcmRuntime pcm_port_v2;
+#endif
 #endif
 
 #ifdef AVSP_ENEMY_SALVAGE_BENCH
@@ -396,6 +400,13 @@ volatile int avsp_diag_hud_palette_empty;
 volatile int avsp_diag_hud_production_interface_version;
 volatile int avsp_diag_hud_port_lock_ok;
 volatile int avsp_diag_hud_submit_count;
+#endif
+#ifdef AVSP_PCM_PROMOTION_BENCH
+volatile int avsp_diag_pcm_production_interface_version;
+volatile int avsp_diag_pcm_port_lock_ok;
+volatile int avsp_diag_pcm_allocation_ok;
+volatile int avsp_diag_pcm_submit_count;
+volatile int avsp_diag_pcm_semantic_active;
 #endif
 #endif
 #ifdef AVSP_PLAYER_SALVAGE_BENCH
@@ -3355,6 +3366,44 @@ static int hud_pcm_energy_fill(const int energy)
 }
 #endif
 
+#ifdef AVSP_PCM_PROMOTION_BENCH
+/* Temporary SCSP adapter for the already-approved cue. The semantic port owns
+ * cue identity and source-frame timing; this adapter only starts/stops the Jo
+ * sound object and remains deletable once the Saturn audio adapter lands. */
+static int pcm_port_start(const AvspPortV2PcmFrame *frame)
+{
+    if (frame == JO_NULL ||
+        frame->cue_id != AVSP_PORT_V2_PCM_CUE_PREDATOR_MELEE ||
+        !hud_pcm_sound_valid(&melee_sound))
+        return 0;
+    play_pcm_committed(&melee_sound, &melee_sound, AVSP_PCM_CHANNEL_MELEE);
+    hud_pcm_bench.pcm_active = 1;
+    hud_pcm_bench.planned_end_frame =
+        hud_pcm_bench.frame +
+        avsp_port_v2_pcm_predator_melee_config.duration_frames;
+    hud_pcm_bench.underrun_reported_start = -1;
+    avsp_diag_pcm_start_frame = frame->start_frame;
+    ++avsp_diag_pcm_submit_count;
+    return 1;
+}
+
+static int pcm_port_stop(const AvspPortV2PcmFrame *frame)
+{
+    if (frame == JO_NULL ||
+        frame->cue_id != AVSP_PORT_V2_PCM_CUE_PREDATOR_MELEE)
+        return 0;
+    if (jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_MELEE))
+    {
+        jo_audio_stop_sound(&melee_sound);
+        slSndFlush();
+    }
+    hud_pcm_bench.pcm_active = 0;
+    avsp_diag_pcm_end_frame = frame->end_frame;
+    ++avsp_diag_pcm_submit_count;
+    return 1;
+}
+#endif
+
 static void hud_pcm_bench_negative_control(const int control)
 {
     static jo_color rejected_zero_based[AVSP_CRAM_MAX_COLOURS];
@@ -3424,6 +3473,12 @@ static void hud_pcm_bench_init(void)
         AVSP_PORT_V2_HUD_INTERFACE_VERSION;
     avsp_diag_hud_submit_count = 0;
 #endif
+#ifdef AVSP_PCM_PROMOTION_BENCH
+    avsp_port_v2_pcm_init(&pcm_port_v2);
+    avsp_diag_pcm_production_interface_version =
+        AVSP_PORT_V2_PCM_INTERFACE_VERSION;
+    avsp_diag_pcm_submit_count = 0;
+#endif
     world.encounter_started = 1;
     world.encounter_state = CAP_ENCOUNTER_WAVE_ONE;
     world.frame = 0;
@@ -3442,6 +3497,11 @@ static void hud_pcm_bench_frame_callback(void)
     AvspPortV2HudInput hud_input;
     AvspPortV2HudFrame hud_frame;
     AvspPortV2HudRenderOps hud_operations;
+#endif
+#ifdef AVSP_PCM_PROMOTION_BENCH
+    AvspPortV2PcmInput pcm_input;
+    AvspPortV2PcmFrame pcm_frame;
+    AvspPortV2PcmAudioOps pcm_operations;
 #endif
     jo_clear_screen();
     avsp_diag_runtime_ready = runtime_ready;
@@ -3471,6 +3531,10 @@ static void hud_pcm_bench_frame_callback(void)
         hud_pcm_bench.underrun_reported_start = -1;
 #ifdef AVSP_HUD_PROMOTION_BENCH
         avsp_diag_hud_submit_count = 0;
+#endif
+#ifdef AVSP_PCM_PROMOTION_BENCH
+        avsp_port_v2_pcm_init(&pcm_port_v2);
+        avsp_diag_pcm_submit_count = 0;
 #endif
     }
     if (phase == 0)
@@ -3502,6 +3566,48 @@ static void hud_pcm_bench_frame_callback(void)
         hud_pcm_bench.p2_energy = 32;
     }
 
+#ifdef AVSP_PCM_PROMOTION_BENCH
+    pcm_input.frame = relative;
+    pcm_input.cue_event = relative == HUD_PCM_BENCH_FIRST_EVENT ||
+                          relative == HUD_PCM_BENCH_SECOND_EVENT;
+    pcm_input.cue_id = AVSP_PORT_V2_PCM_CUE_PREDATOR_MELEE;
+    if (!avsp_port_v2_pcm_step(&pcm_port_v2, &pcm_input, &pcm_frame))
+    {
+        ++avsp_diag_pcm_audio_failures;
+        memset(&pcm_frame, 0, sizeof(pcm_frame));
+    }
+    pcm_operations.start = pcm_port_start;
+    pcm_operations.stop = pcm_port_stop;
+    if (!avsp_port_v2_pcm_submit(&pcm_frame, &pcm_operations))
+        ++avsp_diag_pcm_audio_failures;
+    avsp_diag_pcm_event_count = pcm_frame.event_count;
+    avsp_diag_pcm_event_frame = pcm_frame.event_frame;
+    avsp_diag_pcm_semantic_active = pcm_frame.active;
+    avsp_diag_pcm_port_lock_ok =
+        avsp_port_v2_pcm_validate_config(
+            &avsp_port_v2_pcm_predator_melee_config) &&
+        (relative < HUD_PCM_BENCH_FIRST_EVENT ||
+         pcm_frame.event_count > 0);
+    avsp_diag_pcm_allocation_ok =
+        hud_pcm_sound_valid(&melee_sound) &&
+        avsp_port_v2_pcm_predator_melee_config.scsp_channel ==
+            AVSP_PCM_CHANNEL_MELEE;
+    channel_playing = jo_audio_is_channel_playing(AVSP_PCM_CHANNEL_MELEE);
+    if (hud_pcm_bench.pcm_active && channel_playing)
+        avsp_diag_pcm_channel_observed = 1;
+    if (hud_pcm_bench.pcm_active &&
+        hud_pcm_bench.frame >
+            hud_pcm_bench.planned_end_frame - HUD_PCM_BENCH_PCM_FRAMES + 1 &&
+        hud_pcm_bench.frame < hud_pcm_bench.planned_end_frame &&
+        !channel_playing &&
+        hud_pcm_bench.underrun_reported_start !=
+            hud_pcm_bench.planned_end_frame)
+    {
+        ++avsp_diag_pcm_underruns;
+        hud_pcm_bench.underrun_reported_start =
+            hud_pcm_bench.planned_end_frame;
+    }
+#else
     if (relative == HUD_PCM_BENCH_FIRST_EVENT ||
         relative == HUD_PCM_BENCH_SECOND_EVENT)
     {
@@ -3556,6 +3662,7 @@ static void hud_pcm_bench_frame_callback(void)
         hud_pcm_bench.pcm_active = 0;
         avsp_diag_pcm_end_frame = relative;
     }
+#endif
 
     if (relative == 450) hud_pcm_bench_negative_control(0);
     if (relative == 451) hud_pcm_bench_negative_control(1);
