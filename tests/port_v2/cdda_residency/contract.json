@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "task_id": "PROMOTE-07-CDDA-RESIDENCY",
+  "card_profile": "CddaResidencyPromotionBench",
+  "compile_profile": "debug-cdda-residency-promotion-bench",
+  "manifest_profile": "cdda-residency-promotion-bench",
+  "interface_version": 1,
+  "track": 2,
+  "source_event": {
+    "route_manifest": "data/stage1_route.json",
+    "event_id": "street_combat_begins",
+    "frame": 2520,
+    "binding_status": "ADAPTED"
+  },
+  "source_audio": {
+    "path": ".deps/mame/captures/stage1_route_reference.wav",
+    "bytes": 29637952,
+    "sha256": "42e755b02ba0e59e514a07dabe2f8273390e641c2ab410e4af8b7f1b656f2a43"
+  },
+  "fixture": {
+    "source_path": "tests/port_v2/cdda_residency_bench/RESCHK.BIN",
+    "iso_path": "/DIAG/RESCHK.BIN",
+    "bytes": 64,
+    "sha256": "84a73962f97c2479b1c514c5e6747a95a5c3be1a58530ed62dc09cb3fbb57d2d"
+  },
+  "cycle_frames": 300,
+  "checkpoints": {
+    "idle": 20,
+    "cdda_owned": 40,
+    "illegal_read_rejected": 70,
+    "illegal_window_rejected": 100,
+    "data_owned": 130,
+    "window_open": 151,
+    "legal_read_complete": 152,
+    "window_closed": 153,
+    "stable": 240
+  },
+  "expected_final": {
+    "ownership": 0,
+    "track_events": 1,
+    "ownership_transitions": 2,
+    "legal_windows": 1,
+    "legal_reads": 1,
+    "late_reads": 1,
+    "refused_windows": 1,
+    "negative_rejections": 2,
+    "failures": 0,
+    "asset_failures": 0,
+    "canary_ok": 1
+  },
+  "promotion_expected": {
+    "cdda_production_interface_version": 1,
+    "residency_production_interface_version": 1,
+    "port_lock_ok": 1,
+    "cdda_submit_count": 2,
+    "residency_submit_count": 1,
+    "fallback_used": 0
+  },
+  "approved_contracts": [
+    {"path": "tests/port_v2/player/approved_contract.json", "sha256": "d0e6d835aaa3f2bdcd1138d5eeedafcacf96080178feca0454789a942fedf612"},
+    {"path": "tests/port_v2/enemy/approved_contract.json", "sha256": "35d6274c88aa60d32a6594fa535cae0e0964ddcc7f4ec7989553848f361142da"},
+    {"path": "tests/port_v2/integration/player_enemy/approved_contract.json", "sha256": "cc1a3a3d02b15291815a0f0a9e4e9e06665ba14b0b298148814e1c2565c8a92c"},
+    {"path": "tests/port_v2/camera_stage/approved_contract.json", "sha256": "9b3b073d501691cdef5b59eb40b301c2c1dd6c88dd0eb01fc8b0ca36013c425a"},
+    {"path": "tests/port_v2/hud/approved_contract.json", "sha256": "fffd8b28576ebbc65e2e174cb9c5cc5af1ef9fa02919952d0d352743a3e407ca"},
+    {"path": "tests/port_v2/audio/pcm/approved_contract.json", "sha256": "b236a6a3ce490e42a48e1bfad69b36bc9128056e41f9fe8af6cf0778d79c7121"}
+  ],
+  "human_review_status": "APPROVED",
+  "physical_saturn": "UNRUN"
+}

@@ -23,11 +23,12 @@
  },
  "disc_guard": {
   "declared_windows": [
-   "interior wipe: CDDA paused"
+   "interior wipe: CDDA paused",
+   "PROMOTE-07 phase-boundary residency check: frames 150-152"
   ],
   "guard_module": "avsp_disc_guard.c",
   "host_test": "tests/avsp_disc_guard_test.c",
-  "note": "the CD track start call is still disabled, so live CDDA rejection is contract skeleton; the host test proves the guard semantics including both negative controls",
+  "note": "normal release still has its CD track start call disabled; the dedicated PROMOTE-07 profile exercises Track 2 ownership plus rejected illegal read/window controls and one legal phase-boundary read",
   "reader_guarded": "avsp_fs_read_into rejects reads with FS CDDA LOCK when CDDA owns the drive and no measured window is open",
   "status": "ADAPTED"
  },
@@ -78,6 +79,13 @@
  },
  "work_ram_limit": "0x060c0000",
  "work_ram_profiles": {
+  "debug-cdda-residency-promotion-bench": {
+   "bend": "0x06088370",
+   "headroom_bytes": 228496,
+   "limit": "0x060c0000",
+   "profile": "debug-cdda-residency-promotion-bench",
+   "status": "MEASURED"
+  },
   "debug-cdda-residency-salvage-bench": {
    "bend": "0x06087a70",
    "headroom_bytes": 230800,

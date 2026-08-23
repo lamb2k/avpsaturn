@@ -19,6 +19,7 @@ param(
     [switch]$HudPromotionBench,
     [switch]$PcmPromotionBench,
     [switch]$CddaResidencySalvageBench,
+    [switch]$CddaResidencyPromotionBench,
     [switch]$EnemySalvageBench,
     [switch]$EnemyPromotionBench,
     [switch]$PlayerEnemyIntegration,
@@ -216,7 +217,7 @@ try {
         $cddaFixtureSource = Join-Path $projectRoot `
             'tests\port_v2\cdda_residency_bench\RESCHK.BIN'
         $cddaFixtureStaged = Join-Path $contentRoot 'DIAG\RESCHK.BIN'
-        if ($CddaResidencySalvageBench) {
+        if ($CddaResidencySalvageBench -or $CddaResidencyPromotionBench) {
             New-Item -ItemType Directory -Force -Path `
                 (Split-Path -Parent $cddaFixtureStaged) | Out-Null
             Copy-Item -LiteralPath $cddaFixtureSource `
@@ -251,6 +252,7 @@ try {
             elseif ($PlayerEnemyIntegration) { 'player-enemy-integration' }
             elseif ($EnemyPromotionBench) { 'enemy-promotion-bench' }
             elseif ($EnemySalvageBench) { 'enemy-salvage-bench' }
+            elseif ($CddaResidencyPromotionBench) { 'cdda-residency-promotion-bench' }
             elseif ($CddaResidencySalvageBench) { 'cdda-residency-salvage-bench' }
             elseif ($PcmPromotionBench) { 'pcm-promotion-bench' }
             elseif ($HudPromotionBench) { 'hud-promotion-bench' }
@@ -342,6 +344,10 @@ try {
         }
         if ($CddaResidencySalvageBench) {
             $makeArguments += 'AVSP_CDDA_RESIDENCY_SALVAGE_BENCH=1'
+        }
+        if ($CddaResidencyPromotionBench) {
+            $makeArguments += 'AVSP_CDDA_RESIDENCY_SALVAGE_BENCH=1'
+            $makeArguments += 'AVSP_CDDA_RESIDENCY_PROMOTION_BENCH=1'
         }
         if ($EnemySalvageBench) {
             $makeArguments += 'AVSP_ENEMY_SALVAGE_BENCH=1'

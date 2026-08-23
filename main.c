@@ -19,6 +19,10 @@
 #ifdef AVSP_CDDA_RESIDENCY_SALVAGE_BENCH
 #include "tests/port_v2/cdda_residency_bench/cdda_residency_bench.h"
 #endif
+#ifdef AVSP_CDDA_RESIDENCY_PROMOTION_BENCH
+#include "src/port_v2/audio/cdda/cdda.h"
+#include "src/port_v2/residency/residency.h"
+#endif
 #ifdef AVSP_HIT_KO_PROMOTION_BENCH
 #include "tests/port_v2/combat/hit_ko/diagnostic.h"
 #endif
@@ -318,11 +322,21 @@ static AvspPortV2PcmRuntime pcm_port_v2;
 typedef struct
 {
     unsigned long head_canary;
+#ifdef AVSP_CDDA_RESIDENCY_PROMOTION_BENCH
+    unsigned char bytes[AVSP_PORT_V2_RESIDENCY_FIXTURE_BYTES];
+#else
     unsigned char bytes[AVSP_CDDA_RESIDENCY_FIXTURE_BYTES];
+#endif
     unsigned long tail_canary;
 } CddaResidencyReadBuffer;
 
+#ifdef AVSP_CDDA_RESIDENCY_PROMOTION_BENCH
+static AvspPortV2CddaRuntime cdda_port_v2;
+static AvspPortV2ResidencyRuntime residency_port_v2;
+static int cdda_residency_frame;
+#else
 static AvspCddaResidencyRuntime cdda_residency_runtime;
+#endif
 static CddaResidencyReadBuffer cdda_residency_read_buffer;
 #endif
 
@@ -448,6 +462,14 @@ volatile int avsp_diag_cdda_vdp1_high_water;
 volatile int avsp_diag_cdda_vdp2_high_water;
 volatile int avsp_diag_cdda_cram_high_water;
 volatile int avsp_diag_cdda_scsp_high_water;
+#ifdef AVSP_CDDA_RESIDENCY_PROMOTION_BENCH
+volatile int avsp_diag_cdda_production_interface_version;
+volatile int avsp_diag_residency_production_interface_version;
+volatile int avsp_diag_cdda_port_lock_ok;
+volatile int avsp_diag_cdda_submit_count;
+volatile int avsp_diag_residency_submit_count;
+volatile int avsp_diag_cdda_fallback_used;
+#endif
 #endif
 #ifdef AVSP_PLAYER_SALVAGE_BENCH
 volatile int avsp_diag_player_frame;
@@ -4555,6 +4577,258 @@ static void collision_bench_frame_callback(void)
 #endif
 
 #ifdef AVSP_CDDA_RESIDENCY_SALVAGE_BENCH
+#ifdef AVSP_CDDA_RESIDENCY_PROMOTION_BENCH
+static int cdda_residency_read_buffer_ok(void)
+{
+    static const unsigned char expected[
+        AVSP_PORT_V2_RESIDENCY_FIXTURE_BYTES] =
+        "AVSP-CDDA-RESIDENCY-V1|TRACK=02|WINDOW=PHASE-BOUNDARY|OK!!!!!!!\n";
+    return cdda_residency_read_buffer.head_canary ==
+               AVSP_PORT_V2_RESIDENCY_CANARY_HEAD &&
+           cdda_residency_read_buffer.tail_canary ==
+               AVSP_PORT_V2_RESIDENCY_CANARY_TAIL &&
+           memcmp(cdda_residency_read_buffer.bytes, expected,
+                  AVSP_PORT_V2_RESIDENCY_FIXTURE_BYTES) == 0;
+}
+
+static int cdda_port_start(const AvspPortV2CddaFrame *frame)
+{
+    jo_audio_play_cd_track(frame->track, frame->track,
+                           frame->repeat != 0);
+    avsp_disc_guard_cdda_started(&avsp_disc_guard_state);
+    ++avsp_diag_cdda_submit_count;
+    return 1;
+}
+
+static int cdda_port_stop(const AvspPortV2CddaFrame *frame)
+{
+    JO_UNUSED_ARG(frame);
+    jo_audio_stop_cd();
+    avsp_disc_guard_cdda_stopped(&avsp_disc_guard_state);
+    ++avsp_diag_cdda_submit_count;
+    return 1;
+}
+
+static int residency_port_read(const int region_id,
+                               unsigned char *destination,
+                               const int capacity)
+{
+    long read_bytes;
+
+    if (region_id != AVSP_PORT_V2_RESIDENCY_REGION_DIAGNOSTIC ||
+        destination == 0 ||
+        capacity < AVSP_PORT_V2_RESIDENCY_FIXTURE_BYTES)
+        return -1;
+    read_bytes = avsp_fs_read_into(
+        "RESCHK.BIN", "DIAG", destination,
+        AVSP_PORT_V2_RESIDENCY_FIXTURE_BYTES);
+    if (read_bytes == AVSP_PORT_V2_RESIDENCY_FIXTURE_BYTES)
+        ++avsp_diag_residency_submit_count;
+    return (int)read_bytes;
+}
+
+static int cdda_residency_promotion_init(void)
+{
+    avsp_port_v2_cdda_init(&cdda_port_v2);
+    avsp_port_v2_residency_init(&residency_port_v2);
+    cdda_residency_frame = 0;
+    memset(&cdda_residency_read_buffer, 0,
+           sizeof(cdda_residency_read_buffer));
+    cdda_residency_read_buffer.head_canary =
+        AVSP_PORT_V2_RESIDENCY_CANARY_HEAD;
+    cdda_residency_read_buffer.tail_canary =
+        AVSP_PORT_V2_RESIDENCY_CANARY_TAIL;
+    avsp_disc_guard_init(&avsp_disc_guard_state);
+    avsp_diag_cdda_interface_version =
+        AVSP_PORT_V2_CDDA_INTERFACE_VERSION;
+    avsp_diag_cdda_production_interface_version =
+        AVSP_PORT_V2_CDDA_INTERFACE_VERSION;
+    avsp_diag_residency_production_interface_version =
+        AVSP_PORT_V2_RESIDENCY_INTERFACE_VERSION;
+    avsp_diag_cdda_track = avsp_port_v2_cdda_stage1_config.track;
+    avsp_diag_cdda_source_frame =
+        avsp_port_v2_cdda_stage1_config.source_frame;
+    avsp_diag_cdda_work_ram_high_water =
+        avsp_port_v2_stage1_residency_manifest.phase_high_water_bytes[
+            AVSP_PORT_V2_DOMAIN_WORK_RAM];
+    avsp_diag_cdda_cart_high_water =
+        avsp_port_v2_stage1_residency_manifest.phase_high_water_bytes[
+            AVSP_PORT_V2_DOMAIN_CARTRIDGE];
+    avsp_diag_cdda_vdp1_high_water =
+        avsp_port_v2_stage1_residency_manifest.phase_high_water_bytes[
+            AVSP_PORT_V2_DOMAIN_VDP1];
+    avsp_diag_cdda_vdp2_high_water =
+        avsp_port_v2_stage1_residency_manifest.phase_high_water_bytes[
+            AVSP_PORT_V2_DOMAIN_VDP2];
+    avsp_diag_cdda_cram_high_water =
+        avsp_port_v2_stage1_residency_manifest.phase_high_water_bytes[
+            AVSP_PORT_V2_DOMAIN_CRAM];
+    avsp_diag_cdda_scsp_high_water =
+        avsp_port_v2_stage1_residency_manifest.phase_high_water_bytes[
+            AVSP_PORT_V2_DOMAIN_SCSP];
+    avsp_diag_cdda_fallback_used = 0;
+    avsp_diag_cdda_port_lock_ok =
+        avsp_port_v2_cdda_validate_config(
+            &avsp_port_v2_cdda_stage1_config) &&
+        avsp_port_v2_residency_validate_manifest(
+            &avsp_port_v2_stage1_residency_manifest) &&
+        sizeof(cdda_residency_read_buffer) ==
+            AVSP_PORT_V2_RESIDENCY_WORK_RAM_BYTES;
+    return avsp_diag_cdda_port_lock_ok;
+}
+
+static int cdda_residency_action(const int relative)
+{
+    if (relative == 30) return AVSP_CDDA_ACTION_START_TRACK;
+    if (relative == 60) return AVSP_CDDA_ACTION_ILLEGAL_READ;
+    if (relative == 90) return AVSP_CDDA_ACTION_ILLEGAL_WINDOW;
+    if (relative == 120) return AVSP_CDDA_ACTION_STOP_TRACK;
+    if (relative == 150) return AVSP_CDDA_ACTION_WINDOW_BEGIN;
+    if (relative == 151) return AVSP_CDDA_ACTION_LEGAL_READ;
+    if (relative == 152) return AVSP_CDDA_ACTION_WINDOW_END;
+    return AVSP_CDDA_ACTION_NONE;
+}
+
+static void cdda_residency_bench_frame_callback(void)
+{
+    AvspPortV2CddaInput input;
+    AvspPortV2CddaFrame cdda_frame;
+    AvspPortV2CddaAudioOps audio_operations;
+    AvspPortV2ResidencyAssetOps asset_operations;
+    const int relative =
+        cdda_residency_frame % AVSP_CDDA_RESIDENCY_CYCLE_FRAMES;
+    const int action = cdda_residency_action(relative);
+    int succeeded = 1;
+
+    jo_clear_screen();
+    avsp_diag_runtime_ready = runtime_ready;
+    if (!runtime_ready)
+    {
+        jo_printf(2, 10, "CDDA RESIDENCY PROMOTION FAILED");
+        return;
+    }
+    if (relative == 0 && cdda_residency_frame != 0)
+    {
+        int prior_failures = residency_port_v2.failures;
+        if (cdda_port_v2.active || residency_port_v2.window_open)
+            ++prior_failures;
+        if (!avsp_port_v2_residency_canaries_ok(&residency_port_v2))
+            ++prior_failures;
+        avsp_port_v2_cdda_init(&cdda_port_v2);
+        avsp_port_v2_residency_init(&residency_port_v2);
+        residency_port_v2.failures = prior_failures;
+        avsp_disc_guard_init(&avsp_disc_guard_state);
+        avsp_diag_cdda_submit_count = 0;
+        avsp_diag_residency_submit_count = 0;
+    }
+    input.command = AVSP_PORT_V2_CDDA_NONE;
+    input.track = AVSP_PORT_V2_CDDA_TRACK_STAGE1;
+    input.source_frame = AVSP_PORT_V2_CDDA_SOURCE_FRAME_STAGE1;
+    if (action == AVSP_CDDA_ACTION_START_TRACK)
+        input.command = AVSP_PORT_V2_CDDA_START;
+    else if (action == AVSP_CDDA_ACTION_STOP_TRACK)
+        input.command = AVSP_PORT_V2_CDDA_STOP;
+    if (!avsp_port_v2_cdda_step(&cdda_port_v2, &input, &cdda_frame))
+    {
+        ++residency_port_v2.failures;
+        memset(&cdda_frame, 0, sizeof(cdda_frame));
+    }
+    audio_operations.start = cdda_port_start;
+    audio_operations.stop = cdda_port_stop;
+    asset_operations.read = residency_port_read;
+    if (action == AVSP_CDDA_ACTION_START_TRACK)
+    {
+        succeeded = avsp_port_v2_residency_cdda_started(
+            &residency_port_v2) &&
+            avsp_port_v2_cdda_submit(&cdda_frame, &audio_operations);
+    }
+    else if (action == AVSP_CDDA_ACTION_ILLEGAL_READ)
+    {
+        succeeded = avsp_port_v2_residency_submit_read(
+            &residency_port_v2,
+            AVSP_PORT_V2_RESIDENCY_REGION_DIAGNOSTIC,
+            cdda_residency_read_buffer.bytes,
+            AVSP_PORT_V2_RESIDENCY_FIXTURE_BYTES,
+            &asset_operations);
+        succeeded = !succeeded;
+    }
+    else if (action == AVSP_CDDA_ACTION_ILLEGAL_WINDOW)
+    {
+        succeeded = !avsp_port_v2_residency_window_begin(
+            &residency_port_v2);
+    }
+    else if (action == AVSP_CDDA_ACTION_STOP_TRACK)
+    {
+        succeeded = avsp_port_v2_cdda_submit(
+            &cdda_frame, &audio_operations) &&
+            avsp_port_v2_residency_cdda_stopped(&residency_port_v2);
+    }
+    else if (action == AVSP_CDDA_ACTION_WINDOW_BEGIN)
+    {
+        succeeded = avsp_port_v2_residency_window_begin(
+                        &residency_port_v2) &&
+                    avsp_disc_guard_window_begin(
+                        &avsp_disc_guard_state,
+                        "promoted phase-boundary residency check");
+    }
+    else if (action == AVSP_CDDA_ACTION_LEGAL_READ)
+    {
+        succeeded = avsp_port_v2_residency_submit_read(
+                        &residency_port_v2,
+                        AVSP_PORT_V2_RESIDENCY_REGION_DIAGNOSTIC,
+                        cdda_residency_read_buffer.bytes,
+                        AVSP_PORT_V2_RESIDENCY_FIXTURE_BYTES,
+                        &asset_operations) &&
+                    cdda_residency_read_buffer_ok();
+        if (!succeeded) ++avsp_diag_cdda_asset_failures;
+    }
+    else if (action == AVSP_CDDA_ACTION_WINDOW_END)
+    {
+        succeeded = avsp_port_v2_residency_window_end(
+            &residency_port_v2);
+        avsp_disc_guard_window_end(&avsp_disc_guard_state);
+    }
+    if (!succeeded) ++residency_port_v2.failures;
+    avsp_diag_cdda_action = action;
+    avsp_diag_cdda_ownership =
+        residency_port_v2.disc_owner == AVSP_PORT_V2_DISC_CDDA;
+    avsp_diag_cdda_track_events = cdda_port_v2.event_count;
+    avsp_diag_cdda_ownership_transitions =
+        residency_port_v2.ownership_transitions;
+    avsp_diag_cdda_window_open = residency_port_v2.window_open;
+    avsp_diag_cdda_legal_windows = residency_port_v2.legal_window_count;
+    avsp_diag_cdda_legal_reads = residency_port_v2.legal_read_count;
+    avsp_diag_cdda_late_reads = residency_port_v2.late_read_attempts;
+    avsp_diag_cdda_refused_windows = residency_port_v2.refused_windows;
+    avsp_diag_cdda_negative_rejections =
+        residency_port_v2.negative_rejections;
+    avsp_diag_cdda_failures = residency_port_v2.failures;
+    avsp_diag_cdda_canary_ok =
+        avsp_port_v2_residency_canaries_ok(&residency_port_v2) &&
+        (residency_port_v2.legal_read_count == 0 ||
+         cdda_residency_read_buffer_ok());
+    jo_printf(2, 2, "CDDA / RESIDENCY PROMOTED");
+    jo_printf(2, 5, "F %03d TRACK %d OWNER %d", relative,
+              avsp_diag_cdda_track, avsp_diag_cdda_ownership);
+    jo_printf(2, 7, "TRANS %d EVENT %d WINDOW %d READ %d",
+              avsp_diag_cdda_ownership_transitions,
+              avsp_diag_cdda_track_events,
+              avsp_diag_cdda_legal_windows,
+              avsp_diag_cdda_legal_reads);
+    jo_printf(2, 9, "LATE %d REFUSED %d NEG %d",
+              avsp_diag_cdda_late_reads,
+              avsp_diag_cdda_refused_windows,
+              avsp_diag_cdda_negative_rejections);
+    jo_printf(2, 11, "PORT %s SUBMIT %d/%d FAIL %d",
+              avsp_diag_cdda_port_lock_ok ? "PASS" : "FAIL",
+              avsp_diag_cdda_submit_count,
+              avsp_diag_residency_submit_count,
+              avsp_diag_cdda_failures + avsp_diag_cdda_asset_failures);
+    jo_printf(2, 15, "PHYSICAL SATURN UNRUN");
+    avsp_diag_cdda_frame = relative;
+    ++cdda_residency_frame;
+}
+#else
 static int cdda_residency_read_buffer_ok(void)
 {
     static const unsigned char expected[AVSP_CDDA_RESIDENCY_FIXTURE_BYTES] =
@@ -4705,6 +4979,7 @@ static void cdda_residency_bench_frame_callback(void)
               avsp_diag_cdda_failures + avsp_diag_cdda_asset_failures);
     jo_printf(2, 15, "PHYSICAL SATURN UNRUN");
 }
+#endif
 #endif
 
 static void frame_callback(void)
@@ -5439,7 +5714,11 @@ void jo_main(void)
     {
         /* CDDA-only residency body: the track streams from disc and the only
          * phase-owned allocation is the canary-wrapped legal-read buffer. */
+        #ifdef AVSP_CDDA_RESIDENCY_PROMOTION_BENCH
+        runtime_ready = cdda_residency_promotion_init();
+        #else
         runtime_ready = cdda_residency_bench_init();
+        #endif
         if (!runtime_ready) failed_asset = "CDDA RESIDENCY BENCH";
     }
     JO_UNUSED_ARG(index);

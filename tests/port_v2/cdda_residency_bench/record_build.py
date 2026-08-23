@@ -58,9 +58,16 @@ def linked_high_water() -> dict[str, int | str]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=int, choices=(1, 2), required=True)
+    parser.add_argument("--metadata-dir",
+                        default="tests/port_v2/cdda_residency_bench")
+    parser.add_argument("--output-root",
+                        default="build/port_v2/cdda_residency_bench")
     args = parser.parse_args()
-    inventory = json.loads((HERE / "inventory.json").read_text(encoding="utf-8"))
-    contract = json.loads((HERE / "contract.json").read_text(encoding="utf-8"))
+    metadata = ROOT / args.metadata_dir
+    inventory = json.loads((metadata / "inventory.json").read_text(
+        encoding="utf-8"))
+    contract = json.loads((metadata / "contract.json").read_text(
+        encoding="utf-8"))
     profile = (ROOT / "build/last_compile_profile.txt").read_text(
         encoding="ascii").strip()
     release = release_manifest()
@@ -115,7 +122,7 @@ def main() -> None:
         "manifest_iso_sha256": release["iso_sha256"],
         "linked_work_ram_high_water": linked_high_water(),
         "phase_owned_high_water": json.loads(
-            (HERE / "phase_manifest.json").read_text(encoding="utf-8"))[
+            (metadata / "phase_manifest.json").read_text(encoding="utf-8"))[
                 "allocations"],
         "iso_members": members,
         "approved_contract_sha256": approved,
@@ -125,7 +132,7 @@ def main() -> None:
     }
     if report["manifest_iso_sha256"] != artifacts["game_iso"]["sha256"]:
         raise ValueError("hardware manifest and ISO identity disagree")
-    output = ROOT / f"build/port_v2/cdda_residency_bench/run-{args.run}/build.json"
+    output = ROOT / args.output_root / f"run-{args.run}/build.json"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",
                       encoding="ascii", newline="\n")

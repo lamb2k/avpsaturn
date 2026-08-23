@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "task_id": "PROMOTE-07-CDDA-RESIDENCY",
+  "phase_id": "stage1-cdda-residency-promoted",
+  "classification": "ADAPTED",
+  "scope": "first production phase manifest behind the asset/load port",
+  "source_binding": {
+    "route_manifest": "data/stage1_route.json",
+    "event_id": "street_combat_begins",
+    "source_frame": 2520,
+    "binding_status": "ADAPTED",
+    "audio_bytes": 29637952,
+    "audio_sha256": "42e755b02ba0e59e514a07dabe2f8273390e641c2ab410e4af8b7f1b656f2a43"
+  },
+  "disc": {
+    "data_track": 1,
+    "cdda_track": 2,
+    "repeat": true,
+    "legal_data_read_windows": [{
+      "id": "phase-boundary-residency-check",
+      "begin_frame": 150,
+      "read_frame": 151,
+      "end_frame": 152,
+      "iso_member": "/DIAG/RESCHK.BIN",
+      "bytes": 64,
+      "sha256": "84a73962f97c2479b1c514c5e6747a95a5c3be1a58530ed62dc09cb3fbb57d2d"
+    }]
+  },
+  "allocations": {
+    "work_ram": {"capacity_bytes": 770048, "phase_high_water_bytes": 72, "allocation": "64-byte bounded read buffer plus two 32-bit canaries", "canary_policy": "REQUIRED"},
+    "cartridge": {"capacity_bytes": 4194304, "phase_high_water_bytes": 0, "allocation": "none; CDDA streams from disc", "canary_policy": "NOT_REQUIRED_ZERO_ALLOCATION"},
+    "vdp1": {"capacity_bytes": 524288, "phase_high_water_bytes": 0, "allocation": "none", "canary_policy": "NOT_REQUIRED_ZERO_ALLOCATION"},
+    "vdp2": {"capacity_bytes": 524288, "phase_high_water_bytes": 0, "allocation": "none", "canary_policy": "NOT_REQUIRED_ZERO_ALLOCATION"},
+    "cram": {"capacity_bytes": 4096, "phase_high_water_bytes": 0, "allocation": "none", "canary_policy": "NOT_REQUIRED_ZERO_ALLOCATION"},
+    "scsp": {"capacity_bytes": 524288, "phase_high_water_bytes": 0, "allocation": "CDDA hardware path; no phase-owned PCM payload", "canary_policy": "NOT_REQUIRED_ZERO_ALLOCATION"}
+  },
+  "canaries": {"head": "0x52534844", "tail": "0x5253544c"},
+  "normal_release": "UNRUN",
+  "physical_saturn": "UNRUN"
+}

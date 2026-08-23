@@ -34,8 +34,14 @@ def sha(data: bytes | bytearray) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=int, choices=(1, 2), required=True)
+    parser.add_argument("--metadata-dir",
+                        default="tests/port_v2/cdda_residency_bench")
+    parser.add_argument("--output-root",
+                        default="build/port_v2/cdda_residency_bench")
     args = parser.parse_args()
-    inventory = json.loads((HERE / "inventory.json").read_text(encoding="utf-8"))
+    metadata = ROOT / args.metadata_dir
+    inventory = json.loads((metadata / "inventory.json").read_text(
+        encoding="utf-8"))
     image_path = ROOT / "game.iso"
     raw = image_path.read_bytes()
     before = {name: sha(read_iso_path(raw, name))
@@ -71,7 +77,7 @@ def main() -> None:
         "production_payload_changed": False,
         "physical_saturn": "UNRUN",
     }
-    output = ROOT / f"build/port_v2/cdda_residency_bench/run-{args.run}/iso-normalization.json"
+    output = ROOT / args.output_root / f"run-{args.run}/iso-normalization.json"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",
                       encoding="ascii", newline="\n")

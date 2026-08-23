@@ -67,6 +67,9 @@ endif
 ifneq ($(AVSP_CDDA_RESIDENCY_SALVAGE_BENCH),)
 CCFLAGS += -DAVSP_CDDA_RESIDENCY_SALVAGE_BENCH=1
 endif
+ifneq ($(AVSP_CDDA_RESIDENCY_PROMOTION_BENCH),)
+CCFLAGS += -DAVSP_CDDA_RESIDENCY_PROMOTION_BENCH=1
+endif
 ifneq ($(AVSP_ENEMY_SALVAGE_BENCH),)
 CCFLAGS += -DAVSP_ENEMY_SALVAGE_BENCH=1
 endif
@@ -101,6 +104,9 @@ SRCS += src/port_v2/combat/hit_ko/hit_ko.c src/port_v2/integration/combat/combat
 endif
 ifneq ($(AVSP_CDDA_RESIDENCY_SALVAGE_BENCH),)
 SRCS += tests/port_v2/cdda_residency_bench/cdda_residency_bench.c
+endif
+ifneq ($(AVSP_CDDA_RESIDENCY_PROMOTION_BENCH),)
+SRCS += src/port_v2/audio/cdda/cdda.c src/port_v2/residency/residency.c
 endif
 
 # The pinned Yaba Sanshiro boot path stalls when Jo Engine's monolithic first-

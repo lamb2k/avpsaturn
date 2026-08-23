@@ -109,9 +109,17 @@ def snapshot(mcp: Mcp, syms: dict[str, int]) -> dict[str, int]:
         "vdp2_high_water": "avsp_diag_cdda_vdp2_high_water",
         "cram_high_water": "avsp_diag_cdda_cram_high_water",
         "scsp_high_water": "avsp_diag_cdda_scsp_high_water",
+        "cdda_production_interface_version":
+            "avsp_diag_cdda_production_interface_version",
+        "residency_production_interface_version":
+            "avsp_diag_residency_production_interface_version",
+        "port_lock_ok": "avsp_diag_cdda_port_lock_ok",
+        "cdda_submit_count": "avsp_diag_cdda_submit_count",
+        "residency_submit_count": "avsp_diag_residency_submit_count",
+        "fallback_used": "avsp_diag_cdda_fallback_used",
     }
     state = {name: signed32(mcp.u32(syms[symbol]))
-             for name, symbol in fields.items()}
+             for name, symbol in fields.items() if symbol in syms}
     status = mcp.call("debug_status")
     match = re.search(r"^frame:\s+(\d+)$", status, re.MULTILINE)
     state["emulator_frame"] = int(match.group(1)) if match else -1
@@ -143,10 +151,19 @@ def main() -> None:
     parser.add_argument("--run", type=int, choices=(1, 2), required=True)
     parser.add_argument("--emulator-pid", type=int, required=True)
     parser.add_argument("--timeout", type=float, default=180.0)
+    parser.add_argument("--metadata-dir",
+                        default="tests/port_v2/cdda_residency_bench")
+    parser.add_argument("--output-root",
+                        default="build/port_v2/cdda_residency_bench")
     args = parser.parse_args()
-    inventory = json.loads((HERE / "inventory.json").read_text(encoding="utf-8"))
-    contract = json.loads((HERE / "contract.json").read_text(encoding="utf-8"))
-    build = json.loads((ROOT / f"build/port_v2/cdda_residency_bench/run-{args.run}/build.json").read_text(encoding="ascii"))
+    metadata = ROOT / args.metadata_dir
+    output_root = ROOT / args.output_root
+    inventory = json.loads((metadata / "inventory.json").read_text(
+        encoding="utf-8"))
+    contract = json.loads((metadata / "contract.json").read_text(
+        encoding="utf-8"))
+    build = json.loads((output_root / f"run-{args.run}/build.json").read_text(
+        encoding="ascii"))
     syms = symbols(inventory["required_readback_symbols"])
     mcp = Mcp("http://127.0.0.1:9640/mcp")
     deadline = time.time() + args.timeout
@@ -173,7 +190,7 @@ def main() -> None:
     for label, target in contract["checkpoints"].items():
         samples[label] = wait_frame(mcp, syms, target, args.timeout)
         if label == "stable":
-            screenshot = ROOT / f"build/port_v2/cdda_residency_bench/run-{args.run}/emulator.png"
+            screenshot = output_root / f"run-{args.run}/emulator.png"
             screenshot.parent.mkdir(parents=True, exist_ok=True)
             ImageGrab.grab(bbox=bounds, all_screens=True).save(screenshot)
     samples["repeat_idle"] = wait_frame(
@@ -217,6 +234,10 @@ def main() -> None:
             repeat["ownership"] == 0 and repeat["track_events"] == 0 and
             repeat["late_reads"] == 0 and repeat["refused_windows"] == 0):
         raise RuntimeError("CDDA deterministic cycle did not reset")
+    for name, expected in contract.get("promotion_expected", {}).items():
+        if final.get(name) != expected:
+            raise RuntimeError(
+                f"CDDA promotion {name} was {final.get(name)}, expected {expected}")
 
     process = process_record(args.emulator_pid)
     executable = Path(str(process["executable"]))
@@ -253,11 +274,11 @@ def main() -> None:
             "settings_sha256": sha256(settings),
             "command_line": process["command_line"],
         },
-        "human_review": "PENDING",
+        "human_review": contract.get("human_review_status", "PENDING"),
         "physical_saturn": "UNRUN",
         "result": "PASS",
     }
-    output = ROOT / f"build/port_v2/cdda_residency_bench/run-{args.run}/readback.json"
+    output = output_root / f"run-{args.run}/readback.json"
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",
                       encoding="ascii", newline="\n")
     print(f"recorded {output.relative_to(ROOT)}")
