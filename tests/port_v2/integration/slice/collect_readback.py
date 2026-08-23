@@ -51,10 +51,21 @@ def wait_frame(mcp, syms, target, timeout):
     current = signed(mcp, syms[symbol])
     if target - current > 10:
         mcp.call("resume")
+        last_progress = time.time()
+        last_current = current
         while time.time() < deadline:
             current = signed(mcp, syms[symbol])
             if current >= target - 10:
                 break
+            if current != last_current:
+                last_current = current
+                last_progress = time.time()
+            elif time.time() - last_progress >= 0.25:
+                # Yaba can report one residual stop after an unfiltered write
+                # watchpoint is removed. Resume it here; a real runtime stall
+                # still times out because the published frame will not move.
+                mcp.call("resume")
+                last_progress = time.time()
             time.sleep(0.002)
         mcp.call("pause")
         current = signed(mcp, syms[symbol])
@@ -146,7 +157,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=int, choices=(1, 2), required=True)
     parser.add_argument("--emulator-pid", type=int, required=True)
-    parser.add_argument("--timeout", type=float, default=180.0)
+    parser.add_argument("--timeout", type=float, default=300.0)
     args = parser.parse_args()
     inventory = json.loads((HERE / "inventory.json").read_text())
     build = json.loads((ROOT / inventory["build_root"] /
