@@ -63,3 +63,22 @@ checkpoint precedes physical testing; explicit user approval is not physical pro
 ## Next eligible cards
 
 - `SALVAGE-08-FRONTEND` only after the physical capability slice is accepted.
+
+## Current candidate checkpoint
+
+- Candidate implementation: `3273779516051a6b6f62719bc0bdceef07655310`.
+- Exact `release-normal-release` ISO repeat:
+  `8a3cecba96d5fbe2b891bb8abe2d2df36b4f26e3d8c3f8a4dc64998244586129`.
+- Host deterministic repeat, real negative controls, Fast, exact release build,
+  and paired pinned-emulator semantic/readback review pass.
+- Clean integrated HIT and KO frames retain the approved player/enemy alignment,
+  camera/stage, P1/P2 HUD, PCM, and CDDA locks with zero fallback, late-read, or
+  canary failures.
+- Physical Saturn is `UNRUN`; emulator and user review are not physical proof.
+- Required Full is blocked by generator drift in three artifacts outside this
+  card's owned paths: `data/avsp_palette_coverage.json`,
+  `data/avsp_translation_boundary.json`, and
+  `data/avsp_vertical_slice_oracle_manifest.json`.
+- The final integrated subjective checkpoint is pending. Do not activate
+  `SALVAGE-08-FRONTEND` until the checkpoint, Full lane, and physical procedure
+  are complete.

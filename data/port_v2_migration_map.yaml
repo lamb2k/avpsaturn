@@ -812,6 +812,60 @@
         "requested_changes": [],
         "priority": null
       }
+    },
+    {
+      "task_id": "INTEGRATE-03-PLAYABLE-SLICE",
+      "evaluated_commit": "3273779516051a6b6f62719bc0bdceef07655310",
+      "technical_status": "FAIL",
+      "fidelity_status": "ADAPTED",
+      "user_status": "AWAITING_USER_FEEDBACK",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
+      "production_interface": null,
+      "diagnostic_interface": "tests/port_v2/integration/slice/run_pinned_emulator.ps1",
+      "blockers": [
+        "Unblock: resolve or explicitly disposition Full-lane generator drift in data/avsp_palette_coverage.json, data/avsp_translation_boundary.json, and data/avsp_vertical_slice_oracle_manifest.json under the correct owning scope.",
+        "Unblock: record the final integrated subjective checkpoint without inferring approval from silence.",
+        "Unblock: execute the declared physical Saturn capability procedure only after Full is clean and the subjective checkpoint is accepted; physical Saturn remains UNRUN."
+      ],
+      "exact_next_experiment": "Present the ignored exact-release feedback package, record the response verbatim, and route the three out-of-scope Full-lane generator drifts to their correct owner before any physical test or successor activation.",
+      "evidence": {
+        "candidate_interface": "src/port_v2/integration/slice/slice.h",
+        "strict_c90_compile": "PASS",
+        "focused_deterministic_repeat": "PASS / two identical 901-frame host replays",
+        "real_negative_controls": "PASS / missing dependency, illegal CDDA-window read, and canary corruption rejected",
+        "fast_lane": "PASS",
+        "oracle_applicable_controls": "PASS / committed oracle controls and pinned avspu identity",
+        "oracle_generic_lane": "INCOMPLETE / unrelated paused V2-2B private writer inputs absent",
+        "target_lane": "PASS / exact release-normal-release build; generic report BUILD_ONLY",
+        "full_lane": "FAIL / three generated tracked artifacts drifted in detached shadow worktree",
+        "full_shadow_diff": "build/verification/full-shadow-diff.json",
+        "exact_release_profile": "release-normal-release / normal-release",
+        "normalized_iso_sha256": "8a3cecba96d5fbe2b891bb8abe2d2df36b4f26e3d8c3f8a4dc64998244586129",
+        "paired_pinned_emulator_readback": "PASS / exact semantic equality",
+        "hit_frame": {"frame": 185, "combat_events": 1, "enemy_health": 63, "hit": 1},
+        "ko_frame": {"frame": 860, "combat_events": 4, "enemy_health": -1, "ko": 1},
+        "hud_render_events": 4,
+        "pcm_event": "PASS / frame 180",
+        "cdda_ownership_transitions": 2,
+        "asset_or_late_read_failures": 0,
+        "fallback_count": 0,
+        "canaries": "PASS",
+        "stability_frames": 901,
+        "linked_work_ram_bend": "0x06096d80",
+        "linked_work_ram_headroom_bytes": 168576,
+        "visual_self_review": "PASS / promoted player-enemy alignment, camera/stage, both HUDs, PCM, and CDDA retained; legacy foreground object replay disabled only in the slice profile",
+        "emulator": "Yaba Sanshiro 1.20.37-2986eb",
+        "emulator_evidence_tier": "ONE_EMULATOR",
+        "human_review": "PENDING",
+        "physical_saturn": "UNRUN"
+      },
+      "user_observation_state": {
+        "formal_review_question_asked": false,
+        "exact_observations": [],
+        "approved_components": [],
+        "requested_changes": [],
+        "priority": null
+      }
     }
   ],
   "subsystems": [
