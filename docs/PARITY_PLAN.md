@@ -63,9 +63,9 @@ production interface with host, Saturn diagnostic, and one-emulator evidence.
 It does not promote attack, contact, damage, AI, normal release, or physical
 Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
-has activated the dependency-safe combat integration.
+has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: PROMOTE-05-HUD
+CURRENT_TASK: PROMOTE-06-PCM
 
 ## 4. Current salvage queue and production extension
 

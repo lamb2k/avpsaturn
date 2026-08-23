@@ -25,15 +25,16 @@ its historical metadata and existing continuity branch.
 
 ## Current task and next action
 
-`PROMOTE-04-CAMERA-STAGE` is accepted at
-`b6ef0ceff9fc4ed8cf06948cc353e7ce67950d3c`. The approved two-plane
-composition now flows through bounded Jo/SGL-free camera and stage interfaces.
-Two committed-SHA builds and paired pinned-Yaba readbacks agree at normalized
-ISO `d4caec944c0f1f3f9593960073d037cc24f9fa31f1a207f5dc4f617fb000ce33`;
-fixed framing, scroll, CRAM, priorities, plane/PNT canaries, and byte-identical
-screenshots retain USER-04's exact `pass for camera and stage` lock. Row-scroll
-remains `ADAPTED_UNCAPTURED`, and physical Saturn remains `UNRUN`. The active
-card is `PROMOTE-05-HUD`, status `READY`, in the existing continuity worktree
+`PROMOTE-05-HUD` is accepted at
+`d957b3b022e1e1d3598e04ee03b980e59bfe0c03`. The approved corrected P1 and
+active P2 Maj. Schaefer HUD now flow through a bounded Jo/SGL-free semantic HUD
+interface and a declared temporary legacy renderer adapter. Two committed-SHA
+builds and paired pinned-Yaba readbacks agree at normalized ISO
+`4039b82163492278e02e7e0f97a2f0bdc73737a4a728aa74dc70321a38f63782`;
+P1/P2 states, one-based CRAM binding, render counts, canaries, negative controls,
+and byte-identical screenshots retain USER-05's final exact `keep going` lock.
+P2 gameplay/input/join/multitap and physical Saturn remain `UNRUN`. The active
+card is `PROMOTE-06-PCM`, status `READY`, in the existing continuity worktree
 `C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review` on
 branch `codex/avp-user-02-enemy-review`.
 
@@ -43,4 +44,4 @@ changes that fact.
 
 Resume prompt:
 
-> Resume the AvP salvage Goal at PROMOTE-05-HUD in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve every approved player, enemy, combat, promoted camera/stage, P1/P2 HUD, and PCM lock, promote only the approved corrected P1 and active P2 HUD behind a semantic interface, then commit, push to private-origin, and verify the remote SHA.
+> Resume the AvP salvage Goal at PROMOTE-06-PCM in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve every approved player, enemy, combat, camera/stage, promoted P1/P2 HUD, and PCM lock, promote only the approved short Predator melee PCM cue behind a semantic audio port, then commit, push to private-origin, and verify the remote SHA.

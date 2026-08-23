@@ -2,7 +2,7 @@
 
 TASK: PROMOTE-05-HUD
 KIND: PROMOTE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: promote-hud
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

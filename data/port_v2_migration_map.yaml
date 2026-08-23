@@ -1020,17 +1020,25 @@
       "existing_dependencies": ["HUD assets", "palette/CRAM", "semantic player state", "VDP1 priority"],
       "authored_controller_coupling": "HUD values and visibility are fed by authored mixed-runtime world state.",
       "proposed_isolated_bench": "Render fixed health/energy/prompt states over one promoted background with readback.",
+      "temporary_adapter": {
+        "name": "LegacyHudRenderAdapter",
+        "wrapped_implementation": "main.c draw_arcade_hud and Jo texture replacement/draw order",
+        "satisfied_interface": "src/port_v2/hud/hud.h",
+        "approved_regression_locks": ["one-based palette and exact four semantic CRAM colors", "P1 Predator Warrior and active P2 Maj. Schaefer assets/placement", "zero/mid/full/hidden fills and render counts 4/2"],
+        "remaining_authored_controller_coupling": "The adapter still copies semantic frame values into the mixed-runtime world and HUD bench before invoking draw_arcade_hud.",
+        "deletion_condition": "Delete after the Saturn HUD adapter consumes AvspPortV2HudFrame directly and reproduces the approved P1/P2 contract in the production integration profile."
+      },
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
       "user_status": "APPROVED",
-      "salvage_decision": "SALVAGE_WITH_ADAPTER",
-      "production_interface": null,
-      "promoted_commit": null,
-      "evidence_commit": "6127957eee7ca419d39fe4b716dd41df2c255fb0",
-      "diagnostic_interface": "tests/port_v2/player2_hud_bench/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: preserve the approved P1/P2 HUD and PCM presentation until a later integration card has its own review; production integration and simultaneous full-stage CRAM ownership remain untested."],
-      "exact_next_experiment": "Retain the approved P1/P2 HUD and PCM locks while SALVAGE-02 isolates enemy asset, rendering, and animation salvage.",
-      "user_feedback": {"exact_response": "keep going", "approved_components": ["Corrected P1 HUD presentation.", "Active P2 Maj. Schaefer HUD, health, and weapon-field presentation."], "requested_changes": [], "priority": "continue-enemy-salvage"}
+      "salvage_decision": "PROMOTED",
+      "production_interface": "src/port_v2/hud/hud.h",
+      "promoted_commit": "d957b3b022e1e1d3598e04ee03b980e59bfe0c03",
+      "evidence_commit": "d957b3b022e1e1d3598e04ee03b980e59bfe0c03",
+      "diagnostic_interface": "tests/port_v2/hud/run_pinned_emulator.ps1",
+      "blockers": ["Unblock: prove simultaneous full-stage CRAM ownership and normal-release integration while preserving the exact P1/P2 HUD contract.", "Unblock: prove P2 input, joins, gameplay, multiplayer integration, and multitap topology only in their dedicated future cards."],
+      "exact_next_experiment": "Execute PROMOTE-06-PCM while preserving the promoted HUD interface, one-based CRAM binding, active P2 Maj. Schaefer binding, and exact zero/mid/full/hidden render states.",
+      "user_feedback": {"exact_response": "keep going", "approved_components": ["Corrected P1 HUD presentation.", "Active P2 Maj. Schaefer HUD, health, and weapon-field presentation."], "requested_changes": [], "priority": "continue-pcm-promotion"}
     },
     {
       "id": "pcm",
