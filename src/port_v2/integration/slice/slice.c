@@ -4,6 +4,7 @@
 
 static void avsp_port_v2_slice_contact_input(
     const AvspPortV2CombatSourceEvent *source,
+    const AvspPortV2SliceRuntime *runtime,
     AvspPortV2CombatContactInput *input)
 {
     memset(input, 0, sizeof(*input));
@@ -12,12 +13,79 @@ static void avsp_port_v2_slice_contact_input(
     input->enemy_hurt_selector = AVSP_PORT_V2_COMBAT_ENEMY_HURT_SELECTOR;
     input->player_facing = source->player_facing;
     input->enemy_facing = source->enemy_facing;
-    input->player_x = source->player_x;
-    input->player_y = source->player_y;
-    input->player_z = source->player_z;
-    input->enemy_x = source->enemy_x;
-    input->enemy_y = source->enemy_y;
-    input->enemy_z = source->enemy_z;
+    input->player_x = runtime->player_world_x;
+    input->player_y = runtime->player_lane + runtime->player_height;
+    input->player_z = runtime->player_lane;
+    input->enemy_x = runtime->enemy_world_x;
+    input->enemy_y = runtime->enemy_lane;
+    input->enemy_z = runtime->enemy_lane;
+}
+
+int avsp_port_v2_slice_identity_valid(
+    const AvspPortV2SliceActorIdentity *identity)
+{
+    if (identity == 0) return 0;
+    if (identity->role == AVSP_PORT_V2_SLICE_ROLE_PLAYER)
+        return identity->actor_id == AVSP_PORT_V2_SLICE_ACTOR_PLAYER &&
+            identity->class_id == AVSP_PORT_V2_SLICE_CLASS_NOT_APPLICABLE &&
+            identity->archetype_id ==
+                AVSP_PORT_V2_SLICE_ARCHETYPE_PREDATOR_WARRIOR &&
+            identity->asset_set_id ==
+                AVSP_PORT_V2_SLICE_ASSET_PLAYER_APPROVED &&
+            identity->animation_set_id ==
+                AVSP_PORT_V2_SLICE_ANIM_PLAYER_APPROVED;
+    if (identity->role == AVSP_PORT_V2_SLICE_ROLE_ENEMY)
+        return identity->actor_id ==
+                AVSP_PORT_V2_SLICE_ACTOR_STREET_ALIEN &&
+            identity->class_id == AVSP_PORT_V2_ENEMY_CLASS_ID &&
+            identity->archetype_id ==
+                AVSP_PORT_V2_SLICE_ARCHETYPE_STREET_ALIEN &&
+            identity->asset_set_id ==
+                AVSP_PORT_V2_SLICE_ASSET_STREET_ALIEN_ROM &&
+            identity->animation_set_id ==
+                AVSP_PORT_V2_SLICE_ANIM_STREET_ALIEN_ROM &&
+            identity->archetype_id != AVSP_PORT_V2_SLICE_ARCHETYPE_STALKER &&
+            identity->asset_set_id !=
+                AVSP_PORT_V2_SLICE_ASSET_STALKER_CAPTURE &&
+            identity->animation_set_id !=
+                AVSP_PORT_V2_SLICE_ANIM_STALKER_CAPTURE;
+    return 0;
+}
+
+int avsp_port_v2_slice_scene_valid(const AvspPortV2SliceSceneTrace *scene)
+{
+    if (scene == 0 ||
+        !avsp_port_v2_slice_identity_valid(&scene->player_identity) ||
+        !avsp_port_v2_slice_identity_valid(&scene->enemy_identity) ||
+        scene->player_screen_x != scene->player_world_x -
+            scene->camera_world_x + scene->aperture_origin_x ||
+        scene->enemy_screen_x != scene->enemy_world_x -
+            scene->camera_world_x + scene->aperture_origin_x ||
+        scene->player_delta_screen_x != scene->player_delta_world_x -
+            scene->delta_camera_world_x ||
+        scene->enemy_delta_screen_x != scene->enemy_delta_world_x -
+            scene->delta_camera_world_x ||
+        scene->layer_scroll_x[0] != scene->camera_world_x)
+        return 0;
+    if (scene->collision_result &&
+        (!scene->player_attack_active ||
+         scene->attacker_id != AVSP_PORT_V2_SLICE_ACTOR_PLAYER ||
+         scene->defender_id != AVSP_PORT_V2_SLICE_ACTOR_STREET_ALIEN ||
+         scene->health_after >= scene->health_before))
+        return 0;
+    if (!scene->collision_result &&
+        scene->health_after != scene->health_before)
+        return 0;
+    if ((scene->semantic_hit || scene->semantic_ko) &&
+        scene->defender_id != AVSP_PORT_V2_SLICE_ACTOR_STREET_ALIEN)
+        return 0;
+    if (scene->enemy_action == AVSP_PORT_V2_SLICE_ACTION_HIT &&
+        !scene->semantic_hit)
+        return 0;
+    if (scene->enemy_action == AVSP_PORT_V2_SLICE_ACTION_KO &&
+        !scene->semantic_ko)
+        return 0;
+    return 1;
 }
 
 int avsp_port_v2_slice_approval_locks_valid(void)
@@ -48,6 +116,13 @@ void avsp_port_v2_slice_init(AvspPortV2SliceRuntime *runtime)
     avsp_port_v2_pcm_init(&runtime->pcm);
     avsp_port_v2_cdda_init(&runtime->cdda);
     avsp_port_v2_residency_init(&runtime->residency);
+    runtime->player_world_x = AVSP_PORT_V2_SLICE_PLAYER_WORLD_X_INITIAL;
+    runtime->player_lane = AVSP_PORT_V2_SLICE_PLAYER_LANE_INITIAL;
+    runtime->enemy_world_x = AVSP_PORT_V2_SLICE_ENEMY_WORLD_X_INITIAL;
+    runtime->enemy_lane = AVSP_PORT_V2_SLICE_ENEMY_LANE;
+    runtime->previous_player_world_x = runtime->player_world_x;
+    runtime->previous_enemy_world_x = runtime->enemy_world_x;
+    runtime->enemy_action = AVSP_PORT_V2_SLICE_ACTION_WALK;
 }
 
 int avsp_port_v2_slice_load(AvspPortV2SliceRuntime *runtime,
@@ -81,25 +156,176 @@ int avsp_port_v2_slice_load(AvspPortV2SliceRuntime *runtime,
     return 1;
 }
 
-static int avsp_port_v2_slice_combat_step(
+static void avsp_port_v2_slice_motion_step(
     AvspPortV2SliceRuntime *runtime, const AvspPortV2SliceInput *input)
+{
+    runtime->previous_player_world_x = runtime->player_world_x;
+    runtime->previous_enemy_world_x = runtime->enemy_world_x;
+    runtime->previous_camera_world_x = runtime->camera_world_x;
+    if (input->player.left && !input->player.right)
+        runtime->player_world_x -=
+            avsp_port_v2_player_approved_config.horizontal_step;
+    else if (input->player.right && !input->player.left)
+        runtime->player_world_x +=
+            avsp_port_v2_player_approved_config.horizontal_step;
+    if (input->player.up && !input->player.down)
+        --runtime->player_lane;
+    else if (input->player.down && !input->player.up)
+        ++runtime->player_lane;
+    if (input->enemy_move < 0)
+        --runtime->enemy_world_x;
+    else if (input->enemy_move > 0)
+        ++runtime->enemy_world_x;
+    runtime->player_height = input->player_height;
+    runtime->camera_world_x = input->camera.scroll_x[0];
+    if (input->player_attack && !runtime->player_attack_previous &&
+        !runtime->player_attack_active)
+    {
+        runtime->player_attack_active = 1;
+        runtime->player_attack_frame = 0;
+        runtime->player_attack_contact_attempted = 0;
+    }
+    else if (runtime->player_attack_active)
+    {
+        ++runtime->player_attack_frame;
+        if (runtime->player_attack_frame >=
+            AVSP_PORT_V2_SLICE_ATTACK_TOTAL_FRAMES)
+        {
+            runtime->player_attack_active = 0;
+            runtime->player_attack_frame = 0;
+        }
+    }
+    runtime->player_attack_previous = input->player_attack;
+}
+
+static int avsp_port_v2_slice_attack_is_active(
+    const AvspPortV2SliceRuntime *runtime)
+{
+    return runtime->player_attack_active &&
+        runtime->player_attack_frame >=
+            AVSP_PORT_V2_SLICE_ATTACK_ACTIVE_FIRST &&
+        runtime->player_attack_frame <=
+            AVSP_PORT_V2_SLICE_ATTACK_ACTIVE_LAST;
+}
+
+static int avsp_port_v2_slice_combat_step(
+    AvspPortV2SliceRuntime *runtime)
 {
     AvspPortV2CombatSourceEvent source;
     AvspPortV2CombatContactInput contact;
-    if (input->contact_event)
+    runtime->contact_this_frame = 0;
+    if (avsp_port_v2_slice_attack_is_active(runtime) &&
+        !runtime->player_attack_contact_attempted &&
+        runtime->combat_event_count < AVSP_PORT_V2_COMBAT_SOURCE_EVENT_COUNT)
     {
-        if (!avsp_port_v2_combat_source_event(input->contact_index, &source))
+        if (!avsp_port_v2_combat_source_event(
+                runtime->combat_event_count, &source))
             return 0;
-        avsp_port_v2_slice_contact_input(&source, &contact);
+        avsp_port_v2_slice_contact_input(&source, runtime, &contact);
         if (!avsp_port_v2_combat_apply_contact(
                 &runtime->combat, &contact, &runtime->last_combat))
             return 0;
-        ++runtime->combat_event_count;
+        runtime->player_attack_contact_attempted = 1;
+        runtime->contact_this_frame = runtime->last_combat.contact;
+        if (runtime->last_combat.kind !=
+            AVSP_PORT_V2_COMBAT_EVENT_CONTACT_MISS)
+            ++runtime->combat_event_count;
     }
     else if (runtime->combat.transition.active &&
              !avsp_port_v2_combat_step_transition(&runtime->combat))
         return 0;
     return 1;
+}
+
+static void avsp_port_v2_slice_identity(
+    AvspPortV2SliceRuntime *runtime, AvspPortV2SliceSceneTrace *scene)
+{
+    memset(&scene->player_identity, 0, sizeof(scene->player_identity));
+    scene->player_identity.actor_id = AVSP_PORT_V2_SLICE_ACTOR_PLAYER;
+    scene->player_identity.role = AVSP_PORT_V2_SLICE_ROLE_PLAYER;
+    scene->player_identity.class_id =
+        AVSP_PORT_V2_SLICE_CLASS_NOT_APPLICABLE;
+    scene->player_identity.archetype_id =
+        AVSP_PORT_V2_SLICE_ARCHETYPE_PREDATOR_WARRIOR;
+    scene->player_identity.asset_set_id =
+        AVSP_PORT_V2_SLICE_ASSET_PLAYER_APPROVED;
+    scene->player_identity.animation_set_id =
+        AVSP_PORT_V2_SLICE_ANIM_PLAYER_APPROVED;
+    scene->enemy_identity.actor_id =
+        AVSP_PORT_V2_SLICE_ACTOR_STREET_ALIEN;
+    scene->enemy_identity.role = AVSP_PORT_V2_SLICE_ROLE_ENEMY;
+    scene->enemy_identity.class_id = AVSP_PORT_V2_ENEMY_CLASS_ID;
+    scene->enemy_identity.archetype_id =
+        AVSP_PORT_V2_SLICE_ARCHETYPE_STREET_ALIEN;
+    scene->enemy_identity.asset_set_id =
+        AVSP_PORT_V2_SLICE_ASSET_STREET_ALIEN_ROM;
+    scene->enemy_identity.animation_set_id =
+        AVSP_PORT_V2_SLICE_ANIM_STREET_ALIEN_ROM;
+    scene->enemy_identity.palette_bank = AVSP_PORT_V2_ENEMY_PALETTE_BANK;
+    scene->enemy_identity.animation_record =
+        AVSP_PORT_V2_SLICE_ENEMY_WALK_RECORD;
+    if (runtime->semantic_hit)
+    {
+        scene->enemy_identity.palette_bank = 19;
+        scene->enemy_identity.animation_record =
+            runtime->combat.transition.actor.anim_record;
+    }
+    else if (runtime->semantic_ko)
+    {
+        scene->enemy_identity.palette_bank = 16;
+        scene->enemy_identity.animation_record =
+            runtime->combat.transition.actor.anim_record;
+    }
+}
+
+static void avsp_port_v2_slice_scene(
+    AvspPortV2SliceRuntime *runtime, AvspPortV2SliceSceneTrace *scene)
+{
+    memset(scene, 0, sizeof(*scene));
+    scene->player_world_x = runtime->player_world_x;
+    scene->enemy_world_x = runtime->enemy_world_x;
+    scene->camera_world_x = runtime->camera_world_x;
+    scene->aperture_origin_x = AVSP_PORT_V2_SLICE_APERTURE_ORIGIN_X;
+    scene->player_screen_x = scene->player_world_x - scene->camera_world_x +
+        scene->aperture_origin_x;
+    scene->enemy_screen_x = scene->enemy_world_x - scene->camera_world_x +
+        scene->aperture_origin_x;
+    scene->player_delta_world_x = runtime->player_world_x -
+        runtime->previous_player_world_x;
+    scene->enemy_delta_world_x = runtime->enemy_world_x -
+        runtime->previous_enemy_world_x;
+    scene->delta_camera_world_x = runtime->camera_world_x -
+        runtime->previous_camera_world_x;
+    scene->player_delta_screen_x = scene->player_delta_world_x -
+        scene->delta_camera_world_x;
+    scene->enemy_delta_screen_x = scene->enemy_delta_world_x -
+        scene->delta_camera_world_x;
+    scene->player_action = runtime->player_attack_active ?
+        AVSP_PORT_V2_SLICE_ACTION_ATTACK :
+        ((scene->player_delta_world_x != 0) ?
+         AVSP_PORT_V2_SLICE_ACTION_WALK : AVSP_PORT_V2_SLICE_ACTION_IDLE);
+    scene->player_action_frame = runtime->player_attack_frame;
+    scene->player_attack_active = avsp_port_v2_slice_attack_is_active(runtime);
+    scene->enemy_action = runtime->enemy_action;
+    scene->enemy_action_frame = runtime->enemy_action_frame;
+    scene->collision_result = runtime->contact_this_frame;
+    scene->health_before = runtime->combat.enemy_health;
+    scene->health_after = runtime->combat.enemy_health;
+    if (runtime->contact_this_frame)
+    {
+        scene->health_before = runtime->last_combat.health_before;
+        scene->health_after = runtime->last_combat.health_after;
+    }
+    scene->semantic_hit = runtime->semantic_hit;
+    scene->semantic_ko = runtime->semantic_ko;
+    if (runtime->contact_this_frame)
+    {
+        scene->attacker_id = AVSP_PORT_V2_SLICE_ACTOR_PLAYER;
+        scene->defender_id = AVSP_PORT_V2_SLICE_ACTOR_STREET_ALIEN;
+    }
+    else if (runtime->semantic_hit || runtime->semantic_ko)
+        scene->defender_id = AVSP_PORT_V2_SLICE_ACTOR_STREET_ALIEN;
+    avsp_port_v2_slice_identity(runtime, scene);
 }
 
 static int avsp_port_v2_slice_cdda_step(
@@ -130,9 +356,24 @@ int avsp_port_v2_slice_step(AvspPortV2SliceRuntime *runtime,
         return 0;
     memset(frame, 0, sizeof(*frame));
     actor_input.player = input->player;
-    actor_input.enemy_translated = input->enemy_translated;
+    actor_input.enemy_translated = input->enemy_move != 0;
     avsp_port_v2_player_enemy_step(&runtime->combat.presentation, &actor_input);
-    if (!avsp_port_v2_slice_combat_step(runtime, input)) return 0;
+    avsp_port_v2_slice_motion_step(runtime, input);
+    if (!avsp_port_v2_slice_combat_step(runtime)) return 0;
+    runtime->semantic_hit =
+        runtime->last_combat.kind == AVSP_PORT_V2_COMBAT_EVENT_HIT &&
+        runtime->combat.transition.active;
+    runtime->semantic_ko = runtime->combat.enemy_health < 0;
+    if (runtime->semantic_ko)
+        runtime->enemy_action = AVSP_PORT_V2_SLICE_ACTION_KO;
+    else if (runtime->semantic_hit)
+        runtime->enemy_action = AVSP_PORT_V2_SLICE_ACTION_HIT;
+    else
+        runtime->enemy_action = AVSP_PORT_V2_SLICE_ACTION_WALK;
+    runtime->enemy_action_frame =
+        (runtime->enemy_action == AVSP_PORT_V2_SLICE_ACTION_WALK) ?
+        runtime->combat.presentation.enemy.locomotion_frame :
+        runtime->combat.transition.elapsed;
     avsp_port_v2_camera_step(&runtime->camera, &input->camera);
     avsp_port_v2_camera_view(&runtime->camera, &frame->camera);
     if (!avsp_port_v2_stage_build_frame(&frame->camera, &frame->stage))
@@ -150,13 +391,24 @@ int avsp_port_v2_slice_step(AvspPortV2SliceRuntime *runtime,
     hud_input.players[AVSP_PORT_V2_HUD_P2].energy = input->player2_energy;
     if (!avsp_port_v2_hud_build_frame(&hud_input, &frame->hud)) return 0;
     pcm_input.frame = input->frame;
-    pcm_input.cue_event = input->pcm_cue_event;
+    pcm_input.cue_event = input->pcm_cue_event &&
+        runtime->contact_this_frame && runtime->combat_event_count == 1;
     pcm_input.cue_id = AVSP_PORT_V2_PCM_CUE_PREDATOR_MELEE;
     if (!avsp_port_v2_pcm_step(&runtime->pcm, &pcm_input, &frame->pcm) ||
         !avsp_port_v2_slice_cdda_step(runtime, input, &frame->cdda))
         return 0;
     avsp_port_v2_player_enemy_view(&runtime->combat.presentation,
                                    &frame->actors);
+    frame->actors.player.world_x = runtime->player_world_x;
+    frame->actors.player.lane = runtime->player_lane;
+    frame->actors.player.facing = 1;
+    frame->actors.enemy.world_x = runtime->enemy_world_x;
+    frame->actors.enemy.lane = runtime->enemy_lane;
+    frame->actors.enemy.facing =
+        avsp_port_v2_enemy_approved_config.facing;
+    avsp_port_v2_slice_scene(runtime, &frame->scene);
+    frame->scene.layer_scroll_x[0] = frame->stage.layers[0].scroll_x;
+    frame->scene.layer_scroll_x[1] = frame->stage.layers[1].scroll_x;
     frame->interface_version = AVSP_PORT_V2_SLICE_INTERFACE_VERSION;
     frame->ready = runtime->ready;
     frame->frame = input->frame;
@@ -165,6 +417,7 @@ int avsp_port_v2_slice_step(AvspPortV2SliceRuntime *runtime,
     frame->asset_failures = runtime->asset_failures;
     frame->fallback_used = runtime->fallback_used;
     frame->canaries_ok = avsp_port_v2_slice_canaries_ok(runtime);
+    if (!avsp_port_v2_slice_scene_valid(&frame->scene)) return 0;
     ++runtime->frame;
     return 1;
 }

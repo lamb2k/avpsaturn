@@ -105,3 +105,25 @@ ownership (`3000-3059`) windows. The actual run-1 samples were `606`, `2481`,
 and `3003`; run 2 sampled `607`, `2483`, and `3002`. Every sample preserved
 three stage submissions per stability frame, zero fallback, zero late reads,
 and intact canaries. Renewed integrated subjective review is pending.
+
+### Review correction 2
+
+Exact user feedback:
+
+> The alien and player appear anchored incorrectly relative to the camera pan.
+> The intended alien appears to change into a different stalker-like model. The
+> combat exchange and its visible participants do not make sense.
+
+Disposition: `CHANGES_REQUESTED`. These are objective scene-coherence defects,
+not subjective polish. The current candidate proves that individual promoted
+subsystems execute, but it does not prove a coherent gameplay scene. Do not
+accept this candidate, activate `SALVAGE-08-FRONTEND`, run Full, or begin the
+physical Saturn procedure.
+
+The bounded correction must prove a shared world/camera transform, continuous
+player and class-`0x1F` street-alien identity, causal attack/collision/damage
+transitions, synchronized semantic and visual trace QA, and the declared
+negative controls. If the source evidence does not bind the current HIT/KO
+record/object/tile chain to the approved street-alien visual family, or if a
+promoted interface outside this card's owned paths must change, stop at that
+evidence or ownership boundary and propose one bounded repair card.

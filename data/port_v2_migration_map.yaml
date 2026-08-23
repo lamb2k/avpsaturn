@@ -818,16 +818,16 @@
       "evaluated_commit": "dcd5daf12c4464e5f7982d87b18289519d357691",
       "technical_status": "FAIL",
       "fidelity_status": "ADAPTED",
-      "user_status": "AWAITING_USER_FEEDBACK",
-      "salvage_decision": "SALVAGE_WITH_ADAPTER",
+      "user_status": "CHANGES_REQUESTED",
+      "salvage_decision": "REPAIR",
       "production_interface": null,
       "diagnostic_interface": "tests/port_v2/integration/slice/run_pinned_emulator.ps1",
       "blockers": [
         "Unblock: resolve or explicitly disposition Full-lane generator drift in data/avsp_palette_coverage.json, data/avsp_translation_boundary.json, and data/avsp_vertical_slice_oracle_manifest.json under the correct owning scope.",
-        "Unblock: record the final integrated subjective checkpoint without inferring approval from silence.",
+        "Unblock: correct the objective camera/actor anchoring, actor-identity continuity, and causal combat scene defects recorded in Review correction 2, then obtain renewed explicit user review.",
         "Unblock: execute the declared physical Saturn capability procedure only after Full is clean and the subjective checkpoint is accepted; physical Saturn remains UNRUN."
       ],
-      "exact_next_experiment": "Await the exact renewed response to the integrated review package; if approved, route the three out-of-scope Full-lane generator drifts to their correct owner before any physical test or successor activation.",
+      "exact_next_experiment": "Audit whether the shared camera transform, causal encounter, and class-0x1F street-alien HIT/KO visual identity can be proven entirely within INTEGRATE-03 ownership; correct and re-present only if they can, otherwise stop at the exact evidence or promoted-interface boundary and propose one bounded repair card.",
       "evidence": {
         "candidate_interface": "src/port_v2/integration/slice/slice.h",
         "strict_c90_compile": "PASS",
@@ -857,14 +857,15 @@
         "visual_self_review": "PASS / promoted player-enemy alignment, camera/stage, both HUDs, PCM, and CDDA retained; legacy foreground object replay disabled only in the slice profile",
         "emulator": "Yaba Sanshiro 1.20.37-2986eb",
         "emulator_evidence_tier": "ONE_EMULATOR",
-        "human_review": "AWAITING_RENEWED_FEEDBACK",
-        "user_feedback_exact": "I don’t see a contact or hit just the alien and player loads camera pans animation of window breaking happens. They don’t engage in combat.",
+        "human_review": "CHANGES_REQUESTED_REVIEW_CORRECTION_2",
+        "user_feedback_exact": "The alien and player appear anchored incorrectly relative to the camera pan.\nThe intended alien appears to change into a different stalker-like model. The\ncombat exchange and its visible participants do not make sense.",
         "physical_saturn": "UNRUN"
       },
       "user_observation_state": {
         "formal_review_question_asked": false,
         "exact_observations": [
-          "I don’t see a contact or hit just the alien and player loads camera pans animation of window breaking happens. They don’t engage in combat."
+          "I don’t see a contact or hit just the alien and player loads camera pans animation of window breaking happens. They don’t engage in combat.",
+          "The alien and player appear anchored incorrectly relative to the camera pan.\nThe intended alien appears to change into a different stalker-like model. The\ncombat exchange and its visible participants do not make sense."
         ],
         "approved_components": [],
         "requested_changes": [],

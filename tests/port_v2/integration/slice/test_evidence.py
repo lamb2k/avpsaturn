@@ -39,6 +39,8 @@ def main():
     normals = [load(BUILD / f"run-{run}/iso-normalization.json")
                for run in (1, 2)]
     reads = [load(BUILD / f"run-{run}/readback.json") for run in (1, 2)]
+    traces = [load(BUILD / f"run-{run}/scene-trace.json")
+              for run in (1, 2)]
     require(builds[0] == builds[1], "exact release builds are not identical")
     require(builds[0]["compile_profile"] == "release-normal-release" and
             builds[0]["manifest_profile"] == "normal-release" and
@@ -76,7 +78,7 @@ def main():
                     state["slice_stage_submissions"] ==
                     state["slice_stability_frames"] * 3,
                     f"{name} lost a promoted subsystem or safety invariant")
-        require(605 <= report["hit_state"]["slice_frame"] <= 839 and
+        require(605 <= report["hit_state"]["slice_frame"] <= 630 and
                 report["hit_state"]["slice_combat_events"] == 1 and
                 report["hit_state"]["slice_hit_count"] == 1 and
                 report["hit_state"]["slice_review_phase"] == 3 and
@@ -88,6 +90,41 @@ def main():
                 report["final_state"]["slice_cdda_active"] == 0 and
                 report["final_state"]["slice_cdda_transitions"] == 2,
                 "exact HIT, KO, or ownership checkpoint drifted")
+        for state in (report["hit_state"], report["ko_state"],
+                      report["final_state"]):
+            require(state["slice_player_screen_x"] ==
+                    state["slice_player_world_x"] -
+                    state["slice_camera_world_x"] +
+                    state["slice_aperture_origin_x"] and
+                    state["slice_enemy_screen_x"] ==
+                    state["slice_enemy_world_x"] -
+                    state["slice_camera_world_x"] +
+                    state["slice_aperture_origin_x"] and
+                    state["slice_player_delta_screen_x"] ==
+                    state["slice_player_delta_world_x"] -
+                    state["slice_delta_camera_world_x"] and
+                    state["slice_enemy_delta_screen_x"] ==
+                    state["slice_enemy_delta_world_x"] -
+                    state["slice_delta_camera_world_x"] and
+                    state["slice_layer0_scroll_x"] ==
+                    state["slice_camera_world_x"] and
+                    state["slice_player_actor_id"] == 1 and
+                    state["slice_player_role"] == 1 and
+                    state["slice_player_archetype_id"] == 1 and
+                    state["slice_player_asset_set_id"] == 1 and
+                    state["slice_player_animation_set_id"] == 1 and
+                    state["slice_enemy_actor_id"] == 31 and
+                    state["slice_enemy_role"] == 2 and
+                    state["slice_enemy_class_id"] == 31 and
+                    state["slice_enemy_archetype_id"] == 31 and
+                    state["slice_enemy_asset_set_id"] == 2 and
+                    state["slice_enemy_animation_set_id"] == 2 and
+                    state["slice_enemy_object_count"] > 0 and
+                    state["slice_player_object_identity"] != 0 and
+                    state["slice_player_tile_identity"] != 0 and
+                    state["slice_enemy_object_identity"] != 0 and
+                    state["slice_enemy_tile_identity"] != 0,
+                    "scene anchor or actor identity trace drifted")
         for shot in report["screenshots"].values():
             path = ROOT / shot["path"]
             require(path.is_file() and sha(path) == shot["sha256"],
@@ -101,6 +138,33 @@ def main():
     for name in ("hit_state", "ko_state", "final_state"):
         require(stable_state(reads[0], name) == stable_state(reads[1], name),
                 f"paired semantic state drifted at {name}")
+    for trace, build in zip(traces, builds):
+        require(trace["result"] == "PASS" and
+                trace["evidence_tier"] ==
+                "ONE_EMULATOR_SYNCHRONIZED_TRACE" and
+                trace["physical_saturn"] == "UNRUN" and
+                trace["source_commit"] == build["source_commit"] and
+                trace["iso_sha256"] ==
+                build["artifacts"]["game_iso"]["sha256"] and
+                trace["contacts"] == [600, 1200, 1800, 2400],
+                "synchronized trace identity or contact sequence drifted")
+        require(trace["sample_frames"] ==
+                [sample["slice_frame"] for sample in trace["samples"]],
+                "synchronized trace sample order drifted")
+    require(traces[0]["samples"] == traces[1]["samples"],
+            "paired synchronized semantic traces are not deterministic")
+    clip = traces[0]["clip"]
+    require(clip is not None and clip["sample_count"] >= 250,
+            "continuous corrected-scene clip is missing or undersampled")
+    clip_path = ROOT / clip["path"]
+    require(clip_path.is_file() and sha(clip_path) == clip["sha256"] and
+            clip_path.stat().st_size == clip["bytes"],
+            "corrected-scene clip identity drifted")
+    for image_record in traces[0]["key_images"].values():
+        image_path = ROOT / image_record["path"]
+        require(image_path.is_file() and
+                sha(image_path) == image_record["sha256"],
+                "synchronized key image identity drifted")
     print("INTEGRATE-03 paired exact-release emulator evidence: PASS")
 
 

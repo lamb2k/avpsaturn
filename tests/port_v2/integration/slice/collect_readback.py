@@ -72,7 +72,7 @@ def require_fields(actual, expected, label):
 
 def validate_hit(actual):
     require_fields(actual, {
-        "runtime_ready": 1, "slice_interface_version": 1,
+        "runtime_ready": 1, "slice_interface_version": 2,
         "slice_ready": 1, "slice_actor_count": 2,
         "slice_combat_events": 1, "slice_enemy_health": 63,
         "slice_hit_count": 1, "slice_ko_count": 0,
@@ -82,7 +82,14 @@ def validate_hit(actual):
         "slice_asset_failures": 0, "slice_fallback_used": 0,
         "slice_canaries_ok": 1,
         "slice_physical_saturn": 0, "stage_port_lock_ok": 1,
-        "hud_port_lock_ok": 1, "slice_review_phase": 3
+        "hud_port_lock_ok": 1, "slice_review_phase": 3,
+        "slice_semantic_hit": 1, "slice_semantic_ko": 0,
+        "slice_enemy_class_id": 31, "slice_enemy_archetype_id": 31,
+        "slice_enemy_asset_set_id": 2,
+        "slice_enemy_animation_set_id": 2,
+        "slice_enemy_palette_bank": 19,
+        "slice_enemy_animation_record": 0x0012DD50,
+        "slice_defender_id": 31,
     }, "playable-slice HIT")
     if actual["slice_stability_frames"] != actual["slice_frame"] + 1:
         raise RuntimeError("HIT frame and stability counter disagree")
@@ -94,7 +101,7 @@ def validate_hit(actual):
 
 def validate_ko(actual):
     require_fields(actual, {
-        "runtime_ready": 1, "slice_interface_version": 1,
+        "runtime_ready": 1, "slice_interface_version": 2,
         "slice_ready": 1, "slice_actor_count": 2,
         "slice_combat_events": 4, "slice_enemy_health": -1,
         "slice_hit_count": 1, "slice_ko_count": 1,
@@ -103,7 +110,14 @@ def validate_ko(actual):
         "slice_cdda_transitions": 1, "slice_late_reads": 0,
         "slice_asset_failures": 0, "slice_fallback_used": 0,
         "slice_canaries_ok": 1,
-        "slice_physical_saturn": 0, "slice_review_phase": 4
+        "slice_physical_saturn": 0, "slice_review_phase": 4,
+        "slice_semantic_hit": 0, "slice_semantic_ko": 1,
+        "slice_enemy_class_id": 31, "slice_enemy_archetype_id": 31,
+        "slice_enemy_asset_set_id": 2,
+        "slice_enemy_animation_set_id": 2,
+        "slice_enemy_palette_bank": 16,
+        "slice_enemy_animation_record": 0x0012E268,
+        "slice_defender_id": 31,
     }, "playable-slice KO")
     if actual["slice_stability_frames"] != actual["slice_frame"] + 1:
         raise RuntimeError("KO frame and stability counter disagree")
@@ -120,10 +134,50 @@ def validate_final(actual):
         "slice_late_reads": 0, "slice_asset_failures": 0,
         "slice_fallback_used": 0, "slice_canaries_ok": 1,
         "slice_physical_saturn": 0,
-        "slice_review_phase": 4
+        "slice_review_phase": 4, "slice_semantic_ko": 1,
+        "slice_enemy_class_id": 31, "slice_enemy_archetype_id": 31,
+        "slice_enemy_asset_set_id": 2,
+        "slice_enemy_animation_set_id": 2,
+        "slice_enemy_palette_bank": 16,
     }, "playable-slice final")
     if actual["slice_stability_frames"] != actual["slice_frame"] + 1:
         raise RuntimeError("final frame and stability counter disagree")
+
+
+def validate_scene_anchor(actual):
+    if actual["slice_player_screen_x"] != \
+            actual["slice_player_world_x"] - \
+            actual["slice_camera_world_x"] + \
+            actual["slice_aperture_origin_x"] or \
+            actual["slice_enemy_screen_x"] != \
+            actual["slice_enemy_world_x"] - \
+            actual["slice_camera_world_x"] + \
+            actual["slice_aperture_origin_x"] or \
+            actual["slice_layer0_scroll_x"] != \
+            actual["slice_camera_world_x"]:
+        raise RuntimeError("actor and stage camera anchors diverged")
+    if actual["slice_player_delta_screen_x"] != \
+            actual["slice_player_delta_world_x"] - \
+            actual["slice_delta_camera_world_x"] or \
+            actual["slice_enemy_delta_screen_x"] != \
+            actual["slice_enemy_delta_world_x"] - \
+            actual["slice_delta_camera_world_x"]:
+        raise RuntimeError("per-frame world-to-screen delta invariant drifted")
+    if actual["slice_player_actor_id"] != 1 or \
+            actual["slice_player_role"] != 1 or \
+            actual["slice_player_archetype_id"] != 1 or \
+            actual["slice_player_asset_set_id"] != 1 or \
+            actual["slice_player_animation_set_id"] != 1 or \
+            actual["slice_enemy_actor_id"] != 31 or \
+            actual["slice_enemy_role"] != 2:
+        raise RuntimeError("two-actor integration identity contract drifted")
+    if actual["slice_player_object_identity"] == 0 or \
+            actual["slice_player_tile_identity"] == 0:
+        raise RuntimeError("player rendered identity is empty")
+    if actual["slice_enemy_object_count"] <= 0 or \
+            actual["slice_enemy_object_identity"] == 0 or \
+            actual["slice_enemy_tile_identity"] == 0:
+        raise RuntimeError("enemy object/tile identity is empty")
 
 
 def main():
@@ -155,7 +209,7 @@ def main():
     bounds = tools.window_bounds(args.emulator_pid, args.timeout)
     run_root = ROOT / inventory["build_root"] / f"run-{args.run}"
     checkpoint_contract = {
-        "hit": (605, 839, validate_hit),
+        "hit": (605, 630, validate_hit),
         "ko": (2480, 2999, validate_ko),
         "final": (3000, 3059, validate_final),
     }
@@ -163,6 +217,7 @@ def main():
     checkpoint_state = wait_frame(
         mcp, syms, target, ceiling, args.timeout)
     validator(checkpoint_state)
+    validate_scene_anchor(checkpoint_state)
     screenshot = None
     if args.checkpoint in ("hit", "ko"):
         screenshot_path = run_root / f"{args.checkpoint}.png"

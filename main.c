@@ -346,18 +346,9 @@ static CddaResidencyReadBuffer cdda_residency_read_buffer;
 #endif
 
 #ifdef AVSP_PLAYABLE_SLICE
-#define AVSP_SLICE_FIRST_CONTACT_FRAME 600
-#define AVSP_SLICE_CONTACT_INTERVAL 600
-#define AVSP_SLICE_ATTACK_LEAD_FRAMES 60
-#define AVSP_SLICE_ATTACK_HOLD_FRAMES 180
-#define AVSP_SLICE_HIT_HOLD_FRAMES 240
 #define AVSP_SLICE_CDDA_STOP_FRAME 3000
 static AvspPortV2SliceRuntime playable_slice_runtime;
 static AvspPortV2SliceFrame playable_slice_frame;
-static int playable_slice_player_attack_frame;
-static int playable_slice_player_attack_hold;
-static int playable_slice_enemy_action_frame;
-static int playable_slice_hit_hold;
 volatile int avsp_diag_slice_interface_version;
 volatile int avsp_diag_slice_frame;
 volatile int avsp_diag_slice_ready;
@@ -382,6 +373,52 @@ volatile int avsp_diag_slice_physical_saturn;
 volatile int avsp_diag_slice_init_stage;
 volatile int avsp_diag_slice_frame_stage;
 volatile int avsp_diag_slice_review_phase;
+volatile int avsp_diag_slice_player_world_x;
+volatile int avsp_diag_slice_enemy_world_x;
+volatile int avsp_diag_slice_camera_world_x;
+volatile int avsp_diag_slice_player_screen_x;
+volatile int avsp_diag_slice_enemy_screen_x;
+volatile int avsp_diag_slice_aperture_origin_x;
+volatile int avsp_diag_slice_player_delta_world_x;
+volatile int avsp_diag_slice_enemy_delta_world_x;
+volatile int avsp_diag_slice_delta_camera_world_x;
+volatile int avsp_diag_slice_player_delta_screen_x;
+volatile int avsp_diag_slice_enemy_delta_screen_x;
+volatile int avsp_diag_slice_layer0_scroll_x;
+volatile int avsp_diag_slice_layer1_scroll_x;
+volatile int avsp_diag_slice_player_action;
+volatile int avsp_diag_slice_player_action_frame;
+volatile int avsp_diag_slice_player_attack_active;
+volatile int avsp_diag_slice_enemy_action;
+volatile int avsp_diag_slice_enemy_action_frame;
+volatile int avsp_diag_slice_collision_result;
+volatile int avsp_diag_slice_attacker_id;
+volatile int avsp_diag_slice_defender_id;
+volatile int avsp_diag_slice_health_before;
+volatile int avsp_diag_slice_health_after;
+volatile int avsp_diag_slice_semantic_hit;
+volatile int avsp_diag_slice_semantic_ko;
+volatile int avsp_diag_slice_player_actor_id;
+volatile int avsp_diag_slice_player_role;
+volatile int avsp_diag_slice_player_class_id;
+volatile int avsp_diag_slice_player_archetype_id;
+volatile int avsp_diag_slice_player_asset_set_id;
+volatile int avsp_diag_slice_player_animation_set_id;
+volatile int avsp_diag_slice_player_palette_bank;
+volatile int avsp_diag_slice_player_animation_record;
+volatile int avsp_diag_slice_player_object_identity;
+volatile int avsp_diag_slice_player_tile_identity;
+volatile int avsp_diag_slice_enemy_actor_id;
+volatile int avsp_diag_slice_enemy_role;
+volatile int avsp_diag_slice_enemy_class_id;
+volatile int avsp_diag_slice_enemy_archetype_id;
+volatile int avsp_diag_slice_enemy_asset_set_id;
+volatile int avsp_diag_slice_enemy_animation_set_id;
+volatile int avsp_diag_slice_enemy_palette_bank;
+volatile int avsp_diag_slice_enemy_animation_record;
+volatile int avsp_diag_slice_enemy_object_count;
+volatile int avsp_diag_slice_enemy_object_identity;
+volatile int avsp_diag_slice_enemy_tile_identity;
 #endif
 
 #ifdef AVSP_ENEMY_SALVAGE_BENCH
@@ -2303,7 +2340,12 @@ static void rom_actor_prepare(void)
         state.palette = (unsigned char)(0x10 + (enemy->variant & 3));
 #ifdef AVSP_COMBAT_INTEGRATION_BENCH
         if (enemy->action == CAP_ACT_HIT || enemy->action == CAP_ACT_KO)
+#ifdef AVSP_PLAYABLE_SLICE
+            state.palette = (unsigned char)
+                playable_slice_frame.scene.enemy_identity.palette_bank;
+#else
             state.palette = 0x13;
+#endif
 #endif
         state.mode = 1;
         state.or_value = 0x8000;
@@ -2555,13 +2597,20 @@ static int draw_rom_actor_tiles(const CapActor *actor, const int slot)
        centre. */
     const int emit_origin_cps_x =
         0x40 + rom_actor_emit_world_x[slot] - world.camera_x;
+#ifndef AVSP_PLAYABLE_SLICE
     const int visual_origin_cps_x = 0x40 + actor->x - world.camera_x;
+#endif
     const int origin_dec_y =
         (0x100 + 0xFF - rom_actor_emit_world_y[slot]) & 0x3FF;
     const int anchor_jo_y = actor->lane - 200 - actor->height + 88;
     const int depth = 330 - actor->lane;
     int index;
     int rendered = 0;
+#ifdef AVSP_PLAYABLE_SLICE
+    unsigned long object_identity = 2166136261UL;
+    unsigned long tile_identity = 2166136261UL;
+    avsp_diag_slice_enemy_object_count = rom_actor_entry_counts[slot];
+#endif
 
     jo_sprite_set_palette_4bits(tile_palette.id, 0);
     for (index = rom_actor_entry_counts[slot] - 1; index >= 0; --index)
@@ -2577,6 +2626,12 @@ static int draw_rom_actor_tiles(const CapActor *actor, const int slot)
         int count = avsp_entry_tiles(entry->y, entry->code, entry->attr,
                                      tiles, 64);
         int tile;
+#ifdef AVSP_PLAYABLE_SLICE
+        object_identity = (object_identity ^ entry->x) * 16777619UL;
+        object_identity = (object_identity ^ entry->y) * 16777619UL;
+        object_identity = (object_identity ^ entry->code) * 16777619UL;
+        object_identity = (object_identity ^ entry->attr) * 16777619UL;
+#endif
         if (count <= 0 || bank_slot < 0)
         {
             ++tile_diag_no_bank;
@@ -2614,8 +2669,15 @@ static int draw_rom_actor_tiles(const CapActor *actor, const int slot)
                 ++tile_diag_no_sprite;
                 continue;
             }
+#ifdef AVSP_PLAYABLE_SLICE
+            jo_x = playable_slice_frame.scene.enemy_screen_x +
+                fit_352(offset_x + tiles[tile].dx + 8);
+            tile_identity =
+                (tile_identity ^ tiles[tile].code) * 16777619UL;
+#else
             jo_x = fit_352(visual_origin_cps_x - 256 + offset_x +
                            tiles[tile].dx + 8);
+#endif
             jo_y = anchor_jo_y + offset_y + tiles[tile].dy + 8;
             if (tiles[tile].flip_x) jo_sprite_enable_horizontal_flip();
             if (tiles[tile].flip_y) jo_sprite_enable_vertical_flip();
@@ -2625,6 +2687,10 @@ static int draw_rom_actor_tiles(const CapActor *actor, const int slot)
             if (tiles[tile].flip_y) jo_sprite_disable_vertical_flip();
         }
     }
+#ifdef AVSP_PLAYABLE_SLICE
+    avsp_diag_slice_enemy_object_identity = (int)object_identity;
+    avsp_diag_slice_enemy_tile_identity = (int)tile_identity;
+#endif
     return rendered;
 }
 
@@ -5154,10 +5220,6 @@ static int playable_slice_init(void)
             &playable_slice_runtime, cart_available, &operations))
         return 0;
     avsp_diag_slice_init_stage = 17;
-    playable_slice_player_attack_frame = -1;
-    playable_slice_player_attack_hold = 0;
-    playable_slice_enemy_action_frame = 0;
-    playable_slice_hit_hold = 0;
     avsp_diag_slice_interface_version = AVSP_PORT_V2_SLICE_INTERFACE_VERSION;
     avsp_diag_slice_frame = 0;
     avsp_diag_slice_ready = 1;
@@ -5172,20 +5234,24 @@ static int playable_slice_init(void)
     return 1;
 }
 
-static int playable_slice_contact_index(const int frame)
+static int playable_slice_scripted_attack(const int frame)
 {
-    int delta = frame - AVSP_SLICE_FIRST_CONTACT_FRAME;
-    if (delta >= 0 && delta % AVSP_SLICE_CONTACT_INTERVAL == 0 &&
-        delta / AVSP_SLICE_CONTACT_INTERVAL <
-            AVSP_PORT_V2_COMBAT_SOURCE_EVENT_COUNT)
-        return delta / AVSP_SLICE_CONTACT_INTERVAL;
-    return -1;
+    return frame == 588 || frame == 1188 || frame == 1788 || frame == 2388;
 }
 
-static int playable_slice_attack_lead_index(const int frame)
+static void playable_slice_scripted_movement(AvspPortV2SliceInput *input)
 {
-    return playable_slice_contact_index(
-        frame + AVSP_SLICE_ATTACK_LEAD_FRAMES);
+    const int frame = input->frame;
+    input->player.down = frame >= 30 && frame < 60;
+    input->player.left = frame >= 300 && frame < 340;
+    input->enemy_move = frame >= 300 && frame < 340;
+    if ((frame >= 900 && frame < 909) ||
+        (frame >= 1500 && frame < 1519) ||
+        (frame >= 2100 && frame < 2108))
+        input->player.right = 1;
+    if (frame == 2100) input->enemy_move = -1;
+    input->player_attack = playable_slice_scripted_attack(frame);
+    input->player_height = frame >= 2300 ? 13 : 0;
 }
 
 static void playable_slice_publish_combat(void)
@@ -5216,21 +5282,25 @@ static void playable_slice_draw_actors(void)
 {
     CapActor player;
     CapActor *enemy = &world.enemies[0];
-    AvspPortV2CombatSourceEvent source;
-    AvspPortV2CombatPresentation presentation;
-    int source_index = playable_slice_frame.combat_event_count > 0 ?
-        playable_slice_frame.combat_event_count - 1 : 0;
     int rendered = 0;
     memset(&player, 0, sizeof(player));
     player.active = 1;
     player.kind = CAP_ACTOR_PLAYER;
     player.x = playable_slice_frame.actors.player.world_x;
     player.lane = playable_slice_frame.actors.player.lane;
+    player.height = playable_slice_runtime.player_height;
     player.facing = playable_slice_frame.actors.player.facing;
     player.locomotion_frame =
         playable_slice_frame.actors.player.locomotion_frame;
-    player.action = playable_slice_frame.actors.player.action ==
-        AVSP_PORT_V2_PLAYER_ACTION_WALK ? CAP_ACT_WALK : CAP_ACT_IDLE;
+    if (playable_slice_frame.scene.player_action ==
+        AVSP_PORT_V2_SLICE_ACTION_ATTACK)
+        player.action = CAP_ACT_ATTACK;
+    else if (playable_slice_frame.scene.player_action ==
+             AVSP_PORT_V2_SLICE_ACTION_WALK)
+        player.action = CAP_ACT_WALK;
+    else
+        player.action = CAP_ACT_IDLE;
+    player.action_frame = playable_slice_frame.scene.player_action_frame;
     memset(enemy, 0, sizeof(*enemy));
     enemy->active = 1;
     enemy->kind = CAP_ACTOR_ALIEN;
@@ -5241,41 +5311,30 @@ static void playable_slice_draw_actors(void)
     enemy->facing = playable_slice_frame.actors.enemy.facing;
     enemy->locomotion_frame =
         playable_slice_frame.actors.enemy.locomotion_frame;
-    enemy->action = CAP_ACT_WALK;
-    if (avsp_port_v2_combat_source_event(source_index, &source) &&
-        avsp_port_v2_combat_presentation(&source, &presentation) &&
-        playable_slice_frame.combat_event_count > 0)
-    {
-        player.x = presentation.player_x;
-        player.lane = presentation.player_lane;
-        player.height = presentation.player_height;
-        player.facing = presentation.player_facing;
-        enemy->x = presentation.enemy_x;
-        enemy->lane = presentation.enemy_lane;
-        enemy->height = presentation.enemy_height;
-        enemy->facing = presentation.enemy_facing;
-    }
-    if (playable_slice_player_attack_frame >= 0)
-    {
-        player.action = CAP_ACT_ATTACK;
-        player.action_frame = playable_slice_player_attack_frame;
-    }
-    if ((playable_slice_runtime.combat.transition.active ||
-         playable_slice_hit_hold > 0) &&
-        playable_slice_runtime.last_combat.kind ==
-            AVSP_PORT_V2_COMBAT_EVENT_HIT)
+    if (playable_slice_frame.scene.enemy_action ==
+        AVSP_PORT_V2_SLICE_ACTION_HIT)
         enemy->action = CAP_ACT_HIT;
-    else if (playable_slice_runtime.last_combat.kind ==
-             AVSP_PORT_V2_COMBAT_EVENT_KO)
+    else if (playable_slice_frame.scene.enemy_action ==
+             AVSP_PORT_V2_SLICE_ACTION_KO)
         enemy->action = CAP_ACT_KO;
-    enemy->action_frame = playable_slice_enemy_action_frame;
+    else
+        enemy->action = CAP_ACT_WALK;
+    enemy->action_frame = playable_slice_frame.scene.enemy_action_frame;
     world.encounter_started = 1;
     world.encounter_state = CAP_ENCOUNTER_WAVE_ONE;
-    world.camera_x = 0;
+    world.camera_x = playable_slice_frame.scene.camera_world_x;
     rom_actor_prepare();
     jo_sprite_change_sprite_scale_xy(
         (float)CAP_VIEW_WIDTH / (float)CAP_CPS2_VIEW_WIDTH, 1.0f);
-    draw_player(&player, cap_actor_screen_x(player.x, 0, 1));
+    draw_player(&player, playable_slice_frame.scene.player_screen_x);
+    playable_slice_frame.scene.player_identity.emitted_object_identity =
+        2166136261UL ^
+        (unsigned long)(unsigned int)playable_slice_frame.scene.player_action ^
+        ((unsigned long)(unsigned int)current_player_action_pose << 8);
+    playable_slice_frame.scene.player_identity.emitted_tile_identity =
+        2166136261UL ^
+        (unsigned long)(unsigned int)player_action_sprites[0] ^
+        ((unsigned long)(unsigned int)player_action_sprites[1] << 8);
     if (rom_actor_entry_counts[0] > 0 && tile_archive_ready)
         rendered = draw_rom_actor_tiles(enemy, 0);
     jo_sprite_restore_sprite_scale();
@@ -5287,6 +5346,13 @@ static void playable_slice_draw_actors(void)
     avsp_diag_enemy_lane = enemy->lane;
     avsp_diag_enemy_facing = enemy->facing;
     avsp_diag_enemy_render_count = rendered;
+    playable_slice_frame.scene.enemy_identity.emitted_object_identity =
+        (unsigned long)(unsigned int)avsp_diag_slice_enemy_object_identity;
+    playable_slice_frame.scene.enemy_identity.emitted_tile_identity =
+        (unsigned long)(unsigned int)avsp_diag_slice_enemy_tile_identity;
+    if (!avsp_port_v2_slice_identity_valid(
+            &playable_slice_frame.scene.enemy_identity))
+        ++playable_slice_runtime.asset_failures;
 }
 
 static void playable_slice_frame_callback(void)
@@ -5294,9 +5360,6 @@ static void playable_slice_frame_callback(void)
     AvspPortV2SliceInput input;
     AvspPortV2PcmAudioOps pcm_operations;
     AvspPortV2CddaAudioOps cdda_operations;
-    CapInput pad;
-    int contact_index;
-    int lead_index;
     if (!runtime_ready)
     {
         avsp_diag_runtime_ready = 0;
@@ -5307,12 +5370,7 @@ static void playable_slice_frame_callback(void)
     avsp_diag_slice_frame_stage = 2;
     memset(&input, 0, sizeof(input));
     input.frame = playable_slice_runtime.frame;
-    pad = read_input();
-    input.player.left = pad.left;
-    input.player.right = pad.right;
-    input.player.up = pad.up;
-    input.player.down = pad.down;
-    input.enemy_translated = (input.frame % 240) >= 120;
+    playable_slice_scripted_movement(&input);
     input.camera.scroll_x[0] = avsp_diag_street_scx[0];
     input.camera.scroll_x[1] = avsp_diag_street_scx[1];
     input.player_health = 101;
@@ -5320,23 +5378,7 @@ static void playable_slice_frame_callback(void)
     input.player2_visible = 1;
     input.player2_health = 50;
     input.player2_energy = 32;
-    lead_index = playable_slice_attack_lead_index(input.frame);
-    if (lead_index >= 0)
-    {
-        playable_slice_player_attack_frame = 0;
-        playable_slice_player_attack_hold =
-            AVSP_SLICE_ATTACK_HOLD_FRAMES;
-    }
-    contact_index = playable_slice_contact_index(input.frame);
-    if (contact_index >= 0)
-    {
-        input.contact_event = 1;
-        input.contact_index = contact_index;
-        playable_slice_enemy_action_frame = 0;
-        if (contact_index == 0)
-            playable_slice_hit_hold = AVSP_SLICE_HIT_HOLD_FRAMES;
-    }
-    input.pcm_cue_event = input.frame == AVSP_SLICE_FIRST_CONTACT_FRAME;
+    input.pcm_cue_event = input.frame == 600;
     if (input.frame == 0) input.cdda_command = AVSP_PORT_V2_CDDA_START;
     if (input.frame == AVSP_SLICE_CDDA_STOP_FRAME)
         input.cdda_command = AVSP_PORT_V2_CDDA_STOP;
@@ -5378,27 +5420,12 @@ static void playable_slice_frame_callback(void)
         }
     }
     avsp_diag_slice_frame_stage = 6;
-    if (playable_slice_player_attack_frame >= 0)
-    {
-        ++playable_slice_player_attack_frame;
-        if (--playable_slice_player_attack_hold <= 0)
-            playable_slice_player_attack_frame = -1;
-        else if (playable_slice_player_attack_frame >= 24)
-            playable_slice_player_attack_frame = 23;
-    }
-    if (playable_slice_hit_hold > 0)
-        --playable_slice_hit_hold;
-    if (playable_slice_runtime.combat.transition.active ||
-        playable_slice_hit_hold > 0 ||
-        playable_slice_runtime.last_combat.kind ==
-            AVSP_PORT_V2_COMBAT_EVENT_KO)
-        ++playable_slice_enemy_action_frame;
-    if (playable_slice_runtime.last_combat.kind ==
-            AVSP_PORT_V2_COMBAT_EVENT_KO)
+    if (playable_slice_frame.scene.semantic_ko)
         avsp_diag_slice_review_phase = 4;
-    else if (playable_slice_hit_hold > 0)
+    else if (playable_slice_frame.scene.semantic_hit)
         avsp_diag_slice_review_phase = 3;
-    else if (playable_slice_player_attack_frame >= 0)
+    else if (playable_slice_frame.scene.player_action ==
+             AVSP_PORT_V2_SLICE_ACTION_ATTACK)
         avsp_diag_slice_review_phase = 2;
     else
         avsp_diag_slice_review_phase = 1;
@@ -5426,6 +5453,85 @@ static void playable_slice_frame_callback(void)
     avsp_diag_slice_fallback_used = playable_slice_runtime.fallback_used;
     avsp_diag_slice_canaries_ok =
         avsp_port_v2_slice_canaries_ok(&playable_slice_runtime);
+    avsp_diag_slice_player_world_x =
+        playable_slice_frame.scene.player_world_x;
+    avsp_diag_slice_enemy_world_x =
+        playable_slice_frame.scene.enemy_world_x;
+    avsp_diag_slice_camera_world_x =
+        playable_slice_frame.scene.camera_world_x;
+    avsp_diag_slice_player_screen_x =
+        playable_slice_frame.scene.player_screen_x;
+    avsp_diag_slice_enemy_screen_x =
+        playable_slice_frame.scene.enemy_screen_x;
+    avsp_diag_slice_aperture_origin_x =
+        playable_slice_frame.scene.aperture_origin_x;
+    avsp_diag_slice_player_delta_world_x =
+        playable_slice_frame.scene.player_delta_world_x;
+    avsp_diag_slice_enemy_delta_world_x =
+        playable_slice_frame.scene.enemy_delta_world_x;
+    avsp_diag_slice_delta_camera_world_x =
+        playable_slice_frame.scene.delta_camera_world_x;
+    avsp_diag_slice_player_delta_screen_x =
+        playable_slice_frame.scene.player_delta_screen_x;
+    avsp_diag_slice_enemy_delta_screen_x =
+        playable_slice_frame.scene.enemy_delta_screen_x;
+    avsp_diag_slice_layer0_scroll_x =
+        playable_slice_frame.scene.layer_scroll_x[0];
+    avsp_diag_slice_layer1_scroll_x =
+        playable_slice_frame.scene.layer_scroll_x[1];
+    avsp_diag_slice_player_action =
+        playable_slice_frame.scene.player_action;
+    avsp_diag_slice_player_action_frame =
+        playable_slice_frame.scene.player_action_frame;
+    avsp_diag_slice_player_attack_active =
+        playable_slice_frame.scene.player_attack_active;
+    avsp_diag_slice_enemy_action = playable_slice_frame.scene.enemy_action;
+    avsp_diag_slice_enemy_action_frame =
+        playable_slice_frame.scene.enemy_action_frame;
+    avsp_diag_slice_collision_result =
+        playable_slice_frame.scene.collision_result;
+    avsp_diag_slice_attacker_id = playable_slice_frame.scene.attacker_id;
+    avsp_diag_slice_defender_id = playable_slice_frame.scene.defender_id;
+    avsp_diag_slice_health_before = playable_slice_frame.scene.health_before;
+    avsp_diag_slice_health_after = playable_slice_frame.scene.health_after;
+    avsp_diag_slice_semantic_hit = playable_slice_frame.scene.semantic_hit;
+    avsp_diag_slice_semantic_ko = playable_slice_frame.scene.semantic_ko;
+    avsp_diag_slice_player_actor_id =
+        playable_slice_frame.scene.player_identity.actor_id;
+    avsp_diag_slice_player_role =
+        playable_slice_frame.scene.player_identity.role;
+    avsp_diag_slice_player_class_id =
+        playable_slice_frame.scene.player_identity.class_id;
+    avsp_diag_slice_player_archetype_id =
+        playable_slice_frame.scene.player_identity.archetype_id;
+    avsp_diag_slice_player_asset_set_id =
+        playable_slice_frame.scene.player_identity.asset_set_id;
+    avsp_diag_slice_player_animation_set_id =
+        playable_slice_frame.scene.player_identity.animation_set_id;
+    avsp_diag_slice_player_palette_bank =
+        playable_slice_frame.scene.player_identity.palette_bank;
+    avsp_diag_slice_player_animation_record =
+        (int)playable_slice_frame.scene.player_identity.animation_record;
+    avsp_diag_slice_player_object_identity =
+        (int)playable_slice_frame.scene.player_identity.emitted_object_identity;
+    avsp_diag_slice_player_tile_identity =
+        (int)playable_slice_frame.scene.player_identity.emitted_tile_identity;
+    avsp_diag_slice_enemy_actor_id =
+        playable_slice_frame.scene.enemy_identity.actor_id;
+    avsp_diag_slice_enemy_role =
+        playable_slice_frame.scene.enemy_identity.role;
+    avsp_diag_slice_enemy_class_id =
+        playable_slice_frame.scene.enemy_identity.class_id;
+    avsp_diag_slice_enemy_archetype_id =
+        playable_slice_frame.scene.enemy_identity.archetype_id;
+    avsp_diag_slice_enemy_asset_set_id =
+        playable_slice_frame.scene.enemy_identity.asset_set_id;
+    avsp_diag_slice_enemy_animation_set_id =
+        playable_slice_frame.scene.enemy_identity.animation_set_id;
+    avsp_diag_slice_enemy_palette_bank =
+        playable_slice_frame.scene.enemy_identity.palette_bank;
+    avsp_diag_slice_enemy_animation_record =
+        (int)playable_slice_frame.scene.enemy_identity.animation_record;
     ++avsp_diag_slice_stability_frames;
     /* Publish last so debugger readback sees a complete semantic frame. */
     avsp_diag_slice_frame = playable_slice_frame.frame;
