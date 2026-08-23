@@ -62,10 +62,10 @@
   ],
   "approved_stage_contract_sha256": "dac93621e7ef290ee2465055076b856f1f10a73480654c86782fbb4e522af300",
   "local_build_dependency_sha256": {
-    "loader/loader.c": "77ac9637f5233ebbb16ed380896f6bbf6217e48d4788dddf0cf824c1cd4022d8",
-    "loader/loader.linker": "a8d817b20eae7e09f1c9f62ea014efced8cea386f1640b0c4c8b00d2f5c2148c",
-    "loader/trampoline.s": "d888d3299a27c47b9ad70b4b3685a42669f0e399cacc2dbaca91c3663609474e",
-    "tools/build_loader_ip.py": "599f871f44f2cd5d5a9f8bee881aeb2a8a8f00bc830b7d93005d2d9ce307625a"
+    "loader/loader.c": "4147b23f98abae70bf25bbf0c6f5818d594d1077c95676b6829b2bc8584e081f",
+    "loader/loader.linker": "5d798517a8501e8abf5cfc547a4ddec0b3d54c5ba45ca1f2de60e35ce4cb1f89",
+    "loader/trampoline.s": "dcfbd692113877f42832a0bee554d9f153f67c2cb57c67137be6dc08fefb8c05",
+    "tools/build_loader_ip.py": "be712c7e45a0d0db61a57327eb3e026886ffc5903508bedff46637d1826c7413"
   },
   "disabled_systems": ["P2 input", "P2 gameplay", "join state", "multiplayer integration", "multitap topology", "CDDA", "combat", "camera movement", "stage expansion"],
   "physical_saturn": "UNRUN"
