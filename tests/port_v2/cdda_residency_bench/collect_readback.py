@@ -129,18 +129,21 @@ def snapshot(mcp: Mcp, syms: dict[str, int]) -> dict[str, int]:
 def wait_frame(mcp: Mcp, syms: dict[str, int], target: int,
                timeout: float) -> dict[str, int]:
     address = hex(syms["avsp_diag_cdda_frame"])
+    deadline = time.time() + timeout
     mcp.call("pause")
     mcp.call("breakpoint_add", cpu="master", type="memory", address=address,
              write=True, value=hex(target))
     try:
-        mcp.call("resume")
-        stopped = mcp.call("wait_for_stop", timeout_ms=int(timeout * 1000))
-        if "stopped: true" not in stopped:
-            raise TimeoutError(f"CDDA frame {target} was not reached")
-        state = snapshot(mcp, syms)
-        if state["relative_frame"] != target:
-            raise RuntimeError(f"CDDA frame mismatch: {state}")
-        return state
+        while time.time() < deadline:
+            mcp.call("resume")
+            remaining_ms = max(1, int((deadline - time.time()) * 1000))
+            stopped = mcp.call("wait_for_stop", timeout_ms=remaining_ms)
+            if "stopped: true" not in stopped:
+                break
+            state = snapshot(mcp, syms)
+            if state["relative_frame"] == target:
+                return state
+        raise TimeoutError(f"CDDA frame {target} was not reached")
     finally:
         mcp.call("breakpoint_remove", cpu="master", type="memory",
                  address=address)
