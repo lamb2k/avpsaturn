@@ -78,6 +78,13 @@
  },
  "work_ram_limit": "0x060c0000",
  "work_ram_profiles": {
+  "debug-cdda-residency-salvage-bench": {
+   "bend": "0x06087a70",
+   "headroom_bytes": 230800,
+   "limit": "0x060c0000",
+   "profile": "debug-cdda-residency-salvage-bench",
+   "status": "MEASURED"
+  },
   "debug-encounter-test": {
    "bend": "0x060bfec0",
    "headroom_bytes": 320,

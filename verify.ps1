@@ -14,6 +14,7 @@ param(
         'BossKoTest', 'PlayerSalvageBench', 'PlayerPromotionBench',
         'CameraStageSalvageBench', 'CameraStagePromotionBench',
         'HudPcmSalvageBench', 'HudPromotionBench', 'PcmPromotionBench',
+        'CddaResidencySalvageBench',
         'EnemySalvageBench',
         'EnemyPromotionBench', 'PlayerEnemyIntegration',
         'CollisionSalvageBench', 'HitKoPromotionBench',
@@ -148,6 +149,7 @@ function Invoke-FastLane {
     Invoke-PythonTest 'tests\port_v2\combat\hit_ko\test_contract.py'
     Invoke-PythonTest 'tests\port_v2\integration\combat\test_contract.py'
     Invoke-PythonTest 'tests\port_v2\camera_stage\test_contract.py'
+    Invoke-PythonTest 'tests\port_v2\cdda_residency_bench\test_contract.py'
     Invoke-PythonTest 'tests\test_avsp_vertical_slice_oracle.py'
     Invoke-PythonTest 'tests\test_avsp_translation_boundary.py'
 
@@ -271,6 +273,7 @@ function Invoke-TargetLane {
         HudPcmSalvageBench = 'debug-hud-pcm-salvage-bench'
         HudPromotionBench = 'debug-hud-promotion-bench'
         PcmPromotionBench = 'debug-pcm-promotion-bench'
+        CddaResidencySalvageBench = 'debug-cdda-residency-salvage-bench'
         EnemySalvageBench = 'debug-enemy-salvage-bench'
         EnemyPromotionBench = 'debug-enemy-promotion-bench'
         PlayerEnemyIntegration = 'debug-player-enemy-integration'

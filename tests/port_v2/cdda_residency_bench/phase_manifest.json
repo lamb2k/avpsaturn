@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "task_id": "SALVAGE-07-CDDA-RESIDENCY",
+  "phase_id": "stage1-cdda-residency-salvage",
+  "classification": "ADAPTED",
+  "scope": "phase-owned allocations only; Jo/SGL platform baseline remains outside the package and is bounded separately by the linked profile high-water",
+  "source_binding": {
+    "route_manifest": "data/stage1_route.json",
+    "event_id": "street_combat_begins",
+    "source_frame": 2520,
+    "binding_status": "ADAPTED",
+    "audio_capture": ".deps/mame/captures/stage1_route_reference.wav",
+    "audio_bytes": 29637952,
+    "audio_sha256": "42e755b02ba0e59e514a07dabe2f8273390e641c2ab410e4af8b7f1b656f2a43"
+  },
+  "disc": {
+    "data_track": 1,
+    "cdda_track": 2,
+    "cdda_event_frame": 30,
+    "cdda_stop_frame": 120,
+    "repeat": true,
+    "legal_data_read_windows": [
+      {
+        "id": "phase-boundary-residency-check",
+        "begin_frame": 150,
+        "read_frame": 151,
+        "end_frame": 152,
+        "iso_member": "/DIAG/RESCHK.BIN",
+        "bytes": 64,
+        "sha256": "84a73962f97c2479b1c514c5e6747a95a5c3be1a58530ed62dc09cb3fbb57d2d"
+      }
+    ]
+  },
+  "allocations": {
+    "work_ram": {
+      "capacity_bytes": 770048,
+      "phase_high_water_bytes": 72,
+      "allocation": "64-byte bounded read buffer plus two 32-bit canaries",
+      "canary_policy": "REQUIRED"
+    },
+    "cartridge": {
+      "capacity_bytes": 4194304,
+      "phase_high_water_bytes": 0,
+      "allocation": "none; CDDA streams from disc",
+      "canary_policy": "NOT_REQUIRED_ZERO_ALLOCATION"
+    },
+    "vdp1": {
+      "capacity_bytes": 524288,
+      "phase_high_water_bytes": 0,
+      "allocation": "none",
+      "canary_policy": "NOT_REQUIRED_ZERO_ALLOCATION"
+    },
+    "vdp2": {
+      "capacity_bytes": 524288,
+      "phase_high_water_bytes": 0,
+      "allocation": "none",
+      "canary_policy": "NOT_REQUIRED_ZERO_ALLOCATION"
+    },
+    "cram": {
+      "capacity_bytes": 4096,
+      "phase_high_water_bytes": 0,
+      "allocation": "none",
+      "canary_policy": "NOT_REQUIRED_ZERO_ALLOCATION"
+    },
+    "scsp": {
+      "capacity_bytes": 524288,
+      "phase_high_water_bytes": 0,
+      "allocation": "no PCM payload; CDDA uses the hardware CD audio path",
+      "canary_policy": "NOT_REQUIRED_ZERO_ALLOCATION"
+    }
+  },
+  "linked_profile_high_water": {
+    "profile": "debug-cdda-residency-salvage-bench",
+    "bend": "0x06087a70",
+    "limit": "0x060c0000",
+    "headroom_bytes": 230800,
+    "status": "MEASURED"
+  },
+  "canaries": {
+    "head": "0x43445248",
+    "tail": "0x43445254"
+  },
+  "negative_controls": [
+    "data read while CDDA owns the drive",
+    "data-read window while CDDA owns the drive",
+    "missing work-RAM allocation",
+    "wrong source-event binding"
+  ],
+  "physical_saturn": "UNRUN"
+}

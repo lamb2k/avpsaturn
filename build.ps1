@@ -18,6 +18,7 @@ param(
     [switch]$HudPcmSalvageBench,
     [switch]$HudPromotionBench,
     [switch]$PcmPromotionBench,
+    [switch]$CddaResidencySalvageBench,
     [switch]$EnemySalvageBench,
     [switch]$EnemyPromotionBench,
     [switch]$PlayerEnemyIntegration,
@@ -212,6 +213,18 @@ try {
         }
 
         $contentRoot = Join-Path $projectRoot 'build\avsp_cd'
+        $cddaFixtureSource = Join-Path $projectRoot `
+            'tests\port_v2\cdda_residency_bench\RESCHK.BIN'
+        $cddaFixtureStaged = Join-Path $contentRoot 'DIAG\RESCHK.BIN'
+        if ($CddaResidencySalvageBench) {
+            New-Item -ItemType Directory -Force -Path `
+                (Split-Path -Parent $cddaFixtureStaged) | Out-Null
+            Copy-Item -LiteralPath $cddaFixtureSource `
+                -Destination $cddaFixtureStaged -Force
+        }
+        elseif (Test-Path -LiteralPath $cddaFixtureStaged) {
+            Remove-Item -LiteralPath $cddaFixtureStaged -Force
+        }
         # RP4 fixture separation: the captured street strips are a
         # validation fixture and ship only in the StreetTest profile.
         $fixtureSource = Join-Path $projectRoot 'build\rp4_fixture\STRIPS.BIN'
@@ -238,6 +251,7 @@ try {
             elseif ($PlayerEnemyIntegration) { 'player-enemy-integration' }
             elseif ($EnemyPromotionBench) { 'enemy-promotion-bench' }
             elseif ($EnemySalvageBench) { 'enemy-salvage-bench' }
+            elseif ($CddaResidencySalvageBench) { 'cdda-residency-salvage-bench' }
             elseif ($PcmPromotionBench) { 'pcm-promotion-bench' }
             elseif ($HudPromotionBench) { 'hud-promotion-bench' }
             elseif ($HudPcmSalvageBench) { 'hud-pcm-salvage-bench' }
@@ -325,6 +339,9 @@ try {
             $makeArguments += 'AVSP_HUD_PCM_SALVAGE_BENCH=1'
             $makeArguments += 'AVSP_HUD_PROMOTION_BENCH=1'
             $makeArguments += 'AVSP_PCM_PROMOTION_BENCH=1'
+        }
+        if ($CddaResidencySalvageBench) {
+            $makeArguments += 'AVSP_CDDA_RESIDENCY_SALVAGE_BENCH=1'
         }
         if ($EnemySalvageBench) {
             $makeArguments += 'AVSP_ENEMY_SALVAGE_BENCH=1'
