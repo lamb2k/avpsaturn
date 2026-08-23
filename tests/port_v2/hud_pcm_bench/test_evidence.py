@@ -84,7 +84,8 @@ def main() -> None:
     parser.add_argument("--suite", choices=("hud_pcm_bench", "hud", "pcm"),
                         default="hud_pcm_bench")
     args = parser.parse_args()
-    suite_here = ROOT / "tests/port_v2" / args.suite
+    suite_relative = "audio/pcm" if args.suite == "pcm" else args.suite
+    suite_here = ROOT / "tests/port_v2" / suite_relative
     contract_name = ("hud_pcm_contract.json" if
                      args.suite == "hud_pcm_bench" else
                      "approved_contract.json")

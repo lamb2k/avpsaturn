@@ -37,7 +37,8 @@ def main() -> None:
     parser.add_argument("--suite", choices=("hud_pcm_bench", "hud", "pcm"),
                         default="hud_pcm_bench")
     args = parser.parse_args()
-    suite_here = ROOT / "tests/port_v2" / args.suite
+    suite_relative = "audio/pcm" if args.suite == "pcm" else args.suite
+    suite_here = ROOT / "tests/port_v2" / suite_relative
     inventory = json.loads((suite_here / "inventory.json").read_text(
         encoding="utf-8"))
     image_path = ROOT / "game.iso"
