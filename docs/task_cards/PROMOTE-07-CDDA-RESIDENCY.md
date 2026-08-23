@@ -2,7 +2,7 @@
 
 TASK: PROMOTE-07-CDDA-RESIDENCY
 KIND: PROMOTE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: promote-cdda-residency
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

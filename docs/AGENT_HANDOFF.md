@@ -25,17 +25,17 @@ its historical metadata and existing continuity branch.
 
 ## Current task and next action
 
-`SALVAGE-07-CDDA-RESIDENCY` is technically accepted at
-`17967a50b62318dae81d12f33c18b92ce8f72b37`. Two committed-SHA pinned-Yaba
-runs agree at normalized ISO
-`46ffc83235340f48e7636692cd8c207d7a58285890af6bccdba348e10d2d8698`:
-Track 2 ownership starts and returns, one late read and one illegal window are
-rejected, the declared legal read succeeds, all phase allocations are explicit,
-and the canaries and linked high-water pass. The binding to source frame 2520 is
-`ADAPTED`, and physical Saturn remains unrun. The exact USER-07 response is
-`yup that works keep going with the next body of work`, explicitly approving
-the bounded Track 2 audible result with no requested change. The active card is
-now `PROMOTE-07-CDDA-RESIDENCY`, status `READY`, in the existing continuity worktree
+`PROMOTE-07-CDDA-RESIDENCY` is accepted at evidence commit
+`684ed1b27e840ac940bc95484b32d7f6e3972a01` with implementation commit
+`89f60047a7a43542e194e8fd745724e74d9f70df`. Two committed-SHA pinned-Yaba
+runs agree semantically at normalized ISO
+`e99bd3a5cdc79b922222c25d65010d6fed011829cd89c3688b268f71774f8f74`:
+both Jo/SGL-free production interfaces are version 1, the port lock and canaries
+pass, fallback/failures are zero, both illegal operations reject, the declared
+legal read succeeds, and each run observes 692 bounded stability frames. Linked
+BSS ends at `0x06088370` with 228496 bytes of headroom. The source-frame binding
+remains `ADAPTED`; normal release and physical Saturn remain unrun. The active
+card is now `INTEGRATE-03-PLAYABLE-SLICE`, status `READY`, in the existing continuity worktree
 `C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review` on
 branch `codex/avp-user-02-enemy-review`.
 
@@ -45,4 +45,4 @@ changes that fact.
 
 Resume prompt:
 
-> Resume the AvP salvage Goal at PROMOTE-07-CDDA-RESIDENCY in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve every approved component and the exact USER-07 Track 2 approval, promote only the accepted CDDA ownership and phase-residency contracts behind narrow port_v2 interfaces, then run the card's focused, Target, and pinned-emulator checks.
+> Resume the AvP salvage Goal at INTEGRATE-03-PLAYABLE-SLICE in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve every approved component lock, integrate only the promoted player, enemy, combat, camera/stage, HUD, PCM, CDDA, and residency interfaces, run the card's exact normal-release checks, and stop at the declared subjective or physical checkpoint.

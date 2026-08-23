@@ -4,15 +4,15 @@ workflow_model: interactive-salvage-promotion-integration
 roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
-production_head: 5fc2b8ff00d7074da8f58697e4a1761ed282db58
-candidate_head: 5fc2b8ff00d7074da8f58697e4a1761ed282db58
+production_head: 684ed1b27e840ac940bc95484b32d7f6e3972a01
+candidate_head: 684ed1b27e840ac940bc95484b32d7f6e3972a01
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-user-02-enemy-review
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 review_candidate_status: ACCEPTED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW, PROMOTE-07-CDDA-RESIDENCY]
 target_scope:
   source_set: avspu
   route: cold-boot-through-title-select-all-stages-ending-credits
@@ -92,6 +92,9 @@ accepted_implementation_history:
   - id: PROMOTE-06-PCM
     status: ACCEPTED
     head: 5fc2b8ff00d7074da8f58697e4a1761ed282db58
+  - id: PROMOTE-07-CDDA-RESIDENCY
+    status: ACCEPTED
+    head: 684ed1b27e840ac940bc95484b32d7f6e3972a01
 accepted_control_plane_history:
   - id: ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN
     status: ACCEPTED
@@ -187,12 +190,12 @@ architecture_enforcement:
     - id: evidence-tier-separation
       status: ACTIVE
       activates_when: always
-current_checkpoint: promote-cdda-residency
-active_task_card: docs/task_cards/PROMOTE-07-CDDA-RESIDENCY.md
-active_task_id: PROMOTE-07-CDDA-RESIDENCY
-active_task_kind: PROMOTE
+current_checkpoint: integrate-playable-slice
+active_task_card: docs/task_cards/INTEGRATE-03-PLAYABLE-SLICE.md
+active_task_id: INTEGRATE-03-PLAYABLE-SLICE
+active_task_kind: INTEGRATE
 task_status: READY
-active_write_owner: PROMOTE-07-CDDA-RESIDENCY
+active_write_owner: INTEGRATE-03-PLAYABLE-SLICE
 awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
@@ -691,6 +694,35 @@ completed_dispositions:
     blockers:
       - Exact source music timing, full-route residency, normal release, a second emulator, and physical Saturn remain outside this approval.
     exact_next_experiment: Promote only the accepted CDDA ownership and phase-residency contracts behind narrow port_v2 interfaces without changing the reviewed audible output.
+  - task: PROMOTE-07-CDDA-RESIDENCY
+    evaluated_head: 684ed1b27e840ac940bc95484b32d7f6e3972a01
+    implementation_head: 89f60047a7a43542e194e8fd745724e74d9f70df
+    technical_status: PASS
+    fidelity_status: ADAPTED
+    user_status: APPROVED
+    salvage_decision: PROMOTED
+    successor_activation: INTEGRATE-03-PLAYABLE-SLICE
+    production_interfaces:
+      - src/port_v2/audio/cdda/cdda.h
+      - src/port_v2/residency/residency.h
+    approved_component_locks:
+      - USER-07 exact response remains `yup that works keep going with the next body of work` and the reviewed Track 2 output is unchanged.
+      - Track 2 remains 29637952 bytes at SHA-256 42e755b02ba0e59e514a07dabe2f8273390e641c2ab410e4af8b7f1b656f2a43.
+      - The adapted source binding remains `street_combat_begins` at frame 2520; no exact source-timing claim is inferred.
+      - One rejected late read, one refused illegal window, one legal window/read, 72 phase-owned work-RAM bytes, required canaries, and explicit zero allocation in the other five domains remain locked.
+      - Promoted player, enemy, corrected combat alignment, camera/stage, P1/P2 HUD, and PCM contracts remain byte-exact.
+    evidence:
+      - Strict C90 host contract passes twice; altered-track, missing-region, and real read-while-CDDA-owns-drive controls reject.
+      - Fast workflow checks PASS. CddaResidencyPromotionBench Target builds PASS with linked BSS end 0x06088370 and 228496 bytes of work-RAM headroom.
+      - Available Oracle checks and pinned avspu identity PASS. The generic Oracle lane is INCOMPLETE only because unrelated paused V2-2B private writer inputs are absent.
+      - Two committed-SHA builds normalize to ISO SHA-256 e99bd3a5cdc79b922222c25d65010d6fed011829cd89c3688b268f71774f8f74.
+      - Paired pinned Yaba Sanshiro 1.20.37-2986eb readbacks have exact semantic equality after excluding only the emulator wall-frame counter and each observe 692 bounded stability frames.
+      - Both runs report CDDA/residency interface version 1, port_lock_ok=1, two CDDA submissions, one residency submission, zero fallback/failures, exact ownership/rejection/read counters, and intact canaries.
+      - Diagnostic self-review PASS for run 1. Run 2 screenshot caught the known alternating blank debug text plane; semantic readback is authoritative. Physical Saturn remains UNRUN and Capability Gate remains 0/12.
+    blockers:
+      - Exact source music timing, full-route residency, normal release, a second emulator, and physical Saturn remain unproven or UNRUN.
+      - The temporary main.c Saturn diagnostic adapter remains until INTEGRATE-03 consumes the production ports in the complete capability slice.
+    exact_next_experiment: Integrate only the promoted player, enemy, combat, camera/stage, HUD, PCM, CDDA, and phase-residency interfaces into INTEGRATE-03; preserve every approved lock, prove exact normal-release emulator behavior, then stop for the declared subjective and physical checkpoints.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR

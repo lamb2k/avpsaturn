@@ -65,12 +65,13 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: PROMOTE-07-CDDA-RESIDENCY
+CURRENT_TASK: INTEGRATE-03-PLAYABLE-SLICE
 
 ## 4. Current salvage queue and production extension
 
-The accepted player, enemy, camera/stage, P1/P2 HUD, and PCM results remain
-regression locks. The current runtime body is not advanced by ARCH-01.
+The accepted player, enemy, combat, camera/stage, P1/P2 HUD, PCM, CDDA, and
+phase-residency results remain regression locks. INTEGRATE-03 is the active
+production body; ARCH-01 itself did not change runtime behavior.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|
