@@ -82,3 +82,16 @@ checkpoint precedes physical testing; explicit user approval is not physical pro
 - The final integrated subjective checkpoint is pending. Do not activate
   `SALVAGE-08-FRONTEND` until the checkpoint, Full lane, and physical procedure
   are complete.
+
+### Review correction 1
+
+Exact user feedback:
+
+> I don’t see a contact or hit just the alien and player loads camera pans
+> animation of window breaking happens. They don’t engage in combat.
+
+Disposition: `CHANGES_REQUESTED`. The semantic events passed, but the original
+human-review presentation exposed each attack for only about 0.4 seconds and
+then held the final KO indefinitely. Correct the Saturn review timeline to give
+the approach, attack, HIT reaction, and KO durable visible holds without
+changing the measured combat events or approved presentation/audio locks.

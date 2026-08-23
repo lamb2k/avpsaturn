@@ -95,16 +95,16 @@ def require_fields(actual, expected, label):
 def validate_hit(actual):
     require_fields(actual, {
         "runtime_ready": 1, "slice_interface_version": 1,
-        "slice_frame": 185, "slice_ready": 1, "slice_actor_count": 2,
+        "slice_frame": 605, "slice_ready": 1, "slice_actor_count": 2,
         "slice_combat_events": 1, "slice_enemy_health": 63,
         "slice_hit_count": 1, "slice_ko_count": 0,
         "slice_hud_render_count": 4, "slice_pcm_events": 1,
         "slice_pcm_active": 1, "slice_cdda_active": 1,
         "slice_cdda_transitions": 1, "slice_late_reads": 0,
         "slice_asset_failures": 0, "slice_fallback_used": 0,
-        "slice_canaries_ok": 1, "slice_stability_frames": 186,
+        "slice_canaries_ok": 1, "slice_stability_frames": 606,
         "slice_physical_saturn": 0, "stage_port_lock_ok": 1,
-        "hud_port_lock_ok": 1
+        "hud_port_lock_ok": 1, "slice_review_phase": 3
     }, "playable-slice HIT")
     if actual["enemy_render_count"] <= 0 or \
             actual["slice_stage_submissions"] < 3 or \
@@ -115,15 +115,15 @@ def validate_hit(actual):
 def validate_ko(actual):
     require_fields(actual, {
         "runtime_ready": 1, "slice_interface_version": 1,
-        "slice_frame": 860, "slice_ready": 1, "slice_actor_count": 2,
+        "slice_frame": 2480, "slice_ready": 1, "slice_actor_count": 2,
         "slice_combat_events": 4, "slice_enemy_health": -1,
         "slice_hit_count": 1, "slice_ko_count": 1,
         "slice_hud_render_count": 4, "slice_pcm_events": 1,
         "slice_pcm_active": 0, "slice_cdda_active": 1,
         "slice_cdda_transitions": 1, "slice_late_reads": 0,
         "slice_asset_failures": 0, "slice_fallback_used": 0,
-        "slice_canaries_ok": 1, "slice_stability_frames": 861,
-        "slice_physical_saturn": 0
+        "slice_canaries_ok": 1, "slice_stability_frames": 2481,
+        "slice_physical_saturn": 0, "slice_review_phase": 4
     }, "playable-slice KO")
     if actual["enemy_render_count"] <= 0 or \
             actual["combat_transition_anim_record"] != 0x0012E268:
@@ -132,12 +132,13 @@ def validate_ko(actual):
 
 def validate_final(actual):
     require_fields(actual, {
-        "runtime_ready": 1, "slice_frame": 900, "slice_ready": 1,
+        "runtime_ready": 1, "slice_frame": 3000, "slice_ready": 1,
         "slice_combat_events": 4, "slice_enemy_health": -1,
         "slice_cdda_active": 0, "slice_cdda_transitions": 2,
         "slice_late_reads": 0, "slice_asset_failures": 0,
         "slice_fallback_used": 0, "slice_canaries_ok": 1,
-        "slice_stability_frames": 901, "slice_physical_saturn": 0
+        "slice_stability_frames": 3001, "slice_physical_saturn": 0,
+        "slice_review_phase": 4
     }, "playable-slice final")
 
 
@@ -166,16 +167,16 @@ def main():
     mcp.call("set_debug_option", cpu_core="interpreter")
     mcp.call("pause")
     bounds = tools.window_bounds(args.emulator_pid, args.timeout)
-    hit = wait_frame(mcp, syms, 185, args.timeout)
+    hit = wait_frame(mcp, syms, 605, args.timeout)
     validate_hit(hit)
     run_root = ROOT / inventory["build_root"] / f"run-{args.run}"
     hit_path = run_root / "hit.png"
     ImageGrab.grab(bbox=bounds, all_screens=True).save(hit_path)
-    ko = wait_frame(mcp, syms, 860, args.timeout)
+    ko = wait_frame(mcp, syms, 2480, args.timeout)
     validate_ko(ko)
     ko_path = run_root / "ko.png"
     ImageGrab.grab(bbox=bounds, all_screens=True).save(ko_path)
-    final = wait_frame(mcp, syms, 900, args.timeout)
+    final = wait_frame(mcp, syms, 3000, args.timeout)
     validate_final(final)
     process = tools.process_record(args.emulator_pid)
     executable = Path(str(process["executable"]))

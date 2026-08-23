@@ -48,6 +48,7 @@
     "avsp_diag_slice_physical_saturn",
     "avsp_diag_slice_init_stage",
     "avsp_diag_slice_frame_stage",
+    "avsp_diag_slice_review_phase",
     "avsp_diag_player_x",
     "avsp_diag_player_lane",
     "avsp_diag_enemy_x",

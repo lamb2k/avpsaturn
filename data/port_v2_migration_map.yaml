@@ -818,7 +818,7 @@
       "evaluated_commit": "3273779516051a6b6f62719bc0bdceef07655310",
       "technical_status": "FAIL",
       "fidelity_status": "ADAPTED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "CHANGES_REQUESTED",
       "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "diagnostic_interface": "tests/port_v2/integration/slice/run_pinned_emulator.ps1",
@@ -857,11 +857,14 @@
         "emulator": "Yaba Sanshiro 1.20.37-2986eb",
         "emulator_evidence_tier": "ONE_EMULATOR",
         "human_review": "PENDING",
+        "user_feedback_exact": "I don’t see a contact or hit just the alien and player loads camera pans animation of window breaking happens. They don’t engage in combat.",
         "physical_saturn": "UNRUN"
       },
       "user_observation_state": {
         "formal_review_question_asked": false,
-        "exact_observations": [],
+        "exact_observations": [
+          "I don’t see a contact or hit just the alien and player loads camera pans animation of window breaking happens. They don’t engage in combat."
+        ],
         "approved_components": [],
         "requested_changes": [],
         "priority": null

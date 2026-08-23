@@ -31,6 +31,8 @@
 #include "tests/port_v2/integration/combat/diagnostic.h"
 #endif
 #ifdef AVSP_PLAYABLE_SLICE
+/* Human-review pacing only. Source samples, damage, HIT, and KO semantics
+ * remain owned by the deterministic Port V2 combat integration. */
 #include "src/port_v2/integration/slice/slice.h"
 #endif
 
@@ -344,10 +346,18 @@ static CddaResidencyReadBuffer cdda_residency_read_buffer;
 #endif
 
 #ifdef AVSP_PLAYABLE_SLICE
+#define AVSP_SLICE_FIRST_CONTACT_FRAME 600
+#define AVSP_SLICE_CONTACT_INTERVAL 600
+#define AVSP_SLICE_ATTACK_LEAD_FRAMES 60
+#define AVSP_SLICE_ATTACK_HOLD_FRAMES 180
+#define AVSP_SLICE_HIT_HOLD_FRAMES 240
+#define AVSP_SLICE_CDDA_STOP_FRAME 3000
 static AvspPortV2SliceRuntime playable_slice_runtime;
 static AvspPortV2SliceFrame playable_slice_frame;
 static int playable_slice_player_attack_frame;
+static int playable_slice_player_attack_hold;
 static int playable_slice_enemy_action_frame;
+static int playable_slice_hit_hold;
 volatile int avsp_diag_slice_interface_version;
 volatile int avsp_diag_slice_frame;
 volatile int avsp_diag_slice_ready;
@@ -371,6 +381,7 @@ volatile int avsp_diag_slice_stability_frames;
 volatile int avsp_diag_slice_physical_saturn;
 volatile int avsp_diag_slice_init_stage;
 volatile int avsp_diag_slice_frame_stage;
+volatile int avsp_diag_slice_review_phase;
 #endif
 
 #ifdef AVSP_ENEMY_SALVAGE_BENCH
@@ -5144,11 +5155,14 @@ static int playable_slice_init(void)
         return 0;
     avsp_diag_slice_init_stage = 17;
     playable_slice_player_attack_frame = -1;
+    playable_slice_player_attack_hold = 0;
     playable_slice_enemy_action_frame = 0;
+    playable_slice_hit_hold = 0;
     avsp_diag_slice_interface_version = AVSP_PORT_V2_SLICE_INTERFACE_VERSION;
     avsp_diag_slice_frame = 0;
     avsp_diag_slice_ready = 1;
     avsp_diag_slice_physical_saturn = 0;
+    avsp_diag_slice_review_phase = 1;
     avsp_diag_hud_port_lock_ok = avsp_port_v2_hud_validate_config(
         &avsp_port_v2_hud_approved_config);
     avsp_diag_pcm_port_lock_ok = avsp_port_v2_pcm_validate_config(
@@ -5160,20 +5174,18 @@ static int playable_slice_init(void)
 
 static int playable_slice_contact_index(const int frame)
 {
-    if (frame == 180) return 0;
-    if (frame == 360) return 1;
-    if (frame == 540) return 2;
-    if (frame == 720) return 3;
+    int delta = frame - AVSP_SLICE_FIRST_CONTACT_FRAME;
+    if (delta >= 0 && delta % AVSP_SLICE_CONTACT_INTERVAL == 0 &&
+        delta / AVSP_SLICE_CONTACT_INTERVAL <
+            AVSP_PORT_V2_COMBAT_SOURCE_EVENT_COUNT)
+        return delta / AVSP_SLICE_CONTACT_INTERVAL;
     return -1;
 }
 
 static int playable_slice_attack_lead_index(const int frame)
 {
-    if (frame == 176) return 0;
-    if (frame == 356) return 1;
-    if (frame == 536) return 2;
-    if (frame == 716) return 3;
-    return -1;
+    return playable_slice_contact_index(
+        frame + AVSP_SLICE_ATTACK_LEAD_FRAMES);
 }
 
 static void playable_slice_publish_combat(void)
@@ -5248,7 +5260,8 @@ static void playable_slice_draw_actors(void)
         player.action = CAP_ACT_ATTACK;
         player.action_frame = playable_slice_player_attack_frame;
     }
-    if (playable_slice_runtime.combat.transition.active &&
+    if ((playable_slice_runtime.combat.transition.active ||
+         playable_slice_hit_hold > 0) &&
         playable_slice_runtime.last_combat.kind ==
             AVSP_PORT_V2_COMBAT_EVENT_HIT)
         enemy->action = CAP_ACT_HIT;
@@ -5308,17 +5321,25 @@ static void playable_slice_frame_callback(void)
     input.player2_health = 50;
     input.player2_energy = 32;
     lead_index = playable_slice_attack_lead_index(input.frame);
-    if (lead_index >= 0) playable_slice_player_attack_frame = 0;
+    if (lead_index >= 0)
+    {
+        playable_slice_player_attack_frame = 0;
+        playable_slice_player_attack_hold =
+            AVSP_SLICE_ATTACK_HOLD_FRAMES;
+    }
     contact_index = playable_slice_contact_index(input.frame);
     if (contact_index >= 0)
     {
         input.contact_event = 1;
         input.contact_index = contact_index;
         playable_slice_enemy_action_frame = 0;
+        if (contact_index == 0)
+            playable_slice_hit_hold = AVSP_SLICE_HIT_HOLD_FRAMES;
     }
-    input.pcm_cue_event = input.frame == 180;
+    input.pcm_cue_event = input.frame == AVSP_SLICE_FIRST_CONTACT_FRAME;
     if (input.frame == 0) input.cdda_command = AVSP_PORT_V2_CDDA_START;
-    if (input.frame == 900) input.cdda_command = AVSP_PORT_V2_CDDA_STOP;
+    if (input.frame == AVSP_SLICE_CDDA_STOP_FRAME)
+        input.cdda_command = AVSP_PORT_V2_CDDA_STOP;
     if (!avsp_port_v2_slice_step(
             &playable_slice_runtime, &input, &playable_slice_frame))
     {
@@ -5357,13 +5378,30 @@ static void playable_slice_frame_callback(void)
         }
     }
     avsp_diag_slice_frame_stage = 6;
-    if (playable_slice_player_attack_frame >= 0 &&
-        ++playable_slice_player_attack_frame >= 24)
-        playable_slice_player_attack_frame = -1;
+    if (playable_slice_player_attack_frame >= 0)
+    {
+        ++playable_slice_player_attack_frame;
+        if (--playable_slice_player_attack_hold <= 0)
+            playable_slice_player_attack_frame = -1;
+        else if (playable_slice_player_attack_frame >= 24)
+            playable_slice_player_attack_frame = 23;
+    }
+    if (playable_slice_hit_hold > 0)
+        --playable_slice_hit_hold;
     if (playable_slice_runtime.combat.transition.active ||
+        playable_slice_hit_hold > 0 ||
         playable_slice_runtime.last_combat.kind ==
             AVSP_PORT_V2_COMBAT_EVENT_KO)
         ++playable_slice_enemy_action_frame;
+    if (playable_slice_runtime.last_combat.kind ==
+            AVSP_PORT_V2_COMBAT_EVENT_KO)
+        avsp_diag_slice_review_phase = 4;
+    else if (playable_slice_hit_hold > 0)
+        avsp_diag_slice_review_phase = 3;
+    else if (playable_slice_player_attack_frame >= 0)
+        avsp_diag_slice_review_phase = 2;
+    else
+        avsp_diag_slice_review_phase = 1;
     avsp_diag_runtime_ready = 1;
     avsp_diag_slice_ready = playable_slice_frame.ready;
     avsp_diag_slice_actor_count = playable_slice_frame.actors.actor_count;
