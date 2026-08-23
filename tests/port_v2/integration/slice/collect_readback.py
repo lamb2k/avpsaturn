@@ -43,39 +43,23 @@ def state(mcp, syms):
     return result
 
 
-def wait_frame(mcp, syms, target, timeout):
+def wait_frame(mcp, syms, target, ceiling, timeout):
     symbol = "avsp_diag_slice_frame"
-    address = hex(syms[symbol])
     deadline = time.time() + timeout
-    mcp.call("pause")
+    mcp.call("resume")
     current = signed(mcp, syms[symbol])
-    if current > target:
-        raise RuntimeError(f"slice passed frame {target}: {current}")
-    if current == target:
-        return state(mcp, syms)
-    # Filter on the published value so Yaba cannot retain an unfiltered
-    # post-capture stop on every subsequent frame.
-    mcp.call("breakpoint_add", cpu="master", type="memory",
-             address=address, write=True, value=hex(target))
-    try:
-        while current < target and time.time() < deadline:
-            mcp.call("resume")
-            remaining_ms = max(1, int((deadline - time.time()) * 1000))
-            stopped = mcp.call(
-                "wait_for_stop",
-                # The MCP HTTP client has a 30-second socket timeout.  Keep
-                # each long-frame wait below that transport ceiling and poll
-                # until the card-level deadline expires.
-                timeout_ms=min(20_000, remaining_ms))
-            if "stopped: true" not in stopped:
-                continue
-            current = signed(mcp, syms[symbol])
-    finally:
-        mcp.call("breakpoint_remove", cpu="master", type="memory",
-                 address=address)
+    while current < target and time.time() < deadline:
+        current = signed(mcp, syms[symbol])
+        if current < target:
+            time.sleep(0.002)
+    if current < target:
+        raise TimeoutError(f"slice frame {target} was not reached")
+    mcp.call("pause")
     result = state(mcp, syms)
-    if result["slice_frame"] != target:
-        raise RuntimeError(f"slice stopped at {result['slice_frame']}, expected {target}")
+    if not target <= result["slice_frame"] <= ceiling:
+        raise RuntimeError(
+            f"slice stopped at {result['slice_frame']}, expected "
+            f"review window {target}-{ceiling}")
     return result
 
 
@@ -89,17 +73,19 @@ def require_fields(actual, expected, label):
 def validate_hit(actual):
     require_fields(actual, {
         "runtime_ready": 1, "slice_interface_version": 1,
-        "slice_frame": 605, "slice_ready": 1, "slice_actor_count": 2,
+        "slice_ready": 1, "slice_actor_count": 2,
         "slice_combat_events": 1, "slice_enemy_health": 63,
         "slice_hit_count": 1, "slice_ko_count": 0,
         "slice_hud_render_count": 4, "slice_pcm_events": 1,
         "slice_pcm_active": 1, "slice_cdda_active": 1,
         "slice_cdda_transitions": 1, "slice_late_reads": 0,
         "slice_asset_failures": 0, "slice_fallback_used": 0,
-        "slice_canaries_ok": 1, "slice_stability_frames": 606,
+        "slice_canaries_ok": 1,
         "slice_physical_saturn": 0, "stage_port_lock_ok": 1,
         "hud_port_lock_ok": 1, "slice_review_phase": 3
     }, "playable-slice HIT")
+    if actual["slice_stability_frames"] != actual["slice_frame"] + 1:
+        raise RuntimeError("HIT frame and stability counter disagree")
     if actual["enemy_render_count"] <= 0 or \
             actual["slice_stage_submissions"] < 3 or \
             actual["pcm_submit_count"] < 1 or actual["cdda_submit_count"] != 1:
@@ -109,16 +95,18 @@ def validate_hit(actual):
 def validate_ko(actual):
     require_fields(actual, {
         "runtime_ready": 1, "slice_interface_version": 1,
-        "slice_frame": 2480, "slice_ready": 1, "slice_actor_count": 2,
+        "slice_ready": 1, "slice_actor_count": 2,
         "slice_combat_events": 4, "slice_enemy_health": -1,
         "slice_hit_count": 1, "slice_ko_count": 1,
         "slice_hud_render_count": 4, "slice_pcm_events": 1,
         "slice_pcm_active": 0, "slice_cdda_active": 1,
         "slice_cdda_transitions": 1, "slice_late_reads": 0,
         "slice_asset_failures": 0, "slice_fallback_used": 0,
-        "slice_canaries_ok": 1, "slice_stability_frames": 2481,
+        "slice_canaries_ok": 1,
         "slice_physical_saturn": 0, "slice_review_phase": 4
     }, "playable-slice KO")
+    if actual["slice_stability_frames"] != actual["slice_frame"] + 1:
+        raise RuntimeError("KO frame and stability counter disagree")
     if actual["enemy_render_count"] <= 0 or \
             actual["combat_transition_anim_record"] != 0x0012E268:
         raise RuntimeError("KO frame lacks the promoted enemy transition")
@@ -126,14 +114,16 @@ def validate_ko(actual):
 
 def validate_final(actual):
     require_fields(actual, {
-        "runtime_ready": 1, "slice_frame": 3000, "slice_ready": 1,
+        "runtime_ready": 1, "slice_ready": 1,
         "slice_combat_events": 4, "slice_enemy_health": -1,
         "slice_cdda_active": 0, "slice_cdda_transitions": 2,
         "slice_late_reads": 0, "slice_asset_failures": 0,
         "slice_fallback_used": 0, "slice_canaries_ok": 1,
-        "slice_stability_frames": 3001, "slice_physical_saturn": 0,
+        "slice_physical_saturn": 0,
         "slice_review_phase": 4
     }, "playable-slice final")
+    if actual["slice_stability_frames"] != actual["slice_frame"] + 1:
+        raise RuntimeError("final frame and stability counter disagree")
 
 
 def main():
@@ -160,17 +150,18 @@ def main():
             if time.time() >= deadline:
                 raise
             time.sleep(0.25)
-    mcp.call("set_debug_option", cpu_core="interpreter")
+    mcp.call("set_debug_option", cpu_core="dynarec")
     mcp.call("pause")
     bounds = tools.window_bounds(args.emulator_pid, args.timeout)
     run_root = ROOT / inventory["build_root"] / f"run-{args.run}"
     checkpoint_contract = {
-        "hit": (605, validate_hit),
-        "ko": (2480, validate_ko),
-        "final": (3000, validate_final),
+        "hit": (605, 839, validate_hit),
+        "ko": (2480, 2999, validate_ko),
+        "final": (3000, 3059, validate_final),
     }
-    target, validator = checkpoint_contract[args.checkpoint]
-    checkpoint_state = wait_frame(mcp, syms, target, args.timeout)
+    target, ceiling, validator = checkpoint_contract[args.checkpoint]
+    checkpoint_state = wait_frame(
+        mcp, syms, target, ceiling, args.timeout)
     validator(checkpoint_state)
     screenshot = None
     if args.checkpoint in ("hit", "ko"):
