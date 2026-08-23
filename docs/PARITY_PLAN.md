@@ -65,7 +65,7 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: SALVAGE-07-CDDA-RESIDENCY
+CURRENT_TASK: USER-07-CDDA-RESIDENCY-REVIEW
 
 ## 4. Current salvage queue and production extension
 
@@ -83,7 +83,7 @@ regression locks. The current runtime body is not advanced by ARCH-01.
 | 7 | `PROMOTE-04-CAMERA-STAGE` | Promote approved camera/stage presentation |
 | 8 | `PROMOTE-05-HUD` | Promote approved P1/P2 HUD presentation |
 | 9 | `PROMOTE-06-PCM` | Promote approved PCM cue path |
-| 10 | `SALVAGE-07-CDDA-RESIDENCY` -> `PROMOTE-07-CDDA-RESIDENCY` | Prove audio/load ownership and manifests |
+| 10 | `SALVAGE-07-CDDA-RESIDENCY` -> `USER-07-CDDA-RESIDENCY-REVIEW` -> `PROMOTE-07-CDDA-RESIDENCY` | Prove audio/load ownership and manifests, then require explicit audible review |
 | 11 | `INTEGRATE-03-PLAYABLE-SLICE` | Integrate and physically prove the capability slice |
 | 12 | `SALVAGE-08-FRONTEND` -> `QA-08-FRONTEND` -> `USER-08-FRONTEND` -> `PROMOTE-08-FRONTEND` | Promote title and four-character select |
 | 13 | `INTEGRATE-04-COLD-BOOT-TO-ROUND1` | Cold boot through Round 1 gameplay |

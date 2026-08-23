@@ -25,16 +25,16 @@ its historical metadata and existing continuity branch.
 
 ## Current task and next action
 
-`PROMOTE-06-PCM` is accepted at
-`5fc2b8ff00d7074da8f58697e4a1761ed282db58`. The approved capture-exact
-Predator melee cue now flows through a bounded Jo/SGL-free semantic PCM
-interface and a declared temporary SCSP adapter. Two committed-SHA builds and
-paired pinned-Yaba readbacks agree at normalized ISO
-`aecbd1b9169776c5a312028133279c89c9596f2cfa568734c643a16899306566`;
-cue identity, 147/150/200 and 387/390/440 timing, channel 1 allocation, canaries,
-zero underruns, and the promoted HUD regression lock all pass. No new subjective
-audio or physical Saturn claim is made. The active card is
-`SALVAGE-07-CDDA-RESIDENCY`, status `READY`, in the existing continuity worktree
+`SALVAGE-07-CDDA-RESIDENCY` is technically accepted at
+`17967a50b62318dae81d12f33c18b92ce8f72b37`. Two committed-SHA pinned-Yaba
+runs agree at normalized ISO
+`46ffc83235340f48e7636692cd8c207d7a58285890af6bccdba348e10d2d8698`:
+Track 2 ownership starts and returns, one late read and one illegal window are
+rejected, the declared legal read succeeds, all phase allocations are explicit,
+and the canaries and linked high-water pass. The binding to source frame 2520 is
+`ADAPTED`, and physical Saturn remains unrun. Because the bench produces new
+audible output, the active card is now `USER-07-CDDA-RESIDENCY-REVIEW`, status
+`AWAITING_USER_FEEDBACK`, in the existing continuity worktree
 `C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review` on
 branch `codex/avp-user-02-enemy-review`.
 
@@ -44,4 +44,4 @@ changes that fact.
 
 Resume prompt:
 
-> Resume the AvP salvage Goal at SALVAGE-07-CDDA-RESIDENCY in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve every promoted player, enemy, combat, camera/stage, P1/P2 HUD, and PCM lock, isolate only one CDDA/data-read ownership transition and one explicit phase residency manifest, then commit, push to private-origin, and verify the remote SHA.
+> Resume the AvP salvage Goal at USER-07-CDDA-RESIDENCY-REVIEW in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; perform no implementation, present only the ignored build/feedback/USER-07-CDDA-RESIDENCY-REVIEW package, record the exact response, and activate PROMOTE-07-CDDA-RESIDENCY only after explicit audible approval.

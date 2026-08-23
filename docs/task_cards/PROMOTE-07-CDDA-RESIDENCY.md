@@ -7,7 +7,7 @@ CHECKPOINT: promote-cdda-residency
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
 TIER: 1
-DEPENDENCIES: [SALVAGE-07-CDDA-RESIDENCY]
+DEPENDENCIES: [SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW]
 REQUIRED_LANES: [Fast, Oracle, Target, Emulator]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false

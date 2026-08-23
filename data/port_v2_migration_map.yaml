@@ -761,6 +761,57 @@
         "requested_changes": [],
         "priority": null
       }
+    },
+    {
+      "task_id": "SALVAGE-07-CDDA-RESIDENCY",
+      "evaluated_commit": "17967a50b62318dae81d12f33c18b92ce8f72b37",
+      "technical_status": "PASS",
+      "fidelity_status": "ADAPTED",
+      "user_status": "AWAITING_USER_FEEDBACK",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
+      "production_interface": null,
+      "diagnostic_interface": "tests/port_v2/cdda_residency_bench/run_pinned_emulator.ps1",
+      "blockers": [
+        "Unblock: record explicit audible feedback through USER-07-CDDA-RESIDENCY-REVIEW before promotion.",
+        "Unblock: exact source music timing, full-route residency, a second emulator, normal release, and physical Saturn remain unproven or UNRUN."
+      ],
+      "exact_next_experiment": "Present the exact ignored USER-07 package, ask the required question, and record the response verbatim before choosing promotion or a bounded repair.",
+      "evidence": {
+        "strict_c90_compile": "PASS",
+        "focused_deterministic_repeat": "PASS",
+        "real_negative_controls": "PASS / illegal read, missing allocation, and wrong source event rejected",
+        "fast_lane": "PASS",
+        "oracle_card_scope": "PASS / Stage 1 event, audio capture, and pinned avspu identity",
+        "generic_oracle_lane": "INCOMPLETE / unrelated paused V2-2B private writer inputs absent",
+        "target_profile": "CddaResidencySalvageBench / debug-cdda-residency-salvage-bench",
+        "normalized_iso_sha256": "46ffc83235340f48e7636692cd8c207d7a58285890af6bccdba348e10d2d8698",
+        "track_audio_sha256": "42e755b02ba0e59e514a07dabe2f8273390e641c2ab410e4af8b7f1b656f2a43",
+        "paired_pinned_emulator_readback": "PASS / exact semantic equality excluding only emulator wall-frame counter",
+        "ownership_transitions": 2,
+        "track_events": 1,
+        "late_reads_rejected": 1,
+        "illegal_windows_refused": 1,
+        "legal_windows": 1,
+        "legal_reads": 1,
+        "phase_owned_work_ram_bytes": 72,
+        "linked_work_ram_headroom_bytes": 230800,
+        "zero_allocation_domains": ["cartridge", "vdp1", "vdp2", "cram", "scsp"],
+        "canaries": "PASS",
+        "runtime_or_asset_failures": 0,
+        "visual_self_review": "PASS / debug-pause text-plane alternation does not replace semantic evidence",
+        "emulator": "Yaba Sanshiro 1.20.37-2986eb",
+        "emulator_evidence_tier": "ONE_EMULATOR",
+        "human_review": "PENDING",
+        "normal_release": "UNRUN",
+        "physical_saturn": "UNRUN"
+      },
+      "user_observation_state": {
+        "formal_review_question_asked": false,
+        "exact_observations": [],
+        "approved_components": [],
+        "requested_changes": [],
+        "priority": null
+      }
     }
   ],
   "subsystems": [
@@ -1068,18 +1119,28 @@
     },
     {
       "id": "cdda-residency",
-      "existing_source_paths": ["main.c", "build.ps1", "avsp_disc_guard.c", "avsp_disc_guard.h", "data/avsp_residency_budget.json"],
+      "existing_source_paths": ["main.c", "build.ps1", "avsp_disc_guard.c", "avsp_disc_guard.h", "data/avsp_residency_budget.json", "tests/port_v2/cdda_residency_bench/**"],
       "existing_dependencies": ["CDDA track", "disc ownership", "loading phases", "SCSP/drive telemetry", "memory canaries"],
       "authored_controller_coupling": "Track selection and loading ownership are mixed with authored route phases.",
       "proposed_isolated_bench": "Start one track after phase load, prove zero data reads during ownership, and verify canaries/high-water.",
-      "technical_status": "UNRUN",
-      "fidelity_status": "UNKNOWN",
-      "user_status": "NOT_REVIEWED",
-      "salvage_decision": "UNTESTED",
+      "temporary_adapter": {
+        "name": "LegacyCddaResidencyAdapter",
+        "wrapped_implementation": "main.c diagnostic calls Jo CDDA plus avsp_disc_guard ownership and guarded filesystem reads",
+        "satisfied_interface": "future AudioPort and AssetPort ownership contract; production interface not yet implemented",
+        "approved_regression_locks": ["Track 2 WAV SHA-256 42e755b02ba0e59e514a07dabe2f8273390e641c2ab410e4af8b7f1b656f2a43", "adapted street_combat_begins binding at source frame 2520", "one rejected late read plus one refused illegal window", "one legal 64-byte read in the declared phase boundary", "72 phase-owned work-RAM bytes with canaries and explicit zero allocation in every other domain"],
+        "remaining_authored_controller_coupling": "Track selection and the ownership sequence still execute from the main.c diagnostic rather than semantic production ports.",
+        "deletion_condition": "Delete after PROMOTE-07 provides Jo/SGL-free CDDA and residency interfaces whose Saturn adapter reproduces the accepted ownership, read-window, high-water, and canary contract."
+      },
+      "technical_status": "PASS",
+      "fidelity_status": "ADAPTED",
+      "user_status": "AWAITING_USER_FEEDBACK",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
-      "blockers": [],
-      "exact_next_experiment": "Defer until promoted loading and PCM exist, then run an illegal-read negative control before R7 integration.",
+      "evidence_commit": "17967a50b62318dae81d12f33c18b92ce8f72b37",
+      "diagnostic_interface": "tests/port_v2/cdda_residency_bench/run_pinned_emulator.ps1",
+      "blockers": ["Unblock: record explicit audible feedback through USER-07 before promotion.", "Unblock: prove exact source music timing, full-route residency, a second emulator, normal release, and physical Saturn only in their dedicated future work."],
+      "exact_next_experiment": "Present the exact USER-07 cue package, record the response verbatim, then either activate PROMOTE-07 after approval or define one bounded correction card.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {

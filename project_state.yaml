@@ -5,14 +5,14 @@ roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 production_head: 5fc2b8ff00d7074da8f58697e4a1761ed282db58
-candidate_head: 5fc2b8ff00d7074da8f58697e4a1761ed282db58
+candidate_head: 17967a50b62318dae81d12f33c18b92ce8f72b37
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-user-02-enemy-review
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 review_candidate_status: ACCEPTED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY]
 target_scope:
   source_set: avspu
   route: cold-boot-through-title-select-all-stages-ending-credits
@@ -187,13 +187,13 @@ architecture_enforcement:
     - id: evidence-tier-separation
       status: ACTIVE
       activates_when: always
-current_checkpoint: salvage-cdda-residency
-active_task_card: docs/task_cards/SALVAGE-07-CDDA-RESIDENCY.md
-active_task_id: SALVAGE-07-CDDA-RESIDENCY
-active_task_kind: SALVAGE
-task_status: READY
-active_write_owner: SALVAGE-07-CDDA-RESIDENCY
-awaiting_user_feedback: []
+current_checkpoint: review-cdda-residency
+active_task_card: docs/task_cards/USER-07-CDDA-RESIDENCY-REVIEW.md
+active_task_id: USER-07-CDDA-RESIDENCY-REVIEW
+active_task_kind: USER_REVIEW
+task_status: AWAITING_USER_FEEDBACK
+active_write_owner: USER-07-CDDA-RESIDENCY-REVIEW
+awaiting_user_feedback: [USER-07-CDDA-RESIDENCY-REVIEW]
 open_blockers: []
 completed_dispositions:
   - task: SALVAGE-00-OLD-BUILD-BASELINE
@@ -651,6 +651,31 @@ completed_dispositions:
       - CDDA ownership, data-read exclusion, phase residency, broad combat mixing, new cues, and route ownership remain unproven.
       - Normal release, a second emulator, and physical Saturn remain UNRUN.
     exact_next_experiment: Execute SALVAGE-07-CDDA-RESIDENCY to isolate one CDDA/data-read ownership transition and one explicit phase residency manifest while preserving the PCM payload/timing and all promoted presentation locks.
+  - task: SALVAGE-07-CDDA-RESIDENCY
+    evaluated_head: 17967a50b62318dae81d12f33c18b92ce8f72b37
+    technical_status: PASS
+    fidelity_status: ADAPTED
+    user_status: AWAITING_USER_FEEDBACK
+    salvage_decision: SALVAGE_WITH_ADAPTER
+    successor_activation: USER-07-CDDA-RESIDENCY-REVIEW
+    approved_component_locks:
+      - Every promoted player, enemy, combat alignment, camera/stage, P1/P2 HUD, and PCM contract hash remains exact.
+      - Track 2 payload remains 29637952 bytes at SHA-256 42e755b02ba0e59e514a07dabe2f8273390e641c2ab410e4af8b7f1b656f2a43.
+      - The adapted source binding remains `street_combat_begins` at frame 2520; no exact source-timing claim is inferred.
+      - Phase-owned work RAM remains 72 bytes with required canaries; cartridge, VDP1, VDP2, CRAM, and SCSP phase-owned allocation remain explicit zero.
+    evidence:
+      - Strict C90 host contract passes twice with deterministic output; permit-illegal-read, missing-allocation, and wrong-source-event controls reject.
+      - Fast workflow checks PASS. The dedicated Target build PASS leaves 230800 bytes linked work-RAM headroom.
+      - Card-scoped source/Oracle binding and pinned avspu identity PASS. The generic Oracle lane is INCOMPLETE only because unrelated paused V2-2B private writer inputs are absent and does not block CDDA.
+      - Two committed-SHA builds normalize to ISO SHA-256 46ffc83235340f48e7636692cd8c207d7a58285890af6bccdba348e10d2d8698.
+      - Paired pinned Yaba Sanshiro 1.20.37-2986eb readbacks PASS with exact semantic equality after excluding only the emulator wall-frame counter.
+      - Both runs observe one Track 2 event, two ownership transitions, one rejected late read, one refused illegal window, one legal window/read, intact canaries, and zero runtime or asset failures.
+      - Diagnostic visual self-review PASS. Debug-pause screenshots can expose alternating text planes; the ownership result is bound to semantic readback rather than screenshot text.
+      - New audible output awaits explicit USER-07 feedback. Normal release, a second emulator, full-route residency, and physical Saturn remain UNRUN; Capability Gate remains 0/12.
+    blockers:
+      - Explicit audible feedback is required before PROMOTE-07 may activate.
+      - Exact source music timing, full-route residency, a second emulator, normal release, and physical Saturn remain unproven or UNRUN.
+    exact_next_experiment: Present only build/feedback/USER-07-CDDA-RESIDENCY-REVIEW, ask the exact review question, record the response verbatim, and activate PROMOTE-07 only after explicit audible approval.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR
@@ -679,6 +704,7 @@ task_queue:
   - PROMOTE-05-HUD
   - PROMOTE-06-PCM
   - SALVAGE-07-CDDA-RESIDENCY
+  - USER-07-CDDA-RESIDENCY-REVIEW
   - PROMOTE-07-CDDA-RESIDENCY
   - INTEGRATE-03-PLAYABLE-SLICE
   - SALVAGE-08-FRONTEND
