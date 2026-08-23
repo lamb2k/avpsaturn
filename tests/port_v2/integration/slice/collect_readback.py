@@ -49,47 +49,26 @@ def wait_frame(mcp, syms, target, timeout):
     deadline = time.time() + timeout
     mcp.call("pause")
     current = signed(mcp, syms[symbol])
-    if target - current > 10:
-        mcp.call("resume")
-        last_progress = time.time()
-        last_current = current
-        while time.time() < deadline:
-            current = signed(mcp, syms[symbol])
-            if current >= target - 10:
-                break
-            if current != last_current:
-                last_current = current
-                last_progress = time.time()
-            elif time.time() - last_progress >= 0.25:
-                # Yaba can report one residual stop after an unfiltered write
-                # watchpoint is removed. Resume it here; a real runtime stall
-                # still times out because the published frame will not move.
-                mcp.call("resume")
-                last_progress = time.time()
-            time.sleep(0.002)
-        mcp.call("pause")
-        current = signed(mcp, syms[symbol])
     if current > target:
         raise RuntimeError(f"slice passed frame {target}: {current}")
-    if current != target:
-        # Stop on each diagnostic publish and inspect the value.  A value-
-        # filtered watchpoint is unreliable while Yaba is completing the long
-        # initial disc load; the unfiltered write watchpoint remains exact and
-        # bounds this loop to at most ten published frames.
-        mcp.call("breakpoint_add", cpu="master", type="memory",
-                 address=address, write=True)
-        try:
-            while current < target and time.time() < deadline:
-                mcp.call("resume")
-                stopped = mcp.call(
-                    "wait_for_stop",
-                    timeout_ms=max(1, int((deadline - time.time()) * 1000)))
-                if "stopped: true" not in stopped:
-                    raise TimeoutError(f"slice frame {target} was not reached")
-                current = signed(mcp, syms[symbol])
-        finally:
-            mcp.call("breakpoint_remove", cpu="master", type="memory",
-                     address=address)
+    if current == target:
+        return state(mcp, syms)
+    # Filter on the published value so Yaba cannot retain an unfiltered
+    # post-capture stop on every subsequent frame.
+    mcp.call("breakpoint_add", cpu="master", type="memory",
+             address=address, write=True, value=hex(target))
+    try:
+        while current < target and time.time() < deadline:
+            mcp.call("resume")
+            stopped = mcp.call(
+                "wait_for_stop",
+                timeout_ms=max(1, int((deadline - time.time()) * 1000)))
+            if "stopped: true" not in stopped:
+                raise TimeoutError(f"slice frame {target} was not reached")
+            current = signed(mcp, syms[symbol])
+    finally:
+        mcp.call("breakpoint_remove", cpu="master", type="memory",
+                 address=address)
     result = state(mcp, syms)
     if result["slice_frame"] != target:
         raise RuntimeError(f"slice stopped at {result['slice_frame']}, expected {target}")
