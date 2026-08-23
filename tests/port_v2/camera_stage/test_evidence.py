@@ -27,6 +27,12 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def deterministic_state(state: dict[str, object]) -> dict[str, object]:
+    result = dict(state)
+    result.pop("emulator_frame", None)
+    return result
+
+
 def check_state(state: dict[str, object], contract: dict[str, object]) -> None:
     require(state["runtime_ready"] == 1, "stage runtime not ready")
     require(state["interface_version"] == contract["stage_interface_version"],
@@ -82,6 +88,14 @@ def main() -> None:
             "normalized promotion ISO is not deterministic")
     require(builds[0]["iso_members"] == builds[1]["iso_members"],
             "repeat promotion package drifted")
+    require([deterministic_state(state) for state in reads[0]["fixed_samples"]] ==
+            [deterministic_state(state) for state in reads[1]["fixed_samples"]],
+            "fixed-checkpoint semantic readback is not deterministic")
+    require({key: deterministic_state(value) for key, value in
+             reads[0]["scroll_threshold"].items()} ==
+            {key: deterministic_state(value) for key, value in
+             reads[1]["scroll_threshold"].items()},
+            "scroll-threshold semantic readback is not deterministic")
     require(builds[0]["iso_members"]["/ST1/STRIPS.BIN"]["sha256"] ==
             contract["fixture"]["strips_bin_sha256"],
             "approved stage fixture identity drifted")

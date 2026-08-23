@@ -25,13 +25,15 @@ its historical metadata and existing continuity branch.
 
 ## Current task and next action
 
-`REPAIR-03-COMBAT-ACTOR-ALIGNMENT` is accepted at
-`4abbc86f596c27d7873a96016c3e52c2d777edb4`. The user explicitly approved the
-renewed corrected package with the exact response `much better lets keep
-going`. The corrected source-relative player/enemy position, actor order,
-shared lane/ground baseline, attack-facing relationship, scale, palette, and
-readability shown in that package are regression locks. The active card is
-`PROMOTE-04-CAMERA-STAGE`, status `READY`, in the existing continuity worktree
+`PROMOTE-04-CAMERA-STAGE` is accepted at
+`b6ef0ceff9fc4ed8cf06948cc353e7ce67950d3c`. The approved two-plane
+composition now flows through bounded Jo/SGL-free camera and stage interfaces.
+Two committed-SHA builds and paired pinned-Yaba readbacks agree at normalized
+ISO `d4caec944c0f1f3f9593960073d037cc24f9fa31f1a207f5dc4f617fb000ce33`;
+fixed framing, scroll, CRAM, priorities, plane/PNT canaries, and byte-identical
+screenshots retain USER-04's exact `pass for camera and stage` lock. Row-scroll
+remains `ADAPTED_UNCAPTURED`, and physical Saturn remains `UNRUN`. The active
+card is `PROMOTE-05-HUD`, status `READY`, in the existing continuity worktree
 `C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review` on
 branch `codex/avp-user-02-enemy-review`.
 
@@ -41,4 +43,4 @@ changes that fact.
 
 Resume prompt:
 
-> Resume the AvP salvage Goal at PROMOTE-04-CAMERA-STAGE in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve every approved player, enemy, combat, camera/stage, HUD, and PCM lock, promote only the approved adapted camera and two-plane stage presentation behind bounded interfaces, then commit, push to private-origin, and verify the remote SHA.
+> Resume the AvP salvage Goal at PROMOTE-05-HUD in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve every approved player, enemy, combat, promoted camera/stage, P1/P2 HUD, and PCM lock, promote only the approved corrected P1 and active P2 HUD behind a semantic interface, then commit, push to private-origin, and verify the remote SHA.

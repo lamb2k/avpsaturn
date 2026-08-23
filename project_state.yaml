@@ -4,15 +4,15 @@ workflow_model: interactive-salvage-promotion-integration
 roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
-production_head: 4abbc86f596c27d7873a96016c3e52c2d777edb4
-candidate_head: 4abbc86f596c27d7873a96016c3e52c2d777edb4
+production_head: b6ef0ceff9fc4ed8cf06948cc353e7ce67950d3c
+candidate_head: b6ef0ceff9fc4ed8cf06948cc353e7ce67950d3c
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-user-02-enemy-review
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 review_candidate_status: ACCEPTED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE]
 target_scope:
   source_set: avspu
   route: cold-boot-through-title-select-all-stages-ending-credits
@@ -83,6 +83,9 @@ accepted_implementation_history:
   - id: REPAIR-03-COMBAT-ACTOR-ALIGNMENT
     status: ACCEPTED
     head: 4abbc86f596c27d7873a96016c3e52c2d777edb4
+  - id: PROMOTE-04-CAMERA-STAGE
+    status: ACCEPTED
+    head: b6ef0ceff9fc4ed8cf06948cc353e7ce67950d3c
 accepted_control_plane_history:
   - id: ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN
     status: ACCEPTED
@@ -178,12 +181,12 @@ architecture_enforcement:
     - id: evidence-tier-separation
       status: ACTIVE
       activates_when: always
-current_checkpoint: promote-camera-stage
-active_task_card: docs/task_cards/PROMOTE-04-CAMERA-STAGE.md
-active_task_id: PROMOTE-04-CAMERA-STAGE
+current_checkpoint: promote-hud
+active_task_card: docs/task_cards/PROMOTE-05-HUD.md
+active_task_id: PROMOTE-05-HUD
 active_task_kind: PROMOTE
 task_status: READY
-active_write_owner: PROMOTE-04-CAMERA-STAGE
+active_write_owner: PROMOTE-05-HUD
 awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
@@ -564,6 +567,33 @@ completed_dispositions:
     blockers:
       - Second and third HIT reaction timing, general attack/damage rules, enemy AI, combat audio, normal release, a second emulator, and physical Saturn remain unpromoted or UNRUN.
     exact_next_experiment: Execute PROMOTE-04-CAMERA-STAGE while preserving the newly approved combat alignment and every earlier presentation lock.
+  - task: PROMOTE-04-CAMERA-STAGE
+    evaluated_head: b6ef0ceff9fc4ed8cf06948cc353e7ce67950d3c
+    technical_status: PASS
+    fidelity_status: ADAPTED
+    user_status: APPROVED
+    salvage_decision: PROMOTED
+    successor_activation: PROMOTE-05-HUD
+    production_interfaces:
+      - src/port_v2/camera/camera.h
+      - src/port_v2/stage/stage.h
+    approved_component_locks:
+      - USER-04 exact response remains `pass for camera and stage`.
+      - Approved two-plane composition, palette banks 2/3, priority order 2<3<4<6, final 352x224 framing, fixed frame 20, and frame 45-to-46 scroll step remain unchanged.
+      - Approved player, enemy, corrected combat alignment, corrected P1/P2 HUD, PCM, and street tile archive remain unchanged.
+    evidence:
+      - Strict C90 host contract, two deterministic replays, and real wrong-aperture, missing-plane, palette-dependency, and priority-inversion controls PASS.
+      - Fast PASS from implementation commit b6ef0ceff9fc4ed8cf06948cc353e7ce67950d3c.
+      - CameraStagePromotionBench target builds PASS without compile warnings; the two committed-SHA builds normalize to ISO SHA-256 d4caec944c0f1f3f9593960073d037cc24f9fa31f1a207f5dc4f617fb000ce33.
+      - Paired pinned Yaba Sanshiro 1.20.37-2986eb readbacks PASS with exact semantic equality after excluding only the emulator wall-frame counter.
+      - Both runs report fixed frame 20 scroll [0,7] with 477 objects and frame 45 [0,7] to frame 46 [10,15].
+      - Both runs retain plane/PNT canaries, CRAM offsets 2/3 and content, priority order 2<3<4<6, port_lock_ok=1, zero asset/late-read failures, and active semantic render submissions.
+      - Visual self-review PASS; paired screenshots are byte-identical at SHA-256 288b63d3f02cd1def08e6fbfdeab18badd1ddf52628436c4685a4e4df38768aa.
+      - Row-scroll remains ADAPTED_UNCAPTURED. Normal release, a second emulator, and physical Saturn remain UNRUN; Capability Gate remains 0/12.
+    blockers:
+      - The enabled scroll2 gfxram row-scroll table remains uncaptured; this promotion makes no source-faithful row-scroll or complete final-scanout claim.
+      - New stage content, full-route camera behavior, normal release, a second emulator, and physical Saturn remain unpromoted or UNRUN.
+    exact_next_experiment: Execute PROMOTE-05-HUD behind a semantic HUD render interface while preserving the promoted camera/stage and all earlier locks.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR
