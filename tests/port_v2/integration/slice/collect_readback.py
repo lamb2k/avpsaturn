@@ -139,6 +139,8 @@ def validate_final(actual):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=int, choices=(1, 2), required=True)
+    parser.add_argument("--checkpoint", choices=("hit", "ko", "final"),
+                        required=True)
     parser.add_argument("--emulator-pid", type=int, required=True)
     parser.add_argument("--timeout", type=float, default=300.0)
     args = parser.parse_args()
@@ -161,36 +163,73 @@ def main():
     mcp.call("set_debug_option", cpu_core="interpreter")
     mcp.call("pause")
     bounds = tools.window_bounds(args.emulator_pid, args.timeout)
-    hit = wait_frame(mcp, syms, 605, args.timeout)
-    validate_hit(hit)
     run_root = ROOT / inventory["build_root"] / f"run-{args.run}"
-    hit_path = run_root / "hit.png"
-    ImageGrab.grab(bbox=bounds, all_screens=True).save(hit_path)
-    ko = wait_frame(mcp, syms, 2480, args.timeout)
-    validate_ko(ko)
-    ko_path = run_root / "ko.png"
-    ImageGrab.grab(bbox=bounds, all_screens=True).save(ko_path)
-    final = wait_frame(mcp, syms, 3000, args.timeout)
-    validate_final(final)
+    checkpoint_contract = {
+        "hit": (605, validate_hit),
+        "ko": (2480, validate_ko),
+        "final": (3000, validate_final),
+    }
+    target, validator = checkpoint_contract[args.checkpoint]
+    checkpoint_state = wait_frame(mcp, syms, target, args.timeout)
+    validator(checkpoint_state)
+    screenshot = None
+    if args.checkpoint in ("hit", "ko"):
+        screenshot_path = run_root / f"{args.checkpoint}.png"
+        ImageGrab.grab(bbox=bounds, all_screens=True).save(screenshot_path)
+        screenshot = {
+            "path": screenshot_path.relative_to(ROOT).as_posix(),
+            "sha256": sha(screenshot_path),
+            "bytes": screenshot_path.stat().st_size,
+        }
     process = tools.process_record(args.emulator_pid)
     executable = Path(str(process["executable"]))
     settings = Path(os.environ["APPDATA"]) / "YabaSanshiro/yabause.ini"
+    checkpoint_report = {
+        "checkpoint": args.checkpoint,
+        "source_commit": build["source_commit"],
+        "iso_sha256": build["artifacts"]["game_iso"]["sha256"],
+        "state": checkpoint_state,
+        "screenshot": screenshot,
+        "process": {
+            "process_id": process["pid"],
+            "executable_sha256": sha(executable),
+            "settings_sha256": sha(settings),
+            "command_line": process["command_line"],
+        },
+    }
+    checkpoint_path = run_root / f"{args.checkpoint}-checkpoint.json"
+    checkpoint_path.write_text(
+        json.dumps(checkpoint_report, indent=2, sort_keys=True) + "\n")
+    print(f"recorded {checkpoint_path.relative_to(ROOT)}")
+
+    if args.checkpoint != "final":
+        return
+
+    checkpoints = {}
+    for name in ("hit", "ko", "final"):
+        path = run_root / f"{name}-checkpoint.json"
+        checkpoints[name] = json.loads(path.read_text(encoding="ascii"))
+        if checkpoints[name]["checkpoint"] != name or \
+                checkpoints[name]["source_commit"] != build["source_commit"] or \
+                checkpoints[name]["iso_sha256"] != \
+                build["artifacts"]["game_iso"]["sha256"]:
+            raise RuntimeError(f"{name} checkpoint identity drifted")
     report = {
         "schema": 1, "task_id": inventory["task_id"],
         "card_profile": inventory["card_profile"],
         "source_commit": build["source_commit"],
         "iso_sha256": build["artifacts"]["game_iso"]["sha256"],
-        "hit_state": hit, "ko_state": ko, "final_state": final,
+        "hit_state": checkpoints["hit"]["state"],
+        "ko_state": checkpoints["ko"]["state"],
+        "final_state": checkpoints["final"]["state"],
         "screenshots": {
-            "hit": {"path": hit_path.relative_to(ROOT).as_posix(),
-                    "sha256": sha(hit_path), "bytes": hit_path.stat().st_size},
-            "ko": {"path": ko_path.relative_to(ROOT).as_posix(),
-                   "sha256": sha(ko_path), "bytes": ko_path.stat().st_size}},
+            "hit": checkpoints["hit"]["screenshot"],
+            "ko": checkpoints["ko"]["screenshot"]},
         "emulator": {"identity": "Yaba Sanshiro 1.20.37-2986eb",
-                     "evidence_tier": "ONE_EMULATOR", "process_id": process["pid"],
-                     "executable_sha256": sha(executable),
-                     "settings_sha256": sha(settings),
-                     "command_line": process["command_line"]},
+                     "evidence_tier": "ONE_EMULATOR",
+                     "checkpoint_processes": {
+                         name: checkpoints[name]["process"]
+                         for name in ("hit", "ko", "final")}},
         "physical_saturn": "UNRUN", "result": "PASS"}
     output = run_root / "readback.json"
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
