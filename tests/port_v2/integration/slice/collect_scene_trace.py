@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
+from ctypes import wintypes
 import hashlib
 import importlib.util
 import json
@@ -37,6 +39,55 @@ def sha(path):
 
 def signed(mcp, address):
     return tools.signed32(mcp.u32(address))
+
+
+def pin_emulator_window(pid, timeout):
+    """Keep the emulator scanout unobscured for screen-based visual evidence."""
+    user32 = ctypes.windll.user32
+    user32.SetWindowPos.argtypes = (
+        wintypes.HWND, wintypes.HWND, ctypes.c_int, ctypes.c_int,
+        ctypes.c_int, ctypes.c_int, wintypes.UINT)
+    user32.SetWindowPos.restype = wintypes.BOOL
+    callback_type = ctypes.WINFUNCTYPE(
+        ctypes.c_bool, ctypes.c_void_p, ctypes.c_void_p)
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        found = []
+
+        @callback_type
+        def callback(hwnd, _):
+            found_pid = ctypes.c_ulong()
+            user32.GetWindowThreadProcessId(hwnd, ctypes.byref(found_pid))
+            if found_pid.value == pid and user32.IsWindowVisible(hwnd):
+                found.append(hwnd)
+                return False
+            return True
+
+        user32.EnumWindows(callback, 0)
+        if found:
+            hwnd = found[0]
+            rect = wintypes.RECT()
+            user32.ShowWindow(hwnd, 9)
+            # HWND_TOPMOST with NOMOVE/NOSIZE/SHOWWINDOW. The wrapper destroys
+            # this process after capture, so the pin cannot leak past the run.
+            require(user32.SetWindowPos(
+                hwnd, wintypes.HWND(-1), 0, 0, 0, 0,
+                0x0001 | 0x0002 | 0x0040) != 0,
+                "could not pin the emulator above occluding windows")
+            user32.BringWindowToTop(hwnd)
+            user32.SetForegroundWindow(hwnd)
+            require(user32.GetWindowRect(hwnd, ctypes.byref(rect)) != 0,
+                    "could not read pinned emulator bounds")
+            return hwnd, (rect.left, rect.top, rect.right, rect.bottom)
+        time.sleep(0.25)
+    raise TimeoutError("pinned emulator window unavailable")
+
+
+def foreground(hwnd):
+    user32 = ctypes.windll.user32
+    require(user32.BringWindowToTop(hwnd) != 0,
+            "emulator lost its visual-evidence foreground pin")
+    user32.SetForegroundWindow(hwnd)
 
 
 def snapshot(mcp, syms):
@@ -158,7 +209,7 @@ def main():
             time.sleep(0.25)
     mcp.call("set_debug_option", cpu_core="dynarec")
     mcp.call("pause")
-    bounds = tools.window_bounds(args.emulator_pid, args.timeout)
+    hwnd, bounds = pin_emulator_window(args.emulator_pid, args.timeout)
 
     exact = {
         20, 40, 45, 46, 60, 300, 320, 339,
@@ -180,6 +231,8 @@ def main():
         validate_sample(sample)
         samples.append(sample)
         if not args.no_clip:
+            foreground(hwnd)
+            time.sleep(0.02)
             image = ImageGrab.grab(bbox=bounds, all_screens=True).convert("RGB")
             images.append(image.convert(
                 "P", palette=Image.Palette.ADAPTIVE, colors=256))
