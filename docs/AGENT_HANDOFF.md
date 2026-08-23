@@ -32,9 +32,10 @@ runs agree at normalized ISO
 Track 2 ownership starts and returns, one late read and one illegal window are
 rejected, the declared legal read succeeds, all phase allocations are explicit,
 and the canaries and linked high-water pass. The binding to source frame 2520 is
-`ADAPTED`, and physical Saturn remains unrun. Because the bench produces new
-audible output, the active card is now `USER-07-CDDA-RESIDENCY-REVIEW`, status
-`AWAITING_USER_FEEDBACK`, in the existing continuity worktree
+`ADAPTED`, and physical Saturn remains unrun. The exact USER-07 response is
+`yup that works keep going with the next body of work`, explicitly approving
+the bounded Track 2 audible result with no requested change. The active card is
+now `PROMOTE-07-CDDA-RESIDENCY`, status `READY`, in the existing continuity worktree
 `C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review` on
 branch `codex/avp-user-02-enemy-review`.
 
@@ -44,4 +45,4 @@ changes that fact.
 
 Resume prompt:
 
-> Resume the AvP salvage Goal at USER-07-CDDA-RESIDENCY-REVIEW in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; perform no implementation, present only the ignored build/feedback/USER-07-CDDA-RESIDENCY-REVIEW package, record the exact response, and activate PROMOTE-07-CDDA-RESIDENCY only after explicit audible approval.
+> Resume the AvP salvage Goal at PROMOTE-07-CDDA-RESIDENCY in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve every approved component and the exact USER-07 Track 2 approval, promote only the accepted CDDA ownership and phase-residency contracts behind narrow port_v2 interfaces, then run the card's focused, Target, and pinned-emulator checks.

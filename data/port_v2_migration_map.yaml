@@ -767,7 +767,7 @@
       "evaluated_commit": "17967a50b62318dae81d12f33c18b92ce8f72b37",
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "APPROVED",
       "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "diagnostic_interface": "tests/port_v2/cdda_residency_bench/run_pinned_emulator.ps1",
@@ -1133,15 +1133,15 @@
       },
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "APPROVED",
       "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
       "evidence_commit": "17967a50b62318dae81d12f33c18b92ce8f72b37",
       "diagnostic_interface": "tests/port_v2/cdda_residency_bench/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: record explicit audible feedback through USER-07 before promotion.", "Unblock: prove exact source music timing, full-route residency, a second emulator, normal release, and physical Saturn only in their dedicated future work."],
-      "exact_next_experiment": "Present the exact USER-07 cue package, record the response verbatim, then either activate PROMOTE-07 after approval or define one bounded correction card.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
+      "blockers": ["Unblock: prove exact source music timing, full-route residency, a second emulator, normal release, and physical Saturn only in their dedicated future work."],
+      "exact_next_experiment": "Execute PROMOTE-07 behind narrow Jo/SGL-free CDDA and residency interfaces while retaining the reviewed audible output and exact ownership/read/allocation locks.",
+      "user_feedback": {"exact_response": "yup that works keep going with the next body of work", "approved_components": ["Bounded Track 2 audible output presented in the exact USER-07 package."], "requested_changes": [], "priority": "continue-cdda-residency-promotion"}
     },
     {
       "id": "diagnostics-emulator-readback",

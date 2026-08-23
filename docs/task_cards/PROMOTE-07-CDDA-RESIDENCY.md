@@ -2,7 +2,7 @@
 
 TASK: PROMOTE-07-CDDA-RESIDENCY
 KIND: PROMOTE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: promote-cdda-residency
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
