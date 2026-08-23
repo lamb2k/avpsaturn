@@ -25,16 +25,16 @@ its historical metadata and existing continuity branch.
 
 ## Current task and next action
 
-`PROMOTE-05-HUD` is accepted at
-`d957b3b022e1e1d3598e04ee03b980e59bfe0c03`. The approved corrected P1 and
-active P2 Maj. Schaefer HUD now flow through a bounded Jo/SGL-free semantic HUD
-interface and a declared temporary legacy renderer adapter. Two committed-SHA
-builds and paired pinned-Yaba readbacks agree at normalized ISO
-`4039b82163492278e02e7e0f97a2f0bdc73737a4a728aa74dc70321a38f63782`;
-P1/P2 states, one-based CRAM binding, render counts, canaries, negative controls,
-and byte-identical screenshots retain USER-05's final exact `keep going` lock.
-P2 gameplay/input/join/multitap and physical Saturn remain `UNRUN`. The active
-card is `PROMOTE-06-PCM`, status `READY`, in the existing continuity worktree
+`PROMOTE-06-PCM` is accepted at
+`5fc2b8ff00d7074da8f58697e4a1761ed282db58`. The approved capture-exact
+Predator melee cue now flows through a bounded Jo/SGL-free semantic PCM
+interface and a declared temporary SCSP adapter. Two committed-SHA builds and
+paired pinned-Yaba readbacks agree at normalized ISO
+`aecbd1b9169776c5a312028133279c89c9596f2cfa568734c643a16899306566`;
+cue identity, 147/150/200 and 387/390/440 timing, channel 1 allocation, canaries,
+zero underruns, and the promoted HUD regression lock all pass. No new subjective
+audio or physical Saturn claim is made. The active card is
+`SALVAGE-07-CDDA-RESIDENCY`, status `READY`, in the existing continuity worktree
 `C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review` on
 branch `codex/avp-user-02-enemy-review`.
 
@@ -44,4 +44,4 @@ changes that fact.
 
 Resume prompt:
 
-> Resume the AvP salvage Goal at PROMOTE-06-PCM in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve every approved player, enemy, combat, camera/stage, promoted P1/P2 HUD, and PCM lock, promote only the approved short Predator melee PCM cue behind a semantic audio port, then commit, push to private-origin, and verify the remote SHA.
+> Resume the AvP salvage Goal at SALVAGE-07-CDDA-RESIDENCY in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve every promoted player, enemy, combat, camera/stage, P1/P2 HUD, and PCM lock, isolate only one CDDA/data-read ownership transition and one explicit phase residency manifest, then commit, push to private-origin, and verify the remote SHA.

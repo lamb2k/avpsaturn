@@ -65,7 +65,7 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: PROMOTE-06-PCM
+CURRENT_TASK: SALVAGE-07-CDDA-RESIDENCY
 
 ## 4. Current salvage queue and production extension
 

@@ -2,7 +2,7 @@
 
 TASK: PROMOTE-06-PCM
 KIND: PROMOTE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: promote-pcm
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

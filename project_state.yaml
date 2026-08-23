@@ -4,15 +4,15 @@ workflow_model: interactive-salvage-promotion-integration
 roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
-production_head: d957b3b022e1e1d3598e04ee03b980e59bfe0c03
-candidate_head: d957b3b022e1e1d3598e04ee03b980e59bfe0c03
+production_head: 5fc2b8ff00d7074da8f58697e4a1761ed282db58
+candidate_head: 5fc2b8ff00d7074da8f58697e4a1761ed282db58
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-user-02-enemy-review
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 review_candidate_status: ACCEPTED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM]
 target_scope:
   source_set: avspu
   route: cold-boot-through-title-select-all-stages-ending-credits
@@ -89,6 +89,9 @@ accepted_implementation_history:
   - id: PROMOTE-05-HUD
     status: ACCEPTED
     head: d957b3b022e1e1d3598e04ee03b980e59bfe0c03
+  - id: PROMOTE-06-PCM
+    status: ACCEPTED
+    head: 5fc2b8ff00d7074da8f58697e4a1761ed282db58
 accepted_control_plane_history:
   - id: ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN
     status: ACCEPTED
@@ -184,12 +187,12 @@ architecture_enforcement:
     - id: evidence-tier-separation
       status: ACTIVE
       activates_when: always
-current_checkpoint: promote-pcm
-active_task_card: docs/task_cards/PROMOTE-06-PCM.md
-active_task_id: PROMOTE-06-PCM
-active_task_kind: PROMOTE
+current_checkpoint: salvage-cdda-residency
+active_task_card: docs/task_cards/SALVAGE-07-CDDA-RESIDENCY.md
+active_task_id: SALVAGE-07-CDDA-RESIDENCY
+active_task_kind: SALVAGE
 task_status: READY
-active_write_owner: PROMOTE-06-PCM
+active_write_owner: SALVAGE-07-CDDA-RESIDENCY
 awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
@@ -623,6 +626,31 @@ completed_dispositions:
       - Simultaneous full-stage CRAM ownership and normal-release integration remain unproven.
       - P2 input, joins, gameplay, multiplayer integration, multitap topology, a second emulator, and physical Saturn remain UNRUN.
     exact_next_experiment: Execute PROMOTE-06-PCM behind a semantic audio port while locking cue SHA-256 e2f2870251cf28c5cf52d0d074c3b426cc6db5afb4cde2eebf4838ffa296f125 and event/start/end frames 147/150/200.
+  - task: PROMOTE-06-PCM
+    evaluated_head: 5fc2b8ff00d7074da8f58697e4a1761ed282db58
+    technical_status: PASS
+    fidelity_status: ADAPTED
+    user_status: APPROVED
+    salvage_decision: PROMOTED
+    successor_activation: SALVAGE-07-CDDA-RESIDENCY
+    production_interface: src/port_v2/audio/pcm/pcm.h
+    approved_component_locks:
+      - USER-05 exact PCM response remains `sound is great hud looks broken in terms of colors` and the final package response remains `keep going`.
+      - Predator melee PCM payload remains 144752 bytes at SHA-256 e2f2870251cf28c5cf52d0d074c3b426cc6db5afb4cde2eebf4838ffa296f125.
+      - Event/start/end timing remains 147/150/200 and 387/390/440 on SCSP channel 1.
+      - Promoted P1/P2 HUD, camera/stage, player, enemy, corrected combat alignment, and street tile archive remain unchanged.
+    evidence:
+      - Strict C90 host contract passes twice with deterministic output; wrong-cue and wrong-start-delay mutations reject.
+      - Fast workflow checks PASS. PcmPromotionBench target build PASS with no PCM-specific compile warnings.
+      - Two committed-SHA builds normalize to ISO SHA-256 aecbd1b9169776c5a312028133279c89c9596f2cfa568734c643a16899306566.
+      - Paired pinned Yaba Sanshiro 1.20.37-2986eb readbacks PASS with exact semantic equality after excluding only the emulator wall-frame counter.
+      - Both runs report interface version 1, port_lock_ok=1, allocation_ok=1, exact two event/start/stop sequences, four semantic submissions, SCSP channel observed, intact canaries, and zero underruns/audio/asset/late-read failures.
+      - Promoted HUD regression readback remains exact; visual self-review PASS and paired screenshots are byte-identical at SHA-256 6a01ff1d6d5a5952bc4cebe6742708b12c4bed1c36874acaaebd7dcd2fd9bc58.
+      - No new subjective audio claim is made. Normal release, a second emulator, CDDA, broad combat mixing, and physical Saturn remain UNRUN; Capability Gate remains 0/12.
+    blockers:
+      - CDDA ownership, data-read exclusion, phase residency, broad combat mixing, new cues, and route ownership remain unproven.
+      - Normal release, a second emulator, and physical Saturn remain UNRUN.
+    exact_next_experiment: Execute SALVAGE-07-CDDA-RESIDENCY to isolate one CDDA/data-read ownership transition and one explicit phase residency manifest while preserving the PCM payload/timing and all promoted presentation locks.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR

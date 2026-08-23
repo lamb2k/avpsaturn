@@ -1046,17 +1046,25 @@
       "existing_dependencies": ["source audio evidence", "SCSP RAM", "event queue", "build packaging"],
       "authored_controller_coupling": "PCM event triggers are coupled to authored mixed-runtime events.",
       "proposed_isolated_bench": "Load and trigger one short PCM cue from a fixed semantic event with timing/readback diagnostics.",
+      "temporary_adapter": {
+        "name": "LegacyPcmScspAdapter",
+        "wrapped_implementation": "main.c play_pcm_committed plus Jo/SGL channel start/stop",
+        "satisfied_interface": "src/port_v2/audio/pcm/pcm.h",
+        "approved_regression_locks": ["MELEE.PCM SHA-256 e2f2870251cf28c5cf52d0d074c3b426cc6db5afb4cde2eebf4838ffa296f125", "event/start/end frames 147/150/200 and 387/390/440", "SCSP channel 1 with zero underruns"],
+        "remaining_authored_controller_coupling": "The adapter still owns the Jo sound object and calls SGL flush after semantic start/stop requests.",
+        "deletion_condition": "Delete after the Saturn SCSP adapter consumes AvspPortV2PcmFrame directly and reproduces the approved cue identity/timing in the production integration profile."
+      },
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
       "user_status": "APPROVED",
-      "salvage_decision": "SALVAGE_WITH_ADAPTER",
-      "production_interface": null,
-      "promoted_commit": null,
-      "evidence_commit": "89ef72b86f394f26fc63536f9d9f95f581673c18",
-      "diagnostic_interface": "tests/port_v2/hud_pcm_bench/collect_readback.py",
-      "blockers": ["Unblock: later promotion and integration must preserve the approved capture-exact PCM payload, event timing, and audible presentation; CDDA, combat mixing, normal release, and physical Saturn remain unrun."],
-      "exact_next_experiment": "Lock the approved PCM payload SHA-256 and event/start/end timing while REPAIR-05 changes only HUD color binding.",
-      "user_feedback": {"exact_response": "sound is great hud looks broken in terms of colors", "approved_components": ["Short Predator melee PCM cue presented in the USER-05 package."], "requested_changes": [], "priority": "preserve-pcm-during-hud-repair"}
+      "salvage_decision": "PROMOTED",
+      "production_interface": "src/port_v2/audio/pcm/pcm.h",
+      "promoted_commit": "5fc2b8ff00d7074da8f58697e4a1761ed282db58",
+      "evidence_commit": "5fc2b8ff00d7074da8f58697e4a1761ed282db58",
+      "diagnostic_interface": "tests/port_v2/audio/pcm/run_pinned_emulator.ps1",
+      "blockers": ["Unblock: prove CDDA ownership, data-read exclusion, and phase residency without changing the approved PCM cue.", "Unblock: prove broad combat mixing, new cues, normal release, and physical Saturn only in their dedicated future cards."],
+      "exact_next_experiment": "Execute SALVAGE-07-CDDA-RESIDENCY with the exact PCM payload, event/start/end timing, SCSP channel, allocation, and canary locks retained.",
+      "user_feedback": {"exact_response": "sound is great hud looks broken in terms of colors", "approved_components": ["Short Predator melee PCM cue presented in the USER-05 package."], "requested_changes": [], "priority": "continue-cdda-residency-salvage"}
     },
     {
       "id": "cdda-residency",

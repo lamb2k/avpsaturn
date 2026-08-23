@@ -2,7 +2,7 @@
 
 TASK: SALVAGE-07-CDDA-RESIDENCY
 KIND: SALVAGE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: salvage-cdda-residency
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
