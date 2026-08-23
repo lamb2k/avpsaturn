@@ -60,11 +60,15 @@ def wait_frame(mcp, syms, target, timeout):
     try:
         while current < target and time.time() < deadline:
             mcp.call("resume")
+            remaining_ms = max(1, int((deadline - time.time()) * 1000))
             stopped = mcp.call(
                 "wait_for_stop",
-                timeout_ms=max(1, int((deadline - time.time()) * 1000)))
+                # The MCP HTTP client has a 30-second socket timeout.  Keep
+                # each long-frame wait below that transport ceiling and poll
+                # until the card-level deadline expires.
+                timeout_ms=min(20_000, remaining_ms))
             if "stopped: true" not in stopped:
-                raise TimeoutError(f"slice frame {target} was not reached")
+                continue
             current = signed(mcp, syms[symbol])
     finally:
         mcp.call("breakpoint_remove", cpu="master", type="memory",
