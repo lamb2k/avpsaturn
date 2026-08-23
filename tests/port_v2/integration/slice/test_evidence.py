@@ -142,6 +142,7 @@ def main():
                 f"paired semantic state drifted at {name}")
     for trace, build in zip(traces, builds):
         require(trace["result"] == "PASS" and
+                trace["fidelity"] == "ADAPTED" and
                 trace["evidence_tier"] ==
                 "ONE_EMULATOR_SYNCHRONIZED_TRACE" and
                 trace["physical_saturn"] == "UNRUN" and
@@ -150,6 +151,22 @@ def main():
                 build["artifacts"]["game_iso"]["sha256"] and
                 trace["contacts"] == [600, 1200, 1800, 2400],
                 "synchronized trace identity or contact sequence drifted")
+        require(trace["adapted_scope"] ==
+                "deterministic capability-slice movement and four-attack "
+                "choreography; not production player control or enemy AI" and
+                trace["post_ko_framing"] == {
+                    "intentional_exit": False,
+                    "player_world_x": 446,
+                    "camera_world_x": 161,
+                    "player_screen_x": 109,
+                    "aperture": [-176, 175],
+                    "result": "VISIBLE_HOLD",
+                }, "ADAPTED label or post-KO framing contract drifted")
+        require(trace["render_identity_contract"]["result"] == "PASS" and
+                set(trace["render_identity_contract"]["phases"]) ==
+                {"WALK", "HIT", "RECOVERY", "KO"} and
+                trace["render_identity_mutation_control"] == "PASS_REJECTED",
+                "exact rendered street-alien identity contract drifted")
         require(trace["sample_frames"] ==
                 [sample["slice_frame"] for sample in trace["samples"]],
                 "synchronized trace sample order drifted")

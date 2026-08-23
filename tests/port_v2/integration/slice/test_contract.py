@@ -74,7 +74,7 @@ def main() -> None:
     require(first == second, "playable slice replay drifted")
     require(first == (
         "F3000 A2 C4 HP-1 HIT1 KO1 HUD4 PCM1/1 CDDA1/1 "
-        "LATE1 NEG1 SCROLL1 FALLBACK0 CANARY1\n"
+        "LATE1 NEG1 SCROLL6 FALLBACK0 CANARY1\n"
         "Playable slice deterministic integration: PASS\n"),
         "playable slice semantic contract drifted")
     negative = compile_and_run("--negative-control")

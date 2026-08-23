@@ -139,9 +139,14 @@ def validate_final(actual):
         "slice_enemy_asset_set_id": 2,
         "slice_enemy_animation_set_id": 2,
         "slice_enemy_palette_bank": 16,
+        "slice_player_world_x": 446,
+        "slice_camera_world_x": 161,
+        "slice_player_screen_x": 109,
     }, "playable-slice final")
     if actual["slice_stability_frames"] != actual["slice_frame"] + 1:
         raise RuntimeError("final frame and stability counter disagree")
+    if not -176 <= actual["slice_player_screen_x"] <= 175:
+        raise RuntimeError("post-KO player hold left the visible aperture")
 
 
 def validate_scene_anchor(actual):

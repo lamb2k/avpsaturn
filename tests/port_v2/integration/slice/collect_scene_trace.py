@@ -27,6 +27,8 @@ def load_module(name, path):
 tools = load_module(
     "enemy_bench_scene_trace",
     ROOT / "tests/port_v2/enemy_bench/collect_readback.py")
+identity_contract = load_module(
+    "slice_render_identity_contract", HERE / "render_identity.py")
 
 
 def sha(path):
@@ -165,9 +167,11 @@ def main():
         1500, 1788, 1799, 1800, 1801,
         2100, 2388, 2399, 2400, 2401, 2420, 2480, 2560,
     }
-    targets = sorted(set(range(20, 2561, 10)) | exact)
+    exact |= {2999, 3000, 3001, 3050}
+    targets = sorted(set(range(20, 3051, 10)) | exact)
     key_frames = {20, 45, 46, 320, 588, 599, 600, 601, 620, 637,
-                  1188, 1200, 1788, 1800, 2388, 2400, 2420, 2480}
+                  1188, 1200, 1788, 1800, 2388, 2400, 2420, 2480,
+                  2999, 3000, 3001, 3050}
     samples = []
     images = []
     key_images = {}
@@ -244,10 +248,29 @@ def main():
         "contacts": [sample["slice_frame"] for sample in contacts],
         "key_images": key_images,
         "clip": clip,
+        "fidelity": "ADAPTED",
+        "adapted_scope": "deterministic capability-slice movement and four-attack choreography; not production player control or enemy AI",
+        "post_ko_framing": {
+            "intentional_exit": False,
+            "player_world_x": by_frame[3050]["slice_player_world_x"],
+            "camera_world_x": by_frame[3050]["slice_camera_world_x"],
+            "player_screen_x": by_frame[3050]["slice_player_screen_x"],
+            "aperture": [-176, 175],
+            "result": "VISIBLE_HOLD",
+        },
         "result": "PASS",
     }
     output = build_root / "scene-trace.json"
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+    contract_path = HERE / "render_identity_contract.json"
+    if contract_path.is_file():
+        contract = json.loads(contract_path.read_text(encoding="utf-8"))
+        identity_result = identity_contract.validate_trace(report, contract)
+        require(identity_contract.mutation_is_rejected(report, contract),
+                "wrong nonzero object/tile family mutation was accepted")
+        report["render_identity_contract"] = identity_result
+        report["render_identity_mutation_control"] = "PASS_REJECTED"
+        output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     print(f"recorded {output.relative_to(ROOT)}")
     if clip:
         print(f"recorded {clip['path']}")

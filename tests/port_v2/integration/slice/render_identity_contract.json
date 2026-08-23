@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "fidelity": "ADAPTED",
+  "actor_id": 31,
+  "class_id": 31,
+  "description": "Exact rendered class-0x1F street-alien identity across the deterministic capability-slice choreography; this is not production player control or enemy AI.",
+  "phases": {
+    "WALK": {
+      "sample_count": 221,
+      "sequence_sha256": "6d01b7cd8059aa14cad870b13695ed40831111541669871b54e3de89e6cd82a9",
+      "animation_records": [1239884],
+      "palette_banks": [17]
+    },
+    "HIT": {
+      "sample_count": 5,
+      "sequence_sha256": "b9dc421bbd018ff669c91855520525d6c348fd673fa5ee61fd9feefbc36f1d61",
+      "animation_records": [1236304],
+      "palette_banks": [19]
+    },
+    "RECOVERY": {
+      "sample_count": 27,
+      "sequence_sha256": "629b425ab836e874a031e54cdb080f7fbdbe78e4eb5bc0453a590dd53621e168",
+      "animation_records": [1239884],
+      "palette_banks": [17]
+    },
+    "KO": {
+      "sample_count": 69,
+      "sequence_sha256": "c173261d587b9b7ca6f93e37de4501aeea774cb5ccfefe6820f3d441a830537b",
+      "animation_records": [1237524, 1237572, 1237588, 1237608],
+      "palette_banks": [16]
+    }
+  },
+  "anchors": [
+    {"phase": "WALK", "frame": 46, "identity_row": [46, 1, 46, 1239884, 17, 2, -1059845698, -403435128]},
+    {"phase": "WALK", "frame": 320, "identity_row": [320, 1, 80, 1239884, 17, 5, -130267640, -1717272789]},
+    {"phase": "WALK", "frame": 588, "identity_row": [588, 1, 108, 1239884, 17, 5, -1813219646, 130878419]},
+    {"phase": "HIT", "frame": 600, "identity_row": [600, 3, 0, 1236304, 19, 4, 1749601984, 1791278282]},
+    {"phase": "HIT", "frame": 620, "identity_row": [620, 3, 20, 1236304, 19, 4, 1749601984, 1791278282]},
+    {"phase": "RECOVERY", "frame": 637, "identity_row": [637, 1, 157, 1239884, 17, 5, -229218178, -318728749]},
+    {"phase": "RECOVERY", "frame": 890, "identity_row": [890, 1, 170, 1239884, 17, 5, -1813219646, 130878419]},
+    {"phase": "KO", "frame": 2400, "identity_row": [2400, 4, 0, 1237524, 16, 4, -1306104730, 230372650]},
+    {"phase": "KO", "frame": 2420, "identity_row": [2420, 4, 20, 1237572, 16, 4, -1306104730, 230372650]},
+    {"phase": "KO", "frame": 2480, "identity_row": [2480, 4, 80, 1237608, 16, 1, -430669811, -696215131]},
+    {"phase": "KO", "frame": 2999, "identity_row": [2999, 4, 139, 1237608, 16, 1, -430669811, -696215131]},
+    {"phase": "KO", "frame": 3000, "identity_row": [3000, 4, 139, 1237608, 16, 1, -430669811, -696215131]},
+    {"phase": "KO", "frame": 3001, "identity_row": [3001, 4, 139, 1237608, 16, 1, -430669811, -696215131]},
+    {"phase": "KO", "frame": 3050, "identity_row": [3050, 4, 139, 1237608, 16, 1, -430669811, -696215131]}
+  ],
+  "negative_control": {
+    "target_frame": 600,
+    "substitute_frame": 588,
+    "mutation": "Replace the valid HIT object/tile identity with a wrong but nonzero WALK family while leaving actor metadata unchanged.",
+    "expected": "REJECT"
+  }
+}

@@ -100,6 +100,50 @@ static void load_operations(AvspPortV2SliceLoadOps *operations)
     operations->load_pcm = load_pcm;
 }
 
+static void adapted_stage_camera(const int tick, AvspPortV2CameraInput *camera)
+{
+    /* ADAPTED capability-slice choreography. These checkpoints mirror the
+     * pinned stage adapter's observed pan and final hold; they are not a
+     * production camera controller. Keeping the final 161-pixel anchor here
+     * prevents the host replay from inventing a post-KO exit that the Saturn
+     * scene does not perform. */
+    if (tick < 46)
+    {
+        camera->scroll_x[0] = 0;
+        camera->scroll_x[1] = 7;
+    }
+    else if (tick < 50)
+    {
+        camera->scroll_x[0] = 10;
+        camera->scroll_x[1] = 15;
+    }
+    else if (tick < 60)
+    {
+        camera->scroll_x[0] = 44;
+        camera->scroll_x[1] = 45;
+    }
+    else if (tick < 70)
+    {
+        camera->scroll_x[0] = 95;
+        camera->scroll_x[1] = 90;
+    }
+    else if (tick < 80)
+    {
+        camera->scroll_x[0] = 123;
+        camera->scroll_x[1] = 115;
+    }
+    else if (tick < 90)
+    {
+        camera->scroll_x[0] = 144;
+        camera->scroll_x[1] = 133;
+    }
+    else
+    {
+        camera->scroll_x[0] = 161;
+        camera->scroll_x[1] = 148;
+    }
+}
+
 static int replay(AvspPortV2SliceFrame *final_frame,
                   AvspPortV2SliceFrame *first_contact_frame,
                   const int emit)
@@ -141,8 +185,7 @@ static int replay(AvspPortV2SliceFrame *final_frame,
         input.player_attack = tick == 588 || tick == 1188 ||
             tick == 1788 || tick == 2388;
         input.player_height = tick >= 2300 ? 13 : 0;
-        input.camera.scroll_x[0] = tick < 46 ? 0 : 10;
-        input.camera.scroll_x[1] = tick < 46 ? 7 : 15;
+        adapted_stage_camera(tick, &input.camera);
         input.player_health = 101;
         input.player_energy = 64;
         input.player2_visible = 1;
@@ -186,13 +229,13 @@ static int replay(AvspPortV2SliceFrame *final_frame,
            pcm_starts == 1 && pcm_stops == 1 && cdda_starts == 1 &&
            cdda_stops == 1 && runtime.residency.late_read_attempts == 1 &&
            runtime.residency.negative_rejections == 1 &&
-           frame.camera.scroll_steps == 1 && !frame.fallback_used &&
+           frame.camera.scroll_steps == 6 && !frame.fallback_used &&
            frame.canaries_ok && stage_submits == 9003 && hud_submits == 3001 &&
            frame.scene.player_world_x == 446 &&
            frame.scene.enemy_world_x == 317 &&
-           frame.scene.camera_world_x == 10 &&
-           frame.scene.player_screen_x == 260 &&
-           frame.scene.enemy_screen_x == 131 &&
+           frame.scene.camera_world_x == 161 &&
+           frame.scene.player_screen_x == 109 &&
+           frame.scene.enemy_screen_x == -20 &&
            frame.scene.enemy_identity.archetype_id ==
                AVSP_PORT_V2_SLICE_ARCHETYPE_STREET_ALIEN &&
            frame.scene.enemy_identity.palette_bank == 16 &&
