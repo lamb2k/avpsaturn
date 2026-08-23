@@ -2,7 +2,7 @@
 
 TASK: USER-03-COMBAT-FEEL-REVIEW
 KIND: USER_REVIEW
-STATUS: AWAITING_USER_FEEDBACK
+STATUS: ACCEPTED
 CHECKPOINT: review-combat-feel
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -77,4 +77,17 @@ Ask exactly: "What should remain unchanged, what looks or feels wrong, and which
   `4abbc86f596c27d7873a96016c3e52c2d777edb4`.
 - The ignored package was regenerated from that exact commit and normalized ISO
   `3c4096835741882f7a815483c47e37c9bcf2bfbb0ef3fb846ee2c20e67526b7b`.
-- Renewed review is pending; no approval is inferred.
+- The regenerated package remained unapproved until the renewed response below.
+
+## Renewed feedback
+
+- Exact response: `much better lets keep going`
+- Approved components: corrected source-relative player/enemy positioning and
+  actor order; shared lane/ground baseline; attack-facing-toward-enemy
+  relationship; and the shown corrected scale, palette, and readability.
+- Requested changes: none.
+- Priority: continue with `PROMOTE-04-CAMERA-STAGE`.
+- Scope boundary: second and third HIT reaction timing, general attack/damage
+  rules, enemy AI, combat audio, normal release, a second emulator, and
+  physical Saturn remain unpromoted or `UNRUN`.
+- Disposition: `ACCEPTED`; activate only `PROMOTE-04-CAMERA-STAGE`.

@@ -2,7 +2,7 @@
 
 TASK: PROMOTE-04-CAMERA-STAGE
 KIND: PROMOTE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: promote-camera-stage
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

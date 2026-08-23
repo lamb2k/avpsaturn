@@ -668,15 +668,14 @@
       "evaluated_commit": "4abbc86f596c27d7873a96016c3e52c2d777edb4",
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
-      "user_status": "AWAITING_USER_FEEDBACK",
-      "salvage_decision": "REPAIR",
+      "user_status": "APPROVED",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "diagnostic_interface": "tests/port_v2/integration/combat/run_pinned_emulator.ps1",
       "blockers": [
-        "Unblock: renewed USER-03 subjective review of the corrected position, facing, lane baseline, scale, palette, and readability.",
         "Unblock: second and third HIT reaction timing, general attack/damage rules, AI, a second emulator, normal release, and physical Saturn remain unpromoted or UNRUN."
       ],
-      "exact_next_experiment": "Present the corrected ignored USER-03 package, ask the exact required question, record the exact response, and perform no implementation while review is pending.",
+      "exact_next_experiment": "Execute PROMOTE-04-CAMERA-STAGE while preserving the approved corrected combat alignment and every earlier presentation lock.",
       "evidence": {
         "source_samples": [5190, 5236, 5283, 5329],
         "retained_workram_identity": "PASS / four exact SHA-256 identities",
@@ -902,15 +901,15 @@
       "proposed_isolated_bench": "Evaluate source hitboxes and deterministic contact selectors without applying authored damage behavior.",
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
-      "user_status": "AWAITING_USER_FEEDBACK",
-      "salvage_decision": "REPAIR",
+      "user_status": "APPROVED",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "promoted_commit": null,
       "evidence_commit": "4abbc86f596c27d7873a96016c3e52c2d777edb4",
       "diagnostic_interface": "tests/port_v2/integration/combat/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: obtain renewed USER-03 review of the corrected source-relative actor placement.", "Unblock: second and third reaction timing, general attack/damage rules, AI, a second emulator, normal release, and physical Saturn remain unpromoted or UNRUN."],
-      "exact_next_experiment": "Present the corrected ignored USER-03 package and record the exact response; perform no implementation while feedback is pending.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": ["Prior USER-03 requested player/enemy relative position, shared lane/ground, and attack-facing correction; renewed review is pending."], "priority": "renewed-combat-alignment-review"}
+      "blockers": ["Unblock: second and third HIT reaction timing, general attack/damage rules, AI, a second emulator, normal release, and physical Saturn remain unpromoted or UNRUN."],
+      "exact_next_experiment": "Execute PROMOTE-04-CAMERA-STAGE while preserving the approved corrected combat alignment and every earlier presentation lock.",
+      "user_feedback": {"exact_response": "much better lets keep going", "approved_components": ["Corrected source-relative player/enemy positioning and actor order shown in the renewed HIT and KO evidence.", "Shared lane/ground baseline and attack-facing-toward-enemy relationship shown in the renewed evidence.", "Corrected combat scale, palette, and readability shown in the renewed evidence."], "requested_changes": [], "priority": "continue-camera-stage-promotion"}
     },
     {
       "id": "palette-cram",

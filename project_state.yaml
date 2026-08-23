@@ -12,7 +12,7 @@ production_branch: codex/avp-user-02-enemy-review
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 review_candidate_status: ACCEPTED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW]
 target_scope:
   source_set: avspu
   route: cold-boot-through-title-select-all-stages-ending-credits
@@ -178,13 +178,13 @@ architecture_enforcement:
     - id: evidence-tier-separation
       status: ACTIVE
       activates_when: always
-current_checkpoint: review-combat-feel
-active_task_card: docs/task_cards/USER-03-COMBAT-FEEL-REVIEW.md
-active_task_id: USER-03-COMBAT-FEEL-REVIEW
-active_task_kind: USER_REVIEW
-task_status: AWAITING_USER_FEEDBACK
-active_write_owner: USER-03-COMBAT-FEEL-REVIEW
-awaiting_user_feedback: [USER-03-COMBAT-FEEL-REVIEW]
+current_checkpoint: promote-camera-stage
+active_task_card: docs/task_cards/PROMOTE-04-CAMERA-STAGE.md
+active_task_id: PROMOTE-04-CAMERA-STAGE
+active_task_kind: PROMOTE
+task_status: READY
+active_write_owner: PROMOTE-04-CAMERA-STAGE
+awaiting_user_feedback: []
 open_blockers: []
 completed_dispositions:
   - task: SALVAGE-00-OLD-BUILD-BASELINE
@@ -518,30 +518,32 @@ completed_dispositions:
       - Second and third HIT reaction timing, general attack/damage rules, enemy AI, combat audio, normal release, a second emulator, and physical Saturn remain unpromoted or UNRUN.
     exact_next_experiment: Execute REPAIR-03 using retained MAME frames 5190 and 5329, reject the mixed generic/source transform, preserve semantic and approved-component locks, and return corrected evidence to USER-03.
   - task: USER-03-COMBAT-FEEL-REVIEW
-    evaluated_head: cc5f6999e8dd15146b739285db264b4b2ea45bfb
+    evaluated_head: 4abbc86f596c27d7873a96016c3e52c2d777edb4
     technical_status: PASS
     fidelity_status: ADAPTED
-    user_status: CHANGES_REQUESTED
-    salvage_decision: REPAIR
-    successor_activation: REPAIR-03-COMBAT-ACTOR-ALIGNMENT
+    user_status: APPROVED
+    salvage_decision: SALVAGE_WITH_ADAPTER
+    successor_activation: PROMOTE-04-CAMERA-STAGE
     exact_response: Does it seem like the positioning of of the player and enemy is incorrect it misaligned?
     priority_response: ok let’s do that since it is a durable requirement unless it would be best to defer once other dependencies are satisfied that would rectify the misalignment
-    approved_components: []
-    requested_changes:
-      - Correct player/enemy relative positioning and shared lane/ground alignment.
-      - Ensure the player attack faces toward the contacted enemy.
-    priority: combat-actor-alignment-first
+    renewed_exact_response: much better lets keep going
+    approved_components:
+      - Corrected source-relative player/enemy positioning and actor order shown in the renewed HIT and KO evidence.
+      - Shared lane/ground baseline and attack-facing-toward-enemy relationship shown in the renewed evidence.
+      - Corrected combat scale, palette, and readability shown in the renewed evidence.
+    requested_changes: []
+    priority: continue-camera-stage-promotion
     blockers:
-      - No subjective combat presentation is approved until renewed USER-03 review.
+      - Second and third HIT reaction timing, general attack/damage rules, enemy AI, combat audio, normal release, and a second emulator remain unpromoted or UNRUN.
       - Physical Saturn remains UNRUN.
-    exact_next_experiment: Execute only REPAIR-03 combat actor alignment, then regenerate the ignored USER-03 package and request renewed exact feedback.
+    exact_next_experiment: Promote only the previously approved adapted camera and two-plane stage presentation behind bounded camera-state and render-port interfaces.
   - task: REPAIR-03-COMBAT-ACTOR-ALIGNMENT
     evaluated_head: 4abbc86f596c27d7873a96016c3e52c2d777edb4
     technical_status: PASS
     fidelity_status: ADAPTED
-    user_status: AWAITING_USER_FEEDBACK
-    salvage_decision: REPAIR
-    successor_activation: USER-03-COMBAT-FEEL-REVIEW
+    user_status: APPROVED
+    salvage_decision: SALVAGE_WITH_ADAPTER
+    successor_activation: PROMOTE-04-CAMERA-STAGE
     production_interface: src/port_v2/integration/combat/combat.h
     approved_component_locks:
       - Promoted player contract d0e6d835...fedf612.
@@ -560,9 +562,8 @@ completed_dispositions:
       - Visual self-review against retained source screenshots PASS; ignored package build/feedback/USER-03-COMBAT-FEEL-REVIEW/ is pinned to the implementation commit.
       - No user approval is inferred. Normal release, a second emulator, and physical Saturn remain UNRUN; Capability Gate remains 0/12.
     blockers:
-      - Renewed USER-03 subjective review is required before dependent presentation promotion.
       - Second and third HIT reaction timing, general attack/damage rules, enemy AI, combat audio, normal release, a second emulator, and physical Saturn remain unpromoted or UNRUN.
-    exact_next_experiment: Present the corrected ignored USER-03 package and record the exact response to the required review question; perform no implementation while review is pending.
+    exact_next_experiment: Execute PROMOTE-04-CAMERA-STAGE while preserving the newly approved combat alignment and every earlier presentation lock.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR
