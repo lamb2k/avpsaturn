@@ -65,9 +65,9 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
+CURRENT_TASK: SALVAGE-11-STREET-ALIEN-AI
 
-ACTIVE_SOFTWARE_TASK: PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
+ACTIVE_SOFTWARE_TASK: SALVAGE-11-STREET-ALIEN-AI
 
 ## 4. Current salvage queue and production extension
 

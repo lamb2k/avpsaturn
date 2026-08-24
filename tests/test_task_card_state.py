@@ -377,13 +377,16 @@ def main() -> None:
             "hardware pretest is not parked while software work proceeds")
 
     for token in (
-        "production_player_control: UNRUN",
+        "production_player_control: PASS_BOUNDED_ONE_EMULATOR",
         "street_alien_ai: UNRUN",
         "encounter_controller: UNRUN",
         "interactive_human_review: UNRUN",
         "scripted_capability_slice_sufficient: false",
     ):
         require(token in state, f"live-gameplay state missing {token}")
+    require(scalar(cards["PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER"],
+                   "STATUS") == "ACCEPTED",
+            "bounded production player-action promotion is not accepted")
     require("production player control and enemy AI remain UNKNOWN" in state,
             "INTEGRATE-03 was relabeled as measured production gameplay")
 

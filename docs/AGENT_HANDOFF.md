@@ -34,12 +34,12 @@ withdrawal set piece, not a kill clear. The live-loop contract is explicitly
 adapted to one ORACLE-05 alien and clears only after target KO then inactivity;
 timers and presentation flags cannot clear it.
 
-SALVAGE-10 is accepted at implementation `c81715d`. Its two cold pinned-Yaba
-runs have identical 384-sample ledgers and normalized diagnostic ISO
-`a6017eac...b8f075`; controller edges own attack selection, while 50 contact
-reports are telemetry only. Enemy AI, route progression, subjective feel, and
+SALVAGE-10 and PROMOTE-10 are accepted at `c81715d` and `6b943ea`.
+The production core is Jo/SGL-free at `src/port_v2/gameplay/player_action`;
+two post-commit cold Yaba reads have identical 384-sample ledgers and ISO
+`a6017eac...b8f075`. Enemy AI, route progression, subjective feel, and
 physical Saturn remain outside that acceptance.
 
-The sole software writer is `PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER`.
+The sole software writer is `SALVAGE-11-STREET-ALIEN-AI`.
 Resume prompt:
-> Resume the AvP salvage Goal by executing only PROMOTE-10 on codex/avp-playable-loop-pivot; preserve accepted SALVAGE-10 implementation c81715da365683d240950c49b9930543691beb1a, ORACLE-04/05/06 evidence, approved INTEGRATE-03 ISO 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef, Probe ISO 82c3a86c34b79626bf2cda7c2da4174ab1ee3603b3341f5091b141b740b4ef50, all component locks, dirty/private evidence, and physical Saturn UNRUN; promote only the bounded Jo/SGL-free Predator Warrior action controller behind a narrow production interface, validate, and advance serially.
+> Resume the AvP salvage Goal by executing only SALVAGE-11 on codex/avp-playable-loop-pivot; preserve accepted PROMOTE-10 implementation 6b943ead3db9ad5cb50bff3bca3884125b973a78, ORACLE-04/05/06 evidence, approved INTEGRATE-03 ISO 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef, Probe ISO 82c3a86c34b79626bf2cda7c2da4174ab1ee3603b3341f5091b141b740b4ef50, all component locks, dirty/private evidence, and physical Saturn UNRUN; implement only the measured class-0x1F target/approach/lane/facing/attack/cooldown/contact/damage/HIT/KO/RNG loop in a Jo/SGL-free core, validate, promote, and advance serially.

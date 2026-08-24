@@ -2,7 +2,7 @@
 
 TASK: SALVAGE-11-STREET-ALIEN-AI
 KIND: SALVAGE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: salvage-street-alien-ai
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

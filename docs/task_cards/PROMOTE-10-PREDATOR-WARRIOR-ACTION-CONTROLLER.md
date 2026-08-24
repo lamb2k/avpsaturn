@@ -2,7 +2,7 @@
 
 TASK: PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
 KIND: PROMOTE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: promote-predator-warrior-action-controller
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -62,6 +62,20 @@ No renewed review if accepted presentation is unchanged; USER-09 judges feel.
 
 - Interface cannot isolate gameplay authority, temporary adapter cannot be
   retired, approved lock changes, or material architecture decision.
+
+## Accepted evidence
+
+- Production implementation: `6b943ead3db9ad5cb50bff3bca3884125b973a78`.
+- Fast, Oracle, and dedicated production Target lanes: `PASS`.
+- Two post-commit cold pinned-Yaba reads: `PASS`, exact 384-sample ledgers,
+  bound to the production commit and normalized diagnostic ISO SHA-256
+  `a6017eac7c1b38d82e9cff0335dd51101ccb7858edb71ad4521baaf72eb8f075`.
+- The production core is strict C90 and Jo/SGL/render-free. The SALVAGE-10
+  compatibility surface is include-only, owns no behavior, and is deleted
+  when integrated player-action coverage replaces that diagnostic.
+- Player presentation behavior remains unchanged. Enemy AI, live collision
+  damage authority, route progression, multiplayer, subjective feel, and
+  physical Saturn remain outside this acceptance; physical Saturn is `UNRUN`.
 
 ## Next eligible cards
 

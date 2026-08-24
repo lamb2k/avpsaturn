@@ -230,10 +230,20 @@ def validate_ledger(ledger: dict) -> None:
         require(isinstance(entry["existing_dependencies"], list),
                 f"{entry['id']} dependencies are not a list")
         validate_disposition(entry)
-    for identifier in (
-        "player-action-controller", "street-alien-ai",
-        "round1-encounter-controller",
-    ):
+    player_action = subsystem(ledger, "player-action-controller")
+    if player_action["technical_status"] == "UNRUN":
+        require(player_action["fidelity_status"] == "UNKNOWN" and
+                player_action["salvage_decision"] == "UNTESTED",
+                "unrun player-action fixture advanced")
+    else:
+        require(player_action["technical_status"] == "PASS" and
+                player_action["fidelity_status"] == "ADAPTED" and
+                player_action["salvage_decision"] == "PROMOTED" and
+                player_action["production_interface"] ==
+                "src/port_v2/gameplay/player_action/player_action.h" and
+                player_action["temporary_adapter"]["remaining_authored_controller_coupling"].startswith("None"),
+                "promoted player-action disposition drifted")
+    for identifier in ("street-alien-ai", "round1-encounter-controller"):
         entry = subsystem(ledger, identifier)
         require(entry["technical_status"] == "UNRUN" and
                 entry["fidelity_status"] == "UNKNOWN" and
