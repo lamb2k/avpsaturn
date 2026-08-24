@@ -67,6 +67,8 @@ has now advanced through the dependency-safe presentation promotions.
 
 CURRENT_TASK: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
 
+ACTIVE_SOFTWARE_TASK: ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS
+
 ## 4. Current salvage queue and production extension
 
 The accepted player, enemy, combat, camera/stage, P1/P2 HUD, PCM, CDDA, and

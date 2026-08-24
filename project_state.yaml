@@ -197,8 +197,8 @@ independent_read_only_cards:
   - ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS
   - ORACLE-05-STREET-ALIEN-AI
   - ORACLE-06-ROUND1-ENCOUNTER-RULES
-active_independent_read_only_card: null
-independent_oracle_write_owner: null
+active_independent_read_only_card: ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS
+independent_oracle_write_owner: ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS
 independent_read_only_policy:
   primary_task_must_remain_active: true
   allowed_primary_hard_stop: READY_FOR_PHYSICAL
@@ -236,6 +236,7 @@ open_blockers: []
 hardware_pretest:
   task: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
   status: READY_FOR_PHYSICAL
+  execution_state: WAITING_FOR_EXTERNAL_HARDWARE
   task_kind: QA
   control_plane_head: edb02ee135fb1b30188ba5e089b3fdf126a90cff
   accepted_combat_interface_head: 417ed808e10f0f255948b1e6ecf0223399509c74

@@ -214,7 +214,7 @@ def main() -> None:
         "status: ACTIVE_FOR_NEW_ADAPTERS",
         "status: ACTIVE",
         "independent_read_only_cards:",
-        "active_independent_read_only_card: null",
+        "active_independent_read_only_card:",
         "serial_oracle_writers: true",
         "production_runtime_writes: false",
         "physical_status_changes: false",
