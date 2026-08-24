@@ -490,7 +490,10 @@ function Invoke-FullLane {
     finally {
         foreach ($link in @($linkedInputs)) {
             if (Test-Path -LiteralPath $link) {
-                Remove-Item -LiteralPath $link -Force
+                # Windows PowerShell 5 can throw a null-reference while
+                # Remove-Item handles a junction. Directory.Delete removes
+                # only the junction entry and never traverses its target.
+                [IO.Directory]::Delete($link)
             }
         }
         if (Test-Path -LiteralPath $shadowRoot) {
