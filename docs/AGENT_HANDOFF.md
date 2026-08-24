@@ -22,28 +22,25 @@ Future production cards continue sequentially from `production_head`.
 ## Current task and next action
 
 REPAIR-09 is accepted at `417ed808e10f0f255948b1e6ecf0223399509c74`.
-Its interface version 2 binds selector-specific presentation, collision,
-damage, and the class-`0x1F` reaction to one independent MAME source event.
-The active card is `INTEGRATE-03-PLAYABLE-SLICE`, status `READY` and user
-`APPROVED` for `SOURCE_BOUND_WITH_ADAPTED_INPUT`, in
-`C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review`
-on `codex/avp-user-02-enemy-review`. Candidate
-`82965ef80223a03937e0b527d16161ed68d874a0` consumes the accepted source-bound
-interface. Its exact normal-release ISO is
-`4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef`;
-paired 577-sample traces, 297 cadence-1 combat frames, source mutations, visual
-QA, and Full pass. Task fidelity is `ADAPTED` (`SOURCE_BOUND_WITH_ADAPTED_INPUT`):
-six combat components are measured, while input choreography is adapted. The
-actor comparator passes 297 frames and five mutations; all seven calculated
-same-assembly flags were directly inspected. The exact approval is recorded
-verbatim in the task card, state, and migration ledger. Preserve every named
-component lock; add no comparator machinery without a concrete discrepancy.
-All approved locks remain preserved. Physical Saturn is still `0/12` and
-`UNRUN`: no Windows-visible Saturn loader/removable target or capture device was
-detected, and the required Probe 3 representative/909-tile physical executable
-is absent. This is a required-interaction/missing-evidence hard stop;
+INTEGRATE-03 remains user `APPROVED` for
+`SOURCE_BOUND_WITH_ADAPTED_INPUT` at candidate `82965ef80223a03937e0b527d16161ed68d874a0`
+and exact ISO `4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef`.
+The active `QA` card is `HW-01-PROBE-3-VDP1-BUDGET-PRETEST`, status `READY`
+(workflow vocabulary for `READY_FOR_PHYSICAL`), in the isolated
+`AvPSaturnCapabilityTest-hw-01-probe3` worktree on
+`codex/avp-hw-01-probe3`. Isolation was required because the continuity
+worktree had an owned-path collision with generated tracked data.
+
+Probe schedule `e892836d...abd84` binds committed AvP measurements: frame 5637
+expands to 567 commands and frame 5776 expands exactly to 909. Strict Probe
+image `f37507be...0b0b` passes two identical pinned-emulator semantic runs with
+summary `0xe3241b49`; the overload control trips. The normal-release regression
+remains exact at `4a142774...98ef`. Operator package is under
+`build/feedback/HW-01-PROBE-3-VDP1-BUDGET-PRETEST/`. Read-only preflight found
+no removable target, serial/debug device, capture device, or loader tool and
+performed no write. Physical Saturn timing/scanout/soak remain `UNRUN`;
 `SALVAGE-08-FRONTEND` remains inactive.
 
 Resume prompt:
 
-> Resume the AvP salvage Goal at the INTEGRATE-03 physical hard stop in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve exact ISO 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef and all user-approved locks, connect and identify the declared Saturn/cart/loader/pad/capture setup, run Probe 3 representative/909-tile plus overload control, then execute the exact-image capability record twice and ten-minute soak; keep physical evidence UNRUN and SALVAGE-08 inactive until every physical condition passes.
+> Resume the AvP salvage Goal at HW-01-PROBE-3-VDP1-BUDGET-PRETEST `READY_FOR_PHYSICAL`; preserve Probe ISO f37507be53164ba833eb261eded4f0291dd9957412d228155473af0172306b0b, approved INTEGRATE-03 ISO 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef, and all locks; identify the connected Saturn/cart/boot/pad/capture setup, request explicit authorization for any exact target write, run representative, peak-909, overload, alternating soak, then the two cold-boot exact-image records and integrated soak; keep physical evidence UNRUN and SALVAGE-08 inactive until every physical condition passes.

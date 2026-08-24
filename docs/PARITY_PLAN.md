@@ -65,7 +65,7 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: INTEGRATE-03-PLAYABLE-SLICE
+CURRENT_TASK: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
 
 ## 4. Current salvage queue and production extension
 
@@ -74,9 +74,14 @@ phase-residency results remain regression locks. REPAIR-09 is accepted at the
 implementation recorded by `project_state.production_head`: the player/combat
 interface now binds each selector-specific player presentation, collision,
 damage, and class-`0x1F` alien reaction to one independent MAME source event.
-INTEGRATE-03 remains unaccepted and `CHANGES_REQUESTED`; it is active on the
-same continuity branch to consume that interface, recapture the complete
-normal-release scene, rerun Full, and stop for renewed human review.
+INTEGRATE-03 is user `APPROVED` for `SOURCE_BOUND_WITH_ADAPTED_INPUT` at exact
+candidate `82965ef` and normalized ISO SHA-256 `4a142774...`. It remains
+physically `UNRUN`. The bounded QA prerequisite
+`HW-01-PROBE-3-VDP1-BUDGET-PRETEST` has prepared its representative, exact
+909-tile, and overload-control hardware package. Host checks, strict build,
+paired pinned-emulator semantics, overload detection, and the exact approved
+normal-ISO regression pass. It is `READY_FOR_PHYSICAL`; physical timing and
+soak remain `UNRUN`, and `SALVAGE-08` remains inactive.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|
@@ -90,7 +95,7 @@ normal-release scene, rerun Full, and stop for renewed human review.
 | 8 | `PROMOTE-05-HUD` | Promote approved P1/P2 HUD presentation |
 | 9 | `PROMOTE-06-PCM` | Promote approved PCM cue path |
 | 10 | `SALVAGE-07-CDDA-RESIDENCY` -> `USER-07-CDDA-RESIDENCY-REVIEW` -> `PROMOTE-07-CDDA-RESIDENCY` | Prove audio/load ownership and manifests, then require explicit audible review |
-| 11 | `REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION` -> corrected `INTEGRATE-03-PLAYABLE-SLICE` | Bind selector-specific player/combat presentation to independent cadence-1 MAME evidence, then integrate and physically prove the capability slice |
+| 11 | `REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION` -> corrected `INTEGRATE-03-PLAYABLE-SLICE` -> `HW-01-PROBE-3-VDP1-BUDGET-PRETEST` | Preserve the approved source-bound slice and prepare its isolated representative/909/overload physical prerequisite before physical execution |
 | 12 | `SALVAGE-08-FRONTEND` -> `QA-08-FRONTEND` -> `USER-08-FRONTEND` -> `PROMOTE-08-FRONTEND` | Promote title and four-character select |
 | 13 | `INTEGRATE-04-COLD-BOOT-TO-ROUND1` | Cold boot through Round 1 gameplay |
 | 14 | `ORACLE-01`, `ORACLE-02`, `ORACLE-03` | Complete title-to-credits and four-character source evidence |

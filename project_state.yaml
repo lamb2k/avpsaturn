@@ -193,14 +193,31 @@ architecture_enforcement:
     - id: evidence-tier-separation
       status: ACTIVE
       activates_when: always
-current_checkpoint: integrate-playable-slice
-active_task_card: docs/task_cards/INTEGRATE-03-PLAYABLE-SLICE.md
-active_task_id: INTEGRATE-03-PLAYABLE-SLICE
-active_task_kind: INTEGRATE
+current_checkpoint: hw-01-probe-3-vdp1-budget-pretest
+active_task_card: docs/task_cards/HW-01-PROBE-3-VDP1-BUDGET-PRETEST.md
+active_task_id: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
+active_task_kind: QA
 task_status: READY
-active_write_owner: INTEGRATE-03-PLAYABLE-SLICE
+active_write_owner: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
 awaiting_user_feedback: []
 open_blockers: []
+hardware_pretest:
+  task: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
+  status: READY_FOR_PHYSICAL
+  task_kind: QA
+  control_plane_head: edb02ee135fb1b30188ba5e089b3fdf126a90cff
+  accepted_combat_interface_head: 417ed808e10f0f255948b1e6ecf0223399509c74
+  approved_runtime_candidate_head: 82965ef80223a03937e0b527d16161ed68d874a0
+  schedule_sha256: e892836d68ad143367153b80f7b19b22ca07354389ef5afe2a0de250f0aabd84
+  representative_workload: source frame 5637 / 57 measured objects / 567 reachable and drawn commands
+  peak_workload: source frame 5776 / 78 measured objects / 909 reachable and drawn commands
+  probe_iso_sha256: f37507be53164ba833eb261eded4f0291dd9957412d228155473af0172306b0b
+  probe_manifest_sha256: 13f959d8d1563b23144ec1c841e238b5575c78f0c7a6226febd0ba544a6b4caa
+  paired_pinned_emulator: PASS_SEMANTICS_ONLY / identical checksum 0xe3241b49 / overload detector tripped
+  approved_iso_regression: PASS / 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef
+  operator_package: build/feedback/HW-01-PROBE-3-VDP1-BUDGET-PRETEST
+  read_only_preflight: no removable target, serial/debug device, capture device, or loader tool; no write performed
+  physical_saturn: UNRUN
 pending_integration_review:
   task: INTEGRATE-03-PLAYABLE-SLICE
   disposition: USER_APPROVED_PHYSICAL_PENDING
@@ -281,7 +298,7 @@ pending_integration_review:
     - route progression
     - multiplayer
     - physical Saturn behavior
-  physical_prerequisites: BLOCKED_REQUIRED_INTERACTION / no Windows-visible Saturn loader, removable target, or capture device was detected; the required Probe 3 representative/909-tile physical executable is absent
+  physical_prerequisites: READY_FOR_PHYSICAL / complete Probe 3 representative, exact peak-909, overload-control, hashes, read-only preflight, and operator package; exact physical setup identification and authorized boot-media preparation remain required interaction
   physical_saturn: UNRUN
   blocked_successor: SALVAGE-08-FRONTEND
 completed_dispositions:
@@ -867,6 +884,7 @@ task_queue:
   - USER-07-CDDA-RESIDENCY-REVIEW
   - PROMOTE-07-CDDA-RESIDENCY
   - REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
+  - HW-01-PROBE-3-VDP1-BUDGET-PRETEST
   - INTEGRATE-03-PLAYABLE-SLICE
   - SALVAGE-08-FRONTEND
   - QA-08-FRONTEND

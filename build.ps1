@@ -27,6 +27,7 @@ param(
     [switch]$HitKoPromotionBench,
     [switch]$CombatIntegrationBench,
     [switch]$PlayableSlice,
+    [switch]$Probe3,
     [switch]$SkipHostTests
 )
 
@@ -41,7 +42,7 @@ $usePlayableSlice = $PlayableSlice -or ($Release -and
           $CddaResidencySalvageBench -or $CddaResidencyPromotionBench -or
           $EnemySalvageBench -or $EnemyPromotionBench -or
           $PlayerEnemyIntegration -or $CollisionSalvageBench -or
-          $HitKoPromotionBench -or $CombatIntegrationBench))
+          $HitKoPromotionBench -or $CombatIntegrationBench -or $Probe3))
 if (-not $JoEngineRoot) {
     $JoEngineRoot = Join-Path $projectRoot '.deps\joengine'
 }
@@ -208,6 +209,35 @@ try {
             throw "Tile archive on disk is $tileArchiveBytes bytes but the manifest records $($tileManifestData.archive.bytes)."
         }
         Write-Host "Tile archive: $tileArchiveBytes bytes, scope=street, budget $($tileManifestData.tile_region_budget_used_pct)% used"
+        if ($Probe3) {
+            $probe3ScheduleGenerator = Join-Path $projectRoot `
+                'tests\hardware\probe3\generate_schedule.py'
+            $probe3Schedule = Join-Path $projectRoot `
+                'tests\hardware\probe3\probe3-schedule.json'
+            $probe3TileManifest = Join-Path $projectRoot `
+                'build\hardware\probe3\probe3-tile-manifest.json'
+            & $PythonPath $probe3ScheduleGenerator
+            if ($LASTEXITCODE -ne 0) {
+                throw "Probe 3 schedule generation failed with exit code $LASTEXITCODE."
+            }
+            & $PythonPath (Join-Path $projectRoot 'tools\gen_avsp_gfx_tiles.py') `
+                '--probe3-schedule' $probe3Schedule `
+                '--output-bin' $tileArchive `
+                '--output-json' $probe3TileManifest
+            if ($LASTEXITCODE -ne 0) {
+                throw "Probe 3 exact tile archive generation failed with exit code $LASTEXITCODE."
+            }
+            $probe3TileManifestData = Get-Content -LiteralPath `
+                $probe3TileManifest -Raw | ConvertFrom-Json
+            if ($probe3TileManifestData.scope -ne 'probe3-exact-schedule-union') {
+                throw "Probe 3 tile archive did not retain exact schedule scope."
+            }
+            $tileArchiveBytes = (Get-Item -LiteralPath $tileArchive).Length
+            if ($tileArchiveBytes -ne $probe3TileManifestData.archive.bytes) {
+                throw 'Probe 3 tile archive bytes disagree with its manifest.'
+            }
+            Write-Host "Probe 3 tile archive: $tileArchiveBytes bytes, $($probe3TileManifestData.tile_count) exact schedule tiles"
+        }
 
         # INTEGRATE-02 keeps the approved street archive byte-identical and
         # stages the exact jump-record HIT/KO tiles as a profile-only overlay.
@@ -293,7 +323,8 @@ try {
                 -Destination (Join-Path $contentRoot $metadataName) -Force
         }
 
-        $buildProfile = if ($PlayableSlice) { 'playable-slice' }
+        $buildProfile = if ($Probe3) { 'probe3' }
+            elseif ($PlayableSlice) { 'playable-slice' }
             elseif ($CombatIntegrationBench) { 'combat-integration-bench' }
             elseif ($HitKoPromotionBench) { 'hit-ko-promotion-bench' }
             elseif ($CollisionSalvageBench) { 'collision-salvage-bench' }
@@ -325,7 +356,9 @@ try {
         }
         else { '' }
         if ($previousProfile -ne $compileProfile) {
-            foreach ($objectName in @('main.o', 'capability_model.o')) {
+            foreach ($objectName in @(
+                'main.o', 'capability_model.o',
+                'tests\hardware\probe3\probe3.o')) {
                 $objectPath = Join-Path $projectRoot $objectName
                 if (Test-Path -LiteralPath $objectPath) {
                     Remove-Item -LiteralPath $objectPath -Force
@@ -438,6 +471,9 @@ try {
             $makeArguments += 'AVSP_CDDA_RESIDENCY_PROMOTION_BENCH=1'
             $makeArguments += 'AVSP_COMBAT_INTEGRATION_BENCH=1'
             $makeArguments += 'AVSP_PLAYABLE_SLICE=1'
+        }
+        if ($Probe3) {
+            $makeArguments += 'AVSP_PROBE3=1'
         }
         if ($FrontendTest) {
             $makeArguments += 'AVSP_FRONTEND_TEST=1'

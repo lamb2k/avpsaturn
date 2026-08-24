@@ -36,6 +36,9 @@
  * remain owned by the deterministic Port V2 combat integration. */
 #include "src/port_v2/integration/slice/slice.h"
 #endif
+#ifdef AVSP_PROBE3
+#include "tests/hardware/probe3/probe3.h"
+#endif
 
 #include "generated/avsp_anim_records.h"
 #include "generated/avsp_emit_windows.h"
@@ -2627,6 +2630,20 @@ static const AvspTileArchive *tile_pool_archive[AVSP_TILE_SPRITE_POOL];
 static unsigned long tile_pool_stamp[AVSP_TILE_SPRITE_POOL];
 static unsigned long tile_pool_clock;
 static int tile_pool_used;
+#ifdef AVSP_PROBE3
+static volatile unsigned long probe3_copy_count;
+static volatile unsigned long probe3_copy_ticks;
+static volatile unsigned long probe3_texture_bytes;
+static volatile unsigned long probe3_cart_read_bytes;
+static volatile unsigned long probe3_legal_copy_direction;
+static volatile unsigned long probe3_cram_writes_pending;
+static volatile unsigned long probe3_vblank_fields;
+static volatile unsigned long probe3_vblank_edsr;
+static volatile unsigned long probe3_vblank_frc;
+static unsigned long probe3_last_vblank_fields;
+static unsigned long probe3_frame_number;
+static int probe3_last_mode;
+#endif
 /* A missing tile or bank is an asset defect, never a silent skip: these
    counters surface on the debug HUD and stay readable by the headless
    debugger (volatile so the release optimizer keeps them). */
@@ -2682,6 +2699,9 @@ static int load_tile_archive(void)
             colors[slot * 16 + index] = (jo_color)
                 avsp_tiles_cram_color(&tile_archive, slot, index);
     jo_create_palette_from(&tile_palette, colors, AVSP_CRAM_MAX_COLOURS);
+#ifdef AVSP_PROBE3
+    probe3_cram_writes_pending = AVSP_CRAM_MAX_COLOURS;
+#endif
     tile_pool_used = 0;
     tile_pool_clock = 0;
     tile_archive_ready = 1;
@@ -2708,6 +2728,49 @@ static int tile_sprite_for_archive_rank(const AvspTileArchive *archive,
     img.height = 16;
     img.data = (unsigned char *)avsp_tiles_texture(archive, rank);
     if (img.data == JO_NULL) return -1;
+#ifdef AVSP_PROBE3
+    {
+        unsigned long source = (unsigned long)img.data;
+        unsigned long archive_start = (unsigned long)archive->data;
+        unsigned long archive_end = archive_start + archive->size;
+        unsigned int copy_start = (unsigned int)jo_time_get_frc();
+        int sprite_id;
+        if (source < archive_start || source + AVSP_TILE_BYTES > archive_end ||
+            archive_start < (unsigned long)AVSP_CART_DRAM1_BASE ||
+            archive_end > (unsigned long)(AVSP_CART_DRAM1_BASE +
+                                           AVSP_TILE_REGION_BYTES))
+            probe3_legal_copy_direction = 0;
+        if (tile_pool_used < AVSP_TILE_SPRITE_POOL)
+        {
+            sprite_id = jo_sprite_add_4bits_image(&img);
+            if (sprite_id < 0) return -1;
+            tile_pool_sprite[tile_pool_used] = sprite_id;
+            tile_pool_rank[tile_pool_used] = rank;
+            tile_pool_archive[tile_pool_used] = archive;
+            tile_pool_stamp[tile_pool_used] = ++tile_pool_clock;
+            ++tile_pool_used;
+        }
+        else
+        {
+            for (index = 1; index < AVSP_TILE_SPRITE_POOL; ++index)
+                if (tile_pool_stamp[index] < tile_pool_stamp[victim])
+                    victim = index;
+            if (jo_sprite_replace_4bits_image(&img,
+                                               tile_pool_sprite[victim]) < 0)
+                return -1;
+            tile_pool_rank[victim] = rank;
+            tile_pool_archive[victim] = archive;
+            tile_pool_stamp[victim] = ++tile_pool_clock;
+            sprite_id = tile_pool_sprite[victim];
+        }
+        ++probe3_copy_count;
+        probe3_texture_bytes += AVSP_TILE_BYTES;
+        probe3_cart_read_bytes += AVSP_TILE_BYTES;
+        probe3_copy_ticks +=
+            ((unsigned int)jo_time_get_frc() - copy_start) & 0xFFFFU;
+        return sprite_id;
+    }
+#else
     if (tile_pool_used < AVSP_TILE_SPRITE_POOL)
     {
         int sprite_id = jo_sprite_add_4bits_image(&img);
@@ -2726,6 +2789,7 @@ static int tile_sprite_for_archive_rank(const AvspTileArchive *archive,
     tile_pool_archive[victim] = archive;
     tile_pool_stamp[victim] = ++tile_pool_clock;
     return tile_pool_sprite[victim];
+#endif
 }
 
 static int wrap_signed_10bit(int delta)
@@ -2864,6 +2928,165 @@ static int draw_rom_actor_tiles(const CapActor *actor, const int slot)
 #endif
     return rendered;
 }
+
+#ifdef AVSP_PROBE3
+static int probe3_decode_coordinate(const int value)
+{
+    int decoded = value & 0x3FF;
+    if (decoded >= 512) decoded -= 1024;
+    return decoded;
+}
+
+static void probe3_vblank_callback(void)
+{
+    probe3_vblank_edsr = JO_VDP1_EDSR;
+    probe3_vblank_frc = (unsigned long)jo_time_get_frc();
+    ++probe3_vblank_fields;
+}
+
+static void probe3_invalidate_texture_cache(void)
+{
+    int index;
+    for (index = 0; index < tile_pool_used; ++index)
+    {
+        tile_pool_rank[index] = -1;
+        tile_pool_archive[index] = JO_NULL;
+        tile_pool_stamp[index] = 0;
+    }
+    tile_pool_clock = 0;
+}
+
+static int probe3_draw_schedule(const AvspProbe3Schedule *schedule)
+{
+    int object_index;
+    int drawn = 0;
+    for (object_index = (int)schedule->object_count - 1;
+         object_index >= 0; --object_index)
+    {
+        const AvspProbe3Object *object = &schedule->objects[object_index];
+        AvspEntryTile tiles[256];
+        int bank_slot = avsp_tiles_bank_slot(&tile_archive,
+                                             object->attr & 0x1F);
+        int tile_count = avsp_entry_tiles(object->y, object->code,
+                                          object->attr, tiles, 256);
+        int x = probe3_decode_coordinate((object->x + 0x40) & 0x3FF);
+        int y = probe3_decode_coordinate((0x100 - object->y) & 0x3FF);
+        int priority = (object->x >> 13) & 7;
+        int tile_index;
+        if (bank_slot < 0 || tile_count <= 0)
+        {
+            ++tile_diag_no_bank;
+            continue;
+        }
+        jo_sprite_set_palette_4bits(tile_palette.id, bank_slot);
+        for (tile_index = 0; tile_index < tile_count; ++tile_index)
+        {
+            long rank = avsp_tiles_find(&tile_archive,
+                                        tiles[tile_index].code);
+            int sprite_id;
+            int jo_x;
+            int jo_y;
+            if (rank < 0)
+            {
+                ++tile_diag_no_rank;
+                continue;
+            }
+            sprite_id = tile_sprite_for_archive_rank(&tile_archive, rank);
+            if (sprite_id < 0)
+            {
+                ++tile_diag_no_sprite;
+                continue;
+            }
+            jo_x = fit_352(x - CAP_CPS2_VIEW_WIDTH / 2 +
+                           tiles[tile_index].dx + 8);
+            jo_y = y - 112 + tiles[tile_index].dy + 8;
+            if (tiles[tile_index].flip_x)
+                jo_sprite_enable_horizontal_flip();
+            if (tiles[tile_index].flip_y)
+                jo_sprite_enable_vertical_flip();
+            jo_sprite_draw3D(sprite_id, jo_x, jo_y, 360 - priority * 8);
+            ++drawn;
+            if (tiles[tile_index].flip_x)
+                jo_sprite_disable_horizontal_flip();
+            if (tiles[tile_index].flip_y)
+                jo_sprite_disable_vertical_flip();
+        }
+    }
+    return drawn;
+}
+
+static void probe3_frame_callback(void)
+{
+    const AvspProbe3Schedule *schedule;
+    unsigned long fields;
+    unsigned long field_delta;
+    unsigned int prepare_start;
+    unsigned long prepare_ticks;
+    unsigned long cram_writes;
+    unsigned long failures;
+    int drawn;
+
+    if (!runtime_ready || avsp_probe3_telemetry.status ==
+        PROBE3_STATUS_FAILED)
+    {
+        jo_clear_screen();
+        jo_printf(2, 3, "PROBE 3 FAILED %lu",
+                  avsp_probe3_telemetry.failure_reason);
+        jo_printf(2, 5, "PHYSICAL SATURN UNRUN");
+        return;
+    }
+    if (avsp_probe3_telemetry.complete)
+    {
+        jo_clear_screen();
+        jo_printf(2, 3, "PROBE 3 READY FOR PHYSICAL");
+        jo_printf(2, 5, "REP %lu PEAK %lu OVERLOAD %lu",
+                  avsp_probe3_telemetry.representative_high_water,
+                  avsp_probe3_telemetry.peak_high_water,
+                  avsp_probe3_telemetry.overload_tripped);
+        jo_printf(2, 7, "MISS %lu LATE %lu CANARY %lu",
+                  avsp_probe3_telemetry.missed_fields,
+                  avsp_probe3_telemetry.late_command_lists,
+                  avsp_probe3_telemetry.canary_state);
+        jo_printf(2, 9, "SUMMARY %08lX",
+                  avsp_probe3_telemetry.summary_checksum);
+        jo_printf(2, 11, "TIMING IS EMULATOR ONLY");
+        jo_printf(2, 13, "PHYSICAL SATURN UNRUN");
+        return;
+    }
+
+    if (probe3_last_mode != (int)avsp_probe3_telemetry.mode)
+    {
+        probe3_invalidate_texture_cache();
+        probe3_last_mode = (int)avsp_probe3_telemetry.mode;
+    }
+    schedule = avsp_probe3_schedule();
+    fields = probe3_vblank_fields;
+    field_delta = fields - probe3_last_vblank_fields;
+    probe3_last_vblank_fields = fields;
+    probe3_copy_count = 0;
+    probe3_copy_ticks = 0;
+    probe3_texture_bytes = 0;
+    probe3_cart_read_bytes = 0;
+    probe3_legal_copy_direction = 1;
+    tile_diag_no_bank = 0;
+    tile_diag_no_rank = 0;
+    tile_diag_no_sprite = 0;
+    cram_writes = probe3_cram_writes_pending;
+    probe3_cram_writes_pending = 0;
+    prepare_start = (unsigned int)jo_time_get_frc();
+    drawn = probe3_draw_schedule(schedule);
+    prepare_ticks = ((unsigned int)jo_time_get_frc() - prepare_start) &
+                    0xFFFFU;
+    failures = (unsigned long)(tile_diag_no_bank + tile_diag_no_rank +
+                               tile_diag_no_sprite);
+    avsp_probe3_record_frame(
+        ++probe3_frame_number, probe3_vblank_edsr, field_delta,
+        (unsigned long)drawn, prepare_ticks, probe3_texture_bytes,
+        probe3_copy_count, probe3_copy_ticks, probe3_legal_copy_direction,
+        cram_writes, probe3_cart_read_bytes, failures);
+    JO_UNUSED_ARG(probe3_vblank_frc);
+}
+#endif
 
 
 #ifdef AVSP_STREET_TEST
@@ -5750,6 +5973,10 @@ static void frame_callback(void)
 {
     CapInput input;
     CapClipRequest clip_request;
+#ifdef AVSP_PROBE3
+    probe3_frame_callback();
+    return;
+#endif
 #ifndef AVSP_STREET_TEST
     /* MEASURED (write watchpoint, prnt_0 via jo_clear_screen_line): the
      * SGL ASCII text map lives at VDP2_VRAM_B0 (0x25E40000), which the
@@ -6417,8 +6644,33 @@ void jo_main(void)
                            AVSP_CART_DRAM1_BYTES - AVSP_TILE_REGION_BYTES -
                                AVSP_STRIPS_REGION_BYTES);
     }
+#ifndef AVSP_PROBE3
     set_actor_palette();
-#if defined(AVSP_PLAYABLE_SLICE)
+#endif
+#if defined(AVSP_PROBE3)
+    avsp_probe3_init();
+    probe3_last_mode = -1;
+    probe3_frame_number = 0;
+    probe3_vblank_fields = 0;
+    probe3_last_vblank_fields = 0;
+    if (!cart_available)
+    {
+        failed_asset = "4MB RAM CART REQUIRED";
+        runtime_ready = 0;
+        avsp_probe3_telemetry.status = PROBE3_STATUS_FAILED;
+        avsp_probe3_telemetry.failure_reason = PROBE3_FAILURE_ASSET;
+    }
+    else
+    {
+        runtime_ready = load_tile_archive();
+        if (!runtime_ready)
+        {
+            avsp_probe3_telemetry.status = PROBE3_STATUS_FAILED;
+            avsp_probe3_telemetry.failure_reason = PROBE3_FAILURE_ASSET;
+        }
+    }
+    JO_UNUSED_ARG(index);
+#elif defined(AVSP_PLAYABLE_SLICE)
     set_frontend_palettes();
     set_hud_palette();
     cap_world_init(&world);
@@ -6657,6 +6909,9 @@ void jo_main(void)
 #endif
 #endif
     jo_core_set_screens_order(JO_NBG0_SCREEN, JO_SPRITE_SCREEN, JO_NBG1_SCREEN);
+#ifdef AVSP_PROBE3
+    jo_core_add_vblank_callback(probe3_vblank_callback);
+#endif
     jo_core_add_callback(frame_callback);
     jo_core_run();
 }

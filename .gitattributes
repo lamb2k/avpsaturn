@@ -1,3 +1,9 @@
 *.patch whitespace=-blank-at-eol
 *.bin binary
 *.tga binary
+# These are byte-hashed acceptance locks. Preserve their committed LF bytes on
+# every platform so a clean Windows Full-lane worktree verifies the same locks.
+tests/port_v2/*/approved_contract.json text eol=lf
+tests/port_v2/integration/*/approved_contract.json text eol=lf
+tests/port_v2/player/approved_contract.json text eol=crlf
+data/avsp_source_combat_presentation_contract.json text eol=crlf

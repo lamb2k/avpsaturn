@@ -1,0 +1,25 @@
+# HW-01 physical setup record
+
+- Date/time and timezone:
+- Operator:
+- Saturn model / serial:
+- Console region:
+- Video standard (NTSC/PAL):
+- 32 Mbit expansion cartridge make/model:
+- Cartridge serial/identifier:
+- Boot method (optical/ODE/loader/other):
+- Boot device and firmware:
+- Exact writable target, if any:
+- Explicit write authorization reference:
+- Digital pad make/model/port:
+- Display:
+- Capture device and signal path:
+- Capture resolution/rate/format:
+- Latency measurement method:
+- Probe 3 ISO SHA-256:
+- Approved INTEGRATE-03 ISO SHA-256:
+- Probe manifest SHA-256:
+- Schedule SHA-256:
+- Preflight record filename/SHA-256:
+- Setup photo/video filenames and SHA-256 values:
+- Deviations or anomalies:

@@ -96,6 +96,27 @@ def entry_tile_codes(code: int, y: int, attr: int) -> set[int]:
     return codes
 
 
+def entry_tile_codes_exact(code: int, y: int, attr: int) -> set[int]:
+    """Tile codes fetched by the entry's recorded facing only."""
+    code17 = code + ((y & 0x6000) << 3)
+    nx = ((attr >> 8) & 0xF) + 1
+    ny = ((attr >> 12) & 0xF) + 1
+    flip_x = (attr >> 5) & 1
+    flip_y = (attr >> 6) & 1
+    codes = set()
+    for out_y in range(ny):
+        for out_x in range(nx):
+            if flip_x or flip_y:
+                source_x = nx - 1 - out_x if flip_x else out_x
+                source_y = ny - 1 - out_y if flip_y else out_y
+                tile = code17 + source_x + 0x10 * source_y
+            else:
+                tile = ((code17 & ~0xF) + ((code17 + out_x) & 0xF)
+                        + 0x10 * out_y)
+            codes.add(tile)
+    return codes
+
+
 def collect_full_route_entries(spec, tiles, banks):
     """Object-list truth from the RP2 delta capture for a frame interval.
 
@@ -227,22 +248,55 @@ def read_tile_region_bytes() -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--scope", required=True, choices=("street", "round1"),
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--scope", choices=("street", "round1"),
                         help="street: the archive proven to fit the current "
                              "cartridge budget. round1: the complete "
                              "four-route cast archive, does not fit today.")
+    source.add_argument("--probe3-schedule", type=Path,
+                        help="tracked Probe 3 schedule whose exact recorded "
+                             "tile union is staged through the AVTL path")
+    parser.add_argument("--output-bin", type=Path, default=OUT_BIN)
+    parser.add_argument("--output-json", type=Path, default=OUT_JSON)
     parser.add_argument("--allow-over-budget", action="store_true",
                         help="write the archive even if it exceeds the "
                              "runtime's AVSP_TILE_REGION_BYTES carve "
                              "(measurement only - never for a build).")
     args = parser.parse_args()
-    routes = ROUTES_BY_SCOPE[args.scope]
     avsp.verify_roms()
     gfx = avsp.load_gfx_region()
     avsp.verify_loaded_gfx_region(gfx)
-    rom = Rom(ROM_PATH.read_bytes())
-
-    tiles, banks, per_route = collect_entries(rom, routes)
+    schedule_sha256 = None
+    if args.probe3_schedule:
+        schedule_path = args.probe3_schedule.resolve()
+        schedule_bytes = schedule_path.read_bytes()
+        schedule_sha256 = hashlib.sha256(schedule_bytes).hexdigest()
+        schedule = json.loads(schedule_bytes)
+        tiles: set[int] = set()
+        banks: set[int] = set()
+        per_route = {}
+        for workload in schedule["schedules"]:
+            entries = workload["object_entries"]
+            for entry in entries:
+                tiles |= entry_tile_codes_exact(
+                    entry["code"], entry["y"], entry["attr"])
+                banks.add(entry["attr"] & 0x1F)
+            per_route[workload["id"]] = {
+                "source_frame": workload["source_frame"],
+                "object_entries": len(entries),
+                "reachable_commands": workload["actual_reachable_command_count"],
+                "workload_checksum_sha256": workload["workload_checksum_sha256"],
+            }
+        palette_path = (ROOT / schedule["schedules"][1]["palette_artifact"])
+        scope = "probe3-exact-schedule-union"
+        facing_union = False
+    else:
+        routes = ROUTES_BY_SCOPE[args.scope]
+        rom = Rom(ROM_PATH.read_bytes())
+        tiles, banks, per_route = collect_entries(rom, routes)
+        palette_path = pick_palette_frame()
+        scope = args.scope
+        facing_union = True
     max_code = len(gfx) * 8 // (TILE_BYTES * 8)
     bad = [c for c in tiles if c < 0 or c >= max_code]
     if bad:
@@ -250,7 +304,6 @@ def main() -> int:
                          % ", ".join("0x%X" % c for c in sorted(bad)[:8]))
     codes = sorted(tiles)
 
-    palette_path = pick_palette_frame()
     bank_map, slots, cram = build_palette_block(banks, palette_path)
     print("tiles: %d (%d bytes), palette banks: %s -> %d slots"
           % (len(codes), len(codes) * TILE_BYTES,
@@ -287,31 +340,39 @@ def main() -> int:
     print("tile region budget: %d / %d bytes used (%.1f%%)"
          % (len(blob), region_bytes, 100 * len(blob) / region_bytes))
 
-    OUT_BIN.parent.mkdir(parents=True, exist_ok=True)
-    OUT_BIN.write_bytes(blob)
+    args.output_bin.parent.mkdir(parents=True, exist_ok=True)
+    args.output_bin.write_bytes(blob)
 
     manifest = {
         "schema": 1,
         "classification": "tile archive manifest - no ROM bytes",
-        "archive": {"file": "build/avsp_cd/SPR4/TILES.BIN",
-                    "bytes": len(blob),
-                    "sha256": hashlib.sha256(bytes(blob)).hexdigest()},
+        "archive": {"file": str(args.output_bin.relative_to(ROOT)).replace("\\", "/"),
+                     "bytes": len(blob),
+                     "sha256": hashlib.sha256(bytes(blob)).hexdigest()},
         "tile_count": len(codes),
         "tile_bytes": TILE_BYTES,
         "palette": {"source": str(palette_path.relative_to(ROOT)).replace(
                         "\\", "/"),
                     "banks": ["0x%02X" % b for b in slots],
                     "label": "ADAPTED single-frame palette"},
-        "facing_union": True,
-        "scope": args.scope,
+        "facing_union": facing_union,
+        "scope": scope,
         "tile_region_budget_bytes": region_bytes,
         "tile_region_budget_used_pct": round(100 * len(blob) / region_bytes, 2),
         "sample_stride": SAMPLE_STRIDE,
         "routes": per_route,
         "gfx_region_sha256": hashlib.sha256(bytes(gfx)).hexdigest(),
     }
-    OUT_JSON.write_text(json.dumps(manifest, indent=1, sort_keys=True) + "\n")
-    print("wrote %s (%d bytes) and %s" % (OUT_BIN, len(blob), OUT_JSON))
+    if schedule_sha256 is not None:
+        manifest["probe3_schedule"] = {
+            "file": str(schedule_path.relative_to(ROOT)).replace("\\", "/"),
+            "sha256": schedule_sha256,
+        }
+    args.output_json.parent.mkdir(parents=True, exist_ok=True)
+    args.output_json.write_text(
+        json.dumps(manifest, indent=1, sort_keys=True) + "\n")
+    print("wrote %s (%d bytes) and %s" %
+          (args.output_bin, len(blob), args.output_json))
     return 0
 
 

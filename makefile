@@ -91,6 +91,9 @@ endif
 ifneq ($(AVSP_PLAYABLE_SLICE),)
 CCFLAGS += -DAVSP_PLAYABLE_SLICE=1
 endif
+ifneq ($(AVSP_PROBE3),)
+CCFLAGS += -DAVSP_PROBE3=1 -Werror -Wno-unused-function
+endif
 JO_DEBUG ?= 1
 JO_NTSC = 1
 JO_COMPILE_USING_SGL = 1
@@ -113,6 +116,9 @@ SRCS += src/port_v2/audio/cdda/cdda.c src/port_v2/residency/residency.c
 endif
 ifneq ($(AVSP_PLAYABLE_SLICE),)
 SRCS += src/port_v2/integration/slice/slice.c
+endif
+ifneq ($(AVSP_PROBE3),)
+SRCS += tests/hardware/probe3/probe3.c
 endif
 
 # The pinned Yaba Sanshiro boot path stalls when Jo Engine's monolithic first-

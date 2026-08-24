@@ -18,7 +18,7 @@ param(
         'EnemySalvageBench',
         'EnemyPromotionBench', 'PlayerEnemyIntegration',
         'CollisionSalvageBench', 'HitKoPromotionBench',
-        'CombatIntegrationBench', 'PlayableSlice')]
+        'CombatIntegrationBench', 'PlayableSlice', 'Probe3')]
     [string]$TargetProfile = 'Default',
 
     [switch]$Regenerate,
@@ -154,6 +154,7 @@ function Invoke-FastLane {
     Invoke-PythonTest 'tests\port_v2\cdda_residency\test_contract.py'
     Invoke-PythonTest 'tests\test_avsp_vertical_slice_oracle.py'
     Invoke-PythonTest 'tests\test_avsp_translation_boundary.py'
+    Invoke-PythonTest 'tests\hardware\probe3\test_probe3.py'
 
     $portV2Root = Join-Path $projectRoot 'tests\port_v2'
     if (Test-Path -LiteralPath $portV2Root) {
@@ -285,6 +286,7 @@ function Invoke-TargetLane {
         HitKoPromotionBench = 'debug-hit-ko-promotion-bench'
         CombatIntegrationBench = 'debug-combat-integration-bench'
         PlayableSlice = 'debug-playable-slice'
+        Probe3 = 'debug-probe3'
     }
     $expectedProfile = $profileNames[$TargetProfile]
     $profilePath = Join-Path $projectRoot 'build\last_compile_profile.txt'

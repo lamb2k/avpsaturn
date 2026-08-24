@@ -2,7 +2,7 @@
 
 TASK: INTEGRATE-03-PLAYABLE-SLICE
 KIND: INTEGRATE
-STATUS: READY
+STATUS: BLOCKED
 CHECKPOINT: integrate-playable-slice
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
