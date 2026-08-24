@@ -211,9 +211,11 @@ hardware_pretest:
   schedule_sha256: e892836d68ad143367153b80f7b19b22ca07354389ef5afe2a0de250f0aabd84
   representative_workload: source frame 5637 / 57 measured objects / 567 reachable and drawn commands
   peak_workload: source frame 5776 / 78 measured objects / 909 reachable and drawn commands
-  probe_iso_sha256: f37507be53164ba833eb261eded4f0291dd9957412d228155473af0172306b0b
-  probe_manifest_sha256: 13f959d8d1563b23144ec1c841e238b5575c78f0c7a6226febd0ba544a6b4caa
+  probe_source_commit: 78dc52c1510fc600fa788c306f332105c87d9840
+  probe_iso_sha256: b4410c8d74939903a253d391571720b3972f6253f77e599cd88a715e912591c8
+  probe_manifest_sha256: 5bd5f41b6f61ddc8cd807929405cb371080af68aa410f8950403dc9bd7f4c45d
   paired_pinned_emulator: PASS_SEMANTICS_ONLY / identical checksum 0xe3241b49 / overload detector tripped
+  required_nonphysical_lanes: Fast PASS / Probe3 Target BUILD_ONLY / paired Emulator PASS / Full PASS with zero tracked drift
   approved_iso_regression: PASS / 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef
   operator_package: build/feedback/HW-01-PROBE-3-VDP1-BUDGET-PRETEST
   read_only_preflight: no removable target, serial/debug device, capture device, or loader tool; no write performed

@@ -33,7 +33,7 @@ worktree had an owned-path collision with generated tracked data.
 
 Probe schedule `e892836d...abd84` binds committed AvP measurements: frame 5637
 expands to 567 commands and frame 5776 expands exactly to 909. Strict Probe
-image `f37507be...0b0b` passes two identical pinned-emulator semantic runs with
+image `b4410c8d...91c8` from implementation `78dc52c` passes two identical pinned-emulator semantic runs with
 summary `0xe3241b49`; the overload control trips. The normal-release regression
 remains exact at `4a142774...98ef`. Operator package is under
 `build/feedback/HW-01-PROBE-3-VDP1-BUDGET-PRETEST/`. Read-only preflight found
@@ -43,4 +43,4 @@ performed no write. Physical Saturn timing/scanout/soak remain `UNRUN`;
 
 Resume prompt:
 
-> Resume the AvP salvage Goal at HW-01-PROBE-3-VDP1-BUDGET-PRETEST `READY_FOR_PHYSICAL`; preserve Probe ISO f37507be53164ba833eb261eded4f0291dd9957412d228155473af0172306b0b, approved INTEGRATE-03 ISO 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef, and all locks; identify the connected Saturn/cart/boot/pad/capture setup, request explicit authorization for any exact target write, run representative, peak-909, overload, alternating soak, then the two cold-boot exact-image records and integrated soak; keep physical evidence UNRUN and SALVAGE-08 inactive until every physical condition passes.
+> Resume the AvP salvage Goal at HW-01-PROBE-3-VDP1-BUDGET-PRETEST `READY_FOR_PHYSICAL`; preserve Probe ISO b4410c8d74939903a253d391571720b3972f6253f77e599cd88a715e912591c8, approved INTEGRATE-03 ISO 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef, and all locks; identify the connected Saturn/cart/boot/pad/capture setup, request explicit authorization for any exact target write, run representative, peak-909, overload, alternating soak, then the two cold-boot exact-image records and integrated soak; keep physical evidence UNRUN and SALVAGE-08 inactive until every physical condition passes.

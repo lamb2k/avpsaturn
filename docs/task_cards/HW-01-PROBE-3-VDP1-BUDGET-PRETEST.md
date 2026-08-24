@@ -118,16 +118,19 @@ with telemetry and record the declared console/cart/loader/pad/capture setup.
   to exactly 909 reachable/drawn commands. Their workload SHA-256 values are
   `194cb70efb503a3277e9f1256b71f01bcf4393566aeed6f3a538018c0e385e68`
   and `92e468908f59a9c1ca3b6c5c7ccfbf5a98e38ccf464adb05393233db03f7966c`.
-- Strict `release-probe3` compile passes. Probe ISO SHA-256 is
-  `f37507be53164ba833eb261eded4f0291dd9957412d228155473af0172306b0b`;
+- Strict `release-probe3` compile passes from implementation commit
+  `78dc52c1510fc600fa788c306f332105c87d9840`. Probe ISO SHA-256 is
+  `b4410c8d74939903a253d391571720b3972f6253f77e599cd88a715e912591c8`;
   manifest SHA-256 is
-  `13f959d8d1563b23144ec1c841e238b5575c78f0c7a6226febd0ba544a6b4caa`;
+  `5bd5f41b6f61ddc8cd807929405cb371080af68aa410f8950403dc9bd7f4c45d`;
   executable ELF/BIN hashes are respectively
   `02b431941f7075ea31275e08c6400e21649081fcb46e1a0fbcd2f37a76568380`
   and `9d7608d1df5c90cb22faa608f00bb8e012f8436dd398b186b2c006fd83dc1594`.
 - Two pinned Yaba Sanshiro 1.20.37-2986eb semantic runs pass with identical
   post-run checksum `0xe3241b49`; overload safely trips its declared detector.
   These runs make no physical timing claim.
+- Fast, Probe3 Target BUILD_ONLY, and clean-shadow Full lanes pass. Full records
+  zero changed tracked artifacts.
 - The rebuilt normal release normalizes to the locked exact ISO SHA-256
   `4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef`.
 - The ignored operator package is complete at
