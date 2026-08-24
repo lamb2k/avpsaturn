@@ -112,7 +112,7 @@ with telemetry and record the declared console/cart/loader/pad/capture setup.
 - Schedule: `e892836d68ad143367153b80f7b19b22ca07354389ef5afe2a0de250f0aabd84`;
   generated header: `fb2e9e88a9284be1496a26ca86b171ab25794781954183b9fd95767a539e7804`.
   Both bind committed demand artifact `data/avsp_sprite_demand.json` SHA-256
-  `9b3d110fb842705c1cc31a0b6aec637be230ebeb3b3f6176324708f55c251193`.
+  `9b3d110bb353b0103f7739b46dc37b6bf895d1b09952e7f6e2739fbab1f6e39b`.
 - Representative source frame 5637 expands 57 measured objects to exactly 567
   reachable/drawn commands. Peak source frame 5776 expands 78 measured objects
   to exactly 909 reachable/drawn commands. Their workload SHA-256 values are
