@@ -118,9 +118,9 @@ with telemetry and record the declared console/cart/loader/pad/capture setup.
   ten-minute soak is measured by the independent elapsed VBlank clock and
   alternates in 60-elapsed-field blocks; completed workloads remain a separate
   count.
-- READY_FOR_PHYSICAL remains withdrawn until the corrected Target, paired
-  emulator soak, Full, approved-image regression, commit, push, and remote-SHA
-  gates pass.
+- The corrected Target, paired emulator soak, Full, and approved-image
+  regression gates pass. `READY_FOR_PHYSICAL` becomes publishable only when
+  these commits are pushed and the remote branch SHA is verified.
 
 ## Next eligible cards
 
@@ -147,17 +147,28 @@ with telemetry and record the declared console/cart/loader/pad/capture setup.
   to exactly 909 AvP workload tile draws. Their workload SHA-256 values are
   `194cb70efb503a3277e9f1256b71f01bcf4393566aeed6f3a538018c0e385e68`
   and `92e468908f59a9c1ca3b6c5c7ccfbf5a98e38ccf464adb05393233db03f7966c`.
-- Strict `release-probe3` compile passes from implementation commit
-  `78dc52c1510fc600fa788c306f332105c87d9840`. Probe ISO SHA-256 is
-  `b4410c8d74939903a253d391571720b3972f6253f77e599cd88a715e912591c8`;
+- Strict `release-probe3` compile passes from corrected implementation commit
+  `cdfae46e440a64ae9bfc503d024b3e46b58223ac`; canonical generated-data hygiene
+  is fixed at `85654aa4d94f8805a315f672207b3a8e747e9a8b`. Probe ISO SHA-256 is
+  `82c3a86c34b79626bf2cda7c2da4174ab1ee3603b3341f5091b141b740b4ef50`;
   manifest SHA-256 is
-  `5bd5f41b6f61ddc8cd807929405cb371080af68aa410f8950403dc9bd7f4c45d`;
+  `b36b63fc4324c31eeb680814a5ac120b484e23575f8817d847555d00f9dc0d48`;
   executable ELF/BIN hashes are respectively
-  `02b431941f7075ea31275e08c6400e21649081fcb46e1a0fbcd2f37a76568380`
-  and `9d7608d1df5c90cb22faa608f00bb8e012f8436dd398b186b2c006fd83dc1594`.
+  `106a1366c8f07a4904592299e52eb9502678a952d4ec5b0cced097dcd1bfdba1`
+  and `719df77e0ca7705dbeedd69c4370bea197bf0997a4d5402deff49cd1ded2eb7e`.
 - Two pinned Yaba Sanshiro 1.20.37-2986eb semantic runs pass with identical
-  post-run checksum `0xe3241b49`; overload safely trips its declared detector.
-  These runs make no physical timing claim.
+  post-run checksum `0xf032955f`; overload safely trips its declared detector.
+  Each run reaches 36,000 independent elapsed VBlank fields while alternating
+  4,560 workload submissions, with zero missed/late workload lists, zero soak
+  skips, zero asset/canary/copy-path failures, and a 66.12% minimum measured
+  emulator margin. These runs make no physical timing claim.
+- Both command censuses preserve the exact measured composition. Representative
+  mode records 567 requested/submitted/workload draws, one auxiliary SGL
+  sentinel, 568 total reachable draws, three state commands, one terminator,
+  572 reachable entries, and 572 stored nonzero slots. Peak and overload each
+  record 909 requested/submitted/workload draws, one auxiliary sentinel, 910
+  total reachable draws, three state commands, one terminator, 914 reachable
+  entries, and 914 stored nonzero slots.
 - Fast, Probe3 Target BUILD_ONLY, and clean-shadow Full lanes pass. Full records
   zero changed tracked artifacts.
 - The rebuilt normal release normalizes to the locked exact ISO SHA-256
