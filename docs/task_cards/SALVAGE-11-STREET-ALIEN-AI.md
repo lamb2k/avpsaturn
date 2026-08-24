@@ -2,7 +2,7 @@
 
 TASK: SALVAGE-11-STREET-ALIEN-AI
 KIND: SALVAGE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: salvage-street-alien-ai
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -63,6 +63,22 @@ No acceptance of feel here; USER-09 reviews the integrated behavior.
 
 - Missing source branch/RNG ownership, unsupported scheduler dependency,
   approved regression, nondeterminism, or material architecture decision.
+
+## Accepted evidence
+
+- Implementation commit: `97e84dbea67fd49a11465bcbf4ab0375494e2fd6`.
+- Fast, Oracle, and dedicated Target lanes: `PASS`.
+- Two post-commit cold pinned-Yaba runs: `PASS`, exact 576-sample ledgers and
+  normalized diagnostic ISO SHA-256
+  `4172b359c39110180c701cea8a1352f332252af5d5b24f3dd25c60dfbf326fc1`.
+- Exact bounded result: one target selection, 38-update `+111/-23` approach,
+  source RNG `0x7301 -> 0x595a`, 120-update attack with contacts at offsets
+  48/119, forced-seed 30-update counterfactual, current-position contact
+  suppression, nonlethal HIT recovery, lethal KO removal, deterministic
+  scheduler count, zero failures, and intact canaries.
+- Generic AI, other classes, bosses, multiplayer targeting, live encounter
+  progression, subjective feel, and physical Saturn remain excluded;
+  physical Saturn is `UNRUN`.
 
 ## Next eligible cards
 
