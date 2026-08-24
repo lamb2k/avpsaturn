@@ -2,7 +2,7 @@
 
 TASK: ORACLE-05-STREET-ALIEN-AI
 KIND: ORACLE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: oracle-street-alien-ai
 BASE: project_state.foundation_head
 BRANCH: project_state.production_branch

@@ -67,7 +67,7 @@ has now advanced through the dependency-safe presentation promotions.
 
 CURRENT_TASK: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
 
-ACTIVE_SOFTWARE_TASK: ORACLE-05-STREET-ALIEN-AI
+ACTIVE_SOFTWARE_TASK: ORACLE-06-ROUND1-ENCOUNTER-RULES
 
 ## 4. Current salvage queue and production extension
 

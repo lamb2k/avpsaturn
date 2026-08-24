@@ -1163,8 +1163,8 @@
       "salvage_decision": "UNTESTED",
       "production_interface": null,
       "promoted_commit": null,
-      "blockers": ["Unblock: accept ORACLE-05 and ORACLE-06; HW-01 remains a parallel physical prerequisite and does not block the declared software sequence."],
-      "exact_next_experiment": "Run ORACLE-05 serially while preserving the accepted ORACLE-04 source subset, active HW-01 state, and production runtime.",
+      "blockers": ["Unblock: accept ORACLE-06; HW-01 remains a parallel physical prerequisite and does not block the declared software sequence."],
+      "exact_next_experiment": "Run ORACLE-06 serially while preserving the accepted ORACLE-04 and ORACLE-05 source evidence, active HW-01 state, and production runtime.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {
