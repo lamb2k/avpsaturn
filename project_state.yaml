@@ -4,15 +4,16 @@ workflow_model: interactive-salvage-promotion-integration
 roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
-production_head: 97e84dbea67fd49a11465bcbf4ab0375494e2fd6
-candidate_head: 97e84dbea67fd49a11465bcbf4ab0375494e2fd6
+production_head: b75d8c8758073b01d7ea657ed9640c7f48c0f190
+candidate_head: b75d8c8758073b01d7ea657ed9640c7f48c0f190
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-playable-loop-pivot
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 review_candidate_status: ACCEPTED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW, PROMOTE-07-CDDA-RESIDENCY, REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION, ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS, ORACLE-05-STREET-ALIEN-AI, ORACLE-06-ROUND1-ENCOUNTER-RULES, SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, SALVAGE-11-STREET-ALIEN-AI]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW, PROMOTE-07-CDDA-RESIDENCY, REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION, ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS, ORACLE-05-STREET-ALIEN-AI, ORACLE-06-ROUND1-ENCOUNTER-RULES, SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, SALVAGE-11-STREET-ALIEN-AI, PROMOTE-11-STREET-ALIEN-AI]
+software_dependency_satisfied_tasks: [INTEGRATE-03-PLAYABLE-SLICE]
 target_scope:
   source_set: avspu
   route: cold-boot-through-title-select-all-stages-ending-credits
@@ -107,6 +108,9 @@ accepted_implementation_history:
   - id: SALVAGE-11-STREET-ALIEN-AI
     status: ACCEPTED
     head: 97e84dbea67fd49a11465bcbf4ab0375494e2fd6
+  - id: PROMOTE-11-STREET-ALIEN-AI
+    status: ACCEPTED
+    head: b75d8c8758073b01d7ea657ed9640c7f48c0f190
 accepted_control_plane_history:
   - id: ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN
     status: ACCEPTED
@@ -229,7 +233,7 @@ first_live_gameplay_encounter:
   player_count: 1
   measured_round1_encounter_count: 1
   production_player_control: PASS_BOUNDED_ONE_EMULATOR
-  street_alien_ai: UNRUN
+  street_alien_ai: PASS_BOUNDED_ONE_EMULATOR
   encounter_controller: UNRUN
   interactive_human_review: UNRUN
   scripted_capability_slice_sufficient: false
@@ -308,12 +312,23 @@ salvage11_street_alien_ai:
   lanes: Fast PASS / Oracle PASS / Target PASS / Emulator PASS
   excluded: generic AI / other archetypes / bosses / multiplayer targeting / route progression / subjective feel
   physical_saturn: UNRUN
-current_checkpoint: promote-street-alien-ai
-active_task_card: docs/task_cards/PROMOTE-11-STREET-ALIEN-AI.md
-active_task_id: PROMOTE-11-STREET-ALIEN-AI
-active_task_kind: PROMOTE
+promote11_street_alien_ai:
+  task: PROMOTE-11-STREET-ALIEN-AI
+  status: ACCEPTED
+  implementation_commit: b75d8c8758073b01d7ea657ed9640c7f48c0f190
+  classification: MEASURED_CLASS_1F_PRODUCTION_AI_WITH_ADAPTED_ONE_PLAYER_INTERFACE
+  normalized_diagnostic_iso_sha256: 4172b359c39110180c701cea8a1352f332252af5d5b24f3dd25c60dfbf326fc1
+  paired_pinned_emulator: PASS / 2 post-commit cold reads / exact 576-sample ledger / source commit and ISO bound / zero failures / canaries intact
+  production_interface: src/port_v2/gameplay/street_alien_ai/street_alien_ai.h
+  compatibility_adapter: include-only salvage diagnostic / zero gameplay behavior / explicit deletion condition
+  lanes: Fast PASS / Oracle PASS / Target PASS / Emulator PASS
+  physical_saturn: UNRUN
+current_checkpoint: integrate-live-control-ai-encounter
+active_task_card: docs/task_cards/INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER.md
+active_task_id: INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
+active_task_kind: INTEGRATE
 task_status: READY
-active_write_owner: PROMOTE-11-STREET-ALIEN-AI
+active_write_owner: INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
 awaiting_user_feedback: []
 open_blockers: []
 hardware_pretest:

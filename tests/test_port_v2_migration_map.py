@@ -243,12 +243,24 @@ def validate_ledger(ledger: dict) -> None:
                 "src/port_v2/gameplay/player_action/player_action.h" and
                 player_action["temporary_adapter"]["remaining_authored_controller_coupling"].startswith("None"),
                 "promoted player-action disposition drifted")
-    for identifier in ("street-alien-ai", "round1-encounter-controller"):
-        entry = subsystem(ledger, identifier)
-        require(entry["technical_status"] == "UNRUN" and
-                entry["fidelity_status"] == "UNKNOWN" and
-                entry["salvage_decision"] == "UNTESTED",
-                f"{identifier} advanced before live-gameplay execution")
+    street_ai = subsystem(ledger, "street-alien-ai")
+    if street_ai["technical_status"] == "UNRUN":
+        require(street_ai["fidelity_status"] == "UNKNOWN" and
+                street_ai["salvage_decision"] == "UNTESTED",
+                "unrun street-alien AI fixture advanced")
+    else:
+        require(street_ai["technical_status"] == "PASS" and
+                street_ai["fidelity_status"] == "ADAPTED" and
+                street_ai["salvage_decision"] == "PROMOTED" and
+                street_ai["production_interface"] ==
+                "src/port_v2/gameplay/street_alien_ai/street_alien_ai.h" and
+                street_ai["temporary_adapter"]["remaining_authored_controller_coupling"].startswith("None"),
+                "promoted street-alien AI disposition drifted")
+    encounter = subsystem(ledger, "round1-encounter-controller")
+    require(encounter["technical_status"] == "UNRUN" and
+            encounter["fidelity_status"] == "UNKNOWN" and
+            encounter["salvage_decision"] == "UNTESTED",
+            "round1 encounter controller advanced before integration")
     validate_card_results(ledger)
 
 

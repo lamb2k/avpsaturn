@@ -2,7 +2,7 @@
 
 TASK: INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
 KIND: INTEGRATE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: integrate-live-control-ai-encounter
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

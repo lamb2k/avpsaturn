@@ -65,9 +65,9 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: PROMOTE-11-STREET-ALIEN-AI
+CURRENT_TASK: INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
 
-ACTIVE_SOFTWARE_TASK: PROMOTE-11-STREET-ALIEN-AI
+ACTIVE_SOFTWARE_TASK: INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
 
 ## 4. Current salvage queue and production extension
 
@@ -77,9 +77,11 @@ implementation `417ed80`: the player/combat
 interface now binds each selector-specific player presentation, collision,
 damage, and class-`0x1F` alien reaction to one independent MAME source event.
 INTEGRATE-03 is user `APPROVED` for `SOURCE_BOUND_WITH_ADAPTED_INPUT` at exact
-candidate `82965ef` and normalized ISO SHA-256 `4a142774...`. Production player
-control, enemy AI, targeting, encounter progression, and free-form gameplay
-remain `UNKNOWN`; the deterministic choreography is not playable Round 1. The
+candidate `82965ef` and normalized ISO SHA-256 `4a142774...`. PROMOTE-10 and
+PROMOTE-11 now provide bounded production player-action and class-`0x1F` AI
+interfaces; their integration, targeting, encounter progression, and
+free-form gameplay remain `UNRUN`. The deterministic choreography is not
+playable Round 1. The
 slice remains physically `UNRUN`. The bounded QA prerequisite
 `HW-01-PROBE-3-VDP1-BUDGET-PRETEST` has prepared its representative, exact
 909-tile, and overload-control hardware package. Host checks, strict build,

@@ -170,6 +170,16 @@ def main() -> None:
     queue_index = {task: index for index, task in enumerate(queue)}
     ready_executable = []
     accepted = set(inline_list(state, "accepted_tasks"))
+    software_dependency_satisfied = set(inline_list(
+        state, "software_dependency_satisfied_tasks"))
+    require(software_dependency_satisfied == {
+        "INTEGRATE-03-PLAYABLE-SLICE",
+    }, "bounded software dependency exceptions drifted")
+    require(scalar(cards["INTEGRATE-03-PLAYABLE-SLICE"], "STATUS") ==
+            "BLOCKED" and
+            "PASS_USER_APPROVED_PHYSICAL_PENDING" in state,
+            "software dependency exception obscured the physical hard stop")
+    dependency_satisfied = accepted | software_dependency_satisfied
     independent_read_only = yaml_block_list(
         state, "independent_read_only_cards")
     require(len(independent_read_only) == len(set(independent_read_only)),
@@ -214,7 +224,7 @@ def main() -> None:
                 f"{task} names unknown dependency")
         if task in queue:
             for dependency in dependencies:
-                if dependency not in accepted:
+                if dependency not in dependency_satisfied:
                     require(dependency in queue_index and
                             queue_index[dependency] < queue_index[task],
                             f"{task} is not dependency ordered")
@@ -283,7 +293,8 @@ def main() -> None:
     awaiting_feedback = set(inline_list(state, "awaiting_user_feedback"))
     require(activation_is_legal(
         active_id, scalar(active, "KIND"),
-        set(inline_list(active, "DEPENDENCIES")), accepted, awaiting_feedback),
+        set(inline_list(active, "DEPENDENCIES")), dependency_satisfied,
+        awaiting_feedback),
         "active card has unaccepted dependencies or crosses feedback gate")
     if scalar(active, "KIND") == "USER_REVIEW" and \
             scalar(active, "STATUS") == "AWAITING_USER_FEEDBACK":
@@ -378,7 +389,7 @@ def main() -> None:
 
     for token in (
         "production_player_control: PASS_BOUNDED_ONE_EMULATOR",
-        "street_alien_ai: UNRUN",
+        "street_alien_ai: PASS_BOUNDED_ONE_EMULATOR",
         "encounter_controller: UNRUN",
         "interactive_human_review: UNRUN",
         "scripted_capability_slice_sufficient: false",
@@ -387,6 +398,9 @@ def main() -> None:
     require(scalar(cards["PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER"],
                    "STATUS") == "ACCEPTED",
             "bounded production player-action promotion is not accepted")
+    require(scalar(cards["PROMOTE-11-STREET-ALIEN-AI"], "STATUS") ==
+            "ACCEPTED",
+            "bounded production street-alien AI promotion is not accepted")
     require("production player control and enemy AI remain UNKNOWN" in state,
             "INTEGRATE-03 was relabeled as measured production gameplay")
 

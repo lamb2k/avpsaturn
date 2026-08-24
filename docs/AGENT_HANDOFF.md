@@ -34,12 +34,13 @@ withdrawal set piece, not a kill clear. The live-loop contract is explicitly
 adapted to one ORACLE-05 alien and clears only after target KO then inactivity;
 timers and presentation flags cannot clear it.
 
-PROMOTE-10 is accepted at `6b943ea`; SALVAGE-11 is accepted at `97e84db`.
-The alien core proves the one-target 38-update approach, source RNG timer
-branch, current-state contacts, HIT recovery, and KO removal in two identical
-576-sample cold Yaba reads; ISO `4172b359...326fc1`. Generic AI, route
-progression, subjective feel, and physical Saturn remain outside acceptance.
+PROMOTE-10 is accepted at `6b943ea`; PROMOTE-11 is accepted at `b75d8c8`.
+The production alien core proves the one-target 38-update approach, source RNG
+timer branch, current-state contacts, HIT recovery, and KO removal in two
+identical post-commit 576-sample cold Yaba reads; ISO `4172b359...326fc1`.
+Generic AI, route progression, subjective feel, and physical Saturn remain
+outside acceptance.
 
-The sole software writer is `PROMOTE-11-STREET-ALIEN-AI`.
+The sole software writer is `INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER`.
 Resume prompt:
-> Resume the AvP salvage Goal by executing only PROMOTE-11 on codex/avp-playable-loop-pivot; preserve accepted SALVAGE-11 implementation 97e84dbea67fd49a11465bcbf4ab0375494e2fd6, PROMOTE-10, ORACLE-04/05/06 evidence, approved INTEGRATE-03 ISO 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef, Probe ISO 82c3a86c34b79626bf2cda7c2da4174ab1ee3603b3341f5091b141b740b4ef50, all component locks, dirty/private evidence, and physical Saturn UNRUN; promote only the class-0x1F loop behind a narrow production interface with no fallback, validate, and advance serially.
+> Resume the AvP salvage Goal by executing only INTEGRATE-04A on codex/avp-playable-loop-pivot; preserve accepted PROMOTE-10 at 6b943ead3db9ad5cb50bff3bca3884125b973a78, PROMOTE-11 at b75d8c8758073b01d7ea657ed9640c7f48c0f190, ORACLE-04/05/06 evidence, approved INTEGRATE-03 ISO 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef, Probe ISO 82c3a86c34b79626bf2cda7c2da4174ab1ee3603b3341f5091b141b740b4ef50, all component locks, dirty/private evidence, and physical Saturn UNRUN; integrate real input, current-state player/AI/collision/damage/HIT/KO, adapted target-KO-then-inactivity clear, unlock, and continued movement, then stop at USER-09.

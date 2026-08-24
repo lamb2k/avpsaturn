@@ -2,7 +2,7 @@
 
 TASK: PROMOTE-11-STREET-ALIEN-AI
 KIND: PROMOTE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: promote-street-alien-ai
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
