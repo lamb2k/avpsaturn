@@ -67,10 +67,15 @@ control before displaying the post-run checksum summary.
 ## Emulator readback
 
 Read the fixed linker-visible `avsp_probe3_telemetry` work-RAM block. Require
-567/567 representative commands, 909/909 peak commands, 909/909 overload
-commands with `detector_tripped=1`, zero asset/canary/copy-direction failures,
-and identical paired semantic state. Emulator timing is instrumentation
-evidence only, never the 15% hardware margin.
+567/909/909 requested and submitted AvP workload tile draws; one separately
+reported SGL scaled-sprite sentinel per table; 568/910/910 total reachable
+hardware draws; three reachable state commands; one terminator; and
+572/914/914 total reachable table entries. Record stored nonzero slots as a
+separate residue/extent measurement. Overload must report
+`detector_tripped=1`; asset, canary, copy-path, traversal, and production-mode
+deadline failures must remain zero. Paired semantic state must be identical.
+Emulator timing is instrumentation evidence only, never the 15% hardware
+margin.
 
 ## Human-review requirement
 
@@ -93,6 +98,30 @@ with telemetry and record the declared console/cart/loader/pad/capture setup.
   normal-release hash drift, canary/asset/copy-direction failure, overload that
   does not trip, unsafe approved-lock overlap, or required physical interaction
 
+## Bounded correction contract (2026-08-24)
+
+- The Probe-only SCU sprite-draw-end interrupt is reliable in pinned Yaba and
+  produces an intra-field FRC timestamp; next-field EDSR is no longer used to
+  estimate margin.
+- The model-equivalent live VDP1 census found that SGL prepends one reachable
+  8x1 `SCALED_SPRITE` Z-sort sentinel (`CMDCTRL 0x0501`, texture source
+  `0x07ff00`) before the three state commands and the AvP workload tile draws.
+  The sentinel remains in the production-facing path and is classified and
+  reported separately rather than suppressed.
+- Schema 3 distinguishes requested workload tile draws, submitted workload
+  draw calls, the auxiliary sentinel, total reachable hardware draws,
+  reachable state commands, the terminator, total reachable table entries,
+  and stored nonzero slots. The 567 and 909 workload figures are never
+  described as complete VDP1 hardware command counts.
+- Reliable SCU draw-end timestamps govern the shared deadline predicate when
+  present; VBlank span remains the unreliable/missing-timestamp fallback. The
+  ten-minute soak is measured by the independent elapsed VBlank clock and
+  alternates in 60-elapsed-field blocks; completed workloads remain a separate
+  count.
+- READY_FOR_PHYSICAL remains withdrawn until the corrected Target, paired
+  emulator soak, Full, approved-image regression, commit, push, and remote-SHA
+  gates pass.
+
 ## Next eligible cards
 
 - Resume `INTEGRATE-03-PLAYABLE-SLICE` physical execution only after the user
@@ -114,8 +143,8 @@ with telemetry and record the declared console/cart/loader/pad/capture setup.
   Both bind committed demand artifact `data/avsp_sprite_demand.json` SHA-256
   `9b3d110bb353b0103f7739b46dc37b6bf895d1b09952e7f6e2739fbab1f6e39b`.
 - Representative source frame 5637 expands 57 measured objects to exactly 567
-  reachable/drawn commands. Peak source frame 5776 expands 78 measured objects
-  to exactly 909 reachable/drawn commands. Their workload SHA-256 values are
+  AvP workload tile draws. Peak source frame 5776 expands 78 measured objects
+  to exactly 909 AvP workload tile draws. Their workload SHA-256 values are
   `194cb70efb503a3277e9f1256b71f01bcf4393566aeed6f3a538018c0e385e68`
   and `92e468908f59a9c1ca3b6c5c7ccfbf5a98e38ccf464adb05393233db03f7966c`.
 - Strict `release-probe3` compile passes from implementation commit

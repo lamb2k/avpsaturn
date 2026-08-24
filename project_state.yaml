@@ -203,7 +203,7 @@ awaiting_user_feedback: []
 open_blockers: []
 hardware_pretest:
   task: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
-  status: READY_FOR_PHYSICAL
+  status: PRE_PHYSICAL_VALIDATION_IN_PROGRESS
   task_kind: QA
   control_plane_head: edb02ee135fb1b30188ba5e089b3fdf126a90cff
   accepted_combat_interface_head: 417ed808e10f0f255948b1e6ecf0223399509c74

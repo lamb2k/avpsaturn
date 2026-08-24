@@ -59,7 +59,7 @@ $schedulePath = Join-Path $PSScriptRoot 'probe3-schedule.json'
 $tileManifestPath = Join-Path $output 'probe3-tile-manifest.json'
 $profileStamp = Join-Path $root 'build\last_compile_profile.txt'
 $manifest = [ordered]@{
-    schema = 'avsp-probe3-manifest-v1'
+    schema = 'avsp-probe3-manifest-v3'
     task = 'HW-01-PROBE-3-VDP1-BUDGET-PRETEST'
     profile = (Get-Content -LiteralPath $profileStamp -Raw).Trim()
     source_commit = (git -C $root rev-parse HEAD).Trim()
@@ -72,11 +72,32 @@ $manifest = [ordered]@{
     telemetry = [ordered]@{
         symbol = 'avsp_probe3_telemetry'
         work_ram_address = $telemetryAddress
-        schema = 1
-        fixed_size_bytes = 252
+        schema = 3
+        fixed_size_bytes = 624
         overlay_during_measurement = $false
+        draw_end_timestamp = 'SCU sprite-drawing-finished interrupt; first Probe-only FRC observation'
+        timer = 'SH-2 FRC clock-divisor 32; measured NTSC field-period calibration'
+        command_census = [ordered]@{
+            workload_tile_draws = 'measured AvP schedule expansion'
+            submitted_workload_draw_calls = 'production Jo draw-call count'
+            auxiliary_draws = 'measured separately from workload draws'
+            sgl_sentinel = 'CMDCTRL 0x0501, source 0x07ff00, size 8x1'
+            total_reachable_draws = 'workload plus auxiliary draws'
+            state_commands = 'measured reachable VDP1 state commands'
+            terminator = 'measured reachable draw-end entry'
+            total_reachable_entries = 'control-flow traversal including terminator'
+            stored_nonzero_slots = 'stored extent; never used as reachable count'
+        }
     }
-    modes = @('PROBE3_REPRESENTATIVE', 'PROBE3_PEAK_909', 'PROBE3_OVERLOAD')
+    modes = @('PROBE3_REPRESENTATIVE', 'PROBE3_PEAK_909',
+              'PROBE3_OVERLOAD', 'PROBE3_TEN_MINUTE_ALTERNATING_SOAK')
+    soak = [ordered]@{
+        target_fields = 36000
+        block_fields = 60
+        workloads = @('PROBE3_REPRESENTATIVE', 'PROBE3_PEAK_909')
+        overload_excluded = $true
+        summary_only_after_completion = $true
+    }
     physical_saturn = 'UNRUN'
     timing_claim = 'EMULATOR_SEMANTICS_ONLY'
     artifacts = [ordered]@{

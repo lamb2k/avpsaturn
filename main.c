@@ -2631,17 +2631,56 @@ static unsigned long tile_pool_stamp[AVSP_TILE_SPRITE_POOL];
 static unsigned long tile_pool_clock;
 static int tile_pool_used;
 #ifdef AVSP_PROBE3
+typedef void (*Probe3InterruptHandler)(void);
+typedef void (*Probe3SetScuHandler)(unsigned long, void *);
+typedef Probe3InterruptHandler (*Probe3GetScuHandler)(unsigned long);
+typedef void (*Probe3ChangeScuMask)(unsigned long, unsigned long);
+#define PROBE3_SCU_SPR_VECTOR 0x4DUL
+#define PROBE3_SCU_SPR_MASK (1UL << 13)
+#define PROBE3_SYS_SET_SCU_HANDLER(n, h) \
+    ((*(Probe3SetScuHandler *)0x06000300UL)((n), (void *)(h)))
+#define PROBE3_SYS_GET_SCU_HANDLER(n) \
+    ((*(Probe3GetScuHandler *)0x06000304UL)(n))
+#define PROBE3_SYS_CHANGE_SCU_MASK(and_mask, or_mask) \
+    ((*(Probe3ChangeScuMask *)0x06000344UL)((and_mask), (or_mask)))
 static volatile unsigned long probe3_copy_count;
 static volatile unsigned long probe3_copy_ticks;
 static volatile unsigned long probe3_texture_bytes;
 static volatile unsigned long probe3_cart_read_bytes;
-static volatile unsigned long probe3_legal_copy_direction;
+static volatile unsigned long probe3_cart_source_valid;
+static volatile unsigned long probe3_vdp1_destination_valid;
+static volatile unsigned long probe3_cart_to_vdp1_path_valid;
 static volatile unsigned long probe3_cram_writes_pending;
 static volatile unsigned long probe3_vblank_fields;
-static volatile unsigned long probe3_vblank_edsr;
-static volatile unsigned long probe3_vblank_frc;
-static unsigned long probe3_last_vblank_fields;
+static volatile unsigned long probe3_vblank_raw;
+static volatile unsigned long probe3_vblank_timestamp;
+static volatile unsigned long probe3_field_period_ticks;
+static volatile unsigned long probe3_draw_end_timestamp;
+static volatile unsigned long probe3_draw_end_field_start;
+static volatile unsigned long probe3_draw_end_field_period;
+static volatile unsigned long probe3_draw_end_field_number;
+static volatile unsigned long probe3_draw_end_edsr;
+static volatile unsigned long probe3_draw_end_reliable;
+static volatile unsigned long probe3_draw_end_armed;
+static volatile unsigned long probe3_transfer_start_timestamp;
+static volatile unsigned long probe3_transfer_end_timestamp;
+static void (*probe3_previous_sprite_irq)(void);
+static unsigned long probe3_submission_field_number;
+static unsigned long probe3_prepare_start_timestamp;
+static unsigned long probe3_prepare_end_timestamp;
+static unsigned long probe3_submission_timestamp;
+static unsigned long probe3_submitted_draws;
+static unsigned long probe3_submitted_mode;
+static unsigned long probe3_submitted_checksum;
+static unsigned long probe3_submitted_cram_writes;
+static unsigned long probe3_submitted_asset_failures;
+static int probe3_pending_measurement;
+static int probe3_submission_needs_arm;
+static int probe3_need_census;
+static volatile unsigned long probe3_irq_census_ready;
+static AvspProbe3Census probe3_irq_census;
 static unsigned long probe3_frame_number;
+static unsigned long probe3_soak_start_field_number;
 static int probe3_last_mode;
 #endif
 /* A missing tile or bank is an asset defect, never a silent skip: these
@@ -2735,11 +2774,15 @@ static int tile_sprite_for_archive_rank(const AvspTileArchive *archive,
         unsigned long archive_end = archive_start + archive->size;
         unsigned int copy_start = (unsigned int)jo_time_get_frc();
         int sprite_id;
+        unsigned long destination;
+        if (probe3_copy_count == 0UL)
+            probe3_transfer_start_timestamp = probe3_vblank_timestamp +
+                (((unsigned long)copy_start - probe3_vblank_raw) & 0xFFFFUL);
         if (source < archive_start || source + AVSP_TILE_BYTES > archive_end ||
             archive_start < (unsigned long)AVSP_CART_DRAM1_BASE ||
             archive_end > (unsigned long)(AVSP_CART_DRAM1_BASE +
                                            AVSP_TILE_REGION_BYTES))
-            probe3_legal_copy_direction = 0;
+            probe3_cart_source_valid = 0;
         if (tile_pool_used < AVSP_TILE_SPRITE_POOL)
         {
             sprite_id = jo_sprite_add_4bits_image(&img);
@@ -2763,11 +2806,23 @@ static int tile_sprite_for_archive_rank(const AvspTileArchive *archive,
             tile_pool_stamp[victim] = ++tile_pool_clock;
             sprite_id = tile_pool_sprite[victim];
         }
+        destination = (unsigned long)JO_VDP1_VRAM +
+            (unsigned long)__jo_sprite_def[sprite_id].adr * 8UL;
+        if (destination < (unsigned long)JO_VDP1_VRAM +
+                JO_VDP1_TEXTURE_DEF_BASE_ADDRESS ||
+            destination + AVSP_TILE_BYTES >
+                (unsigned long)JO_VDP1_USER_AREA_END_ADDR)
+            probe3_vdp1_destination_valid = 0;
+        if (!probe3_cart_source_valid || !probe3_vdp1_destination_valid)
+            probe3_cart_to_vdp1_path_valid = 0;
         ++probe3_copy_count;
         probe3_texture_bytes += AVSP_TILE_BYTES;
         probe3_cart_read_bytes += AVSP_TILE_BYTES;
         probe3_copy_ticks +=
             ((unsigned int)jo_time_get_frc() - copy_start) & 0xFFFFU;
+        probe3_transfer_end_timestamp = probe3_vblank_timestamp +
+            (((unsigned long)(unsigned int)jo_time_get_frc() -
+              probe3_vblank_raw) & 0xFFFFUL);
         return sprite_id;
     }
 #else
@@ -2939,9 +2994,41 @@ static int probe3_decode_coordinate(const int value)
 
 static void probe3_vblank_callback(void)
 {
-    probe3_vblank_edsr = JO_VDP1_EDSR;
-    probe3_vblank_frc = (unsigned long)jo_time_get_frc();
+    unsigned long raw = (unsigned long)(unsigned int)jo_time_get_frc();
+    unsigned long delta = (raw - probe3_vblank_raw) & 0xFFFFUL;
+    if (probe3_vblank_fields != 0UL)
+    {
+        probe3_vblank_timestamp += delta;
+        probe3_field_period_ticks = delta;
+    }
+    else probe3_vblank_timestamp = raw;
+    probe3_vblank_raw = raw;
     ++probe3_vblank_fields;
+}
+
+static unsigned long probe3_timestamp_now(void)
+{
+    unsigned long raw = (unsigned long)(unsigned int)jo_time_get_frc();
+    return probe3_vblank_timestamp + ((raw - probe3_vblank_raw) & 0xFFFFUL);
+}
+
+/* Probe-only wrapper around the SCU sprite-drawing-finished vector.  Capture
+ * before chaining so the timestamp is the first software observation of the
+ * actual hardware event; SGL's installed handler remains in the path. */
+static void probe3_sprite_draw_end_irq(void)
+{
+    if (probe3_draw_end_armed && !probe3_draw_end_reliable)
+    {
+        probe3_draw_end_timestamp = probe3_timestamp_now();
+        probe3_draw_end_field_start = probe3_vblank_timestamp;
+        probe3_draw_end_field_period = probe3_field_period_ticks;
+        probe3_draw_end_field_number = probe3_vblank_fields;
+        probe3_draw_end_edsr = JO_VDP1_EDSR;
+        probe3_draw_end_reliable = 1UL;
+        probe3_draw_end_armed = 0UL;
+    }
+    if (probe3_previous_sprite_irq != JO_NULL)
+        probe3_previous_sprite_irq();
 }
 
 static void probe3_invalidate_texture_cache(void)
@@ -3018,13 +3105,6 @@ static int probe3_draw_schedule(const AvspProbe3Schedule *schedule)
 static void probe3_frame_callback(void)
 {
     const AvspProbe3Schedule *schedule;
-    unsigned long fields;
-    unsigned long field_delta;
-    unsigned int prepare_start;
-    unsigned long prepare_ticks;
-    unsigned long cram_writes;
-    unsigned long failures;
-    int drawn;
 
     if (!runtime_ready || avsp_probe3_telemetry.status ==
         PROBE3_STATUS_FAILED)
@@ -3035,21 +3115,160 @@ static void probe3_frame_callback(void)
         jo_printf(2, 5, "PHYSICAL SATURN UNRUN");
         return;
     }
+
+    if (probe3_pending_measurement && !probe3_draw_end_reliable)
+    {
+        /* slSynch can return before the Probe-only SCU draw-end wrapper has
+         * observed the just-submitted list.  Do not consume stale timestamp
+         * fields or submit a replacement list while this one is pending. */
+        if (probe3_vblank_fields - probe3_submission_field_number > 4UL)
+            avsp_probe3_fail(PROBE3_FAILURE_DRAW_END_TIMESTAMP);
+        return;
+    }
+
+    if (probe3_pending_measurement)
+    {
+        AvspProbe3DeadlineObservation observation;
+        AvspProbe3Census census;
+        unsigned long draw_elapsed = 0UL;
+        unsigned long margin = 0UL;
+        unsigned long total_elapsed = 0UL;
+        unsigned long total_budget = 0UL;
+        unsigned long total_margin = 0UL;
+        unsigned long period = probe3_draw_end_field_period;
+        unsigned long field_delta = probe3_draw_end_field_number -
+            probe3_submission_field_number;
+        if (probe3_draw_end_timestamp >= probe3_draw_end_field_start)
+            draw_elapsed = probe3_draw_end_timestamp -
+                probe3_draw_end_field_start;
+        if (period > draw_elapsed) margin = period - draw_elapsed;
+        if (probe3_draw_end_timestamp >= probe3_prepare_start_timestamp)
+            total_elapsed = probe3_draw_end_timestamp -
+                probe3_prepare_start_timestamp;
+        total_budget = period * 2UL;
+        if (total_budget > total_elapsed)
+            total_margin = total_budget - total_elapsed;
+
+        avsp_probe3_telemetry.mode = probe3_submitted_mode;
+        avsp_probe3_telemetry.frame_number = ++probe3_frame_number;
+        avsp_probe3_telemetry.workload_checksum_word =
+            probe3_submitted_checksum;
+        avsp_probe3_telemetry.requested_workload_tile_draws =
+            avsp_probe3_schedule()->reachable_commands;
+        avsp_probe3_telemetry.submitted_workload_draw_calls =
+            probe3_submitted_draws;
+        avsp_probe3_telemetry.vdp1_draw_end_state = probe3_draw_end_edsr;
+        avsp_probe3_telemetry.draw_end_deadline_fields =
+            probe3_submitted_mode == PROBE3_OVERLOAD ? 0UL : 1UL;
+        avsp_probe3_telemetry.field_delta = field_delta;
+        avsp_probe3_telemetry.field_start_timestamp =
+            probe3_draw_end_field_start;
+        avsp_probe3_telemetry.field_period_ticks = period;
+        avsp_probe3_telemetry.timer_calibration_field_ticks = period;
+        avsp_probe3_telemetry.cpu_prepare_start_timestamp =
+            probe3_prepare_start_timestamp;
+        avsp_probe3_telemetry.cpu_prepare_end_timestamp =
+            probe3_prepare_end_timestamp;
+        avsp_probe3_telemetry.transfer_start_timestamp =
+            probe3_transfer_start_timestamp;
+        avsp_probe3_telemetry.transfer_end_timestamp =
+            probe3_transfer_end_timestamp;
+        avsp_probe3_telemetry.submission_timestamp =
+            probe3_submission_timestamp;
+        avsp_probe3_telemetry.draw_end_timestamp = probe3_draw_end_timestamp;
+        avsp_probe3_telemetry.draw_end_timestamp_reliable =
+            probe3_draw_end_reliable;
+        avsp_probe3_telemetry.draw_end_margin_ticks = margin;
+        avsp_probe3_telemetry.draw_end_margin_percent_x100 = period == 0UL ?
+            0UL : (margin * 10000UL) / period;
+        avsp_probe3_telemetry.total_frame_margin_ticks = total_margin;
+        avsp_probe3_telemetry.total_frame_margin_percent_x100 =
+            total_budget == 0UL ? 0UL :
+            (total_margin * 10000UL) / total_budget;
+        avsp_probe3_telemetry.timer_wrapped =
+            ((probe3_draw_end_timestamp & 0xFFFFUL) <
+             (probe3_prepare_start_timestamp & 0xFFFFUL)) ? 1UL : 0UL;
+        avsp_probe3_telemetry.texture_bytes_copied = probe3_texture_bytes;
+        avsp_probe3_telemetry.copy_count = probe3_copy_count;
+        avsp_probe3_telemetry.copy_ticks = probe3_copy_ticks;
+        avsp_probe3_telemetry.cart_texture_source_valid =
+            probe3_cart_source_valid;
+        avsp_probe3_telemetry.vdp1_texture_destination_valid =
+            probe3_vdp1_destination_valid;
+        avsp_probe3_telemetry.cart_to_vdp1_path_valid =
+            probe3_cart_to_vdp1_path_valid;
+        avsp_probe3_telemetry.cram_writes = probe3_submitted_cram_writes;
+        avsp_probe3_telemetry.cartridge_read_bytes =
+            probe3_cart_read_bytes;
+        avsp_probe3_telemetry.asset_failures =
+            probe3_submitted_asset_failures;
+        if (field_delta == 0UL) {
+            ++avsp_probe3_telemetry.repeated_fields;
+            if (avsp_probe3_telemetry.phase == PROBE3_PHASE_SOAK)
+                ++avsp_probe3_telemetry.soak_repeated_fields;
+        } else if (field_delta > 1UL) {
+            avsp_probe3_telemetry.skipped_fields += field_delta - 1UL;
+            if (avsp_probe3_telemetry.phase == PROBE3_PHASE_SOAK)
+                avsp_probe3_telemetry.soak_skipped_fields += field_delta - 1UL;
+        }
+
+        observation.detector_enabled =
+            avsp_probe3_telemetry.detector_enabled;
+        observation.draw_end_observed = probe3_draw_end_reliable;
+        observation.draw_end_reliable = probe3_draw_end_reliable;
+        observation.field_delta = field_delta;
+        observation.deadline_fields =
+            avsp_probe3_telemetry.draw_end_deadline_fields;
+        observation.draw_elapsed_ticks = draw_elapsed;
+        observation.field_period_ticks = period;
+        observation.soak_elapsed_fields = 0UL;
+        probe3_pending_measurement = 0;
+        if (probe3_need_census)
+        {
+            if (!probe3_irq_census_ready)
+            {
+                avsp_probe3_fail(PROBE3_FAILURE_COMMAND_TABLE);
+                return;
+            }
+            census = probe3_irq_census;
+            avsp_probe3_record_precheck(&observation, &census);
+            if (avsp_probe3_telemetry.phase == PROBE3_PHASE_SOAK)
+                probe3_soak_start_field_number = probe3_vblank_fields;
+        }
+        else
+        {
+            /* A ten-minute soak is 36,000 elapsed NTSC VBlank fields, not
+             * 36,000 completed workloads.  Draw-end field_delta can be zero
+             * when submission and IRQ land within one field, so summing it
+             * undercounts real elapsed time. */
+            observation.soak_elapsed_fields = probe3_vblank_fields -
+                probe3_soak_start_field_number;
+            avsp_probe3_record_soak(&observation);
+        }
+        probe3_draw_end_reliable = 0UL;
+        probe3_need_census = 0;
+    }
+
     if (avsp_probe3_telemetry.complete)
     {
         jo_clear_screen();
         jo_printf(2, 3, "PROBE 3 READY FOR PHYSICAL");
-        jo_printf(2, 5, "REP %lu PEAK %lu OVERLOAD %lu",
-                  avsp_probe3_telemetry.representative_high_water,
-                  avsp_probe3_telemetry.peak_high_water,
+        jo_printf(2, 5, "WORK REP %lu PEAK %lu OVL %lu",
+                  avsp_probe3_telemetry.
+                    representative_workload_tile_draw_high_water,
+                  avsp_probe3_telemetry.peak_workload_tile_draw_high_water,
                   avsp_probe3_telemetry.overload_tripped);
-        jo_printf(2, 7, "MISS %lu LATE %lu CANARY %lu",
-                  avsp_probe3_telemetry.missed_fields,
-                  avsp_probe3_telemetry.late_command_lists,
+        jo_printf(2, 7, "SOAK %lu/%lu MIN %lu.%02lu%%",
+                  avsp_probe3_telemetry.soak_elapsed_fields,
+                  avsp_probe3_telemetry.soak_target_fields,
+                  avsp_probe3_telemetry.soak_min_draw_margin_percent_x100 / 100UL,
+                  avsp_probe3_telemetry.soak_min_draw_margin_percent_x100 % 100UL);
+        jo_printf(2, 9, "MISS %lu LATE %lu CANARY %lu",
+                  avsp_probe3_telemetry.soak_missed_fields,
+                  avsp_probe3_telemetry.soak_late_lists,
                   avsp_probe3_telemetry.canary_state);
-        jo_printf(2, 9, "SUMMARY %08lX",
+        jo_printf(2, 11, "SUMMARY %08lX",
                   avsp_probe3_telemetry.summary_checksum);
-        jo_printf(2, 11, "TIMING IS EMULATOR ONLY");
         jo_printf(2, 13, "PHYSICAL SATURN UNRUN");
         return;
     }
@@ -3060,31 +3279,69 @@ static void probe3_frame_callback(void)
         probe3_last_mode = (int)avsp_probe3_telemetry.mode;
     }
     schedule = avsp_probe3_schedule();
-    fields = probe3_vblank_fields;
-    field_delta = fields - probe3_last_vblank_fields;
-    probe3_last_vblank_fields = fields;
     probe3_copy_count = 0;
     probe3_copy_ticks = 0;
     probe3_texture_bytes = 0;
     probe3_cart_read_bytes = 0;
-    probe3_legal_copy_direction = 1;
+    probe3_cart_source_valid = 1UL;
+    probe3_vdp1_destination_valid = 1UL;
+    probe3_cart_to_vdp1_path_valid = 1UL;
     tile_diag_no_bank = 0;
     tile_diag_no_rank = 0;
     tile_diag_no_sprite = 0;
-    cram_writes = probe3_cram_writes_pending;
+    probe3_submitted_cram_writes = probe3_cram_writes_pending;
     probe3_cram_writes_pending = 0;
-    prepare_start = (unsigned int)jo_time_get_frc();
-    drawn = probe3_draw_schedule(schedule);
-    prepare_ticks = ((unsigned int)jo_time_get_frc() - prepare_start) &
-                    0xFFFFU;
-    failures = (unsigned long)(tile_diag_no_bank + tile_diag_no_rank +
-                               tile_diag_no_sprite);
-    avsp_probe3_record_frame(
-        ++probe3_frame_number, probe3_vblank_edsr, field_delta,
-        (unsigned long)drawn, prepare_ticks, probe3_texture_bytes,
-        probe3_copy_count, probe3_copy_ticks, probe3_legal_copy_direction,
-        cram_writes, probe3_cart_read_bytes, failures);
-    JO_UNUSED_ARG(probe3_vblank_frc);
+    probe3_transfer_start_timestamp = probe3_timestamp_now();
+    probe3_transfer_end_timestamp = probe3_transfer_start_timestamp;
+    probe3_prepare_start_timestamp = probe3_timestamp_now();
+    probe3_submitted_draws = (unsigned long)probe3_draw_schedule(schedule);
+    probe3_prepare_end_timestamp = probe3_timestamp_now();
+    probe3_submitted_asset_failures =
+        (unsigned long)(tile_diag_no_bank + tile_diag_no_rank +
+                        tile_diag_no_sprite);
+    probe3_submitted_mode = avsp_probe3_telemetry.mode;
+    probe3_submitted_checksum = schedule->checksum_word;
+    probe3_pending_measurement = 1;
+    probe3_submission_needs_arm = 1;
+    probe3_need_census = avsp_probe3_telemetry.phase != PROBE3_PHASE_SOAK;
+    probe3_irq_census_ready = 0UL;
+    if (probe3_need_census)
+        avsp_probe3_telemetry.phase = PROBE3_PHASE_PRECHECK_VALIDATE;
+}
+
+static void probe3_run_loop(void)
+{
+    for (;;)
+    {
+        probe3_frame_callback();
+        slSynch();
+        if (probe3_submission_needs_arm)
+        {
+            /* SGL retires the preceding list and submits the draw calls
+             * queued by probe3_frame_callback inside slSynch.  Arm only
+             * after that return so the next sprite-draw-end IRQ belongs to
+             * this workload rather than to the preceding SGL list. */
+            probe3_submission_timestamp = probe3_timestamp_now();
+            probe3_submission_field_number = probe3_vblank_fields;
+            if (probe3_need_census)
+            {
+                /* Census the finalized submission before VDP1 can rewrite
+                 * its active END marker onto the first workload command at
+                 * draw completion.  The IRQ remains the sole timing source;
+                 * this snapshot is the authoritative submitted topology. */
+                avsp_probe3_census(
+                    (const volatile unsigned short *)JO_VDP1_VRAM,
+                    AVSP_PROBE3_VDP1_TABLE_BYTES, probe3_submitted_draws,
+                    &probe3_irq_census);
+                probe3_irq_census.submitted_workload_draw_calls =
+                    probe3_submitted_draws;
+                probe3_irq_census_ready = 1UL;
+            }
+            probe3_draw_end_reliable = 0UL;
+            probe3_draw_end_armed = 1UL;
+            probe3_submission_needs_arm = 0;
+        }
+    }
 }
 #endif
 
@@ -6652,7 +6909,15 @@ void jo_main(void)
     probe3_last_mode = -1;
     probe3_frame_number = 0;
     probe3_vblank_fields = 0;
-    probe3_last_vblank_fields = 0;
+    probe3_vblank_raw = (unsigned long)(unsigned int)jo_time_get_frc();
+    probe3_vblank_timestamp = probe3_vblank_raw;
+    probe3_field_period_ticks = 0UL;
+    probe3_pending_measurement = 0;
+    probe3_submission_needs_arm = 0;
+    probe3_need_census = 0;
+    probe3_irq_census_ready = 0UL;
+    probe3_draw_end_reliable = 0UL;
+    probe3_draw_end_armed = 0UL;
     if (!cart_available)
     {
         failed_asset = "4MB RAM CART REQUIRED";
@@ -6911,7 +7176,16 @@ void jo_main(void)
     jo_core_set_screens_order(JO_NBG0_SCREEN, JO_SPRITE_SCREEN, JO_NBG1_SCREEN);
 #ifdef AVSP_PROBE3
     jo_core_add_vblank_callback(probe3_vblank_callback);
+    probe3_previous_sprite_irq =
+        PROBE3_SYS_GET_SCU_HANDLER(PROBE3_SCU_SPR_VECTOR);
+    PROBE3_SYS_SET_SCU_HANDLER(PROBE3_SCU_SPR_VECTOR,
+                               probe3_sprite_draw_end_irq);
+    PROBE3_SYS_CHANGE_SCU_MASK(~PROBE3_SCU_SPR_MASK, 0UL);
 #endif
+#ifdef AVSP_PROBE3
+    probe3_run_loop();
+#else
     jo_core_add_callback(frame_callback);
     jo_core_run();
+#endif
 }

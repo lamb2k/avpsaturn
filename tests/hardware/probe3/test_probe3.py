@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import subprocess
 from pathlib import Path
 
 
@@ -29,6 +30,20 @@ def load_generator():
     assert spec.loader is not None
     spec.loader.exec_module(module)
     return module
+
+
+def compile_and_run_contract() -> None:
+    translated = subprocess.run(
+        ["wsl.exe", "wslpath", "-a", str(ROOT)], check=True,
+        capture_output=True, text=True).stdout.strip()
+    command = (
+        f"cd '{translated}' && mkdir -p build/hardware/probe3/host && "
+        "gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 -I. "
+        "tests/hardware/probe3/probe3.c "
+        "tests/hardware/probe3/test_probe3_contract.c "
+        "-o build/hardware/probe3/host/probe3_contract && "
+        "./build/hardware/probe3/host/probe3_contract")
+    subprocess.run(["wsl.exe", "sh", "-lc", command], check=True)
 
 
 def validate_identity(report: dict, expected_peak_count: int = 909,
@@ -55,6 +70,7 @@ def expect_reject(report: dict, count: int, workload_id: str) -> None:
 
 
 def main() -> int:
+    compile_and_run_contract()
     generator = load_generator()
     report = json.loads((HERE / "probe3-schedule.json").read_text())
     validate_identity(report)
@@ -112,13 +128,34 @@ def main() -> int:
             "Probe 3 compile isolation missing")
     require("#ifdef AVSP_PROBE3" in main_c,
             "Probe 3 runtime isolation missing")
+    require("PROBE3_SCU_SPR_VECTOR" in main_c and
+            "probe3_sprite_draw_end_irq" in main_c,
+            "reliable Probe-only VDP1 draw-end interrupt seam missing")
+    require("probe3_run_loop" in main_c and "slSynch();" in main_c,
+            "explicit Probe-only command-list submission seam missing")
+    require("AVSP_PROBE3_SOAK_FIELDS 36000UL" in
+            (HERE / "probe3.h").read_text(encoding="utf-8"),
+            "release Probe image lacks full ten-minute NTSC soak")
+    probe_header = (HERE / "probe3.h").read_text(encoding="utf-8")
+    require("AVSP_PROBE3_SCHEMA 3UL" in probe_header and
+            "workload_tile_draw_commands" in probe_header and
+            "auxiliary_draw_commands" in probe_header and
+            "sgl_scaled_sprite_sentinel_draw_commands" in probe_header and
+            "total_reachable_draw_commands" in probe_header and
+            "reachable_state_commands" in probe_header and
+            "reachable_table_entries" in probe_header and
+            "stored_nonzero_slots" in probe_header,
+            "Probe 3 command-composition telemetry contract is incomplete")
     require("src/port_v2" not in str(HERE.relative_to(ROOT)).replace("\\", "/"),
             "Probe 3 diagnostic escaped its owned path")
 
     print("HW-01 Probe 3 focused host controls: PASS")
     print(f"schedule_sha256={sha256(HERE / 'probe3-schedule.json')}")
     print(f"header_sha256={sha256(HERE / 'generated/probe3_schedule.h')}")
-    print("negative_controls=count-mutation,workload-identity-mutation,overload-deadline")
+    print("negative_controls=detector-disable,deadline-mutation,manual-assertion,"
+          "production-false-positive,early-end,invalid-link,sentinel-signature,"
+          "command-composition,elapsed-field-clock,count-mutation,"
+          "workload-identity-mutation")
     return 0
 
 

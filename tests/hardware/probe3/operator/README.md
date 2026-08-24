@@ -9,35 +9,51 @@ method are recorded and the user explicitly authorizes that write. Running
 Boot the exact `probe3.iso`/`probe3.cue` pair named in `HASHES.sha256`. No
 controller input is required. The image runs:
 
-1. `PROBE3_REPRESENTATIVE`: source frame 5637, 567 reachable/drawn commands,
-   for 120 fields.
-2. `PROBE3_PEAK_909`: source frame 5776, exactly 909 reachable/drawn commands,
-   for 120 fields.
-3. `PROBE3_OVERLOAD`: the exact 909-command body with a declared zero-field
-   diagnostic deadline, for one bounded field. This is a detector control, not
-   a production budget.
+1. `PROBE3_REPRESENTATIVE`: source frame 5637, 567 requested/submitted AvP
+   workload tile draws, followed by one untimed actual-command-table census
+   frame.
+2. `PROBE3_PEAK_909`: source frame 5776, exactly 909 requested/submitted AvP
+   workload tile draws, followed by one untimed actual-command-table census
+   frame.
+3. `PROBE3_OVERLOAD`: the exact 909-workload-draw body with a declared zero-field
+   diagnostic deadline, followed by its untimed census frame. The shared
+   deadline predicate must trip; this is a detector control, not a production
+   budget.
+4. `PROBE3_TEN_MINUTE_ALTERNATING_SOAK`: the image resets soak-only counters,
+   anchors elapsed duration to the independent VBlank clock, alternates
+   representative and peak in fixed 60-elapsed-field blocks, excludes the
+   overload body, and runs at least 36,000 measured NTSC fields with no overlay.
+   Completed workload submissions are reported separately from elapsed fields.
 
 Do not reset between modes. Capture the final summary screen and read the
-252-byte `avsp_probe3_telemetry` block at the manifest address when the boot
+624-byte schema-3 `avsp_probe3_telemetry` block at the manifest address when the boot
 method provides a debug/readback channel. The on-screen checksum and telemetry
 `summary_checksum` must agree.
 
 ## Immediate pass/fail rules
 
-The diagnostic is eligible to proceed to the ten-minute alternating soak only
-when representative is 567/567, peak is 909/909, overload is 909/909 with its
-detector tripped, both canaries are intact, legal copy direction is 1, and
+The image enters its embedded soak only when the actual reachable VDP1 census
+separately reports 567/909/909 AvP workload tile draws, the same submitted
+workload draw-call counts, one auxiliary SGL scaled-sprite sentinel, total
+reachable hardware draws of 568/910/910, three state commands, one terminator,
+and total reachable table entries of 572/914/914. Stored nonzero slots are
+reported as stored extent and are never substituted for reachable entries.
+Each census must have no invalid link, loop, traversal failure, early end, or
+truncation; overload has tripped the shared predicate; both canaries are
+intact; cart source, VDP1 destination, and cart-to-VDP1 path validity are 1; and
 asset failures/failure reason/missed fields/late lists are zero for the two
 measured modes. Any hang, corruption, mismatch, missing summary, canary or asset
 failure, illegal copy direction, missed field, or late list is a failure.
 
 The overload control passes only by tripping its declared detector safely. It
 must not be counted as a production deadline failure. Physical timing must
-show the required 15 percent margin; emulator timing is never accepted for
-that condition.
+show the required 15 percent margin from the Probe-only SCU sprite-draw-end
+interrupt timestamp and measured FRC field period; next-field EDSR alone is
+not evidence. Emulator timing is never accepted for that condition.
 
-After the three modes pass, run a ten-minute physical soak alternating the
-representative and peak schedules and retain uninterrupted video/readback.
+Do not start a separate manual Probe soak. Retain uninterrupted video/readback
+while this exact image runs its built-in 36,000-field alternating soak. The
+summary appears only after it completes or immediately after a hard failure.
 
 ## Evidence naming
 
