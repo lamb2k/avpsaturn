@@ -43,6 +43,11 @@
     },
     {
       "id": "round1",
+      "technical_capability_slice": "PARTIAL",
+      "live_player_control": "UNRUN",
+      "street_alien_ai": "UNRUN",
+      "encounter_controller": "UNRUN",
+      "complete_round1": "UNRUN",
       "captured": "PARTIAL",
       "labeled": "PARTIAL",
       "packaged": "UNKNOWN",
@@ -51,10 +56,10 @@
       "human_review": "PARTIAL",
       "physical_workload": "UNRUN",
       "blockers": [
-        "Approved player, class 0x1F enemy, camera/stage, HUD, and PCM components do not establish complete Round 1 behavior.",
-        "Collision, combat, encounters, boss, route transitions, CDDA, residency, and physical Saturn remain incomplete."
+        "The approved SOURCE_BOUND_WITH_ADAPTED_INPUT technical capability slice uses deterministic choreography and does not establish production player control, autonomous enemy AI, encounter clear, or complete Round 1 behavior.",
+        "Physical capability acceptance, the three bounded live-encounter Oracles, production action/AI controllers, encounter integration, USER-09 playability review, frontend, boss, and complete route transitions remain incomplete."
       ],
-      "next_experiment": "Finish the active salvage/combat/capability sequence, then integrate cold boot through Round 1 under INTEGRATE-04."
+      "next_experiment": "Preserve HW-01 at READY_FOR_PHYSICAL while ORACLE-04, ORACLE-05, and ORACLE-06 run serially as read-only research; after physical INTEGRATE-03 acceptance, build and review the first live encounter before frontend and INTEGRATE-04."
     },
     {
       "id": "round2_underpass_through_frame_18000",

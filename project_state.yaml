@@ -193,6 +193,38 @@ architecture_enforcement:
     - id: evidence-tier-separation
       status: ACTIVE
       activates_when: always
+independent_read_only_cards:
+  - ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS
+  - ORACLE-05-STREET-ALIEN-AI
+  - ORACLE-06-ROUND1-ENCOUNTER-RULES
+active_independent_read_only_card: null
+independent_oracle_write_owner: null
+independent_read_only_policy:
+  primary_task_must_remain_active: true
+  allowed_primary_hard_stop: READY_FOR_PHYSICAL
+  serial_oracle_writers: true
+  production_runtime_writes: false
+  production_head_changes: false
+  physical_status_changes: false
+  successor_activation: false
+  allowed_writes:
+    - card-scoped-source-research
+    - derived-evidence
+    - coverage-and-migration-ledgers
+    - independent-oracle-state-and-card
+first_live_gameplay_encounter:
+  milestone: FIRST LIVE GAMEPLAY ENCOUNTER
+  status: BLOCKED
+  player_character: predator_warrior
+  enemy_class: "0x1F"
+  player_count: 1
+  measured_round1_encounter_count: 1
+  production_player_control: UNRUN
+  street_alien_ai: UNRUN
+  encounter_controller: UNRUN
+  interactive_human_review: UNRUN
+  scripted_capability_slice_sufficient: false
+  physical_proof_source: INTEGRATE-03-PLAYABLE-SLICE only
 current_checkpoint: hw-01-probe-3-vdp1-budget-pretest
 active_task_card: docs/task_cards/HW-01-PROBE-3-VDP1-BUDGET-PRETEST.md
 active_task_id: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
@@ -888,6 +920,15 @@ task_queue:
   - REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
   - HW-01-PROBE-3-VDP1-BUDGET-PRETEST
   - INTEGRATE-03-PLAYABLE-SLICE
+  - ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS
+  - ORACLE-05-STREET-ALIEN-AI
+  - ORACLE-06-ROUND1-ENCOUNTER-RULES
+  - SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
+  - PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
+  - SALVAGE-11-STREET-ALIEN-AI
+  - PROMOTE-11-STREET-ALIEN-AI
+  - INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
+  - USER-09-LIVE-ENCOUNTER-REVIEW
   - SALVAGE-08-FRONTEND
   - QA-08-FRONTEND
   - USER-08-FRONTEND

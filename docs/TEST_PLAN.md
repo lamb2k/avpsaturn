@@ -59,6 +59,11 @@ Fast runs workflow-policy, task-card/state, migration-map schema, and existing
 focused deterministic checks without regenerating private captures. Run it for
 this governance update and as the ordinary repository-level smoke lane.
 
+For the live-gameplay pivot, Fast also verifies the serial read-only Oracle
+exception, the player-action/AI/encounter dependency chain, the frontend gate,
+and negative transitions that would relabel the scripted capability slice as
+playable Round 1 or physical proof.
+
 ## ARCH-01 control-plane lane
 
 `ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN` runs control-plane checks only:

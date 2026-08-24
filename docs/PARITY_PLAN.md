@@ -75,8 +75,10 @@ implementation recorded by `project_state.production_head`: the player/combat
 interface now binds each selector-specific player presentation, collision,
 damage, and class-`0x1F` alien reaction to one independent MAME source event.
 INTEGRATE-03 is user `APPROVED` for `SOURCE_BOUND_WITH_ADAPTED_INPUT` at exact
-candidate `82965ef` and normalized ISO SHA-256 `4a142774...`. It remains
-physically `UNRUN`. The bounded QA prerequisite
+candidate `82965ef` and normalized ISO SHA-256 `4a142774...`. Production player
+control, enemy AI, targeting, encounter progression, and free-form gameplay
+remain `UNKNOWN`; the deterministic choreography is not playable Round 1. The
+slice remains physically `UNRUN`. The bounded QA prerequisite
 `HW-01-PROBE-3-VDP1-BUDGET-PRETEST` has prepared its representative, exact
 909-tile, and overload-control hardware package. Host checks, strict build,
 paired pinned-emulator semantics, overload detection, and the exact approved
@@ -96,19 +98,47 @@ soak remain `UNRUN`, and `SALVAGE-08` remains inactive.
 | 9 | `PROMOTE-06-PCM` | Promote approved PCM cue path |
 | 10 | `SALVAGE-07-CDDA-RESIDENCY` -> `USER-07-CDDA-RESIDENCY-REVIEW` -> `PROMOTE-07-CDDA-RESIDENCY` | Prove audio/load ownership and manifests, then require explicit audible review |
 | 11 | `REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION` -> corrected `INTEGRATE-03-PLAYABLE-SLICE` -> `HW-01-PROBE-3-VDP1-BUDGET-PRETEST` | Preserve the approved source-bound slice and prepare its isolated representative/909/overload physical prerequisite before physical execution |
-| 12 | `SALVAGE-08-FRONTEND` -> `QA-08-FRONTEND` -> `USER-08-FRONTEND` -> `PROMOTE-08-FRONTEND` | Promote title and four-character select |
-| 13 | `INTEGRATE-04-COLD-BOOT-TO-ROUND1` | Cold boot through Round 1 gameplay |
-| 14 | `ORACLE-01`, `ORACLE-02`, `ORACLE-03` | Complete title-to-credits and four-character source evidence |
-| 15 | stage-segment templates -> `INTEGRATE-05-REFERENCE-CHARACTER-FULL-GAME` | Complete one reference character through credits |
-| 16 | character templates -> `INTEGRATE-06-FOUR-CHARACTER-ROSTER` | Add the remaining three characters through one runtime |
-| 17 | multiplayer templates -> `INTEGRATE-07-THREE-PLAYER-MULTIPLAYER` | Add input, joins, camera, combat, and resource peaks |
-| 18 | `QA-09-RELEASE-HARDENING` | Repeatable build and soak hardening |
-| 19 | `QA-10-FINAL-TITLE-TO-CREDITS-ACCEPTANCE` | Exact release acceptance for every character and multiplayer scope |
+| 12 | `ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS` -> `ORACLE-05-STREET-ALIEN-AI` -> `ORACLE-06-ROUND1-ENCOUNTER-RULES` | Read-only source research for the first live encounter; these may run serially while HW-01 remains at its physical hard stop |
+| 13 | `SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER` -> `PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER` | Build the bounded production player-action authority |
+| 14 | `SALVAGE-11-STREET-ALIEN-AI` -> `PROMOTE-11-STREET-ALIEN-AI` | Build the bounded autonomous class-`0x1F` authority |
+| 15 | `INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER` -> `USER-09-LIVE-ENCOUNTER-REVIEW` | Prove and explicitly review `FIRST LIVE GAMEPLAY ENCOUNTER` |
+| 16 | `SALVAGE-08-FRONTEND` -> `QA-08-FRONTEND` -> `USER-08-FRONTEND` -> `PROMOTE-08-FRONTEND` | Promote title and four-character select only after the live-encounter review |
+| 17 | `INTEGRATE-04-COLD-BOOT-TO-ROUND1` | Cold boot into the real controller-driven Round 1 encounter, never the scripted capability demonstration |
+| 18 | `ORACLE-01`, `ORACLE-02`, `ORACLE-03` | Complete title-to-credits and four-character source evidence |
+| 19 | stage-segment templates -> `INTEGRATE-05-REFERENCE-CHARACTER-FULL-GAME` | Complete one reference character through credits |
+| 20 | character templates -> `INTEGRATE-06-FOUR-CHARACTER-ROSTER` | Add the remaining three characters through one runtime |
+| 21 | multiplayer templates -> `INTEGRATE-07-THREE-PLAYER-MULTIPLAYER` | Add input, joins, camera, combat, and resource peaks |
+| 22 | `QA-09-RELEASE-HARDENING` | Repeatable build and soak hardening |
+| 23 | `QA-10-FINAL-TITLE-TO-CREDITS-ACCEPTANCE` | Exact release acceptance for every character and multiplayer scope |
 
 Exact dependencies, statuses, and predeclared successors are machine-checked
 from the cards and `project_state.yaml`.
 
-## 5. Nonblocking full-game evidence lane
+## 5. Nonblocking source-research lanes
+
+The first-live-encounter Oracle cards are read-only, serial bodies. Goal Mode
+may execute one at a time while `HW-01-PROBE-3-VDP1-BUDGET-PRETEST` remains
+`READY_FOR_PHYSICAL`, using the predeclared `independent_read_only_cards`
+mechanism. They may change only card-scoped source research, derived evidence,
+coverage/migration state, and their own cards. They cannot change the approved
+runtime, Probe 3 result, physical evidence, exact INTEGRATE-03 ISO,
+`production_head`, or `SALVAGE-08`; they cannot advance physical status.
+
+- `ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS` measures real input, movement,
+  facing, four bounded attacks, timing, boxes, health, HIT/KO, interruption,
+  and relevant RNG without claiming the complete move set.
+- `ORACLE-05-STREET-ALIEN-AI` measures one complete class-`0x1F` behavior loop,
+  scheduler order, timers, collision/damage, HIT/KO, and consumed RNG through
+  controlled counterfactuals.
+- `ORACLE-06-ROUND1-ENCOUNTER-RULES` separates measured encounter entry,
+  spawn, bounds/lock, active/clear guards, unlock, and continuation from actor
+  AI and presentation events.
+
+Two identical captures and one real perturbation are mandatory for each body.
+Only one Oracle writer may operate at a time. Facts not captured remain
+`UNKNOWN` or `UNRUN`.
+
+The later full-game Oracle cards remain read-only source research:
 
 The three Oracle cards are read-only source research. They may be activated only
 by Goal Mode and never write production runtime paths. They do not block the
@@ -187,7 +217,7 @@ read windows, high-water, and canaries.
 **Exit:** exact emulator readback rejects illegal overlap, fallback, missing
 assets, and canary damage.
 
-### R7 — Integrated playable capability slice
+### R7A — Physical capability proof
 
 First repair the promoted player/combat presentation boundary so selectors 1-4
 carry their measured source action, animation, pose, pivot, grounding, and
@@ -197,9 +227,26 @@ must originate from MAME/source evidence, never from the current Saturn
 candidate's hashes.
 
 **Exit:** all 12 capability conditions close through the required physical
-Saturn procedure; emulator or user evidence is not substituted.
+Saturn procedure; emulator or user evidence is not substituted. This proves
+the technical capability slice, not production control, AI, encounter clear,
+or a playable Round 1 loop.
 
-### R8 — Frontend and cold boot through Round 1
+### R7B — First live gameplay encounter
+
+Measure and implement only the Predator Warrior subset, one autonomous
+class-`0x1F` street-alien loop, and one Round 1 encounter controller. Integrate
+real controller input, current-state action/AI decisions, live overlap/damage,
+player and alien HIT/KO, encounter clear, restored stage progression, and
+continued movement. Machine tests use deterministic input ledgers; the human
+checkpoint uses real interactive input.
+
+**Exit:** the player can approach or retreat, change lanes, choose when to
+attack, miss, make contact, receive an enemy attack, KO the alien, clear the
+encounter, and move afterward; no result is injected merely because a
+fixed-frame or review-event count was reached. `USER-09-LIVE-ENCOUNTER-REVIEW` is
+explicitly accepted.
+
+### R8 — Frontend and cold boot into playable Round 1
 
 Promote presentation-only frontend scenes, measured input semantics, four
 selectable identities, loading ownership, and the route transition into Round
@@ -207,7 +254,8 @@ selectable identities, loading ownership, and the route transition into Round
 requires it.
 
 **Exit:** cold boot reaches title, credit/start, four-character select, confirm,
-and Round 1 gameplay.
+loading, and the real controller-driven Round 1 encounter. Loading the scripted
+INTEGRATE-03 capability demonstration cannot satisfy this milestone.
 
 ### R9 — Complete source route and coverage ledgers
 

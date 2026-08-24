@@ -20,6 +20,13 @@ not used for ordinary implementation. Claude is an optional bounded provider
 only when the active task card explicitly permits it. The task card fixes the
 scope, owned paths, checks, exclusions, hard stops, and next eligible cards.
 
+While a physical card is stopped at `READY_FOR_PHYSICAL`, Goal Mode may run
+only a predeclared `independent_read_only_cards` Oracle body. Exactly one
+Oracle writer may operate at a time. It may write only card-scoped source
+research, derived evidence, ledgers, state, and its card; it may not write
+production runtime paths, change the active physical card, advance physical
+status, or activate an implementation successor.
+
 ## Branch and worktree continuity
 
 A new tranche, task card, milestone, or checkpoint does not by itself justify

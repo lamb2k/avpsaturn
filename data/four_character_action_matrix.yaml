@@ -42,6 +42,18 @@
       "character_id": "predator_warrior",
       "display_name": "Predator Warrior",
       "select_identity": "MEASURED",
+      "first_live_encounter_subset": {
+        "status": "UNRUN",
+        "planned_scope": [
+          "horizontal_movement",
+          "lane_movement",
+          "facing",
+          "four_measured_attack_selectors",
+          "startup_active_recovery",
+          "health_hit_ko_return_to_control"
+        ],
+        "evidence_gate": "ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS"
+      },
       "idle": "UNKNOWN",
       "movement": "UNKNOWN",
       "lane_movement": "UNKNOWN",
@@ -119,5 +131,5 @@
       "physical_saturn": "UNRUN"
     }
   ],
-  "next_experiment": "ORACLE-02 must bind the promoted subset and every action/resource delta to explicit character identities before character runtime expansion."
+  "next_experiment": "ORACLE-04 must first measure only Predator Warrior's bounded live-encounter subset; ORACLE-02 later binds the complete four-character action/resource matrix before roster expansion."
 }

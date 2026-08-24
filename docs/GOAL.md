@@ -18,9 +18,14 @@ required Saturn controller and multitap topology. Neither four-character
 gameplay parity nor three-player hardware behavior is assumed proven; both
 remain evidence-gated future work.
 
-The first acceptance target remains a deterministic, gameplay-valid physical
-Saturn capability slice. It retires hardware risk but is not the complete-port
-finish line.
+The first acceptance target remains a deterministic physical Saturn capability
+slice. It retires hardware risk but is not proof of production control, enemy
+AI, encounter progression, or a complete gameplay loop. The next
+category-changing milestone is `FIRST LIVE GAMEPLAY ENCOUNTER`: one player,
+Predator Warrior, and one autonomous class `0x1F` street alien in one measured
+Round 1 encounter, driven by real controller input and current gameplay state
+rather than fixed-frame choreography. Frontend expansion follows that live
+encounter and its explicit human playability review.
 
 Development uses a human-in-the-loop salvage-and-promotion process. Treat the
 old mixed runtime as a source of reusable loading, graphics, animation, input,

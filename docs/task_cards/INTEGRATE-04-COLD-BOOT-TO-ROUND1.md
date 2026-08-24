@@ -7,7 +7,7 @@ CHECKPOINT: integrate-cold-boot-round1
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
 TIER: 2
-DEPENDENCIES: [INTEGRATE-03-PLAYABLE-SLICE, PROMOTE-08-FRONTEND]
+DEPENDENCIES: [USER-09-LIVE-ENCOUNTER-REVIEW, PROMOTE-08-FRONTEND]
 REQUIRED_LANES: [Fast, Oracle, Target, Emulator, Full]
 OPTIONAL_LANES: [Physical]
 CLAUDE_ALLOWED: false
@@ -15,8 +15,10 @@ NEXT_ELIGIBLE_CARDS: [ORACLE-01-FULL-REFERENCE-ROUTE, ORACLE-02-FOUR-CHARACTER-A
 
 ## Objective
 
-Integrate cold boot, frontend, credits/start, four-character select/confirm,
-loading, and the accepted playable slice into Round 1 gameplay.
+Integrate cold boot, title, credit/start, four-character select/confirm,
+loading, and the accepted live encounter into real controller-driven Round 1
+gameplay. The scripted INTEGRATE-03 capability demonstration cannot satisfy
+this objective.
 
 ## Owned paths
 
@@ -25,7 +27,8 @@ loading, and the accepted playable slice into Round 1 gameplay.
 
 ## Existing systems to reuse
 
-- Promoted frontend and accepted physical capability-slice components only.
+- Promoted frontend, accepted USER-09 live-encounter result, accepted physical
+  capability-slice components, and their regression locks only.
 
 ## Systems deliberately disabled
 
@@ -33,8 +36,9 @@ loading, and the accepted playable slice into Round 1 gameplay.
 
 ## Focused machine checks
 
-- Deterministic cold-boot route/input ledger, load/audio ownership, all approved
-  locks, no fallback, and route/identity/load perturbation controls.
+- Deterministic cold-boot route/input ledger, load/audio ownership, real player
+  action and enemy AI state, encounter clear/continued progression, all
+  approved locks, no fallback, and route/identity/load/scripted-slice controls.
 
 ## Saturn build profile
 
@@ -51,7 +55,8 @@ Renew review for any approved component or frontend result at risk.
 
 ## Exclusions
 
-- No complete-game claim and no invented post-Round-1 behavior.
+- No complete-game claim, no invented post-Round-1 behavior, and no pass by
+  loading the scripted capability slice.
 
 ## Hard stops
 

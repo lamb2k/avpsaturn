@@ -11,7 +11,7 @@ DEPENDENCIES: [INTEGRATE-02-COMBAT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMER
 REQUIRED_LANES: [Fast, Oracle, Target, Emulator, Full, Physical]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [SALVAGE-08-FRONTEND]
+NEXT_ELIGIBLE_CARDS: [ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS]
 
 ## Objective
 
@@ -62,7 +62,11 @@ checkpoint precedes physical testing; explicit user approval is not physical pro
 
 ## Next eligible cards
 
-- `SALVAGE-08-FRONTEND` only after the physical capability slice is accepted.
+- `ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS` is the first production-sequence
+  successor after physical acceptance. Its read-only body may also run through
+  the predeclared independent Oracle exception while physical access is pending.
+- `SALVAGE-08-FRONTEND` remains blocked until the later
+  `USER-09-LIVE-ENCOUNTER-REVIEW` is explicitly accepted.
 
 ## Current candidate checkpoint
 

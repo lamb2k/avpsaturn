@@ -11,7 +11,7 @@ DEPENDENCIES: [PROMOTE-01-PLAYER-PIPELINE, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03
 REQUIRED_LANES: [Fast, Oracle, Target, Emulator]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [INTEGRATE-03-PLAYABLE-SLICE]
+NEXT_ELIGIBLE_CARDS: [INTEGRATE-03-PLAYABLE-SLICE, ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS]
 
 ## Objective
 
@@ -138,3 +138,5 @@ human review. Silence is not approval.
 - `INTEGRATE-03-PLAYABLE-SLICE` only after this repair is accepted. It must then
   consume the source-bound interface, recapture the complete scene, rerun Full,
   and stop for renewed human review before physical Saturn or SALVAGE-08.
+- `ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS` may run read-only through the
+  independent Oracle mechanism without changing the physical card or runtime.

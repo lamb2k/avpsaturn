@@ -42,6 +42,9 @@ def main() -> None:
         "verify that the remote branch",
         "select the existing branch and worktree",
         "sequentially from the approved predecessor",
+        "independent_read_only_cards",
+        "Exactly one\nOracle writer",
+        "advance physical\nstatus",
     ):
         require(token in agents, f"AGENTS.md missing policy: {token}")
     require(not re.search(r"\b[0-9a-f]{40}\b", agents),
@@ -74,6 +77,8 @@ def main() -> None:
         "Linn Kurosawa",
         "up to three simultaneous",
         "title-specific deterministic Port V2",
+        "FIRST LIVE GAMEPLAY ENCOUNTER",
+        "current gameplay state",
     ):
         require(token in goal, f"goal missing {token}")
 
@@ -102,6 +107,11 @@ def main() -> None:
         "production_head",
         "candidate_head",
         "evidence_candidate_head",
+        "First live gameplay boundary",
+        "Predator Warrior action controller",
+        "class-`0x1F` AI controller",
+        "Round 1 encounter controller",
+        "Fixed-frame contact injection",
     ):
         require(token in architecture,
                 f"production architecture missing {token}")
@@ -135,9 +145,11 @@ def main() -> None:
         require(token in test_plan, f"test plan missing {token}")
 
     roadmap = (ROOT / "docs/PARITY_PLAN.md").read_text(encoding="utf-8")
-    for milestone in range(14):
-        require(f"### R{milestone} " in roadmap,
-                f"roadmap missing R{milestone}")
+    for milestone in [*(f"R{index}" for index in range(7)),
+                      "R7A", "R7B",
+                      *(f"R{index}" for index in range(8, 14))]:
+        require(f"### {milestone} " in roadmap,
+                f"roadmap missing {milestone}")
     for token in (
         "only roadmap",
         "Isolated salvage benches",
@@ -160,6 +172,17 @@ def main() -> None:
         "ORACLE-01-FULL-REFERENCE-ROUTE",
         "ORACLE-02-FOUR-CHARACTER-ACTION-MATRIX",
         "ORACLE-03-ENDING-CREDITS-DELTAS",
+        "FIRST LIVE GAMEPLAY ENCOUNTER",
+        "ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS",
+        "ORACLE-05-STREET-ALIEN-AI",
+        "ORACLE-06-ROUND1-ENCOUNTER-RULES",
+        "SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER",
+        "PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER",
+        "SALVAGE-11-STREET-ALIEN-AI",
+        "PROMOTE-11-STREET-ALIEN-AI",
+        "INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER",
+        "USER-09-LIVE-ENCOUNTER-REVIEW",
+        "fixed-frame",
         "all four playable characters",
         "up to three simultaneous",
     ):
@@ -190,6 +213,13 @@ def main() -> None:
         "status: STAGED",
         "status: ACTIVE_FOR_NEW_ADAPTERS",
         "status: ACTIVE",
+        "independent_read_only_cards:",
+        "active_independent_read_only_card: null",
+        "serial_oracle_writers: true",
+        "production_runtime_writes: false",
+        "physical_status_changes: false",
+        "FIRST LIVE GAMEPLAY ENCOUNTER",
+        "scripted_capability_slice_sufficient: false",
     ):
         require(token in state, f"state missing continuity policy: {token}")
     require(scalar(roadmap, "CURRENT_TASK") == scalar(state, "active_task_id"),
@@ -260,6 +290,15 @@ def main() -> None:
         require(all(row[field] == "UNKNOWN"
                     for field in unknown_action_fields),
                 f"{row['character_id']} contains fabricated action facts")
+    predator = actions["characters"][0]
+    require(predator["first_live_encounter_subset"]["status"] == "UNRUN",
+            "Predator Warrior live subset was marked measured before ORACLE-04")
+    require(predator["first_live_encounter_subset"]["evidence_gate"] ==
+            "ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS",
+            "Predator Warrior live subset lost its source gate")
+    require(all("first_live_encounter_subset" not in row
+                for row in actions["characters"][1:]),
+            "other characters received invented live-encounter scope")
 
     endings = ledgers["endings"]
     require([row["character_id"] for row in endings["characters"]] ==
@@ -288,6 +327,15 @@ def main() -> None:
                 f"{row['id']} lacks blocker/next experiment")
         require(row["physical_workload"] == "UNRUN",
                 f"{row['id']} fabricates physical workload evidence")
+    round1 = next(row for row in route_bodies if row["id"] == "round1")
+    require(round1["technical_capability_slice"] == "PARTIAL",
+            "Round 1 lost the bounded capability-slice distinction")
+    for field in (
+        "live_player_control", "street_alien_ai", "encounter_controller",
+        "complete_round1",
+    ):
+        require(round1[field] == "UNRUN",
+                f"Round 1 {field} was advanced without its evidence card")
 
     scene_manifest = json.loads(
         (ROOT / "data/avsp_scene_manifest.json").read_text(encoding="utf-8"))

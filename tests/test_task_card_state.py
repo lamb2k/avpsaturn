@@ -77,6 +77,12 @@ def activation_is_legal(task: str, kind: str, dependencies: set[str],
     return True
 
 
+def can_advance_physical(kind: str, required_lanes: set[str]) -> bool:
+    """Only an executable physical card may advance physical evidence."""
+    return kind in EXECUTABLE_KINDS and kind != "ORACLE" and \
+        "Physical" in required_lanes
+
+
 def validate_transition_fixtures() -> None:
     """Keep the initial, salvage, and review transitions independently covered."""
     accepted = {"WF-1", "SALVAGE-00-OLD-BUILD-BASELINE"}
@@ -106,6 +112,25 @@ def validate_transition_fixtures() -> None:
         {"SALVAGE-00-OLD-BUILD-BASELINE"}, accepted,
         {"USER-01-PLAYER-BASELINE-REVIEW"}),
         "independent salvage must remain legal while feedback is pending")
+
+    live_accepted = {
+        "INTEGRATE-03-PLAYABLE-SLICE",
+        "INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER",
+        "PROMOTE-08-FRONTEND",
+    }
+    require(not activation_is_legal(
+        "SALVAGE-08-FRONTEND", "SALVAGE",
+        {"USER-09-LIVE-ENCOUNTER-REVIEW"}, live_accepted, set()),
+        "frontend salvage bypassed the accepted live-encounter review")
+    require(not activation_is_legal(
+        "INTEGRATE-04-COLD-BOOT-TO-ROUND1", "INTEGRATE",
+        {"USER-09-LIVE-ENCOUNTER-REVIEW", "PROMOTE-08-FRONTEND"},
+        live_accepted, set()),
+        "cold boot accepted only the scripted capability slice")
+    require(not can_advance_physical("ORACLE", {"Fast", "Oracle"}),
+            "read-only Oracle work advanced physical status")
+    require(not can_advance_physical("USER_REVIEW", {"Fast"}),
+            "user approval became physical proof")
 
 
 def main() -> None:
@@ -145,6 +170,15 @@ def main() -> None:
     queue_index = {task: index for index, task in enumerate(queue)}
     ready_executable = []
     accepted = set(inline_list(state, "accepted_tasks"))
+    independent_read_only = yaml_block_list(
+        state, "independent_read_only_cards")
+    require(len(independent_read_only) == len(set(independent_read_only)),
+            "independent read-only card list contains duplicates")
+    require(set(independent_read_only) == {
+        "ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS",
+        "ORACLE-05-STREET-ALIEN-AI",
+        "ORACLE-06-ROUND1-ENCOUNTER-RULES",
+    }, "independent read-only Oracle inventory drifted")
 
     for task, text in cards.items():
         require(scalar(text, "TASK") == task,
@@ -186,6 +220,15 @@ def main() -> None:
                             f"{task} is not dependency ordered")
         if kind in EXECUTABLE_KINDS and status == "READY":
             ready_executable.append(task)
+        if task in independent_read_only:
+            require(kind == "ORACLE", f"{task} is not an Oracle")
+            require(scalar(text, "READ_ONLY") == "true",
+                    f"{task} lost its read-only boundary")
+            require("Physical" not in required + optional,
+                    f"{task} can create physical evidence")
+            require("All production runtime" in text and
+                    "No production-path write" in text,
+                    f"{task} permits production runtime writes")
         if kind == "USER_REVIEW":
             require("Perform no implementation" in text,
                     f"{task} permits implementation")
@@ -205,6 +248,13 @@ def main() -> None:
     require(active_id in cards, "active card does not exist")
     require(active_id in queue, "active card is not in the task queue")
     active = cards[active_id]
+    active_independent = scalar(
+        state, "active_independent_read_only_card")
+    independent_owner = scalar(state, "independent_oracle_write_owner")
+    if active_independent == "null":
+        active_independent = None
+    if independent_owner == "null":
+        independent_owner = None
     active_cards = [
         task for task, text in cards.items()
         if (scalar(text, "KIND") in EXECUTABLE_KINDS and
@@ -212,11 +262,14 @@ def main() -> None:
            (scalar(text, "KIND") == "USER_REVIEW" and
             scalar(text, "STATUS") in {"READY", "AWAITING_USER_FEEDBACK"})
     ]
-    require(active_cards == [active_id],
-            "exactly one implementation or review card must be active")
-    require(ready_executable == [active_id] or
+    expected_active_cards = {active_id}
+    if active_independent is not None:
+        expected_active_cards.add(active_independent)
+    require(set(active_cards) == expected_active_cards,
+            "active cards exceed the primary plus one read-only Oracle")
+    require(active_id in ready_executable or
             scalar(active, "KIND") == "USER_REVIEW",
-            "active executable readiness disagrees with active card")
+            "primary executable readiness disagrees with active card")
     require(scalar(state, "active_task_id") == active_id,
             "active task id mismatch")
     require(scalar(state, "active_task_kind") == scalar(active, "KIND"),
@@ -241,6 +294,26 @@ def main() -> None:
                 "non-review activation unexpectedly awaits feedback")
     require(scalar(state, "open_blockers") == "[]",
             "active task retains blockers")
+
+    if active_independent is None:
+        require(independent_owner is None,
+                "inactive Oracle lane retains a write owner")
+    else:
+        require(active_independent in independent_read_only,
+                "active independent card is not predeclared")
+        require(independent_owner == active_independent,
+                "independent Oracle writer ownership drifted")
+        independent_card = cards[active_independent]
+        require(scalar(independent_card, "STATUS") == "READY",
+                "active independent Oracle is not ready")
+        require(activation_is_legal(
+            active_independent, "ORACLE",
+            set(inline_list(independent_card, "DEPENDENCIES")),
+            accepted, awaiting_feedback),
+            "independent Oracle has unaccepted dependencies")
+        require(scalar(active, "KIND") == "QA" and
+                "Physical" in inline_list(active, "REQUIRED_LANES"),
+                "independent Oracle ran without a physical hard stop")
 
     require(accepted <= set(cards), "accepted task is absent from task cards")
     for accepted_task in accepted:
@@ -283,6 +356,32 @@ def main() -> None:
     require(scalar(state, "capability_gate") == f"{closed}/12",
             "capability gate count drifted")
     require(closed == 0, "salvage evidence cannot advance capability status")
+
+    hardware = re.search(
+        r"(?ms)^hardware_pretest:[ \t]*\r?\n(.*?)^pending_integration_review:",
+        state,
+    )
+    require(hardware is not None, "hardware pretest state is missing")
+    hardware_text = hardware.group(1)
+    require(re.search(rf"(?m)^  task:\s*{re.escape(active_id)}\s*$",
+                      hardware_text) is not None,
+            "active physical card and hardware pretest task disagree")
+    require(re.search(r"(?m)^  status:\s*READY_FOR_PHYSICAL\s*$",
+                      hardware_text) is not None and
+            re.search(r"(?m)^  physical_saturn:\s*UNRUN\s*$",
+                      hardware_text) is not None,
+            "physical hard-stop status advanced or drifted")
+
+    for token in (
+        "production_player_control: UNRUN",
+        "street_alien_ai: UNRUN",
+        "encounter_controller: UNRUN",
+        "interactive_human_review: UNRUN",
+        "scripted_capability_slice_sufficient: false",
+    ):
+        require(token in state, f"live-gameplay state missing {token}")
+    require("production player control and enemy AI remain UNKNOWN" in state,
+            "INTEGRATE-03 was relabeled as measured production gameplay")
 
     head_keys = (
         "foundation_head",
@@ -355,6 +454,40 @@ def main() -> None:
     roadmap = (ROOT / "docs/PARITY_PLAN.md").read_text(encoding="utf-8")
     require(scalar(roadmap, "CURRENT_TASK") == active_id,
             "roadmap and state active cards disagree")
+
+    require(inline_list(cards["SALVAGE-08-FRONTEND"], "DEPENDENCIES") ==
+            ["USER-09-LIVE-ENCOUNTER-REVIEW"],
+            "frontend salvage can bypass the live-encounter review")
+    require(set(inline_list(
+        cards["INTEGRATE-04-COLD-BOOT-TO-ROUND1"], "DEPENDENCIES")) == {
+            "USER-09-LIVE-ENCOUNTER-REVIEW", "PROMOTE-08-FRONTEND",
+        }, "cold-boot integration dependencies drifted")
+    live_card = cards["INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER"]
+    for pattern, label in (
+        (r"promoted Predator Warrior action\s+controller", "player action state"),
+        (r"promoted class-`0x1F` AI", "enemy AI state"),
+        (r"current game state", "current-state decisions"),
+        (r"Fixed-frame contact", "fixed-frame prohibition"),
+        (r"damage without current overlap", "overlap-owned damage"),
+        (r"(?:encounter clear|clear the\s+encounter)", "encounter clear"),
+        (r"continue moving", "continued movement"),
+    ):
+        require(re.search(pattern, live_card) is not None,
+                f"live encounter card missing invariant: {label}")
+    require("scripted INTEGRATE-03 capability demonstration cannot satisfy" in
+            cards["INTEGRATE-04-COLD-BOOT-TO-ROUND1"],
+            "scripted capability slice can satisfy playable Round 1")
+    require(scalar(cards["USER-09-LIVE-ENCOUNTER-REVIEW"], "STATUS") ==
+            "BLOCKED" and "physical proof" in
+            cards["USER-09-LIVE-ENCOUNTER-REVIEW"],
+            "USER-09 can become physical proof")
+    for later in (
+        "INTEGRATE-06-FOUR-CHARACTER-ROSTER",
+        "INTEGRATE-07-THREE-PLAYER-MULTIPLAYER",
+    ):
+        require(scalar(cards[later], "STATUS") == "BLOCKED" and
+                inline_list(cards[later], "DEPENDENCIES"),
+                f"{later} lost its evidence gate")
 
     validate_transition_fixtures()
 

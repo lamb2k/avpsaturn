@@ -11,7 +11,7 @@ DEPENDENCIES: [QA-08-FRONTEND]
 REQUIRED_LANES: [Fast]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [PROMOTE-08-FRONTEND, ORACLE-01-FULL-REFERENCE-ROUTE, ORACLE-02-FOUR-CHARACTER-ACTION-MATRIX, ORACLE-03-ENDING-CREDITS-DELTAS]
+NEXT_ELIGIBLE_CARDS: [PROMOTE-08-FRONTEND]
 
 ## Objective
 
@@ -60,5 +60,3 @@ Record the exact response. Silence is not approval. Set
 ## Next eligible cards
 
 - `PROMOTE-08-FRONTEND` only after explicit approval or an exact bounded repair.
-- The three read-only Oracle cards may proceed while feedback is pending because
-  they cannot alter the reviewed frontend result.

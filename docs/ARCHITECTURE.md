@@ -56,7 +56,8 @@ void avsp_game_step(
 `AvspFrameOutput` owns fixed-capacity arrays of semantic render, audio, load
 and release, route-transition, and telemetry events. Gameplay performs no
 dynamic allocation during an active phase. Every result is deterministic from
-game state, source-frame input, and measured or explicitly adapted content.
+game state, sampled input, deterministic RNG state, and measured or explicitly
+adapted content.
 
 The kernel owns:
 
@@ -88,6 +89,29 @@ pose, palette, priority, camera, stage-layer state, and semantic HUD state.
 They never decide attacks, damage, wave completion, boss death, route
 transition, or ending selection. Audio adapters submit semantic sound/music
 events and never determine route progression.
+
+## First live gameplay boundary
+
+The first production gameplay milestone is intentionally title-specific and
+bounded to Predator Warrior, one class `0x1F` street alien, and one measured
+Round 1 encounter. Its domain core contains three separate authorities:
+
+- a Predator Warrior action controller consuming sampled controller state and
+  owning movement, lanes, facing, action selection, startup/active/recovery,
+  action movement, health, HIT, KO, and return to control;
+- a class-`0x1F` AI controller owning one-player target selection, approach,
+  lane adjustment, facing, attack selection/execution, cooldown, contact,
+  damage, HIT, KO, and source-required RNG consumption order;
+- a Round 1 encounter controller owning entry, spawn, bounds/camera lock,
+  encounter-active and clear guards, unlock, and continued stage progression.
+
+These machines consume current state. Fixed-frame contact injection,
+event-count attack selection, damage without current overlap, teleported
+contact, and presentation snapshots overriding gameplay positions are
+prohibited. Deterministic input ledgers drive machine tests; real controller
+input drives human playability review. Presentation and `AvspSceneDef` may
+display events but may not choose attacks, AI decisions, damage, encounter
+clear, or route progression.
 
 ## Hierarchical route model
 

@@ -29,7 +29,8 @@ REQUIRED_SUBSYSTEMS = {
     "enemy-animation", "collision-combat", "palette-cram",
     "vdp2-stage-layers", "camera-framing", "hud", "pcm",
     "cdda-residency", "diagnostics-emulator-readback",
-    "playable-skeleton-prototype",
+    "playable-skeleton-prototype", "player-action-controller",
+    "street-alien-ai", "round1-encounter-controller",
 }
 REQUIRED_FIELDS = {
     "id", "existing_source_paths", "existing_dependencies",
@@ -229,6 +230,15 @@ def validate_ledger(ledger: dict) -> None:
         require(isinstance(entry["existing_dependencies"], list),
                 f"{entry['id']} dependencies are not a list")
         validate_disposition(entry)
+    for identifier in (
+        "player-action-controller", "street-alien-ai",
+        "round1-encounter-controller",
+    ):
+        entry = subsystem(ledger, identifier)
+        require(entry["technical_status"] == "UNRUN" and
+                entry["fidelity_status"] == "UNKNOWN" and
+                entry["salvage_decision"] == "UNTESTED",
+                f"{identifier} advanced before live-gameplay execution")
     validate_card_results(ledger)
 
 
