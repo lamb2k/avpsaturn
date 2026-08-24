@@ -70,9 +70,13 @@ def main() -> None:
     stage = json.loads((ROOT / "tests/port_v2/camera_stage/approved_contract.json").read_text())
     hud = json.loads((ROOT / "tests/port_v2/hud/approved_contract.json").read_text())
     cdda = json.loads((ROOT / "tests/port_v2/cdda_residency/approved_contract.json").read_text())
+    source_combat = json.loads((ROOT / "data/avsp_source_combat_presentation_contract.json").read_text())
     expected = dict(player["asset_sha256"])
     expected["/SPR4/TILES.BIN"] = enemy["tile_archive_sha256"]
-    expected["/SPR4/COMBAT.BIN"] = "070443fb8dd7c6791fd846fb95cce100e89eee301ba9ad6dffeea581f72cf40c"
+    expected["/SPR4/COMBAT.BIN"] = \
+        "09c20b38beef8089867b5c90ebbe145bf55c63d3649d1e077dad9c933e1b87c5"
+    expected["/SPR4/PCMBT.RLE"] = \
+        source_combat["source_player_archive"]["sha256"]
     expected["/ST1/STRIPS.BIN"] = stage["fixture"]["strips_bin_sha256"]
     expected.update(hud["payload_sha256"])
     expected["/DIAG/RESCHK.BIN"] = cdda["fixture"]["sha256"]

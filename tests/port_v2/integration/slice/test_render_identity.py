@@ -1,22 +1,16 @@
 #!/usr/bin/env python3
-"""Validate the pinned rendered-identity contract and its mutation control."""
+"""Reject candidate-derived fidelity pins and run the MAME-source mutations."""
 
 from __future__ import annotations
 
-import importlib.util
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 
+ROOT = Path(__file__).resolve().parents[4]
 HERE = Path(__file__).resolve().parent
-
-
-def load_module():
-    path = HERE / "render_identity.py"
-    spec = importlib.util.spec_from_file_location("render_identity", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
 
 
 def require(condition: bool, message: str) -> None:
@@ -25,32 +19,26 @@ def require(condition: bool, message: str) -> None:
 
 
 def main() -> None:
-    contract = json.loads(
+    retired = json.loads(
         (HERE / "render_identity_contract.json").read_text(encoding="utf-8"))
-    require(contract["schema"] == 1 and contract["fidelity"] == "ADAPTED",
-            "render identity contract header drifted")
-    require(set(contract["phases"]) == {"WALK", "HIT", "RECOVERY", "KO"},
-            "render identity phases drifted")
-    require(all(entry["sample_count"] > 0 and
-                len(entry["sequence_sha256"]) == 64 and
-                entry["animation_records"] and entry["palette_banks"]
-                for entry in contract["phases"].values()),
-            "a rendered identity phase is not pinned")
-    by_frame = {entry["frame"]: entry for entry in contract["anchors"]}
-    mutation = contract["negative_control"]
-    require(mutation["target_frame"] in by_frame and
-            mutation["substitute_frame"] in by_frame,
-            "mutation frames are not exact anchors")
-    target = by_frame[mutation["target_frame"]]["identity_row"]
-    substitute = by_frame[mutation["substitute_frame"]]["identity_row"]
-    require(target[-2] != 0 and target[-1] != 0 and
-            substitute[-2] != 0 and substitute[-1] != 0 and
-            target[-2:] != substitute[-2:],
-            "wrong-family mutation is empty or indistinguishable")
-    module = load_module()
-    require(module.digest([target]) != module.digest([substitute]),
-            "wrong nonzero object/tile family mutation was accepted")
-    print("INTEGRATE-03 exact rendered street-alien identity contract: PASS")
+    require(retired == {
+        "schema": 2,
+        "status": "SUPERSEDED",
+        "former_evidence": "Saturn-candidate-derived render sequence hashes",
+        "reason": "A candidate output cannot independently prove source fidelity.",
+        "replacement": "data/avsp_source_combat_presentation_contract.json",
+        "replacement_origin": "MAME_SOURCE_ONLY",
+        "active_runtime_check": "Each emitted player and alien object/tile identity is compared with the source event or source timeline identity; any mismatch increments slice_asset_failures.",
+    }, "candidate-derived render contract was reactivated or drifted")
+    result = subprocess.run(
+        [sys.executable, "-B", str(
+            ROOT / "tests/port_v2/integration/combat/"
+            "test_source_bound_presentation.py")],
+        cwd=ROOT, check=True, capture_output=True, text=True)
+    require("coherent source-event presentation contract: PASS" in
+            result.stdout,
+            "independent source contract or its mutations failed")
+    print("INTEGRATE-03 MAME-source rendered identity contract: PASS")
 
 
 if __name__ == "__main__":

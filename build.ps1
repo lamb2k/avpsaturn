@@ -229,7 +229,7 @@ try {
         elseif (Test-Path -LiteralPath $combatTileOverlay) {
             Remove-Item -LiteralPath $combatTileOverlay -Force
         }
-        if ($CombatIntegrationBench) {
+        if ($CombatIntegrationBench -or $usePlayableSlice) {
             if (-not (Test-Path -LiteralPath $sourceCombatPlayerCache)) {
                 & $PythonPath (Join-Path $projectRoot `
                     'tools\analyze_source_bound_combat_presentation.py')
@@ -238,7 +238,7 @@ try {
                 }
             }
             if (-not (Test-Path -LiteralPath $sourceCombatContract)) {
-                throw 'CombatIntegrationBench requires the tracked source combat contract.'
+                throw 'Source-bound combat profiles require the tracked source combat contract.'
             }
             $sourceCombatIdentity = (Get-Content -LiteralPath $sourceCombatContract -Raw |
                 ConvertFrom-Json).source_player_archive
@@ -252,7 +252,7 @@ try {
             Copy-Item -LiteralPath $sourceCombatPlayerCache `
                 -Destination $sourceCombatPlayer -Force
             if (-not (Test-Path -LiteralPath $sourceCombatPlayer)) {
-                throw 'CombatIntegrationBench requires build\avsp_cd\SPR4\PCMBT.RLE.'
+                throw 'Source-bound combat profiles require build\avsp_cd\SPR4\PCMBT.RLE.'
             }
         }
         elseif (Test-Path -LiteralPath $sourceCombatPlayer) {
@@ -625,7 +625,7 @@ try {
                 throw "Combat tile overlay ISO verification failed with exit code $LASTEXITCODE."
             }
         }
-        if ($CombatIntegrationBench) {
+        if ($CombatIntegrationBench -or $usePlayableSlice) {
             & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
                 'game.iso' '/SPR4/PCMBT.RLE' '--equals' $sourceCombatPlayer
             if ($LASTEXITCODE -ne 0) {

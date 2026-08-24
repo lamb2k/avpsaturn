@@ -9,7 +9,7 @@
 #include "../../audio/cdda/cdda.h"
 #include "../../residency/residency.h"
 
-#define AVSP_PORT_V2_SLICE_INTERFACE_VERSION 2
+#define AVSP_PORT_V2_SLICE_INTERFACE_VERSION 3
 #define AVSP_PORT_V2_SLICE_CANARY_HEAD 0x534C4844UL
 #define AVSP_PORT_V2_SLICE_CANARY_TAIL 0x534C544CUL
 
@@ -32,9 +32,12 @@
 #define AVSP_PORT_V2_SLICE_ENEMY_WORLD_X_INITIAL 128
 #define AVSP_PORT_V2_SLICE_ENEMY_LANE 200
 #define AVSP_PORT_V2_SLICE_APERTURE_ORIGIN_X (-176)
-#define AVSP_PORT_V2_SLICE_ATTACK_ACTIVE_FIRST 12
-#define AVSP_PORT_V2_SLICE_ATTACK_ACTIVE_LAST 14
-#define AVSP_PORT_V2_SLICE_ATTACK_TOTAL_FRAMES 24
+#define AVSP_PORT_V2_SLICE_SOURCE_FIRST 5173
+#define AVSP_PORT_V2_SLICE_SOURCE_LAST 5469
+#define AVSP_PORT_V2_SLICE_SOURCE_FIRST_CONTACT 5190
+#define AVSP_PORT_V2_SLICE_FIRST_CONTACT_FRAME 600
+#define AVSP_PORT_V2_SLICE_SOURCE_PLAYER_ANCHOR_X 440
+#define AVSP_PORT_V2_SLICE_SOURCE_PLAYER_ANCHOR_LANE 208
 #define AVSP_PORT_V2_SLICE_ENEMY_WALK_RECORD 0x0012EB4CUL
 
 typedef enum
@@ -77,8 +80,21 @@ typedef struct
     int player_action;
     int player_action_frame;
     int player_attack_active;
+    int player_presentation_active;
+    int source_sample;
+    int source_event_index;
+    int attack_sequence_step;
+    int attack_selector;
+    int player_source_action;
+    int player_source_substate;
+    int player_source_pose;
+    int player_source_pivot_x;
+    int player_source_pivot_y;
+    int player_source_height;
     int enemy_action;
     int enemy_action_frame;
+    int enemy_source_action;
+    int enemy_source_substate;
     int collision_result;
     int attacker_id;
     int defender_id;
@@ -159,6 +175,12 @@ typedef struct
     int player_attack_frame;
     int player_attack_previous;
     int player_attack_contact_attempted;
+    int source_sample;
+    int source_event_index;
+    int armed_source_event;
+    int player_presentation_active;
+    AvspPortV2PlayerCombatPresentation player_source;
+    AvspPortV2CombatEnemyPresentation enemy_source;
     int contact_this_frame;
     int enemy_action;
     int enemy_action_frame;

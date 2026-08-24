@@ -84,7 +84,7 @@ def main():
                 report["hit_state"]["slice_combat_events"] == 1 and
                 report["hit_state"]["slice_hit_count"] == 1 and
                 report["hit_state"]["slice_review_phase"] == 3 and
-                2480 <= report["ko_state"]["slice_frame"] <= 2999 and
+                850 <= report["ko_state"]["slice_frame"] <= 879 and
                 report["ko_state"]["slice_combat_events"] == 4 and
                 report["ko_state"]["slice_ko_count"] == 1 and
                 report["ko_state"]["slice_review_phase"] == 4 and
@@ -142,38 +142,43 @@ def main():
                 f"paired semantic state drifted at {name}")
     for trace, build in zip(traces, builds):
         require(trace["result"] == "PASS" and
-                trace["fidelity"] == "ADAPTED" and
+                trace["fidelity"] == "SOURCE_BOUND_WITH_ADAPTED_INPUT" and
                 trace["evidence_tier"] ==
                 "ONE_EMULATOR_SYNCHRONIZED_TRACE" and
                 trace["physical_saturn"] == "UNRUN" and
                 trace["source_commit"] == build["source_commit"] and
                 trace["iso_sha256"] ==
                 build["artifacts"]["game_iso"]["sha256"] and
-                trace["contacts"] == [600, 1200, 1800, 2400],
+                trace["contacts"] == [600, 646, 693, 739],
                 "synchronized trace identity or contact sequence drifted")
         require(trace["adapted_scope"] ==
-                "deterministic capability-slice movement and four-attack "
-                "choreography; not production player control or enemy AI" and
+                "deterministic input choreography only; attack presentation, "
+                "collision, damage, and alien reaction are source-bound; "
+                "production player control and enemy AI remain UNKNOWN" and
                 trace["post_ko_framing"] == {
                     "intentional_exit": False,
-                    "player_world_x": 446,
+                    "player_world_x": 440,
                     "camera_world_x": 161,
-                    "player_screen_x": 109,
+                    "player_screen_x": 103,
                     "aperture": [-176, 175],
                     "result": "VISIBLE_HOLD",
                 }, "ADAPTED label or post-KO framing contract drifted")
-        require(trace["render_identity_contract"]["result"] == "PASS" and
-                set(trace["render_identity_contract"]["phases"]) ==
-                {"WALK", "HIT", "RECOVERY", "KO"} and
-                trace["render_identity_mutation_control"] == "PASS_REJECTED",
-                "exact rendered street-alien identity contract drifted")
+        require(trace["source_contract"] == {
+                    "path":
+                        "data/avsp_source_combat_presentation_contract.json",
+                    "origin": "MAME_SOURCE_ONLY",
+                }, "independent source contract binding drifted")
         require(trace["sample_frames"] ==
                 [sample["slice_frame"] for sample in trace["samples"]],
                 "synchronized trace sample order drifted")
+        require([frame for frame in trace["sample_frames"]
+                 if 583 <= frame <= 879] == list(range(583, 880)) and
+                trace["clip"]["combat_cadence"] == 1,
+                "combat exchange is not captured at cadence 1")
     require(traces[0]["samples"] == traces[1]["samples"],
             "paired synchronized semantic traces are not deterministic")
     clip = traces[0]["clip"]
-    require(clip is not None and clip["sample_count"] >= 250,
+    require(clip is not None and clip["sample_count"] >= 500,
             "continuous corrected-scene clip is missing or undersampled")
     clip_path = ROOT / clip["path"]
     require(clip_path.is_file() and sha(clip_path) == clip["sha256"] and

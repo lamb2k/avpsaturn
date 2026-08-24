@@ -72,7 +72,7 @@ def require_fields(actual, expected, label):
 
 def validate_hit(actual):
     require_fields(actual, {
-        "runtime_ready": 1, "slice_interface_version": 2,
+        "runtime_ready": 1, "slice_interface_version": 3,
         "slice_ready": 1, "slice_actor_count": 2,
         "slice_combat_events": 1, "slice_enemy_health": 63,
         "slice_hit_count": 1, "slice_ko_count": 0,
@@ -101,7 +101,7 @@ def validate_hit(actual):
 
 def validate_ko(actual):
     require_fields(actual, {
-        "runtime_ready": 1, "slice_interface_version": 2,
+        "runtime_ready": 1, "slice_interface_version": 3,
         "slice_ready": 1, "slice_actor_count": 2,
         "slice_combat_events": 4, "slice_enemy_health": -1,
         "slice_hit_count": 1, "slice_ko_count": 1,
@@ -115,7 +115,7 @@ def validate_ko(actual):
         "slice_enemy_class_id": 31, "slice_enemy_archetype_id": 31,
         "slice_enemy_asset_set_id": 2,
         "slice_enemy_animation_set_id": 2,
-        "slice_enemy_palette_bank": 16,
+        "slice_enemy_palette_bank": 19,
         "slice_enemy_animation_record": 0x0012E268,
         "slice_defender_id": 31,
     }, "playable-slice KO")
@@ -138,10 +138,10 @@ def validate_final(actual):
         "slice_enemy_class_id": 31, "slice_enemy_archetype_id": 31,
         "slice_enemy_asset_set_id": 2,
         "slice_enemy_animation_set_id": 2,
-        "slice_enemy_palette_bank": 16,
-        "slice_player_world_x": 446,
+        "slice_enemy_palette_bank": 19,
+        "slice_player_world_x": 440,
         "slice_camera_world_x": 161,
-        "slice_player_screen_x": 109,
+        "slice_player_screen_x": 103,
     }, "playable-slice final")
     if actual["slice_stability_frames"] != actual["slice_frame"] + 1:
         raise RuntimeError("final frame and stability counter disagree")
@@ -215,7 +215,7 @@ def main():
     run_root = ROOT / inventory["build_root"] / f"run-{args.run}"
     checkpoint_contract = {
         "hit": (605, 630, validate_hit),
-        "ko": (2480, 2999, validate_ko),
+        "ko": (850, 879, validate_ko),
         "final": (3000, 3059, validate_final),
     }
     target, ceiling, validator = checkpoint_contract[args.checkpoint]

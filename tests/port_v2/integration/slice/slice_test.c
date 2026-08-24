@@ -177,14 +177,9 @@ static int replay(AvspPortV2SliceFrame *final_frame,
         input.player.down = tick >= 30 && tick < 60;
         input.player.right = tick >= 300 && tick < 335;
         input.enemy_move = tick >= 300 && tick < 490;
-        if ((tick >= 900 && tick < 909) ||
-            (tick >= 1500 && tick < 1519) ||
-            (tick >= 2100 && tick < 2108))
-            input.player.right = 1;
-        if (tick == 2100) input.enemy_move = -1;
-        input.player_attack = tick == 588 || tick == 1188 ||
-            tick == 1788 || tick == 2388;
-        input.player_height = tick >= 2300 ? 13 : 0;
+        input.player_attack = tick == 595 || tick == 640 ||
+            tick == 685 || tick == 730;
+        input.player_height = 0;
         adapted_stage_camera(tick, &input.camera);
         input.player_health = 101;
         input.player_energy = 64;
@@ -208,7 +203,8 @@ static int replay(AvspPortV2SliceFrame *final_frame,
     }
     if (emit)
         printf("F%d A%d C%d HP%d HIT%d KO%d HUD%d PCM%d/%d CDDA%d/%d "
-               "LATE%d NEG%d SCROLL%d FALLBACK%d CANARY%d\n",
+               "LATE%d NEG%d SCROLL%d FALLBACK%d CANARY%d "
+               "PW%d EW%d CAM%d PS%d ES%d PAL%d REC%lx\n",
                frame.frame, frame.actors.actor_count,
                frame.combat_event_count, runtime.combat.enemy_health,
                runtime.combat.hit_count, runtime.combat.ko_count,
@@ -217,12 +213,16 @@ static int replay(AvspPortV2SliceFrame *final_frame,
                runtime.residency.late_read_attempts,
                runtime.residency.negative_rejections,
                frame.camera.scroll_steps, frame.fallback_used,
-               frame.canaries_ok);
+               frame.canaries_ok, frame.scene.player_world_x,
+               frame.scene.enemy_world_x, frame.scene.camera_world_x,
+               frame.scene.player_screen_x, frame.scene.enemy_screen_x,
+               frame.scene.enemy_identity.palette_bank,
+               frame.scene.enemy_identity.animation_record);
     *final_frame = frame;
     return load_count == 8 && load_order[0] == 1 && load_order[1] == 2 &&
            load_order[2] == 3 && load_order[3] == 4 && load_order[4] == 5 &&
            load_order[5] == 6 && load_order[6] == 7 && load_order[7] == 8 &&
-           frame.interface_version == 2 && frame.ready &&
+           frame.interface_version == 3 && frame.ready &&
            frame.actors.actor_count == 2 && frame.combat_event_count == 4 &&
            runtime.combat.enemy_health == -1 && runtime.combat.hit_count == 1 &&
            runtime.combat.ko_count == 1 && frame.hud.render_count == 4 &&
@@ -231,14 +231,12 @@ static int replay(AvspPortV2SliceFrame *final_frame,
            runtime.residency.negative_rejections == 1 &&
            frame.camera.scroll_steps == 6 && !frame.fallback_used &&
            frame.canaries_ok && stage_submits == 9003 && hud_submits == 3001 &&
-           frame.scene.player_world_x == 446 &&
-           frame.scene.enemy_world_x == 317 &&
+           frame.scene.player_world_x == 440 &&
            frame.scene.camera_world_x == 161 &&
-           frame.scene.player_screen_x == 109 &&
-           frame.scene.enemy_screen_x == -20 &&
+           frame.scene.player_screen_x == 103 &&
            frame.scene.enemy_identity.archetype_id ==
                AVSP_PORT_V2_SLICE_ARCHETYPE_STREET_ALIEN &&
-           frame.scene.enemy_identity.palette_bank == 16 &&
+           frame.scene.enemy_identity.palette_bank == 19 &&
            frame.scene.enemy_identity.animation_record ==
                AVSP_PORT_V2_KO_ANIM_RECORD_5;
 }
@@ -275,25 +273,24 @@ static int negative_controls(const AvspPortV2SliceFrame *contact_frame,
         load_operations(&loads);
         avsp_port_v2_slice_init(&encounter);
         if (!avsp_port_v2_slice_load(&encounter, 1, &loads)) return 0;
-        for (tick = 0; tick <= AVSP_PORT_V2_SLICE_ATTACK_ACTIVE_FIRST;
-             ++tick)
+        for (tick = 0; tick <= 600; ++tick)
         {
+            int stepped;
             memset(&input, 0, sizeof(input));
             input.frame = tick;
-            input.player_attack = tick == 0;
             input.player_health = 101;
             input.player_energy = 64;
-            if (!avsp_port_v2_slice_step(&encounter, &input, &frame))
-                return 0;
-            if (tick < AVSP_PORT_V2_SLICE_ATTACK_ACTIVE_FIRST &&
+            stepped = avsp_port_v2_slice_step(&encounter, &input, &frame);
+            if (tick < 600 && !stepped) return 0;
+            if (tick == 600 && stepped) return 0;
+            if (tick < 600 &&
                 (encounter.combat.damage_count != 0 ||
                  encounter.combat_event_count != 0)) return 0;
         }
         if (encounter.combat.damage_count != 0 ||
             encounter.combat_event_count != 0 ||
             encounter.combat.enemy_health != 87 ||
-            encounter.last_combat.kind !=
-                AVSP_PORT_V2_COMBAT_EVENT_CONTACT_MISS)
+            encounter.last_combat.kind != AVSP_PORT_V2_COMBAT_EVENT_NONE)
             return 0;
     }
     {

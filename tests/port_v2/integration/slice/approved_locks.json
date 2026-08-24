@@ -9,7 +9,8 @@
     {"path": "tests/port_v2/camera_stage/approved_contract.json", "sha256": "9b3b073d501691cdef5b59eb40b301c2c1dd6c88dd0eb01fc8b0ca36013c425a"},
     {"path": "tests/port_v2/hud/approved_contract.json", "sha256": "fffd8b28576ebbc65e2e174cb9c5cc5af1ef9fa02919952d0d352743a3e407ca"},
     {"path": "tests/port_v2/audio/pcm/approved_contract.json", "sha256": "b236a6a3ce490e42a48e1bfad69b36bc9128056e41f9fe8af6cf0778d79c7121"},
-    {"path": "tests/port_v2/cdda_residency/approved_contract.json", "sha256": "59cad89e40c5c82761f3dcc2927414c094e3ae9afebeb66bc5e5e16b3f6a1551"}
+    {"path": "tests/port_v2/cdda_residency/approved_contract.json", "sha256": "59cad89e40c5c82761f3dcc2927414c094e3ae9afebeb66bc5e5e16b3f6a1551"},
+    {"path": "data/avsp_source_combat_presentation_contract.json", "sha256": "455e5c593e7fcc1b08afcf0e5a0b6c5a48796fa1043e2039dbb15151145bca6b"}
   ],
   "normal_release": "UNRUN",
   "physical_saturn": "UNRUN"

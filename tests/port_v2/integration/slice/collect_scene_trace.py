@@ -29,8 +29,6 @@ def load_module(name, path):
 tools = load_module(
     "enemy_bench_scene_trace",
     ROOT / "tests/port_v2/enemy_bench/collect_readback.py")
-identity_contract = load_module(
-    "slice_render_identity_contract", HERE / "render_identity.py")
 
 
 def sha(path):
@@ -125,7 +123,7 @@ def require(condition, message):
 def validate_sample(sample):
     frame = sample["slice_frame"]
     require(sample["runtime_ready"] == 1 and
-            sample["slice_interface_version"] == 2 and
+            sample["slice_interface_version"] == 3 and
             sample["slice_ready"] == 1 and
             sample["slice_actor_count"] == 2,
             f"frame {frame}: slice runtime/actor contract drifted")
@@ -166,6 +164,11 @@ def validate_sample(sample):
     contact = sample["slice_collision_result"]
     if contact:
         require(sample["slice_player_attack_active"] == 1 and
+                sample["slice_player_presentation_active"] == 1 and
+                sample["slice_attack_sequence_step"] ==
+                sample["slice_attack_selector"] and
+                sample["slice_source_event_index"] ==
+                sample["slice_attack_selector"] - 1 and
                 sample["slice_attacker_id"] == 1 and
                 sample["slice_defender_id"] == 31 and
                 sample["slice_health_after"] < sample["slice_health_before"],
@@ -213,15 +216,21 @@ def main():
 
     exact = {
         20, 40, 45, 46, 60, 300, 320, 339,
-        588, 599, 600, 601, 620, 637,
-        900, 1188, 1199, 1200, 1201,
-        1500, 1788, 1799, 1800, 1801,
-        2100, 2388, 2399, 2400, 2401, 2420, 2480, 2560,
+        583, 595, 599, 600, 601, 605, 620, 627,
+        640, 645, 646, 647, 660, 677,
+        685, 692, 693, 694, 710, 722,
+        730, 738, 739, 740, 760, 800, 850, 879,
     }
     exact |= {2999, 3000, 3001, 3050}
+    # The complete source-bound exchange is captured at cadence 1 so a
+    # one-frame family, pivot, grounding, or reaction error cannot hide
+    # between review samples.  The longer stability envelope remains sampled
+    # every ten frames.
+    exact |= set(range(583, 880))
     targets = sorted(set(range(20, 3051, 10)) | exact)
-    key_frames = {20, 45, 46, 320, 588, 599, 600, 601, 620, 637,
-                  1188, 1200, 1788, 1800, 2388, 2400, 2420, 2480,
+    key_frames = {20, 45, 46, 320, 583, 595, 600, 601, 605, 627,
+                  640, 646, 647, 677, 685, 693, 694, 722,
+                  730, 739, 740, 760, 800, 850, 879,
                   2999, 3000, 3001, 3050}
     samples = []
     images = []
@@ -259,8 +268,13 @@ def main():
             by_frame[45]["slice_player_screen_x"],
             "stationary world actor did not move opposite the camera pan")
     require([sample["slice_frame"] for sample in contacts] ==
-            [600, 1200, 1800, 2400],
+            [600, 646, 693, 739],
             "trace does not contain the four causal contacts exactly once")
+    require([sample["slice_source_sample"] for sample in contacts] ==
+            [5190, 5236, 5283, 5329] and
+            [sample["slice_attack_selector"] for sample in contacts] ==
+            [1, 2, 3, 4],
+            "contacts are detached from their source samples/selectors")
     require([sample["slice_health_after"] for sample in contacts] ==
             [63, 39, 8, -1],
             "trace contact damage sequence drifted")
@@ -283,7 +297,11 @@ def main():
             "sha256": sha(clip_path),
             "bytes": clip_path.stat().st_size,
             "sample_count": len(images),
-            "sample_interval_frames": 10,
+            "sample_interval_frames":
+                "cadence-1 for frames 583-879; otherwise cadence-10 plus exact checkpoints",
+            "combat_cadence": 1,
+            "combat_first_frame": 583,
+            "combat_last_frame": 879,
             "playback_fps": 6,
         }
 
@@ -301,8 +319,8 @@ def main():
         "contacts": [sample["slice_frame"] for sample in contacts],
         "key_images": key_images,
         "clip": clip,
-        "fidelity": "ADAPTED",
-        "adapted_scope": "deterministic capability-slice movement and four-attack choreography; not production player control or enemy AI",
+        "fidelity": "SOURCE_BOUND_WITH_ADAPTED_INPUT",
+        "adapted_scope": "deterministic input choreography only; attack presentation, collision, damage, and alien reaction are source-bound; production player control and enemy AI remain UNKNOWN",
         "post_ko_framing": {
             "intentional_exit": False,
             "player_world_x": by_frame[3050]["slice_player_world_x"],
@@ -315,15 +333,11 @@ def main():
     }
     output = build_root / "scene-trace.json"
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
-    contract_path = HERE / "render_identity_contract.json"
-    if contract_path.is_file():
-        contract = json.loads(contract_path.read_text(encoding="utf-8"))
-        identity_result = identity_contract.validate_trace(report, contract)
-        require(identity_contract.mutation_is_rejected(report, contract),
-                "wrong nonzero object/tile family mutation was accepted")
-        report["render_identity_contract"] = identity_result
-        report["render_identity_mutation_control"] = "PASS_REJECTED"
-        output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+    report["source_contract"] = {
+        "path": "data/avsp_source_combat_presentation_contract.json",
+        "origin": "MAME_SOURCE_ONLY",
+    }
+    output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     print(f"recorded {output.relative_to(ROOT)}")
     if clip:
         print(f"recorded {clip['path']}")
