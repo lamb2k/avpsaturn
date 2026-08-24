@@ -5,7 +5,7 @@ roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 production_head: 684ed1b27e840ac940bc95484b32d7f6e3972a01
-candidate_head: 0d612401c874755acce62c25164ab9494dc967bd
+candidate_head: 509cb20d9c8867e869ca3ade90c62ede57540571
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-user-02-enemy-review
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
