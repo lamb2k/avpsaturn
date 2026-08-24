@@ -179,6 +179,22 @@ def main():
                 "combat exchange is not captured at cadence 1")
     require(traces[0]["samples"] == traces[1]["samples"],
             "paired synchronized semantic traces are not deterministic")
+    package = ROOT / "build/feedback/INTEGRATE-03-PLAYABLE-SLICE"
+    metrics = load(package / "actor-image-metrics.json")
+    findings = load(package / "visual-findings.json")
+    require(metrics["result"] == "PASS" and
+            metrics["frames_checked"] == 297 and
+            metrics["alien_frames_checked"] == 297,
+            "cadence-1 actor-image metrics did not pass")
+    require({item["name"] for item in metrics["negative_controls"]} == {
+                "valid_wrong_alien_crop", "one_frame_y_offset",
+                "stale_repeated_pose", "skipped_reaction_pose", "pivot_jump",
+            } and all(item["result"] == "REJECTED"
+                      for item in metrics["negative_controls"]),
+            "an actor-image negative control escaped")
+    require(findings["result"] == "PASS" and
+            findings["direct_inspection"] == "COMPLETE",
+            "calculated visual flags lack complete direct inspection")
     clip = traces[0]["clip"]
     require(clip is not None and clip["sample_count"] >= 500,
             "continuous corrected-scene clip is missing or undersampled")

@@ -218,7 +218,16 @@ pending_integration_review:
   repair_implementation_head: 417ed808e10f0f255948b1e6ecf0223399509c74
   corrected_candidate_status: PASS_PENDING_RENEWED_HUMAN_REVIEW
   fidelity: SOURCE_BOUND_WITH_ADAPTED_INPUT
+  task_level_fidelity_status: ADAPTED
   adapted_scope: deterministic input choreography only; production player control and enemy AI remain UNKNOWN
+  measured_components:
+    - attack selector and player presentation
+    - active-window timing
+    - collision geometry
+    - damage
+    - class-0x1F reaction identity and timing
+    - KO/death sequence
+  actor_image_comparator: PASS / 297 cadence frames, 390 retained framebuffer actor crops, and five required mutations; seven same-assembly record flags directly inspected
   exact_release_iso_sha256: 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef
   paired_emulator_trace: PASS / two identical 577-sample traces with 297 cadence-1 combat frames
   full_lane: PASS

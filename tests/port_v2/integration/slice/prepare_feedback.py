@@ -58,6 +58,14 @@ def source_validator():
     return module
 
 
+def actor_comparator():
+    path = HERE / "actor_image_compare.py"
+    spec = importlib.util.spec_from_file_location("slice_actor_compare", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def copy_record(source: Path, target: Path, records: list[dict]) -> None:
     assert source.is_file(), source
     shutil.copy2(source, target)
@@ -203,62 +211,22 @@ def main() -> int:
     copy_record(
         ROOT / "data" / "avsp_source_combat_presentation_contract.json",
         DESTINATION / "mame-source-combat-contract.json", copied)
-
-    findings = {
-        "schema": 1,
-        "source": "independent MAME contract plus exact-release Saturn frames",
-        "findings": [
-            {
-                "frame": 600,
-                "observation": "Selector 1 player pose and class-0x1F contact pose are visible together.",
-                "source_comparison": "Collision overlay 1 shows the corresponding source attack/hurt overlap.",
-                "semantic_state": "source 5190; selector 1; damage 87 to 63",
-                "repair": "One source event now supplies pose, active box, collision, damage, and reaction.",
-                "result": "PASS",
-            },
-            {
-                "frame": 646,
-                "observation": "Selector 2 has a distinct low player pose and the intended street-alien family.",
-                "source_comparison": "Collision overlay 2 matches source 5236 geometry.",
-                "semantic_state": "source 5236; selector 2; damage 63 to 39",
-                "repair": "Removed the generic attack animation and fixed 600-frame spacing.",
-                "result": "PASS",
-            },
-            {
-                "frame": 693,
-                "observation": "A visible silhouette gap remains, while the selector-3 attack box reaches the hurt box.",
-                "source_comparison": "The same source-supported gap and overlap appear in collision overlay 3.",
-                "semantic_state": "source 5283; selector 3; damage 39 to 8",
-                "repair": "Preserved source geometry instead of widening boxes or moving actors.",
-                "result": "PASS",
-            },
-            {
-                "frame": 739,
-                "observation": "Selector 4 uses its source-supported airborne pose; the alien enters the preserved KO/death family.",
-                "source_comparison": "Collision overlay 4 and grounding trace show height 13 only for the source pose.",
-                "semantic_state": "source 5329; selector 4; damage 8 to -1; KO",
-                "repair": "Removed the timeline-wide height rule and bound height/pivot to the source pose.",
-                "result": "PASS",
-            },
-            {
-                "frame": 879,
-                "observation": "The class-0x1F death pose remains visible and stable.",
-                "source_comparison": "The accepted source reaction timeline ends in the same KO/death family.",
-                "semantic_state": "KO/death hold",
-                "repair": "Preserved the working death animation.",
-                "result": "PASS",
-            },
-        ],
-        "unresolved_objective_discrepancies": [],
-    }
-    findings_path = DESTINATION / "integrated-frame-indexed-findings.json"
-    findings_path.write_text(
-        json.dumps(findings, indent=2) + "\n", encoding="utf-8")
-    copied.append({
-        "path": findings_path.name,
-        "bytes": findings_path.stat().st_size,
-        "sha256": sha256(findings_path),
-    })
+    comparison = actor_comparator().generate()
+    assert comparison["result"] == "PASS"
+    assert comparison["frames_checked"] == 297
+    assert all(item["result"] == "REJECTED"
+               for item in comparison["negative_controls"])
+    shutil.copy2(
+        DESTINATION / "actor-image-direct-inspection.json",
+        DESTINATION / "integrated-frame-indexed-findings.json")
+    for name in (
+            "actor-image-metrics.json", "visual-findings.json",
+            "actor-image-direct-inspection.json",
+            "integrated-frame-indexed-findings.json",
+            "actor-silhouette-comparison.png", "actor-flagged-pairs.png"):
+        path = DESTINATION / name
+        copied.append({"path": name, "bytes": path.stat().st_size,
+                       "sha256": sha256(path)})
 
     summary = {
         "schema": 2,
@@ -278,9 +246,13 @@ def main() -> int:
             "byte_identical_source_reruns": True,
         },
         "candidate_derived_render_hash_contract": "SUPERSEDED / NOT EVIDENCE",
-        "wrong_family_mutations": "PASS_REJECTED_BY_INDEPENDENT_SOURCE_CONTRACT",
+        "actor_image_negative_controls": (
+            "PASS / valid wrong alien crop, one-frame Y offset, stale pose, "
+            "skipped reaction, and pivot jump rejected"),
         "post_ko_framing": traces[0]["post_ko_framing"],
-        "ai_visual_qa": "PASS / direct frame inspection plus source overlays",
+        "ai_visual_qa": (
+            "PASS / calculated cadence-1 actor metrics plus direct inspection "
+            "of every automatically flagged pair"),
         "full_lane": "PASS",
         "physical_saturn": "UNRUN",
         "remaining_unknown": [
@@ -298,7 +270,10 @@ def main() -> int:
         "Review the source clip and collision overlays first, then the exact "
         "release Saturn full-speed and slow-motion clips. The same measured "
         "source event now supplies each selector, rendered player pose, "
-        "collision box, damage, and alien reaction.\n\n"
+        "collision box, damage, and alien reaction. `visual-findings.json` "
+        "is calculated from all 297 cadence frames; its seven same-assembly "
+        "record flags are dispositioned in "
+        "`actor-image-direct-inspection.json`.\n\n"
         f"ISO SHA-256: `{iso_sha}`\n\n"
         "Only the deterministic input choreography is ADAPTED. Production "
         "player control and enemy AI remain UNKNOWN. Full passes separately; "

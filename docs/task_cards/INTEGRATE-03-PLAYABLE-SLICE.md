@@ -317,3 +317,29 @@ The ignored review package is
 and `CHANGES_REQUESTED` pending renewed explicit human review. Physical Saturn
 is `UNRUN`; do not activate `SALVAGE-08-FRONTEND` before human approval and the
 separate physical capability procedure.
+
+### Actor-image evidence hardening
+
+The complete candidate is `SOURCE_BOUND_WITH_ADAPTED_INPUT`; its task-level
+workflow fidelity is therefore `ADAPTED`, not `MEASURED`. The independently
+measured portions are selector/player presentation, active-window timing,
+collision geometry, damage, class-`0x1F` reaction identity/timing, and the
+KO/death sequence. Deterministic input choreography remains the adaptation.
+
+The minimal cadence-1 comparator uses independent MAME actor layers and the
+exact Saturn `PCMBT.RLE`, `TILES.BIN`, and `COMBAT.BIN` layers selected by the
+paired trace, then corroborates their edges against all 390 applicable retained
+Saturn framebuffer actor crops. It pivot-normalizes the 384-to-352 mapping and
+calculates bounds, area, silhouette IoU, centroid, lowest visible baseline,
+component count, edge similarity, and adjacent-frame change across all 297
+frames. A valid wrong alien crop, one-frame Y offset, stale pose, skipped
+reaction, and pivot jump all reject.
+
+Seven source record changes intentionally reuse the same visible assembly:
+player frames `5204/5249/5299/5350` and alien frames `5343/5345/5350`. Codex
+directly inspected every automatically flagged MAME/Saturn pair. The layers
+are silhouette-identical, and the record pairs resolve to the same source
+assembly; no runtime correction is justified. Calculated metrics live in
+`actor-image-metrics.json`, with dispositions in
+`actor-image-direct-inspection.json`. Physical Saturn remains `UNRUN`, and
+renewed human review is still required.

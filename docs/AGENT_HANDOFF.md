@@ -33,7 +33,10 @@ on `codex/avp-user-02-enemy-review`. Candidate
 interface. Its exact normal-release ISO is
 `4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef`;
 paired 577-sample traces, 297 cadence-1 combat frames, source mutations, visual
-QA, and Full pass. The ignored package is
+QA, and Full pass. Task fidelity is `ADAPTED` (`SOURCE_BOUND_WITH_ADAPTED_INPUT`):
+six combat components are measured, while input choreography is adapted. The
+actor comparator passes 297 frames and five mutations; all seven calculated
+same-assembly flags were directly inspected. The ignored package is
 `build/feedback/INTEGRATE-03-PLAYABLE-SLICE`. Present it and record the exact
 response; do not infer approval.
 
