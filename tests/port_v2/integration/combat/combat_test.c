@@ -137,10 +137,10 @@ static int test_source_alignment(void)
 {
     static const int expected[4][7] =
     {
-        {211, 208, 0, 160, 200, 0, 8},
-        {227, 208, 0, 160, 200, 0, 8},
-        {262, 208, 0, 160, 200, 0, 8},
-        {278, 208, 13, 160, 200, 0, -5}
+        {264, 208, 0, 213, 200, 0, 8},
+        {264, 208, 0, 197, 200, 0, 8},
+        {264, 208, 0, 162, 200, 0, 8},
+        {264, 208, 13, 146, 200, 0, -5}
     };
     AvspPortV2CombatSourceEvent source;
     AvspPortV2CombatPresentation presentation;
@@ -179,6 +179,101 @@ static int test_legacy_alignment_rejected(void)
     return !avsp_port_v2_combat_alignment_valid(&legacy);
 }
 
+static int test_source_bound_player_pipeline(void)
+{
+    static const unsigned short contacts[4] = {5190u, 5236u, 5283u, 5329u};
+    static const unsigned long records[4] =
+        {0x001600F8UL, 0x0016014CUL, 0x001601C0UL, 0x00160234UL};
+    AvspPortV2CombatSourceEvent source;
+    AvspPortV2PlayerCombatPresentation frame;
+    int index;
+    for (index = 0; index < 4; ++index)
+    {
+        int action_frame;
+        int saw_contact_record = 0;
+        int active_frames = 0;
+        if (!avsp_port_v2_combat_source_event(index, &source)) return 0;
+        for (action_frame = 0;
+             action_frame <= source.player_presentation_end -
+                             source.player_presentation_start;
+             ++action_frame)
+        {
+            unsigned short sample = (unsigned short)
+                (source.player_presentation_start + action_frame);
+            if (!avsp_port_v2_combat_source_player_frame(
+                    index, action_frame, &frame) ||
+                !avsp_port_v2_combat_source_player_frame_valid(
+                    index, action_frame, &frame) ||
+                frame.attack_selector != (unsigned short)(index + 1))
+                return 0;
+            if (frame.attack_active) ++active_frames;
+            if (sample == contacts[index])
+            {
+                if (!frame.attack_active ||
+                    frame.source_animation_record != records[index]) return 0;
+                saw_contact_record = 1;
+            }
+        }
+        if (!saw_contact_record || active_frames !=
+            source.attack_active_end - source.attack_active_start + 1)
+            return 0;
+    }
+    return 1;
+}
+
+static int test_source_bound_mutations_rejected(void)
+{
+    AvspPortV2PlayerCombatPresentation frame;
+    AvspPortV2CombatEnemyPresentation enemy;
+    if (!avsp_port_v2_combat_source_player_frame(0, 3, &frame)) return 0;
+    ++frame.attack_selector;
+    if (avsp_port_v2_combat_source_player_frame_valid(0, 3, &frame)) return 0;
+    if (!avsp_port_v2_combat_source_player_frame(0, 3, &frame)) return 0;
+    frame.source_animation_record = 0x0016014CUL;
+    if (avsp_port_v2_combat_source_player_frame_valid(0, 3, &frame)) return 0;
+    if (!avsp_port_v2_combat_source_player_frame(0, 3, &frame)) return 0;
+    ++frame.pose_index;
+    if (avsp_port_v2_combat_source_player_frame_valid(0, 3, &frame)) return 0;
+    if (!avsp_port_v2_combat_source_player_frame(3, 6, &frame)) return 0;
+    frame.height = 0;
+    if (avsp_port_v2_combat_source_player_frame_valid(3, 6, &frame)) return 0;
+    if (!avsp_port_v2_combat_source_enemy_frame(0, 0, &enemy)) return 0;
+    enemy.source_object_identity = 2546903006UL;
+    if (avsp_port_v2_combat_source_enemy_frame_valid(0, 0, &enemy)) return 0;
+    if (!avsp_port_v2_combat_source_enemy_frame(0, 0, &enemy)) return 0;
+    enemy.source_tile_identity = 230372650UL;
+    if (avsp_port_v2_combat_source_enemy_frame_valid(0, 0, &enemy)) return 0;
+    if (!avsp_port_v2_combat_source_enemy_frame(0, 0, &enemy)) return 0;
+    enemy.source_animation_record = 0x0012DD28UL;
+    return !avsp_port_v2_combat_source_enemy_frame_valid(0, 0, &enemy);
+}
+
+static int test_source_bound_enemy_pipeline(void)
+{
+    AvspPortV2CombatSourceEvent source;
+    AvspPortV2CombatEnemyPresentation frame;
+    int event_index;
+    for (event_index = 0; event_index < 4; ++event_index)
+    {
+        int action_frame = 0;
+        if (!avsp_port_v2_combat_source_event(event_index, &source)) return 0;
+        while (avsp_port_v2_combat_source_enemy_frame(
+                   event_index, action_frame, &frame))
+        {
+            if (!avsp_port_v2_combat_source_enemy_frame_valid(
+                    event_index, action_frame, &frame) ||
+                frame.palette != 19u || frame.source_object_identity == 0UL ||
+                frame.source_tile_identity == 0UL)
+                return 0;
+            ++action_frame;
+        }
+        if (action_frame != source.enemy_reaction_end -
+                            source.enemy_reaction_start + 1)
+            return 0;
+    }
+    return 1;
+}
+
 int main(const int argc, char **argv)
 {
     AvspPortV2CombatRuntime first;
@@ -201,13 +296,19 @@ int main(const int argc, char **argv)
                       "approved actor presentation regressed")) return 1;
     if (!require_true(test_source_alignment(),
                       "source-relative combat alignment drifted")) return 1;
+    if (!require_true(test_source_bound_player_pipeline(),
+                      "source-bound player pipeline drifted")) return 1;
+    if (!require_true(test_source_bound_enemy_pipeline(),
+                      "source-bound enemy pipeline drifted")) return 1;
     if (negative &&
         (!require_true(test_no_contact(),
                        "no-contact control applied damage") ||
          !require_true(test_wrong_selector(),
                        "wrong-selector control was accepted") ||
          !require_true(test_legacy_alignment_rejected(),
-                       "legacy mixed alignment was accepted"))) return 1;
+                       "legacy mixed alignment was accepted") ||
+         !require_true(test_source_bound_mutations_rejected(),
+                       "source-bound mutation was accepted"))) return 1;
     puts(negative ? "Combat integration negative controls: PASS" :
                     "Combat integration contract: PASS");
     return 0;

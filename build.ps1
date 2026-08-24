@@ -109,12 +109,13 @@ try {
             (Test-Path -LiteralPath $animCaptureB) -and
             (Test-Path -LiteralPath (Join-Path $animAnchorRoot 'workram_05191.bin')) -and
             (Test-Path -LiteralPath (Join-Path $animAnchorRoot 'workram_05469.bin'))) {
+            # REPAIR-09 consumes the complete cadence-1 source exchange. The
+            # former split omitted reaction records 0x12DD28 and 0x12DD3C.
             & $PythonPath (Join-Path $projectRoot 'tools\gen_avsp_anim_records.py') `
                 '--rom' '.deps/mame/actorprobe/decrypted_program_2m.bin' `
                 '--capture' '.deps/mame/collision_probe/workram.bin' `
                 '--capture' '.deps/mame/collision_probe_boss/workram.bin' `
-                '--capture-dir-range' '.deps/mame/enemy_actions:5191:5226' `
-                '--capture-dir-range' '.deps/mame/enemy_actions:5330:5469' `
+                '--capture-dir-range' '.deps/mame/enemy_actions:5191:5469' `
                 '--verify-deterministic'
             if ($LASTEXITCODE -ne 0) {
                 throw "Animation-record extraction failed with exit code $LASTEXITCODE."
@@ -211,6 +212,11 @@ try {
         # INTEGRATE-02 keeps the approved street archive byte-identical and
         # stages the exact jump-record HIT/KO tiles as a profile-only overlay.
         $combatTileOverlay = Join-Path $projectRoot 'build\avsp_cd\SPR4\COMBAT.BIN'
+        $sourceCombatPlayer = Join-Path $projectRoot 'build\avsp_cd\SPR4\PCMBT.RLE'
+        $sourceCombatPlayerCache = Join-Path $projectRoot `
+            '.deps\mame\source_bound_combat\PCMBT.RLE'
+        $sourceCombatContract = Join-Path $projectRoot `
+            'data\avsp_source_combat_presentation_contract.json'
         if ($CombatIntegrationBench -or $usePlayableSlice) {
             & $PythonPath (Join-Path $projectRoot 'tests\port_v2\integration\combat\build_tile_overlay.py')
             if ($LASTEXITCODE -ne 0) {
@@ -222,6 +228,35 @@ try {
         }
         elseif (Test-Path -LiteralPath $combatTileOverlay) {
             Remove-Item -LiteralPath $combatTileOverlay -Force
+        }
+        if ($CombatIntegrationBench) {
+            if (-not (Test-Path -LiteralPath $sourceCombatPlayerCache)) {
+                & $PythonPath (Join-Path $projectRoot `
+                    'tools\analyze_source_bound_combat_presentation.py')
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Source-bound combat player generation failed with exit code $LASTEXITCODE."
+                }
+            }
+            if (-not (Test-Path -LiteralPath $sourceCombatContract)) {
+                throw 'CombatIntegrationBench requires the tracked source combat contract.'
+            }
+            $sourceCombatIdentity = (Get-Content -LiteralPath $sourceCombatContract -Raw |
+                ConvertFrom-Json).source_player_archive
+            $sourceCombatCacheHash = (Get-FileHash -LiteralPath $sourceCombatPlayerCache `
+                -Algorithm SHA256).Hash.ToLowerInvariant()
+            $sourceCombatCacheLength = (Get-Item -LiteralPath $sourceCombatPlayerCache).Length
+            if ($sourceCombatCacheHash -ne $sourceCombatIdentity.sha256 -or
+                $sourceCombatCacheLength -ne $sourceCombatIdentity.bytes) {
+                throw 'Pinned source combat player archive does not match the independent source contract.'
+            }
+            Copy-Item -LiteralPath $sourceCombatPlayerCache `
+                -Destination $sourceCombatPlayer -Force
+            if (-not (Test-Path -LiteralPath $sourceCombatPlayer)) {
+                throw 'CombatIntegrationBench requires build\avsp_cd\SPR4\PCMBT.RLE.'
+            }
+        }
+        elseif (Test-Path -LiteralPath $sourceCombatPlayer) {
+            Remove-Item -LiteralPath $sourceCombatPlayer -Force
         }
 
         $contentRoot = Join-Path $projectRoot 'build\avsp_cd'
@@ -588,6 +623,13 @@ try {
                 'game.iso' '/SPR4/COMBAT.BIN' '--equals' $combatTileOverlay
             if ($LASTEXITCODE -ne 0) {
                 throw "Combat tile overlay ISO verification failed with exit code $LASTEXITCODE."
+            }
+        }
+        if ($CombatIntegrationBench) {
+            & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+                'game.iso' '/SPR4/PCMBT.RLE' '--equals' $sourceCombatPlayer
+            if ($LASTEXITCODE -ne 0) {
+                throw "Source-bound combat player ISO verification failed with exit code $LASTEXITCODE."
             }
         }
         & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `

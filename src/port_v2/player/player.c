@@ -130,3 +130,20 @@ int avsp_port_v2_player_bounds_valid(const int left, const int top,
     return left >= 0 && top >= 0 && right > left && bottom > top &&
            right <= 192 && bottom <= 192;
 }
+
+int avsp_port_v2_player_combat_presentation_valid(
+    const AvspPortV2PlayerCombatPresentation *presentation)
+{
+    if (presentation == 0) return 0;
+    return presentation->sequence_step >= 1u &&
+           presentation->sequence_step <= 4u &&
+           presentation->attack_selector == presentation->sequence_step &&
+           presentation->source_animation_record >= 0x00100000UL &&
+           presentation->source_animation_record < 0x00200000UL &&
+           presentation->source_object_identity != 0UL &&
+           presentation->source_tile_identity != 0UL &&
+           presentation->pivot_x >= 0 && presentation->pivot_x < 384 &&
+           presentation->pivot_y >= 0 && presentation->pivot_y < 256 &&
+           presentation->height >= 0 && presentation->height <= 32 &&
+           presentation->attack_active <= 1u;
+}

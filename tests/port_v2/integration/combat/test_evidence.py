@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate paired REPAIR-03 build and pinned-emulator evidence."""
+"""Validate paired REPAIR-09 build and pinned-emulator evidence."""
 
 import hashlib
 import json
@@ -39,7 +39,7 @@ def main():
     require(reads[0]["iso_sha256"] == reads[1]["iso_sha256"] ==
             normals[0]["normalized_iso_sha256"],
             "combat build/readback ISO identities disagree")
-    for key in ("events", "hit_state", "final_state"):
+    for key in ("events", "event_states", "final_state"):
         require(reads[0][key] == reads[1][key],
                 f"combat deterministic {key} drifted")
     for report in reads:
@@ -47,15 +47,30 @@ def main():
                 report["physical_saturn"] == "UNRUN" and
                 report["emulator"]["evidence_tier"] == "ONE_EMULATOR",
                 "combat evidence tier/result drifted")
-        require(report["hit_state"]["combat_frame"] == 185 and
-                report["hit_state"]["combat_presented_frame"] == 185 and
-                report["final_state"]["combat_frame"] == 860 and
-                report["final_state"]["combat_presented_frame"] == 860,
+        require([states["contact"]["combat_frame"]
+                 for states in report["event_states"]] ==
+                [186, 232, 279, 325] and
+                report["final_state"]["combat_frame"] == 465 and
+                report["final_state"]["combat_presented_frame"] == 465,
                 "combat readback was not sampled at exact frames")
-        for state in (report["hit_state"], report["final_state"]):
+        sampled_states = [report["final_state"]]
+        for event_index, event_states in enumerate(report["event_states"]):
+            sampled_states.extend(event_states.values())
+            contact = event_states["contact"]
+            reaction = event_states["reaction"]
+            require(contact["combat_contact_count"] == event_index + 1 and
+                    contact["combat_damage_count"] == event_index + 1 and
+                    contact["combat_player_attack_active"] == 1 and
+                    reaction["combat_enemy_render_object_identity"] ==
+                    reaction["combat_enemy_source_object_identity"] and
+                    reaction["combat_enemy_render_tile_identity"] ==
+                    reaction["combat_enemy_source_tile_identity"],
+                    "combat source event detached from rendered presentation")
+        for state in sampled_states:
             require(state["enemy_tile_bank_misses"] == 0 and
                     state["enemy_tile_rank_misses"] == 0 and
                     state["combat_missing_code_count"] == 0 and
+                    state["combat_tile_sprite_misses"] == 0 and
                     state["combat_alignment_ok"] == 1 and
                     state["combat_attack_toward_target"] == 1 and
                     abs(state["combat_baseline_delta"]) <= 8 and
@@ -81,7 +96,7 @@ def main():
     require(builds[0]["asset_members"]["/SPR4/TILES.BIN"]["bytes"] +
             member["bytes"] <= 0x50000,
             "combat tile assets exceed the existing cartridge carve")
-    print("REPAIR-03 paired emulator alignment evidence: PASS")
+    print("REPAIR-09 paired source-event emulator evidence: PASS")
 
 
 if __name__ == "__main__":

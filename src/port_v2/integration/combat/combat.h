@@ -4,7 +4,7 @@
 #include "../player_enemy/player_enemy.h"
 #include "../../combat/hit_ko/hit_ko.h"
 
-#define AVSP_PORT_V2_COMBAT_INTERFACE_VERSION 1
+#define AVSP_PORT_V2_COMBAT_INTERFACE_VERSION 2
 #define AVSP_PORT_V2_COMBAT_SOURCE_EVENT_COUNT 4
 
 #define AVSP_PORT_V2_COMBAT_PLAYER_TABLE_SET 0x0011AE02UL
@@ -12,8 +12,8 @@
 #define AVSP_PORT_V2_COMBAT_ENEMY_HURT_SELECTOR 1
 #define AVSP_PORT_V2_COMBAT_SOURCE_VIEW_WIDTH 384
 #define AVSP_PORT_V2_COMBAT_TARGET_VIEW_WIDTH 352
-#define AVSP_PORT_V2_COMBAT_ENEMY_ANCHOR_X 160
-#define AVSP_PORT_V2_COMBAT_ENEMY_ANCHOR_LANE 200
+#define AVSP_PORT_V2_COMBAT_PLAYER_ANCHOR_X 264
+#define AVSP_PORT_V2_COMBAT_PLAYER_ANCHOR_LANE 208
 #define AVSP_PORT_V2_COMBAT_BASELINE_DELTA_LIMIT 8
 
 typedef enum
@@ -28,6 +28,13 @@ typedef enum
 typedef struct
 {
     unsigned short source_sample;
+    unsigned short attack_input_sample;
+    unsigned short player_presentation_start;
+    unsigned short player_presentation_end;
+    unsigned short attack_active_start;
+    unsigned short attack_active_end;
+    unsigned short enemy_reaction_start;
+    unsigned short enemy_reaction_end;
     unsigned short attack_selector;
     unsigned short hit_value;
     short health_before;
@@ -41,6 +48,16 @@ typedef struct
     unsigned short player_facing;
     unsigned short enemy_facing;
     unsigned short transition_kind;
+    unsigned short player_source_action;
+    unsigned short player_source_substate;
+    unsigned long player_animation_record;
+    unsigned long enemy_contact_animation_record;
+    unsigned long enemy_reaction_animation_record;
+    unsigned long enemy_contact_object_identity;
+    unsigned long enemy_contact_tile_identity;
+    unsigned long enemy_reaction_object_identity;
+    unsigned long enemy_reaction_tile_identity;
+    unsigned short enemy_palette;
 } AvspPortV2CombatSourceEvent;
 
 typedef struct
@@ -57,6 +74,22 @@ typedef struct
     int enemy_facing;
     int baseline_delta;
 } AvspPortV2CombatPresentation;
+
+typedef struct
+{
+    unsigned short source_sample;
+    unsigned short source_action;
+    unsigned short source_substate;
+    unsigned short palette;
+    unsigned short action_frame;
+    unsigned short facing;
+    unsigned long source_animation_record;
+    unsigned long source_object_identity;
+    unsigned long source_tile_identity;
+    int world_x;
+    int world_y;
+    int world_z;
+} AvspPortV2CombatEnemyPresentation;
 
 typedef struct
 {
@@ -100,6 +133,20 @@ typedef struct
 void avsp_port_v2_combat_init(AvspPortV2CombatRuntime *runtime);
 int avsp_port_v2_combat_source_event(
     int index, AvspPortV2CombatSourceEvent *event);
+int avsp_port_v2_combat_source_player_frame(
+    int event_index, int action_frame,
+    AvspPortV2PlayerCombatPresentation *presentation);
+int avsp_port_v2_combat_source_player_frame_valid(
+    int event_index, int action_frame,
+    const AvspPortV2PlayerCombatPresentation *presentation);
+int avsp_port_v2_combat_source_enemy_frame(
+    int event_index, int action_frame,
+    AvspPortV2CombatEnemyPresentation *presentation);
+int avsp_port_v2_combat_source_enemy_frame_valid(
+    int event_index, int action_frame,
+    const AvspPortV2CombatEnemyPresentation *presentation);
+int avsp_port_v2_combat_source_enemy_sample(
+    int source_sample, AvspPortV2CombatEnemyPresentation *presentation);
 int avsp_port_v2_combat_presentation(
     const AvspPortV2CombatSourceEvent *source,
     AvspPortV2CombatPresentation *presentation);

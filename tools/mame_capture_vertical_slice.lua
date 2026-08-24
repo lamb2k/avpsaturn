@@ -16,6 +16,9 @@ local root = assert(os.getenv("AVSP_VSLICE_CAPTURE_ROOT"),
 local first_frame = tonumber(os.getenv("AVSP_VSLICE_FIRST") or "4080")
 local last_frame = tonumber(os.getenv("AVSP_VSLICE_LAST") or "5469")
 local perturb_frame = tonumber(os.getenv("AVSP_VSLICE_PERTURB_FRAME") or "0")
+local capture_render_contract =
+    os.getenv("AVSP_VSLICE_RENDER_CONTRACT") == "1"
+local trace_enabled = os.getenv("AVSP_VSLICE_TRACE") ~= "0"
 local trace_path = root .. "/maincpu.trace"
 
 local in0 = machine.ioport.ports[":IN0"].fields
@@ -37,12 +40,20 @@ local trace_active = false
 local qsound_latch = 0
 local samples = assert(io.open(root .. "/samples.tsv", "w"))
 local qsound = assert(io.open(root .. "/qsound.tsv", "w"))
+local render_contract = capture_render_contract and assert(io.open(
+    root .. "/actor_render.tsv", "w")) or nil
 samples:write("frame\tinput_word\tactive_bank\tbank_writes",
     "\tp_state\tp_class\tp_sub\tp_action\tp_type\tp_facing\tp_x\tp_y\tp_z",
     "\tp_anim\tp_timer\tp_health\tp_hit\tp_source\tp_hurt\tp_attack",
     "\te_state\te_class\te_sub\te_action\te_type\te_facing\te_x\te_y\te_z",
     "\te_anim\te_timer\te_health\te_hit\te_source\te_hurt\te_attack\n")
 qsound:write("frame\tpc\tport\tbyte\tregister\tvalue\n")
+if render_contract then
+    render_contract:write(
+        "frame\trole\tslot\tclass_id\ttype\tpalette\tmode\tfacing",
+        "\tor_value\tworld_x\tworld_y\tworld_z\tanim_record",
+        "\tanchor_x\tanchor_y\n")
+end
 
 local function u16(address)
     return program:read_u16(address)
@@ -124,6 +135,20 @@ local function write_actor(fields, actor_value)
     fields[#fields + 1] = actor_value.attack
 end
 
+local function write_render_actor(frame_value, role, base)
+    if not render_contract then return end
+    local values = {
+        frame_value, role, string.format("0x%06x", base),
+        program:read_u8(base + 0x02), program:read_u8(base + 0x08),
+        program:read_u8(base + 0x0e), program:read_u8(base + 0x0d),
+        program:read_u8(base + 0x0f), u16(base + 0x2e),
+        s16(u16(base + 0x10)), s16(u16(base + 0x14)),
+        s16(u16(base + 0x18)), string.format("0x%08x", u32(base + 0x1c)),
+        u16(0xff8278), u16(0xff827c)
+    }
+    render_contract:write(table.concat(values, "\t") .. "\n")
+end
+
 local function clear_inputs()
     coin:clear_value(); start:clear_value(); left:clear_value(); right:clear_value()
     up:clear_value(); down:clear_value(); gun:clear_value(); attack:clear_value()
@@ -203,6 +228,8 @@ local function capture_frame(input_word)
     write_actor(row, player)
     write_actor(row, enemy)
     samples:write(table.concat(row, "\t") .. "\n")
+    write_render_actor(frame, "player", 0xff8380)
+    write_render_actor(frame, "street_alien", 0xffa000)
 end
 
 vertical_slice_subscription = emu.add_machine_frame_notifier(function()
@@ -212,8 +239,10 @@ vertical_slice_subscription = emu.add_machine_frame_notifier(function()
     -- held so the route cannot divert through Continue; enemy behavior stays native.
     if frame >= 4200 then program:write_u8(0xff83c1, 0x65) end
     if frame == first_frame then
-        debugger:command("trace " .. trace_path .. ",:maincpu")
-        trace_active = true
+        if trace_enabled then
+            debugger:command("trace " .. trace_path .. ",:maincpu")
+            trace_active = true
+        end
     end
     if frame >= first_frame and frame <= last_frame then capture_frame(input_word) end
     if frame == last_frame then
@@ -222,6 +251,7 @@ vertical_slice_subscription = emu.add_machine_frame_notifier(function()
         clear_inputs()
         samples:close()
         qsound:close()
+        if render_contract then render_contract:close() end
         machine:exit()
     end
 end)

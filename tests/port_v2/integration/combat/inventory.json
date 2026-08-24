@@ -10,6 +10,7 @@
     "/SPR4/PXI0.BIN",
     "/SPR4/PXI1.BIN",
     "/SPR4/PACT.RLE",
+    "/SPR4/PCMBT.RLE",
     "/SPR4/TILES.BIN",
     "/SPR4/COMBAT.BIN"
   ],
@@ -55,15 +56,36 @@
     "avsp_diag_combat_transition_timer",
     "avsp_diag_combat_transition_hit_value",
     "avsp_diag_combat_player_attack_active",
+    "avsp_diag_combat_player_presentation_active",
+    "avsp_diag_combat_player_source_pose",
+    "avsp_diag_combat_player_source_anim_record",
+    "avsp_diag_combat_player_source_action",
+    "avsp_diag_combat_player_source_substate",
+    "avsp_diag_combat_player_source_object_identity",
+    "avsp_diag_combat_player_source_tile_identity",
+    "avsp_diag_combat_player_source_pivot_x",
+    "avsp_diag_combat_player_source_pivot_y",
     "avsp_diag_combat_player_action_frame",
     "avsp_diag_combat_enemy_visual_action",
     "avsp_diag_combat_enemy_action_frame",
+    "avsp_diag_combat_enemy_render_anim_record",
+    "avsp_diag_combat_enemy_render_palette",
+    "avsp_diag_combat_enemy_source_object_identity",
+    "avsp_diag_combat_enemy_source_tile_identity",
+    "avsp_diag_combat_enemy_render_object_identity",
+    "avsp_diag_combat_enemy_render_tile_identity",
+    "avsp_diag_combat_enemy_render_object_count",
+    "avsp_diag_combat_enemy_source_event_index",
+    "avsp_diag_combat_enemy_source_world_x",
+    "avsp_diag_combat_enemy_source_world_y",
+    "avsp_diag_combat_enemy_source_world_z",
     "avsp_diag_combat_negative_rejections",
     "avsp_diag_combat_failures",
     "avsp_diag_combat_complete",
     "avsp_diag_combat_canary_ok"
     ,"avsp_diag_combat_missing_code_count"
     ,"avsp_diag_combat_missing_codes"
+    ,"avsp_diag_combat_tile_sprite_misses"
     ,"avsp_diag_combat_presented_frame"
     ,"avsp_diag_combat_player_x"
     ,"avsp_diag_combat_player_lane"

@@ -28,6 +28,9 @@
 #endif
 #ifdef AVSP_COMBAT_INTEGRATION_BENCH
 #include "src/port_v2/integration/combat/combat.h"
+#ifndef AVSP_PLAYABLE_SLICE
+#include "src/port_v2/integration/combat/source_player_generated.h"
+#endif
 #include "tests/port_v2/integration/combat/diagnostic.h"
 #endif
 #ifdef AVSP_PLAYABLE_SLICE
@@ -183,6 +186,10 @@ static unsigned char *sequence_rle[AVSP_SEQUENCE_SCENES];
 static unsigned char *sequence_pixels;
 static unsigned char *background_bitmap;
 static unsigned char *player_action_archive;
+#if defined(AVSP_COMBAT_INTEGRATION_BENCH) && !defined(AVSP_PLAYABLE_SLICE)
+static unsigned char *source_combat_player_archive;
+static jo_img_4bits source_combat_player_image;
+#endif
 static unsigned char *enemy_action_archive;
 static unsigned char *stalker_action_archive;
 static unsigned char *enemy_action_buffer;
@@ -214,6 +221,10 @@ static jo_sound breach_sound;
 static jo_sound *opening_channel_sound;
 static int player_idle_sprites[2];
 static int player_action_sprites[AVSP_PLAYER_ACTION_LAYERS];
+#if defined(AVSP_COMBAT_INTEGRATION_BENCH) && !defined(AVSP_PLAYABLE_SLICE)
+static int source_combat_player_sprite;
+static int current_source_combat_player_pose;
+#endif
 static int enemy_action_sprites[CAP_MAX_ENEMIES];
 static int boss_action_sprite;
 static int hud_top_sprite;
@@ -1079,8 +1090,59 @@ static int load_player_action_sequences(void)
             return 0;
         }
     }
+#if defined(AVSP_COMBAT_INTEGRATION_BENCH) && !defined(AVSP_PLAYABLE_SLICE)
+    length = 0;
+    source_combat_player_archive =
+        (unsigned char *)avsp_fs_read_file_in_dir(
+            AVSP_SOURCE_COMBAT_PLAYER_ARCHIVE_FILE, "SPR4", &length);
+    if (source_combat_player_archive == JO_NULL ||
+        length != AVSP_SOURCE_COMBAT_PLAYER_ARCHIVE_BYTES)
+    {
+        failed_asset = AVSP_SOURCE_COMBAT_PLAYER_ARCHIVE_FILE;
+        return 0;
+    }
+    source_combat_player_image.width = CEL_WIDTH;
+    source_combat_player_image.height = CEL_HEIGHT;
+    source_combat_player_image.data = (unsigned char *)jo_malloc(
+        AVSP_SOURCE_COMBAT_PLAYER_DECODED_BYTES);
+    if (source_combat_player_image.data == JO_NULL)
+    {
+        failed_asset = "SOURCE COMBAT PLAYER BUFFER";
+        return 0;
+    }
+#endif
     return 1;
 }
+
+#if defined(AVSP_COMBAT_INTEGRATION_BENCH) && !defined(AVSP_PLAYABLE_SLICE)
+static int decode_source_combat_player_pose(const int pose)
+{
+    unsigned int source = 0;
+    unsigned int target = 0;
+    unsigned int source_offset;
+    unsigned int source_length;
+    const unsigned char *source_data;
+    unsigned char *output;
+    if (pose < 0 || pose >= AVSP_SOURCE_COMBAT_PLAYER_POSES) return 0;
+    source_offset = avsp_source_combat_player_rle_offsets[pose];
+    source_length = avsp_source_combat_player_rle_bytes[pose];
+    if (source_offset + source_length >
+        AVSP_SOURCE_COMBAT_PLAYER_ARCHIVE_BYTES) return 0;
+    source_data = source_combat_player_archive + source_offset;
+    output = source_combat_player_image.data;
+    while (source + 1 < source_length)
+    {
+        unsigned int count = source_data[source++];
+        unsigned char value = source_data[source++];
+        if (count == 0 || target + count >
+            AVSP_SOURCE_COMBAT_PLAYER_DECODED_BYTES) return 0;
+        memset(output + target, value, count);
+        target += count;
+    }
+    return source == source_length &&
+        target == AVSP_SOURCE_COMBAT_PLAYER_DECODED_BYTES;
+}
+#endif
 
 static int decode_player_action_pose(const int pose)
 {
@@ -1732,6 +1794,17 @@ static int create_sprite_working_set(void)
             failed_asset = "PLAYER ACTION VDP1";
     }
     current_player_action_pose = 0;
+#if defined(AVSP_COMBAT_INTEGRATION_BENCH) && !defined(AVSP_PLAYABLE_SLICE)
+    if (!decode_source_combat_player_pose(0)) return 0;
+    source_combat_player_sprite = jo_sprite_add_4bits_image(
+        &source_combat_player_image);
+    if (source_combat_player_sprite < 0)
+    {
+        failed_asset = "SOURCE COMBAT PLAYER VDP1";
+        return 0;
+    }
+    current_source_combat_player_pose = 0;
+#endif
     hud_top_sprite = jo_sprite_add_8bits_image(&hud_top_image);
     hud_prompt_sprite = jo_sprite_add_8bits_image(&hud_prompt_image);
     hud_heat_sprite = jo_sprite_add_8bits_image(&hud_heat_image);
@@ -1782,6 +1855,17 @@ static int create_player_sprite_working_set(void)
         }
     }
     current_player_action_pose = 0;
+#if defined(AVSP_COMBAT_INTEGRATION_BENCH) && !defined(AVSP_PLAYABLE_SLICE)
+    if (!decode_source_combat_player_pose(0)) return 0;
+    source_combat_player_sprite = jo_sprite_add_4bits_image(
+        &source_combat_player_image);
+    if (source_combat_player_sprite < 0)
+    {
+        failed_asset = "SOURCE COMBAT PLAYER VDP1";
+        return 0;
+    }
+    current_source_combat_player_pose = 0;
+#endif
     return 1;
 }
 #endif
@@ -1980,7 +2064,28 @@ static void draw_player(const CapActor *actor, const int screen_x)
 {
     int depth = 330 - actor->lane;
     int layer;
-    int clip = player_clip_for_action(actor->action);
+    int clip;
+#if defined(AVSP_COMBAT_INTEGRATION_BENCH) && !defined(AVSP_PLAYABLE_SLICE)
+    if (avsp_diag_combat_player_presentation_active)
+    {
+        int pose = avsp_diag_combat_player_source_pose;
+        if (pose != current_source_combat_player_pose)
+        {
+            if (!decode_source_combat_player_pose(pose))
+            {
+                runtime_ready = 0;
+                return;
+            }
+            jo_sprite_replace_4bits_image(
+                &source_combat_player_image, source_combat_player_sprite);
+            current_source_combat_player_pose = pose;
+        }
+        draw_exact_layer(actor, screen_x, source_combat_player_sprite, 0,
+                         depth);
+        return;
+    }
+#endif
+    clip = player_clip_for_action(actor->action);
     if (clip >= 0)
     {
         int frame = actor->action == CAP_ACT_WALK ?
@@ -2284,7 +2389,11 @@ static void rom_actor_prepare(void)
         /* ADAPTED action bridge: the two live-verified street-alien loops. */
 #ifdef AVSP_COMBAT_INTEGRATION_BENCH
         if (enemy->action == CAP_ACT_HIT || enemy->action == CAP_ACT_KO)
+#ifdef AVSP_PLAYABLE_SLICE
             seed = avsp_diag_combat_transition_anim_record;
+#else
+            seed = avsp_diag_combat_enemy_render_anim_record;
+#endif
         else
 #endif
             seed = (enemy->action == CAP_ACT_ATTACK) ? 0x12D8A0u : 0x12EB4Cu;
@@ -2317,16 +2426,29 @@ static void rom_actor_prepare(void)
         if (enemy->action == CAP_ACT_HIT || enemy->action == CAP_ACT_KO)
         {
             AvspPortV2CombatSourceEvent combat_source;
+#ifdef AVSP_PLAYABLE_SLICE
             int combat_index = enemy->action == CAP_ACT_HIT ? 0 : 3;
             if (!avsp_port_v2_combat_source_event(
                     combat_index, &combat_source))
+#else
+            int combat_index = avsp_diag_combat_enemy_source_event_index;
+            if (!avsp_port_v2_combat_source_event(
+                    combat_index, &combat_source))
+#endif
             {
                 ++rom_collision_gap;
                 ++rom_collision_gap_frame;
                 continue;
             }
+#ifdef AVSP_PLAYABLE_SLICE
             state.world_x = (unsigned short)combat_source.enemy_x;
             state.world_y = (unsigned short)combat_source.enemy_y;
+#else
+            state.world_x = (unsigned short)
+                avsp_diag_combat_enemy_source_world_x;
+            state.world_y = (unsigned short)
+                avsp_diag_combat_enemy_source_world_y;
+#endif
         }
         else
 #endif
@@ -2344,7 +2466,8 @@ static void rom_actor_prepare(void)
             state.palette = (unsigned char)
                 playable_slice_frame.scene.enemy_identity.palette_bank;
 #else
-            state.palette = 0x13;
+            state.palette = (unsigned char)
+                avsp_diag_combat_enemy_render_palette;
 #endif
 #endif
         state.mode = 1;
@@ -2483,6 +2606,7 @@ static volatile int tile_diag_no_sprite;
 volatile int avsp_diag_combat_missing_code_count;
 volatile unsigned long avsp_diag_combat_missing_codes[16];
 volatile int avsp_diag_combat_presented_frame;
+volatile int avsp_diag_combat_tile_sprite_misses;
 #endif
 
 static int load_tile_archive(void)
@@ -2606,10 +2730,15 @@ static int draw_rom_actor_tiles(const CapActor *actor, const int slot)
     const int depth = 330 - actor->lane;
     int index;
     int rendered = 0;
-#ifdef AVSP_PLAYABLE_SLICE
+#if defined(AVSP_PLAYABLE_SLICE) || defined(AVSP_COMBAT_INTEGRATION_BENCH)
     unsigned long object_identity = 2166136261UL;
     unsigned long tile_identity = 2166136261UL;
+#endif
+#ifdef AVSP_PLAYABLE_SLICE
     avsp_diag_slice_enemy_object_count = rom_actor_entry_counts[slot];
+#elif defined(AVSP_COMBAT_INTEGRATION_BENCH)
+    avsp_diag_combat_enemy_render_object_count =
+        rom_actor_entry_counts[slot];
 #endif
 
     jo_sprite_set_palette_4bits(tile_palette.id, 0);
@@ -2629,6 +2758,13 @@ static int draw_rom_actor_tiles(const CapActor *actor, const int slot)
 #ifdef AVSP_PLAYABLE_SLICE
         object_identity = (object_identity ^ entry->x) * 16777619UL;
         object_identity = (object_identity ^ entry->y) * 16777619UL;
+        object_identity = (object_identity ^ entry->code) * 16777619UL;
+        object_identity = (object_identity ^ entry->attr) * 16777619UL;
+#elif defined(AVSP_COMBAT_INTEGRATION_BENCH)
+        object_identity = (object_identity ^
+                           (unsigned short)offset_x) * 16777619UL;
+        object_identity = (object_identity ^
+                           (unsigned short)offset_y) * 16777619UL;
         object_identity = (object_identity ^ entry->code) * 16777619UL;
         object_identity = (object_identity ^ entry->attr) * 16777619UL;
 #endif
@@ -2672,11 +2808,13 @@ static int draw_rom_actor_tiles(const CapActor *actor, const int slot)
 #ifdef AVSP_PLAYABLE_SLICE
             jo_x = playable_slice_frame.scene.enemy_screen_x +
                 fit_352(offset_x + tiles[tile].dx + 8);
-            tile_identity =
-                (tile_identity ^ tiles[tile].code) * 16777619UL;
 #else
             jo_x = fit_352(visual_origin_cps_x - 256 + offset_x +
                            tiles[tile].dx + 8);
+#endif
+#if defined(AVSP_PLAYABLE_SLICE) || defined(AVSP_COMBAT_INTEGRATION_BENCH)
+            tile_identity =
+                (tile_identity ^ tiles[tile].code) * 16777619UL;
 #endif
             jo_y = anchor_jo_y + offset_y + tiles[tile].dy + 8;
             if (tiles[tile].flip_x) jo_sprite_enable_horizontal_flip();
@@ -2690,6 +2828,9 @@ static int draw_rom_actor_tiles(const CapActor *actor, const int slot)
 #ifdef AVSP_PLAYABLE_SLICE
     avsp_diag_slice_enemy_object_identity = (int)object_identity;
     avsp_diag_slice_enemy_tile_identity = (int)tile_identity;
+#elif defined(AVSP_COMBAT_INTEGRATION_BENCH)
+    avsp_diag_combat_enemy_render_object_identity = object_identity;
+    avsp_diag_combat_enemy_render_tile_identity = tile_identity;
 #endif
     return rendered;
 }
@@ -4026,6 +4167,8 @@ static void enemy_bench_frame_callback(void)
         enemy->action = CAP_ACT_HIT;
     else if (avsp_diag_combat_enemy_visual_action == 2)
         enemy->action = CAP_ACT_KO;
+    else if (avsp_diag_combat_enemy_visual_action == 3)
+        enemy->action = CAP_ACT_HIT;
     else
         enemy->action = CAP_ACT_WALK;
     enemy->action_frame = avsp_diag_combat_enemy_action_frame;
@@ -4065,6 +4208,9 @@ static void enemy_bench_frame_callback(void)
     avsp_diag_enemy_disc_late_reads = avsp_disc_guard_state.late_read_attempts;
     avsp_diag_enemy_tile_bank_misses = tile_diag_no_bank;
     avsp_diag_enemy_tile_rank_misses = tile_diag_no_rank;
+#ifdef AVSP_COMBAT_INTEGRATION_BENCH
+    avsp_diag_combat_tile_sprite_misses = tile_diag_no_sprite;
+#endif
 #ifdef AVSP_ENEMY_PROMOTION_BENCH
     avsp_diag_enemy_approval_lock_ok = avsp_port_v2_enemy_validate_config(
         &avsp_port_v2_enemy_approved_config);
@@ -4200,7 +4346,11 @@ static void player_bench_step(const CapInput *input)
     actor->lane = avsp_diag_combat_player_lane;
     actor->height = avsp_diag_combat_player_height;
     actor->facing = avsp_diag_combat_player_facing;
+#ifdef AVSP_PLAYABLE_SLICE
     if (avsp_diag_combat_player_attack_active)
+#else
+    if (avsp_diag_combat_player_presentation_active)
+#endif
     {
         actor->action = CAP_ACT_ATTACK;
         actor->action_frame = avsp_diag_combat_player_action_frame;
@@ -4424,24 +4574,9 @@ static void player_bench_frame_callback(void)
             }
         }
 #ifdef AVSP_COMBAT_INTEGRATION_BENCH
-        jo_printf(0, 20, "ALIGN %d PX%d EX%d B%d T%d",
-                  avsp_diag_combat_alignment_ok,
-                  avsp_diag_combat_player_x,
-                  avsp_diag_combat_enemy_x,
-                  avsp_diag_combat_baseline_delta,
-                  avsp_diag_combat_attack_toward_target);
-        jo_printf(0, 21, "COMBAT E%d S%d HP%d",
-                  avsp_diag_combat_event_kind,
-                  avsp_diag_combat_attack_selector,
-                  avsp_diag_combat_enemy_health);
-        jo_printf(0, 22, "CONTACT %d DAMAGE %d HIT %d KO %d",
-                  avsp_diag_combat_contact_count,
-                  avsp_diag_combat_damage_count,
-                  avsp_diag_combat_hit_count,
-                  avsp_diag_combat_ko_count);
-        jo_printf(0, 23, "NEG %d FAIL %d PHYSICAL UNRUN",
-                  avsp_diag_combat_negative_rejections,
-                  avsp_diag_combat_failures);
+        /* MCP reads the diagnostic symbols directly.  Text rows 20-23 used
+         * to obscure the actor pixels and updated on a separate UI cadence,
+         * making a clean paired visual trace impossible. */
         avsp_diag_combat_presented_frame = avsp_diag_combat_frame;
 #endif
         /* Publish last so MCP observes one complete integration snapshot. */

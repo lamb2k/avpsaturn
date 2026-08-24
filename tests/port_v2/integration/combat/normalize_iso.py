@@ -26,11 +26,24 @@ def main():
     spec.loader.exec_module(module)
     image_path = ROOT / "game.iso"
     raw = image_path.read_bytes()
+    raw_identity = sha(raw)
     normalized = bytearray(raw)
     descriptors, records, generators, changed = module.normalize(normalized)
     if changed == 0:
-        raise ValueError("combat normalization found no container metadata")
-    image_path.write_bytes(normalized)
+        prior_path = (ROOT / inventory["build_root"] /
+                      f"run-{args.run}/iso-normalization.json")
+        if not prior_path.is_file():
+            raise ValueError("combat normalization found no container metadata")
+        prior = json.loads(prior_path.read_text())
+        if prior["normalized_iso_sha256"] != sha(raw):
+            raise ValueError("combat ISO is neither raw nor the recorded normalization")
+        descriptors = prior["volume_descriptor_count"]
+        records = prior["directory_record_count"]
+        generators = prior["generator_metadata_sector_count"]
+        changed = prior["changed_byte_count"]
+        raw_identity = prior["raw_iso_sha256"]
+    else:
+        image_path.write_bytes(normalized)
     normalized_hash = sha(normalized)
     manifest = ROOT / "build/hardware_release_manifest.txt"
     lines = manifest.read_text(encoding="ascii").splitlines()
@@ -46,7 +59,7 @@ def main():
     output.write_text(json.dumps({
         "schema": 1,
         "classification": "diagnostic-container-metadata-adapter",
-        "raw_iso_sha256": sha(raw),
+        "raw_iso_sha256": raw_identity,
         "normalized_iso_sha256": normalized_hash,
         "changed_byte_count": changed,
         "volume_descriptor_count": descriptors,

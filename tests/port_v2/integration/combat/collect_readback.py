@@ -58,10 +58,25 @@ def scalar_state(mcp, syms):
         "combat_transition_sub_state", "combat_transition_action",
         "combat_transition_anim_record", "combat_transition_timer",
         "combat_transition_hit_value", "combat_player_attack_active",
+        "combat_player_presentation_active", "combat_player_source_pose",
+        "combat_player_source_anim_record", "combat_player_source_action",
+        "combat_player_source_substate",
+        "combat_player_source_object_identity",
+        "combat_player_source_tile_identity",
+        "combat_player_source_pivot_x", "combat_player_source_pivot_y",
         "combat_player_action_frame", "combat_enemy_visual_action",
         "combat_enemy_action_frame", "combat_negative_rejections",
+        "combat_enemy_render_anim_record", "combat_enemy_render_palette",
+        "combat_enemy_source_object_identity",
+        "combat_enemy_source_tile_identity",
+        "combat_enemy_render_object_identity",
+        "combat_enemy_render_tile_identity",
+        "combat_enemy_render_object_count",
+        "combat_enemy_source_event_index", "combat_enemy_source_world_x",
+        "combat_enemy_source_world_y", "combat_enemy_source_world_z",
         "combat_failures", "combat_complete", "combat_canary_ok"
-        , "combat_missing_code_count", "combat_presented_frame",
+        , "combat_missing_code_count", "combat_tile_sprite_misses",
+        "combat_presented_frame",
         "combat_player_x", "combat_player_lane", "combat_player_height",
         "combat_player_facing", "combat_enemy_x", "combat_enemy_lane",
         "combat_enemy_height", "combat_enemy_facing",
@@ -71,7 +86,8 @@ def scalar_state(mcp, syms):
     result = {}
     for name in names:
         symbol = "avsp_diag_" + name
-        result[name] = signed(mcp, syms[symbol])
+        result[name] = (mcp.u32(syms[symbol]) if name.endswith("identity")
+                        else signed(mcp, syms[symbol]))
     return result
 
 
@@ -116,77 +132,110 @@ def wait_frame(mcp, syms, target, timeout):
                  address=address)
 
 
-def validate_hit(state):
+def validate_common(state, frame):
     expected = {
         "runtime_ready": 1, "integration_approval_locks_ok": 1,
         "integration_actor_count": 2, "integration_render_order_ok": 1,
         "integration_canaries_ok": 1, "integration_asset_failures": 0,
-        "integration_disc_late_reads": 0, "combat_interface_version": 1,
-        "combat_source_sample": 5190, "combat_event_kind": 3,
-        "combat_attack_selector": 1, "combat_contact_count": 1,
-        "combat_damage_count": 1, "combat_enemy_health": 63,
-        "combat_hit_count": 1, "combat_ko_count": 0,
-        "combat_event_count": 1, "combat_transition_state": 1,
-        "combat_frame": 185, "combat_presented_frame": 185,
-        "combat_enemy_action_frame": 5,
-        "combat_player_action_frame": 9,
-        "combat_transition_hit_value": 4,
+        "integration_disc_late_reads": 0, "combat_interface_version": 2,
+        "combat_frame": frame, "combat_presented_frame": frame,
         "combat_negative_rejections": 2, "combat_failures": 0,
-        "combat_canary_ok": 1, "combat_enemy_visual_action": 1,
-        "player_canary_ok": 1, "player_asset_failures": 0,
-        "player_disc_late_reads": 0, "enemy_canary_ok": 1,
-        "enemy_asset_failures": 0, "enemy_disc_late_reads": 0,
-        "enemy_tile_bank_misses": 0, "enemy_tile_rank_misses": 0
-        , "combat_player_x": 211, "combat_player_lane": 208,
-        "combat_player_height": 0, "combat_player_facing": 1,
-        "combat_enemy_x": 160, "combat_enemy_lane": 200,
-        "combat_enemy_height": 0, "combat_enemy_facing": -1,
-        "combat_baseline_delta": 8, "combat_attack_toward_target": 1,
-        "combat_alignment_ok": 1
-    }
-    for name, value in expected.items():
-        if state[name] != value:
-            raise RuntimeError(f"combat HIT readback drifted: {name}={state[name]} expected {value}")
-    if state["player_render_count"] <= 0 or state["enemy_render_count"] <= 0:
-        raise RuntimeError("combat HIT frame did not render both approved actors")
-
-
-def validate_final(state):
-    expected = {
-        "runtime_ready": 1, "integration_approval_locks_ok": 1,
-        "integration_actor_count": 2, "integration_render_order_ok": 1,
-        "integration_canaries_ok": 1, "integration_asset_failures": 0,
-        "integration_disc_late_reads": 0, "combat_interface_version": 1,
-        "combat_source_sample": 5329, "combat_event_kind": 4,
-        "combat_attack_selector": 4, "combat_contact_count": 4,
-        "combat_damage_count": 4, "combat_enemy_health": -1,
-        "combat_hit_count": 1, "combat_ko_count": 1,
-        "combat_event_count": 4, "combat_transition_state": 2,
-        "combat_transition_sub_state": 0x0600,
-        "combat_transition_action": 0,
-        "combat_transition_anim_record": 0x0012E268,
-        "combat_transition_timer": 6, "combat_transition_hit_value": 0,
-        "combat_enemy_visual_action": 2, "combat_negative_rejections": 2,
-        "combat_failures": 0, "combat_complete": 1,
-        "combat_frame": 860, "combat_presented_frame": 860,
-        "combat_enemy_action_frame": 140,
         "combat_canary_ok": 1, "player_canary_ok": 1,
         "player_asset_failures": 0, "player_disc_late_reads": 0,
         "enemy_canary_ok": 1, "enemy_asset_failures": 0,
         "enemy_disc_late_reads": 0, "enemy_tile_bank_misses": 0,
-        "enemy_tile_rank_misses": 0,
-        "combat_player_x": 278, "combat_player_lane": 208,
-        "combat_player_height": 13, "combat_player_facing": 1,
-        "combat_enemy_x": 160, "combat_enemy_lane": 200,
-        "combat_enemy_height": 0, "combat_enemy_facing": -1,
-        "combat_baseline_delta": -5, "combat_attack_toward_target": 1,
-        "combat_alignment_ok": 1
+        "enemy_tile_rank_misses": 0, "combat_attack_toward_target": 1,
+        "combat_alignment_ok": 1, "combat_tile_sprite_misses": 0,
     }
     for name, value in expected.items():
         if state[name] != value:
-            raise RuntimeError(f"combat final readback drifted: {name}={state[name]} expected {value}")
+            raise RuntimeError(
+                f"combat frame {frame} drifted: {name}={state[name]} expected {value}")
     if state["player_render_count"] <= 0 or state["enemy_render_count"] <= 0:
-        raise RuntimeError("combat KO frame did not render both approved actors")
+        raise RuntimeError(
+            f"combat frame {frame} did not render both actors: "
+            f"player={state['player_render_count']} "
+            f"enemy={state['enemy_render_count']} "
+            f"objects={state['combat_enemy_render_object_count']} "
+            f"sprite_misses={state['combat_tile_sprite_misses']}")
+
+
+def validate_event(state, event, event_index, frame, reaction=False):
+    validate_common(state, frame)
+    expected_kind = (3, 2, 2, 4)[event_index]
+    expected = {
+        "combat_source_sample": event["contact_frame"],
+        "combat_event_kind": expected_kind,
+        "combat_attack_selector": event["attack_selector"],
+        "combat_contact_count": event_index + 1,
+        "combat_damage_count": event_index + 1,
+        "combat_enemy_health": event["health_after"],
+        "combat_hit_count": 1,
+        "combat_ko_count": 1 if event_index == 3 else 0,
+        "combat_event_count": event_index + 1,
+        "combat_player_presentation_active": 1,
+        "combat_player_attack_active": 1,
+        "combat_player_source_anim_record": int(
+            event["player"]["animation_record"], 16),
+        "combat_player_source_object_identity":
+            event["player"]["runtime_object_identity_fnv32"],
+        "combat_player_source_tile_identity":
+            event["player"]["runtime_tile_identity_fnv32"],
+        "combat_player_source_pivot_x": event["player"]["pivot"][0],
+        "combat_player_x": 264, "combat_player_lane": 208,
+        "combat_player_height": event["player"]["height"],
+        "combat_player_facing": 1,
+        "combat_enemy_render_palette": event["enemy_reaction" if reaction
+                                               else "enemy_contact"]["palette"],
+        "combat_enemy_render_anim_record": int(
+            event["enemy_reaction" if reaction else "enemy_contact"]
+            ["animation_record"], 16),
+        "combat_enemy_source_object_identity":
+            event["enemy_reaction" if reaction else "enemy_contact"]
+            ["runtime_object_identity_fnv32"],
+        "combat_enemy_source_tile_identity":
+            event["enemy_reaction" if reaction else "enemy_contact"]
+            ["runtime_tile_identity_fnv32"],
+    }
+    if reaction:
+        expected["combat_enemy_visual_action"] = 2 if event_index == 3 else 1
+    else:
+        expected["combat_enemy_visual_action"] = 3
+    for name, value in expected.items():
+        if state[name] != value:
+            raise RuntimeError(
+                f"event {event_index + 1} frame {frame} drifted: "
+                f"{name}={state[name]} expected {value}")
+    if (state["combat_enemy_render_object_identity"] !=
+            state["combat_enemy_source_object_identity"] or
+            state["combat_enemy_render_tile_identity"] !=
+            state["combat_enemy_source_tile_identity"] or
+            state["combat_enemy_render_object_count"] <= 0):
+        raise RuntimeError(
+            f"event {event_index + 1} rendered alien identity detached from source: "
+            f"object={state['combat_enemy_render_object_identity']}/"
+            f"{state['combat_enemy_source_object_identity']} "
+            f"tile={state['combat_enemy_render_tile_identity']}/"
+            f"{state['combat_enemy_source_tile_identity']} "
+            f"count={state['combat_enemy_render_object_count']}")
+
+
+def validate_final(state, frame):
+    validate_common(state, frame)
+    expected = {
+        "combat_source_sample": 5329, "combat_event_kind": 4,
+        "combat_attack_selector": 4, "combat_contact_count": 4,
+        "combat_damage_count": 4, "combat_enemy_health": -1,
+        "combat_hit_count": 1, "combat_ko_count": 1,
+        "combat_event_count": 4, "combat_complete": 1,
+        "combat_player_presentation_active": 0,
+        "combat_player_attack_active": 0, "combat_player_height": 0,
+    }
+    for name, value in expected.items():
+        if state[name] != value:
+            raise RuntimeError(
+                f"combat final frame {frame} drifted: "
+                f"{name}={state[name]} expected {value}")
 
 
 def main():
@@ -212,25 +261,46 @@ def main():
     mcp.call("set_debug_option", cpu_core="interpreter")
     mcp.call("pause")
     bounds = tools.window_bounds(args.emulator_pid, args.timeout)
-    hit_state = wait_frame(mcp, syms, 185, args.timeout)
-    if hit_state["enemy_tile_rank_misses"]:
-        count = min(hit_state["combat_missing_code_count"], 16)
-        codes = array(mcp, syms["avsp_diag_combat_missing_codes"], count)
-        raise RuntimeError(
-            f"combat HIT missing tile codes: count={hit_state['combat_missing_code_count']} "
-            f"codes={[hex(value) for value in codes]}")
-    validate_hit(hit_state)
     run_root = ROOT / inventory["build_root"] / f"run-{args.run}"
-    hit_shot = run_root / "hit.png"
-    ImageGrab.grab(bbox=bounds, all_screens=True).save(hit_shot)
-    final_state = wait_frame(mcp, syms, 860, args.timeout)
+    source_contract = json.loads((
+        ROOT / "data/avsp_source_combat_presentation_contract.json").read_text())
+    event_frames = (186, 232, 279, 325)
+    states = []
+    screenshots = {}
+    for event_index, (event, event_frame) in enumerate(
+            zip(source_contract["events"], event_frames)):
+        attack_frame = event_frame - 1
+        attack_state = wait_frame(mcp, syms, attack_frame, args.timeout)
+        validate_common(attack_state, attack_frame)
+        attack_path = run_root / f"event-{event_index + 1}-attack.png"
+        ImageGrab.grab(bbox=bounds, all_screens=True).save(attack_path)
+        contact_state = wait_frame(mcp, syms, event_frame, args.timeout)
+        validate_event(contact_state, event, event_index, event_frame)
+        contact_path = run_root / f"event-{event_index + 1}-contact.png"
+        ImageGrab.grab(bbox=bounds, all_screens=True).save(contact_path)
+        reaction_frame = event_frame + 1
+        reaction_state = wait_frame(mcp, syms, reaction_frame, args.timeout)
+        validate_event(reaction_state, event, event_index, reaction_frame,
+                       reaction=True)
+        reaction_path = run_root / f"event-{event_index + 1}-reaction.png"
+        ImageGrab.grab(bbox=bounds, all_screens=True).save(reaction_path)
+        states.append({"attack": attack_state, "contact": contact_state,
+                       "reaction": reaction_state})
+        for label, path in (("attack", attack_path),
+                            ("contact", contact_path),
+                            ("reaction", reaction_path)):
+            screenshots[f"event_{event_index + 1}_{label}"] = {
+                "path": path.relative_to(ROOT).as_posix(),
+                "sha256": sha(path), "bytes": path.stat().st_size}
+    final_frame = 465
+    final_state = wait_frame(mcp, syms, final_frame, args.timeout)
     if final_state["enemy_tile_rank_misses"]:
         count = min(final_state["combat_missing_code_count"], 16)
         codes = array(mcp, syms["avsp_diag_combat_missing_codes"], count)
         raise RuntimeError(
             f"combat KO missing tile codes: count={final_state['combat_missing_code_count']} "
             f"codes={[hex(value) for value in codes]}")
-    validate_final(final_state)
+    validate_final(final_state, final_frame)
     events = {
         "samples": array(mcp, syms["avsp_diag_combat_event_samples"], 4),
         "kinds": array(mcp, syms["avsp_diag_combat_event_kinds"], 4),
@@ -248,8 +318,11 @@ def main():
     }
     if events != expected_events:
         raise RuntimeError(f"combat event ledger drifted: {events}")
-    ko_shot = run_root / "ko.png"
+    ko_shot = run_root / "final-ko.png"
     ImageGrab.grab(bbox=bounds, all_screens=True).save(ko_shot)
+    screenshots["final_ko"] = {
+        "path": ko_shot.relative_to(ROOT).as_posix(),
+        "sha256": sha(ko_shot), "bytes": ko_shot.stat().st_size}
     process = tools.process_record(args.emulator_pid)
     executable = Path(str(process["executable"]))
     settings = Path(os.environ["APPDATA"]) / "YabaSanshiro/yabause.ini"
@@ -258,14 +331,9 @@ def main():
         "card_profile": inventory["card_profile"],
         "source_commit": build["source_commit"],
         "iso_sha256": build["artifacts"]["game_iso"]["sha256"],
-        "hit_state": hit_state, "final_state": final_state,
+        "event_states": states, "final_state": final_state,
         "events": events,
-        "screenshots": {
-            "hit": {"path": hit_shot.relative_to(ROOT).as_posix(),
-                    "sha256": sha(hit_shot), "bytes": hit_shot.stat().st_size},
-            "ko": {"path": ko_shot.relative_to(ROOT).as_posix(),
-                   "sha256": sha(ko_shot), "bytes": ko_shot.stat().st_size}
-        },
+        "screenshots": screenshots,
         "emulator": {"identity": "Yaba Sanshiro 1.20.37-2986eb",
                      "evidence_tier": "ONE_EMULATOR", "process_id": process["pid"],
                      "executable_sha256": sha(executable),

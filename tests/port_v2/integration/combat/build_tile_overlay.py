@@ -23,7 +23,10 @@ import extract_avspu_stage1 as avsp  # noqa: E402
 from gen_avsp_gfx_tiles import entry_tile_codes, tile_texture  # noqa: E402
 
 
-SOURCE_WINDOWS = ((5191, 5227), (5330, 5469))
+# Complete cadence-1 source exchange.  The old integration overlay skipped
+# 5228-5329, which excluded the exact second/third reaction tile families that
+# REPAIR-09 now binds to their collision events.
+SOURCE_WINDOWS = ((5191, 5469),)
 SOURCE_BANK = 0x13
 MAGIC = 0x4156544C
 OUT = ROOT / "build/avsp_cd/SPR4/COMBAT.BIN"
@@ -103,7 +106,7 @@ def build() -> dict:
     OUT.write_bytes(blob)
     return {
         "schema": 1,
-        "task_id": "INTEGRATE-02-COMBAT",
+        "task_id": "REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION",
         "classification": "source-measured combat-profile tile overlay",
         "source_windows": [list(window) for window in SOURCE_WINDOWS],
         "source_palette_bank": SOURCE_BANK,

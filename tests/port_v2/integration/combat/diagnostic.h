@@ -3,7 +3,7 @@
 
 #include "../../../../src/port_v2/integration/combat/combat.h"
 
-#define AVSP_COMBAT_DIAGNOSTIC_INTERFACE_VERSION 1
+#define AVSP_COMBAT_DIAGNOSTIC_INTERFACE_VERSION 2
 
 extern volatile int avsp_diag_combat_interface_version;
 extern volatile int avsp_diag_combat_frame;
@@ -29,9 +29,29 @@ extern volatile unsigned long avsp_diag_combat_transition_anim_record;
 extern volatile int avsp_diag_combat_transition_timer;
 extern volatile int avsp_diag_combat_transition_hit_value;
 extern volatile int avsp_diag_combat_player_attack_active;
+extern volatile int avsp_diag_combat_player_presentation_active;
+extern volatile int avsp_diag_combat_player_source_pose;
+extern volatile unsigned long avsp_diag_combat_player_source_anim_record;
+extern volatile int avsp_diag_combat_player_source_action;
+extern volatile int avsp_diag_combat_player_source_substate;
+extern volatile unsigned long avsp_diag_combat_player_source_object_identity;
+extern volatile unsigned long avsp_diag_combat_player_source_tile_identity;
+extern volatile int avsp_diag_combat_player_source_pivot_x;
+extern volatile int avsp_diag_combat_player_source_pivot_y;
 extern volatile int avsp_diag_combat_player_action_frame;
 extern volatile int avsp_diag_combat_enemy_visual_action;
 extern volatile int avsp_diag_combat_enemy_action_frame;
+extern volatile unsigned long avsp_diag_combat_enemy_render_anim_record;
+extern volatile int avsp_diag_combat_enemy_render_palette;
+extern volatile unsigned long avsp_diag_combat_enemy_source_object_identity;
+extern volatile unsigned long avsp_diag_combat_enemy_source_tile_identity;
+extern volatile unsigned long avsp_diag_combat_enemy_render_object_identity;
+extern volatile unsigned long avsp_diag_combat_enemy_render_tile_identity;
+extern volatile int avsp_diag_combat_enemy_render_object_count;
+extern volatile int avsp_diag_combat_enemy_source_event_index;
+extern volatile int avsp_diag_combat_enemy_source_world_x;
+extern volatile int avsp_diag_combat_enemy_source_world_y;
+extern volatile int avsp_diag_combat_enemy_source_world_z;
 extern volatile int avsp_diag_combat_negative_rejections;
 extern volatile int avsp_diag_combat_failures;
 extern volatile int avsp_diag_combat_complete;

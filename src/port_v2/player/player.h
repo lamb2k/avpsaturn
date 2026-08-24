@@ -1,7 +1,7 @@
 #ifndef AVSP_PORT_V2_PLAYER_H
 #define AVSP_PORT_V2_PLAYER_H
 
-#define AVSP_PORT_V2_PLAYER_INTERFACE_VERSION 1
+#define AVSP_PORT_V2_PLAYER_INTERFACE_VERSION 2
 
 #define AVSP_PORT_V2_PLAYER_INPUT_LEFT 1
 #define AVSP_PORT_V2_PLAYER_INPUT_RIGHT 2
@@ -10,6 +10,7 @@
 
 #define AVSP_PORT_V2_PLAYER_ACTION_IDLE 0
 #define AVSP_PORT_V2_PLAYER_ACTION_WALK 1
+#define AVSP_PORT_V2_PLAYER_ACTION_SOURCE_ATTACK 2
 
 typedef struct
 {
@@ -57,6 +58,26 @@ typedef struct
     int render_layers;
 } AvspPortV2PlayerView;
 
+/* Bounded source-combat presentation carried by the player port.  This is not
+ * a general attack state machine: one source event owns selector, action,
+ * record, pose, active window, and height together. */
+typedef struct
+{
+    unsigned short sequence_step;
+    unsigned short attack_selector;
+    unsigned short source_action;
+    unsigned short source_substate;
+    unsigned long source_animation_record;
+    unsigned long source_object_identity;
+    unsigned long source_tile_identity;
+    unsigned short pose_index;
+    unsigned short action_frame;
+    short pivot_x;
+    short pivot_y;
+    short height;
+    unsigned short attack_active;
+} AvspPortV2PlayerCombatPresentation;
+
 typedef int (*AvspPortV2PlayerLoadStep)(void);
 
 typedef struct
@@ -78,5 +99,7 @@ void avsp_port_v2_player_step(AvspPortV2PlayerRuntime *runtime,
 void avsp_port_v2_player_view(const AvspPortV2PlayerRuntime *runtime,
                               AvspPortV2PlayerView *view);
 int avsp_port_v2_player_bounds_valid(int left, int top, int right, int bottom);
+int avsp_port_v2_player_combat_presentation_valid(
+    const AvspPortV2PlayerCombatPresentation *presentation);
 
 #endif

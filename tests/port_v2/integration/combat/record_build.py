@@ -31,6 +31,8 @@ def main():
     player = json.loads((ROOT / "tests/port_v2/player/approved_contract.json").read_text())
     enemy = json.loads((ROOT / "tests/port_v2/enemy/approved_contract.json").read_text())
     overlay = json.loads((HERE / "tile_overlay_contract.json").read_text())
+    source_combat = json.loads((
+        ROOT / "data/avsp_source_combat_presentation_contract.json").read_text())
     profile = (ROOT / "build/last_compile_profile.txt").read_text().strip()
     manifest = dict(line.split("=", 1) for line in
                     (ROOT / "build/hardware_release_manifest.txt").read_text(
@@ -48,6 +50,8 @@ def main():
     expected = dict(player["asset_sha256"])
     expected["/SPR4/TILES.BIN"] = enemy["tile_archive_sha256"]
     expected["/SPR4/COMBAT.BIN"] = overlay["archive_sha256"]
+    expected["/SPR4/PCMBT.RLE"] = source_combat[
+        "source_player_archive"]["sha256"]
     if {name: value["sha256"] for name, value in members.items()} != expected:
         raise ValueError("combat image changed an approved component asset")
     artifacts = {}
