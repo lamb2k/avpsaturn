@@ -4,7 +4,7 @@
   "interface_version": 1,
   "source_manifest": "data/avsp_hit_ko_writer_set.json",
   "source_manifest_schema": 4,
-  "source_manifest_sha256": "a13cffd40c6e44a1368b5edfa917af08c95644580d5384aaeddc0f9ef5e65aed",
+  "source_manifest_sha256": "fce4e7b91ce6c16a0ffdb83c5620709f058c0c02473ce95f28bec1c2f5eb61cc",
   "target": {"set": "avspu", "revision": "USA 940520", "type": 12, "class": 31},
   "hit": {"before_sample": 5190, "first_sample": 5191, "last_sample": 5227, "writer_instance": 972, "anim_record": 1236304},
   "ko": {"before_sample": 5329, "first_sample": 5330, "last_sample": 5469, "writer_instance": 1067, "anim_record": 1237524},

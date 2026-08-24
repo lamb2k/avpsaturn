@@ -527,7 +527,7 @@
       ],
       "exact_next_experiment": "Execute V2-B1 on the production continuity line, bind the accepted exact class 0x1F HIT/KO state transition behind src/port_v2/combat/hit_ko, and reject a substituted authored transition through the host differential.",
       "evidence": {
-        "manifest_sha256": "a13cffd40c6e44a1368b5edfa917af08c95644580d5384aaeddc0f9ef5e65aed",
+        "manifest_sha256": "fce4e7b91ce6c16a0ffdb83c5620709f058c0c02473ce95f28bec1c2f5eb61cc",
         "manifest_bytes": 1564141,
         "decoded_writer_instances": 1159,
         "transition_write_count": 1104,
@@ -574,7 +574,7 @@
       ],
       "exact_next_experiment": "Execute INTEGRATE-02-COMBAT one bounded behavior at a time through the accepted player, enemy, collision, and HIT/KO interfaces, preserve every approved presentation lock, and then stop at USER-03 for exact feedback.",
       "evidence": {
-        "source_manifest_sha256": "a13cffd40c6e44a1368b5edfa917af08c95644580d5384aaeddc0f9ef5e65aed",
+        "source_manifest_sha256": "fce4e7b91ce6c16a0ffdb83c5620709f058c0c02473ce95f28bec1c2f5eb61cc",
         "interface_version": 1,
         "hit_source_samples": "5191-5227",
         "ko_source_samples": "5330-5469",
@@ -1156,12 +1156,15 @@
       "proposed_isolated_bench": "SALVAGE-10 consumes real input and measures one bounded Predator Warrior movement/attack/HIT/KO/return-to-control subset.",
       "technical_status": "UNRUN",
       "fidelity_status": "UNKNOWN",
+      "source_research_status": "MEASURED",
+      "source_research_evidence": "data/oracle04_predator_warrior_control_actions.json",
+      "source_research_scope": "bounded first-live-encounter movement, facing, four attack selectors, timing, boxes, and enemy HIT/KO only; complete move set, interruption/cancellation, and player-side RNG remain UNKNOWN",
       "user_status": "NOT_REVIEWED",
       "salvage_decision": "UNTESTED",
       "production_interface": null,
       "promoted_commit": null,
-      "blockers": ["Unblock: accept ORACLE-04 through ORACLE-06 and physically accept INTEGRATE-03 before SALVAGE-10 implementation."],
-      "exact_next_experiment": "Run ORACLE-04 serially as read-only source research without changing the active HW-01 card or production runtime.",
+      "blockers": ["Unblock: accept ORACLE-05 and ORACLE-06; HW-01 remains a parallel physical prerequisite and does not block the declared software sequence."],
+      "exact_next_experiment": "Run ORACLE-05 serially while preserving the accepted ORACLE-04 source subset, active HW-01 state, and production runtime.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {

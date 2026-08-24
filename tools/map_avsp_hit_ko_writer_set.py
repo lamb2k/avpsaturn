@@ -46,9 +46,9 @@ FIELD_LAYOUT = {
 EXPECTED_COUNTS = {"state": 7, "sub_state": 16, "action": 57, "anim_record": 274, "anim_timer": 704, "health": 4, "hit_value": 42}
 EXPECTED = {
     "contract": "74016fb2e73c2ae00144fa062662b37e0f575a3ee3ff3b7a420b1ed0f55a4638",
-    "oracle": "106fffb92cc5a14acf5fdae7eb14d33b7d9206b9f9ecffcbac67a6fc326696d2",
+    "oracle": "24b6eae1247e59169fa4afde65cbb40be6b72b7ed57c7acfef505b7fc24dcfe6",
     "ledger": "f6e813169a05388ce265d6406382efaa1801fe8c838beb0fdab03bda7725d1a1",
-    "boundary": "95e002b7f6d48e8aafbe5e201a370b6dc7c3c5559e7d2253901d0473c0c7b0f4",
+    "boundary": "aaca7d358ddde28496b69668a5a170b28015e56e08613fe2fc6b2640918f45dc",
     "trace": "9bbbc28715668348aeb4d206b7381073123c5b22ec9e2f2557bda1622e142f5f",
     "opcodes": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
     "program": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9",

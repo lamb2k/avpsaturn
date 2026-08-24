@@ -291,8 +291,20 @@ def main() -> None:
                     for field in unknown_action_fields),
                 f"{row['character_id']} contains fabricated action facts")
     predator = actions["characters"][0]
-    require(predator["first_live_encounter_subset"]["status"] == "UNRUN",
-            "Predator Warrior live subset was marked measured before ORACLE-04")
+    live_subset = predator["first_live_encounter_subset"]
+    require(live_subset["status"] == "MEASURED",
+            "Predator Warrior bounded live subset lost ORACLE-04 measurement")
+    require(live_subset["classification"] == "MEASURED_MAME_SOURCE_SUBSET" and
+            live_subset["evidence"] ==
+            "data/oracle04_predator_warrior_control_actions.json",
+            "Predator Warrior live subset lost its bounded evidence binding")
+    require(set(live_subset["unknown_scope"]) == {
+                "complete_move_set", "interruption_and_cancellation",
+                "player_side_rng_consumption"},
+            "Predator Warrior live subset overstated unresolved source facts")
+    require(live_subset["saturn_emulator"] == "UNRUN" and
+            live_subset["physical_saturn"] == "UNRUN",
+            "source-only Predator Warrior evidence overstated Saturn proof")
     require(predator["first_live_encounter_subset"]["evidence_gate"] ==
             "ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS",
             "Predator Warrior live subset lost its source gate")

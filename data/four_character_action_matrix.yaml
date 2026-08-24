@@ -43,7 +43,9 @@
       "display_name": "Predator Warrior",
       "select_identity": "MEASURED",
       "first_live_encounter_subset": {
-        "status": "UNRUN",
+        "status": "MEASURED",
+        "classification": "MEASURED_MAME_SOURCE_SUBSET",
+        "evidence": "data/oracle04_predator_warrior_control_actions.json",
         "planned_scope": [
           "horizontal_movement",
           "lane_movement",
@@ -52,7 +54,23 @@
           "startup_active_recovery",
           "health_hit_ko_return_to_control"
         ],
-        "evidence_gate": "ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS"
+        "measured_scope": [
+          "horizontal_movement",
+          "lane_movement",
+          "facing",
+          "four_attack_selectors",
+          "startup_active_contact_and_return_timing",
+          "attack_and_enemy_hurt_boxes",
+          "enemy_health_hit_and_ko_sequence"
+        ],
+        "unknown_scope": [
+          "complete_move_set",
+          "interruption_and_cancellation",
+          "player_side_rng_consumption"
+        ],
+        "evidence_gate": "ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS",
+        "saturn_emulator": "UNRUN",
+        "physical_saturn": "UNRUN"
       },
       "idle": "UNKNOWN",
       "movement": "UNKNOWN",
@@ -131,5 +149,5 @@
       "physical_saturn": "UNRUN"
     }
   ],
-  "next_experiment": "ORACLE-04 must first measure only Predator Warrior's bounded live-encounter subset; ORACLE-02 later binds the complete four-character action/resource matrix before roster expansion."
+  "next_experiment": "ORACLE-04 measured only Predator Warrior's bounded first-live-encounter subset; ORACLE-02 later binds the complete four-character action/resource matrix before roster expansion."
 }

@@ -6,7 +6,7 @@
   "source_files": {
     "collision": {"path": "data/avsp_collision.json", "normalized_sha256": "e1e41ea1f1a3666342e8b17e7c42f54e24437af181ccea141d6400019547cc5a"},
     "damage": {"path": "data/enemy_action_capture.json", "normalized_sha256": "489681f31009e0d1e6ae714cd7d92eeed695427a077675edbc2004f9def360ee"},
-    "hit_ko": {"path": "data/avsp_hit_ko_writer_set.json", "normalized_sha256": "a13cffd40c6e44a1368b5edfa917af08c95644580d5384aaeddc0f9ef5e65aed"},
+    "hit_ko": {"path": "data/avsp_hit_ko_writer_set.json", "normalized_sha256": "fce4e7b91ce6c16a0ffdb83c5620709f058c0c02473ce95f28bec1c2f5eb61cc"},
     "presentation": {"path": "tests/port_v2/integration/player_enemy/approved_contract.json", "normalized_sha256": "cc1a3a3d02b15291815a0f0a9e4e9e06665ba14b0b298148814e1c2565c8a92c"}
   },
   "player_table_set": "0x11ae02",

@@ -225,6 +225,19 @@ first_live_gameplay_encounter:
   interactive_human_review: UNRUN
   scripted_capability_slice_sufficient: false
   physical_proof_source: INTEGRATE-03-PLAYABLE-SLICE only
+oracle04_source_research:
+  task: ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS
+  status: VALIDATED
+  classification: MEASURED_MAME_SOURCE_SUBSET
+  evidence: data/oracle04_predator_warrior_control_actions.json
+  evidence_sha256: abee00783583ea121958cd030a4a12dbbdbc7c7ac3466cb1cf6a5fdea58d95e4
+  control_capture_sha256: 498592af6d91405d9458104b2530fd59bb0c3f4c9ee8e220ac2b83fb71f266cb
+  perturbation_capture_sha256: 2c8ddf142c2dc176a9ca2261b30f237c69aae432238b0ef835d1143ee0edf4ad
+  measured: horizontal-and-lane movement / facing / four attack selectors / timing / attack and hurt boxes / enemy HIT and KO
+  unknown: complete move set / interruption and cancellation / player-side RNG consumption
+  lanes: Fast PASS / Oracle PASS
+  saturn_emulator: UNRUN
+  physical_saturn: UNRUN
 current_checkpoint: hw-01-probe-3-vdp1-budget-pretest
 active_task_card: docs/task_cards/HW-01-PROBE-3-VDP1-BUDGET-PRETEST.md
 active_task_id: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
@@ -607,7 +620,7 @@ completed_dispositions:
       - The closure contains 2,102 accepted-boundary PCs, 2,240 internal edges, 48 routines, 125 computed targets, 119 external callees, 196 outgoing control edges, and zero unresolved or unattributed dependencies.
       - HIT and KO animation repoints bind exact instruction 0x016526, successor 0x01652a, two bus events, A6=0xffa000, and program-image records 0x12dd50 and 0x12e214.
       - The mapper self-test, focused committed-artifact controls, two genuine private-input scratch mutations, Oracle lane, MAME avspu verification, and isolated Full regression PASS.
-      - Two generations are byte-identical at 1,564,141 bytes and SHA-256 a13cffd40c6e44a1368b5edfa917af08c95644580d5384aaeddc0f9ef5e65aed.
+      - Two generations are byte-identical at 1,564,141 bytes and SHA-256 fce4e7b91ce6c16a0ffdb83c5620709f058c0c02473ce95f28bec1c2f5eb61cc after advancing the refreshed oracle and boundary provenance identities.
       - Consolidated Tier 2 review ACCEPTED after tightening writer exits to return or typed context switch and adding successor-PC, bus-event, register-binding, and ROM-purpose controls.
       - The evidence branch was pushed to private-origin and remote SHA 597f4ed517d4e715d814ff841bd00d3977803f85 was verified.
       - No production runtime, Saturn build, emulator, release, audio, or physical evidence was produced; Capability Gate remains 0/12.
@@ -948,7 +961,7 @@ task_queue:
 contract_sha256: 74016fb2e73c2ae00144fa062662b37e0f575a3ee3ff3b7a420b1ed0f55a4638
 oracle_manifest_sha256: 24b6eae1247e59169fa4afde65cbb40be6b72b7ed57c7acfef505b7fc24dcfe6
 translation_boundary_sha256: aaca7d358ddde28496b69668a5a170b28015e56e08613fe2fc6b2640918f45dc
-writer_set_manifest_sha256: a13cffd40c6e44a1368b5edfa917af08c95644580d5384aaeddc0f9ef5e65aed
+writer_set_manifest_sha256: fce4e7b91ce6c16a0ffdb83c5620709f058c0c02473ce95f28bec1c2f5eb61cc
 capability_gate: 0/12
 capability_conditions:
   - id: source_identity
