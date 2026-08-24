@@ -818,15 +818,16 @@
       "evaluated_commit": "509cb20d9c8867e869ca3ade90c62ede57540571",
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "CHANGES_REQUESTED",
       "salvage_decision": "REPAIR",
       "production_interface": null,
       "diagnostic_interface": "tests/port_v2/integration/slice/run_pinned_emulator.ps1",
       "blockers": [
-        "Unblock: obtain renewed explicit user review of the hardened shared-camera, exact rendered street-alien identity, causal-combat, and post-KO framing scene; do not infer approval from automated evidence.",
-        "Unblock: execute the declared physical Saturn capability procedure only after Full is clean and the subjective checkpoint is accepted; physical Saturn remains UNRUN."
+        "Unblock: REPAIR-09 must extend only the promoted player/combat presentation boundary because the current player interface cannot carry source selector, action/substate, animation record, pose, pivot, grounding, or selector-owned active-window state.",
+        "Unblock: build the expected visual and semantic contract from independent cadence-1 MAME evidence around source samples 5190, 5236, 5283, and 5329; current Saturn render hashes are candidate pins only.",
+        "Unblock: return the corrected INTEGRATE-03 scene for explicit user review, rerun Full, and complete the separate physical Saturn procedure before SALVAGE-08; physical Saturn remains UNRUN."
       ],
-      "exact_next_experiment": "Present build/feedback/INTEGRATE-03-PLAYABLE-SLICE and the running exact release, ask the required review question verbatim, record the exact response, and keep INTEGRATE-03 unaccepted until explicit approval.",
+      "exact_next_experiment": "Execute REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION on the existing continuity branch: capture independent cadence-1 MAME truth, bind selectors 1-4 to source action/pose/pivot/active-window presentation, reject valid wrong families, and return only after its focused Oracle/Target/emulator evidence passes. Then resume INTEGRATE-03 for the complete scene and renewed review.",
       "evidence": {
         "candidate_interface": "src/port_v2/integration/slice/slice.h",
         "strict_c90_compile": "PASS",
@@ -843,14 +844,14 @@
         "paired_pinned_emulator_readback": "PASS / invariant semantic equality plus identical 322-sample synchronized traces",
         "world_to_screen_contract": "PASS / screen_x = world_x - camera_world_x + aperture_origin_x for player and enemy; VDP2 scrolls recorded from the same camera progression",
         "camera_negative_controls": "PASS / omitted and reversed camera terms rejected",
-        "actor_identity_contract": "PASS / exact WALK, HIT, recovery, and KO record, palette, emitted-object, and emitted-tile sequences pinned for class-0x1F actor 31; wrong but nonzero WALK-family substitution into HIT rejected",
-        "source_actor_identity": "PASS / slot 0xffa000 and table set 0x00130ac8 bind walk 0x0012eb4c, HIT 0x0012dd50, and KO records beginning 0x0012e214 to actor 31",
+        "actor_identity_contract": "PASS_AS_CANDIDATE_PIN_ONLY / exact WALK, HIT, recovery, and KO record, palette, emitted-object, and emitted-tile sequences pin the current Saturn output but do not prove correspondence to independent source crops or tile families",
+        "source_actor_identity": "PARTIAL / slot 0xffa000 and table set 0x00130ac8 bind walk 0x0012eb4c, HIT 0x0012dd50, and KO records beginning 0x0012e214 to actor 31; selector-specific object/tile/crop correspondence remains unproven",
         "causal_contacts": {"frames": [600, 1200, 1800, 2400], "attacker_id": 1, "defender_id": 31, "health": [87, 63, 39, 8, -1]},
         "causal_negative_controls": "PASS / no-overlap, pre-active, swapped-role, wrong-defender, enemy-enemy, damage-without-contact, and visual-HIT-without-semantic rejected",
         "synchronized_scene_trace": "PASS / two exact 322-sample traces plus clean foreground-pinned continuous run-1 clip",
         "post_ko_framing": "PASS / not an intentional exit; player world 446, camera world 161, aperture origin -176, player screen 109, visible hold",
         "adapted_scope": "ADAPTED / deterministic capability-slice movement and four-attack choreography; not production player control or enemy AI",
-        "ai_visual_qa": "PASS_PENDING_HUMAN_REVIEW / clean unobscured clip correlated with actor, camera, exact render identity, combat, health, and post-KO trace fields",
+        "ai_visual_qa": "FAIL / Review correction 4 identifies alien-family switches on attacks 1 and 4, noncredible contact geometry on attacks 2 and 3, and a fourth-hit grounding defect; candidate-derived render hashes cannot override visible source-fidelity defects",
         "review_package": "build/feedback/INTEGRATE-03-PLAYABLE-SLICE",
         "hit_frame": {"frame": 600, "combat_events": 1, "enemy_health": 63, "hit": 1},
         "ko_frame": {"frame": 2400, "combat_events": 4, "enemy_health": -1, "ko": 1},
@@ -864,19 +865,58 @@
         "stability_frames": "PASS / actual sampled frame plus one in all six emulator checkpoints",
         "linked_work_ram_bend": "0x06096d80",
         "linked_work_ram_headroom_bytes": 168576,
-        "visual_self_review": "PASS_PENDING_HUMAN_REVIEW / camera and actors share one anchor, the class-0x1F actor remains continuous, all contacts visibly correlate with semantic causes, and approved stage/HUD/audio locks remain intact",
+        "visual_self_review": "FAIL / the current clip does not establish source-bound selector presentation, continuous alien visual family, credible contacts 2-3, or fourth-hit grounding despite passing semantic counters",
         "emulator": "Yaba Sanshiro 1.20.37-2986eb",
         "emulator_evidence_tier": "ONE_EMULATOR",
-        "human_review": "AWAITING_RENEWED_FEEDBACK_REVIEW_HARDENING_3",
+        "human_review": "CHANGES_REQUESTED_REVIEW_CORRECTION_4",
         "user_feedback_exact": "The alien and player appear anchored incorrectly relative to the camera pan.\nThe intended alien appears to change into a different stalker-like model. The\ncombat exchange and its visible participants do not make sense.",
+        "review_correction_4_user_feedback_exact": "On the first player attack, the alien sprite still switches. The second\nrecorded hit has no credible visible collision and the distance looks wrong.\nThe third player attack is too far away and appears not to make contact. The\nfourth hit causes the player to lose grounding/anchor and the alien sprite\nswitches again. The death animation works and should remain unchanged.",
+        "promoted_interface_hard_stop": "player.h version 1 exposes directional input plus IDLE/WALK only; slice input exposes one generic attack boolean and main.c maps every attack to CAP_ACT_ATTACK",
+        "activated_repair_card": "REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION",
         "physical_saturn": "UNRUN"
       },
       "user_observation_state": {
         "formal_review_question_asked": false,
         "exact_observations": [
           "I don’t see a contact or hit just the alien and player loads camera pans animation of window breaking happens. They don’t engage in combat.",
-          "The alien and player appear anchored incorrectly relative to the camera pan.\nThe intended alien appears to change into a different stalker-like model. The\ncombat exchange and its visible participants do not make sense."
+          "The alien and player appear anchored incorrectly relative to the camera pan.\nThe intended alien appears to change into a different stalker-like model. The\ncombat exchange and its visible participants do not make sense.",
+          "On the first player attack, the alien sprite still switches. The second\nrecorded hit has no credible visible collision and the distance looks wrong.\nThe third player attack is too far away and appears not to make contact. The\nfourth hit causes the player to lose grounding/anchor and the alien sprite\nswitches again. The death animation works and should remain unchanged."
         ],
+        "approved_components": [],
+        "requested_changes": [],
+        "priority": null
+      }
+    },
+    {
+      "task_id": "REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION",
+      "evaluated_commit": null,
+      "technical_status": "UNRUN",
+      "fidelity_status": "UNKNOWN",
+      "user_status": "NOT_REVIEWED",
+      "salvage_decision": "REPAIR",
+      "production_interface": null,
+      "diagnostic_interface": "tests/port_v2/integration/combat/run_source_bound_presentation.ps1",
+      "blockers": [
+        "Unblock: capture independent cadence-1 MAME actor, animation, identity, geometry, grounding, collision, and timing evidence around all four source contacts.",
+        "Unblock: prove the source asset package contains every selector-specific player pose and class-0x1F reaction/death pose before changing the presentation interface."
+      ],
+      "exact_next_experiment": "Capture at least 12 frames before each source attack through reaction/recovery at samples 5190, 5236, 5283, and 5329; derive a tracked contract from MAME evidence; then add the smallest player/combat presentation fields for selector, action/substate, animation record, pose, pivot, grounding, and active-window state.",
+      "evidence": {
+        "source_set": "avspu",
+        "source_emulator": "MAME 0.289",
+        "source_samples": [5190, 5236, 5283, 5329],
+        "attack_selectors": [1, 2, 3, 4],
+        "expected_contract_origin": "MAME_SOURCE_ONLY",
+        "current_saturn_hashes_as_source_truth": "PROHIBITED",
+        "runtime_implementation": "UNRUN",
+        "oracle_capture": "UNRUN",
+        "target": "UNRUN",
+        "paired_pinned_emulator": "UNRUN",
+        "physical_saturn": "UNRUN"
+      },
+      "user_observation_state": {
+        "formal_review_question_asked": false,
+        "exact_observations": [],
         "approved_components": [],
         "requested_changes": [],
         "priority": null

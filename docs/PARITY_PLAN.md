@@ -65,13 +65,16 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: INTEGRATE-03-PLAYABLE-SLICE
+CURRENT_TASK: REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
 
 ## 4. Current salvage queue and production extension
 
 The accepted player, enemy, combat, camera/stage, P1/P2 HUD, PCM, CDDA, and
-phase-residency results remain regression locks. INTEGRATE-03 is the active
-production body; ARCH-01 itself did not change runtime behavior.
+phase-residency results remain regression locks. INTEGRATE-03 is unaccepted and
+`CHANGES_REQUESTED` after Review correction 4 exposed selector-presentation,
+alien-family, collision-visibility, and player-grounding defects. The promoted
+player contract cannot carry the required source presentation state, so the
+bounded REPAIR-09 interface body is active on the same continuity branch.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|
@@ -85,7 +88,7 @@ production body; ARCH-01 itself did not change runtime behavior.
 | 8 | `PROMOTE-05-HUD` | Promote approved P1/P2 HUD presentation |
 | 9 | `PROMOTE-06-PCM` | Promote approved PCM cue path |
 | 10 | `SALVAGE-07-CDDA-RESIDENCY` -> `USER-07-CDDA-RESIDENCY-REVIEW` -> `PROMOTE-07-CDDA-RESIDENCY` | Prove audio/load ownership and manifests, then require explicit audible review |
-| 11 | `INTEGRATE-03-PLAYABLE-SLICE` | Integrate and physically prove the capability slice |
+| 11 | `REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION` -> corrected `INTEGRATE-03-PLAYABLE-SLICE` | Bind selector-specific player/combat presentation to independent cadence-1 MAME evidence, then integrate and physically prove the capability slice |
 | 12 | `SALVAGE-08-FRONTEND` -> `QA-08-FRONTEND` -> `USER-08-FRONTEND` -> `PROMOTE-08-FRONTEND` | Promote title and four-character select |
 | 13 | `INTEGRATE-04-COLD-BOOT-TO-ROUND1` | Cold boot through Round 1 gameplay |
 | 14 | `ORACLE-01`, `ORACLE-02`, `ORACLE-03` | Complete title-to-credits and four-character source evidence |
@@ -179,8 +182,12 @@ assets, and canary damage.
 
 ### R7 — Integrated playable capability slice
 
-Integrate combat, camera/stage, HUD, PCM, CDDA, and residency in the exact
-normal-release composition.
+First repair the promoted player/combat presentation boundary so selectors 1-4
+carry their measured source action, animation, pose, pivot, grounding, and
+active-window state. Then integrate combat, camera/stage, HUD, PCM, CDDA, and
+residency in the exact normal-release composition. Expected visual identity
+must originate from MAME/source evidence, never from the current Saturn
+candidate's hashes.
 
 **Exit:** all 12 capability conditions close through the required physical
 Saturn procedure; emulator or user evidence is not substituted.

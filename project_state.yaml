@@ -190,14 +190,29 @@ architecture_enforcement:
     - id: evidence-tier-separation
       status: ACTIVE
       activates_when: always
-current_checkpoint: integrate-playable-slice
-active_task_card: docs/task_cards/INTEGRATE-03-PLAYABLE-SLICE.md
-active_task_id: INTEGRATE-03-PLAYABLE-SLICE
-active_task_kind: INTEGRATE
+current_checkpoint: repair-source-bound-combat-presentation
+active_task_card: docs/task_cards/REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION.md
+active_task_id: REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
+active_task_kind: REPAIR
 task_status: READY
-active_write_owner: INTEGRATE-03-PLAYABLE-SLICE
+active_write_owner: REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
 awaiting_user_feedback: []
 open_blockers: []
+pending_integration_review:
+  task: INTEGRATE-03-PLAYABLE-SLICE
+  disposition: CHANGES_REQUESTED
+  correction: 4
+  candidate_head: 509cb20d9c8867e869ca3ade90c62ede57540571
+  exact_feedback: |-
+    On the first player attack, the alien sprite still switches. The second
+    recorded hit has no credible visible collision and the distance looks wrong.
+    The third player attack is too far away and appears not to make contact. The
+    fourth hit causes the player to lose grounding/anchor and the alien sprite
+    switches again. The death animation works and should remain unchanged.
+  hard_stop: The promoted player contract cannot carry source attack selector, action/substate, animation record, pose, pivot, grounding, or selector-owned active-window state.
+  repair_card: REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
+  physical_saturn: UNRUN
+  blocked_successor: SALVAGE-08-FRONTEND
 completed_dispositions:
   - task: SALVAGE-00-OLD-BUILD-BASELINE
     evaluated_head: fcb7eaf0c3e6af28394908c251056daca7fb62c2
@@ -753,6 +768,7 @@ task_queue:
   - SALVAGE-07-CDDA-RESIDENCY
   - USER-07-CDDA-RESIDENCY-REVIEW
   - PROMOTE-07-CDDA-RESIDENCY
+  - REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
   - INTEGRATE-03-PLAYABLE-SLICE
   - SALVAGE-08-FRONTEND
   - QA-08-FRONTEND

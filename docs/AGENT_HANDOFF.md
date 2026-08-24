@@ -25,24 +25,22 @@ its historical metadata and existing continuity branch.
 
 ## Current task and next action
 
-`PROMOTE-07-CDDA-RESIDENCY` is accepted at evidence commit
-`684ed1b27e840ac940bc95484b32d7f6e3972a01` with implementation commit
-`89f60047a7a43542e194e8fd745724e74d9f70df`. Two committed-SHA pinned-Yaba
-runs agree semantically at normalized ISO
-`e99bd3a5cdc79b922222c25d65010d6fed011829cd89c3688b268f71774f8f74`:
-both Jo/SGL-free production interfaces are version 1, the port lock and canaries
-pass, fallback/failures are zero, both illegal operations reject, the declared
-legal read succeeds, and each run observes 692 bounded stability frames. Linked
-BSS ends at `0x06088370` with 228496 bytes of headroom. The source-frame binding
-remains `ADAPTED`; normal release and physical Saturn remain unrun. The active
-card is now `INTEGRATE-03-PLAYABLE-SLICE`, status `READY`, in the existing continuity worktree
-`C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review` on
-branch `codex/avp-user-02-enemy-review`.
+INTEGRATE-03 remains unaccepted and `CHANGES_REQUESTED` after Review correction
+4. The user reports alien-family switches on attacks 1 and 4, noncredible
+contact geometry on attacks 2 and 3, and a fourth-hit player grounding defect;
+the working death animation remains locked. Candidate-derived Saturn render
+hashes are not independent source-fidelity evidence.
 
-The accepted camera/stage, corrected P1/P2 HUD, and short PCM cue remain locked.
-Physical Saturn is still `0/12`; no host, MAME, emulator, or user evidence
-changes that fact.
+The active card is `REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION`, status `READY`,
+in `C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review`
+on `codex/avp-user-02-enemy-review`. The version-1 player interface exposes
+directional IDLE/WALK only, so the repair must capture independent cadence-1
+MAME truth and extend only the player/combat presentation boundary. Do not
+change INTEGRATE-03 slice paths during REPAIR-09.
+
+All approved locks remain preserved. Physical Saturn is still `0/12` and
+`UNRUN`; `SALVAGE-08-FRONTEND` remains inactive.
 
 Resume prompt:
 
-> Resume the AvP salvage Goal at INTEGRATE-03-PLAYABLE-SLICE in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; preserve every approved component lock, integrate only the promoted player, enemy, combat, camera/stage, HUD, PCM, CDDA, and residency interfaces, run the card's exact normal-release checks, and stop at the declared subjective or physical checkpoint.
+> Resume the AvP salvage Goal at REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION in the existing AvPSaturnCapabilityTest-user-02-enemy-review worktree on codex/avp-user-02-enemy-review; capture independent cadence-1 MAME truth around samples 5190, 5236, 5283, and 5329, extend only the promoted player/combat presentation interface needed for selectors 1-4, preserve every approved lock, and stop before changing INTEGRATE-03 slice paths, physical Saturn, or SALVAGE-08.
