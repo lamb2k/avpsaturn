@@ -203,7 +203,7 @@ awaiting_user_feedback: []
 open_blockers: []
 pending_integration_review:
   task: INTEGRATE-03-PLAYABLE-SLICE
-  disposition: CHANGES_REQUESTED
+  disposition: USER_APPROVED_PHYSICAL_PENDING
   correction: 4
   candidate_head: 82965ef80223a03937e0b527d16161ed68d874a0
   exact_feedback: |-
@@ -216,7 +216,7 @@ pending_integration_review:
   repair_card: REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
   repair_status: ACCEPTED
   repair_implementation_head: 417ed808e10f0f255948b1e6ecf0223399509c74
-  corrected_candidate_status: PASS_PENDING_RENEWED_HUMAN_REVIEW
+  corrected_candidate_status: PASS_USER_APPROVED_PHYSICAL_PENDING
   fidelity: SOURCE_BOUND_WITH_ADAPTED_INPUT
   task_level_fidelity_status: ADAPTED
   adapted_scope: deterministic input choreography only; production player control and enemy AI remain UNKNOWN
@@ -232,7 +232,56 @@ pending_integration_review:
   paired_emulator_trace: PASS / two identical 577-sample traces with 297 cadence-1 combat frames
   full_lane: PASS
   review_package: build/feedback/INTEGRATE-03-PLAYABLE-SLICE
-  renewed_human_review: PENDING
+  renewed_human_review: APPROVED
+  approval_scope: SOURCE_BOUND_WITH_ADAPTED_INPUT
+  approval_exact: |-
+    APPROVED for INTEGRATE-03 as a source-bound capability slice.
+
+    Keep unchanged:
+
+    - the four selector-specific player attack sequences;
+    - the class-0x1F street-alien identity and reaction sequence;
+    - the measured collision geometry and damage sequence;
+    - player pivot and grounding, including the source-supported fourth airborne
+      attack;
+    - the KO/death animation;
+    - the shared camera/world transform;
+    - stage presentation;
+    - P1/P2 HUD;
+    - PCM and CDDA;
+    - residency, canaries, zero late reads, and fallback protections.
+
+    I approve the presentation, collision, damage, reaction, and KO behavior shown
+    in the exact-release review package.
+
+    This approval is limited to SOURCE_BOUND_WITH_ADAPTED_INPUT. It does not approve
+    production player control, enemy AI, targeting, route progression, multiplayer,
+    or physical Saturn behavior.
+
+    Record the approval verbatim, complete the declared physical Saturn capability
+    procedure against the exact reviewed ISO, and preserve the reviewed ISO hash.
+
+    Do not activate SALVAGE-08 unless the physical procedure passes. Do not add more
+    visual-comparator machinery unless a concrete new discrepancy is observed.
+  approval_locks:
+    - four selector-specific player attack sequences
+    - class-0x1F street-alien identity and reaction sequence
+    - measured collision geometry and damage sequence
+    - player pivot and grounding, including the source-supported fourth airborne attack
+    - KO/death animation
+    - shared camera/world transform
+    - stage presentation
+    - P1/P2 HUD
+    - PCM and CDDA
+    - residency, canaries, zero late reads, and fallback protections
+  unapproved_scope:
+    - production player control
+    - enemy AI
+    - targeting
+    - route progression
+    - multiplayer
+    - physical Saturn behavior
+  physical_prerequisites: BLOCKED_REQUIRED_INTERACTION / no Windows-visible Saturn loader, removable target, or capture device was detected; the required Probe 3 representative/909-tile physical executable is absent
   physical_saturn: UNRUN
   blocked_successor: SALVAGE-08-FRONTEND
 completed_dispositions:

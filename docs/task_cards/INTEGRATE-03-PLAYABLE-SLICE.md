@@ -341,5 +341,52 @@ directly inspected every automatically flagged MAME/Saturn pair. The layers
 are silhouette-identical, and the record pairs resolve to the same source
 assembly; no runtime correction is justified. Calculated metrics live in
 `actor-image-metrics.json`, with dispositions in
-`actor-image-direct-inspection.json`. Physical Saturn remains `UNRUN`, and
-renewed human review is still required.
+`actor-image-direct-inspection.json`. Physical Saturn remains `UNRUN`; renewed
+human review was still required at this checkpoint.
+
+### Final human approval
+
+Exact user response:
+
+> APPROVED for INTEGRATE-03 as a source-bound capability slice.
+>
+> Keep unchanged:
+>
+> - the four selector-specific player attack sequences;
+> - the class-0x1F street-alien identity and reaction sequence;
+> - the measured collision geometry and damage sequence;
+> - player pivot and grounding, including the source-supported fourth airborne
+>   attack;
+> - the KO/death animation;
+> - the shared camera/world transform;
+> - stage presentation;
+> - P1/P2 HUD;
+> - PCM and CDDA;
+> - residency, canaries, zero late reads, and fallback protections.
+>
+> I approve the presentation, collision, damage, reaction, and KO behavior shown
+> in the exact-release review package.
+>
+> This approval is limited to SOURCE_BOUND_WITH_ADAPTED_INPUT. It does not approve
+> production player control, enemy AI, targeting, route progression, multiplayer,
+> or physical Saturn behavior.
+>
+> Record the approval verbatim, complete the declared physical Saturn capability
+> procedure against the exact reviewed ISO, and preserve the reviewed ISO hash.
+>
+> Do not activate SALVAGE-08 unless the physical procedure passes. Do not add more
+> visual-comparator machinery unless a concrete new discrepancy is observed.
+
+Disposition: user `APPROVED` for `SOURCE_BOUND_WITH_ADAPTED_INPUT`; the card is
+not yet accepted because physical Saturn remains `UNRUN`. Preserve ISO SHA-256
+`4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef`, cue
+SHA-256 `bfc58c7020d90952e93bef7ecba32dea8d4faddf6ce6a90e1054206ee1807b12`,
+Track 2 SHA-256 `42e755b02ba0e59e514a07dabe2f8273390e641c2ab410e4af8b7f1b656f2a43`,
+and manifest SHA-256
+`4c2d416930d9769e6044018c583097291ed430e8bf32a053dd133b6447c0fbcc`.
+
+The physical prerequisite audit found no Windows-visible Saturn loader,
+removable target, or capture device and no card-owned Probe 3 representative/909-tile
+physical executable. This is a declared required-interaction and missing-
+evidence hard stop. `SALVAGE-08-FRONTEND` remains inactive. Do not extend the
+visual comparator unless a concrete new discrepancy appears.

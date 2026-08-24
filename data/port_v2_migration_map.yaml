@@ -818,16 +818,16 @@
       "evaluated_commit": "82965ef80223a03937e0b527d16161ed68d874a0",
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
-      "user_status": "CHANGES_REQUESTED",
-      "salvage_decision": "REPAIR",
+      "user_status": "APPROVED",
+      "salvage_decision": "SALVAGE_WITH_ADAPTER",
       "production_interface": null,
       "diagnostic_interface": "tests/port_v2/integration/slice/run_pinned_emulator.ps1",
       "blockers": [
-        "Unblock: obtain renewed explicit human approval of the ignored source-bound exact-release review package.",
-        "Unblock: after human approval, complete the separate physical Saturn capability procedure; physical Saturn remains UNRUN.",
-        "Unblock: keep SALVAGE-08 inactive until both review and physical procedure complete."
+        "Unblock: connect and identify the NTSC Saturn, 32 Mbit expansion cart, loader/firmware, digital pad, and capture/latency chain, then run the required Probe 3 representative/909-tile physical pretest with overload control.",
+        "Unblock: complete the exact-image cold-boot controller record, telemetry capture, second cold boot, and ten-minute physical soak; physical Saturn remains UNRUN.",
+        "Unblock: keep SALVAGE-08 inactive until the physical procedure passes all 12 capability conditions."
       ],
-      "exact_next_experiment": "Present build/feedback/INTEGRATE-03-PLAYABLE-SLICE and record the exact response to the required review question. If explicitly approved, perform the separate physical Saturn procedure; otherwise repair only the first named objective defect. Do not activate SALVAGE-08.",
+      "exact_next_experiment": "On connected physical hardware, run Probe 3 representative/909-tile schedules and overload negative control, then boot exact ISO 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef with its pinned cue/audio/manifest, execute the fixed controller record twice, capture all declared counters and audio/scanout evidence, and complete the ten-minute soak. Do not activate SALVAGE-08 unless every physical condition passes.",
       "evidence": {
         "candidate_interface": "src/port_v2/integration/slice/slice.h",
         "strict_c90_compile": "PASS",
@@ -854,7 +854,7 @@
         "adapted_scope": "SOURCE_BOUND_WITH_ADAPTED_INPUT / deterministic input choreography only; attack presentation, collision, damage, and alien reaction are source-bound; production player control and enemy AI remain UNKNOWN",
         "measured_components": ["attack selector and player presentation", "active-window timing", "collision geometry", "damage", "class-0x1F reaction identity and timing", "KO/death sequence"],
         "actor_image_comparator": "PASS / 297 pivot-normalized cadence frames; bbox, area, IoU, centroid, baseline, components, edges, temporal change, and retained framebuffer-crop edge support calculated; valid wrong alien crop, one-frame Y offset, stale pose, skipped reaction, and pivot jump rejected",
-        "ai_visual_qa": "PASS_PENDING_HUMAN_REVIEW / seven record-without-pixel-change flags were directly inspected and bind to intentional same-assembly source transitions; no unresolved silhouette, family, pivot, grounding, stale-pose, disappearance, or reaction-timing discrepancy",
+        "ai_visual_qa": "PASS_USER_APPROVED / seven record-without-pixel-change flags were directly inspected and bind to intentional same-assembly source transitions; no unresolved silhouette, family, pivot, grounding, stale-pose, disappearance, or reaction-timing discrepancy",
         "review_package": "build/feedback/INTEGRATE-03-PLAYABLE-SLICE",
         "hit_frame": {"frame": 600, "combat_events": 1, "enemy_health": 63, "hit": 1},
         "ko_frame": {"frame": 852, "combat_events": 4, "enemy_health": -1, "ko": 1},
@@ -868,12 +868,16 @@
         "stability_frames": "PASS / actual sampled frame plus one in all six emulator checkpoints",
         "linked_work_ram_bend": "0x0609e230",
         "linked_work_ram_headroom_bytes": 138704,
-        "visual_self_review": "PASS_PENDING_HUMAN_REVIEW / direct exact-release inspection correlates all four selector poses, source box geometry, class-0x1F reaction family, per-pose grounding, and preserved death motion",
+        "visual_self_review": "PASS_USER_APPROVED / direct exact-release inspection correlates all four selector poses, source box geometry, class-0x1F reaction family, per-pose grounding, and preserved death motion",
         "emulator": "Yaba Sanshiro 1.20.37-2986eb",
         "emulator_evidence_tier": "ONE_EMULATOR",
-        "human_review": "CHANGES_REQUESTED_RENEWED_REVIEW_PENDING",
+        "human_review": "APPROVED_SOURCE_BOUND_WITH_ADAPTED_INPUT",
         "user_feedback_exact": "The alien and player appear anchored incorrectly relative to the camera pan.\nThe intended alien appears to change into a different stalker-like model. The\ncombat exchange and its visible participants do not make sense.",
         "review_correction_4_user_feedback_exact": "On the first player attack, the alien sprite still switches. The second\nrecorded hit has no credible visible collision and the distance looks wrong.\nThe third player attack is too far away and appears not to make contact. The\nfourth hit causes the player to lose grounding/anchor and the alien sprite\nswitches again. The death animation works and should remain unchanged.",
+        "final_approval_user_feedback_exact": "APPROVED for INTEGRATE-03 as a source-bound capability slice.\n\nKeep unchanged:\n\n- the four selector-specific player attack sequences;\n- the class-0x1F street-alien identity and reaction sequence;\n- the measured collision geometry and damage sequence;\n- player pivot and grounding, including the source-supported fourth airborne\n  attack;\n- the KO/death animation;\n- the shared camera/world transform;\n- stage presentation;\n- P1/P2 HUD;\n- PCM and CDDA;\n- residency, canaries, zero late reads, and fallback protections.\n\nI approve the presentation, collision, damage, reaction, and KO behavior shown\nin the exact-release review package.\n\nThis approval is limited to SOURCE_BOUND_WITH_ADAPTED_INPUT. It does not approve\nproduction player control, enemy AI, targeting, route progression, multiplayer,\nor physical Saturn behavior.\n\nRecord the approval verbatim, complete the declared physical Saturn capability\nprocedure against the exact reviewed ISO, and preserve the reviewed ISO hash.\n\nDo not activate SALVAGE-08 unless the physical procedure passes. Do not add more\nvisual-comparator machinery unless a concrete new discrepancy is observed.",
+        "approved_component_locks": ["four selector-specific player attack sequences", "class-0x1F street-alien identity and reaction sequence", "measured collision geometry and damage sequence", "player pivot and grounding including the source-supported fourth airborne attack", "KO/death animation", "shared camera/world transform", "stage presentation", "P1/P2 HUD", "PCM and CDDA", "residency, canaries, zero late reads, and fallback protections"],
+        "unapproved_scope": ["production player control", "enemy AI", "targeting", "route progression", "multiplayer", "physical Saturn behavior"],
+        "physical_prerequisite_audit": "BLOCKED_REQUIRED_INTERACTION / no Windows-visible Saturn loader, removable target, or capture device detected; required Probe 3 representative/909-tile physical executable absent",
         "promoted_interface_hard_stop": "RESOLVED_BY_ACCEPTED_REPAIR_09_INTERFACE_VERSION_2",
         "activated_repair_card": "REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION",
         "physical_saturn": "UNRUN"
@@ -883,7 +887,8 @@
         "exact_observations": [
           "I don’t see a contact or hit just the alien and player loads camera pans animation of window breaking happens. They don’t engage in combat.",
           "The alien and player appear anchored incorrectly relative to the camera pan.\nThe intended alien appears to change into a different stalker-like model. The\ncombat exchange and its visible participants do not make sense.",
-          "On the first player attack, the alien sprite still switches. The second\nrecorded hit has no credible visible collision and the distance looks wrong.\nThe third player attack is too far away and appears not to make contact. The\nfourth hit causes the player to lose grounding/anchor and the alien sprite\nswitches again. The death animation works and should remain unchanged."
+          "On the first player attack, the alien sprite still switches. The second\nrecorded hit has no credible visible collision and the distance looks wrong.\nThe third player attack is too far away and appears not to make contact. The\nfourth hit causes the player to lose grounding/anchor and the alien sprite\nswitches again. The death animation works and should remain unchanged.",
+          "APPROVED for INTEGRATE-03 as a source-bound capability slice.\n\nKeep unchanged:\n\n- the four selector-specific player attack sequences;\n- the class-0x1F street-alien identity and reaction sequence;\n- the measured collision geometry and damage sequence;\n- player pivot and grounding, including the source-supported fourth airborne\n  attack;\n- the KO/death animation;\n- the shared camera/world transform;\n- stage presentation;\n- P1/P2 HUD;\n- PCM and CDDA;\n- residency, canaries, zero late reads, and fallback protections.\n\nI approve the presentation, collision, damage, reaction, and KO behavior shown\nin the exact-release review package.\n\nThis approval is limited to SOURCE_BOUND_WITH_ADAPTED_INPUT. It does not approve\nproduction player control, enemy AI, targeting, route progression, multiplayer,\nor physical Saturn behavior.\n\nRecord the approval verbatim, complete the declared physical Saturn capability\nprocedure against the exact reviewed ISO, and preserve the reviewed ISO hash.\n\nDo not activate SALVAGE-08 unless the physical procedure passes. Do not add more\nvisual-comparator machinery unless a concrete new discrepancy is observed."
         ],
         "approved_components": [],
         "requested_changes": [],
