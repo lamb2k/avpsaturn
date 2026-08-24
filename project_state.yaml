@@ -5,7 +5,7 @@ roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 production_head: 417ed808e10f0f255948b1e6ecf0223399509c74
-candidate_head: 417ed808e10f0f255948b1e6ecf0223399509c74
+candidate_head: 82965ef80223a03937e0b527d16161ed68d874a0
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-user-02-enemy-review
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
@@ -205,7 +205,7 @@ pending_integration_review:
   task: INTEGRATE-03-PLAYABLE-SLICE
   disposition: CHANGES_REQUESTED
   correction: 4
-  candidate_head: 509cb20d9c8867e869ca3ade90c62ede57540571
+  candidate_head: 82965ef80223a03937e0b527d16161ed68d874a0
   exact_feedback: |-
     On the first player attack, the alien sprite still switches. The second
     recorded hit has no credible visible collision and the distance looks wrong.
@@ -216,6 +216,14 @@ pending_integration_review:
   repair_card: REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
   repair_status: ACCEPTED
   repair_implementation_head: 417ed808e10f0f255948b1e6ecf0223399509c74
+  corrected_candidate_status: PASS_PENDING_RENEWED_HUMAN_REVIEW
+  fidelity: SOURCE_BOUND_WITH_ADAPTED_INPUT
+  adapted_scope: deterministic input choreography only; production player control and enemy AI remain UNKNOWN
+  exact_release_iso_sha256: 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef
+  paired_emulator_trace: PASS / two identical 577-sample traces with 297 cadence-1 combat frames
+  full_lane: PASS
+  review_package: build/feedback/INTEGRATE-03-PLAYABLE-SLICE
+  renewed_human_review: PENDING
   physical_saturn: UNRUN
   blocked_successor: SALVAGE-08-FRONTEND
 completed_dispositions:

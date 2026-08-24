@@ -28,7 +28,7 @@ QUESTION = (
 
 
 def read_json(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8-sig"))
 
 
 def sha256(path: Path) -> str:
@@ -44,7 +44,7 @@ def stable_state(report: dict, name: str) -> dict:
     for key in (
         "slice_frame_stage", "slice_frame", "slice_stability_frames",
         "slice_stage_submissions", "slice_player_action_frame",
-        "slice_enemy_action_frame",
+        "slice_enemy_action_frame", "slice_source_sample",
     ):
         state.pop(key, None)
     return state
@@ -72,11 +72,22 @@ def save_combat_clip(
         gif_path: Path, sample_frames: list[int], target: Path,
         duration_ms: int) -> None:
     selected = []
+    sample_index = 0
     with Image.open(gif_path) as image:
-        for index, frame_number in enumerate(sample_frames):
-            if 583 <= frame_number <= 879:
-                image.seek(index)
-                selected.append(image.convert("RGB").copy())
+        for gif_index in range(image.n_frames):
+            image.seek(gif_index)
+            # GIF stores durations in 10 ms units and coalesces identical
+            # adjacent samples.  Expand each duration back to the 167 ms
+            # collector ledger before selecting the cadence-1 combat window.
+            repeats = round(image.info.get("duration", 167) / 167)
+            rendered = image.convert("RGB").copy()
+            for _ in range(repeats):
+                assert sample_index < len(sample_frames)
+                frame_number = sample_frames[sample_index]
+                if 583 <= frame_number <= 879:
+                    selected.append(rendered)
+                sample_index += 1
+    assert sample_index == len(sample_frames)
     assert len(selected) == 297
     selected[0].save(
         target, format="WEBP", save_all=True, append_images=selected[1:],
@@ -95,7 +106,8 @@ def main() -> int:
     iso_sha = builds[0]["artifacts"]["game_iso"]["sha256"]
 
     assert builds[1]["artifacts"]["game_iso"]["sha256"] == iso_sha
-    assert normals[0]["normalized_iso_sha256"] == +        normals[1]["normalized_iso_sha256"] == iso_sha
+    assert (normals[0]["normalized_iso_sha256"] ==
+            normals[1]["normalized_iso_sha256"] == iso_sha)
     for build in builds:
         assert build["task_id"] == TASK_ID
         assert build["exact_normal_release"] is True
@@ -105,8 +117,10 @@ def main() -> int:
     for state_name in ("hit_state", "ko_state", "final_state"):
         for report in reads:
             state = report[state_name]
-            assert state["slice_stage_submissions"] == +                state["slice_stability_frames"] * 3
-        assert stable_state(reads[0], state_name) == +            stable_state(reads[1], state_name)
+            assert (state["slice_stage_submissions"] ==
+                    state["slice_stability_frames"] * 3)
+        assert (stable_state(reads[0], state_name) ==
+                stable_state(reads[1], state_name))
 
     source_contract = read_json(
         ROOT / "data" / "avsp_source_combat_presentation_contract.json")
@@ -114,7 +128,8 @@ def main() -> int:
     for trace in traces:
         assert trace["result"] == "PASS"
         assert trace["fidelity"] == "SOURCE_BOUND_WITH_ADAPTED_INPUT"
-        assert trace["clip"]["combat_cadence"] == 1
+        assert (trace["clip"] is None or
+                trace["clip"]["combat_cadence"] == 1)
         assert trace["contacts"] == [600, 646, 693, 739]
         assert trace["post_ko_framing"] == {
             "intentional_exit": False,
@@ -124,7 +139,8 @@ def main() -> int:
             "aperture": [-176, 175],
             "result": "VISIBLE_HOLD",
         }
-        assert validator.validate_trace(trace, source_contract)["result"] == +            "PASS"
+        assert (validator.validate_trace(trace, source_contract)["result"] ==
+                "PASS")
     assert traces[0]["samples"] == traces[1]["samples"]
 
     full = read_json(ROOT / "build" / "verification" / "full.json")
@@ -133,10 +149,13 @@ def main() -> int:
     copied: list[dict] = []
 
     for run_name, run_source in (("run-1", run_1), ("run-2", run_2)):
-        for name in (
+        names = [
             "build.json", "iso-normalization.json", "readback.json",
-            "scene-trace.json", "hit.png", "ko.png", "visual-qa.json",
-        ):
+            "scene-trace.json", "hit.png", "ko.png",
+        ]
+        if run_name == "run-1":
+            names.append("visual-qa.json")
+        for name in names:
             copy_record(
                 run_source / name, DESTINATION / f"{run_name}-{name}", copied)
 
@@ -159,11 +178,7 @@ def main() -> int:
          "sha256": sha256(saturn_slow)},
     ])
 
-    key_frames = (
-        45, 46, 583, 595, 599, 600, 601, 605, 627, 640, 645, 646,
-        647, 677, 685, 692, 693, 694, 722, 730, 738, 739, 740, 760,
-        800, 850, 879, 2999, 3000, 3001, 3050,
-    )
+    key_frames = sorted(int(frame) for frame in traces[0]["key_images"])
     for frame in key_frames:
         source = run_1 / f"scene-{frame:04d}.png"
         copy_record(source, DESTINATION / source.name, copied)

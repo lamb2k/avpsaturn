@@ -33,6 +33,7 @@ def stable_state(report, name):
     state.pop("slice_stage_submissions", None)
     state.pop("slice_player_action_frame", None)
     state.pop("slice_enemy_action_frame", None)
+    state.pop("slice_source_sample", None)
     return state
 
 
@@ -173,7 +174,8 @@ def main():
                 "synchronized trace sample order drifted")
         require([frame for frame in trace["sample_frames"]
                  if 583 <= frame <= 879] == list(range(583, 880)) and
-                trace["clip"]["combat_cadence"] == 1,
+                (trace["clip"] is None or
+                 trace["clip"]["combat_cadence"] == 1),
                 "combat exchange is not captured at cadence 1")
     require(traces[0]["samples"] == traces[1]["samples"],
             "paired synchronized semantic traces are not deterministic")

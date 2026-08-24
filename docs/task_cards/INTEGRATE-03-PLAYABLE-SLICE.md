@@ -282,3 +282,38 @@ Resume this card by replacing its stitched slice choreography with the accepted
 source-bound interface. Then rebuild the complete `release-normal-release`
 scene, rerun Full, and stop for renewed explicit human review before the
 separate physical Saturn procedure. `SALVAGE-08-FRONTEND` remains inactive.
+
+### Source-bound correction candidate
+
+Candidate implementation `82965ef80223a03937e0b527d16161ed68d874a0`
+replaces the stitched slice choreography with the accepted REPAIR-09 event
+pipeline. The same measured event now supplies the attack selector, rendered
+player record/pose/pivot/height, active collision box, damage, and matching
+class-`0x1F` alien contact/reaction identity. Only deterministic input
+choreography remains `ADAPTED`; production player control and enemy AI remain
+`UNKNOWN`.
+
+The exact `release-normal-release` image repeats at SHA-256
+`4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef`.
+Paired pinned Yaba Sanshiro runs reproduce identical 577-sample traces,
+including every frame from slice 583 through 879. Contacts occur at slice
+frames `600/646/693/739`, source samples `5190/5236/5283/5329`, and selectors
+`1/2/3/4`. Candidate-derived render hashes are explicitly superseded as
+fidelity evidence; valid wrong player/alien object and tile families, wrong
+palette, and wrong selector reject against the independent MAME source
+contract.
+
+Codex directly inspected all four exact-release contact frames, the cadence-1
+reaction/death sequence, source collision overlays, alien-family comparison,
+and grounding trace. Attack 3 retains the source-supported silhouette gap and
+box overlap; attack 4 uses its measured airborne height/pivot only for that
+pose. The accepted death/KO sequence and its late leftward source motion remain
+unchanged. Camera/stage, P1/P2 HUD, PCM, CDDA, residency, canaries, and the
+post-KO player hold at screen X `103` remain locked. Full passes in the
+detached shadow worktree.
+
+The ignored review package is
+`build/feedback/INTEGRATE-03-PLAYABLE-SLICE`. INTEGRATE-03 remains unaccepted
+and `CHANGES_REQUESTED` pending renewed explicit human review. Physical Saturn
+is `UNRUN`; do not activate `SALVAGE-08-FRONTEND` before human approval and the
+separate physical capability procedure.
