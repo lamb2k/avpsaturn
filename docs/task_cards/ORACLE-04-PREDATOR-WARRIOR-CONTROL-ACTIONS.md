@@ -2,7 +2,7 @@
 
 TASK: ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS
 KIND: ORACLE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: oracle-predator-warrior-control-actions
 BASE: project_state.foundation_head
 BRANCH: project_state.production_branch

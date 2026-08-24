@@ -41,9 +41,9 @@ control. Normal ISO remains exact at `4a142774...98ef`. Operator package is at
 no removable target, serial/debug device, capture device, or loader tool and
 performed no write. Physical Saturn timing/scanout/soak remain `UNRUN`;
 `SALVAGE-08-FRONTEND` remains inactive.
-The sole software writer is read-only `ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS`.
+ORACLE-04 is accepted at `c3124b8c4ed71416e9b85d7acb0626c7068f0a41`; its
+unresolved boundaries remain unknown. The sole software writer is read-only `ORACLE-05-STREET-ALIEN-AI`.
 HW-01 is parked `WAITING_FOR_EXTERNAL_HARDWARE`; do not wait on it.
-
 Resume prompt:
 
-> Resume the AvP salvage Goal by continuing only ORACLE-04 read-only source research on the canonical playable-loop line; preserve Probe ISO 82c3a86c34b79626bf2cda7c2da4174ab1ee3603b3341f5091b141b740b4ef50, approved INTEGRATE-03 ISO 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef, all locks, and physical Saturn UNRUN; complete two identical Predator Warrior control/action captures plus a real input perturbation, accept and publish the bounded evidence, then activate ORACLE-05 serially.
+> Resume the AvP salvage Goal by continuing only ORACLE-05 read-only source research on the canonical playable-loop line; preserve accepted ORACLE-04 commit c3124b8c4ed71416e9b85d7acb0626c7068f0a41, Probe ISO 82c3a86c34b79626bf2cda7c2da4174ab1ee3603b3341f5091b141b740b4ef50, approved INTEGRATE-03 ISO 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef, all locks, and physical Saturn UNRUN; capture the bounded class-0x1F street-alien AI with scheduler and consumed-RNG ownership plus controlled counterfactuals, then accept and publish it before activating ORACLE-06 serially.
