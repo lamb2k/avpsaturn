@@ -2,7 +2,7 @@
 
 TASK: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
 KIND: QA
-STATUS: READY
+STATUS: READY_FOR_PHYSICAL
 CHECKPOINT: hw-01-probe-3-vdp1-budget-pretest
 BASE: project_state.candidate_head
 BRANCH: codex/avp-hw-01-probe3

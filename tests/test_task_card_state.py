@@ -16,7 +16,7 @@ EXECUTABLE_KINDS = IMPLEMENTATION_KINDS | CONTROL_KINDS
 ALLOWED_KINDS = EXECUTABLE_KINDS | {"USER_REVIEW"}
 ALLOWED_STATUSES = {
     "ACCEPTED", "READY", "BLOCKED", "PAUSED", "AWAITING_USER_FEEDBACK",
-    "CHANGES_REQUESTED",
+    "CHANGES_REQUESTED", "READY_FOR_PHYSICAL",
 }
 ALLOWED_LANES = {"Fast", "Oracle", "Target", "Emulator", "Full", "Physical"}
 REQUIRED_QUESTION = (
@@ -363,14 +363,18 @@ def main() -> None:
     )
     require(hardware is not None, "hardware pretest state is missing")
     hardware_text = hardware.group(1)
-    require(re.search(rf"(?m)^  task:\s*{re.escape(active_id)}\s*$",
+    require(re.search(r"(?m)^  task:\s*HW-01-PROBE-3-VDP1-BUDGET-PRETEST\s*$",
                       hardware_text) is not None,
-            "active physical card and hardware pretest task disagree")
+            "hardware pretest task drifted")
     require(re.search(r"(?m)^  status:\s*READY_FOR_PHYSICAL\s*$",
                       hardware_text) is not None and
             re.search(r"(?m)^  physical_saturn:\s*UNRUN\s*$",
                       hardware_text) is not None,
             "physical hard-stop status advanced or drifted")
+    require(scalar(cards["HW-01-PROBE-3-VDP1-BUDGET-PRETEST"], "STATUS") ==
+            "READY_FOR_PHYSICAL" and active_id !=
+            "HW-01-PROBE-3-VDP1-BUDGET-PRETEST",
+            "hardware pretest is not parked while software work proceeds")
 
     for token in (
         "production_player_control: UNRUN",

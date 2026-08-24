@@ -205,7 +205,7 @@ def main() -> None:
         "production_head:",
         "candidate_head:",
         "evidence_candidate_head:",
-        "production_branch: codex/avp-user-02-enemy-review",
+        "production_branch: codex/avp-playable-loop-pivot",
         "maximum_simultaneous_local_players: 3",
         "controller_and_multitap_topology: UNRUN",
         "architecture_enforcement:",

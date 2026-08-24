@@ -65,9 +65,9 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
+CURRENT_TASK: SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
 
-ACTIVE_SOFTWARE_TASK: ORACLE-06-ROUND1-ENCOUNTER-RULES
+ACTIVE_SOFTWARE_TASK: SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
 
 ## 4. Current salvage queue and production extension
 
@@ -136,9 +136,11 @@ runtime, Probe 3 result, physical evidence, exact INTEGRATE-03 ISO,
   spawn, bounds/lock, active/clear guards, unlock, and continuation from actor
   AI and presentation events.
 
-Two identical captures and one real perturbation are mandatory for each body.
-Only one Oracle writer may operate at a time. Facts not captured remain
-`UNKNOWN` or `UNRUN`.
+Two identical captures and one real perturbation were required for each body.
+All three are accepted; no Oracle writer remains active. ORACLE-06 proved that
+the source opening is a withdrawal set piece, so the first live implementation
+uses a source-bound, adapted one-alien KO/inactive clear. Facts not captured
+remain `UNKNOWN` or `UNRUN`.
 
 The later full-game Oracle cards remain read-only source research:
 

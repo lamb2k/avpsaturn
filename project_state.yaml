@@ -7,12 +7,12 @@ foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 production_head: 417ed808e10f0f255948b1e6ecf0223399509c74
 candidate_head: 82965ef80223a03937e0b527d16161ed68d874a0
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
-production_branch: codex/avp-user-02-enemy-review
+production_branch: codex/avp-playable-loop-pivot
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 review_candidate_status: ACCEPTED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW, PROMOTE-07-CDDA-RESIDENCY, REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION, ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS, ORACLE-05-STREET-ALIEN-AI]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW, PROMOTE-07-CDDA-RESIDENCY, REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION, ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS, ORACLE-05-STREET-ALIEN-AI, ORACLE-06-ROUND1-ENCOUNTER-RULES]
 target_scope:
   source_set: avspu
   route: cold-boot-through-title-select-all-stages-ending-credits
@@ -151,8 +151,8 @@ worktree_routing_policy:
   tranche_or_milestone_alone_requires_new_worktree: false
   preserve_existing_worktrees: true
   preserve_other_transition_validation_approval_and_push_requirements: true
-  current_continuity_worktree: C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-user-02-enemy-review
-  current_continuity_branch: codex/avp-user-02-enemy-review
+  current_continuity_worktree: C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-playable-loop-pivot
+  current_continuity_branch: codex/avp-playable-loop-pivot
 architecture_enforcement:
   mode: staged
   accepted_legacy_paths_are_grandfathered: true
@@ -197,8 +197,8 @@ independent_read_only_cards:
   - ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS
   - ORACLE-05-STREET-ALIEN-AI
   - ORACLE-06-ROUND1-ENCOUNTER-RULES
-active_independent_read_only_card: ORACLE-06-ROUND1-ENCOUNTER-RULES
-independent_oracle_write_owner: ORACLE-06-ROUND1-ENCOUNTER-RULES
+active_independent_read_only_card: null
+independent_oracle_write_owner: null
 independent_read_only_policy:
   primary_task_must_remain_active: true
   allowed_primary_hard_stop: READY_FOR_PHYSICAL
@@ -252,12 +252,28 @@ oracle05_source_research:
   lanes: Fast PASS / Oracle PASS
   saturn_emulator: UNRUN
   physical_saturn: UNRUN
-current_checkpoint: hw-01-probe-3-vdp1-budget-pretest
-active_task_card: docs/task_cards/HW-01-PROBE-3-VDP1-BUDGET-PRETEST.md
-active_task_id: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
-active_task_kind: QA
+oracle06_source_research:
+  task: ORACLE-06-ROUND1-ENCOUNTER-RULES
+  status: ACCEPTED
+  evidence_commit: 0b2ab60bccc0add6f2b5d2cd0fc8b6c118d713e8
+  classification: MEASURED_SOURCE_SET_PIECE_WITH_ADAPTED_SINGLE_ALIEN_CLEAR
+  fidelity: SOURCE_BOUND_WITH_ADAPTED_SINGLE_ALIEN_CLEAR
+  evidence: data/oracle06_round1_encounter.json
+  evidence_sha256: aa1406321b11a2616427431ddf13bb24d948914e12765c66191dc934d1457ce9
+  control_capture_sha256: ccf58c95c821cee7f54a6c4148a62f1d15c3436a05e92f89fdaaca600325f120
+  measured: credited Start and input-responsive P1 actor / class-0x1F spawn positions / controller active state / three camera locks and bounds / entry QSound batch / withdrawal with six living enemies / presentation removal / warehouse continuation
+  adapted: first live controller spawns one ORACLE-05 class-0x1F target and clears only after target KO then inactivity before camera unlock and continued movement
+  rejected_authority: timer-only clear / presentation-owned clear / source withdrawal as kill gate
+  bounded_unknown: entry audio semantic name / later Round 1 encounters / bosses / multiplayer scaling
+  lanes: Fast PASS / Oracle PASS
+  saturn_emulator: UNRUN
+  physical_saturn: UNRUN
+current_checkpoint: salvage-predator-warrior-action-controller
+active_task_card: docs/task_cards/SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER.md
+active_task_id: SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
+active_task_kind: SALVAGE
 task_status: READY
-active_write_owner: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
+active_write_owner: SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
 awaiting_user_feedback: []
 open_blockers: []
 hardware_pretest:

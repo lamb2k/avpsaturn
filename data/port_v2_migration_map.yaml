@@ -1198,8 +1198,10 @@
       "salvage_decision": "UNTESTED",
       "production_interface": null,
       "promoted_commit": null,
-      "blockers": ["Unblock: accept ORACLE-06 and both bounded production controllers before INTEGRATE-04A."],
-      "exact_next_experiment": "Run ORACLE-06 after ORACLE-05 and separate encounter state from street-alien AI and presentation events.",
+      "evidence_commit": "0b2ab60bccc0add6f2b5d2cd0fc8b6c118d713e8",
+      "diagnostic_interface": "data/oracle06_round1_encounter.json",
+      "blockers": ["Unblock: promote both bounded production controllers before INTEGRATE-04A; the adapted clear must consume target KO then inactivity and must not consume a timer or presentation flag."],
+      "exact_next_experiment": "Implement SALVAGE-10 against the accepted ORACLE-04/06 input and action contract while HW-01 remains parked for external physical hardware.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {
