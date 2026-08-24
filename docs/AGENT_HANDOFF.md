@@ -31,11 +31,12 @@ The active `QA` card is `HW-01-PROBE-3-VDP1-BUDGET-PRETEST`, status `READY`
 `codex/avp-hw-01-probe3`. Isolation was required because the continuity
 worktree had an owned-path collision with generated tracked data.
 
-Probe schedule `e892836d...abd84` binds committed AvP measurements: frame 5637
-expands to 567 commands and frame 5776 expands exactly to 909. Strict Probe
-image `b4410c8d...91c8` from implementation `78dc52c` passes two identical pinned-emulator semantic runs with
-summary `0xe3241b49`; the overload control trips. The normal-release regression
-remains exact at `4a142774...98ef`. Operator package is under
+Probe schedule `e892836d...abd84` binds frame 5637 to 567 workload draws and
+frame 5776 to 909; census composition is recorded separately in state. Probe
+image `82c3a86c...ef50` from `cdfae46e` passes two independent 36,000-field
+soaks with 4,560 alternating submissions, zero missed/late lists, checksum
+`0xf032955f`, 66.12% emulator-only minimum margin, and a tripped overload
+control. Normal ISO remains exact at `4a142774...98ef`. Operator package is at
 `build/feedback/HW-01-PROBE-3-VDP1-BUDGET-PRETEST/`. Read-only preflight found
 no removable target, serial/debug device, capture device, or loader tool and
 performed no write. Physical Saturn timing/scanout/soak remain `UNRUN`;
@@ -43,4 +44,4 @@ performed no write. Physical Saturn timing/scanout/soak remain `UNRUN`;
 
 Resume prompt:
 
-> Resume the AvP salvage Goal at HW-01-PROBE-3-VDP1-BUDGET-PRETEST `READY_FOR_PHYSICAL`; preserve Probe ISO b4410c8d74939903a253d391571720b3972f6253f77e599cd88a715e912591c8, approved INTEGRATE-03 ISO 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef, and all locks; identify the connected Saturn/cart/boot/pad/capture setup, request explicit authorization for any exact target write, run representative, peak-909, overload, alternating soak, then the two cold-boot exact-image records and integrated soak; keep physical evidence UNRUN and SALVAGE-08 inactive until every physical condition passes.
+> Resume the AvP salvage Goal at HW-01-PROBE-3-VDP1-BUDGET-PRETEST `READY_FOR_PHYSICAL`; preserve Probe ISO 82c3a86c34b79626bf2cda7c2da4174ab1ee3603b3341f5091b141b740b4ef50, approved INTEGRATE-03 ISO 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef, and all locks; identify the connected Saturn/cart/boot/pad/capture setup, request explicit authorization for any exact target write, run representative, peak-909, overload, alternating soak, then the two cold-boot exact-image records and integrated soak; keep physical evidence UNRUN and SALVAGE-08 inactive until every physical condition passes.
