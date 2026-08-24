@@ -18,7 +18,8 @@ param(
         'EnemySalvageBench',
         'EnemyPromotionBench', 'PlayerEnemyIntegration',
         'CollisionSalvageBench', 'HitKoPromotionBench',
-        'CombatIntegrationBench', 'PlayableSlice', 'Probe3')]
+        'CombatIntegrationBench', 'PlayableSlice', 'Probe3',
+        'PredatorWarriorActionSalvageBench')]
     [string]$TargetProfile = 'Default',
 
     [switch]$Regenerate,
@@ -156,6 +157,7 @@ function Invoke-FastLane {
     Invoke-PythonTest 'tests\test_oracle04_predator_controls.py'
     Invoke-PythonTest 'tests\test_oracle05_street_alien_ai.py'
     Invoke-PythonTest 'tests\test_oracle06_round1_encounter.py'
+    Invoke-PythonTest 'tests\port_v2\predator_warrior_action_bench\test_contract.py'
     Invoke-PythonTest 'tests\test_avsp_translation_boundary.py'
     Invoke-PythonTest 'tests\hardware\probe3\test_probe3.py'
 
@@ -218,6 +220,7 @@ function Invoke-OracleLane {
     Invoke-PythonTest 'tests\test_oracle04_predator_controls.py'
     Invoke-PythonTest 'tests\test_oracle05_street_alien_ai.py'
     Invoke-PythonTest 'tests\test_oracle06_round1_encounter.py'
+    Invoke-PythonTest 'tests\port_v2\predator_warrior_action_bench\test_contract.py'
     Invoke-PythonTest 'tests\test_avsp_translation_boundary.py'
 
     $mame = Join-Path $projectRoot '.deps\mame\mame0289\mame.exe'
@@ -293,6 +296,7 @@ function Invoke-TargetLane {
         CombatIntegrationBench = 'debug-combat-integration-bench'
         PlayableSlice = 'debug-playable-slice'
         Probe3 = 'debug-probe3'
+        PredatorWarriorActionSalvageBench = 'debug-predator-warrior-action-salvage-bench'
     }
     $expectedProfile = $profileNames[$TargetProfile]
     $profilePath = Join-Path $projectRoot 'build\last_compile_profile.txt'

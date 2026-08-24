@@ -39,6 +39,9 @@
 #ifdef AVSP_PROBE3
 #include "tests/hardware/probe3/probe3.h"
 #endif
+#ifdef AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH
+#include "tests/port_v2/predator_warrior_action_bench/predator_warrior_action_bench.h"
+#endif
 
 #include "generated/avsp_anim_records.h"
 #include "generated/avsp_emit_windows.h"
@@ -717,6 +720,53 @@ volatile int avsp_diag_collision_canary_ok;
 volatile AvspCollisionBenchResult
     avsp_diag_collision_samples[AVSP_COLLISION_CASE_COUNT];
 volatile int avsp_diag_collision_sample_count;
+#endif
+#ifdef AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH
+#define PW_ACTION_CANARY_HEAD 0x50574148UL
+#define PW_ACTION_CANARY_TAIL 0x50574154UL
+#define PW_ACTION_CAPTURE_FRAMES 384
+typedef struct
+{
+    int frame;
+    int input_mask;
+    int x;
+    int lane;
+    int height;
+    int health;
+    int facing;
+    int state;
+    int phase;
+    int selector;
+    int action_elapsed;
+    int source_action;
+    int source_substate;
+    int attack_active;
+    int box_x_center;
+    int box_x_half;
+    int box_y_center;
+    int box_y_half;
+    int box_z_center;
+    int box_z_half;
+    int hit_value;
+} AvspPwDiagnosticSample;
+typedef struct
+{
+    unsigned long head_canary;
+    AvspPwRuntime runtime;
+    unsigned long tail_canary;
+} AvspPwDiagnosticState;
+static AvspPwDiagnosticState pw_action_state;
+volatile AvspPwDiagnosticSample
+    avsp_diag_pw_action_samples[PW_ACTION_CAPTURE_FRAMES];
+volatile int avsp_diag_pw_action_sample_count;
+volatile int avsp_diag_pw_action_interface_version;
+volatile int avsp_diag_pw_action_frame;
+volatile int avsp_diag_pw_action_failures;
+volatile int avsp_diag_pw_action_canary_ok;
+volatile int avsp_diag_pw_action_accepted_edges;
+volatile int avsp_diag_pw_action_rejected_edges;
+volatile int avsp_diag_pw_action_contact_reports;
+volatile int avsp_diag_pw_action_negative_rejections;
 #endif
 #ifdef AVSP_FRONTEND_SHOT_TEST
 /* Visual-verification profile. The frontend surfaces this pass must compare
@@ -5343,6 +5393,118 @@ static void collision_bench_frame_callback(void)
 }
 #endif
 
+#ifdef AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH
+static int pw_action_bench_init(void)
+{
+    AvspPwAttackDef mutation[AVSP_PW_ACTION_COUNT];
+    memset(&pw_action_state, 0, sizeof(pw_action_state));
+    pw_action_state.head_canary = PW_ACTION_CANARY_HEAD;
+    pw_action_state.tail_canary = PW_ACTION_CANARY_TAIL;
+    avsp_pw_init(&pw_action_state.runtime);
+    avsp_diag_pw_action_sample_count = 0;
+    avsp_diag_pw_action_failures = 0;
+    avsp_diag_pw_action_negative_rejections = 0;
+    if (!avsp_pw_action_defs_valid(avsp_pw_action_defs,
+                                   AVSP_PW_ACTION_COUNT))
+        ++avsp_diag_pw_action_failures;
+    if (!avsp_pw_action_defs_valid(avsp_pw_action_defs,
+                                   AVSP_PW_ACTION_COUNT - 1u))
+        ++avsp_diag_pw_action_negative_rejections;
+    memcpy(mutation, avsp_pw_action_defs, sizeof(mutation));
+    mutation[3].box.z_half = 11;
+    if (!avsp_pw_action_defs_valid(mutation, AVSP_PW_ACTION_COUNT))
+        ++avsp_diag_pw_action_negative_rejections;
+    return avsp_diag_pw_action_failures == 0 &&
+           avsp_diag_pw_action_negative_rejections == 2;
+}
+
+static AvspPwInput pw_action_bench_input(const int frame)
+{
+    AvspPwInput input;
+    input.mask = 0u;
+    input.received_damage = 0;
+    if (frame >= 0 && frame < 20) input.mask |= AVSP_PW_INPUT_RIGHT;
+    if (frame >= 30 && frame < 50) input.mask |= AVSP_PW_INPUT_UP;
+    if (frame == 80 || frame == 125 || frame == 170 || frame == 215)
+        input.mask |= AVSP_PW_INPUT_ATTACK;
+    if (frame == 270) input.received_damage = 8;
+    if (frame == 310) input.received_damage = 100;
+    return input;
+}
+
+static void pw_action_bench_frame_callback(void)
+{
+    AvspPwDiagnosticSample sample;
+    AvspPwInput input;
+    AvspPwView view;
+    int frame;
+    frame = avsp_diag_pw_action_frame;
+    if (frame < PW_ACTION_CAPTURE_FRAMES)
+    {
+        input = pw_action_bench_input(frame);
+        avsp_pw_step(&pw_action_state.runtime, &input);
+        if (pw_action_state.runtime.attack_active)
+            avsp_pw_report_contact(&pw_action_state.runtime);
+        avsp_pw_view(&pw_action_state.runtime, &view);
+        sample.frame = frame;
+        sample.input_mask = input.mask;
+        sample.x = view.x;
+        sample.lane = view.lane;
+        sample.height = view.height;
+        sample.health = view.health;
+        sample.facing = view.facing;
+        sample.state = view.state;
+        sample.phase = view.phase;
+        sample.selector = view.selector;
+        sample.action_elapsed = view.action_elapsed;
+        sample.source_action = view.source_action;
+        sample.source_substate = view.source_substate;
+        sample.attack_active = view.attack_active;
+        sample.box_x_center = view.attack_box.x_center;
+        sample.box_x_half = view.attack_box.x_half;
+        sample.box_y_center = view.attack_box.y_center;
+        sample.box_y_half = view.attack_box.y_half;
+        sample.box_z_center = view.attack_box.z_center;
+        sample.box_z_half = view.attack_box.z_half;
+        sample.hit_value = view.attack_box.hit_value;
+        avsp_diag_pw_action_samples[frame] = sample;
+        avsp_diag_pw_action_sample_count = frame + 1;
+        ++avsp_diag_pw_action_frame;
+    }
+    avsp_diag_runtime_ready = runtime_ready;
+    avsp_diag_pw_action_interface_version =
+        AVSP_PW_ACTION_BENCH_INTERFACE_VERSION;
+    avsp_diag_pw_action_canary_ok =
+        pw_action_state.head_canary == PW_ACTION_CANARY_HEAD &&
+        pw_action_state.tail_canary == PW_ACTION_CANARY_TAIL;
+    avsp_diag_pw_action_accepted_edges =
+        (int)pw_action_state.runtime.accepted_attack_edges;
+    avsp_diag_pw_action_rejected_edges =
+        (int)pw_action_state.runtime.rejected_attack_edges;
+    avsp_diag_pw_action_contact_reports =
+        (int)pw_action_state.runtime.contact_reports;
+    jo_printf(2, 3, "SALVAGE-10 P WARRIOR ACTION");
+    jo_printf(2, 5, "FRAME %03d SAMPLE %03d", avsp_diag_pw_action_frame,
+              avsp_diag_pw_action_sample_count);
+    jo_printf(2, 7, "POS %d,%d H %d HP %d", pw_action_state.runtime.x,
+              pw_action_state.runtime.lane, pw_action_state.runtime.height,
+              pw_action_state.runtime.health);
+    jo_printf(2, 9, "STATE %d PHASE %d SEL %d T %d",
+              pw_action_state.runtime.state, pw_action_state.runtime.phase,
+              pw_action_state.runtime.selector,
+              pw_action_state.runtime.action_elapsed);
+    jo_printf(2, 11, "EDGES %d REJECT %d CONTACT %d",
+              avsp_diag_pw_action_accepted_edges,
+              avsp_diag_pw_action_rejected_edges,
+              avsp_diag_pw_action_contact_reports);
+    jo_printf(2, 13, "NEG %d/2 CANARY %s FAIL %d",
+              avsp_diag_pw_action_negative_rejections,
+              avsp_diag_pw_action_canary_ok ? "PASS" : "FAIL",
+              avsp_diag_pw_action_failures);
+    jo_printf(2, 15, "PHYSICAL SATURN UNRUN");
+}
+#endif
+
 #ifdef AVSP_CDDA_RESIDENCY_SALVAGE_BENCH
 #ifdef AVSP_CDDA_RESIDENCY_PROMOTION_BENCH
 static int cdda_residency_read_buffer_ok(void)
@@ -6270,6 +6432,10 @@ static void frame_callback(void)
     collision_bench_frame_callback();
     return;
 #endif
+#ifdef AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH
+    pw_action_bench_frame_callback();
+    return;
+#endif
 #ifdef AVSP_CDDA_RESIDENCY_SALVAGE_BENCH
     cdda_residency_bench_frame_callback();
     return;
@@ -6950,6 +7116,10 @@ void jo_main(void)
 #elif defined(AVSP_COLLISION_SALVAGE_BENCH)
     runtime_ready = collision_bench_init();
     if (!runtime_ready) failed_asset = "COLLISION BENCH FAILED";
+    JO_UNUSED_ARG(index);
+#elif defined(AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH)
+    runtime_ready = pw_action_bench_init();
+    if (!runtime_ready) failed_asset = "P WARRIOR ACTION BENCH FAILED";
     JO_UNUSED_ARG(index);
 #elif defined(AVSP_PLAYER_SALVAGE_BENCH)
 #ifdef AVSP_PLAYER_ENEMY_INTEGRATION

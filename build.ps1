@@ -28,6 +28,7 @@ param(
     [switch]$CombatIntegrationBench,
     [switch]$PlayableSlice,
     [switch]$Probe3,
+    [switch]$PredatorWarriorActionSalvageBench,
     [switch]$SkipHostTests
 )
 
@@ -42,7 +43,8 @@ $usePlayableSlice = $PlayableSlice -or ($Release -and
           $CddaResidencySalvageBench -or $CddaResidencyPromotionBench -or
           $EnemySalvageBench -or $EnemyPromotionBench -or
           $PlayerEnemyIntegration -or $CollisionSalvageBench -or
-          $HitKoPromotionBench -or $CombatIntegrationBench -or $Probe3))
+          $HitKoPromotionBench -or $CombatIntegrationBench -or $Probe3 -or
+          $PredatorWarriorActionSalvageBench))
 if (-not $JoEngineRoot) {
     $JoEngineRoot = Join-Path $projectRoot '.deps\joengine'
 }
@@ -324,6 +326,7 @@ try {
         }
 
         $buildProfile = if ($Probe3) { 'probe3' }
+            elseif ($PredatorWarriorActionSalvageBench) { 'predator-warrior-action-salvage-bench' }
             elseif ($PlayableSlice) { 'playable-slice' }
             elseif ($CombatIntegrationBench) { 'combat-integration-bench' }
             elseif ($HitKoPromotionBench) { 'hit-ko-promotion-bench' }
@@ -358,7 +361,8 @@ try {
         if ($previousProfile -ne $compileProfile) {
             foreach ($objectName in @(
                 'main.o', 'capability_model.o',
-                'tests\hardware\probe3\probe3.o')) {
+                'tests\hardware\probe3\probe3.o',
+                'tests\port_v2\predator_warrior_action_bench\predator_warrior_action_bench.o')) {
                 $objectPath = Join-Path $projectRoot $objectName
                 if (Test-Path -LiteralPath $objectPath) {
                     Remove-Item -LiteralPath $objectPath -Force
@@ -474,6 +478,9 @@ try {
         }
         if ($Probe3) {
             $makeArguments += 'AVSP_PROBE3=1'
+        }
+        if ($PredatorWarriorActionSalvageBench) {
+            $makeArguments += 'AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH=1'
         }
         if ($FrontendTest) {
             $makeArguments += 'AVSP_FRONTEND_TEST=1'

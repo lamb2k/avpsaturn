@@ -94,6 +94,9 @@ endif
 ifneq ($(AVSP_PROBE3),)
 CCFLAGS += -DAVSP_PROBE3=1 -Werror -Wno-unused-function
 endif
+ifneq ($(AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH),)
+CCFLAGS += -DAVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH=1 -Werror -Wno-unused-function
+endif
 JO_DEBUG ?= 1
 JO_NTSC = 1
 JO_COMPILE_USING_SGL = 1
@@ -119,6 +122,9 @@ SRCS += src/port_v2/integration/slice/slice.c
 endif
 ifneq ($(AVSP_PROBE3),)
 SRCS += tests/hardware/probe3/probe3.c
+endif
+ifneq ($(AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH),)
+SRCS += tests/port_v2/predator_warrior_action_bench/predator_warrior_action_bench.c
 endif
 
 # The pinned Yaba Sanshiro boot path stalls when Jo Engine's monolithic first-
