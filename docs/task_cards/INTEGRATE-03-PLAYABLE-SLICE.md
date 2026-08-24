@@ -2,7 +2,7 @@
 
 TASK: INTEGRATE-03-PLAYABLE-SLICE
 KIND: INTEGRATE
-STATUS: CHANGES_REQUESTED
+STATUS: READY
 CHECKPOINT: integrate-playable-slice
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -11,7 +11,7 @@ DEPENDENCIES: [INTEGRATE-02-COMBAT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMER
 REQUIRED_LANES: [Fast, Oracle, Target, Emulator, Full, Physical]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION]
+NEXT_ELIGIBLE_CARDS: [SALVAGE-08-FRONTEND]
 
 ## Objective
 
@@ -260,3 +260,25 @@ pivot, grounding, and active-window state. INTEGRATE-03 may resume only after
 REPAIR-09 is accepted, and must then replace the stitched choreography,
 recapture source-versus-Saturn visual QA, rerun Full, and stop for renewed human
 review. Preserve the working death/KO animation and every other approved lock.
+
+### REPAIR-09 accepted interface checkpoint
+
+REPAIR-09 implementation `417ed808e10f0f255948b1e6ecf0223399509c74`
+accepts player/combat interface version 2. One independently captured MAME
+source event now owns the attack selector, source player action/substate,
+animation record, pose, pivot, height, active window, collision selector,
+damage, and the corresponding class-`0x1F` alien reaction identity.
+
+The four source contacts remain at relative offsets `0/46/93/139`. Paired
+pinned-emulator readbacks and two independent 297-frame cadence captures pass;
+valid nonzero wrong player/alien object and tile families, a wrong palette, and
+a wrong selector are rejected. Codex directly inspected all four collision
+overlays, the alien-family comparison, and the temporal strips. Attack 3's
+silhouette gap is source-supported box reach; attack 4 is a source-supported
+airborne pose with its own pivot and height. The death/KO sequence remains
+unchanged.
+
+Resume this card by replacing its stitched slice choreography with the accepted
+source-bound interface. Then rebuild the complete `release-normal-release`
+scene, rerun Full, and stop for renewed explicit human review before the
+separate physical Saturn procedure. `SALVAGE-08-FRONTEND` remains inactive.

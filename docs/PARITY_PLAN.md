@@ -65,16 +65,18 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
+CURRENT_TASK: INTEGRATE-03-PLAYABLE-SLICE
 
 ## 4. Current salvage queue and production extension
 
 The accepted player, enemy, combat, camera/stage, P1/P2 HUD, PCM, CDDA, and
-phase-residency results remain regression locks. INTEGRATE-03 is unaccepted and
-`CHANGES_REQUESTED` after Review correction 4 exposed selector-presentation,
-alien-family, collision-visibility, and player-grounding defects. The promoted
-player contract cannot carry the required source presentation state, so the
-bounded REPAIR-09 interface body is active on the same continuity branch.
+phase-residency results remain regression locks. REPAIR-09 is accepted at the
+implementation recorded by `project_state.production_head`: the player/combat
+interface now binds each selector-specific player presentation, collision,
+damage, and class-`0x1F` alien reaction to one independent MAME source event.
+INTEGRATE-03 remains unaccepted and `CHANGES_REQUESTED`; it is active on the
+same continuity branch to consume that interface, recapture the complete
+normal-release scene, rerun Full, and stop for renewed human review.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

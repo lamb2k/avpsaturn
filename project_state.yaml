@@ -4,15 +4,15 @@ workflow_model: interactive-salvage-promotion-integration
 roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
-production_head: 684ed1b27e840ac940bc95484b32d7f6e3972a01
-candidate_head: 509cb20d9c8867e869ca3ade90c62ede57540571
+production_head: 417ed808e10f0f255948b1e6ecf0223399509c74
+candidate_head: 417ed808e10f0f255948b1e6ecf0223399509c74
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-user-02-enemy-review
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 review_candidate_status: ACCEPTED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW, PROMOTE-07-CDDA-RESIDENCY]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW, PROMOTE-07-CDDA-RESIDENCY, REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION]
 target_scope:
   source_set: avspu
   route: cold-boot-through-title-select-all-stages-ending-credits
@@ -95,6 +95,9 @@ accepted_implementation_history:
   - id: PROMOTE-07-CDDA-RESIDENCY
     status: ACCEPTED
     head: 684ed1b27e840ac940bc95484b32d7f6e3972a01
+  - id: REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
+    status: ACCEPTED
+    head: 417ed808e10f0f255948b1e6ecf0223399509c74
 accepted_control_plane_history:
   - id: ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN
     status: ACCEPTED
@@ -190,12 +193,12 @@ architecture_enforcement:
     - id: evidence-tier-separation
       status: ACTIVE
       activates_when: always
-current_checkpoint: repair-source-bound-combat-presentation
-active_task_card: docs/task_cards/REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION.md
-active_task_id: REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
-active_task_kind: REPAIR
+current_checkpoint: integrate-playable-slice
+active_task_card: docs/task_cards/INTEGRATE-03-PLAYABLE-SLICE.md
+active_task_id: INTEGRATE-03-PLAYABLE-SLICE
+active_task_kind: INTEGRATE
 task_status: READY
-active_write_owner: REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
+active_write_owner: INTEGRATE-03-PLAYABLE-SLICE
 awaiting_user_feedback: []
 open_blockers: []
 pending_integration_review:
@@ -209,8 +212,10 @@ pending_integration_review:
     The third player attack is too far away and appears not to make contact. The
     fourth hit causes the player to lose grounding/anchor and the alien sprite
     switches again. The death animation works and should remain unchanged.
-  hard_stop: The promoted player contract cannot carry source attack selector, action/substate, animation record, pose, pivot, grounding, or selector-owned active-window state.
+  resolved_interface_gap: REPAIR-09 accepted player/combat interface version 2 at 417ed808e10f0f255948b1e6ecf0223399509c74; INTEGRATE-03 must now consume it without widening the repair.
   repair_card: REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
+  repair_status: ACCEPTED
+  repair_implementation_head: 417ed808e10f0f255948b1e6ecf0223399509c74
   physical_saturn: UNRUN
   blocked_successor: SALVAGE-08-FRONTEND
 completed_dispositions:
@@ -738,6 +743,33 @@ completed_dispositions:
       - Exact source music timing, full-route residency, normal release, a second emulator, and physical Saturn remain unproven or UNRUN.
       - The temporary main.c Saturn diagnostic adapter remains until INTEGRATE-03 consumes the production ports in the complete capability slice.
     exact_next_experiment: Integrate only the promoted player, enemy, combat, camera/stage, HUD, PCM, CDDA, and phase-residency interfaces into INTEGRATE-03; preserve every approved lock, prove exact normal-release emulator behavior, then stop for the declared subjective and physical checkpoints.
+  - task: REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
+    evaluated_head: 417ed808e10f0f255948b1e6ecf0223399509c74
+    technical_status: PASS
+    fidelity_status: MEASURED
+    user_status: NOT_REVIEWED
+    salvage_decision: PROMOTED
+    successor_activation: INTEGRATE-03-PLAYABLE-SLICE
+    production_interfaces:
+      - src/port_v2/player/player.h
+      - src/port_v2/integration/combat/combat.h
+    approved_component_locks:
+      - Approved player idle/walk assets, pivot, palette, grounding, and animation presentation remain unchanged.
+      - Approved class-0x1F WALK and death/KO presentation remain unchanged.
+      - Shared camera/stage, P1/P2 HUD, PCM, CDDA, residency, canary, collision, and HIT/KO semantic contracts remain locked.
+    evidence:
+      - Independent MAME 0.289 avspu cadence captures agree byte-for-byte across source frames 5173 through 5469 and bind contacts 5190, 5236, 5283, and 5329 to selectors 1, 2, 3, and 4.
+      - One source event owns selector, player action/substate/record/pose/pivot/height/active window, collision selector, damage, and the matching alien reaction record/palette/object/tile identities.
+      - Strict C90 focused repeat and real mutations PASS; wrong selector, valid nonzero player or alien object/tile family, wrong palette, mutated writer, and player negative controls reject.
+      - Fast PASS. Applicable Oracle controls and pinned avspu identity PASS; the generic Oracle wrapper is INCOMPLETE only for protected V2-2B private writer inputs absent here.
+      - Two deterministic CombatIntegrationBench Target builds normalize to ISO SHA-256 28a1ac476b5945d30643d531d1748efb5b9ab06218a2d010fba1035e8cac0caf.
+      - Paired pinned Yaba Sanshiro 1.20.37-2986eb semantic readbacks PASS, and two independent 297-frame cadence traces have identical semantic state and normalized aperture pixels.
+      - Source-versus-Saturn timing differences are zero for all four contacts. Codex directly inspected all collision overlays, the alien-family comparison, and temporal strips; attack 3 has source-supported box reach and attack 4 has a source-supported airborne pivot/height.
+      - The ignored review package is build/feedback/REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION. Production control and enemy AI remain UNKNOWN; only deterministic choreography is ADAPTED. Physical Saturn remains UNRUN.
+    blockers:
+      - INTEGRATE-03 must consume the accepted interface in its slice-owned paths and replace the stitched choreography before renewed human review.
+      - Full, normal-release acceptance, renewed human approval, and the separate physical Saturn capability procedure remain required before SALVAGE-08.
+    exact_next_experiment: In active INTEGRATE-03, consume player/combat interface version 2 through slice-owned paths, rebuild and recapture the complete normal-release scene, rerun Full, and stop for renewed explicit human review before physical Saturn or SALVAGE-08.
 task_queue:
   - SALVAGE-00-OLD-BUILD-BASELINE
   - WF-2-SALVAGE-TRANSITION-REPAIR

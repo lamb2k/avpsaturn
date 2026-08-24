@@ -2,7 +2,7 @@
 
 TASK: REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION
 KIND: REPAIR
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: repair-source-bound-combat-presentation
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
