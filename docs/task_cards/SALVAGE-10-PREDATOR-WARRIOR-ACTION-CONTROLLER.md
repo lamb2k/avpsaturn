@@ -2,7 +2,7 @@
 
 TASK: SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
 KIND: SALVAGE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: salvage-predator-warrior-action-controller
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -65,6 +65,22 @@ No acceptance of feel here; USER-09 reviews the integrated encounter.
 
 - Missing source rule, required interface widening beyond the bounded action
   controller, approved regression, nondeterminism, or architecture decision.
+
+## Accepted evidence
+
+- Implementation commit: `c81715da365683d240950c49b9930543691beb1a`.
+- Fast, Oracle, and dedicated Target lanes: `PASS`.
+- Two cold pinned-Yaba runs: `PASS`, exact 384-sample ledgers and normalized
+  diagnostic ISO SHA-256
+  `a6017eac7c1b38d82e9cff0335dd51101ccb7858edb71ad4521baaf72eb8f075`.
+- Exact result: four accepted controller-owned attack edges, zero rejected
+  edges, 50 telemetry-only contact reports, source-bound movement/attack
+  timing and boxes, nonlethal HIT recovery, lethal KO hold, zero failures,
+  intact canaries, and deterministic repeat.
+- Contact reports do not select attacks or change player state. Enemy AI,
+  collision damage authority, route progression, multiplayer, subjective
+  feel, and physical Saturn remain outside this acceptance; physical Saturn
+  is `UNRUN`.
 
 ## Next eligible cards
 

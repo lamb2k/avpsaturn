@@ -2,7 +2,7 @@
 
 TASK: PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
 KIND: PROMOTE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: promote-predator-warrior-action-controller
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

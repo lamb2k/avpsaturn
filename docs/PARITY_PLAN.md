@@ -65,15 +65,15 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
+CURRENT_TASK: PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
 
-ACTIVE_SOFTWARE_TASK: SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
+ACTIVE_SOFTWARE_TASK: PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
 
 ## 4. Current salvage queue and production extension
 
 The accepted player, enemy, combat, camera/stage, P1/P2 HUD, PCM, CDDA, and
-phase-residency results remain regression locks. REPAIR-09 is accepted at the
-implementation recorded by `project_state.production_head`: the player/combat
+phase-residency results remain regression locks. REPAIR-09 is accepted at
+implementation `417ed80`: the player/combat
 interface now binds each selector-specific player presentation, collision,
 damage, and class-`0x1F` alien reaction to one independent MAME source event.
 INTEGRATE-03 is user `APPROVED` for `SOURCE_BOUND_WITH_ADAPTED_INPUT` at exact

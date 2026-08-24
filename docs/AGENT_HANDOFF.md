@@ -34,8 +34,12 @@ withdrawal set piece, not a kill clear. The live-loop contract is explicitly
 adapted to one ORACLE-05 alien and clears only after target KO then inactivity;
 timers and presentation flags cannot clear it.
 
-The sole software writer is
-`SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER`.
-Resume prompt:
+SALVAGE-10 is accepted at implementation `c81715d`. Its two cold pinned-Yaba
+runs have identical 384-sample ledgers and normalized diagnostic ISO
+`a6017eac...b8f075`; controller edges own attack selection, while 50 contact
+reports are telemetry only. Enemy AI, route progression, subjective feel, and
+physical Saturn remain outside that acceptance.
 
-> Resume the AvP salvage Goal by executing only SALVAGE-10 on codex/avp-playable-loop-pivot; preserve the accepted ORACLE-04/05/06 evidence, approved INTEGRATE-03 ISO 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef, Probe ISO 82c3a86c34b79626bf2cda7c2da4174ab1ee3603b3341f5091b141b740b4ef50, all component locks, dirty/private evidence, and physical Saturn UNRUN; implement only the bounded Jo/SGL-free Predator Warrior action controller and its dedicated diagnostic/readback, then validate, promote, and advance serially.
+The sole software writer is `PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER`.
+Resume prompt:
+> Resume the AvP salvage Goal by executing only PROMOTE-10 on codex/avp-playable-loop-pivot; preserve accepted SALVAGE-10 implementation c81715da365683d240950c49b9930543691beb1a, ORACLE-04/05/06 evidence, approved INTEGRATE-03 ISO 4a1427749833ee3860c1a802c02105e921171c266693f9c612fd6e64a3cd98ef, Probe ISO 82c3a86c34b79626bf2cda7c2da4174ab1ee3603b3341f5091b141b740b4ef50, all component locks, dirty/private evidence, and physical Saturn UNRUN; promote only the bounded Jo/SGL-free Predator Warrior action controller behind a narrow production interface, validate, and advance serially.
