@@ -155,6 +155,7 @@ function Invoke-FastLane {
     Invoke-PythonTest 'tests\test_avsp_vertical_slice_oracle.py'
     Invoke-PythonTest 'tests\test_oracle04_predator_controls.py'
     Invoke-PythonTest 'tests\test_oracle05_street_alien_ai.py'
+    Invoke-PythonTest 'tests\test_oracle06_round1_encounter.py'
     Invoke-PythonTest 'tests\test_avsp_translation_boundary.py'
     Invoke-PythonTest 'tests\hardware\probe3\test_probe3.py'
 
@@ -216,6 +217,7 @@ function Invoke-OracleLane {
     Invoke-PythonTest 'tests\test_avsp_vertical_slice_oracle.py'
     Invoke-PythonTest 'tests\test_oracle04_predator_controls.py'
     Invoke-PythonTest 'tests\test_oracle05_street_alien_ai.py'
+    Invoke-PythonTest 'tests\test_oracle06_round1_encounter.py'
     Invoke-PythonTest 'tests\test_avsp_translation_boundary.py'
 
     $mame = Join-Path $projectRoot '.deps\mame\mame0289\mame.exe'

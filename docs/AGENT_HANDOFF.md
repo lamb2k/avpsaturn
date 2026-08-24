@@ -1,10 +1,8 @@
 # Active checkpoint
-
 `project_state.yaml` is the machine-readable source of truth and
 `docs/PARITY_PLAN.md` is the only roadmap.
 
 ## Workflow pivot
-
 Future production cards continue sequentially from `production_head`.
 
 ## Preserved evidence work
