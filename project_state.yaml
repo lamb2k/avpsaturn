@@ -239,6 +239,18 @@ oracle04_source_research:
   lanes: Fast PASS / Oracle PASS
   saturn_emulator: UNRUN
   physical_saturn: UNRUN
+oracle05_source_research:
+  task: ORACLE-05-STREET-ALIEN-AI
+  status: VALIDATED
+  classification: MEASURED_MAME_EXECUTION_WITH_STATIC_ROUTINE_BINDING
+  evidence: data/oracle05_street_alien_ai.json
+  evidence_sha256: 8b7a9372555414ba0ecfb44b6e8e207d0b873499bc6f7dedb45e52b2fd677031
+  control_capture_sha256: f65d127841ae23f4358cdc50dde5177252aeadb32e9e3ad46dc904a582d5741b
+  measured: class-0x1F spawn / one-player target / approach and observed lane motion / facing / attack selection and timer / two damage contacts / HIT recovery KO removal / reposition state / scheduler order / consumed RNG recurrence
+  bounded_unknown: target-relative lane reselection in the controlled window / other archetypes / live multiplayer targeting
+  lanes: Fast PASS / Oracle PASS
+  saturn_emulator: UNRUN
+  physical_saturn: UNRUN
 current_checkpoint: hw-01-probe-3-vdp1-budget-pretest
 active_task_card: docs/task_cards/HW-01-PROBE-3-VDP1-BUDGET-PRETEST.md
 active_task_id: HW-01-PROBE-3-VDP1-BUDGET-PRETEST

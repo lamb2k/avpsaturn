@@ -1175,12 +1175,15 @@
       "proposed_isolated_bench": "SALVAGE-11 replays the measured class-0x1F loop against current player state and deterministic source RNG.",
       "technical_status": "UNRUN",
       "fidelity_status": "UNKNOWN",
+      "source_research_status": "MEASURED",
+      "source_research_evidence": "data/oracle05_street_alien_ai.json",
+      "source_research_scope": "one class-0x1F slot on the first-live-encounter route: spawn, one-player target, approach and observed lane motion, facing, attack timer/contacts/damage, HIT/recovery/KO/removal, reposition state, scheduler order, and consumed RNG; target-relative lane reselection in the controlled window, other archetypes, and live multiplayer remain unmeasured",
       "user_status": "NOT_REVIEWED",
       "salvage_decision": "UNTESTED",
       "production_interface": null,
       "promoted_commit": null,
-      "blockers": ["Unblock: accept ORACLE-05 and promote the bounded Predator Warrior action controller before SALVAGE-11."],
-      "exact_next_experiment": "Run ORACLE-05 after ORACLE-04 using controlled distance, lane, health, timer, attack-timing, and RNG counterfactuals.",
+      "blockers": ["Unblock: accept ORACLE-06 and promote the bounded Predator Warrior action controller before SALVAGE-11."],
+      "exact_next_experiment": "Run ORACLE-06 serially, preserving the accepted class-0x1F scheduler/RNG evidence and separating encounter authority from actor AI and presentation.",
       "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
     },
     {
