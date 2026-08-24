@@ -21,7 +21,7 @@ param(
         'CombatIntegrationBench', 'PlayableSlice', 'Probe3',
         'PredatorWarriorActionSalvageBench',
         'PredatorWarriorActionPromotionBench',
-        'StreetAlienAiSalvageBench')]
+        'StreetAlienAiSalvageBench', 'StreetAlienAiPromotionBench')]
     [string]$TargetProfile = 'Default',
 
     [switch]$Regenerate,
@@ -162,6 +162,7 @@ function Invoke-FastLane {
     Invoke-PythonTest 'tests\port_v2\predator_warrior_action_bench\test_contract.py'
     Invoke-PythonTest 'tests\port_v2\predator_warrior_action\test_contract.py'
     Invoke-PythonTest 'tests\port_v2\street_alien_ai_bench\test_contract.py'
+    Invoke-PythonTest 'tests\port_v2\street_alien_ai\test_contract.py'
     Invoke-PythonTest 'tests\test_avsp_translation_boundary.py'
     Invoke-PythonTest 'tests\hardware\probe3\test_probe3.py'
 
@@ -227,6 +228,7 @@ function Invoke-OracleLane {
     Invoke-PythonTest 'tests\port_v2\predator_warrior_action_bench\test_contract.py'
     Invoke-PythonTest 'tests\port_v2\predator_warrior_action\test_contract.py'
     Invoke-PythonTest 'tests\port_v2\street_alien_ai_bench\test_contract.py'
+    Invoke-PythonTest 'tests\port_v2\street_alien_ai\test_contract.py'
     Invoke-PythonTest 'tests\test_avsp_translation_boundary.py'
 
     $mame = Join-Path $projectRoot '.deps\mame\mame0289\mame.exe'
@@ -305,6 +307,7 @@ function Invoke-TargetLane {
         PredatorWarriorActionSalvageBench = 'debug-predator-warrior-action-salvage-bench'
         PredatorWarriorActionPromotionBench = 'debug-predator-warrior-action-promotion-bench'
         StreetAlienAiSalvageBench = 'debug-street-alien-ai-salvage-bench'
+        StreetAlienAiPromotionBench = 'debug-street-alien-ai-promotion-bench'
     }
     $expectedProfile = $profileNames[$TargetProfile]
     $profilePath = Join-Path $projectRoot 'build\last_compile_profile.txt'

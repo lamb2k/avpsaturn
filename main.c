@@ -46,6 +46,8 @@
 #endif
 #ifdef AVSP_STREET_ALIEN_AI_SALVAGE_BENCH
 #include "tests/port_v2/street_alien_ai_bench/street_alien_ai_bench.h"
+#elif defined(AVSP_STREET_ALIEN_AI_PROMOTION_BENCH)
+#include "src/port_v2/gameplay/street_alien_ai/street_alien_ai.h"
 #endif
 
 #include "generated/avsp_anim_records.h"
@@ -774,7 +776,8 @@ volatile int avsp_diag_pw_action_rejected_edges;
 volatile int avsp_diag_pw_action_contact_reports;
 volatile int avsp_diag_pw_action_negative_rejections;
 #endif
-#ifdef AVSP_STREET_ALIEN_AI_SALVAGE_BENCH
+#if defined(AVSP_STREET_ALIEN_AI_SALVAGE_BENCH) || \
+    defined(AVSP_STREET_ALIEN_AI_PROMOTION_BENCH)
 #define ALIEN_AI_CANARY_HEAD 0x41494148UL
 #define ALIEN_AI_CANARY_TAIL 0x41494154UL
 #define ALIEN_AI_CAPTURE_FRAMES 576
@@ -5558,7 +5561,8 @@ static void pw_action_bench_frame_callback(void)
 }
 #endif
 
-#ifdef AVSP_STREET_ALIEN_AI_SALVAGE_BENCH
+#if defined(AVSP_STREET_ALIEN_AI_SALVAGE_BENCH) || \
+    defined(AVSP_STREET_ALIEN_AI_PROMOTION_BENCH)
 static int alien_ai_bench_init(void)
 {
     memset(&alien_ai_state, 0, sizeof(alien_ai_state));
@@ -6595,7 +6599,8 @@ static void frame_callback(void)
     pw_action_bench_frame_callback();
     return;
 #endif
-#ifdef AVSP_STREET_ALIEN_AI_SALVAGE_BENCH
+#if defined(AVSP_STREET_ALIEN_AI_SALVAGE_BENCH) || \
+    defined(AVSP_STREET_ALIEN_AI_PROMOTION_BENCH)
     alien_ai_bench_frame_callback();
     return;
 #endif
@@ -7285,7 +7290,8 @@ void jo_main(void)
     runtime_ready = pw_action_bench_init();
     if (!runtime_ready) failed_asset = "P WARRIOR ACTION BENCH FAILED";
     JO_UNUSED_ARG(index);
-#elif defined(AVSP_STREET_ALIEN_AI_SALVAGE_BENCH)
+#elif defined(AVSP_STREET_ALIEN_AI_SALVAGE_BENCH) || \
+      defined(AVSP_STREET_ALIEN_AI_PROMOTION_BENCH)
     runtime_ready = alien_ai_bench_init();
     if (!runtime_ready) failed_asset = "STREET ALIEN AI BENCH FAILED";
     JO_UNUSED_ARG(index);

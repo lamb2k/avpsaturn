@@ -31,6 +31,7 @@ param(
     [switch]$PredatorWarriorActionSalvageBench,
     [switch]$PredatorWarriorActionPromotionBench,
     [switch]$StreetAlienAiSalvageBench,
+    [switch]$StreetAlienAiPromotionBench,
     [switch]$SkipHostTests
 )
 
@@ -48,7 +49,7 @@ $usePlayableSlice = $PlayableSlice -or ($Release -and
           $HitKoPromotionBench -or $CombatIntegrationBench -or $Probe3 -or
           $PredatorWarriorActionSalvageBench -or
           $PredatorWarriorActionPromotionBench -or
-          $StreetAlienAiSalvageBench))
+          $StreetAlienAiSalvageBench -or $StreetAlienAiPromotionBench))
 if (-not $JoEngineRoot) {
     $JoEngineRoot = Join-Path $projectRoot '.deps\joengine'
 }
@@ -330,6 +331,7 @@ try {
         }
 
         $buildProfile = if ($Probe3) { 'probe3' }
+            elseif ($StreetAlienAiPromotionBench) { 'street-alien-ai-promotion-bench' }
             elseif ($StreetAlienAiSalvageBench) { 'street-alien-ai-salvage-bench' }
             elseif ($PredatorWarriorActionPromotionBench) { 'predator-warrior-action-promotion-bench' }
             elseif ($PredatorWarriorActionSalvageBench) { 'predator-warrior-action-salvage-bench' }
@@ -370,7 +372,8 @@ try {
                 'tests\hardware\probe3\probe3.o',
                 'tests\port_v2\predator_warrior_action_bench\predator_warrior_action_bench.o',
                 'src\port_v2\gameplay\player_action\player_action.o',
-                'tests\port_v2\street_alien_ai_bench\street_alien_ai_bench.o')) {
+                'tests\port_v2\street_alien_ai_bench\street_alien_ai_bench.o',
+                'src\port_v2\gameplay\street_alien_ai\street_alien_ai.o')) {
                 $objectPath = Join-Path $projectRoot $objectName
                 if (Test-Path -LiteralPath $objectPath) {
                     Remove-Item -LiteralPath $objectPath -Force
@@ -495,6 +498,9 @@ try {
         }
         if ($StreetAlienAiSalvageBench) {
             $makeArguments += 'AVSP_STREET_ALIEN_AI_SALVAGE_BENCH=1'
+        }
+        if ($StreetAlienAiPromotionBench) {
+            $makeArguments += 'AVSP_STREET_ALIEN_AI_PROMOTION_BENCH=1'
         }
         if ($FrontendTest) {
             $makeArguments += 'AVSP_FRONTEND_TEST=1'
