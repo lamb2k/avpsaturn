@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "task_id": "PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER",
+  "card_profile": "PredatorWarriorActionPromotionBench",
+  "compile_profile": "debug-predator-warrior-action-promotion-bench",
+  "manifest_profile": "predator-warrior-action-promotion-bench",
+  "build_root": "build/port_v2/predator_warrior_action",
+  "required_readback_symbols": [
+    "avsp_diag_runtime_ready", "avsp_diag_pw_action_interface_version",
+    "avsp_diag_pw_action_frame", "avsp_diag_pw_action_failures",
+    "avsp_diag_pw_action_canary_ok", "avsp_diag_pw_action_accepted_edges",
+    "avsp_diag_pw_action_rejected_edges", "avsp_diag_pw_action_contact_reports",
+    "avsp_diag_pw_action_negative_rejections", "avsp_diag_pw_action_sample_count",
+    "avsp_diag_pw_action_samples"
+  ]
+}

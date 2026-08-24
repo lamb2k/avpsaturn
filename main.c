@@ -41,6 +41,8 @@
 #endif
 #ifdef AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH
 #include "tests/port_v2/predator_warrior_action_bench/predator_warrior_action_bench.h"
+#elif defined(AVSP_PREDATOR_WARRIOR_ACTION_PROMOTION_BENCH)
+#include "src/port_v2/gameplay/player_action/player_action.h"
 #endif
 
 #include "generated/avsp_anim_records.h"
@@ -721,7 +723,8 @@ volatile AvspCollisionBenchResult
     avsp_diag_collision_samples[AVSP_COLLISION_CASE_COUNT];
 volatile int avsp_diag_collision_sample_count;
 #endif
-#ifdef AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH
+#if defined(AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH) || \
+    defined(AVSP_PREDATOR_WARRIOR_ACTION_PROMOTION_BENCH)
 #define PW_ACTION_CANARY_HEAD 0x50574148UL
 #define PW_ACTION_CANARY_TAIL 0x50574154UL
 #define PW_ACTION_CAPTURE_FRAMES 384
@@ -5393,7 +5396,8 @@ static void collision_bench_frame_callback(void)
 }
 #endif
 
-#ifdef AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH
+#if defined(AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH) || \
+    defined(AVSP_PREDATOR_WARRIOR_ACTION_PROMOTION_BENCH)
 static int pw_action_bench_init(void)
 {
     AvspPwAttackDef mutation[AVSP_PW_ACTION_COUNT];
@@ -6432,7 +6436,8 @@ static void frame_callback(void)
     collision_bench_frame_callback();
     return;
 #endif
-#ifdef AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH
+#if defined(AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH) || \
+    defined(AVSP_PREDATOR_WARRIOR_ACTION_PROMOTION_BENCH)
     pw_action_bench_frame_callback();
     return;
 #endif
@@ -7117,7 +7122,8 @@ void jo_main(void)
     runtime_ready = collision_bench_init();
     if (!runtime_ready) failed_asset = "COLLISION BENCH FAILED";
     JO_UNUSED_ARG(index);
-#elif defined(AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH)
+#elif defined(AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH) || \
+      defined(AVSP_PREDATOR_WARRIOR_ACTION_PROMOTION_BENCH)
     runtime_ready = pw_action_bench_init();
     if (!runtime_ready) failed_asset = "P WARRIOR ACTION BENCH FAILED";
     JO_UNUSED_ARG(index);

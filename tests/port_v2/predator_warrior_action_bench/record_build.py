@@ -60,7 +60,7 @@ def main():
         "oracle06_sha256": contract["oracle06_sha256"],
         "physical_saturn": "UNRUN", "result": "PASS"
     }
-    output = ROOT / f"build/port_v2/predator_warrior_action_bench/run-{args.run}/build.json"
+    output = ROOT / inventory["build_root"] / f"run-{args.run}/build.json"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="ascii")
     print(f"recorded {output.relative_to(ROOT)}")

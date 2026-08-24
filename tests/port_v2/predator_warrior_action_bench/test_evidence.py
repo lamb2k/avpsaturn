@@ -49,7 +49,7 @@ def main():
         with Image.open(screenshot) as image:
             colours = image.convert("RGB").getcolors(maxcolors=image.width * image.height)
         assert colours is not None and len(colours) >= 2
-    print("PredatorWarriorActionSalvageBench evidence: PASS")
+    print(f"{inventory['card_profile']} evidence: PASS")
 
 
 if __name__ == "__main__":

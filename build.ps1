@@ -29,6 +29,7 @@ param(
     [switch]$PlayableSlice,
     [switch]$Probe3,
     [switch]$PredatorWarriorActionSalvageBench,
+    [switch]$PredatorWarriorActionPromotionBench,
     [switch]$SkipHostTests
 )
 
@@ -44,7 +45,8 @@ $usePlayableSlice = $PlayableSlice -or ($Release -and
           $EnemySalvageBench -or $EnemyPromotionBench -or
           $PlayerEnemyIntegration -or $CollisionSalvageBench -or
           $HitKoPromotionBench -or $CombatIntegrationBench -or $Probe3 -or
-          $PredatorWarriorActionSalvageBench))
+          $PredatorWarriorActionSalvageBench -or
+          $PredatorWarriorActionPromotionBench))
 if (-not $JoEngineRoot) {
     $JoEngineRoot = Join-Path $projectRoot '.deps\joengine'
 }
@@ -326,6 +328,7 @@ try {
         }
 
         $buildProfile = if ($Probe3) { 'probe3' }
+            elseif ($PredatorWarriorActionPromotionBench) { 'predator-warrior-action-promotion-bench' }
             elseif ($PredatorWarriorActionSalvageBench) { 'predator-warrior-action-salvage-bench' }
             elseif ($PlayableSlice) { 'playable-slice' }
             elseif ($CombatIntegrationBench) { 'combat-integration-bench' }
@@ -362,7 +365,8 @@ try {
             foreach ($objectName in @(
                 'main.o', 'capability_model.o',
                 'tests\hardware\probe3\probe3.o',
-                'tests\port_v2\predator_warrior_action_bench\predator_warrior_action_bench.o')) {
+                'tests\port_v2\predator_warrior_action_bench\predator_warrior_action_bench.o',
+                'src\port_v2\gameplay\player_action\player_action.o')) {
                 $objectPath = Join-Path $projectRoot $objectName
                 if (Test-Path -LiteralPath $objectPath) {
                     Remove-Item -LiteralPath $objectPath -Force
@@ -481,6 +485,9 @@ try {
         }
         if ($PredatorWarriorActionSalvageBench) {
             $makeArguments += 'AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH=1'
+        }
+        if ($PredatorWarriorActionPromotionBench) {
+            $makeArguments += 'AVSP_PREDATOR_WARRIOR_ACTION_PROMOTION_BENCH=1'
         }
         if ($FrontendTest) {
             $makeArguments += 'AVSP_FRONTEND_TEST=1'

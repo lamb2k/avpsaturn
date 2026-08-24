@@ -19,6 +19,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=int, choices=(1, 2), required=True)
     args = parser.parse_args()
+    inventory = json.loads((HERE / "inventory.json").read_text())
     path = ROOT / "tests/port_v2/player/normalize_iso.py"
     spec = importlib.util.spec_from_file_location("player_iso_normalizer", path)
     module = importlib.util.module_from_spec(spec)
@@ -52,10 +53,10 @@ def main():
         "production_payload_changed": False,
         "physical_saturn": "UNRUN"
     }
-    output = ROOT / f"build/port_v2/predator_warrior_action_bench/run-{args.run}/iso-normalization.json"
+    output = ROOT / inventory["build_root"] / f"run-{args.run}/iso-normalization.json"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="ascii")
-    print(f"normalized SALVAGE-10 ISO: {normalized_hash}")
+    print(f"normalized {inventory['card_profile']} ISO: {normalized_hash}")
 
 
 if __name__ == "__main__":

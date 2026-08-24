@@ -34,7 +34,8 @@ require(contract["selection_authority"] ==
         contract["contact_reports_are_selection_authority"] is False,
         "contact/fixed event count became selection authority")
 
-core = (HERE / "predator_warrior_action_bench.c").read_text(encoding="utf-8")
+production_core = ROOT / "src/port_v2/gameplay/player_action/player_action.c"
+core = production_core.read_text(encoding="utf-8")
 require(not re.search(r"\bjo_|\bsl[A-Z]|spr[A-Z]|VDP1|VDP2", core),
         "portable core has Jo/SGL/render dependency")
 require(not re.search(r"5185|5230|5275|5320|5190|5236|5283|5329", core),
@@ -48,7 +49,7 @@ translated = subprocess.run(
 command = (
     f"cd '{translated}' && mkdir -p build/port_v2/predator_warrior_action_bench && "
     "gcc -std=c90 -pedantic -Wall -Wextra -Werror -O2 "
-    "tests/port_v2/predator_warrior_action_bench/predator_warrior_action_bench.c "
+    "src/port_v2/gameplay/player_action/player_action.c "
     "tests/port_v2/predator_warrior_action_bench/predator_warrior_action_test.c "
     "-o build/port_v2/predator_warrior_action_bench/action_test && "
     "./build/port_v2/predator_warrior_action_bench/action_test")
