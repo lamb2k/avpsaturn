@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "task_id": "SALVAGE-11-STREET-ALIEN-AI",
+  "classification": "MEASURED_CLASS_1F_BOUNDED_AI_CORE",
+  "oracle05_sha256": "8b7a9372555414ba0ecfb44b6e8e207d0b873499bc6f7dedb45e52b2fd677031",
+  "oracle06_sha256": "aa1406321b11a2616427431ddf13bb24d948914e12765c66191dc934d1457ce9",
+  "class_id": 31,
+  "approach_frames": 38,
+  "approach_x": 111,
+  "approach_lane": -23,
+  "rng_seed_before": 29441,
+  "rng_seed_after": 22874,
+  "attack_timer": 120,
+  "forced_seed": 1,
+  "forced_timer": 30,
+  "contact_offsets": [48, 119],
+  "contact_damage": 8,
+  "hit_frames": 39,
+  "ko_frames": 141,
+  "target_scope": "one active player",
+  "disabled_systems": ["generic_ai", "other_archetypes", "bosses", "multiplayer_targeting", "route_progression"],
+  "physical_saturn": "UNRUN"
+}

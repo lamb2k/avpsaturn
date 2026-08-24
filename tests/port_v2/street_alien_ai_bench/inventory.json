@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "task_id": "SALVAGE-11-STREET-ALIEN-AI",
+  "card_profile": "StreetAlienAiSalvageBench",
+  "compile_profile": "debug-street-alien-ai-salvage-bench",
+  "manifest_profile": "street-alien-ai-salvage-bench",
+  "build_root": "build/port_v2/street_alien_ai_bench",
+  "required_readback_symbols": [
+    "avsp_diag_runtime_ready", "avsp_diag_alien_ai_interface_version",
+    "avsp_diag_alien_ai_frame", "avsp_diag_alien_ai_failures",
+    "avsp_diag_alien_ai_canary_ok", "avsp_diag_alien_ai_negative_rejections",
+    "avsp_diag_alien_ai_contacts", "avsp_diag_alien_ai_damage_events",
+    "avsp_diag_alien_ai_scheduler_updates", "avsp_diag_alien_ai_target_selections",
+    "avsp_diag_alien_ai_sample_count", "avsp_diag_alien_ai_samples"
+  ]
+}

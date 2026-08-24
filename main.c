@@ -44,6 +44,9 @@
 #elif defined(AVSP_PREDATOR_WARRIOR_ACTION_PROMOTION_BENCH)
 #include "src/port_v2/gameplay/player_action/player_action.h"
 #endif
+#ifdef AVSP_STREET_ALIEN_AI_SALVAGE_BENCH
+#include "tests/port_v2/street_alien_ai_bench/street_alien_ai_bench.h"
+#endif
 
 #include "generated/avsp_anim_records.h"
 #include "generated/avsp_emit_windows.h"
@@ -770,6 +773,52 @@ volatile int avsp_diag_pw_action_accepted_edges;
 volatile int avsp_diag_pw_action_rejected_edges;
 volatile int avsp_diag_pw_action_contact_reports;
 volatile int avsp_diag_pw_action_negative_rejections;
+#endif
+#ifdef AVSP_STREET_ALIEN_AI_SALVAGE_BENCH
+#define ALIEN_AI_CANARY_HEAD 0x41494148UL
+#define ALIEN_AI_CANARY_TAIL 0x41494154UL
+#define ALIEN_AI_CAPTURE_FRAMES 576
+typedef struct
+{
+    int frame;
+    int target_active;
+    int target_x;
+    int target_lane;
+    int state;
+    int inner_state;
+    int target_id;
+    int x;
+    int lane;
+    int health;
+    int facing;
+    int approach_elapsed;
+    int attack_elapsed;
+    int attack_timer;
+    int rng_seed;
+    int rng_cursor;
+    int contact;
+    int contact_damage;
+    int removed;
+} AvspAlienAiDiagnosticSample;
+typedef struct
+{
+    unsigned long head_canary;
+    AvspAlienRuntime runtime;
+    unsigned long tail_canary;
+} AvspAlienAiDiagnosticState;
+static AvspAlienAiDiagnosticState alien_ai_state;
+volatile AvspAlienAiDiagnosticSample
+    avsp_diag_alien_ai_samples[ALIEN_AI_CAPTURE_FRAMES];
+volatile int avsp_diag_alien_ai_sample_count;
+volatile int avsp_diag_alien_ai_interface_version;
+volatile int avsp_diag_alien_ai_frame;
+volatile int avsp_diag_alien_ai_failures;
+volatile int avsp_diag_alien_ai_canary_ok;
+volatile int avsp_diag_alien_ai_negative_rejections;
+volatile int avsp_diag_alien_ai_contacts;
+volatile int avsp_diag_alien_ai_damage_events;
+volatile int avsp_diag_alien_ai_scheduler_updates;
+volatile int avsp_diag_alien_ai_target_selections;
 #endif
 #ifdef AVSP_FRONTEND_SHOT_TEST
 /* Visual-verification profile. The frontend surfaces this pass must compare
@@ -5509,6 +5558,111 @@ static void pw_action_bench_frame_callback(void)
 }
 #endif
 
+#ifdef AVSP_STREET_ALIEN_AI_SALVAGE_BENCH
+static int alien_ai_bench_init(void)
+{
+    memset(&alien_ai_state, 0, sizeof(alien_ai_state));
+    alien_ai_state.head_canary = ALIEN_AI_CANARY_HEAD;
+    alien_ai_state.tail_canary = ALIEN_AI_CANARY_TAIL;
+    avsp_alien_ai_init(&alien_ai_state.runtime, 0x7301u);
+    avsp_diag_alien_ai_frame = 0;
+    avsp_diag_alien_ai_sample_count = 0;
+    avsp_diag_alien_ai_failures = 0;
+    avsp_diag_alien_ai_negative_rejections = 0;
+    if (!avsp_alien_ai_contract_valid()) ++avsp_diag_alien_ai_failures;
+    if (avsp_alien_ai_rng_step(0x7301u) != 0x595bu)
+        ++avsp_diag_alien_ai_negative_rejections;
+    if (avsp_alien_ai_timer_for_seed(0x595au) != 30u)
+        ++avsp_diag_alien_ai_negative_rejections;
+    return avsp_diag_alien_ai_failures == 0 &&
+           avsp_diag_alien_ai_negative_rejections == 2;
+}
+
+static AvspAlienInput alien_ai_bench_input(const int frame)
+{
+    AvspAlienInput input;
+    input.target.active = 1u;
+    input.target.id = 1u;
+    input.target.x = 1200;
+    input.target.lane = 320;
+    input.incoming_damage = 0;
+    if (frame == 300) input.incoming_damage = 24;
+    if (frame == 400) input.incoming_damage = 64;
+    return input;
+}
+
+static void alien_ai_bench_frame_callback(void)
+{
+    AvspAlienAiDiagnosticSample sample;
+    AvspAlienInput input;
+    AvspAlienView view;
+    int frame;
+    frame = avsp_diag_alien_ai_frame;
+    if (frame < ALIEN_AI_CAPTURE_FRAMES)
+    {
+        input = alien_ai_bench_input(frame);
+        avsp_alien_ai_step(&alien_ai_state.runtime, &input);
+        avsp_alien_ai_view(&alien_ai_state.runtime, &view);
+        sample.frame = frame;
+        sample.target_active = input.target.active;
+        sample.target_x = input.target.x;
+        sample.target_lane = input.target.lane;
+        sample.state = view.state;
+        sample.inner_state = view.inner_state;
+        sample.target_id = view.target_id;
+        sample.x = view.x;
+        sample.lane = view.lane;
+        sample.health = view.health;
+        sample.facing = view.facing;
+        sample.approach_elapsed = view.approach_elapsed;
+        sample.attack_elapsed = view.attack_elapsed;
+        sample.attack_timer = view.attack_timer;
+        sample.rng_seed = view.rng_seed;
+        sample.rng_cursor = view.rng_cursor;
+        sample.contact = view.contact;
+        sample.contact_damage = view.contact_damage;
+        sample.removed = view.removed;
+        avsp_diag_alien_ai_samples[frame] = sample;
+        avsp_diag_alien_ai_sample_count = frame + 1;
+        ++avsp_diag_alien_ai_frame;
+    }
+    avsp_diag_runtime_ready = runtime_ready;
+    avsp_diag_alien_ai_interface_version = AVSP_ALIEN_AI_INTERFACE_VERSION;
+    avsp_diag_alien_ai_canary_ok =
+        alien_ai_state.head_canary == ALIEN_AI_CANARY_HEAD &&
+        alien_ai_state.tail_canary == ALIEN_AI_CANARY_TAIL;
+    avsp_diag_alien_ai_contacts = (int)alien_ai_state.runtime.contacts;
+    avsp_diag_alien_ai_damage_events =
+        (int)alien_ai_state.runtime.damage_events;
+    avsp_diag_alien_ai_scheduler_updates =
+        (int)alien_ai_state.runtime.scheduler_updates;
+    avsp_diag_alien_ai_target_selections =
+        (int)alien_ai_state.runtime.target_selections;
+    jo_printf(2, 3, "SALVAGE-11 STREET ALIEN AI");
+    jo_printf(2, 5, "FRAME %03d SAMPLE %03d", avsp_diag_alien_ai_frame,
+              avsp_diag_alien_ai_sample_count);
+    jo_printf(2, 7, "STATE %d INNER %d TARGET %d",
+              alien_ai_state.runtime.state, alien_ai_state.runtime.inner_state,
+              alien_ai_state.runtime.target_id);
+    jo_printf(2, 9, "POS %d,%d HP %d FACE %d", alien_ai_state.runtime.x,
+              alien_ai_state.runtime.lane, alien_ai_state.runtime.health,
+              alien_ai_state.runtime.facing);
+    jo_printf(2, 11, "RNG %04x CUR %d ATK %d/%d",
+              alien_ai_state.runtime.rng_seed,
+              alien_ai_state.runtime.rng_cursor,
+              alien_ai_state.runtime.attack_elapsed,
+              alien_ai_state.runtime.attack_timer);
+    jo_printf(2, 13, "CONTACT %d DAMAGE %d UPDATE %d",
+              avsp_diag_alien_ai_contacts, avsp_diag_alien_ai_damage_events,
+              avsp_diag_alien_ai_scheduler_updates);
+    jo_printf(2, 15, "NEG %d/2 CANARY %s FAIL %d",
+              avsp_diag_alien_ai_negative_rejections,
+              avsp_diag_alien_ai_canary_ok ? "PASS" : "FAIL",
+              avsp_diag_alien_ai_failures);
+    jo_printf(2, 17, "PHYSICAL SATURN UNRUN");
+}
+#endif
+
 #ifdef AVSP_CDDA_RESIDENCY_SALVAGE_BENCH
 #ifdef AVSP_CDDA_RESIDENCY_PROMOTION_BENCH
 static int cdda_residency_read_buffer_ok(void)
@@ -6441,6 +6595,10 @@ static void frame_callback(void)
     pw_action_bench_frame_callback();
     return;
 #endif
+#ifdef AVSP_STREET_ALIEN_AI_SALVAGE_BENCH
+    alien_ai_bench_frame_callback();
+    return;
+#endif
 #ifdef AVSP_CDDA_RESIDENCY_SALVAGE_BENCH
     cdda_residency_bench_frame_callback();
     return;
@@ -7126,6 +7284,10 @@ void jo_main(void)
       defined(AVSP_PREDATOR_WARRIOR_ACTION_PROMOTION_BENCH)
     runtime_ready = pw_action_bench_init();
     if (!runtime_ready) failed_asset = "P WARRIOR ACTION BENCH FAILED";
+    JO_UNUSED_ARG(index);
+#elif defined(AVSP_STREET_ALIEN_AI_SALVAGE_BENCH)
+    runtime_ready = alien_ai_bench_init();
+    if (!runtime_ready) failed_asset = "STREET ALIEN AI BENCH FAILED";
     JO_UNUSED_ARG(index);
 #elif defined(AVSP_PLAYER_SALVAGE_BENCH)
 #ifdef AVSP_PLAYER_ENEMY_INTEGRATION

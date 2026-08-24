@@ -100,6 +100,9 @@ endif
 ifneq ($(AVSP_PREDATOR_WARRIOR_ACTION_PROMOTION_BENCH),)
 CCFLAGS += -DAVSP_PREDATOR_WARRIOR_ACTION_PROMOTION_BENCH=1 -Werror -Wno-unused-function
 endif
+ifneq ($(AVSP_STREET_ALIEN_AI_SALVAGE_BENCH),)
+CCFLAGS += -DAVSP_STREET_ALIEN_AI_SALVAGE_BENCH=1 -Werror -Wno-unused-function
+endif
 JO_DEBUG ?= 1
 JO_NTSC = 1
 JO_COMPILE_USING_SGL = 1
@@ -131,6 +134,9 @@ SRCS += src/port_v2/gameplay/player_action/player_action.c
 endif
 ifneq ($(AVSP_PREDATOR_WARRIOR_ACTION_PROMOTION_BENCH),)
 SRCS += src/port_v2/gameplay/player_action/player_action.c
+endif
+ifneq ($(AVSP_STREET_ALIEN_AI_SALVAGE_BENCH),)
+SRCS += tests/port_v2/street_alien_ai_bench/street_alien_ai_bench.c
 endif
 
 # The pinned Yaba Sanshiro boot path stalls when Jo Engine's monolithic first-
