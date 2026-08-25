@@ -2,7 +2,7 @@
 
 TASK: REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER
 KIND: INTEGRATE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: reimplement-source-closed-live-encounter
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

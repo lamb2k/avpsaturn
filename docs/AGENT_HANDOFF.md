@@ -36,9 +36,13 @@ ORACLE-09 (`d530820`) binds the type-12 class-`0x1F` authored route states,
 facing, animation records, assemblies, RNG, scheduler, and HIT/KO/removal.
 Fast and Oracle pass; production is unchanged.
 
-Active card: `SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT`. Continue
-through REIMPLEMENT-12, QA-12, and renewed USER-09. Retain the current
-diagnostic harness; do not activate frontend work.
+SPEC-01 (`299468a`) binds all implementation-required behavior to the accepted
+Oracle and Port V2 identities with executable fixtures and mutation controls.
+Fast and Oracle pass; production is unchanged.
 
-Resume prompt: Resume the AvP salvage Goal at SPEC-01, enforce the
-specification firewall, and return to USER-09 only after QA-12 passes.
+Active card: `REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER`. Implement only from
+SPEC-01 and accepted Port V2 interfaces, then continue through QA-12 and renewed
+USER-09. Retain the current diagnostic harness; do not activate frontend work.
+
+Resume prompt: Resume the AvP salvage Goal at REIMPLEMENT-12, enforce the
+SPEC-01 firewall, and return to USER-09 only after QA-12 passes.

@@ -60,9 +60,9 @@
       "blockers": [
         "The approved SOURCE_BOUND_WITH_ADAPTED_INPUT technical capability slice uses deterministic choreography and does not establish production player control, autonomous enemy AI, encounter clear, or complete Round 1 behavior.",
         "USER-09 explicitly classifies the live encounter as a useful technical prototype and adapted gameplay scaffold that is not source-closed or user-approved.",
-        "ORACLE-07/08/09 source-close bounded player action/equipment, Coffee Shop navigation/non-walkable bounds, and type-12 class-0x1F state/facing/presentation, but production remains the unchanged adapted prototype. The reviewed executable specification, reimplementation, and complete source/Saturn consistency matrix remain open; frontend and physical Saturn remain blocked or UNRUN."
+        "ORACLE-07/08/09 and accepted SPEC-01 source-close bounded player action/equipment, Coffee Shop navigation/non-walkable bounds, type-12 class-0x1F state/facing/presentation, collision/damage, encounter authority, and same-tick diagnostics, but production remains the unchanged adapted prototype. Reimplementation and the complete source/Saturn consistency matrix remain open; frontend and physical Saturn remain blocked or UNRUN."
       ],
-      "next_experiment": "Execute active SPEC-01; reimplement only from the accepted executable specification; pass QA-12; then renew USER-09 without activating frontend work."
+      "next_experiment": "Execute active REIMPLEMENT-12 only from accepted SPEC-01 and Port V2 interfaces; pass QA-12; then renew USER-09 without activating frontend work."
     },
     {
       "id": "round2_underpass_through_frame_18000",

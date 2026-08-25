@@ -65,7 +65,7 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT
+CURRENT_TASK: REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER
 
 ACTIVE_SOFTWARE_TASK: SOURCE_CLOSURE_ORACLE
 
@@ -181,8 +181,8 @@ runtime, Probe 3 result, physical evidence, exact INTEGRATE-03 ISO,
   guessed range threshold are explicitly forbidden.
 
 Two identical captures and real perturbations were required for each body.
-ORACLE-04 through ORACLE-09 are accepted; SPEC-01 is the active executable
-specification gate. ORACLE-06 proved that
+ORACLE-04 through ORACLE-09 and SPEC-01 are accepted; REIMPLEMENT-12 is the
+active specification-only production reimplementation. ORACLE-06 proved that
 the source opening is a withdrawal set piece, so the first live implementation
 uses a source-bound, adapted one-alien KO/inactive clear. Facts not captured
 remain `UNKNOWN` or `UNRUN`.
