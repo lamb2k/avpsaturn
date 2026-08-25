@@ -4,15 +4,15 @@ workflow_model: interactive-salvage-promotion-integration
 roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
-production_head: 4ea7c1829013e95b5ffdc34ef02ea5c133ee9a80
-candidate_head: 4ea7c1829013e95b5ffdc34ef02ea5c133ee9a80
+production_head: 7185c38c41a2575698f5b79ca32020d38d10c178
+candidate_head: 7185c38c41a2575698f5b79ca32020d38d10c178
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-playable-loop-pivot
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 review_candidate_status: ACCEPTED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW, PROMOTE-07-CDDA-RESIDENCY, REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION, ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS, ORACLE-05-STREET-ALIEN-AI, ORACLE-06-ROUND1-ENCOUNTER-RULES, SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, SALVAGE-11-STREET-ALIEN-AI, PROMOTE-11-STREET-ALIEN-AI, INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER, REPAIR-10-LIVE-PLAYER-PRESENTATION, ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT, ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS, ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION, SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW, PROMOTE-07-CDDA-RESIDENCY, REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION, ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS, ORACLE-05-STREET-ALIEN-AI, ORACLE-06-ROUND1-ENCOUNTER-RULES, SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, SALVAGE-11-STREET-ALIEN-AI, PROMOTE-11-STREET-ALIEN-AI, INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER, REPAIR-10-LIVE-PLAYER-PRESENTATION, ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT, ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS, ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION, SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT, REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER]
 software_dependency_satisfied_tasks: [INTEGRATE-03-PLAYABLE-SLICE]
 target_scope:
   source_set: avspu
@@ -117,6 +117,9 @@ accepted_implementation_history:
   - id: REPAIR-10-LIVE-PLAYER-PRESENTATION
     status: ACCEPTED
     head: 4ea7c1829013e95b5ffdc34ef02ea5c133ee9a80
+  - id: REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER
+    status: ACCEPTED
+    head: 7185c38c41a2575698f5b79ca32020d38d10c178
 accepted_control_plane_history:
   - id: ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN
     status: ACCEPTED
@@ -239,14 +242,14 @@ first_live_gameplay_encounter:
   enemy_class: "0x1F"
   player_count: 1
   measured_round1_encounter_count: 1
-  production_player_control: TECHNICAL_PROTOTYPE_NOT_SOURCE_CLOSED
-  street_alien_ai: TECHNICAL_PROTOTYPE_NOT_SOURCE_CLOSED
-  encounter_controller: ADAPTED_GAMEPLAY_SCAFFOLD
+  production_player_control: SOURCE_CLOSED_BOUNDED_TECHNICAL_QA_PENDING
+  street_alien_ai: SOURCE_CLOSED_BOUNDED_TECHNICAL_QA_PENDING
+  encounter_controller: SPEC_BOUND_ADAPTED_CLEAR_QA_PENDING
   interactive_human_review: CHANGES_REQUESTED
   user09_feedback_exact: "The current live encounter is a useful technical prototype, but it is not yet a faithful reproduction. The alien faces the wrong direction during some walk or attack states. Player attack presentation changes incoherently between weapon and no-weapon assemblies. The player can move through non-walkable wall or stage areas. The resulting player, AI, animation, and navigation systems feel disconnected from the original game. The next work must lift more confirmed source logic rather than repair isolated visible symptoms."
   requested_changes: [source-closed-player-action-and-equipment, source-closed-round1-navigation, source-closed-class-0x1F-state-facing-presentation, executable-specification, source-closed-reimplementation, complete-source-saturn-differential]
   first_priority: ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT
-  unresolved_after_repair10: [source-closed-reimplementation, complete-source-saturn-differential]
+  unresolved_after_repair10: [complete-source-saturn-differential, renewed-user09]
   specification_firewall: [read-only-source-closure, reviewed-executable-specification, specification-only-implementation, differential-and-visual-consistency-qa, renewed-user09]
   source_closure_sequence: [ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT, ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS, ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION, SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT, REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER, QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL, USER-09-LIVE-ENCOUNTER-REVIEW]
   engineering_clean_room_boundary: true
@@ -348,6 +351,20 @@ spec01_executable_contract:
   lanes: Fast PASS / Oracle PASS
   saturn_emulator: UNRUN
   physical_saturn: UNRUN
+reimplement12_source_closed_live_encounter:
+  task: REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER
+  status: ACCEPTED_TECHNICAL
+  implementation_commit: 7185c38c41a2575698f5b79ca32020d38d10c178
+  classification: [TECHNICAL_PROTOTYPE, ADAPTED_GAMEPLAY_SCAFFOLD, NOT_SOURCE_CLOSED, NOT_USER_APPROVED]
+  spec01_sha256: a8a8d5ff06d70a8df4cc7687928e0eb5200927ac8901adb3eb76745c4b42bd0f
+  evidence: data/reimplement12_source_closed_live_encounter.json
+  normalized_diagnostic_iso_sha256: 3ccd3873095bcdee77e97ad3feba452770369cbd5d8d69ae2e5857f009264a41
+  paired_pinned_emulator: PASS / 2 cold runs / exact identical 471-frame ledgers / 4 player contacts / 1 alien contact and player-damage event / 1 deliberate miss / 3 HIT events / 1 KO / unlock at frame 450 / continued movement and camera follow / exact state-record-assembly identity / zero failures and fallbacks / canaries intact
+  mutation_controls: combo timing / equipment visibility / upper wall / generic facing / random attack assembly / KO assembly / wide contact / projection sign / camera origin / presentation clear all REJECTED
+  lanes: Fast PASS / Oracle PASS / Target BUILD_ONLY PASS / Emulator PASS
+  remaining: QA-12 full semantic and visual consistency matrix / renewed USER-09
+  frontend_active: false
+  physical_saturn: UNRUN
 salvage10_player_action:
   task: SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
   status: ACCEPTED
@@ -420,15 +437,15 @@ source_closure:
   status: ACTIVE
   prototype_harness_retained: true
   preserved_infrastructure: [rendering, HUD, camera, audio, collision, readback, emulator, visual-QA]
-  active_card: REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER
+  active_card: QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL
   frontend_activation_allowed: false
   physical_saturn: UNRUN
-current_checkpoint: reimplement-source-closed-live-encounter
-active_task_card: docs/task_cards/REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER.md
-active_task_id: REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER
-active_task_kind: INTEGRATE
+current_checkpoint: qa-live-encounter-source-differential
+active_task_card: docs/task_cards/QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL.md
+active_task_id: QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL
+active_task_kind: QA
 task_status: READY
-active_write_owner: REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER
+active_write_owner: QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL
 awaiting_user_feedback: []
 open_blockers: []
 hardware_pretest:

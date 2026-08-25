@@ -65,9 +65,9 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER
+CURRENT_TASK: QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL
 
-ACTIVE_SOFTWARE_TASK: SOURCE_CLOSURE_ORACLE
+ACTIVE_SOFTWARE_TASK: SOURCE_CLOSURE_QA
 
 ## 4. Current salvage queue and production extension
 
@@ -181,8 +181,11 @@ runtime, Probe 3 result, physical evidence, exact INTEGRATE-03 ISO,
   guessed range threshold are explicitly forbidden.
 
 Two identical captures and real perturbations were required for each body.
-ORACLE-04 through ORACLE-09 and SPEC-01 are accepted; REIMPLEMENT-12 is the
-active specification-only production reimplementation. ORACLE-06 proved that
+ORACLE-04 through ORACLE-09, SPEC-01, and REIMPLEMENT-12 are technically
+accepted; QA-12 is the active complete source/Saturn differential. The
+REIMPLEMENT-12 candidate at `7185c38` passes Fast, Oracle, target build-only,
+and two cold pinned-emulator runs with exact 471-frame semantic equality.
+ORACLE-06 proved that
 the source opening is a withdrawal set piece, so the first live implementation
 uses a source-bound, adapted one-alien KO/inactive clear. Facts not captured
 remain `UNKNOWN` or `UNRUN`.

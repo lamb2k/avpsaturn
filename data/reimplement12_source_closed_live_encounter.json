@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "task": "REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER",
+  "result": "ACCEPTED_TECHNICAL",
+  "classification": [
+    "TECHNICAL_PROTOTYPE",
+    "ADAPTED_GAMEPLAY_SCAFFOLD",
+    "NOT_SOURCE_CLOSED",
+    "NOT_USER_APPROVED"
+  ],
+  "implementation": {
+    "initial_commit": "e544a0832c766a0b764448bec1206a6486d7a2b3",
+    "correction_commit": "d03d1ba1dd7967981d0fa3d3d14adb2fdc810fde",
+    "evidence_head": "7185c38c41a2575698f5b79ca32020d38d10c178",
+    "source_tree": "c7b5f32cef0d89d5e98dc326cc77d33cb86f8df6",
+    "spec01_sha256": "a8a8d5ff06d70a8df4cc7687928e0eb5200927ac8901adb3eb76745c4b42bd0f",
+    "source_sha256": {
+      "main.c": "5374337f706f7d73aea87bf2af74f161b6224a4f4c406e7b0513e46afce8381b",
+      "src/port_v2/gameplay/player_action/player_action.c": "c4357b0c9298df993662506ede0facdb935875fae105287bd90420bba3bf82a3",
+      "src/port_v2/gameplay/street_alien_ai/street_alien_ai.c": "c84e2bf868651f0b6ee6ac921c87770a72082430b5f50df3d3b592d225a191fd",
+      "src/port_v2/integration/live_encounter/live_encounter.c": "44608bfb67bf9affacd587a84d172eb7547ac81977801e0caf3de3fa64b97ecc"
+    }
+  },
+  "validation": {
+    "lanes": {
+      "Fast": "PASS",
+      "Oracle": "PASS",
+      "Target": "BUILD_ONLY_PASS",
+      "Emulator": "PASS"
+    },
+    "emulator": {
+      "identity": "Yaba Sanshiro 1.20.37-2986eb",
+      "cold_runs": 2,
+      "iso_sha256": "3ccd3873095bcdee77e97ad3feba452770369cbd5d8d69ae2e5857f009264a41",
+      "sample_count_each": 471,
+      "last_evidence_frame": 470,
+      "samples_semantic_sha256": "2693b9c29b7418b90837cc0a59f198314b75de9d5e9d5bfaac92c81f59521008",
+      "state_semantic_sha256": "adf39a8dbb81afb9267db0fa00e92fdec3954821675851eb30ec021fc7acf530",
+      "exact_semantic_equality": true,
+      "chronology": {
+        "player_contacts": 4,
+        "alien_contacts": 1,
+        "player_damage_events": 1,
+        "misses": 1,
+        "hit_events": 3,
+        "ko_events": 1,
+        "unlock_frame": 450
+      },
+      "final": {
+        "runtime_ready": 1,
+        "interface_version": 2,
+        "contract_flags": 127,
+        "route_unlocked": 1,
+        "continued_after_unlock": 1,
+        "failures": 0,
+        "fallback_count": 0,
+        "canaries_ok": 1
+      }
+    },
+    "rejected_real_mutations": [
+      "combo-90",
+      "equipment-visible",
+      "upper-wall",
+      "generic-facing",
+      "random-assembly",
+      "ko-assembly",
+      "wide-contact",
+      "projection-sign",
+      "camera-origin",
+      "presentation-clear"
+    ]
+  },
+  "preserved": [
+    "REPAIR-10 diagnostic harness",
+    "approved camera movement",
+    "approved damage values",
+    "approved HIT and KO death transition",
+    "HUD shell",
+    "PCM and CDDA paths",
+    "rendering and visual-QA infrastructure"
+  ],
+  "disabled": [
+    "frontend activation",
+    "automatic selector cycling",
+    "generic face-target AI",
+    "independent weapon or assembly selection",
+    "unbounded player navigation",
+    "timer or presentation owned clear"
+  ],
+  "remaining": [
+    "QA-12 complete source/Saturn semantic and visual consistency matrix",
+    "renewed USER-09 explicit review"
+  ],
+  "physical_saturn": "UNRUN"
+}

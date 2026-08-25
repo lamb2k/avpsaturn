@@ -2,7 +2,7 @@
 
 TASK: QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL
 KIND: QA
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: qa-live-encounter-source-differential
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

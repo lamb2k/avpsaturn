@@ -40,9 +40,9 @@ SPEC-01 (`299468a`) binds all implementation-required behavior to the accepted
 Oracle and Port V2 identities with executable fixtures and mutation controls.
 Fast and Oracle pass; production is unchanged.
 
-Active card: `REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER`. Implement only from
-SPEC-01 and accepted Port V2 interfaces, then continue through QA-12 and renewed
-USER-09. Retain the current diagnostic harness; do not activate frontend work.
-
-Resume prompt: Resume the AvP salvage Goal at REIMPLEMENT-12, enforce the
-SPEC-01 firewall, and return to USER-09 only after QA-12 passes.
+REIMPLEMENT-12 is technically accepted at `7185c38`; its exact 471-frame paired
+emulator ledgers and all required lanes pass. Active card:
+`QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL`. Run the full semantic and visual
+matrix, then continue only to renewed USER-09; keep frontend work inactive.
+Resume prompt: Resume the AvP salvage Goal at QA-12, verify exact candidate
+`7185c38`, and return to USER-09 only after the full matrix passes.

@@ -2,7 +2,7 @@
 
 TASK: REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER
 KIND: INTEGRATE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: reimplement-source-closed-live-encounter
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -69,3 +69,25 @@ No direct user approval here. QA-12 must pass before renewed USER-09.
 ## Next eligible cards
 
 - `QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL` after technical acceptance.
+
+## Validated evidence
+
+- SPEC-01 identity `a8a8d5ff...bd0f` is compiled into interface version 2;
+  the committed source-closed candidate and hardened readback harness are at
+  `7185c38c41a2575698f5b79ca32020d38d10c178`.
+- Fast, Oracle, and target build-only lanes pass. Ten real source mutations
+  covering combo timing, equipment visibility, wall bounds, alien facing,
+  attack and KO assemblies, contact width, projection, camera origin, and
+  clear authority are rejected.
+- Two cold pinned Yaba runs use exact ISO `3ccd3873...a41`, the same committed
+  source tree, and identical 471-frame semantic ledgers. They record four
+  player contacts, one alien contact/damage event, one deliberate miss, three
+  HIT events, one KO, unlock at frame 450, continued camera movement, intact
+  canaries, and zero failures or fallbacks.
+- The later KO record/assembly resolver now consumes each source record's
+  exact `+0x04` assembly pointer; state, record, and assembly remain same-tick
+  through the preserved death transition.
+- This is technical acceptance only. The milestone remains
+  `TECHNICAL_PROTOTYPE` / `ADAPTED_GAMEPLAY_SCAFFOLD` / `NOT_SOURCE_CLOSED` /
+  `NOT_USER_APPROVED` until QA-12 and renewed USER-09 complete. Frontend is
+  inactive and physical Saturn remains `UNRUN`.
