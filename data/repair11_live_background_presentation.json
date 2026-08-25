@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "task": "REPAIR-11-LIVE-BACKGROUND-PRESENTATION",
+  "result": "ACCEPTED_TECHNICAL",
+  "implementation_commit": "236eef0c42aaa5c39b105420f8130fcde308e34e",
+  "normalized_diagnostic_iso_sha256": "9b900cffdd0da0d44069f704059c258787e2a0066300be6f2534cf0635df51ba",
+  "correction": {
+    "opening_camera_world_x": 768,
+    "opening_plane_scroll_x": [0, 7],
+    "post_unlock_camera_world_x": 881,
+    "post_unlock_plane_scroll_x": [103, 97],
+    "raw_bridge_rejected": [768, 384],
+    "source_schedule": "captured scroll2-to-scroll3 interpolation with measured endpoint clamp"
+  },
+  "visual_evidence": {
+    "package": "build/feedback/REPAIR-11-LIVE-BACKGROUND-PRESENTATION",
+    "opening_frame": 53,
+    "opening_sha256": "447d8f3315334e2fa8a9c141e2abce19a2b6d33322248592013197bb7b5c465c",
+    "post_unlock_frame": 5713,
+    "post_unlock_sha256": "030cea0bf54340e59a287bf4a57723ac23402d112dd1c6270025c125b14216b3",
+    "strip_sha256": "6ac0ceb5d3ffd49d51dec57c15fe4648143f3809d3883c99b929e927a7d12e34",
+    "opening_and_post_unlock_edges": "PASS",
+    "plane_corruption": "ABSENT",
+    "raw_pnt_offset_displacement": "ABSENT",
+    "player_alien_camera_coherence": "PASS"
+  },
+  "regression_locks": {
+    "reviewed_attack_sequence": "PASS_UNCHANGED_471_FRAME_LEDGER",
+    "class_0x1f_player_tracking": "PASS_UNCHANGED_471_FRAME_LEDGER",
+    "hud_audio_palette_priority_residency_gameplay": "PASS_NO_REGRESSION",
+    "neutral_facing_release": "UNRESOLVED_FOR_ROUND1_PLAYER_AUTHORITY"
+  },
+  "validation": {
+    "focused": "PASS",
+    "target": "BUILD_ONLY_PASS",
+    "paired_emulator": "PASS_2_COLD_RUNS_EXACT_471_FRAME_EQUALITY",
+    "fast": "PASS",
+    "qa12_frozen_evidence": "PASS"
+  },
+  "user09": "CHANGES_REQUESTED",
+  "frontend_active": false,
+  "physical_saturn": "UNRUN"
+}
