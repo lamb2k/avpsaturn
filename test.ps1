@@ -472,6 +472,12 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Translation-boundary classification/control test failed with exit code $LASTEXITCODE."
 }
+if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\oracle07_predator_warrior_action_graph_equipment.json')) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tests\test_oracle07_player_action.py')
+    if ($LASTEXITCODE -ne 0) {
+        throw "ORACLE-07 player action/equipment test failed with exit code $LASTEXITCODE."
+    }
+}
 if (Test-Path -LiteralPath (Join-Path $PSScriptRoot '.deps\mame\vertical_slice\input_manifest.json')) {
     & $PythonPath (Join-Path $PSScriptRoot 'tools\verify_avsp_vertical_slice_oracle.py') '--generate'
     if ($LASTEXITCODE -ne 0) {
