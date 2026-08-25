@@ -48,8 +48,18 @@ card only for a genuinely independent body or source-evidence hard stop.
   still-`PARTIAL` player family. Two independent byte-identical source runs
   bind Button-3 edge dispatch, fixed-point vector setup and integration,
   neutral jump presentation, landing guard/snap, facing retention, and return
-  to control. Directional dash/air actions remain separate active backlog; a
-  direction-plus-jump HIT capture is retained only as a falsification control.
+  to control. Its earlier direction-plus-jump HIT capture is retained as the
+  unmodified interruption witness for the broader checkpoint below.
+- `predator-warrior-directional-airborne-interruption`: `SOURCE_CLOSED` inside
+  the still-`PARTIAL` player family. The baseline, perturbed, and
+  failure/continue universe reaches `0x0400/02/04/06`; input-only targeted
+  routes additionally bind `0x040a/0c/0e/10` across every direction lane,
+  airborne Button-1 and Button-2 guards, landing, HIT cancellation, and return
+  to control. `0x0408/12/14` have no route or input-only witness and are
+  explicitly `NOT_REQUIRED_FOR_ROUND1`, with a witness-reopens-family control.
+  Evidence and mutation controls are in
+  `data/oracle11_predator_air_authority.json` and the sole route-segment x
+  authority-family matrix remains in `data/round1_system_coverage.yaml`.
 - `predator-warrior-weapon-projectile-resource`: `SOURCE_CLOSED` inside the
   still-`PARTIAL` player family. Two independently launched byte-identical
   captures plus twelve causal counterfactual classes bind Button-1 edge/held
@@ -61,7 +71,7 @@ card only for a genuinely independent body or source-evidence hard stop.
   `data/oracle11_predator_weapon_projectile_resource.json` and
   `data/oracle11_predator_warrior_authority.json`. Player HIT/KO, failure,
   continue, respawn, return-to-control, and route-wide pickup/resource/audio/
-  load ownership remain the next active checkpoint.
+  load ownership remain the next active checkpoints.
 
 ## Owned paths
 

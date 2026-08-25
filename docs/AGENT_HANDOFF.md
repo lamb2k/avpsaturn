@@ -19,16 +19,15 @@ evidence, recovery patches, ROMs, captures, and component-scoped user locks.
 
 Resume the AvP salvage Goal at
 `ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE`; it remains active. Actor
-scheduler/lifecycle, Predator Warrior
-locomotion/neutral/facing, melee, normal jump, and now weapon/projectile/
-resource ownership are source closed. The latest checkpoint has two
-independently launched byte-identical source captures and twelve causal
-counterfactual classes. It binds the real twelve-attempt class-`0x05` Button-1
-volley, record-type-4 lifecycle, empty-resource fallback, B1+B2 health-funded
-special, resource debit/recharge/depleted state, temporary 600-tick award,
-class-`0x54` presentation ownership, current-state collision/removal, audio
-boundaries, facing, and RNG/order in
-`data/oracle11_predator_weapon_projectile_resource.json`.
+scheduler/lifecycle and Predator Warrior locomotion/neutral/facing, melee,
+normal jump, directional/airborne actions, interruption cancellation, and
+weapon/projectile/resource ownership are source closed. The latest checkpoint
+reconciles the full-route phase census with input-only counterfactuals: required
+phases `0x0400/02/04/06/0a/0c/0e/10` are closed, while unwitnessed
+`0x0408/12/14` are explicit `NOT_REQUIRED_FOR_ROUND1`. The player family
+remains `PARTIAL`; evidence is in `data/oracle11_predator_air_authority.json`
+and the sole route-segment x authority-family matrix plus SPEC-02 zero-gap gate
+are in `data/round1_system_coverage.yaml`.
 
 Continue the same card and Goal with Predator Warrior HIT, KO, failure,
 continue, respawn, and return to control; then close route-wide pickup,

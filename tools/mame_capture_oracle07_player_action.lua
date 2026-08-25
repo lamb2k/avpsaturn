@@ -31,6 +31,21 @@ local allowed = {
     close_combo_hold=true, close_combo_startup_repeat=true,
     close_combo_recovery_repeat=true,
     jump_only=true, dash_right=true,
+    air_cold=true,
+    isolated_dash_right=true, isolated_dash_left=true,
+    isolated_dash_up=true, isolated_dash_down=true,
+    air_button2_neutral=true, air_button2_right=true,
+    air_button2_left=true, air_button2_up=true,
+    air_button2_down=true, air_button2_hold=true,
+    air_button2_followup_4436=true, air_button2_followup_4442=true,
+    air_button2_followup_4449=true, air_button2_followup_4454=true,
+    air_button2_midair_down=true,
+    air_button2_midair_down_followup_4440=true,
+    air_button2_midair_down_followup_4448=true,
+    dash_right_jump_reverse=true,
+    air_button1_resource=true,
+    air_button3_repeat=true, air_button1=true,
+    air_special_combo=true,
 }
 assert(allowed[variant], "unsupported ORACLE-07 variant: " .. variant)
 
@@ -131,6 +146,8 @@ local function apply_schedule(f)
     local attack_on = f >= 2600 and f < 4200 and f % 310 < 7
     local jump_on = f >= 2600 and f < 4200 and f % 430 < 7
     local left_on = f >= 4201 and f < 4210
+    local up_on = false
+    local down_on = false
 
     -- Default accepted combat tail: four five-frame Button-2 pulses, 45
     -- frames apart. Variants replace only the declared tail inputs.
@@ -174,6 +191,60 @@ local function apply_schedule(f)
     elseif variant == "dash_right" and f >= 4420 then
         attack_on = false; gun_on = false; left_on = false
         jump_on = pulse(f, 4420, 5); right_on = f >= 4412 and f < 4470
+    elseif (variant == "air_cold" or
+            variant == "air_button2_neutral" or
+            variant == "air_button2_hold" or
+            variant:match("^air_button2_followup_") or
+            variant:match("^air_button2_midair_down") or
+            variant == "air_button3_repeat" or
+            variant == "air_button1" or
+            variant == "air_special_combo") and f >= 4420 then
+        attack_on = false; gun_on = false; jump_on = pulse(f, 4420, 5)
+        right_on = false; left_on = false
+        if variant == "air_button2_neutral" then
+            attack_on = pulse(f, 4430, 5)
+        elseif variant == "air_button2_hold" then
+            attack_on = f >= 4430 and f < 4460
+        elseif variant:match("^air_button2_followup_") then
+            local second = tonumber(variant:match("(%d+)$"))
+            attack_on = pulse(f, 4430, 5) or pulse(f, second, 5)
+        elseif variant:match("^air_button2_midair_down") then
+            down_on = f >= 4428 and f < 4470
+            attack_on = pulse(f, 4430, 5)
+            local second = tonumber(variant:match("followup_(%d+)$"))
+            if second then attack_on = attack_on or pulse(f, second, 5) end
+        elseif variant == "air_button3_repeat" then
+            jump_on = jump_on or pulse(f, 4430, 5)
+        elseif variant == "air_button1" then
+            gun_on = pulse(f, 4430, 5)
+        elseif variant == "air_special_combo" then
+            gun_on = pulse(f, 4430, 5); attack_on = pulse(f, 4430, 5)
+        end
+    elseif (variant == "isolated_dash_right" or
+            variant == "isolated_dash_left" or
+            variant == "isolated_dash_up" or
+            variant == "isolated_dash_down" or
+            variant == "air_button2_right" or
+            variant == "air_button2_left" or
+            variant == "air_button2_up" or
+            variant == "air_button2_down") and f >= 4420 then
+        attack_on = false; gun_on = false; jump_on = pulse(f, 4420, 5)
+        right_on = false; left_on = false; up_on = false; down_on = false
+        if variant:match("right$") then right_on = f >= 4412 and f < 4470 end
+        if variant:match("left$") then left_on = f >= 4412 and f < 4470 end
+        if variant:match("up$") then up_on = f >= 4412 and f < 4470 end
+        if variant:match("down$") then down_on = f >= 4412 and f < 4470 end
+        if variant:match("^air_button2_") then
+            attack_on = pulse(f, 4430, 5)
+        end
+    elseif variant == "dash_right_jump_reverse" and f >= 4420 then
+        attack_on = false; gun_on = false; left_on = false
+        right_on = f >= 4412 and f < 4470
+        jump_on = pulse(f, 4420, 5) or pulse(f, 4430, 5)
+    elseif variant == "air_button1_resource" and f >= 4420 then
+        attack_on = false; gun_on = pulse(f, 4695, 5)
+        left_on = false; right_on = f >= 4672 and f < 4730
+        jump_on = pulse(f, 4680, 5)
     elseif variant == "isolated_combo_48" and f >= 4420 then
         attack_on = pulse(f, 4420, 5) or pulse(f, 4468, 5)
         gun_on = false; jump_on = false; right_on = false; left_on = false
@@ -202,8 +273,8 @@ local function apply_schedule(f)
     word = drive(gun, gun_on, 16, word)
     word = drive(attack, attack_on, 32, word)
     word = drive(jump, jump_on, 64, word)
-    word = drive(up, false, 128, word)
-    word = drive(down, false, 256, word)
+    word = drive(up, up_on, 128, word)
+    word = drive(down, down_on, 256, word)
     return word
 end
 
@@ -238,7 +309,10 @@ end
 oracle07_subscription = emu.add_machine_frame_notifier(function()
     frame = frame + 1
     local input_word = apply_schedule(frame)
-    if variant == "isolated_combo_48" or variant == "isolated_combo_49" then
+    if variant == "isolated_combo_48" or variant == "isolated_combo_49" or
+            variant == "air_cold" or variant:match("^isolated_dash_") or
+            variant:match("^air_button") or variant == "air_special_combo" or
+            variant == "dash_right_jump_reverse" then
         -- Declared player-controller counterfactual: remove active class-0x1f
         -- enemies after the common route so no HIT state masks the reset edge.
         if frame >= 4200 then
@@ -249,6 +323,9 @@ oracle07_subscription = emu.add_machine_frame_notifier(function()
                 end
             end
         end
+    end
+    if variant == "air_button1_resource" and frame >= 4670 and frame < 4695 then
+        program:write_u8(player_base + 0x8c, 0x40)
     end
     if frame >= 4200 then program:write_u8(0xff83c1, 0x65) end
     if frame >= first_frame and frame <= last_frame then capture(input_word) end

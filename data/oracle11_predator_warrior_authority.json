@@ -20,6 +20,284 @@
     },
     "independently_launched_cold_runs": true
   },
+  "directional_airborne_interruption": {
+    "airborne_actions": {
+      "button1": {
+        "guard": "0x01a6f4 source edge/resource checks",
+        "phase": "0x0406",
+        "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
+        "resource_artifact_sha256": "fcd693b2d71848b946c813448ec16951f2b94fc57d9bd30e8d0b22408fe2d50c",
+        "resource_status": "SOURCE_CLOSED",
+        "spawn_branch": "0x023858",
+        "writer": "0x023860"
+      },
+      "button2": {
+        "down_held_at_air_edge_phase": "0x0410",
+        "guard": "0x01a6c4 new Button2 edge",
+        "held_or_repeated_edge": "does not auto-repeat or enter a gated continuation when +0x6e animation-event byte remains zero",
+        "neutral_or_non_down_phase": "0x040e",
+        "writer": "0x02367c"
+      },
+      "classification": "SOURCE_CLOSED",
+      "motion": "all required branches return through 0x01a8e6 and source landing 0x023630",
+      "rng_consumption": "none for action, direction, phase, or presentation selection"
+    },
+    "counterfactuals": {
+      "air_button1_empty_rejected_and_sufficient_resource_accepted": true,
+      "air_button2_followup_guards_rejected": true,
+      "air_button2_hold_no_auto_repeat": true,
+      "air_button2_neutral_and_down_split": true,
+      "air_button3_directional_repeat_guard_rejected": true,
+      "all_four_direction_lanes_exercised": true,
+      "independent_cold_runs_byte_identical": true,
+      "natural_hit_cancels_directional_air": true
+    },
+    "coverage_universe": {
+      "all_required_phases_closed": true,
+      "required_counterfactual_phases": [
+        "0x040a",
+        "0x040c",
+        "0x040e",
+        "0x0410"
+      ],
+      "required_route_phases": [
+        "0x0400",
+        "0x0402",
+        "0x0404",
+        "0x0406"
+      ],
+      "route_phase_census": {
+        "baseline-completions": [
+          1024,
+          1026,
+          1028,
+          1030
+        ],
+        "failure-continue": [
+          1024,
+          1026,
+          1028,
+          1030
+        ],
+        "perturbed-completions": [
+          1024,
+          1026,
+          1028,
+          1030
+        ]
+      },
+      "routes": [
+        "baseline-completion-a",
+        "baseline-completion-b",
+        "perturbed-completions",
+        "failure-continue",
+        "targeted-counterfactuals"
+      ]
+    },
+    "directional_actions": {
+      "classification": "SOURCE_CLOSED",
+      "cleanup": "0x01a3fa clears action; 0x0198de returns to source idle/locomotion dispatch",
+      "directions": {
+        "down_lane": {
+          "phases": [
+            "0x0400",
+            "0x040a",
+            "0x040c"
+          ]
+        },
+        "left": {
+          "phases": [
+            "0x0400",
+            "0x0402",
+            "0x0404"
+          ]
+        },
+        "neutral": {
+          "phases": [
+            "0x0400",
+            "0x0402",
+            "0x0404"
+          ]
+        },
+        "right": {
+          "phases": [
+            "0x0400",
+            "0x0402",
+            "0x0404"
+          ]
+        },
+        "up_lane": {
+          "phases": [
+            "0x0400",
+            "0x0402",
+            "0x0404"
+          ]
+        }
+      },
+      "entry": "0x0233e6",
+      "facing": "latched from +0x0f; direction-specific fixed-point vectors are selected before airborne updates",
+      "input_guard": "new Button3 edge at actor +0xee/+0xef bit 6",
+      "landing_guard": "0x01a8e6 signed world-Y versus world-Z comparison; carry clear enters 0x023630",
+      "landing_phase": "0x0404",
+      "landing_writer": "0x023636",
+      "rng_consumption": "none",
+      "vector_resolver": "0x02331e"
+    },
+    "interruption": {
+      "classification": "SOURCE_CLOSED",
+      "natural_witness": {
+        "air_phase_frame": 4424,
+        "hit_cancel_frame": 4433,
+        "inner_after": 2,
+        "phase_before": "0x0402"
+      },
+      "rng_consumption": "none",
+      "rule": "source HIT entry advances the inner dispatcher, clears buffered/action-local state, and replaces the airborne action; damage and HIT recovery remain owned by the player HIT/KO authority checkpoint",
+      "writers": [
+        "0x01a988",
+        "0x01aa30",
+        "0x01aa34",
+        "0x01aa5c"
+      ]
+    },
+    "mutation_controls": [
+      "reject missing required phase",
+      "reject widened phase requirement",
+      "reject incorrect phase writer",
+      "reject random action selection",
+      "reject held Button2 auto-repeat",
+      "reject interruption omission",
+      "reject a NOT_REQUIRED phase once a route witness appears"
+    ],
+    "not_required_for_round1": {
+      "classification": "NOT_REQUIRED_FOR_ROUND1",
+      "mutation_rule": "a future route witness for any phase reopens this family and forbids retaining NOT_REQUIRED_FOR_ROUND1",
+      "phases": {
+        "0x0408": "dispatcher body exists but has no entry in either completion, failure/continue, perturbed, or input-only targeted routes",
+        "0x0412": "requires +0x6e animation-event continuation from an air attack; all reachable PW air-attack records keep the guard clear",
+        "0x0414": "requires the 0x01a932 direction/terrain-mask reversal guard; directional Button3-repeat counterfactual does not satisfy it"
+      }
+    },
+    "protected_boundaries": {
+      "frontend_active": false,
+      "physical_saturn": "UNRUN",
+      "production_runtime_writes": 0,
+      "salvage08_active": false,
+      "user09_status": "CHANGES_REQUESTED",
+      "yaba_run": false
+    },
+    "remaining_unknowns": [],
+    "schema": "oracle11-predator-air-authority-v1",
+    "scope": "Predator Warrior route-reachable directional jump, airborne Button1/Button2 actions, landing, interruption cancellation, and return to control",
+    "source_identity": {
+      "air_reverse_guard": {
+        "bytes": 60,
+        "end_exclusive": "0x01a96e",
+        "sha256": "1436f42c1e960428899352c77a984995bc22586c931bd63c09f2d3d1f517c66b",
+        "start": "0x01a932"
+      },
+      "air_state_dispatch_and_bodies": {
+        "bytes": 840,
+        "end_exclusive": "0x02370c",
+        "sha256": "b64492a07f0916fa99e99e49ec04515fc1012fe85007aba75f178a81ed2781db",
+        "start": "0x0233c4"
+      },
+      "air_vector_table_resolver": {
+        "bytes": 332,
+        "end_exclusive": "0x023858",
+        "sha256": "c23cd4d7881dcbca348b4fde3f815925a31d8bb1167e732b37fbf4bb3028714e",
+        "start": "0x02370c"
+      },
+      "airborne_button1_spawn_branch": {
+        "bytes": 206,
+        "end_exclusive": "0x023926",
+        "sha256": "641cc2ea2c57712af9752bed21d040adbcdf0461bcf82521874ba12554dbd260",
+        "start": "0x023858"
+      },
+      "button2_edge_guard": {
+        "bytes": 24,
+        "end_exclusive": "0x01a6dc",
+        "sha256": "45b7203210bafce656b004ff2753b6d3990285650dcb5ff894eba592195e28ab",
+        "start": "0x01a6c4"
+      },
+      "capture_manifests": {
+        "oracle11_player_air_b": {
+          "manifest_sha256": "8e3049f2847694634e95e14abc12099f145876637c0a15ff145df8e8cc9e47a7",
+          "variant_names": [
+            "air_cold_1",
+            "air_cold_2",
+            "dash_right",
+            "dash_left",
+            "dash_up",
+            "dash_down",
+            "air_button2_neutral",
+            "air_button2_right",
+            "air_button2_left",
+            "air_button2_up",
+            "air_button2_down",
+            "air_button2_hold",
+            "air_button2_followup_4436",
+            "air_button2_followup_4442",
+            "air_button2_followup_4449",
+            "air_button2_followup_4454",
+            "air_button3_repeat",
+            "air_button1",
+            "air_special_combo"
+          ]
+        },
+        "oracle11_player_air_c": {
+          "manifest_sha256": "d7c4b9d80191d39b581695e5ca0cac937525136d0f76679a4de918e127190029",
+          "variant_names": [
+            "air_button2_midair_down",
+            "air_button2_midair_down_followup_4440",
+            "air_button2_midair_down_followup_4448",
+            "dash_right_jump_reverse"
+          ]
+        },
+        "oracle11_player_air_d": {
+          "manifest_sha256": "9b15f02605c9e6265c25a93ca2f13f66d62b68e2b97dd526d84dc56ef2416b69",
+          "variant_names": [
+            "air_button1_resource"
+          ]
+        }
+      },
+      "decoded_opcodes_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
+      "decrypted_program_sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9",
+      "fixed_point_air_motion": {
+        "bytes": 76,
+        "end_exclusive": "0x01a932",
+        "sha256": "f117dd89d1f7bad190f1bfcecc66afa5998ac236b7d7e785a29f246658bc48b7",
+        "start": "0x01a8e6"
+      },
+      "interruption_reset": {
+        "bytes": 240,
+        "end_exclusive": "0x01aa5e",
+        "sha256": "b7f3dd0e07d1078d099cb64b67d85a668e948e28f92b6c6c859cc4028b3a6432",
+        "start": "0x01a96e"
+      },
+      "jump_dispatch_and_vector_setup": {
+        "bytes": 166,
+        "end_exclusive": "0x0233c4",
+        "sha256": "b8bcc247f79422f4b321a8e329d9ad82ca2b58aff5b72097dff87ab9979e0819",
+        "start": "0x02331e"
+      }
+    },
+    "state_dispatch": {
+      "0x00": "0x0233e6",
+      "0x02": "0x02349a",
+      "0x04": "0x0234e4",
+      "0x06": "0x0234f0",
+      "0x08": "0x023500",
+      "0x0a": "0x023534",
+      "0x0c": "0x02358e",
+      "0x0e": "0x02359c",
+      "0x10": "0x0235bc",
+      "0x12": "0x0235ec",
+      "0x14": "0x02360c"
+    },
+    "status": "SOURCE_CLOSED",
+    "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE"
+  },
   "locomotion_neutral_facing": {
     "actor_slot": "0xff8380",
     "classification": "SOURCE_CLOSED",
@@ -274,7 +552,6 @@
     "user09_status": "CHANGES_REQUESTED"
   },
   "remaining_player_backlog": [
-    "directional jump/dash, airborne action, and their interruption authority",
     "player HIT/KO, failure/continue, spawn return, and return to control",
     "route-wide resource, pickup, and audio/load interactions"
   ],
@@ -802,7 +1079,7 @@
     "scheduler_position": "player slot before the non-player pools"
   },
   "schema": "oracle11-predator-warrior-authority-v1",
-  "scope": "Round 1 one-player source authority; locomotion, melee, jump, weapon/projectile/resource and special ownership are closed while HIT/KO/continue and route-wide pickup/audio/load bodies remain active backlog",
+  "scope": "Round 1 one-player source authority; locomotion, melee, all route-reachable directional/air actions, action interruption cancellation, weapon/projectile/resource and special ownership are closed while HIT/KO/continue and route-wide pickup/audio/load bodies remain active backlog",
   "source_identity": {
     "air_motion_arithmetic": {
       "bytes": 76,

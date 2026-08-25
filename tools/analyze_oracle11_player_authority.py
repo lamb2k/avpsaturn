@@ -17,6 +17,7 @@ ORACLE07 = ROOT / "data" / "oracle07_predator_warrior_action_graph_equipment.jso
 ORACLE10 = ROOT / "data" / "oracle10_round1_route.json"
 OUT = ROOT / "data" / "oracle11_predator_warrior_authority.json"
 WEAPON = ROOT / "data" / "oracle11_predator_weapon_projectile_resource.json"
+AIR = ROOT / "data" / "oracle11_predator_air_authority.json"
 VARIANTS = ("cold_run_1", "cold_run_2", "skip_right_edge",
             "hold_right", "reverse_without_neutral")
 
@@ -445,6 +446,18 @@ def build_report() -> dict[str, object]:
             "melee, jump, weapon/projectile/resource and special ownership "
             "are closed while HIT/KO/continue and route-wide pickup/audio/load "
             "bodies remain active backlog")
+    if AIR.exists():
+        report["directional_airborne_interruption"] = json.loads(
+            AIR.read_text(encoding="ascii"))
+        report["remaining_player_backlog"] = [
+            item for item in report["remaining_player_backlog"]
+            if "directional jump/dash" not in item.lower()
+        ]
+        report["scope"] = ("Round 1 one-player source authority; locomotion, "
+            "melee, all route-reachable directional/air actions, action "
+            "interruption cancellation, weapon/projectile/resource and special "
+            "ownership are closed while HIT/KO/continue and route-wide "
+            "pickup/audio/load bodies remain active backlog")
     validate(report)
     return report
 
@@ -510,6 +523,14 @@ def validate(report: dict[str, object]) -> None:
                 weapon["authority_separation"]["equipment_resource"]
                 ["action_latch"].endswith("not ownership"),
                 "weapon/projectile/resource authority drift")
+    if "directional_airborne_interruption" in report:
+        air = report["directional_airborne_interruption"]
+        require(air["status"] == "SOURCE_CLOSED" and
+                air["coverage_universe"]["all_required_phases_closed"] is True and
+                air["remaining_unknowns"] == [] and
+                not any("directional jump/dash" in item.lower()
+                        for item in report["remaining_player_backlog"]),
+                "directional/air/interruption authority drift")
     require(report["protected_boundaries"] == {
         "production_runtime_writes": 0, "frontend_active": False,
         "user09_status": "CHANGES_REQUESTED", "salvage08_active": False,
@@ -520,7 +541,7 @@ def validate(report: dict[str, object]) -> None:
 def main() -> None:
     report = build_report()
     OUT.write_bytes(canonical(report))
-    print("ORACLE-11 Predator Warrior: locomotion/neutral/facing SOURCE_CLOSED; player family PARTIAL")
+    print("ORACLE-11 Predator Warrior: directional/air/interruption checkpoint SOURCE_CLOSED; player family PARTIAL")
 
 
 if __name__ == "__main__":

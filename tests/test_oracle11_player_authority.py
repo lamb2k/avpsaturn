@@ -98,6 +98,10 @@ mutant["status"] = "SOURCE_CLOSED"
 mutant["remaining_player_backlog"] = []
 reject(mutant, "premature player-family closure")
 
+mutant = copy.deepcopy(report)
+mutant["directional_airborne_interruption"]["status"] = "PARTIAL"
+reject(mutant, "air checkpoint downgraded")
+
 rebuilt = oracle11.build_report()
 assert oracle11.canonical(rebuilt) == ARTIFACT.read_bytes(), "derived report drift"
-print("ORACLE-11 player authority tests: PASS (15 mutations rejected)")
+print("ORACLE-11 player authority tests: PASS (16 mutations rejected)")

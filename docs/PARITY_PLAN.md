@@ -150,6 +150,15 @@ class/type archetypes, 26 route events, route/camera/RNG state, and actor,
 audio, and load writer evidence. ORACLE-11 now uses that census as its sole
 backlog and closes one authority family at a time. No production runtime changed.
 
+ORACLE-11 currently retains one generated 94-segment x 10-family coverage
+matrix in `data/round1_system_coverage.yaml`; SPEC-02 is mechanically blocked
+until every declared zero-gap counter is zero. Predator Warrior locomotion,
+melee, weapon/projectile/resource, and all route-reachable directional and
+airborne phases are source closed. Unwitnessed air-table phases
+`0x0408/12/14` are explicit `NOT_REQUIRED_FOR_ROUND1`; HIT/KO, continue,
+respawn, return-to-control, and route-wide pickup/audio/load ownership keep the
+player family and ORACLE-11 active.
+
 | Sequence | Card or card family | Result |
 |---:|---|---|
 | 1 | `INTEGRATE-01-PLAYER-AND-ENEMY` | Accepted player/enemy co-residency and ordering |
