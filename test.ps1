@@ -478,6 +478,12 @@ if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\oracle07_predator_warr
         throw "ORACLE-07 player action/equipment test failed with exit code $LASTEXITCODE."
     }
 }
+if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\oracle08_round1_navigation_bounds.json')) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tests\test_oracle08_navigation.py')
+    if ($LASTEXITCODE -ne 0) {
+        throw "ORACLE-08 navigation/bounds test failed with exit code $LASTEXITCODE."
+    }
+}
 if (Test-Path -LiteralPath (Join-Path $PSScriptRoot '.deps\mame\vertical_slice\input_manifest.json')) {
     & $PythonPath (Join-Path $PSScriptRoot 'tools\verify_avsp_vertical_slice_oracle.py') '--generate'
     if ($LASTEXITCODE -ne 0) {
