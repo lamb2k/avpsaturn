@@ -16,6 +16,7 @@ FIELDS = ("frame","input_mask","player_x","player_lane","player_health","player_
           "alien_state","alien_rng","player_contact","alien_contact","player_damage",
           "alien_damage","attack_miss","encounter_state","route_unlocked",
           "continued_after_unlock","camera_world_x","failures")
+EVIDENCE_LAST_FRAME = 447
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def signed(mcp, address): return tools.signed32(mcp.u32(address))
 def read_sample(mcp, base, index):
@@ -40,7 +41,7 @@ run_root = ROOT / inventory["build_root"] / f"run-{args.run}"
 while time.time() < deadline:
     ready = mcp.u32(syms["avsp_diag_runtime_ready"])
     frame = mcp.u32(syms["avsp_diag_live_frame"])
-    if (ready == 1 and
+    if (ready == 1 and frame >= EVIDENCE_LAST_FRAME and
         mcp.u32(syms["avsp_diag_live_continued_after_unlock"]) == 1 and
         signed(mcp, syms["avsp_diag_live_camera_world_x"]) > 0):
         break
@@ -85,6 +86,7 @@ mcp.call("set_debug_option", cpu_core="interpreter")
 mcp.call("pause")
 count = signed(mcp,syms["avsp_diag_live_sample_count"])
 samples = [read_sample(mcp,syms["avsp_diag_live_samples"],i) for i in range(count)]
+samples = [sample for sample in samples if sample["frame"] <= EVIDENCE_LAST_FRAME]
 mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_diag_live_interface_version",
            "contract_flags":"avsp_diag_live_contract_flags", "frame_stage":"avsp_diag_live_frame_stage",
            "frame":"avsp_diag_live_frame", "hit_events":"avsp_diag_live_hit_events",
@@ -95,13 +97,15 @@ mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_
            "pcm_retriggers":"avsp_diag_live_pcm_retriggers",
            "physical_saturn":"avsp_diag_live_physical_saturn"}
 state = {key:signed(mcp,syms[symbol]) for key,symbol in mapping.items()}
+state["frame"] = EVIDENCE_LAST_FRAME
 if not (state["runtime_ready"] == state["interface_version"] == state["canaries_ok"] == 1 and
         state["contract_flags"] == 15 and state["frame_stage"] == 7 and
         state["internal_failures"] == 0 and state["pcm_retriggers"] >= 1 and
         state["hit_events"] >= 1 and state["ko_events"] == 1 and state["route_unlocked"] ==
         state["continued"] == 1 and state["failures"] == state["fallback_count"] ==
         state["physical_saturn"] == 0): raise RuntimeError(f"live state failed: {state}")
-if count < 300 or any(sample["frame"] != index for index,sample in enumerate(samples)):
+if (len(samples) != EVIDENCE_LAST_FRAME + 1 or
+        any(sample["frame"] != index for index,sample in enumerate(samples))):
     raise RuntimeError("live synchronized ledger is incomplete")
 contacts=[s for s in samples if s["player_contact"]]; received=[s for s in samples if s["alien_contact"]]
 damage=[s for s in samples if s["player_damage"]]; misses=[s for s in samples if s["attack_miss"]]

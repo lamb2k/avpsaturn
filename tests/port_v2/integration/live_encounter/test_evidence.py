@@ -14,6 +14,8 @@ visual=load(f"{base}/visual-qa.json")
 assert builds[0]["source_commit"] == builds[1]["source_commit"]
 assert normals[0]["normalized_iso_sha256"] == normals[1]["normalized_iso_sha256"]
 assert reads[0]["samples"] == reads[1]["samples"]
+assert reads[0]["state"] == reads[1]["state"]
+assert len(reads[0]["samples"]) == 448 and reads[0]["state"]["frame"] == 447
 for build,normal,report in zip(builds,normals,reads):
     assert build["result"] == report["result"] == "PASS"
     assert normal["production_payload_changed"] is False
