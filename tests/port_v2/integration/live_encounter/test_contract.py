@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import re
+import runpy
 import subprocess
 from pathlib import Path
 
@@ -83,4 +84,5 @@ command = (f"cd '{translated}' && mkdir -p build/port_v2/live_encounter && "
            "-o build/port_v2/live_encounter/live_encounter_test && "
            "./build/port_v2/live_encounter/live_encounter_test")
 subprocess.run(["wsl.exe", "bash", "-lc", command], check=True)
+runpy.run_path(str(HERE / "test_stage_bridge.py"), run_name="__main__")
 print("INTEGRATE-04A production contract and deterministic negative controls: PASS")

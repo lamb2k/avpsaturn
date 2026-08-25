@@ -3959,6 +3959,49 @@ static void street_apply_cycle(const int rel)
 #endif
 }
 
+#ifdef AVSP_LIVE_ENCOUNTER
+/* The live camera is expressed in CPS2 scroll2 world X.  NBG0/NBG1 are
+ * cropped strips with independent origins, and scroll3 follows its own
+ * captured register trajectory.  Feeding camera_world_x (or half of it)
+ * directly to SGL treats world coordinates as PNT offsets and exposes
+ * wrapped/empty map regions.  Interpolate only inside the captured
+ * scroll2-to-scroll3 schedule and clamp at its measured endpoints. */
+static int street_scroll3_for_scroll2(const int scroll2_x)
+{
+    unsigned long at;
+    int previous_scroll2;
+    int previous_scroll3;
+    int frame;
+
+    at = street_scroll_offset;
+    previous_scroll2 = (int)street_u16(at);
+    previous_scroll3 = (int)street_u16(at + 4);
+    if (scroll2_x <= previous_scroll2) return previous_scroll3;
+
+    for (frame = 1; frame < street_frames; ++frame)
+    {
+        const int current_scroll2 = (int)street_u16(
+            street_scroll_offset + (unsigned long)frame * 8);
+        const int current_scroll3 = (int)street_u16(
+            street_scroll_offset + (unsigned long)frame * 8 + 4);
+        if (current_scroll2 > previous_scroll2)
+        {
+            if (scroll2_x <= current_scroll2)
+            {
+                const int span = current_scroll2 - previous_scroll2;
+                const int offset = scroll2_x - previous_scroll2;
+                const int delta = current_scroll3 - previous_scroll3;
+                return previous_scroll3 +
+                    (offset * delta + span / 2) / span;
+            }
+            previous_scroll2 = current_scroll2;
+            previous_scroll3 = current_scroll3;
+        }
+    }
+    return previous_scroll3;
+}
+#endif
+
 static void street_test_frame(void)
 {
     static int frame_counter = 0;
@@ -4012,9 +4055,15 @@ static void street_test_frame(void)
 #ifdef AVSP_LIVE_ENCOUNTER
         /* The live encounter owns the camera after load.  The approved stage
          * port still owns both VDP2 submissions and their priority/palette
-         * locks; the second plane retains bounded adapted parallax. */
-        scx0 = live_encounter_runtime.camera_world_x;
-        scx1 = live_encounter_runtime.camera_world_x / 2;
+         * locks. Translate source scroll2 world X through each strip origin;
+         * derive scroll3 from the captured register relationship. */
+        const int live_scroll2_x = live_encounter_runtime.camera_world_x;
+        const int live_scroll3_x =
+            street_scroll3_for_scroll2(live_scroll2_x);
+        scx0 = street_out_of(live_scroll2_x + 64) -
+            street_out_of(street_plane[0].world_x0);
+        scx1 = street_out_of(live_scroll3_x + 64) -
+            street_out_of(street_plane[1].world_x0);
 #endif
 #ifdef AVSP_CAMERA_STAGE_PROMOTION_BENCH
         AvspPortV2CameraInput camera_input;
