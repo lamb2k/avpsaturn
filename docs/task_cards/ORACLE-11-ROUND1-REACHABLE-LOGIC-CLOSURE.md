@@ -29,6 +29,15 @@ card only for a genuinely independent body or source-evidence hard stop.
   and release rules, required Round 1 dispatch entries, deterministic controls,
   and route-wide class-removal counterfactuals are bound. Player update
   authority remains deliberately assigned to the player family.
+- `predator-warrior-locomotion-neutral-facing`: `SOURCE_CLOSED` inside the
+  still-`PARTIAL` player family in
+  `data/oracle11_predator_warrior_authority.json`. Source input decode,
+  signed fixed-point vectors, facing writers, ten-tick stop transition,
+  stop-to-idle presentation, and facing retention are bound. Source Up maps to
+  positive world Y/Z and Down maps to negative world Y/Z; screen conversion is
+  a later executable-contract concern. Remaining actions, equipment,
+  projectile/resource ownership, HIT/KO/continue, and return-to-control bodies
+  remain active backlog.
 
 ## Owned paths
 

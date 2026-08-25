@@ -2,10 +2,11 @@
   "bodies": [
     {
       "accepted_evidence": [
-        "data/oracle07_predator_warrior_action_graph_equipment.json"
+        "data/oracle07_predator_warrior_action_graph_equipment.json",
+        "data/oracle11_predator_warrior_authority.json"
       ],
-      "counterfactual": "bounded action/equipment mutations accepted; full-route completion perturbation pending",
-      "exact_next_experiment": "Close locomotion-to-neutral, complete actions/equipment/projectiles, HIT/KO/continue, and return to control.",
+      "counterfactual": "locomotion-to-neutral has two byte-identical captures plus skipped-edge, held-direction, and direct-reversal controls; remaining actions/resources/continue stay open",
+      "exact_next_experiment": "Close remaining route-reachable actions, equipment/projectiles, HIT/KO/continue, resource ownership, and return to control.",
       "id": "predator-warrior-player-authority",
       "status": "PARTIAL"
     },

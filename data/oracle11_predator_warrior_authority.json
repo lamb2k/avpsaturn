@@ -1,0 +1,219 @@
+{
+  "accepted_prior_player_bodies": {
+    "attack_selector_order": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "random_attack_selection": false,
+    "source": "data/oracle07_predator_warrior_action_graph_equipment.json",
+    "source_sha256": "67d4a9e59b7dfc5b647b5180f385149b375f82163f5c7e778ccbf4f7604ad6ef"
+  },
+  "character": "Predator Warrior",
+  "determinism": {
+    "byte_identical": true,
+    "files": {
+      "player_entries.tsv": "c0e1922cbb4609027046abee3cf36fc481328b73cb6a7c026e56ee9f28f498fb",
+      "player_writes.tsv": "0ef95f2645c98857d153887e83c343058b71aa76f3a0a86b2c077759a21f7c3d",
+      "samples.tsv": "ea9b4028a33f73a0efeb3d6a942ed78c4e76c440a8a5abef64becff75998b155"
+    },
+    "independently_launched_cold_runs": true
+  },
+  "locomotion_neutral_facing": {
+    "actor_slot": "0xff8380",
+    "classification": "SOURCE_CLOSED",
+    "counterfactuals": {
+      "hold_right": {
+        "retained_neutral_facing": 1,
+        "status": "PASS",
+        "stop_deferred_until_release": true
+      },
+      "reverse_without_neutral": {
+        "direct_facing_change": [
+          1,
+          0
+        ],
+        "retained_neutral_facing": 0,
+        "status": "PASS"
+      },
+      "skip_right_edge": {
+        "final_x_delta": -2,
+        "response_shift_frames": 1,
+        "status": "PASS"
+      }
+    },
+    "input_decode": {
+      "down_lane": {
+        "actor_input_bit": 2,
+        "direction_index": 4,
+        "source_world_effect": "-Y and -Z",
+        "trace_word": 256
+      },
+      "left": {
+        "actor_input_bit": 1,
+        "direction_index": 6,
+        "facing": 0,
+        "facing_writer": "0x01a38a",
+        "trace_word": 4
+      },
+      "resolver_table": [
+        255,
+        2,
+        6,
+        255,
+        4,
+        3,
+        5,
+        255,
+        0,
+        1,
+        7,
+        255,
+        255,
+        255,
+        255,
+        255
+      ],
+      "right": {
+        "actor_input_bit": 0,
+        "direction_index": 2,
+        "facing": 1,
+        "facing_writer": "0x01a37e",
+        "trace_word": 8
+      },
+      "up_lane": {
+        "actor_input_bit": 3,
+        "direction_index": 0,
+        "source_world_effect": "+Y and +Z",
+        "trace_word": 128
+      }
+    },
+    "movement_arithmetic": {
+      "fields_read": [
+        "+0x0c s8 direction",
+        "+0xd2 s8 character",
+        "+0x74 u16 mode"
+      ],
+      "fields_written": [
+        "+0x10 s16.16 X",
+        "+0x14 s16.16 Y",
+        "+0x18 s16.16 Z"
+      ],
+      "routine": "0x01a39c",
+      "rule": "character table selects eight signed 16.16 vector pairs; direction index multiplies by eight; first long adds to world X, second to world Y, and world Z mirrors or receives the same lane delta according to +0x74"
+    },
+    "mutation_control": "tests reject facing reset, lane-bit inversion, stop-timer, writer, and classification mutations",
+    "navigation_boundary": "source input/vector arithmetic is closed here; the frame-2718 measured-geometry interruption remains owned by Round 1 navigation authority and forbids unrestricted wall traversal",
+    "release_transition": {
+      "cleanup_writer": "0x01a3fa writes inner/action long 0x02000000",
+      "facing_rule": "neutral performs no +0x0f write and preserves the last directional facing",
+      "idle_phase_writer": "0x0198de writes action low byte 0x02 on the next update",
+      "left_witness": {
+        "retained_facing": 0,
+        "stop_frame": 2607
+      },
+      "presentation": [
+        {
+          "animation_record": "0x15f258",
+          "assembly": "0x160aac",
+          "assembly_window_sha256": "d792fe72aa630b94c37e29d76908266e60c08a5c6b2bbd80f3931154f6b9fc6d",
+          "attack_selector": 0,
+          "hurt_selector": 17,
+          "record_sha256": "ea82a26e65efac3239d50ed523c988cfd1f22cc64113b5e8fe3fb8e5f7f54c73"
+        },
+        {
+          "animation_record": "0x15f268",
+          "assembly": "0x160aca",
+          "assembly_window_sha256": "80b19649d0046e8b42c924b0dfd54f5b8c0dd1519445466dbf111556b3fd35db",
+          "attack_selector": 0,
+          "hurt_selector": 17,
+          "record_sha256": "7aa9aa37fe7c952e551d657f8ff5ed0a3062e672a6bac711f572c708bb7efd26"
+        },
+        {
+          "animation_record": "0x15f278",
+          "assembly": "0x160af2",
+          "assembly_window_sha256": "d9e511d28ed112cd2196bb562b3b34b4f4215dd3f3fde5888a133e575a8533d3",
+          "attack_selector": 0,
+          "hurt_selector": 17,
+          "record_sha256": "0e6b953f36b6d4d8973a9a91fab5476ed56e9e461c7eb3ae11e318bb2f14159a"
+        },
+        {
+          "animation_record": "0x15f1f4",
+          "assembly": "0x1626a4",
+          "assembly_window_sha256": "19608f5c0eacc1c55533e08175a1a96258d653ede705e1d67e0f787587deb8c0",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "record_sha256": "28ff074b1e6e554544e4c197cae211a68240ea9d9e0a9e50a64e39448c09581e"
+        }
+      ],
+      "right_witness": {
+        "neutral_frame": 2557,
+        "retained_facing": 1,
+        "stop_frame": 2547
+      },
+      "stop_action": "0x0204",
+      "stop_entry_writer": "0x019a46",
+      "stop_guard": "+0x0c direction becomes negative when no valid direction is held",
+      "stop_timer": {
+        "decrement": "0x019a9e",
+        "field": "+0x2a high u8",
+        "ticks": 10,
+        "writer": "0x019a4a"
+      },
+      "walking_action": "0x0202"
+    },
+    "remaining_unknowns": [],
+    "rng_consumption": "none"
+  },
+  "protected_boundaries": {
+    "frontend_active": false,
+    "physical_saturn": "UNRUN",
+    "production_runtime_writes": 0,
+    "salvage08_active": false,
+    "user09_status": "CHANGES_REQUESTED"
+  },
+  "remaining_player_backlog": [
+    "route-reachable action/state dispatch beyond accepted ORACLE-07 subset",
+    "equipment and projectile lifecycle beyond action-local flag evidence",
+    "player HIT/KO, failure/continue, spawn return, and return to control",
+    "route-wide resource, pickup, and audio/load interactions"
+  ],
+  "schema": "oracle11-predator-warrior-authority-v1",
+  "scope": "Round 1 one-player source authority; locomotion-to-neutral is closed while remaining action/equipment/continue bodies stay active backlog",
+  "source_identity": {
+    "common_control_reset": {
+      "bytes": 120,
+      "end_exclusive": "0x01a45a",
+      "sha256": "4069df6fc46499c6892ecb9a69a0790895a701c5fc1eded647f993d33229fa10",
+      "start": "0x01a3e2"
+    },
+    "decoded_opcodes_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
+    "decrypted_program_sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9",
+    "fixed_point_motion": {
+      "bytes": 70,
+      "end_exclusive": "0x01a3e2",
+      "sha256": "ae0425021ca3f46a9ecb64f32efb862a60c6cfb18f1cd285bc288456b6a56d43",
+      "start": "0x01a39c"
+    },
+    "input_facing_decode": {
+      "bytes": 56,
+      "end_exclusive": "0x01a39c",
+      "sha256": "67cbfa4aaa50511c09deed668d77048e189eedbf338d439476e1d6da43d61ec5",
+      "start": "0x01a364"
+    },
+    "predator_warrior_vector_table": {
+      "bytes": 72,
+      "end_exclusive": "0x01b6d4",
+      "sha256": "077480b70f4551d3fdb07d805b6bc8373dfdad5cd1ed53c5a85751d8142d1085",
+      "start": "0x01b68c"
+    },
+    "walk_release": {
+      "bytes": 178,
+      "end_exclusive": "0x019ae6",
+      "sha256": "cffd6fbbf9d9e2050e320c015daa9be8a9bf9d3ce9d87b69b605459211c977fa",
+      "start": "0x019a34"
+    }
+  },
+  "status": "PARTIAL"
+}
