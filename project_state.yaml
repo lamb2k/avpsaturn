@@ -4,15 +4,15 @@ workflow_model: interactive-salvage-promotion-integration
 roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
-production_head: b75d8c8758073b01d7ea657ed9640c7f48c0f190
-candidate_head: b75d8c8758073b01d7ea657ed9640c7f48c0f190
+production_head: d9021965dab64d47953d2e829c7d307b0b01a455
+candidate_head: d9021965dab64d47953d2e829c7d307b0b01a455
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-playable-loop-pivot
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 review_candidate_status: ACCEPTED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW, PROMOTE-07-CDDA-RESIDENCY, REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION, ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS, ORACLE-05-STREET-ALIEN-AI, ORACLE-06-ROUND1-ENCOUNTER-RULES, SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, SALVAGE-11-STREET-ALIEN-AI, PROMOTE-11-STREET-ALIEN-AI]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW, PROMOTE-07-CDDA-RESIDENCY, REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION, ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS, ORACLE-05-STREET-ALIEN-AI, ORACLE-06-ROUND1-ENCOUNTER-RULES, SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, SALVAGE-11-STREET-ALIEN-AI, PROMOTE-11-STREET-ALIEN-AI, INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER]
 software_dependency_satisfied_tasks: [INTEGRATE-03-PLAYABLE-SLICE]
 target_scope:
   source_set: avspu
@@ -111,6 +111,9 @@ accepted_implementation_history:
   - id: PROMOTE-11-STREET-ALIEN-AI
     status: ACCEPTED
     head: b75d8c8758073b01d7ea657ed9640c7f48c0f190
+  - id: INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
+    status: ACCEPTED
+    head: d9021965dab64d47953d2e829c7d307b0b01a455
 accepted_control_plane_history:
   - id: ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN
     status: ACCEPTED
@@ -227,15 +230,15 @@ independent_read_only_policy:
     - independent-oracle-state-and-card
 first_live_gameplay_encounter:
   milestone: FIRST LIVE GAMEPLAY ENCOUNTER
-  status: BLOCKED
+  status: AWAITING_USER_FEEDBACK
   player_character: predator_warrior
   enemy_class: "0x1F"
   player_count: 1
   measured_round1_encounter_count: 1
   production_player_control: PASS_BOUNDED_ONE_EMULATOR
   street_alien_ai: PASS_BOUNDED_ONE_EMULATOR
-  encounter_controller: UNRUN
-  interactive_human_review: UNRUN
+  encounter_controller: PASS_BOUNDED_ONE_EMULATOR
+  interactive_human_review: AWAITING_USER_FEEDBACK
   scripted_capability_slice_sufficient: false
   physical_proof_source: INTEGRATE-03-PLAYABLE-SLICE only
 oracle04_source_research:
@@ -323,13 +326,26 @@ promote11_street_alien_ai:
   compatibility_adapter: include-only salvage diagnostic / zero gameplay behavior / explicit deletion condition
   lanes: Fast PASS / Oracle PASS / Target PASS / Emulator PASS
   physical_saturn: UNRUN
-current_checkpoint: integrate-live-control-ai-encounter
-active_task_card: docs/task_cards/INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER.md
-active_task_id: INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
-active_task_kind: INTEGRATE
-task_status: READY
-active_write_owner: INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
-awaiting_user_feedback: []
+integrate04a_live_encounter:
+  task: INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
+  status: ACCEPTED_TECHNICAL_USER_REVIEW_PENDING
+  implementation_commit: d9021965dab64d47953d2e829c7d307b0b01a455
+  classification: SOURCE_BOUND_PLAYER_AND_CLASS_1F_AI_WITH_ADAPTED_SINGLE_ALIEN_CLEAR
+  production_interface: src/port_v2/integration/live_encounter/live_encounter.h
+  normalized_diagnostic_iso_sha256: 3246659a2538ac6650a033a4fb0fa6d3795c6be40289a606383348ff747938c5
+  exact_interactive_iso_sha256: ae65359601d56e5fbee82c94eb66acfd12ed8c842d95b8f7a63e51d78bca7a8a
+  paired_pinned_emulator: PASS / 2 post-commit cold reads / exact identical 448-frame ledgers / 4 player contacts / 2 alien contacts / 1 deliberate miss / 3 HIT events / 1 KO / unlock at frame 401 / continued movement and camera follow / zero failures / zero fallbacks / canaries intact
+  visual_qa: PASS / genuine Yaba Windows.Graphics.Capture at gameplay frame 181 / intact Coffee Shop stage and live combat
+  lanes: Fast PASS / Oracle PASS / Target BUILD_ONLY PASS / Emulator PASS
+  review_package: build/feedback/USER-09-LIVE-ENCOUNTER-REVIEW
+  physical_saturn: UNRUN
+current_checkpoint: review-live-encounter
+active_task_card: docs/task_cards/USER-09-LIVE-ENCOUNTER-REVIEW.md
+active_task_id: USER-09-LIVE-ENCOUNTER-REVIEW
+active_task_kind: USER_REVIEW
+task_status: AWAITING_USER_FEEDBACK
+active_write_owner: USER-09-LIVE-ENCOUNTER-REVIEW
+awaiting_user_feedback: [USER-09-LIVE-ENCOUNTER-REVIEW]
 open_blockers: []
 hardware_pretest:
   task: HW-01-PROBE-3-VDP1-BUDGET-PRETEST

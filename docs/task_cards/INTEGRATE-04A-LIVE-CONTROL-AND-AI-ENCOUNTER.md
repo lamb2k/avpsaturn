@@ -2,7 +2,7 @@
 
 TASK: INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
 KIND: INTEGRATE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: integrate-live-control-ai-encounter
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -79,3 +79,16 @@ deterministic ledgers alone do not approve playability.
 ## Next eligible cards
 
 - `USER-09-LIVE-ENCOUNTER-REVIEW`.
+
+## Accepted technical result
+
+- Implementation/evidence head: `d9021965dab64d47953d2e829c7d307b0b01a455`.
+- Paired post-commit Yaba reads match across an exact 448-frame ledger and
+  prove current-state input, AI, collision/damage, HIT/KO, target-KO-then-
+  inactivity clear, route unlock, and continued movement with zero failures,
+  fallbacks, or canary faults.
+- Diagnostic ISO SHA-256: `3246659a2538ac6650a033a4fb0fa6d3795c6be40289a606383348ff747938c5`.
+- Exact interactive ISO SHA-256: `ae65359601d56e5fbee82c94eb66acfd12ed8c842d95b8f7a63e51d78bca7a8a`.
+- Genuine Windows Graphics Capture visual QA shows the intact Coffee Shop
+  stage and live combat at frame 181. Physical Saturn remains `UNRUN`.
+- Playability is not accepted here; it is awaiting explicit `USER-09` review.

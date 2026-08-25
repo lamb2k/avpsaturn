@@ -390,8 +390,8 @@ def main() -> None:
     for token in (
         "production_player_control: PASS_BOUNDED_ONE_EMULATOR",
         "street_alien_ai: PASS_BOUNDED_ONE_EMULATOR",
-        "encounter_controller: UNRUN",
-        "interactive_human_review: UNRUN",
+        "encounter_controller: PASS_BOUNDED_ONE_EMULATOR",
+        "interactive_human_review: AWAITING_USER_FEEDBACK",
         "scripted_capability_slice_sufficient: false",
     ):
         require(token in state, f"live-gameplay state missing {token}")
@@ -401,6 +401,9 @@ def main() -> None:
     require(scalar(cards["PROMOTE-11-STREET-ALIEN-AI"], "STATUS") ==
             "ACCEPTED",
             "bounded production street-alien AI promotion is not accepted")
+    require(scalar(cards["INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER"],
+                   "STATUS") == "ACCEPTED",
+            "bounded live encounter integration is not accepted")
     require("production player control and enemy AI remain UNKNOWN" in state,
             "INTEGRATE-03 was relabeled as measured production gameplay")
 
@@ -499,7 +502,8 @@ def main() -> None:
             cards["INTEGRATE-04-COLD-BOOT-TO-ROUND1"],
             "scripted capability slice can satisfy playable Round 1")
     require(scalar(cards["USER-09-LIVE-ENCOUNTER-REVIEW"], "STATUS") ==
-            "BLOCKED" and "physical proof" in
+            "AWAITING_USER_FEEDBACK" and active_id ==
+            "USER-09-LIVE-ENCOUNTER-REVIEW" and "physical proof" in
             cards["USER-09-LIVE-ENCOUNTER-REVIEW"],
             "USER-09 can become physical proof")
     for later in (

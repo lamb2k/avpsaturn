@@ -257,10 +257,18 @@ def validate_ledger(ledger: dict) -> None:
                 street_ai["temporary_adapter"]["remaining_authored_controller_coupling"].startswith("None"),
                 "promoted street-alien AI disposition drifted")
     encounter = subsystem(ledger, "round1-encounter-controller")
-    require(encounter["technical_status"] == "UNRUN" and
-            encounter["fidelity_status"] == "UNKNOWN" and
-            encounter["salvage_decision"] == "UNTESTED",
-            "round1 encounter controller advanced before integration")
+    if encounter["technical_status"] == "UNRUN":
+        require(encounter["fidelity_status"] == "UNKNOWN" and
+                encounter["salvage_decision"] == "UNTESTED",
+                "unrun round1 encounter controller advanced")
+    else:
+        require(encounter["technical_status"] == "PASS" and
+                encounter["fidelity_status"] == "ADAPTED" and
+                encounter["user_status"] == "AWAITING_USER_FEEDBACK" and
+                encounter["salvage_decision"] == "PROMOTED" and
+                encounter["production_interface"] ==
+                "src/port_v2/integration/live_encounter/live_encounter.h",
+                "integrated round1 encounter disposition drifted")
     validate_card_results(ledger)
 
 

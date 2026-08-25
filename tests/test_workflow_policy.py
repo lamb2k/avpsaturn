@@ -342,12 +342,16 @@ def main() -> None:
     round1 = next(row for row in route_bodies if row["id"] == "round1")
     require(round1["technical_capability_slice"] == "PARTIAL",
             "Round 1 lost the bounded capability-slice distinction")
+    require("INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER" in
+            scalar(state, "accepted_tasks"),
+            "bounded live encounter advanced without accepted INTEGRATE-04A")
     for field in (
         "live_player_control", "street_alien_ai", "encounter_controller",
-        "complete_round1",
     ):
-        require(round1[field] == "UNRUN",
-                f"Round 1 {field} was advanced without its evidence card")
+        require(round1[field] == "PASS_BOUNDED_ONE_EMULATOR",
+                f"Round 1 {field} lost its bounded INTEGRATE-04A evidence")
+    require(round1["complete_round1"] == "UNRUN",
+            "bounded live encounter was inflated into complete Round 1")
 
     scene_manifest = json.loads(
         (ROOT / "data/avsp_scene_manifest.json").read_text(encoding="utf-8"))

@@ -65,9 +65,9 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
+CURRENT_TASK: USER-09-LIVE-ENCOUNTER-REVIEW
 
-ACTIVE_SOFTWARE_TASK: INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
+ACTIVE_SOFTWARE_TASK: NONE_USER_REVIEW_CHECKPOINT
 
 ## 4. Current salvage queue and production extension
 
@@ -78,10 +78,14 @@ interface now binds each selector-specific player presentation, collision,
 damage, and class-`0x1F` alien reaction to one independent MAME source event.
 INTEGRATE-03 is user `APPROVED` for `SOURCE_BOUND_WITH_ADAPTED_INPUT` at exact
 candidate `82965ef` and normalized ISO SHA-256 `4a142774...`. PROMOTE-10 and
-PROMOTE-11 now provide bounded production player-action and class-`0x1F` AI
-interfaces; their integration, targeting, encounter progression, and
-free-form gameplay remain `UNRUN`. The deterministic choreography is not
-playable Round 1. The
+PROMOTE-11 provide bounded production player-action and class-`0x1F` AI
+interfaces. INTEGRATE-04A now binds them to real controller input, current-
+state collision/damage, HIT/KO, the adapted target-KO-then-inactivity clear,
+route unlock, and continued movement at `d902196`. Its paired 448-frame Yaba
+ledgers and intact visual capture pass, and exact interactive ISO
+`ae653596...a7a8a` is frozen for `USER-09`. Subjective playability remains
+`AWAITING_USER_FEEDBACK`; this is one bounded encounter, not complete playable
+Round 1. The
 slice remains physically `UNRUN`. The bounded QA prerequisite
 `HW-01-PROBE-3-VDP1-BUDGET-PRETEST` has prepared its representative, exact
 909-tile, and overload-control hardware package. Host checks, strict build,
