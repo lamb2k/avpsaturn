@@ -10,6 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / ".deps" / "mame" / "oracle11_player_locomotion_a"
+RAW_JUMP = ROOT / ".deps" / "mame" / "oracle11_player_jump_a"
 OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
 PROGRAM = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_program_2m.bin"
 ORACLE07 = ROOT / "data" / "oracle07_predator_warrior_action_graph_equipment.json"
@@ -37,6 +38,14 @@ PREFIXES = {
               "1d7c001e00824e75",
     0x022ED6: "542e0007422e00801d7c0001009d1d7c000c00924eb90001"
               "a3644eb90001d768",
+    0x01A6A2: "102e00ef4600c02e00ee080000064e752d7c020004000004"
+              "422e0095700360000a02",
+    0x02331E: "70001d40000c122e00ee080100026600006a02410003672e",
+    0x0233E6: "4a6e00246a0000f2542e00071d7c0001005c6100ff24",
+    0x023630: "1d7c00040007422e005c4eb90000229a4a6e007466063d6e"
+              "00180014700a4ef90001b0c4",
+    0x01A8E6: "4a6e00746644202e0030d1ae00104840320002418000202e"
+              "0038d1ae0030302e003002408000b1416708",
 }
 
 
@@ -69,6 +78,10 @@ def samples(name: str) -> dict[int, dict[str, object]]:
     require(len(result) == 261 and min(result) == 2500 and max(result) == 2760,
             f"{name}: sample window drift")
     return result
+
+
+def indexed_rows(path: Path) -> dict[int, dict[str, str]]:
+    return {int(row["frame"]): row for row in read_rows(path)}
 
 
 def write_exists(rows: list[dict[str, str]], *, frame: int, offset: str,
@@ -121,6 +134,21 @@ def build_report() -> dict[str, object]:
         require(digest(RAW / "cold_run_1" / filename) ==
                 digest(RAW / "cold_run_2" / filename),
                 f"cold locomotion captures differ: {filename}")
+
+    jump_manifest = json.loads((RAW_JUMP / "input_manifest.json").read_text(
+        encoding="utf-8-sig"))
+    require([row["name"] for row in jump_manifest["variants"]] ==
+            ["jump_cold_1", "jump_cold_2", "dash_right"],
+            "jump variant inventory drift")
+    for item in jump_manifest["variants"]:
+        for filename, expected in item["sha256"].items():
+            require(digest(RAW_JUMP / item["name"] / filename) == expected,
+                    f"{item['name']}: {filename} identity drift")
+    for filename in ("samples.tsv", "player_writes.tsv",
+                     "player_global_writes.tsv"):
+        require(digest(RAW_JUMP / "jump_cold_1" / filename) ==
+                digest(RAW_JUMP / "jump_cold_2" / filename),
+                f"cold jump captures differ: {filename}")
 
     runs = {name: samples(name) for name in VARIANTS}
     writes = {name: read_rows(RAW / name / "player_writes.tsv")
@@ -184,6 +212,24 @@ def build_report() -> dict[str, object]:
     require(base[2718]["inner"] == 0x0204 and base[2718]["anim"] == "0015f520",
             "down-lane geometry interruption witness drift")
 
+    jump = indexed_rows(RAW_JUMP / "jump_cold_1" / "samples.tsv")
+    dash = indexed_rows(RAW_JUMP / "dash_right" / "samples.tsv")
+    require((int(jump[4422]["p_action"]), int(jump[4422]["p_y"]),
+             int(jump[4422]["p_z"])) == (0x0400, 319, 319),
+            "normal jump dispatch drift")
+    require(int(jump[4424]["p_action"]) == 0x0402 and
+            max(int(jump[frame]["p_y"]) for frame in range(4422, 4461)) == 395 and
+            all(int(jump[frame]["p_z"]) == 319 for frame in range(4422, 4461)),
+            "normal jump arc drift")
+    require((int(jump[4460]["p_action"]), int(jump[4460]["p_y"]),
+             int(jump[4460]["p_z"])) == (0x0404, 319, 319) and
+            (int(jump[4462]["p_action"]), int(jump[4462]["p_facing"])) ==
+            (0x0002, 0), "normal jump landing/control return drift")
+    require(int(dash[4424]["p_action"]) == 0x0402 and
+            dash[4424]["p_anim"] == "0015f43c" and
+            int(dash[4433]["p_inner"]) == 2,
+            "directional jump falsification control drift")
+
     for frame, expected_ee, expected_direction in (
             (2527, 0x01, 0x02), (2587, 0x02, 0x06),
             (2647, 0x08, 0x00), (2707, 0x04, 0x04)):
@@ -215,6 +261,10 @@ def build_report() -> dict[str, object]:
             "close_combo_entry": source_window(opcodes, 0x022588, 0x022666),
             "close_combo_transition": source_window(opcodes, 0x022666, 0x0226FC),
             "contextual_melee": source_window(opcodes, 0x022ED6, 0x022F9C),
+            "jump_input_dispatch": source_window(opcodes, 0x01A6A2, 0x01A6C4),
+            "jump_vector_setup": source_window(opcodes, 0x02331E, 0x0233C4),
+            "jump_state_machine": source_window(opcodes, 0x0233E6, 0x023680),
+            "air_motion_arithmetic": source_window(opcodes, 0x01A8E6, 0x01A932),
         },
         "route_reachable_melee_actions": {
             "classification": "SOURCE_CLOSED",
@@ -257,6 +307,46 @@ def build_report() -> dict[str, object]:
                 "random_selector_cycle_forbidden": True,
             },
             "mutation_control": "tests reject selector reorder, random selection, held auto-chain, window fitting, and classification mutations",
+            "remaining_unknowns": [],
+        },
+        "normal_jump_air_landing": {
+            "classification": "SOURCE_CLOSED",
+            "scope": "neutral Button3 jump through airborne arc, source landing, and return to control; directional dash/air actions remain separate backlog",
+            "input_guard": "new Button3 edge from actor +0xee/+0xef bit 6",
+            "dispatch": {"action": "0x0400", "writer": "0x01a6b2",
+                         "buffer_clear": "0x01a6ba clears +0x95",
+                         "presentation_selector": 3},
+            "state_machine": {
+                "entry": "0x0233e6",
+                "air_action": "0x0402",
+                "air_entry_writer": "0x0233f4",
+                "movement_routine": "0x01a8e6",
+                "landing_action": "0x0404",
+                "landing_writer": "0x023636",
+                "landing_guard": "signed comparison of source world Y against ground/world Z after fixed-point velocity and acceleration updates",
+                "ground_sync": "0x023646 copies +0x18 world Z to +0x14 world Y when +0x74 is zero",
+                "cleanup": "0x01a3e2 common control reset, then idle phase writer 0x0198de",
+            },
+            "arithmetic": {
+                "position_fields": ["+0x10 s16.16 X", "+0x14 s16.16 Y"],
+                "velocity_fields": ["+0x30 s16.16 X velocity", "+0x34 s16.16 Y velocity"],
+                "acceleration_fields": ["+0x38 s16.16 X acceleration", "+0x3c s16.16 Y acceleration"],
+                "source_table": "0x0243d2 selected from input lane and facing by 0x02331e",
+            },
+            "witness": {"dispatch_frame": 4422, "air_frame": 4424,
+                        "apex_world_y": 395, "ground_world_z": 319,
+                        "landing_frame": 4460, "control_return_frame": 4462,
+                        "retained_facing": 0},
+            "presentation": oracle07["presentation_identity"]["sequences"]["jump"],
+            "rng_consumption": "none",
+            "scheduler_position": "player slot before the non-player pools",
+            "counterfactuals": {
+                "independent_cold_runs_byte_identical": True,
+                "direction_plus_jump_selects_distinct_presentation": True,
+                "directional_variant_hit_interruption_observed": True,
+                "directional_variant_does_not_authorize_normal_jump_changes": True,
+            },
+            "mutation_control": "tests reject fitted apex, inverted ground comparison, missing landing sync, RNG, and widened directional scope",
             "remaining_unknowns": [],
         },
         "locomotion_neutral_facing": {
@@ -324,7 +414,7 @@ def build_report() -> dict[str, object]:
         },
         "remaining_player_backlog": [
             "Button1 equipment and projectile lifecycle beyond action-local flag evidence",
-            "jump, air action, landing, and interruption authority",
+            "directional jump/dash, airborne action, and their interruption authority",
             "special action resource, spawned actor, and recovery authority",
             "player HIT/KO, failure/continue, spawn return, and return to control",
             "route-wide resource, pickup, and audio/load interactions",
@@ -385,6 +475,19 @@ def validate(report: dict[str, object]) -> None:
             "melee selector/window/RNG contract drift")
     require(all(melee["counterfactuals"].values()),
             "melee counterfactual failed")
+    jump = report["normal_jump_air_landing"]
+    require(jump["classification"] == "SOURCE_CLOSED" and
+            jump["remaining_unknowns"] == [], "normal jump authority is not closed")
+    require(jump["witness"]["apex_world_y"] == 395 and
+            jump["witness"]["ground_world_z"] == 319 and
+            jump["witness"]["control_return_frame"] == 4462,
+            "normal jump witness drift")
+    require(jump["state_machine"]["landing_writer"] == "0x023636" and
+            jump["state_machine"]["ground_sync"].startswith("0x023646") and
+            jump["rng_consumption"] == "none",
+            "normal jump landing/RNG contract drift")
+    require(all(jump["counterfactuals"].values()),
+            "normal jump counterfactual failed")
     require(bool(report["remaining_player_backlog"]),
             "player authority was prematurely declared complete")
     require(report["protected_boundaries"] == {

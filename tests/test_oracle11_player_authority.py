@@ -76,10 +76,28 @@ mutant["route_reachable_melee_actions"]["counterfactuals"] \
 reject(mutant, "held attack auto-chain admitted")
 
 mutant = copy.deepcopy(report)
+mutant["normal_jump_air_landing"]["witness"]["apex_world_y"] = 394
+reject(mutant, "jump apex fitted")
+
+mutant = copy.deepcopy(report)
+mutant["normal_jump_air_landing"]["state_machine"]["landing_writer"] = \
+    "0x023634"
+reject(mutant, "wrong jump landing writer")
+
+mutant = copy.deepcopy(report)
+mutant["normal_jump_air_landing"]["rng_consumption"] = "one call"
+reject(mutant, "jump RNG introduced")
+
+mutant = copy.deepcopy(report)
+mutant["normal_jump_air_landing"]["counterfactuals"] \
+    ["directional_variant_does_not_authorize_normal_jump_changes"] = False
+reject(mutant, "directional jump widened into normal authority")
+
+mutant = copy.deepcopy(report)
 mutant["status"] = "SOURCE_CLOSED"
 mutant["remaining_player_backlog"] = []
 reject(mutant, "premature player-family closure")
 
 rebuilt = oracle11.build_report()
 assert oracle11.canonical(rebuilt) == ARTIFACT.read_bytes(), "derived report drift"
-print("ORACLE-11 player authority tests: PASS (11 mutations rejected)")
+print("ORACLE-11 player authority tests: PASS (15 mutations rejected)")

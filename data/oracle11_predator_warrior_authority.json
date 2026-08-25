@@ -166,6 +166,106 @@
     "remaining_unknowns": [],
     "rng_consumption": "none"
   },
+  "normal_jump_air_landing": {
+    "arithmetic": {
+      "acceleration_fields": [
+        "+0x38 s16.16 X acceleration",
+        "+0x3c s16.16 Y acceleration"
+      ],
+      "position_fields": [
+        "+0x10 s16.16 X",
+        "+0x14 s16.16 Y"
+      ],
+      "source_table": "0x0243d2 selected from input lane and facing by 0x02331e",
+      "velocity_fields": [
+        "+0x30 s16.16 X velocity",
+        "+0x34 s16.16 Y velocity"
+      ]
+    },
+    "classification": "SOURCE_CLOSED",
+    "counterfactuals": {
+      "direction_plus_jump_selects_distinct_presentation": true,
+      "directional_variant_does_not_authorize_normal_jump_changes": true,
+      "directional_variant_hit_interruption_observed": true,
+      "independent_cold_runs_byte_identical": true
+    },
+    "dispatch": {
+      "action": "0x0400",
+      "buffer_clear": "0x01a6ba clears +0x95",
+      "presentation_selector": 3,
+      "writer": "0x01a6b2"
+    },
+    "input_guard": "new Button3 edge from actor +0xee/+0xef bit 6",
+    "mutation_control": "tests reject fitted apex, inverted ground comparison, missing landing sync, RNG, and widened directional scope",
+    "presentation": [
+      {
+        "assembly": "0x160bc6",
+        "attack_selector": 0,
+        "hurt_selector": 1,
+        "record": "0x15f2cc"
+      },
+      {
+        "assembly": "0x160bc6",
+        "attack_selector": 0,
+        "hurt_selector": 1,
+        "record": "0x15f2dc"
+      },
+      {
+        "assembly": "0x160cda",
+        "attack_selector": 0,
+        "hurt_selector": 2,
+        "record": "0x15f2f0"
+      },
+      {
+        "assembly": "0x160d02",
+        "attack_selector": 0,
+        "hurt_selector": 2,
+        "record": "0x15f300"
+      },
+      {
+        "assembly": "0x160d2a",
+        "attack_selector": 0,
+        "hurt_selector": 2,
+        "record": "0x15f310"
+      },
+      {
+        "assembly": "0x160d52",
+        "attack_selector": 0,
+        "hurt_selector": 2,
+        "record": "0x15f320"
+      },
+      {
+        "assembly": "0x160d86",
+        "attack_selector": 0,
+        "hurt_selector": 2,
+        "record": "0x15f330"
+      }
+    ],
+    "remaining_unknowns": [],
+    "rng_consumption": "none",
+    "scheduler_position": "player slot before the non-player pools",
+    "scope": "neutral Button3 jump through airborne arc, source landing, and return to control; directional dash/air actions remain separate backlog",
+    "state_machine": {
+      "air_action": "0x0402",
+      "air_entry_writer": "0x0233f4",
+      "cleanup": "0x01a3e2 common control reset, then idle phase writer 0x0198de",
+      "entry": "0x0233e6",
+      "ground_sync": "0x023646 copies +0x18 world Z to +0x14 world Y when +0x74 is zero",
+      "landing_action": "0x0404",
+      "landing_guard": "signed comparison of source world Y against ground/world Z after fixed-point velocity and acceleration updates",
+      "landing_writer": "0x023636",
+      "movement_routine": "0x01a8e6"
+    },
+    "witness": {
+      "air_frame": 4424,
+      "apex_world_y": 395,
+      "control_return_frame": 4462,
+      "dispatch_frame": 4422,
+      "ground_world_z": 319,
+      "landing_frame": 4460,
+      "retained_facing": 0
+    }
+  },
   "protected_boundaries": {
     "frontend_active": false,
     "physical_saturn": "UNRUN",
@@ -175,7 +275,7 @@
   },
   "remaining_player_backlog": [
     "Button1 equipment and projectile lifecycle beyond action-local flag evidence",
-    "jump, air action, landing, and interruption authority",
+    "directional jump/dash, airborne action, and their interruption authority",
     "special action resource, spawned actor, and recovery authority",
     "player HIT/KO, failure/continue, spawn return, and return to control",
     "route-wide resource, pickup, and audio/load interactions"
@@ -706,6 +806,12 @@
   "schema": "oracle11-predator-warrior-authority-v1",
   "scope": "Round 1 one-player source authority; locomotion-to-neutral is closed while remaining action/equipment/continue bodies stay active backlog",
   "source_identity": {
+    "air_motion_arithmetic": {
+      "bytes": 76,
+      "end_exclusive": "0x01a932",
+      "sha256": "f117dd89d1f7bad190f1bfcecc66afa5998ac236b7d7e785a29f246658bc48b7",
+      "start": "0x01a8e6"
+    },
     "button2_dispatch": {
       "bytes": 24,
       "end_exclusive": "0x01a6f4",
@@ -749,6 +855,24 @@
       "end_exclusive": "0x01a39c",
       "sha256": "67cbfa4aaa50511c09deed668d77048e189eedbf338d439476e1d6da43d61ec5",
       "start": "0x01a364"
+    },
+    "jump_input_dispatch": {
+      "bytes": 34,
+      "end_exclusive": "0x01a6c4",
+      "sha256": "e00577f010e60e7850ae1df8642d654c595f9670c5c1689859c5f7969ca69fee",
+      "start": "0x01a6a2"
+    },
+    "jump_state_machine": {
+      "bytes": 666,
+      "end_exclusive": "0x023680",
+      "sha256": "6a54c230ad68119e8ef360d7372270b517d33590e3e69b61d03c02c90116fe0e",
+      "start": "0x0233e6"
+    },
+    "jump_vector_setup": {
+      "bytes": 166,
+      "end_exclusive": "0x0233c4",
+      "sha256": "b8bcc247f79422f4b321a8e329d9ad82ca2b58aff5b72097dff87ab9979e0819",
+      "start": "0x02331e"
     },
     "predator_warrior_vector_table": {
       "bytes": 72,

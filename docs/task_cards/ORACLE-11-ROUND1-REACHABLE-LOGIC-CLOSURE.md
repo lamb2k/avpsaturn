@@ -44,6 +44,12 @@ card only for a genuinely independent body or source-evidence hard stop.
   chaining, and non-random state-owned presentation are bound in
   `data/oracle11_predator_warrior_authority.json`. The confirmed selector
   timing and attack assemblies remain locked.
+- `predator-warrior-normal-jump-air-landing`: `SOURCE_CLOSED` inside the
+  still-`PARTIAL` player family. Two independent byte-identical source runs
+  bind Button-3 edge dispatch, fixed-point vector setup and integration,
+  neutral jump presentation, landing guard/snap, facing retention, and return
+  to control. Directional dash/air actions remain separate active backlog; a
+  direction-plus-jump HIT capture is retained only as a falsification control.
 
 ## Owned paths
 
