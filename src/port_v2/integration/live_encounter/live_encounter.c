@@ -135,7 +135,8 @@ static void avsp_live_camera_step(AvspLiveEncounterRuntime *runtime)
         runtime->camera_world_x = AVSP_LIVE_ENCOUNTER_CAMERA_LOCK_X;
         return;
     }
-    target = runtime->player.x - AVSP_LIVE_ENCOUNTER_PLAYER_X;
+    target = AVSP_LIVE_ENCOUNTER_CAMERA_LOCK_X +
+        runtime->player.x - AVSP_LIVE_ENCOUNTER_PLAYER_X;
     if (target < AVSP_LIVE_ENCOUNTER_CAMERA_LOCK_X)
         target = AVSP_LIVE_ENCOUNTER_CAMERA_LOCK_X;
     runtime->camera_world_x = (short)target;

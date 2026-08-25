@@ -73,7 +73,13 @@ unsigned long avsp_alien_ai_assembly_for_record(const unsigned long record)
         case 0x0012DD50UL: return 0x00130248UL;
         case 0x0012DD28UL: return 0x0013020CUL;
         case 0x0012DD3CUL: return 0x0013023AUL;
+        case 0x0012D2F8UL: return 0x0012F994UL;
         case 0x0012E214UL: return 0x0013020CUL;
+        case 0x0012E224UL: return 0x0013020CUL;
+        case 0x0012E234UL: return 0x0013020CUL;
+        case 0x0012E244UL: return 0x0013020CUL;
+        case 0x0012E254UL: return 0x00130294UL;
+        case 0x0012E268UL: return 0x00130346UL;
         default: return 0UL;
     }
 }
@@ -96,7 +102,15 @@ int avsp_alien_ai_contract_valid(void)
            avsp_alien_ai_assembly_for_record(0x0012E8ECUL) ==
                0x0012F5DEUL &&
            avsp_alien_ai_assembly_for_record(0x0012D5E4UL) ==
-               0x0012FAE8UL;
+               0x0012FAE8UL &&
+           avsp_alien_ai_assembly_for_record(0x0012D2F8UL) ==
+               0x0012F994UL &&
+           avsp_alien_ai_assembly_for_record(0x0012E224UL) ==
+               0x0013020CUL &&
+           avsp_alien_ai_assembly_for_record(0x0012E254UL) ==
+               0x00130294UL &&
+           avsp_alien_ai_assembly_for_record(0x0012E268UL) ==
+               0x00130346UL;
 }
 
 void avsp_alien_ai_init(AvspAlienRuntime *runtime,

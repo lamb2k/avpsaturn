@@ -7947,7 +7947,7 @@ void jo_main(void)
     live_autotest_release = 0;
 #endif
     avsp_diag_live_physical_saturn = 0;
-    runtime_ready = runtime_ready && avsp_diag_live_contract_flags == 15;
+    runtime_ready = runtime_ready && avsp_diag_live_contract_flags == 127;
 #endif
     if (!runtime_ready) failed_asset = "PLAYABLE SLICE FAILED";
     JO_UNUSED_ARG(index);

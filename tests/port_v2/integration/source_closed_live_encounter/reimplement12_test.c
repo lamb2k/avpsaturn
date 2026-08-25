@@ -172,6 +172,18 @@ static int test_live_same_tick_contract(void)
                output.alien.assembly == avsp_alien_ai_assembly_for_record(
                    output.alien.animation_record),
                "same-tick state/record/assembly diagnostics drift")) return 0;
+    avsp_live_encounter_init(&runtime);
+    runtime.route_unlocked = 1u;
+    runtime.unlock_player_x = 990;
+    runtime.player.x_numerator = 1000L * 8L;
+    runtime.player.x = 1000;
+    input.frame = 0UL;
+    input.player_mask = 0u;
+    if (!avsp_live_encounter_step(&runtime, &input, &output)) return 0;
+    if (!check(output.camera_world_x == 790 &&
+               output.continued_after_unlock == 1u,
+               "source-world camera delta lost its approved lock origin"))
+        return 0;
     return check(!avsp_live_encounter_clear_allowed(0u, 0u, 1u, 1u) &&
                  !avsp_live_encounter_clear_allowed(1u, 0u, 1u, 1u) &&
                  avsp_live_encounter_clear_allowed(1u, 1u, 0u, 0u),

@@ -32,6 +32,12 @@ sources = {
     "live_encounter.c": ROOT / "src/port_v2/integration/live_encounter/live_encounter.c",
 }
 
+main_source = (ROOT / "main.c").read_text(encoding="utf-8")
+require("avsp_diag_live_contract_flags == 127" in main_source,
+        "Saturn runtime handoff does not require the complete source-closed contract")
+require("avsp_diag_live_contract_flags == 15" not in main_source,
+        "obsolete four-flag live encounter contract remains reachable")
+
 
 def translated(path: Path) -> str:
     return subprocess.run(
@@ -95,11 +101,17 @@ mutations = (
     ("random-assembly", "street_alien_ai.c",
      "case 0x0012E8ECUL: return 0x0012F5DEUL;",
      "case 0x0012E8ECUL: return 0x0012FA0CUL;"),
+    ("ko-assembly", "street_alien_ai.c",
+     "case 0x0012E224UL: return 0x0013020CUL;",
+     "case 0x0012E224UL: return 0x00130346UL;"),
     ("wide-contact", "street_alien_ai.c", "#define AVSP_ALIEN_MAX_CONTACT_X 68",
      "#define AVSP_ALIEN_MAX_CONTACT_X 160"),
     ("projection-sign", "live_encounter.c",
      "(world_z - AVSP_LIVE_ENCOUNTER_WORLD_Z_ANCHOR) - height",
      "-(world_z - AVSP_LIVE_ENCOUNTER_WORLD_Z_ANCHOR) - height"),
+    ("camera-origin", "live_encounter.c",
+     "target = AVSP_LIVE_ENCOUNTER_CAMERA_LOCK_X +\n        runtime->player.x - AVSP_LIVE_ENCOUNTER_PLAYER_X;",
+     "target = runtime->player.x - AVSP_LIVE_ENCOUNTER_PLAYER_X;"),
     ("presentation-clear", "live_encounter.c",
      "return target_ko != 0u && target_inactive != 0u;",
      "return presentation_flag != 0u;"),
