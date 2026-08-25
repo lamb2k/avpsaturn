@@ -21,9 +21,8 @@ module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
 image_path = ROOT / "game.iso"
 raw = image_path.read_bytes(); normalized = bytearray(raw)
 descriptors, records, generators, changed = module.normalize(normalized)
-if changed == 0:
-    raise ValueError("INTEGRATE-04A ISO contained no normalizable metadata")
-image_path.write_bytes(normalized)
+if changed != 0:
+    image_path.write_bytes(normalized)
 normalized_hash = digest(normalized)
 manifest = ROOT / "build/hardware_release_manifest.txt"
 lines = manifest.read_text(encoding="ascii").splitlines()
@@ -37,8 +36,10 @@ report = {"schema":1, "classification":"diagnostic-container-metadata-adapter",
           "raw_iso_sha256":digest(raw), "normalized_iso_sha256":normalized_hash,
           "changed_byte_count":changed, "volume_descriptor_count":descriptors,
           "directory_record_count":records, "generator_metadata_sector_count":generators,
+          "already_normalized":changed == 0,
           "production_payload_changed":False, "physical_saturn":"UNRUN"}
 output = ROOT / inventory["build_root"] / f"run-{args.run}/iso-normalization.json"
 output.parent.mkdir(parents=True, exist_ok=True)
 output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="ascii")
-print(f"normalized INTEGRATE-04A ISO: {normalized_hash}")
+verb = "reused normalized" if changed == 0 else "normalized"
+print(f"{verb} INTEGRATE-04A ISO: {normalized_hash}")

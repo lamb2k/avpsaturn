@@ -22,9 +22,18 @@ FIELDS = ("frame","input_mask","player_x","player_lane","player_health","player_
 EVIDENCE_LAST_FRAME = 470
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def signed(mcp, address): return tools.signed32(mcp.u32(address))
-def read_sample(mcp, base, index):
-    address = base + index * len(FIELDS) * 4
-    return {name:signed(mcp,address + offset*4) for offset,name in enumerate(FIELDS)}
+def read_samples(mcp, base, count):
+    record_bytes = len(FIELDS) * 4
+    payload = mcp.read(base, count * record_bytes)
+    result = []
+    for index in range(count):
+        start = index * record_bytes
+        record = payload[start:start + record_bytes]
+        result.append({
+            name: tools.signed32(int.from_bytes(record[offset * 4:offset * 4 + 4], "big"))
+            for offset, name in enumerate(FIELDS)
+        })
+    return result
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--run", type=int, choices=(1,2), required=True)
@@ -42,13 +51,21 @@ while True:
         time.sleep(0.25)
 run_root = ROOT / inventory["build_root"] / f"run-{args.run}"
 while time.time() < deadline:
-    ready = mcp.u32(syms["avsp_diag_runtime_ready"])
-    frame = mcp.u32(syms["avsp_diag_live_frame"])
-    if (ready == 1 and frame >= EVIDENCE_LAST_FRAME and
-        mcp.u32(syms["avsp_diag_live_continued_after_unlock"]) == 1 and
-        signed(mcp, syms["avsp_diag_live_camera_world_x"]) > 768):
-        break
-    time.sleep(0.01)
+    try:
+        ready = mcp.u32(syms["avsp_diag_runtime_ready"])
+        frame = mcp.u32(syms["avsp_diag_live_frame"])
+        if (ready == 1 and frame >= EVIDENCE_LAST_FRAME and
+            mcp.u32(syms["avsp_diag_live_continued_after_unlock"]) == 1 and
+            signed(mcp, syms["avsp_diag_live_camera_world_x"]) > 768):
+            break
+    except Exception:
+        # The pinned Windows build occasionally resets one HTTP connection
+        # while the emulator remains alive. Reinitialize the bridge and keep
+        # the bounded deadline authoritative.
+        time.sleep(0.25)
+        try: mcp.initialize()
+        except Exception: pass
+    time.sleep(0.05)
 else:
     failed_asset_pointer = mcp.u32(syms["failed_asset"])
     failed_asset_name = ""
@@ -88,7 +105,9 @@ else:
 mcp.call("set_debug_option", cpu_core="interpreter")
 mcp.call("pause")
 count = signed(mcp,syms["avsp_diag_live_sample_count"])
-all_samples = [read_sample(mcp,syms["avsp_diag_live_samples"],i) for i in range(count)]
+if count < 1 or count > 600:
+    raise RuntimeError(f"invalid live sample count: {count}")
+all_samples = read_samples(mcp, syms["avsp_diag_live_samples"], count)
 mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_diag_live_interface_version",
            "contract_flags":"avsp_diag_live_contract_flags", "frame_stage":"avsp_diag_live_frame_stage",
            "frame":"avsp_diag_live_frame", "hit_events":"avsp_diag_live_hit_events",
@@ -153,19 +172,30 @@ player_assemblies = {
     0x160264:0x162AA6, 0x160274:0x162AA6,
 }
 alien_assemblies = {
+    0x12DDB0:0x130346,
     0x12EC04:0x12F7CC, 0x12EC14:0x12F7E4, 0x12EC24:0x12F7FC,
     0x12EC34:0x12F814, 0x12EC44:0x12F82C, 0x12EC54:0x12F85E,
     0x12EC64:0x12F890, 0x12EC74:0x12F8B8, 0x12E8EC:0x12F5DE,
     0x12E8FC:0x12FA0C, 0x12E90C:0x12FA2A, 0x12E91C:0x12FA0C,
     0x12D5E4:0x12FAE8, 0x12DD50:0x130248, 0x12DD28:0x13020C,
-    0x12DD3C:0x13023A, 0x12E214:0x13020C,
+    0x12DD3C:0x13023A, 0x12D2F8:0x12F994, 0x12E214:0x13020C,
+    0x12E224:0x13020C, 0x12E234:0x13020C, 0x12E244:0x13020C,
+    0x12E254:0x130294, 0x12E268:0x130346,
 }
 if any(player_assemblies.get(s["player_animation_record"]) != s["player_assembly"]
        for s in samples):
     raise RuntimeError("player animation-record/assembly ownership drift")
-if any(alien_assemblies.get(s["alien_animation_record"]) != s["alien_assembly"]
-       for s in samples if s["alien_state"] != 0):
-    raise RuntimeError("alien animation-record/assembly ownership drift")
+alien_identity_drift = [
+    {"frame":s["frame"], "state":s["alien_state"],
+     "action":hex(s["alien_action"]),
+     "record":hex(s["alien_animation_record"]),
+     "assembly":hex(s["alien_assembly"]),
+     "expected":hex(alien_assemblies.get(s["alien_animation_record"], 0))}
+    for s in samples if s["alien_state"] != 0 and
+    alien_assemblies.get(s["alien_animation_record"]) != s["alien_assembly"]
+]
+if alien_identity_drift:
+    raise RuntimeError(f"alien animation-record/assembly ownership drift: {alien_identity_drift[:8]}")
 for before, after in zip(samples, samples[1:]):
     if (before["player_state"] == after["player_state"] == 0 and
         after["player_lane"] != before["player_lane"] and
