@@ -2,7 +2,7 @@
 
 TASK: ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION
 KIND: ORACLE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: oracle-alien-state-facing-presentation
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

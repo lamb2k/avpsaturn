@@ -65,7 +65,7 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS
+CURRENT_TASK: ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION
 
 ACTIVE_SOFTWARE_TASK: SOURCE_CLOSURE_ORACLE
 
@@ -169,9 +169,13 @@ runtime, Probe 3 result, physical evidence, exact INTEGRATE-03 ISO,
   selection, action-local equipment flag writers, facing latch, HIT
   cancellation, animation records, assemblies, and exact close-contact
   presentation identity.
+- `ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS` source-closes the bounded Coffee
+  Shop navigation authority: dynamic world-space player bounds, a
+  non-rectangular obstacle/terrain route, player-versus-class-`0x1F` boundary
+  separation, and the measured camera lock/unlock/next-lock sequence.
 
 Two identical captures and real perturbations were required for each body.
-ORACLE-04 through ORACLE-07 are accepted; ORACLE-08 is the active read-only
+ORACLE-04 through ORACLE-08 are accepted; ORACLE-09 is the active read-only
 source-closure writer. ORACLE-06 proved that
 the source opening is a withdrawal set piece, so the first live implementation
 uses a source-bound, adapted one-alien KO/inactive clear. Facts not captured
