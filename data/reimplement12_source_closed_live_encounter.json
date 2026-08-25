@@ -11,11 +11,12 @@
   "implementation": {
     "initial_commit": "e544a0832c766a0b764448bec1206a6486d7a2b3",
     "correction_commit": "d03d1ba1dd7967981d0fa3d3d14adb2fdc810fde",
-    "evidence_head": "7185c38c41a2575698f5b79ca32020d38d10c178",
-    "source_tree": "c7b5f32cef0d89d5e98dc326cc77d33cb86f8df6",
+    "visual_projection_correction_commit": "e23733545af0bebe1f9ae26c4f391a9080c7006f",
+    "evidence_head": "e23733545af0bebe1f9ae26c4f391a9080c7006f",
+    "source_tree": "ebc54deb94a0d5c6a826b63ab9e3b36ec9b70828",
     "spec01_sha256": "a8a8d5ff06d70a8df4cc7687928e0eb5200927ac8901adb3eb76745c4b42bd0f",
     "source_sha256": {
-      "main.c": "5374337f706f7d73aea87bf2af74f161b6224a4f4c406e7b0513e46afce8381b",
+      "main.c": "40a7c20e36bb3db1a2c8cc1cf8509d9c20b098379247be0a939d940d39e35eb5",
       "src/port_v2/gameplay/player_action/player_action.c": "c4357b0c9298df993662506ede0facdb935875fae105287bd90420bba3bf82a3",
       "src/port_v2/gameplay/street_alien_ai/street_alien_ai.c": "c84e2bf868651f0b6ee6ac921c87770a72082430b5f50df3d3b592d225a191fd",
       "src/port_v2/integration/live_encounter/live_encounter.c": "44608bfb67bf9affacd587a84d172eb7547ac81977801e0caf3de3fa64b97ecc"
@@ -31,7 +32,7 @@
     "emulator": {
       "identity": "Yaba Sanshiro 1.20.37-2986eb",
       "cold_runs": 2,
-      "iso_sha256": "3ccd3873095bcdee77e97ad3feba452770369cbd5d8d69ae2e5857f009264a41",
+      "iso_sha256": "8e20cb7e8c482035578422d8d1734cd9713adfc525ac5bf7c6dd8eade386bea8",
       "sample_count_each": 471,
       "last_evidence_frame": 470,
       "samples_semantic_sha256": "2693b9c29b7418b90837cc0a59f198314b75de9d5e9d5bfaac92c81f59521008",
