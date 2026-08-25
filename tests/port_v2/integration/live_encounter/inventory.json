@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "task_id": "INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER",
+  "card_profile": "LiveEncounterBench",
+  "compile_profile": "debug-live-encounter-bench",
+  "manifest_profile": "live-encounter-bench",
+  "build_root": "build/port_v2/live_encounter",
+  "required_readback_symbols": [
+    "avsp_diag_runtime_ready",
+    "avsp_diag_live_interface_version",
+    "avsp_diag_live_contract_flags",
+    "avsp_diag_live_frame_stage",
+    "avsp_diag_live_internal_failures",
+    "avsp_diag_live_pcm_retriggers",
+    "avsp_diag_live_frame",
+    "avsp_diag_live_samples",
+    "avsp_diag_live_sample_count",
+    "avsp_diag_live_hit_events",
+    "avsp_diag_live_ko_events",
+    "avsp_diag_live_route_unlocked",
+    "avsp_diag_live_continued_after_unlock",
+    "avsp_diag_live_failures",
+    "avsp_diag_live_fallback_count",
+    "avsp_diag_live_canaries_ok",
+    "avsp_diag_live_physical_saturn"
+  ]
+}

@@ -32,12 +32,15 @@ param(
     [switch]$PredatorWarriorActionPromotionBench,
     [switch]$StreetAlienAiSalvageBench,
     [switch]$StreetAlienAiPromotionBench,
+    [switch]$LiveEncounterBench,
+    [switch]$LiveEncounter,
     [switch]$SkipHostTests
 )
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
-$usePlayableSlice = $PlayableSlice -or ($Release -and
+$usePlayableSlice = $PlayableSlice -or $LiveEncounterBench -or
+    $LiveEncounter -or ($Release -and
     -not ($VisualTest -or $FrontendTest -or $FrontendShotTest -or
           $EncounterTest -or $StreetTest -or $BossHitTest -or $BossKoTest -or
           $PlayerSalvageBench -or $PlayerPromotionBench -or
@@ -49,7 +52,8 @@ $usePlayableSlice = $PlayableSlice -or ($Release -and
           $HitKoPromotionBench -or $CombatIntegrationBench -or $Probe3 -or
           $PredatorWarriorActionSalvageBench -or
           $PredatorWarriorActionPromotionBench -or
-          $StreetAlienAiSalvageBench -or $StreetAlienAiPromotionBench))
+          $StreetAlienAiSalvageBench -or $StreetAlienAiPromotionBench -or
+          $LiveEncounterBench -or $LiveEncounter))
 if (-not $JoEngineRoot) {
     $JoEngineRoot = Join-Path $projectRoot '.deps\joengine'
 }
@@ -331,6 +335,8 @@ try {
         }
 
         $buildProfile = if ($Probe3) { 'probe3' }
+            elseif ($LiveEncounterBench) { 'live-encounter-bench' }
+            elseif ($LiveEncounter) { 'live-encounter' }
             elseif ($StreetAlienAiPromotionBench) { 'street-alien-ai-promotion-bench' }
             elseif ($StreetAlienAiSalvageBench) { 'street-alien-ai-salvage-bench' }
             elseif ($PredatorWarriorActionPromotionBench) { 'predator-warrior-action-promotion-bench' }
@@ -373,7 +379,8 @@ try {
                 'tests\port_v2\predator_warrior_action_bench\predator_warrior_action_bench.o',
                 'src\port_v2\gameplay\player_action\player_action.o',
                 'tests\port_v2\street_alien_ai_bench\street_alien_ai_bench.o',
-                'src\port_v2\gameplay\street_alien_ai\street_alien_ai.o')) {
+                'src\port_v2\gameplay\street_alien_ai\street_alien_ai.o',
+                'src\port_v2\integration\live_encounter\live_encounter.o')) {
                 $objectPath = Join-Path $projectRoot $objectName
                 if (Test-Path -LiteralPath $objectPath) {
                     Remove-Item -LiteralPath $objectPath -Force
@@ -486,6 +493,12 @@ try {
             $makeArguments += 'AVSP_CDDA_RESIDENCY_PROMOTION_BENCH=1'
             $makeArguments += 'AVSP_COMBAT_INTEGRATION_BENCH=1'
             $makeArguments += 'AVSP_PLAYABLE_SLICE=1'
+        }
+        if ($LiveEncounterBench -or $LiveEncounter) {
+            $makeArguments += 'AVSP_LIVE_ENCOUNTER=1'
+        }
+        if ($LiveEncounterBench) {
+            $makeArguments += 'AVSP_LIVE_ENCOUNTER_AUTOTEST=1'
         }
         if ($Probe3) {
             $makeArguments += 'AVSP_PROBE3=1'

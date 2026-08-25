@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+import argparse
+import hashlib
+import importlib.util
+import json
+import os
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[4]
+HERE = Path(__file__).resolve().parent
+spec = importlib.util.spec_from_file_location("enemy_tools", ROOT / "tests/port_v2/enemy_bench/collect_readback.py")
+tools = importlib.util.module_from_spec(spec); spec.loader.exec_module(tools)
+FIELDS = ("frame","input_mask","player_x","player_lane","player_health","player_state",
+          "player_selector","player_attack_active","alien_x","alien_lane","alien_health",
+          "alien_state","alien_rng","player_contact","alien_contact","player_damage",
+          "alien_damage","attack_miss","encounter_state","route_unlocked",
+          "continued_after_unlock","camera_world_x","failures")
+def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
+def signed(mcp, address): return tools.signed32(mcp.u32(address))
+def read_sample(mcp, base, index):
+    address = base + index * len(FIELDS) * 4
+    return {name:signed(mcp,address + offset*4) for offset,name in enumerate(FIELDS)}
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--run", type=int, choices=(1,2), required=True)
+parser.add_argument("--emulator-pid", type=int, required=True)
+parser.add_argument("--timeout", type=float, default=180.0)
+args = parser.parse_args()
+inventory = json.loads((HERE / "inventory.json").read_text())
+build = json.loads((ROOT / inventory["build_root"] / f"run-{args.run}/build.json").read_text())
+syms = tools.symbols(inventory["required_readback_symbols"])
+mcp = tools.Mcp("http://127.0.0.1:9640/mcp"); deadline=time.time()+args.timeout
+while True:
+    try: mcp.initialize(); break
+    except Exception:
+        if time.time() >= deadline: raise
+        time.sleep(0.25)
+run_root = ROOT / inventory["build_root"] / f"run-{args.run}"
+while time.time() < deadline:
+    ready = mcp.u32(syms["avsp_diag_runtime_ready"])
+    frame = mcp.u32(syms["avsp_diag_live_frame"])
+    if (ready == 1 and
+        mcp.u32(syms["avsp_diag_live_continued_after_unlock"]) == 1 and
+        signed(mcp, syms["avsp_diag_live_camera_world_x"]) > 0):
+        break
+    time.sleep(0.01)
+else:
+    failed_asset_pointer = mcp.u32(syms["failed_asset"])
+    failed_asset_name = ""
+    if failed_asset_pointer != 0:
+        failed_asset_name = mcp.read(failed_asset_pointer, 64).split(b"\0", 1)[0].decode(
+            "ascii", errors="replace"
+        )
+    timeout_state = {
+        "runtime_ready": mcp.u32(syms["avsp_diag_runtime_ready"]),
+        "contract_flags": mcp.u32(syms["avsp_diag_live_contract_flags"]),
+        "frame_stage": signed(mcp, syms["avsp_diag_live_frame_stage"]),
+        "internal_failures": mcp.u32(syms["avsp_diag_live_internal_failures"]),
+        "pcm_retriggers": mcp.u32(syms["avsp_diag_live_pcm_retriggers"]),
+        "runtime_ready_internal": mcp.u32(syms["runtime_ready"]),
+        "slice_init_stage": signed(mcp, syms["avsp_diag_slice_init_stage"]),
+        "slice_ready": mcp.u32(syms["avsp_diag_slice_ready"]),
+        "frame": mcp.u32(syms["avsp_diag_live_frame"]),
+        "sample_count": mcp.u32(syms["avsp_diag_live_sample_count"]),
+        "encounter_state": mcp.u32(syms["avsp_diag_live_encounter_state"]),
+        "player_x": signed(mcp, syms["avsp_diag_live_player_x"]),
+        "player_health": signed(mcp, syms["avsp_diag_live_player_health"]),
+        "alien_x": signed(mcp, syms["avsp_diag_live_alien_x"]),
+        "alien_health": signed(mcp, syms["avsp_diag_live_alien_health"]),
+        "alien_state": mcp.u32(syms["avsp_diag_live_alien_state"]),
+        "hit_events": mcp.u32(syms["avsp_diag_live_hit_events"]),
+        "ko_events": mcp.u32(syms["avsp_diag_live_ko_events"]),
+        "failures": mcp.u32(syms["avsp_diag_live_failures"]),
+        "fallback_count": mcp.u32(syms["avsp_diag_live_fallback_count"]),
+        "failed_asset_pointer": hex(failed_asset_pointer),
+        "failed_asset_name": failed_asset_name,
+    }
+    timeout_state["debug_status"] = mcp.call("debug_status")
+    raise TimeoutError(
+        "INTEGRATE-04A diagnostic did not clear and continue: "
+        f"{timeout_state}"
+    )
+mcp.call("set_debug_option", cpu_core="interpreter")
+mcp.call("pause")
+count = signed(mcp,syms["avsp_diag_live_sample_count"])
+samples = [read_sample(mcp,syms["avsp_diag_live_samples"],i) for i in range(count)]
+mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_diag_live_interface_version",
+           "contract_flags":"avsp_diag_live_contract_flags", "frame_stage":"avsp_diag_live_frame_stage",
+           "frame":"avsp_diag_live_frame", "hit_events":"avsp_diag_live_hit_events",
+           "ko_events":"avsp_diag_live_ko_events", "route_unlocked":"avsp_diag_live_route_unlocked",
+           "continued":"avsp_diag_live_continued_after_unlock", "failures":"avsp_diag_live_failures",
+           "fallback_count":"avsp_diag_live_fallback_count", "canaries_ok":"avsp_diag_live_canaries_ok",
+           "internal_failures":"avsp_diag_live_internal_failures",
+           "pcm_retriggers":"avsp_diag_live_pcm_retriggers",
+           "physical_saturn":"avsp_diag_live_physical_saturn"}
+state = {key:signed(mcp,syms[symbol]) for key,symbol in mapping.items()}
+if not (state["runtime_ready"] == state["interface_version"] == state["canaries_ok"] == 1 and
+        state["contract_flags"] == 15 and state["frame_stage"] == 7 and
+        state["internal_failures"] == 0 and state["pcm_retriggers"] >= 1 and
+        state["hit_events"] >= 1 and state["ko_events"] == 1 and state["route_unlocked"] ==
+        state["continued"] == 1 and state["failures"] == state["fallback_count"] ==
+        state["physical_saturn"] == 0): raise RuntimeError(f"live state failed: {state}")
+if count < 300 or any(sample["frame"] != index for index,sample in enumerate(samples)):
+    raise RuntimeError("live synchronized ledger is incomplete")
+contacts=[s for s in samples if s["player_contact"]]; received=[s for s in samples if s["alien_contact"]]
+damage=[s for s in samples if s["player_damage"]]; misses=[s for s in samples if s["attack_miss"]]
+if not (len(contacts) >= 4 and len(received) >= 1 and len(damage) >= 1 and len(misses) >= 1 and
+        all(s["player_attack_active"] == 1 and s["alien_damage"] in (9,24,31) for s in contacts)):
+    raise RuntimeError("live miss/contact/damage chronology failed")
+unlock=next((i for i,s in enumerate(samples) if s["route_unlocked"]),None)
+if unlock is None or samples[unlock]["alien_state"] != 0 or any(s["camera_world_x"] != 0 for s in samples[:unlock]):
+    raise RuntimeError("clear/camera authority failed")
+if not any(s["continued_after_unlock"] and s["camera_world_x"] > 0 for s in samples[unlock:]):
+    raise RuntimeError("continued movement after unlock missing")
+process=tools.process_record(args.emulator_pid); executable=Path(str(process["executable"]))
+settings=Path(os.environ["APPDATA"])/"YabaSanshiro/yabause.ini"
+report={"schema":1,"task_id":inventory["task_id"],"card_profile":inventory["card_profile"],
+        "source_commit":build["source_commit"],"iso_sha256":build["artifacts"]["game_iso"]["sha256"],
+        "state":state,"samples":samples,"chronology":{"player_contacts":len(contacts),
+        "alien_contacts":len(received),"player_damage_events":len(damage),"misses":len(misses),
+        "unlock_frame":unlock},
+        "visual_scanout":"UNAVAILABLE_WINDOWS_ACCELERATED_SURFACE",
+        "emulator":{"identity":"Yaba Sanshiro 1.20.37-2986eb","evidence_tier":"ONE_EMULATOR",
+        "process_id":process["pid"],"executable_sha256":sha(executable),"settings_sha256":sha(settings),
+        "command_line":process["command_line"]},"physical_saturn":"UNRUN","result":"PASS"}
+output=run_root/"readback.json"; output.write_text(json.dumps(report,indent=2,sort_keys=True)+"\n",encoding="ascii")
+print(f"recorded {output.relative_to(ROOT)}")

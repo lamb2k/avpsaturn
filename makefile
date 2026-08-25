@@ -91,6 +91,12 @@ endif
 ifneq ($(AVSP_PLAYABLE_SLICE),)
 CCFLAGS += -DAVSP_PLAYABLE_SLICE=1
 endif
+ifneq ($(AVSP_LIVE_ENCOUNTER),)
+CCFLAGS += -DAVSP_LIVE_ENCOUNTER=1 -Werror -Wno-unused-function
+endif
+ifneq ($(AVSP_LIVE_ENCOUNTER_AUTOTEST),)
+CCFLAGS += -DAVSP_LIVE_ENCOUNTER_AUTOTEST=1
+endif
 ifneq ($(AVSP_PROBE3),)
 CCFLAGS += -DAVSP_PROBE3=1 -Werror -Wno-unused-function
 endif
@@ -128,6 +134,9 @@ SRCS += src/port_v2/audio/cdda/cdda.c src/port_v2/residency/residency.c
 endif
 ifneq ($(AVSP_PLAYABLE_SLICE),)
 SRCS += src/port_v2/integration/slice/slice.c
+endif
+ifneq ($(AVSP_LIVE_ENCOUNTER),)
+SRCS += src/port_v2/gameplay/player_action/player_action.c src/port_v2/gameplay/street_alien_ai/street_alien_ai.c src/port_v2/integration/live_encounter/live_encounter.c
 endif
 ifneq ($(AVSP_PROBE3),)
 SRCS += tests/hardware/probe3/probe3.c

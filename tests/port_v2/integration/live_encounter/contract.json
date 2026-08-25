@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "task_id": "INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER",
+  "interface": "src/port_v2/integration/live_encounter/live_encounter.h",
+  "source_set": "avspu",
+  "fidelity": "SOURCE_BOUND_WITH_ADAPTED_SINGLE_ALIEN_CLEAR",
+  "real_input_authority": true,
+  "fixed_frame_authority": false,
+  "presentation_owned_outcome": false,
+  "fallback_present": false,
+  "clear_authority": "target class-0x1F KO then inactive",
+  "physical_saturn": "UNRUN"
+}
