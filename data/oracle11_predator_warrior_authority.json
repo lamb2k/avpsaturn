@@ -174,19 +174,567 @@
     "user09_status": "CHANGES_REQUESTED"
   },
   "remaining_player_backlog": [
-    "route-reachable action/state dispatch beyond accepted ORACLE-07 subset",
-    "equipment and projectile lifecycle beyond action-local flag evidence",
+    "Button1 equipment and projectile lifecycle beyond action-local flag evidence",
+    "jump, air action, landing, and interruption authority",
+    "special action resource, spawned actor, and recovery authority",
     "player HIT/KO, failure/continue, spawn return, and return to control",
     "route-wide resource, pickup, and audio/load interactions"
   ],
+  "route_reachable_melee_actions": {
+    "classification": "SOURCE_CLOSED",
+    "close_combo": {
+      "animation_sequences": {
+        "close_1": [
+          {
+            "assembly": "0x1629e6",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x1600e8"
+          },
+          {
+            "assembly": "0x162a04",
+            "attack_selector": 1,
+            "hurt_selector": 8,
+            "record": "0x1600f8"
+          },
+          {
+            "assembly": "0x1629e6",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x160108"
+          },
+          {
+            "assembly": "0x1629e6",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x160118"
+          }
+        ],
+        "close_2": [
+          {
+            "assembly": "0x162a32",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x16012c"
+          },
+          {
+            "assembly": "0x162a5a",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x16013c"
+          },
+          {
+            "assembly": "0x162a82",
+            "attack_selector": 2,
+            "hurt_selector": 8,
+            "record": "0x16014c"
+          },
+          {
+            "assembly": "0x162a5a",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x16015c"
+          },
+          {
+            "assembly": "0x162a32",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x16016c"
+          },
+          {
+            "assembly": "0x162a32",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x16017c"
+          }
+        ],
+        "close_3": [
+          {
+            "assembly": "0x162a32",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x160190"
+          },
+          {
+            "assembly": "0x16144e",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x1601a0"
+          },
+          {
+            "assembly": "0x161476",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x1601b0"
+          },
+          {
+            "assembly": "0x1614a4",
+            "attack_selector": 3,
+            "hurt_selector": 8,
+            "record": "0x1601c0"
+          },
+          {
+            "assembly": "0x161476",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x1601d0"
+          },
+          {
+            "assembly": "0x161476",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x1601e0"
+          }
+        ],
+        "close_4": [
+          {
+            "assembly": "0x162aa6",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x1601f4"
+          },
+          {
+            "assembly": "0x162abe",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x160204"
+          },
+          {
+            "assembly": "0x162ad6",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x160214"
+          },
+          {
+            "assembly": "0x162afe",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x160224"
+          },
+          {
+            "assembly": "0x162b26",
+            "attack_selector": 4,
+            "hurt_selector": 19,
+            "record": "0x160234"
+          },
+          {
+            "assembly": "0x162b5a",
+            "attack_selector": 0,
+            "hurt_selector": 19,
+            "record": "0x160244"
+          },
+          {
+            "assembly": "0x162b82",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x160254"
+          },
+          {
+            "assembly": "0x162aa6",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x160264"
+          },
+          {
+            "assembly": "0x162aa6",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x160274"
+          }
+        ],
+        "contextual_button2": [
+          {
+            "assembly": "0x1629e6",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x160288"
+          },
+          {
+            "assembly": "0x162a04",
+            "attack_selector": 21,
+            "hurt_selector": 11,
+            "record": "0x160298"
+          },
+          {
+            "assembly": "0x162a04",
+            "attack_selector": 0,
+            "hurt_selector": 11,
+            "record": "0x1602a8"
+          },
+          {
+            "assembly": "0x1629e6",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x1602b8"
+          },
+          {
+            "assembly": "0x1629e6",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x1602c8"
+          }
+        ],
+        "dash_right_observed_before_hit": [
+          {
+            "assembly": "0x160bc6",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x15f2cc"
+          },
+          {
+            "assembly": "0x160bc6",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x15f2dc"
+          },
+          {
+            "assembly": "0x162baa",
+            "attack_selector": 0,
+            "hurt_selector": 18,
+            "record": "0x15f43c"
+          },
+          {
+            "assembly": "0x162bc8",
+            "attack_selector": 0,
+            "hurt_selector": 18,
+            "record": "0x15f44c"
+          }
+        ],
+        "gun_observed_before_hit": [
+          {
+            "assembly": "0x161772",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x15fcfc"
+          }
+        ],
+        "hit": [
+          {
+            "assembly": "0x1610f2",
+            "attack_selector": 0,
+            "hurt_selector": 0,
+            "record": "0x15f054"
+          }
+        ],
+        "idle": [
+          {
+            "assembly": "0x1626a4",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x15f1f4"
+          }
+        ],
+        "jump": [
+          {
+            "assembly": "0x160bc6",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x15f2cc"
+          },
+          {
+            "assembly": "0x160bc6",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "record": "0x15f2dc"
+          },
+          {
+            "assembly": "0x160cda",
+            "attack_selector": 0,
+            "hurt_selector": 2,
+            "record": "0x15f2f0"
+          },
+          {
+            "assembly": "0x160d02",
+            "attack_selector": 0,
+            "hurt_selector": 2,
+            "record": "0x15f300"
+          },
+          {
+            "assembly": "0x160d2a",
+            "attack_selector": 0,
+            "hurt_selector": 2,
+            "record": "0x15f310"
+          },
+          {
+            "assembly": "0x160d52",
+            "attack_selector": 0,
+            "hurt_selector": 2,
+            "record": "0x15f320"
+          },
+          {
+            "assembly": "0x160d86",
+            "attack_selector": 0,
+            "hurt_selector": 2,
+            "record": "0x15f330"
+          }
+        ],
+        "special": [
+          {
+            "assembly": "0x1626cc",
+            "attack_selector": 0,
+            "hurt_selector": 0,
+            "record": "0x15fd10"
+          },
+          {
+            "assembly": "0x1626fa",
+            "attack_selector": 0,
+            "hurt_selector": 0,
+            "record": "0x15fd20"
+          },
+          {
+            "assembly": "0x162728",
+            "attack_selector": 0,
+            "hurt_selector": 0,
+            "record": "0x15fd30"
+          },
+          {
+            "assembly": "0x1627b8",
+            "attack_selector": 0,
+            "hurt_selector": 0,
+            "record": "0x15fd40"
+          },
+          {
+            "assembly": "0x1627b8",
+            "attack_selector": 11,
+            "hurt_selector": 0,
+            "record": "0x15fd50"
+          },
+          {
+            "assembly": "0x1627e0",
+            "attack_selector": 11,
+            "hurt_selector": 0,
+            "record": "0x15fd60"
+          },
+          {
+            "assembly": "0x16280e",
+            "attack_selector": 11,
+            "hurt_selector": 0,
+            "record": "0x15fd70"
+          },
+          {
+            "assembly": "0x1627e0",
+            "attack_selector": 11,
+            "hurt_selector": 0,
+            "record": "0x15fd80"
+          },
+          {
+            "assembly": "0x1627b8",
+            "attack_selector": 11,
+            "hurt_selector": 0,
+            "record": "0x15fd90"
+          },
+          {
+            "assembly": "0x1627e0",
+            "attack_selector": 11,
+            "hurt_selector": 0,
+            "record": "0x15fda0"
+          },
+          {
+            "assembly": "0x16280e",
+            "attack_selector": 11,
+            "hurt_selector": 0,
+            "record": "0x15fdb0"
+          },
+          {
+            "assembly": "0x1627e0",
+            "attack_selector": 11,
+            "hurt_selector": 0,
+            "record": "0x15fdc0"
+          },
+          {
+            "assembly": "0x162728",
+            "attack_selector": 0,
+            "hurt_selector": 0,
+            "record": "0x15fdd0"
+          },
+          {
+            "assembly": "0x16278a",
+            "attack_selector": 0,
+            "hurt_selector": 0,
+            "record": "0x15fde0"
+          },
+          {
+            "assembly": "0x16275c",
+            "attack_selector": 0,
+            "hurt_selector": 0,
+            "record": "0x15fdf0"
+          },
+          {
+            "assembly": "0x1626cc",
+            "attack_selector": 0,
+            "hurt_selector": 0,
+            "record": "0x15fe00"
+          },
+          {
+            "assembly": "0x1626a4",
+            "attack_selector": 0,
+            "hurt_selector": 0,
+            "record": "0x15fe10"
+          }
+        ],
+        "walk": [
+          {
+            "assembly": "0x160a02",
+            "attack_selector": 0,
+            "hurt_selector": 17,
+            "record": "0x15f208"
+          },
+          {
+            "assembly": "0x160a2a",
+            "attack_selector": 0,
+            "hurt_selector": 17,
+            "record": "0x15f218"
+          },
+          {
+            "assembly": "0x160a52",
+            "attack_selector": 0,
+            "hurt_selector": 17,
+            "record": "0x15f228"
+          },
+          {
+            "assembly": "0x160a70",
+            "attack_selector": 0,
+            "hurt_selector": 17,
+            "record": "0x15f238"
+          },
+          {
+            "assembly": "0x160a8e",
+            "attack_selector": 0,
+            "hurt_selector": 17,
+            "record": "0x15f248"
+          },
+          {
+            "assembly": "0x160aac",
+            "attack_selector": 0,
+            "hurt_selector": 17,
+            "record": "0x15f258"
+          },
+          {
+            "assembly": "0x160aca",
+            "attack_selector": 0,
+            "hurt_selector": 17,
+            "record": "0x15f268"
+          }
+        ]
+      },
+      "attack_selectors": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "completion_guard": "animation/event flag +0x80",
+      "entry": "0x022588",
+      "followup_window": {
+        "decrement_writer": "0x01982a",
+        "field": "+0x82 high u8",
+        "ticks": 30
+      },
+      "held_input_rule": "held Button2 does not create a new edge or auto-chain",
+      "phase_field": "+0x07 u8 even dispatch offset",
+      "step_field": "+0x81 u8",
+      "step_rule": "advance modulo four on completion; lane inputs 0x08 or 0x04 at step one retain the step and toggle +0x87 instead",
+      "step_values": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "collision_damage_identity": "accepted source combat contract bound through ORACLE-07; presentation cannot own contact or damage",
+    "contextual_melee": {
+      "animation_sequence": [
+        {
+          "assembly": "0x1629e6",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "record": "0x160288"
+        },
+        {
+          "assembly": "0x162a04",
+          "attack_selector": 21,
+          "hurt_selector": 11,
+          "record": "0x160298"
+        },
+        {
+          "assembly": "0x162a04",
+          "attack_selector": 0,
+          "hurt_selector": 11,
+          "record": "0x1602a8"
+        },
+        {
+          "assembly": "0x1629e6",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "record": "0x1602b8"
+        },
+        {
+          "assembly": "0x1629e6",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "record": "0x1602c8"
+        }
+      ],
+      "attack_selectors_observed": [
+        21,
+        20
+      ],
+      "entry": "0x022ed6",
+      "step_field": "+0x81 u8",
+      "step_rule": "advance modulo four on +0x80 completion, otherwise clear the step and toggle +0x87"
+    },
+    "counterfactuals": {
+      "expired_window_restarts_step_one": true,
+      "held_button_no_auto_chain": true,
+      "random_selector_cycle_forbidden": true,
+      "recovery_edge_advances": true,
+      "startup_repeat_no_chain": true
+    },
+    "dispatch": {
+      "common_action": "0x0600",
+      "common_writer": "0x01a6e4",
+      "target_context_action": "0x1400",
+      "target_context_guard": "actor +0x5a nonzero",
+      "target_context_writer": "0x01a6ea"
+    },
+    "input_guard": "new Button2 edge from actor +0xee/+0xef bit 5",
+    "mutation_control": "tests reject selector reorder, random selection, held auto-chain, window fitting, and classification mutations",
+    "remaining_unknowns": [],
+    "rng_consumption": "none for selector or assembly choice; state selects the measured animation record",
+    "scheduler_position": "player slot before the non-player pools"
+  },
   "schema": "oracle11-predator-warrior-authority-v1",
   "scope": "Round 1 one-player source authority; locomotion-to-neutral is closed while remaining action/equipment/continue bodies stay active backlog",
   "source_identity": {
+    "button2_dispatch": {
+      "bytes": 24,
+      "end_exclusive": "0x01a6f4",
+      "sha256": "5f5f74dee7c7443097e0236bab9bdbeb220c5e77ca2231ef51578ee09b9a6f59",
+      "start": "0x01a6dc"
+    },
+    "close_combo_entry": {
+      "bytes": 222,
+      "end_exclusive": "0x022666",
+      "sha256": "925aa8344ab501fc1fe98ff8f8b78909abb22c5fed93db0d0faaa539b3fbd6ee",
+      "start": "0x022588"
+    },
+    "close_combo_transition": {
+      "bytes": 150,
+      "end_exclusive": "0x0226fc",
+      "sha256": "d3d14b910157c8e7154d822c3cb9b7a56257b3742874175a521637b84ea50c19",
+      "start": "0x022666"
+    },
     "common_control_reset": {
       "bytes": 120,
       "end_exclusive": "0x01a45a",
       "sha256": "4069df6fc46499c6892ecb9a69a0790895a701c5fc1eded647f993d33229fa10",
       "start": "0x01a3e2"
+    },
+    "contextual_melee": {
+      "bytes": 198,
+      "end_exclusive": "0x022f9c",
+      "sha256": "e35a1ca2e3d1bf90de8ed49e9c6bd90b227dfe8e5781b339f915ed116f30f490",
+      "start": "0x022ed6"
     },
     "decoded_opcodes_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
     "decrypted_program_sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9",

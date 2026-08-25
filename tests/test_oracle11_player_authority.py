@@ -57,10 +57,29 @@ mutant["accepted_prior_player_bodies"]["attack_selector_order"] = [1, 3, 2, 4]
 reject(mutant, "attack lock reordered")
 
 mutant = copy.deepcopy(report)
+mutant["route_reachable_melee_actions"]["classification"] = "PARTIAL"
+reject(mutant, "melee classification downgraded")
+
+mutant = copy.deepcopy(report)
+mutant["route_reachable_melee_actions"]["close_combo"] \
+    ["followup_window"]["ticks"] = 28
+reject(mutant, "combo window fitted")
+
+mutant = copy.deepcopy(report)
+mutant["route_reachable_melee_actions"]["rng_consumption"] = \
+    "random selector choice"
+reject(mutant, "random attack selection introduced")
+
+mutant = copy.deepcopy(report)
+mutant["route_reachable_melee_actions"]["counterfactuals"] \
+    ["held_button_no_auto_chain"] = False
+reject(mutant, "held attack auto-chain admitted")
+
+mutant = copy.deepcopy(report)
 mutant["status"] = "SOURCE_CLOSED"
 mutant["remaining_player_backlog"] = []
 reject(mutant, "premature player-family closure")
 
 rebuilt = oracle11.build_report()
 assert oracle11.canonical(rebuilt) == ARTIFACT.read_bytes(), "derived report drift"
-print("ORACLE-11 player authority tests: PASS (7 mutations rejected)")
+print("ORACLE-11 player authority tests: PASS (11 mutations rejected)")

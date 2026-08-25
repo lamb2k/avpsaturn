@@ -13,6 +13,7 @@ RAW = ROOT / ".deps" / "mame" / "oracle11_player_locomotion_a"
 OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
 PROGRAM = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_program_2m.bin"
 ORACLE07 = ROOT / "data" / "oracle07_predator_warrior_action_graph_equipment.json"
+ORACLE10 = ROOT / "data" / "oracle10_round1_route.json"
 OUT = ROOT / "data" / "oracle11_predator_warrior_authority.json"
 VARIANTS = ("cold_run_1", "cold_run_2", "skip_right_edge",
             "hold_right", "reverse_without_neutral")
@@ -26,6 +27,16 @@ PREFIXES = {
     0x01A3E2: "610011f4660011f6610012086600120a2d7c020000000004",
     0x01A39C: "7000102e000c6b3c122e00d24881d24141fa12de32301000"
               "41f01000e74841f000002018d1ae00102010d1ae0014",
+    0x01A6DC: "2d7c0200060000044a6e005a67082d7c0200140000044e75",
+    0x022588: "542e0007422e0080422e00951d7c0001009d1d7c000c0092"
+              "4eb90001a3644eb90001d768",
+    0x022666: "4a2e008167064a2e006e671c4a2e002567164eb90001a6c4"
+              "670e6100002a422e0007422e0092",
+    0x0226AC: "4a2e00806700003e0c2e000100816614102e00ee0200000f"
+              "0c00000867180c0000046712522e0081022e00030081"
+              "1d7c001e00824e75",
+    0x022ED6: "542e0007422e00801d7c0001009d1d7c000c00924eb90001"
+              "a3644eb90001d768",
 }
 
 
@@ -181,6 +192,11 @@ def build_report() -> dict[str, object]:
                 f"decoded direction mapping drift at frame {frame}")
 
     oracle07 = json.loads(ORACLE07.read_text(encoding="utf-8"))
+    oracle10 = json.loads(ORACLE10.read_text(encoding="utf-8"))
+    route_melee = next(row for row in oracle10["player_action_families"]
+                       if row["id"] == "button2-contextual-close-combo")
+    require(route_melee["classification"] == "SOURCE_CLOSED",
+            "ORACLE-10 melee classification drift")
     neutral_records = [0x15F258, 0x15F268, 0x15F278, 0x15F1F4]
     report = {
         "schema": "oracle11-predator-warrior-authority-v1",
@@ -195,6 +211,53 @@ def build_report() -> dict[str, object]:
             "walk_release": source_window(opcodes, 0x019A34, 0x019AE6),
             "common_control_reset": source_window(opcodes, 0x01A3E2, 0x01A45A),
             "predator_warrior_vector_table": source_window(program, 0x01B68C, 0x01B6D4),
+            "button2_dispatch": source_window(opcodes, 0x01A6DC, 0x01A6F4),
+            "close_combo_entry": source_window(opcodes, 0x022588, 0x022666),
+            "close_combo_transition": source_window(opcodes, 0x022666, 0x0226FC),
+            "contextual_melee": source_window(opcodes, 0x022ED6, 0x022F9C),
+        },
+        "route_reachable_melee_actions": {
+            "classification": "SOURCE_CLOSED",
+            "input_guard": "new Button2 edge from actor +0xee/+0xef bit 5",
+            "dispatch": {
+                "common_action": "0x0600",
+                "common_writer": "0x01a6e4",
+                "target_context_action": "0x1400",
+                "target_context_guard": "actor +0x5a nonzero",
+                "target_context_writer": "0x01a6ea",
+            },
+            "close_combo": {
+                "entry": "0x022588",
+                "phase_field": "+0x07 u8 even dispatch offset",
+                "step_field": "+0x81 u8",
+                "step_values": [0, 1, 2, 3],
+                "completion_guard": "animation/event flag +0x80",
+                "followup_window": {"field": "+0x82 high u8", "ticks": 30,
+                                    "decrement_writer": "0x01982a"},
+                "step_rule": "advance modulo four on completion; lane inputs 0x08 or 0x04 at step one retain the step and toggle +0x87 instead",
+                "held_input_rule": "held Button2 does not create a new edge or auto-chain",
+                "attack_selectors": [1, 2, 3, 4],
+                "animation_sequences": oracle07["presentation_identity"]["sequences"],
+            },
+            "contextual_melee": {
+                "entry": "0x022ed6",
+                "step_field": "+0x81 u8",
+                "step_rule": "advance modulo four on +0x80 completion, otherwise clear the step and toggle +0x87",
+                "attack_selectors_observed": [21, 20],
+                "animation_sequence": oracle07["presentation_identity"]["sequences"]["contextual_button2"],
+            },
+            "collision_damage_identity": "accepted source combat contract bound through ORACLE-07; presentation cannot own contact or damage",
+            "rng_consumption": "none for selector or assembly choice; state selects the measured animation record",
+            "scheduler_position": "player slot before the non-player pools",
+            "counterfactuals": {
+                "held_button_no_auto_chain": True,
+                "startup_repeat_no_chain": True,
+                "recovery_edge_advances": True,
+                "expired_window_restarts_step_one": True,
+                "random_selector_cycle_forbidden": True,
+            },
+            "mutation_control": "tests reject selector reorder, random selection, held auto-chain, window fitting, and classification mutations",
+            "remaining_unknowns": [],
         },
         "locomotion_neutral_facing": {
             "classification": "SOURCE_CLOSED",
@@ -260,8 +323,9 @@ def build_report() -> dict[str, object]:
             "random_attack_selection": oracle07["equipment_contract"]["random_selection"],
         },
         "remaining_player_backlog": [
-            "route-reachable action/state dispatch beyond accepted ORACLE-07 subset",
-            "equipment and projectile lifecycle beyond action-local flag evidence",
+            "Button1 equipment and projectile lifecycle beyond action-local flag evidence",
+            "jump, air action, landing, and interruption authority",
+            "special action resource, spawned actor, and recovery authority",
             "player HIT/KO, failure/continue, spawn return, and return to control",
             "route-wide resource, pickup, and audio/load interactions",
         ],
@@ -312,6 +376,15 @@ def validate(report: dict[str, object]) -> None:
             [1, 2, 3, 4] and
             report["accepted_prior_player_bodies"]["random_attack_selection"] is False,
             "accepted attack lock drift")
+    melee = report["route_reachable_melee_actions"]
+    require(melee["classification"] == "SOURCE_CLOSED" and
+            melee["remaining_unknowns"] == [], "melee authority is not closed")
+    require(melee["close_combo"]["attack_selectors"] == [1, 2, 3, 4] and
+            melee["close_combo"]["followup_window"]["ticks"] == 30 and
+            melee["rng_consumption"].startswith("none"),
+            "melee selector/window/RNG contract drift")
+    require(all(melee["counterfactuals"].values()),
+            "melee counterfactual failed")
     require(bool(report["remaining_player_backlog"]),
             "player authority was prematurely declared complete")
     require(report["protected_boundaries"] == {

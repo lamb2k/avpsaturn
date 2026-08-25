@@ -38,6 +38,12 @@ card only for a genuinely independent body or source-evidence hard stop.
   a later executable-contract concern. Remaining actions, equipment,
   projectile/resource ownership, HIT/KO/continue, and return-to-control bodies
   remain active backlog.
+- `predator-warrior-route-melee`: `SOURCE_CLOSED` inside the still-`PARTIAL`
+  player family. Button-2 edge dispatch, target-context override, four-step
+  selector/assembly ownership, the 30-tick follow-up window, recovery-edge
+  chaining, and non-random state-owned presentation are bound in
+  `data/oracle11_predator_warrior_authority.json`. The confirmed selector
+  timing and attack assemblies remain locked.
 
 ## Owned paths
 
