@@ -6585,7 +6585,7 @@ static void live_encounter_build_slice_frame(void)
     playable_slice_frame.actors.player.lane =
         live_encounter_frame.player.lane;
     playable_slice_frame.actors.player.facing =
-        live_encounter_frame.player.facing ? -1 : 1;
+        avsp_pw_render_facing(live_encounter_frame.player.facing);
     playable_slice_frame.actors.player.locomotion_frame =
         (int)(live_encounter_frame.frame % 39UL);
     playable_slice_frame.actors.enemy.class_id = AVSP_PORT_V2_ENEMY_CLASS_ID;
@@ -6627,8 +6627,9 @@ static void live_encounter_build_slice_frame(void)
     else
         scene->player_action = AVSP_PORT_V2_SLICE_ACTION_IDLE;
     live_encounter_identity();
-    if (live_encounter_frame.player.selector >= 1u &&
-        live_encounter_frame.player.selector <= AVSP_PW_ACTION_COUNT)
+    if (avsp_pw_source_presentation_ready(
+            live_encounter_frame.player.selector,
+            live_encounter_frame.player.action_elapsed))
     {
         source_frame = (int)live_encounter_frame.player.action_elapsed -
             (int)avsp_pw_action_defs[
@@ -6655,6 +6656,15 @@ static void live_encounter_build_slice_frame(void)
             scene->player_identity.emitted_tile_identity =
                 presentation.source_tile_identity;
         }
+    }
+    if (live_encounter_frame.player.state == AVSP_PW_STATE_ATTACK &&
+        !scene->player_presentation_active)
+    {
+        /* The measured source remains in its control pose for the first two
+           attack ticks. Do not flash the unrelated legacy attack clip before
+           the selector-owned source presentation becomes active. */
+        scene->player_action = AVSP_PORT_V2_SLICE_ACTION_IDLE;
+        scene->player_action_frame = 0;
     }
     if (live_encounter_frame.alien.state == AVSP_ALIEN_STATE_KO)
     {

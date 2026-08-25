@@ -97,6 +97,9 @@ typedef struct
 extern const AvspPwAttackDef avsp_pw_action_defs[AVSP_PW_ACTION_COUNT];
 
 int avsp_pw_action_defs_valid(const AvspPwAttackDef *defs, unsigned int count);
+int avsp_pw_render_facing(unsigned short source_facing);
+int avsp_pw_source_presentation_ready(unsigned short selector,
+                                      unsigned short action_elapsed);
 void avsp_pw_init(AvspPwRuntime *runtime);
 void avsp_pw_step(AvspPwRuntime *runtime, const AvspPwInput *input);
 void avsp_pw_view(const AvspPwRuntime *runtime, AvspPwView *view);

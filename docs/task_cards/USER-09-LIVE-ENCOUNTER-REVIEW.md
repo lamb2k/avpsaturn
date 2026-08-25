@@ -2,7 +2,7 @@
 
 TASK: USER-09-LIVE-ENCOUNTER-REVIEW
 KIND: USER_REVIEW
-STATUS: AWAITING_USER_FEEDBACK
+STATUS: CHANGES_REQUESTED
 CHECKPOINT: review-live-encounter
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -11,7 +11,7 @@ DEPENDENCIES: [INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER]
 REQUIRED_LANES: [Fast]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [SALVAGE-08-FRONTEND]
+NEXT_ELIGIBLE_CARDS: [REPAIR-10-LIVE-PLAYER-PRESENTATION]
 
 ## Objective
 
@@ -69,3 +69,14 @@ encounter flow, and overall arcade feel. Record the exact response and remain
 
 - `SALVAGE-08-FRONTEND` only after explicit acceptance; otherwise one bounded
   correction card for the issue chosen first.
+
+## Recorded feedback
+
+Exact response:
+
+> the character sprite is faving the wrong way with certain walking firectios.  attack sprites seem randomply selected such as weapon to no weapon to no weapon. impact works but the ai  and collosion between player and alien seem off. I'm not sure if these need to work at this point.&#x20;
+
+Disposition: `CHANGES_REQUESTED`. Facing and attack-presentation coherence are
+first priority in `REPAIR-10-LIVE-PLAYER-PRESENTATION`. AI and player/alien
+collision are also required for the R7B first-live-encounter exit and remain
+explicitly unresolved; they are not waived by the first bounded repair.

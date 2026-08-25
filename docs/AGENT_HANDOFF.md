@@ -29,10 +29,14 @@ player/AI/collision/damage/HIT/KO, adapted clear, unlock, and continued
 movement. Diagnostic ISO: `3246659a...938c5`; exact interactive ISO:
 `ae65359601d56e5fbee82c94eb66acfd12ed8c842d95b8f7a63e51d78bca7a8a`.
 
-The active checkpoint is `USER-09-LIVE-ENCOUNTER-REVIEW`; there is no active
-software implementation. Reuse
-`build/feedback/USER-09-LIVE-ENCOUNTER-REVIEW` without rebuilding behavior.
-Record explicit feedback before selecting one bounded correction card or
-`SALVAGE-08-FRONTEND`; do not infer approval or activate frontend work.
+USER-09 returned `CHANGES_REQUESTED`: player facing is wrong in some walking
+directions, attacks flash incoherently between weapon/no-weapon poses, and AI
+plus player/alien collision feel off. The active bounded implementation is
+`REPAIR-10-LIVE-PLAYER-PRESENTATION`. Correct only the facing-sign mapping and
+the two startup ticks that currently use the unrelated legacy attack clip;
+preserve all four selector-owned source sequences and all combat locks. AI and
+collision remain explicit unresolved follow-ups. Do not activate frontend work.
 
-Resume prompt: Resume the AvP salvage Goal at USER-09 using the frozen package.
+Resume prompt: Resume the AvP salvage Goal at REPAIR-10; complete focused
+repeat/mutation, Target, paired emulator, and renewed USER-09 evidence while
+keeping AI/collision unresolved and visible.

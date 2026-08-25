@@ -139,6 +139,7 @@ int main(void)
 {
     Result first;
     Result second;
+    unsigned int selector;
     if (avsp_live_encounter_contract_flags() != 15u ||
         !avsp_live_encounter_contract_valid() ||
         avsp_live_encounter_clear_allowed(0u, 0u, 1u, 1u) ||
@@ -146,6 +147,24 @@ int main(void)
         avsp_live_encounter_clear_allowed(0u, 1u, 0u, 0u) ||
         !avsp_live_encounter_clear_allowed(1u, 1u, 0u, 0u))
         return 1;
+    if (avsp_pw_render_facing(0u) != -1 ||
+        avsp_pw_render_facing(1u) != 1)
+        return 4;
+    for (selector = 1u; selector <= AVSP_PW_ACTION_COUNT; ++selector)
+    {
+        const AvspPwAttackDef *definition = &avsp_pw_action_defs[selector - 1u];
+        if (avsp_pw_source_presentation_ready(
+                (unsigned short)selector,
+                (unsigned short)(definition->presentation_first - 1u)) ||
+            !avsp_pw_source_presentation_ready(
+                (unsigned short)selector, definition->presentation_first) ||
+            avsp_pw_source_presentation_ready(
+                (unsigned short)selector, definition->return_frame))
+            return 5;
+    }
+    if (avsp_pw_source_presentation_ready(0u, 2u) ||
+        avsp_pw_source_presentation_ready(5u, 2u))
+        return 6;
     if (!replay(&first) || !replay(&second) ||
         memcmp(&first, &second, sizeof(first)) != 0)
         return 2;

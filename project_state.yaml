@@ -230,7 +230,7 @@ independent_read_only_policy:
     - independent-oracle-state-and-card
 first_live_gameplay_encounter:
   milestone: FIRST LIVE GAMEPLAY ENCOUNTER
-  status: AWAITING_USER_FEEDBACK
+  status: CORRECTION_REQUIRED
   player_character: predator_warrior
   enemy_class: "0x1F"
   player_count: 1
@@ -238,7 +238,11 @@ first_live_gameplay_encounter:
   production_player_control: PASS_BOUNDED_ONE_EMULATOR
   street_alien_ai: PASS_BOUNDED_ONE_EMULATOR
   encounter_controller: PASS_BOUNDED_ONE_EMULATOR
-  interactive_human_review: AWAITING_USER_FEEDBACK
+  interactive_human_review: CHANGES_REQUESTED
+  user09_feedback_exact: "the character sprite is faving the wrong way with certain walking firectios.  attack sprites seem randomply selected such as weapon to no weapon to no weapon. impact works but the ai  and collosion between player and alien seem off. I'm not sure if these need to work at this point.&#x20;"
+  requested_changes: [player-facing, attack-presentation-coherence, street-alien-ai, player-alien-collision]
+  first_priority: REPAIR-10-LIVE-PLAYER-PRESENTATION
+  unresolved_after_first_repair: [street-alien-ai, player-alien-collision]
   scripted_capability_slice_sufficient: false
   physical_proof_source: INTEGRATE-03-PLAYABLE-SLICE only
 oracle04_source_research:
@@ -328,7 +332,7 @@ promote11_street_alien_ai:
   physical_saturn: UNRUN
 integrate04a_live_encounter:
   task: INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
-  status: ACCEPTED_TECHNICAL_USER_REVIEW_PENDING
+  status: ACCEPTED_TECHNICAL_USER_CHANGES_REQUESTED
   implementation_commit: d9021965dab64d47953d2e829c7d307b0b01a455
   classification: SOURCE_BOUND_PLAYER_AND_CLASS_1F_AI_WITH_ADAPTED_SINGLE_ALIEN_CLEAR
   production_interface: src/port_v2/integration/live_encounter/live_encounter.h
@@ -339,13 +343,13 @@ integrate04a_live_encounter:
   lanes: Fast PASS / Oracle PASS / Target BUILD_ONLY PASS / Emulator PASS
   review_package: build/feedback/USER-09-LIVE-ENCOUNTER-REVIEW
   physical_saturn: UNRUN
-current_checkpoint: review-live-encounter
-active_task_card: docs/task_cards/USER-09-LIVE-ENCOUNTER-REVIEW.md
-active_task_id: USER-09-LIVE-ENCOUNTER-REVIEW
-active_task_kind: USER_REVIEW
-task_status: AWAITING_USER_FEEDBACK
-active_write_owner: USER-09-LIVE-ENCOUNTER-REVIEW
-awaiting_user_feedback: [USER-09-LIVE-ENCOUNTER-REVIEW]
+current_checkpoint: repair-live-player-presentation
+active_task_card: docs/task_cards/REPAIR-10-LIVE-PLAYER-PRESENTATION.md
+active_task_id: REPAIR-10-LIVE-PLAYER-PRESENTATION
+active_task_kind: REPAIR
+task_status: READY
+active_write_owner: REPAIR-10-LIVE-PLAYER-PRESENTATION
+awaiting_user_feedback: []
 open_blockers: []
 hardware_pretest:
   task: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
@@ -1046,6 +1050,7 @@ task_queue:
   - PROMOTE-11-STREET-ALIEN-AI
   - INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
   - USER-09-LIVE-ENCOUNTER-REVIEW
+  - REPAIR-10-LIVE-PLAYER-PRESENTATION
   - SALVAGE-08-FRONTEND
   - QA-08-FRONTEND
   - USER-08-FRONTEND

@@ -264,7 +264,7 @@ def validate_ledger(ledger: dict) -> None:
     else:
         require(encounter["technical_status"] == "PASS" and
                 encounter["fidelity_status"] == "ADAPTED" and
-                encounter["user_status"] == "AWAITING_USER_FEEDBACK" and
+                encounter["user_status"] == "CHANGES_REQUESTED" and
                 encounter["salvage_decision"] == "PROMOTED" and
                 encounter["production_interface"] ==
                 "src/port_v2/integration/live_encounter/live_encounter.h",

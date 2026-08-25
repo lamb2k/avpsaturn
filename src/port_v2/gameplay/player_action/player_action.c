@@ -53,6 +53,23 @@ int avsp_pw_action_defs_valid(const AvspPwAttackDef *defs,
     return 1;
 }
 
+int avsp_pw_render_facing(const unsigned short source_facing)
+{
+    /* ORACLE-04 records 0 for left and 1 for right. CapActor rendering uses
+       a negative sign for left-facing horizontal flip and positive for right. */
+    return source_facing == 0u ? -1 : 1;
+}
+
+int avsp_pw_source_presentation_ready(const unsigned short selector,
+                                      const unsigned short action_elapsed)
+{
+    const AvspPwAttackDef *definition;
+    if (selector < 1u || selector > AVSP_PW_ACTION_COUNT) return 0;
+    definition = &avsp_pw_action_defs[selector - 1u];
+    return action_elapsed >= definition->presentation_first &&
+           action_elapsed < definition->return_frame;
+}
+
 static void avsp_pw_apply_fraction(long *numerator, short *position,
                                    const int amount)
 {

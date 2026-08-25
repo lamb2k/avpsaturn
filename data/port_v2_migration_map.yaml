@@ -84,8 +84,8 @@
       "evaluated_commit": "fc9f46746d082e4ccfe800304f49c55bec3e3800",
       "technical_status": "PASS",
       "fidelity_status": "MEASURED",
-      "user_status": "APPROVED",
-      "salvage_decision": "SALVAGE_WITH_ADAPTER",
+      "user_status": "CHANGES_REQUESTED",
+      "salvage_decision": "REPAIR",
       "production_interface": null,
       "diagnostic_interface": "tests/port_v2/player_bench/run_pinned_emulator.ps1",
       "blockers": [
@@ -1144,9 +1144,9 @@
       "promoted_commit": null,
       "evidence_commit": "4abbc86f596c27d7873a96016c3e52c2d777edb4",
       "diagnostic_interface": "tests/port_v2/integration/combat/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: production player action authority, class-0x1F AI, encounter clear/progression, a second emulator, normal release, and physical Saturn remain unpromoted or UNRUN."],
-      "exact_next_experiment": "After ORACLE-04 through ORACLE-06 and the two bounded promotions, integrate current-state collision/damage in INTEGRATE-04A without fixed-frame contact injection.",
-      "user_feedback": {"exact_response": "much better lets keep going", "approved_components": ["Corrected source-relative player/enemy positioning and actor order shown in the renewed HIT and KO evidence.", "Shared lane/ground baseline and attack-facing-toward-enemy relationship shown in the renewed evidence.", "Corrected combat scale, palette, and readability shown in the renewed evidence."], "requested_changes": [], "priority": "continue-camera-stage-promotion"}
+      "blockers": ["Unblock: USER-09 reports that live player/alien collision feels off; preserve the approved measured geometry and isolate the current-state adapter only after the first-priority player-presentation repair. Physical Saturn remains UNRUN."],
+      "exact_next_experiment": "After REPAIR-10 and renewed review, activate one bounded live collision correction if the reported discrepancy remains; do not change the approved measured geometry or damage sequence without new source evidence.",
+      "user_feedback": {"exact_response": "the character sprite is faving the wrong way with certain walking firectios.  attack sprites seem randomply selected such as weapon to no weapon to no weapon. impact works but the ai  and collosion between player and alien seem off. I'm not sure if these need to work at this point.&#x20;", "approved_components": ["Impact feedback works in the reviewed live encounter."], "requested_changes": ["Correct live player/alien collision feel while preserving measured geometry and damage locks."], "priority": "after-player-facing-and-attack-presentation"}
     },
     {
       "id": "player-action-controller",
@@ -1168,15 +1168,15 @@
       "source_research_status": "MEASURED",
       "source_research_evidence": "data/oracle04_predator_warrior_control_actions.json",
       "source_research_scope": "bounded first-live-encounter movement, facing, four attack selectors, timing, boxes, and enemy HIT/KO only; complete move set, interruption/cancellation, and player-side RNG remain UNKNOWN",
-      "user_status": "NOT_REVIEWED",
+      "user_status": "CHANGES_REQUESTED",
       "salvage_decision": "PROMOTED",
       "production_interface": "src/port_v2/gameplay/player_action/player_action.h",
       "promoted_commit": "6b943ead3db9ad5cb50bff3bca3884125b973a78",
       "evidence_commit": "6b943ead3db9ad5cb50bff3bca3884125b973a78",
       "diagnostic_interface": "tests/port_v2/predator_warrior_action/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: subjective feel remains USER-09 and physical Saturn remains UNRUN."],
-      "exact_next_experiment": "Obtain USER-09 feedback on the exact INTEGRATE-04A interactive image without rebuilding behavior.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
+      "blockers": ["Unblock: USER-09 reports inverted walking-facing and incoherent attack sprite handoff; AI and collision are separate unresolved follow-ups. Physical Saturn remains UNRUN."],
+      "exact_next_experiment": "Execute REPAIR-10-LIVE-PLAYER-PRESENTATION: map measured facing to the CapActor sign and hold the measured control pose until each selector-owned source presentation begins, without changing selector order or combat locks.",
+      "user_feedback": {"exact_response": "the character sprite is faving the wrong way with certain walking firectios.  attack sprites seem randomply selected such as weapon to no weapon to no weapon. impact works but the ai  and collosion between player and alien seem off. I'm not sure if these need to work at this point.&#x20;", "approved_components": ["Impact feedback works in the reviewed live encounter."], "requested_changes": ["Correct player-facing direction.", "Remove the incoherent weapon/no-weapon attack sprite handoff without changing the four source selector sequences."], "priority": "player-facing-and-attack-presentation-first"}
     },
     {
       "id": "street-alien-ai",
@@ -1189,7 +1189,7 @@
       "source_research_status": "MEASURED",
       "source_research_evidence": "data/oracle05_street_alien_ai.json",
       "source_research_scope": "one class-0x1F slot on the first-live-encounter route: spawn, one-player target, approach and observed lane motion, facing, attack timer/contacts/damage, HIT/recovery/KO/removal, reposition state, scheduler order, and consumed RNG; target-relative lane reselection in the controlled window, other archetypes, and live multiplayer remain unmeasured",
-      "user_status": "NOT_REVIEWED",
+      "user_status": "CHANGES_REQUESTED",
       "salvage_decision": "PROMOTED",
       "production_interface": "src/port_v2/gameplay/street_alien_ai/street_alien_ai.h",
       "promoted_commit": "b75d8c8758073b01d7ea657ed9640c7f48c0f190",
@@ -1197,9 +1197,9 @@
       "diagnostic_interface": "tests/port_v2/street_alien_ai/run_pinned_emulator.ps1",
       "temporary_adapter": {"path": "tests/port_v2/street_alien_ai_bench/street_alien_ai_bench.h", "remaining_authored_controller_coupling": "None; include-only compatibility adapter owns zero gameplay behavior.", "deletion_condition": "Delete with the SALVAGE-11 diagnostic after integrated AI coverage replaces it."},
       "behavioral_classification": "MEASURED class-0x1F target/approach/RNG/attack/HIT/KO loop behind an adapted one-player production interface",
-      "blockers": ["Unblock: subjective playability remains USER-09 and physical Saturn remains UNRUN."],
-      "exact_next_experiment": "Obtain USER-09 feedback on the exact INTEGRATE-04A interactive image without rebuilding behavior.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
+      "blockers": ["Unblock: USER-09 reports that the live class-0x1F AI feels off; this remains a separate bounded correction after the first-priority player-presentation repair. Physical Saturn remains UNRUN."],
+      "exact_next_experiment": "After REPAIR-10 and renewed review, compare live target/approach/lane/attack transitions against ORACLE-05 and activate one bounded AI correction if the discrepancy remains.",
+      "user_feedback": {"exact_response": "the character sprite is faving the wrong way with certain walking firectios.  attack sprites seem randomply selected such as weapon to no weapon to no weapon. impact works but the ai  and collosion between player and alien seem off. I'm not sure if these need to work at this point.&#x20;", "approved_components": ["Impact feedback works in the reviewed live encounter."], "requested_changes": ["Correct the live class-0x1F AI feel against measured source transitions."], "priority": "after-player-facing-and-attack-presentation"}
     },
     {
       "id": "round1-encounter-controller",
@@ -1209,15 +1209,15 @@
       "proposed_isolated_bench": "INTEGRATE-04A runs one measured encounter controller over current player/enemy state and proves clear plus continued movement.",
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
-      "user_status": "AWAITING_USER_FEEDBACK",
+      "user_status": "CHANGES_REQUESTED",
       "salvage_decision": "PROMOTED",
       "production_interface": "src/port_v2/integration/live_encounter/live_encounter.h",
       "promoted_commit": "d9021965dab64d47953d2e829c7d307b0b01a455",
       "evidence_commit": "d9021965dab64d47953d2e829c7d307b0b01a455",
       "diagnostic_interface": "tests/port_v2/integration/live_encounter/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: subjective playability remains USER-09 and physical Saturn remains UNRUN."],
-      "exact_next_experiment": "Obtain USER-09 feedback on the frozen exact interactive image; do not rebuild behavior.",
-      "user_feedback": {"exact_response": null, "approved_components": [], "requested_changes": [], "priority": null}
+      "blockers": ["Unblock: USER-09 requests player presentation correction first and reports AI/collision discrepancies that remain required before first-live-encounter acceptance. Physical Saturn remains UNRUN."],
+      "exact_next_experiment": "Complete REPAIR-10-LIVE-PLAYER-PRESENTATION and renew USER-09 without activating SALVAGE-08; keep AI and collision corrections explicit if still observed.",
+      "user_feedback": {"exact_response": "the character sprite is faving the wrong way with certain walking firectios.  attack sprites seem randomply selected such as weapon to no weapon to no weapon. impact works but the ai  and collosion between player and alien seem off. I'm not sure if these need to work at this point.&#x20;", "approved_components": ["Impact feedback works in the reviewed live encounter."], "requested_changes": ["Correct player-facing direction.", "Correct attack sprite coherence.", "Correct live AI feel.", "Correct player/alien collision feel."], "priority": "player-facing-and-attack-presentation-first"}
     },
     {
       "id": "palette-cram",

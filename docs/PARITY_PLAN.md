@@ -65,9 +65,9 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: USER-09-LIVE-ENCOUNTER-REVIEW
+CURRENT_TASK: REPAIR-10-LIVE-PLAYER-PRESENTATION
 
-ACTIVE_SOFTWARE_TASK: NONE_USER_REVIEW_CHECKPOINT
+ACTIVE_SOFTWARE_TASK: REPAIR_PLAYER_FACING_AND_SOURCE_ATTACK_HANDOFF
 
 ## 4. Current salvage queue and production extension
 
@@ -83,9 +83,13 @@ interfaces. INTEGRATE-04A now binds them to real controller input, current-
 state collision/damage, HIT/KO, the adapted target-KO-then-inactivity clear,
 route unlock, and continued movement at `d902196`. Its paired 448-frame Yaba
 ledgers and intact visual capture pass, and exact interactive ISO
-`ae653596...a7a8a` is frozen for `USER-09`. Subjective playability remains
-`AWAITING_USER_FEEDBACK`; this is one bounded encounter, not complete playable
-Round 1. The
+`ae653596...a7a8a` was reviewed at `USER-09`. The user reported inverted player
+facing, incoherent weapon/no-weapon attack presentation, off AI, and off
+player/alien collision. `REPAIR-10-LIVE-PLAYER-PRESENTATION` fixes the first
+bounded priority: the facing-sign boundary and the unsourced two-tick legacy
+attack flash before each selector-owned source sequence. AI and collision remain
+explicitly unresolved follow-up corrections; this is one bounded encounter,
+not complete playable Round 1. The
 slice remains physically `UNRUN`. The bounded QA prerequisite
 `HW-01-PROBE-3-VDP1-BUDGET-PRETEST` has prepared its representative, exact
 909-tile, and overload-control hardware package. Host checks, strict build,

@@ -15,6 +15,19 @@ contract = json.loads((HERE / "contract.json").read_text())
 source = (ROOT / "src/port_v2/integration/live_encounter/live_encounter.c").read_text()
 header = (ROOT / "src/port_v2/integration/live_encounter/live_encounter.h").read_text()
 main = (ROOT / "main.c").read_text()
+
+def presentation_boundary_ok(text):
+    return (
+        "avsp_pw_render_facing(live_encounter_frame.player.facing)" in text and
+        "live_encounter_frame.player.facing ? -1 : 1" not in text and
+        "avsp_pw_source_presentation_ready(" in text and
+        re.search(
+            r"live_encounter_frame\.player\.state == AVSP_PW_STATE_ATTACK &&\s*"
+            r"!scene->player_presentation_active\)\s*\{.*?"
+            r"scene->player_action = AVSP_PORT_V2_SLICE_ACTION_IDLE;",
+            text, re.S) is not None
+    )
+
 require(contract["real_input_authority"] is True and
         contract["fixed_frame_authority"] is False and
         contract["presentation_owned_outcome"] is False and
@@ -30,6 +43,24 @@ require(not re.search(r"runtime->frame\s*[>=]=?\s*\d+.*(?:clear|contact|damage)"
 require("AVSP_LIVE_ENCOUNTER_AUTOTEST" in main and
         "jo_is_pad1_key_pressed" in main and "jo_is_pad1_key_down" in main,
         "exact live profile lacks real controller input boundary")
+require(presentation_boundary_ok(main),
+        "live player facing or source-presentation boundary drifted")
+require(not presentation_boundary_ok(main.replace(
+            "avsp_pw_render_facing(live_encounter_frame.player.facing)",
+            "live_encounter_frame.player.facing ? -1 : 1", 1)),
+        "facing-sign mutation control failed")
+require(not presentation_boundary_ok(main.replace(
+            "!scene->player_presentation_active)\n"
+            "    {\n"
+            "        /* The measured source remains in its control pose for the first two\n"
+            "           attack ticks. Do not flash the unrelated legacy attack clip before\n"
+            "           the selector-owned source presentation becomes active. */\n"
+            "        scene->player_action = AVSP_PORT_V2_SLICE_ACTION_IDLE;",
+            "!scene->player_presentation_active)\n"
+            "    {\n"
+            "        /* MUTATED: restore the unrelated legacy attack clip. */\n"
+            "        scene->player_action = AVSP_PORT_V2_SLICE_ACTION_ATTACK;", 1)),
+        "legacy attack-flash mutation control failed")
 require("PHYSICAL SATURN" not in source.upper(),
         "production core introduced a physical claim")
 translated = subprocess.run(["wsl.exe", "wslpath", "-a", str(ROOT).replace("\\", "/")], check=True, capture_output=True, text=True).stdout.strip()

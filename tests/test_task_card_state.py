@@ -391,7 +391,8 @@ def main() -> None:
         "production_player_control: PASS_BOUNDED_ONE_EMULATOR",
         "street_alien_ai: PASS_BOUNDED_ONE_EMULATOR",
         "encounter_controller: PASS_BOUNDED_ONE_EMULATOR",
-        "interactive_human_review: AWAITING_USER_FEEDBACK",
+        "interactive_human_review: CHANGES_REQUESTED",
+        "first_priority: REPAIR-10-LIVE-PLAYER-PRESENTATION",
         "scripted_capability_slice_sufficient: false",
     ):
         require(token in state, f"live-gameplay state missing {token}")
@@ -502,10 +503,16 @@ def main() -> None:
             cards["INTEGRATE-04-COLD-BOOT-TO-ROUND1"],
             "scripted capability slice can satisfy playable Round 1")
     require(scalar(cards["USER-09-LIVE-ENCOUNTER-REVIEW"], "STATUS") ==
-            "AWAITING_USER_FEEDBACK" and active_id ==
-            "USER-09-LIVE-ENCOUNTER-REVIEW" and "physical proof" in
+            "CHANGES_REQUESTED" and active_id ==
+            "REPAIR-10-LIVE-PLAYER-PRESENTATION" and "physical proof" in
             cards["USER-09-LIVE-ENCOUNTER-REVIEW"],
             "USER-09 can become physical proof")
+    repair = cards["REPAIR-10-LIVE-PLAYER-PRESENTATION"]
+    require("facing" in repair and "legacy attack clip" in repair and
+            "AI and collision" in repair and
+            inline_list(repair, "NEXT_ELIGIBLE_CARDS") ==
+            ["USER-09-LIVE-ENCOUNTER-REVIEW"],
+            "USER-09 correction scope or renewed review gate drifted")
     for later in (
         "INTEGRATE-06-FOUR-CHARACTER-ROSTER",
         "INTEGRATE-07-THREE-PLAYER-MULTIPLAYER",
