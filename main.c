@@ -6602,8 +6602,12 @@ static void live_encounter_build_slice_frame(void)
         live_encounter_frame.alien.removed ? 2 : 34;
     playable_slice_frame.actors.player.world_x =
         live_encounter_frame.player.x;
+    /* The source projection is top-origin CPS2 screen space; Jo's sprite
+       submission is centre-origin, and the captured 192px cel pivot is 88px
+       below its centre.  Convert both offsets exactly once before the legacy
+       lane-to-screen bridge also derives its positive VDP1 depth. */
     playable_slice_frame.actors.player.lane =
-        live_encounter_frame.player_screen_y + 200 +
+        live_encounter_frame.player_screen_y + 200 - JO_TV_HEIGHT / 2 - 88 +
         live_encounter_frame.player.height;
     playable_slice_frame.actors.player.facing =
         avsp_pw_render_facing(live_encounter_frame.player.facing);
@@ -6614,7 +6618,7 @@ static void live_encounter_build_slice_frame(void)
         AVSP_PORT_V2_ENEMY_PALETTE_BANK;
     playable_slice_frame.actors.enemy.world_x = live_encounter_frame.alien.x;
     playable_slice_frame.actors.enemy.lane =
-        live_encounter_frame.alien_screen_y + 200;
+        live_encounter_frame.alien_screen_y + 200 - JO_TV_HEIGHT / 2 - 88;
     playable_slice_frame.actors.enemy.facing =
         live_encounter_frame.alien.facing ? -1 : 1;
     playable_slice_frame.actors.enemy.locomotion_frame =
