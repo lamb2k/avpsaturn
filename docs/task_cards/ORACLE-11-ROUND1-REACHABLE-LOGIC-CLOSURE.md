@@ -50,6 +50,18 @@ card only for a genuinely independent body or source-evidence hard stop.
   neutral jump presentation, landing guard/snap, facing retention, and return
   to control. Directional dash/air actions remain separate active backlog; a
   direction-plus-jump HIT capture is retained only as a falsification control.
+- `predator-warrior-weapon-projectile-resource`: `SOURCE_CLOSED` inside the
+  still-`PARTIAL` player family. Two independently launched byte-identical
+  captures plus twelve causal counterfactual classes bind Button-1 edge/held
+  dispatch, the twelve-attempt class-`0x05` volley, record-type-4 allocation
+  and lifecycle, current-state collision/removal, the presentation-only empty
+  fallback, B1+B2 health-funded special, meter debit/recharge/depleted state,
+  temporary resource-award timer, class-`0x54` display ownership, facing,
+  gameplay-audio boundaries, and RNG/order. Evidence is in
+  `data/oracle11_predator_weapon_projectile_resource.json` and
+  `data/oracle11_predator_warrior_authority.json`. Player HIT/KO, failure,
+  continue, respawn, return-to-control, and route-wide pickup/resource/audio/
+  load ownership remain the next active checkpoint.
 
 ## Owned paths
 

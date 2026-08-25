@@ -3,10 +3,11 @@
     {
       "accepted_evidence": [
         "data/oracle07_predator_warrior_action_graph_equipment.json",
-        "data/oracle11_predator_warrior_authority.json"
+        "data/oracle11_predator_warrior_authority.json",
+        "data/oracle11_predator_weapon_projectile_resource.json"
       ],
-      "counterfactual": "locomotion-to-neutral has two byte-identical captures plus skipped-edge, held-direction, and direct-reversal controls; remaining actions/resources/continue stay open",
-      "exact_next_experiment": "Close remaining route-reachable actions, equipment/projectiles, HIT/KO/continue, resource ownership, and return to control.",
+      "counterfactual": "locomotion, melee, normal jump, Button1 volley, empty-resource fallback, special, projectile lifecycle, resource/recharge, temporary resource award and facing have byte-identical controls plus twelve weapon/resource counterfactual classes; HIT/KO/continue remains open",
+      "exact_next_experiment": "Close player HIT, KO, failure/continue, respawn and return to control, then route-wide pickup/resource/audio/load ownership.",
       "id": "predator-warrior-player-authority",
       "status": "PARTIAL"
     },
@@ -42,12 +43,13 @@
     },
     {
       "accepted_evidence": [
-        "data/oracle07_predator_warrior_action_graph_equipment.json"
+        "data/oracle07_predator_warrior_action_graph_equipment.json",
+        "data/oracle11_predator_weapon_projectile_resource.json"
       ],
-      "counterfactual": "bounded action-local equipment mutation accepted; route bodies pending",
-      "exact_next_experiment": "Identify each actor class/type by source table and test its resource/collision/lifecycle authority.",
+      "counterfactual": "Button1 resource sufficiency, held/repeated input, special health gate, range, allocation, collision target removal, lifetime, recharge, class-0x54 removal, projectile scheduler removal and pre-dispatch facing controls are accepted",
+      "exact_next_experiment": "Retain the closed player weapon/projectile/resource contract while later archetype-specific projectiles, route pickups, hazards and destructibles are closed in their owning families.",
       "id": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-      "status": "OBSERVED"
+      "status": "PARTIAL"
     },
     {
       "accepted_evidence": [

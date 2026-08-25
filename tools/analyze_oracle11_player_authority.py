@@ -16,6 +16,7 @@ PROGRAM = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_program_2m.bin"
 ORACLE07 = ROOT / "data" / "oracle07_predator_warrior_action_graph_equipment.json"
 ORACLE10 = ROOT / "data" / "oracle10_round1_route.json"
 OUT = ROOT / "data" / "oracle11_predator_warrior_authority.json"
+WEAPON = ROOT / "data" / "oracle11_predator_weapon_projectile_resource.json"
 VARIANTS = ("cold_run_1", "cold_run_2", "skip_right_edge",
             "hold_right", "reverse_without_neutral")
 
@@ -432,6 +433,18 @@ def build_report() -> dict[str, object]:
             "physical_saturn": "UNRUN",
         },
     }
+    if WEAPON.exists():
+        report["weapon_projectile_resource"] = json.loads(
+            WEAPON.read_text(encoding="ascii"))
+        report["remaining_player_backlog"] = [
+            item for item in report["remaining_player_backlog"]
+            if not any(token in item.lower() for token in
+                       ("button1", "projectile", "special action resource"))
+        ]
+        report["scope"] = ("Round 1 one-player source authority; locomotion, "
+            "melee, jump, weapon/projectile/resource and special ownership "
+            "are closed while HIT/KO/continue and route-wide pickup/audio/load "
+            "bodies remain active backlog")
     validate(report)
     return report
 
@@ -490,6 +503,13 @@ def validate(report: dict[str, object]) -> None:
             "normal jump counterfactual failed")
     require(bool(report["remaining_player_backlog"]),
             "player authority was prematurely declared complete")
+    if "weapon_projectile_resource" in report:
+        weapon = report["weapon_projectile_resource"]
+        require(weapon["status"] == "SOURCE_CLOSED" and
+                weapon["mutation_controls"]["count"] == 12 and
+                weapon["authority_separation"]["equipment_resource"]
+                ["action_latch"].endswith("not ownership"),
+                "weapon/projectile/resource authority drift")
     require(report["protected_boundaries"] == {
         "production_runtime_writes": 0, "frontend_active": False,
         "user09_status": "CHANGES_REQUESTED", "salvage08_active": False,

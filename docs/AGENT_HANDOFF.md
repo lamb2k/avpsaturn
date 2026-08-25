@@ -17,18 +17,23 @@ evidence, recovery patches, ROMs, captures, and component-scoped user locks.
 
 ## Current task and next action
 
-ORACLE-10 is accepted. Two independent 18,000-frame source completions are
-byte-identical. The completing input perturbation reaches the exact Round 2
-underpass signature at frame 16,425 and continues in rendered gameplay.
-Thirteen counterfactuals cover ten authority families; no-continue and forced
-boss removal cannot fabricate completion. The census contains 94 route bodies,
-427 actor lifetimes, 20 class/type archetypes, 26 route events, and route,
-camera, RNG, actor-writer, audio-writer, and load evidence. Fast and Oracle pass.
-
 Resume the AvP salvage Goal at
-`ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE`. Use the ORACLE-10 census as the sole
-backlog and close one authority family at a time. Continue dependency-safe
-families around blockers; create a child card only for a genuinely independent
-body or evidence hard stop. Do not write production runtime, infer USER-09
-approval, activate SALVAGE-08 before explicit USER-10 acceptance, or advance
-physical Saturn beyond `UNRUN`.
+`ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE`; it remains active. Actor
+scheduler/lifecycle, Predator Warrior
+locomotion/neutral/facing, melee, normal jump, and now weapon/projectile/
+resource ownership are source closed. The latest checkpoint has two
+independently launched byte-identical source captures and twelve causal
+counterfactual classes. It binds the real twelve-attempt class-`0x05` Button-1
+volley, record-type-4 lifecycle, empty-resource fallback, B1+B2 health-funded
+special, resource debit/recharge/depleted state, temporary 600-tick award,
+class-`0x54` presentation ownership, current-state collision/removal, audio
+boundaries, facing, and RNG/order in
+`data/oracle11_predator_weapon_projectile_resource.json`.
+
+Continue the same card and Goal with Predator Warrior HIT, KO, failure,
+continue, respawn, and return to control; then close route-wide pickup,
+resource, gameplay-audio, and load/release ownership. Do not activate SPEC-02
+until every completion-route authority is closed or narrowly adapted with
+mutation controls. Do not write production runtime, infer USER-09 approval,
+activate SALVAGE-08 before explicit USER-10 acceptance, or advance physical
+Saturn beyond `UNRUN`.
