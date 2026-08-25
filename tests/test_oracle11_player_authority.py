@@ -102,6 +102,15 @@ mutant = copy.deepcopy(report)
 mutant["directional_airborne_interruption"]["status"] = "PARTIAL"
 reject(mutant, "air checkpoint downgraded")
 
+mutant = copy.deepcopy(report)
+mutant["hit_ko_failure_continue_respawn"]["status"] = "PARTIAL"
+reject(mutant, "HIT/KO checkpoint downgraded")
+
+mutant = copy.deepcopy(report)
+mutant["hit_ko_failure_continue_respawn"]["failure_continue"] \
+    ["direction_only_confirms"] = True
+reject(mutant, "direction-only continue confirmation")
+
 rebuilt = oracle11.build_report()
 assert oracle11.canonical(rebuilt) == ARTIFACT.read_bytes(), "derived report drift"
-print("ORACLE-11 player authority tests: PASS (16 mutations rejected)")
+print("ORACLE-11 player authority tests: PASS (18 mutations rejected)")

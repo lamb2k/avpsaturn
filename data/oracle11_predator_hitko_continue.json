@@ -1,0 +1,232 @@
+{
+  "counterfactuals": {
+    "activation_frames": {
+      "coin_only": null,
+      "continue_confirm_attack": 6723,
+      "continue_confirm_gun": 6723,
+      "continue_confirm_jump": 6843,
+      "continue_confirm_right": null,
+      "delayed_start": 6768,
+      "no_continue": null,
+      "respawn_input_suppressed": null,
+      "start_only": 6723,
+      "survive_contact": 6200
+    },
+    "all_gameplay_buttons_confirm": true,
+    "coin_only_no_respawn": true,
+    "delayed_start_shifts_continue_and_respawn": true,
+    "direction_alone_does_not_confirm": true,
+    "health_50_suppresses_lethal_ko": true,
+    "no_continue_no_respawn": true,
+    "no_gameplay_input_no_respawn": true,
+    "start_only_matches_baseline": true
+  },
+  "coverage_universe": {
+    "all_required_bodies_closed": true,
+    "natural_route_window": [
+      5800,
+      6900
+    ],
+    "required_bodies": [
+      "nonlethal-hit",
+      "lethal-ko",
+      "failure-state",
+      "credited-start",
+      "button-confirmation",
+      "respawn-initialization",
+      "return-to-control"
+    ],
+    "routes": [
+      "baseline-completion-a",
+      "baseline-completion-b",
+      "perturbed-completions",
+      "failure-continue",
+      "targeted-counterfactuals"
+    ]
+  },
+  "failure_continue": {
+    "classification": "SOURCE_CLOSED",
+    "coin_without_start_confirms": false,
+    "confirmation_rule": "phase +0xd5=2 computes new input edges from +0xee/+0xef; Button1 bit4, Button2 bit5, or Button3 bit6 enters 0x00ea74; left/right bits1/0 only move the selection cursor",
+    "credit_rule": "0x00e880 performs packed-BCD credit debit and rejects borrow before setting player/continue ownership bits",
+    "credited_start": {
+      "frame": 6692,
+      "value": 4,
+      "write_pc": "0x0090f2"
+    },
+    "direction_only_confirms": false,
+    "failure_state": {
+      "frame": 6200,
+      "value": 2,
+      "write_pc": "0x008bb2"
+    },
+    "global_state_byte": "0xff8009",
+    "rng_consumption": "none",
+    "start_with_available_credit_enters_continue": true
+  },
+  "lethal_ko": {
+    "active_word": "0x0201",
+    "classification": "SOURCE_CLOSED",
+    "damage_guard": "current signed 16-bit health crosses below zero",
+    "entry": "0x01b132",
+    "final_countdown_ticks": 60,
+    "inactive_frame": 6199,
+    "required_action_phases": [
+      "0x0202",
+      "0x0800",
+      "0x0202",
+      "0x0404",
+      "0x0606"
+    ],
+    "rng_consumption": "none",
+    "top_state": 4,
+    "writers": [
+      "0x01d5ee",
+      "0x01d5f6",
+      "0x01d4aa",
+      "0x01b14c",
+      "0x01b150",
+      "0x01b2a0",
+      "0x01b344",
+      "0x01b406",
+      "0x01b30c",
+      "0x01b36e",
+      "0x01b3d2",
+      "0x01b272",
+      "0x01b562",
+      "0x01b566"
+    ]
+  },
+  "mutation_controls": [
+    "reject nonnegative health as KO",
+    "reject fitted KO phase order",
+    "reject shortened death countdown",
+    "reject Coin without Start",
+    "reject direction-only confirmation",
+    "reject missing gameplay-button confirmation",
+    "reject health/resource reset other than 101",
+    "reject fixed-frame respawn",
+    "reject missing HIT invulnerability",
+    "reject random HIT/KO/continue selection"
+  ],
+  "nonlethal_hit": {
+    "active_recovery": "0x01aad0",
+    "classification": "SOURCE_CLOSED",
+    "damage_guard": "current signed 16-bit health remains nonnegative after current-state collision damage",
+    "entry": "0x01a96e",
+    "health": {
+      "after": 85,
+      "before": 101,
+      "latched_at_entry": 85
+    },
+    "invulnerability": "actor +0x70 is set to 1 at recovery and consumed by the next scheduler tick",
+    "return_to_control_frame": 6857,
+    "rng_consumption": "none",
+    "writers": [
+      "0x01d5ee",
+      "0x01a988",
+      "0x01a9c8",
+      "0x01ab9e",
+      "0x01abbe",
+      "0x01a3fa"
+    ]
+  },
+  "protected_boundaries": {
+    "frontend_active": false,
+    "physical_saturn": "UNRUN",
+    "production_runtime_writes": 0,
+    "salvage08_active": false,
+    "user09_status": "CHANGES_REQUESTED",
+    "yaba_run": false
+  },
+  "remaining_unknowns": [],
+  "respawn_return": {
+    "active_frame": 6723,
+    "classification": "SOURCE_CLOSED",
+    "cleanup": "0x01a3fa clears the respawn action before locomotion dispatch",
+    "confirmation_writer": "0x00eab8",
+    "continue_marker": "actor +0xed=1 at 0x00eac8",
+    "health_and_latched_health": 101,
+    "init_entry": "0x019604",
+    "initial_action": "0x1200 -> 0x1202 -> 0x1204 -> 0x0c00",
+    "return_to_control_frame": 6786,
+    "rng_consumption": "none",
+    "spawn_coordinates": "route +0x278/+0x27c with source offsets"
+  },
+  "schema": "oracle11-predator-hitko-continue-v1",
+  "scope": "Predator Warrior route-reachable nonlethal HIT, lethal KO, failure, credited continue, respawn, and return to control",
+  "source_identity": {
+    "capture_manifests": {
+      "oracle11_player_hitko_continue_a": {
+        "manifest_sha256": "b0d645c24d20392384b680f65ea941e7a12b531ca5af41048d70463796364e16",
+        "variant_names": [
+          "baseline_hitko_1",
+          "baseline_hitko_2",
+          "no_continue",
+          "coin_only",
+          "start_only",
+          "delayed_start",
+          "survive_contact",
+          "respawn_input_suppressed"
+        ]
+      },
+      "oracle11_player_hitko_continue_b": {
+        "manifest_sha256": "fb841e0f195d148d52adfa804aa1a10d6ceb73e042ceeabd87d8c3e5d4fb3beb",
+        "variant_names": [
+          "continue_confirm_gun",
+          "continue_confirm_attack",
+          "continue_confirm_jump",
+          "continue_confirm_right"
+        ]
+      }
+    },
+    "continue_credit_debit": {
+      "bytes": 144,
+      "end_exclusive": "0x00e910",
+      "sha256": "cc497042285d52bf11978f66e9ee43af81ab089e2a3901a8f9031a09b04840b7",
+      "start": "0x00e880"
+    },
+    "continue_dispatch_table": {
+      "actor_byte": "+0xd5",
+      "base": "0x00e93c",
+      "entries": {
+        "0x00": "0x00e942",
+        "0x02": "0x00e9ce",
+        "0x04": "0x00eb80"
+      }
+    },
+    "continue_player_preview_dispatch": {
+      "bytes": 624,
+      "end_exclusive": "0x00eb80",
+      "sha256": "9d22a48e8623341add819314955a4dbd2d1c3d8f7c26f86ae2336c0eb87bde03",
+      "start": "0x00e910"
+    },
+    "decoded_opcodes_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
+    "global_failure_and_continue_writers": {
+      "bytes": 3026,
+      "end_exclusive": "0x009102",
+      "sha256": "9e409966537614fc96600528212136f9502b5dceb529513f3c6cce72cc77d6de",
+      "start": "0x008530"
+    },
+    "ko_state_and_substate_bodies": {
+      "bytes": 1184,
+      "end_exclusive": "0x01b5d2",
+      "sha256": "1cbc534cc039de6430ce759b295b08bfde353fa89f20d4c6b85a0cfa53d60257",
+      "start": "0x01b132"
+    },
+    "nonlethal_hit_entry_and_recovery": {
+      "bytes": 604,
+      "end_exclusive": "0x01abca",
+      "sha256": "e2998cf6773ad387cbb0a60e393f69389b17ccf41cb6ee9c8b92456d0da9fc1f",
+      "start": "0x01a96e"
+    },
+    "player_top_state_dispatch_and_init": {
+      "bytes": 376,
+      "end_exclusive": "0x019764",
+      "sha256": "ab7f709c7e86ed55186d4e2d62a4bcf2658ba32e250b698b1abb77495b9e3554",
+      "start": "0x0195ec"
+    }
+  },
+  "status": "SOURCE_CLOSED",
+  "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE"
+}

@@ -21,17 +21,20 @@ Resume the AvP salvage Goal at
 `ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE`; it remains active. Actor
 scheduler/lifecycle and Predator Warrior locomotion/neutral/facing, melee,
 normal jump, directional/airborne actions, interruption cancellation, and
-weapon/projectile/resource ownership are source closed. The latest checkpoint
+weapon/projectile/resource ownership are source closed. Player nonlethal HIT,
+lethal KO, failure/continue, respawn initialization, and return-to-control are
+also source closed. The latest checkpoint
 reconciles the full-route phase census with input-only counterfactuals: required
 phases `0x0400/02/04/06/0a/0c/0e/10` are closed, while unwitnessed
 `0x0408/12/14` are explicit `NOT_REQUIRED_FOR_ROUND1`. The player family
-remains `PARTIAL`; evidence is in `data/oracle11_predator_air_authority.json`
+remains `PARTIAL`; the latest evidence is in
+`data/oracle11_predator_hitko_continue.json`
 and the sole route-segment x authority-family matrix plus SPEC-02 zero-gap gate
 are in `data/round1_system_coverage.yaml`.
 
-Continue the same card and Goal with Predator Warrior HIT, KO, failure,
-continue, respawn, and return to control; then close route-wide pickup,
-resource, gameplay-audio, and load/release ownership. Do not activate SPEC-02
+Continue the same card and Goal with the sole remaining Predator Warrior
+backlog: route-wide pickup, resource, gameplay-audio, and load/release
+ownership. Do not activate SPEC-02
 until every completion-route authority is closed or narrowly adapted with
 mutation controls. Do not write production runtime, infer USER-09 approval,
 activate SALVAGE-08 before explicit USER-10 acceptance, or advance physical

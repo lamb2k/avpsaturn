@@ -4,11 +4,12 @@
       "accepted_evidence": [
         "data/oracle07_predator_warrior_action_graph_equipment.json",
         "data/oracle11_predator_air_authority.json",
+        "data/oracle11_predator_hitko_continue.json",
         "data/oracle11_predator_warrior_authority.json",
         "data/oracle11_predator_weapon_projectile_resource.json"
       ],
-      "counterfactual": "locomotion, melee, neutral and all four directional Button3 paths, route-reachable airborne Button1/Button2 branches, landing, natural HIT interruption cancellation, Button1 volley, empty-resource fallback, special, projectile lifecycle, resource/recharge, temporary resource award and facing are source-closed with byte-identical controls and targeted negatives; phases 0x0408/0x0412/0x0414 are explicitly NOT_REQUIRED_FOR_ROUND1; HIT/KO/continue remains open",
-      "exact_next_experiment": "Close player HIT, KO, failure/continue, respawn and return to control, then route-wide pickup/resource/audio/load ownership.",
+      "counterfactual": "locomotion, melee, neutral and all four directional Button3 paths, route-reachable airborne Button1/Button2 branches, landing, natural HIT interruption cancellation, Button1 volley, empty-resource fallback, special, projectile lifecycle, resource/recharge, temporary resource award, facing, nonlethal HIT, lethal KO, failure/continue, respawn, and return-to-control are source-closed with byte-identical controls and targeted negatives; phases 0x0408/0x0412/0x0414 are explicitly NOT_REQUIRED_FOR_ROUND1; Coin-only, no-continue, delayed-Start, health-threshold, gameplay-button confirmation, and direction-only controls reject unsourced transitions",
+      "exact_next_experiment": "Close the sole remaining player backlog: route-wide pickup/resource/audio/load/release ownership across the full coverage universe.",
       "id": "predator-warrior-player-authority",
       "status": "PARTIAL"
     },
@@ -73,10 +74,11 @@
     },
     {
       "accepted_evidence": [
+        "data/oracle11_predator_hitko_continue.json",
         "data/round1_route_census.json"
       ],
-      "counterfactual": "two source continues are captured; completing route-wide perturbation and clear/handoff controls pending",
-      "exact_next_experiment": "Bind failure/credit/continue, boss-clear, Round 2 title/load, and first stable Round 2 gameplay state.",
+      "counterfactual": "Predator Warrior lethal KO, failure state, packed-BCD credit debit, credited Start, gameplay-button confirmation, respawn initialization and return-to-control are source-closed; boss-clear and Round 2 handoff controls remain pending",
+      "exact_next_experiment": "Retain the closed player failure/continue contract while binding boss-clear, Round 2 title/load, and first stable Round 2 gameplay state.",
       "id": "stage-clear-failure-continue-round2-handoff",
       "status": "OBSERVED"
     },
@@ -829,6 +831,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -947,6 +950,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -1010,6 +1014,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -1128,6 +1133,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -1191,6 +1197,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -1309,6 +1316,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -1372,6 +1380,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -1490,6 +1499,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -1553,6 +1563,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -1671,6 +1682,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -1734,6 +1746,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -1852,6 +1865,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -1915,6 +1929,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -2033,6 +2048,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -2096,6 +2112,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -2214,6 +2231,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -2277,6 +2295,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -2395,6 +2414,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -2458,6 +2478,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -2576,6 +2597,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -2639,6 +2661,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -2757,6 +2780,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -2820,6 +2844,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -2938,6 +2963,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -3001,6 +3027,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -3119,6 +3146,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -3182,6 +3210,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -3300,6 +3329,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -3363,6 +3393,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -3481,6 +3512,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -3544,6 +3576,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -3662,6 +3695,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -3725,6 +3759,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -3843,6 +3878,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -3906,6 +3942,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -4024,6 +4061,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -4087,6 +4125,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -4205,6 +4244,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -4268,6 +4308,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -4386,6 +4427,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -4449,6 +4491,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -4567,6 +4610,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -4630,6 +4674,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -4748,6 +4793,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -4811,6 +4857,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -4929,6 +4976,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -4992,6 +5040,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -5110,6 +5159,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -5173,6 +5223,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -5291,6 +5342,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -5354,6 +5406,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -5472,6 +5525,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -5535,6 +5589,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -5653,6 +5708,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -5716,6 +5772,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -5834,6 +5891,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -5897,6 +5955,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -6015,6 +6074,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -6078,6 +6138,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -6196,6 +6257,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -6259,6 +6321,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -6377,6 +6440,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -6440,6 +6504,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -6558,6 +6623,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -6621,6 +6687,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -6739,6 +6806,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -6802,6 +6870,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -6920,6 +6989,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -6983,6 +7053,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -7101,6 +7172,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -7164,6 +7236,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -7282,6 +7355,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -7345,6 +7419,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -7463,6 +7538,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -7526,6 +7602,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -7644,6 +7721,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -7707,6 +7785,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -7825,6 +7904,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -7888,6 +7968,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -8006,6 +8087,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -8069,6 +8151,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -8187,6 +8270,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -8250,6 +8334,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -8368,6 +8453,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -8431,6 +8517,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -8549,6 +8636,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -8612,6 +8700,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -8730,6 +8819,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -8793,6 +8883,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -8911,6 +9002,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -8974,6 +9066,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -9092,6 +9185,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -9155,6 +9249,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -9273,6 +9368,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -9336,6 +9432,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -9454,6 +9551,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -9517,6 +9615,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -9635,6 +9734,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -9698,6 +9798,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -9816,6 +9917,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -9879,6 +9981,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -9997,6 +10100,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -10060,6 +10164,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -10178,6 +10283,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -10241,6 +10347,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -10359,6 +10466,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -10422,6 +10530,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -10540,6 +10649,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -10603,6 +10713,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -10721,6 +10832,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -10784,6 +10896,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -10902,6 +11015,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -10965,6 +11079,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -11083,6 +11198,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -11146,6 +11262,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -11264,6 +11381,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -11327,6 +11445,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -11445,6 +11564,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -11508,6 +11628,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -11626,6 +11747,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -11689,6 +11811,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -11807,6 +11930,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -11870,6 +11994,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -11988,6 +12113,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -12051,6 +12177,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -12169,6 +12296,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -12232,6 +12360,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -12350,6 +12479,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -12413,6 +12543,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -12531,6 +12662,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -12594,6 +12726,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -12712,6 +12845,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -12775,6 +12909,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -12893,6 +13028,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -12956,6 +13092,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -13074,6 +13211,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -13137,6 +13275,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -13255,6 +13394,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -13318,6 +13458,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -13436,6 +13577,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -13499,6 +13641,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -13617,6 +13760,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -13680,6 +13824,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -13798,6 +13943,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -13861,6 +14007,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -13979,6 +14126,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -14042,6 +14190,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -14160,6 +14309,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -14223,6 +14373,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -14341,6 +14492,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -14404,6 +14556,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -14522,6 +14675,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -14585,6 +14739,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -14703,6 +14858,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -14766,6 +14922,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -14884,6 +15041,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -14947,6 +15105,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -15065,6 +15224,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -15128,6 +15288,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -15246,6 +15407,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -15309,6 +15471,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -15427,6 +15590,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -15490,6 +15654,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -15608,6 +15773,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -15671,6 +15837,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -15789,6 +15956,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -15852,6 +16020,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -15970,6 +16139,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -16033,6 +16203,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -16151,6 +16322,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -16214,6 +16386,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -16332,6 +16505,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -16395,6 +16569,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -16513,6 +16688,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -16576,6 +16752,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -16694,6 +16871,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -16757,6 +16935,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -16875,6 +17054,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -16938,6 +17118,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -17056,6 +17237,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -17119,6 +17301,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -17237,6 +17420,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -17300,6 +17484,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -17418,6 +17603,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -17481,6 +17667,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -17599,6 +17786,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,
@@ -17662,6 +17850,7 @@
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
+              "data/oracle11_predator_hitko_continue.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -17780,6 +17969,7 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
+              "data/oracle11_predator_hitko_continue.json",
               "data/round1_route_census.json"
             ],
             "required": true,

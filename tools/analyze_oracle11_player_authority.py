@@ -18,6 +18,7 @@ ORACLE10 = ROOT / "data" / "oracle10_round1_route.json"
 OUT = ROOT / "data" / "oracle11_predator_warrior_authority.json"
 WEAPON = ROOT / "data" / "oracle11_predator_weapon_projectile_resource.json"
 AIR = ROOT / "data" / "oracle11_predator_air_authority.json"
+HITKO = ROOT / "data" / "oracle11_predator_hitko_continue.json"
 VARIANTS = ("cold_run_1", "cold_run_2", "skip_right_edge",
             "hold_right", "reverse_without_neutral")
 
@@ -458,6 +459,19 @@ def build_report() -> dict[str, object]:
             "interruption cancellation, weapon/projectile/resource and special "
             "ownership are closed while HIT/KO/continue and route-wide "
             "pickup/audio/load bodies remain active backlog")
+    if HITKO.exists():
+        report["hit_ko_failure_continue_respawn"] = json.loads(
+            HITKO.read_text(encoding="ascii"))
+        report["remaining_player_backlog"] = [
+            item for item in report["remaining_player_backlog"]
+            if "player hit/ko" not in item.lower()
+        ]
+        report["scope"] = ("Round 1 one-player source authority; locomotion, "
+            "melee, all route-reachable directional/air actions, interruption "
+            "cancellation, weapon/projectile/resource, nonlethal HIT, lethal "
+            "KO, failure/continue, respawn, and return-to-control are closed "
+            "while route-wide pickup/resource/audio/load ownership remains "
+            "active backlog")
     validate(report)
     return report
 
@@ -531,6 +545,16 @@ def validate(report: dict[str, object]) -> None:
                 not any("directional jump/dash" in item.lower()
                         for item in report["remaining_player_backlog"]),
                 "directional/air/interruption authority drift")
+    if "hit_ko_failure_continue_respawn" in report:
+        hitko = report["hit_ko_failure_continue_respawn"]
+        require(hitko["status"] == "SOURCE_CLOSED" and
+                hitko["coverage_universe"]["all_required_bodies_closed"] is True and
+                hitko["remaining_unknowns"] == [] and
+                hitko["failure_continue"]["direction_only_confirms"] is False and
+                hitko["respawn_return"]["return_to_control_frame"] == 6786 and
+                not any("player hit/ko" in item.lower()
+                        for item in report["remaining_player_backlog"]),
+                "HIT/KO/continue/respawn authority drift")
     require(report["protected_boundaries"] == {
         "production_runtime_writes": 0, "frontend_active": False,
         "user09_status": "CHANGES_REQUESTED", "salvage08_active": False,
@@ -541,7 +565,7 @@ def validate(report: dict[str, object]) -> None:
 def main() -> None:
     report = build_report()
     OUT.write_bytes(canonical(report))
-    print("ORACLE-11 Predator Warrior: directional/air/interruption checkpoint SOURCE_CLOSED; player family PARTIAL")
+    print("ORACLE-11 Predator Warrior: HIT/KO/continue/respawn checkpoint SOURCE_CLOSED; player family PARTIAL")
 
 
 if __name__ == "__main__":

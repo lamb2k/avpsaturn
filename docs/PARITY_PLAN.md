@@ -155,9 +155,10 @@ matrix in `data/round1_system_coverage.yaml`; SPEC-02 is mechanically blocked
 until every declared zero-gap counter is zero. Predator Warrior locomotion,
 melee, weapon/projectile/resource, and all route-reachable directional and
 airborne phases are source closed. Unwitnessed air-table phases
-`0x0408/12/14` are explicit `NOT_REQUIRED_FOR_ROUND1`; HIT/KO, continue,
-respawn, return-to-control, and route-wide pickup/audio/load ownership keep the
-player family and ORACLE-11 active.
+`0x0408/12/14` are explicit `NOT_REQUIRED_FOR_ROUND1`. Nonlethal HIT, lethal
+KO, failure/continue, respawn, and return-to-control are also source closed;
+route-wide pickup/resource/gameplay-audio/load/release ownership is the sole
+remaining player backlog and keeps the player family and ORACLE-11 active.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

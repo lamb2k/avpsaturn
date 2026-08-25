@@ -69,9 +69,21 @@ card only for a genuinely independent body or source-evidence hard stop.
   temporary resource-award timer, class-`0x54` display ownership, facing,
   gameplay-audio boundaries, and RNG/order. Evidence is in
   `data/oracle11_predator_weapon_projectile_resource.json` and
-  `data/oracle11_predator_warrior_authority.json`. Player HIT/KO, failure,
-  continue, respawn, return-to-control, and route-wide pickup/resource/audio/
-  load ownership remain the next active checkpoints.
+  `data/oracle11_predator_warrior_authority.json`. The player HIT/KO and
+  continue checkpoint below consumes the next dependency; route-wide
+  pickup/resource/audio/load/release ownership remains active afterward.
+- `predator-warrior-hit-ko-failure-continue-respawn-return`: `SOURCE_CLOSED`
+  inside the still-`PARTIAL` player family. Two independently launched
+  byte-identical captures bind signed-health lethal KO, the full source-owned
+  KO phase sequence and 60-tick removal countdown, nonlethal HIT recovery and
+  one-tick invulnerability, failure state, packed-BCD credit debit, credited
+  Start, gameplay-button confirmation, respawn initialization, and return to
+  control. Coin-only, no-continue, delayed-Start, health-threshold,
+  input-suppression, isolated Button1/Button2/Button3, and direction-only
+  counterfactuals reject fixed-frame or cursor-owned respawn. Evidence is in
+  `data/oracle11_predator_hitko_continue.json` and the integrated player
+  artifact. Route-wide pickup/resource/audio/load/release ownership is the
+  sole remaining Predator Warrior backlog; the family remains `PARTIAL`.
 
 ## Owned paths
 

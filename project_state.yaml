@@ -512,9 +512,9 @@ source_closure:
   prototype_harness_retained: true
   preserved_infrastructure: [rendering, HUD, camera, audio, collision, readback, emulator, visual-QA]
   active_card: ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE
-  accepted_checkpoints: [actor-scheduler-allocation-lifecycle, predator-warrior-locomotion-neutral-facing, predator-warrior-route-melee, predator-warrior-normal-jump-air-landing, predator-warrior-weapon-projectile-resource]
-  latest_evidence: data/oracle11_predator_weapon_projectile_resource.json
-  exact_next_experiment: Close Predator Warrior HIT/KO/failure/continue/respawn/return-to-control, then route-wide pickup/resource/audio/load ownership without advancing SPEC-02.
+  accepted_checkpoints: [actor-scheduler-allocation-lifecycle, predator-warrior-locomotion-neutral-facing, predator-warrior-route-melee, predator-warrior-normal-jump-air-landing, predator-warrior-directional-airborne-interruption, predator-warrior-weapon-projectile-resource, predator-warrior-hit-ko-failure-continue-respawn-return]
+  latest_evidence: data/oracle11_predator_hitko_continue.json
+  exact_next_experiment: Close the sole remaining Predator Warrior backlog: route-wide pickup/resource/gameplay-audio/load/release ownership across the full coverage universe, without advancing SPEC-02.
   frontend_activation_allowed: false
   physical_saturn: UNRUN
 current_checkpoint: oracle-round1-reachable-logic-closure
