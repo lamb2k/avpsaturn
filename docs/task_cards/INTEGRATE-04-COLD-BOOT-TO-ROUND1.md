@@ -7,7 +7,7 @@ CHECKPOINT: integrate-cold-boot-round1
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
 TIER: 2
-DEPENDENCIES: [USER-09-LIVE-ENCOUNTER-REVIEW, PROMOTE-08-FRONTEND]
+DEPENDENCIES: [USER-10-ROUND1-PLAYTHROUGH-REVIEW, PROMOTE-08-FRONTEND]
 REQUIRED_LANES: [Fast, Oracle, Target, Emulator, Full]
 OPTIONAL_LANES: [Physical]
 CLAUDE_ALLOWED: false

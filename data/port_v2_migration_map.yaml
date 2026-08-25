@@ -1215,8 +1215,8 @@
       "promoted_commit": "d9021965dab64d47953d2e829c7d307b0b01a455",
       "evidence_commit": "d9021965dab64d47953d2e829c7d307b0b01a455",
       "diagnostic_interface": "tests/port_v2/integration/live_encounter/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: renewed USER-09 reports corrupted live background presentation and neutral-facing reversal. The integrated encounter remains a TECHNICAL_PROTOTYPE / ADAPTED_GAMEPLAY_SCAFFOLD and is NOT_SOURCE_CLOSED / NOT_USER_APPROVED. Physical Saturn remains UNRUN."],
-      "exact_next_experiment": "Execute REPAIR-11 against the e237335 behavior: correct only the live camera-to-VDP2-plane coordinate bridge, preserve the confirmed attack sequence and player-tracking alien AI, and leave neutral-facing reversal for the next bounded review/repair.",
+      "blockers": ["Unblock: REPAIR-11 is accepted at 236eef0 with evidence 35d527e; neutral-facing release and every remaining completion-route authority must be closed through ORACLE-10/11, SPEC-02, REIMPLEMENT-13, QA-13, and explicit USER-10. Physical Saturn remains UNRUN."],
+      "exact_next_experiment": "Execute ORACLE-10 as a read-only end-to-end Round 1 census through stable Round 2 handoff; retain this bounded encounter only as technical substrate and keep USER-09 CHANGES_REQUESTED.",
       "user_feedback": {"exact_response": "the background looks correupted.&#x20;\n\nalso confirm the attack animation sequence is correct. also the player resets to opposite direction when the key is supressed. overall this feels a bit more faithful . the alien ai also tracks the player", "approved_components": ["The reviewed attack animation sequence is correct and must remain unchanged.", "The class-0x1F alien AI tracks the player and must remain unchanged in the background repair."], "requested_changes": ["Correct the corrupted live background presentation first.", "Keep the neutral-facing reversal after directional release recorded for the following bounded repair/review."], "priority": "REPAIR-11-live-background-first"}
     },
     {
@@ -1251,8 +1251,8 @@
       "promoted_commit": "b6ef0ceff9fc4ed8cf06948cc353e7ce67950d3c",
       "evidence_commit": "b6ef0ceff9fc4ed8cf06948cc353e7ce67950d3c",
       "diagnostic_interface": "tests/port_v2/camera_stage/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: renewed USER-09 reports that live integration presents the background as corrupted because its camera is bridged into the captured plane maps in the wrong coordinate space. The enabled scroll2 row-scroll gfxram table also remains uncaptured."],
-      "exact_next_experiment": "Execute REPAIR-11 only at the live camera-to-plane bridge; preserve the promoted two-plane payload, plane/PNT canaries, palettes, and priority order.",
+      "blockers": ["Unblock: REPAIR-11 visually verifies the live camera-to-plane bridge at 236eef0; full Round 1 layer ownership and any route-required scroll2 row-scroll behavior remain for ORACLE-10/11 census and closure."],
+      "exact_next_experiment": "Census every Round 1 camera/layer state and source ownership in ORACLE-10, preserving the accepted REPAIR-11 two-plane bridge and presentation locks.",
       "user_feedback": {"exact_response": "pass for camera and stage", "approved_components": ["Adapted two-plane stage composition, palette, priority, and final 352x224 presentation shown in USER-04."], "requested_changes": [], "priority": "continue-hud-pcm"}
     },
     {
@@ -1269,8 +1269,8 @@
       "promoted_commit": "b6ef0ceff9fc4ed8cf06948cc353e7ce67950d3c",
       "evidence_commit": "b6ef0ceff9fc4ed8cf06948cc353e7ce67950d3c",
       "diagnostic_interface": "tests/port_v2/camera_stage/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: renewed USER-09 reports corrupted background presentation in the live integration; full-route camera ownership and route-driven camera requests remain unpromoted."],
-      "exact_next_experiment": "Execute REPAIR-11 to translate live world-camera X through the captured plane origins and 384-to-352 mapping while retaining fixed frame 20, the frame 45-to-46 step, and framing locks.",
+      "blockers": ["Unblock: the bounded REPAIR-11 camera bridge is accepted at 236eef0; full-route camera locks, unlocks, bounds, requests, and Round 2 handoff remain to be censused and source-closed."],
+      "exact_next_experiment": "Record every Round 1 camera lock/unlock and route ownership in ORACLE-10, then recover its source guards in ORACLE-11 without changing the accepted bridge.",
       "user_feedback": {"exact_response": "pass for camera and stage", "approved_components": ["Camera movement, scroll behavior, framing, and fixed-checkpoint presentation shown in USER-04."], "requested_changes": [], "priority": "continue-hud-pcm"}
     },
     {

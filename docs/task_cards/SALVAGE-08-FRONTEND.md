@@ -7,7 +7,7 @@ CHECKPOINT: salvage-frontend
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
 TIER: 1
-DEPENDENCIES: [USER-09-LIVE-ENCOUNTER-REVIEW]
+DEPENDENCIES: [USER-10-ROUND1-PLAYTHROUGH-REVIEW]
 REQUIRED_LANES: [Fast, Oracle, Target, Emulator]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
@@ -27,8 +27,9 @@ select/confirm, and loading handoff without giving scene bytecode gameplay autho
 
 - `AvspSceneDef`, scene manifest, measured frontend interaction, and current
   source-derived frontend assets.
-- Accepted first-live-encounter review as a locked gameplay handoff; frontend
-  work may not alter its player, AI, combat, clear, or progression authority.
+- Accepted USER-10 Round 1 playthrough as a locked gameplay handoff; frontend
+  work may not alter its player, AI, combat, route, boss, clear, or progression
+  authority.
 
 ## Systems deliberately disabled
 
@@ -63,4 +64,4 @@ Required through `USER-08-FRONTEND` after QA.
 
 ## Next eligible cards
 
-- `QA-08-FRONTEND` only after USER-09 is explicitly accepted.
+- `QA-08-FRONTEND` only after USER-10 is explicitly accepted.

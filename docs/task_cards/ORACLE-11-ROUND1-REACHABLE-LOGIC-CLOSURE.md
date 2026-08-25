@@ -1,0 +1,78 @@
+# ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE task card
+
+TASK: ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE
+KIND: ORACLE
+STATUS: BLOCKED
+CHECKPOINT: oracle-round1-reachable-logic-closure
+BASE: project_state.production_head
+BRANCH: project_state.production_branch
+TIER: 1
+DEPENDENCIES: [ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS]
+REQUIRED_LANES: [Fast, Oracle]
+OPTIONAL_LANES: []
+CLAUDE_ALLOWED: false
+READ_ONLY: true
+NEXT_ELIGIBLE_CARDS: [SPEC-02-ROUND1-EXECUTABLE-CONTRACT]
+
+## Objective
+
+Use the ORACLE-10 census as the backlog and close every reachable gameplay
+authority required to complete Round 1 with Predator Warrior. Process one
+authority family at a time with coherent evidence checkpoints; create a child
+card only for a genuinely independent body or source-evidence hard stop.
+
+## Owned paths
+
+- Card-scoped static analysis, deterministic captures, counterfactuals,
+  evidence, tests, census closure fields, and state/roadmap ledgers
+
+## Existing systems to reuse
+
+- ORACLE-10 census, accepted Oracle evidence, source routines/tables, pinned
+  reference captures, and deterministic mutation infrastructure.
+
+## Systems deliberately disabled
+
+- All production runtime writes, generalized engines, behavior-tree/ECS/script
+  frameworks, whole-program recompilation, frontend, other characters,
+  multiplayer, later stages, and physical status.
+
+## Focused machine checks
+
+- Recover entry/exit states, dispatch, guards, types/signedness, reads/writes,
+  timers, arithmetic, facing, actions, animations/assemblies, collision,
+  damage/resources, RNG/order, scheduler position, and route interactions for
+  player authority; navigation; scheduler/lifecycle; every required enemy;
+  equipment/projectiles/pickups/hazards; encounters; scripts; boss; clear,
+  continue, handoff; and gameplay-owned audio/load triggers.
+- Prefer bounded source routines over frame fitting. Continue independent
+  families around blockers. Complete only when every completion-route behavior
+  is `SOURCE_CLOSED` or narrowly `ADAPTED` with rule and mutation controls.
+
+## Saturn build profile
+
+None. Read-only source closure; no production or Target build.
+
+## Emulator readback
+
+Reference MAME evidence only. All production Saturn and Yaba execution is
+disabled.
+
+## Human-review requirement
+
+None; this card cannot infer or grant user approval.
+
+## Exclusions
+
+- No production implementation, visual guessing, plausible fallback, generic
+  CPS-2 engine, all-four-character work, multiplayer, or whole-game closure.
+
+## Hard stops
+
+- Completion-route authority remains `UNKNOWN` with no dependency-safe work
+  remaining, or source identity/mutation evidence cannot be established.
+
+## Next eligible cards
+
+- `SPEC-02-ROUND1-EXECUTABLE-CONTRACT` after required Round 1 authority reaches
+  zero UNKNOWN.

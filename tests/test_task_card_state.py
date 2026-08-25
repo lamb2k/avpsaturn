@@ -120,11 +120,11 @@ def validate_transition_fixtures() -> None:
     }
     require(not activation_is_legal(
         "SALVAGE-08-FRONTEND", "SALVAGE",
-        {"USER-09-LIVE-ENCOUNTER-REVIEW"}, live_accepted, set()),
-        "frontend salvage bypassed the accepted live-encounter review")
+        {"USER-10-ROUND1-PLAYTHROUGH-REVIEW"}, live_accepted, set()),
+        "frontend salvage bypassed the accepted Round 1 review")
     require(not activation_is_legal(
         "INTEGRATE-04-COLD-BOOT-TO-ROUND1", "INTEGRATE",
-        {"USER-09-LIVE-ENCOUNTER-REVIEW", "PROMOTE-08-FRONTEND"},
+        {"USER-10-ROUND1-PLAYTHROUGH-REVIEW", "PROMOTE-08-FRONTEND"},
         live_accepted, set()),
         "cold boot accepted only the scripted capability slice")
     require(not can_advance_physical("ORACLE", {"Fast", "Oracle"}),
@@ -485,11 +485,11 @@ def main() -> None:
             "roadmap and state active cards disagree")
 
     require(inline_list(cards["SALVAGE-08-FRONTEND"], "DEPENDENCIES") ==
-            ["USER-09-LIVE-ENCOUNTER-REVIEW"],
-            "frontend salvage can bypass the live-encounter review")
+            ["USER-10-ROUND1-PLAYTHROUGH-REVIEW"],
+            "frontend salvage can bypass the Round 1 playthrough review")
     require(set(inline_list(
         cards["INTEGRATE-04-COLD-BOOT-TO-ROUND1"], "DEPENDENCIES")) == {
-            "USER-09-LIVE-ENCOUNTER-REVIEW", "PROMOTE-08-FRONTEND",
+            "USER-10-ROUND1-PLAYTHROUGH-REVIEW", "PROMOTE-08-FRONTEND",
         }, "cold-boot integration dependencies drifted")
     live_card = cards["INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER"]
     for pattern, label in (
@@ -508,7 +508,7 @@ def main() -> None:
             "scripted capability slice can satisfy playable Round 1")
     user09 = cards["USER-09-LIVE-ENCOUNTER-REVIEW"]
     require(scalar(user09, "STATUS") == "CHANGES_REQUESTED" and
-            active_id == "REPAIR-11-LIVE-BACKGROUND-PRESENTATION" and
+            active_id == "ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS" and
             inline_list(user09, "DEPENDENCIES") ==
             ["QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL"] and
             "NOT_SOURCE_CLOSED" in user09 and "physical proof" in user09,
@@ -532,10 +532,9 @@ def main() -> None:
                        if scalar(cards[task], "STATUS") != "ACCEPTED"), None)
     if first_open is None:
         repair11 = cards["REPAIR-11-LIVE-BACKGROUND-PRESENTATION"]
-        require(active_id == "REPAIR-11-LIVE-BACKGROUND-PRESENTATION" and
-                scalar(repair11, "STATUS") == "READY" and
+        require(scalar(repair11, "STATUS") == "ACCEPTED" and
                 scalar(user09, "STATUS") == "CHANGES_REQUESTED",
-                "renewed USER-09 feedback did not activate background repair")
+                "REPAIR-11 acceptance or USER-09 disposition drifted")
     else:
         require(active_id == closure[first_open] and
                 scalar(cards[closure[first_open]], "STATUS") == "READY",
@@ -560,6 +559,42 @@ def main() -> None:
     require("SPEC-01" in cards[closure[4]] and
             "raw MAME" in cards[closure[4]],
             "REIMPLEMENT-12 can bypass the executable specification")
+    round1_closure = [
+        "ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS",
+        "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE",
+        "SPEC-02-ROUND1-EXECUTABLE-CONTRACT",
+        "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
+        "QA-13-ROUND1-END-TO-END-DIFFERENTIAL",
+        "USER-10-ROUND1-PLAYTHROUGH-REVIEW",
+    ]
+    round1_first_open = next(
+        (index for index, task in enumerate(round1_closure)
+         if scalar(cards[task], "STATUS") != "ACCEPTED"), None)
+    require(round1_first_open is not None,
+            "Round 1 sequence cannot complete without explicit USER-10 review")
+    require(active_id == round1_closure[round1_first_open] and
+            scalar(cards[active_id], "STATUS") == "READY",
+            "first open Round 1 card is not the sole active card")
+    for index, task in enumerate(round1_closure):
+        expected_dependencies = (["REPAIR-11-LIVE-BACKGROUND-PRESENTATION"]
+                                 if index == 0 else [round1_closure[index - 1]])
+        require(inline_list(cards[task], "DEPENDENCIES") == expected_dependencies,
+                f"{task} bypasses the Round 1 dependency sequence")
+        expected_status = ("ACCEPTED" if index < round1_first_open else
+                           "READY" if index == round1_first_open else "BLOCKED")
+        require(scalar(cards[task], "STATUS") == expected_status,
+                f"{task} Round 1 sequence status drifted")
+    for task in round1_closure[:2]:
+        lowered = cards[task].lower()
+        require(scalar(cards[task], "READ_ONLY") == "true" and
+                "production" in lowered and "no production" in lowered,
+                f"{task} lost its read-only source firewall")
+    require("SPEC-02" in cards[round1_closure[3]] and
+            "Raw trace" in cards[round1_closure[3]],
+            "REIMPLEMENT-13 can bypass the executable specification")
+    require(inline_list(cards["SALVAGE-08-FRONTEND"], "DEPENDENCIES") ==
+            [round1_closure[-1]],
+            "frontend can bypass explicit USER-10 acceptance")
     for later in (
         "INTEGRATE-06-FOUR-CHARACTER-ROSTER",
         "INTEGRATE-07-THREE-PLAYER-MULTIPLAYER",

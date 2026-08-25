@@ -4,15 +4,15 @@ workflow_model: interactive-salvage-promotion-integration
 roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
-production_head: e23733545af0bebe1f9ae26c4f391a9080c7006f
-candidate_head: e23733545af0bebe1f9ae26c4f391a9080c7006f
+production_head: 236eef0c42aaa5c39b105420f8130fcde308e34e
+candidate_head: 236eef0c42aaa5c39b105420f8130fcde308e34e
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-playable-loop-pivot
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 review_candidate_status: ACCEPTED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW, PROMOTE-07-CDDA-RESIDENCY, REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION, ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS, ORACLE-05-STREET-ALIEN-AI, ORACLE-06-ROUND1-ENCOUNTER-RULES, SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, SALVAGE-11-STREET-ALIEN-AI, PROMOTE-11-STREET-ALIEN-AI, INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER, REPAIR-10-LIVE-PLAYER-PRESENTATION, ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT, ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS, ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION, SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT, REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER, QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW, PROMOTE-07-CDDA-RESIDENCY, REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION, ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS, ORACLE-05-STREET-ALIEN-AI, ORACLE-06-ROUND1-ENCOUNTER-RULES, SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, SALVAGE-11-STREET-ALIEN-AI, PROMOTE-11-STREET-ALIEN-AI, INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER, REPAIR-10-LIVE-PLAYER-PRESENTATION, ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT, ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS, ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION, SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT, REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER, QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL, REPAIR-11-LIVE-BACKGROUND-PRESENTATION]
 software_dependency_satisfied_tasks: [INTEGRATE-03-PLAYABLE-SLICE]
 target_scope:
   source_set: avspu
@@ -120,6 +120,9 @@ accepted_implementation_history:
   - id: REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER
     status: ACCEPTED
     head: e23733545af0bebe1f9ae26c4f391a9080c7006f
+  - id: REPAIR-11-LIVE-BACKGROUND-PRESENTATION
+    status: ACCEPTED
+    head: 236eef0c42aaa5c39b105420f8130fcde308e34e
 accepted_control_plane_history:
   - id: ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN
     status: ACCEPTED
@@ -255,14 +258,32 @@ first_live_gameplay_encounter:
   renewed_user09_preservation_locks: [reviewed-attack-animation-sequence, class-0x1F-player-tracking]
   requested_changes: [live-background-coordinate-bridge, neutral-facing-release]
   first_priority: ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT
-  current_priority: REPAIR-11-LIVE-BACKGROUND-PRESENTATION
-  unresolved_after_repair10: [live-background-coordinate-bridge, neutral-facing-release, renewed-user09]
+  current_priority: ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS
+  unresolved_after_repair11: [neutral-facing-release, renewed-user09]
   specification_firewall: [read-only-source-closure, reviewed-executable-specification, specification-only-implementation, differential-and-visual-consistency-qa, renewed-user09]
   source_closure_sequence: [ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT, ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS, ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION, SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT, REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER, QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL, USER-09-LIVE-ENCOUNTER-REVIEW]
   engineering_clean_room_boundary: true
   formal_legal_clean_room_claim: false
   scripted_capability_slice_sufficient: false
   physical_proof_source: INTEGRATE-03-PLAYABLE-SLICE only
+round1_end_to_end_playable_slice:
+  milestone: R7C — SOURCE-CLOSED ROUND 1 END-TO-END PLAYABLE SLICE
+  status: ACTIVE
+  reference_character: predator_warrior
+  player_count: 1
+  direct_round1_diagnostic_boot_allowed: true
+  frontend_in_scope: false
+  other_characters_in_scope: false
+  multiplayer_in_scope: false
+  harness_role: reusable-technical-substrate-not-final-round1-authority
+  dependency_sequence: [REPAIR-11-LIVE-BACKGROUND-PRESENTATION, ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS, ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE, SPEC-02-ROUND1-EXECUTABLE-CONTRACT, REIMPLEMENT-13-SOURCE-CLOSED-ROUND1, QA-13-ROUND1-END-TO-END-DIFFERENTIAL, USER-10-ROUND1-PLAYTHROUGH-REVIEW, SALVAGE-08-FRONTEND]
+  exit: interactive source-bound route from stable Round 1 entry through boss defeat / stage clear / stable Round 2 handoff
+  prohibited_authority: [fixed-frame-result, review-event-counter, presentation-scene-result, snapshot-teleport, plausible-guess, authored-fallback]
+  neutral_facing_release: UNRESOLVED_IN_PLAYER_AUTHORITY
+  user09_status: CHANGES_REQUESTED
+  user10_status: BLOCKED
+  frontend_active: false
+  physical_saturn: UNRUN
 oracle04_source_research:
   task: ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS
   status: ACCEPTED
@@ -454,19 +475,33 @@ repair10_live_player_presentation:
   review_package: build/feedback/USER-09-LIVE-ENCOUNTER-REVIEW-RENEWED
   unresolved: weapon-no-weapon subjective progression / class-0x1F AI feel / player-alien collision feel / physical Saturn
   physical_saturn: UNRUN
+repair11_live_background_presentation:
+  task: REPAIR-11-LIVE-BACKGROUND-PRESENTATION
+  status: ACCEPTED
+  implementation_commit: 236eef0c42aaa5c39b105420f8130fcde308e34e
+  evidence_commit: 35d527ee993315f6109189ed1331e4de36401be2
+  evidence: data/repair11_live_background_presentation.json
+  normalized_diagnostic_iso_sha256: 9b900cffdd0da0d44069f704059c258787e2a0066300be6f2534cf0635df51ba
+  opening_visual_sha256: 447d8f3315334e2fa8a9c141e2abce19a2b6d33322248592013197bb7b5c465c
+  post_unlock_visual_sha256: 030cea0bf54340e59a287bf4a57723ac23402d112dd1c6270025c125b14216b3
+  visual_qa: PASS / both VDP2 planes coherent at opening and post-unlock left/right edges / measured relative scroll preserved / no raw PNT displacement / player and alien coherent against camera
+  preservation_locks: [reviewed-attack-animation-sequence, class-0x1F-player-tracking, contact, alien-HIT-KO, HUD, audio, palette, priority, residency]
+  unresolved: [neutral-facing-release]
+  lanes: Fast PASS / Target BUILD_ONLY PASS / Emulator PASS / applicable regressions PASS
+  physical_saturn: UNRUN
 source_closure:
   status: ACTIVE
   prototype_harness_retained: true
   preserved_infrastructure: [rendering, HUD, camera, audio, collision, readback, emulator, visual-QA]
-  active_card: REPAIR-11-LIVE-BACKGROUND-PRESENTATION
+  active_card: ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS
   frontend_activation_allowed: false
   physical_saturn: UNRUN
-current_checkpoint: repair-live-background-presentation
-active_task_card: docs/task_cards/REPAIR-11-LIVE-BACKGROUND-PRESENTATION.md
-active_task_id: REPAIR-11-LIVE-BACKGROUND-PRESENTATION
-active_task_kind: REPAIR
+current_checkpoint: oracle-round1-end-to-end-system-census
+active_task_card: docs/task_cards/ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS.md
+active_task_id: ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS
+active_task_kind: ORACLE
 task_status: READY
-active_write_owner: REPAIR-11-LIVE-BACKGROUND-PRESENTATION
+active_write_owner: ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS
 awaiting_user_feedback: []
 open_blockers: []
 hardware_pretest:
@@ -1176,6 +1211,12 @@ task_queue:
   - QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL
   - USER-09-LIVE-ENCOUNTER-REVIEW
   - REPAIR-11-LIVE-BACKGROUND-PRESENTATION
+  - ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS
+  - ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE
+  - SPEC-02-ROUND1-EXECUTABLE-CONTRACT
+  - REIMPLEMENT-13-SOURCE-CLOSED-ROUND1
+  - QA-13-ROUND1-END-TO-END-DIFFERENTIAL
+  - USER-10-ROUND1-PLAYTHROUGH-REVIEW
   - SALVAGE-08-FRONTEND
   - QA-08-FRONTEND
   - USER-08-FRONTEND

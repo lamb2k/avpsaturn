@@ -65,9 +65,9 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: REPAIR-11-LIVE-BACKGROUND-PRESENTATION
+CURRENT_TASK: ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS
 
-ACTIVE_SOFTWARE_TASK: BOUNDED_PRESENTATION_REPAIR
+ACTIVE_SOFTWARE_TASK: ROUND1_SOURCE_CENSUS
 
 ## 4. Current salvage queue and production extension
 
@@ -112,21 +112,32 @@ paired pinned-emulator semantics, overload detection, and the exact approved
 normal-ISO regression pass. It is `READY_FOR_PHYSICAL`; physical timing and
 soak remain `UNRUN`, and `SALVAGE-08` remains inactive.
 
-Renewed USER-09 reports that the background is corrupted and that the neutral
-player sprite reverses after directional release. It also confirms the attack
-animation sequence is correct, the result feels more faithful overall, and the
-alien AI tracks the player. `REPAIR-11-LIVE-BACKGROUND-PRESENTATION` is active
-first: correct only the live camera-to-VDP2-plane coordinate bridge, preserve
-the reviewed attack sequence and player-tracking AI, and leave neutral-facing
-reversal recorded for the next bounded review/repair.
+Renewed USER-09 remains `CHANGES_REQUESTED`; no approval is inferred. REPAIR-11
+is accepted at production correction `236eef0` and evidence commit `35d527e`.
+Direct Yaba inspection confirms coherent opening and post-unlock views, both
+VDP2 planes at both visible edges, measured unequal relative scroll, and no raw
+PNT displacement. Player/alien camera coherence, the reviewed attack sequence,
+class-`0x1F` tracking, HUD, audio, palettes, priorities, residency, gameplay,
+and canaries remain locked. The neutral-facing reversal after directional
+release remains unresolved for Round 1 player authority.
 
-The exact serial firewall is
+R7C — `SOURCE-CLOSED ROUND 1 END-TO-END PLAYABLE SLICE` is now the milestone
+before frontend. The first-live-encounter harness remains reusable technical
+substrate, not final Round 1 gameplay authority. One Predator Warrior,
+one-player route is in scope from direct Round 1 diagnostic entry through boss
+defeat, stage clear, and stable Round 2 handoff. Other characters, multiplayer,
+frontend, and complete-game work are excluded. The exact dependency sequence is
+`REPAIR-11` -> `ORACLE-10` -> `ORACLE-11` -> `SPEC-02` -> `REIMPLEMENT-13` ->
+`QA-13` -> `USER-10` -> `SALVAGE-08`. Frontend depends on explicit USER-10
+acceptance, never the current USER-09 result.
+
+The accepted bounded predecessor firewall remains recorded as
 `ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT` ->
 `ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS` ->
 `ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION` ->
 `SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT` ->
 `REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER` ->
-`QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL` -> renewed USER-09.
+`QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL` -> USER-09 changes requested.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|
@@ -146,14 +157,15 @@ The exact serial firewall is
 | 14 | `SALVAGE-11-STREET-ALIEN-AI` -> `PROMOTE-11-STREET-ALIEN-AI` | Build the bounded autonomous class-`0x1F` authority |
 | 15 | `INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER` -> `REPAIR-10` -> first/renewed `USER-09` | Preserve the useful technical harness while recording that it is adapted, not source-closed or user-approved |
 | 16 | `ORACLE-07` -> `ORACLE-08` -> `ORACLE-09` -> `SPEC-01` -> `REIMPLEMENT-12` -> `QA-12` -> renewed `USER-09` | Source-close and explicitly review `FIRST LIVE GAMEPLAY ENCOUNTER` behind the specification firewall |
-| 17 | `SALVAGE-08-FRONTEND` -> `QA-08-FRONTEND` -> `USER-08-FRONTEND` -> `PROMOTE-08-FRONTEND` | Promote title and four-character select only after explicit renewed USER-09 acceptance |
-| 18 | `INTEGRATE-04-COLD-BOOT-TO-ROUND1` | Cold boot into the real controller-driven Round 1 encounter, never the scripted capability demonstration |
-| 19 | `ORACLE-01`, `ORACLE-02`, `ORACLE-03` | Complete title-to-credits and four-character source evidence |
-| 20 | stage-segment templates -> `INTEGRATE-05-REFERENCE-CHARACTER-FULL-GAME` | Complete one reference character through credits |
-| 21 | character templates -> `INTEGRATE-06-FOUR-CHARACTER-ROSTER` | Add the remaining three characters through one runtime |
-| 22 | multiplayer templates -> `INTEGRATE-07-THREE-PLAYER-MULTIPLAYER` | Add input, joins, camera, combat, and resource peaks |
-| 23 | `QA-09-RELEASE-HARDENING` | Repeatable build and soak hardening |
-| 24 | `QA-10-FINAL-TITLE-TO-CREDITS-ACCEPTANCE` | Exact release acceptance for every character and multiplayer scope |
+| 17 | `REPAIR-11` -> `ORACLE-10` -> `ORACLE-11` -> `SPEC-02` -> `REIMPLEMENT-13` -> `QA-13` -> `USER-10` | R7C source-closes and implements the complete Predator Warrior Round 1 route through stable Round 2 handoff |
+| 18 | `SALVAGE-08-FRONTEND` -> `QA-08-FRONTEND` -> `USER-08-FRONTEND` -> `PROMOTE-08-FRONTEND` | Promote title and four-character select only after explicit USER-10 acceptance |
+| 19 | `INTEGRATE-04-COLD-BOOT-TO-ROUND1` | Integrate frontend into the already playable Round 1 route; direct diagnostic boot is acceptable during R7C |
+| 20 | `ORACLE-01`, `ORACLE-02`, `ORACLE-03` | Complete title-to-credits and four-character source evidence |
+| 21 | stage-segment templates -> `INTEGRATE-05-REFERENCE-CHARACTER-FULL-GAME` | Complete one reference character through credits |
+| 22 | character templates -> `INTEGRATE-06-FOUR-CHARACTER-ROSTER` | Add the remaining three characters through one runtime |
+| 23 | multiplayer templates -> `INTEGRATE-07-THREE-PLAYER-MULTIPLAYER` | Add input, joins, camera, combat, and resource peaks |
+| 24 | `QA-09-RELEASE-HARDENING` | Repeatable build and soak hardening |
+| 25 | `QA-10-FINAL-TITLE-TO-CREDITS-ACCEPTANCE` | Exact release acceptance for every character and multiplayer scope |
 
 Exact dependencies, statuses, and predeclared successors are machine-checked
 from the cards and `project_state.yaml`.

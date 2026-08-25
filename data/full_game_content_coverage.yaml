@@ -39,13 +39,14 @@
         "No complete cold-boot-to-character-confirm production route is accepted.",
         "Frontend line-scroll requirements are measured only for the captured scenes that need them."
       ],
-      "next_experiment": "Execute SALVAGE-08 after the playable capability slice; isolate title and four-character select without adding gameplay to scene bytecode."
+      "next_experiment": "Keep SALVAGE-08 blocked until explicit USER-10 acceptance of the source-closed Round 1 playthrough."
     },
     {
       "id": "round1",
       "technical_capability_slice": "PARTIAL",
       "live_player_control": "PASS_BOUNDED_ONE_EMULATOR",
-      "live_player_presentation_repair": "PARTIAL",
+      "live_player_presentation_repair": "PASS_BOUNDED_ONE_EMULATOR",
+      "background_camera_plane_bridge": "PASS_VISUALLY_VERIFIED",
       "street_alien_ai": "PASS_BOUNDED_ONE_EMULATOR",
       "encounter_controller": "PASS_BOUNDED_ONE_EMULATOR",
       "live_encounter_classification": ["TECHNICAL_PROTOTYPE", "ADAPTED_GAMEPLAY_SCAFFOLD", "NOT_SOURCE_CLOSED", "NOT_USER_APPROVED"],
@@ -59,10 +60,11 @@
       "physical_workload": "UNRUN",
       "blockers": [
         "The approved SOURCE_BOUND_WITH_ADAPTED_INPUT technical capability slice uses deterministic choreography and does not establish production player control, autonomous enemy AI, encounter clear, or complete Round 1 behavior.",
-        "USER-09 explicitly classifies the live encounter as a useful technical prototype and adapted gameplay scaffold that is not source-closed or user-approved.",
-        "REIMPLEMENT-12 technically consumes accepted SPEC-01 for bounded player action/equipment, Coffee Shop navigation/non-walkable bounds, type-12 class-0x1F state/facing/presentation, collision/damage, encounter authority, and same-tick diagnostics at exact candidate 7185c38, but QA-12 and renewed USER-09 remain open; frontend and physical Saturn remain blocked or UNRUN."
+        "USER-09 remains CHANGES_REQUESTED; the bounded encounter stays a useful technical substrate, not final Round 1 authority.",
+        "REIMPLEMENT-12 and QA-12 are technically accepted; REPAIR-11 visually verifies the corrected camera-to-plane bridge at 236eef0 while neutral-facing release remains unresolved for Round 1 player authority.",
+        "The complete Round 1 system census, reachable source logic, boss, route clear, failure/continue branch, and stable Round 2 handoff are not yet closed."
       ],
-      "next_experiment": "Execute active QA-12 against exact candidate 7185c38; then renew USER-09 without activating frontend work."
+      "next_experiment": "Execute ORACLE-10 from stable Round 1 entry through stable Round 2 handoff with two independent identical completions, one completing perturbation, authority counterfactuals, and a permitted failure/continue branch."
     },
     {
       "id": "round2_underpass_through_frame_18000",

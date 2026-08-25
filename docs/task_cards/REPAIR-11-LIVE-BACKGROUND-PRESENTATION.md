@@ -2,7 +2,7 @@
 
 TASK: REPAIR-11-LIVE-BACKGROUND-PRESENTATION
 KIND: REPAIR
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: repair-live-background-presentation
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -11,7 +11,7 @@ DEPENDENCIES: [QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL]
 REQUIRED_LANES: [Fast, Target, Emulator]
 OPTIONAL_LANES: [Oracle, Full]
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [USER-09-LIVE-ENCOUNTER-REVIEW]
+NEXT_ELIGIBLE_CARDS: [ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS]
 
 ## Objective
 
@@ -85,6 +85,19 @@ separate bounded repair is activated.
 
 ## Next eligible cards
 
-- Renewed `USER-09-LIVE-ENCOUNTER-REVIEW` only. The neutral-facing reversal
-  remains recorded for that review, `SALVAGE-08-FRONTEND` remains blocked, and
-  physical Saturn remains `UNRUN`.
+- `ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS` only. The neutral-facing
+  reversal remains unresolved for the Round 1 player-authority closure,
+  `USER-09` remains `CHANGES_REQUESTED`, frontend remains blocked, and physical
+  Saturn remains `UNRUN`.
+
+## Accepted result
+
+Accepted production correction `236eef0c42aaa5c39b105420f8130fcde308e34e`
+with evidence commit `35d527ee993315f6109189ed1331e4de36401be2`.
+Direct Yaba inspection covered the paused opening, gameplay frame 53, player
+movement across the viewport, post-unlock camera movement, and both visible
+edges at gameplay frame 5713. Both VDP2 planes remain coherent and preserve
+their unequal measured scroll; no raw PNT offset appears as displacement.
+The reviewed attack sequence and class-`0x1F` tracking are unchanged. Fast,
+Target build-only, paired Emulator, focused, and applicable regressions pass;
+HUD, audio, palette, priority, residency, gameplay, and canaries remain intact.

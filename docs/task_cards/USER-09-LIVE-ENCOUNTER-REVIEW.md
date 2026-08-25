@@ -11,7 +11,7 @@ DEPENDENCIES: [QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL]
 REQUIRED_LANES: [Fast]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [REPAIR-11-LIVE-BACKGROUND-PRESENTATION, SALVAGE-08-FRONTEND]
+NEXT_ELIGIBLE_CARDS: [ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS]
 
 ## Objective
 
@@ -136,8 +136,9 @@ animation sequence is correct and becomes a preservation lock. The observed
 class-`0x1F` player tracking also becomes a preservation lock. "Overall this
 feels a bit more faithful" is positive feedback but is not blanket approval.
 
-The corrupted background is the first bounded repair because it was reported
+The corrupted background was the first bounded repair because it was reported
 first. The neutral sprite reversing after directional release is recorded and
-remains unresolved for the following review/repair. Activate only
-`REPAIR-11-LIVE-BACKGROUND-PRESENTATION`; keep frontend inactive and physical
-Saturn `UNRUN`.
+remains unresolved for the Round 1 player-authority closure. REPAIR-11 is
+accepted without altering that behavior. USER-09 remains `CHANGES_REQUESTED`;
+continue to `ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS`, keep frontend inactive,
+and preserve physical Saturn as `UNRUN`.
