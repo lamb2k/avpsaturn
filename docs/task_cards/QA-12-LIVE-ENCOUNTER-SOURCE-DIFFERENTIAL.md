@@ -2,7 +2,7 @@
 
 TASK: QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL
 KIND: QA
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: qa-live-encounter-source-differential
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -71,3 +71,21 @@ After QA acceptance, renew USER-09 and ask exactly: "What should remain unchange
 ## Next eligible cards
 
 - Renewed `USER-09-LIVE-ENCOUNTER-REVIEW` only after the full matrix passes.
+
+## Accepted result
+
+Accepted at evidence commit `f99df5e1ece90694f17942796e32da2ddf855d42`
+against corrected production candidate
+`e23733545af0bebe1f9ae26c4f391a9080c7006f` and normalized diagnostic ISO
+SHA-256 `8e20cb7e8c482035578422d8d1734cd9713adfc525ac5bf7c6dd8eade386bea8`.
+The first visual pass rejected candidate `7185c38` because its source-derived
+screen Y placed both actors outside the viewport; the bounded REIMPLEMENT-12
+projection correction was committed before QA restarted.
+
+Fast, Oracle, Target build-only, and paired Emulator lanes pass. Thirty-four
+scenarios and the complete 471-frame host/Saturn ledger agree exactly; six QA
+mutations reject. Codex directly inspected the full-speed sequence, temporal
+strip, actor crops, collision-origin overlays, and state/contact timeline.
+Physical Saturn remains `UNRUN`, frontend remains inactive, and the top-level
+classification remains `TECHNICAL_PROTOTYPE` / `ADAPTED_GAMEPLAY_SCAFFOLD` /
+`NOT_SOURCE_CLOSED` / `NOT_USER_APPROVED` pending renewed USER-09.

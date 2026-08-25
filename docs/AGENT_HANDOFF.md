@@ -20,8 +20,8 @@
 
 ## Current task and next action
 
-USER-09 remains `CHANGES_REQUESTED`. The current live encounter and REPAIR-10
-are preserved as useful bounded work, but the runtime is classified
+USER-09 is renewed at `AWAITING_USER_FEEDBACK`. The live encounter and REPAIR-10
+remain useful bounded work, but the runtime is classified
 `TECHNICAL_PROTOTYPE`, `ADAPTED_GAMEPLAY_SCAFFOLD`, `NOT_SOURCE_CLOSED`, and
 `NOT_USER_APPROVED`. Physical Saturn remains `UNRUN`.
 
@@ -40,9 +40,10 @@ SPEC-01 (`299468a`) binds all implementation-required behavior to the accepted
 Oracle and Port V2 identities with executable fixtures and mutation controls.
 Fast and Oracle pass; production is unchanged.
 
-REIMPLEMENT-12 is technically accepted at `7185c38`; its exact 471-frame paired
-emulator ledgers and all required lanes pass. Active card:
-`QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL`. Run the full semantic and visual
-matrix, then continue only to renewed USER-09; keep frontend work inactive.
-Resume prompt: Resume the AvP salvage Goal at QA-12, verify exact candidate
-`7185c38`, and return to USER-09 only after the full matrix passes.
+REIMPLEMENT-12 is technically accepted at corrected candidate `e237335`; its
+exact 471-frame paired emulator ledgers and all required lanes pass. QA-12 is
+accepted at `f99df5e` after the restarted 34-scenario semantic and direct visual
+matrix passed and six mutations rejected. Resume the AvP salvage Goal at
+`USER-09-LIVE-ENCOUNTER-REVIEW`; reuse the exact reviewed behavior and keep
+frontend work inactive, preserve physical Saturn as `UNRUN`, and infer no user
+approval. Ask exactly: "What should remain unchanged, what looks or feels wrong, and which issue should be fixed first?"

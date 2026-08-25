@@ -507,8 +507,8 @@ def main() -> None:
             cards["INTEGRATE-04-COLD-BOOT-TO-ROUND1"],
             "scripted capability slice can satisfy playable Round 1")
     user09 = cards["USER-09-LIVE-ENCOUNTER-REVIEW"]
-    require(scalar(user09, "STATUS") == "CHANGES_REQUESTED" and
-            active_id != "USER-09-LIVE-ENCOUNTER-REVIEW" and
+    require(scalar(user09, "STATUS") == "AWAITING_USER_FEEDBACK" and
+            active_id == "USER-09-LIVE-ENCOUNTER-REVIEW" and
             inline_list(user09, "DEPENDENCIES") ==
             ["QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL"] and
             "NOT_SOURCE_CLOSED" in user09 and "physical proof" in user09,
@@ -530,9 +530,14 @@ def main() -> None:
     ]
     first_open = next((index for index, task in enumerate(closure)
                        if scalar(cards[task], "STATUS") != "ACCEPTED"), None)
-    require(first_open is not None and active_id == closure[first_open] and
-            scalar(cards[closure[first_open]], "STATUS") == "READY",
-            "first open source-closure card is not the sole active card")
+    if first_open is None:
+        require(active_id == "USER-09-LIVE-ENCOUNTER-REVIEW" and
+                scalar(user09, "STATUS") == "AWAITING_USER_FEEDBACK",
+                "completed source-closure sequence did not renew USER-09")
+    else:
+        require(active_id == closure[first_open] and
+                scalar(cards[closure[first_open]], "STATUS") == "READY",
+                "first open source-closure card is not the sole active card")
     for index, task in enumerate(closure):
         card = cards[task]
         if index:
@@ -540,7 +545,7 @@ def main() -> None:
                                      closure[:3])
             require(inline_list(card, "DEPENDENCIES") == expected_dependencies,
                     f"{task} bypasses the source-closure prerequisites")
-        expected_status = ("ACCEPTED" if index < first_open else
+        expected_status = ("ACCEPTED" if first_open is None or index < first_open else
                            "READY" if index == first_open else "BLOCKED")
         require(scalar(card, "STATUS") == expected_status,
                 f"{task} source-closure sequence status drifted")

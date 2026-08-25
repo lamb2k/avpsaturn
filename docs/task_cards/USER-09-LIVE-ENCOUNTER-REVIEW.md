@@ -2,7 +2,7 @@
 
 TASK: USER-09-LIVE-ENCOUNTER-REVIEW
 KIND: USER_REVIEW
-STATUS: CHANGES_REQUESTED
+STATUS: AWAITING_USER_FEEDBACK
 CHECKPOINT: review-live-encounter
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -109,3 +109,16 @@ bounded work, but isolated visible symptom repair is no longer the active path.
 The required serial path is ORACLE-07, ORACLE-08, ORACLE-09, SPEC-01,
 REIMPLEMENT-12, QA-12, and only then renewed USER-09. `SALVAGE-08-FRONTEND`
 remains blocked. Physical Saturn remains `UNRUN`.
+
+## Renewed review activation
+
+QA-12 is accepted at `f99df5e1ece90694f17942796e32da2ddf855d42`
+against exact gameplay candidate
+`e23733545af0bebe1f9ae26c4f391a9080c7006f` and diagnostic ISO SHA-256
+`8e20cb7e8c482035578422d8d1734cd9713adfc525ac5bf7c6dd8eade386bea8`.
+The renewed review reuses that QA-reviewed behavior without rebuilding it.
+
+Status is `AWAITING_USER_FEEDBACK`; no acceptance is inferred from QA,
+emulator output, images, silence, or prior approvals. Frontend activation and
+physical-status promotion remain disabled. Ask exactly: "What should remain
+unchanged, what looks or feels wrong, and which issue should be fixed first?"

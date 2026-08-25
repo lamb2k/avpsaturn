@@ -65,9 +65,9 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL
+CURRENT_TASK: USER-09-LIVE-ENCOUNTER-REVIEW
 
-ACTIVE_SOFTWARE_TASK: SOURCE_CLOSURE_QA
+ACTIVE_SOFTWARE_TASK: USER_REVIEW
 
 ## 4. Current salvage queue and production extension
 
@@ -97,8 +97,14 @@ non-walkable wall traversal, and disconnected player/AI/animation/navigation
 authority. The active path is a specification firewall: read-only
 ORACLE-07/08/09 source closure, reviewed SPEC-01 executable contracts,
 SPEC-only REIMPLEMENT-12, complete QA-12 source/Saturn differential, then
-renewed USER-09. Existing rendering, HUD, camera, audio, collision, readback,
-emulator, and visual-QA infrastructure remains the diagnostic harness. The
+renewed USER-09. That serial firewall has reached renewed USER-09: QA-12 is
+accepted at `f99df5e` against corrected gameplay candidate `e237335` and
+diagnostic ISO SHA-256 `8e20cb7e...86bea8`. The first visual QA pass rejected
+the prior candidate because its source screen-Y projection placed both actors
+outside the viewport; the corrected bridge passed the restarted 34-scenario,
+471-frame semantic and visual matrix. Existing rendering, HUD, camera, audio,
+collision, readback, emulator, and visual-QA infrastructure remains the
+diagnostic harness. The
 slice remains physically `UNRUN`. The bounded QA prerequisite
 `HW-01-PROBE-3-VDP1-BUDGET-PRETEST` has prepared its representative, exact
 909-tile, and overload-control hardware package. Host checks, strict build,
@@ -181,10 +187,12 @@ runtime, Probe 3 result, physical evidence, exact INTEGRATE-03 ISO,
   guessed range threshold are explicitly forbidden.
 
 Two identical captures and real perturbations were required for each body.
-ORACLE-04 through ORACLE-09, SPEC-01, and REIMPLEMENT-12 are technically
-accepted; QA-12 is the active complete source/Saturn differential. The
-REIMPLEMENT-12 candidate at `7185c38` passes Fast, Oracle, target build-only,
-and two cold pinned-emulator runs with exact 471-frame semantic equality.
+ORACLE-04 through ORACLE-09, SPEC-01, REIMPLEMENT-12, and QA-12 are technically
+accepted. Corrected REIMPLEMENT-12 candidate `e237335` and QA-12 evidence
+`f99df5e` pass Fast, Oracle, target build-only, two cold pinned-emulator runs
+with exact 471-frame semantic equality, six rejecting mutations, and direct
+visual review of the complete encounter. Renewed USER-09 is active; no user
+approval is inferred.
 ORACLE-06 proved that
 the source opening is a withdrawal set piece, so the first live implementation
 uses a source-bound, adapted one-alien KO/inactive clear. Facts not captured
