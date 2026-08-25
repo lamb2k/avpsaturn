@@ -12,7 +12,7 @@ production_branch: codex/avp-playable-loop-pivot
 accepted_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 review_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 review_candidate_status: ACCEPTED
-accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW, PROMOTE-07-CDDA-RESIDENCY, REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION, ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS, ORACLE-05-STREET-ALIEN-AI, ORACLE-06-ROUND1-ENCOUNTER-RULES, SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, SALVAGE-11-STREET-ALIEN-AI, PROMOTE-11-STREET-ALIEN-AI, INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER, REPAIR-10-LIVE-PLAYER-PRESENTATION, ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT, ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS]
+accepted_tasks: [WF-1, SALVAGE-00-OLD-BUILD-BASELINE, WF-2-SALVAGE-TRANSITION-REPAIR, SALVAGE-01-PLAYER-LOAD-RENDER-INPUT, REPAIR-01-PLAYER-CROP-PIVOT, USER-01-PLAYER-BASELINE-REVIEW, PROMOTE-01-PLAYER-PIPELINE, SALVAGE-04-CAMERA-STAGE-LAYERS, USER-04-STAGE-REVIEW, SALVAGE-05-HUD-PCM, REPAIR-05-HUD-COLORS, SALVAGE-05B-PLAYER-2-HUD, USER-05-HUD-PCM-REVIEW, SALVAGE-02-ENEMY-RENDER-ANIMATION, USER-02-ENEMY-BASELINE-REVIEW, PROMOTE-02-ENEMY-PIPELINE, ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN, INTEGRATE-01-PLAYER-AND-ENEMY, SALVAGE-03-COLLISION, V2-2B, V2-B1, INTEGRATE-02-COMBAT, REPAIR-03-COMBAT-ACTOR-ALIGNMENT, USER-03-COMBAT-FEEL-REVIEW, PROMOTE-04-CAMERA-STAGE, PROMOTE-05-HUD, PROMOTE-06-PCM, SALVAGE-07-CDDA-RESIDENCY, USER-07-CDDA-RESIDENCY-REVIEW, PROMOTE-07-CDDA-RESIDENCY, REPAIR-09-SOURCE-BOUND-COMBAT-PRESENTATION, ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS, ORACLE-05-STREET-ALIEN-AI, ORACLE-06-ROUND1-ENCOUNTER-RULES, SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER, SALVAGE-11-STREET-ALIEN-AI, PROMOTE-11-STREET-ALIEN-AI, INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER, REPAIR-10-LIVE-PLAYER-PRESENTATION, ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT, ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS, ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION]
 software_dependency_satisfied_tasks: [INTEGRATE-03-PLAYABLE-SLICE]
 target_scope:
   source_set: avspu
@@ -246,7 +246,7 @@ first_live_gameplay_encounter:
   user09_feedback_exact: "The current live encounter is a useful technical prototype, but it is not yet a faithful reproduction. The alien faces the wrong direction during some walk or attack states. Player attack presentation changes incoherently between weapon and no-weapon assemblies. The player can move through non-walkable wall or stage areas. The resulting player, AI, animation, and navigation systems feel disconnected from the original game. The next work must lift more confirmed source logic rather than repair isolated visible symptoms."
   requested_changes: [source-closed-player-action-and-equipment, source-closed-round1-navigation, source-closed-class-0x1F-state-facing-presentation, executable-specification, source-closed-reimplementation, complete-source-saturn-differential]
   first_priority: ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT
-  unresolved_after_repair10: [player-action-selection, equipment-continuity, round1-navigation-and-bounds, street-alien-state-facing-presentation, complete-source-saturn-differential]
+  unresolved_after_repair10: [executable-specification, source-closed-reimplementation, complete-source-saturn-differential]
   specification_firewall: [read-only-source-closure, reviewed-executable-specification, specification-only-implementation, differential-and-visual-consistency-qa, renewed-user09]
   source_closure_sequence: [ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT, ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS, ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION, SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT, REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER, QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL, USER-09-LIVE-ENCOUNTER-REVIEW]
   engineering_clean_room_boundary: true
@@ -322,6 +322,19 @@ oracle08_source_research:
   lanes: Fast PASS / Oracle PASS
   saturn_emulator: UNRUN
   physical_saturn: UNRUN
+oracle09_source_research:
+  task: ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION
+  status: ACCEPTED
+  evidence_commit: d530820ba87b3cc530c485c38bc046a4d942e801
+  classification: MEASURED_MAME_SOURCE_BOUNDED_ALIEN_STATE_PRESENTATION_CONTRACT
+  evidence: data/oracle09_street_alien_state_facing_presentation.json
+  evidence_sha256: a3027c3ffcd19af2656c515e0dfc0e9c56086b1bf3dd029e854d74be372c847f
+  measured: class-0x1F state/substate and one-player target / authored approach and lane motion / bounded crossing and lane-facing states / state-owned animation records and assemblies / attack RNG and timer / rendered HIT identities / scheduler order / HIT KO removal
+  rejected_authority: every-frame generic face-target / immediate universal crossing flip / independent random assembly selection / guessed Euclidean attack range / presentation-owned HIT KO removal
+  bounded_unknown: generic alien AI and range model / other archetypes / multiplayer / Saturn runtime behavior
+  lanes: Fast PASS / Oracle PASS
+  saturn_emulator: UNRUN
+  physical_saturn: UNRUN
 salvage10_player_action:
   task: SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER
   status: ACCEPTED
@@ -394,15 +407,15 @@ source_closure:
   status: ACTIVE
   prototype_harness_retained: true
   preserved_infrastructure: [rendering, HUD, camera, audio, collision, readback, emulator, visual-QA]
-  active_card: ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION
+  active_card: SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT
   frontend_activation_allowed: false
   physical_saturn: UNRUN
-current_checkpoint: oracle-alien-state-facing-presentation
-active_task_card: docs/task_cards/ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION.md
-active_task_id: ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION
-active_task_kind: ORACLE
+current_checkpoint: spec-first-live-encounter
+active_task_card: docs/task_cards/SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT.md
+active_task_id: SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT
+active_task_kind: SPEC
 task_status: READY
-active_write_owner: ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION
+active_write_owner: SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT
 awaiting_user_feedback: []
 open_blockers: []
 hardware_pretest:

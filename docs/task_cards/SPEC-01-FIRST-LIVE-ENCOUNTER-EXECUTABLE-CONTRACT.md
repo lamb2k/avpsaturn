@@ -2,7 +2,7 @@
 
 TASK: SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT
 KIND: SPEC
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: spec-first-live-encounter
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

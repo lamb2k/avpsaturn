@@ -1145,7 +1145,7 @@
       "evidence_commit": "4abbc86f596c27d7873a96016c3e52c2d777edb4",
       "diagnostic_interface": "tests/port_v2/integration/combat/run_pinned_emulator.ps1",
       "blockers": ["Unblock: only through SPEC-01 and QA-12; the current live collision path is infrastructure inside a NOT_SOURCE_CLOSED technical prototype. Preserve approved measured geometry while source-closing navigation, actor state, selector authority, and visible cause. Physical Saturn remains UNRUN."],
-      "exact_next_experiment": "Do not patch collision feel in isolation; consume accepted ORACLE-07/08 plus active ORACLE-09 only through SPEC-01, then require QA-12 source-supported geometry, visible cause, damage, and overlay agreement.",
+      "exact_next_experiment": "Do not patch collision feel in isolation; consume accepted ORACLE-07/08/09 only through active SPEC-01, then require QA-12 source-supported geometry, visible cause, damage, and overlay agreement.",
       "user_feedback": {"exact_response": "The current live encounter is a useful technical prototype, but it is not yet a faithful reproduction. The alien faces the wrong direction during some walk or attack states. Player attack presentation changes incoherently between weapon and no-weapon assemblies. The player can move through non-walkable wall or stage areas. The resulting player, AI, animation, and navigation systems feel disconnected from the original game. The next work must lift more confirmed source logic rather than repair isolated visible symptoms.", "approved_components": ["The current live encounter is useful as a technical prototype and diagnostic harness."], "requested_changes": ["Source-close collision selectors and visible contact authority through SPEC-01 rather than an isolated symptom repair."], "priority": "after-oracle07-08-09-and-spec01"}
     },
     {
@@ -1174,21 +1174,21 @@
       "promoted_commit": "4ea7c1829013e95b5ffdc34ef02ea5c133ee9a80",
       "evidence_commit": "4ea7c1829013e95b5ffdc34ef02ea5c133ee9a80",
       "diagnostic_interface": "tests/port_v2/predator_warrior_action/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: production only through ORACLE-09 and accepted SPEC-01; ORACLE-07 rejects automatic selector cycling and arbitrary visible-weapon inference, ORACLE-08 rejects arbitrary screen clamps, but the adapted runtime remains unchanged. Physical Saturn remains UNRUN."],
-      "exact_next_experiment": "Execute active ORACLE-09; production must not change until SPEC-01 accepts the executable contract.",
+      "blockers": ["Unblock: production only through accepted SPEC-01; ORACLE-07 rejects automatic selector cycling and arbitrary visible-weapon inference, ORACLE-08 rejects arbitrary screen clamps, and ORACLE-09 rejects disconnected facing or assembly selection, but the adapted runtime remains unchanged. Physical Saturn remains UNRUN."],
+      "exact_next_experiment": "Execute active SPEC-01; production must not change until the executable contract is accepted.",
       "user_feedback": {"exact_response": "The current live encounter is a useful technical prototype, but it is not yet a faithful reproduction. The alien faces the wrong direction during some walk or attack states. Player attack presentation changes incoherently between weapon and no-weapon assemblies. The player can move through non-walkable wall or stage areas. The resulting player, AI, animation, and navigation systems feel disconnected from the original game. The next work must lift more confirmed source logic rather than repair isolated visible symptoms.", "approved_components": ["REPAIR-10 remains useful bounded work and the live encounter remains useful as a technical prototype harness."], "requested_changes": ["Source-close player action selection, combo and equipment state, facing, animation record, and assembly continuity before reimplementation."], "priority": "ORACLE-07-first"}
     },
     {
       "id": "street-alien-ai",
-      "existing_source_paths": ["src/port_v2/gameplay/street_alien_ai/**", "src/port_v2/enemy/**", "src/port_v2/combat/hit_ko/**", "data/oracle05_street_alien_ai.json", "data/oracle08_round1_navigation_bounds.json"],
-      "existing_dependencies": ["promoted class-0x1F presentation", "exact collision and HIT/KO", "ORACLE-05 and ORACLE-08 source research", "promoted player action state"],
+      "existing_source_paths": ["src/port_v2/gameplay/street_alien_ai/**", "src/port_v2/enemy/**", "src/port_v2/combat/hit_ko/**", "data/oracle05_street_alien_ai.json", "data/oracle08_round1_navigation_bounds.json", "data/oracle09_street_alien_state_facing_presentation.json"],
+      "existing_dependencies": ["promoted class-0x1F presentation", "exact collision and HIT/KO", "ORACLE-05/08/09 source research", "promoted player action state"],
       "authored_controller_coupling": "The approved slice schedules enemy reactions but does not contain autonomous target, approach, attack, cooldown, or RNG-owned AI.",
       "proposed_isolated_bench": "SALVAGE-11 replays the measured class-0x1F loop against current player state and deterministic source RNG.",
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
-      "source_research_status": "MEASURED",
-      "source_research_evidence": "data/oracle05_street_alien_ai.json",
-      "source_research_scope": "one class-0x1F slot on the first-live-encounter route: spawn, one-player target, approach and observed lane motion, facing, attack timer/contacts/damage, HIT/recovery/KO/removal, reposition state, scheduler order, and consumed RNG; target-relative lane reselection in the controlled window, other archetypes, and live multiplayer remain unmeasured",
+      "source_research_status": "MEASURED_SOURCE_CLOSED_BOUNDED_STATE_PRESENTATION",
+      "source_research_evidence": "data/oracle09_street_alien_state_facing_presentation.json",
+      "source_research_scope": "one type-12 class-0x1F slot on the first-live-encounter route: spawn, one-player target, authored approach, bounded crossing/lane response, state-owned facing/animation/assembly, attack RNG/timer/contacts, rendered HIT identity, scheduler, and HIT/recovery/KO/removal; generic AI/range behavior, other archetypes, and multiplayer remain UNKNOWN",
       "user_status": "CHANGES_REQUESTED",
       "salvage_decision": "PROMOTED",
       "production_interface": "src/port_v2/gameplay/street_alien_ai/street_alien_ai.h",
@@ -1197,8 +1197,8 @@
       "diagnostic_interface": "tests/port_v2/street_alien_ai/run_pinned_emulator.ps1",
       "temporary_adapter": {"path": "tests/port_v2/street_alien_ai_bench/street_alien_ai_bench.h", "remaining_authored_controller_coupling": "None; include-only compatibility adapter owns zero gameplay behavior.", "deletion_condition": "Delete with the SALVAGE-11 diagnostic after integrated AI coverage replaces it."},
       "behavioral_classification": "MEASURED class-0x1F target/approach/RNG/attack/HIT/KO loop behind an adapted one-player production interface",
-      "blockers": ["Unblock: through ORACLE-09 and SPEC-01; route-only approach is insufficient; target crossing, lane reselection, facing, animation record, and assembly identity must come from one source-bound state. Physical Saturn remains UNRUN."],
-      "exact_next_experiment": "Execute active ORACLE-09 left/right/crossing/lane/range/action counterfactuals; production must not change until SPEC-01 accepts the executable contract.",
+      "blockers": ["Unblock: through active SPEC-01; ORACLE-09 source-closes bounded crossing/lane response and state-owned facing/animation/assembly but production remains the adapted runtime. Physical Saturn remains UNRUN."],
+      "exact_next_experiment": "Consume accepted ORACLE-09 only through active SPEC-01; production must not change until the executable contract is accepted.",
       "user_feedback": {"exact_response": "The current live encounter is a useful technical prototype, but it is not yet a faithful reproduction. The alien faces the wrong direction during some walk or attack states. Player attack presentation changes incoherently between weapon and no-weapon assemblies. The player can move through non-walkable wall or stage areas. The resulting player, AI, animation, and navigation systems feel disconnected from the original game. The next work must lift more confirmed source logic rather than repair isolated visible symptoms.", "approved_components": ["The current live encounter remains useful as a technical prototype harness."], "requested_changes": ["Source-close class-0x1F state, target-relative movement, facing, animation record, and assembly identity before reimplementation."], "priority": "ORACLE-09-after-navigation-closure"}
     },
     {
@@ -1215,8 +1215,8 @@
       "promoted_commit": "d9021965dab64d47953d2e829c7d307b0b01a455",
       "evidence_commit": "d9021965dab64d47953d2e829c7d307b0b01a455",
       "diagnostic_interface": "tests/port_v2/integration/live_encounter/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: the integrated live encounter is a TECHNICAL_PROTOTYPE / ADAPTED_GAMEPLAY_SCAFFOLD and is NOT_SOURCE_CLOSED / NOT_USER_APPROVED. ORACLE-07/08 are accepted; ORACLE-09, SPEC-01, REIMPLEMENT-12, QA-12, and renewed USER-09 remain required. Physical Saturn remains UNRUN."],
-      "exact_next_experiment": "Retain the encounter as the diagnostic harness; execute active ORACLE-09 and prohibit production gameplay changes until SPEC-01 is accepted.",
+      "blockers": ["Unblock: the integrated live encounter is a TECHNICAL_PROTOTYPE / ADAPTED_GAMEPLAY_SCAFFOLD and is NOT_SOURCE_CLOSED / NOT_USER_APPROVED. ORACLE-07/08/09 are accepted; SPEC-01, REIMPLEMENT-12, QA-12, and renewed USER-09 remain required. Physical Saturn remains UNRUN."],
+      "exact_next_experiment": "Retain the encounter as the diagnostic harness; execute active SPEC-01 and prohibit production gameplay changes until it is accepted.",
       "user_feedback": {"exact_response": "The current live encounter is a useful technical prototype, but it is not yet a faithful reproduction. The alien faces the wrong direction during some walk or attack states. Player attack presentation changes incoherently between weapon and no-weapon assemblies. The player can move through non-walkable wall or stage areas. The resulting player, AI, animation, and navigation systems feel disconnected from the original game. The next work must lift more confirmed source logic rather than repair isolated visible symptoms.", "approved_components": ["The rendering, HUD, camera, audio, collision, readback, emulator, and visual-QA infrastructure remain useful as a diagnostic harness."], "requested_changes": ["Source-close player action/equipment, Coffee Shop navigation, and class-0x1F state/facing/presentation; build SPEC-01; reimplement behind existing interfaces; pass QA-12."], "priority": "source-closure-sequence"}
     },
     {

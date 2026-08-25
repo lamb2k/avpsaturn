@@ -65,7 +65,7 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION
+CURRENT_TASK: SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT
 
 ACTIVE_SOFTWARE_TASK: SOURCE_CLOSURE_ORACLE
 
@@ -173,10 +173,16 @@ runtime, Probe 3 result, physical evidence, exact INTEGRATE-03 ISO,
   Shop navigation authority: dynamic world-space player bounds, a
   non-rectangular obstacle/terrain route, player-versus-class-`0x1F` boundary
   separation, and the measured camera lock/unlock/next-lock sequence.
+- `ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION` source-closes the
+  bounded type-12 class-`0x1F` actor: one-player target, authored approach,
+  asymmetric crossing/lane state responses, state-owned facing/animation/
+  assembly identity, attack RNG/timer, rendered HIT identity, scheduler, and
+  HIT/KO/removal. Generic face-target, independent assembly cycling, and a
+  guessed range threshold are explicitly forbidden.
 
 Two identical captures and real perturbations were required for each body.
-ORACLE-04 through ORACLE-08 are accepted; ORACLE-09 is the active read-only
-source-closure writer. ORACLE-06 proved that
+ORACLE-04 through ORACLE-09 are accepted; SPEC-01 is the active executable
+specification gate. ORACLE-06 proved that
 the source opening is a withdrawal set piece, so the first live implementation
 uses a source-bound, adapted one-alien KO/inactive clear. Facts not captured
 remain `UNKNOWN` or `UNRUN`.
