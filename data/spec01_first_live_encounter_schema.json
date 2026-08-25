@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "contract_schema": 1,
+  "required_top_level": ["schema", "task", "classification", "scope", "provenance", "required_behavior_unknown_count", "field_contracts", "player", "navigation", "alien", "collision", "encounter", "diagnostics", "reference_fixtures", "deferred_out_of_scope", "saturn_emulator", "physical_saturn"],
+  "required_field_metadata": ["id", "family", "type", "signed", "classification", "required_for_reimplementation", "provenance", "guard", "reads", "writes", "mutation_control"],
+  "allowed_types": ["bool", "enum_u8", "enum_u16", "pointer_u16", "s16", "sha256", "u8", "u16", "u32"],
+  "allowed_required_classifications": ["MEASURED", "SOURCE_BOUND_ACCEPTED", "ADAPTED_EXPLICIT_ACCEPTED_INTERFACE"],
+  "required_mutation_families": ["player_action_equipment", "navigation", "projection", "alien_state_presentation", "collision_damage", "encounter_authority", "diagnostic_observability"],
+  "unknown_tokens_forbidden_in_required_fields": ["UNKNOWN", "UNRESOLVED", "GUESSED", "FALLBACK"]
+}

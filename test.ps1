@@ -490,6 +490,12 @@ if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\oracle09_street_alien_
         throw "ORACLE-09 alien state/facing/presentation test failed with exit code $LASTEXITCODE."
     }
 }
+if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec01_first_live_encounter_executable_contract.json')) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tests\test_spec01_encounter_contract.py')
+    if ($LASTEXITCODE -ne 0) {
+        throw "SPEC-01 executable encounter contract test failed with exit code $LASTEXITCODE."
+    }
+}
 if (Test-Path -LiteralPath (Join-Path $PSScriptRoot '.deps\mame\vertical_slice\input_manifest.json')) {
     & $PythonPath (Join-Path $PSScriptRoot 'tools\verify_avsp_vertical_slice_oracle.py') '--generate'
     if ($LASTEXITCODE -ne 0) {
