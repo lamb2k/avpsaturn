@@ -21,6 +21,15 @@ authority required to complete Round 1 with Predator Warrior. Process one
 authority family at a time with coherent evidence checkpoints; create a child
 card only for a genuinely independent body or source-evidence hard stop.
 
+## Evidence checkpoints
+
+- `actor-scheduler-allocation-lifecycle`: `SOURCE_CLOSED` in
+  `data/oracle11_actor_scheduler_lifecycle.json`. The exact required pool
+  topology, fixed frame order, active/class dispatch, low-word LIFO allocation
+  and release rules, required Round 1 dispatch entries, deterministic controls,
+  and route-wide class-removal counterfactuals are bound. Player update
+  authority remains deliberately assigned to the player family.
+
 ## Owned paths
 
 - Card-scoped static analysis, deterministic captures, counterfactuals,

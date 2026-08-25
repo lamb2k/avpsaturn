@@ -21,12 +21,13 @@
     },
     {
       "accepted_evidence": [
-        "data/oracle09_street_alien_state_facing_presentation.json"
+        "data/oracle09_street_alien_state_facing_presentation.json",
+        "data/oracle11_actor_scheduler_lifecycle.json"
       ],
-      "counterfactual": "class-0x1F scheduler mutation accepted; route-wide allocation/lifecycle controls pending",
-      "exact_next_experiment": "Recover pool allocator, scheduler loop, class dispatch order, spawn, despawn, and cleanup writers.",
+      "counterfactual": "two byte-identical completion captures plus class-0x1F, class-0x00, class-0x01, class-0x06, and auxiliary-class removal controls bind route-wide non-player pool authority",
+      "exact_next_experiment": "Consume this closed pool/scheduler contract inside each remaining class, spawn-controller, and player-authority family.",
       "id": "actor-scheduler-allocation-lifecycle",
-      "status": "OBSERVED"
+      "status": "SOURCE_CLOSED"
     },
     {
       "accepted_evidence": [

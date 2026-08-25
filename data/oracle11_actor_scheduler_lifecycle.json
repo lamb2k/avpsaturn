@@ -1,0 +1,420 @@
+{
+  "closure": {
+    "classification": "SOURCE_CLOSED",
+    "entry_exit": "pool allocation/pop and release/push routines recovered",
+    "mutation_control": "tests reject stride, scheduler order, dispatch mapping, free-list, and classification mutations",
+    "reads_writes": "scheduler and pool-specific release field sets are bound by decoded routines",
+    "remaining_unknowns": [],
+    "rng": "no scheduler RNG; consumption remains with each class authority",
+    "state_dispatch": "active guard, class-table indexing, call, slot increment, and pool order recovered",
+    "types_signedness": "active/type/count are u8; class is sign-extended s8; slot pointers are low-word work-RAM addresses"
+  },
+  "deterministic_source_controls": {
+    "byte_identical": true,
+    "capture_a_samples_sha256": "47b2d68fa2669a1b8f7fa8ecf1819dbcb676a49d6532e8f83608564e9f38193b",
+    "capture_b_samples_sha256": "47b2d68fa2669a1b8f7fa8ecf1819dbcb676a49d6532e8f83608564e9f38193b",
+    "independently_launched": true
+  },
+  "frame_scheduler": {
+    "full_order": [
+      {
+        "record_type": 4,
+        "routine": "0x01b846"
+      },
+      {
+        "record_type": 8,
+        "routine": "0x01b916"
+      },
+      {
+        "record_type": 12,
+        "routine": "0x01b974"
+      },
+      {
+        "record_type": 16,
+        "routine": "0x01b8bc"
+      },
+      {
+        "record_type": 20,
+        "routine": "0x01bc38"
+      },
+      {
+        "record_type": 24,
+        "routine": "0x01ba62"
+      },
+      {
+        "record_type": 28,
+        "routine": "0x01bcda"
+      },
+      {
+        "record_type": 36,
+        "routine": "0x01bd48"
+      }
+    ],
+    "owner": "0x00849e..0x0084ce",
+    "required_round1_order": [
+      12,
+      16,
+      20,
+      24
+    ],
+    "rule": "each active pool is exhausted in ascending slot order before the next pool begins"
+  },
+  "pools": [
+    {
+      "active_field": "+0x00 u8; zero skips dispatch",
+      "allocation": {
+        "free_count": "0xffee80 u8",
+        "free_cursor": "0xffee58 low-word pointer",
+        "routine": "0x01769e",
+        "rule": "if count is nonzero, decrement then pop the next low-word slot address into A4; otherwise return without allocating"
+      },
+      "capacity": 20,
+      "class_field": "+0x02 s8 extended to word then multiplied by four",
+      "dispatch_table": "0x01b9b6",
+      "dispatch_table_entries": 43,
+      "dispatch_table_identity": {
+        "bytes": 172,
+        "end_exclusive": "0x01ba62",
+        "sha256": "9cd2e531e3df081bf519223178dade77511860804982492d87299971dc5e238f",
+        "start": "0x01b9b6"
+      },
+      "initializer": "0x01729e",
+      "last_slot": "0xffa3c0",
+      "record_type": 12,
+      "record_type_field": "+0x08 u8 initialized before activation",
+      "release": {
+        "order": "LIFO free-list reuse",
+        "routine": "0x0176b4",
+        "rule": "clear source-selected record fields, push A6 low-word address before the current cursor, increment free count"
+      },
+      "required_round1_dispatch": [
+        {
+          "class": "0x00",
+          "routine": "0x03f09c"
+        },
+        {
+          "class": "0x01",
+          "routine": "0x0407b0"
+        },
+        {
+          "class": "0x06",
+          "routine": "0x04956c"
+        },
+        {
+          "class": "0x1f",
+          "routine": "0x060532"
+        }
+      ],
+      "scheduler": "0x01b974",
+      "source_base": "0xff9580",
+      "stride": 192,
+      "update": {
+        "bounds_rule": "no scheduler bounds check; allocation/initialization must preserve a valid source class",
+        "dispatch": "read signed class byte +0x02, multiply by four, PC-relative absolute-long table call",
+        "guard": "dispatch only when +0x00 active is nonzero",
+        "order": "ascending address/index, exactly capacity slots",
+        "rng_consumption": "none in scheduler; class routine owns any RNG calls",
+        "scheduler_owned_writes": [
+          "+0x48 u8 countdown",
+          "+0x47 u8 gated flag"
+        ]
+      }
+    },
+    {
+      "active_field": "+0x00 u8; zero skips dispatch",
+      "allocation": {
+        "free_count": "0xffee83 u8",
+        "free_cursor": "0xffee5e low-word pointer",
+        "routine": "0x01778c",
+        "rule": "if count is nonzero, decrement then pop the next low-word slot address into A4; otherwise return without allocating"
+      },
+      "capacity": 20,
+      "class_field": "+0x02 s8 extended to word then multiplied by four",
+      "dispatch_table": "0x01b8ee",
+      "dispatch_table_entries": 10,
+      "dispatch_table_identity": {
+        "bytes": 40,
+        "end_exclusive": "0x01b916",
+        "sha256": "1b2740ab9e2f0dc67e27455455a4e7e66dbe068758e14cebf9f505d9a811ebea",
+        "start": "0x01b8ee"
+      },
+      "initializer": "0x017376",
+      "last_slot": "0xffae00",
+      "record_type": 16,
+      "record_type_field": "+0x08 u8 initialized before activation",
+      "release": {
+        "order": "LIFO free-list reuse",
+        "routine": "0x0177a2",
+        "rule": "clear source-selected record fields, push A6 low-word address before the current cursor, increment free count"
+      },
+      "required_round1_dispatch": [
+        {
+          "class": "0x06",
+          "routine": "0x03537e"
+        }
+      ],
+      "scheduler": "0x01b8bc",
+      "source_base": "0xffa480",
+      "stride": 128,
+      "update": {
+        "bounds_rule": "no scheduler bounds check; allocation/initialization must preserve a valid source class",
+        "dispatch": "read signed class byte +0x02, multiply by four, PC-relative absolute-long table call",
+        "guard": "dispatch only when +0x00 active is nonzero",
+        "order": "ascending address/index, exactly capacity slots",
+        "rng_consumption": "none in scheduler; class routine owns any RNG calls",
+        "scheduler_owned_writes": []
+      }
+    },
+    {
+      "active_field": "+0x00 u8; zero skips dispatch",
+      "allocation": {
+        "free_count": "0xffee85 u8",
+        "free_cursor": "0xffee62 low-word pointer",
+        "routine": "0x0176f0",
+        "rule": "if count is nonzero, decrement then pop the next low-word slot address into A4; otherwise return without allocating"
+      },
+      "capacity": 16,
+      "class_field": "+0x02 s8 extended to word then multiplied by four",
+      "dispatch_table": "0x01bc7a",
+      "dispatch_table_entries": 24,
+      "dispatch_table_identity": {
+        "bytes": 96,
+        "end_exclusive": "0x01bcda",
+        "sha256": "02fd801e11f0d4c4558662ffd77d87f50dc75ae1310f3fb9beb40e9e2c6d86ff",
+        "start": "0x01bc7a"
+      },
+      "initializer": "0x017344",
+      "last_slot": "0xffb600",
+      "record_type": 20,
+      "record_type_field": "+0x08 u8 initialized before activation",
+      "release": {
+        "order": "LIFO free-list reuse",
+        "routine": "0x017706",
+        "rule": "clear source-selected record fields, push A6 low-word address before the current cursor, increment free count"
+      },
+      "required_round1_dispatch": [
+        {
+          "class": "0x07",
+          "routine": "0x06d1aa"
+        },
+        {
+          "class": "0x08",
+          "routine": "0x06d53c"
+        },
+        {
+          "class": "0x09",
+          "routine": "0x06d926"
+        },
+        {
+          "class": "0x0a",
+          "routine": "0x06de92"
+        }
+      ],
+      "scheduler": "0x01bc38",
+      "source_base": "0xffae80",
+      "stride": 128,
+      "update": {
+        "bounds_rule": "no scheduler bounds check; allocation/initialization must preserve a valid source class",
+        "dispatch": "read signed class byte +0x02, multiply by four, PC-relative absolute-long table call",
+        "guard": "dispatch only when +0x00 active is nonzero",
+        "order": "ascending address/index, exactly capacity slots",
+        "rng_consumption": "none in scheduler; class routine owns any RNG calls",
+        "scheduler_owned_writes": []
+      }
+    },
+    {
+      "active_field": "+0x00 u8; zero skips dispatch",
+      "allocation": {
+        "free_count": "0xffee89 u8",
+        "free_cursor": "0xffee6a low-word pointer",
+        "routine": "0x0177da",
+        "rule": "if count is nonzero, decrement then pop the next low-word slot address into A4; otherwise return without allocating"
+      },
+      "capacity": 32,
+      "class_field": "+0x02 s8 extended to word then multiplied by four",
+      "dispatch_table": "0x01ba94",
+      "dispatch_table_entries": 105,
+      "dispatch_table_identity": {
+        "bytes": 420,
+        "end_exclusive": "0x01bc38",
+        "sha256": "687c75f282826a680760dbb2425102afdcadf15db089e13fff67599216f14740",
+        "start": "0x01ba94"
+      },
+      "initializer": "0x0173aa",
+      "last_slot": "0xffc600",
+      "record_type": 24,
+      "record_type_field": "+0x08 u8 initialized before activation",
+      "release": {
+        "order": "LIFO free-list reuse",
+        "routine": "0x0177f0",
+        "rule": "clear source-selected record fields, push A6 low-word address before the current cursor, increment free count"
+      },
+      "required_round1_dispatch": [
+        {
+          "class": "0x10",
+          "routine": "0x079ffc"
+        },
+        {
+          "class": "0x3d",
+          "routine": "0x0887c8"
+        },
+        {
+          "class": "0x43",
+          "routine": "0x08ce44"
+        },
+        {
+          "class": "0x45",
+          "routine": "0x08dc1c"
+        },
+        {
+          "class": "0x49",
+          "routine": "0x08f080"
+        },
+        {
+          "class": "0x4b",
+          "routine": "0x08f86e"
+        },
+        {
+          "class": "0x4e",
+          "routine": "0x0927f6"
+        }
+      ],
+      "scheduler": "0x01ba62",
+      "source_base": "0xffb680",
+      "stride": 128,
+      "update": {
+        "bounds_rule": "no scheduler bounds check; allocation/initialization must preserve a valid source class",
+        "dispatch": "read signed class byte +0x02, multiply by four, PC-relative absolute-long table call",
+        "guard": "dispatch only when +0x00 active is nonzero",
+        "order": "ascending address/index, exactly capacity slots",
+        "rng_consumption": "none in scheduler; class routine owns any RNG calls",
+        "scheduler_owned_writes": []
+      }
+    }
+  ],
+  "protected_boundaries": {
+    "frontend_active": false,
+    "physical_saturn": "UNRUN",
+    "production_runtime_writes": 0,
+    "salvage08_active": false,
+    "user09_status": "CHANGES_REQUESTED"
+  },
+  "required_dispatch_count": 16,
+  "schema": "oracle11-actor-scheduler-lifecycle-v1",
+  "scope": "Round 1 non-player record types 12, 16, 20, and 24; player update authority is deliberately deferred to the player family",
+  "source_identity": {
+    "allocation_release": {
+      "bytes": 696,
+      "end_exclusive": "0x01790c",
+      "sha256": "9e8c44276fa4450aa722af7fb67f8fcfca062452eb106847a27ad3c34923e204",
+      "start": "0x017654"
+    },
+    "decoded_opcodes_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
+    "decrypted_program_sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9",
+    "pool_initializer": {
+      "bytes": 518,
+      "end_exclusive": "0x0174a4",
+      "sha256": "8eec916357d3bf01a82f65749ef04196844f9e41b11d338f590bbf2d35020373",
+      "start": "0x01729e"
+    },
+    "scheduler_call_order": {
+      "bytes": 48,
+      "end_exclusive": "0x0084ce",
+      "sha256": "0ffa65768998acb6b95c6fd8e71672e3a29c5d3e03e808bc5f32f0e20f23b417",
+      "start": "0x00849e"
+    }
+  },
+  "status": "SOURCE_CLOSED",
+  "targeted_counterfactuals": [
+    {
+      "actor_events_sha256": "91fb12ba5c730281753d8d912f96c0d09d76c13ef066ca27ea782aac27e083c7",
+      "completed_round1": false,
+      "first_semantic_difference": {
+        "control": {
+          "actor_population": "09-14:1,1f-0c:10"
+        },
+        "fields": [
+          "actor_population"
+        ],
+        "frame": 2074,
+        "variant": {
+          "actor_population": "09-14:1"
+        }
+      },
+      "name": "remove_class_1f",
+      "status": "PASS"
+    },
+    {
+      "actor_events_sha256": "8487a264e3b16947b171de32f517e9396639190930fca93dccc5c17e2b03c630",
+      "completed_round1": true,
+      "first_semantic_difference": {
+        "control": {
+          "actor_population": "00-0c:2,06-0c:1,07-14:1"
+        },
+        "fields": [
+          "actor_population"
+        ],
+        "frame": 5660,
+        "variant": {
+          "actor_population": "06-0c:1,07-14:1"
+        }
+      },
+      "name": "remove_class_00",
+      "status": "PASS"
+    },
+    {
+      "actor_events_sha256": "1d1e8ccf56a8b8f5aa3bf547024264b4e3c240c8e0c38f754a0164142f8e4838",
+      "completed_round1": true,
+      "first_semantic_difference": {
+        "control": {
+          "actor_population": "01-0c:1,06-0c:1,07-14:1"
+        },
+        "fields": [
+          "actor_population"
+        ],
+        "frame": 11045,
+        "variant": {
+          "actor_population": "06-0c:1,07-14:1"
+        }
+      },
+      "name": "remove_class_01",
+      "status": "PASS"
+    },
+    {
+      "actor_events_sha256": "3d4f26937170977ffd4ab78367a79937814c049b3e17d7e3a33a45273f7d9dd8",
+      "completed_round1": false,
+      "first_semantic_difference": {
+        "control": {
+          "actor_population": "06-0c:1,07-14:1"
+        },
+        "fields": [
+          "actor_population"
+        ],
+        "frame": 5566,
+        "variant": {
+          "actor_population": "07-14:1"
+        }
+      },
+      "name": "remove_class_06",
+      "status": "PASS"
+    },
+    {
+      "actor_events_sha256": "863165db465cab282c0a72b275a305df3a7bf4461491f800d56f7d1405def9e9",
+      "completed_round1": false,
+      "first_semantic_difference": {
+        "control": {
+          "rng": "8def"
+        },
+        "fields": [
+          "rng"
+        ],
+        "frame": 1972,
+        "variant": {
+          "rng": "a998"
+        }
+      },
+      "name": "remove_auxiliary_classes",
+      "status": "PASS"
+    }
+  ]
+}
