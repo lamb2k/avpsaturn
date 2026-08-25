@@ -2,7 +2,7 @@
 
 TASK: ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE
 KIND: ORACLE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: oracle-round1-reachable-logic-closure
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

@@ -1,0 +1,811 @@
+{
+  "bodies": [
+    {
+      "accepted_evidence": [
+        "data/oracle07_predator_warrior_action_graph_equipment.json"
+      ],
+      "counterfactual": "bounded action/equipment mutations accepted; full-route completion perturbation pending",
+      "exact_next_experiment": "Close locomotion-to-neutral, complete actions/equipment/projectiles, HIT/KO/continue, and return to control.",
+      "id": "predator-warrior-player-authority",
+      "status": "PARTIAL"
+    },
+    {
+      "accepted_evidence": [
+        "data/oracle08_round1_navigation_bounds.json",
+        "data/repair11_live_background_presentation.json"
+      ],
+      "counterfactual": "Coffee Shop bounds mutations accepted; all later geometry and route camera guards pending",
+      "exact_next_experiment": "Bind every later terrain/obstacle/destructible and camera lock/unlock source guard.",
+      "id": "round1-navigation-terrain-camera",
+      "status": "PARTIAL"
+    },
+    {
+      "accepted_evidence": [
+        "data/oracle09_street_alien_state_facing_presentation.json"
+      ],
+      "counterfactual": "class-0x1F scheduler mutation accepted; route-wide allocation/lifecycle controls pending",
+      "exact_next_experiment": "Recover pool allocator, scheduler loop, class dispatch order, spawn, despawn, and cleanup writers.",
+      "id": "actor-scheduler-allocation-lifecycle",
+      "status": "OBSERVED"
+    },
+    {
+      "accepted_evidence": [
+        "data/oracle09_street_alien_state_facing_presentation.json",
+        "data/stalker_action_capture.json"
+      ],
+      "counterfactual": "class-0x1F controls accepted; each additional observed class/type requires targeted control",
+      "exact_next_experiment": "Bind and counterfactually test each required class/type dispatcher.",
+      "id": "round1-enemy-archetypes",
+      "status": "OBSERVED"
+    },
+    {
+      "accepted_evidence": [
+        "data/oracle07_predator_warrior_action_graph_equipment.json"
+      ],
+      "counterfactual": "bounded action-local equipment mutation accepted; route bodies pending",
+      "exact_next_experiment": "Identify each actor class/type by source table and test its resource/collision/lifecycle authority.",
+      "id": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+      "status": "OBSERVED"
+    },
+    {
+      "accepted_evidence": [
+        "data/oracle06_round1_encounter.json"
+      ],
+      "counterfactual": "first street entry/withdrawal controls accepted; later route controllers pending",
+      "exact_next_experiment": "Bind every spawn/wave/script trigger and reject fixed-frame or presentation-owned clear.",
+      "id": "encounters-waves-scripted-triggers",
+      "status": "PARTIAL"
+    },
+    {
+      "accepted_evidence": [
+        "data/boss_action_capture.json",
+        "data/boss_ko_capture.json"
+      ],
+      "counterfactual": "action/KO captures exist; boss phase and encounter authority controls pending",
+      "exact_next_experiment": "Recover boss dispatcher, phase guards, RNG, attacks, collision, damage, KO, and encounter clear.",
+      "id": "round1-boss",
+      "status": "OBSERVED"
+    },
+    {
+      "accepted_evidence": [
+        "data/round1_route_census.json"
+      ],
+      "counterfactual": "two source continues are captured; completing route-wide perturbation and clear/handoff controls pending",
+      "exact_next_experiment": "Bind failure/credit/continue, boss-clear, Round 2 title/load, and first stable Round 2 gameplay state.",
+      "id": "stage-clear-failure-continue-round2-handoff",
+      "status": "OBSERVED"
+    },
+    {
+      "accepted_evidence": [
+        "data/stage1_route.json"
+      ],
+      "counterfactual": "event changes are observed; gameplay-owner suppression controls pending",
+      "exact_next_experiment": "Bind each route-required QSound/load/release event to its gameplay writer and guard.",
+      "id": "gameplay-audio-load-release",
+      "status": "OBSERVED"
+    },
+    {
+      "accepted_evidence": [
+        "freeze_rng counterfactual"
+      ],
+      "counterfactual": "freeze_rng detected source-state divergence",
+      "exact_next_experiment": "Bind every RNG call site and consumption order in ORACLE-11.",
+      "id": "rng-consumption",
+      "status": "OBSERVED"
+    }
+  ],
+  "classification_vocabulary": [
+    "SOURCE_CLOSED",
+    "PARTIAL",
+    "OBSERVED",
+    "ADAPTED",
+    "UNKNOWN",
+    "NOT_REQUIRED_FOR_ROUND1"
+  ],
+  "control_capture_identity": {
+    "byte_identical": true,
+    "region_index_sha256": "05b572cfe4dd792d351a0c7b66543a7162b873e1b7de976fabf42b8b2c1cc9b1",
+    "samples_sha256": "47b2d68fa2669a1b8f7fa8ecf1819dbcb676a49d6532e8f83608564e9f38193b",
+    "screenshot_hash_stream_sha256": "bab7563357758052b1fef6b3a7e98da8c0ca36d9589d6c8d4133a0d0d4d18013"
+  },
+  "counterfactual_authority_coverage": [
+    {
+      "authority_family": "predator-warrior-player-authority",
+      "outcomes": {
+        "route_perturbed": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "g8009": "4",
+              "p_x": "192",
+              "p_z": "0"
+            },
+            "fields": [
+              "g8009",
+              "p_x",
+              "p_z"
+            ],
+            "frame": 6692,
+            "variant": {
+              "g8009": "2",
+              "p_x": "1233",
+              "p_z": "311"
+            }
+          },
+          "stable_round2_handoff_frame": 16425
+        },
+        "suppress_boss_offense": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "p_phase": "6656"
+            },
+            "fields": [
+              "p_phase"
+            ],
+            "frame": 10052,
+            "variant": {
+              "p_phase": "514"
+            }
+          },
+          "stable_round2_handoff_frame": 16765
+        },
+        "suppress_street_offense": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "rng": "6c35"
+            },
+            "fields": [
+              "rng"
+            ],
+            "frame": 2080,
+            "variant": {
+              "rng": "44fb"
+            }
+          },
+          "stable_round2_handoff_frame": 14439
+        },
+        "suppress_warehouse_offense": {
+          "completed_round1": false,
+          "first_semantic_difference": {
+            "control": {
+              "p_phase": "3072",
+              "p_x": "964"
+            },
+            "fields": [
+              "p_phase",
+              "p_x"
+            ],
+            "frame": 5732,
+            "variant": {
+              "p_phase": "514",
+              "p_x": "966"
+            }
+          },
+          "stable_round2_handoff_frame": null
+        }
+      },
+      "status": "PASS",
+      "variants": [
+        "route_perturbed",
+        "suppress_street_offense",
+        "suppress_warehouse_offense",
+        "suppress_boss_offense"
+      ]
+    },
+    {
+      "authority_family": "round1-navigation-terrain-camera",
+      "outcomes": {
+        "hold_navigation": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "p_facing": "1",
+              "p_phase": "512",
+              "p_x": "946"
+            },
+            "fields": [
+              "p_phase",
+              "p_facing",
+              "p_x"
+            ],
+            "frame": 2602,
+            "variant": {
+              "p_facing": "0",
+              "p_phase": "2",
+              "p_x": "944"
+            }
+          },
+          "stable_round2_handoff_frame": 15227
+        },
+        "remove_navigation_bodies": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "actor_population": "09-14:1"
+            },
+            "fields": [
+              "actor_population"
+            ],
+            "frame": 2073,
+            "variant": {
+              "actor_population": ""
+            }
+          },
+          "stable_round2_handoff_frame": 14455
+        }
+      },
+      "status": "PASS",
+      "variants": [
+        "hold_navigation",
+        "remove_navigation_bodies"
+      ]
+    },
+    {
+      "authority_family": "actor-scheduler-allocation-lifecycle",
+      "outcomes": {
+        "remove_auxiliary_classes": {
+          "completed_round1": false,
+          "first_semantic_difference": {
+            "control": {
+              "rng": "8def"
+            },
+            "fields": [
+              "rng"
+            ],
+            "frame": 1972,
+            "variant": {
+              "rng": "a998"
+            }
+          },
+          "stable_round2_handoff_frame": null
+        },
+        "remove_class_00": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "actor_population": "00-0c:2,06-0c:1,07-14:1"
+            },
+            "fields": [
+              "actor_population"
+            ],
+            "frame": 5660,
+            "variant": {
+              "actor_population": "06-0c:1,07-14:1"
+            }
+          },
+          "stable_round2_handoff_frame": 14639
+        },
+        "remove_class_01": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "actor_population": "01-0c:1,06-0c:1,07-14:1"
+            },
+            "fields": [
+              "actor_population"
+            ],
+            "frame": 11045,
+            "variant": {
+              "actor_population": "06-0c:1,07-14:1"
+            }
+          },
+          "stable_round2_handoff_frame": 14181
+        },
+        "remove_class_06": {
+          "completed_round1": false,
+          "first_semantic_difference": {
+            "control": {
+              "actor_population": "06-0c:1,07-14:1"
+            },
+            "fields": [
+              "actor_population"
+            ],
+            "frame": 5566,
+            "variant": {
+              "actor_population": "07-14:1"
+            }
+          },
+          "stable_round2_handoff_frame": null
+        },
+        "remove_class_1f": {
+          "completed_round1": false,
+          "first_semantic_difference": {
+            "control": {
+              "actor_population": "09-14:1,1f-0c:10"
+            },
+            "fields": [
+              "actor_population"
+            ],
+            "frame": 2074,
+            "variant": {
+              "actor_population": "09-14:1"
+            }
+          },
+          "stable_round2_handoff_frame": null
+        }
+      },
+      "status": "PASS",
+      "variants": [
+        "remove_class_1f",
+        "remove_class_00",
+        "remove_class_01",
+        "remove_class_06",
+        "remove_auxiliary_classes"
+      ]
+    },
+    {
+      "authority_family": "round1-enemy-archetypes",
+      "outcomes": {
+        "remove_class_00": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "actor_population": "00-0c:2,06-0c:1,07-14:1"
+            },
+            "fields": [
+              "actor_population"
+            ],
+            "frame": 5660,
+            "variant": {
+              "actor_population": "06-0c:1,07-14:1"
+            }
+          },
+          "stable_round2_handoff_frame": 14639
+        },
+        "remove_class_01": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "actor_population": "01-0c:1,06-0c:1,07-14:1"
+            },
+            "fields": [
+              "actor_population"
+            ],
+            "frame": 11045,
+            "variant": {
+              "actor_population": "06-0c:1,07-14:1"
+            }
+          },
+          "stable_round2_handoff_frame": 14181
+        },
+        "remove_class_1f": {
+          "completed_round1": false,
+          "first_semantic_difference": {
+            "control": {
+              "actor_population": "09-14:1,1f-0c:10"
+            },
+            "fields": [
+              "actor_population"
+            ],
+            "frame": 2074,
+            "variant": {
+              "actor_population": "09-14:1"
+            }
+          },
+          "stable_round2_handoff_frame": null
+        }
+      },
+      "status": "PASS",
+      "variants": [
+        "remove_class_1f",
+        "remove_class_00",
+        "remove_class_01"
+      ]
+    },
+    {
+      "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+      "outcomes": {
+        "remove_auxiliary_classes": {
+          "completed_round1": false,
+          "first_semantic_difference": {
+            "control": {
+              "rng": "8def"
+            },
+            "fields": [
+              "rng"
+            ],
+            "frame": 1972,
+            "variant": {
+              "rng": "a998"
+            }
+          },
+          "stable_round2_handoff_frame": null
+        },
+        "remove_navigation_bodies": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "actor_population": "09-14:1"
+            },
+            "fields": [
+              "actor_population"
+            ],
+            "frame": 2073,
+            "variant": {
+              "actor_population": ""
+            }
+          },
+          "stable_round2_handoff_frame": 14455
+        },
+        "suppress_street_offense": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "rng": "6c35"
+            },
+            "fields": [
+              "rng"
+            ],
+            "frame": 2080,
+            "variant": {
+              "rng": "44fb"
+            }
+          },
+          "stable_round2_handoff_frame": 14439
+        }
+      },
+      "status": "PASS",
+      "variants": [
+        "remove_navigation_bodies",
+        "remove_auxiliary_classes",
+        "suppress_street_offense"
+      ]
+    },
+    {
+      "authority_family": "encounters-waves-scripted-triggers",
+      "outcomes": {
+        "remove_class_00": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "actor_population": "00-0c:2,06-0c:1,07-14:1"
+            },
+            "fields": [
+              "actor_population"
+            ],
+            "frame": 5660,
+            "variant": {
+              "actor_population": "06-0c:1,07-14:1"
+            }
+          },
+          "stable_round2_handoff_frame": 14639
+        },
+        "remove_class_1f": {
+          "completed_round1": false,
+          "first_semantic_difference": {
+            "control": {
+              "actor_population": "09-14:1,1f-0c:10"
+            },
+            "fields": [
+              "actor_population"
+            ],
+            "frame": 2074,
+            "variant": {
+              "actor_population": "09-14:1"
+            }
+          },
+          "stable_round2_handoff_frame": null
+        },
+        "suppress_street_offense": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "rng": "6c35"
+            },
+            "fields": [
+              "rng"
+            ],
+            "frame": 2080,
+            "variant": {
+              "rng": "44fb"
+            }
+          },
+          "stable_round2_handoff_frame": 14439
+        },
+        "suppress_warehouse_offense": {
+          "completed_round1": false,
+          "first_semantic_difference": {
+            "control": {
+              "p_phase": "3072",
+              "p_x": "964"
+            },
+            "fields": [
+              "p_phase",
+              "p_x"
+            ],
+            "frame": 5732,
+            "variant": {
+              "p_phase": "514",
+              "p_x": "966"
+            }
+          },
+          "stable_round2_handoff_frame": null
+        }
+      },
+      "status": "PASS",
+      "variants": [
+        "suppress_street_offense",
+        "suppress_warehouse_offense",
+        "remove_class_1f",
+        "remove_class_00"
+      ]
+    },
+    {
+      "authority_family": "round1-boss",
+      "outcomes": {
+        "remove_class_06": {
+          "completed_round1": false,
+          "first_semantic_difference": {
+            "control": {
+              "actor_population": "06-0c:1,07-14:1"
+            },
+            "fields": [
+              "actor_population"
+            ],
+            "frame": 5566,
+            "variant": {
+              "actor_population": "07-14:1"
+            }
+          },
+          "stable_round2_handoff_frame": null
+        },
+        "suppress_boss_offense": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "p_phase": "6656"
+            },
+            "fields": [
+              "p_phase"
+            ],
+            "frame": 10052,
+            "variant": {
+              "p_phase": "514"
+            }
+          },
+          "stable_round2_handoff_frame": 16765
+        }
+      },
+      "status": "PASS",
+      "variants": [
+        "suppress_boss_offense",
+        "remove_class_06"
+      ]
+    },
+    {
+      "authority_family": "stage-clear-failure-continue-round2-handoff",
+      "outcomes": {
+        "no_continue": {
+          "completed_round1": false,
+          "first_semantic_difference": {
+            "control": {
+              "g8009": "4",
+              "p_x": "192",
+              "p_z": "0"
+            },
+            "fields": [
+              "g8009",
+              "p_x",
+              "p_z"
+            ],
+            "frame": 6692,
+            "variant": {
+              "g8009": "2",
+              "p_x": "1233",
+              "p_z": "311"
+            }
+          },
+          "stable_round2_handoff_frame": null
+        },
+        "remove_class_06": {
+          "completed_round1": false,
+          "first_semantic_difference": {
+            "control": {
+              "actor_population": "06-0c:1,07-14:1"
+            },
+            "fields": [
+              "actor_population"
+            ],
+            "frame": 5566,
+            "variant": {
+              "actor_population": "07-14:1"
+            }
+          },
+          "stable_round2_handoff_frame": null
+        },
+        "route_perturbed": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "g8009": "4",
+              "p_x": "192",
+              "p_z": "0"
+            },
+            "fields": [
+              "g8009",
+              "p_x",
+              "p_z"
+            ],
+            "frame": 6692,
+            "variant": {
+              "g8009": "2",
+              "p_x": "1233",
+              "p_z": "311"
+            }
+          },
+          "stable_round2_handoff_frame": 16425
+        }
+      },
+      "status": "PASS",
+      "variants": [
+        "route_perturbed",
+        "no_continue",
+        "remove_class_06"
+      ]
+    },
+    {
+      "authority_family": "gameplay-audio-load-release",
+      "outcomes": {
+        "hold_navigation": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "p_facing": "1",
+              "p_phase": "512",
+              "p_x": "946"
+            },
+            "fields": [
+              "p_phase",
+              "p_facing",
+              "p_x"
+            ],
+            "frame": 2602,
+            "variant": {
+              "p_facing": "0",
+              "p_phase": "2",
+              "p_x": "944"
+            }
+          },
+          "stable_round2_handoff_frame": 15227
+        },
+        "route_perturbed": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "g8009": "4",
+              "p_x": "192",
+              "p_z": "0"
+            },
+            "fields": [
+              "g8009",
+              "p_x",
+              "p_z"
+            ],
+            "frame": 6692,
+            "variant": {
+              "g8009": "2",
+              "p_x": "1233",
+              "p_z": "311"
+            }
+          },
+          "stable_round2_handoff_frame": 16425
+        },
+        "suppress_boss_offense": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "p_phase": "6656"
+            },
+            "fields": [
+              "p_phase"
+            ],
+            "frame": 10052,
+            "variant": {
+              "p_phase": "514"
+            }
+          },
+          "stable_round2_handoff_frame": 16765
+        }
+      },
+      "status": "PASS",
+      "variants": [
+        "route_perturbed",
+        "hold_navigation",
+        "suppress_boss_offense"
+      ]
+    },
+    {
+      "authority_family": "rng-consumption",
+      "outcomes": {
+        "freeze_rng": {
+          "completed_round1": false,
+          "first_semantic_difference": {
+            "control": {
+              "rng": "a998"
+            },
+            "fields": [
+              "rng"
+            ],
+            "frame": 2073,
+            "variant": {
+              "rng": "8def"
+            }
+          },
+          "stable_round2_handoff_frame": null
+        }
+      },
+      "status": "PASS",
+      "variants": [
+        "freeze_rng"
+      ]
+    }
+  ],
+  "counts": {
+    "actor_archetypes": 20,
+    "actor_instances": 427,
+    "audio_change_frames": 874,
+    "camera_lock_runs": 19,
+    "counterfactual_variants": 13,
+    "load_release_boundaries": 4,
+    "rng_changes": 1023,
+    "route_events": 24,
+    "route_state_transitions": 15,
+    "segments": 94
+  },
+  "frontend_active": false,
+  "next_card": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE",
+  "oracle10_exit": "PASS",
+  "pending_oracle10_controls": [],
+  "physical_saturn": "UNRUN",
+  "production_runtime_writes": 0,
+  "required_unknown_count": 0,
+  "route": {
+    "first_round1_title_frame": 1972,
+    "players": 1,
+    "reference_character": "predator_warrior",
+    "round2_stable_handoff_frame": 15193
+  },
+  "route_wide_perturbation": {
+    "first_input_difference": {
+      "control": {
+        "input_word": "9"
+      },
+      "fields": [
+        "input_word"
+      ],
+      "frame": 4230,
+      "variant": {
+        "input_word": "8"
+      }
+    },
+    "first_semantic_difference": {
+      "control": {
+        "g8009": "4",
+        "p_x": "192",
+        "p_z": "0"
+      },
+      "fields": [
+        "g8009",
+        "p_x",
+        "p_z"
+      ],
+      "frame": 6692,
+      "variant": {
+        "g8009": "2",
+        "p_x": "1233",
+        "p_z": "311"
+      }
+    },
+    "rendered_witness": "private frames/16800.png directly inspected",
+    "stable_round2_handoff_frame": 16425,
+    "status": "PASS",
+    "variant": "route_perturbed"
+  },
+  "schema": "round1-system-coverage-v1",
+  "source_set": "avspu",
+  "status": "ACCEPTED",
+  "task": "ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS",
+  "user09_status": "CHANGES_REQUESTED"
+}

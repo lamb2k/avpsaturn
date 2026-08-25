@@ -2,7 +2,7 @@
 
 TASK: ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS
 KIND: ORACLE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: oracle-round1-end-to-end-system-census
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -83,3 +83,21 @@ USER-10.
 
 - `ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE` after the complete census and its
   mutation evidence are accepted.
+
+## Accepted result
+
+Accepted with `data/oracle10_round1_route.json` SHA-256
+`d690678aec4a419d736a69a381f9f3dd6d16d33c0245e3168a3d5b844314fe13`
+and `data/round1_system_coverage.yaml` SHA-256
+`df8b9ba4918db2e6a195d551b0d3c9f3a85d8efa76af58a6ebbfc58356c05b16`.
+Two independently launched 18,000-frame source completions are byte-identical
+across captured regions and cadence-1 screenshots. A route-wide input
+perturbation reaches the exact Round 2 underpass signature at frame 16,425 and
+continues in rendered Round 2 gameplay. Thirteen counterfactual variants cover
+all ten discovered authority families; the no-continue path does not complete,
+and forced boss removal does not create an unsourced clear. The census records
+94 route bodies, 427 actor lifetimes, 20 class/type archetypes, route/camera/RNG,
+audio/load writers, source route events, and exact next experiments. Fast and
+Oracle pass with six tracked mutation rejects. Production runtime writes remain
+zero; USER-09 remains `CHANGES_REQUESTED`, frontend remains inactive, and
+physical Saturn remains `UNRUN`.

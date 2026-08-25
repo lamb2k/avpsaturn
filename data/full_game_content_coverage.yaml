@@ -28,8 +28,12 @@
   "route_bodies": [
     {
       "id": "frontend",
-      "captured": "PARTIAL",
-      "labeled": "PARTIAL",
+      "round1_system_census": "MEASURED",
+      "round1_census_route_bodies": 94,
+      "round1_census_actor_archetypes": 20,
+      "round1_census_counterfactuals": 13,
+      "captured": "MEASURED",
+      "labeled": "MEASURED",
       "packaged": "UNKNOWN",
       "host_parity": "PARTIAL",
       "emulator": "UNRUN",
@@ -62,9 +66,9 @@
         "The approved SOURCE_BOUND_WITH_ADAPTED_INPUT technical capability slice uses deterministic choreography and does not establish production player control, autonomous enemy AI, encounter clear, or complete Round 1 behavior.",
         "USER-09 remains CHANGES_REQUESTED; the bounded encounter stays a useful technical substrate, not final Round 1 authority.",
         "REIMPLEMENT-12 and QA-12 are technically accepted; REPAIR-11 visually verifies the corrected camera-to-plane bridge at 236eef0 while neutral-facing release remains unresolved for Round 1 player authority.",
-        "The complete Round 1 system census, reachable source logic, boss, route clear, failure/continue branch, and stable Round 2 handoff are not yet closed."
+        "ORACLE-10 accepts the complete system census and stable Round 2 handoff evidence; reachable logic for player, later navigation, scheduler/lifecycle, additional enemy classes, auxiliary bodies, encounters, boss, clear/continue, audio, and load ownership remains to be source-closed in ORACLE-11."
       ],
-      "next_experiment": "Execute ORACLE-10 from stable Round 1 entry through stable Round 2 handoff with two independent identical completions, one completing perturbation, authority counterfactuals, and a permitted failure/continue branch."
+      "next_experiment": "Execute ORACLE-11 one authority family at a time from data/round1_system_coverage.yaml until every completion-route behavior is SOURCE_CLOSED or narrowly ADAPTED with mutation controls."
     },
     {
       "id": "round2_underpass_through_frame_18000",

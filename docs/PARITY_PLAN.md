@@ -65,9 +65,9 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS
+CURRENT_TASK: ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE
 
-ACTIVE_SOFTWARE_TASK: ROUND1_SOURCE_CENSUS
+ACTIVE_SOFTWARE_TASK: ROUND1_REACHABLE_LOGIC_CLOSURE
 
 ## 4. Current salvage queue and production extension
 
@@ -138,6 +138,17 @@ The accepted bounded predecessor firewall remains recorded as
 `SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT` ->
 `REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER` ->
 `QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL` -> USER-09 changes requested.
+
+ORACLE-10 is accepted. Two independent 18,000-frame source completions are
+byte-identical; a route-wide input perturbation reaches the exact Round 2
+underpass signature at frame 16,425 and continues in rendered Round 2 gameplay.
+The bounded source route includes continue/failure evidence. Thirteen detected
+counterfactuals cover ten authority families, including the negative controls
+that suppress continue and forcibly remove the boss; neither can fabricate a
+completion. The census records 94 route bodies, 427 actor lifetimes, 20
+class/type archetypes, 26 route events, route/camera/RNG state, and actor,
+audio, and load writer evidence. ORACLE-11 now uses that census as its sole
+backlog and closes one authority family at a time. No production runtime changed.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

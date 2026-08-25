@@ -508,7 +508,6 @@ def main() -> None:
             "scripted capability slice can satisfy playable Round 1")
     user09 = cards["USER-09-LIVE-ENCOUNTER-REVIEW"]
     require(scalar(user09, "STATUS") == "CHANGES_REQUESTED" and
-            active_id == "ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS" and
             inline_list(user09, "DEPENDENCIES") ==
             ["QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL"] and
             "NOT_SOURCE_CLOSED" in user09 and "physical proof" in user09,
