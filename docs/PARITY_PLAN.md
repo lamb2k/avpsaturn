@@ -65,9 +65,9 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: REPAIR-10-LIVE-PLAYER-PRESENTATION
+CURRENT_TASK: USER-09-LIVE-ENCOUNTER-REVIEW
 
-ACTIVE_SOFTWARE_TASK: REPAIR_PLAYER_FACING_AND_SOURCE_ATTACK_HANDOFF
+ACTIVE_SOFTWARE_TASK: NONE_USER_REVIEW_CHECKPOINT
 
 ## 4. Current salvage queue and production extension
 
@@ -85,11 +85,13 @@ route unlock, and continued movement at `d902196`. Its paired 448-frame Yaba
 ledgers and intact visual capture pass, and exact interactive ISO
 `ae653596...a7a8a` was reviewed at `USER-09`. The user reported inverted player
 facing, incoherent weapon/no-weapon attack presentation, off AI, and off
-player/alien collision. `REPAIR-10-LIVE-PLAYER-PRESENTATION` fixes the first
-bounded priority: the facing-sign boundary and the unsourced two-tick legacy
-attack flash before each selector-owned source sequence. AI and collision remain
-explicitly unresolved follow-up corrections; this is one bounded encounter,
-not complete playable Round 1. The
+player/alien collision. `REPAIR-10-LIVE-PLAYER-PRESENTATION` is technically
+accepted at `4ea7c18`: it fixes the facing-sign boundary and the unsourced
+two-tick legacy attack flash before each selector-owned source sequence. Paired
+448-sample emulator state and visual QA pass; renewed interactive ISO
+`4b73b534...e0f5f` is now at `USER-09`. Weapon/no-weapon subjective progression,
+AI, and collision remain explicit unresolved review/follow-up issues; this is
+one bounded encounter, not complete playable Round 1. The
 slice remains physically `UNRUN`. The bounded QA prerequisite
 `HW-01-PROBE-3-VDP1-BUDGET-PRETEST` has prepared its representative, exact
 909-tile, and overload-control hardware package. Host checks, strict build,

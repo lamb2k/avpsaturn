@@ -2,7 +2,7 @@
 
 TASK: REPAIR-10-LIVE-PLAYER-PRESENTATION
 KIND: REPAIR
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: repair-live-player-presentation
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -84,3 +84,27 @@ reported AI or player/alien collision problems.
 
 - Renewed `USER-09-LIVE-ENCOUNTER-REVIEW`; the reported AI and collision issues
   remain unresolved and `SALVAGE-08-FRONTEND` remains blocked.
+
+## Validated evidence
+
+- Implementation commit:
+  `4ea7c1829013e95b5ffdc34ef02ea5c133ee9a80`.
+- Strict C90 live-encounter replay passes twice. Source-facing `0 -> -1` and
+  `1 -> +1`, every selector's `presentation_first` and `return_frame`, invalid
+  selectors, reversed-facing mutation, and restored legacy-attack-flash
+  mutation are checked.
+- Fast and Oracle lanes pass. Both normal interactive and diagnostic Saturn
+  Target profiles build with strict warnings-as-errors.
+- Two cold pinned Yaba Sanshiro `1.20.37-2986eb` runs use normalized diagnostic
+  ISO SHA-256
+  `26368cd72ad93d7df423ddf94d81ea5daf537dee3041f6c6568f4848d3b60921`.
+  Their 448 semantic samples and final state are identical: four player
+  contacts, two alien contacts, one deliberate miss, HIT/KO/clear/continued
+  movement, zero failures/fallbacks, and intact canaries.
+- Genuine Windows.Graphics.Capture action frame 182 is bound to the same commit.
+  The renewed interactive ISO SHA-256 is
+  `4b73b534f9a2f542f5e51680b1332c235201aa2b88b58f12391b04c0951e0f5f`.
+- Review package:
+  `build/feedback/USER-09-LIVE-ENCOUNTER-REVIEW-RENEWED`.
+- Technical repair acceptance does not accept subjective weapon/no-weapon
+  progression, AI, collision feel, or physical Saturn behavior.

@@ -2,7 +2,7 @@
 
 TASK: USER-09-LIVE-ENCOUNTER-REVIEW
 KIND: USER_REVIEW
-STATUS: CHANGES_REQUESTED
+STATUS: AWAITING_USER_FEEDBACK
 CHECKPOINT: review-live-encounter
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -11,7 +11,7 @@ DEPENDENCIES: [INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER]
 REQUIRED_LANES: [Fast]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [REPAIR-10-LIVE-PLAYER-PRESENTATION]
+NEXT_ELIGIBLE_CARDS: [SALVAGE-08-FRONTEND]
 
 ## Objective
 
@@ -80,3 +80,10 @@ Disposition: `CHANGES_REQUESTED`. Facing and attack-presentation coherence are
 first priority in `REPAIR-10-LIVE-PLAYER-PRESENTATION`. AI and player/alien
 collision are also required for the R7B first-live-encounter exit and remain
 explicitly unresolved; they are not waived by the first bounded repair.
+
+REPAIR-10 is technically accepted at
+`4ea7c1829013e95b5ffdc34ef02ea5c133ee9a80`; renewed review now uses
+`build/feedback/USER-09-LIVE-ENCOUNTER-REVIEW-RENEWED`. This wait state asks
+whether facing is corrected and whether the weapon/no-weapon progression still
+feels random. AI and collision remain known unresolved issues even if the
+player-presentation repair is accepted.

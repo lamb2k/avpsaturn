@@ -29,14 +29,18 @@ player/AI/collision/damage/HIT/KO, adapted clear, unlock, and continued
 movement. Diagnostic ISO: `3246659a...938c5`; exact interactive ISO:
 `ae65359601d56e5fbee82c94eb66acfd12ed8c842d95b8f7a63e51d78bca7a8a`.
 
-USER-09 returned `CHANGES_REQUESTED`: player facing is wrong in some walking
-directions, attacks flash incoherently between weapon/no-weapon poses, and AI
-plus player/alien collision feel off. The active bounded implementation is
-`REPAIR-10-LIVE-PLAYER-PRESENTATION`. Correct only the facing-sign mapping and
-the two startup ticks that currently use the unrelated legacy attack clip;
-preserve all four selector-owned source sequences and all combat locks. AI and
-collision remain explicit unresolved follow-ups. Do not activate frontend work.
+USER-09 returned `CHANGES_REQUESTED`: player facing was wrong in some walking
+directions, attacks looked incoherent between weapon/no-weapon poses, and AI
+plus player/alien collision felt off. `REPAIR-10-LIVE-PLAYER-PRESENTATION` is
+technically accepted at `4ea7c1829013e95b5ffdc34ef02ea5c133ee9a80` with
+Fast/Oracle/Target and paired pinned-emulator/visual evidence. It corrects the
+facing sign and the two startup ticks that used the unrelated legacy attack
+clip while preserving the four selector-owned source sequences and combat
+locks. Renew USER-09 with
+`build/feedback/USER-09-LIVE-ENCOUNTER-REVIEW-RENEWED`. Explicitly ask whether
+weapon/no-weapon progression still feels random. AI and collision remain
+unresolved follow-ups. Do not activate frontend work.
 
-Resume prompt: Resume the AvP salvage Goal at REPAIR-10; complete focused
-repeat/mutation, Target, paired emulator, and renewed USER-09 evidence while
-keeping AI/collision unresolved and visible.
+Resume prompt: Resume the AvP salvage Goal at renewed USER-09 using the repaired
+interactive package; keep weapon progression, AI, and collision unresolved and
+visible until explicit feedback chooses the next bounded correction.

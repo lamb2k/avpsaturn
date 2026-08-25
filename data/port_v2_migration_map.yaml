@@ -1171,11 +1171,11 @@
       "user_status": "CHANGES_REQUESTED",
       "salvage_decision": "PROMOTED",
       "production_interface": "src/port_v2/gameplay/player_action/player_action.h",
-      "promoted_commit": "6b943ead3db9ad5cb50bff3bca3884125b973a78",
-      "evidence_commit": "6b943ead3db9ad5cb50bff3bca3884125b973a78",
+      "promoted_commit": "4ea7c1829013e95b5ffdc34ef02ea5c133ee9a80",
+      "evidence_commit": "4ea7c1829013e95b5ffdc34ef02ea5c133ee9a80",
       "diagnostic_interface": "tests/port_v2/predator_warrior_action/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: USER-09 reports inverted walking-facing and incoherent attack sprite handoff; AI and collision are separate unresolved follow-ups. Physical Saturn remains UNRUN."],
-      "exact_next_experiment": "Execute REPAIR-10-LIVE-PLAYER-PRESENTATION: map measured facing to the CapActor sign and hold the measured control pose until each selector-owned source presentation begins, without changing selector order or combat locks.",
+      "blockers": ["Unblock: renewed USER-09 must confirm corrected facing and attack handoff and say whether weapon/no-weapon progression still feels random; AI and collision are separate unresolved follow-ups. Physical Saturn remains UNRUN."],
+      "exact_next_experiment": "Review commit 4ea7c18 and interactive ISO 4b73b534f9a2f542f5e51680b1332c235201aa2b88b58f12391b04c0951e0f5f at renewed USER-09 without changing selector order or combat locks.",
       "user_feedback": {"exact_response": "the character sprite is faving the wrong way with certain walking firectios.  attack sprites seem randomply selected such as weapon to no weapon to no weapon. impact works but the ai  and collosion between player and alien seem off. I'm not sure if these need to work at this point.&#x20;", "approved_components": ["Impact feedback works in the reviewed live encounter."], "requested_changes": ["Correct player-facing direction.", "Remove the incoherent weapon/no-weapon attack sprite handoff without changing the four source selector sequences."], "priority": "player-facing-and-attack-presentation-first"}
     },
     {
