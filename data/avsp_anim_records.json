@@ -16,22 +16,13 @@
     "sha256": "6896ab7feddb3e7b9f4638bab74794c14fd239be79cce78ce6ab80f829500246"
    },
    {
-    "distinct_seed_pointers": 67,
+    "distinct_seed_pointers": 162,
     "frame_range": {
      "first": 5191,
-     "last": 5226
-    },
-    "path": ".deps/mame/enemy_actions",
-    "sha256_concatenated_workram": "ed50d0d08fc3b11af2db8d4649e48105f9ac06069491e4be8cc27ccb235449bb"
-   },
-   {
-    "distinct_seed_pointers": 116,
-    "frame_range": {
-     "first": 5330,
      "last": 5469
     },
     "path": ".deps/mame/enemy_actions",
-    "sha256_concatenated_workram": "2ee447687102b2234b0b7ea4e8a697d0d321f2e7581490571fdef15333306658"
+    "sha256_concatenated_workram": "59fd33595fa6bab74a56cfa6eb9e1baa17cd22086201483f9d73e760130d0cc5"
    }
   ],
   "program_image": {
@@ -41,13 +32,13 @@
   }
  },
  "method": "reachability walk from every observed actor +0x1C, following the script's own control flow",
- "reachable_records": 648,
- "record_bytes": 10948,
+ "reachable_records": 670,
+ "record_bytes": 11316,
  "record_format": "16 bytes, advancing to +16; 20 bytes and jumping to the u32 at +16 when flags bit 15 is set",
  "schema": 1,
- "seed_pointers": 562,
- "span_bytes": 10824,
- "span_count": 70,
+ "seed_pointers": 590,
+ "span_bytes": 11192,
+ "span_count": 69,
  "spans": [
   {
    "base": "0x010000",
@@ -116,6 +107,10 @@
   {
    "base": "0x092a04",
    "bytes": 84
+  },
+  {
+   "base": "0x092b84",
+   "bytes": 100
   },
   {
    "base": "0x0936d2",
@@ -190,8 +185,8 @@
    "bytes": 148
   },
   {
-   "base": "0x12dd50",
-   "bytes": 20
+   "base": "0x12dd28",
+   "bytes": 60
   },
   {
    "base": "0x12dd78",
@@ -207,11 +202,7 @@
   },
   {
    "base": "0x12e04c",
-   "bytes": 100
-  },
-  {
-   "base": "0x12e0f0",
-   "bytes": 40
+   "bytes": 204
   },
   {
    "base": "0x12e214",
@@ -323,11 +314,7 @@
   },
   {
    "base": "0x1600e8",
-   "bytes": 168
-  },
-  {
-   "base": "0x160234",
-   "bytes": 84
+   "bytes": 416
   }
  ]
 }

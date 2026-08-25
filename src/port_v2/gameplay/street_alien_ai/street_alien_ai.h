@@ -1,7 +1,7 @@
 #ifndef AVSP_PORT_V2_STREET_ALIEN_AI_H
 #define AVSP_PORT_V2_STREET_ALIEN_AI_H
 
-#define AVSP_ALIEN_AI_INTERFACE_VERSION 1
+#define AVSP_ALIEN_AI_INTERFACE_VERSION 2
 #define AVSP_ALIEN_CLASS_ID 0x1fu
 #define AVSP_ALIEN_STATE_INACTIVE 0u
 #define AVSP_ALIEN_STATE_APPROACH 2u
@@ -43,6 +43,10 @@ typedef struct
     unsigned short contact;
     unsigned short contact_damage;
     unsigned short removed;
+    unsigned short source_action;
+    unsigned short presentation_index;
+    unsigned long animation_record;
+    unsigned long assembly;
     long x_numerator;
     long lane_numerator;
     unsigned long scheduler_updates;
@@ -69,6 +73,10 @@ typedef struct
     unsigned short contact;
     unsigned short contact_damage;
     unsigned short removed;
+    unsigned short source_action;
+    unsigned short presentation_index;
+    unsigned long animation_record;
+    unsigned long assembly;
 } AvspAlienView;
 
 void avsp_alien_ai_init(AvspAlienRuntime *runtime, unsigned short seed);
@@ -76,6 +84,7 @@ void avsp_alien_ai_step(AvspAlienRuntime *runtime, const AvspAlienInput *input);
 void avsp_alien_ai_view(const AvspAlienRuntime *runtime, AvspAlienView *view);
 unsigned short avsp_alien_ai_rng_step(unsigned short seed);
 unsigned short avsp_alien_ai_timer_for_seed(unsigned short seed_after);
+unsigned long avsp_alien_ai_assembly_for_record(unsigned long animation_record);
 int avsp_alien_ai_contract_valid(void);
 
 #endif

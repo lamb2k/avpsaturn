@@ -50,7 +50,7 @@ static unsigned short policy(AvspLiveEncounterRuntime *runtime,
     }
     if (*phase == 2)
     {
-        if (runtime->player.x > 240) return AVSP_PW_INPUT_LEFT;
+        if (runtime->player.x > 914) return AVSP_PW_INPUT_LEFT;
         if (avsp_pw_can_control(&runtime->player))
         {
             *phase = 3;
@@ -130,6 +130,17 @@ static int replay(Result *result)
     result->alien_state = runtime.alien.state;
     result->route_unlocked = runtime.route_unlocked;
     result->continued = runtime.continued_after_unlock;
+    if (!(pcm_retriggers > 0 && runtime.failures == 0UL &&
+          runtime.fallback_count == 0UL &&
+          avsp_live_encounter_canaries_ok(&runtime)))
+        fprintf(stderr,
+            "replay incomplete frame=%lu px=%d pz=%d ax=%d az=%d state=%u hp=%d contacts=%lu alien_contacts=%lu misses=%lu hit=%lu ko=%lu clear=%lu phase=%d retriggers=%d\n",
+            runtime.frame, runtime.player.x, runtime.player.lane,
+            runtime.alien.x, runtime.alien.lane, runtime.alien.state,
+            runtime.alien.health, runtime.player_contacts,
+            runtime.alien_contacts, runtime.player_misses,
+            runtime.hit_events, runtime.ko_events, runtime.clear_events,
+            phase, pcm_retriggers);
     return pcm_retriggers > 0 && runtime.failures == 0UL &&
         runtime.fallback_count == 0UL &&
         avsp_live_encounter_canaries_ok(&runtime);
@@ -140,7 +151,7 @@ int main(void)
     Result first;
     Result second;
     unsigned int selector;
-    if (avsp_live_encounter_contract_flags() != 15u ||
+    if (avsp_live_encounter_contract_flags() != 127u ||
         !avsp_live_encounter_contract_valid() ||
         avsp_live_encounter_clear_allowed(0u, 0u, 1u, 1u) ||
         avsp_live_encounter_clear_allowed(1u, 0u, 1u, 1u) ||

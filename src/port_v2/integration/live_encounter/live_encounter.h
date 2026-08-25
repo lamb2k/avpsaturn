@@ -5,16 +5,20 @@
 #include "../../gameplay/street_alien_ai/street_alien_ai.h"
 #include "../../combat/hit_ko/hit_ko.h"
 
-#define AVSP_LIVE_ENCOUNTER_INTERFACE_VERSION 1
+#define AVSP_LIVE_ENCOUNTER_INTERFACE_VERSION 2
+#define AVSP_LIVE_ENCOUNTER_SPEC01_SHA256 \
+    "a8a8d5ff06d70a8df4cc7687928e0eb5200927ac8901adb3eb76745c4b42bd0f"
 #define AVSP_LIVE_ENCOUNTER_CANARY_HEAD 0x4C564844UL
 #define AVSP_LIVE_ENCOUNTER_CANARY_TAIL 0x4C56544CUL
 #define AVSP_LIVE_ENCOUNTER_APERTURE_ORIGIN_X (-176)
-#define AVSP_LIVE_ENCOUNTER_ENTRY_X 320
-#define AVSP_LIVE_ENCOUNTER_PLAYER_X 304
-#define AVSP_LIVE_ENCOUNTER_PLAYER_LANE 178
-#define AVSP_LIVE_ENCOUNTER_ALIEN_X 286
-#define AVSP_LIVE_ENCOUNTER_ALIEN_LANE 201
-#define AVSP_LIVE_ENCOUNTER_CAMERA_LOCK_X 0
+#define AVSP_LIVE_ENCOUNTER_ENTRY_X 1003
+#define AVSP_LIVE_ENCOUNTER_PLAYER_X 978
+#define AVSP_LIVE_ENCOUNTER_PLAYER_LANE 320
+#define AVSP_LIVE_ENCOUNTER_ALIEN_X 960
+#define AVSP_LIVE_ENCOUNTER_ALIEN_LANE 343
+#define AVSP_LIVE_ENCOUNTER_CAMERA_LOCK_X 768
+#define AVSP_LIVE_ENCOUNTER_WORLD_Z_ANCHOR 319
+#define AVSP_LIVE_ENCOUNTER_SCREEN_Y_ANCHOR 178
 
 #define AVSP_LIVE_ENCOUNTER_WAIT_ENTRY 0u
 #define AVSP_LIVE_ENCOUNTER_ACTIVE 1u
@@ -80,6 +84,8 @@ typedef struct
     short camera_world_x;
     short player_screen_x;
     short alien_screen_x;
+    short player_screen_y;
+    short alien_screen_y;
 } AvspLiveEncounterFrame;
 
 int avsp_live_encounter_contract_valid(void);
@@ -89,6 +95,7 @@ int avsp_live_encounter_clear_allowed(unsigned short target_ko,
                                       unsigned short timer_elapsed,
                                       unsigned short presentation_flag);
 int avsp_live_encounter_canaries_ok(const AvspLiveEncounterRuntime *runtime);
+short avsp_live_encounter_project_screen_y(short world_z, short height);
 void avsp_live_encounter_init(AvspLiveEncounterRuntime *runtime);
 int avsp_live_encounter_step(AvspLiveEncounterRuntime *runtime,
                              const AvspLiveEncounterInput *input,

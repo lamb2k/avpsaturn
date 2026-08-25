@@ -471,10 +471,20 @@ typedef struct
     int player_state;
     int player_selector;
     int player_attack_active;
+    int player_facing;
+    int player_animation_record;
+    int player_assembly;
+    int player_screen_y;
     int alien_x;
     int alien_lane;
     int alien_health;
     int alien_state;
+    int alien_inner;
+    int alien_action;
+    int alien_facing;
+    int alien_animation_record;
+    int alien_assembly;
+    int alien_screen_y;
     int alien_rng;
     int player_contact;
     int alien_contact;
@@ -504,10 +514,20 @@ volatile int avsp_diag_live_player_lane;
 volatile int avsp_diag_live_player_health;
 volatile int avsp_diag_live_player_state;
 volatile int avsp_diag_live_player_selector;
+volatile int avsp_diag_live_player_facing;
+volatile int avsp_diag_live_player_animation_record;
+volatile int avsp_diag_live_player_assembly;
+volatile int avsp_diag_live_player_screen_y;
 volatile int avsp_diag_live_alien_x;
 volatile int avsp_diag_live_alien_lane;
 volatile int avsp_diag_live_alien_health;
 volatile int avsp_diag_live_alien_state;
+volatile int avsp_diag_live_alien_inner;
+volatile int avsp_diag_live_alien_action;
+volatile int avsp_diag_live_alien_facing;
+volatile int avsp_diag_live_alien_animation_record;
+volatile int avsp_diag_live_alien_assembly;
+volatile int avsp_diag_live_alien_screen_y;
 volatile int avsp_diag_live_alien_rng;
 volatile int avsp_diag_live_player_contact;
 volatile int avsp_diag_live_alien_contact;
@@ -6503,7 +6523,7 @@ static unsigned short live_encounter_autotest_input(void)
     }
     if (live_autotest_phase == 2)
     {
-        if (live_encounter_runtime.player.x > 240)
+        if (live_encounter_runtime.player.x > 914)
             return AVSP_PW_INPUT_LEFT;
         if (avsp_pw_can_control(&live_encounter_runtime.player))
         {
@@ -6583,7 +6603,8 @@ static void live_encounter_build_slice_frame(void)
     playable_slice_frame.actors.player.world_x =
         live_encounter_frame.player.x;
     playable_slice_frame.actors.player.lane =
-        live_encounter_frame.player.lane;
+        live_encounter_frame.player_screen_y + 200 +
+        live_encounter_frame.player.height;
     playable_slice_frame.actors.player.facing =
         avsp_pw_render_facing(live_encounter_frame.player.facing);
     playable_slice_frame.actors.player.locomotion_frame =
@@ -6592,7 +6613,8 @@ static void live_encounter_build_slice_frame(void)
     playable_slice_frame.actors.enemy.palette_bank =
         AVSP_PORT_V2_ENEMY_PALETTE_BANK;
     playable_slice_frame.actors.enemy.world_x = live_encounter_frame.alien.x;
-    playable_slice_frame.actors.enemy.lane = live_encounter_frame.alien.lane;
+    playable_slice_frame.actors.enemy.lane =
+        live_encounter_frame.alien_screen_y + 200;
     playable_slice_frame.actors.enemy.facing =
         live_encounter_frame.alien.facing ? -1 : 1;
     playable_slice_frame.actors.enemy.locomotion_frame =
@@ -6627,6 +6649,8 @@ static void live_encounter_build_slice_frame(void)
     else
         scene->player_action = AVSP_PORT_V2_SLICE_ACTION_IDLE;
     live_encounter_identity();
+    scene->player_identity.animation_record =
+        live_encounter_frame.player.animation_record;
     if (avsp_pw_source_presentation_ready(
             live_encounter_frame.player.selector,
             live_encounter_frame.player.action_elapsed))
@@ -6685,15 +6709,21 @@ static void live_encounter_build_slice_frame(void)
     else if (live_encounter_frame.alien.state == AVSP_ALIEN_STATE_ATTACK)
     {
         scene->enemy_action = AVSP_PORT_V2_SLICE_ACTION_ATTACK;
-        scene->enemy_identity.animation_record = 0x0012D8A0UL;
+        scene->enemy_identity.animation_record =
+            live_encounter_frame.alien.animation_record;
     }
     else
     {
         scene->enemy_action = AVSP_PORT_V2_SLICE_ACTION_WALK;
-        scene->enemy_identity.animation_record = AVSP_PORT_V2_SLICE_ENEMY_WALK_RECORD;
+        scene->enemy_identity.animation_record =
+            live_encounter_frame.alien.animation_record;
     }
-    scene->enemy_action_frame = live_encounter_runtime.reaction_elapsed;
-    scene->enemy_source_action = live_encounter_frame.alien.state;
+    scene->enemy_action_frame =
+        (live_encounter_frame.alien.state == AVSP_ALIEN_STATE_HIT ||
+         live_encounter_frame.alien.state == AVSP_ALIEN_STATE_KO) ?
+        live_encounter_runtime.reaction_elapsed :
+        live_encounter_frame.alien.presentation_index;
+    scene->enemy_source_action = live_encounter_frame.alien.source_action;
     scene->enemy_source_substate = live_encounter_frame.alien.inner_state;
     scene->collision_result = live_encounter_frame.player_contact;
     scene->health_before = live_encounter_frame.health_before;
@@ -6800,10 +6830,24 @@ static void live_encounter_publish(void)
         sample->player_selector = live_encounter_frame.player.selector;
         sample->player_attack_active =
             live_encounter_frame.player.attack_active;
+        sample->player_facing = live_encounter_frame.player.facing;
+        sample->player_animation_record =
+            (int)live_encounter_frame.player.animation_record;
+        sample->player_assembly =
+            (int)live_encounter_frame.player.assembly;
+        sample->player_screen_y = live_encounter_frame.player_screen_y;
         sample->alien_x = live_encounter_frame.alien.x;
         sample->alien_lane = live_encounter_frame.alien.lane;
         sample->alien_health = live_encounter_frame.alien.health;
         sample->alien_state = live_encounter_frame.alien.state;
+        sample->alien_inner = live_encounter_frame.alien.inner_state;
+        sample->alien_action = live_encounter_frame.alien.source_action;
+        sample->alien_facing = live_encounter_frame.alien.facing;
+        sample->alien_animation_record =
+            (int)live_encounter_frame.alien.animation_record;
+        sample->alien_assembly =
+            (int)live_encounter_frame.alien.assembly;
+        sample->alien_screen_y = live_encounter_frame.alien_screen_y;
         sample->alien_rng = live_encounter_frame.alien.rng_seed;
         sample->player_contact = live_encounter_frame.player_contact;
         sample->alien_contact = live_encounter_frame.alien_contact;
@@ -6825,10 +6869,24 @@ static void live_encounter_publish(void)
     avsp_diag_live_player_health = live_encounter_frame.player.health;
     avsp_diag_live_player_state = live_encounter_frame.player.state;
     avsp_diag_live_player_selector = live_encounter_frame.player.selector;
+    avsp_diag_live_player_facing = live_encounter_frame.player.facing;
+    avsp_diag_live_player_animation_record =
+        (int)live_encounter_frame.player.animation_record;
+    avsp_diag_live_player_assembly =
+        (int)live_encounter_frame.player.assembly;
+    avsp_diag_live_player_screen_y = live_encounter_frame.player_screen_y;
     avsp_diag_live_alien_x = live_encounter_frame.alien.x;
     avsp_diag_live_alien_lane = live_encounter_frame.alien.lane;
     avsp_diag_live_alien_health = live_encounter_frame.alien.health;
     avsp_diag_live_alien_state = live_encounter_frame.alien.state;
+    avsp_diag_live_alien_inner = live_encounter_frame.alien.inner_state;
+    avsp_diag_live_alien_action = live_encounter_frame.alien.source_action;
+    avsp_diag_live_alien_facing = live_encounter_frame.alien.facing;
+    avsp_diag_live_alien_animation_record =
+        (int)live_encounter_frame.alien.animation_record;
+    avsp_diag_live_alien_assembly =
+        (int)live_encounter_frame.alien.assembly;
+    avsp_diag_live_alien_screen_y = live_encounter_frame.alien_screen_y;
     avsp_diag_live_alien_rng = live_encounter_frame.alien.rng_seed;
     avsp_diag_live_player_contact = live_encounter_frame.player_contact;
     avsp_diag_live_alien_contact = live_encounter_frame.alien_contact;

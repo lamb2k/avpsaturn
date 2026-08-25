@@ -9,6 +9,18 @@
 #define AVSP_ALIEN_HIT_FRAMES 39u
 #define AVSP_ALIEN_KO_FRAMES 141u
 #define AVSP_ALIEN_CONTACT_DAMAGE 8u
+#define AVSP_ALIEN_MAX_CONTACT_X 68
+
+static const unsigned long avsp_alien_approach_records[8] =
+{
+    0x0012EC04UL, 0x0012EC14UL, 0x0012EC24UL, 0x0012EC34UL,
+    0x0012EC44UL, 0x0012EC54UL, 0x0012EC64UL, 0x0012EC74UL
+};
+
+static const unsigned long avsp_alien_attack_records[4] =
+{
+    0x0012E8ECUL, 0x0012E8FCUL, 0x0012E90CUL, 0x0012E91CUL
+};
 
 static short avsp_alien_abs(const short value)
 {
@@ -40,12 +52,51 @@ unsigned short avsp_alien_ai_timer_for_seed(const unsigned short seed_after)
     return (seed_after & 0xffu) < 0x40u ? 30u : 120u;
 }
 
+unsigned long avsp_alien_ai_assembly_for_record(const unsigned long record)
+{
+    switch (record)
+    {
+        case 0x0012DDB0UL: return 0x00130346UL;
+        case 0x0012EC04UL: return 0x0012F7CCUL;
+        case 0x0012EC14UL: return 0x0012F7E4UL;
+        case 0x0012EC24UL: return 0x0012F7FCUL;
+        case 0x0012EC34UL: return 0x0012F814UL;
+        case 0x0012EC44UL: return 0x0012F82CUL;
+        case 0x0012EC54UL: return 0x0012F85EUL;
+        case 0x0012EC64UL: return 0x0012F890UL;
+        case 0x0012EC74UL: return 0x0012F8B8UL;
+        case 0x0012E8ECUL: return 0x0012F5DEUL;
+        case 0x0012E8FCUL: return 0x0012FA0CUL;
+        case 0x0012E90CUL: return 0x0012FA2AUL;
+        case 0x0012E91CUL: return 0x0012FA0CUL;
+        case 0x0012D5E4UL: return 0x0012FAE8UL;
+        case 0x0012DD50UL: return 0x00130248UL;
+        case 0x0012DD28UL: return 0x0013020CUL;
+        case 0x0012DD3CUL: return 0x0013023AUL;
+        case 0x0012E214UL: return 0x0013020CUL;
+        default: return 0UL;
+    }
+}
+
+static void avsp_alien_set_presentation(AvspAlienRuntime *runtime,
+                                        const unsigned long record,
+                                        const unsigned short index)
+{
+    runtime->presentation_index = index;
+    runtime->animation_record = record;
+    runtime->assembly = avsp_alien_ai_assembly_for_record(record);
+}
+
 int avsp_alien_ai_contract_valid(void)
 {
     return avsp_alien_ai_rng_step(0x7301u) == 0x595au &&
            avsp_alien_ai_timer_for_seed(0x595au) == 120u &&
            avsp_alien_ai_rng_step(0x0001u) == 0x0001u &&
-           avsp_alien_ai_timer_for_seed(0x0001u) == 30u;
+           avsp_alien_ai_timer_for_seed(0x0001u) == 30u &&
+           avsp_alien_ai_assembly_for_record(0x0012E8ECUL) ==
+               0x0012F5DEUL &&
+           avsp_alien_ai_assembly_for_record(0x0012D5E4UL) ==
+               0x0012FAE8UL;
 }
 
 void avsp_alien_ai_init(AvspAlienRuntime *runtime,
@@ -70,6 +121,8 @@ void avsp_alien_ai_init(AvspAlienRuntime *runtime,
     runtime->contact = 0u;
     runtime->contact_damage = 0u;
     runtime->removed = 0u;
+    runtime->source_action = 0x1600u;
+    avsp_alien_set_presentation(runtime, avsp_alien_approach_records[0], 0u);
     runtime->x_numerator = 0;
     runtime->lane_numerator = 0;
     runtime->scheduler_updates = 0UL;
@@ -98,30 +151,24 @@ static void avsp_alien_begin_attack(AvspAlienRuntime *runtime)
     runtime->attack_elapsed = 0u;
     runtime->state = AVSP_ALIEN_STATE_ATTACK;
     runtime->inner_state = 0u;
+    runtime->source_action = 0x1800u;
+    runtime->facing = 1;
+    avsp_alien_set_presentation(runtime, avsp_alien_attack_records[0], 0u);
 }
 
 static void avsp_alien_approach(AvspAlienRuntime *runtime,
                                 const AvspAlienTarget *target)
 {
-    int lane_amount;
-    if (runtime->x < target->x)
-    {
-        avsp_alien_fraction(&runtime->x_numerator, &runtime->x,
-                            AVSP_ALIEN_APPROACH_X);
-        runtime->facing = 1;
-    }
-    else if (runtime->x > target->x)
-    {
-        avsp_alien_fraction(&runtime->x_numerator, &runtime->x,
-                            -AVSP_ALIEN_APPROACH_X);
-        runtime->facing = 0;
-    }
-    lane_amount = 0;
-    if (runtime->lane < target->lane) lane_amount = AVSP_ALIEN_APPROACH_LANE;
-    else if (runtime->lane > target->lane) lane_amount = -AVSP_ALIEN_APPROACH_LANE;
-    if (lane_amount != 0)
-        avsp_alien_fraction(&runtime->lane_numerator, &runtime->lane,
-                            lane_amount);
+    (void)target;
+    runtime->source_action = 0x1600u;
+    runtime->facing = 1;
+    avsp_alien_fraction(&runtime->x_numerator, &runtime->x,
+                        AVSP_ALIEN_APPROACH_X);
+    avsp_alien_fraction(&runtime->lane_numerator, &runtime->lane,
+                        -AVSP_ALIEN_APPROACH_LANE);
+    avsp_alien_set_presentation(runtime,
+        avsp_alien_approach_records[runtime->approach_elapsed & 7u],
+        (unsigned short)(runtime->approach_elapsed & 7u));
     ++runtime->approach_elapsed;
     if (runtime->approach_elapsed >= AVSP_ALIEN_APPROACH_FRAMES)
     {
@@ -136,9 +183,13 @@ static void avsp_alien_attack(AvspAlienRuntime *runtime,
                               const AvspAlienTarget *target)
 {
     ++runtime->attack_elapsed;
+    avsp_alien_set_presentation(runtime,
+        avsp_alien_attack_records[runtime->attack_elapsed & 3u],
+        (unsigned short)(runtime->attack_elapsed & 3u));
     if ((runtime->attack_elapsed == 48u || runtime->attack_elapsed == 119u) &&
-        avsp_alien_abs((short)(target->x - runtime->x)) <= 160 &&
-        avsp_alien_abs((short)(target->lane - runtime->lane)) <= 32)
+        avsp_alien_abs((short)(target->x - runtime->x)) <=
+            AVSP_ALIEN_MAX_CONTACT_X &&
+        target->lane == runtime->lane)
     {
         runtime->contact = 1u;
         runtime->contact_damage = AVSP_ALIEN_CONTACT_DAMAGE;
@@ -151,6 +202,25 @@ static void avsp_alien_attack(AvspAlienRuntime *runtime,
         runtime->inner_state = 8u;
         runtime->attack_elapsed = 0u;
         runtime->attack_timer = 0u;
+        if (target->x < runtime->x)
+        {
+            runtime->source_action = 0x1A00u;
+            runtime->facing = 0;
+            avsp_alien_set_presentation(runtime, 0x0012D5E4UL, 0u);
+        }
+        else if (target->lane > runtime->lane)
+        {
+            runtime->source_action = 0x0600u;
+            runtime->facing = 0;
+            avsp_alien_set_presentation(runtime, 0x0012D5E4UL, 0u);
+        }
+        else
+        {
+            runtime->source_action = 0x1600u;
+            runtime->facing = 1;
+            avsp_alien_set_presentation(runtime,
+                avsp_alien_approach_records[0], 0u);
+        }
     }
 }
 
@@ -174,11 +244,13 @@ void avsp_alien_ai_step(AvspAlienRuntime *runtime,
         {
             runtime->state = AVSP_ALIEN_STATE_KO;
             runtime->ko_timer = AVSP_ALIEN_KO_FRAMES;
+            avsp_alien_set_presentation(runtime, 0x0012E214UL, 0u);
         }
         else
         {
             runtime->state = AVSP_ALIEN_STATE_HIT;
             runtime->hit_timer = AVSP_ALIEN_HIT_FRAMES;
+            avsp_alien_set_presentation(runtime, 0x0012DD50UL, 0u);
         }
     }
     if (runtime->state == AVSP_ALIEN_STATE_KO)
@@ -198,11 +270,15 @@ void avsp_alien_ai_step(AvspAlienRuntime *runtime,
         {
             runtime->state = AVSP_ALIEN_STATE_APPROACH;
             runtime->inner_state = 8u;
+            runtime->source_action = 0x1A00u;
+            runtime->facing = 0;
+            avsp_alien_set_presentation(runtime, 0x0012D5E4UL, 0u);
         }
         return;
     }
     if (!avsp_alien_select_target(runtime, &input->target)) return;
-    if (runtime->state == AVSP_ALIEN_STATE_APPROACH)
+    if (runtime->state == AVSP_ALIEN_STATE_APPROACH &&
+        runtime->source_action == 0x1600u)
         avsp_alien_approach(runtime, &input->target);
     else if (runtime->state == AVSP_ALIEN_STATE_ATTACK)
         avsp_alien_attack(runtime, &input->target);
@@ -227,4 +303,8 @@ void avsp_alien_ai_view(const AvspAlienRuntime *runtime, AvspAlienView *view)
     view->contact = runtime->contact;
     view->contact_damage = runtime->contact_damage;
     view->removed = runtime->removed;
+    view->source_action = runtime->source_action;
+    view->presentation_index = runtime->presentation_index;
+    view->animation_record = runtime->animation_record;
+    view->assembly = runtime->assembly;
 }

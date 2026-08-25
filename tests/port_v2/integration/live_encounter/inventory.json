@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "task_id": "INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER",
+  "task_id": "REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER",
   "card_profile": "LiveEncounterBench",
   "compile_profile": "debug-live-encounter-bench",
   "manifest_profile": "live-encounter-bench",
@@ -23,5 +23,26 @@
     "avsp_diag_live_fallback_count",
     "avsp_diag_live_canaries_ok",
     "avsp_diag_live_physical_saturn"
+    ,"avsp_diag_live_player_x"
+    ,"avsp_diag_live_player_health"
+    ,"avsp_diag_live_player_state"
+    ,"avsp_diag_live_player_facing"
+    ,"avsp_diag_live_player_animation_record"
+    ,"avsp_diag_live_player_assembly"
+    ,"avsp_diag_live_player_screen_y"
+    ,"avsp_diag_live_camera_world_x"
+    ,"avsp_diag_live_alien_x"
+    ,"avsp_diag_live_alien_health"
+    ,"avsp_diag_live_alien_state"
+    ,"avsp_diag_live_alien_action"
+    ,"avsp_diag_live_alien_facing"
+    ,"avsp_diag_live_alien_animation_record"
+    ,"avsp_diag_live_alien_assembly"
+    ,"avsp_diag_live_alien_screen_y"
+    ,"avsp_diag_live_encounter_state"
+    ,"runtime_ready"
+    ,"avsp_diag_slice_init_stage"
+    ,"avsp_diag_slice_ready"
+    ,"failed_asset"
   ]
 }

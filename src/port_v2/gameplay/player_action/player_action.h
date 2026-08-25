@@ -1,7 +1,7 @@
 #ifndef AVSP_PORT_V2_PLAYER_ACTION_H
 #define AVSP_PORT_V2_PLAYER_ACTION_H
 
-#define AVSP_PW_ACTION_BENCH_INTERFACE_VERSION 1
+#define AVSP_PW_ACTION_BENCH_INTERFACE_VERSION 2
 #define AVSP_PW_ACTION_COUNT 4
 #define AVSP_PW_DIRECTION_LATENCY 2
 
@@ -68,6 +68,11 @@ typedef struct
     unsigned short hit_timer;
     unsigned short combo_next;
     unsigned short combo_idle_frames;
+    unsigned short completed_close_step;
+    unsigned short combo_followup_counter;
+    unsigned short action_local_equipment_flag;
+    unsigned long animation_record;
+    unsigned long assembly;
     unsigned short current_mask;
     unsigned short previous_mask;
     unsigned short input_edges;
@@ -91,6 +96,11 @@ typedef struct
     unsigned short source_action;
     unsigned short source_substate;
     unsigned short attack_active;
+    unsigned short completed_close_step;
+    unsigned short combo_followup_counter;
+    unsigned short action_local_equipment_flag;
+    unsigned long animation_record;
+    unsigned long assembly;
     AvspPwAttackBox attack_box;
 } AvspPwView;
 
@@ -100,6 +110,8 @@ int avsp_pw_action_defs_valid(const AvspPwAttackDef *defs, unsigned int count);
 int avsp_pw_render_facing(unsigned short source_facing);
 int avsp_pw_source_presentation_ready(unsigned short selector,
                                       unsigned short action_elapsed);
+unsigned long avsp_pw_assembly_for_record(unsigned long animation_record);
+void avsp_pw_resolve_navigation(short *world_x, short *world_z);
 void avsp_pw_init(AvspPwRuntime *runtime);
 void avsp_pw_step(AvspPwRuntime *runtime, const AvspPwInput *input);
 void avsp_pw_view(const AvspPwRuntime *runtime, AvspPwView *view);

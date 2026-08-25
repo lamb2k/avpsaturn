@@ -38,6 +38,10 @@ require("avsp_collision_overlap" in source and
         "avsp_pw_step" in source and "avsp_alien_ai_step" in source and
         "avsp_port_v2_hit_ko_begin" in source,
         "promoted gameplay authorities are not integrated")
+require("AVSP_LIVE_ENCOUNTER_SPEC01_SHA256" in header and
+        "avsp_live_encounter_project_screen_y" in source and
+        "avsp_pw_resolve_navigation" in source,
+        "SPEC-01 identity, projection, or navigation authority is absent")
 require(not re.search(r"runtime->frame\s*[>=]=?\s*\d+.*(?:clear|contact|damage)",
                       source, re.I), "fixed-frame gameplay authority introduced")
 require("AVSP_LIVE_ENCOUNTER_AUTOTEST" in main and

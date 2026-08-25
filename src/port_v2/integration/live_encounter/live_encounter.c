@@ -17,6 +17,8 @@ static short avsp_live_damage_for_selector(const unsigned short selector)
 unsigned int avsp_live_encounter_contract_flags(void)
 {
     unsigned int flags = 0u;
+    short x;
+    short z;
     if (avsp_pw_action_defs_valid(avsp_pw_action_defs,
                                   AVSP_PW_ACTION_COUNT))
         flags |= 1u;
@@ -27,12 +29,29 @@ unsigned int avsp_live_encounter_contract_flags(void)
         avsp_live_damage_for_selector(3u) == 31 &&
         avsp_live_damage_for_selector(4u) == 9)
         flags |= 8u;
+    x = 1200;
+    z = 400;
+    avsp_pw_resolve_navigation(&x, &z);
+    if (x == 1091 && z == 327) flags |= 16u;
+    if (avsp_live_encounter_project_screen_y(327, 0) == 170 &&
+        avsp_live_encounter_project_screen_y(224, 0) == 273)
+        flags |= 32u;
+    if (strlen(AVSP_LIVE_ENCOUNTER_SPEC01_SHA256) == 64u &&
+        avsp_alien_ai_assembly_for_record(0x0012E8ECUL) == 0x0012F5DEUL)
+        flags |= 64u;
     return flags;
 }
 
 int avsp_live_encounter_contract_valid(void)
 {
-    return avsp_live_encounter_contract_flags() == 15u;
+    return avsp_live_encounter_contract_flags() == 127u;
+}
+
+short avsp_live_encounter_project_screen_y(const short world_z,
+                                           const short height)
+{
+    return (short)(AVSP_LIVE_ENCOUNTER_SCREEN_Y_ANCHOR -
+        (world_z - AVSP_LIVE_ENCOUNTER_WORLD_Z_ANCHOR) - height);
 }
 
 int avsp_live_encounter_clear_allowed(const unsigned short target_ko,
@@ -132,6 +151,7 @@ int avsp_live_encounter_step(AvspLiveEncounterRuntime *runtime,
     AvspPwInput player_input;
     AvspAlienInput alien_input;
     AvspPwView player_view;
+    AvspPortV2PlayerCombatPresentation player_presentation;
     unsigned char hit_value;
     short damage;
     short health_before;
@@ -254,6 +274,29 @@ int avsp_live_encounter_step(AvspLiveEncounterRuntime *runtime,
     avsp_pw_view(&runtime->player, &frame->player);
     avsp_alien_ai_view(&runtime->alien, &frame->alien);
     frame->alien_presentation = runtime->alien_transition.actor;
+    if (avsp_pw_source_presentation_ready(frame->player.selector,
+            frame->player.action_elapsed) &&
+        avsp_port_v2_combat_source_player_frame(
+            (int)frame->player.selector - 1,
+            (int)frame->player.action_elapsed -
+                (int)avsp_pw_action_defs[
+                    frame->player.selector - 1u].presentation_first,
+            &player_presentation))
+    {
+        frame->player.animation_record =
+            player_presentation.source_animation_record;
+        frame->player.assembly = avsp_pw_assembly_for_record(
+            frame->player.animation_record);
+    }
+    if ((frame->alien.state == AVSP_ALIEN_STATE_HIT ||
+         frame->alien.state == AVSP_ALIEN_STATE_KO) &&
+        frame->alien_presentation.anim_record != 0UL)
+    {
+        frame->alien.animation_record =
+            frame->alien_presentation.anim_record;
+        frame->alien.assembly = avsp_alien_ai_assembly_for_record(
+            frame->alien.animation_record);
+    }
     frame->encounter_state = runtime->encounter_state;
     frame->route_unlocked = runtime->route_unlocked;
     frame->continued_after_unlock = runtime->continued_after_unlock;
@@ -264,6 +307,10 @@ int avsp_live_encounter_step(AvspLiveEncounterRuntime *runtime,
         frame->camera_world_x + AVSP_LIVE_ENCOUNTER_APERTURE_ORIGIN_X);
     frame->alien_screen_x = (short)(frame->alien.x -
         frame->camera_world_x + AVSP_LIVE_ENCOUNTER_APERTURE_ORIGIN_X);
+    frame->player_screen_y = avsp_live_encounter_project_screen_y(
+        frame->player.lane, frame->player.height);
+    frame->alien_screen_y = avsp_live_encounter_project_screen_y(
+        frame->alien.lane, 0);
     ++runtime->frame;
     return 1;
 }

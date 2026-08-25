@@ -12,11 +12,14 @@ HERE = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location("enemy_tools", ROOT / "tests/port_v2/enemy_bench/collect_readback.py")
 tools = importlib.util.module_from_spec(spec); spec.loader.exec_module(tools)
 FIELDS = ("frame","input_mask","player_x","player_lane","player_health","player_state",
-          "player_selector","player_attack_active","alien_x","alien_lane","alien_health",
-          "alien_state","alien_rng","player_contact","alien_contact","player_damage",
+          "player_selector","player_attack_active","player_facing",
+          "player_animation_record","player_assembly","player_screen_y",
+          "alien_x","alien_lane","alien_health","alien_state","alien_inner",
+          "alien_action","alien_facing","alien_animation_record","alien_assembly",
+          "alien_screen_y","alien_rng","player_contact","alien_contact","player_damage",
           "alien_damage","attack_miss","encounter_state","route_unlocked",
           "continued_after_unlock","camera_world_x","failures")
-EVIDENCE_LAST_FRAME = 447
+EVIDENCE_LAST_FRAME = 470
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def signed(mcp, address): return tools.signed32(mcp.u32(address))
 def read_sample(mcp, base, index):
@@ -43,7 +46,7 @@ while time.time() < deadline:
     frame = mcp.u32(syms["avsp_diag_live_frame"])
     if (ready == 1 and frame >= EVIDENCE_LAST_FRAME and
         mcp.u32(syms["avsp_diag_live_continued_after_unlock"]) == 1 and
-        signed(mcp, syms["avsp_diag_live_camera_world_x"]) > 0):
+        signed(mcp, syms["avsp_diag_live_camera_world_x"]) > 768):
         break
     time.sleep(0.01)
 else:
@@ -85,8 +88,7 @@ else:
 mcp.call("set_debug_option", cpu_core="interpreter")
 mcp.call("pause")
 count = signed(mcp,syms["avsp_diag_live_sample_count"])
-samples = [read_sample(mcp,syms["avsp_diag_live_samples"],i) for i in range(count)]
-samples = [sample for sample in samples if sample["frame"] <= EVIDENCE_LAST_FRAME]
+all_samples = [read_sample(mcp,syms["avsp_diag_live_samples"],i) for i in range(count)]
 mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_diag_live_interface_version",
            "contract_flags":"avsp_diag_live_contract_flags", "frame_stage":"avsp_diag_live_frame_stage",
            "frame":"avsp_diag_live_frame", "hit_events":"avsp_diag_live_hit_events",
@@ -95,11 +97,32 @@ mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_
            "fallback_count":"avsp_diag_live_fallback_count", "canaries_ok":"avsp_diag_live_canaries_ok",
            "internal_failures":"avsp_diag_live_internal_failures",
            "pcm_retriggers":"avsp_diag_live_pcm_retriggers",
-           "physical_saturn":"avsp_diag_live_physical_saturn"}
+           "physical_saturn":"avsp_diag_live_physical_saturn",
+           "player_health":"avsp_diag_live_player_health",
+           "player_state":"avsp_diag_live_player_state",
+           "player_facing":"avsp_diag_live_player_facing",
+           "player_animation_record":"avsp_diag_live_player_animation_record",
+           "player_assembly":"avsp_diag_live_player_assembly",
+           "player_screen_y":"avsp_diag_live_player_screen_y",
+           "alien_health":"avsp_diag_live_alien_health",
+           "alien_state":"avsp_diag_live_alien_state",
+           "alien_action":"avsp_diag_live_alien_action",
+           "alien_facing":"avsp_diag_live_alien_facing",
+           "alien_animation_record":"avsp_diag_live_alien_animation_record",
+           "alien_assembly":"avsp_diag_live_alien_assembly",
+           "alien_screen_y":"avsp_diag_live_alien_screen_y"}
 state = {key:signed(mcp,syms[symbol]) for key,symbol in mapping.items()}
+observed_frame = state["frame"]
+current_sample = next((sample for sample in all_samples
+                       if sample["frame"] == observed_frame), None)
+if current_sample is None:
+    raise RuntimeError("same-tick diagnostic sample is unavailable")
 state["frame"] = EVIDENCE_LAST_FRAME
-if not (state["runtime_ready"] == state["interface_version"] == state["canaries_ok"] == 1 and
-        state["contract_flags"] == 15 and state["frame_stage"] == 7 and
+samples = [sample for sample in all_samples
+           if sample["frame"] <= EVIDENCE_LAST_FRAME]
+if not (state["runtime_ready"] == state["canaries_ok"] == 1 and
+        state["interface_version"] == 2 and state["contract_flags"] == 127 and
+        state["frame_stage"] == 7 and
         state["internal_failures"] == 0 and state["pcm_retriggers"] >= 1 and
         state["hit_events"] >= 1 and state["ko_events"] == 1 and state["route_unlocked"] ==
         state["continued"] == 1 and state["failures"] == state["fallback_count"] ==
@@ -113,10 +136,53 @@ if not (len(contacts) >= 4 and len(received) >= 1 and len(damage) >= 1 and len(m
         all(s["player_attack_active"] == 1 and s["alien_damage"] in (9,24,31) for s in contacts)):
     raise RuntimeError("live miss/contact/damage chronology failed")
 unlock=next((i for i,s in enumerate(samples) if s["route_unlocked"]),None)
-if unlock is None or samples[unlock]["alien_state"] != 0 or any(s["camera_world_x"] != 0 for s in samples[:unlock]):
+if unlock is None or samples[unlock]["alien_state"] != 0 or any(s["camera_world_x"] != 768 for s in samples[:unlock]):
     raise RuntimeError("clear/camera authority failed")
-if not any(s["continued_after_unlock"] and s["camera_world_x"] > 0 for s in samples[unlock:]):
+if not any(s["continued_after_unlock"] and s["camera_world_x"] > 768 for s in samples[unlock:]):
     raise RuntimeError("continued movement after unlock missing")
+
+player_assemblies = {
+    0x15F1F4:0x1626A4, 0x1600E8:0x1629E6, 0x1600F8:0x162A04,
+    0x160108:0x1629E6, 0x160118:0x1629E6, 0x16012C:0x162A32,
+    0x16013C:0x162A5A, 0x16014C:0x162A82, 0x16015C:0x162A5A,
+    0x16016C:0x162A32, 0x16017C:0x162A32, 0x160190:0x162A32,
+    0x1601A0:0x16144E, 0x1601B0:0x161476, 0x1601C0:0x1614A4,
+    0x1601D0:0x161476, 0x1601E0:0x161476, 0x1601F4:0x162AA6,
+    0x160204:0x162ABE, 0x160214:0x162AD6, 0x160224:0x162AFE,
+    0x160234:0x162B26, 0x160244:0x162B5A, 0x160254:0x162B82,
+    0x160264:0x162AA6, 0x160274:0x162AA6,
+}
+alien_assemblies = {
+    0x12EC04:0x12F7CC, 0x12EC14:0x12F7E4, 0x12EC24:0x12F7FC,
+    0x12EC34:0x12F814, 0x12EC44:0x12F82C, 0x12EC54:0x12F85E,
+    0x12EC64:0x12F890, 0x12EC74:0x12F8B8, 0x12E8EC:0x12F5DE,
+    0x12E8FC:0x12FA0C, 0x12E90C:0x12FA2A, 0x12E91C:0x12FA0C,
+    0x12D5E4:0x12FAE8, 0x12DD50:0x130248, 0x12DD28:0x13020C,
+    0x12DD3C:0x13023A, 0x12E214:0x13020C,
+}
+if any(player_assemblies.get(s["player_animation_record"]) != s["player_assembly"]
+       for s in samples):
+    raise RuntimeError("player animation-record/assembly ownership drift")
+if any(alien_assemblies.get(s["alien_animation_record"]) != s["alien_assembly"]
+       for s in samples if s["alien_state"] != 0):
+    raise RuntimeError("alien animation-record/assembly ownership drift")
+for before, after in zip(samples, samples[1:]):
+    if (before["player_state"] == after["player_state"] == 0 and
+        after["player_lane"] != before["player_lane"] and
+        (after["player_screen_y"] - before["player_screen_y"]) *
+            (after["player_lane"] - before["player_lane"]) >= 0):
+        raise RuntimeError("world-z/screen-y sign drift")
+neutral_latches = [after for before, after in zip(samples, samples[1:])
+                   if before["input_mask"] & 0x0008 and
+                   after["input_mask"] == 0 and after["player_state"] == 0]
+if not neutral_latches or any(s["player_facing"] != 1 for s in neutral_latches):
+    raise RuntimeError("neutral release facing latch drift")
+for key in ("player_health", "player_state", "player_facing",
+            "player_animation_record", "player_assembly", "player_screen_y",
+            "alien_health", "alien_state", "alien_action", "alien_facing",
+            "alien_animation_record", "alien_assembly", "alien_screen_y"):
+    if state[key] != current_sample[key]:
+        raise RuntimeError(f"same-tick diagnostic drift for {key}")
 process=tools.process_record(args.emulator_pid); executable=Path(str(process["executable"]))
 settings=Path(os.environ["APPDATA"])/"YabaSanshiro/yabause.ini"
 report={"schema":1,"task_id":inventory["task_id"],"card_profile":inventory["card_profile"],

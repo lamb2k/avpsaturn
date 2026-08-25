@@ -28,7 +28,7 @@ static int test_loop(void)
     int contact_frames[2];
     int contacts;
     avsp_alien_ai_init(&runtime, 0x7301u);
-    input = input_at(1200, 320, 0);
+    input = input_at(1003, 320, 0);
     contacts = 0;
     for (frame = 0; frame <= 157; ++frame)
     {
