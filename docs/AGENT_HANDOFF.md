@@ -22,25 +22,21 @@
 
 ## Current task and next action
 
-INTEGRATE-04A is technically accepted at
-`d9021965dab64d47953d2e829c7d307b0b01a455`. Two post-commit cold Yaba runs
-match across an exact 448-frame ledger and prove real input, current-state
-player/AI/collision/damage/HIT/KO, adapted clear, unlock, and continued
-movement. Diagnostic ISO: `3246659a...938c5`; exact interactive ISO:
-`ae65359601d56e5fbee82c94eb66acfd12ed8c842d95b8f7a63e51d78bca7a8a`.
+USER-09 remains `CHANGES_REQUESTED`. The current live encounter and REPAIR-10
+are preserved as useful bounded work, but the runtime is classified
+`TECHNICAL_PROTOTYPE`, `ADAPTED_GAMEPLAY_SCAFFOLD`, `NOT_SOURCE_CLOSED`, and
+`NOT_USER_APPROVED`. Physical Saturn remains `UNRUN`.
 
-USER-09 returned `CHANGES_REQUESTED`: player facing was wrong in some walking
-directions, attacks looked incoherent between weapon/no-weapon poses, and AI
-plus player/alien collision felt off. `REPAIR-10-LIVE-PLAYER-PRESENTATION` is
-technically accepted at `4ea7c1829013e95b5ffdc34ef02ea5c133ee9a80` with
-Fast/Oracle/Target and paired pinned-emulator/visual evidence. It corrects the
-facing sign and the two startup ticks that used the unrelated legacy attack
-clip while preserving the four selector-owned source sequences and combat
-locks. Renew USER-09 with
-`build/feedback/USER-09-LIVE-ENCOUNTER-REVIEW-RENEWED`. Explicitly ask whether
-weapon/no-weapon progression still feels random. AI and collision remain
-unresolved follow-ups. Do not activate frontend work.
+The exact renewed feedback requires a source-closure course correction because
+alien facing/presentation, player weapon/equipment continuity, Coffee Shop
+navigation, and the combined player/AI/animation authority remain disconnected
+from confirmed source logic. Do not patch those symptoms in production.
 
-Resume prompt: Resume the AvP salvage Goal at renewed USER-09 using the repaired
-interactive package; keep weapon progression, AI, and collision unresolved and
-visible until explicit feedback chooses the next bounded correction.
+Active card: `ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT`. Continue
+serially through ORACLE-08 navigation/bounds, ORACLE-09 alien closure, SPEC-01,
+REIMPLEMENT-12, QA-12, and renewed USER-09. Retain the existing rendering, HUD,
+camera, audio, collision, readback, emulator, and visual-QA harness. Do not
+activate frontend work.
+
+Resume prompt: Resume the AvP salvage Goal at ORACLE-07, enforce the
+specification firewall, and return to USER-09 only after QA-12 passes.

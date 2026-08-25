@@ -233,19 +233,24 @@ independent_read_only_policy:
     - independent-oracle-state-and-card
 first_live_gameplay_encounter:
   milestone: FIRST LIVE GAMEPLAY ENCOUNTER
-  status: AWAITING_RENEWED_USER_FEEDBACK
+  status: SOURCE_CLOSURE_REQUIRED
+  classification: [TECHNICAL_PROTOTYPE, ADAPTED_GAMEPLAY_SCAFFOLD, NOT_SOURCE_CLOSED, NOT_USER_APPROVED]
   player_character: predator_warrior
   enemy_class: "0x1F"
   player_count: 1
   measured_round1_encounter_count: 1
-  production_player_control: PASS_BOUNDED_ONE_EMULATOR
-  street_alien_ai: PASS_BOUNDED_ONE_EMULATOR
-  encounter_controller: PASS_BOUNDED_ONE_EMULATOR
-  interactive_human_review: AWAITING_USER_FEEDBACK
-  user09_feedback_exact: "the character sprite is faving the wrong way with certain walking firectios.  attack sprites seem randomply selected such as weapon to no weapon to no weapon. impact works but the ai  and collosion between player and alien seem off. I'm not sure if these need to work at this point.&#x20;"
-  requested_changes: [player-facing, attack-presentation-coherence, street-alien-ai, player-alien-collision]
-  first_priority: REPAIR-10-LIVE-PLAYER-PRESENTATION
-  unresolved_after_first_repair: [street-alien-ai, player-alien-collision]
+  production_player_control: TECHNICAL_PROTOTYPE_NOT_SOURCE_CLOSED
+  street_alien_ai: TECHNICAL_PROTOTYPE_NOT_SOURCE_CLOSED
+  encounter_controller: ADAPTED_GAMEPLAY_SCAFFOLD
+  interactive_human_review: CHANGES_REQUESTED
+  user09_feedback_exact: "The current live encounter is a useful technical prototype, but it is not yet a faithful reproduction. The alien faces the wrong direction during some walk or attack states. Player attack presentation changes incoherently between weapon and no-weapon assemblies. The player can move through non-walkable wall or stage areas. The resulting player, AI, animation, and navigation systems feel disconnected from the original game. The next work must lift more confirmed source logic rather than repair isolated visible symptoms."
+  requested_changes: [source-closed-player-action-and-equipment, source-closed-round1-navigation, source-closed-class-0x1F-state-facing-presentation, executable-specification, source-closed-reimplementation, complete-source-saturn-differential]
+  first_priority: ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT
+  unresolved_after_repair10: [player-action-selection, equipment-continuity, round1-navigation-and-bounds, street-alien-state-facing-presentation, complete-source-saturn-differential]
+  specification_firewall: [read-only-source-closure, reviewed-executable-specification, specification-only-implementation, differential-and-visual-consistency-qa, renewed-user09]
+  source_closure_sequence: [ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT, ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS, ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION, SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT, REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER, QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL, USER-09-LIVE-ENCOUNTER-REVIEW]
+  engineering_clean_room_boundary: true
+  formal_legal_clean_room_claim: false
   scripted_capability_slice_sufficient: false
   physical_proof_source: INTEGRATE-03-PLAYABLE-SLICE only
 oracle04_source_research:
@@ -359,13 +364,20 @@ repair10_live_player_presentation:
   review_package: build/feedback/USER-09-LIVE-ENCOUNTER-REVIEW-RENEWED
   unresolved: weapon-no-weapon subjective progression / class-0x1F AI feel / player-alien collision feel / physical Saturn
   physical_saturn: UNRUN
-current_checkpoint: review-live-encounter
-active_task_card: docs/task_cards/USER-09-LIVE-ENCOUNTER-REVIEW.md
-active_task_id: USER-09-LIVE-ENCOUNTER-REVIEW
-active_task_kind: USER_REVIEW
-task_status: AWAITING_USER_FEEDBACK
-active_write_owner: USER-09-LIVE-ENCOUNTER-REVIEW
-awaiting_user_feedback: [USER-09-LIVE-ENCOUNTER-REVIEW]
+source_closure:
+  status: ACTIVE
+  prototype_harness_retained: true
+  preserved_infrastructure: [rendering, HUD, camera, audio, collision, readback, emulator, visual-QA]
+  active_card: ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT
+  frontend_activation_allowed: false
+  physical_saturn: UNRUN
+current_checkpoint: oracle-player-action-graph-equipment
+active_task_card: docs/task_cards/ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT.md
+active_task_id: ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT
+active_task_kind: ORACLE
+task_status: READY
+active_write_owner: ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT
+awaiting_user_feedback: []
 open_blockers: []
 hardware_pretest:
   task: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
@@ -1065,8 +1077,14 @@ task_queue:
   - SALVAGE-11-STREET-ALIEN-AI
   - PROMOTE-11-STREET-ALIEN-AI
   - INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER
-  - USER-09-LIVE-ENCOUNTER-REVIEW
   - REPAIR-10-LIVE-PLAYER-PRESENTATION
+  - ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT
+  - ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS
+  - ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION
+  - SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT
+  - REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER
+  - QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL
+  - USER-09-LIVE-ENCOUNTER-REVIEW
   - SALVAGE-08-FRONTEND
   - QA-08-FRONTEND
   - USER-08-FRONTEND

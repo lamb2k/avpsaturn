@@ -182,6 +182,13 @@ def main() -> None:
         "PROMOTE-11-STREET-ALIEN-AI",
         "INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER",
         "USER-09-LIVE-ENCOUNTER-REVIEW",
+        "ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT",
+        "ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS",
+        "ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION",
+        "SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT",
+        "REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER",
+        "QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL",
+        "specification firewall",
         "fixed-frame",
         "all four playable characters",
         "up to three simultaneous",
@@ -220,6 +227,9 @@ def main() -> None:
         "physical_status_changes: false",
         "FIRST LIVE GAMEPLAY ENCOUNTER",
         "scripted_capability_slice_sufficient: false",
+        "status: SOURCE_CLOSURE_REQUIRED",
+        "NOT_SOURCE_CLOSED",
+        "formal_legal_clean_room_claim: false",
     ):
         require(token in state, f"state missing continuity policy: {token}")
     require(scalar(roadmap, "CURRENT_TASK") == scalar(state, "active_task_id"),

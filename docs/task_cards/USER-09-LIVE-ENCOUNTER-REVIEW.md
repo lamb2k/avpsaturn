@@ -2,16 +2,16 @@
 
 TASK: USER-09-LIVE-ENCOUNTER-REVIEW
 KIND: USER_REVIEW
-STATUS: AWAITING_USER_FEEDBACK
+STATUS: CHANGES_REQUESTED
 CHECKPOINT: review-live-encounter
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
 TIER: 0
-DEPENDENCIES: [INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER]
+DEPENDENCIES: [QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL]
 REQUIRED_LANES: [Fast]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [SALVAGE-08-FRONTEND]
+NEXT_ELIGIBLE_CARDS: [ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT, SALVAGE-08-FRONTEND]
 
 ## Objective
 
@@ -42,11 +42,11 @@ feedback. Perform no implementation.
 
 ## Saturn build profile
 
-Reuse the exact INTEGRATE-04A-reviewed image; do not rebuild behavior.
+Reuse the exact QA-12-reviewed image; do not rebuild behavior.
 
 ## Emulator readback
 
-Reuse INTEGRATE-04A evidence only; create no new acceptance tier.
+Reuse QA-12 evidence only; create no new acceptance tier.
 
 ## Human-review requirement
 
@@ -67,8 +67,9 @@ encounter flow, and overall arcade feel. Record the exact response and remain
 
 ## Next eligible cards
 
-- `SALVAGE-08-FRONTEND` only after explicit acceptance; otherwise one bounded
-  correction card for the issue chosen first.
+- `SALVAGE-08-FRONTEND` only after explicit acceptance; otherwise the bounded
+  source-closure sequence beginning with
+  `ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT`.
 
 ## Recorded feedback
 
@@ -87,3 +88,24 @@ REPAIR-10 is technically accepted at
 whether facing is corrected and whether the weapon/no-weapon progression still
 feels random. AI and collision remain known unresolved issues even if the
 player-presentation repair is accepted.
+
+## Source-closure course correction
+
+Exact response:
+
+> The current live encounter is a useful technical prototype, but it is not yet
+> a faithful reproduction. The alien faces the wrong direction during some walk
+> or attack states. Player attack presentation changes incoherently between
+> weapon and no-weapon assemblies. The player can move through non-walkable wall
+> or stage areas. The resulting player, AI, animation, and navigation systems
+> feel disconnected from the original game. The next work must lift more
+> confirmed source logic rather than repair isolated visible symptoms.
+
+Disposition: `CHANGES_REQUESTED`, `NOT_USER_APPROVED`. The current live
+encounter is retained as a `TECHNICAL_PROTOTYPE` and
+`ADAPTED_GAMEPLAY_SCAFFOLD`; it is `NOT_SOURCE_CLOSED`. REPAIR-10 remains useful
+bounded work, but isolated visible symptom repair is no longer the active path.
+
+The required serial path is ORACLE-07, ORACLE-08, ORACLE-09, SPEC-01,
+REIMPLEMENT-12, QA-12, and only then renewed USER-09. `SALVAGE-08-FRONTEND`
+remains blocked. Physical Saturn remains `UNRUN`.

@@ -65,9 +65,9 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: USER-09-LIVE-ENCOUNTER-REVIEW
+CURRENT_TASK: ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT
 
-ACTIVE_SOFTWARE_TASK: NONE_USER_REVIEW_CHECKPOINT
+ACTIVE_SOFTWARE_TASK: SOURCE_CLOSURE_ORACLE
 
 ## 4. Current salvage queue and production extension
 
@@ -89,15 +89,30 @@ player/alien collision. `REPAIR-10-LIVE-PLAYER-PRESENTATION` is technically
 accepted at `4ea7c18`: it fixes the facing-sign boundary and the unsourced
 two-tick legacy attack flash before each selector-owned source sequence. Paired
 448-sample emulator state and visual QA pass; renewed interactive ISO
-`4b73b534...e0f5f` is now at `USER-09`. Weapon/no-weapon subjective progression,
-AI, and collision remain explicit unresolved review/follow-up issues; this is
-one bounded encounter, not complete playable Round 1. The
+`4b73b534...e0f5f` was reviewed again and remains useful only as a
+`TECHNICAL_PROTOTYPE` / `ADAPTED_GAMEPLAY_SCAFFOLD`; it is
+`NOT_SOURCE_CLOSED` and `NOT_USER_APPROVED`. The renewed feedback identifies
+alien state-facing errors, player equipment/assembly discontinuity,
+non-walkable wall traversal, and disconnected player/AI/animation/navigation
+authority. The active path is a specification firewall: read-only
+ORACLE-07/08/09 source closure, reviewed SPEC-01 executable contracts,
+SPEC-only REIMPLEMENT-12, complete QA-12 source/Saturn differential, then
+renewed USER-09. Existing rendering, HUD, camera, audio, collision, readback,
+emulator, and visual-QA infrastructure remains the diagnostic harness. The
 slice remains physically `UNRUN`. The bounded QA prerequisite
 `HW-01-PROBE-3-VDP1-BUDGET-PRETEST` has prepared its representative, exact
 909-tile, and overload-control hardware package. Host checks, strict build,
 paired pinned-emulator semantics, overload detection, and the exact approved
 normal-ISO regression pass. It is `READY_FOR_PHYSICAL`; physical timing and
 soak remain `UNRUN`, and `SALVAGE-08` remains inactive.
+
+The exact serial firewall is
+`ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT` ->
+`ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS` ->
+`ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION` ->
+`SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT` ->
+`REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER` ->
+`QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL` -> renewed USER-09.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|
@@ -115,15 +130,16 @@ soak remain `UNRUN`, and `SALVAGE-08` remains inactive.
 | 12 | `ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS` -> `ORACLE-05-STREET-ALIEN-AI` -> `ORACLE-06-ROUND1-ENCOUNTER-RULES` | Read-only source research for the first live encounter; these may run serially while HW-01 remains at its physical hard stop |
 | 13 | `SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER` -> `PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER` | Build the bounded production player-action authority |
 | 14 | `SALVAGE-11-STREET-ALIEN-AI` -> `PROMOTE-11-STREET-ALIEN-AI` | Build the bounded autonomous class-`0x1F` authority |
-| 15 | `INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER` -> `USER-09-LIVE-ENCOUNTER-REVIEW` | Prove and explicitly review `FIRST LIVE GAMEPLAY ENCOUNTER` |
-| 16 | `SALVAGE-08-FRONTEND` -> `QA-08-FRONTEND` -> `USER-08-FRONTEND` -> `PROMOTE-08-FRONTEND` | Promote title and four-character select only after the live-encounter review |
-| 17 | `INTEGRATE-04-COLD-BOOT-TO-ROUND1` | Cold boot into the real controller-driven Round 1 encounter, never the scripted capability demonstration |
-| 18 | `ORACLE-01`, `ORACLE-02`, `ORACLE-03` | Complete title-to-credits and four-character source evidence |
-| 19 | stage-segment templates -> `INTEGRATE-05-REFERENCE-CHARACTER-FULL-GAME` | Complete one reference character through credits |
-| 20 | character templates -> `INTEGRATE-06-FOUR-CHARACTER-ROSTER` | Add the remaining three characters through one runtime |
-| 21 | multiplayer templates -> `INTEGRATE-07-THREE-PLAYER-MULTIPLAYER` | Add input, joins, camera, combat, and resource peaks |
-| 22 | `QA-09-RELEASE-HARDENING` | Repeatable build and soak hardening |
-| 23 | `QA-10-FINAL-TITLE-TO-CREDITS-ACCEPTANCE` | Exact release acceptance for every character and multiplayer scope |
+| 15 | `INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER` -> `REPAIR-10` -> first/renewed `USER-09` | Preserve the useful technical harness while recording that it is adapted, not source-closed or user-approved |
+| 16 | `ORACLE-07` -> `ORACLE-08` -> `ORACLE-09` -> `SPEC-01` -> `REIMPLEMENT-12` -> `QA-12` -> renewed `USER-09` | Source-close and explicitly review `FIRST LIVE GAMEPLAY ENCOUNTER` behind the specification firewall |
+| 17 | `SALVAGE-08-FRONTEND` -> `QA-08-FRONTEND` -> `USER-08-FRONTEND` -> `PROMOTE-08-FRONTEND` | Promote title and four-character select only after explicit renewed USER-09 acceptance |
+| 18 | `INTEGRATE-04-COLD-BOOT-TO-ROUND1` | Cold boot into the real controller-driven Round 1 encounter, never the scripted capability demonstration |
+| 19 | `ORACLE-01`, `ORACLE-02`, `ORACLE-03` | Complete title-to-credits and four-character source evidence |
+| 20 | stage-segment templates -> `INTEGRATE-05-REFERENCE-CHARACTER-FULL-GAME` | Complete one reference character through credits |
+| 21 | character templates -> `INTEGRATE-06-FOUR-CHARACTER-ROSTER` | Add the remaining three characters through one runtime |
+| 22 | multiplayer templates -> `INTEGRATE-07-THREE-PLAYER-MULTIPLAYER` | Add input, joins, camera, combat, and resource peaks |
+| 23 | `QA-09-RELEASE-HARDENING` | Repeatable build and soak hardening |
+| 24 | `QA-10-FINAL-TITLE-TO-CREDITS-ACCEPTANCE` | Exact release acceptance for every character and multiplayer scope |
 
 Exact dependencies, statuses, and predeclared successors are machine-checked
 from the cards and `project_state.yaml`.
@@ -255,6 +271,14 @@ real controller input, current-state action/AI decisions, live overlap/damage,
 player and alien HIT/KO, encounter clear, restored stage progression, and
 continued movement. Machine tests use deterministic input ledgers; the human
 checkpoint uses real interactive input.
+
+The current live encounter is retained only as a technical prototype and
+diagnostic harness. R7B now requires ORACLE-07 player action/equipment closure,
+ORACLE-08 Coffee Shop navigation closure, ORACLE-09 class-`0x1F`
+state/facing/presentation closure, SPEC-01 executable contracts, implementation
+only from those contracts, and QA-12 cadence-1 semantic plus visual
+differential review. This is an engineering clean-room boundary, not a formal
+legal clean-room claim.
 
 **Exit:** the player can approach or retreat, change lanes, choose when to
 attack, miss, make contact, receive an enemy attack, KO the alien, clear the

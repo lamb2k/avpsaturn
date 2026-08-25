@@ -45,9 +45,10 @@
       "id": "round1",
       "technical_capability_slice": "PARTIAL",
       "live_player_control": "PASS_BOUNDED_ONE_EMULATOR",
-      "live_player_presentation_repair": "PASS_BOUNDED_ONE_EMULATOR_USER_REVIEW_PENDING",
+      "live_player_presentation_repair": "PARTIAL",
       "street_alien_ai": "PASS_BOUNDED_ONE_EMULATOR",
       "encounter_controller": "PASS_BOUNDED_ONE_EMULATOR",
+      "live_encounter_classification": ["TECHNICAL_PROTOTYPE", "ADAPTED_GAMEPLAY_SCAFFOLD", "NOT_SOURCE_CLOSED", "NOT_USER_APPROVED"],
       "complete_round1": "UNRUN",
       "captured": "PARTIAL",
       "labeled": "PARTIAL",
@@ -58,9 +59,10 @@
       "physical_workload": "UNRUN",
       "blockers": [
         "The approved SOURCE_BOUND_WITH_ADAPTED_INPUT technical capability slice uses deterministic choreography and does not establish production player control, autonomous enemy AI, encounter clear, or complete Round 1 behavior.",
-        "USER-09 reported player-facing, attack-presentation, AI, and collision problems. Facing and source-presentation startup are technically repaired; weapon progression, AI, collision, physical capability, frontend, boss, and complete route transitions remain incomplete."
+        "USER-09 explicitly classifies the live encounter as a useful technical prototype and adapted gameplay scaffold that is not source-closed or user-approved.",
+        "Player action/equipment selection, Coffee Shop navigation and non-walkable bounds, class-0x1F state/facing/presentation, and the complete source/Saturn consistency matrix remain open; frontend and physical Saturn remain blocked or UNRUN."
       ],
-      "next_experiment": "Review the exact REPAIR-10 interactive ISO at renewed USER-09; confirm facing and attack handoff, explicitly report whether weapon progression still feels random, and choose the next bounded AI or collision correction without activating frontend work."
+      "next_experiment": "Execute ORACLE-07, ORACLE-08, and ORACLE-09 serially; build SPEC-01; reimplement only from the accepted executable specification; pass QA-12; then renew USER-09 without activating frontend work."
     },
     {
       "id": "round2_underpass_through_frame_18000",

@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 IMPLEMENTATION_KINDS = {"SALVAGE", "REPAIR", "PROMOTE", "INTEGRATE"}
-CONTROL_KINDS = {"ARCHITECTURE", "ORACLE", "QA"}
+CONTROL_KINDS = {"ARCHITECTURE", "ORACLE", "SPEC", "QA"}
 EXECUTABLE_KINDS = IMPLEMENTATION_KINDS | CONTROL_KINDS
 ALLOWED_KINDS = EXECUTABLE_KINDS | {"USER_REVIEW"}
 ALLOWED_STATUSES = {
@@ -388,11 +388,15 @@ def main() -> None:
             "hardware pretest is not parked while software work proceeds")
 
     for token in (
-        "production_player_control: PASS_BOUNDED_ONE_EMULATOR",
-        "street_alien_ai: PASS_BOUNDED_ONE_EMULATOR",
-        "encounter_controller: PASS_BOUNDED_ONE_EMULATOR",
-        "interactive_human_review: AWAITING_USER_FEEDBACK",
-        "first_priority: REPAIR-10-LIVE-PLAYER-PRESENTATION",
+        "status: SOURCE_CLOSURE_REQUIRED",
+        "TECHNICAL_PROTOTYPE",
+        "ADAPTED_GAMEPLAY_SCAFFOLD",
+        "NOT_SOURCE_CLOSED",
+        "NOT_USER_APPROVED",
+        "interactive_human_review: CHANGES_REQUESTED",
+        "first_priority: ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT",
+        "specification_firewall:",
+        "formal_legal_clean_room_claim: false",
         "scripted_capability_slice_sufficient: false",
     ):
         require(token in state, f"live-gameplay state missing {token}")
@@ -502,11 +506,13 @@ def main() -> None:
     require("scripted INTEGRATE-03 capability demonstration cannot satisfy" in
             cards["INTEGRATE-04-COLD-BOOT-TO-ROUND1"],
             "scripted capability slice can satisfy playable Round 1")
-    require(scalar(cards["USER-09-LIVE-ENCOUNTER-REVIEW"], "STATUS") ==
-            "AWAITING_USER_FEEDBACK" and active_id ==
-            "USER-09-LIVE-ENCOUNTER-REVIEW" and "physical proof" in
-            cards["USER-09-LIVE-ENCOUNTER-REVIEW"],
-            "USER-09 can become physical proof")
+    user09 = cards["USER-09-LIVE-ENCOUNTER-REVIEW"]
+    require(scalar(user09, "STATUS") == "CHANGES_REQUESTED" and
+            active_id != "USER-09-LIVE-ENCOUNTER-REVIEW" and
+            inline_list(user09, "DEPENDENCIES") ==
+            ["QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL"] and
+            "NOT_SOURCE_CLOSED" in user09 and "physical proof" in user09,
+            "USER-09 source-closure disposition drifted")
     repair = cards["REPAIR-10-LIVE-PLAYER-PRESENTATION"]
     require(scalar(repair, "STATUS") == "ACCEPTED" and
             "facing" in repair and "legacy attack clip" in repair and
@@ -514,6 +520,34 @@ def main() -> None:
             inline_list(repair, "NEXT_ELIGIBLE_CARDS") ==
             ["USER-09-LIVE-ENCOUNTER-REVIEW"],
             "USER-09 correction scope or renewed review gate drifted")
+    closure = [
+        "ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT",
+        "ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS",
+        "ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION",
+        "SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT",
+        "REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER",
+        "QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL",
+    ]
+    require(active_id == closure[0] and scalar(cards[closure[0]], "STATUS") ==
+            "READY", "ORACLE-07 is not the sole active source-closure card")
+    for index, task in enumerate(closure):
+        card = cards[task]
+        if index:
+            expected_dependencies = ([closure[index - 1]] if index != 3 else
+                                     closure[:3])
+            require(inline_list(card, "DEPENDENCIES") == expected_dependencies,
+                    f"{task} bypasses the source-closure prerequisites")
+            require(scalar(card, "STATUS") == "BLOCKED",
+                    f"{task} activated before its predecessor")
+    for task in closure[:3]:
+        lowered = cards[task].lower()
+        require(scalar(cards[task], "READ_ONLY") == "true" and
+                "all production" in lowered and
+                "no production" in lowered,
+                f"{task} lost its read-only source firewall")
+    require("SPEC-01" in cards[closure[4]] and
+            "raw MAME" in cards[closure[4]],
+            "REIMPLEMENT-12 can bypass the executable specification")
     for later in (
         "INTEGRATE-06-FOUR-CHARACTER-ROSTER",
         "INTEGRATE-07-THREE-PLAYER-MULTIPLAYER",
