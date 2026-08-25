@@ -20,15 +20,10 @@
 
 ## Current task and next action
 
-USER-09 is renewed at `AWAITING_USER_FEEDBACK`. The live encounter and REPAIR-10
-remain useful bounded work, but the runtime is classified
+Renewed USER-09 is `CHANGES_REQUESTED`. The live encounter and REPAIR-10 remain
+useful bounded work, but the runtime is classified
 `TECHNICAL_PROTOTYPE`, `ADAPTED_GAMEPLAY_SCAFFOLD`, `NOT_SOURCE_CLOSED`, and
 `NOT_USER_APPROVED`. Physical Saturn remains `UNRUN`.
-
-The exact renewed feedback requires a source-closure course correction because
-alien facing/presentation, player weapon/equipment continuity, Coffee Shop
-navigation, and the combined player/AI/animation authority remain disconnected
-from confirmed source logic. Do not patch those symptoms in production.
 
 ORACLE-07 (`67d6b3f`) source-closes bounded player action/equipment. ORACLE-08
 (`718c298`) proves the non-rectangular Coffee Shop world-space contract.
@@ -43,7 +38,10 @@ Fast and Oracle pass; production is unchanged.
 REIMPLEMENT-12 is technically accepted at corrected candidate `e237335`; its
 exact 471-frame paired emulator ledgers and all required lanes pass. QA-12 is
 accepted at `f99df5e` after the restarted 34-scenario semantic and direct visual
-matrix passed and six mutations rejected. Resume the AvP salvage Goal at
-`USER-09-LIVE-ENCOUNTER-REVIEW`; reuse the exact reviewed behavior and keep
-frontend work inactive, preserve physical Saturn as `UNRUN`, and infer no user
-approval. Ask exactly: "What should remain unchanged, what looks or feels wrong, and which issue should be fixed first?"
+matrix passed and six mutations rejected. USER-09 now confirms the attack
+sequence and player-tracking AI, but reports corrupted background presentation
+and neutral-facing reversal after input release. Resume the AvP salvage Goal at
+`REPAIR-11-LIVE-BACKGROUND-PRESENTATION`; repair only the live camera-to-plane
+coordinate bridge, preserve gameplay and the two new review locks, leave the
+neutral-facing issue unresolved, keep frontend inactive, and preserve physical
+Saturn as `UNRUN`.

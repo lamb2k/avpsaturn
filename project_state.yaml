@@ -251,9 +251,12 @@ first_live_gameplay_encounter:
   encounter_controller: SPEC_BOUND_ADAPTED_CLEAR_QA_PENDING
   interactive_human_review: CHANGES_REQUESTED
   user09_feedback_exact: "The current live encounter is a useful technical prototype, but it is not yet a faithful reproduction. The alien faces the wrong direction during some walk or attack states. Player attack presentation changes incoherently between weapon and no-weapon assemblies. The player can move through non-walkable wall or stage areas. The resulting player, AI, animation, and navigation systems feel disconnected from the original game. The next work must lift more confirmed source logic rather than repair isolated visible symptoms."
-  requested_changes: [source-closed-player-action-and-equipment, source-closed-round1-navigation, source-closed-class-0x1F-state-facing-presentation, executable-specification, source-closed-reimplementation, complete-source-saturn-differential]
+  renewed_user09_feedback_exact: ["the background looks correupted.&#x20;", "also confirm the attack animation sequence is correct. also the player resets to opposite direction when the key is supressed. overall this feels a bit more faithful . the alien ai also tracks the player"]
+  renewed_user09_preservation_locks: [reviewed-attack-animation-sequence, class-0x1F-player-tracking]
+  requested_changes: [live-background-coordinate-bridge, neutral-facing-release]
   first_priority: ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT
-  unresolved_after_repair10: [complete-source-saturn-differential, renewed-user09]
+  current_priority: REPAIR-11-LIVE-BACKGROUND-PRESENTATION
+  unresolved_after_repair10: [live-background-coordinate-bridge, neutral-facing-release, renewed-user09]
   specification_firewall: [read-only-source-closure, reviewed-executable-specification, specification-only-implementation, differential-and-visual-consistency-qa, renewed-user09]
   source_closure_sequence: [ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT, ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS, ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION, SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT, REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER, QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL, USER-09-LIVE-ENCOUNTER-REVIEW]
   engineering_clean_room_boundary: true
@@ -455,16 +458,16 @@ source_closure:
   status: ACTIVE
   prototype_harness_retained: true
   preserved_infrastructure: [rendering, HUD, camera, audio, collision, readback, emulator, visual-QA]
-  active_card: USER-09-LIVE-ENCOUNTER-REVIEW
+  active_card: REPAIR-11-LIVE-BACKGROUND-PRESENTATION
   frontend_activation_allowed: false
   physical_saturn: UNRUN
-current_checkpoint: review-live-encounter
-active_task_card: docs/task_cards/USER-09-LIVE-ENCOUNTER-REVIEW.md
-active_task_id: USER-09-LIVE-ENCOUNTER-REVIEW
-active_task_kind: USER_REVIEW
-task_status: AWAITING_USER_FEEDBACK
-active_write_owner: USER-09-LIVE-ENCOUNTER-REVIEW
-awaiting_user_feedback: [USER-09-LIVE-ENCOUNTER-REVIEW]
+current_checkpoint: repair-live-background-presentation
+active_task_card: docs/task_cards/REPAIR-11-LIVE-BACKGROUND-PRESENTATION.md
+active_task_id: REPAIR-11-LIVE-BACKGROUND-PRESENTATION
+active_task_kind: REPAIR
+task_status: READY
+active_write_owner: REPAIR-11-LIVE-BACKGROUND-PRESENTATION
+awaiting_user_feedback: []
 open_blockers: []
 hardware_pretest:
   task: HW-01-PROBE-3-VDP1-BUDGET-PRETEST
@@ -1172,6 +1175,7 @@ task_queue:
   - REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER
   - QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL
   - USER-09-LIVE-ENCOUNTER-REVIEW
+  - REPAIR-11-LIVE-BACKGROUND-PRESENTATION
   - SALVAGE-08-FRONTEND
   - QA-08-FRONTEND
   - USER-08-FRONTEND

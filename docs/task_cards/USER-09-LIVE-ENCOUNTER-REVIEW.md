@@ -2,7 +2,7 @@
 
 TASK: USER-09-LIVE-ENCOUNTER-REVIEW
 KIND: USER_REVIEW
-STATUS: AWAITING_USER_FEEDBACK
+STATUS: CHANGES_REQUESTED
 CHECKPOINT: review-live-encounter
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -11,7 +11,7 @@ DEPENDENCIES: [QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL]
 REQUIRED_LANES: [Fast]
 OPTIONAL_LANES: []
 CLAUDE_ALLOWED: false
-NEXT_ELIGIBLE_CARDS: [ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT, SALVAGE-08-FRONTEND]
+NEXT_ELIGIBLE_CARDS: [REPAIR-11-LIVE-BACKGROUND-PRESENTATION, SALVAGE-08-FRONTEND]
 
 ## Objective
 
@@ -118,7 +118,26 @@ against exact gameplay candidate
 `8e20cb7e8c482035578422d8d1734cd9713adfc525ac5bf7c6dd8eade386bea8`.
 The renewed review reuses that QA-reviewed behavior without rebuilding it.
 
-Status is `AWAITING_USER_FEEDBACK`; no acceptance is inferred from QA,
-emulator output, images, silence, or prior approvals. Frontend activation and
-physical-status promotion remain disabled. Ask exactly: "What should remain
-unchanged, what looks or feels wrong, and which issue should be fixed first?"
+The renewed launch entered `AWAITING_USER_FEEDBACK`; no acceptance was inferred
+from QA, emulator output, images, silence, or prior approvals. Frontend
+activation and physical-status promotion remained disabled. The required
+question was asked exactly before the feedback below was received.
+
+## Renewed review feedback
+
+Exact responses, in order:
+
+> the background looks correupted.&#x20;
+
+> also confirm the attack animation sequence is correct. also the player resets to opposite direction when the key is supressed. overall this feels a bit more faithful . the alien ai also tracks the player
+
+Disposition: `CHANGES_REQUESTED`, `NOT_USER_APPROVED`. The reviewed attack
+animation sequence is correct and becomes a preservation lock. The observed
+class-`0x1F` player tracking also becomes a preservation lock. "Overall this
+feels a bit more faithful" is positive feedback but is not blanket approval.
+
+The corrupted background is the first bounded repair because it was reported
+first. The neutral sprite reversing after directional release is recorded and
+remains unresolved for the following review/repair. Activate only
+`REPAIR-11-LIVE-BACKGROUND-PRESENTATION`; keep frontend inactive and physical
+Saturn `UNRUN`.

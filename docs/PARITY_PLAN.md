@@ -65,9 +65,9 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: USER-09-LIVE-ENCOUNTER-REVIEW
+CURRENT_TASK: REPAIR-11-LIVE-BACKGROUND-PRESENTATION
 
-ACTIVE_SOFTWARE_TASK: USER_REVIEW
+ACTIVE_SOFTWARE_TASK: BOUNDED_PRESENTATION_REPAIR
 
 ## 4. Current salvage queue and production extension
 
@@ -111,6 +111,14 @@ slice remains physically `UNRUN`. The bounded QA prerequisite
 paired pinned-emulator semantics, overload detection, and the exact approved
 normal-ISO regression pass. It is `READY_FOR_PHYSICAL`; physical timing and
 soak remain `UNRUN`, and `SALVAGE-08` remains inactive.
+
+Renewed USER-09 reports that the background is corrupted and that the neutral
+player sprite reverses after directional release. It also confirms the attack
+animation sequence is correct, the result feels more faithful overall, and the
+alien AI tracks the player. `REPAIR-11-LIVE-BACKGROUND-PRESENTATION` is active
+first: correct only the live camera-to-VDP2-plane coordinate bridge, preserve
+the reviewed attack sequence and player-tracking AI, and leave neutral-facing
+reversal recorded for the next bounded review/repair.
 
 The exact serial firewall is
 `ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT` ->

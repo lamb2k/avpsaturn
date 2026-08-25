@@ -507,8 +507,8 @@ def main() -> None:
             cards["INTEGRATE-04-COLD-BOOT-TO-ROUND1"],
             "scripted capability slice can satisfy playable Round 1")
     user09 = cards["USER-09-LIVE-ENCOUNTER-REVIEW"]
-    require(scalar(user09, "STATUS") == "AWAITING_USER_FEEDBACK" and
-            active_id == "USER-09-LIVE-ENCOUNTER-REVIEW" and
+    require(scalar(user09, "STATUS") == "CHANGES_REQUESTED" and
+            active_id == "REPAIR-11-LIVE-BACKGROUND-PRESENTATION" and
             inline_list(user09, "DEPENDENCIES") ==
             ["QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL"] and
             "NOT_SOURCE_CLOSED" in user09 and "physical proof" in user09,
@@ -531,9 +531,11 @@ def main() -> None:
     first_open = next((index for index, task in enumerate(closure)
                        if scalar(cards[task], "STATUS") != "ACCEPTED"), None)
     if first_open is None:
-        require(active_id == "USER-09-LIVE-ENCOUNTER-REVIEW" and
-                scalar(user09, "STATUS") == "AWAITING_USER_FEEDBACK",
-                "completed source-closure sequence did not renew USER-09")
+        repair11 = cards["REPAIR-11-LIVE-BACKGROUND-PRESENTATION"]
+        require(active_id == "REPAIR-11-LIVE-BACKGROUND-PRESENTATION" and
+                scalar(repair11, "STATUS") == "READY" and
+                scalar(user09, "STATUS") == "CHANGES_REQUESTED",
+                "renewed USER-09 feedback did not activate background repair")
     else:
         require(active_id == closure[first_open] and
                 scalar(cards[closure[first_open]], "STATUS") == "READY",
