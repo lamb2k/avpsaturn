@@ -2,7 +2,7 @@
 
 TASK: ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS
 KIND: ORACLE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: oracle-round1-navigation-bounds
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

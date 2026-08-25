@@ -1150,8 +1150,8 @@
     },
     {
       "id": "player-action-controller",
-      "existing_source_paths": ["src/port_v2/gameplay/player_action/**", "tests/port_v2/predator_warrior_action/**", "data/avsp_source_combat_presentation_contract.json"],
-      "existing_dependencies": ["promoted directional input", "REPAIR-09 presentation contract", "exact collision and HIT/KO", "ORACLE-04 and ORACLE-06 source research"],
+      "existing_source_paths": ["src/port_v2/gameplay/player_action/**", "tests/port_v2/predator_warrior_action/**", "data/avsp_source_combat_presentation_contract.json", "data/oracle07_predator_warrior_action_graph_equipment.json"],
+      "existing_dependencies": ["promoted directional input", "REPAIR-09 presentation contract", "exact collision and HIT/KO", "ORACLE-04, ORACLE-06, and ORACLE-07 source research"],
       "authored_controller_coupling": "The live core still owns an automatic selector 1-to-2-to-3-to-4 cycle and incomplete equipment/action closure; technical determinism is not source closure.",
       "proposed_isolated_bench": "Replay exact movement, four attack windows, HIT recovery, and KO in a strict portable host test and dedicated Saturn diagnostic.",
       "temporary_adapter": {
@@ -1165,17 +1165,17 @@
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
       "behavioral_classification": "SOURCE_BOUND_WITH_ADAPTED_INPUT",
-      "source_research_status": "MEASURED",
-      "source_research_evidence": "data/oracle04_predator_warrior_control_actions.json",
-      "source_research_scope": "bounded first-live-encounter movement, facing, four attack selectors, timing, boxes, and enemy HIT/KO only; complete move set, interruption/cancellation, and player-side RNG remain UNKNOWN",
+      "source_research_status": "MEASURED_SOURCE_CLOSED_BOUNDED_CONTROLLER",
+      "source_research_evidence": "data/oracle07_predator_warrior_action_graph_equipment.json",
+      "source_research_scope": "bounded first-live-encounter input edges, contextual dispatch, close-combo window and step state, action-local equipment flag, facing latch, movement, animation/assembly selection, collision identity, interruption/cancellation, HIT, and prior accepted KO binding; complete move set and multiplayer remain UNKNOWN",
       "user_status": "CHANGES_REQUESTED",
       "salvage_decision": "PROMOTED",
       "production_interface": "src/port_v2/gameplay/player_action/player_action.h",
       "promoted_commit": "4ea7c1829013e95b5ffdc34ef02ea5c133ee9a80",
       "evidence_commit": "4ea7c1829013e95b5ffdc34ef02ea5c133ee9a80",
       "diagnostic_interface": "tests/port_v2/predator_warrior_action/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: through ORACLE-07 and SPEC-01; action selection, combo sequencing, equipment state, interruption/cancellation, direction reversal, and state-owned assembly identity are not source-closed. Do not preserve automatic selector cycling without proof. Physical Saturn remains UNRUN."],
-      "exact_next_experiment": "Execute ORACLE-07 controlled input/action/equipment experiments and static writer binding; production must not change until SPEC-01 accepts the executable contract.",
+      "blockers": ["Unblock: production only through ORACLE-08/09 and accepted SPEC-01; ORACLE-07 rejects automatic selector cycling and arbitrary visible-weapon inference, but the adapted runtime remains unchanged. Physical Saturn remains UNRUN."],
+      "exact_next_experiment": "Execute ORACLE-08 Coffee Shop navigation/bounds then ORACLE-09; production must not change until SPEC-01 accepts the executable contract.",
       "user_feedback": {"exact_response": "The current live encounter is a useful technical prototype, but it is not yet a faithful reproduction. The alien faces the wrong direction during some walk or attack states. Player attack presentation changes incoherently between weapon and no-weapon assemblies. The player can move through non-walkable wall or stage areas. The resulting player, AI, animation, and navigation systems feel disconnected from the original game. The next work must lift more confirmed source logic rather than repair isolated visible symptoms.", "approved_components": ["REPAIR-10 remains useful bounded work and the live encounter remains useful as a technical prototype harness."], "requested_changes": ["Source-close player action selection, combo and equipment state, facing, animation record, and assembly continuity before reimplementation."], "priority": "ORACLE-07-first"}
     },
     {

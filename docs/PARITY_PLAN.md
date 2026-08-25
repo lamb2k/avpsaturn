@@ -65,7 +65,7 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT
+CURRENT_TASK: ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS
 
 ACTIVE_SOFTWARE_TASK: SOURCE_CLOSURE_ORACLE
 
@@ -163,9 +163,16 @@ runtime, Probe 3 result, physical evidence, exact INTEGRATE-03 ISO,
 - `ORACLE-06-ROUND1-ENCOUNTER-RULES` separates measured encounter entry,
   spawn, bounds/lock, active/clear guards, unlock, and continuation from actor
   AI and presentation events.
+- `ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT` source-closes the
+  bounded player controller: edge-owned close-combo advance, the 30-frame
+  follow-up counter, held/startup/recovery behavior, contextual action
+  selection, action-local equipment flag writers, facing latch, HIT
+  cancellation, animation records, assemblies, and exact close-contact
+  presentation identity.
 
-Two identical captures and one real perturbation were required for each body.
-All three are accepted; no Oracle writer remains active. ORACLE-06 proved that
+Two identical captures and real perturbations were required for each body.
+ORACLE-04 through ORACLE-07 are accepted; ORACLE-08 is the active read-only
+source-closure writer. ORACLE-06 proved that
 the source opening is a withdrawal set piece, so the first live implementation
 uses a source-bound, adapted one-alien KO/inactive clear. Facts not captured
 remain `UNKNOWN` or `UNRUN`.

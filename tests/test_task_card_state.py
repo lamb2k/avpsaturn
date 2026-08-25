@@ -528,8 +528,11 @@ def main() -> None:
         "REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER",
         "QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL",
     ]
-    require(active_id == closure[0] and scalar(cards[closure[0]], "STATUS") ==
-            "READY", "ORACLE-07 is not the sole active source-closure card")
+    first_open = next((index for index, task in enumerate(closure)
+                       if scalar(cards[task], "STATUS") != "ACCEPTED"), None)
+    require(first_open is not None and active_id == closure[first_open] and
+            scalar(cards[closure[first_open]], "STATUS") == "READY",
+            "first open source-closure card is not the sole active card")
     for index, task in enumerate(closure):
         card = cards[task]
         if index:
@@ -537,8 +540,10 @@ def main() -> None:
                                      closure[:3])
             require(inline_list(card, "DEPENDENCIES") == expected_dependencies,
                     f"{task} bypasses the source-closure prerequisites")
-            require(scalar(card, "STATUS") == "BLOCKED",
-                    f"{task} activated before its predecessor")
+        expected_status = ("ACCEPTED" if index < first_open else
+                           "READY" if index == first_open else "BLOCKED")
+        require(scalar(card, "STATUS") == expected_status,
+                f"{task} source-closure sequence status drifted")
     for task in closure[:3]:
         lowered = cards[task].lower()
         require(scalar(cards[task], "READ_ONLY") == "true" and

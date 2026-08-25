@@ -2,7 +2,7 @@
 
 TASK: ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT
 KIND: ORACLE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: oracle-player-action-graph-equipment
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -73,3 +73,33 @@ USER-09.
 ## Next eligible cards
 
 - `ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS` only after accepted source closure.
+
+## Validated evidence
+
+- Two independently launched primary captures are byte-identical across 3,070
+  samples and actor writes; two independently launched equipment captures are
+  also byte-identical across samples, actor writes, and the player-header write
+  trace.
+- Button 2 does not randomly select or automatically cycle attacks. Near the
+  target, four discrete edges within a source-owned 30-frame follow-up counter
+  produce selectors 1, 2, 3, and 4. Held input and startup-repeat input do not
+  auto-chain; an accepted recovery edge advances, while an edge at counter 1
+  or after expiry restarts at step 1.
+- Gun, contextual Button-2, jump/directional-jump, special, close-combo, HIT,
+  and return-to-control transitions are bound to actor fields, exact writer
+  PCs, animation records, assembly pointers, collision selectors, and the
+  accepted source-combat identity contract.
+- Gun and special actions set actor byte `+0xad` through different source
+  writers and common cleanup clears the containing `+0xac` word. This is an
+  action-local equipment/resource flag, not evidence that any arbitrary frame
+  may display a weapon sprite.
+- Facing remains latched during an active action and changes only when
+  locomotion resumes; the next action consumes the new facing. HIT at frame
+  4433 cancels gun/contextual attack/directional-jump state through the measured
+  cleanup writer set.
+- The public report is
+  `data/oracle07_predator_warrior_action_graph_equipment.json`, SHA-256
+  `67d4a9e59b7dfc5b647b5180f385149b375f82163f5c7e778ccbf4f7604ad6ef`,
+  at evidence commit `67d6b3f9c182b1e3306b151fff7677424b97cb11`.
+  `Fast` and `Oracle` pass. Saturn emulator and physical Saturn remain `UNRUN`;
+  no production gameplay path changed.

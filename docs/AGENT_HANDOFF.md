@@ -17,7 +17,7 @@
   `82965ef80223a03937e0b527d16161ed68d874a0`; exact ISO `4a142774...98ef`.
 - HW-01 is parked `READY_FOR_PHYSICAL` / `WAITING_FOR_EXTERNAL_HARDWARE` with
   Probe ISO `82c3a86c...ef50`. Physical Saturn remains `UNRUN`; do not wait.
-- ORACLE-04/05/06 and PROMOTE-10/11 remain accepted. The ORACLE-06 live-loop
+- ORACLE-04/05/06/07 and PROMOTE-10/11 remain accepted. The ORACLE-06 live-loop
   clear is explicitly adapted to target KO then inactivity.
 
 ## Current task and next action
@@ -32,11 +32,17 @@ alien facing/presentation, player weapon/equipment continuity, Coffee Shop
 navigation, and the combined player/AI/animation authority remain disconnected
 from confirmed source logic. Do not patch those symptoms in production.
 
-Active card: `ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT`. Continue
-serially through ORACLE-08 navigation/bounds, ORACLE-09 alien closure, SPEC-01,
+ORACLE-07 is accepted at evidence commit `67d6b3f`: close attacks require
+discrete edges inside the source follow-up counter, held/startup-repeat input
+does not auto-chain, action facing is latched, and the `+0xad` action-local flag
+cannot be treated as arbitrary visible weapon state. Fast and Oracle pass;
+production remains unchanged.
+
+Active card: `ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS`. Continue serially
+through ORACLE-09 alien closure, SPEC-01,
 REIMPLEMENT-12, QA-12, and renewed USER-09. Retain the existing rendering, HUD,
 camera, audio, collision, readback, emulator, and visual-QA harness. Do not
 activate frontend work.
 
-Resume prompt: Resume the AvP salvage Goal at ORACLE-07, enforce the
+Resume prompt: Resume the AvP salvage Goal at ORACLE-08, enforce the
 specification firewall, and return to USER-09 only after QA-12 passes.
