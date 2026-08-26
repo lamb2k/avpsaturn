@@ -2,7 +2,7 @@
   "schema": 1,
   "task_id": "REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER",
   "card_profile": "LiveEncounterBench",
-  "compile_profile": "debug-live-encounter-bench",
+  "compile_profile": "release-live-encounter-bench",
   "manifest_profile": "live-encounter-bench",
   "build_root": "build/port_v2/live_encounter",
   "required_readback_symbols": [

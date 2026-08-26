@@ -274,13 +274,20 @@ suppressions, paired Emulator, and direct selector-2/4 inspection pass. Commit
 `f6cab22` then implements the source-owned Button1 action/resource/allocation
 boundary. Commit `09c8a28` implements the exact type-24/class-0x10 depleted
 effect allocation, ten-record presentation, guarded movement, and release.
-The existing fixture now also contains class-0x05 angle/selector tables, all
-64 signed motion pairs, state-2 arithmetic/bounds/presentation, and state-4
-impact allocation writes. Class-0x05 execution remains blocked only on the
-type-24/class-0x3a impact handler and the current-state collision writer for
-attack table `0x03136a`; no travel, collision, damage, or impact is claimed.
-Fifty-one host mutations, 44 Target suppressions, Target, two byte-identical
-emulator ledgers, Fast, Oracle, and direct frames 211/260 inspection pass.
+The current checkpoint completes class-0x05 states 0/2/4/6 from the amended
+SPEC fixture: angle/selector tables, all 64 signed motion pairs, arithmetic,
+bounds, presentation, impact allocation, and release. It also implements the
+type-24/class-0x3a state 0/2/4 five-record impact presentation/release handler
+and the current-state collision/damage writer for attack table `0x03136a`.
+Sixty-four host mutations, release Target, Fast, Oracle, and two byte-identical
+paired-emulator runs pass. The paired target records 49 projectile-render frames,
+40 impact-render frames, three collision writes, three damage writes, and zero
+fallback, decode failure, or gameplay PCM. Direct paused scanout inspection at
+native controller updates 212 and about 253 preserves coherent actors, P1-only
+HUD, camera, both VDP2 planes, palette, and priority. Source audio command
+identities `0x007e`/`0x0148` remain telemetry without guessed semantic names or
+Saturn PCM bindings. Contract-header dependencies and a focused identity check
+now prevent stale target binding after deterministic SPEC regeneration.
 Enemy movement, damage, dynamic spawn, and the preserved first-segment blockers
 remain pending; frame 2328 is not gameplay authority.
 

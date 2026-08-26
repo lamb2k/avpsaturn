@@ -15,6 +15,7 @@ local allowed = {
     target_removed=true, lifetime_writer_suppressed=true,
     recharge_writer_frozen=true, pickup_actor_removed=true,
     projectile_class_removed=true, facing_reversed=true,
+    damage_attack_class_2=true,
 }
 assert(allowed[variant], "unsupported weapon variant: " .. variant)
 
@@ -35,10 +36,14 @@ local samples = assert(io.open(root .. "/samples.tsv", "w"))
 local writes = assert(io.open(root .. "/writes.tsv", "w"))
 local actors = assert(io.open(root .. "/actors.tsv", "w"))
 local qsound = assert(io.open(root .. "/qsound.tsv", "w"))
+local damage = assert(io.open(root .. "/damage.tsv", "w"))
+local impact_audio = assert(io.open(root .. "/impact_audio.tsv", "w"))
 samples:write("frame\tvariant\tinput\taction\tinner\tfacing\tx\ty\tz\thealth\tresource\trecharge\tdepleted\taward_timer\tlatched\tanim\tr4_free\tr24_free\tr36_free\n")
 writes:write("frame\tvariant\tsequence\tkind\taddress\toffset\tdata\tmask\tpc\tvalue\n")
-actors:write("frame\tvariant\tkind\tslot\tactive\tclass\tstate\tinner\tfacing\tx\ty\tz\tanim\tparent\thealth\n")
+actors:write("frame\tvariant\tkind\tslot\tactive\tclass\tstate\tinner\tmode\tpalette\tfacing\tx\ty\tz\tanim\tparent\tobject_or\thealth\n")
 qsound:write("frame\tvariant\tpc\tport\tbyte\tregister\tvalue\n")
+damage:write("frame\tvariant\tpc\tattacker\tdefender\tattack_record\ta5\tglobal_mode_word\tdefender_active8\tglobal_modifier244\tdefender_modifier73\tattacker_5e\troute_1ea\tdefender_57\tattack_selector\toffense_address\toffense_value\tdefense_address\tdefense_value\tmatrix_address\tdamage\thealth_before\thealth_after\n")
+impact_audio:write("frame\tvariant\tselector_ff0eda\tclass3a_count\n")
 
 local function u8(a) return program:read_u8(a) end
 local function u16(a) return program:read_u16(a) end
@@ -47,11 +52,38 @@ local function s16(v) return v >= 0x8000 and v - 0x10000 or v end
 local function write_tap(first, last, name, kind)
     return program:install_write_tap(first, last, name, function(offset, data, mask)
         if frame < first_frame or frame > last_frame then return end
+        local pc = maincpu.state["PC"].value & 0xffffff
+        if kind == "record12" and ((offset - record12) % record12_stride) == 0x40 and pc == 0x01d590 then
+            local attacker = maincpu.state["A6"].value & 0xffffff
+            local defender = maincpu.state["A1"].value & 0xffffff
+            local attack_record = maincpu.state["A3"].value & 0xffffff
+            local a5 = maincpu.state["A5"].value & 0xffffff
+            local attacker_5e = u8(attacker + 0x5e)
+            local route_1ea = u16(a5 + 0x1ea)
+            local defender_57 = u8(defender + 0x57)
+            local attack_selector = u8(attack_record + 9)
+            local global_mode_word = u16(a5 - 0x6762)
+            local defender_active8 = u8(defender + 8)
+            local global_modifier244 = u8(a5 + 0x244)
+            local defender_modifier73 = u8(defender + 0x73)
+            local offense_address = 0x115420 + attacker_5e * 32 + route_1ea
+            local offense_value = u8(offense_address)
+            local defense_address = 0x114000 + defender_57 * 32 + route_1ea
+            local defense_value = u8(defense_address)
+            local matrix_address = 0x1142a0 + defense_value * 128 + ((offense_value + attack_selector) & 0xff)
+            damage:write(string.format("%d\t%s\t%06x\t%06x\t%06x\t%06x\t%06x\t%04x\t%02x\t%02x\t%02x\t%02x\t%04x\t%02x\t%02x\t%06x\t%02x\t%06x\t%02x\t%06x\t%02x\t%04x\t%04x\n",
+                frame, variant, pc, attacker, defender, attack_record, a5,
+                global_mode_word, defender_active8, global_modifier244,
+                defender_modifier73,
+                attacker_5e, route_1ea, defender_57, attack_selector,
+                offense_address, offense_value, defense_address, defense_value,
+                matrix_address, u8(matrix_address), u16(offset), data & 0xffff))
+        end
         sequence = sequence + 1
         writes:write(string.format("%d\t%s\t%d\t%s\t%06x\t%02x\t%04x\t%04x\t%06x\t%08x\n",
             frame, variant, sequence, kind, offset & 0xffffff,
             (offset - first) & 0xff, data & 0xffff, mask & 0xffff,
-            maincpu.state["PC"].value & 0xffffff, u32(offset & 0xfffffe)))
+            pc, u32(offset & 0xfffffe)))
     end)
 end
 oracle11_weapon_taps = {
@@ -109,10 +141,11 @@ local function each_pool(base, count, stride, kind)
         local a=base+i*stride
         if u8(a) ~= 0 then
             actors:write(table.concat({frame,variant,kind,string.format("%06x",a),u8(a),
-                string.format("%02x",u8(a+2)),u8(a+4),u8(a+5),u8(a+0xf),
+                string.format("%02x",u8(a+2)),u8(a+4),u8(a+5),
+                u8(a+0xd),u8(a+0xe),u8(a+0xf),
                 s16(u16(a+0x10)),s16(u16(a+0x14)),s16(u16(a+0x18)),
                 string.format("%08x",u32(a+0x1c)),string.format("%04x",u16(a+0x26)),
-                s16(u16(a+0x40))},"\t").."\n")
+                string.format("%04x",u16(a+0x2e)),s16(u16(a+0x40))},"\t").."\n")
         end
     end
 end
@@ -138,7 +171,7 @@ local function apply_counterfactuals()
         if variant == "resource_empty" then program:write_u8(player+0x8c,0); program:write_u8(player+0x8b,1) end
         if variant == "special_low_health" then program:write_u16(player+0x40,5); program:write_u16(player+0x42,5) end
         if variant == "special_zero_health" then program:write_u16(player+0x40,0); program:write_u16(player+0x42,0) end
-        if variant == "facing_reversed" then program:write_u8(player+0x0f,0) end
+        if variant == "facing_reversed" then program:write_u8(player+0x0f,1) end
         if variant == "pickup_actor_removed" then
             program:write_u16(player+0xae,600)
             local a=record24
@@ -159,6 +192,7 @@ local function apply_counterfactuals()
     local projectile=first_projectile()
     if projectile then
         if variant == "projectile_class_removed" then program:write_u8(projectile,0) end
+        if variant == "damage_attack_class_2" then program:write_u8(projectile+0x5e,2) end
         if variant == "lifetime_writer_suppressed" and u8(projectile+4)>=4 then program:write_u8(projectile+4,2); program:write_u32(projectile+0x40,0) end
     end
     if variant == "recharge_writer_frozen" and frame >= 4490 then program:write_u8(player+0x8c,24); program:write_u8(player+0x8d,12) end
@@ -184,9 +218,16 @@ oracle11_weapon_subscription=emu.add_machine_frame_notifier(function()
         each_pool(record12,record12_count,record12_stride,"record12")
         each_pool(record24,record24_count,record24_stride,"record24")
         each_pool(record36,record36_count,record36_stride,"record36")
+        local class3a_count=0
+        for i=0,record24_count-1 do
+            local a=record24+i*record24_stride
+            if u8(a)~=0 and u8(a+2)==0x3a then class3a_count=class3a_count+1 end
+        end
+        impact_audio:write(string.format("%d\t%s\t%02x\t%d\n",
+            frame,variant,u8(0xff0eda),class3a_count))
     end
     if frame==last_frame then
         coin:clear_value();start:clear_value();left:clear_value();right:clear_value();up:clear_value();down:clear_value();gun:clear_value();attack:clear_value();jump:clear_value()
-        samples:close();writes:close();actors:close();qsound:close();machine:exit()
+        samples:close();writes:close();actors:close();qsound:close();damage:close();impact_audio:close();machine:exit()
     end
 end)

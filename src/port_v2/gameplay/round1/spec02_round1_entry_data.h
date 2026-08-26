@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=cd3a2f050aa4ef3af80ed99d3ba10e9d7ba88d3075053c2fd589fe065645d926 */
-/* fixtures_sha256=9f289da6685e7ae4e5b05b844e24875f0ded55c7cd3e3311ced9d52b7fbeaf1f */
+/* contract_sha256=5700f7c21d7820f0272f788b8177227de9a8047025817771efeed12cb421fe47 */
+/* fixtures_sha256=589a5f597217663be9798bc8e4bd3b4a1d72a7b5a1ebb0f40c99637318cad76d */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -586,6 +586,63 @@ static const AvspRound1AnimationStateSpec avsp_round1_weapon_projectile_presenta
     { { 8u, 0, 0x0003113eUL, 0x00031260UL, 0u, 2u }, { 8u, -32768, 0x0003114eUL, 0x00031340UL, 0u, 2u } },
     { { 8u, 0, 0x00031162UL, 0x0003126eUL, 0u, 2u }, { 8u, -32768, 0x00031172UL, 0x0003134eUL, 0u, 2u } },
     { { 8u, 0, 0x00031186UL, 0x0003127cUL, 0u, 2u }, { 8u, -32768, 0x00031196UL, 0x0003135cUL, 0u, 2u } },
+};
+
+static const AvspRound1WeaponProjectileSpec avsp_round1_weapon_projectile =
+{
+    0u, 2u, 4u, 6u, 0x80u,
+    0x50, 0x0220u, 0x10, 0x0120u, 0x3a, 0u,
+    0u, 0u, 0x8000u
+};
+
+static const AvspRound1CollisionBoxSpec avsp_round1_weapon_projectile_hurt_box =
+{
+    0, 0, 0u, 0u, 0, 0u, 0, 0u, 0u
+};
+
+static const AvspRound1CollisionBoxSpec avsp_round1_weapon_projectile_attack_boxes[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =
+{
+    { 0, 0, 0u, 0u, 0, 0u, 0, 0u, 0u },
+    { 16, 0, 18u, 5u, 0, 8u, -1, 0u, 6u },
+    { 16, 0, 18u, 5u, 0, 8u, 0, 0u, 6u },
+};
+
+static const AvspRound1DamageClassValueSpec avsp_round1_weapon_damage_offense[AVSP_ROUND1_WEAPON_DAMAGE_OFFENSE_COUNT] =
+{
+    { 0u, 10u, 0u },
+    { 2u, 10u, 4u }
+};
+
+static const AvspRound1DamageClassValueSpec avsp_round1_weapon_damage_defense[AVSP_ROUND1_WEAPON_DAMAGE_DEFENSE_COUNT] =
+{
+    { 16u, 10u, 33u }
+};
+
+static const AvspRound1DamageMatrixValueSpec avsp_round1_weapon_damage_matrix[AVSP_ROUND1_WEAPON_DAMAGE_MATRIX_COUNT] =
+{
+    { 33u, 6u, 24u },
+    { 33u, 10u, 31u }
+};
+
+static const AvspRound1WeaponImpactSpec avsp_round1_weapon_impact =
+{
+    24u, 0x3a, 0u, 0u, 2u, 4u, 0x086f62UL,
+    0u, 0u, 0x8000u,
+    { 0x007eu, 0x0148u }
+};
+
+static const short avsp_round1_weapon_impact_variant_offsets[AVSP_ROUND1_WEAPON_IMPACT_VARIANT_COUNT] =
+{
+    12, 96, 196, 248, 348
+};
+
+static const AvspRound1AnimationStateSpec avsp_round1_weapon_impact_variant0_records[AVSP_ROUND1_WEAPON_IMPACT_PRESENTATION_COUNT] =
+{
+    { 2u, 0, 0x00086fdcUL, 0x00087180UL, 0u, 0u },
+    { 2u, 0, 0x00086fecUL, 0x0008718eUL, 0u, 0u },
+    { 2u, 0, 0x00086ffcUL, 0x0008719cUL, 0u, 0u },
+    { 2u, 0, 0x0008700cUL, 0x000871aaUL, 0u, 0u },
+    { 2u, -32768, 0x0008701cUL, 0x000871aaUL, 0u, 0u },
 };
 
 static const AvspRound1VecS16 avsp_round1_empty_effect_variant_offsets[AVSP_ROUND1_EMPTY_EFFECT_VARIANT_COUNT] =

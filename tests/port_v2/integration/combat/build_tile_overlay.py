@@ -20,7 +20,16 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "tools"))
 
 import extract_avspu_stage1 as avsp  # noqa: E402
-from gen_avsp_gfx_tiles import entry_tile_codes, tile_texture  # noqa: E402
+from decode_avsp_object_stream import Rom  # noqa: E402
+from gen_avsp_gfx_tiles import (           # noqa: E402
+    ROM_PATH,
+    ROUTES_BY_SCOPE,
+    build_archive_blob,
+    collect_entries,
+    entry_tile_codes,
+    pick_palette_frame,
+    tile_texture,
+)
 
 
 # Complete cadence-1 source exchange.  The old integration overlay skipped
@@ -85,8 +94,28 @@ def build() -> dict:
         (ROOT / "tests/port_v2/enemy/approved_contract.json").read_text())
     base = ROOT / "build/avsp_cd/SPR4/TILES.BIN"
     base_sha = hashlib.sha256(base.read_bytes()).hexdigest()
-    if base_sha != approved["tile_archive_sha256"]:
-        raise SystemExit("approved street tile archive identity drifted")
+    base_manifest = json.loads(
+        (ROOT / "data/avsp_gfx_tiles.json").read_text())
+    if base_manifest["scope"] != "street" or base_sha != \
+            base_manifest["archive"]["sha256"]:
+        raise SystemExit("current street tile archive/manifest disagree")
+    fixture_path = ROOT / "data/spec02_round1_generated_fixtures.json"
+    fixture_sha = hashlib.sha256(fixture_path.read_bytes()).hexdigest()
+    extension = base_manifest["routes"].get(
+        "spec02_round1_button1_presentations", {})
+    if extension.get("fixture_sha256") != fixture_sha or \
+            extension.get("tiles_added", 0) <= 0:
+        raise SystemExit("SPEC-02 Button1 tile extension is unbound")
+    legacy_tiles, legacy_banks, _routes = collect_entries(
+        Rom(ROM_PATH.read_bytes()), ROUTES_BY_SCOPE["street"])
+    legacy_blob, _slots = build_archive_blob(
+        sorted(legacy_tiles), legacy_banks, pick_palette_frame(),
+        avsp.load_gfx_region())
+    legacy_sha = hashlib.sha256(legacy_blob).hexdigest()
+    if legacy_sha != approved["tile_archive_sha256"]:
+        raise SystemExit("approved pre-extension street archive drifted")
+    if not legacy_tiles.issubset(base_codes(base)):
+        raise SystemExit("current street archive dropped approved tiles")
     all_tiles, object_sha, entry_count = source_tiles()
     codes = sorted(set(all_tiles) - base_codes(base))
     palette, palette_sha = palette_block()
@@ -114,6 +143,9 @@ def build() -> dict:
         "source_object_lists_sha256": object_sha,
         "source_palette_sha256": palette_sha,
         "approved_base_archive_sha256": base_sha,
+        "approved_pre_extension_archive_sha256": legacy_sha,
+        "spec02_fixture_sha256": fixture_sha,
+        "spec02_tiles_added": extension["tiles_added"],
         "tile_count": len(codes),
         "tile_codes_sha256": hashlib.sha256(
             ",".join(f"0x{code:04x}" for code in codes).encode("ascii")

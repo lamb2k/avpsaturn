@@ -168,6 +168,14 @@ COMPILER_DIR = $(JO_ENGINE_ROOT)/Compiler
 
 include $(COMPILER_DIR)/COMMON/jo_engine_makefile
 
+# Jo Engine's bundled make rules do not emit C header dependencies. Keep the
+# executable contract identity and generated Round 1 fixture from remaining
+# stale when SPEC-02 is deterministically regenerated.
+main.o: src/port_v2/gameplay/round1/round1.h
+src/port_v2/gameplay/round1/round1.o: \
+	src/port_v2/gameplay/round1/round1.h \
+	src/port_v2/gameplay/round1/spec02_round1_entry_data.h
+
 # The disc first reads this compact program at Jo Engine's proven 0x06004000
 # address. It stages the separately linked game payload in low work RAM, then
 # a position-independent trampoline overwrites 0x06004000, purges the SH-2

@@ -9,7 +9,7 @@ ART=ROOT/'data/oracle11_predator_weapon_projectile_resource.json'
 def validate(d):
     assert d['status']=='SOURCE_CLOSED'
     assert d['determinism']['byte_identical'] is True
-    assert d['mutation_controls']=={'all_downstream_effects_asserted':True,'count':12,'no_fixed_frame_result':True,'no_visible_weapon_inference_from_0xad':True}
+    assert d['mutation_controls']=={'all_downstream_effects_asserted':True,'count':13,'no_fixed_frame_result':True,'no_visible_weapon_inference_from_0xad':True}
     p=d['authority_separation']['projectile_lifecycle']
     assert p['class']=='0x05' and p['volley'].startswith('12 attempts')
     assert p['resource_debit'].startswith('3 per successful')
@@ -50,7 +50,7 @@ def validate(d):
         'animation_record':'0x00163158','assembly':'0x00165488',
         'hurt_selector':1,'attack_selector':0}
     projectile=implementation['projectile_lifecycle_contract']
-    assert projectile['spec_executable'] is False
+    assert projectile['spec_executable'] is True
     assert projectile['state_sequence']==[0,2,4,6] and projectile['rng_calls']==0
     init=projectile['initialization']
     assert init['writes']['motion_table']=='0x001fc1c0'
@@ -61,6 +61,16 @@ def validate(d):
     assert init['angle']['facing0_u8']==[40,42,44,46,48,50,49,47,45,43,41,40]
     assert init['angle']['facing1_u8']==[24,22,20,18,16,14,15,17,19,21,23,24]
     assert init['player_presentation_selector_u8']==[6,6,5,5,4,3,3,4,5,5,6,6]
+    actor_fields=init['presentation_actor_fields']
+    assert actor_fields['coordinate_mode_u8']==0
+    assert actor_fields['palette_u8']==0
+    assert actor_fields['object_or_u16']=='0x8000'
+    assert actor_fields['determinism']=={
+        'actors_tsv_byte_identical':True,'cold_runs':2}
+    assert actor_fields['mutation']['projectile_facing_before']==0
+    assert actor_fields['mutation']['projectile_facing_after']==1
+    assert actor_fields['mutation']['first_projectile_x_before']==1181
+    assert actor_fields['mutation']['first_projectile_x_after']==1213
     active=projectile['active_state']
     assert active['motion']['vectors_s16'][16]==[3072,0]
     assert active['motion']['vectors_s16'][48]==[-3072,0]
@@ -68,14 +78,39 @@ def validate(d):
     assert active['bounds_guards'][1]['expression']=='u16(y_high - A5+0x27c + 0x10) > 0x0120'
     assert active['update_order']==['collision guard','x bounds','y bounds','ground guard','motion','animation','visibility']
     assert projectile['impact_state']['writes']['impact_class']=='0x3a'
-    assert len(projectile['implementation_blocker']['missing_fields'])==2
+    assert projectile['impact_actor_contract']['spec_executable'] is True
+    impact_audio=projectile['impact_actor_contract']['initialization']['audio']
+    assert impact_audio['alternating_command_u16']==[0x007e,0x0148]
+    assert impact_audio['selector']['route_initial']==0
+    assert impact_audio['selector']['write_rule'].endswith('& 2 after the table read')
+    impact_fields=projectile['impact_actor_contract']['initialization'][
+        'presentation_actor_fields']
+    assert impact_fields['coordinate_mode_u8']==0
+    assert impact_fields['palette_u8']==0
+    assert impact_fields['object_or_u16']=='0x8000'
+    assert projectile['implementation_blocker'] is None
+    damage=projectile['current_state_interfaces']['collision']['damage']
+    assert damage['routine']=='0x01d504'
+    assert damage['route_current_guards']=={
+        'A5_minus_0x6762_u16':0,'A5_plus_0x244_u8':0,
+        'defender_plus_0x08_u8':12,'defender_plus_0x73_u8':0}
+    assert damage['baseline']=={
+        'attack_selector':6,'attacker_class_index':0,'damage':24,
+        'defender_class_index':16,'defense':33,
+        'defense_address':'0x11420a','health_after':39,'health_before':63,
+        'matrix_address':'0x115326','offense':0,
+        'offense_address':'0x11542a','route_index':10}
+    assert damage['mutation']['damage']==31
+    assert damage['mutation']['matrix_address']=='0x11532a'
+    assert damage['suppression']['baseline_writes']==8
+    assert damage['suppression']['mutated_writes']==4
     empty_effect=implementation['empty_effect_variant1_contract']
     assert empty_effect['spec_executable'] is True
     assert empty_effect['state_sequence']==[0,2,4] and empty_effect['variant']==1
     assert empty_effect['initialization']['variant_offsets_s16'][1]==[0,78]
     assert [(x['timer'],x['branch']) for x in empty_effect['active_state']['presentation_records']]==[(1,0)]*8+[(8,1),(4095,-32767)]
     assert empty_effect['capture_projection']['movement_frames']==list(range(4494,4502))
-    assert len(d['counterfactuals'])==12
+    assert len(d['counterfactuals'])==13
     assert d['physical_saturn']=='UNRUN' and d['saturn_emulator']=='UNRUN'
 
 def reject(mut,label):
@@ -85,7 +120,7 @@ def reject(mut,label):
 
 d=json.loads(ART.read_text(encoding='ascii'));validate(d)
 for path,value,label in [
- (('mutation_controls','count'),11,'counterfactual removed'),
+ (('mutation_controls','count'),12,'counterfactual removed'),
  (('authority_separation','projectile_lifecycle','class'),'0x00','wrong projectile class'),
  (('authority_separation','equipment_resource','capacity'),63,'fitted resource capacity'),
  (('resource_causal_trace','empty','damaging_projectile_count'),1,'empty fallback damage'),
@@ -101,14 +136,19 @@ for path,value,label in [
  (('implementation_contract','empty_fallback','timer_initial'),15,'wrong empty timer'),
  (('implementation_contract','movement_facing','baseline_invariant'),False,'movement during weapon action'),
  (('implementation_contract','projectile_lifecycle_contract','initialization','angle','facing1_u8',0),25,'wrong facing angle mapping'),
+ (('implementation_contract','projectile_lifecycle_contract','initialization','presentation_actor_fields','object_or_u16'),'0x0000','wrong projectile object priority'),
+ (('implementation_contract','projectile_lifecycle_contract','initialization','presentation_actor_fields','mutation','projectile_facing_after'),0,'nondiscriminating projectile facing mutation'),
  (('implementation_contract','projectile_lifecycle_contract','active_state','motion','vectors_s16',48,0),-3071,'wrong signed 16.16 motion vector'),
  (('implementation_contract','projectile_lifecycle_contract','active_state','bounds_guards',0,'expression'),'u16(x) > 0x0220','wrong bounds arithmetic'),
  (('implementation_contract','projectile_lifecycle_contract','impact_state','writes','impact_class'),'0x39','wrong impact class'),
- (('implementation_contract','projectile_lifecycle_contract','implementation_blocker','missing_fields'),[],'unsupported full projectile lifecycle claim'),
+ (('implementation_contract','projectile_lifecycle_contract','impact_actor_contract','initialization','presentation_actor_fields','palette_u8'),1,'wrong impact palette'),
+ (('implementation_contract','projectile_lifecycle_contract','spec_executable'),False,'projectile contract reopened'),
+ (('implementation_contract','projectile_lifecycle_contract','current_state_interfaces','collision','damage','baseline','damage'),23,'fitted baseline damage'),
+ (('implementation_contract','projectile_lifecycle_contract','current_state_interfaces','collision','damage','mutation','damage'),24,'damage table mutation ignored'),
  (('implementation_contract','empty_effect_variant1_contract','variant'),0,'wrong class-0x10 variant'),
  (('implementation_contract','empty_effect_variant1_contract','initialization','variant_offsets_s16',1,1),79,'wrong empty-effect y offset'),
  (('implementation_contract','empty_effect_variant1_contract','active_state','presentation_records',9,'branch'),-32768,'wrong empty-effect terminal branch')]:
     m=copy.deepcopy(d);x=m
     for k in path[:-1]:x=x[k]
     x[path[-1]]=value;reject(m,label)
-print('ORACLE-11 weapon/projectile/resource tests: PASS (23 invariant mutations rejected)')
+print('ORACLE-11 weapon/projectile/resource tests: PASS (28 invariant mutations rejected)')

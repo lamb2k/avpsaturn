@@ -91,13 +91,54 @@ static short abs_word(short v)
     return (short)((v < 0) ? -v : v);
 }
 
+int avsp_collision_overlap_boxes(const AvspActor *attacker,
+                                 const AvspAttackBox *atk,
+                                 const AvspActor *defender,
+                                 const AvspBox *hurt,
+                                 unsigned char *hit_value)
+{
+    short depth_delta;
+    short ax, dx, ay, dy;
+
+    if (attacker == 0 || atk == 0 || defender == 0 || hurt == 0) {
+        return 0;
+    }
+
+    /* Depth. The signed delta is kept, because the Y axis reuses it as the
+     * belt-scroller's depth-to-screen projection (0x01D2E6). */
+    depth_delta = as_word(((long)hurt->z_center + (long)defender->world_z)
+                        - ((long)atk->box.z_center + (long)attacker->world_z));
+    if (abs_word(depth_delta) > (short)((int)atk->box.z_half + (int)hurt->z_half)) {
+        return 0;
+    }
+
+    /* X. Each box's own owner's facing byte mirrors its centre (0x01D296). */
+    ax = as_word((attacker->facing ? -(long)atk->box.x_center : (long)atk->box.x_center)
+                 + (long)attacker->world_x);
+    dx = as_word((defender->facing ? -(long)hurt->x_center : (long)hurt->x_center)
+                 + (long)defender->world_x);
+    if (abs_word(as_word((long)dx - (long)ax)) > (short)((int)atk->box.x_half + (int)hurt->x_half)) {
+        return 0;
+    }
+
+    /* Y, with the depth delta folded into the attacker's side. */
+    ay = as_word((long)atk->box.y_center + (long)depth_delta + (long)attacker->world_y);
+    dy = as_word((long)hurt->y_center + (long)defender->world_y);
+    if (abs_word(as_word((long)dy - (long)ay)) > (short)((int)atk->box.y_half + (int)hurt->y_half)) {
+        return 0;
+    }
+
+    if (hit_value != 0) {
+        *hit_value = atk->hit_value;
+    }
+    return 1;
+}
+
 int avsp_collision_overlap(const AvspActor *attacker, const AvspActor *defender,
                            unsigned char *hit_value)
 {
     AvspAttackBox atk;
     AvspBox hurt;
-    short depth_delta;
-    short ax, dx, ay, dy;
 
     if (attacker == 0 || defender == 0) {
         return 0;
@@ -111,35 +152,8 @@ int avsp_collision_overlap(const AvspActor *attacker, const AvspActor *defender,
     if (!avsp_collision_hurt_box(defender->table_set, defender->sel_hurt, &hurt)) {
         return 0;
     }
-
-    /* Depth. The signed delta is kept, because the Y axis reuses it as the
-     * belt-scroller's depth-to-screen projection (0x01D2E6). */
-    depth_delta = as_word(((long)hurt.z_center + (long)defender->world_z)
-                        - ((long)atk.box.z_center + (long)attacker->world_z));
-    if (abs_word(depth_delta) > (short)((int)atk.box.z_half + (int)hurt.z_half)) {
-        return 0;
-    }
-
-    /* X. Each box's own owner's facing byte mirrors its centre (0x01D296). */
-    ax = as_word((attacker->facing ? -(long)atk.box.x_center : (long)atk.box.x_center)
-                 + (long)attacker->world_x);
-    dx = as_word((defender->facing ? -(long)hurt.x_center : (long)hurt.x_center)
-                 + (long)defender->world_x);
-    if (abs_word(as_word((long)dx - (long)ax)) > (short)((int)atk.box.x_half + (int)hurt.x_half)) {
-        return 0;
-    }
-
-    /* Y, with the depth delta folded into the attacker's side. */
-    ay = as_word((long)atk.box.y_center + (long)depth_delta + (long)attacker->world_y);
-    dy = as_word((long)hurt.y_center + (long)defender->world_y);
-    if (abs_word(as_word((long)dy - (long)ay)) > (short)((int)atk.box.y_half + (int)hurt.y_half)) {
-        return 0;
-    }
-
-    if (hit_value != 0) {
-        *hit_value = atk.hit_value;
-    }
-    return 1;
+    return avsp_collision_overlap_boxes(attacker, &atk, defender, &hurt,
+                                        hit_value);
 }
 
 int avsp_collision_guarded(const AvspActor *attacker, const AvspActor *defender)

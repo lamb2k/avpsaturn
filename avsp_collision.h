@@ -49,6 +49,15 @@ int avsp_table_set_for_class(unsigned char class_id, unsigned long *out);
 int avsp_collision_overlap(const AvspActor *attacker, const AvspActor *defender,
                            unsigned char *hit_value);
 
+/* The same source overlap arithmetic with already-resolved boxes. This is the
+ * bounded Port V2 interface for source table sets added through SPEC fixtures
+ * without extending the legacy generated family inventory. */
+int avsp_collision_overlap_boxes(const AvspActor *attacker,
+                                 const AvspAttackBox *attack,
+                                 const AvspActor *defender,
+                                 const AvspBox *hurt,
+                                 unsigned char *hit_value);
+
 /* The caller's guards at 0x01D042..0x01D060: the defender must be in state 1
  * with its suppress byte clear, and must not already carry this attacker's id
  * in the per-attacker latch slot the attacker indexes. Returns 1 when the hit

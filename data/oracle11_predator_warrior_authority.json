@@ -26,7 +26,7 @@
         "guard": "0x01a6f4 source edge/resource checks",
         "phase": "0x0406",
         "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
-        "resource_artifact_sha256": "e0d8bcd415cad6a125090ef2bee4dc560a77292eb1c88ca0f5f1bf174a00a1b9",
+        "resource_artifact_sha256": "c851dfabb5f9521e8c7bbb2bdeb7cf0e8b648a6527fdff3b7d367f26d7928f25",
         "resource_status": "SOURCE_CLOSED",
         "spawn_branch": "0x023858",
         "writer": "0x023860"
@@ -8151,6 +8151,10 @@
       {
         "class": "facing_reversed_before_dispatch",
         "result": "same volley/debit, source projectile horizontal sign reversed"
+      },
+      {
+        "class": "damage_attacker_class_index",
+        "result": "attacker +0x5e 0 -> 2 selects offense 0 -> 4 and table-derived damage 24 -> 31"
       }
     ],
     "determinism": {
@@ -8551,7 +8555,9 @@
         "reject recovery before tick 49",
         "reject movement or facing during action",
         "reject recharge before action update",
-        "reject fixed-frame projectile hit or removal"
+        "reject fixed-frame projectile hit or removal",
+        "reject fitted damage by mutating attacker class and requiring the selected source-table result",
+        "reject projectile/impact coordinate mode, palette, object priority, or facing drift"
       ],
       "presentation_timeline": [
         {
@@ -9300,9 +9306,343 @@
         "class": "0x05",
         "current_state_interfaces": {
           "bounds": "A5+0x278:s16 and A5+0x27c:s16 are the accepted current route/navigation bound fields",
-          "collision": "current collision system owns signed s16 +0x40; projectile class only consumes it"
+          "collision": {
+            "captured_contact": {
+              "frame": 4492,
+              "health_after": 39,
+              "health_before": 63,
+              "projectile_collision_result": -1,
+              "projectile_consumes_result_next_dispatch": true,
+              "projectile_slot": "0xff8680",
+              "target_animation_record": "0x0012d8d0",
+              "target_hurt_selector": 1,
+              "target_slot": "0xff9e80",
+              "target_state_after": "2:2",
+              "target_state_before": "2:0"
+            },
+            "damage": {
+              "arithmetic": [
+                "offense = u8(0x115420 + attacker_class_index * 32 + route_index)",
+                "damage_index = u8(offense + attack_selector)",
+                "defense = u8(0x114000 + defender_class_index * 32 + route_index)",
+                "damage = u8(0x1142a0 + defense * 128 + damage_index)",
+                "health = s16(health - damage); clamp negative result to -1"
+              ],
+              "baseline": {
+                "attack_selector": 6,
+                "attacker_class_index": 0,
+                "damage": 24,
+                "defender_class_index": 16,
+                "defense": 33,
+                "defense_address": "0x11420a",
+                "health_after": 39,
+                "health_before": 63,
+                "matrix_address": "0x115326",
+                "offense": 0,
+                "offense_address": "0x11542a",
+                "route_index": 10
+              },
+              "mutation": {
+                "control": "attacker +0x5e = 2 for later projectiles",
+                "damage": 31,
+                "health_after": 8,
+                "health_before": 39,
+                "matrix_address": "0x11532a",
+                "offense": 4,
+                "offense_address": "0x11546a"
+              },
+              "reads": {
+                "attack_selector": "u8 attack record +9",
+                "attacker_class_index": "u8 attacker +0x5e",
+                "defender_class_index": "u8 defender +0x57",
+                "route_index": "u16 A5 +0x1ea"
+              },
+              "route_current_guards": {
+                "A5_minus_0x6762_u16": 0,
+                "A5_plus_0x244_u8": 0,
+                "defender_plus_0x08_u8": 12,
+                "defender_plus_0x73_u8": 0
+              },
+              "routine": "0x01d504",
+              "suppression": {
+                "baseline_writes": 8,
+                "control": "target removed at the accepted guard",
+                "last_mutated_frame": 4504,
+                "mutated_writes": 4
+              },
+              "write_pc_successor": "0x01d590"
+            },
+            "guards": [
+              "defender active byte == 1",
+              "defender +0x70 suppress == 0",
+              "per-attacker latch differs when attacker +0x65 is nonnegative",
+              "attacker attack selector nonzero",
+              "defender hurt selector nonzero"
+            ],
+            "predicate": "0x01d116 then shared overlap 0x01d25e",
+            "projectile_table": {
+              "attack_entries": [
+                {
+                  "address": "0x00031376",
+                  "hit_value": 0,
+                  "knockback_mode": 0,
+                  "record_sha256": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+                  "unknown_bytes": {
+                    "0x06": 0,
+                    "0x07": 0,
+                    "0x08": 0,
+                    "0x09": 0,
+                    "0x0b": 0,
+                    "0x0c": 0,
+                    "0x0d": 0,
+                    "0x0f": 0
+                  },
+                  "x_center": 0,
+                  "x_half": 0,
+                  "y_center": 0,
+                  "y_half": 0,
+                  "z_center": 0,
+                  "z_half": 0
+                },
+                {
+                  "address": "0x00031386",
+                  "hit_value": 0,
+                  "knockback_mode": -1,
+                  "record_sha256": "c6a34b5e153a863901f46d243605f16be9bd7e8646131970231a40b4f1b44fb7",
+                  "unknown_bytes": {
+                    "0x06": 0,
+                    "0x07": 0,
+                    "0x08": 10,
+                    "0x09": 6,
+                    "0x0b": 32,
+                    "0x0c": 13,
+                    "0x0d": 0,
+                    "0x0f": 15
+                  },
+                  "x_center": 16,
+                  "x_half": 18,
+                  "y_center": 0,
+                  "y_half": 5,
+                  "z_center": 0,
+                  "z_half": 8
+                },
+                {
+                  "address": "0x00031396",
+                  "hit_value": 0,
+                  "knockback_mode": 0,
+                  "record_sha256": "328721878de7c47b38c36f65d597eaeaa26759bf4e119447a87ce1be557541c5",
+                  "unknown_bytes": {
+                    "0x06": 0,
+                    "0x07": 0,
+                    "0x08": 10,
+                    "0x09": 6,
+                    "0x0b": 32,
+                    "0x0c": 13,
+                    "0x0d": 0,
+                    "0x0f": 15
+                  },
+                  "x_center": 16,
+                  "x_half": 18,
+                  "y_center": 0,
+                  "y_half": 5,
+                  "z_center": 0,
+                  "z_half": 8
+                }
+              ],
+              "attack_relative_s16": 12,
+              "hurt_entries": [
+                {
+                  "address": "0x0003136e",
+                  "record_sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+                  "x_center": 0,
+                  "x_half": 0,
+                  "y_center": 0,
+                  "y_half": 0,
+                  "z_center": 0,
+                  "z_half": 0
+                }
+              ],
+              "hurt_relative_s16": 4,
+              "table_set": "0x03136a"
+            },
+            "scheduler_pass": "0x01cbcc record-type-4 attackers against record-type-12 defenders in ascending pool/list order",
+            "target_table_set": "0x130ac8",
+            "writer_order": [
+              "0x030d6e clears projectile +0x40 during class-0x05 state 0",
+              "0x01cc14 writes -1 to projectile +0x40 after successful current-state contact; trace reports successor PC 0x01cc1a",
+              "0x01cc1a writes projectile +0x6e = 1",
+              "0x01cc20 clears projectile +0x71 unless the global branch increments it"
+            ]
+          }
         },
         "dispatch": "0x030d34",
+        "impact_actor_contract": {
+          "active_state": {
+            "guard": "state 2",
+            "terminal_guard": "signed animation branch word +0x24 < 0 enters state 4 before animation",
+            "update_order": [
+              "terminal branch guard",
+              "variant-2 movement guard",
+              "animation",
+              "visibility"
+            ],
+            "variant0_movement": "none",
+            "variant2_only_movement": "when variant == 2 and A5+0x1e8 == 10, add A5+0x2c0 s16 to x high word"
+          },
+          "capture_projection": {
+            "animation_records": [
+              "0x00086fdc",
+              "0x00086fec",
+              "0x00086fec",
+              "0x00086ffc",
+              "0x00086ffc",
+              "0x0008700c",
+              "0x0008700c",
+              "0x0008701c",
+              "0x0008701c"
+            ],
+            "first_active_frame": 4535,
+            "release_frame": 4543,
+            "slot": "0xffc100",
+            "state4_frame": 4543
+          },
+          "class": "0x3a",
+          "dispatch": "0x086f62",
+          "initialization": {
+            "audio": {
+              "alternating_command_u16": [
+                126,
+                328
+              ],
+              "argument_rule": "d2 starts at 6, 0x003abc adds source spatial bits, and facing selects high word 0x00060000 or 0x00050000 before the shared wrapper",
+              "caller": "0x0026c2",
+              "command_table": "0x002702",
+              "guard": "variant == 0",
+              "selector": {
+                "capture_projection": {
+                  "frame_4534": [
+                    0,
+                    0
+                  ],
+                  "frame_4535": [
+                    2,
+                    1
+                  ],
+                  "frame_4537": [
+                    0,
+                    4
+                  ]
+                },
+                "read_rule": "use selector value 0 or 2 as byte offset into the two-word command table",
+                "route_initial": 0,
+                "storage": "A5-0x7126 u8",
+                "write_rule": "selector = u8(selector + 2) & 2 after the table read"
+              },
+              "semantic_sound_name": "UNKNOWN",
+              "shared_dispatch_entry": "0x003a88"
+            },
+            "guard": "state 0",
+            "presentation_actor_fields": {
+              "coordinate_mode_u8": 0,
+              "determinism": {
+                "actors_tsv_byte_identical": true,
+                "cold_runs": 2
+              },
+              "mutation": {
+                "control": "player facing forced from 0 to 1 before Button1 dispatch",
+                "first_projectile_x_after": 1213,
+                "first_projectile_x_before": 1181,
+                "projectile_facing_after": 1,
+                "projectile_facing_before": 0
+              },
+              "object_or_u16": "0x8000",
+              "palette_u8": 0,
+              "source_fields": {
+                "coordinate_mode": "actor +0x0d u8",
+                "facing": "actor +0x0f u8",
+                "object_or": "actor +0x2e u16",
+                "palette": "actor +0x0e u8"
+              }
+            },
+            "variant0_presentation_records": [
+              {
+                "animation_record": "0x00086fdc",
+                "assembly": "0x00087180",
+                "attack_selector": 0,
+                "branch": 0,
+                "hurt_selector": 0,
+                "record_sha256": "ca4cf491a39d0a6bb1e628be4cadd42492851288dc71d2c63d9ac60d1ea28e44",
+                "timer": 2
+              },
+              {
+                "animation_record": "0x00086fec",
+                "assembly": "0x0008718e",
+                "attack_selector": 0,
+                "branch": 0,
+                "hurt_selector": 0,
+                "record_sha256": "98f8bb9e91938f4b9ef45585f1e78a9b77a75726d9fc21457d912a199659e106",
+                "timer": 2
+              },
+              {
+                "animation_record": "0x00086ffc",
+                "assembly": "0x0008719c",
+                "attack_selector": 0,
+                "branch": 0,
+                "hurt_selector": 0,
+                "record_sha256": "2e45bd5fc78536150ddd751619e3fc6d657887091a181cc1d56a316140f154a1",
+                "timer": 2
+              },
+              {
+                "animation_record": "0x0008700c",
+                "assembly": "0x000871aa",
+                "attack_selector": 0,
+                "branch": 0,
+                "hurt_selector": 0,
+                "record_sha256": "0f6d8a5adc909ff41f9f70def0b7b04ea4111e6c7b33100fdcc232b009fa3f71",
+                "timer": 2
+              },
+              {
+                "animation_record": "0x0008701c",
+                "assembly": "0x000871aa",
+                "attack_selector": 0,
+                "branch": -32768,
+                "hurt_selector": 0,
+                "record_sha256": "792490a162225f10940116516882211cfb10312f34599063260b12542ec15fe7",
+                "timer": 2
+              }
+            ],
+            "variant_offsets_s16": [
+              12,
+              96,
+              196,
+              248,
+              348
+            ],
+            "writes": {
+              "facing": 0,
+              "state": 2,
+              "substate": 0,
+              "target_pointer": "0x8000"
+            }
+          },
+          "record_type": 24,
+          "release_state": {
+            "guard": "state 4 or 6",
+            "result": "zero/release record type 24 in the same dispatch",
+            "routine": "0x0177f0"
+          },
+          "rng_calls": 0,
+          "scheduler_position": "record type 24 after record types 4/8/12/16/20",
+          "spec_executable": true,
+          "state_sequence": [
+            0,
+            2,
+            4
+          ],
+          "state_type": "u8",
+          "suppression_control": "removing class-0x05 from its scheduler produces zero downstream type-24 class-0x3a actors",
+          "variant": 0
+        },
         "impact_state": {
           "allocation_failure": "projectile remains state 6 and proceeds to release",
           "guard": "state 4",
@@ -9315,13 +9655,7 @@
             "projectile_state": 6
           }
         },
-        "implementation_blocker": {
-          "missing_fields": [
-            "type-24 class-0x3a impact handler state/presentation/release contract",
-            "native current-state collision writer binding for class-0x05 attack table 0x03136a"
-          ],
-          "unblock": "close only the class-0x3a handler and bind the accepted current collision interface before native ground impact or damage is claimed"
-        },
+        "implementation_blocker": null,
         "initialization": {
           "angle": {
             "attempt_indices_after_decrement": "11 down to 0 in time order",
@@ -9804,6 +10138,28 @@
             6
           ],
           "position_rule": "add selected signed s16 x/y offsets to the high words of signed 16.16 x/y; negate x offset when facing byte +0x0f is zero; add one to z high word",
+          "presentation_actor_fields": {
+            "coordinate_mode_u8": 0,
+            "determinism": {
+              "actors_tsv_byte_identical": true,
+              "cold_runs": 2
+            },
+            "mutation": {
+              "control": "player facing forced from 0 to 1 before Button1 dispatch",
+              "first_projectile_x_after": 1213,
+              "first_projectile_x_before": 1181,
+              "projectile_facing_after": 1,
+              "projectile_facing_before": 0
+            },
+            "object_or_u16": "0x8000",
+            "palette_u8": 0,
+            "source_fields": {
+              "coordinate_mode": "actor +0x0d u8",
+              "facing": "actor +0x0f u8",
+              "object_or": "actor +0x2e u16",
+              "palette": "actor +0x0e u8"
+            }
+          },
           "writes": {
             "active_collision": 1,
             "attack_table": "0x0003136a",
@@ -9822,7 +10178,7 @@
         },
         "rng_calls": 0,
         "scheduler_position": "record type 4 before record types 8/12/16/20/24/28/36",
-        "spec_executable": false,
+        "spec_executable": true,
         "state_sequence": [
           0,
           2,
@@ -9907,7 +10263,7 @@
     },
     "mutation_controls": {
       "all_downstream_effects_asserted": true,
-      "count": 12,
+      "count": 13,
       "no_fixed_frame_result": true,
       "no_visible_weapon_inference_from_0xad": true
     },
@@ -9920,11 +10276,17 @@
     },
     "provenance": {
       "capture_manifest_sha256": "ef75b751c7a07d60a73a7a2a04370e42e26b2d706e8fa3f13906efdac34afd5f",
+      "damage_capture_script_sha256": "475a72320ac52138aaae7f82dd683531ad42a04d62538dc635d4aa0322283669",
+      "damage_cold_run_sha256": "b7b63ce328478d3c78ecf422149c1f254cfedbe273efe621ae7f9b9ad49cf8b5",
+      "damage_mutation_sha256": "6ddc91de5789cfaac56caf1f94d572fd960e4c502159017c1b370a21944c4b6e",
+      "impact_audio_selector_sha256": "e0be1d7a9c5fe0769c1bf93a49d56199b318593a1a49d434bc92b3f4ee9e0cf0",
       "mame": {
         "sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
         "version": "0.289 (mame0289)"
       },
       "nvram_baseline_sha256": "35720ff0054bb7ba233da6d00ccbe92473c8a87e2c53c134c83ac2721f7d0ebf",
+      "presentation_actor_cold_run_sha256": "67849c27a2e4343baba1e15bc29c83d115a84ed3bc3b68be41a3715b92f9afe0",
+      "presentation_actor_facing_mutation_sha256": "bcbdc65eb1d6cccb2c886cd858938922f2cfd0d2255091670db88ab3c91ce75c",
       "zero_health_supplement_manifest_sha256": "c8a81ea78e27111b4d5bfc9ca3bed05d7bf5c0223f78b584c9f487302e5bca2c"
     },
     "resource_causal_trace": {
@@ -9967,6 +10329,30 @@
         "sha256": "86e7ac4c7b1e78c76ff9c1aabdfcee6375f92fe49890a8917235df5fad9af3b1",
         "start": "0x01a75e"
       },
+      "damage_defense_class_table": {
+        "bytes": 672,
+        "end_exclusive": "0x1142a0",
+        "sha256": "5d7eda09a1cb649fe96a964d955f8f488e36c13aa3adcbc8c25932856b1f9705",
+        "start": "0x114000"
+      },
+      "damage_matrix": {
+        "bytes": 4480,
+        "end_exclusive": "0x115420",
+        "sha256": "474060f7b51d5813ab9c7ed013116f50cba77f2f04ddc759fbbbce5709638be1",
+        "start": "0x1142a0"
+      },
+      "damage_offense_class_table": {
+        "bytes": 128,
+        "end_exclusive": "0x1154a0",
+        "sha256": "65339db278de6f74ed9656143a8cb3078c910223a605f27de08d0447a8bfb17c",
+        "start": "0x115420"
+      },
+      "damage_routine_current_path": {
+        "bytes": 154,
+        "end_exclusive": "0x01d59e",
+        "sha256": "3f82b5231d65d8dd41b8a8331e3b32f4dda6f9725f9a8df98b720d14da531b25",
+        "start": "0x01d504"
+      },
       "empty_fallback": {
         "bytes": 100,
         "end_exclusive": "0x019f98",
@@ -9991,6 +10377,12 @@
         "sha256": "8ccd5d4849366e6925d777516bade8434a05c463421cdbd2bd8d418fcf90503c",
         "start": "0x07a08e"
       },
+      "record24_class3a_presentation_assemblies": {
+        "bytes": 56,
+        "end_exclusive": "0x0871b8",
+        "sha256": "95b84c0546d302234ab786c4130ea268d45976290391172cc46f6e1ca59e5579",
+        "start": "0x087180"
+      },
       "record4_class5": {
         "bytes": 292,
         "end_exclusive": "0x030e58",
@@ -10002,6 +10394,12 @@
         "end_exclusive": "0x016284",
         "sha256": "3edd55f4d35fadf56acdee8bc049d165aac8d5b5b5bbcd4e8408bd09f0965aec",
         "start": "0x016248"
+      },
+      "record4_class5_presentation_assemblies": {
+        "bytes": 448,
+        "end_exclusive": "0x03136a",
+        "sha256": "f15a9a68c887eaf6df439f1aae18bde6edc422ec3d3e2c78bd187bbf535937b6",
+        "start": "0x0311aa"
       },
       "record4_class5_presentation_tables": {
         "bytes": 79,

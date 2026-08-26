@@ -13,7 +13,7 @@ assert builds[0]["source_tree"] == builds[1]["source_tree"]
 assert normals[0]["normalized_iso_sha256"] == normals[1]["normalized_iso_sha256"]
 assert reads[0]["samples"] == reads[1]["samples"]
 assert reads[0]["state"] == reads[1]["state"]
-assert len(reads[0]["samples"]) == 471 and reads[0]["state"]["frame"] == 470
+assert len(reads[0]["samples"]) == 467 and reads[0]["state"]["frame"] == 466
 for build,normal,report in zip(builds,normals,reads):
     assert build["result"] == report["result"] == "PASS"
     assert normal["production_payload_changed"] is False
@@ -39,26 +39,26 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_entry_gate8236"] == 0
     assert report["state"]["round1_entry_gate81af"] == 1
     assert report["state"]["round1_control_enabled"] == 1
-    assert report["state"]["round1_player_x"] == 1031
+    assert report["state"]["round1_player_x"] == 1025
     assert report["state"]["round1_player_z"] == 320
     assert report["state"]["round1_player_facing"] == 1
     assert report["state"]["round1_player_source_action"] == 514
-    assert report["state"]["round1_player_controller_updates"] == 301
-    assert report["state"]["round1_scheduler_frames"] == 301
-    assert report["state"]["round1_scheduler_dispatches"] == 3029
+    assert report["state"]["round1_player_controller_updates"] == 468
+    assert report["state"]["round1_scheduler_frames"] == 468
+    assert report["state"]["round1_scheduler_dispatches"] == 4928
     assert report["state"]["round1_scheduler_trace_count"] == 10
     assert report["state"]["round1_scheduler_order_hash"] == -2089937380
-    assert report["state"]["round1_actor_handler_dispatches"] == 3010
-    assert report["state"]["round1_presentation_bindings"] == 3010
-    assert report["state"]["round1_state_context_bindings"] == 3010
+    assert report["state"]["round1_actor_handler_dispatches"] == 4680
+    assert report["state"]["round1_presentation_bindings"] == 4680
+    assert report["state"]["round1_state_context_bindings"] == 4680
     assert report["state"]["round1_navigation_bound_x"] == 720
     assert report["state"]["round1_navigation_bound_z"] == 256
-    assert report["state"]["round1_navigation_applications"] == 301
+    assert report["state"]["round1_navigation_applications"] == 468
     assert report["state"]["round1_navigation_clamps"] == 0
     assert report["state"]["round1_player_stop_ticks"] == 0
-    assert report["state"]["round1_player_stop_entries"] == 2
-    assert report["state"]["round1_player_stop_completions"] == 1
-    assert report["state"]["round1_player_stop_motion_suppressions"] == 10
+    assert report["state"]["round1_player_stop_entries"] == 4
+    assert report["state"]["round1_player_stop_completions"] == 3
+    assert report["state"]["round1_player_stop_motion_suppressions"] == 19
     assert report["state"]["round1_player_melee_entries"] == 4
     assert report["state"]["round1_player_melee_completions"] == 4
     assert report["state"]["round1_player_melee_selector_mask"] == 15
@@ -77,14 +77,21 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_player_weapon_empty_releases"] == 1
     assert report["state"]["round1_player_weapon_empty_presentation_bindings"] == 10
     assert report["state"]["round1_player_weapon_interruptions"] == 0
-    assert report["state"]["round1_player_resource"] == 4
-    assert report["state"]["round1_player_resource_recharge"] == 5
-    assert report["state"]["round1_player_weapon_projectile_free"] == 12
+    assert report["state"]["round1_player_resource"] == 32
+    assert report["state"]["round1_player_resource_recharge"] == 6
+    assert report["state"]["round1_player_weapon_projectile_free"] == 24
+    assert report["state"]["round1_native_projectile_render_frames"] > 0
+    assert report["state"]["round1_native_impact_render_frames"] > 0
+    assert report["state"]["round1_native_projectile_render_commands_peak"] > 0
+    assert report["state"]["round1_native_impact_render_commands_peak"] > 0
+    assert report["state"]["round1_native_presentation_decode_failures"] == 0
+    assert report["state"]["round1_native_projectile_collision_writes"] > 0
+    assert report["state"]["round1_native_projectile_damage_writes"] > 0
     assert report["state"]["round1_presentation_ready"] == 1
     assert report["state"]["round1_presentation_seen"] == 1
     assert report["state"]["round1_presentation_commands_peak"] == 2
     assert report["chronology"] == {
-        "alien_contacts":1, "misses":1, "player_contacts":4,
-        "player_damage_events":1, "unlock_frame":450}
+        "alien_contacts":1, "misses":0, "player_contacts":0,
+        "player_damage_events":1, "unlock_frame":None}
     assert report["visual_scanout"] == "UNAVAILABLE_WINDOWS_ACCELERATED_SURFACE"
 print("REIMPLEMENT-13 paired source-closed emulator evidence: PASS")

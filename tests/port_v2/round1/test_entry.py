@@ -8,12 +8,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "cd3a2f050aa4ef3af80ed99d3ba10e9d7ba88d3075053c2fd589fe065645d926"
+EXPECTED = "5700f7c21d7820f0272f788b8177227de9a8047025817771efeed12cb421fe47"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
 header = (ROOT / "src/port_v2/gameplay/round1/round1.h").read_text()
 generated = (ROOT / "src/port_v2/gameplay/round1/spec02_round1_entry_data.h").read_text()
+assert EXPECTED in header
 subprocess.run(["python", str(ROOT / "tools/gen_spec02_round1_entry.py"), "--check"], check=True)
 
 def wsl(path):
@@ -29,6 +30,7 @@ def run(body, header_body, passes):
         command = (f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra -Werror "
                    f"-I '{wsl(temp)}' -I src/port_v2/gameplay/player_action "
                    f"'{wsl(temp / 'round1.c')}' "
+                   f"avsp_actor.c avsp_collision.c "
                    f"src/port_v2/gameplay/player_action/player_action.c "
                    f"tests/port_v2/round1/round1_entry_test.c -o '{wsl(temp / 'test')}' && "
                    f"'{wsl(temp / 'test')}'")
@@ -70,6 +72,12 @@ for before, after in (
     ("actor->y = (short)(actor->y + 4);", "actor->y = (short)(actor->y + 3);"),
     ("if (actor->animation_branch < 0)", "if (actor->animation_branch < -32767)"),
     ("++runtime->player_weapon_empty_auxiliary_releases;", "runtime->player_weapon_empty_auxiliary_releases += 2u;"),
+    ("projectile->collision_result = -1;", "projectile->collision_result = 0;"),
+    ("target->substate = 0x0200u;", "target->substate = 2u;"),
+    ("(runtime->player_weapon_impact_audio_selector + 2u) & 2u", "(runtime->player_weapon_impact_audio_selector + 0u) & 2u"),
+    ("runtime->route_state != 4 &&\n             pool->free_stack[pool->capacity - 1u] != last_slots[index]", "runtime->route_state == 4 &&\n             pool->free_stack[pool->capacity - 1u] != last_slots[index]"),
+    ("projectile->y_fp += (long)motion->y * 256L;", "projectile->y_fp += (long)motion->y * 0L;"),
+    ("projectile->assembly = record->assembly;", "projectile->assembly = 0UL;"),
 ):
     assert before in source
     run(source.replace(before, after), header, False)
@@ -92,6 +100,13 @@ for before, after in (
     ("    40u, 42u, 44u, 46u, 48u, 50u, 49u, 47u, 45u, 43u, 41u, 40u", "    39u, 42u, 44u, 46u, 48u, 50u, 49u, 47u, 45u, 43u, 41u, 40u"),
     ("    { 0, 78 },", "    { 0, 77 },"),
     ("{ 4095u, -32767, 0x0007a12cUL, 0x0007a3a0UL, 0u, 0u },", "{ 4095u, -32768, 0x0007a12cUL, 0x0007a3a0UL, 0u, 0u },"),
+    ("{ 16, 0, 18u, 5u, 0, 8u, 0, 0u, 6u },", "{ 16, 0, 18u, 5u, 0, 8u, 0, 0u, 5u },"),
+    ("{ 2u, 10u, 4u }", "{ 2u, 10u, 3u }"),
+    ("{ 33u, 6u, 24u },", "{ 33u, 6u, 23u },"),
+    ("{ 0x007eu, 0x0148u }", "{ 0x007eu, 0x0147u }"),
+    ("    0u, 0u, 0x8000u\n};\n\nstatic const AvspRound1CollisionBoxSpec avsp_round1_weapon_projectile_hurt_box", "    0u, 0u, 0x0000u\n};\n\nstatic const AvspRound1CollisionBoxSpec avsp_round1_weapon_projectile_hurt_box"),
+    ("    0u, 0u, 0x8000u,\n    { 0x007eu, 0x0148u }", "    0u, 1u, 0x8000u,\n    { 0x007eu, 0x0148u }"),
+    ("{ 2u, -32768, 0x0008701cUL, 0x000871aaUL, 0u, 0u },", "{ 2u, -32767, 0x0008701cUL, 0x000871aaUL, 0u, 0u },"),
 ):
     assert before in generated
     changed = generated.replace(before, after, 1)
@@ -104,9 +119,10 @@ for before, after in (
         command = (f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra -Werror "
                    f"-I '{wsl(temp)}' -I src/port_v2/gameplay/player_action "
                    f"'{wsl(temp / 'round1.c')}' "
+                   f"avsp_actor.c avsp_collision.c "
                    f"src/port_v2/gameplay/player_action/player_action.c "
                    f"tests/port_v2/round1/round1_entry_test.c -o '{wsl(temp / 'test')}' && "
                    f"'{wsl(temp / 'test')}'")
         result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/global-bounds/neutral-stop/melee/Button1 differential: PASS (51 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/global-bounds/neutral-stop/melee/Button1 differential: PASS (64 real mutations)")

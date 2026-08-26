@@ -25,12 +25,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from decode_avsp_object_stream import Rom  # noqa: E402
+from decode_avsp_object_stream import Rom, decode_family2_entry  # noqa: E402
 import verify_avsp_object_corpus as V      # noqa: E402
 
 ROM_PATH = ROOT / ".deps/mame/actorprobe/decrypted_program_2m.bin"
 PAGE = 256
 SAMPLE_STRIDE = 7   # every 7th frame per route keeps the run fast
+SPEC_FIXTURE_PATH = ROOT / "data/spec02_round1_generated_fixtures.json"
 
 
 class RecordingRom(Rom):
@@ -96,6 +97,79 @@ def decode_route_sample(rom, root):
     return results
 
 
+def load_spec02_round1_presentations():
+    """The exact route-reachable Button1 assemblies, derived from SPEC-02.
+
+    These actors are shorter-lived than the retained capture-corpus sampling
+    window.  Keeping their source addresses in the accepted fixture and
+    deriving this list prevents the Saturn content window from becoming a
+    second, hand-maintained gameplay contract.
+    """
+    fixture_bytes = SPEC_FIXTURE_PATH.read_bytes()
+    fixture = json.loads(fixture_bytes)
+    lifecycle = fixture["authority_data"]["player"][
+        "weapon_projectile_resource"]["implementation_contract"][
+            "projectile_lifecycle_contract"]
+    initialization = lifecycle["initialization"]
+    actor_fields = initialization["presentation_actor_fields"]
+    selectors = initialization["parent_presentation_selector"]
+    presentations = selectors["presentation_sequences"]
+    result = []
+    seen = set()
+    for parent_selector in selectors["route_reachable_values"]:
+        sequence = selectors["animation_selector_u8"][parent_selector]
+        for phase in ("first", "terminal"):
+            assembly = int(presentations[sequence][phase]["assembly"], 16)
+            for facing in (0, 1):
+                key = ("projectile", assembly, facing)
+                if key not in seen:
+                    seen.add(key)
+                    result.append({
+                        "kind": "projectile",
+                        "assembly": assembly,
+                        "facing": facing,
+                        "coordinate_mode": actor_fields[
+                            "coordinate_mode_u8"],
+                        "palette": actor_fields["palette_u8"],
+                        "object_or": int(actor_fields["object_or_u16"], 16),
+                    })
+    impact = lifecycle["impact_actor_contract"]["initialization"]
+    impact_fields = impact["presentation_actor_fields"]
+    for record in impact["variant0_presentation_records"]:
+        assembly = int(record["assembly"], 16)
+        key = ("impact", assembly, 0)
+        if key not in seen:
+            seen.add(key)
+            result.append({
+                "kind": "impact",
+                "assembly": assembly,
+                "facing": 0,
+                "coordinate_mode": impact_fields["coordinate_mode_u8"],
+                "palette": impact_fields["palette_u8"],
+                "object_or": int(impact_fields["object_or_u16"], 16),
+            })
+    return result, hashlib.sha256(fixture_bytes).hexdigest()
+
+
+def decode_spec02_presentations(rom, presentations):
+    """Decode fixture-owned family-2 assemblies through the supplied ROM."""
+    results = []
+    for item in presentations:
+        assembly = item["assembly"]
+        top = rom.u16(assembly)
+        if top != 0x0002:
+            raise AssertionError("SPEC-02 assembly 0x%06x is not family 2" %
+                                 assembly)
+        entry = decode_family2_entry(
+            rom, assembly + 4, 944, 320, item["facing"], item["palette"],
+            item["object_or"], 720, 256,
+            item["coordinate_mode"] > 0)
+        results.append((item["kind"], assembly, item["facing"],
+                        tuple(int(entry[name], 16)
+                              for name in ("x", "y", "code", "attr"))))
+    return results
+
+
 def main() -> int:
     data = ROM_PATH.read_bytes()
     rec = RecordingRom(data)
@@ -105,6 +179,8 @@ def main() -> int:
     full_results = []
     for root in roots:
         full_results.extend(decode_route_sample(rec, root))
+    spec_presentations, fixture_sha256 = load_spec02_round1_presentations()
+    spec_full_results = decode_spec02_presentations(rec, spec_presentations)
     print("sampled decodes: %d, touched pages: %d"
           % (len(full_results), len(rec.touched)))
 
@@ -130,6 +206,11 @@ def main() -> int:
         check_results.extend(decode_route_sample(wrom, root))
     if check_results != full_results:
         print("VERIFY FAIL: window decode differs from full-image decode")
+        return 1
+    spec_check_results = decode_spec02_presentations(wrom,
+                                                     spec_presentations)
+    if spec_check_results != spec_full_results:
+        print("VERIFY FAIL: SPEC-02 presentation window decode differs")
         return 1
     print("verify: window-only decode identical on all %d sampled decodes"
           % len(check_results))
@@ -160,6 +241,15 @@ def main() -> int:
         "page_bytes": PAGE,
         "sample_stride": SAMPLE_STRIDE,
         "sampled_decodes": len(full_results),
+        "spec02_round1_presentations": {
+            "fixture": str(SPEC_FIXTURE_PATH.relative_to(ROOT)).replace(
+                "\\", "/"),
+            "fixture_sha256": fixture_sha256,
+            "decoded_variants": len(spec_full_results),
+            "unique_assemblies": len({item["assembly"]
+                                      for item in spec_presentations}),
+            "verified_identical": True,
+        },
         "windows": [{"base": "0x%06x" % base, "size": size,
                      "sha256": hashlib.sha256(data[base:base + size]).hexdigest()}
                     for base, size in windows],

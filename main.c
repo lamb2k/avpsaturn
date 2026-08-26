@@ -521,6 +521,7 @@ typedef struct
     unsigned int round1_player_stop_state;
     unsigned int round1_player_weapon_state0;
     unsigned int round1_player_weapon_state1;
+    unsigned int round1_native_presentation_state;
 } LiveEncounterDiagSample;
 static AvspLiveEncounterRuntime live_encounter_runtime;
 static AvspLiveEncounterFrame live_encounter_frame;
@@ -636,6 +637,9 @@ volatile int avsp_diag_round1_player_weapon_interruptions;
 volatile int avsp_diag_round1_player_resource;
 volatile int avsp_diag_round1_player_resource_recharge;
 volatile int avsp_diag_round1_player_weapon_projectile_free;
+volatile int avsp_diag_round1_native_projectile_render_commands;
+volatile int avsp_diag_round1_native_impact_render_commands;
+volatile int avsp_diag_round1_native_presentation_decode_failures;
 /* Boot-to-first-control chronology. One packed u32 per state transition:
  *  0..3 route, 4 initialized, 5 visible, 6 P1 HUD, 7 P2 HUD,
  *  8 control, 9 retained step, 10 contact, 11 damage, 12 PCM event,
@@ -3295,6 +3299,144 @@ static int draw_rom_actor_tiles(const CapActor *actor, const int slot)
 #endif
     return rendered;
 }
+
+#ifdef AVSP_LIVE_ENCOUNTER
+static int draw_round1_source_actor(const short world_x,
+                                    const short world_y,
+                                    const short world_z,
+                                    const unsigned char facing,
+                                    const unsigned char coordinate_mode,
+                                    const unsigned char palette,
+                                    const unsigned short object_or,
+                                    const unsigned long assembly)
+{
+    AvspEmitActor actor;
+    AvspObjectEntry entries[16];
+    const int emit_origin_cps_x = 0x40 + world_x -
+        round1_runtime.navigation_bound_x;
+    const int origin_dec_y = (round1_runtime.navigation_bound_z + 0x100 -
+                              world_y) & 0x3ff;
+    const int screen_x = world_x -
+        playable_slice_frame.scene.camera_world_x +
+        AVSP_LIVE_ENCOUNTER_APERTURE_ORIGIN_X;
+    const int projected_lane = avsp_live_encounter_project_screen_y(
+        world_z, 0) + 200 - JO_TV_HEIGHT / 2 - 88;
+    const int anchor_jo_y = projected_lane - 200 + 88;
+    const int depth = 330 - projected_lane;
+    int count;
+    int index;
+    int rendered = 0;
+
+    if (!tile_archive_ready || assembly == 0UL)
+        return 0;
+    actor.world_x = (unsigned short)world_x;
+    actor.world_y = (unsigned short)world_y;
+    actor.facing = facing;
+    actor.palette = palette;
+    actor.mode = coordinate_mode;
+    actor.or_value = object_or;
+    actor.anchor_x = (unsigned short)round1_runtime.navigation_bound_x;
+    actor.anchor_y = (unsigned short)round1_runtime.navigation_bound_z;
+    count = avsp_emit_pose_view(&rom_actor_view, assembly, &actor,
+                                entries, 16);
+    if (count <= 0 || count > 16)
+    {
+        ++avsp_diag_round1_native_presentation_decode_failures;
+        return 0;
+    }
+    for (index = count - 1; index >= 0; --index)
+    {
+        const AvspObjectEntry *entry = &entries[index];
+        AvspEntryTile tiles[64];
+        int offset_x = wrap_signed_10bit((int)(entry->x & 0x3ff) -
+                                         (emit_origin_cps_x & 0x3ff));
+        int offset_y = wrap_signed_10bit((int)(entry->y & 0x3ff) -
+                                         origin_dec_y);
+        int bank_slot = avsp_tiles_bank_slot(&tile_archive,
+                                             entry->attr & 0x1f);
+        int tile_count = avsp_entry_tiles(entry->y, entry->code,
+                                          entry->attr, tiles, 64);
+        int tile_index;
+        if (tile_count <= 0 || bank_slot < 0)
+        {
+            ++tile_diag_no_bank;
+            continue;
+        }
+        jo_sprite_set_palette_4bits(tile_palette.id, bank_slot);
+        for (tile_index = 0; tile_index < tile_count; ++tile_index)
+        {
+            long rank = avsp_tiles_find(&tile_archive,
+                                        tiles[tile_index].code);
+            int sprite_id;
+            int jo_x;
+            int jo_y;
+            if (rank < 0)
+            {
+                ++tile_diag_no_rank;
+                continue;
+            }
+            sprite_id = tile_sprite_for_archive_rank(&tile_archive, rank);
+            if (sprite_id < 0)
+            {
+                ++tile_diag_no_sprite;
+                continue;
+            }
+            jo_x = screen_x + fit_352(offset_x +
+                                      tiles[tile_index].dx + 8);
+            jo_y = anchor_jo_y + offset_y + tiles[tile_index].dy + 8;
+            if (tiles[tile_index].flip_x)
+                jo_sprite_enable_horizontal_flip();
+            if (tiles[tile_index].flip_y)
+                jo_sprite_enable_vertical_flip();
+            jo_sprite_draw3D(sprite_id, jo_x, jo_y, depth);
+            ++rendered;
+            if (tiles[tile_index].flip_x)
+                jo_sprite_disable_horizontal_flip();
+            if (tiles[tile_index].flip_y)
+                jo_sprite_disable_vertical_flip();
+        }
+    }
+    return rendered;
+}
+
+static int draw_round1_weapon_projectiles(void)
+{
+    unsigned int index;
+    int rendered = 0;
+    for (index = 0u; index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY; ++index)
+    {
+        const AvspRound1WeaponProjectileAllocation *projectile =
+            &round1_runtime.player_weapon_projectiles[index];
+        if (!projectile->active || projectile->assembly == 0UL)
+            continue;
+        rendered += draw_round1_source_actor(
+            projectile->x, projectile->y, projectile->z,
+            projectile->facing, projectile->coordinate_mode,
+            projectile->palette, projectile->object_or,
+            projectile->assembly);
+    }
+    return rendered;
+}
+
+static int draw_round1_weapon_impacts(void)
+{
+    const AvspRound1Pool *pool = &round1_runtime.pools[3];
+    unsigned int index;
+    int rendered = 0;
+    for (index = 0u; index < pool->capacity; ++index)
+    {
+        const AvspRound1ActorCore *actor = &pool->records[index];
+        if (!avsp_round1_is_weapon_impact_actor(actor) ||
+            actor->assembly == 0UL)
+            continue;
+        rendered += draw_round1_source_actor(
+            actor->x, actor->y, actor->z, actor->facing,
+            actor->coordinate_mode, actor->palette, actor->object_or,
+            actor->assembly);
+    }
+    return rendered;
+}
+#endif
 
 #ifdef AVSP_PROBE3
 static int probe3_decode_coordinate(const int value)
@@ -6619,12 +6761,20 @@ static void playable_slice_draw_actors(void)
             (unsigned long)(unsigned int)player_action_sprites[0] ^
             ((unsigned long)(unsigned int)player_action_sprites[1] << 8);
     }
+#ifdef AVSP_LIVE_ENCOUNTER
+    avsp_diag_round1_native_projectile_render_commands =
+        draw_round1_weapon_projectiles();
+#endif
     expected_enemy_object =
         playable_slice_frame.scene.enemy_identity.emitted_object_identity;
     expected_enemy_tile =
         playable_slice_frame.scene.enemy_identity.emitted_tile_identity;
     if (enemy->active && rom_actor_entry_counts[0] > 0 && tile_archive_ready)
         rendered = draw_rom_actor_tiles(enemy, 0);
+#ifdef AVSP_LIVE_ENCOUNTER
+    avsp_diag_round1_native_impact_render_commands =
+        draw_round1_weapon_impacts();
+#endif
     jo_sprite_restore_sprite_scale();
     rom_actor_advance();
     avsp_diag_player_x = player.x;
@@ -7332,6 +7482,20 @@ static void live_encounter_publish(void)
             (((unsigned int)round1_runtime.player_resource & 0x7fu) << 15) |
             (((unsigned int)round1_runtime.player_resource_recharge & 0x0fu) << 22) |
             (((unsigned int)round1_runtime.player_weapon_projectile_free_count & 0x1fu) << 26);
+        sample->round1_native_presentation_state =
+            ((unsigned int)
+                avsp_diag_round1_native_projectile_render_commands & 0x00ffu) |
+            (((unsigned int)
+                avsp_diag_round1_native_impact_render_commands & 0x00ffu) << 8) |
+            (((unsigned int)
+                avsp_diag_round1_native_presentation_decode_failures &
+                0x000fu) << 16) |
+            (((unsigned int)
+                round1_runtime.player_weapon_projectile_collision_writes &
+                0x003fu) << 20) |
+            (((unsigned int)
+                round1_runtime.player_weapon_projectile_damage_writes &
+                0x003fu) << 26);
         avsp_diag_live_sample_count = (int)live_encounter_frame.frame + 1;
     }
     avsp_diag_live_interface_version = AVSP_LIVE_ENCOUNTER_INTERFACE_VERSION;
@@ -7390,8 +7554,8 @@ static void live_encounter_publish(void)
     avsp_diag_slice_canaries_ok = playable_slice_frame.canaries_ok;
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
-        AVSP_ROUND1_SPEC02_SHA256[0] == 'c' &&
-        AVSP_ROUND1_SPEC02_SHA256[63] == '6';
+        AVSP_ROUND1_SPEC02_SHA256[0] == '5' &&
+        AVSP_ROUND1_SPEC02_SHA256[63] == '7';
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
     avsp_diag_round1_rng_seed = round1_runtime.rng_seed;

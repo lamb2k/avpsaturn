@@ -565,7 +565,7 @@ def validate(report: dict[str, object]) -> None:
     if "weapon_projectile_resource" in report:
         weapon = report["weapon_projectile_resource"]
         require(weapon["status"] == "SOURCE_CLOSED" and
-                weapon["mutation_controls"]["count"] == 12 and
+                weapon["mutation_controls"]["count"] == 13 and
                 weapon["authority_separation"]["equipment_resource"]
                 ["action_latch"].endswith("not ownership"),
                 "weapon/projectile/resource authority drift")

@@ -132,25 +132,34 @@ pinned-window inspection pass. Commit `09c8a28` amends only the existing
 SPEC-02 fixture from accepted Oracle evidence and implements the executable
 type-24/class-0x10 empty-request effect: exact variant-1 allocation, offset,
 ten presentation records, timers/branches, low-byte movement guard, and pool
-release. The same fixture now binds class-0x05 allocation angle/selector tables,
+release. The same fixture binds class-0x05 allocation angle/selector tables,
 all 64 signed motion pairs, presentation records, state-2 arithmetic/bounds,
-and state-4 impact allocation writes, but class-0x05 execution remains blocked
-only by the type-24/class-0x3a impact handler and the current-state collision
-writer for attack table `0x03136a`. Fifty-one host mutations, 44 Target
-suppressions, Target, paired Emulator, Fast, Oracle, and direct frames 211/260
-inspection pass. Preserve the class-0x1F, Coffee Shop, Button3, and remaining
-class-0x05 blockers. The startup-authority correction binds source frames
+state-4 impact allocation, and state-6 release. The current checkpoint
+implements that body plus the exact type-24/class-0x3a state 0/2/4 five-record
+impact presentation/release handler and current-state collision/damage writer
+for attack table `0x03136a`. Sixty-four host mutations, release Target, paired
+Emulator, Fast, and Oracle pass. Byte-identical target runs record 49 projectile
+render frames, 40 impact render frames, three collision writes, three damage
+writes, and zero fallback, decode failure, or gameplay PCM. Direct paused
+scanout inspection at native controller updates 212 and about 253 preserves the
+source projectile/impact assemblies, coherent actors, P1-only HUD, camera, both
+VDP2 planes, palette, and priority. Audio command identities `0x007e` and
+`0x0148` remain semantic-name unknown telemetry; no PCM mapping is inferred.
+The build explicitly depends on the SPEC header, and the focused lane checks
+the complete hash, preventing stale target binding after fixture regeneration.
+Preserve the class-0x1F, Coffee Shop, and Button3 blockers. The startup-authority
+correction binds source frames
 2040/2072/2075/2238/2520 to title, P1 HUD/player initialization, player
 visibility, control, and one Track-2 start. Retained gameplay is not initialized
 or stepped before route state 4, active P2 HUD visibility is false, retained
 contact cannot trigger gameplay PCM, and native state owns P1 HUD. Paired
 startup traces have zero hidden contact/damage, orphan PCM, duplicate CDDA,
 fallback, or failure; direct scanout review matches the source P1 top and
-weapon-meter assets. Fast, Oracle, Target, and paired Emulator pass. Close only
-the smallest accepted-evidence gap for the
-class-0x3a handler and collision writer next; if it cannot proceed, continue
-another dependency-safe first-segment blocker and return before leaving the
-segment.
+weapon-meter assets. Fast, Oracle, release Target, and paired Emulator pass.
+Close the preserved class-0x1F initial `0x0200:1000/1200/1400` transition body
+next, using accepted Oracle evidence to amend only the existing SPEC fixture and
+the smallest bounded Oracle follow-up only if an exact implementation field is
+genuinely absent. Do not leave the first segment.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.

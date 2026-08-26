@@ -8,9 +8,26 @@
   "bytes": 2097152,
   "sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9"
  },
- "total_bytes": 28416,
+ "spec02_round1_presentations": {
+  "decoded_variants": 20,
+  "fixture": "data/spec02_round1_generated_fixtures.json",
+  "fixture_sha256": "589a5f597217663be9798bc8e4bd3b4a1d72a7b5a1ebb0f40c99637318cad76d",
+  "unique_assemblies": 12,
+  "verified_identical": true
+ },
+ "total_bytes": 29184,
  "verified_identical": true,
  "windows": [
+  {
+   "base": "0x031200",
+   "sha256": "986a7ce5d30c2d5370e67b5874bce80c607692c61ea370caa168cd4ca6e3481e",
+   "size": 512
+  },
+  {
+   "base": "0x087100",
+   "sha256": "9631e0d6f82b5928db05ec78e373216ccde019206244e77f5c91b781b4a1cce0",
+   "size": 256
+  },
   {
    "base": "0x12a200",
    "sha256": "4bf7c1de801153d7a386ef0ed8066d5848741477582ff922b542f257eb2db157",

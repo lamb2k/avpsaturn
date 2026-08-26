@@ -19,9 +19,18 @@ assert weapon["source_input"]["button1_mask"] == "0x0010"
 assert weapon["sufficient_volley"]["spawn_tick_offsets"] == list(range(0, 48, 4))
 assert weapon["sufficient_volley"]["cleanup_tick_offset"] == 49
 assert weapon["empty_fallback"]["cleanup_tick_offset"] == 17
-assert weapon["projectile_lifecycle_contract"]["spec_executable"] is False
-assert len(weapon["projectile_lifecycle_contract"][
-    "implementation_blocker"]["missing_fields"]) == 2
+projectile = weapon["projectile_lifecycle_contract"]
+assert projectile["spec_executable"] is True
+assert projectile["implementation_blocker"] is None
+assert projectile["impact_actor_contract"]["spec_executable"] is True
+assert projectile["initialization"]["presentation_actor_fields"][
+    "object_or_u16"] == "0x8000"
+assert projectile["impact_actor_contract"]["initialization"][
+    "presentation_actor_fields"]["coordinate_mode_u8"] == 0
+damage = projectile["current_state_interfaces"]["collision"]["damage"]
+assert damage["baseline"]["damage"] == 24
+assert damage["mutation"]["damage"] == 31
+assert damage["suppression"]["mutated_writes"] == 4
 assert weapon["empty_effect_variant1_contract"]["spec_executable"] is True
 rebuilt_contract, rebuilt_fixtures = spec02.build_artifacts()
 assert spec02.canonical(rebuilt_contract) == spec02.OUT.read_bytes()
@@ -45,6 +54,9 @@ m = copy.deepcopy(contract); m["coverage_gate"]["orphan_authoritative_writers"] 
 f = copy.deepcopy(fixtures); f["authority_data"]["rng"]["algorithm"]["recurrence"] = "guess"; mutations.append((contract, f, "fixture mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["sufficient_volley"]["cadence_reload"] = 3; mutations.append((contract, f, "weapon cadence mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["empty_effect_variant1_contract"]["variant"] = 0; mutations.append((contract, f, "empty effect variant mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["projectile_lifecycle_contract"]["current_state_interfaces"]["collision"]["damage"]["mutation"]["damage"] = 24; mutations.append((contract, f, "projectile damage lookup mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["projectile_lifecycle_contract"]["initialization"]["presentation_actor_fields"]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "projectile presentation object priority mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["projectile_lifecycle_contract"]["impact_actor_contract"]["initialization"]["presentation_actor_fields"]["palette_u8"] = 1; mutations.append((contract, f, "impact presentation palette mutation"))
 m = copy.deepcopy(contract); m["protected_boundaries"]["physical_saturn"] = "PASS"; mutations.append((m, fixtures, "hardware overclaim"))
 m = copy.deepcopy(contract); m["next_card"] = "SALVAGE-08-FRONTEND"; mutations.append((m, fixtures, "frontend bypass"))
 for args in mutations:

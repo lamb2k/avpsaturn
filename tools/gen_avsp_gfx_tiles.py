@@ -48,6 +48,10 @@ sys.path.insert(0, str(ROOT / "tools"))
 import extract_avspu_stage1 as avsp        # noqa: E402
 from decode_avsp_object_stream import Rom  # noqa: E402
 import verify_avsp_object_corpus as V      # noqa: E402
+from gen_avsp_emit_windows import (       # noqa: E402
+    decode_spec02_presentations,
+    load_spec02_round1_presentations,
+)
 
 ROM_PATH = ROOT / ".deps/mame/actorprobe/decrypted_program_2m.bin"
 MAIN_C = ROOT / "main.c"
@@ -246,6 +250,26 @@ def read_tile_region_bytes() -> int:
     return int(m.group(1), 16)
 
 
+def build_archive_blob(codes, banks, palette_path, gfx):
+    """Serialize one deterministic AVTL archive from an exact tile set."""
+    bank_map, slots, cram = build_palette_block(banks, palette_path)
+    header_bytes = 0x10 + 32 + len(cram) * 2
+    blob = bytearray()
+    blob += b"AVTL"
+    blob += len(codes).to_bytes(4, "big")
+    blob += len(slots).to_bytes(4, "big")
+    blob += header_bytes.to_bytes(4, "big")
+    blob += bytes(bank_map)
+    for value in cram:
+        blob += value.to_bytes(2, "big")
+    assert len(blob) == header_bytes
+    for code in codes:
+        blob += code.to_bytes(4, "big")
+    for code in codes:
+        blob += tile_texture(gfx, code)
+    return blob, slots
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     source = parser.add_mutually_exclusive_group(required=True)
@@ -294,6 +318,21 @@ def main() -> int:
         routes = ROUTES_BY_SCOPE[args.scope]
         rom = Rom(ROM_PATH.read_bytes())
         tiles, banks, per_route = collect_entries(rom, routes)
+        spec_presentations, spec_fixture_sha256 = (
+            load_spec02_round1_presentations())
+        spec_results = decode_spec02_presentations(rom, spec_presentations)
+        spec_tile_count_before = len(tiles)
+        for _kind, _assembly, _facing, flat in spec_results:
+            _x, y, code, attr = flat
+            tiles |= entry_tile_codes_exact(code, y, attr)
+            banks.add(attr & 0x1F)
+        per_route["spec02_round1_button1_presentations"] = {
+            "fixture_sha256": spec_fixture_sha256,
+            "decoded_variants": len(spec_results),
+            "unique_assemblies": len({item["assembly"]
+                                      for item in spec_presentations}),
+            "tiles_added": len(tiles) - spec_tile_count_before,
+        }
         palette_path = pick_palette_frame()
         scope = args.scope
         facing_union = True
@@ -304,26 +343,10 @@ def main() -> int:
                          % ", ".join("0x%X" % c for c in sorted(bad)[:8]))
     codes = sorted(tiles)
 
-    bank_map, slots, cram = build_palette_block(banks, palette_path)
+    blob, slots = build_archive_blob(codes, banks, palette_path, gfx)
     print("tiles: %d (%d bytes), palette banks: %s -> %d slots"
           % (len(codes), len(codes) * TILE_BYTES,
              ",".join("0x%02X" % b for b in sorted(banks)), len(slots)))
-
-    header_bytes = 0x10 + 32 + len(cram) * 2
-    codes_offset = header_bytes
-    blob = bytearray()
-    blob += b"AVTL"
-    blob += len(codes).to_bytes(4, "big")
-    blob += len(slots).to_bytes(4, "big")
-    blob += codes_offset.to_bytes(4, "big")
-    blob += bytes(bank_map)
-    for value in cram:
-        blob += value.to_bytes(2, "big")
-    assert len(blob) == header_bytes
-    for code in codes:
-        blob += code.to_bytes(4, "big")
-    for code in codes:
-        blob += tile_texture(gfx, code)
 
     region_bytes = read_tile_region_bytes()
     if len(blob) > region_bytes and not args.allow_over_budget:
