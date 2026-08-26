@@ -73,6 +73,8 @@
     ,"avsp_diag_round1_scheduler_dispatches"
     ,"avsp_diag_round1_scheduler_trace_count"
     ,"avsp_diag_round1_scheduler_order_hash"
+    ,"avsp_diag_round1_actor_handler_dispatches"
+    ,"avsp_diag_round1_presentation_bindings"
     ,"failed_asset"
   ]
 }

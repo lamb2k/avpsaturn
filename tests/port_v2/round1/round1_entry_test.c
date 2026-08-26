@@ -48,7 +48,14 @@ int main(void)
     if (!avsp_round1_step_scheduler(&runtime) ||
         runtime.scheduler_trace_count != 10u ||
         runtime.scheduler_frames != 1u ||
-        runtime.scheduler_dispatches != 10u)
+        runtime.scheduler_dispatches != 10u ||
+        runtime.actor_handler_dispatches != 10u ||
+        runtime.presentation_bindings != 10u ||
+        runtime.pools[0].records[10].assembly != 0x0012F5DEUL ||
+        runtime.pools[0].records[10].hurt_selector != 2u ||
+        runtime.pools[0].records[10].attack_selector != 0u ||
+        runtime.pools[0].records[16].assembly != 0x0012F994UL ||
+        runtime.pools[0].records[16].hurt_selector != 1u)
         return 7;
     for (calls = 0u; calls < 10u; ++calls)
     {
@@ -78,10 +85,13 @@ int main(void)
         runtime.scheduler_trace_count != 13u ||
         runtime.scheduler_frames != 2u ||
         runtime.scheduler_dispatches != 23u ||
+        runtime.actor_handler_dispatches != 20u ||
+        runtime.presentation_bindings != 20u ||
         runtime.scheduler_trace[10].record_type != 16u ||
         runtime.scheduler_trace[11].record_type != 20u ||
         runtime.scheduler_trace[12].record_type != 24u ||
-        runtime.pools[0].records[10].scheduler_updates != 2u)
+        runtime.pools[0].records[10].scheduler_updates != 2u ||
+        runtime.pools[0].records[10].handler_updates != 2u)
         return 9;
     first = &runtime.pools[0].records[19];
     last = &runtime.pools[0].records[10];

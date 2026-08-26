@@ -43,6 +43,11 @@ def build() -> str:
     for pool in scheduler["pools"]:
         for dispatch in pool["required_round1_dispatch"]:
             dispatches.append((pool["record_type"], int(dispatch["class"], 16)))
+    class1f = next(archetype for archetype in
+                   fixtures["authority_data"]["enemies"]["archetypes"]
+                   if archetype["type"] == 12 and archetype["class"] == "0x1f")
+    presentation = class1f["presentation_and_collision"]
+    presentation_rows = presentation["records"]
     if len(spawns) != 10 or len(commands) != len(KINDS):
         raise ValueError("SPEC-02 entry cardinality drift")
     if [int(row["sequence"]) for row in spawns] != list(range(10)):
@@ -51,6 +56,11 @@ def build() -> str:
         raise ValueError("SPEC-02 entry program/timer drift")
     if scheduler_order != [12, 16, 20, 24] or len(dispatches) != 16:
         raise ValueError("SPEC-02 Round 1 scheduler/dispatch drift")
+    records = [int(row["animation_record"], 16) for row in presentation_rows]
+    if (presentation["orphan_records"] != 0 or
+        presentation["record_count"] != len(presentation_rows) or
+        records != sorted(records) or len(records) != len(set(records))):
+        raise ValueError("SPEC-02 class-0x1f presentation table drift")
 
     cursor = int(player["initial_cursor"], 16)
     step_rows = []
@@ -119,6 +129,17 @@ def build() -> str:
     ])
     for record_type, actor_class in dispatches:
         lines.append(f"    {{ {record_type}u, 0x{actor_class:02X} }},")
+    lines.extend([
+        "};", "",
+        f"#define AVSP_ROUND1_CLASS1F_PRESENTATION_COUNT {len(presentation_rows)}u",
+        "static const AvspRound1PresentationSpec avsp_round1_class1f_presentation[AVSP_ROUND1_CLASS1F_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in presentation_rows:
+        lines.append(
+            "    { %sUL, %sUL, %du, %du }," % (
+                row["animation_record"], row["assembly"],
+                row["hurt_selector"], row["attack_selector"]))
     lines.extend(["};", "", "#endif", ""])
     return "\n".join(lines)
 

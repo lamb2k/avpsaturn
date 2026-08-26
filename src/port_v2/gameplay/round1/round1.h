@@ -44,7 +44,11 @@ typedef struct
     short z;
     short health;
     unsigned long animation_record;
+    unsigned long assembly;
+    unsigned char hurt_selector;
+    unsigned char attack_selector;
     unsigned long scheduler_updates;
+    unsigned long handler_updates;
 } AvspRound1ActorCore;
 
 typedef struct
@@ -52,6 +56,14 @@ typedef struct
     unsigned char record_type;
     signed char actor_class;
 } AvspRound1DispatchSpec;
+
+typedef struct
+{
+    unsigned long animation_record;
+    unsigned long assembly;
+    unsigned char hurt_selector;
+    unsigned char attack_selector;
+} AvspRound1PresentationSpec;
 
 typedef struct
 {
@@ -138,6 +150,8 @@ typedef struct
     unsigned long scheduler_frames;
     unsigned long scheduler_dispatches;
     unsigned long scheduler_order_hash;
+    unsigned long actor_handler_dispatches;
+    unsigned long presentation_bindings;
     unsigned long failure_count;
     unsigned long fallback_count;
     unsigned long tail_canary;

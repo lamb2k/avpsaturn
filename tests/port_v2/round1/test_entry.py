@@ -49,6 +49,7 @@ for before, after in (
     ("if (actor->active == 0u)\n                continue;", "if (actor->active != 0u)\n                continue;"),
     ("pool_index = order_index;", "pool_index = (order_index + 1u) % AVSP_ROUND1_POOL_COUNT;"),
     ("!avsp_round1_dispatch_supported(actor->type,\n                                                actor->actor_class)", "0"),
+    ("actor->assembly = presentation->assembly;", "actor->assembly = 0UL;"),
 ):
     assert before in source
     run(source.replace(before, after), header, False)
@@ -56,6 +57,7 @@ for before, after in (
     ("{ 0xffa3c0u, 12u, 656, 312, 312,", "{ 0xffa3c0u, 12u, 657, 312, 312,"),
     ("{ AVSP_ROUND1_ENTRY_DWELL, 0x00u, 0u, 60u,", "{ AVSP_ROUND1_ENTRY_DWELL, 0x00u, 0u, 59u,"),
     ("    12u, 16u, 20u, 24u", "    16u, 12u, 20u, 24u"),
+    ("{ 0x0012e8ecUL, 0x0012f5deUL,", "{ 0x0012e8ecUL, 0x0012f994UL,"),
 ):
     assert before in generated
     changed = generated.replace(before, after, 1)
@@ -73,4 +75,4 @@ for before, after in (
                    f"'{wsl(temp / 'test')}'")
         result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
         assert result.returncode != 0
-print("REIMPLEMENT-13 first entry/current-input/scheduler differential: PASS (15 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/presentation differential: PASS (17 real mutations)")

@@ -506,6 +506,8 @@ typedef struct
     int round1_scheduler_dispatches;
     int round1_scheduler_trace_count;
     int round1_scheduler_order_hash;
+    int round1_actor_handler_dispatches;
+    int round1_presentation_bindings;
 } LiveEncounterDiagSample;
 static AvspLiveEncounterRuntime live_encounter_runtime;
 static AvspLiveEncounterFrame live_encounter_frame;
@@ -587,6 +589,8 @@ volatile int avsp_diag_round1_scheduler_frames;
 volatile int avsp_diag_round1_scheduler_dispatches;
 volatile int avsp_diag_round1_scheduler_trace_count;
 volatile int avsp_diag_round1_scheduler_order_hash;
+volatile int avsp_diag_round1_actor_handler_dispatches;
+volatile int avsp_diag_round1_presentation_bindings;
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
 static int live_autotest_phase;
 static int live_autotest_release;
@@ -6970,6 +6974,10 @@ static void live_encounter_publish(void)
             (int)round1_runtime.scheduler_trace_count;
         sample->round1_scheduler_order_hash =
             (int)round1_runtime.scheduler_order_hash;
+        sample->round1_actor_handler_dispatches =
+            (int)round1_runtime.actor_handler_dispatches;
+        sample->round1_presentation_bindings =
+            (int)round1_runtime.presentation_bindings;
         avsp_diag_live_sample_count = (int)live_encounter_frame.frame + 1;
     }
     avsp_diag_live_interface_version = AVSP_LIVE_ENCOUNTER_INTERFACE_VERSION;
@@ -7065,6 +7073,10 @@ static void live_encounter_publish(void)
         (int)round1_runtime.scheduler_trace_count;
     avsp_diag_round1_scheduler_order_hash =
         (int)round1_runtime.scheduler_order_hash;
+    avsp_diag_round1_actor_handler_dispatches =
+        (int)round1_runtime.actor_handler_dispatches;
+    avsp_diag_round1_presentation_bindings =
+        (int)round1_runtime.presentation_bindings;
 }
 
 static void live_encounter_frame_callback(void)

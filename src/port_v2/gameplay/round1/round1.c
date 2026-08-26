@@ -96,6 +96,26 @@ static unsigned long avsp_round1_scheduler_hash_byte(unsigned long hash,
     return (hash ^ (unsigned long)value) * 16777619UL;
 }
 
+static const AvspRound1PresentationSpec *avsp_round1_find_class1f_presentation(
+    unsigned long animation_record)
+{
+    unsigned int low = 0u;
+    unsigned int high = AVSP_ROUND1_CLASS1F_PRESENTATION_COUNT;
+    while (low < high)
+    {
+        unsigned int middle = low + (high - low) / 2u;
+        unsigned long candidate =
+            avsp_round1_class1f_presentation[middle].animation_record;
+        if (candidate < animation_record)
+            low = middle + 1u;
+        else if (candidate > animation_record)
+            high = middle;
+        else
+            return &avsp_round1_class1f_presentation[middle];
+    }
+    return 0;
+}
+
 int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
 {
     unsigned int order_index;
@@ -125,6 +145,7 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
             AvspRound1ActorCore *actor =
                 &runtime->pools[pool_index].records[slot_index];
             AvspRound1SchedulerVisit *visit;
+            const AvspRound1PresentationSpec *presentation;
             unsigned short expected_slot;
             if (actor->active == 0u)
                 continue;
@@ -152,6 +173,22 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
                 (unsigned char)actor->actor_class);
             hash = avsp_round1_scheduler_hash_byte(hash,
                 (unsigned char)slot_index);
+            if (actor->type == 12u && actor->actor_class == 0x1f)
+            {
+                presentation = avsp_round1_find_class1f_presentation(
+                    actor->animation_record);
+                if (presentation == 0)
+                {
+                    ++runtime->failure_count;
+                    return 0;
+                }
+                actor->assembly = presentation->assembly;
+                actor->hurt_selector = presentation->hurt_selector;
+                actor->attack_selector = presentation->attack_selector;
+                ++actor->handler_updates;
+                ++runtime->actor_handler_dispatches;
+                ++runtime->presentation_bindings;
+            }
             ++actor->scheduler_updates;
             ++runtime->scheduler_dispatches;
         }
