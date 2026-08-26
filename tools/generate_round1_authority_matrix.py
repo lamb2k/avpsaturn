@@ -15,6 +15,7 @@ AUXILIARY=ROOT/'data/oracle11_round1_auxiliary_authority.json'
 ENCOUNTERS=ROOT/'data/oracle11_round1_encounter_route_authority.json'
 BOSS=ROOT/'data/oracle11_round1_boss_orchestration.json'
 HANDOFF=ROOT/'data/oracle11_round1_handoff.json'
+RNG=ROOT/'data/oracle11_round1_rng.json'
 FAMILIES=(
  'predator-warrior-player-authority','round1-navigation-terrain-camera',
  'actor-scheduler-allocation-lifecycle','round1-enemy-archetypes',
@@ -110,6 +111,11 @@ def build(coverage,route):
         writer_pcs.difference_update(encounter_report['owned_authoritative_writer_pcs'])
     if handoff_report and handoff_report['status']=='SOURCE_CLOSED':
         writer_pcs.difference_update(handoff_report['owned_authoritative_writer_pcs'])
+    rng_report=None
+    if RNG.exists():
+        rng_report=json.loads(RNG.read_text(encoding='ascii'))
+    if rng_report and rng_report['status']=='SOURCE_CLOSED':
+        writer_pcs.difference_update(rng_report['owned_authoritative_writer_pcs'])
     events={
       'spawn':len(unmapped_pairs),'damage':1 if counts['PARTIAL'] else 0,
       'audio':len(route['audio_change_frames']) if bodies[FAMILIES[8]]['status']!='SOURCE_CLOSED' else 0,
@@ -285,6 +291,25 @@ def main():
           'Retain the closed Round 1 clear and stable Round 2 handoff while '
           'route-wide global RNG algorithm, caller ownership and exact '
           'consumption order are source-closed.')
+    if RNG.exists():
+        rng=json.loads(RNG.read_text(encoding='ascii'))
+        body=next(item for item in coverage['bodies'] if item['id']=='rng-consumption')
+        body['status']=rng['status']
+        evidence=body.setdefault('accepted_evidence',[])
+        for item in ('data/oracle11_round1_rng.json',
+                     'data/oracle11_round1_enemy_archetypes.json',
+                     'data/oracle11_round1_auxiliary_authority.json',
+                     'data/oracle10_round1_route.json'):
+            if item not in evidence:evidence.append(item)
+        body['counterfactual']=(
+          'two byte-identical completion ledgers contain exactly 2,280 calls '
+          'on 1,023 seed-change frames with zero recurrence or ownership gaps; '
+          'the completing route and offense perturbations change consumption '
+          'while freezing the shared seed prevents Round 1 completion')
+        body['exact_next_experiment']=(
+          'Reconcile every remaining authoritative writer PC against the '
+          'already source-closed authority-family evidence without weakening '
+          'the sole 94 x 10 zero-gap gate.')
     coverage['route_segment_authority_matrix']=build(coverage,route)
     coverage['spec02_closure_gate']=coverage['route_segment_authority_matrix']['closure_gate']
     COVERAGE.write_bytes((json.dumps(coverage,sort_keys=True,indent=2)+'\n').encode('ascii'))

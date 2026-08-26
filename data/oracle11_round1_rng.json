@@ -1,0 +1,297 @@
+{
+  "algorithm": {
+    "classification": "SOURCE_CLOSED",
+    "entry": "0x017c5e",
+    "input": "old_seed:u16",
+    "recurrence": "high=((3*old_seed)&0xffff)>>8; low=((old_seed&0xff)+high)&0xff; new_seed=(high<<8)|low",
+    "return": "new low byte in D0",
+    "source_window": {
+      "first": "0x017c5e",
+      "last_exclusive": "0x017c78",
+      "sha256": "461307125b5a9555bbbb5ecf1bb6feb5dec0f156d8f1080aaf2b389d76b0c9ff"
+    },
+    "state": "0xff81a8..0xff81a9:u16",
+    "state_writer_tap_pcs": [
+      "0x017c70",
+      "0x017c72"
+    ],
+    "types": "all arithmetic wraps at u16/u8"
+  },
+  "capture_identity": {
+    "auxiliary_rng_sha256": "6e771b5ee240af7eb4a0dc20e72a83cc40800be0dd3ce457eebfdbe369f12235",
+    "byte_identical": true,
+    "completion_a": {
+      "files": {
+        "dispatches.tsv": "c58ce0b2fd9811112002e717b33ee8364a7808aa6c42ffdceb97380b8f8b9985",
+        "lifecycle_writes.tsv": "21bbd8c035146051401132e86f20f77282348a3227290b5e80bbf58675224656",
+        "projectiles.tsv": "6f724e0675fc8949e720960d1d8d020998290ef8a785b560de6bab53dd9baf60",
+        "result.tsv": "e75dded8c4f6dd02bedcf3e2b32782bd2e53d65256e042e11436435317b734ed",
+        "route_rng.tsv": "8f59258961ea4694e545993331a9478b006a1a3df9913390df01822ad397dd19",
+        "route_samples.tsv": "ad723acfbd3d51c0c833da0eed3490833494bab5af9862244f8ca35e2876a54c",
+        "route_writer_summary.tsv": "cc644d0f0dba7adf039b0a5240d871410f2082d29c903212ef5e6caa5e9558e0",
+        "route_writes.tsv": "6f1e4d6da736d9b886a834bf72fc426e58011f68e512acf1d6e8b7348c4f858a",
+        "samples.tsv": "1fa5054501203d374c9872d4f1bd2cfd11b354d2d6d7f6da4ee2edbd8c042f1a",
+        "score_writes.tsv": "66293054225844fd0f20216e6b41b9f3f54628f3abafda7257f1b2c89c6af9fe"
+      },
+      "mame_sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
+      "manifest_sha256": "bf36fcb28d783857a52af4c02f61df55f20ad6e85eee5df48f3ef9bcfa3668f0",
+      "nvram_baseline_sha256": "35720ff0054bb7ba233da6d00ccbe92473c8a87e2c53c134c83ac2721f7d0ebf",
+      "variant": "baseline"
+    },
+    "completion_b": {
+      "files": {
+        "dispatches.tsv": "c58ce0b2fd9811112002e717b33ee8364a7808aa6c42ffdceb97380b8f8b9985",
+        "lifecycle_writes.tsv": "21bbd8c035146051401132e86f20f77282348a3227290b5e80bbf58675224656",
+        "projectiles.tsv": "6f724e0675fc8949e720960d1d8d020998290ef8a785b560de6bab53dd9baf60",
+        "result.tsv": "e75dded8c4f6dd02bedcf3e2b32782bd2e53d65256e042e11436435317b734ed",
+        "route_rng.tsv": "8f59258961ea4694e545993331a9478b006a1a3df9913390df01822ad397dd19",
+        "route_samples.tsv": "ad723acfbd3d51c0c833da0eed3490833494bab5af9862244f8ca35e2876a54c",
+        "route_writer_summary.tsv": "cc644d0f0dba7adf039b0a5240d871410f2082d29c903212ef5e6caa5e9558e0",
+        "route_writes.tsv": "6f1e4d6da736d9b886a834bf72fc426e58011f68e512acf1d6e8b7348c4f858a",
+        "samples.tsv": "1fa5054501203d374c9872d4f1bd2cfd11b354d2d6d7f6da4ee2edbd8c042f1a",
+        "score_writes.tsv": "66293054225844fd0f20216e6b41b9f3f54628f3abafda7257f1b2c89c6af9fe"
+      },
+      "mame_sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
+      "manifest_sha256": "bf36fcb28d783857a52af4c02f61df55f20ad6e85eee5df48f3ef9bcfa3668f0",
+      "nvram_baseline_sha256": "35720ff0054bb7ba233da6d00ccbe92473c8a87e2c53c134c83ac2721f7d0ebf",
+      "variant": "baseline"
+    },
+    "enemy_rng_sha256": "c655a40fa664ef471c7b1be41ed58b4e3d3cb3ca0321acc1ddcf64bbc150f8c7",
+    "opcode_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501"
+  },
+  "consumption": {
+    "calls": 2280,
+    "distinct_seed_change_frames": 1023,
+    "first_frame": 2072,
+    "initial_seed": "0x8def",
+    "last_frame": 15192,
+    "max_calls_in_one_frame": 196,
+    "missing_calls": 0,
+    "order_sha256": "f1299d1a86314bdbe0429f3c07cc0d2882c4d6e91d15ada3e9c4542743712bad",
+    "recurrence_gaps": 0,
+    "seed_after_last_call": "0xf920"
+  },
+  "counterfactuals": {
+    "freeze_rng": {
+      "classification": "DISCRIMINATING",
+      "completed_round1": false,
+      "frozen_seed": "0x8def"
+    },
+    "route_perturbed": {
+      "classification": "DISCRIMINATING",
+      "completed_round1": true,
+      "final_seed": "0x786c"
+    },
+    "semantic_names_inferred": false,
+    "suppress_boss_offense": {
+      "classification": "DISCRIMINATING",
+      "completed_round1": true,
+      "final_seed": "0xf48c"
+    }
+  },
+  "coverage": {
+    "closed_calls": 2280,
+    "closed_seed_change_frames": 1023,
+    "orphan_calls": 0,
+    "orphan_owner_groups": 0,
+    "recurrence_gaps": 0,
+    "required_calls": 2280,
+    "required_seed_change_frames": 1023,
+    "unowned_seed_writers": 0
+  },
+  "owned_authoritative_writer_pcs": [
+    "0x017c70",
+    "0x017c72"
+  ],
+  "owner_partition": {
+    "auxiliary_type16_20_24": {
+      "calls": 1348,
+      "classification": "SOURCE_CLOSED",
+      "contract": "data/oracle11_round1_auxiliary_authority.json",
+      "source_dispatched_actor_calls": 1288,
+      "transient_child_calls": 60,
+      "transient_child_groups": [
+        {
+          "caller_pcs": [
+            "0x08ebd6",
+            "0x08ebe8",
+            "0x08ebfa",
+            "0x08ec0c",
+            "0x08ec1e",
+            "0x08ed38"
+          ],
+          "calls": 28,
+          "class": "0x47",
+          "classification": "SOURCE_CLOSED",
+          "owner": "Predator Warrior special-action child presentation actor",
+          "semantic_name": "UNKNOWN",
+          "source_contract": "data/oracle11_predator_weapon_projectile_resource.json",
+          "type": 24
+        },
+        {
+          "caller_pcs": [
+            "0x081ab2",
+            "0x081ae2"
+          ],
+          "calls": 20,
+          "class": "0x25",
+          "classification": "SOURCE_CLOSED",
+          "owner": "type-24 child actor initialization at boss-room controller edges",
+          "semantic_name": "UNKNOWN",
+          "type": 24
+        },
+        {
+          "caller_pcs": [
+            "0x092770",
+            "0x0927a2"
+          ],
+          "calls": 11,
+          "class": "0x4d",
+          "classification": "SOURCE_CLOSED",
+          "owner": "type-24 route presentation child state dispatch",
+          "semantic_name": "UNKNOWN",
+          "type": 24
+        },
+        {
+          "caller_pcs": [
+            "0x0bc6ba"
+          ],
+          "calls": 1,
+          "class": "0x05",
+          "classification": "SOURCE_CLOSED",
+          "owner": "type-20 source child initialization",
+          "semantic_name": "UNKNOWN",
+          "type": 20
+        }
+      ]
+    },
+    "enemy_type12": {
+      "calls": 893,
+      "classification": "SOURCE_CLOSED_CONSUMED_NOT_REOPENED",
+      "contract": "data/oracle11_round1_enemy_archetypes.json"
+    },
+    "global_route_and_controller": {
+      "calls": 39,
+      "classification": "SOURCE_CLOSED",
+      "groups": [
+        {
+          "call_pc": "0x017af0",
+          "caller_chain": [
+            "0x01bf5c",
+            "0x01be4e",
+            "0x00848c"
+          ],
+          "calls": 3,
+          "classification": "SOURCE_CLOSED",
+          "effect": "D0&0x3e indexes 0x017b98 and adjusts the source stage parameter",
+          "frames": [
+            2072,
+            5565,
+            15192
+          ],
+          "guard": "source stage-table record type 0x1c passes its route and player-variant guards, then 0x017a1e selects the stage row",
+          "owner": "route-stage-table setup",
+          "reads": [
+            "0xff8218:u16",
+            "stage table 0x00117560",
+            "0xff81a8:u16"
+          ],
+          "return_pc": "0x017af6",
+          "source_window": {
+            "first": "0x017ac6",
+            "last_exclusive": "0x017b26",
+            "sha256": "923ef9a5b9f784d148b880257ee4af19fc5a6dfa9a724e42b138a58ab08e8d53"
+          },
+          "writes": [
+            "0xff81ea:s16 stage parameter",
+            "0xff81a8:u16 RNG state"
+          ]
+        },
+        {
+          "call_pc": "0x028a5a",
+          "caller_chain": [
+            "0x0288fa",
+            "0x028860",
+            "0x01bde6"
+          ],
+          "calls": 32,
+          "classification": "SOURCE_CLOSED",
+          "effect": "source tables 0x028aca/0x028afa choose child variant and z offset",
+          "first_frame": 2510,
+          "guard": "u8(0xff8019)&7 == 0 and actor allocation 0x01769e succeeds inside the class-0x02 route controller",
+          "last_frame": 5062,
+          "owner": "encounter controller class-0x1f spawn initialization",
+          "reads": [
+            "0xff8019:u8",
+            "controller+0x10:u16",
+            "0xff81a8:u16"
+          ],
+          "return_pc": "0x028a60",
+          "source_window": {
+            "first": "0x028a30",
+            "last_exclusive": "0x028a90",
+            "sha256": "9aa36db19b3587b4f89315a47ba061ba4f802b4348ea169c9ae8ec3100d943a0"
+          },
+          "writes": [
+            "allocated class-0x1f actor fields",
+            "0xff81a8:u16 RNG state"
+          ]
+        },
+        {
+          "call_pcs": [
+            "0x00a5d8",
+            "0x00a5ea"
+          ],
+          "caller_chain": [
+            "0x0094a6",
+            "0x0080a2"
+          ],
+          "calls": 4,
+          "classification": "SOURCE_CLOSED",
+          "effect": "first draw selects 32..95 ticks; second selects table bank 0/16/32/48",
+          "frames": [
+            15058,
+            15058,
+            15060,
+            15060
+          ],
+          "guard": "route transition substate +0x14 dispatches source handler 0x00a5d4",
+          "owner": "stage-clear transition presentation parameter setup",
+          "reads": [
+            "route+0x14:u16",
+            "0xff81a8:u16"
+          ],
+          "return_pcs": [
+            "0x00a5de",
+            "0x00a5f0"
+          ],
+          "source_window": {
+            "first": "0x00a5ae",
+            "last_exclusive": "0x00a60e",
+            "sha256": "b746f6bd10795e07821bbe0c9000bfe18261f7cfb9f22b4c9058f4a984dc1435"
+          },
+          "writes": [
+            "route+0x16:u16 timer",
+            "0xff9086:u16 table selector",
+            "0xff9088:u16 table offset",
+            "0xff81a8:u16 RNG state"
+          ]
+        }
+      ]
+    },
+    "orphan_calls": 0,
+    "total": 2280
+  },
+  "protected_boundaries": {
+    "physical_saturn": "UNRUN",
+    "predator_warrior": "SOURCE_CLOSED",
+    "production_runtime_writes": 0,
+    "spec02_active": false,
+    "user09": "CHANGES_REQUESTED",
+    "yaba_runs": 0
+  },
+  "schema": "oracle11-round1-global-rng-v1",
+  "scope": "Round 1 shared RNG algorithm, seed state, exact call order and every route-reachable owner",
+  "status": "SOURCE_CLOSED",
+  "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE"
+}

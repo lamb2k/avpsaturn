@@ -219,8 +219,12 @@ capture continues under interactive Round 2 state. Presentation labels and
 fixed frames are not authoritative. The matrix now has 23 required
 `OBSERVED`, zero required `PARTIAL` or `UNKNOWN`, zero unmapped pairs or route
 edges, 374 orphan writers, and the same sole 1,023-frame RNG event backlog.
-ORACLE-11 remains active; global RNG and exact writer reconciliation are next,
-and SPEC-02 remains ineligible.
+Global RNG is also `SOURCE_CLOSED`: two byte-identical ledgers bind the exact
+`0x017c5e` recurrence and all 2,280 calls on 1,023 seed-change frames to enemy,
+auxiliary/transient-child, and global route/controller owners with no gaps.
+The matrix has zero required `OBSERVED`, `PARTIAL`, or `UNKNOWN`, zero unmapped
+pairs/edges/events, and 374 orphan writer PCs. ORACLE-11 remains active for
+exact writer reconciliation; SPEC-02 remains ineligible.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

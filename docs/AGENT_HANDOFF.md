@@ -29,7 +29,6 @@ their owning command/handler transaction.
 Navigation/terrain/obstacle/camera is `SOURCE_CLOSED` in
 `data/oracle11_round1_navigation.json`, including all 19 camera runs. Type-20
 damage/destruction and presentation remain assigned to their existing families.
-
 Type-12 enemies and all source-dispatched auxiliary pickup/projectile/hazard/
 destructible actors are `SOURCE_CLOSED` in `data/oracle11_round1_enemy_archetypes.json`
 and `data/oracle11_round1_auxiliary_authority.json`. The corrected auxiliary
@@ -41,7 +40,8 @@ and 56 enemy spawns with zero orphans or fixed-frame/count substitutes. Round 1
 boss orchestration and the stage-clear/Round 2 handoff are `SOURCE_CLOSED`:
 three player clear phases and all four post-clear route edges reach stable
 Round 2 control without fixed-frame or presentation-label authority. Next
-source-close global RNG consumption and reconcile the remaining writer PCs.
+reconcile the 374 remaining writer PCs; global RNG is `SOURCE_CLOSED` with
+2,280 ordered calls on 1,023 frames and zero recurrence or ownership gaps.
 The sole route-segment x authority-family matrix and SPEC-02 zero-gap gate
 remain in `data/round1_system_coverage.yaml`.
 Continue the same ORACLE-11 card and Goal; SPEC-02 requires zero-gap closure.

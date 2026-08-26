@@ -114,12 +114,16 @@
     },
     {
       "accepted_evidence": [
-        "freeze_rng counterfactual"
+        "freeze_rng counterfactual",
+        "data/oracle11_round1_rng.json",
+        "data/oracle11_round1_enemy_archetypes.json",
+        "data/oracle11_round1_auxiliary_authority.json",
+        "data/oracle10_round1_route.json"
       ],
-      "counterfactual": "freeze_rng detected source-state divergence",
-      "exact_next_experiment": "Bind every RNG call site and consumption order in ORACLE-11.",
+      "counterfactual": "two byte-identical completion ledgers contain exactly 2,280 calls on 1,023 seed-change frames with zero recurrence or ownership gaps; the completing route and offense perturbations change consumption while freezing the shared seed prevents Round 1 completion",
+      "exact_next_experiment": "Reconcile every remaining authoritative writer PC against the already source-closed authority-family evidence without weakening the sole 94 x 10 zero-gap gate.",
       "id": "rng-consumption",
-      "status": "OBSERVED"
+      "status": "SOURCE_CLOSED"
     }
   ],
   "classification_vocabulary": [
@@ -811,7 +815,7 @@
     "cell_count": 940,
     "closure_gate": {
       "orphan_authoritative_writers": 374,
-      "required_observed": 23,
+      "required_observed": 0,
       "required_partial": 0,
       "required_unknown": 0,
       "spec02_eligible": false,
@@ -822,7 +826,7 @@
         "damage": 0,
         "load": 0,
         "release": 0,
-        "rng": 1023,
+        "rng": 0,
         "spawn": 0
       }
     },
@@ -1016,7 +1020,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1025,10 +1029,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -1220,7 +1228,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1229,10 +1237,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -1433,7 +1445,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -1637,7 +1653,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -1832,7 +1852,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1841,10 +1861,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -2036,7 +2060,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2045,10 +2069,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -2240,7 +2268,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2249,10 +2277,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -2453,7 +2485,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -2657,7 +2693,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -2852,7 +2892,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2861,10 +2901,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -3065,7 +3109,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -3269,7 +3317,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -3473,7 +3525,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -3668,7 +3724,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3677,10 +3733,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -3881,7 +3941,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -4076,7 +4140,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4085,10 +4149,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -4289,7 +4357,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -4493,7 +4565,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -4697,7 +4773,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -4901,7 +4981,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -5105,7 +5189,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -5309,7 +5397,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -5513,7 +5605,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -5717,7 +5813,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -5921,7 +6021,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -6125,7 +6229,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -6329,7 +6437,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -6533,7 +6645,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -6737,7 +6853,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -6932,7 +7052,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6941,10 +7061,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -7145,7 +7269,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -7349,7 +7477,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -7553,7 +7685,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -7757,7 +7893,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -7961,7 +8101,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -8165,7 +8309,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -8369,7 +8517,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -8564,7 +8716,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8573,10 +8725,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -8777,7 +8933,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -8981,7 +9141,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -9185,7 +9349,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -9380,7 +9548,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9389,10 +9557,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -9593,7 +9765,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -9797,7 +9973,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -10001,7 +10181,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -10205,7 +10389,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -10400,7 +10588,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10409,10 +10597,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -10613,7 +10805,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -10817,7 +11013,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -11021,7 +11221,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -11225,7 +11429,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -11429,7 +11637,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -11633,7 +11845,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -11828,7 +12044,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11837,10 +12053,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -12041,7 +12261,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -12245,7 +12469,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -12449,7 +12677,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -12644,7 +12876,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12653,10 +12885,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -12857,7 +13093,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -13061,7 +13301,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -13265,7 +13509,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -13469,7 +13717,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -13673,7 +13925,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -13877,7 +14133,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -14081,7 +14341,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -14276,7 +14540,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14285,10 +14549,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -14489,7 +14757,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -14684,7 +14956,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14693,10 +14965,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -14897,7 +15173,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -15092,7 +15372,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15101,10 +15381,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -15305,7 +15589,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -15509,7 +15797,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -15713,7 +16005,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -15908,7 +16204,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15917,10 +16213,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -16121,7 +16421,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -16325,7 +16629,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -16529,7 +16837,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -16733,7 +17045,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -16937,7 +17253,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -17141,7 +17461,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -17345,7 +17669,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -17540,7 +17868,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17549,10 +17877,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -17753,7 +18085,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -17957,7 +18293,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -18161,7 +18501,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -18356,7 +18700,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -18365,10 +18709,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -18569,7 +18917,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -18773,7 +19125,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -18968,7 +19324,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -18977,10 +19333,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -19181,7 +19541,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -19376,7 +19740,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -19385,10 +19749,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -19589,7 +19957,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -19793,7 +20165,11 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -19988,7 +20364,7 @@
           },
           {
             "authority_family": "rng-consumption",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -19997,10 +20373,14 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "freeze_rng counterfactual"
+              "freeze_rng counterfactual",
+              "data/oracle11_round1_rng.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           }
         ],
         "route_edge": {
@@ -20059,7 +20439,7 @@
   "source_set": "avspu",
   "spec02_closure_gate": {
     "orphan_authoritative_writers": 374,
-    "required_observed": 23,
+    "required_observed": 0,
     "required_partial": 0,
     "required_unknown": 0,
     "spec02_eligible": false,
@@ -20070,7 +20450,7 @@
       "damage": 0,
       "load": 0,
       "release": 0,
-      "rng": 1023,
+      "rng": 0,
       "spawn": 0
     }
   },

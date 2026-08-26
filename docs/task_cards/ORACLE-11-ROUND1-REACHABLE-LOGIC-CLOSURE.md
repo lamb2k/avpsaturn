@@ -227,6 +227,16 @@ card only for a genuinely independent body or source-evidence hard stop.
   no-continue route cannot fabricate completion. Evidence is in
   `data/oracle11_round1_handoff.json`. Global RNG ownership and the remaining
   authoritative-writer reconciliation are the next active ORACLE-11 body.
+- `round1-global-rng-consumption`: `SOURCE_CLOSED`. The exact `0x017c5e`
+  16-bit recurrence is recovered from source and both independent route
+  captures contain the same 2,280 calls on 1,023 distinct frames with no
+  recurrence gap. The ledger reconciles 893 calls to accepted type-12 enemy
+  contracts, 1,348 to auxiliary pools and explicitly bound transient source
+  children, and 39 to three route/controller caller groups. A route input
+  perturbation and boss-offense suppression both complete with distinct final
+  seeds; freezing the shared seed at `0x8def` prevents completion. Evidence is
+  in `data/oracle11_round1_rng.json`. Only exact authoritative-writer ownership
+  reconciliation remains before the zero-gap gate.
 
 ## Owned paths
 
