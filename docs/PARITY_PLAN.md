@@ -236,10 +236,16 @@ writer holds route state 2, so neither a frame nor presentation can own the
 first edge. REIMPLEMENT-13 has implemented and validated the
 native stable-entry state and exact fixed actor pools. The direct diagnostic
 boot and target readback now expose the exact state with paired-emulator
-agreement and zero fallback. The first source-derived Round 1 title view now
-renders through the accepted presentation adapter and passes direct paused-frame
-inspection. The first exact route-state guard, title-owned spawn boundary, and
-controllable street segment are the active vertical checkpoint.
+agreement and zero fallback. The first source-derived Round 1 title view renders
+through the accepted presentation adapter. The first executable entry body now
+also owns the exact ten-row spawn, semantic player-entry sequence, 164 source
+scheduler decrements, signed terminator, selected gate clear, route state
+`2 -> 4`, and control enable. Direct inspection proves coherent post-unlock and
+controller-moved street frames with intact camera, both VDP2 planes, HUD,
+palette, and priority. The next vertical body replaces the retained harness
+handoff with the SPEC-02-bound Predator Warrior controller and fixed-pool
+scheduler for the ten initial actors through the first dynamic spawn boundary
+at source frame 2328.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

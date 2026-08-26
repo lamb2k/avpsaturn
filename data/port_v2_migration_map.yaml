@@ -1203,10 +1203,10 @@
     },
     {
       "id": "round1-encounter-controller",
-      "existing_source_paths": ["avsp_route.c", "data/stage1_route.json", "src/port_v2/camera/**", "src/port_v2/stage/**", "data/oracle08_round1_navigation_bounds.json"],
-      "existing_dependencies": ["ORACLE-06 encounter rules", "ORACLE-08 Coffee Shop navigation/bounds", "promoted player action controller", "promoted class-0x1F AI", "approved camera and stage"],
-      "authored_controller_coupling": "None in the production encounter core; entry, active/clear guards, camera unlock, and continued progression consume current gameplay state. The single-alien kill clear remains explicitly adapted from ORACLE-06.",
-      "proposed_isolated_bench": "INTEGRATE-04A runs one measured encounter controller over current player/enemy state and proves clear plus continued movement.",
+      "existing_source_paths": ["avsp_route.c", "data/stage1_route.json", "src/port_v2/camera/**", "src/port_v2/stage/**", "data/oracle08_round1_navigation_bounds.json", "data/spec02_round1_generated_fixtures.json", "src/port_v2/gameplay/round1/**"],
+      "existing_dependencies": ["accepted SPEC-02 Round 1 contract", "ORACLE-06 encounter rules", "ORACLE-08 Coffee Shop navigation/bounds", "promoted player action controller", "promoted class-0x1F AI", "approved camera and stage"],
+      "authored_controller_coupling": "The source-closed first-entry body now owns exact fixed-pool allocation, ten table spawns, the player entry program, gate clear, route 2-to-4 edge, and control enable. The post-entry live-encounter actor handoff remains technical substrate and must be replaced before claiming the first encounter or wider street segment.",
+      "proposed_isolated_bench": "REIMPLEMENT-13 advances vertically from the accepted first entry through the ten initial fixed-pool actors and first dynamic spawn boundary before adding later street progression.",
       "technical_status": "PASS",
       "fidelity_status": "ADAPTED",
       "user_status": "CHANGES_REQUESTED",
@@ -1215,8 +1215,8 @@
       "promoted_commit": "d9021965dab64d47953d2e829c7d307b0b01a455",
       "evidence_commit": "d9021965dab64d47953d2e829c7d307b0b01a455",
       "diagnostic_interface": "tests/port_v2/integration/live_encounter/run_pinned_emulator.ps1",
-      "blockers": ["Unblock: ORACLE-10 accepts the complete Round 1 census and counterfactual matrix; ORACLE-11 must source-close neutral-facing release and every remaining completion-route authority before SPEC-02. Physical Saturn remains UNRUN."],
-      "exact_next_experiment": "Execute ORACLE-11 one authority family at a time from the accepted census; retain this bounded encounter only as technical substrate and keep USER-09 CHANGES_REQUESTED.",
+      "blockers": ["Unblock: replace the retained single-actor live-encounter handoff by binding the accepted Predator Warrior controller and fixed-pool scheduler to the ten initial SPEC-02 actors through source frame 2328. Physical Saturn remains UNRUN."],
+      "exact_next_experiment": "In REIMPLEMENT-13, replace the retained handoff with current-input Predator Warrior updates and fixed-pool actor scheduling through the first dynamic spawn boundary; keep USER-09 CHANGES_REQUESTED.",
       "user_feedback": {"exact_response": "the background looks correupted.&#x20;\n\nalso confirm the attack animation sequence is correct. also the player resets to opposite direction when the key is supressed. overall this feels a bit more faithful . the alien ai also tracks the player", "approved_components": ["The reviewed attack animation sequence is correct and must remain unchanged.", "The class-0x1F alien AI tracks the player and must remain unchanged in the background repair."], "requested_changes": ["Correct the corrupted live background presentation first.", "Keep the neutral-facing reversal after directional release recorded for the following bounded repair/review."], "priority": "REPAIR-11-live-background-first"}
     },
     {

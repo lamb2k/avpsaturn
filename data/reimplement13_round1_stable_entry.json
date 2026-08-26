@@ -1,43 +1,58 @@
 {
   "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
-  "checkpoint": "stable-round1-entry-native-substrate",
-  "status": "PASS_RENDERED_ENTRY_PRESENTATION",
+  "checkpoint": "native-round1-first-entry-spawn-control",
+  "status": "PASS_FIRST_CONTROLLABLE_STREET_ENTRY",
+  "implementation_commit": "35620a9df12e2f56ffeb1dcdbae179977846bc34",
   "implementation_source": {
     "spec02_sha256": "3cfa5410fee3942a9bd6bb515f10aefdd293ee4cd628fb503d9685bce4c7c3f8",
     "raw_trace_or_disassembly_consumed": false,
     "authored_fallback_count": 0
   },
   "native_state": {
-    "route_state": 2,
+    "route_state": 4,
     "rng_seed": 36335,
     "player": {
       "active": 1,
       "class": 0,
       "type": 0,
-      "state": 0,
+      "state": 512,
       "substate": 0,
       "health": 101
     },
     "actor_pools": [
-      {"record_type": 12, "capacity": 20, "stride": 192, "source_base": 38272, "last_slot": 41920},
+      {"record_type": 12, "capacity": 20, "free": 10, "stride": 192, "source_base": 38272, "last_slot": 41920},
       {"record_type": 16, "capacity": 20, "stride": 128, "source_base": 42112, "last_slot": 44544},
       {"record_type": 20, "capacity": 16, "stride": 128, "source_base": 44672, "last_slot": 46592},
       {"record_type": 24, "capacity": 32, "stride": 128, "source_base": 46720, "last_slot": 50688}
     ],
+    "first_entry": {
+      "source_program_sha256": "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba",
+      "source_scheduler_calls_to_control": 171,
+      "source_timer_decrements": 164,
+      "timer_loads": [60, 60, 44],
+      "spawn_count": 10,
+      "entry_steps": 8,
+      "gate8236": 0,
+      "gate81af": 1,
+      "control_enabled": 1,
+      "failure_count": 0,
+      "fallback_count": 0
+    },
     "canaries": "PASS"
   },
   "checks": {
     "host_differential": "PASS",
-    "real_mutations_rejected": 4,
-    "target_live_encounter": "PASS_BUILD_ONLY",
-    "target_live_encounter_bench": "PASS_BUILD_ONLY",
+    "real_mutations_rejected": 10,
+    "target_wiring_suppressions_rejected": 9,
+    "target_live_encounter": "PASS",
+    "target_live_encounter_bench": "PASS",
     "spec02_entry_correction_revalidated": "PASS",
     "paired_emulator_regression": "PASS",
-    "paired_emulator_iso_sha256": "80bac41cfbd9de702ead6d816c223d20fef68a7818e50804923145d7e65f18a8",
+    "paired_emulator_iso_sha256": "03f07be2bd82ba2accf1f5216a8a9bb44032259d95b53906fa4ed33724928f9d",
     "target_readback_binding": "PASS",
     "round1_title_objects_loaded": 2,
     "round1_title_vdp1_commands_peak": 2,
-    "rendered_regression_inspection": "PASS",
+    "rendered_regression_inspection": "PASS: route-owned title clear, coherent post-unlock street, responsive player movement and camera, intact VDP2 planes/HUD/palette/priority",
     "fast": "PASS",
     "oracle": "PASS"
   },
@@ -53,8 +68,19 @@
       "sha256": "7051be2e12d1d88e5215dd693f19e469e36927f57fb092b6889995c3b2960fab",
       "inspection": "PASS: measured ROUND 1 and CITY OF DESPAIR objects are coherent over both street planes; no gameplay actors leak into the title body"
     },
+    "first_control_visual": {
+      "gameplay_frame": 190,
+      "path": "build/round1-first-control-frame-190.png",
+      "sha256": "04d9296955bf09046504b4ae8dc768a1184c0758e5840f41ac4d005a02cf47af",
+      "inspection": "PASS: the route-state-2 title has cleared only after the native entry terminator/guard; player, alien, both street planes, HUD, palette, and priority are coherent"
+    },
+    "movement_handoff_visual": {
+      "path": "build/round1-first-control-moved.png",
+      "sha256": "f250ed5f5c358f91953b2c3f73861aa4724583b6f8b8a076030ea3e7c15da34a",
+      "inspection": "PASS: real keyboard-backed Saturn controller input advances the player after native control enable; the camera follows and both background planes remain coherent"
+    },
     "objective_discrepancy": null,
-    "exact_next_body": "Implement the first route-state transition guard, title-owned spawn boundary, and first controllable street segment from SPEC-02."
+    "exact_next_body": "Replace the retained harness handoff with the SPEC-02-bound Predator Warrior controller and fixed-pool scheduler for the ten initial street actors through the first dynamic spawn boundary at source frame 2328."
   },
   "preserved": {
     "user09": "CHANGES_REQUESTED",

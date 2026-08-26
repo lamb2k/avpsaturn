@@ -71,15 +71,19 @@ No per-segment review. QA-13 must pass before USER-10.
 
 ## Active vertical checkpoint
 
-The SPEC-02-bound stable-entry state and exact fixed actor-pool initialization
-are implemented in portable C, connected to the direct diagnostic boot, and
-visible through target readback. They pass the host differential, nine bounded
-mutations/suppressions, Target, paired-emulator evidence, rendered legacy-scene
-inspection, Fast, and Oracle. This remains a native diagnostic substrate, not
-yet a playable segment. The first source-derived Round 1 title view now renders
-through the accepted presentation adapter and passed direct paused-frame
-inspection. Implement the first exact route-state guard, title-owned spawn
-boundary, and controllable street segment next.
+The SPEC-02-bound first entry is implemented in portable C: exact fixed pools,
+the ten-row LIFO spawn table, the 26-byte command-derived semantic program,
+`60, 60, 44` dwell loads, 164 source scheduler decrements, signed terminator,
+selected gate clear, route state `2 -> 4`, and control enable. No raw 68000 is
+interpreted at runtime. Ten host mutations and nine target-wiring suppressions
+are rejected; Target, paired Emulator, Fast, and Oracle pass with zero fallback
+or failure. Direct inspection at post-unlock frame 190 and after real controller
+movement shows coherent player/alien presentation, camera, both VDP2 planes,
+HUD, palette, and priority. This is the first controllable street-entry body,
+not the complete first encounter: the retained live-encounter actor handoff is
+still technical substrate. Replace it next with the SPEC-02-bound Predator
+Warrior controller and fixed-pool scheduler for the ten initial actors through
+the first dynamic spawn boundary at source frame 2328.
 Evidence: `data/reimplement13_round1_stable_entry.json`.
 
 ## Next eligible cards

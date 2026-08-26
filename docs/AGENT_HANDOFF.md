@@ -29,21 +29,20 @@ adapted fields, deterministic fixtures, and ten passing mutation controls. Its
 corrective first-entry body binds the exact ten-row table, controller identity,
 26-byte player entry-animation program, timer loads `60, 60, 44`, 164 source
 scheduler decrements, signed terminator, selected gate bit, and route consumer;
-exact-writer suppression holds state 2 and rejects fixed-frame ownership. The
-first REIMPLEMENT-13 body now provides the SPEC-02-bound stable-entry state and
-exact fixed actor pools in portable C. Direct diagnostic boot and target
-readback pass host, nine mutations/suppressions, Target, paired Emulator, Fast,
-Oracle, and rendered regression inspection.
+exact-writer suppression holds state 2 and rejects fixed-frame ownership.
+REIMPLEMENT-13 now owns the source-closed first entry in portable C: exact
+fixed pools, ten LIFO spawns, command-derived entry steps, `60, 60, 44` dwells,
+164 scheduler decrements, signed terminator, gate clear, route `2 -> 4`, and
+control enable. Ten host mutations and nine target-wiring suppressions are
+rejected. Target, paired Emulator, Fast, and Oracle pass with zero fallback.
 
-The first source-derived Round 1 route view is now rendered: the two measured
-title objects submit through the accepted presentation adapter, paired target
-readback reports exactly two commands, and direct inspection at paused target
-frame 57 shows coherent title text and street planes with no gameplay actors in
-the title body. This remains a presentation/entry checkpoint, not yet a
-controllable segment. Implement the first exact route-state guard, title-owned
-spawn boundary, and controllable street segment next. Use only SPEC-02,
-generated fixtures, accepted Port V2 interfaces, and approved assets. Do not
-consume raw traces, disassembly notes, or guesses; preserve the per-body
-differential, Target, paired-emulator, rendered-inspection, commit, and push
-cycle. Do not infer USER-09 approval, activate SALVAGE-08 before
-accepted USER-10, or advance physical Saturn beyond `UNRUN`.
+Direct inspection at paused post-unlock frame 190 and after real controller
+movement shows coherent player/alien presentation, camera, both VDP2 planes,
+HUD, palette, and priority. The retained live-encounter actor handoff remains
+technical substrate, not completed Round 1 authority. Replace it next with the
+SPEC-02-bound Predator Warrior controller and fixed-pool scheduler for the ten
+initial actors through the first dynamic spawn boundary at source frame 2328.
+Use only SPEC-02, generated fixtures, accepted Port V2 interfaces, and approved
+assets. Preserve the per-body differential, Target, paired-emulator, rendered
+inspection, commit, and push cycle. Do not infer USER-09 approval, activate
+SALVAGE-08 before accepted USER-10, or advance physical Saturn beyond `UNRUN`.
