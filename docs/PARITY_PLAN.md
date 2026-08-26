@@ -244,7 +244,7 @@ scheduler decrements, signed terminator, selected gate clear, route state
 controller-moved street frames with intact camera, both VDP2 planes, HUD,
 palette, and priority. The accepted Predator Warrior controller now consumes
 current Saturn input after route state 4 and preserves neutral facing. Paired
-471-frame ledgers bind native frame 470 to x 1074, z 320, facing right, neutral
+471-frame ledgers bind native frame 470 to x 1072, z 320, facing right, neutral
 source action, and 301 controller updates. The SPEC-02-bound scheduler now
 visits active records in pool order 12/16/20/24 and ascending source-slot order;
 paired frame 470 has 3010 visits, ten active class-0x1F actors, and hash
@@ -254,8 +254,13 @@ attack selector with zero orphans, and paired frame 470 reports 3010 bindings.
 Source entry `0x060532` and all 59 route-reachable state/substate contexts are
 also exact-bound with 3010 target validations. Initial transition execution is
 blocked because SPEC-02 omits its predicates, timer guards, writes, movement
-arithmetic, and RNG order. The dependency-safe next vertical body implements
-first-segment navigation, terrain, obstacles, and camera boundaries. Movement,
+arithmetic, and RNG order. The first stable route-4 global rectangle is now
+native and source-bound: bound x/z `720/256`, x `752..1072`, z `272..400`,
+with 301 paired applications and one x-max clamp. Coffee Shop minimum
+penetration, the terrain-record interpreter, and camera target arithmetic are
+separately blocked because the accepted SPEC-02 fixture omits their required
+geometry and update rules. The dependency-safe next vertical body is the
+Predator Warrior walking-to-stop-to-neutral action transition. Movement,
 damage, and dynamic spawn remain pending; frame 2328 is not gameplay authority.
 
 | Sequence | Card or card family | Result |

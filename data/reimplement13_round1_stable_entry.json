@@ -1,8 +1,8 @@
 {
   "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
-  "checkpoint": "native-round1-class1f-state-context-dispatch",
-  "status": "PASS_ENTRY_PLAYER_SCHEDULER_PRESENTATION_AND_STATE_CONTEXT_DISPATCH",
-  "implementation_commit": "cde43c5380a099dc39da287b0809604b4cd8cba9",
+  "checkpoint": "native-round1-first-segment-global-bounds",
+  "status": "PASS_ENTRY_PLAYER_SCHEDULER_PRESENTATION_STATE_CONTEXT_AND_FIRST_SEGMENT_GLOBAL_BOUNDS",
+  "implementation_commit": "45a1aafb747583a9831426f306574916b7c3804e",
   "diagnostic_correction_commit": "4fbc919235f61d962daf342efbfb4cd8f743ab60",
   "implementation_source": {
     "spec02_sha256": "3cfa5410fee3942a9bd6bb515f10aefdd293ee4cd628fb503d9685bce4c7c3f8",
@@ -41,7 +41,7 @@
     },
     "current_input_player": {
       "evidence_frame": 470,
-      "x": 1074,
+      "x": 1072,
       "z": 320,
       "facing": 1,
       "source_action": 0,
@@ -84,21 +84,40 @@
       "invalid_context_rejected": true,
       "state_transition_predicates_implemented": false
     },
+    "first_segment_global_bounds": {
+      "route_state_guard": 4,
+      "bound_x": 720,
+      "bound_z": 256,
+      "x_min": 752,
+      "x_max": 1072,
+      "z_min": 272,
+      "z_max": 400,
+      "source_formula": ["bound_x + 0x20", "bound_x + 0x160", "bound_z + 0x10", "bound_z + 0x90"],
+      "source_coordinate_signs": {"up_world_z": 1, "down_world_z": -1},
+      "evidence_frame": 470,
+      "applications": 301,
+      "clamps": 1,
+      "accepted_encounter_navigation_composed_first": true,
+      "terrain_records_implemented": false,
+      "coffee_shop_obstacle_response_implemented": false,
+      "camera_lock_unlock_implemented": false
+    },
     "canaries": "PASS"
   },
   "checks": {
     "host_differential": "PASS",
-    "real_mutations_rejected": 19,
-    "target_wiring_suppressions_rejected": 16,
+    "real_mutations_rejected": 21,
+    "target_wiring_suppressions_rejected": 17,
     "target_live_encounter": "PASS",
     "target_live_encounter_bench": "PASS",
     "spec02_entry_correction_revalidated": "PASS",
     "paired_emulator_regression": "PASS",
-    "paired_emulator_iso_sha256": "8eb6d30bc8c153b0423cd11929c7d0550d2049e3fdbe8a49ab546f428bdc6d45",
-    "paired_native_player_ledgers": "PASS: 471 byte-identical synchronized samples; frame 470 is x=1074/z=320/facing=1/source_action=0/controller_updates=301",
+    "paired_emulator_iso_sha256": "76ba83abd4d70b4d848e675c537e557a48b8d3600981f1d6be546d63666006f8",
+    "paired_native_player_ledgers": "PASS: 471 byte-identical synchronized samples; frame 470 is x=1072/z=320/facing=1/source_action=0/controller_updates=301",
     "paired_native_scheduler_ledgers": "PASS: frame 470 has 301 scheduler frames, 3010 ordered visits, 10 active type-12/class-0x1f actors, and order hash 0x836e161c",
     "paired_native_presentation_ledgers": "PASS: frame 470 has 3010 class-0x1f handler dispatches and 3010 exact animation-to-assembly/hurt/attack bindings",
     "paired_native_state_context_ledgers": "PASS: frame 470 has 3010 exact class-0x1f current-state/substate bindings to source dispatch entry 0x060532",
+    "paired_native_global_bounds_ledgers": "PASS: frame 470 binds source route-4 bounds x=720/z=256, 301 applications, and one x-max clamp; accepted encounter navigation remains composed ahead of the global rectangle",
     "target_readback_binding": "PASS",
     "round1_title_objects_loaded": 2,
     "round1_title_vdp1_commands_peak": 2,
@@ -153,10 +172,18 @@
       "sha256": "c666adff450758587bbfde536b839e733fe19f2f0e96cd8eafb8d8ee7ac75436",
       "inspection": "PASS: state-context dispatch validation produces no visible regression; player, alien, both VDP2 planes, camera, HUD, palette, and priority remain coherent"
     },
+    "first_segment_global_bounds_visual": {
+      "gameplay_frame": 191,
+      "path": "build/round1-first-segment-bounds-frame-190.png",
+      "sha256": "54d7182d3c429bd0cf37505e3a6c419c5cdee5de6835ef7259c54bb6f0a0fb14",
+      "inspection": "PASS: the source x-max clamp changes world position without disturbing camera-relative composition; player, alien, staff ownership, attack presentation, both VDP2 planes, HUD, palette, and priority remain coherent"
+    },
     "objective_discrepancy": null,
     "blocker": "The accepted SPEC-02 fixture enumerates 59 class-0x1f state/substate contexts and source dispatch entry 0x060532 but supplies no transition predicate, timer guard, writes, or RNG order for the initial 0x0200:1000/1200/1400 bodies.",
     "unblock_condition": "A corrective SPEC-02 fixture derived from accepted Oracle evidence must bind each required initial transition guard, reads, writes, timer semantics, movement arithmetic, and RNG order without fixed-frame authority.",
-    "exact_next_body": "Implement the dependency-safe first-segment Round 1 navigation, terrain, obstacle, and camera-boundary body from SPEC-02 fixtures and accepted Port V2 interfaces while preserving the class-0x1f blocker."
+    "navigation_blocker": "The accepted SPEC-02 fixture provides the exact global-bound formula but gives the Coffee Shop obstacle only a source block identity/minimum-penetration label without source box geometry or per-axis resolution arithmetic; terrain records provide bytes and writer identities without the record interpreter; camera runs provide observed endpoints and writer identity without the target-update arithmetic. Implementing any of those bodies now would require raw-disassembly use or a plausible guess.",
+    "navigation_unblock_condition": "A corrective SPEC-02 fixture derived from accepted Oracle evidence must bind Coffee Shop player/obstacle box geometry and minimum-penetration branch arithmetic, the six terrain-record field semantics and interpreter transitions, and camera target/position update arithmetic and route guards.",
+    "exact_next_body": "Implement the dependency-safe Predator Warrior walking-to-stop-to-neutral action transition from the existing SPEC-02 locomotion fixture and accepted player controller, preserving facing, the reviewed attack sequence, and both recorded blockers."
   },
   "preserved": {
     "user09": "CHANGES_REQUESTED",

@@ -82,7 +82,7 @@ rejected; Target, paired Emulator, Fast, and Oracle pass with zero fallback
 or failure. Direct inspection at post-unlock frame 190 and after real controller
 movement shows coherent player/alien presentation, camera, both VDP2 planes,
 HUD, palette, and priority. Paired 471-frame ledgers bind native frame 470 to
-player x 1074, z 320, facing right, neutral source action, and 301 controller
+player x 1072, z 320, facing right, neutral source action, and 301 controller
 updates. This is not the complete first encounter: the retained live-encounter
 actor handoff is still technical substrate. The SPEC-02-bound fixed-pool
 scheduler now visits active records in pool order 12/16/20/24 and ascending
@@ -100,8 +100,18 @@ paired Emulator, Fast, Oracle, and direct frame-191 inspection pass. Execution
 of the initial `0200:1000/1200/1400` transitions is blocked because SPEC-02 does
 not provide their predicates, timer guards, writes, movement arithmetic, or RNG
 order. Preserve that blocker and implement the dependency-safe first-segment
-navigation/terrain/obstacle/camera boundary next. Frame 2328 remains evidence,
-not gameplay authority.
+global bounds first. Commit `45a1aaf` binds the stable route-4 bounds directly
+from SPEC-02: bound x/z `720/256`, world x `752..1072`, world z `272..400`,
+and the source up/down z signs. They activate on the entry terminal guard,
+compose after the accepted encounter resolver, and produce 301 paired
+applications with one x-max clamp at frame 470. Twenty-one host mutations,
+seventeen Target suppressions, paired Emulator, Fast, Oracle, and direct
+frame-191 inspection pass. Coffee Shop minimum penetration, terrain-record
+interpretation, and camera target updates are blocked because SPEC-02 omits
+their required box geometry and branch/update arithmetic. Preserve both
+blockers and implement the dependency-safe Predator Warrior
+walking-to-stop-to-neutral transition from SPEC-02 next. Frame 2328 remains
+evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json`.
 
 ## Next eligible cards

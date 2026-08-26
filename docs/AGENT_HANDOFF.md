@@ -12,7 +12,6 @@
   bridge, attack sequence, class-`0x1F` tracking, and presentation locks remain.
 - HW-01 is parked `READY_FOR_PHYSICAL`; physical Saturn remains `UNRUN`.
 - USER-09 remains `CHANGES_REQUESTED`; no approval is inferred.
-
 ## Current task and next action
 
 Resume the AvP salvage Goal at `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1`.
@@ -23,7 +22,6 @@ Preserve `0x0abdd2` as packed-BCD score authority, never audio authority.
 All 1,517 baseline writer PCs are reconciled. The sole 94 x 10 matrix reports
 zero required gaps, unmapped actor pairs/route edges, unowned events, or orphan
 authoritative writers.
-
 SPEC-02 is accepted with 27 required field contracts, zero required UNKNOWN or
 adapted fields, deterministic fixtures, and ten passing mutation controls. Its
 corrective first-entry body binds the exact ten-row table, controller identity,
@@ -39,8 +37,13 @@ all 190 exact class-0x1F animation records to assembly, hurt selector, and attac
 selector with zero orphans and 3010 paired target bindings. Commit `cde43c5`
 binds source entry `0x060532` and all 59 route-reachable contexts; nineteen host
 mutations, sixteen target suppressions, paired Emulator, Fast, Oracle, and direct
-frame-191 inspection pass. Initial transition execution is blocked because
-SPEC-02 omits predicates, timers, writes, movement, and RNG order. Preserve that
-blocker; implement the dependency-safe first-segment navigation/terrain/obstacle/
-camera body next from SPEC-02 and accepted interfaces. USER-09 is changes-requested, SALVAGE-08 is
-inactive, and Saturn remains `UNRUN`.
+frame-191 inspection pass. Initial transition execution remains blocked because
+SPEC-02 omits predicates, timers, writes, movement, and RNG order. Commit
+`45a1aaf` implements the exact route-4 global rectangle for bound x/z `720/256`:
+x `752..1072`, z `272..400`; 21 host mutations, 17 target suppressions, paired
+Emulator, Fast, Oracle, and direct frame-191 inspection pass. Coffee Shop
+minimum-penetration, terrain-record interpretation, and camera target arithmetic
+are blocked because their SPEC-02 fixtures omit the implementation-required
+geometry/arithmetic. Preserve both blockers; implement the SPEC-02 Predator
+Warrior walking-to-stop-to-neutral transition next.
+USER-09 remains changes-requested, SALVAGE-08 inactive, and Saturn `UNRUN`.
