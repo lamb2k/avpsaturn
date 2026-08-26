@@ -128,14 +128,21 @@ states, signed 12-attempt volley, four-tick cadence, recovery-edge timing,
 50-frame presentation, successful-allocation resource debit/recharge ordering,
 and the known type-4/class-5 allocation writes. Forty-three host mutations,
 38 Target suppressions, Target, paired Emulator, Fast, Oracle, and direct
-pinned-window inspection pass. Projectile travel, collision, damage, impact,
-removal, and class-10 empty-request lifecycle remain unimplemented because the
-current fixture omits their per-state timers, signed fixed-point vectors and
-branch mapping, presentation, collision writes, bounds, and release contract.
-Preserve the class-0x1F, Coffee Shop, Button3, and projectile-lifecycle blockers.
-Close only the smallest existing-fixture/Oracle gap required for class-5 and
-class-10 lifecycle next; if it cannot proceed, continue another dependency-safe
-first-segment blocker and return before leaving the segment.
+pinned-window inspection pass. Commit `09c8a28` amends only the existing
+SPEC-02 fixture from accepted Oracle evidence and implements the executable
+type-24/class-0x10 empty-request effect: exact variant-1 allocation, offset,
+ten presentation records, timers/branches, low-byte movement guard, and pool
+release. The same fixture now binds class-0x05 allocation angle/selector tables,
+all 64 signed motion pairs, presentation records, state-2 arithmetic/bounds,
+and state-4 impact allocation writes, but class-0x05 execution remains blocked
+only by the type-24/class-0x3a impact handler and the current-state collision
+writer for attack table `0x03136a`. Fifty-one host mutations, 44 Target
+suppressions, Target, paired Emulator, Fast, Oracle, and direct frames 211/260
+inspection pass. Preserve the class-0x1F, Coffee Shop, Button3, and remaining
+class-0x05 blockers. Close only the smallest accepted-evidence gap for the
+class-0x3a handler and collision writer next; if it cannot proceed, continue
+another dependency-safe first-segment blocker and return before leaving the
+segment.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json`.
 

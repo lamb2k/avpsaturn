@@ -244,7 +244,7 @@ scheduler decrements, signed terminator, selected gate clear, route state
 controller-moved street frames with intact camera, both VDP2 planes, HUD,
 palette, and priority. The accepted Predator Warrior controller now consumes
 current Saturn input after route state 4 and preserves neutral facing. Paired
-471-frame ledgers bind native frame 470 to x 1049, z 320, facing right, neutral
+471-frame ledgers bind native frame 470 to x 1031, z 320, facing right, neutral
 source action, and 301 controller updates. The SPEC-02-bound scheduler now
 visits active records in pool order 12/16/20/24 and ascending source-slot order;
 paired frame 470 has 3010 visits, ten active class-0x1F actors, and hash
@@ -270,11 +270,19 @@ numeric signed 16.16 vectors, selector mapping, and branch order. Commit
 `882b15b` implements the source-owned Button2 melee sequence with selectors
 1..4, exact strike presentations, the 30-tick follow-up window, held-edge
 rejection, and interruption preservation. Thirty-two host mutations, 26 Target
-suppressions, paired Emulator, and direct selector-2/4 inspection pass. The
-next vertical body is the source-complete portion of Predator Warrior Button1
-weapon/projectile/resource authority; omitted projectile fields must remain
-blocked rather than guessed. Enemy movement, damage, and dynamic spawn remain
-pending; frame 2328 is not gameplay authority.
+suppressions, paired Emulator, and direct selector-2/4 inspection pass. Commit
+`f6cab22` then implements the source-owned Button1 action/resource/allocation
+boundary. Commit `09c8a28` implements the exact type-24/class-0x10 depleted
+effect allocation, ten-record presentation, guarded movement, and release.
+The existing fixture now also contains class-0x05 angle/selector tables, all
+64 signed motion pairs, state-2 arithmetic/bounds/presentation, and state-4
+impact allocation writes. Class-0x05 execution remains blocked only on the
+type-24/class-0x3a impact handler and the current-state collision writer for
+attack table `0x03136a`; no travel, collision, damage, or impact is claimed.
+Fifty-one host mutations, 44 Target suppressions, Target, two byte-identical
+emulator ledgers, Fast, Oracle, and direct frames 211/260 inspection pass.
+Enemy movement, damage, dynamic spawn, and the preserved first-segment blockers
+remain pending; frame 2328 is not gameplay authority.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|
