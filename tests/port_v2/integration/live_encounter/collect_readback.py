@@ -201,6 +201,10 @@ mapping.update({
            "round1_player_weapon_resource_debits":"avsp_diag_round1_player_weapon_resource_debits",
            "round1_player_weapon_presentation_bindings":"avsp_diag_round1_player_weapon_presentation_bindings",
            "round1_player_weapon_empty_requests":"avsp_diag_round1_player_weapon_empty_requests",
+           "round1_player_weapon_empty_allocations":"avsp_diag_round1_player_weapon_empty_allocations",
+           "round1_player_weapon_empty_allocation_failures":"avsp_diag_round1_player_weapon_empty_allocation_failures",
+           "round1_player_weapon_empty_releases":"avsp_diag_round1_player_weapon_empty_releases",
+           "round1_player_weapon_empty_presentation_bindings":"avsp_diag_round1_player_weapon_empty_presentation_bindings",
            "round1_player_weapon_interruptions":"avsp_diag_round1_player_weapon_interruptions",
            "round1_player_resource":"avsp_diag_round1_player_resource",
            "round1_player_resource_recharge":"avsp_diag_round1_player_resource_recharge",
@@ -270,13 +274,13 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_entry_gate8236"] == 0 and
         state["round1_entry_gate81af"] == 1 and
         state["round1_control_enabled"] == 1 and
-        state["round1_player_x"] == 1049 and
+        state["round1_player_x"] == 1031 and
         state["round1_player_z"] == 320 and
         state["round1_player_facing"] == 1 and
         state["round1_player_source_action"] == 514 and
         state["round1_player_controller_updates"] == 301 and
         state["round1_scheduler_frames"] == 301 and
-        state["round1_scheduler_dispatches"] == 3010 and
+        state["round1_scheduler_dispatches"] == 3029 and
         state["round1_scheduler_trace_count"] == 10 and
         state["round1_scheduler_order_hash"] == -2089937380 and
         state["round1_actor_handler_dispatches"] == 3010 and
@@ -295,17 +299,21 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_player_melee_selector_mask"] == 15 and
         state["round1_player_melee_presentation_mask"] == 15 and
         state["round1_player_melee_interruptions"] == 0 and
-        state["round1_player_weapon_entries"] == 1 and
-        state["round1_player_weapon_completions"] == 1 and
+        state["round1_player_weapon_entries"] == 2 and
+        state["round1_player_weapon_completions"] == 2 and
         state["round1_player_weapon_attempts"] == 12 and
         state["round1_player_weapon_allocations"] == 12 and
         state["round1_player_weapon_allocation_failures"] == 0 and
         state["round1_player_weapon_resource_debits"] == 12 and
-        state["round1_player_weapon_presentation_bindings"] == 51 and
-        state["round1_player_weapon_empty_requests"] == 0 and
+        state["round1_player_weapon_presentation_bindings"] == 70 and
+        state["round1_player_weapon_empty_requests"] == 1 and
+        state["round1_player_weapon_empty_allocations"] == 1 and
+        state["round1_player_weapon_empty_allocation_failures"] == 0 and
+        state["round1_player_weapon_empty_releases"] == 1 and
+        state["round1_player_weapon_empty_presentation_bindings"] == 10 and
         state["round1_player_weapon_interruptions"] == 0 and
-        state["round1_player_resource"] == 46 and
-        state["round1_player_resource_recharge"] == 1 and
+        state["round1_player_resource"] == 4 and
+        state["round1_player_resource_recharge"] == 5 and
         state["round1_player_weapon_projectile_free"] == 12 and
         state["round1_presentation_ready"] == 1 and
         state["round1_presentation_seen"] == 1 and

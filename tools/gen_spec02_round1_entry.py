@@ -70,6 +70,8 @@ def build() -> str:
     weapon_volley = weapon["sufficient_volley"]
     weapon_resource = weapon["resource_tick"]
     weapon_empty = weapon["empty_fallback"]
+    weapon_projectile = weapon["projectile_lifecycle_contract"]
+    weapon_empty_effect = weapon["empty_effect_variant1_contract"]
     weapon_frames = weapon["presentation_timeline"]
     empty_frames = weapon_empty["presentation_timeline"]
     weapon_return_frame = weapon["return_frame"]
@@ -171,7 +173,7 @@ def build() -> str:
         weapon["movement_facing"]["baseline_invariant"] is not True):
         raise ValueError("SPEC-02 Button1 action/resource contract drift")
     allocation = weapon_volley["successful_allocation_writes"]
-    blocker = weapon["projectile_lifecycle_implementation_blocker"]
+    projectile_blocker = weapon_projectile["implementation_blocker"]
     if (allocation != {
             "active_increment": 1,
             "attack_table": "0x03136a",
@@ -180,9 +182,29 @@ def build() -> str:
             "owner": "player low-word pointer",
             "position": "copy player x/y/z",
             "variant": "0 except attempt counter 4 writes 1"} or
-        blocker["spec_executable"] is not False or
-        len(blocker["missing_fields"]) != 5):
+        weapon_projectile["spec_executable"] is not False or
+        len(projectile_blocker["missing_fields"]) != 2 or
+        weapon_empty_effect["spec_executable"] is not True):
         raise ValueError("SPEC-02 projectile allocation/blocker drift")
+    projectile_init = weapon_projectile["initialization"]
+    projectile_active = weapon_projectile["active_state"]
+    projectile_spawn_offsets = projectile_init["parent_presentation_selector"]["spawn_offsets_s16"]
+    projectile_animation_selectors = projectile_init["parent_presentation_selector"]["animation_selector_u8"]
+    projectile_presentations = projectile_init["parent_presentation_selector"]["presentation_sequences"]
+    projectile_angles0 = projectile_init["angle"]["facing0_u8"]
+    projectile_angles1 = projectile_init["angle"]["facing1_u8"]
+    projectile_player_selectors = projectile_init["player_presentation_selector_u8"]
+    projectile_motion = projectile_active["motion"]["vectors_s16"]
+    empty_effect_offsets = weapon_empty_effect["initialization"]["variant_offsets_s16"]
+    empty_effect_records = weapon_empty_effect["active_state"]["presentation_records"]
+    if (len(projectile_spawn_offsets) != 16 or
+        len(projectile_animation_selectors) != 16 or
+        len(projectile_presentations) != 16 or
+        len(projectile_angles0) != 12 or len(projectile_angles1) != 12 or
+        len(projectile_player_selectors) != 12 or
+        len(projectile_motion) != 64 or len(empty_effect_offsets) != 4 or
+        len(empty_effect_records) != 10):
+        raise ValueError("SPEC-02 projectile/effect table cardinality drift")
     projectile_authority = fixtures["authority_data"]["player"][
         "weapon_projectile_resource"]["authority_separation"][
             "projectile_lifecycle"]
@@ -382,7 +404,65 @@ def build() -> str:
             weapon_return_frame["assembly"],
             weapon_return_frame["hurt_selector"],
             weapon_return_frame["attack_selector"]),
-        "};", "", "#endif", ""])
+        "};", "",
+        "static const AvspRound1VecS16 avsp_round1_weapon_projectile_spawn_offsets[AVSP_ROUND1_WEAPON_PROJECTILE_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for x, y in projectile_spawn_offsets:
+        lines.append(f"    {{ {x}, {y} }},")
+    lines.extend([
+        "};", "",
+        "static const unsigned char avsp_round1_weapon_projectile_animation_selectors[AVSP_ROUND1_WEAPON_PROJECTILE_PRESENTATION_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in projectile_animation_selectors),
+        "};", "",
+        "static const unsigned char avsp_round1_weapon_projectile_angles_facing0[AVSP_ROUND1_WEAPON_PROJECTILE_ANGLE_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in projectile_angles0),
+        "};", "",
+        "static const unsigned char avsp_round1_weapon_projectile_angles_facing1[AVSP_ROUND1_WEAPON_PROJECTILE_ANGLE_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in projectile_angles1),
+        "};", "",
+        "static const unsigned char avsp_round1_weapon_projectile_player_selectors[AVSP_ROUND1_WEAPON_PROJECTILE_ANGLE_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in projectile_player_selectors),
+        "};", "",
+        "static const AvspRound1VecS16 avsp_round1_weapon_projectile_motion[AVSP_ROUND1_WEAPON_PROJECTILE_MOTION_COUNT] =",
+        "{",
+    ])
+    for x, y in projectile_motion:
+        lines.append(f"    {{ {x}, {y} }},")
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_weapon_projectile_presentations[AVSP_ROUND1_WEAPON_PROJECTILE_PRESENTATION_COUNT][2] =",
+        "{",
+    ])
+    for sequence in projectile_presentations:
+        records = [sequence["first"], sequence["terminal"]]
+        rendered = []
+        for row in records:
+            rendered.append("{ %du, %d, %sUL, %sUL, %du, %du }" % (
+                row["timer"], row["branch"], row["animation_record"],
+                row["assembly"], row["hurt_selector"], row["attack_selector"]))
+        lines.append("    { " + ", ".join(rendered) + " },")
+    lines.extend([
+        "};", "",
+        "static const AvspRound1VecS16 avsp_round1_empty_effect_variant_offsets[AVSP_ROUND1_EMPTY_EFFECT_VARIANT_COUNT] =",
+        "{",
+    ])
+    for x, y in empty_effect_offsets:
+        lines.append(f"    {{ {x}, {y} }},")
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_empty_effect_variant1_records[AVSP_ROUND1_EMPTY_EFFECT_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in empty_effect_records:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer"], row["branch"], row["animation_record"],
+            row["assembly"], row["hurt_selector"], row["attack_selector"]))
+    lines.extend(["};", "", "#endif", ""])
     return "\n".join(lines)
 
 

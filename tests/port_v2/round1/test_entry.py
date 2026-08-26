@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "b4680e6fe10abf2ddcdb431a06ed03210344eff92c3d4674797df8e482f8d4a0"
+EXPECTED = "cd3a2f050aa4ef3af80ed99d3ba10e9d7ba88d3075053c2fd589fe065645d926"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -65,6 +65,11 @@ for before, after in (
     ("++runtime->player_weapon_resource_debits;", "runtime->player_weapon_resource_debits += 2u;"),
     ("++runtime->player_weapon_allocation_failures;", "runtime->player_weapon_allocation_failures += 2u;"),
     ("avsp_round1_tick_player_resource(runtime);", "/* resource tick suppressed */"),
+    ("avsp_round1_begin_empty_effect(runtime);", "/* empty effect suppressed */"),
+    ("actor->variant = 1u;", "actor->variant = 0u;"),
+    ("actor->y = (short)(actor->y + 4);", "actor->y = (short)(actor->y + 3);"),
+    ("if (actor->animation_branch < 0)", "if (actor->animation_branch < -32767)"),
+    ("++runtime->player_weapon_empty_auxiliary_releases;", "runtime->player_weapon_empty_auxiliary_releases += 2u;"),
 ):
     assert before in source
     run(source.replace(before, after), header, False)
@@ -84,6 +89,9 @@ for before, after in (
     ("    3u,\n    12u,\n    2u,", "    2u,\n    12u,\n    2u,"),
     ("{ 3074u, 2u, 0x00165400UL, 0x00166bf8UL, 1u, 0u },", "{ 3074u, 2u, 0x00165410UL, 0x00166bf8UL, 1u, 0u },"),
     ("{ 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },", "{ 6658u, 2u, 0x001645d4UL, 0x00166c22UL, 1u, 0u },"),
+    ("    40u, 42u, 44u, 46u, 48u, 50u, 49u, 47u, 45u, 43u, 41u, 40u", "    39u, 42u, 44u, 46u, 48u, 50u, 49u, 47u, 45u, 43u, 41u, 40u"),
+    ("    { 0, 78 },", "    { 0, 77 },"),
+    ("{ 4095u, -32767, 0x0007a12cUL, 0x0007a3a0UL, 0u, 0u },", "{ 4095u, -32768, 0x0007a12cUL, 0x0007a3a0UL, 0u, 0u },"),
 ):
     assert before in generated
     changed = generated.replace(before, after, 1)
@@ -101,4 +109,4 @@ for before, after in (
                    f"'{wsl(temp / 'test')}'")
         result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/global-bounds/neutral-stop/melee/Button1 differential: PASS (43 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/global-bounds/neutral-stop/melee/Button1 differential: PASS (51 real mutations)")

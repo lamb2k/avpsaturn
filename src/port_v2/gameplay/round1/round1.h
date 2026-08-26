@@ -4,7 +4,7 @@
 #include "../player_action/player_action.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "b4680e6fe10abf2ddcdb431a06ed03210344eff92c3d4674797df8e482f8d4a0"
+    "cd3a2f050aa4ef3af80ed99d3ba10e9d7ba88d3075053c2fd589fe065645d926"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -24,6 +24,11 @@
 #define AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT 50u
 #define AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT 18u
 #define AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY 24u
+#define AVSP_ROUND1_WEAPON_PROJECTILE_PRESENTATION_COUNT 16u
+#define AVSP_ROUND1_WEAPON_PROJECTILE_ANGLE_COUNT 12u
+#define AVSP_ROUND1_WEAPON_PROJECTILE_MOTION_COUNT 64u
+#define AVSP_ROUND1_EMPTY_EFFECT_VARIANT_COUNT 4u
+#define AVSP_ROUND1_EMPTY_EFFECT_PRESENTATION_COUNT 10u
 #define AVSP_ROUND1_INPUT_BUTTON1 0x0010u
 
 #define AVSP_ROUND1_ENTRY_SET_POSITION 1u
@@ -32,6 +37,22 @@
 #define AVSP_ROUND1_ENTRY_DWELL 4u
 #define AVSP_ROUND1_ENTRY_SOURCE_16 5u
 #define AVSP_ROUND1_ENTRY_TERMINATE 6u
+
+typedef struct
+{
+    short x;
+    short y;
+} AvspRound1VecS16;
+
+typedef struct
+{
+    unsigned short timer;
+    short branch;
+    unsigned long animation_record;
+    unsigned long assembly;
+    unsigned char hurt_selector;
+    unsigned char attack_selector;
+} AvspRound1AnimationStateSpec;
 
 typedef struct
 {
@@ -52,6 +73,10 @@ typedef struct
     unsigned long assembly;
     unsigned char hurt_selector;
     unsigned char attack_selector;
+    unsigned char source_facing_selector;
+    unsigned char animation_index;
+    unsigned short animation_timer;
+    short animation_branch;
     unsigned long dispatch_entry;
     unsigned long scheduler_updates;
     unsigned long handler_updates;
@@ -153,6 +178,16 @@ typedef struct
     short y;
     short z;
     unsigned long attack_table;
+    unsigned char state;
+    unsigned char angle;
+    unsigned char parent_presentation_selector;
+    unsigned char presentation_index;
+    unsigned short animation_timer;
+    short animation_branch;
+    short collision_result;
+    long x_fp;
+    long y_fp;
+    long z_fp;
 } AvspRound1WeaponProjectileAllocation;
 
 typedef struct
@@ -287,6 +322,10 @@ typedef struct
     unsigned long player_weapon_interruptions;
     unsigned long player_weapon_presentation_bindings;
     unsigned long player_weapon_empty_auxiliary_requests;
+    unsigned long player_weapon_empty_auxiliary_allocations;
+    unsigned long player_weapon_empty_auxiliary_allocation_failures;
+    unsigned long player_weapon_empty_auxiliary_releases;
+    unsigned long player_weapon_empty_auxiliary_presentation_bindings;
     unsigned long player_resource_recharges;
     unsigned long failure_count;
     unsigned long fallback_count;

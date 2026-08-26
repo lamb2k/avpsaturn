@@ -49,8 +49,32 @@ def validate(d):
         'tick':50,'action':2,'substate':2,
         'animation_record':'0x00163158','assembly':'0x00165488',
         'hurt_selector':1,'attack_selector':0}
-    blocker=implementation['projectile_lifecycle_implementation_blocker']
-    assert blocker['spec_executable'] is False and len(blocker['missing_fields'])==5
+    projectile=implementation['projectile_lifecycle_contract']
+    assert projectile['spec_executable'] is False
+    assert projectile['state_sequence']==[0,2,4,6] and projectile['rng_calls']==0
+    init=projectile['initialization']
+    assert init['writes']['motion_table']=='0x001fc1c0'
+    assert init['writes']['attack_table']=='0x0003136a'
+    assert init['parent_presentation_selector']['spawn_offsets_s16'][0]==[-21,84]
+    assert init['parent_presentation_selector']['spawn_offsets_s16'][15]==[-47,79]
+    assert init['parent_presentation_selector']['animation_selector_u8']==list(range(15,-1,-1))
+    assert init['angle']['facing0_u8']==[40,42,44,46,48,50,49,47,45,43,41,40]
+    assert init['angle']['facing1_u8']==[24,22,20,18,16,14,15,17,19,21,23,24]
+    assert init['player_presentation_selector_u8']==[6,6,5,5,4,3,3,4,5,5,6,6]
+    active=projectile['active_state']
+    assert active['motion']['vectors_s16'][16]==[3072,0]
+    assert active['motion']['vectors_s16'][48]==[-3072,0]
+    assert active['bounds_guards'][0]['expression']=='u16(x_high - A5+0x278 + 0x50) > 0x0220'
+    assert active['bounds_guards'][1]['expression']=='u16(y_high - A5+0x27c + 0x10) > 0x0120'
+    assert active['update_order']==['collision guard','x bounds','y bounds','ground guard','motion','animation','visibility']
+    assert projectile['impact_state']['writes']['impact_class']=='0x3a'
+    assert len(projectile['implementation_blocker']['missing_fields'])==2
+    empty_effect=implementation['empty_effect_variant1_contract']
+    assert empty_effect['spec_executable'] is True
+    assert empty_effect['state_sequence']==[0,2,4] and empty_effect['variant']==1
+    assert empty_effect['initialization']['variant_offsets_s16'][1]==[0,78]
+    assert [(x['timer'],x['branch']) for x in empty_effect['active_state']['presentation_records']]==[(1,0)]*8+[(8,1),(4095,-32767)]
+    assert empty_effect['capture_projection']['movement_frames']==list(range(4494,4502))
     assert len(d['counterfactuals'])==12
     assert d['physical_saturn']=='UNRUN' and d['saturn_emulator']=='UNRUN'
 
@@ -76,8 +100,15 @@ for path,value,label in [
  (('implementation_contract','resource_tick','normal_recharge_reload'),1,'wrong normal recharge'),
  (('implementation_contract','empty_fallback','timer_initial'),15,'wrong empty timer'),
  (('implementation_contract','movement_facing','baseline_invariant'),False,'movement during weapon action'),
- (('implementation_contract','projectile_lifecycle_implementation_blocker','spec_executable'),True,'unsupported projectile lifecycle claim')]:
+ (('implementation_contract','projectile_lifecycle_contract','initialization','angle','facing1_u8',0),25,'wrong facing angle mapping'),
+ (('implementation_contract','projectile_lifecycle_contract','active_state','motion','vectors_s16',48,0),-3071,'wrong signed 16.16 motion vector'),
+ (('implementation_contract','projectile_lifecycle_contract','active_state','bounds_guards',0,'expression'),'u16(x) > 0x0220','wrong bounds arithmetic'),
+ (('implementation_contract','projectile_lifecycle_contract','impact_state','writes','impact_class'),'0x39','wrong impact class'),
+ (('implementation_contract','projectile_lifecycle_contract','implementation_blocker','missing_fields'),[],'unsupported full projectile lifecycle claim'),
+ (('implementation_contract','empty_effect_variant1_contract','variant'),0,'wrong class-0x10 variant'),
+ (('implementation_contract','empty_effect_variant1_contract','initialization','variant_offsets_s16',1,1),79,'wrong empty-effect y offset'),
+ (('implementation_contract','empty_effect_variant1_contract','active_state','presentation_records',9,'branch'),-32768,'wrong empty-effect terminal branch')]:
     m=copy.deepcopy(d);x=m
     for k in path[:-1]:x=x[k]
     x[path[-1]]=value;reject(m,label)
-print('ORACLE-11 weapon/projectile/resource tests: PASS (16 invariant mutations rejected)')
+print('ORACLE-11 weapon/projectile/resource tests: PASS (23 invariant mutations rejected)')

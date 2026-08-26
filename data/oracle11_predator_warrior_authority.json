@@ -26,7 +26,7 @@
         "guard": "0x01a6f4 source edge/resource checks",
         "phase": "0x0406",
         "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
-        "resource_artifact_sha256": "b0c0e1e86d862f7570df28db1305306b5c6295d4b4dc9b05acaa7c30e4207fab",
+        "resource_artifact_sha256": "e0d8bcd415cad6a125090ef2bee4dc560a77292eb1c88ca0f5f1bf174a00a1b9",
         "resource_status": "SOURCE_CLOSED",
         "spawn_branch": "0x023858",
         "writer": "0x023860"
@@ -8165,6 +8165,203 @@
     },
     "implementation_contract": {
       "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+      "empty_effect_variant1_contract": {
+        "accepted_auxiliary_evidence": {
+          "artifact": "data/oracle11_round1_auxiliary_authority.json",
+          "artifact_sha256": "01b612617acf2f0868641a283423e19f85d68157c065636833c657c5084b098a",
+          "suppression_capture": "oracle11_aux_suppress_24_10_v2",
+          "suppression_count": 74
+        },
+        "active_state": {
+          "guard": "state 2",
+          "movement_guard": "animation branch low byte +0x25 == 0 adds 4 to y high word before animation and visibility",
+          "presentation_records": [
+            {
+              "animation_record": "0x0007a09c",
+              "assembly": "0x0007a140",
+              "attack_selector": 0,
+              "branch": 0,
+              "hurt_selector": 0,
+              "record_sha256": "36110308b1a1f7c99613b44c635accc5ea8f4867571261b5fab4b4176b8a786d",
+              "timer": 1
+            },
+            {
+              "animation_record": "0x0007a0ac",
+              "assembly": "0x0007a18c",
+              "attack_selector": 0,
+              "branch": 0,
+              "hurt_selector": 0,
+              "record_sha256": "bb25f8fb5907c2adbe70aa56edb45da4903c36df0a6e16b35b3f77a3e9e6a4d6",
+              "timer": 1
+            },
+            {
+              "animation_record": "0x0007a0bc",
+              "assembly": "0x0007a1d8",
+              "attack_selector": 0,
+              "branch": 0,
+              "hurt_selector": 0,
+              "record_sha256": "9bfd89e16b79a10ec036f41363ab184ddab2c280e0d2c332b170c27a8b9ce5c8",
+              "timer": 1
+            },
+            {
+              "animation_record": "0x0007a0cc",
+              "assembly": "0x0007a224",
+              "attack_selector": 0,
+              "branch": 0,
+              "hurt_selector": 0,
+              "record_sha256": "5f7c456d0d9a21e9e8781c77e551e3dfa28bb2bbd7bdddf0805f1994c186b687",
+              "timer": 1
+            },
+            {
+              "animation_record": "0x0007a0dc",
+              "assembly": "0x0007a270",
+              "attack_selector": 0,
+              "branch": 0,
+              "hurt_selector": 0,
+              "record_sha256": "cf075f76fd5a9272c2e4012c6289e9f8c295ad53c0f81e16a03538c5833b98b5",
+              "timer": 1
+            },
+            {
+              "animation_record": "0x0007a0ec",
+              "assembly": "0x0007a2bc",
+              "attack_selector": 0,
+              "branch": 0,
+              "hurt_selector": 0,
+              "record_sha256": "f05aeba627e55efd17ad43660069f73e795d4a0ec1fbbabcad250d0a47ecbc8b",
+              "timer": 1
+            },
+            {
+              "animation_record": "0x0007a0fc",
+              "assembly": "0x0007a308",
+              "attack_selector": 0,
+              "branch": 0,
+              "hurt_selector": 0,
+              "record_sha256": "cb6926acddd53847ce8801ecd4e213c4909f1e806497738f55e9621df85de5a9",
+              "timer": 1
+            },
+            {
+              "animation_record": "0x0007a10c",
+              "assembly": "0x0007a354",
+              "attack_selector": 0,
+              "branch": 0,
+              "hurt_selector": 0,
+              "record_sha256": "0016879909161e64db6025b564c50fc9127f0711be9c72a5b569af6aa1ac6c4f",
+              "timer": 1
+            },
+            {
+              "animation_record": "0x0007a11c",
+              "assembly": "0x0007a3a0",
+              "attack_selector": 0,
+              "branch": 1,
+              "hurt_selector": 0,
+              "record_sha256": "1ad1b9d0d87f40dec42e1bb8c5d3e2269a06ac2432a516ec7b270647c306547f",
+              "timer": 8
+            },
+            {
+              "animation_record": "0x0007a12c",
+              "assembly": "0x0007a3a0",
+              "attack_selector": 0,
+              "branch": -32767,
+              "hurt_selector": 0,
+              "record_sha256": "49d421ad0ff495b56305c42455165316f0597c7fd7e6e36020ba9e1609042bc4",
+              "timer": 4095
+            }
+          ],
+          "terminal_guard": "signed animation branch word +0x24 < 0 enters state 4",
+          "update_order": [
+            "terminal branch guard",
+            "conditional y movement",
+            "animation",
+            "visibility"
+          ]
+        },
+        "allocation": {
+          "guard": "Button1 empty-resource entry and record-type-24 allocator succeeds",
+          "writes": {
+            "active": 1,
+            "class": "0x10",
+            "spawn_facing_selector": "copy player facing",
+            "variant": 1,
+            "x": "copy player x high word",
+            "y": "copy player y high word"
+          }
+        },
+        "capture_projection": {
+          "first_active_frame": 4493,
+          "last_position": [
+            1197,
+            427
+          ],
+          "movement_frames": [
+            4494,
+            4495,
+            4496,
+            4497,
+            4498,
+            4499,
+            4500,
+            4501
+          ],
+          "spawn_frame": 4492,
+          "spawn_position": [
+            1197,
+            395
+          ],
+          "state4_frame": 4510
+        },
+        "class": "0x10",
+        "dispatch": "0x079ffc",
+        "initialization": {
+          "guard": "state 0",
+          "position_rule": "add variant signed s16 x/y offsets; negate x when spawn-facing selector is zero",
+          "variant_offsets_s16": [
+            [
+              0,
+              84
+            ],
+            [
+              0,
+              78
+            ],
+            [
+              0,
+              84
+            ],
+            [
+              0,
+              68
+            ]
+          ],
+          "variant_presentation_offsets_u16": [
+            14,
+            14,
+            14,
+            862
+          ],
+          "writes": {
+            "facing": 0,
+            "record_type": 24,
+            "state": 2,
+            "target_pointer": "0x8000"
+          }
+        },
+        "record_type": 24,
+        "release_state": {
+          "guard": "state 4 or 6",
+          "result": "zero/release record type 24 in the same dispatch",
+          "routine": "0x0177f0"
+        },
+        "rng_calls": 0,
+        "scheduler_position": "record type 24 after record types 4/8/12/16/20",
+        "spec_executable": true,
+        "state_sequence": [
+          0,
+          2,
+          4
+        ],
+        "state_type": "u8",
+        "variant": 1
+      },
       "empty_fallback": {
         "auxiliary_actor": {
           "class": "0x10",
@@ -8808,16 +9005,831 @@
           "tick": 49
         }
       ],
-      "projectile_lifecycle_implementation_blocker": {
-        "missing_fields": [
-          "class-0x05 per-state timers and fixed-point motion arithmetic",
-          "target-to-vector branch/table values",
-          "per-state animation/assembly identity",
-          "collision-result-to-impact initialization writes",
-          "exact removal bounds arithmetic and release timing"
-        ],
+      "projectile_lifecycle_contract": {
+        "active_state": {
+          "bounds_guards": [
+            {
+              "axis": "x",
+              "expression": "u16(x_high - A5+0x278 + 0x50) > 0x0220",
+              "result": "immediate record-type-4 release",
+              "type": "u16"
+            },
+            {
+              "axis": "y",
+              "expression": "u16(y_high - A5+0x27c + 0x10) > 0x0120",
+              "result": "immediate record-type-4 release",
+              "type": "u16"
+            }
+          ],
+          "collision_guard": "signed s16 +0x40 < 0 writes state/substate long 0x06000000; release occurs through state 6 on the next class dispatch",
+          "ground_guard": "u16(y_high) < u16(z_high) enters state 4 before motion/animation/visibility",
+          "guard": "state 2",
+          "motion": {
+            "angle_type": "u8 masked 0x3f",
+            "arithmetic": "sign-extend each s16 component, shift left 8, then add in x-before-y order to signed 16.16 positions",
+            "table": "0x001fc1c0",
+            "vectors_s16": [
+              [
+                0,
+                3510
+              ],
+              [
+                300,
+                3492
+              ],
+              [
+                598,
+                3440
+              ],
+              [
+                890,
+                3355
+              ],
+              [
+                1173,
+                3240
+              ],
+              [
+                1446,
+                3092
+              ],
+              [
+                1704,
+                2916
+              ],
+              [
+                1947,
+                2713
+              ],
+              [
+                2171,
+                2481
+              ],
+              [
+                2374,
+                2225
+              ],
+              [
+                2552,
+                1948
+              ],
+              [
+                2706,
+                1653
+              ],
+              [
+                2835,
+                1340
+              ],
+              [
+                2936,
+                1017
+              ],
+              [
+                3010,
+                684
+              ],
+              [
+                3056,
+                343
+              ],
+              [
+                3072,
+                0
+              ],
+              [
+                3056,
+                -343
+              ],
+              [
+                3010,
+                -684
+              ],
+              [
+                2936,
+                -1017
+              ],
+              [
+                2835,
+                -1340
+              ],
+              [
+                2706,
+                -1653
+              ],
+              [
+                2552,
+                -1948
+              ],
+              [
+                2374,
+                -2225
+              ],
+              [
+                2171,
+                -2481
+              ],
+              [
+                1947,
+                -2713
+              ],
+              [
+                1704,
+                -2916
+              ],
+              [
+                1446,
+                -3092
+              ],
+              [
+                1173,
+                -3240
+              ],
+              [
+                890,
+                -3355
+              ],
+              [
+                598,
+                -3440
+              ],
+              [
+                300,
+                -3492
+              ],
+              [
+                0,
+                -3510
+              ],
+              [
+                -300,
+                -3492
+              ],
+              [
+                -598,
+                -3440
+              ],
+              [
+                -890,
+                -3355
+              ],
+              [
+                -1173,
+                -3240
+              ],
+              [
+                -1446,
+                -3092
+              ],
+              [
+                -1704,
+                -2916
+              ],
+              [
+                -1947,
+                -2713
+              ],
+              [
+                -2171,
+                -2481
+              ],
+              [
+                -2374,
+                -2225
+              ],
+              [
+                -2552,
+                -1948
+              ],
+              [
+                -2706,
+                -1653
+              ],
+              [
+                -2835,
+                -1340
+              ],
+              [
+                -2936,
+                -1017
+              ],
+              [
+                -3010,
+                -684
+              ],
+              [
+                -3056,
+                -343
+              ],
+              [
+                -3072,
+                0
+              ],
+              [
+                -3056,
+                343
+              ],
+              [
+                -3010,
+                684
+              ],
+              [
+                -2936,
+                1017
+              ],
+              [
+                -2835,
+                1340
+              ],
+              [
+                -2706,
+                1653
+              ],
+              [
+                -2552,
+                1948
+              ],
+              [
+                -2374,
+                2225
+              ],
+              [
+                -2171,
+                2481
+              ],
+              [
+                -1947,
+                2713
+              ],
+              [
+                -1704,
+                2916
+              ],
+              [
+                -1446,
+                3092
+              ],
+              [
+                -1173,
+                3240
+              ],
+              [
+                -890,
+                3355
+              ],
+              [
+                -598,
+                3440
+              ],
+              [
+                -300,
+                3492
+              ]
+            ]
+          },
+          "update_order": [
+            "collision guard",
+            "x bounds",
+            "y bounds",
+            "ground guard",
+            "motion",
+            "animation",
+            "visibility"
+          ]
+        },
+        "class": "0x05",
+        "current_state_interfaces": {
+          "bounds": "A5+0x278:s16 and A5+0x27c:s16 are the accepted current route/navigation bound fields",
+          "collision": "current collision system owns signed s16 +0x40; projectile class only consumes it"
+        },
+        "dispatch": "0x030d34",
+        "impact_state": {
+          "allocation_failure": "projectile remains state 6 and proceeds to release",
+          "guard": "state 4",
+          "writes": {
+            "allocation": "record type 24 via 0x0177da if available",
+            "impact_active": 1,
+            "impact_class": "0x3a",
+            "impact_position": "copy projectile x/y/z high words",
+            "impact_variant": 0,
+            "projectile_state": 6
+          }
+        },
+        "implementation_blocker": {
+          "missing_fields": [
+            "type-24 class-0x3a impact handler state/presentation/release contract",
+            "native current-state collision writer binding for class-0x05 attack table 0x03136a"
+          ],
+          "unblock": "close only the class-0x3a handler and bind the accepted current collision interface before native ground impact or damage is claimed"
+        },
+        "initialization": {
+          "angle": {
+            "attempt_indices_after_decrement": "11 down to 0 in time order",
+            "facing0_u8": [
+              40,
+              42,
+              44,
+              46,
+              48,
+              50,
+              49,
+              47,
+              45,
+              43,
+              41,
+              40
+            ],
+            "facing1_u8": [
+              24,
+              22,
+              20,
+              18,
+              16,
+              14,
+              15,
+              17,
+              19,
+              21,
+              23,
+              24
+            ],
+            "rule": "read signed source angle byte by attempt index; when player facing is nonzero negate it, then mask to 0x3f"
+          },
+          "guard": "state 0",
+          "parent_presentation_selector": {
+            "animation_selector_u8": [
+              15,
+              14,
+              13,
+              12,
+              11,
+              10,
+              9,
+              8,
+              7,
+              6,
+              5,
+              4,
+              3,
+              2,
+              1,
+              0
+            ],
+            "presentation_offsets_u16": [
+              34,
+              70,
+              106,
+              142,
+              178,
+              214,
+              250,
+              286,
+              322,
+              358,
+              394,
+              430,
+              466,
+              502,
+              538,
+              574
+            ],
+            "presentation_sequences": [
+              {
+                "first": {
+                  "animation_record": "0x00030f6a",
+                  "assembly": "0x000311aa",
+                  "attack_selector": 1,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "2ae31d948c70a82014a376565b9d3bb8552c4cdfae5c517147ce698f9922bde7",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x00030f7a",
+                  "assembly": "0x0003128a",
+                  "attack_selector": 1,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "d37587322cdb41422412fcdb5eac6f7ff97850ff01877aad4e7c0f4c67172e4c",
+                  "timer": 8
+                }
+              },
+              {
+                "first": {
+                  "animation_record": "0x00030f8e",
+                  "assembly": "0x000311b8",
+                  "attack_selector": 1,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "15ea01afe2c774d4b999450be80cb54e692b9e06dcebe7922064b5780eaa4725",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x00030f9e",
+                  "assembly": "0x00031298",
+                  "attack_selector": 1,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "cb622f4e783e85e61d072420f6dc5609a2226207bd7e1e4ea6c84bd40a3479c7",
+                  "timer": 8
+                }
+              },
+              {
+                "first": {
+                  "animation_record": "0x00030fb2",
+                  "assembly": "0x000311c6",
+                  "attack_selector": 1,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "5017d341a93aaf6fc7235c7e100538a9660e8733fdacebcc805be94082774d30",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x00030fc2",
+                  "assembly": "0x000312a6",
+                  "attack_selector": 1,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "1cf678f82310adac62ae5503feabeacded534d0b6957b4d9ddf75aa6d0fe80db",
+                  "timer": 8
+                }
+              },
+              {
+                "first": {
+                  "animation_record": "0x00030fd6",
+                  "assembly": "0x000311d4",
+                  "attack_selector": 1,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "12a1b2d134bdcaec5e64344e9d2675926cfda2971cb3299450bf8b22b7409411",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x00030fe6",
+                  "assembly": "0x000312b4",
+                  "attack_selector": 1,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "b9056ef15b193ffbd60f37924baae57a8d1a97ad11885daa7e9ad0a90e25053d",
+                  "timer": 8
+                }
+              },
+              {
+                "first": {
+                  "animation_record": "0x00030ffa",
+                  "assembly": "0x000311e2",
+                  "attack_selector": 1,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "ed076faa32fff560e19946b5ebd62c12d1f4745deddb5519e8ac94df3c1c8d1b",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x0003100a",
+                  "assembly": "0x000312c2",
+                  "attack_selector": 1,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "bbc3a369c9dcdae82b6b5a3ab850aacc57361c9e567b609f71dd5f628cf0b010",
+                  "timer": 8
+                }
+              },
+              {
+                "first": {
+                  "animation_record": "0x0003101e",
+                  "assembly": "0x000311f0",
+                  "attack_selector": 1,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "6cff6db988cf3643ee0488e259938394a3c83e8b338c8f591b634e106a78768e",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x0003102e",
+                  "assembly": "0x000312d0",
+                  "attack_selector": 1,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "3608555870f293a423b8a3069891bcd6cc4865562b98edd7ad8f0875b51aa2c8",
+                  "timer": 2
+                }
+              },
+              {
+                "first": {
+                  "animation_record": "0x00031042",
+                  "assembly": "0x000311fe",
+                  "attack_selector": 1,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "cc02a37312b1d8ef7306f365ef8abb21bce1d499d8fdfb9565c23c64d4c20a03",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x00031052",
+                  "assembly": "0x000312de",
+                  "attack_selector": 1,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "1c29972d56f9ef23256c71074e3cea191b755ecb938e43df8f2e8f670c180054",
+                  "timer": 8
+                }
+              },
+              {
+                "first": {
+                  "animation_record": "0x00031066",
+                  "assembly": "0x0003120c",
+                  "attack_selector": 1,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "43dd0c25e7e630509b5651f1023552f6db9d10f4a7b2fef45866c83cbb003192",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x00031076",
+                  "assembly": "0x000312ec",
+                  "attack_selector": 1,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "aa6e90c902dbf2ca6c4e30777e517869fef82e22bd3e715d75135ac8f6b16ca3",
+                  "timer": 8
+                }
+              },
+              {
+                "first": {
+                  "animation_record": "0x0003108a",
+                  "assembly": "0x0003121a",
+                  "attack_selector": 1,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "6a5545cb49209d5987fa204c6e846c56295d4b9bf28fb327ff113ed8ea254784",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x0003109a",
+                  "assembly": "0x000312fa",
+                  "attack_selector": 1,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "9361499e75d268930b0d0b6217f2014db3525daa83d0f98fe1f4b6150678b92b",
+                  "timer": 8
+                }
+              },
+              {
+                "first": {
+                  "animation_record": "0x000310ae",
+                  "assembly": "0x00031228",
+                  "attack_selector": 2,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "b393a653476f13f12e4f22628e91f5de93d56981ef8c82e5adcd0825d0533192",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x000310be",
+                  "assembly": "0x00031308",
+                  "attack_selector": 2,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "6e22a5730220f2cea73e3e08c35085b5eca59767b08412972a2dfe322779ad05",
+                  "timer": 8
+                }
+              },
+              {
+                "first": {
+                  "animation_record": "0x000310d2",
+                  "assembly": "0x00031236",
+                  "attack_selector": 2,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "20a413bd3ac8c5be590d59a03d4e21b50a671be4a2e96948ceca41c55bc8c48e",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x000310e2",
+                  "assembly": "0x00031316",
+                  "attack_selector": 2,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "235ecb9e425cf19ccb8649a201295ea092d65f7e2a3b5811c7cd2dc6afe67516",
+                  "timer": 8
+                }
+              },
+              {
+                "first": {
+                  "animation_record": "0x000310f6",
+                  "assembly": "0x00031244",
+                  "attack_selector": 2,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "95303cc96dfbef6dd99c3149ff1822df8750d0a063c36d4dde116a8044e17f9a",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x00031106",
+                  "assembly": "0x00031324",
+                  "attack_selector": 2,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "a30d8e3ec72b41b5d3789b237f9522bdce685b27ff997030b6a8b9023733c633",
+                  "timer": 8
+                }
+              },
+              {
+                "first": {
+                  "animation_record": "0x0003111a",
+                  "assembly": "0x00031252",
+                  "attack_selector": 2,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "0f2a7681e266b5899a10a7b005e131c7618a431a21d74545bb24da4220aabc95",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x0003112a",
+                  "assembly": "0x00031332",
+                  "attack_selector": 2,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "507465148a0eb5e0f46bd59e09dcea8553b47988ef0745a929c792a1317d0787",
+                  "timer": 8
+                }
+              },
+              {
+                "first": {
+                  "animation_record": "0x0003113e",
+                  "assembly": "0x00031260",
+                  "attack_selector": 2,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "07b169e17683b9dbf79c6456fa024415c9075d857370473fe11de5e3a271cc08",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x0003114e",
+                  "assembly": "0x00031340",
+                  "attack_selector": 2,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "fdd75141e0f63aa29fc356b39ee3878b541307624279cb4b28d40084ac33e702",
+                  "timer": 8
+                }
+              },
+              {
+                "first": {
+                  "animation_record": "0x00031162",
+                  "assembly": "0x0003126e",
+                  "attack_selector": 2,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "05dc98f586f8493cf52f82174ca096e8e8e9a68afb98602942714c66395b02ca",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x00031172",
+                  "assembly": "0x0003134e",
+                  "attack_selector": 2,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "ab9ea92e5148a47133b43623ede5b256b3b0171e99f5da6153f0aab3a09ba03c",
+                  "timer": 8
+                }
+              },
+              {
+                "first": {
+                  "animation_record": "0x00031186",
+                  "assembly": "0x0003127c",
+                  "attack_selector": 2,
+                  "branch": 0,
+                  "hurt_selector": 0,
+                  "record_sha256": "c11647c4b4ce07433c651f14c31a83955c1fc5cbd8e2a27c0ce9bd7e4e433ce3",
+                  "timer": 8
+                },
+                "terminal": {
+                  "animation_record": "0x00031196",
+                  "assembly": "0x0003135c",
+                  "attack_selector": 2,
+                  "branch": -32768,
+                  "hurt_selector": 0,
+                  "record_sha256": "a66d93e07007c1d1dff95164d0a042f902d7cd0f4f5815ca020696cafa29df4d",
+                  "timer": 8
+                }
+              }
+            ],
+            "read": "parent +0x24 low byte u8",
+            "route_reachable_values": [
+              3,
+              4,
+              5,
+              6
+            ],
+            "spawn_offsets_s16": [
+              [
+                -21,
+                84
+              ],
+              [
+                22,
+                79
+              ],
+              [
+                36,
+                68
+              ],
+              [
+                43,
+                55
+              ],
+              [
+                43,
+                38
+              ],
+              [
+                32,
+                26
+              ],
+              [
+                16,
+                16
+              ],
+              [
+                -10,
+                12
+              ],
+              [
+                -24,
+                11
+              ],
+              [
+                -46,
+                14
+              ],
+              [
+                -54,
+                17
+              ],
+              [
+                -66,
+                25
+              ],
+              [
+                -75,
+                37
+              ],
+              [
+                -76,
+                51
+              ],
+              [
+                -70,
+                64
+              ],
+              [
+                -47,
+                79
+              ]
+            ]
+          },
+          "player_presentation_selector_u8": [
+            6,
+            6,
+            5,
+            5,
+            4,
+            3,
+            3,
+            4,
+            5,
+            5,
+            6,
+            6
+          ],
+          "position_rule": "add selected signed s16 x/y offsets to the high words of signed 16.16 x/y; negate x offset when facing byte +0x0f is zero; add one to z high word",
+          "writes": {
+            "active_collision": 1,
+            "attack_table": "0x0003136a",
+            "collision_result": 0,
+            "motion_table": "0x001fc1c0",
+            "state": 2,
+            "target_pointer": "0x8000",
+            "visibility_latch": 0
+          }
+        },
+        "record_type": 4,
+        "release_state": {
+          "guard": "state 6",
+          "result": "zero/release record type 4 in the same dispatch",
+          "routine": "0x017754"
+        },
+        "rng_calls": 0,
+        "scheduler_position": "record type 4 before record types 8/12/16/20/24/28/36",
         "spec_executable": false,
-        "unblock": "amend this existing Oracle/SPEC fixture with only those bounded class-0x05 fields before native projectile motion or damage is claimed"
+        "state_sequence": [
+          0,
+          2,
+          4,
+          6
+        ],
+        "state_type": "u8"
       },
       "resource_tick": {
         "depleted_recharge_reload": 6,
@@ -8967,11 +9979,41 @@
         "sha256": "125137d5ddfccc60f811bcb864921a9457c32c91efdd639e3d61913c34a618de",
         "start": "0x02576a"
       },
+      "record24_class10": {
+        "bytes": 146,
+        "end_exclusive": "0x07a08e",
+        "sha256": "30dc7f9cfc434409bfe4c62345e493cc3d178326fe540bde2afdc5b6d6dec147",
+        "start": "0x079ffc"
+      },
+      "record24_class10_variant1_tables": {
+        "bytes": 174,
+        "end_exclusive": "0x07a13c",
+        "sha256": "8ccd5d4849366e6925d777516bade8434a05c463421cdbd2bd8d418fcf90503c",
+        "start": "0x07a08e"
+      },
       "record4_class5": {
         "bytes": 292,
         "end_exclusive": "0x030e58",
         "sha256": "86889aa06e0b9173414d812cff18919df125ab56753badee47b2833416e4aa18",
         "start": "0x030d34"
+      },
+      "record4_class5_motion": {
+        "bytes": 60,
+        "end_exclusive": "0x016284",
+        "sha256": "3edd55f4d35fadf56acdee8bc049d165aac8d5b5b5bbcd4e8408bd09f0965aec",
+        "start": "0x016248"
+      },
+      "record4_class5_presentation_tables": {
+        "bytes": 79,
+        "end_exclusive": "0x030f68",
+        "sha256": "6aff8d1767371a55e72579579dbc95defa5b36909851e3cf2a2ffa6bee2c41a0",
+        "start": "0x030f19"
+      },
+      "record4_class5_spawn_table": {
+        "bytes": 64,
+        "end_exclusive": "0x030e98",
+        "sha256": "1e013e855a5dd443d5e9ae1f43caa6f20eac1e64840c472edd9f47dc489eac9e",
+        "start": "0x030e58"
       },
       "resource_hud_writer": {
         "bytes": 368,

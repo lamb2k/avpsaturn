@@ -621,6 +621,10 @@ volatile int avsp_diag_round1_player_weapon_allocation_failures;
 volatile int avsp_diag_round1_player_weapon_resource_debits;
 volatile int avsp_diag_round1_player_weapon_presentation_bindings;
 volatile int avsp_diag_round1_player_weapon_empty_requests;
+volatile int avsp_diag_round1_player_weapon_empty_allocations;
+volatile int avsp_diag_round1_player_weapon_empty_allocation_failures;
+volatile int avsp_diag_round1_player_weapon_empty_releases;
+volatile int avsp_diag_round1_player_weapon_empty_presentation_bindings;
 volatile int avsp_diag_round1_player_weapon_interruptions;
 volatile int avsp_diag_round1_player_resource;
 volatile int avsp_diag_round1_player_resource_recharge;
@@ -7102,8 +7106,8 @@ static void live_encounter_publish(void)
     avsp_diag_slice_canaries_ok = playable_slice_frame.canaries_ok;
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
-        AVSP_ROUND1_SPEC02_SHA256[0] == 'b' &&
-        AVSP_ROUND1_SPEC02_SHA256[63] == '0';
+        AVSP_ROUND1_SPEC02_SHA256[0] == 'c' &&
+        AVSP_ROUND1_SPEC02_SHA256[63] == '6';
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
     avsp_diag_round1_rng_seed = round1_runtime.rng_seed;
@@ -7184,6 +7188,15 @@ static void live_encounter_publish(void)
         (int)round1_runtime.player_weapon_presentation_bindings;
     avsp_diag_round1_player_weapon_empty_requests =
         (int)round1_runtime.player_weapon_empty_auxiliary_requests;
+    avsp_diag_round1_player_weapon_empty_allocations =
+        (int)round1_runtime.player_weapon_empty_auxiliary_allocations;
+    avsp_diag_round1_player_weapon_empty_allocation_failures =
+        (int)round1_runtime.player_weapon_empty_auxiliary_allocation_failures;
+    avsp_diag_round1_player_weapon_empty_releases =
+        (int)round1_runtime.player_weapon_empty_auxiliary_releases;
+    avsp_diag_round1_player_weapon_empty_presentation_bindings =
+        (int)round1_runtime.
+            player_weapon_empty_auxiliary_presentation_bindings;
     avsp_diag_round1_player_weapon_interruptions =
         (int)round1_runtime.player_weapon_interruptions;
     avsp_diag_round1_player_resource = round1_runtime.player_resource;
@@ -7253,6 +7266,13 @@ static void live_encounter_frame_callback(void)
             round1_player_mask |= AVSP_PW_INPUT_ATTACK;
         if (round1_runtime.player_controller_updates == 210u)
             round1_player_mask |= AVSP_ROUND1_INPUT_BUTTON1;
+        if (round1_runtime.player_controller_updates == 270u)
+        {
+            round1_runtime.player_resource = 0u;
+            round1_runtime.player_resource_recharge = 12u;
+            round1_runtime.player_resource_depleted = 1u;
+            round1_player_mask |= AVSP_ROUND1_INPUT_BUTTON1;
+        }
     }
 #endif
     if (round1_runtime.route_state == 4 &&

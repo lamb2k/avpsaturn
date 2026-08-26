@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=b4680e6fe10abf2ddcdb431a06ed03210344eff92c3d4674797df8e482f8d4a0 */
-/* fixtures_sha256=d4d34eaede744e30e941743e680f273ec1e1cc6b21a19753089309270e32257c */
+/* contract_sha256=cd3a2f050aa4ef3af80ed99d3ba10e9d7ba88d3075053c2fd589fe065645d926 */
+/* fixtures_sha256=9f289da6685e7ae4e5b05b844e24875f0ded55c7cd3e3311ced9d52b7fbeaf1f */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -458,6 +458,156 @@ static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_empty_frames[AVS
 static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_return_frame =
 {
     2u, 2u, 0x00163158UL, 0x00165488UL, 1u, 0u
+};
+
+static const AvspRound1VecS16 avsp_round1_weapon_projectile_spawn_offsets[AVSP_ROUND1_WEAPON_PROJECTILE_PRESENTATION_COUNT] =
+{
+    { -21, 84 },
+    { 22, 79 },
+    { 36, 68 },
+    { 43, 55 },
+    { 43, 38 },
+    { 32, 26 },
+    { 16, 16 },
+    { -10, 12 },
+    { -24, 11 },
+    { -46, 14 },
+    { -54, 17 },
+    { -66, 25 },
+    { -75, 37 },
+    { -76, 51 },
+    { -70, 64 },
+    { -47, 79 },
+};
+
+static const unsigned char avsp_round1_weapon_projectile_animation_selectors[AVSP_ROUND1_WEAPON_PROJECTILE_PRESENTATION_COUNT] =
+{
+    15u, 14u, 13u, 12u, 11u, 10u, 9u, 8u, 7u, 6u, 5u, 4u, 3u, 2u, 1u, 0u
+};
+
+static const unsigned char avsp_round1_weapon_projectile_angles_facing0[AVSP_ROUND1_WEAPON_PROJECTILE_ANGLE_COUNT] =
+{
+    40u, 42u, 44u, 46u, 48u, 50u, 49u, 47u, 45u, 43u, 41u, 40u
+};
+
+static const unsigned char avsp_round1_weapon_projectile_angles_facing1[AVSP_ROUND1_WEAPON_PROJECTILE_ANGLE_COUNT] =
+{
+    24u, 22u, 20u, 18u, 16u, 14u, 15u, 17u, 19u, 21u, 23u, 24u
+};
+
+static const unsigned char avsp_round1_weapon_projectile_player_selectors[AVSP_ROUND1_WEAPON_PROJECTILE_ANGLE_COUNT] =
+{
+    6u, 6u, 5u, 5u, 4u, 3u, 3u, 4u, 5u, 5u, 6u, 6u
+};
+
+static const AvspRound1VecS16 avsp_round1_weapon_projectile_motion[AVSP_ROUND1_WEAPON_PROJECTILE_MOTION_COUNT] =
+{
+    { 0, 3510 },
+    { 300, 3492 },
+    { 598, 3440 },
+    { 890, 3355 },
+    { 1173, 3240 },
+    { 1446, 3092 },
+    { 1704, 2916 },
+    { 1947, 2713 },
+    { 2171, 2481 },
+    { 2374, 2225 },
+    { 2552, 1948 },
+    { 2706, 1653 },
+    { 2835, 1340 },
+    { 2936, 1017 },
+    { 3010, 684 },
+    { 3056, 343 },
+    { 3072, 0 },
+    { 3056, -343 },
+    { 3010, -684 },
+    { 2936, -1017 },
+    { 2835, -1340 },
+    { 2706, -1653 },
+    { 2552, -1948 },
+    { 2374, -2225 },
+    { 2171, -2481 },
+    { 1947, -2713 },
+    { 1704, -2916 },
+    { 1446, -3092 },
+    { 1173, -3240 },
+    { 890, -3355 },
+    { 598, -3440 },
+    { 300, -3492 },
+    { 0, -3510 },
+    { -300, -3492 },
+    { -598, -3440 },
+    { -890, -3355 },
+    { -1173, -3240 },
+    { -1446, -3092 },
+    { -1704, -2916 },
+    { -1947, -2713 },
+    { -2171, -2481 },
+    { -2374, -2225 },
+    { -2552, -1948 },
+    { -2706, -1653 },
+    { -2835, -1340 },
+    { -2936, -1017 },
+    { -3010, -684 },
+    { -3056, -343 },
+    { -3072, 0 },
+    { -3056, 343 },
+    { -3010, 684 },
+    { -2936, 1017 },
+    { -2835, 1340 },
+    { -2706, 1653 },
+    { -2552, 1948 },
+    { -2374, 2225 },
+    { -2171, 2481 },
+    { -1947, 2713 },
+    { -1704, 2916 },
+    { -1446, 3092 },
+    { -1173, 3240 },
+    { -890, 3355 },
+    { -598, 3440 },
+    { -300, 3492 },
+};
+
+static const AvspRound1AnimationStateSpec avsp_round1_weapon_projectile_presentations[AVSP_ROUND1_WEAPON_PROJECTILE_PRESENTATION_COUNT][2] =
+{
+    { { 8u, 0, 0x00030f6aUL, 0x000311aaUL, 0u, 1u }, { 8u, -32768, 0x00030f7aUL, 0x0003128aUL, 0u, 1u } },
+    { { 8u, 0, 0x00030f8eUL, 0x000311b8UL, 0u, 1u }, { 8u, -32768, 0x00030f9eUL, 0x00031298UL, 0u, 1u } },
+    { { 8u, 0, 0x00030fb2UL, 0x000311c6UL, 0u, 1u }, { 8u, -32768, 0x00030fc2UL, 0x000312a6UL, 0u, 1u } },
+    { { 8u, 0, 0x00030fd6UL, 0x000311d4UL, 0u, 1u }, { 8u, -32768, 0x00030fe6UL, 0x000312b4UL, 0u, 1u } },
+    { { 8u, 0, 0x00030ffaUL, 0x000311e2UL, 0u, 1u }, { 8u, -32768, 0x0003100aUL, 0x000312c2UL, 0u, 1u } },
+    { { 8u, 0, 0x0003101eUL, 0x000311f0UL, 0u, 1u }, { 2u, -32768, 0x0003102eUL, 0x000312d0UL, 0u, 1u } },
+    { { 8u, 0, 0x00031042UL, 0x000311feUL, 0u, 1u }, { 8u, -32768, 0x00031052UL, 0x000312deUL, 0u, 1u } },
+    { { 8u, 0, 0x00031066UL, 0x0003120cUL, 0u, 1u }, { 8u, -32768, 0x00031076UL, 0x000312ecUL, 0u, 1u } },
+    { { 8u, 0, 0x0003108aUL, 0x0003121aUL, 0u, 1u }, { 8u, -32768, 0x0003109aUL, 0x000312faUL, 0u, 1u } },
+    { { 8u, 0, 0x000310aeUL, 0x00031228UL, 0u, 2u }, { 8u, -32768, 0x000310beUL, 0x00031308UL, 0u, 2u } },
+    { { 8u, 0, 0x000310d2UL, 0x00031236UL, 0u, 2u }, { 8u, -32768, 0x000310e2UL, 0x00031316UL, 0u, 2u } },
+    { { 8u, 0, 0x000310f6UL, 0x00031244UL, 0u, 2u }, { 8u, -32768, 0x00031106UL, 0x00031324UL, 0u, 2u } },
+    { { 8u, 0, 0x0003111aUL, 0x00031252UL, 0u, 2u }, { 8u, -32768, 0x0003112aUL, 0x00031332UL, 0u, 2u } },
+    { { 8u, 0, 0x0003113eUL, 0x00031260UL, 0u, 2u }, { 8u, -32768, 0x0003114eUL, 0x00031340UL, 0u, 2u } },
+    { { 8u, 0, 0x00031162UL, 0x0003126eUL, 0u, 2u }, { 8u, -32768, 0x00031172UL, 0x0003134eUL, 0u, 2u } },
+    { { 8u, 0, 0x00031186UL, 0x0003127cUL, 0u, 2u }, { 8u, -32768, 0x00031196UL, 0x0003135cUL, 0u, 2u } },
+};
+
+static const AvspRound1VecS16 avsp_round1_empty_effect_variant_offsets[AVSP_ROUND1_EMPTY_EFFECT_VARIANT_COUNT] =
+{
+    { 0, 84 },
+    { 0, 78 },
+    { 0, 84 },
+    { 0, 68 },
+};
+
+static const AvspRound1AnimationStateSpec avsp_round1_empty_effect_variant1_records[AVSP_ROUND1_EMPTY_EFFECT_PRESENTATION_COUNT] =
+{
+    { 1u, 0, 0x0007a09cUL, 0x0007a140UL, 0u, 0u },
+    { 1u, 0, 0x0007a0acUL, 0x0007a18cUL, 0u, 0u },
+    { 1u, 0, 0x0007a0bcUL, 0x0007a1d8UL, 0u, 0u },
+    { 1u, 0, 0x0007a0ccUL, 0x0007a224UL, 0u, 0u },
+    { 1u, 0, 0x0007a0dcUL, 0x0007a270UL, 0u, 0u },
+    { 1u, 0, 0x0007a0ecUL, 0x0007a2bcUL, 0u, 0u },
+    { 1u, 0, 0x0007a0fcUL, 0x0007a308UL, 0u, 0u },
+    { 1u, 0, 0x0007a10cUL, 0x0007a354UL, 0u, 0u },
+    { 8u, 1, 0x0007a11cUL, 0x0007a3a0UL, 0u, 0u },
+    { 4095u, -32767, 0x0007a12cUL, 0x0007a3a0UL, 0u, 0u },
 };
 
 #endif

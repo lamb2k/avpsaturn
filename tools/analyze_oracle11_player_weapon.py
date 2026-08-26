@@ -10,6 +10,7 @@ RAW_ZERO=ROOT/'.deps/mame/oracle11_player_weapon_zero_a'
 OPCODES=ROOT/'.deps/mame/actorprobe/decrypted_opcodes_2m.bin'
 PROGRAM=ROOT/'.deps/mame/actorprobe/decrypted_program_2m.bin'
 AUTH=ROOT/'data/oracle11_predator_warrior_authority.json'
+AUX=ROOT/'data/oracle11_round1_auxiliary_authority.json'
 OUT=ROOT/'data/oracle11_predator_weapon_projectile_resource.json'
 VARIANTS=('cold_run_1','cold_run_2','resource_empty','b1_held','repeat_startup',
  'repeat_active','repeat_recovery','special_ok','special_low_health','special_zero_health',
@@ -29,6 +30,16 @@ def actor_classes(r,kind): return {x['class'] for x in r['actors.tsv'] if x['kin
 def spawned(r,kind,klass,pc):
     return [x for x in r['writes.tsv'] if x['kind']==kind and x['data']==klass+klass and x['mask']=='ff00' and x['pc']==pc]
 def window(blob,a,b): return {'start':f'0x{a:06x}','end_exclusive':f'0x{b:06x}','bytes':b-a,'sha256':hashlib.sha256(blob[a:b]).hexdigest()}
+def s16(blob,address): return int.from_bytes(blob[address:address+2],'big',signed=True)
+def pairs_s16(blob,address,count):
+    return [[s16(blob,address+i*4),s16(blob,address+i*4+2)] for i in range(count)]
+def animation_record(program,address):
+    return {'animation_record':f'0x{address:08x}',
+      'timer':int.from_bytes(program[address:address+2],'big'),
+      'branch':int.from_bytes(program[address+2:address+4],'big',signed=True),
+      'assembly':f'0x{int.from_bytes(program[address+4:address+8],"big"):08x}',
+      'hurt_selector':program[address+8],'attack_selector':program[address+9],
+      'record_sha256':hashlib.sha256(program[address:address+16]).hexdigest()}
 def first_frame(samples,predicate):
     return int(next(x['frame'] for x in samples if predicate(x)))
 def presentation(program,row,origin):
@@ -69,6 +80,48 @@ require(not spawned(r['projectile_class_removed'],'record4','05','0257f4'),'sche
 
 op=OPCODES.read_bytes()
 program=PROGRAM.read_bytes()
+aux=json.loads(AUX.read_text(encoding='utf-8'))
+class10_aux=next(x for x in aux['archetypes']
+    if x['type']==24 and x['class']=='0x10')
+require(class10_aux['classification']=='SOURCE_CLOSED' and
+        class10_aux['dispatch_entry']=='0x079ffc' and
+        class10_aux['rng']['calls']==0 and
+        class10_aux['counterfactual']['classification']=='PASS',
+        'accepted class-0x10 auxiliary authority drift')
+
+projectile_spawn_offsets=pairs_s16(program,0x030e58,16)
+projectile_presentation_selectors=list(program[0x030f19:0x030f29])
+projectile_presentation_offsets=[int.from_bytes(program[0x030f48+i*2:0x030f4a+i*2],'big') for i in range(16)]
+projectile_presentation=[]
+for offset in projectile_presentation_offsets:
+    first=0x030f48+offset
+    projectile_presentation.append({
+      'first':animation_record(program,first),
+      'terminal':animation_record(program,first+16)})
+projectile_angles_facing0=list(program[0x025ad2:0x025ade])
+projectile_angles_facing1=[(-x)&0x3f for x in projectile_angles_facing0]
+projectile_player_selectors=list(program[0x025ac6:0x025ad2])
+projectile_motion=pairs_s16(program,0x001fc1c0,64)
+class10_offsets=pairs_s16(op,0x07a050,4)
+class10_presentation_offsets=[int.from_bytes(program[0x07a08e+i*2:0x07a090+i*2],'big') for i in range(4)]
+class10_variant1_records=[animation_record(program,0x07a09c+i*16) for i in range(10)]
+require(projectile_spawn_offsets==[[-21,84],[22,79],[36,68],[43,55],[43,38],[32,26],[16,16],[-10,12],[-24,11],[-46,14],[-54,17],[-66,25],[-75,37],[-76,51],[-70,64],[-47,79]],'class-0x05 spawn offset table drift')
+require(projectile_presentation_selectors==list(range(15,-1,-1)),'class-0x05 presentation selector table drift')
+require(projectile_presentation_offsets==[34+36*i for i in range(16)],'class-0x05 presentation base table drift')
+require(projectile_angles_facing0==[40,42,44,46,48,50,49,47,45,43,41,40] and
+        projectile_angles_facing1==[24,22,20,18,16,14,15,17,19,21,23,24],
+        'class-0x05 angle/facing table drift')
+require(projectile_player_selectors==[6,6,5,5,4,3,3,4,5,5,6,6],
+        'class-0x05 player presentation selector drift')
+require(projectile_motion[0]==[0,3510] and projectile_motion[16]==[3072,0] and
+        projectile_motion[32]==[0,-3510] and projectile_motion[48]==[-3072,0] and
+        projectile_motion[63]==[-300,3492], 'class-0x05 64-vector table drift')
+require(class10_offsets==[[0,84],[0,78],[0,84],[0,68]] and
+        class10_presentation_offsets==[14,14,14,862],
+        'class-0x10 offset/presentation table drift')
+require([(x['timer'],x['branch']) for x in class10_variant1_records]==
+        [(1,0)]*8+[(8,1),(4095,-32767)],
+        'class-0x10 variant-1 presentation sequence drift')
 base_samples=b['samples.tsv']
 entry=first_frame(base_samples,lambda x:int(x['action'])==0x0c00)
 complete=first_frame(base_samples,lambda x:int(x['frame'])>entry and int(x['action'])==0)
@@ -126,10 +179,62 @@ implementation_contract={
  'presentation_timeline':[presentation(program,x,entry) for x in weapon_rows],
  'return_frame':presentation(program,next(x for x in base_samples
    if int(x['frame'])==returned),entry),
- 'projectile_lifecycle_implementation_blocker':{
+ 'projectile_lifecycle_contract':{
    'spec_executable':False,
-   'missing_fields':['class-0x05 per-state timers and fixed-point motion arithmetic','target-to-vector branch/table values','per-state animation/assembly identity','collision-result-to-impact initialization writes','exact removal bounds arithmetic and release timing'],
-   'unblock':'amend this existing Oracle/SPEC fixture with only those bounded class-0x05 fields before native projectile motion or damage is claimed'},
+   'record_type':4,'class':'0x05','dispatch':'0x030d34','state_type':'u8',
+   'state_sequence':[0,2,4,6],
+   'scheduler_position':'record type 4 before record types 8/12/16/20/24/28/36',
+   'rng_calls':0,
+   'initialization':{
+     'guard':'state 0','writes':{
+       'state':2,'motion_table':'0x001fc1c0','attack_table':'0x0003136a',
+       'target_pointer':'0x8000','collision_result':0,
+       'visibility_latch':0,'active_collision':1},
+     'parent_presentation_selector':{
+       'read':'parent +0x24 low byte u8','route_reachable_values':[3,4,5,6],
+       'spawn_offsets_s16':projectile_spawn_offsets,
+       'animation_selector_u8':projectile_presentation_selectors,
+       'presentation_offsets_u16':projectile_presentation_offsets,
+       'presentation_sequences':projectile_presentation},
+     'position_rule':'add selected signed s16 x/y offsets to the high words of signed 16.16 x/y; negate x offset when facing byte +0x0f is zero; add one to z high word',
+     'angle':{
+       'attempt_indices_after_decrement':'11 down to 0 in time order',
+       'facing0_u8':projectile_angles_facing0,
+       'facing1_u8':projectile_angles_facing1,
+       'rule':'read signed source angle byte by attempt index; when player facing is nonzero negate it, then mask to 0x3f'},
+     'player_presentation_selector_u8':projectile_player_selectors},
+   'active_state':{
+     'guard':'state 2','collision_guard':'signed s16 +0x40 < 0 writes state/substate long 0x06000000; release occurs through state 6 on the next class dispatch',
+     'bounds_guards':[
+       {'axis':'x','type':'u16','expression':'u16(x_high - A5+0x278 + 0x50) > 0x0220','result':'immediate record-type-4 release'},
+       {'axis':'y','type':'u16','expression':'u16(y_high - A5+0x27c + 0x10) > 0x0120','result':'immediate record-type-4 release'}],
+     'ground_guard':'u16(y_high) < u16(z_high) enters state 4 before motion/animation/visibility',
+     'motion':{'angle_type':'u8 masked 0x3f','table':'0x001fc1c0','vectors_s16':projectile_motion,'arithmetic':'sign-extend each s16 component, shift left 8, then add in x-before-y order to signed 16.16 positions'},
+     'update_order':['collision guard','x bounds','y bounds','ground guard','motion','animation','visibility']},
+   'impact_state':{
+     'guard':'state 4','writes':{'projectile_state':6,
+       'allocation':'record type 24 via 0x0177da if available',
+       'impact_active':1,'impact_class':'0x3a','impact_variant':0,
+       'impact_position':'copy projectile x/y/z high words'},
+     'allocation_failure':'projectile remains state 6 and proceeds to release'},
+   'release_state':{'guard':'state 6','routine':'0x017754','result':'zero/release record type 4 in the same dispatch'},
+   'current_state_interfaces':{
+     'bounds':'A5+0x278:s16 and A5+0x27c:s16 are the accepted current route/navigation bound fields',
+     'collision':'current collision system owns signed s16 +0x40; projectile class only consumes it'},
+   'implementation_blocker':{
+     'missing_fields':['type-24 class-0x3a impact handler state/presentation/release contract','native current-state collision writer binding for class-0x05 attack table 0x03136a'],
+     'unblock':'close only the class-0x3a handler and bind the accepted current collision interface before native ground impact or damage is claimed'}},
+ 'empty_effect_variant1_contract':{
+   'spec_executable':True,'record_type':24,'class':'0x10','variant':1,
+   'dispatch':'0x079ffc','state_type':'u8','state_sequence':[0,2,4],
+   'scheduler_position':'record type 24 after record types 4/8/12/16/20',
+   'rng_calls':0,
+   'allocation':{'guard':'Button1 empty-resource entry and record-type-24 allocator succeeds','writes':{'active':1,'class':'0x10','variant':1,'x':'copy player x high word','y':'copy player y high word','spawn_facing_selector':'copy player facing'}},
+   'initialization':{'guard':'state 0','writes':{'state':2,'target_pointer':'0x8000','record_type':24,'facing':0},'variant_offsets_s16':class10_offsets,'variant_presentation_offsets_u16':class10_presentation_offsets,'position_rule':'add variant signed s16 x/y offsets; negate x when spawn-facing selector is zero'},
+   'active_state':{'guard':'state 2','terminal_guard':'signed animation branch word +0x24 < 0 enters state 4','movement_guard':'animation branch low byte +0x25 == 0 adds 4 to y high word before animation and visibility','update_order':['terminal branch guard','conditional y movement','animation','visibility'],'presentation_records':class10_variant1_records},
+   'release_state':{'guard':'state 4 or 6','routine':'0x0177f0','result':'zero/release record type 24 in the same dispatch'},
+   'capture_projection':{'spawn_frame':4492,'first_active_frame':4493,'spawn_position':[1197,395],'movement_frames':[4494,4495,4496,4497,4498,4499,4500,4501],'last_position':[1197,427],'state4_frame':4510},
+   'accepted_auxiliary_evidence':{'artifact':'data/oracle11_round1_auxiliary_authority.json','artifact_sha256':digest(AUX),'suppression_capture':class10_aux['counterfactual']['capture'],'suppression_count':class10_aux['counterfactual']['suppression_count']}},
  'mutation_controls':['reject Button1 held redispatch','reject cadence other than ticks 0..44 step 4','reject debit without allocation','reject debit other than 3 or missing zero clamp','reject recovery before tick 49','reject movement or facing during action','reject recharge before action update','reject fixed-frame projectile hit or removal']}
 report={
  'schema':1,'task':'ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE','status':'SOURCE_CLOSED',
@@ -138,6 +243,9 @@ report={
  'source_identity':{
   'button_dispatch':window(op,0x01a75e,0x01a8a0),'pw_button1_action':window(op,0x02576a,0x0258a8),
   'empty_fallback':window(op,0x019f34,0x019f98),'record4_class5':window(op,0x030d34,0x030e58),
+  'record4_class5_motion':window(op,0x016248,0x016284),'record4_class5_spawn_table':window(program,0x030e58,0x030e98),
+  'record4_class5_presentation_tables':window(program,0x030f19,0x030f68),'record24_class10':window(op,0x079ffc,0x07a08e),
+  'record24_class10_variant1_tables':window(program,0x07a08e,0x07a13c),
   'special_action':window(op,0x024f04,0x02501e),'special_health_debit':window(op,0x01b492,0x01b4bc),
   'special_class20':window(op,0x07f9a8,0x07fb42),'special_class47':window(op,0x08eb86,0x08ed32),
   'resource_hud_writer':window(op,0x0ade9e,0x0ae00e),'award_display_class54':window(op,0x094b3a,0x094bf0)},

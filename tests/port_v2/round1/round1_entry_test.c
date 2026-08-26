@@ -98,6 +98,8 @@ int main(void)
     runtime.pools[3].records[0].active = 1u;
     runtime.pools[3].records[0].actor_class = 0x10;
     runtime.pools[3].records[0].type = 24u;
+    runtime.pools[3].records[0].variant = 1u;
+    runtime.pools[3].records[0].source_facing_selector = 1u;
     runtime.pools[3].records[0].source_slot = 0x00ffb680UL;
     runtime.pools[3].free_count = 31u;
     if (!avsp_round1_step_scheduler(&runtime) ||
@@ -275,7 +277,15 @@ int main(void)
                 0x9200u ||
             weapon_runtime.player_weapon_projectiles[23].owner != 0x8380u ||
             weapon_runtime.player_weapon_projectiles[23].attack_table !=
-                0x03136aUL)
+                0x03136aUL ||
+            weapon_runtime.player_weapon_projectiles[0].state != 0u ||
+            weapon_runtime.player_weapon_projectiles[0].
+                parent_presentation_selector != 6u ||
+            weapon_runtime.player_weapon_projectiles[0].angle !=
+                (weapon_runtime.player_weapon_projectiles[0].facing ?
+                    24u : 40u) ||
+            weapon_runtime.player_weapon_projectiles[0].x_fp !=
+                (long)weapon_runtime.player_weapon_projectiles[0].x * 65536L)
             return 32;
         if (!avsp_round1_step_player(&weapon_runtime, 0u, 0))
             return 33;
@@ -334,9 +344,63 @@ int main(void)
             !avsp_round1_entry_valid(&weapon_runtime))
             return 42;
     }
+    {
+        AvspRound1Runtime effect_runtime;
+        AvspRound1ActorCore *effect;
+        int index;
+        unsigned int effect_entry_calls = 0u;
+        avsp_round1_init(&effect_runtime);
+        if (!avsp_round1_begin_first_entry(&effect_runtime))
+            return 43;
+        while (!effect_runtime.entry.control_enabled &&
+               effect_entry_calls < 1000u)
+        {
+            if (!avsp_round1_step_first_entry(&effect_runtime))
+                return 43;
+            ++effect_entry_calls;
+        }
+        if (effect_runtime.route_state != 4)
+            return 43;
+        effect_runtime.player_resource = 0u;
+        effect_runtime.player_resource_depleted = 1u;
+        if (!avsp_round1_step_player(&effect_runtime,
+                AVSP_ROUND1_INPUT_BUTTON1, 0) ||
+            effect_runtime.player_weapon_empty_auxiliary_requests != 1u ||
+            effect_runtime.player_weapon_empty_auxiliary_allocations != 1u ||
+            effect_runtime.pools[3].free_count != 31u)
+            return 43;
+        effect = &effect_runtime.pools[3].records[31];
+        if (!avsp_round1_step_scheduler(&effect_runtime) ||
+            effect->state != 2u || effect->variant != 1u ||
+            effect->x != effect_runtime.player.x ||
+            effect->y != effect_runtime.player.y + 78 ||
+            effect->animation_record != 0x0007a09cUL ||
+            effect->animation_timer != 1u || effect->animation_branch != 0)
+            return 44;
+        for (index = 0; index < 8; ++index)
+            if (!avsp_round1_step_scheduler(&effect_runtime))
+                return 45;
+        if (effect->y != effect_runtime.player.y + 110 ||
+            effect->animation_index != 8u ||
+            effect->animation_record != 0x0007a11cUL ||
+            effect->animation_timer != 8u || effect->animation_branch != 1)
+            return 46;
+        for (index = 0; index < 8; ++index)
+            if (!avsp_round1_step_scheduler(&effect_runtime))
+                return 47;
+        if (effect->animation_index != 9u ||
+            effect->animation_record != 0x0007a12cUL ||
+            effect->animation_branch != -32767 ||
+            !avsp_round1_step_scheduler(&effect_runtime) ||
+            effect->state != 4u ||
+            !avsp_round1_step_scheduler(&effect_runtime) ||
+            effect_runtime.pools[3].free_count != 32u ||
+            effect_runtime.player_weapon_empty_auxiliary_releases != 1u)
+            return 48;
+    }
     runtime.entry.gate8236 = 1u;
     if (avsp_round1_entry_valid(&runtime))
-        return 43;
-    puts("REIMPLEMENT-13 native entry/player/scheduler/class1f/global-bounds/neutral-stop/melee/Button1-resource-allocation: PASS");
+        return 49;
+    puts("REIMPLEMENT-13 native entry/player/scheduler/class1f/global-bounds/neutral-stop/melee/Button1-resource/class10-effect: PASS");
     return 0;
 }

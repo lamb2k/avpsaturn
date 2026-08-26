@@ -39,13 +39,13 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_entry_gate8236"] == 0
     assert report["state"]["round1_entry_gate81af"] == 1
     assert report["state"]["round1_control_enabled"] == 1
-    assert report["state"]["round1_player_x"] == 1049
+    assert report["state"]["round1_player_x"] == 1031
     assert report["state"]["round1_player_z"] == 320
     assert report["state"]["round1_player_facing"] == 1
     assert report["state"]["round1_player_source_action"] == 514
     assert report["state"]["round1_player_controller_updates"] == 301
     assert report["state"]["round1_scheduler_frames"] == 301
-    assert report["state"]["round1_scheduler_dispatches"] == 3010
+    assert report["state"]["round1_scheduler_dispatches"] == 3029
     assert report["state"]["round1_scheduler_trace_count"] == 10
     assert report["state"]["round1_scheduler_order_hash"] == -2089937380
     assert report["state"]["round1_actor_handler_dispatches"] == 3010
@@ -64,17 +64,21 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_player_melee_selector_mask"] == 15
     assert report["state"]["round1_player_melee_presentation_mask"] == 15
     assert report["state"]["round1_player_melee_interruptions"] == 0
-    assert report["state"]["round1_player_weapon_entries"] == 1
-    assert report["state"]["round1_player_weapon_completions"] == 1
+    assert report["state"]["round1_player_weapon_entries"] == 2
+    assert report["state"]["round1_player_weapon_completions"] == 2
     assert report["state"]["round1_player_weapon_attempts"] == 12
     assert report["state"]["round1_player_weapon_allocations"] == 12
     assert report["state"]["round1_player_weapon_allocation_failures"] == 0
     assert report["state"]["round1_player_weapon_resource_debits"] == 12
-    assert report["state"]["round1_player_weapon_presentation_bindings"] == 51
-    assert report["state"]["round1_player_weapon_empty_requests"] == 0
+    assert report["state"]["round1_player_weapon_presentation_bindings"] == 70
+    assert report["state"]["round1_player_weapon_empty_requests"] == 1
+    assert report["state"]["round1_player_weapon_empty_allocations"] == 1
+    assert report["state"]["round1_player_weapon_empty_allocation_failures"] == 0
+    assert report["state"]["round1_player_weapon_empty_releases"] == 1
+    assert report["state"]["round1_player_weapon_empty_presentation_bindings"] == 10
     assert report["state"]["round1_player_weapon_interruptions"] == 0
-    assert report["state"]["round1_player_resource"] == 46
-    assert report["state"]["round1_player_resource_recharge"] == 1
+    assert report["state"]["round1_player_resource"] == 4
+    assert report["state"]["round1_player_resource_recharge"] == 5
     assert report["state"]["round1_player_weapon_projectile_free"] == 12
     assert report["state"]["round1_presentation_ready"] == 1
     assert report["state"]["round1_presentation_seen"] == 1
@@ -83,4 +87,4 @@ for build,normal,report in zip(builds,normals,reads):
         "alien_contacts":1, "misses":1, "player_contacts":4,
         "player_damage_events":1, "unlock_frame":450}
     assert report["visual_scanout"] == "UNAVAILABLE_WINDOWS_ACCELERATED_SURFACE"
-print("REIMPLEMENT-12 paired source-closed emulator evidence: PASS")
+print("REIMPLEMENT-13 paired source-closed emulator evidence: PASS")
