@@ -116,6 +116,27 @@ static const AvspRound1PresentationSpec *avsp_round1_find_class1f_presentation(
     return 0;
 }
 
+static int avsp_round1_class1f_state_context_supported(unsigned short state,
+                                                       unsigned short substate)
+{
+    unsigned int low = 0u;
+    unsigned int high = AVSP_ROUND1_CLASS1F_STATE_CONTEXT_COUNT;
+    while (low < high)
+    {
+        unsigned int middle = low + (high - low) / 2u;
+        const AvspRound1StateContextSpec *candidate =
+            &avsp_round1_class1f_state_contexts[middle];
+        if (candidate->state < state ||
+            (candidate->state == state && candidate->substate < substate))
+            low = middle + 1u;
+        else if (candidate->state > state || candidate->substate > substate)
+            high = middle;
+        else
+            return 1;
+    }
+    return 0;
+}
+
 int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
 {
     unsigned int order_index;
@@ -185,9 +206,18 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
                 actor->assembly = presentation->assembly;
                 actor->hurt_selector = presentation->hurt_selector;
                 actor->attack_selector = presentation->attack_selector;
+                if (!avsp_round1_class1f_state_context_supported(
+                        actor->state, actor->substate))
+                {
+                    ++runtime->failure_count;
+                    return 0;
+                }
+                actor->dispatch_entry = AVSP_ROUND1_CLASS1F_DISPATCH_ENTRY;
                 ++actor->handler_updates;
+                ++actor->state_handler_updates;
                 ++runtime->actor_handler_dispatches;
                 ++runtime->presentation_bindings;
+                ++runtime->state_context_bindings;
             }
             ++actor->scheduler_updates;
             ++runtime->scheduler_dispatches;

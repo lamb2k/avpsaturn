@@ -50,6 +50,7 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_scheduler_order_hash"] == -2089937380
     assert report["state"]["round1_actor_handler_dispatches"] == 3010
     assert report["state"]["round1_presentation_bindings"] == 3010
+    assert report["state"]["round1_state_context_bindings"] == 3010
     assert report["state"]["round1_presentation_ready"] == 1
     assert report["state"]["round1_presentation_seen"] == 1
     assert report["state"]["round1_presentation_commands_peak"] == 2

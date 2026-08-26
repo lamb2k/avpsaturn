@@ -24,7 +24,8 @@ FIELDS = FIELDS + ("round1_player_x","round1_player_z","round1_player_facing",
 FIELDS = FIELDS + ("round1_scheduler_frames","round1_scheduler_dispatches",
                    "round1_scheduler_trace_count","round1_scheduler_order_hash")
 FIELDS = FIELDS + ("round1_actor_handler_dispatches",
-                   "round1_presentation_bindings")
+                   "round1_presentation_bindings",
+                   "round1_state_context_bindings")
 EVIDENCE_LAST_FRAME = 470
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def signed(mcp, address): return tools.signed32(mcp.u32(address))
@@ -172,7 +173,8 @@ mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_
            "round1_scheduler_trace_count":"avsp_diag_round1_scheduler_trace_count",
            "round1_scheduler_order_hash":"avsp_diag_round1_scheduler_order_hash",
            "round1_actor_handler_dispatches":"avsp_diag_round1_actor_handler_dispatches",
-           "round1_presentation_bindings":"avsp_diag_round1_presentation_bindings"}
+           "round1_presentation_bindings":"avsp_diag_round1_presentation_bindings",
+           "round1_state_context_bindings":"avsp_diag_round1_state_context_bindings"}
 state = {key:signed(mcp,syms[symbol]) for key,symbol in mapping.items()}
 observed_frame = state["frame"]
 current_sample = next((sample for sample in all_samples
@@ -187,7 +189,8 @@ for key in ("round1_player_x", "round1_player_z", "round1_player_facing",
             "round1_player_source_action", "round1_player_controller_updates",
             "round1_scheduler_frames", "round1_scheduler_dispatches",
             "round1_scheduler_trace_count", "round1_scheduler_order_hash",
-            "round1_actor_handler_dispatches", "round1_presentation_bindings"):
+            "round1_actor_handler_dispatches", "round1_presentation_bindings",
+            "round1_state_context_bindings"):
     state[key] = evidence_sample[key]
 state["frame"] = EVIDENCE_LAST_FRAME
 samples = [sample for sample in all_samples
@@ -223,6 +226,7 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_scheduler_order_hash"] == -2089937380 and
         state["round1_actor_handler_dispatches"] == 3010 and
         state["round1_presentation_bindings"] == 3010 and
+        state["round1_state_context_bindings"] == 3010 and
         state["round1_presentation_ready"] == 1 and
         state["round1_presentation_seen"] == 1 and
         state["round1_presentation_commands_peak"] == 2):

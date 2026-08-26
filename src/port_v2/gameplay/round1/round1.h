@@ -47,8 +47,10 @@ typedef struct
     unsigned long assembly;
     unsigned char hurt_selector;
     unsigned char attack_selector;
+    unsigned long dispatch_entry;
     unsigned long scheduler_updates;
     unsigned long handler_updates;
+    unsigned long state_handler_updates;
 } AvspRound1ActorCore;
 
 typedef struct
@@ -64,6 +66,12 @@ typedef struct
     unsigned char hurt_selector;
     unsigned char attack_selector;
 } AvspRound1PresentationSpec;
+
+typedef struct
+{
+    unsigned short state;
+    unsigned short substate;
+} AvspRound1StateContextSpec;
 
 typedef struct
 {
@@ -152,6 +160,7 @@ typedef struct
     unsigned long scheduler_order_hash;
     unsigned long actor_handler_dispatches;
     unsigned long presentation_bindings;
+    unsigned long state_context_bindings;
     unsigned long failure_count;
     unsigned long fallback_count;
     unsigned long tail_canary;

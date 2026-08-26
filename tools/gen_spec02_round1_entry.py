@@ -48,6 +48,9 @@ def build() -> str:
                    if archetype["type"] == 12 and archetype["class"] == "0x1f")
     presentation = class1f["presentation_and_collision"]
     presentation_rows = presentation["records"]
+    dispatch_entry = int(class1f["dispatch_entry"], 16)
+    state_contexts = [tuple(int(part, 16) for part in context.split(":"))
+                      for context in class1f["state_phase_contexts"]]
     if len(spawns) != 10 or len(commands) != len(KINDS):
         raise ValueError("SPEC-02 entry cardinality drift")
     if [int(row["sequence"]) for row in spawns] != list(range(10)):
@@ -61,6 +64,9 @@ def build() -> str:
         presentation["record_count"] != len(presentation_rows) or
         records != sorted(records) or len(records) != len(set(records))):
         raise ValueError("SPEC-02 class-0x1f presentation table drift")
+    if (dispatch_entry != 0x060532 or state_contexts != sorted(state_contexts) or
+        len(state_contexts) != len(set(state_contexts))):
+        raise ValueError("SPEC-02 class-0x1f state context drift")
 
     cursor = int(player["initial_cursor"], 16)
     step_rows = []
@@ -140,6 +146,15 @@ def build() -> str:
             "    { %sUL, %sUL, %du, %du }," % (
                 row["animation_record"], row["assembly"],
                 row["hurt_selector"], row["attack_selector"]))
+    lines.extend([
+        "};", "",
+        f"#define AVSP_ROUND1_CLASS1F_DISPATCH_ENTRY 0x{dispatch_entry:06X}UL",
+        f"#define AVSP_ROUND1_CLASS1F_STATE_CONTEXT_COUNT {len(state_contexts)}u",
+        "static const AvspRound1StateContextSpec avsp_round1_class1f_state_contexts[AVSP_ROUND1_CLASS1F_STATE_CONTEXT_COUNT] =",
+        "{",
+    ])
+    for state, substate in state_contexts:
+        lines.append(f"    {{ 0x{state:04X}u, 0x{substate:04X}u }},")
     lines.extend(["};", "", "#endif", ""])
     return "\n".join(lines)
 
