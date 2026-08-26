@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "task_id": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
+  "classification": "accepted-evidence startup ownership correction",
+  "source_chronology": {
+    "round1_title_first_frame": 2040,
+    "player_actor_and_p1_hud_frame": 2072,
+    "player_visual_first_frame": 2075,
+    "p2_gameplay_hud_visible": false,
+    "control_and_gameplay_authority_frame": 2238,
+    "native_entry_step_first_frame": 2068,
+    "stage1_cdda_source_frame": 2520,
+    "first_route_reachable_player_audio": {
+      "frame": 2253,
+      "state": "0x0200",
+      "action": "0x0c02",
+      "substate": "0x02",
+      "command": "0x0051"
+    }
+  },
+  "accepted_evidence": [
+    "data/player_hud_capture.json",
+    "data/oracle11_predator_player_audio.json",
+    "data/spec02_round1_executable_contract.json",
+    "generated/avsp_frontend.h",
+    "src/port_v2/audio/cdda/cdda.h"
+  ],
+  "rejected_p2_inference": {
+    "presentation": "PRESS START",
+    "reason": "presentation prompt is not an active P2 gameplay slot",
+    "p1_weapon_meter_asset": "/SPR8/HUDHEAT.BIN",
+    "p1_weapon_meter_asset_sha256": "92785debbe19d2221200f205f880cfac875c1e34f880a37189ae75fa393d71e6",
+    "p2_assets_not_submitted": [
+      "/SPR8/HUD2TOP.BIN",
+      "/SPR8/HUD2HEAT.BIN"
+    ],
+    "visual_finding": "the lower WARRIOR bar is the source P1 weapon meter, not a second player HUD"
+  },
+  "observed_saturn_cue_diagnosis": {
+    "prior_evidence": "build/port_v2/live_encounter/run-1/readback.json",
+    "saturn_retained_frame": 235,
+    "native_player_state": "0x0200",
+    "native_player_action": "0x0204",
+    "native_player_controller_updates": 66,
+    "retained_trigger": "player_contact",
+    "retained_damage": 24,
+    "cue_id": 1,
+    "pcm_payload": "/AUDIO/MELEE.PCM",
+    "pcm_payload_sha256": "e2f2870251cf28c5cf52d0d074c3b426cc6db5afb4cde2eebf4838ffa296f125",
+    "disposition": "premature retained-contact audio",
+    "semantic_sound_name_inferred": false,
+    "source_command_match": false,
+    "reason": "retained contact independently triggered cue 1; accepted source evidence binds player command identity and causal ownership but does not bind this startup contact to the resident melee payload"
+  },
+  "native_ownership_rule": {
+    "before_handoff": "retained encounter is neither initialized nor stepped",
+    "handoff": "retained presentation substrate is initialized once and seeded from native player state",
+    "after_handoff": "native Round 1 owns player, HUD, route, contact, damage, and audio commands",
+    "pcm": "silence unless an exact native source command is bound to an approved Saturn payload",
+    "cdda": "one start at source frame 2520"
+  },
+  "paired_emulator_inspection": {
+    "source_frame": 2520,
+    "iso_sha256": "76580e033fc334248b56001969221d021f74f49f77d14319c129eacc9b67adbd",
+    "main_sha256": "4b3a0eff2f613f2dcc7712cb883e2c3d63ee6b9d0cb4f8e75d15caba3f7b3fff",
+    "source_scanout": ".deps/mame/captures/stage1_2520.png",
+    "source_scanout_sha256": "792dc2b327dc341922609891e01c2f08fac331ee817ba0405e534dddf0820be0",
+    "saturn_run_1_scanout": "build/port_v2/round1_startup/run-1/emulator.png",
+    "saturn_run_2_scanout": "build/port_v2/round1_startup/run-2/emulator.png",
+    "saturn_scanout_sha256": "f3504f23df6ca69be250ec86872937424a7ba90431766b8360c487732d94df26",
+    "visual_inspection": "PASS: P1 top HUD and P1 weapon meter are present, the active-P2 assets are absent, player and alien remain coherent, and both background planes are uncorrupted",
+    "audio_inspection": "PASS: diagnostics and paired execution contain no PCM start before or after first control through source frame 2521; CDDA issues exactly one source-owned start at frame 2520"
+  },
+  "physical_saturn": "UNRUN"
+}

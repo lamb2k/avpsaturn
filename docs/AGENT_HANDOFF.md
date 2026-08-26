@@ -34,7 +34,15 @@ type-24/class-0x10 allocation, ten-record presentation, movement, and release;
 it binds class-0x05 angle/selector tables, 64 motion pairs, state-2 behavior,
 and state-4 impact allocation without executing them. The remaining class-0x05
 blockers are the type-24/class-0x3a handler and current-state collision writer
-for attack table `0x03136a`. Fifty-one host mutations, 44 Target suppressions,
-Target, paired Emulator, Fast, Oracle, and frames 211/260 pass. Close only that
-smallest gap next; if blocked, continue another safe first-segment body.
+for attack table `0x03136a`. Startup authority is now corrected: retained
+gameplay is not initialized or stepped before native route state 4; source
+frames 2040/2072/2075/2238 bind title, P1 HUD/player initialization, player
+visibility, and first control; active P2 HUD remains false; retained contact
+cannot trigger PCM; and Track 2 starts once at source frame 2520. The apparent
+overheat cue was premature retained-contact cue 1, not a valid native event.
+Paired startup runs are byte-identical with zero pre-handoff retained steps,
+hidden contact/damage, orphan PCM, or duplicate CDDA, and direct scanout review
+matches the source P1 top/weapon-meter identity. Fast, Oracle, Target, and
+Emulator pass. Close only the smallest remaining class-0x05 gap next; if
+blocked, continue another safe first-segment body.
 USER-09 remains changes-requested, SALVAGE-08 inactive, and Saturn `UNRUN`.

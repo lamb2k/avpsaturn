@@ -461,9 +461,14 @@ volatile int avsp_diag_slice_enemy_tile_identity;
 #endif
 
 #ifdef AVSP_LIVE_ENCOUNTER
-/* The accepted evidence window ends at frame 470. Retain exactly its inclusive
- * 0..470 ledger while leaving work RAM for source-bound Round 1 state. */
-#define AVSP_LIVE_DIAG_SAMPLES 471
+/* The retained diagnostic historically stored frames 0..470. Four tail
+ * samples from its superseded post-route gameplay choreography are reclaimed
+ * for native startup chronology. The retained shell no longer supplies
+ * gameplay authority, so frames 467..470 cannot be an acceptance dependency. */
+#define AVSP_LIVE_DIAG_SAMPLES 467
+#define AVSP_ROUND1_STARTUP_TRACE_SAMPLES 16
+#define AVSP_ROUND1_DIAGNOSTIC_SOURCE_BASE_FRAME 2040
+#define AVSP_ROUND1_NATIVE_ENTRY_STEP_FRAME 28
 typedef struct
 {
     int frame;
@@ -520,6 +525,8 @@ typedef struct
 static AvspLiveEncounterRuntime live_encounter_runtime;
 static AvspLiveEncounterFrame live_encounter_frame;
 static AvspRound1Runtime round1_runtime;
+static int round1_retained_initialized;
+static int round1_cdda_started;
 volatile LiveEncounterDiagSample avsp_diag_live_samples[
     AVSP_LIVE_DIAG_SAMPLES];
 volatile int avsp_diag_live_sample_count;
@@ -629,6 +636,27 @@ volatile int avsp_diag_round1_player_weapon_interruptions;
 volatile int avsp_diag_round1_player_resource;
 volatile int avsp_diag_round1_player_resource_recharge;
 volatile int avsp_diag_round1_player_weapon_projectile_free;
+/* Boot-to-first-control chronology. One packed u32 per state transition:
+ *  0..3 route, 4 initialized, 5 visible, 6 P1 HUD, 7 P2 HUD,
+ *  8 control, 9 retained step, 10 contact, 11 damage, 12 PCM event,
+ *  13..16 cue id, 17..18 CDDA command, 19..20 rendered actors,
+ *  21 gameplay authority, 22..29 native frame. */
+volatile unsigned long avsp_diag_round1_startup_trace[
+    AVSP_ROUND1_STARTUP_TRACE_SAMPLES];
+volatile int avsp_diag_round1_startup_trace_count;
+volatile int avsp_diag_round1_startup_retained_initializations;
+volatile int avsp_diag_round1_startup_retained_steps;
+volatile int avsp_diag_round1_startup_retained_before_handoff;
+volatile int avsp_diag_round1_startup_p2_visible_frames;
+volatile int avsp_diag_round1_startup_hidden_contacts;
+volatile int avsp_diag_round1_startup_hidden_damage;
+volatile int avsp_diag_round1_startup_orphan_pcm;
+volatile int avsp_diag_round1_startup_cdda_starts;
+volatile int avsp_diag_round1_startup_duplicate_cdda;
+volatile int avsp_diag_round1_startup_first_pcm_frame;
+volatile int avsp_diag_round1_startup_first_pcm_trigger;
+volatile int avsp_diag_round1_startup_first_pcm_cue;
+volatile int avsp_diag_round1_startup_source_frame;
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
 static int live_autotest_phase;
 static int live_autotest_release;
@@ -4429,8 +4457,11 @@ static void update_player2_hud_textures(void)
 }
 #endif
 
-static void draw_arcade_hud(void)
+static void draw_arcade_hud_slots(const int player2_visible)
 {
+#ifndef AVSP_HUD_PCM_SALVAGE_BENCH
+    JO_UNUSED_ARG(player2_visible);
+#endif
     /* Every frontend state, including the Start transition. The transition
      * is drawn by the frontend over the title surface and the ROM shows no
      * gameplay HUD across it; reading the live VDP1 list at held transition
@@ -4448,22 +4479,25 @@ static void draw_arcade_hud(void)
         return;
     update_hud_textures();
 #ifdef AVSP_HUD_PCM_SALVAGE_BENCH
-    update_player2_hud_textures();
+    if (player2_visible) update_player2_hud_textures();
 #endif
     jo_sprite_set_palette(hud_palette.id);
     jo_sprite_draw3D(hud_top_sprite,
                      -JO_TV_WIDTH_2 + AVSP_HUD_TOP_WIDTH / 2,
                      -JO_TV_HEIGHT_2 + AVSP_HUD_TOP_HEIGHT / 2, 100);
 #ifdef AVSP_HUD_PCM_SALVAGE_BENCH
-    jo_sprite_draw3D(hud_p2_top_sprite,
-                     -JO_TV_WIDTH_2 + AVSP_HUD_P2_TOP_X +
-                         AVSP_HUD_P2_TOP_WIDTH / 2,
-                     -JO_TV_HEIGHT_2 + AVSP_HUD_P2_TOP_HEIGHT / 2, 100);
-    jo_sprite_draw3D(hud_p2_heat_sprite,
-                     -JO_TV_WIDTH_2 + AVSP_HUD_P2_HEAT_X +
-                         AVSP_HUD_P2_HEAT_WIDTH / 2,
-                     -JO_TV_HEIGHT_2 + AVSP_HUD_P2_HEAT_Y +
-                         AVSP_HUD_P2_HEAT_HEIGHT / 2, 100);
+    if (player2_visible)
+    {
+        jo_sprite_draw3D(hud_p2_top_sprite,
+                         -JO_TV_WIDTH_2 + AVSP_HUD_P2_TOP_X +
+                             AVSP_HUD_P2_TOP_WIDTH / 2,
+                         -JO_TV_HEIGHT_2 + AVSP_HUD_P2_TOP_HEIGHT / 2, 100);
+        jo_sprite_draw3D(hud_p2_heat_sprite,
+                         -JO_TV_WIDTH_2 + AVSP_HUD_P2_HEAT_X +
+                             AVSP_HUD_P2_HEAT_WIDTH / 2,
+                         -JO_TV_HEIGHT_2 + AVSP_HUD_P2_HEAT_Y +
+                             AVSP_HUD_P2_HEAT_HEIGHT / 2, 100);
+    }
 #else
     if ((world.frame & 63) < 32)
         jo_sprite_draw3D(hud_prompt_sprite,
@@ -4477,6 +4511,15 @@ static void draw_arcade_hud(void)
                          AVSP_HUD_HEAT_HEIGHT / 2, 100);
 }
 
+static void draw_arcade_hud(void)
+{
+#ifdef AVSP_HUD_PCM_SALVAGE_BENCH
+    draw_arcade_hud_slots(1);
+#else
+    draw_arcade_hud_slots(0);
+#endif
+}
+
 #ifdef AVSP_HUD_PROMOTION_BENCH
 /* Temporary legacy render adapter. The production HUD emits only semantic
  * state; this bounded adapter applies it to the already-approved Jo textures
@@ -4485,14 +4528,17 @@ static int hud_port_submit_frame(const AvspPortV2HudFrame *frame)
 {
     if (frame == JO_NULL || frame->player_count != AVSP_PORT_V2_HUD_PLAYER_COUNT)
         return 0;
-    if (!frame->players[AVSP_PORT_V2_HUD_P1].visible ||
-        !frame->players[AVSP_PORT_V2_HUD_P2].visible)
+    if (!frame->players[AVSP_PORT_V2_HUD_P1].visible)
         return frame->render_count == 0;
     world.player.health = frame->players[AVSP_PORT_V2_HUD_P1].health;
     world.weapon_energy = frame->players[AVSP_PORT_V2_HUD_P1].energy;
-    hud_pcm_bench.p2_health = frame->players[AVSP_PORT_V2_HUD_P2].health;
-    hud_pcm_bench.p2_energy = frame->players[AVSP_PORT_V2_HUD_P2].energy;
-    draw_arcade_hud();
+    if (frame->players[AVSP_PORT_V2_HUD_P2].visible)
+    {
+        hud_pcm_bench.p2_health = frame->players[AVSP_PORT_V2_HUD_P2].health;
+        hud_pcm_bench.p2_energy = frame->players[AVSP_PORT_V2_HUD_P2].energy;
+    }
+    draw_arcade_hud_slots(
+        frame->players[AVSP_PORT_V2_HUD_P2].visible);
     ++avsp_diag_hud_submit_count;
     return 1;
 }
@@ -5681,6 +5727,7 @@ static void collision_bench_frame_callback(void)
               collision_bench_state.failures);
     jo_printf(2, 18, "PHYSICAL SATURN UNRUN");
 }
+
 #endif
 
 #if defined(AVSP_PREDATOR_WARRIOR_ACTION_SALVAGE_BENCH) || \
@@ -6488,16 +6535,19 @@ static void playable_slice_draw_actors(void)
 {
     CapActor player;
     CapActor *enemy = &world.enemies[0];
+    const int player_visible = playable_slice_frame.actors.actor_count > 0;
+    const int enemy_visible = playable_slice_frame.actors.actor_count > 1;
     int rendered = 0;
     unsigned long expected_enemy_object;
     unsigned long expected_enemy_tile;
     memset(&player, 0, sizeof(player));
-    player.active = 1;
+    player.active = player_visible;
     player.kind = CAP_ACTOR_PLAYER;
     player.x = playable_slice_frame.actors.player.world_x;
     player.lane = playable_slice_frame.actors.player.lane;
 #ifdef AVSP_LIVE_ENCOUNTER
-    player.height = live_encounter_frame.player.height;
+    player.height = playable_slice_frame.scene.player_presentation_active ?
+        playable_slice_frame.scene.player_source_height : 0;
 #else
     player.height = playable_slice_runtime.player_height;
 #endif
@@ -6520,9 +6570,9 @@ static void playable_slice_draw_actors(void)
         player.action = CAP_ACT_IDLE;
     player.action_frame = playable_slice_frame.scene.player_action_frame;
     memset(enemy, 0, sizeof(*enemy));
-    enemy->active = 1;
+    enemy->active = enemy_visible;
 #ifdef AVSP_LIVE_ENCOUNTER
-    enemy->active = !live_encounter_frame.alien.removed;
+    enemy->active = enemy_visible && !live_encounter_frame.alien.removed;
 #endif
     enemy->kind = CAP_ACTOR_ALIEN;
     enemy->variant = 1;
@@ -6548,14 +6598,17 @@ static void playable_slice_draw_actors(void)
     else
         enemy->action = CAP_ACT_WALK;
     enemy->action_frame = playable_slice_frame.scene.enemy_action_frame;
+#ifndef AVSP_LIVE_ENCOUNTER
     world.encounter_started = 1;
     world.encounter_state = CAP_ENCOUNTER_WAVE_ONE;
+#endif
     world.camera_x = playable_slice_frame.scene.camera_world_x;
     rom_actor_prepare();
     jo_sprite_change_sprite_scale_xy(
         (float)CAP_VIEW_WIDTH / (float)CAP_CPS2_VIEW_WIDTH, 1.0f);
-    draw_player(&player, playable_slice_frame.scene.player_screen_x);
-    if (!playable_slice_frame.scene.player_presentation_active)
+    if (player.active)
+        draw_player(&player, playable_slice_frame.scene.player_screen_x);
+    if (player.active && !playable_slice_frame.scene.player_presentation_active)
     {
         playable_slice_frame.scene.player_identity.emitted_object_identity =
             2166136261UL ^ (unsigned long)(unsigned int)
@@ -6597,7 +6650,7 @@ static void playable_slice_draw_actors(void)
         ++playable_slice_runtime.asset_failures;
 #endif
     }
-    if (!avsp_port_v2_slice_identity_valid(
+    if (enemy->active && !avsp_port_v2_slice_identity_valid(
             &playable_slice_frame.scene.enemy_identity))
     {
 #ifdef AVSP_LIVE_ENCOUNTER
@@ -6890,14 +6943,10 @@ static void live_encounter_build_slice_frame(void)
     hud_input.players[AVSP_PORT_V2_HUD_P1].health =
         live_encounter_frame.player.health;
     hud_input.players[AVSP_PORT_V2_HUD_P1].energy = 64;
-    /* Preserve the already-approved two-player HUD shell. P2 remains a
-     * presentation-only zero-health slot; no second gameplay actor or input
-     * authority is introduced by this integration card. */
-    hud_input.players[AVSP_PORT_V2_HUD_P2].visible = 1;
-    hud_input.players[AVSP_PORT_V2_HUD_P2].character_id =
-        AVSP_PORT_V2_CHARACTER_MAJOR_SCHAEFER;
-    hud_input.players[AVSP_PORT_V2_HUD_P2].health = 0;
-    hud_input.players[AVSP_PORT_V2_HUD_P2].energy = 0;
+    /* One-player Round 1 has no P2 gameplay slot. The source PRESS START
+     * prompt is presentation and was already rejected as active-P2 evidence
+     * by the promoted HUD contract. */
+    hud_input.players[AVSP_PORT_V2_HUD_P2].visible = 0;
     avsp_port_v2_hud_build_frame(&hud_input, &playable_slice_frame.hud);
     playable_slice_frame.combat_event_count =
         (int)live_encounter_runtime.player_contacts;
@@ -6910,42 +6959,186 @@ static void live_encounter_build_slice_frame(void)
         avsp_port_v2_slice_canaries_ok(&playable_slice_runtime);
 }
 
-static int live_encounter_audio_step(void)
+static int round1_startup_player_visible(void)
+{
+    return round1_runtime.frame >= AVSP_FRONTEND_R1SCENE_POP_FRAME;
+}
+
+static int round1_startup_player_initialized(void)
+{
+    /* The native actor storage is prepared at diagnostic boot, but the source
+     * does not expose the Round 1 player body until the HUD-entry boundary.
+     * Report source initialization chronology, not C allocation chronology. */
+    return round1_runtime.frame >= AVSP_FRONTEND_R1HUD_FRAME &&
+        round1_runtime.entry.started && round1_runtime.player.state != 0u;
+}
+
+static int round1_startup_hud_visible(void)
+{
+    return round1_runtime.frame >= AVSP_FRONTEND_R1HUD_FRAME;
+}
+
+static void round1_build_startup_slice_frame(void)
+{
+    AvspPortV2CameraInput camera_input;
+    memset(&playable_slice_frame, 0, sizeof(playable_slice_frame));
+    playable_slice_frame.interface_version =
+        AVSP_PORT_V2_SLICE_INTERFACE_VERSION;
+    playable_slice_frame.ready = 1;
+    playable_slice_frame.frame = (int)round1_runtime.frame;
+    playable_slice_frame.scene.source_event_index = -1;
+    playable_slice_frame.scene.camera_world_x =
+        AVSP_LIVE_ENCOUNTER_CAMERA_LOCK_X;
+    playable_slice_frame.scene.aperture_origin_x =
+        AVSP_LIVE_ENCOUNTER_APERTURE_ORIGIN_X;
+    playable_slice_frame.scene.layer_scroll_x[0] =
+        AVSP_LIVE_ENCOUNTER_CAMERA_LOCK_X;
+    playable_slice_frame.scene.layer_scroll_x[1] =
+        AVSP_LIVE_ENCOUNTER_CAMERA_LOCK_X / 2;
+    live_encounter_identity();
+    memset(&camera_input, 0, sizeof(camera_input));
+    camera_input.scroll_x[0] = AVSP_LIVE_ENCOUNTER_CAMERA_LOCK_X;
+    camera_input.scroll_x[1] = AVSP_LIVE_ENCOUNTER_CAMERA_LOCK_X / 2;
+    avsp_port_v2_camera_step(&playable_slice_runtime.camera, &camera_input);
+    avsp_port_v2_camera_view(&playable_slice_runtime.camera,
+                             &playable_slice_frame.camera);
+    avsp_port_v2_stage_build_frame(&playable_slice_frame.camera,
+                                   &playable_slice_frame.stage);
+    playable_slice_frame.canaries_ok =
+        avsp_round1_canaries_ok(&round1_runtime) &&
+        avsp_port_v2_slice_canaries_ok(&playable_slice_runtime);
+}
+
+static void round1_apply_native_player_and_hud(const int retained_stepped)
+{
+    AvspPortV2SliceSceneTrace *scene = &playable_slice_frame.scene;
+    AvspPortV2PlayerCombatPresentation presentation;
+    AvspPortV2HudInput hud_input;
+    const int player_visible = round1_startup_player_visible();
+    const int enemy_visible = retained_stepped &&
+        !live_encounter_frame.alien.removed;
+    int source_frame;
+
+    playable_slice_frame.frame = (int)round1_runtime.frame;
+    playable_slice_frame.actors.actor_count =
+        (player_visible ? 1 : 0) + (enemy_visible ? 1 : 0);
+    playable_slice_frame.actors.render_order[0] =
+        AVSP_PORT_V2_PLAYER_ENEMY_RENDER_PLAYER;
+    playable_slice_frame.actors.render_order[1] =
+        AVSP_PORT_V2_PLAYER_ENEMY_RENDER_ENEMY;
+    playable_slice_frame.actors.render_command_count =
+        (player_visible ? 2 : 0) + (enemy_visible ? 32 : 0);
+    playable_slice_frame.actors.player.world_x = round1_runtime.player.x;
+    playable_slice_frame.actors.player.lane =
+        avsp_live_encounter_project_screen_y(round1_runtime.player.z, 0) +
+        200 - JO_TV_HEIGHT / 2 - 88;
+    playable_slice_frame.actors.player.facing =
+        avsp_pw_render_facing(round1_runtime.player.facing);
+    playable_slice_frame.actors.player.locomotion_frame =
+        (int)(round1_runtime.player_controller_updates % 39UL);
+    scene->player_world_x = round1_runtime.player.x;
+    scene->player_screen_x = (short)(round1_runtime.player.x -
+        scene->camera_world_x + AVSP_LIVE_ENCOUNTER_APERTURE_ORIGIN_X);
+    scene->player_action_frame =
+        (int)round1_runtime.player_action.action_elapsed;
+    scene->player_attack_active = round1_runtime.player_action.attack_active;
+    scene->player_presentation_active = 0;
+    scene->player_source_pose = 0;
+    scene->player_source_height = 0;
+    scene->player_identity.animation_record =
+        round1_runtime.player.animation_record;
+    if (round1_runtime.player_action.state == AVSP_PW_STATE_ATTACK)
+        scene->player_action = AVSP_PORT_V2_SLICE_ACTION_ATTACK;
+    else if (round1_runtime.player_action.state == AVSP_PW_STATE_HIT)
+        scene->player_action = AVSP_PORT_V2_SLICE_ACTION_HIT;
+    else if (round1_runtime.player_action.state == AVSP_PW_STATE_KO)
+        scene->player_action = AVSP_PORT_V2_SLICE_ACTION_KO;
+    else if (round1_runtime.player.source_action == 0x0200u ||
+             round1_runtime.player.source_action == 0x0202u)
+        scene->player_action = AVSP_PORT_V2_SLICE_ACTION_WALK;
+    else
+        playable_slice_frame.scene.player_action =
+            AVSP_PORT_V2_SLICE_ACTION_IDLE;
+    if (round1_runtime.player_action.state == AVSP_PW_STATE_ATTACK &&
+        avsp_pw_source_presentation_ready(
+            round1_runtime.player_action.selector,
+            round1_runtime.player_action.action_elapsed))
+    {
+        source_frame = (int)round1_runtime.player_action.action_elapsed -
+            (int)avsp_pw_action_defs[
+                round1_runtime.player_action.selector - 1u].presentation_first;
+        if (source_frame >= 0 && avsp_port_v2_combat_source_player_frame(
+                (int)round1_runtime.player_action.selector - 1,
+                source_frame, &presentation))
+        {
+            scene->player_presentation_active = 1;
+            scene->source_event_index =
+                (int)round1_runtime.player_action.selector - 1;
+            scene->attack_sequence_step = presentation.sequence_step;
+            scene->attack_selector = presentation.attack_selector;
+            scene->player_source_action = presentation.source_action;
+            scene->player_source_substate = presentation.source_substate;
+            scene->player_source_pose = presentation.pose_index;
+            scene->player_source_pivot_x = presentation.pivot_x;
+            scene->player_source_pivot_y = presentation.pivot_y;
+            scene->player_source_height = presentation.height;
+            scene->player_identity.animation_record =
+                presentation.source_animation_record;
+            scene->player_identity.emitted_object_identity =
+                presentation.source_object_identity;
+            scene->player_identity.emitted_tile_identity =
+                presentation.source_tile_identity;
+        }
+    }
+    if (round1_runtime.player_action.state == AVSP_PW_STATE_ATTACK &&
+        scene->player_presentation_active == 0)
+    {
+        playable_slice_frame.scene.player_action =
+            AVSP_PORT_V2_SLICE_ACTION_IDLE;
+        scene->player_action_frame = 0;
+    }
+    memset(&hud_input, 0, sizeof(hud_input));
+    hud_input.players[AVSP_PORT_V2_HUD_P1].visible =
+        round1_startup_hud_visible();
+    hud_input.players[AVSP_PORT_V2_HUD_P1].character_id =
+        AVSP_PORT_V2_CHARACTER_PREDATOR_WARRIOR;
+    hud_input.players[AVSP_PORT_V2_HUD_P1].health =
+        round1_runtime.player.health;
+    hud_input.players[AVSP_PORT_V2_HUD_P1].energy =
+        round1_runtime.player_resource;
+    hud_input.players[AVSP_PORT_V2_HUD_P2].visible = 0;
+    avsp_port_v2_hud_build_frame(&hud_input, &playable_slice_frame.hud);
+    playable_slice_frame.canaries_ok =
+        avsp_round1_canaries_ok(&round1_runtime) &&
+        avsp_port_v2_slice_canaries_ok(&playable_slice_runtime) &&
+        (!round1_retained_initialized ||
+         avsp_live_encounter_canaries_ok(&live_encounter_runtime));
+}
+
+static int live_encounter_audio_step(const int source_frame)
 {
     AvspPortV2PcmInput pcm_input;
-    AvspPortV2PcmFrame stop_frame;
     AvspPortV2CddaInput cdda_input;
     memset(&pcm_input, 0, sizeof(pcm_input));
-    pcm_input.frame = (int)live_encounter_frame.frame;
-    pcm_input.cue_event = live_encounter_frame.player_contact;
+    pcm_input.frame = (int)round1_runtime.frame;
+    /* The retained encounter contact was never source audio authority. The
+     * only resident payload is the approved melee cue, but SPEC-02 does not
+     * bind that payload to the startup player commands (0x0051/0x024e).
+     * Silence is required until an exact native command-to-payload adapter is
+     * implemented; retained contact and frame counters cannot trigger it. */
+    pcm_input.cue_event = 0;
     pcm_input.cue_id = AVSP_PORT_V2_PCM_CUE_PREDATOR_MELEE;
     /* The approved PCM core models one SCSP channel and rejects overlapping
      * ownership. Source-paced combo contacts can arrive inside its 50-frame
      * cue, so the integration boundary deterministically cuts the old cue and
      * rearms that same channel. This is explicit arbitration, not a dropped
      * sound or alternate fallback path. */
-    if (pcm_input.cue_event &&
-        (playable_slice_runtime.pcm.pending ||
-         playable_slice_runtime.pcm.active))
-    {
-        if (playable_slice_runtime.pcm.active)
-        {
-            memset(&stop_frame, 0, sizeof(stop_frame));
-            stop_frame.cue_id = AVSP_PORT_V2_PCM_CUE_PREDATOR_MELEE;
-            if (!pcm_port_stop(&stop_frame)) return 0;
-        }
-        avsp_port_v2_pcm_init(&playable_slice_runtime.pcm);
-        ++avsp_diag_live_pcm_retriggers;
-    }
     if (!avsp_port_v2_pcm_step(&playable_slice_runtime.pcm, &pcm_input,
                                &playable_slice_frame.pcm)) return 0;
     memset(&cdda_input, 0, sizeof(cdda_input));
-    /* Native Round 1 entry resets the retained encounter substrate when
-     * route state 4 enables control. Track 2 is already active at that
-     * boundary, so preserve its owner instead of issuing an invalid second
-     * START for the reset encounter frame zero. */
-    cdda_input.command = live_encounter_frame.frame == 0UL &&
-        !playable_slice_runtime.cdda.active ?
+    cdda_input.command = source_frame ==
+            AVSP_PORT_V2_CDDA_SOURCE_FRAME_STAGE1 &&
+        !round1_cdda_started ?
         AVSP_PORT_V2_CDDA_START : AVSP_PORT_V2_CDDA_NONE;
     cdda_input.track = AVSP_PORT_V2_CDDA_TRACK_STAGE1;
     cdda_input.source_frame = AVSP_PORT_V2_CDDA_SOURCE_FRAME_STAGE1;
@@ -6954,7 +7147,98 @@ static int live_encounter_audio_step(void)
     if (playable_slice_frame.cdda.start_request &&
         !avsp_port_v2_residency_cdda_started(
             &playable_slice_runtime.residency)) return 0;
+    if (playable_slice_frame.cdda.start_request)
+    {
+        if (round1_cdda_started)
+            ++avsp_diag_round1_startup_duplicate_cdda;
+        else
+        {
+            round1_cdda_started = 1;
+            ++avsp_diag_round1_startup_cdda_starts;
+        }
+    }
     return 1;
+}
+
+static void round1_record_startup_chronology(const int retained_stepped)
+{
+    const int player_initialized = round1_startup_player_initialized();
+    const int player_visible = round1_startup_player_visible();
+    const int p1_hud_visible =
+        playable_slice_frame.hud.players[AVSP_PORT_V2_HUD_P1].visible;
+    const int p2_hud_visible =
+        playable_slice_frame.hud.players[AVSP_PORT_V2_HUD_P2].visible;
+    const int control_enabled = round1_runtime.entry.control_enabled;
+    const int gameplay_authority = round1_runtime.route_state == 4;
+    const int contact = retained_stepped &&
+        (live_encounter_frame.player_contact ||
+         live_encounter_frame.alien_contact);
+    const int damage = retained_stepped &&
+        (live_encounter_frame.player_damage ||
+         live_encounter_frame.alien_damage);
+    const int pcm_event = playable_slice_frame.pcm.start_request;
+    const int pcm_cue = pcm_event ? playable_slice_frame.pcm.cue_id : 0;
+    const int cdda_command = playable_slice_frame.cdda.start_request ?
+        AVSP_PORT_V2_CDDA_START : AVSP_PORT_V2_CDDA_NONE;
+    unsigned long packed;
+
+    if (retained_stepped)
+    {
+        ++avsp_diag_round1_startup_retained_steps;
+        if (!gameplay_authority)
+            ++avsp_diag_round1_startup_retained_before_handoff;
+    }
+    if (p2_hud_visible)
+        ++avsp_diag_round1_startup_p2_visible_frames;
+    if (contact && (!gameplay_authority || !player_visible))
+        ++avsp_diag_round1_startup_hidden_contacts;
+    if (damage && (!gameplay_authority || !player_visible))
+        ++avsp_diag_round1_startup_hidden_damage;
+    if (pcm_event)
+    {
+        if (avsp_diag_round1_startup_first_pcm_frame < 0)
+        {
+            avsp_diag_round1_startup_first_pcm_frame =
+                (int)round1_runtime.frame;
+            avsp_diag_round1_startup_first_pcm_trigger = 0;
+            avsp_diag_round1_startup_first_pcm_cue = pcm_cue;
+        }
+        /* No startup PCM command is currently mapped to the approved payload.
+         * Any audible start in this profile is therefore orphaned. */
+        ++avsp_diag_round1_startup_orphan_pcm;
+    }
+    avsp_diag_round1_startup_source_frame =
+        AVSP_ROUND1_DIAGNOSTIC_SOURCE_BASE_FRAME +
+        (int)round1_runtime.frame;
+    if (avsp_diag_round1_startup_trace_count > 0 &&
+        (avsp_diag_round1_startup_trace[
+             avsp_diag_round1_startup_trace_count - 1] & (1UL << 8)) != 0UL)
+        return;
+    packed = (unsigned long)(round1_runtime.route_state & 0x0f);
+    packed |= (unsigned long)(player_initialized != 0) << 4;
+    packed |= (unsigned long)(player_visible != 0) << 5;
+    packed |= (unsigned long)(p1_hud_visible != 0) << 6;
+    packed |= (unsigned long)(p2_hud_visible != 0) << 7;
+    packed |= (unsigned long)(control_enabled != 0) << 8;
+    packed |= (unsigned long)(retained_stepped != 0) << 9;
+    packed |= (unsigned long)(contact != 0) << 10;
+    packed |= (unsigned long)(damage != 0) << 11;
+    packed |= (unsigned long)(pcm_event != 0) << 12;
+    packed |= (unsigned long)(pcm_cue & 0x0f) << 13;
+    packed |= (unsigned long)(cdda_command & 0x03) << 17;
+    packed |= (unsigned long)(playable_slice_frame.actors.actor_count & 0x03)
+        << 19;
+    packed |= (unsigned long)(gameplay_authority != 0) << 21;
+    packed |= (unsigned long)(round1_runtime.frame & 0xffUL) << 22;
+    if (avsp_diag_round1_startup_trace_count >=
+            AVSP_ROUND1_STARTUP_TRACE_SAMPLES ||
+        (avsp_diag_round1_startup_trace_count > 0 &&
+         (avsp_diag_round1_startup_trace[
+              avsp_diag_round1_startup_trace_count - 1] & 0x003fffffUL) ==
+          (packed & 0x003fffffUL)))
+        return;
+    avsp_diag_round1_startup_trace[
+        avsp_diag_round1_startup_trace_count++] = packed;
 }
 
 static void live_encounter_publish(void)
@@ -7213,9 +7497,10 @@ static void live_encounter_frame_callback(void)
     AvspPortV2PcmAudioOps pcm_operations;
     AvspPortV2CddaAudioOps cdda_operations;
     AvspPortV2HudRenderOps hud_operations;
-#ifndef AVSP_LIVE_ENCOUNTER_AUTOTEST
     int round1_route_before;
-#endif
+    int retained_stepped = 0;
+    int handoff_frame = 0;
+    int source_frame;
     if (!runtime_ready)
     {
         if (avsp_diag_live_frame_stage == 0)
@@ -7224,26 +7509,27 @@ static void live_encounter_frame_callback(void)
     }
     avsp_diag_live_frame_stage = 1;
     street_test_frame();
-#ifndef AVSP_LIVE_ENCOUNTER_AUTOTEST
     round1_route_before = round1_runtime.route_state;
-#endif
-    if (!avsp_round1_step_first_entry(&round1_runtime))
+    if (round1_runtime.frame >= AVSP_ROUND1_NATIVE_ENTRY_STEP_FRAME &&
+        !avsp_round1_step_first_entry(&round1_runtime))
     {
         avsp_diag_live_frame_stage = -8;
         runtime_ready = 0;
         return;
     }
-#ifndef AVSP_LIVE_ENCOUNTER_AUTOTEST
     if (round1_route_before != 4 && round1_runtime.route_state == 4)
     {
         avsp_live_encounter_init(&live_encounter_runtime);
         live_encounter_runtime.player.x = round1_runtime.player.x;
         live_encounter_runtime.player.lane = round1_runtime.player.z;
+        round1_retained_initialized = 1;
+        handoff_frame = 1;
+        ++avsp_diag_round1_startup_retained_initializations;
     }
-#endif
-    input.frame = live_encounter_runtime.frame;
+    memset(&input, 0, sizeof(input));
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
-    input.player_mask = live_encounter_autotest_input();
+    if (round1_runtime.route_state == 4)
+        input.player_mask = live_encounter_autotest_input();
 #else
     input.player_mask = live_encounter_real_input();
 #endif
@@ -7289,19 +7575,36 @@ static void live_encounter_frame_callback(void)
         runtime_ready = 0;
         return;
     }
-    if (!avsp_live_encounter_step(&live_encounter_runtime, &input,
-                                  &live_encounter_frame))
+    if (round1_runtime.route_state == 4 && !handoff_frame)
     {
-        avsp_diag_live_frame_stage = -2;
-        avsp_diag_live_internal_failures =
-            (int)live_encounter_runtime.failures;
-        runtime_ready = 0;
-        return;
+        /* The old encounter is now a quarantined presentation substrate. It
+         * receives the native player transform, never writes native state,
+         * and owns neither HUD nor audio. */
+        live_encounter_runtime.player.x = round1_runtime.player.x;
+        live_encounter_runtime.player.lane = round1_runtime.player.z;
+        input.frame = live_encounter_runtime.frame;
+        input.player_mask = 0u;
+        if (!avsp_live_encounter_step(&live_encounter_runtime, &input,
+                                      &live_encounter_frame))
+        {
+            avsp_diag_live_frame_stage = -2;
+            avsp_diag_live_internal_failures =
+                (int)live_encounter_runtime.failures;
+            runtime_ready = 0;
+            return;
+        }
+        retained_stepped = 1;
     }
     avsp_diag_live_frame_stage = 2;
-    live_encounter_build_slice_frame();
+    if (retained_stepped)
+        live_encounter_build_slice_frame();
+    else
+        round1_build_startup_slice_frame();
+    round1_apply_native_player_and_hud(retained_stepped);
     avsp_diag_live_frame_stage = 3;
-    if (!live_encounter_audio_step())
+    source_frame = AVSP_ROUND1_DIAGNOSTIC_SOURCE_BASE_FRAME +
+        (int)round1_runtime.frame;
+    if (!live_encounter_audio_step(source_frame))
     {
         ++live_encounter_runtime.failures;
         avsp_diag_live_frame_stage = -3;
@@ -7328,8 +7631,13 @@ static void live_encounter_frame_callback(void)
         return;
     }
     avsp_diag_live_frame_stage = 5;
+    world.encounter_timer = (int)round1_runtime.frame;
+    world.encounter_state = round1_runtime.route_state == 4 ?
+        CAP_ENCOUNTER_WAVE_ONE : CAP_ENCOUNTER_ROUND_TITLE;
     frontend_runtime.vdp1_commands_last_frame = 0;
-    if (round1_runtime.route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE)
+    if (round1_startup_player_visible())
+        playable_slice_draw_actors();
+    if (round1_runtime.frame < AVSP_FRONTEND_R1TEXT_CLEAR_FRAME)
     {
         avsp_frontend_draw_round1_text(&frontend_runtime);
         avsp_diag_round1_presentation_seen = 1;
@@ -7338,8 +7646,6 @@ static void live_encounter_frame_callback(void)
             avsp_diag_round1_presentation_commands_peak =
                 frontend_runtime.vdp1_commands_last_frame;
     }
-    else
-        playable_slice_draw_actors();
     avsp_diag_live_frame_stage = 6;
     hud_operations.submit_frame = hud_port_submit_frame;
     if (!avsp_port_v2_hud_submit(&playable_slice_frame.hud,
@@ -7353,7 +7659,9 @@ static void live_encounter_frame_callback(void)
         return;
     }
     avsp_diag_live_frame_stage = 7;
-    live_encounter_publish();
+    round1_record_startup_chronology(retained_stepped);
+    if (round1_retained_initialized)
+        live_encounter_publish();
     ++round1_runtime.frame;
     avsp_diag_runtime_ready = runtime_ready;
 }
@@ -8306,8 +8614,28 @@ void jo_main(void)
     if (runtime_ready)
         avsp_frontend_set_r1text_fade(
             &frontend_runtime, AVSP_FRONTEND_R1TEXT_FADE_ROWS - 1);
-    avsp_live_encounter_init(&live_encounter_runtime);
     avsp_round1_init(&round1_runtime);
+    round1_retained_initialized = 0;
+    round1_cdda_started = 0;
+    memset(&live_encounter_runtime, 0, sizeof(live_encounter_runtime));
+    memset(&live_encounter_frame, 0, sizeof(live_encounter_frame));
+    memset((void *)avsp_diag_round1_startup_trace, 0,
+           sizeof(avsp_diag_round1_startup_trace));
+    avsp_diag_round1_startup_trace_count = 0;
+    avsp_diag_round1_startup_retained_initializations = 0;
+    avsp_diag_round1_startup_retained_steps = 0;
+    avsp_diag_round1_startup_retained_before_handoff = 0;
+    avsp_diag_round1_startup_p2_visible_frames = 0;
+    avsp_diag_round1_startup_hidden_contacts = 0;
+    avsp_diag_round1_startup_hidden_damage = 0;
+    avsp_diag_round1_startup_orphan_pcm = 0;
+    avsp_diag_round1_startup_cdda_starts = 0;
+    avsp_diag_round1_startup_duplicate_cdda = 0;
+    avsp_diag_round1_startup_first_pcm_frame = -1;
+    avsp_diag_round1_startup_first_pcm_trigger = 0;
+    avsp_diag_round1_startup_first_pcm_cue = 0;
+    avsp_diag_round1_startup_source_frame =
+        AVSP_ROUND1_DIAGNOSTIC_SOURCE_BASE_FRAME;
     avsp_diag_live_frame_stage = 0;
     avsp_diag_live_internal_failures = 0;
     avsp_diag_live_pcm_retriggers = 0;

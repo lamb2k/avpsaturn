@@ -8,7 +8,7 @@ MAIN = (ROOT / "main.c").read_text()
 REQUIRED = (
     '#include "src/port_v2/gameplay/round1/round1.h"',
     "static AvspRound1Runtime round1_runtime;",
-    "#define AVSP_LIVE_DIAG_SAMPLES 471",
+    "#define AVSP_LIVE_DIAG_SAMPLES 467",
     "avsp_round1_init(&round1_runtime);",
     "avsp_round1_begin_first_entry(&round1_runtime);",
     "avsp_round1_step_first_entry(&round1_runtime)",
@@ -50,7 +50,24 @@ REQUIRED = (
     "round1_runtime.player_controller_updates != 2u ?",
     "round1_runtime.player_controller_updates == 30u ||",
     "round1_runtime.player_controller_updates == 161u)",
-    "live_encounter_frame.frame == 0UL &&\n        !playable_slice_runtime.cdda.active ?",
+    "#define AVSP_ROUND1_STARTUP_TRACE_SAMPLES 16",
+    "#define AVSP_ROUND1_DIAGNOSTIC_SOURCE_BASE_FRAME 2040",
+    "#define AVSP_ROUND1_NATIVE_ENTRY_STEP_FRAME 28",
+    "round1_runtime.frame >= AVSP_FRONTEND_R1HUD_FRAME",
+    "round1_runtime.frame >= AVSP_FRONTEND_R1SCENE_POP_FRAME",
+    "round1_runtime.frame >= AVSP_ROUND1_NATIVE_ENTRY_STEP_FRAME &&",
+    "hud_input.players[AVSP_PORT_V2_HUD_P2].visible = 0;",
+    "if (round1_runtime.route_state == 4 && !handoff_frame)",
+    "input.player_mask = 0u;",
+    "pcm_input.cue_event = 0;",
+    "source_frame ==\n            AVSP_PORT_V2_CDDA_SOURCE_FRAME_STAGE1",
+    "round1_record_startup_chronology(retained_stepped);",
+    "avsp_diag_round1_startup_retained_before_handoff",
+    "avsp_diag_round1_startup_p2_visible_frames",
+    "avsp_diag_round1_startup_hidden_contacts",
+    "avsp_diag_round1_startup_hidden_damage",
+    "avsp_diag_round1_startup_orphan_pcm",
+    "avsp_diag_round1_startup_duplicate_cdda",
     "avsp_frontend_load_round1_text(&frontend_runtime);",
 )
 
@@ -59,8 +76,10 @@ def accepts(body):
 
 assert accepts(MAIN)
 for token in REQUIRED[2:]:
-    assert not accepts(MAIN.replace(token, "/* suppressed Round 1 binding */", 1))
-assert "if (round1_runtime.route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE)" in MAIN
+    assert not accepts(MAIN.replace(token, "/* suppressed Round 1 binding */"))
 assert "avsp_frontend_draw_round1_text(&frontend_runtime);" in MAIN
-assert "round1_runtime.frame < AVSP_FRONTEND_R1TEXT_CLEAR_FRAME" not in MAIN
-print(f"REIMPLEMENT-13 target entry/player/scheduler/class1f/global-bounds/neutral-stop/melee/Button1 wiring: PASS ({len(REQUIRED) - 2} suppressions rejected)")
+assert "round1_runtime.frame < AVSP_FRONTEND_R1TEXT_CLEAR_FRAME" in MAIN
+assert "hud_input.players[AVSP_PORT_V2_HUD_P2].visible = 1;" not in MAIN[MAIN.index("static void live_encounter_build_slice_frame"):MAIN.index("static int round1_startup_player_visible")]
+assert "pcm_input.cue_event = live_encounter_frame.player_contact" not in MAIN
+assert "live_encounter_frame.frame == 0UL" not in MAIN
+print(f"REIMPLEMENT-13 target entry/player/scheduler/class1f/global-bounds/neutral-stop/melee/Button1/startup-authority wiring: PASS ({len(REQUIRED) - 2} suppressions rejected)")

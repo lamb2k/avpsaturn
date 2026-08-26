@@ -139,12 +139,21 @@ only by the type-24/class-0x3a impact handler and the current-state collision
 writer for attack table `0x03136a`. Fifty-one host mutations, 44 Target
 suppressions, Target, paired Emulator, Fast, Oracle, and direct frames 211/260
 inspection pass. Preserve the class-0x1F, Coffee Shop, Button3, and remaining
-class-0x05 blockers. Close only the smallest accepted-evidence gap for the
+class-0x05 blockers. The startup-authority correction binds source frames
+2040/2072/2075/2238/2520 to title, P1 HUD/player initialization, player
+visibility, control, and one Track-2 start. Retained gameplay is not initialized
+or stepped before route state 4, active P2 HUD visibility is false, retained
+contact cannot trigger gameplay PCM, and native state owns P1 HUD. Paired
+startup traces have zero hidden contact/damage, orphan PCM, duplicate CDDA,
+fallback, or failure; direct scanout review matches the source P1 top and
+weapon-meter assets. Fast, Oracle, Target, and paired Emulator pass. Close only
+the smallest accepted-evidence gap for the
 class-0x3a handler and collision writer next; if it cannot proceed, continue
 another dependency-safe first-segment blocker and return before leaving the
 segment.
 Frame 2328 remains evidence, not gameplay authority.
-Evidence: `data/reimplement13_round1_stable_entry.json`.
+Evidence: `data/reimplement13_round1_stable_entry.json` and
+`data/reimplement13_startup_authority.json`.
 
 ## Next eligible cards
 
