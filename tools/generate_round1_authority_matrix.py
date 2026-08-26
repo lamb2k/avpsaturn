@@ -9,6 +9,7 @@ COVERAGE=ROOT/'data/round1_system_coverage.yaml'
 ROUTE=ROOT/'data/oracle10_round1_route.json'
 PLAYER=ROOT/'data/oracle11_predator_warrior_authority.json'
 GLOBAL_AUDIO=ROOT/'data/oracle11_global_audio_load_release.json'
+NAVIGATION=ROOT/'data/oracle11_round1_navigation.json'
 FAMILIES=(
  'predator-warrior-player-authority','round1-navigation-terrain-camera',
  'actor-scheduler-allocation-lifecycle','round1-enemy-archetypes',
@@ -126,6 +127,27 @@ def main():
         body['exact_next_experiment']=(
           'Retain the closed global audio/load/release contract while the next '
           'dependency-safe ORACLE-11 authority family is closed.')
+    if NAVIGATION.exists():
+        navigation=json.loads(NAVIGATION.read_text(encoding='ascii'))
+        body=next(item for item in coverage['bodies']
+            if item['id']=='round1-navigation-terrain-camera')
+        body['status']=navigation['status']
+        evidence=body.setdefault('accepted_evidence',[])
+        for item in ('data/oracle11_round1_navigation.json',
+                     'data/oracle08_round1_navigation_bounds.json',
+                     'data/oracle10_round1_route.json'):
+            if item not in evidence:evidence.append(item)
+        body['counterfactual']=(
+          'two byte-identical route completions, a completing directional '
+          'perturbation, the accepted directional/obstacle controls, and the '
+          'route-wide hold/remove controls bind all source bounds, six terrain '
+          'records, four navigation bodies, obstacle response, and all 19 '
+          'camera lock/unlock runs without a guessed route guard')
+        body['exact_next_experiment']=(
+          'Retain the closed navigation/terrain/camera contract while the '
+          'Round 1 enemy-archetype family is source-closed; damage, destruction '
+          'and presentation edges of type-20 actors remain with their declared '
+          'authority families.')
     coverage['route_segment_authority_matrix']=build(coverage,route)
     coverage['spec02_closure_gate']=coverage['route_segment_authority_matrix']['closure_gate']
     COVERAGE.write_bytes((json.dumps(coverage,sort_keys=True,indent=2)+'\n').encode('ascii'))

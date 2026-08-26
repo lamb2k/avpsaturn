@@ -26,23 +26,23 @@ player-origin audio edges across 47 state/action/substate contexts. Preserve:
 `data/oracle11_predator_player_audio.json` and
 `data/oracle11_predator_warrior_authority.json`.
 
-Global gameplay-audio/load/release is `SOURCE_CLOSED`. The main queue drain,
-audio ingress, dispatcher/909-entry table/handlers, and grouped QSound effects
-are closed in `data/oracle11_global_audio_load_release.json` and
-`data/oracle11_global_audio_handlers.json`. All 1,161 commands, 72 identities,
-and handler paths are bound with zero orphans; individual bus writes are not
-logical events. All 175 non-player groups are now source-closed to live owner
-contexts, 50 callers, guards, and command controls. All four load/release
-boundaries now bind route guards, exact callers, package identities,
-destinations, legal windows, results, and suppressions in
-`data/oracle11_global_load_release_boundaries.json`, with zero family orphans.
-Next close Round 1 navigation, terrain, obstacles, destructibles, and camera
-bounds from the existing matrix backlog.
+Global gameplay-audio/load/release is `SOURCE_CLOSED`. All 1,161 commands, 72
+identities, 175 non-player trigger groups, and four load/release boundaries are
+bound with zero family orphans. Individual QSound bus writes remain grouped by
+their owning command/handler transaction.
+
+Round 1 navigation/terrain/obstacle/camera authority is `SOURCE_CLOSED` in
+`data/oracle11_round1_navigation.json`: two byte-identical completions and a
+completing directional perturbation bind `0x01b000` bounds, six source terrain
+records, four type-20 navigation bodies, obstacle response, and all 19 camera
+lock/unlock runs. Type-20 damage/destruction and presentation remain assigned
+to their existing families. Next source-close the Round 1 enemy-archetype
+family, beginning with full-route class-`0x1f`, then classes `0x00`, `0x01`,
+and boss `0x06`.
 The sole route-segment x authority-family matrix and SPEC-02 zero-gap gate
 remain in `data/round1_system_coverage.yaml`.
 
-Continue the same ORACLE-11 card and Goal from
-`cde8cea67fe4fed69f6511d0df30a221a4a72b93`. Do not activate SPEC-02
+Continue the same ORACLE-11 card and Goal. Do not activate SPEC-02
 until every completion-route authority is closed or narrowly adapted with
 mutation controls. Do not write production runtime, infer USER-09 approval,
 activate SALVAGE-08 before explicit USER-10 acceptance, or advance physical

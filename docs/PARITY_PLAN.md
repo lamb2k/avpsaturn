@@ -165,7 +165,7 @@ completion captures plus one causal suppression for each of 38 distinct
 player-origin caller/command edges close the player-to-shared-dispatch boundary
 without changing score, health, damage, resource, projectile, or route state.
 Predator Warrior is now `SOURCE_CLOSED`. The global gameplay-audio/load/release
-family remains open. Its first global subcheckpoint source-closes the data-independent
+family is also `SOURCE_CLOSED`. Its first global subcheckpoint source-closes the data-independent
 main-CPU queue drain to QSound shared RAM across all 1,161 captured route
 transactions. Two additional byte-identical captures source-close the
 audio-CPU 16-byte shared-command ingress and its guarded low/high/register
@@ -184,8 +184,15 @@ boundaries, including route guards, exact callers, package identities,
 destination ownership, legal windows, completion/failure state, and next route
 state. Global gameplay-audio/load/release is now `SOURCE_CLOSED` with zero
 orphan triggers, commands, handlers, QSound transactions, or load callers. The
-generated 94 x 10
-matrix remains ineligible with 291 required `OBSERVED`, 276 required `PARTIAL`,
+Round 1 navigation/terrain/obstacle/camera family is now `SOURCE_CLOSED` from
+two byte-identical completions, one completing directional perturbation, and
+the accepted route-wide counterfactuals. Source routines bind every observed
+dynamic bound run, all six route-reachable terrain records, four type-20
+navigation bodies, obstacle response, and all 19 camera lock/unlock runs. No
+guessed x-only, kill-count, or fixed-frame camera guard is admitted. Type-20
+damage/destruction and presentation edges remain in their declared families.
+The generated 94 x 10 matrix remains ineligible with 291 required `OBSERVED`,
+182 required `PARTIAL`,
 zero required `UNKNOWN`, 18 unmapped actor
 class/type pairs, 94 unmapped route edges, 1,517 orphan authoritative writers,
 and unowned audio/damage/load/release/RNG/spawn counts of

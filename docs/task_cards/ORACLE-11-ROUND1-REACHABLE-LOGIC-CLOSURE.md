@@ -144,6 +144,21 @@ card only for a genuinely independent body or source-evidence hard stop.
   transactions, route guards, packages, destinations, legal windows, or load
   callers. No semantic sound or package names are inferred, and the packed-BCD
   score routines remain rejected as audio owners.
+- `round1-navigation-terrain-obstacle-camera`: `SOURCE_CLOSED`. Two independently
+  launched route completions are byte-identical and a post-frame-4200
+  Up/Down perturbation completes Round 1 while discriminating navigation state.
+  The source `0x01b000..0x01b05e` global-bound routine, signed A5 bound fields,
+  every captured bound run, `0x0b1baa..0x0b1c70` terrain resolver, all six
+  route-reachable terrain records, record-type-20 scheduler ownership, four
+  type-20 navigation bodies, `0x01d930..0x01d99a` minimum-penetration obstacle
+  response, `0xff8032` camera target, exact writer/call chains, and all 19
+  route camera lock/unlock runs are bound in
+  `data/oracle11_round1_navigation.json`. ORACLE-08 directional and obstacle
+  removals plus ORACLE-10 hold-navigation/remove-navigation-body completions
+  remain accepted counterfactuals. No guessed x-only, kill-count, or fixed-frame
+  camera guard is admitted. Type-20 damage, destruction, pickup/hazard, and
+  presentation edges remain explicitly assigned to their existing families;
+  the navigation checkpoint does not silently close those actor edges.
 
 ## Owned paths
 

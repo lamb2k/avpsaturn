@@ -16,6 +16,7 @@ local suppress_a6 = tonumber(os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_A6")
 local suppress_return0 = tonumber(os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_RETURN0") or "")
 local suppress_limit = tonumber(os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_LIMIT") or "") or 1
 local compact_qsound = os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_COMPACT_QSOUND") == "1"
+local navigation_perturb = os.getenv("AVSP_ORACLE11_NAVIGATION_PERTURB") == "1"
 
 local in0 = machine.ioport.ports[":IN0"].fields
 local in2 = machine.ioport.ports[":IN2"].fields
@@ -59,7 +60,7 @@ end
 local function schedule(f)
     local word = 0
     local coin_on, start_on, right_on = false, false, false
-    local gun_on, attack_on, jump_on = false, false, false
+    local gun_on, attack_on, jump_on, up_on, down_on = false, false, false, false, false
     if f <= 4200 then
         coin_on = f >= 1200 and f <= 2400 and (f - 1200) % 180 < 3
         start_on = f >= 1200 and f <= 2400 and
@@ -77,6 +78,10 @@ local function schedule(f)
         gun_on = r % 45 < 7
         attack_on = r % 180 < 8
         jump_on = r % 240 < 8
+        if navigation_perturb then
+            up_on = r % 480 >= 120 and r % 480 < 180
+            down_on = r % 480 >= 360 and r % 480 < 420
+        end
     end
     word = drive(coin, coin_on, 1, word)
     word = drive(start, start_on, 2, word)
@@ -85,8 +90,8 @@ local function schedule(f)
     word = drive(gun, gun_on, 16, word)
     word = drive(attack, attack_on, 32, word)
     word = drive(jump, jump_on, 64, word)
-    word = drive(up, false, 128, word)
-    word = drive(down, false, 256, word)
+    word = drive(up, up_on, 128, word)
+    word = drive(down, down_on, 256, word)
     return word
 end
 
