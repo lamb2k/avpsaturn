@@ -14,6 +14,7 @@ ENEMIES=ROOT/'data/oracle11_round1_enemy_archetypes.json'
 AUXILIARY=ROOT/'data/oracle11_round1_auxiliary_authority.json'
 ENCOUNTERS=ROOT/'data/oracle11_round1_encounter_route_authority.json'
 BOSS=ROOT/'data/oracle11_round1_boss_orchestration.json'
+HANDOFF=ROOT/'data/oracle11_round1_handoff.json'
 FAMILIES=(
  'predator-warrior-player-authority','round1-navigation-terrain-camera',
  'actor-scheduler-allocation-lifecycle','round1-enemy-archetypes',
@@ -53,6 +54,9 @@ def build(coverage,route):
             closed_route_segments.update(
                 item['route_segment'] for item in encounter_report['segment_bindings']
                 if item['classification']=='SOURCE_CLOSED')
+    handoff_report=None
+    if HANDOFF.exists():
+        handoff_report=json.loads(HANDOFF.read_text(encoding='ascii'))
     bodies={x['id']:x for x in coverage['bodies']}
     if 'rng-consumption' not in bodies:
         bodies['rng-consumption']={'status':'OBSERVED','accepted_evidence':['data/oracle10_round1_route.json']}
@@ -104,6 +108,8 @@ def build(coverage,route):
         writer_pcs.difference_update(auxiliary_report['owned_authoritative_writer_pcs'])
     if encounter_report and encounter_report['status']=='SOURCE_CLOSED':
         writer_pcs.difference_update(encounter_report['owned_authoritative_writer_pcs'])
+    if handoff_report and handoff_report['status']=='SOURCE_CLOSED':
+        writer_pcs.difference_update(handoff_report['owned_authoritative_writer_pcs'])
     events={
       'spawn':len(unmapped_pairs),'damage':1 if counts['PARTIAL'] else 0,
       'audio':len(route['audio_change_frames']) if bodies[FAMILIES[8]]['status']!='SOURCE_CLOSED' else 0,
@@ -258,6 +264,27 @@ def main():
         body['exact_next_experiment']=(
           'Retain the closed boss actor/controller/clear contract while stage '
           'clear, results and the stable Round 2 handoff are source-closed.')
+    if HANDOFF.exists():
+        handoff=json.loads(HANDOFF.read_text(encoding='ascii'))
+        body=next(item for item in coverage['bodies']
+            if item['id']=='stage-clear-failure-continue-round2-handoff')
+        body['status']=handoff['status']
+        evidence=body.setdefault('accepted_evidence',[])
+        for item in ('data/oracle11_round1_handoff.json',
+                     'data/oracle11_round1_boss_orchestration.json',
+                     'data/oracle11_predator_warrior_authority.json',
+                     'data/oracle11_global_load_release_boundaries.json'):
+            if item not in evidence:evidence.append(item)
+        body['counterfactual']=(
+          'two byte-identical completions bind the three source stage-clear '
+          'player phases, all four post-clear route edges, the accepted '
+          'failure/continue branch and four load/release boundaries; the '
+          'completing perturbations reach stable Round 2 while exact clear '
+          'suppression, class-0x06 removal and no-continue controls cannot')
+        body['exact_next_experiment']=(
+          'Retain the closed Round 1 clear and stable Round 2 handoff while '
+          'route-wide global RNG algorithm, caller ownership and exact '
+          'consumption order are source-closed.')
     coverage['route_segment_authority_matrix']=build(coverage,route)
     coverage['spec02_closure_gate']=coverage['route_segment_authority_matrix']['closure_gate']
     COVERAGE.write_bytes((json.dumps(coverage,sort_keys=True,indent=2)+'\n').encode('ascii'))

@@ -206,20 +206,21 @@ byte-identical completions bind all 94 route segments, 14 route-state edges,
 609 route-writer transactions, 451 route-writer PCs, and 56 enemy spawns. The
 accepted route perturbation and four targeted offense/class-removal controls
 leave zero orphan route edges, route writers, or enemy spawns and reject
-fixed-frame or actor-count clear substitutes. The generated 94 x 10 matrix
-remains ineligible with 203 required `OBSERVED`, zero required `PARTIAL`, zero
-required `UNKNOWN`, zero unmapped actor class/type pairs, zero unmapped route
-edges, 379 orphan authoritative writers, and unowned
-audio/damage/load/release/RNG/spawn counts of 0/0/0/0/1,023/0. Round 1 boss
+fixed-frame or actor-count clear substitutes. Round 1 boss
 orchestration is now also `SOURCE_CLOSED`: two byte-identical completions bind
 the class-`0x06` actor to 11 controller phases, eight exact boss-room spawns,
 216 boss RNG calls, and the terminal `0xff81f3` clear writer. Suppressing that
 single source write holds the defeated boss route in Round 1; removing
-class-`0x06` also cannot fabricate completion. The matrix now has 117 required
+class-`0x06` also cannot fabricate completion. Stage-clear/failure/continue and
+the stable Round 2 handoff are `SOURCE_CLOSED`: the three player stage-clear
+phases and four route edges `4->6->0->2->4` are bound to source guards and
+writers, the four accepted load/release boundaries retain ownership, and the
+capture continues under interactive Round 2 state. Presentation labels and
+fixed frames are not authoritative. The matrix now has 23 required
 `OBSERVED`, zero required `PARTIAL` or `UNKNOWN`, zero unmapped pairs or route
-edges, 379 orphan writers, and the same sole 1,023-frame RNG event backlog.
-ORACLE-11 remains active; stage clear/results/Round 2 handoff is the exact next
-family and SPEC-02 remains ineligible.
+edges, 374 orphan writers, and the same sole 1,023-frame RNG event backlog.
+ORACLE-11 remains active; global RNG and exact writer reconciliation are next,
+and SPEC-02 remains ineligible.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

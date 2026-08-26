@@ -215,6 +215,18 @@ card only for a genuinely independent body or source-evidence hard stop.
   `data/oracle11_round1_boss_orchestration.json`. Post-clear results and the
   stable Round 2 handoff remain separate, as does route-wide global RNG
   ownership.
+- `round1-stage-clear-failure-continue-round2-handoff`: `SOURCE_CLOSED`. Two
+  byte-identical completion captures bind player action phases `0x1000`,
+  `0x1002`, and `0x1004`, consume the accepted failure/continue and boss-clear
+  edges, and source-bind the four route transitions `4->6->0->2->4`. The
+  class-`0x03` intermission controller is retained only as a presentation
+  dependency; no presentation label or fixed frame is a route guard. The four
+  global load/release boundaries remain owned by their accepted family, and
+  the evidence reaches interactive route state `4` in Round 2 and continues
+  through frame 18,000. Exact clear suppression, class-`0x06` removal, and the
+  no-continue route cannot fabricate completion. Evidence is in
+  `data/oracle11_round1_handoff.json`. Global RNG ownership and the remaining
+  authoritative-writer reconciliation are the next active ORACLE-11 body.
 
 ## Owned paths
 

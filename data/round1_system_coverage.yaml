@@ -88,12 +88,16 @@
     {
       "accepted_evidence": [
         "data/oracle11_predator_hitko_continue.json",
-        "data/round1_route_census.json"
+        "data/round1_route_census.json",
+        "data/oracle11_round1_handoff.json",
+        "data/oracle11_round1_boss_orchestration.json",
+        "data/oracle11_predator_warrior_authority.json",
+        "data/oracle11_global_load_release_boundaries.json"
       ],
-      "counterfactual": "Predator Warrior lethal KO, failure state, packed-BCD credit debit, credited Start, gameplay-button confirmation, respawn initialization and return-to-control are source-closed; boss-clear and Round 2 handoff controls remain pending",
-      "exact_next_experiment": "Retain the closed player failure/continue contract while binding boss-clear, Round 2 title/load, and first stable Round 2 gameplay state.",
+      "counterfactual": "two byte-identical completions bind the three source stage-clear player phases, all four post-clear route edges, the accepted failure/continue branch and four load/release boundaries; the completing perturbations reach stable Round 2 while exact clear suppression, class-0x06 removal and no-continue controls cannot",
+      "exact_next_experiment": "Retain the closed Round 1 clear and stable Round 2 handoff while route-wide global RNG algorithm, caller ownership and exact consumption order are source-closed.",
       "id": "stage-clear-failure-continue-round2-handoff",
-      "status": "OBSERVED"
+      "status": "SOURCE_CLOSED"
     },
     {
       "accepted_evidence": [
@@ -806,8 +810,8 @@
     ],
     "cell_count": 940,
     "closure_gate": {
-      "orphan_authoritative_writers": 379,
-      "required_observed": 117,
+      "orphan_authoritative_writers": 374,
+      "required_observed": 23,
       "required_partial": 0,
       "required_unknown": 0,
       "spec02_eligible": false,
@@ -971,7 +975,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -981,10 +985,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -1171,7 +1179,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1181,10 +1189,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -1371,7 +1383,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1381,10 +1393,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -1571,7 +1587,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1581,10 +1597,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -1771,7 +1791,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1781,10 +1801,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -1971,7 +1995,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1981,10 +2005,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -2171,7 +2199,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2181,10 +2209,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -2371,7 +2403,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2381,10 +2413,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -2571,7 +2607,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2581,10 +2617,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -2771,7 +2811,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2781,10 +2821,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -2971,7 +3015,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2981,10 +3025,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -3171,7 +3219,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3181,10 +3229,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -3371,7 +3423,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3381,10 +3433,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -3571,7 +3627,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3581,10 +3637,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -3771,7 +3831,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3781,10 +3841,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -3971,7 +4035,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3981,10 +4045,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -4171,7 +4239,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4181,10 +4249,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -4371,7 +4443,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4381,10 +4453,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -4571,7 +4647,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4581,10 +4657,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -4771,7 +4851,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4781,10 +4861,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -4971,7 +5055,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4981,10 +5065,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -5171,7 +5259,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5181,10 +5269,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -5371,7 +5463,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5381,10 +5473,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -5571,7 +5667,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5581,10 +5677,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -5771,7 +5871,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5781,10 +5881,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -5971,7 +6075,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5981,10 +6085,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -6171,7 +6279,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6181,10 +6289,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -6371,7 +6483,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6381,10 +6493,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -6571,7 +6687,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6581,10 +6697,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -6771,7 +6891,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6781,10 +6901,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -6971,7 +7095,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6981,10 +7105,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -7171,7 +7299,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7181,10 +7309,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -7371,7 +7503,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7381,10 +7513,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -7571,7 +7707,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7581,10 +7717,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -7771,7 +7911,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7781,10 +7921,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -7971,7 +8115,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7981,10 +8125,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -8171,7 +8319,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8181,10 +8329,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -8371,7 +8523,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8381,10 +8533,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -8571,7 +8727,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8581,10 +8737,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -8771,7 +8931,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8781,10 +8941,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -8971,7 +9135,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8981,10 +9145,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -9171,7 +9339,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9181,10 +9349,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -9371,7 +9543,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9381,10 +9553,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -9571,7 +9747,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9581,10 +9757,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -9771,7 +9951,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9781,10 +9961,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -9971,7 +10155,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9981,10 +10165,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -10171,7 +10359,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10181,10 +10369,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -10371,7 +10563,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10381,10 +10573,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -10571,7 +10767,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10581,10 +10777,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -10771,7 +10971,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10781,10 +10981,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -10971,7 +11175,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10981,10 +11185,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -11171,7 +11379,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11181,10 +11389,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -11371,7 +11583,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11381,10 +11593,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -11571,7 +11787,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11581,10 +11797,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -11771,7 +11991,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11781,10 +12001,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -11971,7 +12195,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11981,10 +12205,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -12171,7 +12399,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12181,10 +12409,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -12371,7 +12603,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12381,10 +12613,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -12571,7 +12807,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12581,10 +12817,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -12771,7 +13011,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12781,10 +13021,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -12971,7 +13215,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12981,10 +13225,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -13171,7 +13419,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13181,10 +13429,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -13371,7 +13623,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13381,10 +13633,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -13571,7 +13827,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13581,10 +13837,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -13771,7 +14031,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13781,10 +14041,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -13971,7 +14235,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13981,10 +14245,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -14171,7 +14439,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14181,10 +14449,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -14371,7 +14643,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14381,10 +14653,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -14571,7 +14847,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14581,10 +14857,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -14771,7 +15051,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14781,10 +15061,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -14971,7 +15255,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14981,10 +15265,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -15171,7 +15459,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15181,10 +15469,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -15371,7 +15663,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15381,10 +15673,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -15571,7 +15867,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15581,10 +15877,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -15771,7 +16071,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15781,10 +16081,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -15971,7 +16275,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15981,10 +16285,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -16171,7 +16479,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16181,10 +16489,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -16371,7 +16683,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16381,10 +16693,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -16571,7 +16887,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16581,10 +16897,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -16771,7 +17091,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16781,10 +17101,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -16971,7 +17295,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16981,10 +17305,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -17171,7 +17499,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17181,10 +17509,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -17371,7 +17703,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17381,10 +17713,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -17571,7 +17907,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17581,10 +17917,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -17771,7 +18111,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17781,10 +18121,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -17971,7 +18315,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17981,10 +18325,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -18171,7 +18519,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -18181,10 +18529,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -18371,7 +18723,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -18381,10 +18733,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -18571,7 +18927,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -18581,10 +18937,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -18771,7 +19131,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -18781,10 +19141,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -18971,7 +19335,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -18981,10 +19345,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -19171,7 +19539,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -19181,10 +19549,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -19371,7 +19743,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -19381,10 +19753,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -19571,7 +19947,7 @@
           },
           {
             "authority_family": "stage-clear-failure-continue-round2-handoff",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -19581,10 +19957,14 @@
             ],
             "evidence": [
               "data/oracle11_predator_hitko_continue.json",
-              "data/round1_route_census.json"
+              "data/round1_route_census.json",
+              "data/oracle11_round1_handoff.json",
+              "data/oracle11_round1_boss_orchestration.json",
+              "data/oracle11_predator_warrior_authority.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "gameplay-audio-load-release",
@@ -19678,8 +20058,8 @@
   "schema": "round1-system-coverage-v1",
   "source_set": "avspu",
   "spec02_closure_gate": {
-    "orphan_authoritative_writers": 379,
-    "required_observed": 117,
+    "orphan_authoritative_writers": 374,
+    "required_observed": 23,
     "required_partial": 0,
     "required_unknown": 0,
     "spec02_eligible": false,

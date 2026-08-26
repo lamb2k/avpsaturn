@@ -1,0 +1,295 @@
+{
+  "accepted_incoming_edges": {
+    "boss_clear": "data/oracle11_round1_boss_orchestration.json",
+    "classifications": "SOURCE_CLOSED_CONSUMED_NOT_REOPENED",
+    "failure_continue_respawn_return": "data/oracle11_predator_warrior_authority.json",
+    "load_release": "data/oracle11_global_load_release_boundaries.json"
+  },
+  "capture_identity": {
+    "byte_identical": true,
+    "completion_a": {
+      "files": {
+        "dispatches.tsv": "c91d625b8bf722ba4ad753424e08ebd12d7ec7bc2db3671c28087edd46bc541d",
+        "handoff_samples.tsv": "f96ac6106f9f85675d2df9fe06407b0b0e5624bbb1a83d663f967e227e20e31c",
+        "handoff_writes.tsv": "9aad6c3910dc7b6222f02982a2571ebbeb4f0433dd32ff0aa20504338a41c19c",
+        "projectiles.tsv": "8d0a3fd6a17d4f8ee43955459e4e3029b38abbc4740e4d772514d29826fa0c9a",
+        "result.tsv": "159975ff816f83ceab41bcd697e809cab4316b323af72a64d80ccacd22ce863e",
+        "samples.tsv": "06d9a7a97dea8e994f0b13f99897ff312f1774e7ff55b06104a94d675f3187c5",
+        "score_writes.tsv": "886b82eb65b9ad51741fd4d94e8a8d13a2b45316f42dad4ff5640c63847b6939"
+      },
+      "mame_sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
+      "manifest_sha256": "4ef31439c5ad3aafcf05a6012f47d574a4b0d52d5ace981aebf0c91301865aee",
+      "nvram_baseline_sha256": "35720ff0054bb7ba233da6d00ccbe92473c8a87e2c53c134c83ac2721f7d0ebf",
+      "variant": "baseline"
+    },
+    "completion_b": {
+      "files": {
+        "dispatches.tsv": "c91d625b8bf722ba4ad753424e08ebd12d7ec7bc2db3671c28087edd46bc541d",
+        "handoff_samples.tsv": "f96ac6106f9f85675d2df9fe06407b0b0e5624bbb1a83d663f967e227e20e31c",
+        "handoff_writes.tsv": "9aad6c3910dc7b6222f02982a2571ebbeb4f0433dd32ff0aa20504338a41c19c",
+        "projectiles.tsv": "8d0a3fd6a17d4f8ee43955459e4e3029b38abbc4740e4d772514d29826fa0c9a",
+        "result.tsv": "159975ff816f83ceab41bcd697e809cab4316b323af72a64d80ccacd22ce863e",
+        "samples.tsv": "06d9a7a97dea8e994f0b13f99897ff312f1774e7ff55b06104a94d675f3187c5",
+        "score_writes.tsv": "886b82eb65b9ad51741fd4d94e8a8d13a2b45316f42dad4ff5640c63847b6939"
+      },
+      "mame_sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
+      "manifest_sha256": "4ef31439c5ad3aafcf05a6012f47d574a4b0d52d5ace981aebf0c91301865aee",
+      "nvram_baseline_sha256": "35720ff0054bb7ba233da6d00ccbe92473c8a87e2c53c134c83ac2721f7d0ebf",
+      "variant": "baseline"
+    },
+    "opcode_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
+    "sample_rows": 4101,
+    "write_rows": 69260
+  },
+  "counterfactuals": {
+    "no_continue_completes": false,
+    "remove_class_06_completes": false,
+    "route_perturbed_completes": true,
+    "suppress_boss_offense_completes": true,
+    "suppress_exact_clear_writer_completes": false,
+    "suppressed_clear_holds_round1_through_frame": 18000
+  },
+  "coverage": {
+    "fixed_frame_authorities": 0,
+    "handoff_route_edges_closed": 4,
+    "handoff_route_edges_required": 4,
+    "load_release_boundaries_consumed": 4,
+    "orphan_handoff_route_edges": 0,
+    "orphan_handoff_writers": 0,
+    "orphan_load_release_events": 0,
+    "orphan_stage_clear_phases": 0,
+    "presentation_label_authorities": 0,
+    "stage_clear_phases_closed": 3,
+    "stage_clear_phases_required": 3
+  },
+  "load_release_ownership": {
+    "boundaries": 4,
+    "classification": "SOURCE_CLOSED_CONSUMED_NOT_REOPENED",
+    "contract": "data/oracle11_global_load_release_boundaries.json",
+    "legal_round1_read_window_last_frame": 15193,
+    "new_unowned_events": 0
+  },
+  "owned_authoritative_writer_pcs": [
+    "0x00188c",
+    "0x003c28",
+    "0x0083a6",
+    "0x0083d4",
+    "0x0083dc",
+    "0x008418",
+    "0x00c37a",
+    "0x00c886",
+    "0x019bb4",
+    "0x019bfa",
+    "0x01a3fa",
+    "0x01b60c",
+    "0x028ea2"
+  ],
+  "protected_boundaries": {
+    "physical_saturn": "UNRUN",
+    "predator_warrior": "SOURCE_CLOSED",
+    "production_runtime_writes": 0,
+    "spec02_active": false,
+    "user09": "CHANGES_REQUESTED",
+    "yaba_runs": 0
+  },
+  "round2_handoff": {
+    "classification": "SOURCE_CLOSED",
+    "continued_capture_through_frame": 18000,
+    "fixed_frame_substitute": false,
+    "live_route_state": {
+      "frame": 15332,
+      "player_action": "0x0000",
+      "player_state": "0x0200",
+      "route_state": 4
+    },
+    "presentation_label_used_as_guard": false,
+    "round2_controller": {
+      "authority": "presentation dependency only",
+      "class": "0x03",
+      "frames": [
+        15193,
+        15194,
+        15195
+      ],
+      "record": "0xffd180",
+      "states": [
+        "0x0200",
+        "0x0202",
+        "0x0204"
+      ]
+    },
+    "stable_round2_route_state": 4,
+    "stable_round2_signature_frame": 16425
+  },
+  "route_edges": [
+    {
+      "classification": "SOURCE_CLOSED",
+      "from": 4,
+      "guard": "u8(0xff81f3) != 0",
+      "reads": [
+        "0xff81f3:u8"
+      ],
+      "source_frame": 15018,
+      "source_window": {
+        "first": "0x008400",
+        "last_exclusive": "0x008428",
+        "sha256": "3b8411569daae07b77f9ebef657d299d5deb984722c16dabea8b2f0cad6e2189"
+      },
+      "tap_pc": "0x008418",
+      "to": 6,
+      "visible_frame": 15019,
+      "writer": "0x008410 move.w #6,0x08(A5)",
+      "writes": [
+        "0xff8008:u16=6"
+      ]
+    },
+    {
+      "classification": "SOURCE_CLOSED",
+      "from": 6,
+      "guard": "round-index second transition body",
+      "reads": [
+        "route transition dispatch"
+      ],
+      "source_frame": 15020,
+      "source_window": {
+        "first": "0x00c86e",
+        "last_exclusive": "0x00c896",
+        "sha256": "22e493466c292377c059950b77fd517c8863a3e8e149568f4a44af4d0ee94c02"
+      },
+      "tap_pc": "0x00c886",
+      "to": 0,
+      "visible_frame": 15021,
+      "writer": "0x00c880 clr.w 0x08(A5)",
+      "writes": [
+        "0xff8008:u16=0"
+      ]
+    },
+    {
+      "classification": "SOURCE_CLOSED",
+      "from": 0,
+      "guard": "s16(0xff837c) == 0",
+      "reads": [
+        "0xff837c:s16"
+      ],
+      "source_frame": 15088,
+      "source_window": {
+        "first": "0x0083bc",
+        "last_exclusive": "0x0083e4",
+        "sha256": "335a3f3ecf8c29ed8659930ba404b978649af1d9f70b5940bfb2fe5f8b9be9d1"
+      },
+      "tap_pc": "0x0083d4",
+      "to": 2,
+      "visible_frame": 15089,
+      "writer": "0x0083ce addq.w #2,0x08(A5)",
+      "writes": [
+        "0xff8008:u16=2"
+      ]
+    },
+    {
+      "classification": "SOURCE_CLOSED",
+      "from": 2,
+      "guard": "u8(0xff8236) & u8(0xff81af) == 0",
+      "reads": [
+        "0xff8236:u8",
+        "0xff81af:u8"
+      ],
+      "source_frame": 15331,
+      "source_window": {
+        "first": "0x00c362",
+        "last_exclusive": "0x00c38a",
+        "sha256": "75ace474b6862f2bcb44edc8bc4032a670bb9e908b4e9ef6732708fe17162bc0"
+      },
+      "tap_pc": "0x00c37a",
+      "to": 4,
+      "visible_frame": 15332,
+      "writer": "0x00c374 addq.w #2,0x08(A5)",
+      "writes": [
+        "0xff8008:u16=4"
+      ]
+    }
+  ],
+  "schema": "oracle11-round1-stage-clear-handoff-v1",
+  "scope": "Round 1 stage-clear player phases, accepted failure/continue, post-clear route reset, intermission ownership, Round 2 route entry and first stable return to interactive control",
+  "scope_boundary": {
+    "global_rng_ownership": "PENDING_GLOBAL_RNG_FAMILY",
+    "stage_clear_and_round2_handoff": "SOURCE_CLOSED"
+  },
+  "stage_clear_player_action": {
+    "classification": "SOURCE_CLOSED",
+    "entry_guard": "controller state 0x020a/substate 0x0200 dispatches the source stage-clear action initializer",
+    "phases": [
+      "0x1000",
+      "0x1002",
+      "0x1004"
+    ],
+    "record": "0xff8380",
+    "state": "0x0200",
+    "timeline_frames": [
+      14355,
+      14356,
+      14357
+    ],
+    "writers": [
+      {
+        "classification": "SOURCE_CLOSED",
+        "source_window": {
+          "first": "0x01b5f4",
+          "last_exclusive": "0x01b61c",
+          "sha256": "890518681c2d0c47e342b357b8cc3eaad397331ff2e03c36879163132e471ce4"
+        },
+        "source_writer": "0x01b604 move.l #0x02001000,0x04(A6)",
+        "tap_pc": "0x01b60c",
+        "writes": [
+          "player state:u16=0x0200",
+          "player action:u16=0x1000"
+        ]
+      },
+      {
+        "classification": "SOURCE_CLOSED",
+        "source_window": {
+          "first": "0x019b9c",
+          "last_exclusive": "0x019bc4",
+          "sha256": "5d95ab12a6b7c0066740036cf958aa4edb0d68e61450839196dac7f6633b1dac"
+        },
+        "source_writer": "stage-clear action dispatch increments low phase byte",
+        "tap_pc": "0x019bb4",
+        "writes": [
+          "player action:u16=0x1002"
+        ]
+      },
+      {
+        "classification": "SOURCE_CLOSED",
+        "source_window": {
+          "first": "0x019be2",
+          "last_exclusive": "0x019c0a",
+          "sha256": "d9ecfee34862500031a97fb61487369eb096bedee8dac97f63ee249db1d6e47d"
+        },
+        "source_writer": "0x019bf4 addq.b #2,0x07(A6)",
+        "tap_pc": "0x019bfa",
+        "writes": [
+          "player action:u16=0x1004"
+        ]
+      }
+    ]
+  },
+  "status": "SOURCE_CLOSED",
+  "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE",
+  "transition_countdown": {
+    "classification": "SOURCE_CLOSED",
+    "decrement": {
+      "first_frame": 15062,
+      "last_frame": 15077,
+      "source_writer": "0x001886 subq.w #1,0x037c(A5)",
+      "tap_pc": "0x00188c",
+      "values": [
+        15,
+        0
+      ]
+    },
+    "initialization": {
+      "frame": 15061,
+      "tap_pc": "0x003c28",
+      "value": 16
+    }
+  }
+}

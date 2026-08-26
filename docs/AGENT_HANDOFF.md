@@ -38,12 +38,12 @@ Encounter/wave/scripted-route authority is `SOURCE_CLOSED` in
 `data/oracle11_round1_encounter_route_authority.json`: two identical completions
 bind all 94 segments, 14 route edges, 609 writer transactions, 451 writer PCs,
 and 56 enemy spawns with zero orphans or fixed-frame/count substitutes. Round 1
-boss orchestration is also `SOURCE_CLOSED`: 11 controller phases, eight exact
-boss-room spawns, 216 boss RNG calls, and the causal clear writer are bound
-without reopening class-`0x06`. Next close stage clear/results/Round 2 handoff.
+boss orchestration and the stage-clear/Round 2 handoff are `SOURCE_CLOSED`:
+three player clear phases and all four post-clear route edges reach stable
+Round 2 control without fixed-frame or presentation-label authority. Next
+source-close global RNG consumption and reconcile the remaining writer PCs.
 The sole route-segment x authority-family matrix and SPEC-02 zero-gap gate
 remain in `data/round1_system_coverage.yaml`.
-
 Continue the same ORACLE-11 card and Goal; SPEC-02 requires zero-gap closure.
 Do not write runtime, infer USER-09 approval, activate SALVAGE-08 before
 accepted USER-10, or advance physical Saturn beyond `UNRUN`.
