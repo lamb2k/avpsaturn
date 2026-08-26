@@ -22,12 +22,10 @@ Preserve `0x0abdd2` as packed-BCD score authority, never audio authority.
 All 1,517 baseline writer PCs are reconciled. The sole 94 x 10 matrix reports
 zero required gaps, unmapped actor pairs/route edges, unowned events, or orphan
 authoritative writers.
-SPEC-02 is accepted with 27 required field contracts, zero required UNKNOWN or
-adapted fields, deterministic fixtures, and ten passing mutation controls. Its
-corrective first-entry body binds the exact ten-row table, controller identity,
-26-byte player entry-animation program, timer loads `60, 60, 44`, 164 source
-scheduler decrements, signed terminator, selected gate bit, and route consumer;
-exact-writer suppression holds state 2 and rejects fixed-frame ownership.
+SPEC-02 is accepted with 27 required contracts, zero required UNKNOWN/adapted
+fields, deterministic fixtures, and mutation controls. Its corrective first-entry
+body binds the exact ten-row table, 26-byte program, `60,60,44` timers, signed
+terminator, gate bit, route consumer, and exact-writer suppression.
 REIMPLEMENT-13 owns exact first-entry pools/spawns/script/timers, signed
 terminator, gate clear, route `2 -> 4`, control, and neutral facing. Its fixed
 scheduler visits 12/16/20/24 ascending slots; frame 470 has 3010 visits and hash
@@ -39,9 +37,13 @@ walk/10-tick-stop/cleanup/neutral with facing continuity and fixes duplicate
 Track-2 start. Coffee Shop geometry, terrain interpretation, and camera arithmetic
 remain fixture-blocked. Button3 jump is also blocked: table `0x0243d2` lacks
 numeric signed 16.16 vectors, selector mapping, and branch order. Commit
-`882b15b` implements Button2 melee selectors 1..4, exact strike bindings,
-30-tick follow-up, held-edge rejection, and interruption preservation. Thirty-two
-host mutations, 26 Target suppressions, paired Emulator, and selector-2/4 visual
-inspection pass. Preserve all blockers; inspect only the source-complete portion
-of Button1 weapon/projectile/resource next without guessing omitted fields.
+`882b15b` implements Button2 melee selectors 1..4. Commit `f6cab22` implements
+the source-complete Button1 action/resource/allocation boundary: exact timing,
+signed 12-attempt/four-tick volley, recovery, class-5 allocation writes, debit,
+recharge, and empty fallback. Forty-three host mutations, 38 Target suppressions,
+Target, paired Emulator, Fast, Oracle, and stable-frame inspection pass. Class-5
+motion/collision/impact/removal and class-10 empty-request lifecycle remain
+fixture-blocked; no travel/damage is claimed. Preserve all four blockers. Close
+only the smallest class-5/class-10 gap next; if blocked, continue another safe
+first-segment body and return before leaving the segment.
 USER-09 remains changes-requested, SALVAGE-08 inactive, and Saturn `UNRUN`.

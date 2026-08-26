@@ -122,10 +122,20 @@ the dependency-safe Button2 melee body: exact source edge, selectors 1..4,
 strike records/assemblies/collision selectors, 30-tick follow-up, held-edge
 rejection, and HIT/KO interruption preservation. Thirty-two host mutations,
 26 Target suppressions, paired Emulator, and direct selector-2/4 inspection
-pass with continuous staff ownership and zero regression. Preserve all fixture
-blockers and inspect the Button1 weapon/projectile/resource fixture next;
-implement only fields sufficient for a source translation and do not guess
-omitted motion, presentation, or lifecycle values.
+pass with continuous staff ownership and zero regression. Commit `f6cab22`
+implements the source-complete Button1 boundary: exact sufficient/empty action
+states, signed 12-attempt volley, four-tick cadence, recovery-edge timing,
+50-frame presentation, successful-allocation resource debit/recharge ordering,
+and the known type-4/class-5 allocation writes. Forty-three host mutations,
+38 Target suppressions, Target, paired Emulator, Fast, Oracle, and direct
+pinned-window inspection pass. Projectile travel, collision, damage, impact,
+removal, and class-10 empty-request lifecycle remain unimplemented because the
+current fixture omits their per-state timers, signed fixed-point vectors and
+branch mapping, presentation, collision writes, bounds, and release contract.
+Preserve the class-0x1F, Coffee Shop, Button3, and projectile-lifecycle blockers.
+Close only the smallest existing-fixture/Oracle gap required for class-5 and
+class-10 lifecycle next; if it cannot proceed, continue another dependency-safe
+first-segment blocker and return before leaving the segment.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json`.
 

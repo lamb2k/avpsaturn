@@ -1,11 +1,11 @@
 {
   "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
-  "checkpoint": "native-round1-player-route-melee",
-  "status": "PASS_ENTRY_PLAYER_SCHEDULER_PRESENTATION_STATE_CONTEXT_GLOBAL_BOUNDS_NEUTRAL_STOP_AND_MELEE",
-  "implementation_commit": "882b15b52362383165b43ee81441086a316e66ee",
+  "checkpoint": "native-round1-player-button1-action-resource-allocation",
+  "status": "PASS_ENTRY_PLAYER_SCHEDULER_PRESENTATION_STATE_CONTEXT_GLOBAL_BOUNDS_NEUTRAL_STOP_MELEE_AND_BUTTON1_BOUNDARY",
+  "implementation_commit": "f6cab22d416e74b044adee656c1a837e571b76c5",
   "diagnostic_correction_commit": "4fbc919235f61d962daf342efbfb4cd8f743ab60",
   "implementation_source": {
-    "spec02_sha256": "3cfa5410fee3942a9bd6bb515f10aefdd293ee4cd628fb503d9685bce4c7c3f8",
+    "spec02_sha256": "b4680e6fe10abf2ddcdb431a06ed03210344eff92c3d4674797df8e482f8d4a0",
     "raw_trace_or_disassembly_consumed": false,
     "authored_fallback_count": 0
   },
@@ -86,6 +86,33 @@
         {"selector": 4, "animation_record": "0x160234", "assembly": "0x162b26", "hurt_selector": 19, "attack_selector": 4}
       ]
     },
+    "player_button1_weapon_boundary": {
+      "input_guard": "new Button1 edge, with one exact recovery edge at source tick 48",
+      "sufficient_action": 3072,
+      "sufficient_substate": 3074,
+      "empty_action": 6656,
+      "empty_substate": 6658,
+      "attempt_counter": {"type": "s8", "initial": 12, "decrement_before_allocation": true},
+      "cadence": {"initial": 1, "reload": 4, "spawn_tick_offsets": [0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44]},
+      "cleanup_tick": 49,
+      "return_tick": 50,
+      "resource": {"capacity": 64, "debit_per_success": 3, "recharge_reload": 12, "update_before_hud": true},
+      "projectile_allocation": {"record_type": 4, "source_base": 65408, "capacity": 24, "stride": 128, "class": 5, "owner": 33664, "attack_table": 201578},
+      "evidence_frame": 470,
+      "entries": 1,
+      "completions": 1,
+      "attempts": 12,
+      "allocations": 12,
+      "allocation_failures": 0,
+      "resource_debits": 12,
+      "presentation_bindings": 51,
+      "resource_at_frame": 46,
+      "recharge_at_frame": 1,
+      "projectile_free_at_frame": 12,
+      "movement_and_facing_held": true,
+      "rng_consumption": "none",
+      "projectile_motion_collision_damage_and_removal_implemented": false
+    },
     "fixed_pool_scheduler": {
       "required_pool_order": [12, 16, 20, 24],
       "required_dispatch_pairs": 16,
@@ -143,15 +170,16 @@
   },
   "checks": {
     "host_differential": "PASS",
-    "real_mutations_rejected": 32,
-    "target_wiring_suppressions_rejected": 26,
+    "real_mutations_rejected": 43,
+    "target_wiring_suppressions_rejected": 38,
     "target_live_encounter": "PASS",
     "target_live_encounter_bench": "PASS",
     "spec02_entry_correction_revalidated": "PASS",
     "paired_emulator_regression": "PASS",
-    "paired_emulator_iso_sha256": "67776e06863149c131f30df432e032fff656421e6c03b17c6201cfd233616c18",
+    "paired_emulator_iso_sha256": "f4c1d96ee332e7bf1e98393ad0b8a6fab92bd2d4ad0fa90d505255c3c1e1752c",
     "paired_native_player_ledgers": "PASS: 471 byte-identical synchronized samples; frame 470 is x=1049/z=320/facing=1/source_action=514/controller_updates=301; neutral stop is 2 entries/1 completion/10 suppressed-motion ticks because the second stop is interrupted by a melee edge",
     "paired_native_melee_ledgers": "PASS: four source-owned Button2 edges complete selectors 1..4 in order with exact presentation mask 15; held Button2 does not chain, no RNG is consumed, and no fallback or unsupported action fires",
+    "paired_native_button1_ledgers": "PASS: two byte-identical 471-frame target runs bind the exact Button1 edge, 12 signed attempts, four-tick cadence, 12 successful type-4/class-5 allocations, 12 resource debits, 51 presentation bindings, cleanup/return, resource 46/recharge 1, zero fallback, and no unsupported projectile lifecycle claim",
     "paired_native_scheduler_ledgers": "PASS: frame 470 has 301 scheduler frames, 3010 ordered visits, 10 active type-12/class-0x1f actors, and order hash 0x836e161c",
     "paired_native_presentation_ledgers": "PASS: frame 470 has 3010 class-0x1f handler dispatches and 3010 exact animation-to-assembly/hurt/attack bindings",
     "paired_native_state_context_ledgers": "PASS: frame 470 has 3010 exact class-0x1f current-state/substate bindings to source dispatch entry 0x060532",
@@ -162,8 +190,8 @@
     "rendered_regression_inspection": "PASS: route-owned title clear, coherent post-unlock street, responsive player movement and camera, intact VDP2 planes/HUD/palette/priority",
     "fast": "PASS",
     "oracle": "PASS",
-    "target_bss_end": "0x060bff40",
-    "target_bss_headroom_bytes": 192
+    "target_bss_end": "0x060bf0e0",
+    "target_bss_headroom_bytes": 3872
   },
   "rendered_boundary": {
     "new_round1_runtime_presented": true,
@@ -239,6 +267,11 @@
       "selector4_sha256": "887ce52b59712afedbf0834401a541eb2101081c12672dc85c75aef67b0c01de",
       "inspection": "PASS: selectors 2 and 4 preserve the reviewed attack assembly sequence, continuous staff ownership, player/alien contact coherence, camera, both VDP2 planes, HUD, palette, and priority"
     },
+    "player_button1_visual_inspection": {
+      "capture_method": "direct Windows.Graphics.Capture of the pinned Yaba window",
+      "inspection": "PASS for the implemented boundary: the weapon-action assembly is coherent and the stable Coffee Shop frame retains intact player/stage composition, both VDP2 planes, HUD, palette, and priority. The retained renderer is not yet bound to native class-5 projectile travel, so this is explicitly not projectile-motion or impact visual acceptance.",
+      "reset_transition_note": "One capture taken during emulator Reset showed transient pre-stabilization VRAM contents; the next stable gameplay capture was coherent and is the only gameplay result used."
+    },
     "objective_discrepancy": {
       "observed": "The normal interactive profile stopped before actor rendering when native entry changed route state 2 to 4.",
       "cause": "The retained encounter reset to frame zero and requested a duplicate CDDA START while Track 2 ownership was already active.",
@@ -251,7 +284,9 @@
     "navigation_unblock_condition": "A corrective SPEC-02 fixture derived from accepted Oracle evidence must bind Coffee Shop player/obstacle box geometry and minimum-penetration branch arithmetic, the six terrain-record field semantics and interpreter transitions, and camera target/position update arithmetic and route guards.",
     "jump_blocker": "The accepted SPEC-02 normal-jump fixture identifies vector table 0x0243d2 and route witnesses but omits the numeric vector entries, initial signed 16.16 velocity/acceleration values, input/facing selector mapping, and branch order required for a native translation.",
     "jump_unblock_condition": "A corrective accepted SPEC-02 fixture must provide the exact numeric source-vector entries, selector mapping, branch order, and signed fixed-point initialization without requiring raw disassembly or a fitted witness.",
-    "exact_next_body": "Preserve the class-0x1F, navigation, and jump fixture blockers; inspect and implement only the dependency-safe source-complete portion of the Predator Warrior Button1 weapon/projectile/resource fixture without inventing projectile motion, presentation, or lifecycle fields."
+    "projectile_lifecycle_blocker": "The amended SPEC-02 fixture now closes the Button1 state, presentation, resource, cadence, and successful allocation writes, but accepted evidence still omits class-5 per-state timers, signed fixed-point motion and target-vector branch, per-state presentation, collision-to-impact writes, removal bounds, and release. The class-10 empty-request lifecycle is also not executable from the current fixture.",
+    "projectile_lifecycle_unblock_condition": "Amend the existing SPEC-02 fixture from accepted Oracle evidence if those exact class-5/class-10 fields are already present; otherwise run only the smallest bounded Oracle follow-up needed to bind their state/timer/motion/collision/removal contracts and mutations.",
+    "exact_next_body": "Keep REIMPLEMENT-13 active. Close the bounded class-5/class-10 projectile-lifecycle specification gap without guessing; if it is not immediately actionable, preserve it and continue another dependency-safe first-segment blocker before returning."
   },
   "preserved": {
     "user09": "CHANGES_REQUESTED",
