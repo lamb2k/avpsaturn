@@ -57,6 +57,13 @@ def build() -> str:
     input_decode = locomotion["input_decode"]
     release = locomotion["release_transition"]
     direction_resolver = input_decode["resolver_table"]
+    melee = fixtures["authority_data"]["player"]["route_reachable_melee_actions"]
+    close_combo = melee["close_combo"]
+    melee_dispatch = melee["dispatch"]
+    melee_sequences = close_combo["animation_sequences"]
+    melee_selectors = close_combo["attack_selectors"]
+    melee_steps = close_combo["step_values"]
+    melee_strikes = []
     first_segment_bounds = next(
         run for run in global_bounds["baseline_bound_runs"]
         if run["route"] == 4 and run["bound_x"] == 720 and
@@ -98,6 +105,27 @@ def build() -> str:
         release["facing_rule"] !=
             "neutral performs no +0x0f write and preserves the last directional facing"):
         raise ValueError("SPEC-02 locomotion-to-neutral transition drift")
+    if (melee["classification"] != "SOURCE_CLOSED" or
+        melee["input_guard"] !=
+            "new Button2 edge from actor +0xee/+0xef bit 5" or
+        melee_dispatch["common_action"] != "0x0600" or
+        melee_dispatch["target_context_action"] != "0x1400" or
+        melee_dispatch["target_context_guard"] != "actor +0x5a nonzero" or
+        close_combo["entry"] != "0x022588" or
+        close_combo["followup_window"]["ticks"] != 30 or
+        close_combo["held_input_rule"] !=
+            "held Button2 does not create a new edge or auto-chain" or
+        melee_selectors != [1, 2, 3, 4] or melee_steps != [0, 1, 2, 3] or
+        melee["rng_consumption"] !=
+            "none for selector or assembly choice; state selects the measured animation record"):
+        raise ValueError("SPEC-02 route-reachable melee contract drift")
+    for selector in melee_selectors:
+        sequence = melee_sequences[f"close_{selector}"]
+        strikes = [row for row in sequence
+                   if row["attack_selector"] == selector]
+        if len(strikes) != 1:
+            raise ValueError("SPEC-02 melee strike presentation drift")
+        melee_strikes.append(strikes[0])
 
     cursor = int(player["initial_cursor"], 16)
     step_rows = []
@@ -202,7 +230,25 @@ def build() -> str:
         "    512u,",
         f"    {release['stop_timer']['ticks']}u,",
         "    {" + ", ".join(f"{value}u" for value in direction_resolver) + "}",
-        "};", "", "#endif", ""])
+        "};", "",
+        "static const AvspRound1PlayerMeleeSpec avsp_round1_player_melee =",
+        "{",
+        f"    {int(melee_dispatch['common_action'], 16)}u,",
+        f"    {int(melee_dispatch['target_context_action'], 16)}u,",
+        f"    {close_combo['followup_window']['ticks']}u,",
+        f"    {len(melee_selectors)}u,",
+        "    {" + ", ".join(f"{value}u" for value in melee_selectors) + "},",
+        "    {" + ", ".join(f"{value}u" for value in melee_steps) + "}",
+        "};", "",
+        "static const AvspRound1PresentationSpec avsp_round1_player_melee_strikes[AVSP_ROUND1_PLAYER_MELEE_COUNT] =",
+        "{",
+    ])
+    for row in melee_strikes:
+        lines.append(
+            "    { %sUL, %sUL, %du, %du }," % (
+                row["record"], row["assembly"], row["hurt_selector"],
+                row["attack_selector"]))
+    lines.extend(["};", "", "#endif", ""])
     return "\n".join(lines)
 
 

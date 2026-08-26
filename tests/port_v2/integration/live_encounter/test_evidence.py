@@ -39,7 +39,7 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_entry_gate8236"] == 0
     assert report["state"]["round1_entry_gate81af"] == 1
     assert report["state"]["round1_control_enabled"] == 1
-    assert report["state"]["round1_player_x"] == 1072
+    assert report["state"]["round1_player_x"] == 1049
     assert report["state"]["round1_player_z"] == 320
     assert report["state"]["round1_player_facing"] == 1
     assert report["state"]["round1_player_source_action"] == 514
@@ -56,9 +56,14 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_navigation_applications"] == 301
     assert report["state"]["round1_navigation_clamps"] == 0
     assert report["state"]["round1_player_stop_ticks"] == 0
-    assert report["state"]["round1_player_stop_entries"] == 1
+    assert report["state"]["round1_player_stop_entries"] == 2
     assert report["state"]["round1_player_stop_completions"] == 1
     assert report["state"]["round1_player_stop_motion_suppressions"] == 10
+    assert report["state"]["round1_player_melee_entries"] == 4
+    assert report["state"]["round1_player_melee_completions"] == 4
+    assert report["state"]["round1_player_melee_selector_mask"] == 15
+    assert report["state"]["round1_player_melee_presentation_mask"] == 15
+    assert report["state"]["round1_player_melee_interruptions"] == 0
     assert report["state"]["round1_presentation_ready"] == 1
     assert report["state"]["round1_presentation_seen"] == 1
     assert report["state"]["round1_presentation_commands_peak"] == 2

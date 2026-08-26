@@ -461,7 +461,9 @@ volatile int avsp_diag_slice_enemy_tile_identity;
 #endif
 
 #ifdef AVSP_LIVE_ENCOUNTER
-#define AVSP_LIVE_DIAG_SAMPLES 512
+/* The accepted evidence window ends at frame 470. Keep a bounded reserve while
+ * leaving work RAM for per-checkpoint Round 1 authority state. */
+#define AVSP_LIVE_DIAG_SAMPLES 510
 typedef struct
 {
     int frame;
@@ -606,6 +608,11 @@ volatile int avsp_diag_round1_player_stop_ticks;
 volatile int avsp_diag_round1_player_stop_entries;
 volatile int avsp_diag_round1_player_stop_completions;
 volatile int avsp_diag_round1_player_stop_motion_suppressions;
+volatile int avsp_diag_round1_player_melee_entries;
+volatile int avsp_diag_round1_player_melee_completions;
+volatile int avsp_diag_round1_player_melee_selector_mask;
+volatile int avsp_diag_round1_player_melee_presentation_mask;
+volatile int avsp_diag_round1_player_melee_interruptions;
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
 static int live_autotest_phase;
 static int live_autotest_release;
@@ -7126,6 +7133,16 @@ static void live_encounter_publish(void)
         (int)round1_runtime.player_stop_completions;
     avsp_diag_round1_player_stop_motion_suppressions =
         (int)round1_runtime.player_stop_motion_suppressions;
+    avsp_diag_round1_player_melee_entries =
+        (int)round1_runtime.player_melee_entries;
+    avsp_diag_round1_player_melee_completions =
+        (int)round1_runtime.player_melee_completions;
+    avsp_diag_round1_player_melee_selector_mask =
+        (int)round1_runtime.player_melee_selector_mask;
+    avsp_diag_round1_player_melee_presentation_mask =
+        (int)round1_runtime.player_melee_presentation_mask;
+    avsp_diag_round1_player_melee_interruptions =
+        (int)round1_runtime.player_melee_interruptions;
 }
 
 static void live_encounter_frame_callback(void)
@@ -7176,6 +7193,16 @@ static void live_encounter_frame_callback(void)
         round1_player_mask =
             round1_runtime.player_controller_updates != 2u ?
             AVSP_PW_INPUT_RIGHT : 0u;
+    else if (round1_runtime.route_state == 4)
+    {
+        round1_player_mask = (unsigned short)(round1_player_mask &
+            (unsigned short)~AVSP_PW_INPUT_ATTACK);
+        if (round1_runtime.player_controller_updates == 30u ||
+            round1_runtime.player_controller_updates == 72u ||
+            round1_runtime.player_controller_updates == 114u ||
+            round1_runtime.player_controller_updates == 161u)
+            round1_player_mask |= AVSP_PW_INPUT_ATTACK;
+    }
 #endif
     if (round1_runtime.route_state == 4 &&
         !avsp_round1_step_player(&round1_runtime, round1_player_mask, 0))

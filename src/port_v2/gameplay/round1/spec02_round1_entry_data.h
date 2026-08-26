@@ -337,4 +337,22 @@ static const AvspRound1PlayerLocomotionSpec avsp_round1_player_locomotion =
     {255u, 2u, 6u, 255u, 4u, 3u, 5u, 255u, 0u, 1u, 7u, 255u, 255u, 255u, 255u, 255u}
 };
 
+static const AvspRound1PlayerMeleeSpec avsp_round1_player_melee =
+{
+    1536u,
+    5120u,
+    30u,
+    4u,
+    {1u, 2u, 3u, 4u},
+    {0u, 1u, 2u, 3u}
+};
+
+static const AvspRound1PresentationSpec avsp_round1_player_melee_strikes[AVSP_ROUND1_PLAYER_MELEE_COUNT] =
+{
+    { 0x1600f8UL, 0x162a04UL, 8u, 1u },
+    { 0x16014cUL, 0x162a82UL, 8u, 2u },
+    { 0x1601c0UL, 0x1614a4UL, 8u, 3u },
+    { 0x160234UL, 0x162b26UL, 19u, 4u },
+};
+
 #endif

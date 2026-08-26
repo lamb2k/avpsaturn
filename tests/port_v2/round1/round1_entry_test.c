@@ -6,6 +6,7 @@ int main(void)
 {
     AvspRound1Runtime runtime;
     unsigned int calls = 0u;
+    unsigned short selector;
     const AvspRound1ActorCore *first;
     const AvspRound1ActorCore *last;
     avsp_round1_init(&runtime);
@@ -166,9 +167,55 @@ int main(void)
         runtime.navigation_clamps != 3u ||
         runtime.player_stop_motion_suppressions != 10u)
         return 15;
+    for (selector = 1u; selector <= AVSP_ROUND1_PLAYER_MELEE_COUNT;
+         ++selector)
+    {
+        unsigned long entries = runtime.player_melee_entries;
+        if (!avsp_round1_step_player(&runtime, AVSP_PW_INPUT_ATTACK, 0) ||
+            runtime.player_action.state != AVSP_PW_STATE_ATTACK ||
+            runtime.player_action.selector != selector ||
+            runtime.player_melee_entries != entries + 1u ||
+            runtime.player_melee_selector_mask !=
+                ((1UL << selector) - 1UL))
+            return 16;
+        if (!avsp_round1_step_player(&runtime, AVSP_PW_INPUT_ATTACK, 0) ||
+            runtime.player_melee_entries != entries + 1u ||
+            runtime.player_action.action_elapsed != 1u)
+            return 17;
+        if (!avsp_round1_step_player(&runtime, 0u, 0) ||
+            runtime.player.source_action != 1536u)
+            return 18;
+        while (!avsp_pw_can_control(&runtime.player_action))
+            if (!avsp_round1_step_player(&runtime, 0u, 0))
+                return 19;
+        if (runtime.player_melee_completions != selector)
+            return 20;
+        while (runtime.player_action.combo_idle_frames < 20u)
+            if (!avsp_round1_step_player(&runtime, 0u, 0))
+                return 21;
+    }
+    if (runtime.player_melee_entries != 4u ||
+        runtime.player_melee_completions != 4u ||
+        runtime.player_melee_selector_mask != 0x0fUL ||
+        runtime.player_melee_presentation_mask != 0x0fUL ||
+        runtime.player_melee_interruptions != 0u)
+        return 22;
+    if (!avsp_round1_step_player(&runtime, AVSP_PW_INPUT_ATTACK, 0) ||
+        !avsp_round1_step_player(&runtime, 0u, 8) ||
+        runtime.player_action.state != AVSP_PW_STATE_HIT ||
+        runtime.player_melee_entries != 5u ||
+        runtime.player_melee_completions != 4u ||
+        runtime.player_melee_interruptions != 1u)
+        return 23;
+    for (calls = 0u; calls < 16u; ++calls)
+        if (!avsp_round1_step_player(&runtime, 0u, 0))
+            return 24;
+    if (!avsp_pw_can_control(&runtime.player_action) ||
+        !avsp_round1_entry_valid(&runtime))
+        return 25;
     runtime.entry.gate8236 = 1u;
     if (avsp_round1_entry_valid(&runtime))
-        return 16;
-    puts("REIMPLEMENT-13 native entry/player/scheduler/class1f/global-bounds/neutral-stop: PASS");
+        return 26;
+    puts("REIMPLEMENT-13 native entry/player/scheduler/class1f/global-bounds/neutral-stop/melee: PASS");
     return 0;
 }

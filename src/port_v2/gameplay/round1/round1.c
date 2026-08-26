@@ -246,6 +246,74 @@ static void avsp_round1_update_player_locomotion(
             avsp_round1_player_locomotion.walking_action;
 }
 
+static int avsp_round1_player_melee_contract_valid(void)
+{
+    unsigned int index;
+    if (!avsp_pw_action_defs_valid(avsp_pw_action_defs,
+                                   AVSP_PW_ACTION_COUNT) ||
+        avsp_round1_player_melee.common_action != 1536u ||
+        avsp_round1_player_melee.target_context_action != 5120u ||
+        avsp_round1_player_melee.followup_ticks != 30u ||
+        avsp_round1_player_melee.selector_count !=
+            AVSP_ROUND1_PLAYER_MELEE_COUNT)
+        return 0;
+    for (index = 0u; index < AVSP_ROUND1_PLAYER_MELEE_COUNT; ++index)
+    {
+        const AvspRound1PresentationSpec *strike =
+            &avsp_round1_player_melee_strikes[index];
+        if (avsp_round1_player_melee.selectors[index] != index + 1u ||
+            avsp_round1_player_melee.step_values[index] != index ||
+            strike->attack_selector != index + 1u ||
+            strike->assembly !=
+                avsp_pw_assembly_for_record(strike->animation_record))
+            return 0;
+    }
+    return 1;
+}
+
+static void avsp_round1_observe_player_melee(AvspRound1Runtime *runtime,
+                                              unsigned short prior_state,
+                                              unsigned short prior_selector,
+                                              unsigned long prior_edges)
+{
+    unsigned short selector = runtime->player_action.selector;
+    unsigned int index;
+    if (runtime->player_action.accepted_attack_edges != prior_edges)
+    {
+        if (runtime->player_action.accepted_attack_edges != prior_edges + 1u ||
+            selector < 1u || selector > AVSP_ROUND1_PLAYER_MELEE_COUNT)
+        {
+            ++runtime->failure_count;
+            return;
+        }
+        if (prior_state == AVSP_PW_STATE_ATTACK)
+            ++runtime->player_melee_completions;
+        ++runtime->player_melee_entries;
+        runtime->player_melee_selector_mask |= 1UL << (selector - 1u);
+    }
+    if (prior_state == AVSP_PW_STATE_ATTACK &&
+        runtime->player_action.state == AVSP_PW_STATE_CONTROL)
+        ++runtime->player_melee_completions;
+    else if (prior_state == AVSP_PW_STATE_ATTACK &&
+             (runtime->player_action.state == AVSP_PW_STATE_HIT ||
+              runtime->player_action.state == AVSP_PW_STATE_KO))
+        ++runtime->player_melee_interruptions;
+    if (runtime->player_action.state != AVSP_PW_STATE_ATTACK)
+        return;
+    for (index = 0u; index < AVSP_ROUND1_PLAYER_MELEE_COUNT; ++index)
+    {
+        const AvspRound1PresentationSpec *strike =
+            &avsp_round1_player_melee_strikes[index];
+        if (runtime->player_action.animation_record ==
+                strike->animation_record &&
+            runtime->player_action.assembly == strike->assembly &&
+            selector == strike->attack_selector)
+            runtime->player_melee_presentation_mask |= 1UL << index;
+    }
+    if (prior_selector > AVSP_ROUND1_PLAYER_MELEE_COUNT)
+        ++runtime->failure_count;
+}
+
 int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
 {
     unsigned int order_index;
@@ -528,6 +596,9 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     short prior_x;
     short prior_lane;
     short prior_facing;
+    unsigned short prior_state;
+    unsigned short prior_selector;
+    unsigned long prior_attack_edges;
     if (runtime == 0 || runtime->route_state != 4 ||
         runtime->entry.control_enabled != 1u ||
         !avsp_round1_canaries_ok(runtime) || runtime->failure_count != 0u ||
@@ -543,7 +614,12 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     prior_x = runtime->player_action.x;
     prior_lane = runtime->player_action.lane;
     prior_facing = runtime->player_action.facing;
+    prior_state = runtime->player_action.state;
+    prior_selector = runtime->player_action.selector;
+    prior_attack_edges = runtime->player_action.accepted_attack_edges;
     avsp_pw_step(&runtime->player_action, &input);
+    avsp_round1_observe_player_melee(runtime, prior_state, prior_selector,
+                                    prior_attack_edges);
     if (was_stopping)
     {
         if (runtime->player_action.x != prior_x ||
@@ -594,7 +670,8 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
         runtime->player.active != 1u || runtime->player.actor_class != 0 ||
         runtime->player.type != 0u ||
         runtime->player.health > AVSP_ROUND1_PLAYER_HEALTH ||
-        runtime->fallback_count != 0u || runtime->failure_count != 0u)
+        runtime->fallback_count != 0u || runtime->failure_count != 0u ||
+        !avsp_round1_player_melee_contract_valid())
         return 0;
     for (index = 0u; index < AVSP_ROUND1_POOL_COUNT; ++index)
     {

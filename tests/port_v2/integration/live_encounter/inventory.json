@@ -84,6 +84,11 @@
     ,"avsp_diag_round1_player_stop_entries"
     ,"avsp_diag_round1_player_stop_completions"
     ,"avsp_diag_round1_player_stop_motion_suppressions"
+    ,"avsp_diag_round1_player_melee_entries"
+    ,"avsp_diag_round1_player_melee_completions"
+    ,"avsp_diag_round1_player_melee_selector_mask"
+    ,"avsp_diag_round1_player_melee_presentation_mask"
+    ,"avsp_diag_round1_player_melee_interruptions"
     ,"failed_asset"
   ]
 }

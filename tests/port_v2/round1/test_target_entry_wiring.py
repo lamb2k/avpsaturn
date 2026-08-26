@@ -8,6 +8,7 @@ MAIN = (ROOT / "main.c").read_text()
 REQUIRED = (
     '#include "src/port_v2/gameplay/round1/round1.h"',
     "static AvspRound1Runtime round1_runtime;",
+    "#define AVSP_LIVE_DIAG_SAMPLES 510",
     "avsp_round1_init(&round1_runtime);",
     "avsp_round1_begin_first_entry(&round1_runtime);",
     "avsp_round1_step_first_entry(&round1_runtime)",
@@ -25,8 +26,12 @@ REQUIRED = (
     "avsp_diag_round1_state_context_bindings =",
     "avsp_diag_round1_navigation_applications =",
     "avsp_diag_round1_player_stop_entries =",
+    "avsp_diag_round1_player_melee_entries =",
+    "avsp_diag_round1_player_melee_presentation_mask =",
     "round1_runtime.player_controller_updates < 15u",
     "round1_runtime.player_controller_updates != 2u ?",
+    "round1_runtime.player_controller_updates == 30u ||",
+    "round1_runtime.player_controller_updates == 161u)",
     "live_encounter_frame.frame == 0UL &&\n        !playable_slice_runtime.cdda.active ?",
     "avsp_frontend_load_round1_text(&frontend_runtime);",
 )
@@ -40,4 +45,4 @@ for token in REQUIRED[2:]:
 assert "if (round1_runtime.route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE)" in MAIN
 assert "avsp_frontend_draw_round1_text(&frontend_runtime);" in MAIN
 assert "round1_runtime.frame < AVSP_FRONTEND_R1TEXT_CLEAR_FRAME" not in MAIN
-print("REIMPLEMENT-13 target entry/player/scheduler/class1f/global-bounds/neutral-stop wiring: PASS (21 suppressions rejected)")
+print("REIMPLEMENT-13 target entry/player/scheduler/class1f/global-bounds/neutral-stop/melee wiring: PASS (26 suppressions rejected)")

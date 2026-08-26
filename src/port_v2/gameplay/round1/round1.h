@@ -20,6 +20,7 @@
 #define AVSP_ROUND1_SCHEDULER_TRACE_CAPACITY 78
 #define AVSP_ROUND1_PLAYER_ENTRY_STATE 2048u
 #define AVSP_ROUND1_PLAYER_CONTROL_STATE 512u
+#define AVSP_ROUND1_PLAYER_MELEE_COUNT 4u
 
 #define AVSP_ROUND1_ENTRY_SET_POSITION 1u
 #define AVSP_ROUND1_ENTRY_SET_SUBHANDLER 2u
@@ -91,6 +92,16 @@ typedef struct
     unsigned short stop_ticks;
     unsigned char direction_resolver[16];
 } AvspRound1PlayerLocomotionSpec;
+
+typedef struct
+{
+    unsigned short common_action;
+    unsigned short target_context_action;
+    unsigned short followup_ticks;
+    unsigned short selector_count;
+    unsigned char selectors[AVSP_ROUND1_PLAYER_MELEE_COUNT];
+    unsigned char step_values[AVSP_ROUND1_PLAYER_MELEE_COUNT];
+} AvspRound1PlayerMeleeSpec;
 
 typedef struct
 {
@@ -192,6 +203,11 @@ typedef struct
     unsigned long player_stop_entries;
     unsigned long player_stop_completions;
     unsigned long player_stop_motion_suppressions;
+    unsigned long player_melee_entries;
+    unsigned long player_melee_completions;
+    unsigned long player_melee_selector_mask;
+    unsigned long player_melee_presentation_mask;
+    unsigned long player_melee_interruptions;
     unsigned long failure_count;
     unsigned long fallback_count;
     unsigned long tail_canary;

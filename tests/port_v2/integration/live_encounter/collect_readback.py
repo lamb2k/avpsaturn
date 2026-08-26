@@ -186,6 +186,12 @@ mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_
            "round1_player_stop_entries":"avsp_diag_round1_player_stop_entries",
            "round1_player_stop_completions":"avsp_diag_round1_player_stop_completions",
            "round1_player_stop_motion_suppressions":"avsp_diag_round1_player_stop_motion_suppressions"}
+mapping.update({
+           "round1_player_melee_entries":"avsp_diag_round1_player_melee_entries",
+           "round1_player_melee_completions":"avsp_diag_round1_player_melee_completions",
+           "round1_player_melee_selector_mask":"avsp_diag_round1_player_melee_selector_mask",
+           "round1_player_melee_presentation_mask":"avsp_diag_round1_player_melee_presentation_mask",
+           "round1_player_melee_interruptions":"avsp_diag_round1_player_melee_interruptions"})
 state = {key:signed(mcp,syms[symbol]) for key,symbol in mapping.items()}
 observed_frame = state["frame"]
 current_sample = next((sample for sample in all_samples
@@ -233,7 +239,7 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_entry_gate8236"] == 0 and
         state["round1_entry_gate81af"] == 1 and
         state["round1_control_enabled"] == 1 and
-        state["round1_player_x"] == 1072 and
+        state["round1_player_x"] == 1049 and
         state["round1_player_z"] == 320 and
         state["round1_player_facing"] == 1 and
         state["round1_player_source_action"] == 514 and
@@ -250,9 +256,14 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_navigation_applications"] == 301 and
         state["round1_navigation_clamps"] == 0 and
         state["round1_player_stop_ticks"] == 0 and
-        state["round1_player_stop_entries"] == 1 and
+        state["round1_player_stop_entries"] == 2 and
         state["round1_player_stop_completions"] == 1 and
         state["round1_player_stop_motion_suppressions"] == 10 and
+        state["round1_player_melee_entries"] == 4 and
+        state["round1_player_melee_completions"] == 4 and
+        state["round1_player_melee_selector_mask"] == 15 and
+        state["round1_player_melee_presentation_mask"] == 15 and
+        state["round1_player_melee_interruptions"] == 0 and
         state["round1_presentation_ready"] == 1 and
         state["round1_presentation_seen"] == 1 and
         state["round1_presentation_commands_peak"] == 2):
