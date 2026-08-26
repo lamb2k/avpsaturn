@@ -23,10 +23,13 @@ def wsl(path):
 def run(body, header_body, passes):
     with tempfile.TemporaryDirectory(prefix="round1-entry-") as name:
         temp = Path(name); (temp / "round1.c").write_text(body)
-        (temp / "round1.h").write_text(header_body)
+        (temp / "round1.h").write_text(header_body.replace(
+            '#include "../player_action/player_action.h"', '#include "player_action.h"'))
         (temp / "spec02_round1_entry_data.h").write_text(generated)
         command = (f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra -Werror "
-                   f"-I '{wsl(temp)}' '{wsl(temp / 'round1.c')}' "
+                   f"-I '{wsl(temp)}' -I src/port_v2/gameplay/player_action "
+                   f"'{wsl(temp / 'round1.c')}' "
+                   f"src/port_v2/gameplay/player_action/player_action.c "
                    f"tests/port_v2/round1/round1_entry_test.c -o '{wsl(temp / 'test')}' && "
                    f"'{wsl(temp / 'test')}'")
         result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
@@ -42,6 +45,7 @@ for before, after in (
     ("--runtime->entry.animation_c8;", "runtime->entry.animation_c8 = 0u;"),
     ("++runtime->entry.timer_decrements;", "runtime->entry.timer_decrements += 2u;"),
     ("pool->free_stack[pool->free_count - 1u]", "pool->free_stack[0]"),
+    ("avsp_pw_step(&runtime->player_action, &input);", "input.mask = 0u; avsp_pw_step(&runtime->player_action, &input);"),
 ):
     assert before in source
     run(source.replace(before, after), header, False)
@@ -54,12 +58,15 @@ for before, after in (
     with tempfile.TemporaryDirectory(prefix="round1-generated-mutation-") as name:
         temp = Path(name)
         (temp / "round1.c").write_text(source)
-        (temp / "round1.h").write_text(header)
+        (temp / "round1.h").write_text(header.replace(
+            '#include "../player_action/player_action.h"', '#include "player_action.h"'))
         (temp / "spec02_round1_entry_data.h").write_text(changed)
         command = (f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra -Werror "
-                   f"-I '{wsl(temp)}' '{wsl(temp / 'round1.c')}' "
+                   f"-I '{wsl(temp)}' -I src/port_v2/gameplay/player_action "
+                   f"'{wsl(temp / 'round1.c')}' "
+                   f"src/port_v2/gameplay/player_action/player_action.c "
                    f"tests/port_v2/round1/round1_entry_test.c -o '{wsl(temp / 'test')}' && "
                    f"'{wsl(temp / 'test')}'")
         result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
         assert result.returncode != 0
-print("REIMPLEMENT-13 first entry host differential: PASS (10 real mutations)")
+print("REIMPLEMENT-13 first entry/current-input differential: PASS (11 real mutations)")

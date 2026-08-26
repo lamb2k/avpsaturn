@@ -158,6 +158,11 @@ int avsp_round1_step_first_entry(AvspRound1Runtime *runtime)
     {
         if ((runtime->entry.gate8236 & runtime->entry.gate81af) == 0u)
         {
+            avsp_pw_init(&runtime->player_action);
+            runtime->player_action.x = runtime->player.x;
+            runtime->player_action.lane = runtime->player.z;
+            runtime->player_action.health = runtime->player.health;
+            runtime->player_action.facing = runtime->player.facing;
             runtime->route_state = 4;
             runtime->player.state = AVSP_ROUND1_PLAYER_CONTROL_STATE;
             runtime->entry.control_enabled = 1u;
@@ -242,6 +247,34 @@ int avsp_round1_step_first_entry(AvspRound1Runtime *runtime)
     return 0;
 }
 
+int avsp_round1_step_player(AvspRound1Runtime *runtime,
+                            unsigned short input_mask,
+                            short received_damage)
+{
+    AvspPwInput input;
+    AvspPwView view;
+    if (runtime == 0 || runtime->route_state != 4 ||
+        runtime->entry.control_enabled != 1u ||
+        !avsp_round1_canaries_ok(runtime) || runtime->failure_count != 0u ||
+        runtime->fallback_count != 0u)
+        return 0;
+    input.mask = input_mask;
+    input.received_damage = received_damage;
+    avsp_pw_step(&runtime->player_action, &input);
+    avsp_pw_view(&runtime->player_action, &view);
+    runtime->player.state = AVSP_ROUND1_PLAYER_CONTROL_STATE;
+    runtime->player.substate = view.source_substate;
+    runtime->player.source_action = view.source_action;
+    runtime->player.facing = (unsigned char)view.facing;
+    runtime->player.x = view.x;
+    runtime->player.y = view.lane;
+    runtime->player.z = view.lane;
+    runtime->player.health = view.health;
+    runtime->player.animation_record = view.animation_record;
+    ++runtime->player_controller_updates;
+    return avsp_round1_entry_valid(runtime);
+}
+
 int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
 {
     unsigned int index;
@@ -258,8 +291,7 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
         runtime->rng_seed != AVSP_ROUND1_INITIAL_RNG ||
         runtime->player.active != 1u || runtime->player.actor_class != 0 ||
         runtime->player.type != 0u ||
-        runtime->player.substate != 0u ||
-        runtime->player.health != AVSP_ROUND1_PLAYER_HEALTH ||
+        runtime->player.health > AVSP_ROUND1_PLAYER_HEALTH ||
         runtime->fallback_count != 0u || runtime->failure_count != 0u)
         return 0;
     for (index = 0u; index < AVSP_ROUND1_POOL_COUNT; ++index)
@@ -271,7 +303,9 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
     }
     if (!runtime->entry.started)
         return runtime->route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE &&
-            runtime->player.state == 0u && runtime->pools[0].free_count == 20u;
+            runtime->player.state == 0u && runtime->player.substate == 0u &&
+            runtime->player.health == AVSP_ROUND1_PLAYER_HEALTH &&
+            runtime->pools[0].free_count == 20u;
     if (runtime->entry_controller.active != 1u ||
         runtime->entry_controller.actor_class != 1 ||
         runtime->entry_controller.type != 32u ||
@@ -315,7 +349,10 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
             runtime->entry.gate8236 == 0u &&
             runtime->entry.timer_decrements == 164u &&
             runtime->entry.step_index == AVSP_ROUND1_ENTRY_STEP_COUNT &&
-            runtime->player.state == AVSP_ROUND1_PLAYER_CONTROL_STATE;
+            runtime->player.state == AVSP_ROUND1_PLAYER_CONTROL_STATE &&
+            runtime->player_action.health == runtime->player.health &&
+            runtime->player_action.x == runtime->player.x &&
+            runtime->player_action.lane == runtime->player.z;
     if (runtime->entry.control_enabled ||
         runtime->player.state != AVSP_ROUND1_PLAYER_ENTRY_STATE)
         return 0;

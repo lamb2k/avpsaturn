@@ -569,6 +569,11 @@ volatile int avsp_diag_round1_entry_gate8236;
 volatile int avsp_diag_round1_entry_gate81af;
 volatile int avsp_diag_round1_control_enabled;
 volatile int avsp_diag_round1_failure_count;
+volatile int avsp_diag_round1_player_x;
+volatile int avsp_diag_round1_player_z;
+volatile int avsp_diag_round1_player_facing;
+volatile int avsp_diag_round1_player_source_action;
+volatile int avsp_diag_round1_player_controller_updates;
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
 static int live_autotest_phase;
 static int live_autotest_release;
@@ -7016,6 +7021,13 @@ static void live_encounter_publish(void)
     avsp_diag_round1_control_enabled =
         round1_runtime.entry.control_enabled;
     avsp_diag_round1_failure_count = (int)round1_runtime.failure_count;
+    avsp_diag_round1_player_x = round1_runtime.player.x;
+    avsp_diag_round1_player_z = round1_runtime.player.z;
+    avsp_diag_round1_player_facing = round1_runtime.player.facing;
+    avsp_diag_round1_player_source_action =
+        round1_runtime.player.source_action;
+    avsp_diag_round1_player_controller_updates =
+        (int)round1_runtime.player_controller_updates;
 }
 
 static void live_encounter_frame_callback(void)
@@ -7058,6 +7070,13 @@ static void live_encounter_frame_callback(void)
 #else
     input.player_mask = live_encounter_real_input();
 #endif
+    if (round1_runtime.route_state == 4 &&
+        !avsp_round1_step_player(&round1_runtime, input.player_mask, 0))
+    {
+        avsp_diag_live_frame_stage = -9;
+        runtime_ready = 0;
+        return;
+    }
     if (!avsp_live_encounter_step(&live_encounter_runtime, &input,
                                   &live_encounter_frame))
     {

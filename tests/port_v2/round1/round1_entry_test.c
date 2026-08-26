@@ -35,6 +35,16 @@ int main(void)
         runtime.pools[0].free_count != 10u ||
         !avsp_round1_entry_valid(&runtime))
         return 5;
+    if (!avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
+        !avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
+        !avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
+        !avsp_round1_step_player(&runtime, 0u, 0) ||
+        !avsp_round1_step_player(&runtime, 0u, 0) ||
+        runtime.player.x <= 944 || runtime.player.z != 320 ||
+        runtime.player.facing != 1u || runtime.player_controller_updates != 5u ||
+        runtime.player.substate != 512u ||
+        !avsp_round1_entry_valid(&runtime))
+        return 6;
     first = &runtime.pools[0].records[19];
     last = &runtime.pools[0].records[10];
     if (first->source_slot != 0x00FFA3C0UL || first->x != 656 ||
@@ -44,10 +54,10 @@ int main(void)
         last->source_slot != 0x00FF9D00UL || last->x != 632 ||
         last->z != 296 || last->variant != 6u ||
         last->substate != 4096u || last->animation_record != 0x0012E8ECUL)
-        return 6;
+        return 7;
     runtime.entry.gate8236 = 1u;
     if (avsp_round1_entry_valid(&runtime))
-        return 7;
-    puts("REIMPLEMENT-13 native first entry/spawn/control: PASS");
+        return 8;
+    puts("REIMPLEMENT-13 native first entry/spawn/current-input control: PASS");
     return 0;
 }

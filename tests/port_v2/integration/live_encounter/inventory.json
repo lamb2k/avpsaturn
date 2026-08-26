@@ -64,6 +64,11 @@
     ,"avsp_diag_round1_entry_gate81af"
     ,"avsp_diag_round1_control_enabled"
     ,"avsp_diag_round1_failure_count"
+    ,"avsp_diag_round1_player_x"
+    ,"avsp_diag_round1_player_z"
+    ,"avsp_diag_round1_player_facing"
+    ,"avsp_diag_round1_player_source_action"
+    ,"avsp_diag_round1_player_controller_updates"
     ,"failed_asset"
   ]
 }

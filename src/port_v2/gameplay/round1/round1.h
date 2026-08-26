@@ -1,6 +1,8 @@
 #ifndef AVSP_PORT_V2_ROUND1_H
 #define AVSP_PORT_V2_ROUND1_H
 
+#include "../player_action/player_action.h"
+
 #define AVSP_ROUND1_SPEC02_SHA256 \
     "3cfa5410fee3942a9bd6bb515f10aefdd293ee4cd628fb503d9685bce4c7c3f8"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
@@ -106,10 +108,12 @@ typedef struct
     short route_state;
     unsigned short rng_seed;
     AvspRound1ActorCore player;
+    AvspPwRuntime player_action;
     AvspRound1ActorCore entry_controller;
     AvspRound1EntryRuntime entry;
     AvspRound1Pool pools[AVSP_ROUND1_POOL_COUNT];
     unsigned long frame;
+    unsigned long player_controller_updates;
     unsigned long failure_count;
     unsigned long fallback_count;
     unsigned long tail_canary;
@@ -118,6 +122,9 @@ typedef struct
 void avsp_round1_init(AvspRound1Runtime *runtime);
 int avsp_round1_begin_first_entry(AvspRound1Runtime *runtime);
 int avsp_round1_step_first_entry(AvspRound1Runtime *runtime);
+int avsp_round1_step_player(AvspRound1Runtime *runtime,
+                            unsigned short input_mask,
+                            short received_damage);
 int avsp_round1_entry_valid(const AvspRound1Runtime *runtime);
 int avsp_round1_canaries_ok(const AvspRound1Runtime *runtime);
 

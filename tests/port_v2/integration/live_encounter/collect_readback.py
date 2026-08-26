@@ -150,7 +150,12 @@ mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_
            "round1_entry_gate8236":"avsp_diag_round1_entry_gate8236",
            "round1_entry_gate81af":"avsp_diag_round1_entry_gate81af",
            "round1_control_enabled":"avsp_diag_round1_control_enabled",
-           "round1_failure_count":"avsp_diag_round1_failure_count"}
+           "round1_failure_count":"avsp_diag_round1_failure_count",
+           "round1_player_x":"avsp_diag_round1_player_x",
+           "round1_player_z":"avsp_diag_round1_player_z",
+           "round1_player_facing":"avsp_diag_round1_player_facing",
+           "round1_player_source_action":"avsp_diag_round1_player_source_action",
+           "round1_player_controller_updates":"avsp_diag_round1_player_controller_updates"}
 state = {key:signed(mcp,syms[symbol]) for key,symbol in mapping.items()}
 observed_frame = state["frame"]
 current_sample = next((sample for sample in all_samples
@@ -180,6 +185,11 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_entry_gate8236"] == 0 and
         state["round1_entry_gate81af"] == 1 and
         state["round1_control_enabled"] == 1 and
+        state["round1_player_x"] == 1081 and
+        state["round1_player_z"] == 320 and
+        state["round1_player_facing"] == 1 and
+        state["round1_player_source_action"] == 0 and
+        state["round1_player_controller_updates"] == 304 and
         state["round1_presentation_ready"] == 1 and
         state["round1_presentation_seen"] == 1 and
         state["round1_presentation_commands_peak"] == 2):
