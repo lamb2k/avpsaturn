@@ -17,6 +17,7 @@ BOSS=ROOT/'data/oracle11_round1_boss_orchestration.json'
 HANDOFF=ROOT/'data/oracle11_round1_handoff.json'
 RNG=ROOT/'data/oracle11_round1_rng.json'
 RECONCILIATION=ROOT/'data/oracle11_round1_writer_reconciliation.json'
+SPEC02=ROOT/'data/spec02_round1_executable_contract.json'
 FAMILIES=(
  'predator-warrior-player-authority','round1-navigation-terrain-camera',
  'actor-scheduler-allocation-lifecycle','round1-enemy-archetypes',
@@ -320,7 +321,10 @@ def main():
     coverage['route_segment_authority_matrix']=build(coverage,route)
     coverage['spec02_closure_gate']=coverage['route_segment_authority_matrix']['closure_gate']
     if coverage['spec02_closure_gate']['spec02_eligible']:
-        coverage['next_card']='SPEC-02-ROUND1-EXECUTABLE-CONTRACT'
+        accepted_spec=(SPEC02.exists() and
+          json.loads(SPEC02.read_text(encoding='ascii')).get('status')=='ACCEPTED')
+        coverage['next_card']=('REIMPLEMENT-13-SOURCE-CLOSED-ROUND1' if accepted_spec
+          else 'SPEC-02-ROUND1-EXECUTABLE-CONTRACT')
     COVERAGE.write_bytes((json.dumps(coverage,sort_keys=True,indent=2)+'\n').encode('ascii'))
     gate=coverage['spec02_closure_gate']
     print('Round 1 authority matrix: segments=%d cells=%d eligible=%s' % (

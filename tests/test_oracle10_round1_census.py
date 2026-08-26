@@ -137,7 +137,11 @@ def validate(route: dict, coverage: dict) -> None:
             "coverage classification vocabulary drifted")
     spec02_eligible = coverage.get("spec02_closure_gate", {}).get(
         "spec02_eligible", False)
-    expected_next = ("SPEC-02-ROUND1-EXECUTABLE-CONTRACT" if spec02_eligible
+    spec02_path = ROOT / "data/spec02_round1_executable_contract.json"
+    spec02_accepted = (spec02_path.exists() and
+                       json.loads(spec02_path.read_text())["status"] == "ACCEPTED")
+    expected_next = ("REIMPLEMENT-13-SOURCE-CLOSED-ROUND1" if spec02_accepted
+                     else "SPEC-02-ROUND1-EXECUTABLE-CONTRACT" if spec02_eligible
                      else "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE")
     require(coverage["pending_oracle10_controls"] == [] and
             coverage["next_card"] == expected_next,
@@ -174,7 +178,7 @@ def main() -> None:
     mutated_coverage["production_runtime_writes"] = 1
     mutations.append((copy.deepcopy(route), mutated_coverage))
     mutated_coverage = copy.deepcopy(coverage)
-    mutated_coverage["next_card"] = "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE"
+    mutated_coverage["next_card"] = "SPEC-02-ROUND1-EXECUTABLE-CONTRACT"
     mutations.append((copy.deepcopy(route), mutated_coverage))
 
     for index, (mutated_route, mutated_coverage) in enumerate(mutations):

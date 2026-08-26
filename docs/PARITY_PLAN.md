@@ -65,9 +65,9 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: SPEC-02-ROUND1-EXECUTABLE-CONTRACT
+CURRENT_TASK: REIMPLEMENT-13-SOURCE-CLOSED-ROUND1
 
-ACTIVE_SOFTWARE_TASK: ROUND1_EXECUTABLE_CONTRACT
+ACTIVE_SOFTWARE_TASK: SOURCE_CLOSED_ROUND1_NATIVE_C
 
 ## 4. Current salvage queue and production extension
 
@@ -225,7 +225,11 @@ and source window; 262 are required `SOURCE_CLOSED` writers and 112 begin only
 after stable Round 2 entry and are `NOT_REQUIRED_FOR_ROUND1`. The matrix now has
 zero required `OBSERVED`, `PARTIAL`, or `UNKNOWN`, zero unmapped actor pairs or
 route edges, zero unowned events, and zero orphan authoritative writers.
-ORACLE-11 is accepted and SPEC-02 is the active card.
+ORACLE-11 is accepted and its zero-gap gate remains locked.
+SPEC-02 is now accepted. Its 26 required field contracts cover all ten
+authority families with zero required UNKNOWN or adapted fields, and its
+generated fixtures contain the source-derived Round 1 content plus accepted
+Port V2 interface identities. REIMPLEMENT-13 is active at stable Round 1 entry.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

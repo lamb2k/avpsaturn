@@ -2,7 +2,7 @@
 
 TASK: SPEC-02-ROUND1-EXECUTABLE-CONTRACT
 KIND: SPEC
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: spec-round1-executable-contract
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -68,3 +68,11 @@ None. SPEC-02 acceptance is technical and cannot infer USER-10 acceptance.
 ## Next eligible cards
 
 - `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` after executable-contract acceptance.
+
+## Accepted result
+
+- `data/spec02_round1_executable_contract.json` binds 26 implementation fields
+  across all ten required authority families with zero required UNKNOWN or
+  adapted fields. `data/spec02_round1_generated_fixtures.json` contains only
+  accepted Oracle-derived content and accepted Port V2 interface contracts.
+  Deterministic regeneration and ten mutation controls pass in Fast and Oracle.

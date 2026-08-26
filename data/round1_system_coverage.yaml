@@ -787,7 +787,7 @@
     "segments": 94
   },
   "frontend_active": false,
-  "next_card": "SPEC-02-ROUND1-EXECUTABLE-CONTRACT",
+  "next_card": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
   "oracle10_exit": "PASS",
   "pending_oracle10_controls": [],
   "physical_saturn": "UNRUN",

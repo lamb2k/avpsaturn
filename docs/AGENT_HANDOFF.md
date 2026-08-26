@@ -16,7 +16,7 @@
 
 ## Current task and next action
 
-Resume the AvP salvage Goal at `SPEC-02-ROUND1-EXECUTABLE-CONTRACT`.
+Resume the AvP salvage Goal at `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1`.
 ORACLE-11 is accepted. All ten authority families are `SOURCE_CLOSED` or
 narrowly `NOT_REQUIRED_FOR_ROUND1`, including scheduler/lifecycle, Predator
 Warrior and its 38 player-audio edges, navigation/camera, enemies, auxiliary
@@ -30,9 +30,11 @@ required `SOURCE_CLOSED`; 112 first occur after stable Round 2 entry and are
 `OBSERVED`, `PARTIAL`, or `UNKNOWN`, zero unmapped actor pairs or route edges,
 zero unowned events, and zero orphan authoritative writers.
 
-Generate only `data/spec02_round1_executable_contract.json` and declared
-fixtures from accepted Oracle evidence hashes. Bind every required field to
-classification, source routine/table/frame, type/signedness, transition guard,
-reads/writes, and a real mutation control. Do not consume raw traces or guesses.
+SPEC-02 is accepted with 26 required field contracts, zero required UNKNOWN or
+adapted fields, deterministic fixtures, and ten passing mutation controls.
+Implement vertically from stable Round 1 entry using only SPEC-02, its generated
+fixtures, accepted Port V2 interfaces, and approved assets. Do not consume raw
+traces, disassembly notes, or guesses; preserve the per-body differential,
+Target, paired-emulator, rendered-inspection, commit, and push cycle.
 Do not write runtime, infer USER-09 approval, activate SALVAGE-08 before
 accepted USER-10, or advance physical Saturn beyond `UNRUN`.

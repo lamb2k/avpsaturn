@@ -2,7 +2,7 @@
 
 TASK: REIMPLEMENT-13-SOURCE-CLOSED-ROUND1
 KIND: INTEGRATE
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: reimplement-source-closed-round1
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
