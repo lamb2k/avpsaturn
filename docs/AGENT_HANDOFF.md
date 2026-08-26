@@ -34,8 +34,11 @@ Type-12 enemies and all source-dispatched auxiliary pickup/projectile/hazard/
 destructible actors are `SOURCE_CLOSED` in `data/oracle11_round1_enemy_archetypes.json`
 and `data/oracle11_round1_auxiliary_authority.json`. The corrected auxiliary
 controls remove every distinct class/type; zero-removal captures are rejected.
-Boss orchestration remains separate. Next close encounter, wave, scripted
-trigger, and route-edge ownership across all 94 segments.
+Encounter/wave/scripted-route authority is `SOURCE_CLOSED` in
+`data/oracle11_round1_encounter_route_authority.json`: two identical completions
+bind all 94 segments, 14 route edges, 609 writer transactions, 451 writer PCs,
+and 56 enemy spawns with zero orphans or fixed-frame/count substitutes. Next
+close Round 1 boss phase/clear orchestration while retaining class-`0x06`.
 The sole route-segment x authority-family matrix and SPEC-02 zero-gap gate
 remain in `data/round1_system_coverage.yaml`.
 

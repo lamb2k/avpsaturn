@@ -63,12 +63,14 @@
     },
     {
       "accepted_evidence": [
-        "data/oracle06_round1_encounter.json"
+        "data/oracle06_round1_encounter.json",
+        "data/oracle11_round1_encounter_route_authority.json",
+        "data/oracle10_round1_route.json"
       ],
-      "counterfactual": "first street entry/withdrawal controls accepted; later route controllers pending",
-      "exact_next_experiment": "Bind every spawn/wave/script trigger and reject fixed-frame or presentation-owned clear.",
+      "counterfactual": "two byte-identical completing captures bind all 94 route segments, 14 global route-state edges, 609 route-writer transactions and 56 Round 1 enemy spawns; completing and non-completing offense, class removal and route perturbations discriminate the source guards",
+      "exact_next_experiment": "Retain the closed encounter/wave/scripted-trigger and 94-segment route map while boss phase/clear orchestration is source-closed.",
       "id": "encounters-waves-scripted-triggers",
-      "status": "PARTIAL"
+      "status": "SOURCE_CLOSED"
     },
     {
       "accepted_evidence": [
@@ -801,16 +803,16 @@
     ],
     "cell_count": 940,
     "closure_gate": {
-      "orphan_authoritative_writers": 830,
+      "orphan_authoritative_writers": 379,
       "required_observed": 203,
-      "required_partial": 88,
+      "required_partial": 0,
       "required_unknown": 0,
       "spec02_eligible": false,
       "unmapped_actor_class_type_pairs": 0,
-      "unmapped_route_edges": 94,
+      "unmapped_route_edges": 0,
       "unowned_events": {
         "audio": 0,
-        "damage": 1,
+        "damage": 0,
         "load": 0,
         "release": 0,
         "rng": 1023,
@@ -937,7 +939,9 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -1123,7 +1127,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1132,10 +1136,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -1318,7 +1324,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1327,10 +1333,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -1522,7 +1530,9 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -1708,7 +1718,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1717,10 +1727,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -1903,7 +1915,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1912,10 +1924,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -2098,7 +2112,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2107,10 +2121,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -2293,7 +2309,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2302,10 +2318,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -2488,7 +2506,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2497,10 +2515,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -2683,7 +2703,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2692,10 +2712,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -2878,7 +2900,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2887,10 +2909,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -3073,7 +3097,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3082,10 +3106,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -3268,7 +3294,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3277,10 +3303,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -3463,7 +3491,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3472,10 +3500,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -3658,7 +3688,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3667,10 +3697,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -3853,7 +3885,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3862,10 +3894,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -4048,7 +4082,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4057,10 +4091,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -4243,7 +4279,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4252,10 +4288,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -4438,7 +4476,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4447,10 +4485,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -4633,7 +4673,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4642,10 +4682,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -4828,7 +4870,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4837,10 +4879,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -5023,7 +5067,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5032,10 +5076,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -5218,7 +5264,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5227,10 +5273,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -5413,7 +5461,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5422,10 +5470,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -5608,7 +5658,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5617,10 +5667,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -5803,7 +5855,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5812,10 +5864,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -5998,7 +6052,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6007,10 +6061,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -6193,7 +6249,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6202,10 +6258,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -6388,7 +6446,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6397,10 +6455,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -6583,7 +6643,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6592,10 +6652,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -6778,7 +6840,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6787,10 +6849,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -6973,7 +7037,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6982,10 +7046,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -7168,7 +7234,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7177,10 +7243,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -7363,7 +7431,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7372,10 +7440,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -7558,7 +7628,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7567,10 +7637,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -7753,7 +7825,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7762,10 +7834,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -7948,7 +8022,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7957,10 +8031,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -8143,7 +8219,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8152,10 +8228,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -8338,7 +8416,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8347,10 +8425,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -8533,7 +8613,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8542,10 +8622,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -8728,7 +8810,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8737,10 +8819,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -8923,7 +9007,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8932,10 +9016,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -9118,7 +9204,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9127,10 +9213,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -9313,7 +9401,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9322,10 +9410,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -9508,7 +9598,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9517,10 +9607,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -9703,7 +9795,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9712,10 +9804,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -9898,7 +9992,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9907,10 +10001,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -10093,7 +10189,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10102,10 +10198,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -10288,7 +10386,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10297,10 +10395,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -10483,7 +10583,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10492,10 +10592,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -10678,7 +10780,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10687,10 +10789,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -10873,7 +10977,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10882,10 +10986,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -11068,7 +11174,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11077,10 +11183,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -11263,7 +11371,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11272,10 +11380,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -11458,7 +11568,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11467,10 +11577,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -11653,7 +11765,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11662,10 +11774,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -11848,7 +11962,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11857,10 +11971,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -12043,7 +12159,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12052,10 +12168,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -12238,7 +12356,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12247,10 +12365,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -12433,7 +12553,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12442,10 +12562,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -12628,7 +12750,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12637,10 +12759,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -12823,7 +12947,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12832,10 +12956,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -13018,7 +13144,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13027,10 +13153,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -13213,7 +13341,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13222,10 +13350,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -13408,7 +13538,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13417,10 +13547,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -13603,7 +13735,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13612,10 +13744,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -13798,7 +13932,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13807,10 +13941,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -13993,7 +14129,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14002,10 +14138,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -14188,7 +14326,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14197,10 +14335,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -14383,7 +14523,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14392,10 +14532,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -14578,7 +14720,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14587,10 +14729,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -14773,7 +14917,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14782,10 +14926,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -14968,7 +15114,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14977,10 +15123,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -15163,7 +15311,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15172,10 +15320,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -15358,7 +15508,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15367,10 +15517,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -15553,7 +15705,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15562,10 +15714,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -15748,7 +15902,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15757,10 +15911,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -15943,7 +16099,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15952,10 +16108,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -16138,7 +16296,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16147,10 +16305,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -16333,7 +16493,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16342,10 +16502,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -16528,7 +16690,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16537,10 +16699,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -16723,7 +16887,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16732,10 +16896,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -16918,7 +17084,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16927,10 +17093,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -17113,7 +17281,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17122,10 +17290,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -17308,7 +17478,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17317,10 +17487,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -17503,7 +17675,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17512,10 +17684,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -17698,7 +17872,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17707,10 +17881,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -17893,7 +18069,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17902,10 +18078,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -18088,7 +18266,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -18097,10 +18275,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -18283,7 +18463,7 @@
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -18292,10 +18472,12 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-boss",
@@ -18487,7 +18669,9 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -18682,7 +18866,9 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -18877,7 +19063,9 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -19072,7 +19260,9 @@
               "targeted-counterfactuals"
             ],
             "evidence": [
-              "data/oracle06_round1_encounter.json"
+              "data/oracle06_round1_encounter.json",
+              "data/oracle11_round1_encounter_route_authority.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -19162,666 +19352,7 @@
     "schema": "round1-route-authority-matrix-v1",
     "segment_count": 94,
     "unmapped_actor_class_type_pairs": [],
-    "unmapped_route_edges": [
-      {
-        "segment": "round1-title",
-        "source_frame_range": [
-          1972,
-          2073
-        ]
-      },
-      {
-        "segment": "round1-street-gameplay",
-        "source_frame_range": [
-          2074,
-          5542
-        ]
-      },
-      {
-        "segment": "S62e6f558413c",
-        "source_frame_range": [
-          5543,
-          5564
-        ]
-      },
-      {
-        "segment": "S5ed3a29ea14a-1",
-        "source_frame_range": [
-          5565,
-          5565
-        ]
-      },
-      {
-        "segment": "S23b5c9bf05f7-4",
-        "source_frame_range": [
-          5566,
-          5566
-        ]
-      },
-      {
-        "segment": "round1-barricade-dialogue",
-        "source_frame_range": [
-          5567,
-          5658
-        ]
-      },
-      {
-        "segment": "round1-warehouse-gameplay",
-        "source_frame_range": [
-          5659,
-          6199
-        ]
-      },
-      {
-        "segment": "Sbdfaec04db65",
-        "source_frame_range": [
-          6200,
-          6200
-        ]
-      },
-      {
-        "segment": "continue-countdown",
-        "source_frame_range": [
-          6201,
-          6692
-        ]
-      },
-      {
-        "segment": "round1-warehouse-stalker",
-        "source_frame_range": [
-          6693,
-          7438
-        ]
-      },
-      {
-        "segment": "S767ba6708a04",
-        "source_frame_range": [
-          7439,
-          7439
-        ]
-      },
-      {
-        "segment": "S96c70d0283db",
-        "source_frame_range": [
-          7440,
-          7442
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-1",
-        "source_frame_range": [
-          7443,
-          7443
-        ]
-      },
-      {
-        "segment": "Sbdfaec04db65-1",
-        "source_frame_range": [
-          7444,
-          7453
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-2",
-        "source_frame_range": [
-          7454,
-          7454
-        ]
-      },
-      {
-        "segment": "S247117539434",
-        "source_frame_range": [
-          7455,
-          7457
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-3",
-        "source_frame_range": [
-          7458,
-          7458
-        ]
-      },
-      {
-        "segment": "Sbdfaec04db65-2",
-        "source_frame_range": [
-          7459,
-          7468
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-4",
-        "source_frame_range": [
-          7469,
-          7469
-        ]
-      },
-      {
-        "segment": "S247117539434-1",
-        "source_frame_range": [
-          7470,
-          7472
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-5",
-        "source_frame_range": [
-          7473,
-          7473
-        ]
-      },
-      {
-        "segment": "Sbdfaec04db65-3",
-        "source_frame_range": [
-          7474,
-          7483
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-6",
-        "source_frame_range": [
-          7484,
-          7484
-        ]
-      },
-      {
-        "segment": "S247117539434-2",
-        "source_frame_range": [
-          7485,
-          7487
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-7",
-        "source_frame_range": [
-          7488,
-          7488
-        ]
-      },
-      {
-        "segment": "Sbdfaec04db65-4",
-        "source_frame_range": [
-          7489,
-          7498
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-8",
-        "source_frame_range": [
-          7499,
-          7499
-        ]
-      },
-      {
-        "segment": "S247117539434-3",
-        "source_frame_range": [
-          7500,
-          7502
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-9",
-        "source_frame_range": [
-          7503,
-          7503
-        ]
-      },
-      {
-        "segment": "round1-warehouse-stalker-2",
-        "source_frame_range": [
-          7504,
-          9004
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-10",
-        "source_frame_range": [
-          9005,
-          9005
-        ]
-      },
-      {
-        "segment": "S96c70d0283db-1",
-        "source_frame_range": [
-          9006,
-          9008
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-11",
-        "source_frame_range": [
-          9009,
-          9009
-        ]
-      },
-      {
-        "segment": "Sf27028a340e0",
-        "source_frame_range": [
-          9010,
-          9019
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-12",
-        "source_frame_range": [
-          9020,
-          9020
-        ]
-      },
-      {
-        "segment": "S96c70d0283db-2",
-        "source_frame_range": [
-          9021,
-          9023
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-13",
-        "source_frame_range": [
-          9024,
-          9024
-        ]
-      },
-      {
-        "segment": "S7e94261c70b9",
-        "source_frame_range": [
-          9025,
-          9034
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-14",
-        "source_frame_range": [
-          9035,
-          9035
-        ]
-      },
-      {
-        "segment": "S96c70d0283db-3",
-        "source_frame_range": [
-          9036,
-          9038
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-15",
-        "source_frame_range": [
-          9039,
-          9039
-        ]
-      },
-      {
-        "segment": "round1-warehouse-gameplay-2",
-        "source_frame_range": [
-          9040,
-          9940
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-16",
-        "source_frame_range": [
-          9941,
-          9941
-        ]
-      },
-      {
-        "segment": "S247117539434-4",
-        "source_frame_range": [
-          9942,
-          9944
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-17",
-        "source_frame_range": [
-          9945,
-          9945
-        ]
-      },
-      {
-        "segment": "Sb5365ba0798c",
-        "source_frame_range": [
-          9946,
-          9955
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-18",
-        "source_frame_range": [
-          9956,
-          9956
-        ]
-      },
-      {
-        "segment": "S247117539434-5",
-        "source_frame_range": [
-          9957,
-          9959
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-19",
-        "source_frame_range": [
-          9960,
-          9960
-        ]
-      },
-      {
-        "segment": "Sf27028a340e0-1",
-        "source_frame_range": [
-          9961,
-          9970
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-20",
-        "source_frame_range": [
-          9971,
-          9971
-        ]
-      },
-      {
-        "segment": "S247117539434-6",
-        "source_frame_range": [
-          9972,
-          9974
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-21",
-        "source_frame_range": [
-          9975,
-          9975
-        ]
-      },
-      {
-        "segment": "round1-chrysalis-battle",
-        "source_frame_range": [
-          9976,
-          11476
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-22",
-        "source_frame_range": [
-          11477,
-          11477
-        ]
-      },
-      {
-        "segment": "S247117539434-7",
-        "source_frame_range": [
-          11478,
-          11480
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-23",
-        "source_frame_range": [
-          11481,
-          11481
-        ]
-      },
-      {
-        "segment": "Sf27028a340e0-2",
-        "source_frame_range": [
-          11482,
-          11491
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-24",
-        "source_frame_range": [
-          11492,
-          11492
-        ]
-      },
-      {
-        "segment": "S247117539434-8",
-        "source_frame_range": [
-          11493,
-          11495
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-25",
-        "source_frame_range": [
-          11496,
-          11496
-        ]
-      },
-      {
-        "segment": "Sf27028a340e0-3",
-        "source_frame_range": [
-          11497,
-          11506
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-26",
-        "source_frame_range": [
-          11507,
-          11507
-        ]
-      },
-      {
-        "segment": "S247117539434-9",
-        "source_frame_range": [
-          11508,
-          11510
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-27",
-        "source_frame_range": [
-          11511,
-          11511
-        ]
-      },
-      {
-        "segment": "Sf27028a340e0-4",
-        "source_frame_range": [
-          11512,
-          11521
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-28",
-        "source_frame_range": [
-          11522,
-          11522
-        ]
-      },
-      {
-        "segment": "S247117539434-10",
-        "source_frame_range": [
-          11523,
-          11525
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-29",
-        "source_frame_range": [
-          11526,
-          11526
-        ]
-      },
-      {
-        "segment": "Sb5365ba0798c-1",
-        "source_frame_range": [
-          11527,
-          11536
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-30",
-        "source_frame_range": [
-          11537,
-          11537
-        ]
-      },
-      {
-        "segment": "S247117539434-11",
-        "source_frame_range": [
-          11538,
-          11540
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-31",
-        "source_frame_range": [
-          11541,
-          11541
-        ]
-      },
-      {
-        "segment": "round1-warehouse-stalker-3",
-        "source_frame_range": [
-          11542,
-          12442
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-32",
-        "source_frame_range": [
-          12443,
-          12443
-        ]
-      },
-      {
-        "segment": "S247117539434-12",
-        "source_frame_range": [
-          12444,
-          12446
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-33",
-        "source_frame_range": [
-          12447,
-          12447
-        ]
-      },
-      {
-        "segment": "Sf27028a340e0-5",
-        "source_frame_range": [
-          12448,
-          12457
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-34",
-        "source_frame_range": [
-          12458,
-          12458
-        ]
-      },
-      {
-        "segment": "S247117539434-13",
-        "source_frame_range": [
-          12459,
-          12461
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-35",
-        "source_frame_range": [
-          12462,
-          12462
-        ]
-      },
-      {
-        "segment": "Sb5365ba0798c-2",
-        "source_frame_range": [
-          12463,
-          12472
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-36",
-        "source_frame_range": [
-          12473,
-          12473
-        ]
-      },
-      {
-        "segment": "S247117539434-14",
-        "source_frame_range": [
-          12474,
-          12476
-        ]
-      },
-      {
-        "segment": "S767ba6708a04-37",
-        "source_frame_range": [
-          12477,
-          12477
-        ]
-      },
-      {
-        "segment": "round1-warehouse-gameplay-3",
-        "source_frame_range": [
-          12478,
-          12798
-        ]
-      },
-      {
-        "segment": "Sbdfaec04db65-5",
-        "source_frame_range": [
-          12799,
-          12799
-        ]
-      },
-      {
-        "segment": "continue-countdown-2",
-        "source_frame_range": [
-          12800,
-          13292
-        ]
-      },
-      {
-        "segment": "round1-chrysalis-battle-2",
-        "source_frame_range": [
-          13293,
-          15039
-        ]
-      },
-      {
-        "segment": "Sc196f8dbfff3-1",
-        "source_frame_range": [
-          15040,
-          15058
-        ]
-      },
-      {
-        "segment": "S5fdeea4b937b",
-        "source_frame_range": [
-          15059,
-          15080
-        ]
-      },
-      {
-        "segment": "Sa96e1f71b9dd",
-        "source_frame_range": [
-          15081,
-          15091
-        ]
-      },
-      {
-        "segment": "round2-title",
-        "source_frame_range": [
-          15092,
-          15192
-        ]
-      },
-      {
-        "segment": "round2-underpass",
-        "source_frame_range": [
-          15193,
-          18000
-        ]
-      }
-    ]
+    "unmapped_route_edges": []
   },
   "route_wide_perturbation": {
     "first_input_difference": {
@@ -19862,16 +19393,16 @@
   "schema": "round1-system-coverage-v1",
   "source_set": "avspu",
   "spec02_closure_gate": {
-    "orphan_authoritative_writers": 830,
+    "orphan_authoritative_writers": 379,
     "required_observed": 203,
-    "required_partial": 88,
+    "required_partial": 0,
     "required_unknown": 0,
     "spec02_eligible": false,
     "unmapped_actor_class_type_pairs": 0,
-    "unmapped_route_edges": 94,
+    "unmapped_route_edges": 0,
     "unowned_events": {
       "audio": 0,
-      "damage": 1,
+      "damage": 0,
       "load": 0,
       "release": 0,
       "rng": 1023,

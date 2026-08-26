@@ -188,6 +188,19 @@ card only for a genuinely independent body or source-evidence hard stop.
   dispatch and are `NOT_REQUIRED_FOR_ROUND1`. Player-side weapon/projectile/
   resource and type-20 navigation geometry contracts remain consumed from
   their accepted evidence rather than reopened.
+- `round1-encounters-waves-scripted-triggers-route-edges`: `SOURCE_CLOSED`.
+  Two independently launched full-route captures are byte-identical and bind
+  all 94 route segments, all 14 observed global route-state edges, 609
+  route-writer transactions across 451 exact source PCs, and all 56 Round 1
+  enemy spawns. The remaining 368 Round 1 spawn events are delegated to the
+  already closed player or auxiliary families. The completing route
+  perturbation plus street-offense, warehouse-offense, class-`0x1f`, and
+  class-`0x00` controls discriminate the source route guards and spawn owners.
+  Evidence is in `data/oracle11_round1_encounter_route_authority.json`; it
+  contains zero orphan route edges, route writers, or enemy spawns and admits
+  no fixed-frame or actor-count clear substitute. Boss phase/clear
+  orchestration, stage clear/Round 2 handoff, and global RNG consumption remain
+  separate active ORACLE-11 families.
 
 ## Owned paths
 

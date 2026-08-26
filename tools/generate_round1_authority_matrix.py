@@ -12,6 +12,7 @@ GLOBAL_AUDIO=ROOT/'data/oracle11_global_audio_load_release.json'
 NAVIGATION=ROOT/'data/oracle11_round1_navigation.json'
 ENEMIES=ROOT/'data/oracle11_round1_enemy_archetypes.json'
 AUXILIARY=ROOT/'data/oracle11_round1_auxiliary_authority.json'
+ENCOUNTERS=ROOT/'data/oracle11_round1_encounter_route_authority.json'
 FAMILIES=(
  'predator-warrior-player-authority','round1-navigation-terrain-camera',
  'actor-scheduler-allocation-lifecycle','round1-enemy-archetypes',
@@ -43,6 +44,14 @@ def build(coverage,route):
             for item in auxiliary_report['phantom_census_aliases']:
                 parts=item['id'].split('-')
                 closed_pairs.add((f"0x{parts[2]}",int(parts[4])))
+    encounter_report=None
+    closed_route_segments=set()
+    if ENCOUNTERS.exists():
+        encounter_report=json.loads(ENCOUNTERS.read_text(encoding='ascii'))
+        if encounter_report['status']=='SOURCE_CLOSED':
+            closed_route_segments.update(
+                item['route_segment'] for item in encounter_report['segment_bindings']
+                if item['classification']=='SOURCE_CLOSED')
     bodies={x['id']:x for x in coverage['bodies']}
     if 'rng-consumption' not in bodies:
         bodies['rng-consumption']={'status':'OBSERVED','accepted_evidence':['data/oracle10_round1_route.json']}
@@ -83,7 +92,8 @@ def build(coverage,route):
         if pair not in closed_pairs and x.get('source_closure_status') not in ('SOURCE_CLOSED','NOT_REQUIRED_FOR_ROUND1'):
             unmapped_pairs.append({'class':pair[0],'type':pair[1],'id':x['id']})
     unmapped_edges=[{'segment':s['id'],'source_frame_range':s['source_frame_range']}
-        for s in route['segments'] if s.get('source_closure_status') not in ('SOURCE_CLOSED','NOT_REQUIRED_FOR_ROUND1')]
+        for s in route['segments'] if s['id'] not in closed_route_segments and
+        s.get('source_closure_status') not in ('SOURCE_CLOSED','NOT_REQUIRED_FOR_ROUND1')]
     writer_pcs=set(route['baseline_writer_bindings']['route']['unique_pcs'])
     writer_pcs.update(route['baseline_writer_bindings']['qsound']['unique_pcs'])
     for value in route['baseline_writer_bindings']['actor'].values():writer_pcs.update(value['writer_pcs'])
@@ -91,6 +101,8 @@ def build(coverage,route):
         writer_pcs.difference_update(enemy_report['owned_authoritative_writer_pcs'])
     if auxiliary_report and auxiliary_report['status']=='SOURCE_CLOSED':
         writer_pcs.difference_update(auxiliary_report['owned_authoritative_writer_pcs'])
+    if encounter_report and encounter_report['status']=='SOURCE_CLOSED':
+        writer_pcs.difference_update(encounter_report['owned_authoritative_writer_pcs'])
     events={
       'spawn':len(unmapped_pairs),'damage':1 if counts['PARTIAL'] else 0,
       'audio':len(route['audio_change_frames']) if bodies[FAMILIES[8]]['status']!='SOURCE_CLOSED' else 0,
@@ -210,6 +222,24 @@ def main():
           'Retain the closed player and auxiliary content contracts while '
           'encounter/wave/scripted trigger, boss orchestration, route handoff '
           'and global RNG ownership are source-closed.')
+    if ENCOUNTERS.exists():
+        encounters=json.loads(ENCOUNTERS.read_text(encoding='ascii'))
+        body=next(item for item in coverage['bodies']
+            if item['id']=='encounters-waves-scripted-triggers')
+        body['status']=encounters['status']
+        evidence=body.setdefault('accepted_evidence',[])
+        for item in ('data/oracle11_round1_encounter_route_authority.json',
+                     'data/oracle06_round1_encounter.json',
+                     'data/oracle10_round1_route.json'):
+            if item not in evidence:evidence.append(item)
+        body['counterfactual']=(
+          'two byte-identical completing captures bind all 94 route segments, '
+          '14 global route-state edges, 609 route-writer transactions and 56 '
+          'Round 1 enemy spawns; completing and non-completing offense, class '
+          'removal and route perturbations discriminate the source guards')
+        body['exact_next_experiment']=(
+          'Retain the closed encounter/wave/scripted-trigger and 94-segment '
+          'route map while boss phase/clear orchestration is source-closed.')
     coverage['route_segment_authority_matrix']=build(coverage,route)
     coverage['spec02_closure_gate']=coverage['route_segment_authority_matrix']['closure_gate']
     COVERAGE.write_bytes((json.dumps(coverage,sort_keys=True,indent=2)+'\n').encode('ascii'))

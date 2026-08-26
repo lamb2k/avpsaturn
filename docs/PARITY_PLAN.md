@@ -201,11 +201,18 @@ destructible family is also `SOURCE_CLOSED`: two byte-identical completions and
 twelve real class/type suppressions bind all source-dispatched auxiliary
 actors. A zero-removal notifier attempt is rejected and preserved outside
 acceptance; four generic census aliases are `NOT_REQUIRED_FOR_ROUND1`. The
-generated 94 x 10 matrix remains ineligible with 203 required `OBSERVED`, 88
-required `PARTIAL`, zero required `UNKNOWN`, zero unmapped actor class/type
-pairs, 94 unmapped route edges, 830 orphan authoritative writers,
-and unowned audio/damage/load/release/RNG/spawn counts of
-0/1/0/0/1,023/0. ORACLE-11 remains active and SPEC-02 remains ineligible.
+encounter/wave/scripted-trigger family is now `SOURCE_CLOSED`: two
+byte-identical completions bind all 94 route segments, 14 route-state edges,
+609 route-writer transactions, 451 route-writer PCs, and 56 enemy spawns. The
+accepted route perturbation and four targeted offense/class-removal controls
+leave zero orphan route edges, route writers, or enemy spawns and reject
+fixed-frame or actor-count clear substitutes. The generated 94 x 10 matrix
+remains ineligible with 203 required `OBSERVED`, zero required `PARTIAL`, zero
+required `UNKNOWN`, zero unmapped actor class/type pairs, zero unmapped route
+edges, 379 orphan authoritative writers, and unowned
+audio/damage/load/release/RNG/spawn counts of 0/0/0/0/1,023/0. ORACLE-11 remains
+active; boss orchestration is the exact next family and SPEC-02 remains
+ineligible.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|
