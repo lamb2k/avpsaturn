@@ -1,4 +1,42 @@
 {
+  "accepted_audio_cpu_subcheckpoints": [
+    {
+      "classification": "SOURCE_CLOSED",
+      "guards": [
+        "0xcffd equals 0x88",
+        "incremented 0xc00f command-ready byte is nonzero"
+      ],
+      "id": "qsound-shared-ram-command-ingress",
+      "reads": {
+        "0xc000..0xc00f": "LDIR tap PC 0x0066 / 1,161 copies",
+        "0xc00f": "tap PC 0x004a / 67,189 polls",
+        "0xcffd": "tap PC 0x0042 / 67,189 polls",
+        "0xcffe": "tap PC 0x006e / 67,189 reads"
+      },
+      "source_routine": "audio ROM 0x0038..0x0074",
+      "transactions_in_each_completion": 1161,
+      "writes": [
+        "copy 16-byte command to 0xf100 plus 0xf007 ring offset",
+        "advance 0xf007 by 0x10",
+        "write 0xff to 0xc00f ready byte",
+        "copy 0xcffe to 0xf040"
+      ]
+    },
+    {
+      "arguments": "DE-derived 16-bit value to 0xd001 low then 0xd000 high; 0xf00d plus 0x80 to 0xd002 register select",
+      "classification": "SOURCE_CLOSED",
+      "guard": "poll 0xd007 until QSound ready bit permits the write",
+      "id": "qsound-bus-write-primitive",
+      "observed_writer_pcs": {
+        "0xd000": "0x0ad7",
+        "0xd001": "0x0ad3",
+        "0xd002": "0x0adb"
+      },
+      "semantic_sound_names_inferred": false,
+      "source_routine": "audio ROM 0x0abc..0x0adb",
+      "writes_per_port_in_each_completion": 489834
+    }
+  ],
   "accepted_subcheckpoint": {
     "all_payload_writer_counts_match_transactions": true,
     "classification": "SOURCE_CLOSED",
@@ -99,8 +137,38 @@
     "transactions_in_each_completion": 1161
   },
   "capture_identity": {
+    "audio_transport_a": {
+      "audio_rom_sha256": "88f7f38e64c5d5c16264768230fc599a4f8de5904633a814789a192a8baa19b3",
+      "files": {
+        "audio_bus_writers.tsv": "9700672c52a3c90e26541bf27dfba482f73861b487ff03468fe278ef20e0dd7e",
+        "audio_shared_reads.tsv": "7ce1fceffc28d09ab23753560abd524eff00561cf310b0cee5032f8b1ced4c9f",
+        "dispatches.tsv": "fd6a80c560d4af8dfaac5c56d035b2ffad3ccdcc006be769d67494168817da0c",
+        "projectiles.tsv": "f309394a466774a0b25daf32bb3e3008869dc350f0fcb52860e84fdeab2f657f",
+        "qsound.tsv": "ec59a4a62c20d20293f9af5389eccbb3c48ba0a2867a602498f2b7b409d37ba0",
+        "result.tsv": "3237763674ad14fdf2fe0a88666a5a066470710cc8527641e546b26c5ec1338d",
+        "samples.tsv": "cb8b55d0de06315073530c9dac497fa45cef7a129da3cb59a4972c43d57a708f",
+        "score_writes.tsv": "adb98eb7b0ca9ff8305361ea055045e9f4bedae79e368a9b04781c38f55076a4"
+      },
+      "manifest_sha256": "c9b1741a3f5b05f58b6c88e48b0ea193ca1179c28acf41c8956ed55403ccc27b"
+    },
+    "audio_transport_b": {
+      "audio_rom_sha256": "88f7f38e64c5d5c16264768230fc599a4f8de5904633a814789a192a8baa19b3",
+      "files": {
+        "audio_bus_writers.tsv": "9700672c52a3c90e26541bf27dfba482f73861b487ff03468fe278ef20e0dd7e",
+        "audio_shared_reads.tsv": "7ce1fceffc28d09ab23753560abd524eff00561cf310b0cee5032f8b1ced4c9f",
+        "dispatches.tsv": "fd6a80c560d4af8dfaac5c56d035b2ffad3ccdcc006be769d67494168817da0c",
+        "projectiles.tsv": "f309394a466774a0b25daf32bb3e3008869dc350f0fcb52860e84fdeab2f657f",
+        "qsound.tsv": "ec59a4a62c20d20293f9af5389eccbb3c48ba0a2867a602498f2b7b409d37ba0",
+        "result.tsv": "3237763674ad14fdf2fe0a88666a5a066470710cc8527641e546b26c5ec1338d",
+        "samples.tsv": "cb8b55d0de06315073530c9dac497fa45cef7a129da3cb59a4972c43d57a708f",
+        "score_writes.tsv": "adb98eb7b0ca9ff8305361ea055045e9f4bedae79e368a9b04781c38f55076a4"
+      },
+      "manifest_sha256": "c9b1741a3f5b05f58b6c88e48b0ea193ca1179c28acf41c8956ed55403ccc27b"
+    },
+    "audio_transport_byte_identical": true,
     "byte_identical": true,
     "completion_a": {
+      "audio_rom_sha256": null,
       "files": {
         "dispatches.tsv": "fd6a80c560d4af8dfaac5c56d035b2ffad3ccdcc006be769d67494168817da0c",
         "projectiles.tsv": "f309394a466774a0b25daf32bb3e3008869dc350f0fcb52860e84fdeab2f657f",
@@ -112,6 +180,7 @@
       "manifest_sha256": "52368057a4ad08129fbc3f986e371f2217460d72866e34c09f4b667caa35a60e"
     },
     "completion_b": {
+      "audio_rom_sha256": null,
       "files": {
         "dispatches.tsv": "fd6a80c560d4af8dfaac5c56d035b2ffad3ccdcc006be769d67494168817da0c",
         "projectiles.tsv": "f309394a466774a0b25daf32bb3e3008869dc350f0fcb52860e84fdeab2f657f",
@@ -5806,9 +5875,9 @@
     "provenance_groups": 175
   },
   "remaining_transport_backlog": {
-    "classification": "OBSERVED",
-    "exact_next_experiment": "bind the audio-CPU shared-RAM reader, command dispatch tables, and exact downstream QSound-bus arguments without semantic names",
-    "scope": "QSound shared RAM to audio-CPU command handling and QSound bus"
+    "classification": "PARTIAL",
+    "exact_next_experiment": "bind each copied command to its audio-CPU dispatch/table path and exact QSound-bus argument effects without semantic names",
+    "scope": "audio-CPU command dispatch, state updates and command tables"
   },
   "schema": "oracle11-global-gameplay-audio-load-release-v1",
   "scope": "global Round 1 gameplay-audio/load/release authority",

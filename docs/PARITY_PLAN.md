@@ -168,8 +168,11 @@ Predator Warrior is now `SOURCE_CLOSED`. The shared queue drain and
 dispatcher-to-QSound transport remain in the global gameplay-audio/load/release
 backlog. Its first global subcheckpoint source-closes the data-independent
 main-CPU queue drain to QSound shared RAM across all 1,161 captured route
-transactions; audio-CPU command handling, 175 non-player trigger-provenance
-groups, and four load/release boundaries remain open. The generated 94 x 10
+transactions. Two additional byte-identical captures source-close the
+audio-CPU 16-byte shared-command ingress and its guarded low/high/register
+QSound write primitive. The intervening audio-CPU command handlers and tables,
+175 non-player trigger-provenance groups, and four load/release boundaries
+remain open. The generated 94 x 10
 matrix remains ineligible with 291 required `OBSERVED`, 307 required `PARTIAL`,
 zero required `UNKNOWN`, 18 unmapped actor
 class/type pairs, 94 unmapped route edges, 1,517 orphan authoritative writers,

@@ -14,12 +14,16 @@ BASE_A = ROOT / ".deps" / "mame" / "oracle11_player_audio_e"
 BASE_B = ROOT / ".deps" / "mame" / "oracle11_player_audio_f"
 ORACLE10 = (ROOT / ".deps" / "mame" /
             "oracle10_round1_system_census_e" / "baseline")
+TRANSPORT_A = ROOT / ".deps" / "mame" / "oracle11_global_audio_transport_b"
+TRANSPORT_B = ROOT / ".deps" / "mame" / "oracle11_global_audio_transport_c"
 OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
 ROUTE = ROOT / "data" / "oracle10_round1_route.json"
 PLAYER_AUDIO = ROOT / "data" / "oracle11_predator_player_audio.json"
 OUT = ROOT / "data" / "oracle11_global_audio_load_release.json"
 IDENTICAL_FILES = ("samples.tsv", "dispatches.tsv", "qsound.tsv",
                    "projectiles.tsv", "score_writes.tsv", "result.tsv")
+TRANSPORT_FILES = IDENTICAL_FILES + ("audio_shared_reads.tsv",
+                                    "audio_bus_writers.tsv")
 PAYLOAD_WRITERS = {
     "0x618006": "0x0018ae", "0x618008": "0x0018b6",
     "0x618000": "0x0018be", "0x618002": "0x0018c6",
@@ -48,15 +52,15 @@ def canonical(value: object) -> bytes:
     return json.dumps(value, sort_keys=True, indent=2).encode("ascii") + b"\n"
 
 
-def capture_identity(path: Path) -> dict[str, object]:
+def capture_identity(path: Path, files=IDENTICAL_FILES) -> dict[str, object]:
     manifest_path = path / "input_manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
-    for filename in IDENTICAL_FILES:
+    for filename in files:
         require(digest(path / filename) == manifest["sha256"][filename],
                 f"{path.name}: {filename} identity drift")
     return {"manifest_sha256": digest(manifest_path),
-            "files": {name: manifest["sha256"][name]
-                      for name in IDENTICAL_FILES}}
+            "files": {name: manifest["sha256"][name] for name in files},
+            "audio_rom_sha256": manifest.get("audio_rom_sha256")}
 
 
 def build_report() -> dict[str, object]:
@@ -121,6 +125,31 @@ def build_report() -> dict[str, object]:
                 for address, pc in PAYLOAD_WRITERS.items()),
             "shared payload writer/count drift")
 
+    transport_a = capture_identity(TRANSPORT_A, TRANSPORT_FILES)
+    transport_b = capture_identity(TRANSPORT_B, TRANSPORT_FILES)
+    require(transport_a["files"] == transport_b["files"],
+            "audio-CPU transport captures differ")
+    require(transport_a["audio_rom_sha256"] ==
+            "88f7f38e64c5d5c16264768230fc599a4f8de5904633a814789a192a8baa19b3",
+            "audio program ROM identity drift")
+    audio_shared = rows(TRANSPORT_A / "audio_shared_reads.tsv")
+    audio_bus = rows(TRANSPORT_A / "audio_bus_writers.tsv")
+    shared_map = {(row["address"], row["pc"]): int(row["count"])
+                  for row in audio_shared}
+    expected_shared = {(f"c{offset:03x}", "0066"): 1161
+                       for offset in range(0x000, 0x010)}
+    expected_shared.update({("c00f", "004a"): 67189,
+                            ("cffd", "0042"): 67189,
+                            ("cffe", "006e"): 67189})
+    require(shared_map == expected_shared,
+            "audio-CPU shared-RAM reader map drift")
+    bus_map = {(row["address"], row["pc"]): int(row["count"])
+               for row in audio_bus}
+    require(bus_map == {("d000", "0ad7"): 489834,
+                        ("d001", "0ad3"): 489834,
+                        ("d002", "0adb"): 489834},
+            "audio-CPU QSound-bus primitive drift")
+
     route = json.loads(ROUTE.read_text(encoding="utf-8"))
     player_audio = json.loads(PLAYER_AUDIO.read_text(encoding="ascii"))
     require(player_audio["status"] == "SOURCE_CLOSED" and
@@ -168,17 +197,56 @@ def build_report() -> dict[str, object]:
             "dispatch_occurrences": len(player),
             "ownership_ends_at": "0x001922 main-side enqueue entry",
         },
+        "accepted_audio_cpu_subcheckpoints": [
+            {
+                "id": "qsound-shared-ram-command-ingress",
+                "classification": "SOURCE_CLOSED",
+                "source_routine": "audio ROM 0x0038..0x0074",
+                "guards": [
+                    "0xcffd equals 0x88",
+                    "incremented 0xc00f command-ready byte is nonzero",
+                ],
+                "reads": {
+                    "0xcffd": "tap PC 0x0042 / 67,189 polls",
+                    "0xc00f": "tap PC 0x004a / 67,189 polls",
+                    "0xc000..0xc00f": "LDIR tap PC 0x0066 / 1,161 copies",
+                    "0xcffe": "tap PC 0x006e / 67,189 reads",
+                },
+                "writes": [
+                    "copy 16-byte command to 0xf100 plus 0xf007 ring offset",
+                    "advance 0xf007 by 0x10",
+                    "write 0xff to 0xc00f ready byte",
+                    "copy 0xcffe to 0xf040",
+                ],
+                "transactions_in_each_completion": 1161,
+            },
+            {
+                "id": "qsound-bus-write-primitive",
+                "classification": "SOURCE_CLOSED",
+                "source_routine": "audio ROM 0x0abc..0x0adb",
+                "guard": "poll 0xd007 until QSound ready bit permits the write",
+                "arguments": (
+                    "DE-derived 16-bit value to 0xd001 low then 0xd000 high; "
+                    "0xf00d plus 0x80 to 0xd002 register select"),
+                "observed_writer_pcs": {
+                    "0xd001": "0x0ad3", "0xd000": "0x0ad7",
+                    "0xd002": "0x0adb",
+                },
+                "writes_per_port_in_each_completion": 489834,
+                "semantic_sound_names_inferred": False,
+            },
+        ],
         "remaining_audio_trigger_backlog": {
             "dispatch_occurrences": len(nonplayer),
             "provenance_groups": len(trigger_backlog),
             "groups": trigger_backlog,
         },
         "remaining_transport_backlog": {
-            "classification": "OBSERVED",
-            "scope": "QSound shared RAM to audio-CPU command handling and QSound bus",
+            "classification": "PARTIAL",
+            "scope": "audio-CPU command dispatch, state updates and command tables",
             "exact_next_experiment": (
-                "bind the audio-CPU shared-RAM reader, command dispatch tables, "
-                "and exact downstream QSound-bus arguments without semantic names"),
+                "bind each copied command to its audio-CPU dispatch/table path "
+                "and exact QSound-bus argument effects without semantic names"),
         },
         "load_release_backlog": {
             "classification": "OBSERVED",
@@ -196,7 +264,10 @@ def build_report() -> dict[str, object]:
         },
         "capture_identity": {"completion_a": identity_a,
                              "completion_b": identity_b,
-                             "byte_identical": True},
+                             "byte_identical": True,
+                             "audio_transport_a": transport_a,
+                             "audio_transport_b": transport_b,
+                             "audio_transport_byte_identical": True},
         "protected_boundaries": {
             "production_runtime_writes": 0, "yaba_runs": 0,
             "frontend_active": False, "user09_status": "CHANGES_REQUESTED",
@@ -230,8 +301,16 @@ def validate(report: dict[str, object]) -> None:
             all(group["classification"] == "OBSERVED"
                 for group in backlog["groups"]),
             "global trigger backlog drift")
-    require(report["remaining_transport_backlog"]["classification"] ==
-            "OBSERVED" and
+    audio_cpu = report["accepted_audio_cpu_subcheckpoints"]
+    require(len(audio_cpu) == 2 and
+            all(item["classification"] == "SOURCE_CLOSED" for item in audio_cpu)
+            and audio_cpu[0]["transactions_in_each_completion"] == 1161 and
+            audio_cpu[1]["writes_per_port_in_each_completion"] == 489834 and
+            audio_cpu[1]["semantic_sound_names_inferred"] is False,
+            "audio-CPU subcheckpoint drift")
+    require(report["capture_identity"]["audio_transport_byte_identical"] is True
+            and report["remaining_transport_backlog"]["classification"] ==
+            "PARTIAL" and
             report["load_release_backlog"]["classification"] == "OBSERVED" and
             report["load_release_backlog"]["boundary_frames"] ==
             [5565, 5566, 6200, 12799], "remaining boundary backlog drift")

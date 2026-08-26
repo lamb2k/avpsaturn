@@ -51,8 +51,16 @@ mutant["remaining_audio_trigger_backlog"]["provenance_groups"] = 174
 reject(mutant, "trigger backlog hidden")
 
 mutant = copy.deepcopy(report)
+mutant["accepted_audio_cpu_subcheckpoints"][0]["transactions_in_each_completion"] = 1160
+reject(mutant, "shared command ingress dropped")
+
+mutant = copy.deepcopy(report)
+mutant["accepted_audio_cpu_subcheckpoints"][1]["writes_per_port_in_each_completion"] = 489833
+reject(mutant, "QSound-bus primitive write dropped")
+
+mutant = copy.deepcopy(report)
 mutant["remaining_transport_backlog"]["classification"] = "SOURCE_CLOSED"
-reject(mutant, "audio-CPU transport falsely closed")
+reject(mutant, "audio command handlers falsely closed")
 
 mutant = copy.deepcopy(report)
 mutant["load_release_backlog"]["boundary_frames"].pop()
@@ -66,4 +74,4 @@ mutant = copy.deepcopy(report)
 mutant["protected_boundaries"]["spec02_active"] = True
 reject(mutant, "SPEC-02 activated")
 
-print("ORACLE-11 global audio/load/release tests: PASS (9 mutations rejected)")
+print("ORACLE-11 global audio/load/release tests: PASS (11 mutations rejected)")

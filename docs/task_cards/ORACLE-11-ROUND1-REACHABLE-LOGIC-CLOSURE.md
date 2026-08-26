@@ -109,7 +109,12 @@ card only for a genuinely independent body or source-evidence hard stop.
   captures contain 1,161 enqueues, and all twelve shared-RAM payload writers
   execute exactly 1,161 times with the source queue guards, 16-byte entry,
   `0x03f0` pointer wrap, ready-byte handshake, and consumer advance bound.
-  This does not close the audio-CPU command handling or QSound-bus transport.
+  Two additional byte-identical full-route captures source-close the audio-CPU
+  16-byte shared-command ingress at audio ROM `0x0038..0x0074` and the guarded
+  three-port QSound write primitive at `0x0abc..0x0adb`; the former processes
+  1,161 commands and the latter writes 489,834 exact low/high/register triples
+  per completion. This does not close the intervening audio-CPU command
+  handlers, state updates, or command tables.
   The remaining backlog contains 783 non-player dispatches grouped into 175
   exact origin-A6/shared-return/command provenance bodies, plus the four route
   load/release boundaries at frames 5,565, 5,566, 6,200, and 12,799. Evidence
