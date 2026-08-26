@@ -76,6 +76,10 @@
     ,"avsp_diag_round1_actor_handler_dispatches"
     ,"avsp_diag_round1_presentation_bindings"
     ,"avsp_diag_round1_state_context_bindings"
+    ,"avsp_diag_round1_navigation_bound_x"
+    ,"avsp_diag_round1_navigation_bound_z"
+    ,"avsp_diag_round1_navigation_applications"
+    ,"avsp_diag_round1_navigation_clamps"
     ,"failed_asset"
   ]
 }

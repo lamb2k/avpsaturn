@@ -26,6 +26,8 @@ FIELDS = FIELDS + ("round1_scheduler_frames","round1_scheduler_dispatches",
 FIELDS = FIELDS + ("round1_actor_handler_dispatches",
                    "round1_presentation_bindings",
                    "round1_state_context_bindings")
+FIELDS = FIELDS + ("round1_navigation_bound_x", "round1_navigation_bound_z",
+                   "round1_navigation_applications", "round1_navigation_clamps")
 EVIDENCE_LAST_FRAME = 470
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def signed(mcp, address): return tools.signed32(mcp.u32(address))
@@ -174,7 +176,11 @@ mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_
            "round1_scheduler_order_hash":"avsp_diag_round1_scheduler_order_hash",
            "round1_actor_handler_dispatches":"avsp_diag_round1_actor_handler_dispatches",
            "round1_presentation_bindings":"avsp_diag_round1_presentation_bindings",
-           "round1_state_context_bindings":"avsp_diag_round1_state_context_bindings"}
+           "round1_state_context_bindings":"avsp_diag_round1_state_context_bindings",
+           "round1_navigation_bound_x":"avsp_diag_round1_navigation_bound_x",
+           "round1_navigation_bound_z":"avsp_diag_round1_navigation_bound_z",
+           "round1_navigation_applications":"avsp_diag_round1_navigation_applications",
+           "round1_navigation_clamps":"avsp_diag_round1_navigation_clamps"}
 state = {key:signed(mcp,syms[symbol]) for key,symbol in mapping.items()}
 observed_frame = state["frame"]
 current_sample = next((sample for sample in all_samples
@@ -190,7 +196,9 @@ for key in ("round1_player_x", "round1_player_z", "round1_player_facing",
             "round1_scheduler_frames", "round1_scheduler_dispatches",
             "round1_scheduler_trace_count", "round1_scheduler_order_hash",
             "round1_actor_handler_dispatches", "round1_presentation_bindings",
-            "round1_state_context_bindings"):
+            "round1_state_context_bindings", "round1_navigation_bound_x",
+            "round1_navigation_bound_z", "round1_navigation_applications",
+            "round1_navigation_clamps"):
     state[key] = evidence_sample[key]
 state["frame"] = EVIDENCE_LAST_FRAME
 samples = [sample for sample in all_samples
@@ -215,7 +223,7 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_entry_gate8236"] == 0 and
         state["round1_entry_gate81af"] == 1 and
         state["round1_control_enabled"] == 1 and
-        state["round1_player_x"] == 1074 and
+        state["round1_player_x"] == 1072 and
         state["round1_player_z"] == 320 and
         state["round1_player_facing"] == 1 and
         state["round1_player_source_action"] == 0 and
@@ -227,6 +235,10 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_actor_handler_dispatches"] == 3010 and
         state["round1_presentation_bindings"] == 3010 and
         state["round1_state_context_bindings"] == 3010 and
+        state["round1_navigation_bound_x"] == 720 and
+        state["round1_navigation_bound_z"] == 256 and
+        state["round1_navigation_applications"] == 301 and
+        state["round1_navigation_clamps"] == 1 and
         state["round1_presentation_ready"] == 1 and
         state["round1_presentation_seen"] == 1 and
         state["round1_presentation_commands_peak"] == 2):

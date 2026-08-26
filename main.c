@@ -509,6 +509,10 @@ typedef struct
     int round1_actor_handler_dispatches;
     int round1_presentation_bindings;
     int round1_state_context_bindings;
+    int round1_navigation_bound_x;
+    int round1_navigation_bound_z;
+    int round1_navigation_applications;
+    int round1_navigation_clamps;
 } LiveEncounterDiagSample;
 static AvspLiveEncounterRuntime live_encounter_runtime;
 static AvspLiveEncounterFrame live_encounter_frame;
@@ -593,6 +597,10 @@ volatile int avsp_diag_round1_scheduler_order_hash;
 volatile int avsp_diag_round1_actor_handler_dispatches;
 volatile int avsp_diag_round1_presentation_bindings;
 volatile int avsp_diag_round1_state_context_bindings;
+volatile int avsp_diag_round1_navigation_bound_x;
+volatile int avsp_diag_round1_navigation_bound_z;
+volatile int avsp_diag_round1_navigation_applications;
+volatile int avsp_diag_round1_navigation_clamps;
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
 static int live_autotest_phase;
 static int live_autotest_release;
@@ -6982,6 +6990,12 @@ static void live_encounter_publish(void)
             (int)round1_runtime.presentation_bindings;
         sample->round1_state_context_bindings =
             (int)round1_runtime.state_context_bindings;
+        sample->round1_navigation_bound_x = round1_runtime.navigation_bound_x;
+        sample->round1_navigation_bound_z = round1_runtime.navigation_bound_z;
+        sample->round1_navigation_applications =
+            (int)round1_runtime.navigation_applications;
+        sample->round1_navigation_clamps =
+            (int)round1_runtime.navigation_clamps;
         avsp_diag_live_sample_count = (int)live_encounter_frame.frame + 1;
     }
     avsp_diag_live_interface_version = AVSP_LIVE_ENCOUNTER_INTERFACE_VERSION;
@@ -7083,6 +7097,12 @@ static void live_encounter_publish(void)
         (int)round1_runtime.presentation_bindings;
     avsp_diag_round1_state_context_bindings =
         (int)round1_runtime.state_context_bindings;
+    avsp_diag_round1_navigation_bound_x = round1_runtime.navigation_bound_x;
+    avsp_diag_round1_navigation_bound_z = round1_runtime.navigation_bound_z;
+    avsp_diag_round1_navigation_applications =
+        (int)round1_runtime.navigation_applications;
+    avsp_diag_round1_navigation_clamps =
+        (int)round1_runtime.navigation_clamps;
 }
 
 static void live_encounter_frame_callback(void)

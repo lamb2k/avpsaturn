@@ -137,6 +137,35 @@ static int avsp_round1_class1f_state_context_supported(unsigned short state,
     return 0;
 }
 
+static void avsp_round1_apply_player_global_bounds(AvspRound1Runtime *runtime)
+{
+    const AvspRound1NavigationBoundsSpec *bounds =
+        &avsp_round1_first_segment_bounds;
+    if (!runtime->navigation_bounds_active)
+        return;
+    ++runtime->navigation_applications;
+    if (runtime->player_action.x < bounds->x_min)
+    {
+        runtime->player_action.x = bounds->x_min;
+        ++runtime->navigation_clamps;
+    }
+    else if (runtime->player_action.x > bounds->x_max)
+    {
+        runtime->player_action.x = bounds->x_max;
+        ++runtime->navigation_clamps;
+    }
+    if (runtime->player_action.lane < bounds->z_min)
+    {
+        runtime->player_action.lane = bounds->z_min;
+        ++runtime->navigation_clamps;
+    }
+    else if (runtime->player_action.lane > bounds->z_max)
+    {
+        runtime->player_action.lane = bounds->z_max;
+        ++runtime->navigation_clamps;
+    }
+}
+
 int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
 {
     unsigned int order_index;
@@ -317,6 +346,9 @@ int avsp_round1_step_first_entry(AvspRound1Runtime *runtime)
             runtime->route_state = 4;
             runtime->player.state = AVSP_ROUND1_PLAYER_CONTROL_STATE;
             runtime->entry.control_enabled = 1u;
+            runtime->navigation_bounds_active = 1u;
+            runtime->navigation_bound_x = avsp_round1_first_segment_bounds.bound_x;
+            runtime->navigation_bound_z = avsp_round1_first_segment_bounds.bound_z;
         }
         return avsp_round1_entry_valid(runtime);
     }
@@ -412,6 +444,7 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     input.mask = input_mask;
     input.received_damage = received_damage;
     avsp_pw_step(&runtime->player_action, &input);
+    avsp_round1_apply_player_global_bounds(runtime);
     avsp_pw_view(&runtime->player_action, &view);
     runtime->player.state = AVSP_ROUND1_PLAYER_CONTROL_STATE;
     runtime->player.substate = view.source_substate;
@@ -500,6 +533,11 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
             runtime->entry.gate8236 == 0u &&
             runtime->entry.timer_decrements == 164u &&
             runtime->entry.step_index == AVSP_ROUND1_ENTRY_STEP_COUNT &&
+            runtime->navigation_bounds_active == 1u &&
+            runtime->navigation_bound_x ==
+                avsp_round1_first_segment_bounds.bound_x &&
+            runtime->navigation_bound_z ==
+                avsp_round1_first_segment_bounds.bound_z &&
             runtime->player.state == AVSP_ROUND1_PLAYER_CONTROL_STATE &&
             runtime->player_action.health == runtime->player.health &&
             runtime->player_action.x == runtime->player.x &&

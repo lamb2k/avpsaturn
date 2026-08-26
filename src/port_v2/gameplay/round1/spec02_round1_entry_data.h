@@ -322,4 +322,10 @@ static const AvspRound1StateContextSpec avsp_round1_class1f_state_contexts[AVSP_
     { 0x0600u, 0x0000u },
 };
 
+static const AvspRound1NavigationBoundsSpec avsp_round1_first_segment_bounds =
+{
+    720, 256, 752, 1072,
+    272, 400
+};
+
 #endif

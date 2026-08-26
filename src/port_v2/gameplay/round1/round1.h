@@ -75,6 +75,16 @@ typedef struct
 
 typedef struct
 {
+    short bound_x;
+    short bound_z;
+    short x_min;
+    short x_max;
+    short z_min;
+    short z_max;
+} AvspRound1NavigationBoundsSpec;
+
+typedef struct
+{
     unsigned char record_type;
     signed char actor_class;
     unsigned short pool_slot;
@@ -161,6 +171,11 @@ typedef struct
     unsigned long actor_handler_dispatches;
     unsigned long presentation_bindings;
     unsigned long state_context_bindings;
+    unsigned char navigation_bounds_active;
+    short navigation_bound_x;
+    short navigation_bound_z;
+    unsigned long navigation_applications;
+    unsigned long navigation_clamps;
     unsigned long failure_count;
     unsigned long fallback_count;
     unsigned long tail_canary;

@@ -23,6 +23,7 @@ REQUIRED = (
     "avsp_diag_round1_scheduler_order_hash =",
     "avsp_diag_round1_presentation_bindings =",
     "avsp_diag_round1_state_context_bindings =",
+    "avsp_diag_round1_navigation_applications =",
     "avsp_frontend_load_round1_text(&frontend_runtime);",
 )
 
@@ -35,4 +36,4 @@ for token in REQUIRED[2:]:
 assert "if (round1_runtime.route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE)" in MAIN
 assert "avsp_frontend_draw_round1_text(&frontend_runtime);" in MAIN
 assert "round1_runtime.frame < AVSP_FRONTEND_R1TEXT_CLEAR_FRAME" not in MAIN
-print("REIMPLEMENT-13 target entry/player/scheduler/presentation/state-context wiring: PASS (16 suppressions rejected)")
+print("REIMPLEMENT-13 target entry/player/scheduler/class1f/global-bounds wiring: PASS (17 suppressions rejected)")

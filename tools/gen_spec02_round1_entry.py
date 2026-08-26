@@ -51,6 +51,12 @@ def build() -> str:
     dispatch_entry = int(class1f["dispatch_entry"], 16)
     state_contexts = [tuple(int(part, 16) for part in context.split(":"))
                       for context in class1f["state_phase_contexts"]]
+    navigation = fixtures["authority_data"]["navigation"]
+    global_bounds = navigation["global_bounds"]
+    first_segment_bounds = next(
+        run for run in global_bounds["baseline_bound_runs"]
+        if run["route"] == 4 and run["bound_x"] == 720 and
+        run["bound_z"] == 256 and run["frames"] == 333)
     if len(spawns) != 10 or len(commands) != len(KINDS):
         raise ValueError("SPEC-02 entry cardinality drift")
     if [int(row["sequence"]) for row in spawns] != list(range(10)):
@@ -67,6 +73,13 @@ def build() -> str:
     if (dispatch_entry != 0x060532 or state_contexts != sorted(state_contexts) or
         len(state_contexts) != len(set(state_contexts))):
         raise ValueError("SPEC-02 class-0x1f state context drift")
+    if (global_bounds["x_min"] != "bound_x + 0x20" or
+        global_bounds["x_max"] != "bound_x + 0x160" or
+        global_bounds["z_min"] != "bound_z + 0x10" or
+        global_bounds["z_max"] != "bound_z + 0x90" or
+        navigation["coordinate_contract"]["up_world_z_delta_sign"] != 1 or
+        navigation["coordinate_contract"]["down_world_z_delta_sign"] != -1):
+        raise ValueError("SPEC-02 first-segment global bounds drift")
 
     cursor = int(player["initial_cursor"], 16)
     step_rows = []
@@ -155,7 +168,15 @@ def build() -> str:
     ])
     for state, substate in state_contexts:
         lines.append(f"    {{ 0x{state:04X}u, 0x{substate:04X}u }},")
-    lines.extend(["};", "", "#endif", ""])
+    bound_x = first_segment_bounds["bound_x"]
+    bound_z = first_segment_bounds["bound_z"]
+    lines.extend([
+        "};", "",
+        "static const AvspRound1NavigationBoundsSpec avsp_round1_first_segment_bounds =",
+        "{",
+        f"    {bound_x}, {bound_z}, {bound_x + 0x20}, {bound_x + 0x160},",
+        f"    {bound_z + 0x10}, {bound_z + 0x90}",
+        "};", "", "#endif", ""])
     return "\n".join(lines)
 
 

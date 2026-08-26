@@ -39,7 +39,7 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_entry_gate8236"] == 0
     assert report["state"]["round1_entry_gate81af"] == 1
     assert report["state"]["round1_control_enabled"] == 1
-    assert report["state"]["round1_player_x"] == 1074
+    assert report["state"]["round1_player_x"] == 1072
     assert report["state"]["round1_player_z"] == 320
     assert report["state"]["round1_player_facing"] == 1
     assert report["state"]["round1_player_source_action"] == 0
@@ -51,6 +51,10 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_actor_handler_dispatches"] == 3010
     assert report["state"]["round1_presentation_bindings"] == 3010
     assert report["state"]["round1_state_context_bindings"] == 3010
+    assert report["state"]["round1_navigation_bound_x"] == 720
+    assert report["state"]["round1_navigation_bound_z"] == 256
+    assert report["state"]["round1_navigation_applications"] == 301
+    assert report["state"]["round1_navigation_clamps"] == 1
     assert report["state"]["round1_presentation_ready"] == 1
     assert report["state"]["round1_presentation_seen"] == 1
     assert report["state"]["round1_presentation_commands_peak"] == 2

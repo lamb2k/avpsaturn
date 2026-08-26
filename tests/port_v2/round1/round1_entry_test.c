@@ -32,6 +32,8 @@ int main(void)
         runtime.entry.gate8236 != 0u || runtime.entry.gate81af != 1u ||
         runtime.entry.source_global_8209 != 2u ||
         runtime.entry.script_cursor != 0x00128FC4UL ||
+        runtime.navigation_bounds_active != 1u ||
+        runtime.navigation_bound_x != 720 || runtime.navigation_bound_z != 256 ||
         runtime.pools[0].free_count != 10u ||
         !avsp_round1_entry_valid(&runtime))
         return 5;
@@ -107,9 +109,35 @@ int main(void)
         last->z != 296 || last->variant != 6u ||
         last->substate != 4096u || last->animation_record != 0x0012E8ECUL)
         return 10;
+    runtime.player_action.x = 2000;
+    runtime.player_action.lane = 1000;
+    if (!avsp_round1_step_player(&runtime, 0u, 0) ||
+        runtime.player.x != 1072 || runtime.player.z != 327)
+    {
+        fprintf(stderr,
+                "high clamp x=%d z=%d action_x=%d lane=%d applications=%lu clamps=%lu\n",
+                runtime.player.x, runtime.player.z,
+                runtime.player_action.x, runtime.player_action.lane,
+                runtime.navigation_applications, runtime.navigation_clamps);
+        return 11;
+    }
+    runtime.player_action.x = -1000;
+    runtime.player_action.lane = -1000;
+    if (!avsp_round1_step_player(&runtime, 0u, 0) ||
+        runtime.player.x != 864 || runtime.player.z != 272 ||
+        runtime.navigation_applications != 7u ||
+        runtime.navigation_clamps != 2u)
+    {
+        fprintf(stderr,
+                "low clamp x=%d z=%d action_x=%d lane=%d applications=%lu clamps=%lu\n",
+                runtime.player.x, runtime.player.z,
+                runtime.player_action.x, runtime.player_action.lane,
+                runtime.navigation_applications, runtime.navigation_clamps);
+        return 12;
+    }
     runtime.entry.gate8236 = 1u;
     if (avsp_round1_entry_valid(&runtime))
-        return 11;
-    puts("REIMPLEMENT-13 native first entry/current-input/fixed-pool scheduler: PASS");
+        return 13;
+    puts("REIMPLEMENT-13 native entry/player/scheduler/class1f/global-bounds: PASS");
     return 0;
 }
