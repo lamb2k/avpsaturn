@@ -10,6 +10,7 @@ ROUTE=ROOT/'data/oracle10_round1_route.json'
 PLAYER=ROOT/'data/oracle11_predator_warrior_authority.json'
 GLOBAL_AUDIO=ROOT/'data/oracle11_global_audio_load_release.json'
 NAVIGATION=ROOT/'data/oracle11_round1_navigation.json'
+ENEMIES=ROOT/'data/oracle11_round1_enemy_archetypes.json'
 FAMILIES=(
  'predator-warrior-player-authority','round1-navigation-terrain-camera',
  'actor-scheduler-allocation-lifecycle','round1-enemy-archetypes',
@@ -25,6 +26,13 @@ CLOSED_PAIRS={('0x1f',12),('0x05',4),('0x10',24),('0x20',24),
 def overlaps(a,b): return a[0]<=b[1] and b[0]<=a[1]
 
 def build(coverage,route):
+    closed_pairs=set(CLOSED_PAIRS)
+    enemy_report=None
+    if ENEMIES.exists():
+        enemy_report=json.loads(ENEMIES.read_text(encoding='ascii'))
+        if enemy_report['status']=='SOURCE_CLOSED':
+            closed_pairs.update((item['class'],item['type'])
+                for item in enemy_report['archetypes'])
     bodies={x['id']:x for x in coverage['bodies']}
     if 'rng-consumption' not in bodies:
         bodies['rng-consumption']={'status':'OBSERVED','accepted_evidence':['data/oracle10_round1_route.json']}
@@ -62,13 +70,15 @@ def build(coverage,route):
     unmapped_pairs=[]
     for x in route['actor_archetypes']:
         pair=(x['class'],x['type'])
-        if pair not in CLOSED_PAIRS and x.get('source_closure_status') not in ('SOURCE_CLOSED','NOT_REQUIRED_FOR_ROUND1'):
+        if pair not in closed_pairs and x.get('source_closure_status') not in ('SOURCE_CLOSED','NOT_REQUIRED_FOR_ROUND1'):
             unmapped_pairs.append({'class':pair[0],'type':pair[1],'id':x['id']})
     unmapped_edges=[{'segment':s['id'],'source_frame_range':s['source_frame_range']}
         for s in route['segments'] if s.get('source_closure_status') not in ('SOURCE_CLOSED','NOT_REQUIRED_FOR_ROUND1')]
     writer_pcs=set(route['baseline_writer_bindings']['route']['unique_pcs'])
     writer_pcs.update(route['baseline_writer_bindings']['qsound']['unique_pcs'])
     for value in route['baseline_writer_bindings']['actor'].values():writer_pcs.update(value['writer_pcs'])
+    if enemy_report and enemy_report['status']=='SOURCE_CLOSED':
+        writer_pcs.difference_update(enemy_report['owned_authoritative_writer_pcs'])
     events={
       'spawn':len(unmapped_pairs),'damage':1 if counts['PARTIAL'] else 0,
       'audio':len(route['audio_change_frames']) if bodies[FAMILIES[8]]['status']!='SOURCE_CLOSED' else 0,
@@ -148,6 +158,26 @@ def main():
           'Round 1 enemy-archetype family is source-closed; damage, destruction '
           'and presentation edges of type-20 actors remain with their declared '
           'authority families.')
+    if ENEMIES.exists():
+        enemies=json.loads(ENEMIES.read_text(encoding='ascii'))
+        body=next(item for item in coverage['bodies']
+            if item['id']=='round1-enemy-archetypes')
+        body['status']=enemies['status']
+        evidence=body.setdefault('accepted_evidence',[])
+        for item in ('data/oracle11_round1_enemy_archetypes.json',
+                     'data/oracle09_street_alien_state_facing_presentation.json',
+                     'data/oracle10_round1_route.json'):
+            if item not in evidence:evidence.append(item)
+        body['counterfactual']=(
+          'two byte-identical route completions bind every route-reachable '
+          'state/phase, writer, RNG call, animation/assembly/collision-selector '
+          'record and damage edge for classes 0x00, 0x01, 0x06 and 0x1f; '
+          'class-removal and offense-suppression controls discriminate every '
+          'archetype, with the accepted ORACLE-09 state controls retained')
+        body['exact_next_experiment']=(
+          'Retain all four source-closed enemy actor contracts while pickups, '
+          'hazards, destructibles, encounters, boss orchestration, route '
+          'handoff and RNG ownership are closed in their declared families.')
     coverage['route_segment_authority_matrix']=build(coverage,route)
     coverage['spec02_closure_gate']=coverage['route_segment_authority_matrix']['closure_gate']
     COVERAGE.write_bytes((json.dumps(coverage,sort_keys=True,indent=2)+'\n').encode('ascii'))

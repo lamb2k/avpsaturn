@@ -191,12 +191,16 @@ dynamic bound run, all six route-reachable terrain records, four type-20
 navigation bodies, obstacle response, and all 19 camera lock/unlock runs. No
 guessed x-only, kill-count, or fixed-frame camera guard is admitted. Type-20
 damage/destruction and presentation edges remain in their declared families.
-The generated 94 x 10 matrix remains ineligible with 291 required `OBSERVED`,
-182 required `PARTIAL`,
-zero required `UNKNOWN`, 18 unmapped actor
-class/type pairs, 94 unmapped route edges, 1,517 orphan authoritative writers,
+All four route-reachable type-12 enemy classes are also `SOURCE_CLOSED` from
+two byte-identical completions plus class-removal, offense-suppression, and
+accepted ORACLE-09 controls. The source contract covers class entries, every
+live state/phase and writer, RNG, animation/assembly/collision selectors,
+damage, HIT, and KO. Boss encounter orchestration stays separate from the
+closed class-`0x06` actor. The generated 94 x 10 matrix remains ineligible with
+203 required `OBSERVED`, 182 required `PARTIAL`, zero required `UNKNOWN`, 15 unmapped actor
+class/type pairs, 94 unmapped route edges, 1,020 orphan authoritative writers,
 and unowned audio/damage/load/release/RNG/spawn counts of
-0/1/0/18/1,023/18. ORACLE-11 remains active and SPEC-02 remains ineligible.
+0/1/0/15/1,023/15. ORACLE-11 remains active and SPEC-02 remains ineligible.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

@@ -17,28 +17,26 @@
 ## Current task and next action
 
 Resume the AvP salvage Goal at `ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE`.
-Scheduler/lifecycle and all required Predator Warrior locomotion, facing,
-melee, directional/airborne/interruption, weapon/resource, HIT/KO, continue,
-respawn, pickup, and route ownership are source closed. Unwitnessed air phases
-`0x0408/12/14` are `NOT_REQUIRED_FOR_ROUND1`. `0x0abdd2` is packed-BCD score
-authority, not audio. Predator Warrior is `SOURCE_CLOSED`, including all 38
-player-origin audio edges across 47 state/action/substate contexts. Preserve:
-`data/oracle11_predator_player_audio.json` and
-`data/oracle11_predator_warrior_authority.json`.
+Scheduler/lifecycle and Predator Warrior are `SOURCE_CLOSED`, including all 38
+player-origin audio edges. Air phases `0x0408/12/14` are
+`NOT_REQUIRED_FOR_ROUND1`; `0x0abdd2` is packed-BCD score authority, not audio.
 
 Global gameplay-audio/load/release is `SOURCE_CLOSED`. All 1,161 commands, 72
 identities, 175 non-player trigger groups, and four load/release boundaries are
 bound with zero family orphans. Individual QSound bus writes remain grouped by
 their owning command/handler transaction.
 
-Round 1 navigation/terrain/obstacle/camera authority is `SOURCE_CLOSED` in
-`data/oracle11_round1_navigation.json`: two byte-identical completions and a
-completing directional perturbation bind `0x01b000` bounds, six source terrain
-records, four type-20 navigation bodies, obstacle response, and all 19 camera
-lock/unlock runs. Type-20 damage/destruction and presentation remain assigned
-to their existing families. Next source-close the Round 1 enemy-archetype
-family, beginning with full-route class-`0x1f`, then classes `0x00`, `0x01`,
-and boss `0x06`.
+Navigation/terrain/obstacle/camera is `SOURCE_CLOSED` in
+`data/oracle11_round1_navigation.json`, including all 19 camera runs. Type-20
+damage/destruction and presentation remain assigned to their existing families.
+
+All route-reachable type-12 enemy archetypes are `SOURCE_CLOSED` in
+`data/oracle11_round1_enemy_archetypes.json`. Two byte-identical completions
+bind classes `0x1f`, `0x00`, `0x01`, and boss actor `0x06` across every live
+state/phase, writer, RNG call, source presentation/collision record, and damage
+edge. Boss encounter orchestration remains separate. Next close the pickup,
+equipment, weapon, projectile, hazard, and destructible family from the sole
+matrix without reopening the accepted player-side weapon/resource contract.
 The sole route-segment x authority-family matrix and SPEC-02 zero-gap gate
 remain in `data/round1_system_coverage.yaml`.
 

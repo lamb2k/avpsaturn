@@ -40,12 +40,14 @@
     {
       "accepted_evidence": [
         "data/oracle09_street_alien_state_facing_presentation.json",
-        "data/stalker_action_capture.json"
+        "data/stalker_action_capture.json",
+        "data/oracle11_round1_enemy_archetypes.json",
+        "data/oracle10_round1_route.json"
       ],
-      "counterfactual": "class-0x1F controls accepted; each additional observed class/type requires targeted control",
-      "exact_next_experiment": "Bind and counterfactually test each required class/type dispatcher.",
+      "counterfactual": "two byte-identical route completions bind every route-reachable state/phase, writer, RNG call, animation/assembly/collision-selector record and damage edge for classes 0x00, 0x01, 0x06 and 0x1f; class-removal and offense-suppression controls discriminate every archetype, with the accepted ORACLE-09 state controls retained",
+      "exact_next_experiment": "Retain all four source-closed enemy actor contracts while pickups, hazards, destructibles, encounters, boss orchestration, route handoff and RNG ownership are closed in their declared families.",
       "id": "round1-enemy-archetypes",
-      "status": "OBSERVED"
+      "status": "SOURCE_CLOSED"
     },
     {
       "accepted_evidence": [
@@ -797,20 +799,20 @@
     ],
     "cell_count": 940,
     "closure_gate": {
-      "orphan_authoritative_writers": 1517,
-      "required_observed": 291,
+      "orphan_authoritative_writers": 1020,
+      "required_observed": 203,
       "required_partial": 182,
       "required_unknown": 0,
       "spec02_eligible": false,
-      "unmapped_actor_class_type_pairs": 18,
+      "unmapped_actor_class_type_pairs": 15,
       "unmapped_route_edges": 94,
       "unowned_events": {
         "audio": 0,
         "damage": 1,
         "load": 0,
-        "release": 18,
+        "release": 15,
         "rng": 1023,
-        "spawn": 18
+        "spawn": 15
       }
     },
     "coverage_universe": {
@@ -896,7 +898,9 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -1077,7 +1081,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1087,10 +1091,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -1268,7 +1274,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1278,10 +1284,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -1469,7 +1477,9 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -1650,7 +1660,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1660,10 +1670,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -1841,7 +1853,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1851,10 +1863,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -2032,7 +2046,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2042,10 +2056,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -2223,7 +2239,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2233,10 +2249,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -2414,7 +2432,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2424,10 +2442,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -2605,7 +2625,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2615,10 +2635,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -2796,7 +2818,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2806,10 +2828,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -2987,7 +3011,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2997,10 +3021,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -3178,7 +3204,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3188,10 +3214,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -3369,7 +3397,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3379,10 +3407,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -3560,7 +3590,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3570,10 +3600,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -3751,7 +3783,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3761,10 +3793,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -3942,7 +3976,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3952,10 +3986,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -4133,7 +4169,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4143,10 +4179,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -4324,7 +4362,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4334,10 +4372,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -4515,7 +4555,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4525,10 +4565,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -4706,7 +4748,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4716,10 +4758,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -4897,7 +4941,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4907,10 +4951,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -5088,7 +5134,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5098,10 +5144,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -5279,7 +5327,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5289,10 +5337,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -5470,7 +5520,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5480,10 +5530,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -5661,7 +5713,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5671,10 +5723,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -5852,7 +5906,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5862,10 +5916,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -6043,7 +6099,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6053,10 +6109,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -6234,7 +6292,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6244,10 +6302,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -6425,7 +6485,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6435,10 +6495,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -6616,7 +6678,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6626,10 +6688,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -6807,7 +6871,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6817,10 +6881,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -6998,7 +7064,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7008,10 +7074,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -7189,7 +7257,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7199,10 +7267,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -7380,7 +7450,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7390,10 +7460,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -7571,7 +7643,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7581,10 +7653,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -7762,7 +7836,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7772,10 +7846,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -7953,7 +8029,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7963,10 +8039,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -8144,7 +8222,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8154,10 +8232,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -8335,7 +8415,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8345,10 +8425,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -8526,7 +8608,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8536,10 +8618,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -8717,7 +8801,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8727,10 +8811,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -8908,7 +8994,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8918,10 +9004,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -9099,7 +9187,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9109,10 +9197,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -9290,7 +9380,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9300,10 +9390,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -9481,7 +9573,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9491,10 +9583,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -9672,7 +9766,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9682,10 +9776,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -9863,7 +9959,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9873,10 +9969,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -10054,7 +10152,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10064,10 +10162,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -10245,7 +10345,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10255,10 +10355,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -10436,7 +10538,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10446,10 +10548,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -10627,7 +10731,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10637,10 +10741,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -10818,7 +10924,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10828,10 +10934,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -11009,7 +11117,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11019,10 +11127,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -11200,7 +11310,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11210,10 +11320,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -11391,7 +11503,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11401,10 +11513,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -11582,7 +11696,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11592,10 +11706,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -11773,7 +11889,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11783,10 +11899,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -11964,7 +12082,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11974,10 +12092,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -12155,7 +12275,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12165,10 +12285,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -12346,7 +12468,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12356,10 +12478,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -12537,7 +12661,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12547,10 +12671,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -12728,7 +12854,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12738,10 +12864,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -12919,7 +13047,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12929,10 +13057,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -13110,7 +13240,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13120,10 +13250,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -13301,7 +13433,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13311,10 +13443,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -13492,7 +13626,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13502,10 +13636,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -13683,7 +13819,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13693,10 +13829,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -13874,7 +14012,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13884,10 +14022,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -14065,7 +14205,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14075,10 +14215,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -14256,7 +14398,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14266,10 +14408,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -14447,7 +14591,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14457,10 +14601,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -14638,7 +14784,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14648,10 +14794,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -14829,7 +14977,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14839,10 +14987,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -15020,7 +15170,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15030,10 +15180,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -15211,7 +15363,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15221,10 +15373,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -15402,7 +15556,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15412,10 +15566,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -15593,7 +15749,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15603,10 +15759,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -15784,7 +15942,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15794,10 +15952,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -15975,7 +16135,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15985,10 +16145,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -16166,7 +16328,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16176,10 +16338,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -16357,7 +16521,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16367,10 +16531,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -16548,7 +16714,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16558,10 +16724,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -16739,7 +16907,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16749,10 +16917,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -16930,7 +17100,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16940,10 +17110,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -17121,7 +17293,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17131,10 +17303,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -17312,7 +17486,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17322,10 +17496,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -17503,7 +17679,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17513,10 +17689,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -17694,7 +17872,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17704,10 +17882,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -17885,7 +18065,7 @@
           },
           {
             "authority_family": "round1-enemy-archetypes",
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17895,10 +18075,12 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
@@ -18086,7 +18268,9 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -18277,7 +18461,9 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -18468,7 +18654,9 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -18659,7 +18847,9 @@
             ],
             "evidence": [
               "data/oracle09_street_alien_state_facing_presentation.json",
-              "data/stalker_action_capture.json"
+              "data/stalker_action_capture.json",
+              "data/oracle11_round1_enemy_archetypes.json",
+              "data/oracle10_round1_route.json"
             ],
             "required": false,
             "unresolved": false
@@ -18789,23 +18979,8 @@
       },
       {
         "class": "0x00",
-        "id": "actor-class-00-type-12",
-        "type": 12
-      },
-      {
-        "class": "0x00",
         "id": "actor-class-00-type-240",
         "type": 240
-      },
-      {
-        "class": "0x01",
-        "id": "actor-class-01-type-12",
-        "type": 12
-      },
-      {
-        "class": "0x06",
-        "id": "actor-class-06-type-12",
-        "type": 12
       },
       {
         "class": "0x06",
@@ -19573,20 +19748,20 @@
   "schema": "round1-system-coverage-v1",
   "source_set": "avspu",
   "spec02_closure_gate": {
-    "orphan_authoritative_writers": 1517,
-    "required_observed": 291,
+    "orphan_authoritative_writers": 1020,
+    "required_observed": 203,
     "required_partial": 182,
     "required_unknown": 0,
     "spec02_eligible": false,
-    "unmapped_actor_class_type_pairs": 18,
+    "unmapped_actor_class_type_pairs": 15,
     "unmapped_route_edges": 94,
     "unowned_events": {
       "audio": 0,
       "damage": 1,
       "load": 0,
-      "release": 18,
+      "release": 15,
       "rng": 1023,
-      "spawn": 18
+      "spawn": 15
     }
   },
   "status": "ACCEPTED",

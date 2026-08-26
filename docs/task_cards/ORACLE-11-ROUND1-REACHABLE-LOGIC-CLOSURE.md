@@ -159,6 +159,20 @@ card only for a genuinely independent body or source-evidence hard stop.
   camera guard is admitted. Type-20 damage, destruction, pickup/hazard, and
   presentation edges remain explicitly assigned to their existing families;
   the navigation checkpoint does not silently close those actor edges.
+- `round1-enemy-archetypes`: `SOURCE_CLOSED`. Two independently launched full
+  route captures are byte-identical across 48,156 live samples, 47,341 exact
+  class entries, 326,632 actor writes, 893 enemy-owned RNG calls, and 19
+  enemy-origin player-damage writes. Every route-reachable state/phase, facing,
+  target pointer, writer/caller, animation record, assembly, hurt/attack
+  selector, health transition, HIT/KO transition, and RNG caller for type-12
+  classes `0x00`, `0x01`, `0x06`, and `0x1f` is bound to source bytes in
+  `data/oracle11_round1_enemy_archetypes.json`. Class-removal and
+  offense-suppression controls discriminate every archetype; the accepted
+  ORACLE-09 class-`0x1f` counterfactuals remain locked. The boss actor contract
+  is closed here, while boss encounter orchestration and encounter spawn/wave
+  guards remain explicitly assigned to their separate families. No generic
+  enemy behavior tree, independent assembly selection, shared player/enemy
+  clamp, semantic sound name, or fixed-frame attack/death substitute is used.
 
 ## Owned paths
 
