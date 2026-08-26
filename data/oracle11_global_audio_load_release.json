@@ -216,8 +216,14 @@
       6200,
       12799
     ],
-    "classification": "OBSERVED",
-    "exact_next_experiment": "capture exact writers, callers, guards, data ownership, and paired suppressions for each of the four route boundaries"
+    "classification": "SOURCE_CLOSED",
+    "evidence": "data/oracle11_global_load_release_boundaries.json",
+    "exact_next_experiment": null,
+    "orphan_destinations": 0,
+    "orphan_legal_read_windows": 0,
+    "orphan_loader_callers": 0,
+    "orphan_packages": 0,
+    "orphan_route_guards": 0
   },
   "player_boundary": {
     "classification": "SOURCE_CLOSED",
@@ -6618,6 +6624,6 @@
     "status": "PASS",
     "timing_or_temporal_adjacency_used": false
   },
-  "status": "PARTIAL",
+  "status": "SOURCE_CLOSED",
   "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE"
 }

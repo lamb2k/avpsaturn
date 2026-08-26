@@ -30,8 +30,8 @@ report = json.loads(ARTIFACT.read_text(encoding="ascii"))
 oracle.validate(report)
 
 mutant = copy.deepcopy(report)
-mutant["status"] = "SOURCE_CLOSED"
-reject(mutant, "premature global closure")
+mutant["status"] = "PARTIAL"
+reject(mutant, "closed global family reopened")
 
 mutant = copy.deepcopy(report)
 mutant["accepted_subcheckpoint"]["source_routine"] = "0x0abdd2..0x0abe18"
@@ -75,6 +75,10 @@ mutant["load_release_backlog"]["boundary_frames"].pop()
 reject(mutant, "load/release boundary dropped")
 
 mutant = copy.deepcopy(report)
+mutant["load_release_backlog"]["orphan_loader_callers"] = 1
+reject(mutant, "load caller orphan hidden")
+
+mutant = copy.deepcopy(report)
 mutant["score_negative_control"]["accepted_as_audio_owner"] = True
 reject(mutant, "score-only routine admitted")
 
@@ -82,4 +86,4 @@ mutant = copy.deepcopy(report)
 mutant["protected_boundaries"]["spec02_active"] = True
 reject(mutant, "SPEC-02 activated")
 
-print("ORACLE-11 global audio/load/release tests: PASS (13 mutations rejected)")
+print("ORACLE-11 global audio/load/release tests: PASS (14 mutations rejected)")

@@ -21,6 +21,7 @@ ROUTE = ROOT / "data" / "oracle10_round1_route.json"
 PLAYER_AUDIO = ROOT / "data" / "oracle11_predator_player_audio.json"
 HANDLERS = ROOT / "data" / "oracle11_global_audio_handlers.json"
 OWNERS = ROOT / "data" / "oracle11_global_audio_trigger_owners.json"
+LOADS = ROOT / "data" / "oracle11_global_load_release_boundaries.json"
 OUT = ROOT / "data" / "oracle11_global_audio_load_release.json"
 IDENTICAL_FILES = ("samples.tsv", "dispatches.tsv", "qsound.tsv",
                    "projectiles.tsv", "score_writes.tsv", "result.tsv")
@@ -156,6 +157,7 @@ def build_report() -> dict[str, object]:
     player_audio = json.loads(PLAYER_AUDIO.read_text(encoding="ascii"))
     handlers = json.loads(HANDLERS.read_text(encoding="ascii"))
     owners = json.loads(OWNERS.read_text(encoding="ascii"))
+    loads = json.loads(LOADS.read_text(encoding="ascii"))
     require(player_audio["status"] == "SOURCE_CLOSED" and
             player_audio["boundary"]["global_backlog_begins"].startswith(
                 "0x001880"), "player/global boundary drift")
@@ -170,6 +172,12 @@ def build_report() -> dict[str, object]:
             owners["coverage"]["orphan_trigger_groups"] == 0 and
             owners["coverage"]["orphan_source_callers"] == 0,
             "non-player trigger-owner checkpoint drift")
+    require(loads["status"] == "SOURCE_CLOSED" and
+            loads["coverage"] == {"boundaries": 4,
+                "orphan_route_guards": 0, "orphan_loader_callers": 0,
+                "orphan_packages": 0, "orphan_destinations": 0,
+                "orphan_legal_read_windows": 0},
+            "load/release boundary checkpoint drift")
     owner_keys = {(item["origin_a6"], item["shared_wrapper_return"],
                    item["command"]): item for item in owners["trigger_groups"]}
     for item in trigger_backlog:
@@ -187,7 +195,7 @@ def build_report() -> dict[str, object]:
     report = {
         "schema": "oracle11-global-gameplay-audio-load-release-v1",
         "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE",
-        "status": "PARTIAL",
+        "status": "SOURCE_CLOSED",
         "scope": "global Round 1 gameplay-audio/load/release authority",
         "accepted_subcheckpoint": {
             "id": "main-queue-to-qsound-shared-ram-transport",
@@ -293,11 +301,13 @@ def build_report() -> dict[str, object]:
             "exact_next_experiment": None,
         },
         "load_release_backlog": {
-            "classification": "OBSERVED",
+            "classification": "SOURCE_CLOSED",
             "boundary_frames": load_frames,
-            "exact_next_experiment": (
-                "capture exact writers, callers, guards, data ownership, and "
-                "paired suppressions for each of the four route boundaries"),
+            "evidence": "data/oracle11_global_load_release_boundaries.json",
+            "orphan_route_guards": 0, "orphan_loader_callers": 0,
+            "orphan_packages": 0, "orphan_destinations": 0,
+            "orphan_legal_read_windows": 0,
+            "exact_next_experiment": None,
         },
         "score_negative_control": {
             "status": "PASS",
@@ -325,7 +335,7 @@ def build_report() -> dict[str, object]:
 
 def validate(report: dict[str, object]) -> None:
     require(report["schema"] == "oracle11-global-gameplay-audio-load-release-v1"
-            and report["status"] == "PARTIAL",
+            and report["status"] == "SOURCE_CLOSED",
             "global family status drift")
     checkpoint = report["accepted_subcheckpoint"]
     require(checkpoint["classification"] == "SOURCE_CLOSED" and
@@ -363,7 +373,12 @@ def validate(report: dict[str, object]) -> None:
     require(report["capture_identity"]["audio_transport_byte_identical"] is True
             and report["remaining_transport_backlog"]["classification"] ==
             "SOURCE_CLOSED" and
-            report["load_release_backlog"]["classification"] == "OBSERVED" and
+            report["load_release_backlog"]["classification"] == "SOURCE_CLOSED" and
+            report["load_release_backlog"]["orphan_route_guards"] == 0 and
+            report["load_release_backlog"]["orphan_loader_callers"] == 0 and
+            report["load_release_backlog"]["orphan_packages"] == 0 and
+            report["load_release_backlog"]["orphan_destinations"] == 0 and
+            report["load_release_backlog"]["orphan_legal_read_windows"] == 0 and
             report["load_release_backlog"]["boundary_frames"] ==
             [5565, 5566, 6200, 12799], "remaining boundary backlog drift")
     negative = report["score_negative_control"]
@@ -382,8 +397,8 @@ def validate(report: dict[str, object]) -> None:
 def main() -> None:
     report = build_report()
     OUT.write_bytes(canonical(report))
-    print("ORACLE-11 global audio/load/release: PARTIAL; 175 trigger groups "
-          "SOURCE_CLOSED; 4 load/release edges remain")
+    print("ORACLE-11 global audio/load/release: SOURCE_CLOSED; zero orphan "
+          "triggers, commands, handlers, QSound transactions, or load callers")
 
 
 if __name__ == "__main__":

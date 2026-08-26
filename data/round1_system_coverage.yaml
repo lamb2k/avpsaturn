@@ -89,12 +89,13 @@
         "data/stage1_route.json",
         "data/oracle11_global_audio_load_release.json",
         "data/oracle11_global_audio_handlers.json",
-        "data/oracle11_global_audio_trigger_owners.json"
+        "data/oracle11_global_audio_trigger_owners.json",
+        "data/oracle11_global_load_release_boundaries.json"
       ],
-      "counterfactual": "the shared main queue, audio-CPU command dispatcher/table/handlers, grouped QSound effects, and all 175 non-player trigger owners/guards are source-closed; four load/release edges remain open",
-      "exact_next_experiment": "Bind the four load/release boundary guards, loader callers, package identity, ownership, legal windows, results, and next route state.",
+      "counterfactual": "the shared main queue, audio-CPU command dispatcher/table/handlers, grouped QSound effects, and all 175 non-player trigger owners/guards are source-closed; all four load/release boundaries have source guards, callers, package identities, legal windows, and suppressions",
+      "exact_next_experiment": "Retain the closed global audio/load/release contract while the next dependency-safe ORACLE-11 authority family is closed.",
       "id": "gameplay-audio-load-release",
-      "status": "PARTIAL"
+      "status": "SOURCE_CLOSED"
     },
     {
       "accepted_evidence": [
@@ -796,15 +797,15 @@
     "closure_gate": {
       "orphan_authoritative_writers": 1517,
       "required_observed": 291,
-      "required_partial": 307,
+      "required_partial": 276,
       "required_unknown": 0,
       "spec02_eligible": false,
       "unmapped_actor_class_type_pairs": 18,
       "unmapped_route_edges": 94,
       "unowned_events": {
-        "audio": 874,
+        "audio": 0,
         "damage": 1,
-        "load": 4,
+        "load": 0,
         "release": 18,
         "rng": 1023,
         "spawn": 18
@@ -965,7 +966,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -977,10 +978,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -1153,7 +1155,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1165,10 +1167,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -1341,7 +1344,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1353,10 +1356,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -1529,7 +1533,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1541,10 +1545,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -1717,7 +1722,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1729,10 +1734,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -1917,7 +1923,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -2093,7 +2100,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2105,10 +2112,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -2281,7 +2289,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2293,10 +2301,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -2469,7 +2478,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2481,10 +2490,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -2657,7 +2667,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2669,10 +2679,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -2857,7 +2868,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -3045,7 +3057,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -3233,7 +3246,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -3421,7 +3435,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -3609,7 +3624,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -3797,7 +3813,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -3985,7 +4002,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -4161,7 +4179,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4173,10 +4191,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -4361,7 +4380,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -4549,7 +4569,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -4737,7 +4758,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -4913,7 +4935,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4925,10 +4947,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -5113,7 +5136,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -5289,7 +5313,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5301,10 +5325,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -5489,7 +5514,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -5677,7 +5703,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -5865,7 +5892,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -6053,7 +6081,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -6241,7 +6270,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -6417,7 +6447,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6429,10 +6459,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -6605,7 +6636,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6617,10 +6648,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -6805,7 +6837,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -6993,7 +7026,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -7169,7 +7203,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7181,10 +7215,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -7369,7 +7404,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -7557,7 +7593,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -7745,7 +7782,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -7933,7 +7971,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -8121,7 +8160,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -8309,7 +8349,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -8497,7 +8538,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -8673,7 +8715,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8685,10 +8727,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -8873,7 +8916,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -9061,7 +9105,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -9249,7 +9294,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -9437,7 +9483,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -9625,7 +9672,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -9801,7 +9849,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9813,10 +9861,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -10001,7 +10050,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -10189,7 +10239,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -10377,7 +10428,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -10553,7 +10605,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10565,10 +10617,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -10753,7 +10806,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -10929,7 +10983,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10941,10 +10995,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -11129,7 +11184,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -11317,7 +11373,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -11505,7 +11562,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -11681,7 +11739,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11693,10 +11751,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -11881,7 +11940,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -12057,7 +12117,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12069,10 +12129,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -12245,7 +12306,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12257,10 +12318,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -12445,7 +12507,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -12633,7 +12696,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -12821,7 +12885,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -13009,7 +13074,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -13197,7 +13263,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -13385,7 +13452,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -13573,7 +13641,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -13761,7 +13830,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -13949,7 +14019,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -14137,7 +14208,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -14313,7 +14385,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14325,10 +14397,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -14513,7 +14586,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -14689,7 +14763,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14701,10 +14775,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -14889,7 +14964,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -15077,7 +15153,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -15265,7 +15342,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -15453,7 +15531,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -15641,7 +15720,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -15829,7 +15909,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -16017,7 +16098,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -16205,7 +16287,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -16393,7 +16476,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -16581,7 +16665,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -16769,7 +16854,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -16945,7 +17031,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16957,10 +17043,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -17133,7 +17220,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17145,10 +17232,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -17321,7 +17409,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17333,10 +17421,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -17509,7 +17598,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17521,10 +17610,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -17697,7 +17787,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17709,10 +17799,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -17885,7 +17976,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17897,10 +17988,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -18085,7 +18177,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -18261,7 +18354,7 @@
           },
           {
             "authority_family": "gameplay-audio-load-release",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -18273,10 +18366,11 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "rng-consumption",
@@ -18461,7 +18555,8 @@
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
               "data/oracle11_global_audio_handlers.json",
-              "data/oracle11_global_audio_trigger_owners.json"
+              "data/oracle11_global_audio_trigger_owners.json",
+              "data/oracle11_global_load_release_boundaries.json"
             ],
             "required": false,
             "unresolved": false
@@ -19290,15 +19385,15 @@
   "spec02_closure_gate": {
     "orphan_authoritative_writers": 1517,
     "required_observed": 291,
-    "required_partial": 307,
+    "required_partial": 276,
     "required_unknown": 0,
     "spec02_eligible": false,
     "unmapped_actor_class_type_pairs": 18,
     "unmapped_route_edges": 94,
     "unowned_events": {
-      "audio": 874,
+      "audio": 0,
       "damage": 1,
-      "load": 4,
+      "load": 0,
       "release": 18,
       "rng": 1023,
       "spawn": 18

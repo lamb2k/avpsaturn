@@ -1,0 +1,1522 @@
+{
+  "boundaries": [
+    {
+      "classification": "SOURCE_CLOSED",
+      "completion": {
+        "guard": "all captured source writes complete before the visible boundary snapshot",
+        "next_route_state": {
+          "frame": "5566",
+          "g8009": "2",
+          "player_active": "1",
+          "player_phase": "0",
+          "player_state": "2048",
+          "state8002": "0",
+          "state8004": "4",
+          "state8006": "0",
+          "state802c": "37472",
+          "state804a": "4815",
+          "state81c2": "0"
+        },
+        "resulting_package_sha256": "42768124ed4684b33f77374a8ad3674b93df0bfa5597fbfc73739722ac2c4247"
+      },
+      "destination_ownership": {
+        "first_address": "0x920000",
+        "last_address": "0x926192",
+        "owner": "CPS2 graphics RAM package plane",
+        "region": "gfxram2"
+      },
+      "failure_control": {
+        "capture": "oracle11_global_load_mut_5565",
+        "kind": "suppress every write to the owned destination region on the source write frame",
+        "mutant_package_sha256": "de2f256064a0af797747c2b97505dc0b9f3df0de4f489eac731c23ae9ca9cc31",
+        "package_difference": true,
+        "route_and_gameplay_projection_unchanged": true,
+        "stable_round2_route_state": 4,
+        "suppressed_writes": 9418
+      },
+      "id": "route-load-release-5565",
+      "legal_read_window": {
+        "first_frame_inclusive": 5565,
+        "last_frame_inclusive": 5565,
+        "next_package_boundary": 5566
+      },
+      "loader_callers": [
+        {
+          "caller_chains": [
+            [
+              "0x0af9e0",
+              "0x0af860",
+              "0x0084d4"
+            ],
+            [
+              "0x0af9f0",
+              "0x0af860",
+              "0x0084d4"
+            ],
+            [
+              "0x0afa00",
+              "0x0af860",
+              "0x0084d4"
+            ],
+            [
+              "0x0afa10",
+              "0x0af860",
+              "0x0084d4"
+            ]
+          ],
+          "destination_first": "0x920000",
+          "destination_last": "0x926192",
+          "origin_a6": [
+            "0xff8268"
+          ],
+          "source_window_sha256": "c9d1bf6b324863be355f320f3a43193f12f87920eb524f79b0e4a035d960402d",
+          "write_count": 6346,
+          "writer_pc": "0x0b1b9a"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x0af9e0",
+              "0x0af860",
+              "0x0084d4"
+            ],
+            [
+              "0x0af9f0",
+              "0x0af860",
+              "0x0084d4"
+            ],
+            [
+              "0x0afa00",
+              "0x0af860",
+              "0x0084d4"
+            ]
+          ],
+          "destination_first": "0x921000",
+          "destination_last": "0x9257fe",
+          "origin_a6": [
+            "0xff8268"
+          ],
+          "source_window_sha256": "ec6cdefdb9739f95e85db4f2c00c9a21af83e5efc2286421e23c1e06d956a1a3",
+          "write_count": 3072,
+          "writer_pc": "0x0b1ba6"
+        }
+      ],
+      "mutation_identity": {
+        "files": {
+          "dispatches.tsv": "3e9a28594c693573d0db1b5f2e08701f93e53c34ccf83d1f91b4333a8fa2dd72",
+          "gfx_writes.tsv": "b07fb27919cbd888ef0e75088bcd6933dc76c82336fdf848dbfef0a76cfa5479",
+          "gfxram0_05565.bin": "73a7529cb37faa6a7ca6c50b0a4f40a59dc908ac41d9cdea8a7dae7c54d00836",
+          "gfxram0_05566.bin": "7bf779b1a9d9f8df6f68d87f904dfce4502dfca356f37b803d8ebfe9f19f8c3d",
+          "gfxram0_06200.bin": "67b66610679a639cc33594ad20721b938e91fd16ee9549589abd3216d695a9c9",
+          "gfxram0_12799.bin": "ca405e1c15bf8ea503c7babedd1c3a851038f6ba78523c957e5f1d6703948a28",
+          "gfxram1_05565.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+          "gfxram1_05566.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+          "gfxram1_06200.bin": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836",
+          "gfxram1_12799.bin": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836",
+          "gfxram2_05565.bin": "de2f256064a0af797747c2b97505dc0b9f3df0de4f489eac731c23ae9ca9cc31",
+          "gfxram2_05566.bin": "5d674ef2b1657f98f38141a52e0a852687296d1acf98ece5a60b4c5ad64c1065",
+          "gfxram2_06200.bin": "5d674ef2b1657f98f38141a52e0a852687296d1acf98ece5a60b4c5ad64c1065",
+          "gfxram2_12799.bin": "5d674ef2b1657f98f38141a52e0a852687296d1acf98ece5a60b4c5ad64c1065",
+          "load_result.tsv": "11d6a028aa0f66c4201083af0d93afc393967281d9b6ce64b413389d349707c7",
+          "projectiles.tsv": "0332e5be6eb05db533e4939267f83d4b3d54dc1acd3029ef4180d07b4c8e001a",
+          "result.tsv": "bdbfe46cf955ee4d682b0c59a867be88e2ddd4f0ff4e44d1f7eabe27fc6201a1",
+          "route_windows.tsv": "3cbafaa133bca5ea95f423e2d49e531faa8f9226f7f7b4c420b5e8e2896f7d23",
+          "samples.tsv": "c539b67aeed910c8b425c555b808edbd02a0de3fb8717d3acac3eed4500f918d",
+          "score_writes.tsv": "15e588536d357726b0d64adbf2ecbee78b412a9bf1d55851e7455a541e160ed6"
+        },
+        "manifest_sha256": "f90f95038262d4b3807b168501a79c1ef89efcbbc1de8b0c046e065dcbb136b7"
+      },
+      "package_identity": {
+        "region": "gfxram2",
+        "snapshot_sha256": "42768124ed4684b33f77374a8ad3674b93df0bfa5597fbfc73739722ac2c4247",
+        "transaction_sha256": "1c26d3e454355f4244183c28f7abd73edc311fe1fd57cc801b4bf166ba6a18a8",
+        "write_count": 9418
+      },
+      "route_guard": {
+        "after": {
+          "frame": "5566",
+          "g8009": "2",
+          "player_active": "1",
+          "player_phase": "0",
+          "player_state": "2048",
+          "state8002": "0",
+          "state8004": "4",
+          "state8006": "0",
+          "state802c": "37472",
+          "state804a": "4815",
+          "state81c2": "0"
+        },
+        "at_boundary": {
+          "frame": "5565",
+          "g8009": "2",
+          "player_active": "1",
+          "player_phase": "0",
+          "player_state": "2048",
+          "state8002": "0",
+          "state8004": "4",
+          "state8006": "0",
+          "state802c": "37056",
+          "state804a": "4815",
+          "state81c2": "0"
+        },
+        "before": {
+          "frame": "5564",
+          "g8009": "2",
+          "player_active": "1",
+          "player_phase": "0",
+          "player_state": "2048",
+          "state8002": "0",
+          "state8004": "4",
+          "state8006": "0",
+          "state802c": "37056",
+          "state804a": "4800",
+          "state81c2": "0"
+        }
+      },
+      "semantic_package_name": "UNKNOWN",
+      "source_write_frame": 5564,
+      "visible_boundary_frame": 5565
+    },
+    {
+      "classification": "SOURCE_CLOSED",
+      "completion": {
+        "guard": "all captured source writes complete before the visible boundary snapshot",
+        "next_route_state": {
+          "frame": "5567",
+          "g8009": "2",
+          "player_active": "1",
+          "player_phase": "0",
+          "player_state": "2048",
+          "state8002": "0",
+          "state8004": "4",
+          "state8006": "0",
+          "state802c": "37472",
+          "state804a": "4815",
+          "state81c2": "512"
+        },
+        "resulting_package_sha256": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98"
+      },
+      "destination_ownership": {
+        "first_address": "0x926194",
+        "last_address": "0x9297fe",
+        "owner": "CPS2 graphics RAM package plane",
+        "region": "gfxram2"
+      },
+      "failure_control": {
+        "capture": "oracle11_global_load_mut_5566",
+        "kind": "suppress every write to the owned destination region on the source write frame",
+        "mutant_package_sha256": "42768124ed4684b33f77374a8ad3674b93df0bfa5597fbfc73739722ac2c4247",
+        "package_difference": true,
+        "route_and_gameplay_projection_unchanged": true,
+        "stable_round2_route_state": 4,
+        "suppressed_writes": 5942
+      },
+      "id": "route-load-release-5566",
+      "legal_read_window": {
+        "first_frame_inclusive": 5566,
+        "last_frame_inclusive": 15193,
+        "next_package_boundary": null
+      },
+      "loader_callers": [
+        {
+          "caller_chains": [
+            [
+              "0x0af860",
+              "0x0084d4",
+              "0x00bfdc"
+            ],
+            [
+              "0x0afa10",
+              "0x0af860",
+              "0x0084d4"
+            ]
+          ],
+          "destination_first": "0x926194",
+          "destination_last": "0x928ffe",
+          "origin_a6": [
+            "0xff8268"
+          ],
+          "source_window_sha256": "c9d1bf6b324863be355f320f3a43193f12f87920eb524f79b0e4a035d960402d",
+          "write_count": 3894,
+          "writer_pc": "0x0b1b9a"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x0af860",
+              "0x0084d4",
+              "0x00bfdc"
+            ],
+            [
+              "0x0afa10",
+              "0x0af860",
+              "0x0084d4"
+            ]
+          ],
+          "destination_first": "0x927000",
+          "destination_last": "0x9297fe",
+          "origin_a6": [
+            "0xff8268"
+          ],
+          "source_window_sha256": "ec6cdefdb9739f95e85db4f2c00c9a21af83e5efc2286421e23c1e06d956a1a3",
+          "write_count": 2048,
+          "writer_pc": "0x0b1ba6"
+        }
+      ],
+      "mutation_identity": {
+        "files": {
+          "dispatches.tsv": "3e9a28594c693573d0db1b5f2e08701f93e53c34ccf83d1f91b4333a8fa2dd72",
+          "gfx_writes.tsv": "9148913a1a2ada337cf77dfae349b66d9bb5c4d601d037d6acbbb1268d6a7215",
+          "gfxram0_05565.bin": "73a7529cb37faa6a7ca6c50b0a4f40a59dc908ac41d9cdea8a7dae7c54d00836",
+          "gfxram0_05566.bin": "7bf779b1a9d9f8df6f68d87f904dfce4502dfca356f37b803d8ebfe9f19f8c3d",
+          "gfxram0_06200.bin": "67b66610679a639cc33594ad20721b938e91fd16ee9549589abd3216d695a9c9",
+          "gfxram0_12799.bin": "ca405e1c15bf8ea503c7babedd1c3a851038f6ba78523c957e5f1d6703948a28",
+          "gfxram1_05565.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+          "gfxram1_05566.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+          "gfxram1_06200.bin": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836",
+          "gfxram1_12799.bin": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836",
+          "gfxram2_05565.bin": "42768124ed4684b33f77374a8ad3674b93df0bfa5597fbfc73739722ac2c4247",
+          "gfxram2_05566.bin": "42768124ed4684b33f77374a8ad3674b93df0bfa5597fbfc73739722ac2c4247",
+          "gfxram2_06200.bin": "42768124ed4684b33f77374a8ad3674b93df0bfa5597fbfc73739722ac2c4247",
+          "gfxram2_12799.bin": "42768124ed4684b33f77374a8ad3674b93df0bfa5597fbfc73739722ac2c4247",
+          "load_result.tsv": "bdb32459d7b0b27430dc2eba4dc2b5b9d93022827198498a435e9ba21c6dd905",
+          "projectiles.tsv": "0332e5be6eb05db533e4939267f83d4b3d54dc1acd3029ef4180d07b4c8e001a",
+          "result.tsv": "bdbfe46cf955ee4d682b0c59a867be88e2ddd4f0ff4e44d1f7eabe27fc6201a1",
+          "route_windows.tsv": "3cbafaa133bca5ea95f423e2d49e531faa8f9226f7f7b4c420b5e8e2896f7d23",
+          "samples.tsv": "c539b67aeed910c8b425c555b808edbd02a0de3fb8717d3acac3eed4500f918d",
+          "score_writes.tsv": "15e588536d357726b0d64adbf2ecbee78b412a9bf1d55851e7455a541e160ed6"
+        },
+        "manifest_sha256": "0d81c9ff48c7fbf9339fa2199301e4bbc950782b89c8a2ffcf9aec3deccb0d1f"
+      },
+      "package_identity": {
+        "region": "gfxram2",
+        "snapshot_sha256": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+        "transaction_sha256": "49497cedfc9721f75c8f3588e9f16104e2e40bf6669dc60462ed4ec5295e7c9b",
+        "write_count": 5942
+      },
+      "route_guard": {
+        "after": {
+          "frame": "5567",
+          "g8009": "2",
+          "player_active": "1",
+          "player_phase": "0",
+          "player_state": "2048",
+          "state8002": "0",
+          "state8004": "4",
+          "state8006": "0",
+          "state802c": "37472",
+          "state804a": "4815",
+          "state81c2": "512"
+        },
+        "at_boundary": {
+          "frame": "5566",
+          "g8009": "2",
+          "player_active": "1",
+          "player_phase": "0",
+          "player_state": "2048",
+          "state8002": "0",
+          "state8004": "4",
+          "state8006": "0",
+          "state802c": "37472",
+          "state804a": "4815",
+          "state81c2": "0"
+        },
+        "before": {
+          "frame": "5565",
+          "g8009": "2",
+          "player_active": "1",
+          "player_phase": "0",
+          "player_state": "2048",
+          "state8002": "0",
+          "state8004": "4",
+          "state8006": "0",
+          "state802c": "37056",
+          "state804a": "4815",
+          "state81c2": "0"
+        }
+      },
+      "semantic_package_name": "UNKNOWN",
+      "source_write_frame": 5565,
+      "visible_boundary_frame": 5566
+    },
+    {
+      "classification": "SOURCE_CLOSED",
+      "completion": {
+        "guard": "all captured source writes complete before the visible boundary snapshot",
+        "next_route_state": {
+          "frame": "6201",
+          "g8009": "2",
+          "player_active": "0",
+          "player_phase": "0",
+          "player_state": "0",
+          "state8002": "0",
+          "state8004": "6",
+          "state8006": "0",
+          "state802c": "37312",
+          "state804a": "1935",
+          "state81c2": "0"
+        },
+        "resulting_package_sha256": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836"
+      },
+      "destination_ownership": {
+        "first_address": "0x910000",
+        "last_address": "0x91fffe",
+        "owner": "CPS2 graphics RAM package plane",
+        "region": "gfxram1"
+      },
+      "failure_control": {
+        "capture": "oracle11_global_load_mut_6200",
+        "kind": "suppress every write to the owned destination region on the source write frame",
+        "mutant_package_sha256": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+        "package_difference": true,
+        "route_and_gameplay_projection_unchanged": true,
+        "stable_round2_route_state": 4,
+        "suppressed_writes": 8960
+      },
+      "id": "route-load-release-6200",
+      "legal_read_window": {
+        "first_frame_inclusive": 6200,
+        "last_frame_inclusive": 12798,
+        "next_package_boundary": 12799
+      },
+      "loader_callers": [
+        {
+          "caller_chains": [
+            [
+              "0x008c50",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x91e000",
+          "destination_last": "0x91fff2",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "4b4381f68ec4cb1c6f1f4138b00cf67015055a8c91f606e4d5b1bd636f997e8e",
+          "write_count": 1024,
+          "writer_pc": "0x00a6f2"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c50",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x91e004",
+          "destination_last": "0x91fff6",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "58961a3d2b0a8330c4865cedf49cd5a01c568560fb94bbe6333f06e3af84d40a",
+          "write_count": 1024,
+          "writer_pc": "0x00a6f4"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c50",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x91e008",
+          "destination_last": "0x91fffa",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "fca2a7cf1a16ca1189e734e697953dc604003b6dd956cbfdb31363897d2021c5",
+          "write_count": 1024,
+          "writer_pc": "0x00a6f6"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c50",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x91e00c",
+          "destination_last": "0x91fffe",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "be3958fb2017f79729e2d1bc0d0d4637ce6fbf438a6cdaf8b3a0812c1a3fa768",
+          "write_count": 1024,
+          "writer_pc": "0x00a6f8"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c7c",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x016f9e",
+              "0x008c7c",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x910000",
+          "destination_last": "0x9117fe",
+          "origin_a6": [
+            "0xff8380"
+          ],
+          "source_window_sha256": "89ccb9813ff7093d89919f0bbb58c674c5a3099f729e399a517db97d6e1223bf",
+          "write_count": 1536,
+          "writer_pc": "0x016fc2"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c000",
+          "destination_last": "0x91cfe2",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "b1ee1de37ad53f52e2edacff76c42e7b188ad0bb5dea12569e48b70ec5e22f7a",
+          "write_count": 256,
+          "writer_pc": "0x017de6"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c004",
+          "destination_last": "0x91cfe6",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "052611a168e943a0651b4247694d8ae8fd07ec92c98b05c066e7119a9f578a2c",
+          "write_count": 256,
+          "writer_pc": "0x017dec"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c008",
+          "destination_last": "0x91cfea",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "fa7b556096411e8cbb7be8504c56be71411aca4339381c67b452c7289c8d0bf1",
+          "write_count": 256,
+          "writer_pc": "0x017df2"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c00c",
+          "destination_last": "0x91cfee",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "4c6c8b8d4e8f0b0a54f5d2402dffff7420501d274672714f33e52014f8e4aa9c",
+          "write_count": 256,
+          "writer_pc": "0x017df8"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c010",
+          "destination_last": "0x91cff2",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "d70485ccb60e6b5151fe68e794c9ba1fbc3e80db3b705aa21b1111bd14e40970",
+          "write_count": 256,
+          "writer_pc": "0x017dfe"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c014",
+          "destination_last": "0x91cff6",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "b024e83e6d07737c1520b92bfefc25e25a628236f2bc08e5170e8c1432faf32b",
+          "write_count": 256,
+          "writer_pc": "0x017e04"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c018",
+          "destination_last": "0x91cffa",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "bcae5f0467bf9ecf0204cf63e8efd55aad873f454367b848ba1b2f981468d4b3",
+          "write_count": 256,
+          "writer_pc": "0x017e0a"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c01c",
+          "destination_last": "0x91cffe",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "9080c57266d52c705d24c0c7c3df5273b7e9ecc59a2d7c7a068e800512d35075",
+          "write_count": 256,
+          "writer_pc": "0x017e10"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c90",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x008ca0",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x914000",
+          "destination_last": "0x9147fc",
+          "origin_a6": [
+            "0xff8380"
+          ],
+          "source_window_sha256": "96b46eda07b20751160d3c48386d3f723d3b6e7dc5300140eb2aa4d9d725f086",
+          "write_count": 512,
+          "writer_pc": "0x0b27e8"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c90",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x008ca0",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x914002",
+          "destination_last": "0x9147fe",
+          "origin_a6": [
+            "0xff8380"
+          ],
+          "source_window_sha256": "f90058e9fcabf0358cff1a3d89a2d9f36c79b3a17d077ca2763472d45478aaef",
+          "write_count": 512,
+          "writer_pc": "0x0b27ea"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008cae",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x008cbc",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x918000",
+          "destination_last": "0x9181fc",
+          "origin_a6": [
+            "0xff8380"
+          ],
+          "source_window_sha256": "886a17a4c8cc7a107684b1b9a8676e3a1005fd65ec021322ee6b458e6a27da1d",
+          "write_count": 128,
+          "writer_pc": "0x0b2cf2"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008cae",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x008cbc",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x918002",
+          "destination_last": "0x9181fe",
+          "origin_a6": [
+            "0xff8380"
+          ],
+          "source_window_sha256": "8e65e2ed8a7d7f0e22f069f81eee84f9142a3ebcdfeb9c94a09c754a90d57a63",
+          "write_count": 128,
+          "writer_pc": "0x0b2cf4"
+        }
+      ],
+      "mutation_identity": {
+        "files": {
+          "dispatches.tsv": "3e9a28594c693573d0db1b5f2e08701f93e53c34ccf83d1f91b4333a8fa2dd72",
+          "gfx_writes.tsv": "a2870fb0284ecce8304e5736b1cf77ee1eb0d385427f03c148c55bfaf89731e5",
+          "gfxram0_05565.bin": "73a7529cb37faa6a7ca6c50b0a4f40a59dc908ac41d9cdea8a7dae7c54d00836",
+          "gfxram0_05566.bin": "7bf779b1a9d9f8df6f68d87f904dfce4502dfca356f37b803d8ebfe9f19f8c3d",
+          "gfxram0_06200.bin": "67b66610679a639cc33594ad20721b938e91fd16ee9549589abd3216d695a9c9",
+          "gfxram0_12799.bin": "ca405e1c15bf8ea503c7babedd1c3a851038f6ba78523c957e5f1d6703948a28",
+          "gfxram1_05565.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+          "gfxram1_05566.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+          "gfxram1_06200.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+          "gfxram1_12799.bin": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836",
+          "gfxram2_05565.bin": "42768124ed4684b33f77374a8ad3674b93df0bfa5597fbfc73739722ac2c4247",
+          "gfxram2_05566.bin": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+          "gfxram2_06200.bin": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+          "gfxram2_12799.bin": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+          "load_result.tsv": "a2da88029e3ec585702eaef446482afe4bab0c9c32bb3a8d4dbd33b67c1ecb09",
+          "projectiles.tsv": "0332e5be6eb05db533e4939267f83d4b3d54dc1acd3029ef4180d07b4c8e001a",
+          "result.tsv": "bdbfe46cf955ee4d682b0c59a867be88e2ddd4f0ff4e44d1f7eabe27fc6201a1",
+          "route_windows.tsv": "3cbafaa133bca5ea95f423e2d49e531faa8f9226f7f7b4c420b5e8e2896f7d23",
+          "samples.tsv": "c539b67aeed910c8b425c555b808edbd02a0de3fb8717d3acac3eed4500f918d",
+          "score_writes.tsv": "15e588536d357726b0d64adbf2ecbee78b412a9bf1d55851e7455a541e160ed6"
+        },
+        "manifest_sha256": "43eb7c6872470b855acc34ed2c82ce8aabeec0c03fa29df51aeff5dcc66f8fc4"
+      },
+      "package_identity": {
+        "region": "gfxram1",
+        "snapshot_sha256": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836",
+        "transaction_sha256": "47d5ee64e221e7d1139027630492c2334ed612250557dc2cdea6dbbc8351dd61",
+        "write_count": 8960
+      },
+      "route_guard": {
+        "after": {
+          "frame": "6201",
+          "g8009": "2",
+          "player_active": "0",
+          "player_phase": "0",
+          "player_state": "0",
+          "state8002": "0",
+          "state8004": "6",
+          "state8006": "0",
+          "state802c": "37312",
+          "state804a": "1935",
+          "state81c2": "0"
+        },
+        "at_boundary": {
+          "frame": "6200",
+          "g8009": "2",
+          "player_active": "0",
+          "player_phase": "0",
+          "player_state": "0",
+          "state8002": "0",
+          "state8004": "6",
+          "state8006": "0",
+          "state802c": "37312",
+          "state804a": "1935",
+          "state81c2": "0"
+        },
+        "before": {
+          "frame": "6199",
+          "g8009": "0",
+          "player_active": "0",
+          "player_phase": "0",
+          "player_state": "0",
+          "state8002": "0",
+          "state8004": "6",
+          "state8006": "0",
+          "state802c": "37376",
+          "state804a": "4815",
+          "state81c2": "0"
+        }
+      },
+      "semantic_package_name": "UNKNOWN",
+      "source_write_frame": 6199,
+      "visible_boundary_frame": 6200
+    },
+    {
+      "classification": "SOURCE_CLOSED",
+      "completion": {
+        "guard": "all captured source writes complete before the visible boundary snapshot",
+        "next_route_state": {
+          "frame": "12800",
+          "g8009": "2",
+          "player_active": "0",
+          "player_phase": "0",
+          "player_state": "0",
+          "state8002": "0",
+          "state8004": "6",
+          "state8006": "0",
+          "state802c": "37312",
+          "state804a": "1935",
+          "state81c2": "0"
+        },
+        "resulting_package_sha256": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836"
+      },
+      "destination_ownership": {
+        "first_address": "0x910000",
+        "last_address": "0x91fffe",
+        "owner": "CPS2 graphics RAM package plane",
+        "region": "gfxram1"
+      },
+      "failure_control": {
+        "capture": "oracle11_global_load_mut_12799",
+        "kind": "suppress every write to the owned destination region on the source write frame",
+        "mutant_package_sha256": "743fb4b58885b0f1d6d888acbe81025019b98672fb94c811fa6e3f6d177d50e9",
+        "package_difference": true,
+        "route_and_gameplay_projection_unchanged": true,
+        "stable_round2_route_state": 4,
+        "suppressed_writes": 8960
+      },
+      "id": "route-load-release-12799",
+      "legal_read_window": {
+        "first_frame_inclusive": 12799,
+        "last_frame_inclusive": 15193,
+        "next_package_boundary": null
+      },
+      "loader_callers": [
+        {
+          "caller_chains": [
+            [
+              "0x008c50",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x91e000",
+          "destination_last": "0x91fff2",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "4b4381f68ec4cb1c6f1f4138b00cf67015055a8c91f606e4d5b1bd636f997e8e",
+          "write_count": 1024,
+          "writer_pc": "0x00a6f2"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c50",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x91e004",
+          "destination_last": "0x91fff6",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "58961a3d2b0a8330c4865cedf49cd5a01c568560fb94bbe6333f06e3af84d40a",
+          "write_count": 1024,
+          "writer_pc": "0x00a6f4"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c50",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x91e008",
+          "destination_last": "0x91fffa",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "fca2a7cf1a16ca1189e734e697953dc604003b6dd956cbfdb31363897d2021c5",
+          "write_count": 1024,
+          "writer_pc": "0x00a6f6"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c50",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x91e00c",
+          "destination_last": "0x91fffe",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "be3958fb2017f79729e2d1bc0d0d4637ce6fbf438a6cdaf8b3a0812c1a3fa768",
+          "write_count": 1024,
+          "writer_pc": "0x00a6f8"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c7c",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x016f9e",
+              "0x008c7c",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x910000",
+          "destination_last": "0x9117fe",
+          "origin_a6": [
+            "0xff8380"
+          ],
+          "source_window_sha256": "89ccb9813ff7093d89919f0bbb58c674c5a3099f729e399a517db97d6e1223bf",
+          "write_count": 1536,
+          "writer_pc": "0x016fc2"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c000",
+          "destination_last": "0x91cfe2",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "b1ee1de37ad53f52e2edacff76c42e7b188ad0bb5dea12569e48b70ec5e22f7a",
+          "write_count": 256,
+          "writer_pc": "0x017de6"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c004",
+          "destination_last": "0x91cfe6",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "052611a168e943a0651b4247694d8ae8fd07ec92c98b05c066e7119a9f578a2c",
+          "write_count": 256,
+          "writer_pc": "0x017dec"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c008",
+          "destination_last": "0x91cfea",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "fa7b556096411e8cbb7be8504c56be71411aca4339381c67b452c7289c8d0bf1",
+          "write_count": 256,
+          "writer_pc": "0x017df2"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c00c",
+          "destination_last": "0x91cfee",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "4c6c8b8d4e8f0b0a54f5d2402dffff7420501d274672714f33e52014f8e4aa9c",
+          "write_count": 256,
+          "writer_pc": "0x017df8"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c010",
+          "destination_last": "0x91cff2",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "d70485ccb60e6b5151fe68e794c9ba1fbc3e80db3b705aa21b1111bd14e40970",
+          "write_count": 256,
+          "writer_pc": "0x017dfe"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c014",
+          "destination_last": "0x91cff6",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "b024e83e6d07737c1520b92bfefc25e25a628236f2bc08e5170e8c1432faf32b",
+          "write_count": 256,
+          "writer_pc": "0x017e04"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c018",
+          "destination_last": "0x91cffa",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "bcae5f0467bf9ecf0204cf63e8efd55aad873f454367b848ba1b2f981468d4b3",
+          "write_count": 256,
+          "writer_pc": "0x017e0a"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c56",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x0180a2",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180b6",
+              "0x008c56",
+              "0x0080a2"
+            ],
+            [
+              "0x0180ca",
+              "0x008c56",
+              "0x0080a2"
+            ]
+          ],
+          "destination_first": "0x91c01c",
+          "destination_last": "0x91cffe",
+          "origin_a6": [
+            "0xff8680"
+          ],
+          "source_window_sha256": "9080c57266d52c705d24c0c7c3df5273b7e9ecc59a2d7c7a068e800512d35075",
+          "write_count": 256,
+          "writer_pc": "0x017e10"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c90",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x008ca0",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x914000",
+          "destination_last": "0x9147fc",
+          "origin_a6": [
+            "0xff8380"
+          ],
+          "source_window_sha256": "96b46eda07b20751160d3c48386d3f723d3b6e7dc5300140eb2aa4d9d725f086",
+          "write_count": 512,
+          "writer_pc": "0x0b27e8"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008c90",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x008ca0",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x914002",
+          "destination_last": "0x9147fe",
+          "origin_a6": [
+            "0xff8380"
+          ],
+          "source_window_sha256": "f90058e9fcabf0358cff1a3d89a2d9f36c79b3a17d077ca2763472d45478aaef",
+          "write_count": 512,
+          "writer_pc": "0x0b27ea"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008cae",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x008cbc",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x918000",
+          "destination_last": "0x9181fc",
+          "origin_a6": [
+            "0xff8380"
+          ],
+          "source_window_sha256": "886a17a4c8cc7a107684b1b9a8676e3a1005fd65ec021322ee6b458e6a27da1d",
+          "write_count": 128,
+          "writer_pc": "0x0b2cf2"
+        },
+        {
+          "caller_chains": [
+            [
+              "0x008cae",
+              "0x0080a2",
+              "0x000000"
+            ],
+            [
+              "0x008cbc",
+              "0x0080a2",
+              "0x000000"
+            ]
+          ],
+          "destination_first": "0x918002",
+          "destination_last": "0x9181fe",
+          "origin_a6": [
+            "0xff8380"
+          ],
+          "source_window_sha256": "8e65e2ed8a7d7f0e22f069f81eee84f9142a3ebcdfeb9c94a09c754a90d57a63",
+          "write_count": 128,
+          "writer_pc": "0x0b2cf4"
+        }
+      ],
+      "mutation_identity": {
+        "files": {
+          "dispatches.tsv": "3e9a28594c693573d0db1b5f2e08701f93e53c34ccf83d1f91b4333a8fa2dd72",
+          "gfx_writes.tsv": "833d26f833ade4f1710018024161b41b02fb64000aed93d4ba69e1493502dd55",
+          "gfxram0_05565.bin": "73a7529cb37faa6a7ca6c50b0a4f40a59dc908ac41d9cdea8a7dae7c54d00836",
+          "gfxram0_05566.bin": "7bf779b1a9d9f8df6f68d87f904dfce4502dfca356f37b803d8ebfe9f19f8c3d",
+          "gfxram0_06200.bin": "67b66610679a639cc33594ad20721b938e91fd16ee9549589abd3216d695a9c9",
+          "gfxram0_12799.bin": "ca405e1c15bf8ea503c7babedd1c3a851038f6ba78523c957e5f1d6703948a28",
+          "gfxram1_05565.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+          "gfxram1_05566.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+          "gfxram1_06200.bin": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836",
+          "gfxram1_12799.bin": "743fb4b58885b0f1d6d888acbe81025019b98672fb94c811fa6e3f6d177d50e9",
+          "gfxram2_05565.bin": "42768124ed4684b33f77374a8ad3674b93df0bfa5597fbfc73739722ac2c4247",
+          "gfxram2_05566.bin": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+          "gfxram2_06200.bin": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+          "gfxram2_12799.bin": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+          "load_result.tsv": "a2da88029e3ec585702eaef446482afe4bab0c9c32bb3a8d4dbd33b67c1ecb09",
+          "projectiles.tsv": "0332e5be6eb05db533e4939267f83d4b3d54dc1acd3029ef4180d07b4c8e001a",
+          "result.tsv": "bdbfe46cf955ee4d682b0c59a867be88e2ddd4f0ff4e44d1f7eabe27fc6201a1",
+          "route_windows.tsv": "3cbafaa133bca5ea95f423e2d49e531faa8f9226f7f7b4c420b5e8e2896f7d23",
+          "samples.tsv": "c539b67aeed910c8b425c555b808edbd02a0de3fb8717d3acac3eed4500f918d",
+          "score_writes.tsv": "15e588536d357726b0d64adbf2ecbee78b412a9bf1d55851e7455a541e160ed6"
+        },
+        "manifest_sha256": "0c90a4d2838ad29fb560c34831c26cc6362dd1f15e071ecad8a1aadbf9dbe56b"
+      },
+      "package_identity": {
+        "region": "gfxram1",
+        "snapshot_sha256": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836",
+        "transaction_sha256": "47d5ee64e221e7d1139027630492c2334ed612250557dc2cdea6dbbc8351dd61",
+        "write_count": 8960
+      },
+      "route_guard": {
+        "after": {
+          "frame": "12800",
+          "g8009": "2",
+          "player_active": "0",
+          "player_phase": "0",
+          "player_state": "0",
+          "state8002": "0",
+          "state8004": "6",
+          "state8006": "0",
+          "state802c": "37312",
+          "state804a": "1935",
+          "state81c2": "0"
+        },
+        "at_boundary": {
+          "frame": "12799",
+          "g8009": "2",
+          "player_active": "0",
+          "player_phase": "0",
+          "player_state": "0",
+          "state8002": "0",
+          "state8004": "6",
+          "state8006": "0",
+          "state802c": "37312",
+          "state804a": "1935",
+          "state81c2": "0"
+        },
+        "before": {
+          "frame": "12798",
+          "g8009": "0",
+          "player_active": "0",
+          "player_phase": "0",
+          "player_state": "0",
+          "state8002": "0",
+          "state8004": "6",
+          "state8006": "0",
+          "state802c": "37376",
+          "state804a": "4815",
+          "state81c2": "0"
+        }
+      },
+      "semantic_package_name": "UNKNOWN",
+      "source_write_frame": 12798,
+      "visible_boundary_frame": 12799
+    }
+  ],
+  "capture_identity": {
+    "byte_identical": true,
+    "completion_a": {
+      "files": {
+        "dispatches.tsv": "3e9a28594c693573d0db1b5f2e08701f93e53c34ccf83d1f91b4333a8fa2dd72",
+        "gfx_writes.tsv": "e40de3146620e9ebeac8e61d744496f89a476741b7dc84551dc1dc466c587b22",
+        "gfxram0_05565.bin": "73a7529cb37faa6a7ca6c50b0a4f40a59dc908ac41d9cdea8a7dae7c54d00836",
+        "gfxram0_05566.bin": "7bf779b1a9d9f8df6f68d87f904dfce4502dfca356f37b803d8ebfe9f19f8c3d",
+        "gfxram0_06200.bin": "67b66610679a639cc33594ad20721b938e91fd16ee9549589abd3216d695a9c9",
+        "gfxram0_12799.bin": "ca405e1c15bf8ea503c7babedd1c3a851038f6ba78523c957e5f1d6703948a28",
+        "gfxram1_05565.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+        "gfxram1_05566.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+        "gfxram1_06200.bin": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836",
+        "gfxram1_12799.bin": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836",
+        "gfxram2_05565.bin": "42768124ed4684b33f77374a8ad3674b93df0bfa5597fbfc73739722ac2c4247",
+        "gfxram2_05566.bin": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+        "gfxram2_06200.bin": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+        "gfxram2_12799.bin": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+        "load_result.tsv": "612de61f4cdb6bf1cf440c25feb4be9df406078805ac75ac091ca6700b283bdc",
+        "projectiles.tsv": "0332e5be6eb05db533e4939267f83d4b3d54dc1acd3029ef4180d07b4c8e001a",
+        "result.tsv": "bdbfe46cf955ee4d682b0c59a867be88e2ddd4f0ff4e44d1f7eabe27fc6201a1",
+        "route_windows.tsv": "3cbafaa133bca5ea95f423e2d49e531faa8f9226f7f7b4c420b5e8e2896f7d23",
+        "samples.tsv": "c539b67aeed910c8b425c555b808edbd02a0de3fb8717d3acac3eed4500f918d",
+        "score_writes.tsv": "15e588536d357726b0d64adbf2ecbee78b412a9bf1d55851e7455a541e160ed6"
+      },
+      "manifest_sha256": "54157a494719b7ca91861e06bb59c4d5b268f3a431189c21fce43a0830fd35fa"
+    },
+    "completion_b": {
+      "files": {
+        "dispatches.tsv": "3e9a28594c693573d0db1b5f2e08701f93e53c34ccf83d1f91b4333a8fa2dd72",
+        "gfx_writes.tsv": "e40de3146620e9ebeac8e61d744496f89a476741b7dc84551dc1dc466c587b22",
+        "gfxram0_05565.bin": "73a7529cb37faa6a7ca6c50b0a4f40a59dc908ac41d9cdea8a7dae7c54d00836",
+        "gfxram0_05566.bin": "7bf779b1a9d9f8df6f68d87f904dfce4502dfca356f37b803d8ebfe9f19f8c3d",
+        "gfxram0_06200.bin": "67b66610679a639cc33594ad20721b938e91fd16ee9549589abd3216d695a9c9",
+        "gfxram0_12799.bin": "ca405e1c15bf8ea503c7babedd1c3a851038f6ba78523c957e5f1d6703948a28",
+        "gfxram1_05565.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+        "gfxram1_05566.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+        "gfxram1_06200.bin": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836",
+        "gfxram1_12799.bin": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836",
+        "gfxram2_05565.bin": "42768124ed4684b33f77374a8ad3674b93df0bfa5597fbfc73739722ac2c4247",
+        "gfxram2_05566.bin": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+        "gfxram2_06200.bin": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+        "gfxram2_12799.bin": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+        "load_result.tsv": "612de61f4cdb6bf1cf440c25feb4be9df406078805ac75ac091ca6700b283bdc",
+        "projectiles.tsv": "0332e5be6eb05db533e4939267f83d4b3d54dc1acd3029ef4180d07b4c8e001a",
+        "result.tsv": "bdbfe46cf955ee4d682b0c59a867be88e2ddd4f0ff4e44d1f7eabe27fc6201a1",
+        "route_windows.tsv": "3cbafaa133bca5ea95f423e2d49e531faa8f9226f7f7b4c420b5e8e2896f7d23",
+        "samples.tsv": "c539b67aeed910c8b425c555b808edbd02a0de3fb8717d3acac3eed4500f918d",
+        "score_writes.tsv": "15e588536d357726b0d64adbf2ecbee78b412a9bf1d55851e7455a541e160ed6"
+      },
+      "manifest_sha256": "54157a494719b7ca91861e06bb59c4d5b268f3a431189c21fce43a0830fd35fa"
+    },
+    "opcode_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501"
+  },
+  "coverage": {
+    "boundaries": 4,
+    "orphan_destinations": 0,
+    "orphan_legal_read_windows": 0,
+    "orphan_loader_callers": 0,
+    "orphan_packages": 0,
+    "orphan_route_guards": 0
+  },
+  "protected_boundaries": {
+    "oracle11_active": true,
+    "packed_bcd_score_routine": "0x0abdd2",
+    "physical_saturn": "UNRUN",
+    "predator_warrior": "SOURCE_CLOSED",
+    "production_runtime_writes": 0,
+    "spec02_active": false,
+    "yaba_runs": 0
+  },
+  "schema": "oracle11-global-load-release-boundaries-v1",
+  "scope": "four route-reachable graphics package load/release boundaries",
+  "status": "SOURCE_CLOSED",
+  "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE"
+}

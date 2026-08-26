@@ -104,7 +104,7 @@ card only for a genuinely independent body or source-evidence hard stop.
   stage-clear phases, and HUD/route presentation remain explicit external
   authority edges. ORACLE-11 remains active and SPEC-02 remains blocked by the
   complete matrix zero-gap gate.
-- `global-gameplay-audio-load-release`: `PARTIAL`. The shared main-CPU queue
+- `global-gameplay-audio-load-release`: `SOURCE_CLOSED`. The shared main-CPU queue
   drain `0x001880..0x001914` is `SOURCE_CLOSED`: both byte-identical completion
   captures contain 1,161 enqueues, and all twelve shared-RAM payload writers
   execute exactly 1,161 times with the source queue guards, 16-byte entry,
@@ -133,8 +133,17 @@ card only for a genuinely independent body or source-evidence hard stop.
   groups, callers, or handler transactions. Evidence is in
   `data/oracle11_global_audio_trigger_owners.json`. Only the four route
   load/release boundaries at frames 5,565, 5,566, 6,200, and 12,799 remain in
-  this family. No semantic sound names are inferred, and the packed-BCD score
-  routines remain rejected as audio owners.
+  this family. Two byte-identical load completions and one full-route
+  suppression for each boundary bind the route guards, exact graphics-RAM
+  writer/caller chains, package snapshot and transaction hashes, destination
+  ownership, legal read windows, completion state, failure-state package
+  mismatch, and next route state. The gameplay/route projection remains
+  unchanged under each presentation-package suppression. Evidence is in
+  `data/oracle11_global_load_release_boundaries.json`. The combined family has
+  zero orphan trigger groups, shared commands, handler paths, QSound
+  transactions, route guards, packages, destinations, legal windows, or load
+  callers. No semantic sound or package names are inferred, and the packed-BCD
+  score routines remain rejected as audio owners.
 
 ## Owned paths
 

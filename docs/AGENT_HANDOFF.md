@@ -26,16 +26,18 @@ player-origin audio edges across 47 state/action/substate contexts. Preserve:
 `data/oracle11_predator_player_audio.json` and
 `data/oracle11_predator_warrior_authority.json`.
 
-Global gameplay-audio/load/release remains `PARTIAL`. The main queue drain,
+Global gameplay-audio/load/release is `SOURCE_CLOSED`. The main queue drain,
 audio ingress, dispatcher/909-entry table/handlers, and grouped QSound effects
-are source closed in
-`data/oracle11_global_audio_load_release.json` and
+are closed in `data/oracle11_global_audio_load_release.json` and
 `data/oracle11_global_audio_handlers.json`. All 1,161 commands, 72 identities,
 and handler paths are bound with zero orphans; individual bus writes are not
 logical events. All 175 non-player groups are now source-closed to live owner
-contexts, 50 callers, guards, and command controls in
-`data/oracle11_global_audio_trigger_owners.json`. Next bind only the four route
-load/release boundaries and their loader/package/ownership transitions.
+contexts, 50 callers, guards, and command controls. All four load/release
+boundaries now bind route guards, exact callers, package identities,
+destinations, legal windows, results, and suppressions in
+`data/oracle11_global_load_release_boundaries.json`, with zero family orphans.
+Next close Round 1 navigation, terrain, obstacles, destructibles, and camera
+bounds from the existing matrix backlog.
 The sole route-segment x authority-family matrix and SPEC-02 zero-gap gate
 remain in `data/round1_system_coverage.yaml`.
 

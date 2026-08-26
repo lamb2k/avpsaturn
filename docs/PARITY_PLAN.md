@@ -178,13 +178,18 @@ QSound transaction groups. Two byte-identical origin-census completions then
 bind all 783 non-player dispatches and 175 trigger groups to live owner
 class/type/state/substate contexts, 50 exact source callsites, guard tails, and
 accepted command-handler controls with zero orphans. Semantic sound names
-remain `UNKNOWN`. Only four load/release boundaries remain open in this family.
-The generated 94 x 10
-matrix remains ineligible with 291 required `OBSERVED`, 307 required `PARTIAL`,
+remain `UNKNOWN`. Two byte-identical load captures and four full-route
+destination suppressions source-close the remaining graphics-package
+boundaries, including route guards, exact callers, package identities,
+destination ownership, legal windows, completion/failure state, and next route
+state. Global gameplay-audio/load/release is now `SOURCE_CLOSED` with zero
+orphan triggers, commands, handlers, QSound transactions, or load callers. The
+generated 94 x 10
+matrix remains ineligible with 291 required `OBSERVED`, 276 required `PARTIAL`,
 zero required `UNKNOWN`, 18 unmapped actor
 class/type pairs, 94 unmapped route edges, 1,517 orphan authoritative writers,
 and unowned audio/damage/load/release/RNG/spawn counts of
-874/1/4/18/1,023/18. ORACLE-11 remains active and SPEC-02 remains ineligible.
+0/1/0/18/1,023/18. ORACLE-11 remains active and SPEC-02 remains ineligible.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|
