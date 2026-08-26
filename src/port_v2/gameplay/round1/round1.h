@@ -15,6 +15,9 @@
 #define AVSP_ROUND1_FIRST_SPAWN_COUNT 10
 #define AVSP_ROUND1_ENTRY_PROGRAM_BYTES 26
 #define AVSP_ROUND1_ENTRY_STEP_COUNT 8
+#define AVSP_ROUND1_SCHEDULER_POOL_COUNT 4
+#define AVSP_ROUND1_REQUIRED_DISPATCH_COUNT 16
+#define AVSP_ROUND1_SCHEDULER_TRACE_CAPACITY 78
 #define AVSP_ROUND1_PLAYER_ENTRY_STATE 2048u
 #define AVSP_ROUND1_PLAYER_CONTROL_STATE 512u
 
@@ -41,7 +44,22 @@ typedef struct
     short z;
     short health;
     unsigned long animation_record;
+    unsigned long scheduler_updates;
 } AvspRound1ActorCore;
+
+typedef struct
+{
+    unsigned char record_type;
+    signed char actor_class;
+} AvspRound1DispatchSpec;
+
+typedef struct
+{
+    unsigned char record_type;
+    signed char actor_class;
+    unsigned short pool_slot;
+    unsigned long source_slot;
+} AvspRound1SchedulerVisit;
 
 typedef struct
 {
@@ -114,6 +132,12 @@ typedef struct
     AvspRound1Pool pools[AVSP_ROUND1_POOL_COUNT];
     unsigned long frame;
     unsigned long player_controller_updates;
+    AvspRound1SchedulerVisit scheduler_trace[
+        AVSP_ROUND1_SCHEDULER_TRACE_CAPACITY];
+    unsigned short scheduler_trace_count;
+    unsigned long scheduler_frames;
+    unsigned long scheduler_dispatches;
+    unsigned long scheduler_order_hash;
     unsigned long failure_count;
     unsigned long fallback_count;
     unsigned long tail_canary;
@@ -125,6 +149,7 @@ int avsp_round1_step_first_entry(AvspRound1Runtime *runtime);
 int avsp_round1_step_player(AvspRound1Runtime *runtime,
                             unsigned short input_mask,
                             short received_damage);
+int avsp_round1_step_scheduler(AvspRound1Runtime *runtime);
 int avsp_round1_entry_valid(const AvspRound1Runtime *runtime);
 int avsp_round1_canaries_ok(const AvspRound1Runtime *runtime);
 

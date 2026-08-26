@@ -77,6 +77,90 @@ static int avsp_round1_spawn_first_entry(AvspRound1Runtime *runtime)
     return 1;
 }
 
+static int avsp_round1_dispatch_supported(unsigned char record_type,
+                                          signed char actor_class)
+{
+    unsigned int index;
+    for (index = 0u; index < AVSP_ROUND1_REQUIRED_DISPATCH_COUNT; ++index)
+    {
+        if (avsp_round1_required_dispatches[index].record_type == record_type &&
+            avsp_round1_required_dispatches[index].actor_class == actor_class)
+            return 1;
+    }
+    return 0;
+}
+
+static unsigned long avsp_round1_scheduler_hash_byte(unsigned long hash,
+                                                     unsigned char value)
+{
+    return (hash ^ (unsigned long)value) * 16777619UL;
+}
+
+int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
+{
+    unsigned int order_index;
+    unsigned int pool_index;
+    unsigned int slot_index;
+    unsigned long hash = 2166136261UL;
+    if (runtime == 0 || runtime->route_state != 4 ||
+        !avsp_round1_canaries_ok(runtime) || runtime->failure_count != 0u ||
+        runtime->fallback_count != 0u)
+        return 0;
+    runtime->scheduler_trace_count = 0u;
+    for (order_index = 0u; order_index < AVSP_ROUND1_SCHEDULER_POOL_COUNT;
+         ++order_index)
+    {
+        pool_index = order_index;
+        if (runtime->pools[pool_index].record_type !=
+            avsp_round1_scheduler_pool_order[order_index] ||
+            !avsp_round1_pool_metadata_valid(&runtime->pools[pool_index],
+                                              pool_index))
+        {
+            ++runtime->failure_count;
+            return 0;
+        }
+        for (slot_index = 0u;
+             slot_index < runtime->pools[pool_index].capacity; ++slot_index)
+        {
+            AvspRound1ActorCore *actor =
+                &runtime->pools[pool_index].records[slot_index];
+            AvspRound1SchedulerVisit *visit;
+            unsigned short expected_slot;
+            if (actor->active == 0u)
+                continue;
+            expected_slot = (unsigned short)(
+                runtime->pools[pool_index].source_base +
+                slot_index * runtime->pools[pool_index].stride);
+            if (actor->type != runtime->pools[pool_index].record_type ||
+                (unsigned short)actor->source_slot != expected_slot ||
+                !avsp_round1_dispatch_supported(actor->type,
+                                                actor->actor_class) ||
+                runtime->scheduler_trace_count >=
+                    AVSP_ROUND1_SCHEDULER_TRACE_CAPACITY)
+            {
+                ++runtime->failure_count;
+                return 0;
+            }
+            visit = &runtime->scheduler_trace[
+                runtime->scheduler_trace_count++];
+            visit->record_type = actor->type;
+            visit->actor_class = actor->actor_class;
+            visit->pool_slot = (unsigned short)slot_index;
+            visit->source_slot = actor->source_slot;
+            hash = avsp_round1_scheduler_hash_byte(hash, actor->type);
+            hash = avsp_round1_scheduler_hash_byte(hash,
+                (unsigned char)actor->actor_class);
+            hash = avsp_round1_scheduler_hash_byte(hash,
+                (unsigned char)slot_index);
+            ++actor->scheduler_updates;
+            ++runtime->scheduler_dispatches;
+        }
+    }
+    runtime->scheduler_order_hash = hash;
+    ++runtime->scheduler_frames;
+    return 1;
+}
+
 int avsp_round1_canaries_ok(const AvspRound1Runtime *runtime)
 {
     return runtime != 0 && runtime->head_canary == AVSP_ROUND1_CANARY_HEAD &&

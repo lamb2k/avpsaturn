@@ -44,6 +44,10 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_player_facing"] == 1
     assert report["state"]["round1_player_source_action"] == 0
     assert report["state"]["round1_player_controller_updates"] == 301
+    assert report["state"]["round1_scheduler_frames"] == 301
+    assert report["state"]["round1_scheduler_dispatches"] == 3010
+    assert report["state"]["round1_scheduler_trace_count"] == 10
+    assert report["state"]["round1_scheduler_order_hash"] == -2089937380
     assert report["state"]["round1_presentation_ready"] == 1
     assert report["state"]["round1_presentation_seen"] == 1
     assert report["state"]["round1_presentation_commands_peak"] == 2

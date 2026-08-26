@@ -37,4 +37,29 @@ static const AvspRound1EntryStepSpec avsp_round1_entry_steps[AVSP_ROUND1_ENTRY_S
     { AVSP_ROUND1_ENTRY_TERMINATE, 0xFFu, 0u, 0u, 0u, 0x00128FC2UL, 0x00128FC4UL },
 };
 
+static const unsigned char avsp_round1_scheduler_pool_order[AVSP_ROUND1_SCHEDULER_POOL_COUNT] =
+{
+    12u, 16u, 20u, 24u
+};
+
+static const AvspRound1DispatchSpec avsp_round1_required_dispatches[AVSP_ROUND1_REQUIRED_DISPATCH_COUNT] =
+{
+    { 12u, 0x00 },
+    { 12u, 0x01 },
+    { 12u, 0x06 },
+    { 12u, 0x1F },
+    { 16u, 0x06 },
+    { 20u, 0x07 },
+    { 20u, 0x08 },
+    { 20u, 0x09 },
+    { 20u, 0x0A },
+    { 24u, 0x10 },
+    { 24u, 0x3D },
+    { 24u, 0x43 },
+    { 24u, 0x45 },
+    { 24u, 0x49 },
+    { 24u, 0x4B },
+    { 24u, 0x4E },
+};
+
 #endif

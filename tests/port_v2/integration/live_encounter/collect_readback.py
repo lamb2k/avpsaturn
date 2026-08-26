@@ -21,6 +21,8 @@ FIELDS = ("frame","input_mask","player_x","player_lane","player_health","player_
           "continued_after_unlock","camera_world_x","failures")
 FIELDS = FIELDS + ("round1_player_x","round1_player_z","round1_player_facing",
                    "round1_player_source_action","round1_player_controller_updates")
+FIELDS = FIELDS + ("round1_scheduler_frames","round1_scheduler_dispatches",
+                   "round1_scheduler_trace_count","round1_scheduler_order_hash")
 EVIDENCE_LAST_FRAME = 470
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def signed(mcp, address): return tools.signed32(mcp.u32(address))
@@ -162,7 +164,11 @@ mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_
            "round1_player_z":"avsp_diag_round1_player_z",
            "round1_player_facing":"avsp_diag_round1_player_facing",
            "round1_player_source_action":"avsp_diag_round1_player_source_action",
-           "round1_player_controller_updates":"avsp_diag_round1_player_controller_updates"}
+           "round1_player_controller_updates":"avsp_diag_round1_player_controller_updates",
+           "round1_scheduler_frames":"avsp_diag_round1_scheduler_frames",
+           "round1_scheduler_dispatches":"avsp_diag_round1_scheduler_dispatches",
+           "round1_scheduler_trace_count":"avsp_diag_round1_scheduler_trace_count",
+           "round1_scheduler_order_hash":"avsp_diag_round1_scheduler_order_hash"}
 state = {key:signed(mcp,syms[symbol]) for key,symbol in mapping.items()}
 observed_frame = state["frame"]
 current_sample = next((sample for sample in all_samples
@@ -174,7 +180,9 @@ evidence_sample = next((sample for sample in all_samples
 if evidence_sample is None:
     raise RuntimeError("fixed evidence-frame diagnostic sample is unavailable")
 for key in ("round1_player_x", "round1_player_z", "round1_player_facing",
-            "round1_player_source_action", "round1_player_controller_updates"):
+            "round1_player_source_action", "round1_player_controller_updates",
+            "round1_scheduler_frames", "round1_scheduler_dispatches",
+            "round1_scheduler_trace_count", "round1_scheduler_order_hash"):
     state[key] = evidence_sample[key]
 state["frame"] = EVIDENCE_LAST_FRAME
 samples = [sample for sample in all_samples
@@ -204,6 +212,10 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_player_facing"] == 1 and
         state["round1_player_source_action"] == 0 and
         state["round1_player_controller_updates"] == 301 and
+        state["round1_scheduler_frames"] == 301 and
+        state["round1_scheduler_dispatches"] == 3010 and
+        state["round1_scheduler_trace_count"] == 10 and
+        state["round1_scheduler_order_hash"] == -2089937380 and
         state["round1_presentation_ready"] == 1 and
         state["round1_presentation_seen"] == 1 and
         state["round1_presentation_commands_peak"] == 2):

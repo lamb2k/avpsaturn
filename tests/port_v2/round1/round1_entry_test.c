@@ -45,6 +45,44 @@ int main(void)
         runtime.player.substate != 512u ||
         !avsp_round1_entry_valid(&runtime))
         return 6;
+    if (!avsp_round1_step_scheduler(&runtime) ||
+        runtime.scheduler_trace_count != 10u ||
+        runtime.scheduler_frames != 1u ||
+        runtime.scheduler_dispatches != 10u)
+        return 7;
+    for (calls = 0u; calls < 10u; ++calls)
+    {
+        if (runtime.scheduler_trace[calls].record_type != 12u ||
+            runtime.scheduler_trace[calls].actor_class != 0x1f ||
+            runtime.scheduler_trace[calls].pool_slot != calls + 10u ||
+            runtime.scheduler_trace[calls].source_slot !=
+                0x00ff9d00UL + calls * 192u)
+            return 8;
+    }
+    runtime.pools[1].records[0].active = 1u;
+    runtime.pools[1].records[0].actor_class = 0x06;
+    runtime.pools[1].records[0].type = 16u;
+    runtime.pools[1].records[0].source_slot = 0x00ffa480UL;
+    runtime.pools[1].free_count = 19u;
+    runtime.pools[2].records[0].active = 1u;
+    runtime.pools[2].records[0].actor_class = 0x07;
+    runtime.pools[2].records[0].type = 20u;
+    runtime.pools[2].records[0].source_slot = 0x00ffae80UL;
+    runtime.pools[2].free_count = 15u;
+    runtime.pools[3].records[0].active = 1u;
+    runtime.pools[3].records[0].actor_class = 0x10;
+    runtime.pools[3].records[0].type = 24u;
+    runtime.pools[3].records[0].source_slot = 0x00ffb680UL;
+    runtime.pools[3].free_count = 31u;
+    if (!avsp_round1_step_scheduler(&runtime) ||
+        runtime.scheduler_trace_count != 13u ||
+        runtime.scheduler_frames != 2u ||
+        runtime.scheduler_dispatches != 23u ||
+        runtime.scheduler_trace[10].record_type != 16u ||
+        runtime.scheduler_trace[11].record_type != 20u ||
+        runtime.scheduler_trace[12].record_type != 24u ||
+        runtime.pools[0].records[10].scheduler_updates != 2u)
+        return 9;
     first = &runtime.pools[0].records[19];
     last = &runtime.pools[0].records[10];
     if (first->source_slot != 0x00FFA3C0UL || first->x != 656 ||
@@ -54,10 +92,10 @@ int main(void)
         last->source_slot != 0x00FF9D00UL || last->x != 632 ||
         last->z != 296 || last->variant != 6u ||
         last->substate != 4096u || last->animation_record != 0x0012E8ECUL)
-        return 7;
+        return 10;
     runtime.entry.gate8236 = 1u;
     if (avsp_round1_entry_valid(&runtime))
-        return 8;
-    puts("REIMPLEMENT-13 native first entry/spawn/current-input control: PASS");
+        return 11;
+    puts("REIMPLEMENT-13 native first entry/current-input/fixed-pool scheduler: PASS");
     return 0;
 }

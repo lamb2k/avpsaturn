@@ -502,6 +502,10 @@ typedef struct
     int round1_player_facing;
     int round1_player_source_action;
     int round1_player_controller_updates;
+    int round1_scheduler_frames;
+    int round1_scheduler_dispatches;
+    int round1_scheduler_trace_count;
+    int round1_scheduler_order_hash;
 } LiveEncounterDiagSample;
 static AvspLiveEncounterRuntime live_encounter_runtime;
 static AvspLiveEncounterFrame live_encounter_frame;
@@ -579,6 +583,10 @@ volatile int avsp_diag_round1_player_z;
 volatile int avsp_diag_round1_player_facing;
 volatile int avsp_diag_round1_player_source_action;
 volatile int avsp_diag_round1_player_controller_updates;
+volatile int avsp_diag_round1_scheduler_frames;
+volatile int avsp_diag_round1_scheduler_dispatches;
+volatile int avsp_diag_round1_scheduler_trace_count;
+volatile int avsp_diag_round1_scheduler_order_hash;
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
 static int live_autotest_phase;
 static int live_autotest_release;
@@ -6954,6 +6962,14 @@ static void live_encounter_publish(void)
             round1_runtime.player.source_action;
         sample->round1_player_controller_updates =
             (int)round1_runtime.player_controller_updates;
+        sample->round1_scheduler_frames =
+            (int)round1_runtime.scheduler_frames;
+        sample->round1_scheduler_dispatches =
+            (int)round1_runtime.scheduler_dispatches;
+        sample->round1_scheduler_trace_count =
+            (int)round1_runtime.scheduler_trace_count;
+        sample->round1_scheduler_order_hash =
+            (int)round1_runtime.scheduler_order_hash;
         avsp_diag_live_sample_count = (int)live_encounter_frame.frame + 1;
     }
     avsp_diag_live_interface_version = AVSP_LIVE_ENCOUNTER_INTERFACE_VERSION;
@@ -7041,6 +7057,14 @@ static void live_encounter_publish(void)
         round1_runtime.player.source_action;
     avsp_diag_round1_player_controller_updates =
         (int)round1_runtime.player_controller_updates;
+    avsp_diag_round1_scheduler_frames =
+        (int)round1_runtime.scheduler_frames;
+    avsp_diag_round1_scheduler_dispatches =
+        (int)round1_runtime.scheduler_dispatches;
+    avsp_diag_round1_scheduler_trace_count =
+        (int)round1_runtime.scheduler_trace_count;
+    avsp_diag_round1_scheduler_order_hash =
+        (int)round1_runtime.scheduler_order_hash;
 }
 
 static void live_encounter_frame_callback(void)
@@ -7087,6 +7111,13 @@ static void live_encounter_frame_callback(void)
         !avsp_round1_step_player(&round1_runtime, input.player_mask, 0))
     {
         avsp_diag_live_frame_stage = -9;
+        runtime_ready = 0;
+        return;
+    }
+    if (round1_runtime.route_state == 4 &&
+        !avsp_round1_step_scheduler(&round1_runtime))
+    {
+        avsp_diag_live_frame_stage = -10;
         runtime_ready = 0;
         return;
     }

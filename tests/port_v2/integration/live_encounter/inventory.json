@@ -69,6 +69,10 @@
     ,"avsp_diag_round1_player_facing"
     ,"avsp_diag_round1_player_source_action"
     ,"avsp_diag_round1_player_controller_updates"
+    ,"avsp_diag_round1_scheduler_frames"
+    ,"avsp_diag_round1_scheduler_dispatches"
+    ,"avsp_diag_round1_scheduler_trace_count"
+    ,"avsp_diag_round1_scheduler_order_hash"
     ,"failed_asset"
   ]
 }

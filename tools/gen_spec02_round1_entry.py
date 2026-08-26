@@ -37,12 +37,20 @@ def build() -> str:
     player = body["player_entry_script"]
     commands = player["source_program"]["commands"]
     program = bytes.fromhex(player["source_program"]["hex"])
+    scheduler = fixtures["authority_data"]["scheduler"]
+    scheduler_order = scheduler["frame_scheduler"]["required_round1_order"]
+    dispatches = []
+    for pool in scheduler["pools"]:
+        for dispatch in pool["required_round1_dispatch"]:
+            dispatches.append((pool["record_type"], int(dispatch["class"], 16)))
     if len(spawns) != 10 or len(commands) != len(KINDS):
         raise ValueError("SPEC-02 entry cardinality drift")
     if [int(row["sequence"]) for row in spawns] != list(range(10)):
         raise ValueError("SPEC-02 entry spawn order drift")
     if sum(LENGTHS) != len(program) or player["timer_semantics"]["loads"] != [60, 60, 44]:
         raise ValueError("SPEC-02 entry program/timer drift")
+    if scheduler_order != [12, 16, 20, 24] or len(dispatches) != 16:
+        raise ValueError("SPEC-02 Round 1 scheduler/dispatch drift")
 
     cursor = int(player["initial_cursor"], 16)
     step_rows = []
@@ -100,6 +108,17 @@ def build() -> str:
     for kind, opcode, arg0, arg1, arg2, first, last in step_rows:
         lines.append(
             f"    {{ {kind}, 0x{opcode:02X}u, {arg0}u, {arg1}u, {arg2}u, 0x{first:08X}UL, 0x{last:08X}UL }},")
+    lines.extend([
+        "};", "",
+        "static const unsigned char avsp_round1_scheduler_pool_order[AVSP_ROUND1_SCHEDULER_POOL_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in scheduler_order),
+        "};", "",
+        "static const AvspRound1DispatchSpec avsp_round1_required_dispatches[AVSP_ROUND1_REQUIRED_DISPATCH_COUNT] =",
+        "{",
+    ])
+    for record_type, actor_class in dispatches:
+        lines.append(f"    {{ {record_type}u, 0x{actor_class:02X} }},")
     lines.extend(["};", "", "#endif", ""])
     return "\n".join(lines)
 
