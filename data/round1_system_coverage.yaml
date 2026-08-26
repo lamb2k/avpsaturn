@@ -5,13 +5,14 @@
         "data/oracle07_predator_warrior_action_graph_equipment.json",
         "data/oracle11_predator_air_authority.json",
         "data/oracle11_predator_hitko_continue.json",
+        "data/oracle11_predator_route_ownership.json",
         "data/oracle11_predator_warrior_authority.json",
         "data/oracle11_predator_weapon_projectile_resource.json"
       ],
-      "counterfactual": "locomotion, melee, neutral and all four directional Button3 paths, route-reachable airborne Button1/Button2 branches, landing, natural HIT interruption cancellation, Button1 volley, empty-resource fallback, special, projectile lifecycle, resource/recharge, temporary resource award, facing, nonlethal HIT, lethal KO, failure/continue, respawn, and return-to-control are source-closed with byte-identical controls and targeted negatives; phases 0x0408/0x0412/0x0414 are explicitly NOT_REQUIRED_FOR_ROUND1; Coin-only, no-continue, delayed-Start, health-threshold, gameplay-button confirmation, and direction-only controls reject unsourced transitions",
-      "exact_next_experiment": "Close the sole remaining player backlog: route-wide pickup/resource/audio/load/release ownership across the full coverage universe.",
+      "counterfactual": "the union of both baseline completions, completing perturbations, failure/continue and targeted counterfactuals maps every observed player phase to a closed player body or explicit external route edge; locomotion/neutral/facing, melee, every required directional/airborne and interruption body, weapons/projectiles/resources, HIT/KO, failure/continue, respawn/return, natural health interaction, source temporary-resource grant, player-owned audio calls and the player-to-route load/release edge are source-closed; 0x0408/0x0412/0x0414 and the naturally unreached class0x0e resource pickup are explicitly NOT_REQUIRED_FOR_ROUND1 while their source bodies remain mutation-covered",
+      "exact_next_experiment": "Retain the closed player artifact while closing the externally mapped pickup-actor, global gameplay-audio/load/release, route, encounter, enemy, boss, RNG and handoff families.",
       "id": "predator-warrior-player-authority",
-      "status": "PARTIAL"
+      "status": "SOURCE_CLOSED"
     },
     {
       "accepted_evidence": [
@@ -791,7 +792,7 @@
     "closure_gate": {
       "orphan_authoritative_writers": 1517,
       "required_observed": 322,
-      "required_partial": 366,
+      "required_partial": 276,
       "required_unknown": 0,
       "spec02_eligible": false,
       "unmapped_actor_class_type_pairs": 18,
@@ -820,7 +821,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -832,11 +833,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -1003,7 +1005,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1015,11 +1017,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -1186,7 +1189,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1198,11 +1201,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -1369,7 +1373,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1381,11 +1385,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -1552,7 +1557,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1564,11 +1569,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -1735,7 +1741,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1747,11 +1753,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -1918,7 +1925,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1930,11 +1937,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -2113,6 +2121,7 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -2296,6 +2305,7 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -2467,7 +2477,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2479,11 +2489,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -2650,7 +2661,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2662,11 +2673,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -2833,7 +2845,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2845,11 +2857,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -3016,7 +3029,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3028,11 +3041,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -3199,7 +3213,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3211,11 +3225,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -3382,7 +3397,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3394,11 +3409,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -3565,7 +3581,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3577,11 +3593,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -3748,7 +3765,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3760,11 +3777,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -3931,7 +3949,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3943,11 +3961,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -4114,7 +4133,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4126,11 +4145,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -4297,7 +4317,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4309,11 +4329,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -4480,7 +4501,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4492,11 +4513,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -4663,7 +4685,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4675,11 +4697,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -4846,7 +4869,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4858,11 +4881,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -5029,7 +5053,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5041,11 +5065,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -5212,7 +5237,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5224,11 +5249,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -5395,7 +5421,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5407,11 +5433,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -5578,7 +5605,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5590,11 +5617,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -5761,7 +5789,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5773,11 +5801,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -5944,7 +5973,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5956,11 +5985,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -6127,7 +6157,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6139,11 +6169,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -6310,7 +6341,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6322,11 +6353,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -6493,7 +6525,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6505,11 +6537,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -6676,7 +6709,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6688,11 +6721,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -6859,7 +6893,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6871,11 +6905,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -7042,7 +7077,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7054,11 +7089,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -7225,7 +7261,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7237,11 +7273,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -7408,7 +7445,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7420,11 +7457,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -7591,7 +7629,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7603,11 +7641,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -7774,7 +7813,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7786,11 +7825,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -7957,7 +7997,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7969,11 +8009,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -8140,7 +8181,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8152,11 +8193,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -8323,7 +8365,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8335,11 +8377,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -8506,7 +8549,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8518,11 +8561,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -8689,7 +8733,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8701,11 +8745,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -8872,7 +8917,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8884,11 +8929,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -9055,7 +9101,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9067,11 +9113,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -9238,7 +9285,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9250,11 +9297,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -9421,7 +9469,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9433,11 +9481,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -9604,7 +9653,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9616,11 +9665,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -9787,7 +9837,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9799,11 +9849,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -9970,7 +10021,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9982,11 +10033,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -10153,7 +10205,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10165,11 +10217,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -10336,7 +10389,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10348,11 +10401,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -10519,7 +10573,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10531,11 +10585,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -10702,7 +10757,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10714,11 +10769,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -10885,7 +10941,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10897,11 +10953,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -11068,7 +11125,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11080,11 +11137,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -11251,7 +11309,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11263,11 +11321,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -11434,7 +11493,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11446,11 +11505,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -11617,7 +11677,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11629,11 +11689,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -11800,7 +11861,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11812,11 +11873,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -11983,7 +12045,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11995,11 +12057,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -12166,7 +12229,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12178,11 +12241,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -12349,7 +12413,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12361,11 +12425,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -12532,7 +12597,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12544,11 +12609,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -12715,7 +12781,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12727,11 +12793,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -12898,7 +12965,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12910,11 +12977,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -13081,7 +13149,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13093,11 +13161,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -13264,7 +13333,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13276,11 +13345,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -13447,7 +13517,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13459,11 +13529,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -13630,7 +13701,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13642,11 +13713,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -13813,7 +13885,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13825,11 +13897,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -13996,7 +14069,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14008,11 +14081,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -14179,7 +14253,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14191,11 +14265,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -14362,7 +14437,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14374,11 +14449,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -14545,7 +14621,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14557,11 +14633,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -14728,7 +14805,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14740,11 +14817,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -14911,7 +14989,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14923,11 +15001,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -15094,7 +15173,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15106,11 +15185,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -15277,7 +15357,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15289,11 +15369,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -15460,7 +15541,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15472,11 +15553,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -15643,7 +15725,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15655,11 +15737,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -15826,7 +15909,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15838,11 +15921,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -16009,7 +16093,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16021,11 +16105,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -16192,7 +16277,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16204,11 +16289,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -16375,7 +16461,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16387,11 +16473,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -16570,6 +16657,7 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -16753,6 +16841,7 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
@@ -16924,7 +17013,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16936,11 +17025,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -17107,7 +17197,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17119,11 +17209,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -17290,7 +17381,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17302,11 +17393,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -17473,7 +17565,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17485,11 +17577,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -17656,7 +17749,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17668,11 +17761,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -17839,7 +17933,7 @@
         "cells": [
           {
             "authority_family": "predator-warrior-player-authority",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17851,11 +17945,12 @@
               "data/oracle07_predator_warrior_action_graph_equipment.json",
               "data/oracle11_predator_air_authority.json",
               "data/oracle11_predator_hitko_continue.json",
+              "data/oracle11_predator_route_ownership.json",
               "data/oracle11_predator_warrior_authority.json",
               "data/oracle11_predator_weapon_projectile_resource.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "round1-navigation-terrain-camera",
@@ -18815,7 +18910,7 @@
   "spec02_closure_gate": {
     "orphan_authoritative_writers": 1517,
     "required_observed": 322,
-    "required_partial": 366,
+    "required_partial": 276,
     "required_unknown": 0,
     "spec02_eligible": false,
     "unmapped_actor_class_type_pairs": 18,

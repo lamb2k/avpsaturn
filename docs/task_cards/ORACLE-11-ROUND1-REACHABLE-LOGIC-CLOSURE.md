@@ -30,28 +30,27 @@ card only for a genuinely independent body or source-evidence hard stop.
   and route-wide class-removal counterfactuals are bound. Player update
   authority remains deliberately assigned to the player family.
 - `predator-warrior-locomotion-neutral-facing`: `SOURCE_CLOSED` inside the
-  still-`PARTIAL` player family in
+  now-`SOURCE_CLOSED` player family in
   `data/oracle11_predator_warrior_authority.json`. Source input decode,
   signed fixed-point vectors, facing writers, ten-tick stop transition,
   stop-to-idle presentation, and facing retention are bound. Source Up maps to
   positive world Y/Z and Down maps to negative world Y/Z; screen conversion is
-  a later executable-contract concern. Remaining actions, equipment,
-  projectile/resource ownership, HIT/KO/continue, and return-to-control bodies
-  remain active backlog.
-- `predator-warrior-route-melee`: `SOURCE_CLOSED` inside the still-`PARTIAL`
+  a later executable-contract concern. The subsequent checkpoints below close
+  the formerly outstanding player bodies without changing this contract.
+- `predator-warrior-route-melee`: `SOURCE_CLOSED` inside the now-`SOURCE_CLOSED`
   player family. Button-2 edge dispatch, target-context override, four-step
   selector/assembly ownership, the 30-tick follow-up window, recovery-edge
   chaining, and non-random state-owned presentation are bound in
   `data/oracle11_predator_warrior_authority.json`. The confirmed selector
   timing and attack assemblies remain locked.
 - `predator-warrior-normal-jump-air-landing`: `SOURCE_CLOSED` inside the
-  still-`PARTIAL` player family. Two independent byte-identical source runs
+  now-`SOURCE_CLOSED` player family. Two independent byte-identical source runs
   bind Button-3 edge dispatch, fixed-point vector setup and integration,
   neutral jump presentation, landing guard/snap, facing retention, and return
   to control. Its earlier direction-plus-jump HIT capture is retained as the
   unmodified interruption witness for the broader checkpoint below.
 - `predator-warrior-directional-airborne-interruption`: `SOURCE_CLOSED` inside
-  the still-`PARTIAL` player family. The baseline, perturbed, and
+  the now-`SOURCE_CLOSED` player family. The baseline, perturbed, and
   failure/continue universe reaches `0x0400/02/04/06`; input-only targeted
   routes additionally bind `0x040a/0c/0e/10` across every direction lane,
   airborne Button-1 and Button-2 guards, landing, HIT cancellation, and return
@@ -61,7 +60,7 @@ card only for a genuinely independent body or source-evidence hard stop.
   `data/oracle11_predator_air_authority.json` and the sole route-segment x
   authority-family matrix remains in `data/round1_system_coverage.yaml`.
 - `predator-warrior-weapon-projectile-resource`: `SOURCE_CLOSED` inside the
-  still-`PARTIAL` player family. Two independently launched byte-identical
+  now-`SOURCE_CLOSED` player family. Two independently launched byte-identical
   captures plus twelve causal counterfactual classes bind Button-1 edge/held
   dispatch, the twelve-attempt class-`0x05` volley, record-type-4 allocation
   and lifecycle, current-state collision/removal, the presentation-only empty
@@ -69,11 +68,10 @@ card only for a genuinely independent body or source-evidence hard stop.
   temporary resource-award timer, class-`0x54` display ownership, facing,
   gameplay-audio boundaries, and RNG/order. Evidence is in
   `data/oracle11_predator_weapon_projectile_resource.json` and
-  `data/oracle11_predator_warrior_authority.json`. The player HIT/KO and
-  continue checkpoint below consumes the next dependency; route-wide
-  pickup/resource/audio/load/release ownership remains active afterward.
+  `data/oracle11_predator_warrior_authority.json`. The later HIT/KO/continue
+  and route-ownership checkpoints below complete its dependent player edges.
 - `predator-warrior-hit-ko-failure-continue-respawn-return`: `SOURCE_CLOSED`
-  inside the still-`PARTIAL` player family. Two independently launched
+  inside the now-`SOURCE_CLOSED` player family. Two independently launched
   byte-identical captures bind signed-health lethal KO, the full source-owned
   KO phase sequence and 60-tick removal countdown, nonlethal HIT recovery and
   one-tick invulnerability, failure state, packed-BCD credit debit, credited
@@ -82,8 +80,19 @@ card only for a genuinely independent body or source-evidence hard stop.
   input-suppression, isolated Button1/Button2/Button3, and direction-only
   counterfactuals reject fixed-frame or cursor-owned respawn. Evidence is in
   `data/oracle11_predator_hitko_continue.json` and the integrated player
-  artifact. Route-wide pickup/resource/audio/load/release ownership is the
-  sole remaining Predator Warrior backlog; the family remains `PARTIAL`.
+  artifact.
+- `predator-warrior-route-pickup-resource-audio-load-ownership`:
+  `SOURCE_CLOSED`, completing the player family. Two independent route-event
+  controls and two independent natural-interaction controls map every observed
+  player action phase. Health/max-health, record24 effect removal, natural
+  interaction completion/button interruption, and native class-`0x0e` target
+  acquisition/resource-grant controls separate gameplay state from display
+  actors. Exact player-owned audio call sites are retained, while global route
+  audio, load/release, pickup-actor lifecycle, stage-clear phases and HUD/route
+  presentation are explicit external authority edges and remain active in
+  their owning ORACLE-11 families. Evidence is in
+  `data/oracle11_predator_route_ownership.json` and the integrated player
+  artifact. ORACLE-11 remains active and SPEC-02 remains blocked.
 
 ## Owned paths
 

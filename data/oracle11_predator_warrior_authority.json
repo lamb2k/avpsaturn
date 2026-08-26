@@ -783,9 +783,466 @@
     "salvage08_active": false,
     "user09_status": "CHANGES_REQUESTED"
   },
-  "remaining_player_backlog": [
-    "route-wide resource, pickup, and audio/load interactions"
-  ],
+  "remaining_player_backlog": [],
+  "route_pickup_resource_audio_load_ownership": {
+    "action_phase_reconciliation": {
+      "external_edge": "0x1000/0x1002/0x1004 are written by the stage-clear/route family; their player-facing phase identity is mapped here but their route guard remains outside player authority",
+      "interaction_intervals": [
+        [
+          3102,
+          3107
+        ],
+        [
+          4032,
+          4051
+        ],
+        [
+          17522,
+          17549
+        ]
+      ],
+      "observed": [
+        "0x0000",
+        "0x0002",
+        "0x0200",
+        "0x0202",
+        "0x0204",
+        "0x0206",
+        "0x0208",
+        "0x020a",
+        "0x020c",
+        "0x020e",
+        "0x0400",
+        "0x0402",
+        "0x0404",
+        "0x0406",
+        "0x0600",
+        "0x0800",
+        "0x0802",
+        "0x0804",
+        "0x0806",
+        "0x0808",
+        "0x080a",
+        "0x080c",
+        "0x0c00",
+        "0x0c02",
+        "0x0c04",
+        "0x0e00",
+        "0x1000",
+        "0x1002",
+        "0x1004",
+        "0x1202",
+        "0x1204",
+        "0x1400",
+        "0x1402",
+        "0x1a00",
+        "0x1a02"
+      ],
+      "owner_by_phase": {
+        "0x0000": "locomotion-neutral",
+        "0x0002": "locomotion-neutral",
+        "0x0200": "locomotion-neutral",
+        "0x0202": "locomotion-neutral",
+        "0x0204": "locomotion-neutral",
+        "0x0206": "route-reachable-melee",
+        "0x0208": "route-reachable-melee",
+        "0x020a": "route-reachable-melee",
+        "0x020c": "route-reachable-melee",
+        "0x020e": "route-reachable-melee",
+        "0x0400": "directional-airborne",
+        "0x0402": "directional-airborne",
+        "0x0404": "directional-airborne",
+        "0x0406": "directional-airborne",
+        "0x0600": "route-reachable-melee",
+        "0x0800": "weapon-projectile-resource",
+        "0x0802": "weapon-projectile-resource",
+        "0x0804": "weapon-projectile-resource",
+        "0x0806": "weapon-projectile-resource",
+        "0x0808": "weapon-projectile-resource",
+        "0x080a": "weapon-projectile-resource",
+        "0x080c": "weapon-projectile-resource",
+        "0x0c00": "weapon-projectile-resource",
+        "0x0c02": "weapon-projectile-resource",
+        "0x0c04": "weapon-projectile-resource",
+        "0x0e00": "route-interaction",
+        "0x1000": "external-stage-clear-route-edge",
+        "0x1002": "external-stage-clear-route-edge",
+        "0x1004": "external-stage-clear-route-edge",
+        "0x1202": "hit-ko-failure-continue-respawn",
+        "0x1204": "hit-ko-failure-continue-respawn",
+        "0x1400": "route-reachable-melee",
+        "0x1402": "route-reachable-melee",
+        "0x1a00": "weapon-projectile-resource",
+        "0x1a02": "weapon-projectile-resource"
+      },
+      "unmapped_player_phases": []
+    },
+    "audio_ownership": {
+      "causal_scope_guard": "the empty main-program audio-write tap is not used to infer silence or route-wide ownership",
+      "classification": "SOURCE_CLOSED_FOR_PLAYER_EDGE",
+      "health_max_alternate_call": "0x0bc5fc..0x0bc664 jumps 0x0abdd2",
+      "player_action_calls": [
+        "0x019bcc",
+        "0x019bde",
+        "0x019c26",
+        "0x01e89e",
+        "0x01f260",
+        "0x01fffe"
+      ],
+      "remaining_player_unknowns": [],
+      "route_audio_owner": "gameplay-audio-load-release",
+      "weapon_audio": "retained from the accepted weapon artifact, including the character-indexed empty fallback"
+    },
+    "capture_identity": {
+      "interaction": {
+        "manifest_sha256": "753b085f1e359cec358b77460cb872238a25a63efe13ad59d3d453ee08a2a083",
+        "variants": [
+          {
+            "mode": "baseline",
+            "name": "route_interaction_1",
+            "sha256": {
+              "actors.tsv": "1d7c1e3dfda96de8b7e77e66847ca7431c2c02e8a6abbf4de5fa0662006b449c",
+              "qsound.tsv": "c5f3ecf741a9311305e6fb116616fdb27559f7640d7c1c2c4a36800f79b6b62f",
+              "samples.tsv": "b9fd73b3bf1645e7682bf2e23094e266e3bf17c88bb1b51c8a504180194f3542",
+              "writes.tsv": "1a9c55e7aaa44b513c332d6803acc46fc5ed3750d5d630fcf5bdfade9377a249"
+            }
+          },
+          {
+            "mode": "baseline",
+            "name": "route_interaction_2",
+            "sha256": {
+              "actors.tsv": "1d7c1e3dfda96de8b7e77e66847ca7431c2c02e8a6abbf4de5fa0662006b449c",
+              "qsound.tsv": "c5f3ecf741a9311305e6fb116616fdb27559f7640d7c1c2c4a36800f79b6b62f",
+              "samples.tsv": "b9fd73b3bf1645e7682bf2e23094e266e3bf17c88bb1b51c8a504180194f3542",
+              "writes.tsv": "1a9c55e7aaa44b513c332d6803acc46fc5ed3750d5d630fcf5bdfade9377a249"
+            }
+          },
+          {
+            "mode": "health_max",
+            "name": "health_max",
+            "sha256": {
+              "actors.tsv": "43384ffdd8ff0966e6d2a889d7ccd7a3cd1d53dde2784d1d8329d53281199f9e",
+              "qsound.tsv": "b324138652efd1a7283897bfe25c3e71eda038df21dbce66d6c51441eaa8529b",
+              "samples.tsv": "b9f0bb51d117870975b1fe3c3f4677d90ce554fc32f54d74245962ee2f7ce3c5",
+              "writes.tsv": "9346c6a4faf0b8a5424a98c1677ad585fe2482e5caa8bbe1f5219f61d0882612"
+            }
+          },
+          {
+            "mode": "effect_pool_unavailable",
+            "name": "effect_pool_unavailable",
+            "sha256": {
+              "actors.tsv": "6711ba189aa2a0e6825d16b6d320cbbf50347f914c53bd4ebbd585d65ea82e69",
+              "qsound.tsv": "fd98e73e113740f40db7c097919d5dd81977d74cd3b270291d0c542228fd93ef",
+              "samples.tsv": "972cd86a1dd89a1dc7e79c35e34764d18302afb657c986d689629d0411ced678",
+              "writes.tsv": "ab7876a37d12fc7f95ab9f404058ab634a1b7ac7813625b1c1ecb1c83287d053"
+            }
+          }
+        ]
+      },
+      "resource": {
+        "manifest_sha256": "b7c628a56b8f5c5634a59582b303282ecdd028ea5ae60ea2e56ad359fc69dba0",
+        "variants": [
+          {
+            "mode": "resource_pickup_near",
+            "name": "resource_pickup_near",
+            "sha256": {
+              "actors.tsv": "80b1949b5fca402654a02fc61ea378e42a875ce7cf31b0bef8c1266913691d63",
+              "qsound.tsv": "4218d91656d78a27d016dd26d40c6ed5aba915ccfa87b3d5cb22d7410abbdf77",
+              "samples.tsv": "8f6a70eaf55a323cc5f62e84fd200dbd2398551f2182700f1e538ba36fe0a66a",
+              "writes.tsv": "dcf306e78b2684ae5dd67288c60604695b9288f11fde0e1589fe855c0ea7236e"
+            }
+          }
+        ]
+      },
+      "route_events": {
+        "a_manifest_sha256": "9f3d21cd9c03de58d52608ca4c331bcfb352a44519886e93ab834d45821c3e08",
+        "b_manifest_sha256": "9f3d21cd9c03de58d52608ca4c331bcfb352a44519886e93ab834d45821c3e08",
+        "files": {
+          "audio_writes.tsv": "b7f1de107bfedf2b028bd8fa2e29f30c95847a2bbb1fc40dea0dad8ddaa159a9",
+          "gfx_writes.tsv": "817ac3cbebb8bea5f0b8ce663b4ea35ebba9873333900077b8370de4a632db9b",
+          "samples.tsv": "5265cb6c8417ce1d1004fb7fabac56536ec35a4f150d15b640f6738628bb70cd"
+        }
+      },
+      "uninterrupted": {
+        "manifest_sha256": "9ffb2ee408a003554560eddc65e047b3be9be1c47684006d3815d8fda4b9e2a0",
+        "variants": [
+          {
+            "mode": "interaction_uninterrupted",
+            "name": "interaction_uninterrupted",
+            "sha256": {
+              "actors.tsv": "2f209eef82b4694497450b73948b0374bd91c9634ca90b021a51ad0aef90a0fc",
+              "qsound.tsv": "110e632e763157565edc2da685dcb5e5fd3b780ffa74efd6b17ff183d73e3fb0",
+              "samples.tsv": "50bdc5b3fd6c922cfe3fe467a9679e4b858f682fe5d4e33f02d41431fe41a5c9",
+              "writes.tsv": "4f1751bb632ca50ad4d05ffe62ef0ce3031cef43d33c4bedfc805f3060626b77"
+            }
+          }
+        ]
+      }
+    },
+    "coverage_universe": {
+      "independent_interaction_controls_byte_identical": true,
+      "independent_route_event_controls_byte_identical": true,
+      "routes": [
+        "baseline-completion-a",
+        "baseline-completion-b",
+        "perturbed-completions",
+        "failure-continue",
+        "targeted-counterfactuals"
+      ],
+      "rule": "union of both baseline completions, completing perturbations, failure/continue, and targeted counterfactual routes"
+    },
+    "external_authority_edges": {
+      "hud_and_transition_gfx": "presentation infrastructure / route family",
+      "note": "these mapped edges are not player unknowns and do not close their owning Round 1 families",
+      "pickup_actor_lifecycle": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+      "route_audio": "gameplay-audio-load-release",
+      "route_load_release": "gameplay-audio-load-release",
+      "stage_clear_action_phases": "stage-clear-failure-continue-round2-handoff"
+    },
+    "health_pickup": {
+      "classification": "SOURCE_CLOSED",
+      "dispatch": "0x019fec..0x01a174 to 0x0bc5fc",
+      "effect_actor_is_gameplay_authority": false,
+      "health_rule": "zero establishes 5, subtype table amount is added, then clamped to 101 and copied to +0x42",
+      "max_health_control": "health 101 preserves the same 0x0e00 action but skips the health and latch writers and takes the source alternate-audio branch",
+      "natural_target": "0xffcd00 class0x0a subtype0x12",
+      "natural_witness": {
+        "entry_frame": 3102,
+        "health_after": 95,
+        "health_before": 85,
+        "target": "0xffcd00"
+      },
+      "remaining_unknowns": [],
+      "target_pool": "record28 0xffc680 base, 16 slots, 0x80 stride",
+      "target_scan": "0x01ce98..0x01cece; 0x01cec2 writes player +0x8e"
+    },
+    "interaction_action_and_interruption": {
+      "action": "0x0e00",
+      "button_interruption": {
+        "baseline_last": 4051,
+        "next_action": "0x0c00",
+        "next_frame": 4052
+      },
+      "classification": "SOURCE_CLOSED",
+      "effect_actor": "record24 class0x20 is presentation/coordination; pool unavailability does not change gameplay result",
+      "natural_completion": {
+        "entry": 4032,
+        "last": 4059,
+        "return_to_neutral": 4060
+      },
+      "remaining_unknowns": []
+    },
+    "load_release_ownership": {
+      "bulk_loader_pcs": [
+        "018420",
+        "018422",
+        "018424",
+        "018426",
+        "018428",
+        "01842a",
+        "01842c",
+        "01842e",
+        "018430",
+        "018432",
+        "018434",
+        "018436",
+        "018438",
+        "01843a",
+        "01843c",
+        "01843e",
+        "0ac1be",
+        "0ac1c2",
+        "0ac1c6",
+        "0ac1ca",
+        "0b1b9a",
+        "0b1ba6"
+      ],
+      "bulk_loader_uses_player_actor_base": false,
+      "classification": "SOURCE_CLOSED_FOR_PLAYER_EDGE",
+      "player_keyed_gfx_classification": "HUD_OR_ROUTE_TRANSITION_PRESENTATION",
+      "player_keyed_gfx_pcs": [
+        "008dc0",
+        "008f7e",
+        "00efa0",
+        "00efa4",
+        "00efaa",
+        "00efae",
+        "00efb8",
+        "00efbc",
+        "00efc2",
+        "00efc6",
+        "016fc2",
+        "0abd24",
+        "0abd26",
+        "0abd44",
+        "0abd46",
+        "0adde4",
+        "0addf8",
+        "0ade84",
+        "0ade8a",
+        "0ade92",
+        "0ade9a",
+        "0aded0",
+        "0adf08",
+        "0ae048",
+        "0ae0be",
+        "0ae0c2",
+        "0ae0c8",
+        "0ae0cc",
+        "0ae140",
+        "0ae142",
+        "0ae146",
+        "0ae148",
+        "0ae150",
+        "0ae154",
+        "0ae2e6",
+        "0ae2f4",
+        "0aec40",
+        "0aec42",
+        "0aec44",
+        "0aec46",
+        "0aec48",
+        "0aec4a",
+        "0aec4c",
+        "0aec4e",
+        "0aec54",
+        "0aec66",
+        "0aec68",
+        "0aec70",
+        "0aec72",
+        "0aec7a",
+        "0aec7c",
+        "0aec84",
+        "0aec86",
+        "0aec8c",
+        "0aecd8",
+        "0aecda",
+        "0aecdc",
+        "0aecde",
+        "0aece0",
+        "0b27e8",
+        "0b27ea",
+        "0b2cf2",
+        "0b2cf4"
+      ],
+      "remaining_player_unknowns": [],
+      "route_load_release_owner": "gameplay-audio-load-release",
+      "route_windows": [
+        [
+          5530,
+          5580
+        ],
+        [
+          6170,
+          6230
+        ],
+        [
+          12770,
+          12830
+        ]
+      ]
+    },
+    "mutation_controls": {
+      "classes": [
+        "independent-launch identity",
+        "health clamp",
+        "health writer",
+        "target acquisition",
+        "resource grant",
+        "display actor separation",
+        "interaction interruption",
+        "action-phase mapping",
+        "audio edge",
+        "load edge"
+      ],
+      "count": 10
+    },
+    "protected_boundaries": {
+      "frontend_active": false,
+      "physical_saturn": "UNRUN",
+      "production_runtime_writes": 0,
+      "salvage08_active": false,
+      "user09_status": "CHANGES_REQUESTED",
+      "yaba_runs": 0
+    },
+    "remaining_player_unknowns": [],
+    "resource_meter": {
+      "authority": "debit/recharge remains bound by the accepted weapon artifact; pickup grant is independently bound above",
+      "classification": "SOURCE_CLOSED",
+      "fields": {
+        "depleted": "+0x8b u8",
+        "meter": "+0x8c u8",
+        "recharge": "+0x8d u8",
+        "temporary_award": "+0xae u16"
+      },
+      "remaining_unknowns": []
+    },
+    "schema": "oracle11-predator-route-ownership-v1",
+    "scope": "Predator Warrior route-reachable action-phase, target, health pickup, temporary-resource grant, interaction interruption, resource-meter, player-owned audio-call and load/release-edge ownership; other actors and route systems remain separate ORACLE-11 authority families",
+    "source_identity": {
+      "class54_display": {
+        "bytes": 182,
+        "end_exclusive": "0x094bf0",
+        "sha256": "d42c34afcc1ecd6637996b372bda8c9359a673f714c3bbef3c06361e9ae3a2f3",
+        "start": "0x094b3a"
+      },
+      "decoded_opcodes_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
+      "decrypted_program_sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9",
+      "health_item": {
+        "bytes": 104,
+        "end_exclusive": "0x0bc664",
+        "sha256": "261a3bf901f5b7d3ed95a0f213ac5dda22fff63eb6c2ebd9372aa4246d8892f6",
+        "start": "0x0bc5fc"
+      },
+      "interaction_dispatch": {
+        "bytes": 492,
+        "end_exclusive": "0x01a1d8",
+        "sha256": "92d3f615f750f205da1f7787741d8c3f8965cf58387c3b23003d9a83d61bc534",
+        "start": "0x019fec"
+      },
+      "interaction_effect": {
+        "bytes": 76,
+        "end_exclusive": "0x01ac48",
+        "sha256": "07c08d0131acd1a250460881e61e4ba8ad7763be092edbc59084fb3728a13536",
+        "start": "0x01abfc"
+      },
+      "record28_scheduler": {
+        "bytes": 110,
+        "end_exclusive": "0x01bd48",
+        "sha256": "5778d387c7c2fd5382f4fe661f3dc2a8513e56be0b40afd13ebb84ee8b6c11c2",
+        "start": "0x01bcda"
+      },
+      "target_scan": {
+        "bytes": 54,
+        "end_exclusive": "0x01cece",
+        "sha256": "9586d087bc02f693055772a5776e44238415d5e0dfb147a251c2c2716382db69",
+        "start": "0x01ce98"
+      }
+    },
+    "status": "SOURCE_CLOSED",
+    "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE",
+    "temporary_resource_pickup": {
+      "classification": "SOURCE_CLOSED",
+      "display_actor": {
+        "allocation_writer": "0x01a1bc",
+        "class": "0x54",
+        "gameplay_authority": false,
+        "pool": "record24"
+      },
+      "grant": {
+        "field": "player +0xae u16",
+        "value": 600,
+        "writer": "0x01a1c6"
+      },
+      "natural_route_classification": "NOT_REQUIRED_FOR_ROUND1",
+      "natural_route_reachable": false,
+      "remaining_unknowns": [],
+      "source_body": "0x01a196..0x01a1d8",
+      "source_body_closed_for_mutation_coverage": true,
+      "target": "record28 class0x0e at 0xffcd00",
+      "targeted_control": "changes only the live class0x0e actor position and supplies one real Button2 edge after native target acquisition"
+    }
+  },
   "route_reachable_melee_actions": {
     "classification": "SOURCE_CLOSED",
     "close_combo": {
@@ -1310,7 +1767,7 @@
     "scheduler_position": "player slot before the non-player pools"
   },
   "schema": "oracle11-predator-warrior-authority-v1",
-  "scope": "Round 1 one-player source authority; locomotion, melee, all route-reachable directional/air actions, interruption cancellation, weapon/projectile/resource, nonlethal HIT, lethal KO, failure/continue, respawn, and return-to-control are closed while route-wide pickup/resource/audio/load ownership remains active backlog",
+  "scope": "Round 1 one-player Predator Warrior authority is source closed across locomotion/neutral/facing, melee, every route-reachable directional and airborne body, interruption, weapons/projectiles/resources, HIT/KO, failure/continue, respawn, return-to-control, pickup interaction, player-owned audio calls, and explicit load/release ownership edges. Route systems, item actors, global audio/loading, enemies, encounters, boss and handoff remain their own active ORACLE-11 families.",
   "source_identity": {
     "air_motion_arithmetic": {
       "bytes": 76,
@@ -1393,7 +1850,7 @@
       "start": "0x019a34"
     }
   },
-  "status": "PARTIAL",
+  "status": "SOURCE_CLOSED",
   "weapon_projectile_resource": {
     "authority_separation": {
       "audio": {

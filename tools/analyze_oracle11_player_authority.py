@@ -19,6 +19,7 @@ OUT = ROOT / "data" / "oracle11_predator_warrior_authority.json"
 WEAPON = ROOT / "data" / "oracle11_predator_weapon_projectile_resource.json"
 AIR = ROOT / "data" / "oracle11_predator_air_authority.json"
 HITKO = ROOT / "data" / "oracle11_predator_hitko_continue.json"
+ROUTE_OWNERSHIP = ROOT / "data" / "oracle11_predator_route_ownership.json"
 VARIANTS = ("cold_run_1", "cold_run_2", "skip_right_edge",
             "hold_right", "reverse_without_neutral")
 
@@ -472,13 +473,27 @@ def build_report() -> dict[str, object]:
             "KO, failure/continue, respawn, and return-to-control are closed "
             "while route-wide pickup/resource/audio/load ownership remains "
             "active backlog")
+    if ROUTE_OWNERSHIP.exists():
+        report["route_pickup_resource_audio_load_ownership"] = json.loads(
+            ROUTE_OWNERSHIP.read_text(encoding="ascii"))
+        report["remaining_player_backlog"] = []
+        report["status"] = "SOURCE_CLOSED"
+        report["scope"] = ("Round 1 one-player Predator Warrior authority is "
+            "source closed across locomotion/neutral/facing, melee, every "
+            "route-reachable directional and airborne body, interruption, "
+            "weapons/projectiles/resources, HIT/KO, failure/continue, respawn, "
+            "return-to-control, pickup interaction, player-owned audio calls, "
+            "and explicit load/release ownership edges. Route systems, item "
+            "actors, global audio/loading, enemies, encounters, boss and "
+            "handoff remain their own active ORACLE-11 families.")
     validate(report)
     return report
 
 
 def validate(report: dict[str, object]) -> None:
     require(report["schema"] == "oracle11-predator-warrior-authority-v1" and
-            report["status"] == "PARTIAL", "player authority status drift")
+            report["status"] in ("PARTIAL", "SOURCE_CLOSED"),
+            "player authority status drift")
     closed = report["locomotion_neutral_facing"]
     require(closed["classification"] == "SOURCE_CLOSED" and
             closed["remaining_unknowns"] == [], "locomotion is not closed")
@@ -528,8 +543,10 @@ def validate(report: dict[str, object]) -> None:
             "normal jump landing/RNG contract drift")
     require(all(jump["counterfactuals"].values()),
             "normal jump counterfactual failed")
-    require(bool(report["remaining_player_backlog"]),
-            "player authority was prematurely declared complete")
+    route_closed = "route_pickup_resource_audio_load_ownership" in report
+    require((report["status"] == "SOURCE_CLOSED") == route_closed and
+            (report["remaining_player_backlog"] == []) == route_closed,
+            "player closure/backlog status drift")
     if "weapon_projectile_resource" in report:
         weapon = report["weapon_projectile_resource"]
         require(weapon["status"] == "SOURCE_CLOSED" and
@@ -555,6 +572,16 @@ def validate(report: dict[str, object]) -> None:
                 not any("player hit/ko" in item.lower()
                         for item in report["remaining_player_backlog"]),
                 "HIT/KO/continue/respawn authority drift")
+    if route_closed:
+        route = report["route_pickup_resource_audio_load_ownership"]
+        require(route["status"] == "SOURCE_CLOSED" and
+                route["action_phase_reconciliation"]["unmapped_player_phases"] == [] and
+                route["remaining_player_unknowns"] == [] and
+                route["audio_ownership"]["route_audio_owner"] ==
+                "gameplay-audio-load-release" and
+                route["load_release_ownership"]["route_load_release_owner"] ==
+                "gameplay-audio-load-release",
+                "route pickup/resource/audio/load ownership drift")
     require(report["protected_boundaries"] == {
         "production_runtime_writes": 0, "frontend_active": False,
         "user09_status": "CHANGES_REQUESTED", "salvage08_active": False,
@@ -565,7 +592,7 @@ def validate(report: dict[str, object]) -> None:
 def main() -> None:
     report = build_report()
     OUT.write_bytes(canonical(report))
-    print("ORACLE-11 Predator Warrior: HIT/KO/continue/respawn checkpoint SOURCE_CLOSED; player family PARTIAL")
+    print("ORACLE-11 Predator Warrior player authority: SOURCE_CLOSED")
 
 
 if __name__ == "__main__":

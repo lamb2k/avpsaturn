@@ -156,9 +156,12 @@ until every declared zero-gap counter is zero. Predator Warrior locomotion,
 melee, weapon/projectile/resource, and all route-reachable directional and
 airborne phases are source closed. Unwitnessed air-table phases
 `0x0408/12/14` are explicit `NOT_REQUIRED_FOR_ROUND1`. Nonlethal HIT, lethal
-KO, failure/continue, respawn, and return-to-control are also source closed;
-route-wide pickup/resource/gameplay-audio/load/release ownership is the sole
-remaining player backlog and keeps the player family and ORACLE-11 active.
+KO, failure/continue, respawn, return-to-control, natural health pickup,
+source temporary-resource grant, interaction interruption, player-owned audio
+calls, and the player-to-route load/release edges are also source closed. Every
+route-observed player phase is mapped; the player family is `SOURCE_CLOSED`.
+Its externally mapped item, global audio/load, route, encounter, enemy, boss,
+RNG, and handoff owners keep ORACLE-11 active and SPEC-02 ineligible.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|
