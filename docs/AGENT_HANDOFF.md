@@ -30,20 +30,18 @@ corrective first-entry body binds the exact ten-row table, controller identity,
 26-byte player entry-animation program, timer loads `60, 60, 44`, 164 source
 scheduler decrements, signed terminator, selected gate bit, and route consumer;
 exact-writer suppression holds state 2 and rejects fixed-frame ownership.
-REIMPLEMENT-13 now owns the source-closed first entry in portable C: exact
-fixed pools, ten LIFO spawns, command-derived entry steps, `60, 60, 44` dwells,
-164 scheduler decrements, signed terminator, gate clear, route `2 -> 4`, and
-control enable. The accepted Predator Warrior controller now consumes current
-Saturn input after route state 4 and preserves neutral facing. Eleven host
-mutations and twelve target-wiring suppressions are rejected. Target, paired
-Emulator/Fast/Oracle pass; paired frame 470 is x 1074/z 320/facing right/neutral/301 updates with zero fallback.
-
-Direct inspection at paused post-unlock frame 190 and after real controller
-movement shows coherent player/alien presentation, camera, both VDP2 planes,
-HUD, palette, and priority. The retained live-encounter actor handoff remains
-technical substrate, not completed Round 1 authority. The fixed-pool scheduler
-now visits active records in 12/16/20/24 and ascending-slot order; paired frame
-470 has 3010 visits and hash `0x836e161c`. Bind the ten initial class-0x1F
-state/substate handlers next; keep the dynamic spawn owner guard pending. Use only SPEC-02, generated fixtures,
-accepted interfaces and assets. Preserve each validation/commit/push cycle. Keep
-USER-09 changes-requested, SALVAGE-08 inactive, and Saturn `UNRUN`.
+REIMPLEMENT-13 owns the source-closed first entry in portable C: exact pools,
+ten LIFO spawns, entry steps, `60, 60, 44` dwells, 164 decrements, signed
+terminator, gate clear, route `2 -> 4`, control enable, current input, and neutral
+facing. The fixed-pool scheduler visits 12/16/20/24 in ascending-slot order;
+paired frame 470 has 3010 visits and hash `0x836e161c`. Commit `6c00cbb` binds
+all 190 exact class-0x1F animation records to assembly, hurt selector, and attack
+selector with zero orphans and 3010 paired target bindings. Seventeen host
+mutations, fifteen target suppressions, Target, paired Emulator, Fast, Oracle,
+and direct frame-191 inspection pass with coherent VDP2, camera, HUD, palette,
+priority, player, and alien. The retained actor handoff remains substrate.
+Movement, damage, state transitions, and dynamic spawn remain pending.
+Implement initial class-0x1F state/substate guards from SPEC-02 fixtures and
+accepted interfaces only; keep fixed-frame authority and dynamic spawn out
+until source predicates exist. USER-09 is changes-requested, SALVAGE-08 is
+inactive, and Saturn remains `UNRUN`.

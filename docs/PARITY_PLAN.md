@@ -248,10 +248,12 @@ current Saturn input after route state 4 and preserves neutral facing. Paired
 source action, and 301 controller updates. The SPEC-02-bound scheduler now
 visits active records in pool order 12/16/20/24 and ascending source-slot order;
 paired frame 470 has 3010 visits, ten active class-0x1F actors, and hash
-`0x836e161c`. The next vertical body binds those ten records to their source
-state/substate handler family and accepted presentation/collision interfaces.
-The dynamic spawn remains pending until its owner state/timer and living-enemy
-guard are implemented; frame 2328 itself is not gameplay authority.
+`0x836e161c`. Those ten records now dispatch exact SPEC-02 presentation bindings:
+all 190 class-0x1F animation records map to their assembly, hurt selector, and
+attack selector with zero orphans, and paired frame 470 reports 3010 bindings.
+The next vertical body implements the initial class-0x1F state/substate
+transition guards. Movement, damage, and dynamic spawn remain pending until
+their source guards are represented; frame 2328 itself is not gameplay authority.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

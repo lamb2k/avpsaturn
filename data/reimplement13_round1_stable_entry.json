@@ -1,8 +1,8 @@
 {
   "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
-  "checkpoint": "native-round1-fixed-pool-scheduler",
-  "status": "PASS_ENTRY_PLAYER_AND_FIXED_POOL_SCHEDULER",
-  "implementation_commit": "36a08da1d96888d26f4bdb28c39c3a479aa364ef",
+  "checkpoint": "native-round1-class1f-presentation-binding",
+  "status": "PASS_ENTRY_PLAYER_SCHEDULER_AND_CLASS1F_PRESENTATION",
+  "implementation_commit": "6c00cbb248f9afe98f631de6a507770f433f451c",
   "diagnostic_correction_commit": "4fbc919235f61d962daf342efbfb4cd8f743ab60",
   "implementation_source": {
     "spec02_sha256": "3cfa5410fee3942a9bd6bb515f10aefdd293ee4cd628fb503d9685bce4c7c3f8",
@@ -62,19 +62,33 @@
       "actor_behavior_dispatched": false,
       "dynamic_spawn_guard_implemented": false
     },
+    "class1f_presentation_binding": {
+      "source_animation_records": 190,
+      "orphan_records": 0,
+      "active_initial_actor_count": 10,
+      "evidence_frame": 470,
+      "actor_handler_dispatches": 3010,
+      "presentation_bindings": 3010,
+      "exact_fields": ["assembly", "hurt_selector", "attack_selector"],
+      "actor_movement_implemented": false,
+      "state_transitions_implemented": false,
+      "damage_implemented": false,
+      "dynamic_spawn_guard_implemented": false
+    },
     "canaries": "PASS"
   },
   "checks": {
     "host_differential": "PASS",
-    "real_mutations_rejected": 15,
-    "target_wiring_suppressions_rejected": 14,
+    "real_mutations_rejected": 17,
+    "target_wiring_suppressions_rejected": 15,
     "target_live_encounter": "PASS",
     "target_live_encounter_bench": "PASS",
     "spec02_entry_correction_revalidated": "PASS",
     "paired_emulator_regression": "PASS",
-    "paired_emulator_iso_sha256": "e0d2441cb2c1aae5df66f12b232e610ace5738ed5c2e16b10f2c3adcd27de767",
+    "paired_emulator_iso_sha256": "35c3e2e24ae0be4f525149ac1ead9dc02d81d5bb96aafed57b1eabc8fecebcf8",
     "paired_native_player_ledgers": "PASS: 471 byte-identical synchronized samples; frame 470 is x=1074/z=320/facing=1/source_action=0/controller_updates=301",
     "paired_native_scheduler_ledgers": "PASS: frame 470 has 301 scheduler frames, 3010 ordered visits, 10 active type-12/class-0x1f actors, and order hash 0x836e161c",
+    "paired_native_presentation_ledgers": "PASS: frame 470 has 3010 class-0x1f handler dispatches and 3010 exact animation-to-assembly/hurt/attack bindings",
     "target_readback_binding": "PASS",
     "round1_title_objects_loaded": 2,
     "round1_title_vdp1_commands_peak": 2,
@@ -117,8 +131,14 @@
       "sha256": "6f7c4da0689f32f4287d26a61272a2d43ce80b6c241afad94aad33a91e983561",
       "inspection": "PASS: scheduler instrumentation produces no presentation change; player, alien, both VDP2 planes, camera, HUD, palette, and priority remain coherent"
     },
+    "class1f_presentation_visual": {
+      "gameplay_frame": 191,
+      "path": "build/round1-class1f-presentation-frame-190.png",
+      "sha256": "d08bd33c30a16152c9d4460985d8fa4bd8fbcb7628a3911e0b26d356dde37781",
+      "inspection": "PASS: exact class-0x1f presentation binding produces no visible regression; player, alien, both VDP2 planes, camera, HUD, palette, and priority remain coherent"
+    },
     "objective_discrepancy": null,
-    "exact_next_body": "Bind the ten initial type-12/class-0x1f records to their SPEC-02 source state/substate handler family and accepted presentation/collision interfaces in scheduler order; keep the first dynamic spawn guard pending until its owner state/timer and living-enemy predicate are implemented."
+    "exact_next_body": "Implement the initial type-12/class-0x1f state/substate transition guards from SPEC-02 fixtures and accepted interfaces without fixed-frame authority; keep movement, damage, and the first dynamic spawn pending until their source guards are represented."
   },
   "preserved": {
     "user09": "CHANGES_REQUESTED",

@@ -87,10 +87,14 @@ updates. This is not the complete first encounter: the retained live-encounter
 actor handoff is still technical substrate. The SPEC-02-bound fixed-pool
 scheduler now visits active records in pool order 12/16/20/24 and ascending
 source-slot order, rejects unsupported route-reachable class dispatches, and
-produces 3010 deterministic visits through evidence frame 470. It does not yet
-run the ten initial class-0x1F behavior handlers or the first dynamic spawn
-guard. Bind those source-owned handlers next; frame 2328 remains evidence, not
-gameplay authority.
+produces 3010 deterministic visits through evidence frame 470. Each of those
+ten initial class-0x1F records now binds its exact SPEC-02 animation record to
+assembly, hurt selector, and attack selector: 190 source records, zero orphans,
+3010 paired target bindings. Seventeen host mutations, fifteen target
+suppressions, Target, paired Emulator, Fast, Oracle, and direct frame-191
+inspection pass. This does not yet implement class-0x1F movement, damage,
+state transitions, or dynamic spawn. Implement source state/substate guards
+next; frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json`.
 
 ## Next eligible cards
