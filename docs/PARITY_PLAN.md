@@ -160,9 +160,17 @@ KO, failure/continue, respawn, return-to-control, natural health pickup,
 source temporary-resource grant, interaction interruption, packed-BCD score
 award, and the player-to-route load/release edges are also source closed. Every
 route-observed player phase is mapped. Static and dynamic source evidence
-corrected `0x0abdd2` from an audio label to score authority; the real
-player-to-global gameplay-audio trigger boundary remains `PARTIAL`, keeping the
-player family and ORACLE-11 active and SPEC-02 ineligible.
+corrected `0x0abdd2` from an audio label to score authority. Two byte-identical
+completion captures plus one causal suppression for each of 38 distinct
+player-origin caller/command edges close the player-to-shared-dispatch boundary
+without changing score, health, damage, resource, projectile, or route state.
+Predator Warrior is now `SOURCE_CLOSED`. The shared queue drain and
+dispatcher-to-QSound transport remain in the global gameplay-audio/load/release
+backlog. The generated 94 x 10 matrix remains ineligible with 322 required
+`OBSERVED`, 276 required `PARTIAL`, zero required `UNKNOWN`, 18 unmapped actor
+class/type pairs, 94 unmapped route edges, 1,517 orphan authoritative writers,
+and unowned audio/damage/load/release/RNG/spawn counts of
+874/1/4/18/1,023/18. ORACLE-11 remains active and SPEC-02 remains ineligible.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

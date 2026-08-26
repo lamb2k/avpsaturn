@@ -18,6 +18,7 @@ EVENT_B = ROOT / ".deps" / "mame" / "oracle11_player_route_events_b"
 OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
 PROGRAM = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_program_2m.bin"
 OUT = ROOT / "data" / "oracle11_predator_route_ownership.json"
+PLAYER_AUDIO = ROOT / "data" / "oracle11_predator_player_audio.json"
 
 ACTION_OWNERS = {
     0x0000: "locomotion-neutral", 0x0002: "locomotion-neutral",
@@ -388,12 +389,35 @@ def build_report() -> dict[str, object]:
             "salvage08_active": False, "physical_saturn": "UNRUN",
         },
     }
+    if PLAYER_AUDIO.exists():
+        player_audio = json.loads(PLAYER_AUDIO.read_text(encoding="ascii"))
+        require(player_audio["status"] == "SOURCE_CLOSED" and
+                player_audio["coverage"]["distinct_trigger_edges"] == 38,
+                "player audio checkpoint drift")
+        report["status"] = "SOURCE_CLOSED"
+        report["audio_ownership"]["classification"] = \
+            "SOURCE_CLOSED_PLAYER_EDGE_GLOBAL_TRANSPORT_OPEN"
+        report["audio_ownership"]["player_trigger_boundary"] = {
+            "artifact": "data/oracle11_predator_player_audio.json",
+            "artifact_sha256": digest(PLAYER_AUDIO),
+            "status": "SOURCE_CLOSED",
+            "trigger_edges": 38,
+            "state_action_substate_contexts": 47,
+            "player_owned_through": "0x001922",
+            "global_backlog_begins": "0x001880",
+        }
+        report["audio_ownership"]["remaining_player_unknowns"] = []
+        report["remaining_player_unknowns"] = []
+        report["mutation_controls"]["count"] = 48
+        report["mutation_controls"]["classes"].append(
+            "38 player-origin command suppressions with downstream audio differences")
     validate(report)
     return report
 
 
 def validate(report: dict[str, object]) -> None:
-    require(report["status"] == "PARTIAL", "route ownership status drift")
+    require(report["status"] in ("PARTIAL", "SOURCE_CLOSED"),
+            "route ownership status drift")
     require(report["action_phase_reconciliation"]["unmapped_player_phases"] == [],
             "unmapped player action phase")
     require(report["health_pickup"]["classification"] == "SOURCE_CLOSED" and
@@ -405,18 +429,29 @@ def validate(report: dict[str, object]) -> None:
     require(report["interaction_action_and_interruption"]["natural_completion"] ==
             {"entry": 4032, "last": 4059, "return_to_neutral": 4060},
             "interaction completion drift")
+    audio_closed = report["status"] == "SOURCE_CLOSED"
     require(report["audio_ownership"]["route_audio_owner"] ==
             "gameplay-audio-load-release" and
-            len(report["audio_ownership"]["remaining_player_unknowns"]) == 1 and
+            len(report["audio_ownership"]["remaining_player_unknowns"]) ==
+            (0 if audio_closed else 1) and
             "BCD score" in report["audio_ownership"]["health_max_score_award"],
             "audio edge drift")
     require(report["load_release_ownership"]["bulk_loader_uses_player_actor_base"]
             is False and
             report["load_release_ownership"]["remaining_player_unknowns"] == [],
             "load/release edge drift")
-    require(len(report["remaining_player_unknowns"]) == 1 and
-            report["mutation_controls"]["count"] == 10,
+    require(len(report["remaining_player_unknowns"]) ==
+            (0 if audio_closed else 1) and
+            report["mutation_controls"]["count"] == (48 if audio_closed else 10),
             "route ownership backlog drift")
+    if audio_closed:
+        boundary = report["audio_ownership"]["player_trigger_boundary"]
+        require(report["audio_ownership"]["classification"] ==
+                "SOURCE_CLOSED_PLAYER_EDGE_GLOBAL_TRANSPORT_OPEN" and
+                boundary["player_owned_through"] == "0x001922" and
+                boundary["global_backlog_begins"] == "0x001880" and
+                boundary["trigger_edges"] == 38,
+                "closed player-audio boundary drift")
     require(report["protected_boundaries"] == {
         "production_runtime_writes": 0, "yaba_runs": 0,
         "frontend_active": False, "user09_status": "CHANGES_REQUESTED",
@@ -427,7 +462,7 @@ def validate(report: dict[str, object]) -> None:
 def main() -> None:
     report = build_report()
     OUT.write_bytes(canonical(report))
-    print("ORACLE-11 Predator route pickup/resource/load ownership closed; real audio trigger boundary PARTIAL")
+    print("ORACLE-11 Predator route pickup/resource/player-audio ownership: SOURCE_CLOSED; global transport retained")
 
 
 if __name__ == "__main__":

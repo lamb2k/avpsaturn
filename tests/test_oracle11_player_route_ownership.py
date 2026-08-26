@@ -30,8 +30,8 @@ report = json.loads(ARTIFACT.read_text(encoding="ascii"))
 oracle.validate(report)
 
 mutant = copy.deepcopy(report)
-mutant["status"] = "SOURCE_CLOSED"
-reject(mutant, "premature status closure")
+mutant["status"] = "PARTIAL"
+reject(mutant, "player audio closure removed")
 
 mutant = copy.deepcopy(report)
 mutant["action_phase_reconciliation"]["unmapped_player_phases"] = ["0x0e00"]
@@ -67,8 +67,12 @@ mutant["load_release_ownership"]["bulk_loader_uses_player_actor_base"] = True
 reject(mutant, "bulk loader assigned to player")
 
 mutant = copy.deepcopy(report)
-mutant["remaining_player_unknowns"] = []
-reject(mutant, "audio backlog erased")
+mutant["remaining_player_unknowns"] = ["restored false player backlog"]
+reject(mutant, "player audio backlog restored")
+
+mutant = copy.deepcopy(report)
+mutant["audio_ownership"]["player_trigger_boundary"]["global_backlog_begins"] = "0x001922"
+reject(mutant, "global transport absorbed into player boundary")
 
 mutant = copy.deepcopy(report)
 mutant["protected_boundaries"]["yaba_runs"] = 1
@@ -76,4 +80,4 @@ reject(mutant, "Yaba run admitted")
 
 rebuilt = oracle.build_report()
 assert oracle.canonical(rebuilt) == ARTIFACT.read_bytes(), "derived report drift"
-print("ORACLE-11 player route-ownership tests: PASS (11 mutations rejected)")
+print("ORACLE-11 player route-ownership tests: PASS (12 mutations rejected)")

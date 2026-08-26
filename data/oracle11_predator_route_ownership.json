@@ -93,11 +93,18 @@
   },
   "audio_ownership": {
     "causal_scope_guard": "the empty main-program audio-write tap is not used to infer silence or route-wide ownership",
-    "classification": "PARTIAL_CROSS_FAMILY",
+    "classification": "SOURCE_CLOSED_PLAYER_EDGE_GLOBAL_TRANSPORT_OPEN",
     "health_max_score_award": "0x0bc5fc..0x0bc664 jumps 0x0abdd2; this is BCD score authority, not audio",
-    "remaining_player_unknowns": [
-      "identify every player-origin gameplay-audio trigger through the real main-to-QSound command boundary"
-    ],
+    "player_trigger_boundary": {
+      "artifact": "data/oracle11_predator_player_audio.json",
+      "artifact_sha256": "1d29bb54c1a38b5328bd15a6eaaa8aaf0d57f0e5814f6e1b430bdce8ea8acae9",
+      "global_backlog_begins": "0x001880",
+      "player_owned_through": "0x001922",
+      "state_action_substate_contexts": 47,
+      "status": "SOURCE_CLOSED",
+      "trigger_edges": 38
+    },
+    "remaining_player_unknowns": [],
     "route_audio_owner": "gameplay-audio-load-release",
     "score_award": {
       "amount_index": "D0 u8 indexes 0x0abf1c",
@@ -367,9 +374,10 @@
       "interaction interruption",
       "action-phase mapping",
       "audio edge",
-      "load edge"
+      "load edge",
+      "38 player-origin command suppressions with downstream audio differences"
     ],
-    "count": 10
+    "count": 48
   },
   "protected_boundaries": {
     "frontend_active": false,
@@ -379,9 +387,7 @@
     "user09_status": "CHANGES_REQUESTED",
     "yaba_runs": 0
   },
-  "remaining_player_unknowns": [
-    "player-to-global gameplay-audio trigger ownership pending real dispatcher closure"
-  ],
+  "remaining_player_unknowns": [],
   "resource_meter": {
     "authority": "debit/recharge remains bound by the accepted weapon artifact; pickup grant is independently bound above",
     "classification": "SOURCE_CLOSED",
@@ -441,7 +447,7 @@
       "start": "0x01ce98"
     }
   },
-  "status": "PARTIAL",
+  "status": "SOURCE_CLOSED",
   "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE",
   "temporary_resource_pickup": {
     "classification": "SOURCE_CLOSED",

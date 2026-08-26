@@ -94,9 +94,14 @@ mutant["normal_jump_air_landing"]["counterfactuals"] \
 reject(mutant, "directional jump widened into normal authority")
 
 mutant = copy.deepcopy(report)
-mutant["status"] = "SOURCE_CLOSED"
-mutant["remaining_player_backlog"] = []
-reject(mutant, "premature player-family closure")
+mutant["status"] = "PARTIAL"
+mutant["remaining_player_backlog"] = ["false restored player backlog"]
+reject(mutant, "player-family closure removed")
+
+mutant = copy.deepcopy(report)
+mutant["player_origin_gameplay_audio"]["boundary"]["global_transport_owner"] = \
+    "predator-warrior-player-authority"
+reject(mutant, "global audio transport assigned to player")
 
 mutant = copy.deepcopy(report)
 mutant["directional_airborne_interruption"]["status"] = "PARTIAL"
@@ -123,4 +128,4 @@ reject(mutant, "global route audio assigned to player")
 
 rebuilt = oracle11.build_report()
 assert oracle11.canonical(rebuilt) == ARTIFACT.read_bytes(), "derived report drift"
-print("ORACLE-11 player authority tests: PASS (20 mutations rejected)")
+print("ORACLE-11 player authority tests: PASS (21 mutations rejected)")

@@ -20,6 +20,7 @@ WEAPON = ROOT / "data" / "oracle11_predator_weapon_projectile_resource.json"
 AIR = ROOT / "data" / "oracle11_predator_air_authority.json"
 HITKO = ROOT / "data" / "oracle11_predator_hitko_continue.json"
 ROUTE_OWNERSHIP = ROOT / "data" / "oracle11_predator_route_ownership.json"
+PLAYER_AUDIO = ROOT / "data" / "oracle11_predator_player_audio.json"
 VARIANTS = ("cold_run_1", "cold_run_2", "skip_right_edge",
             "hold_right", "reverse_without_neutral")
 
@@ -480,6 +481,9 @@ def build_report() -> dict[str, object]:
         if route_status == "SOURCE_CLOSED":
             report["remaining_player_backlog"] = []
             report["status"] = "SOURCE_CLOSED"
+            require(PLAYER_AUDIO.exists(), "closed route missing player audio artifact")
+            report["player_origin_gameplay_audio"] = json.loads(
+                PLAYER_AUDIO.read_text(encoding="ascii"))
         else:
             report["remaining_player_backlog"] = [
                 "player-to-global gameplay-audio trigger ownership through the real main-to-QSound command boundary"
@@ -490,8 +494,9 @@ def build_report() -> dict[str, object]:
             "route-reachable directional and airborne body, interruption, "
             "weapons/projectiles/resources, HIT/KO, failure/continue, respawn, "
             "return-to-control, pickup interaction, BCD score award, and explicit "
-            "load/release ownership edges. The real player-to-global gameplay-"
-            "audio trigger boundary remains active. Route systems, item "
+            "load/release ownership edges, and every player-origin gameplay-"
+            "audio trigger through 0x001922. The shared 0x001880 dispatcher-to-"
+            "QSound transport remains global backlog. Route systems, item "
             "actors, global audio/loading, enemies, encounters, boss and "
             "handoff remain their own active ORACLE-11 families.")
     validate(report)
@@ -591,6 +596,13 @@ def validate(report: dict[str, object]) -> None:
                 route["load_release_ownership"]["route_load_release_owner"] ==
                 "gameplay-audio-load-release",
                 "route pickup/resource/audio/load ownership drift")
+    if report["status"] == "SOURCE_CLOSED":
+        audio = report["player_origin_gameplay_audio"]
+        require(audio["status"] == "SOURCE_CLOSED" and
+                audio["coverage"]["distinct_trigger_edges"] == 38 and
+                audio["boundary"]["global_transport_owner"] ==
+                "gameplay-audio-load-release",
+                "player-origin gameplay-audio authority drift")
     require(report["protected_boundaries"] == {
         "production_runtime_writes": 0, "frontend_active": False,
         "user09_status": "CHANGES_REQUESTED", "salvage08_active": False,
@@ -601,7 +613,7 @@ def validate(report: dict[str, object]) -> None:
 def main() -> None:
     report = build_report()
     OUT.write_bytes(canonical(report))
-    print("ORACLE-11 Predator Warrior player authority: PARTIAL at real gameplay-audio trigger boundary")
+    print("ORACLE-11 Predator Warrior player authority: SOURCE_CLOSED; global audio transport remains active")
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 COVERAGE=ROOT/'data/round1_system_coverage.yaml'
 ROUTE=ROOT/'data/oracle10_round1_route.json'
+PLAYER=ROOT/'data/oracle11_predator_warrior_authority.json'
 FAMILIES=(
  'predator-warrior-player-authority','round1-navigation-terrain-camera',
  'actor-scheduler-allocation-lifecycle','round1-enemy-archetypes',
@@ -86,6 +87,15 @@ def build(coverage,route):
 def main():
     coverage=json.loads(COVERAGE.read_text(encoding='utf-8'))
     route=json.loads(ROUTE.read_text(encoding='utf-8'))
+    player=json.loads(PLAYER.read_text(encoding='utf-8'))
+    if player['status']=='SOURCE_CLOSED':
+        body=next(item for item in coverage['bodies']
+            if item['id']=='predator-warrior-player-authority')
+        body['status']='SOURCE_CLOSED'
+        evidence=body.setdefault('accepted_evidence',[])
+        for item in ('data/oracle11_predator_warrior_authority.json',
+                     'data/oracle11_predator_player_audio.json'):
+            if item not in evidence:evidence.append(item)
     coverage['route_segment_authority_matrix']=build(coverage,route)
     coverage['spec02_closure_gate']=coverage['route_segment_authority_matrix']['closure_gate']
     COVERAGE.write_bytes((json.dumps(coverage,sort_keys=True,indent=2)+'\n').encode('ascii'))

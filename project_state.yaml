@@ -512,9 +512,9 @@ source_closure:
   prototype_harness_retained: true
   preserved_infrastructure: [rendering, HUD, camera, audio, collision, readback, emulator, visual-QA]
   active_card: ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE
-  accepted_checkpoints: [actor-scheduler-allocation-lifecycle, predator-warrior-locomotion-neutral-facing, predator-warrior-route-melee, predator-warrior-normal-jump-air-landing, predator-warrior-directional-airborne-interruption, predator-warrior-weapon-projectile-resource, predator-warrior-hit-ko-failure-continue-respawn-return]
-  latest_evidence: data/oracle11_predator_route_ownership.json
-  exact_next_experiment: Close the real main-to-QSound command boundary and every player-origin gameplay-audio trigger; 0x0abdd2 is packed-BCD score authority, not audio. Do not advance SPEC-02.
+  accepted_checkpoints: [actor-scheduler-allocation-lifecycle, predator-warrior-locomotion-neutral-facing, predator-warrior-route-melee, predator-warrior-normal-jump-air-landing, predator-warrior-directional-airborne-interruption, predator-warrior-weapon-projectile-resource, predator-warrior-hit-ko-failure-continue-respawn-return, predator-warrior-route-pickup-resource-player-audio-ownership]
+  latest_evidence: data/oracle11_predator_player_audio.json
+  exact_next_experiment: Continue ORACLE-11 with the global gameplay-audio/load/release family at shared queue drain 0x001880; bind route-wide command transport and load/release ownership. Predator Warrior is SOURCE_CLOSED. Do not advance SPEC-02.
   frontend_activation_allowed: false
   physical_saturn: UNRUN
 current_checkpoint: oracle-round1-reachable-logic-closure
