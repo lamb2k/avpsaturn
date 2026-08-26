@@ -1,7 +1,7 @@
 {
   "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
   "checkpoint": "stable-round1-entry-native-substrate",
-  "status": "PASS_DIAGNOSTIC_ONLY",
+  "status": "PASS_TARGET_BOUND_DIAGNOSTIC",
   "implementation_source": {
     "spec02_sha256": "6cb1208a190b4977f2f73eb48b181fda08063266e45f1d8efcbc47b7fdc264a4",
     "raw_trace_or_disassembly_consumed": false,
@@ -32,18 +32,20 @@
     "target_live_encounter": "PASS_BUILD_ONLY",
     "target_live_encounter_bench": "PASS_BUILD_ONLY",
     "paired_emulator_regression": "PASS",
-    "paired_emulator_iso_sha256": "c270dd7ad8c1fde27b36ccbbb9d40e5751b2243ddc94f78274f074a73dbb15bc",
+    "paired_emulator_iso_sha256": "82ed3588d379191d5b7429f460b7836bff5b6f40b86bfc9b84b5cfb600f0e1ed",
+    "target_readback_binding": "PASS",
     "rendered_regression_inspection": "PASS",
     "fast": "PASS",
     "oracle": "PASS"
   },
   "rendered_boundary": {
     "new_round1_runtime_presented": false,
+    "new_round1_runtime_target_visible": true,
     "legacy_live_encounter_regression_coherent": true,
     "interactive_visual_sha256": "b9b796f27c7e088f80aca38deb1a8e06f77caf4900795f976bae9c54d7f4b3a3",
     "post_clear_visual_sha256": "68fc77a42a907610ab42ab425f888130f914e5d86154ca4b441f843d7e8dae30",
-    "objective_discrepancy": "The new stable-entry state is compiled and host-validated but is not yet connected to target readback or rendered progression.",
-    "exact_correction": "Connect the native Round 1 runtime to the direct diagnostic boot, target readback, and existing presentation adapters before calling stable entry a playable stage segment."
+    "objective_discrepancy": "The new stable-entry state is target-bound and readback-visible but the rendered scene remains the preserved encounter harness.",
+    "exact_correction": "Render the first source-derived Round 1 route view through the accepted presentation adapters before calling stable entry a playable stage segment."
   },
   "preserved": {
     "user09": "CHANGES_REQUESTED",

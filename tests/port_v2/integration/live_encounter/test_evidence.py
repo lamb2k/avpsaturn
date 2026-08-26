@@ -23,6 +23,15 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["interface_version"] == 2
     assert report["state"]["contract_flags"] == 127
     assert report["state"]["failures"] == report["state"]["fallback_count"] == 0
+    assert report["state"]["round1_spec_bound"] == 1
+    assert report["state"]["round1_entry_valid"] == 1
+    assert report["state"]["round1_canaries_ok"] == 1
+    assert report["state"]["round1_route_state"] == 2
+    assert report["state"]["round1_rng_seed"] == 0x8DEF
+    assert report["state"]["round1_player_health"] == 101
+    assert [report["state"][f"round1_pool{kind}_free"]
+            for kind in (12,16,20,24)] == [20,20,16,32]
+    assert report["state"]["round1_fallback_count"] == 0
     assert report["chronology"] == {
         "alien_contacts":1, "misses":1, "player_contacts":4,
         "player_damage_events":1, "unlock_frame":450}

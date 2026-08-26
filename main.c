@@ -38,6 +38,7 @@
 #endif
 #ifdef AVSP_LIVE_ENCOUNTER
 #include "src/port_v2/integration/live_encounter/live_encounter.h"
+#include "src/port_v2/gameplay/round1/round1.h"
 #endif
 #ifdef AVSP_PROBE3
 #include "tests/hardware/probe3/probe3.h"
@@ -499,6 +500,7 @@ typedef struct
 } LiveEncounterDiagSample;
 static AvspLiveEncounterRuntime live_encounter_runtime;
 static AvspLiveEncounterFrame live_encounter_frame;
+static AvspRound1Runtime round1_runtime;
 volatile LiveEncounterDiagSample avsp_diag_live_samples[
     AVSP_LIVE_DIAG_SAMPLES];
 volatile int avsp_diag_live_sample_count;
@@ -546,6 +548,17 @@ volatile int avsp_diag_live_failures;
 volatile int avsp_diag_live_fallback_count;
 volatile int avsp_diag_live_canaries_ok;
 volatile int avsp_diag_live_physical_saturn;
+volatile int avsp_diag_round1_spec_bound;
+volatile int avsp_diag_round1_entry_valid;
+volatile int avsp_diag_round1_route_state;
+volatile int avsp_diag_round1_rng_seed;
+volatile int avsp_diag_round1_player_health;
+volatile int avsp_diag_round1_pool12_free;
+volatile int avsp_diag_round1_pool16_free;
+volatile int avsp_diag_round1_pool20_free;
+volatile int avsp_diag_round1_pool24_free;
+volatile int avsp_diag_round1_fallback_count;
+volatile int avsp_diag_round1_canaries_ok;
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
 static int live_autotest_phase;
 static int live_autotest_release;
@@ -6970,6 +6983,19 @@ static void live_encounter_publish(void)
         (int)live_encounter_runtime.fallback_count;
     avsp_diag_slice_canaries_ok = playable_slice_frame.canaries_ok;
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
+    avsp_diag_round1_spec_bound =
+        AVSP_ROUND1_SPEC02_SHA256[0] == '6' &&
+        AVSP_ROUND1_SPEC02_SHA256[63] == '4';
+    avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
+    avsp_diag_round1_route_state = round1_runtime.route_state;
+    avsp_diag_round1_rng_seed = round1_runtime.rng_seed;
+    avsp_diag_round1_player_health = round1_runtime.player.health;
+    avsp_diag_round1_pool12_free = round1_runtime.pools[0].free_count;
+    avsp_diag_round1_pool16_free = round1_runtime.pools[1].free_count;
+    avsp_diag_round1_pool20_free = round1_runtime.pools[2].free_count;
+    avsp_diag_round1_pool24_free = round1_runtime.pools[3].free_count;
+    avsp_diag_round1_fallback_count = (int)round1_runtime.fallback_count;
+    avsp_diag_round1_canaries_ok = avsp_round1_canaries_ok(&round1_runtime);
 }
 
 static void live_encounter_frame_callback(void)
@@ -7990,6 +8016,7 @@ void jo_main(void)
     runtime_ready = playable_slice_init();
 #ifdef AVSP_LIVE_ENCOUNTER
     avsp_live_encounter_init(&live_encounter_runtime);
+    avsp_round1_init(&round1_runtime);
     avsp_diag_live_frame_stage = 0;
     avsp_diag_live_internal_failures = 0;
     avsp_diag_live_pcm_retriggers = 0;
@@ -8000,7 +8027,8 @@ void jo_main(void)
     live_autotest_release = 0;
 #endif
     avsp_diag_live_physical_saturn = 0;
-    runtime_ready = runtime_ready && avsp_diag_live_contract_flags == 127;
+    runtime_ready = runtime_ready && avsp_diag_live_contract_flags == 127 &&
+        avsp_round1_entry_valid(&round1_runtime);
 #endif
     if (!runtime_ready) failed_asset = "PLAYABLE SLICE FAILED";
     JO_UNUSED_ARG(index);

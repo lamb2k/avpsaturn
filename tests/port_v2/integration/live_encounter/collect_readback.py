@@ -129,7 +129,18 @@ mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_
            "alien_facing":"avsp_diag_live_alien_facing",
            "alien_animation_record":"avsp_diag_live_alien_animation_record",
            "alien_assembly":"avsp_diag_live_alien_assembly",
-           "alien_screen_y":"avsp_diag_live_alien_screen_y"}
+           "alien_screen_y":"avsp_diag_live_alien_screen_y",
+           "round1_spec_bound":"avsp_diag_round1_spec_bound",
+           "round1_entry_valid":"avsp_diag_round1_entry_valid",
+           "round1_route_state":"avsp_diag_round1_route_state",
+           "round1_rng_seed":"avsp_diag_round1_rng_seed",
+           "round1_player_health":"avsp_diag_round1_player_health",
+           "round1_pool12_free":"avsp_diag_round1_pool12_free",
+           "round1_pool16_free":"avsp_diag_round1_pool16_free",
+           "round1_pool20_free":"avsp_diag_round1_pool20_free",
+           "round1_pool24_free":"avsp_diag_round1_pool24_free",
+           "round1_fallback_count":"avsp_diag_round1_fallback_count",
+           "round1_canaries_ok":"avsp_diag_round1_canaries_ok"}
 state = {key:signed(mcp,syms[symbol]) for key,symbol in mapping.items()}
 observed_frame = state["frame"]
 current_sample = next((sample for sample in all_samples
@@ -146,6 +157,13 @@ if not (state["runtime_ready"] == state["canaries_ok"] == 1 and
         state["hit_events"] >= 1 and state["ko_events"] == 1 and state["route_unlocked"] ==
         state["continued"] == 1 and state["failures"] == state["fallback_count"] ==
         state["physical_saturn"] == 0): raise RuntimeError(f"live state failed: {state}")
+if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
+        state["round1_canaries_ok"] == 1 and
+        state["round1_route_state"] == 2 and state["round1_rng_seed"] == 0x8DEF and
+        state["round1_player_health"] == 101 and
+        [state[f"round1_pool{kind}_free"] for kind in (12,16,20,24)] ==
+        [20,20,16,32] and state["round1_fallback_count"] == 0):
+    raise RuntimeError(f"Round 1 stable-entry target binding failed: {state}")
 if (len(samples) != EVIDENCE_LAST_FRAME + 1 or
         any(sample["frame"] != index for index,sample in enumerate(samples))):
     raise RuntimeError("live synchronized ledger is incomplete")

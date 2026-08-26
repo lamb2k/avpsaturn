@@ -230,10 +230,11 @@ SPEC-02 is now accepted. Its 26 required field contracts cover all ten
 authority families with zero required UNKNOWN or adapted fields, and its
 generated fixtures contain the source-derived Round 1 content plus accepted
 Port V2 interface identities. REIMPLEMENT-13 has implemented and validated the
-native stable-entry state and exact fixed actor pools. That body remains a
-diagnostic substrate until the direct diagnostic boot, target readback, and
-accepted presentation adapters expose it; this connection is the active
-vertical checkpoint before the first route segment.
+native stable-entry state and exact fixed actor pools. The direct diagnostic
+boot and target readback now expose the exact state with paired-emulator
+agreement and zero fallback. It remains a diagnostic substrate until the first
+source-derived Round 1 route view is rendered through accepted presentation
+adapters; that view is the active vertical checkpoint before route logic.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

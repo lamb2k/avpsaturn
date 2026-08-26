@@ -43,6 +43,17 @@
     ,"runtime_ready"
     ,"avsp_diag_slice_init_stage"
     ,"avsp_diag_slice_ready"
+    ,"avsp_diag_round1_spec_bound"
+    ,"avsp_diag_round1_entry_valid"
+    ,"avsp_diag_round1_route_state"
+    ,"avsp_diag_round1_rng_seed"
+    ,"avsp_diag_round1_player_health"
+    ,"avsp_diag_round1_pool12_free"
+    ,"avsp_diag_round1_pool16_free"
+    ,"avsp_diag_round1_pool20_free"
+    ,"avsp_diag_round1_pool24_free"
+    ,"avsp_diag_round1_fallback_count"
+    ,"avsp_diag_round1_canaries_ok"
     ,"failed_asset"
   ]
 }
