@@ -497,6 +497,11 @@ typedef struct
     int continued_after_unlock;
     int camera_world_x;
     int failures;
+    int round1_player_x;
+    int round1_player_z;
+    int round1_player_facing;
+    int round1_player_source_action;
+    int round1_player_controller_updates;
 } LiveEncounterDiagSample;
 static AvspLiveEncounterRuntime live_encounter_runtime;
 static AvspLiveEncounterFrame live_encounter_frame;
@@ -6898,7 +6903,8 @@ static int live_encounter_audio_step(void)
 
 static void live_encounter_publish(void)
 {
-    if (live_encounter_frame.frame < AVSP_LIVE_DIAG_SAMPLES)
+    if (live_encounter_frame.frame < AVSP_LIVE_DIAG_SAMPLES &&
+        avsp_diag_live_sample_count <= (int)live_encounter_frame.frame)
     {
         volatile LiveEncounterDiagSample *sample =
             &avsp_diag_live_samples[live_encounter_frame.frame];
@@ -6941,6 +6947,13 @@ static void live_encounter_publish(void)
             live_encounter_frame.continued_after_unlock;
         sample->camera_world_x = live_encounter_frame.camera_world_x;
         sample->failures = (int)live_encounter_runtime.failures;
+        sample->round1_player_x = round1_runtime.player.x;
+        sample->round1_player_z = round1_runtime.player.z;
+        sample->round1_player_facing = round1_runtime.player.facing;
+        sample->round1_player_source_action =
+            round1_runtime.player.source_action;
+        sample->round1_player_controller_updates =
+            (int)round1_runtime.player_controller_updates;
         avsp_diag_live_sample_count = (int)live_encounter_frame.frame + 1;
     }
     avsp_diag_live_interface_version = AVSP_LIVE_ENCOUNTER_INTERFACE_VERSION;

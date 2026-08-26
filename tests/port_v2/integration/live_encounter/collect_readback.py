@@ -19,12 +19,19 @@ FIELDS = ("frame","input_mask","player_x","player_lane","player_health","player_
           "alien_screen_y","alien_rng","player_contact","alien_contact","player_damage",
           "alien_damage","attack_miss","encounter_state","route_unlocked",
           "continued_after_unlock","camera_world_x","failures")
+FIELDS = FIELDS + ("round1_player_x","round1_player_z","round1_player_facing",
+                   "round1_player_source_action","round1_player_controller_updates")
 EVIDENCE_LAST_FRAME = 470
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def signed(mcp, address): return tools.signed32(mcp.u32(address))
 def read_samples(mcp, base, count):
     record_bytes = len(FIELDS) * 4
-    payload = mcp.read(base, count * record_bytes)
+    max_records = 65536 // record_bytes
+    payload = bytearray()
+    for first in range(0, count, max_records):
+        records = min(max_records, count - first)
+        payload.extend(mcp.read(base + first * record_bytes,
+                                records * record_bytes))
     result = []
     for index in range(count):
         start = index * record_bytes
@@ -162,6 +169,13 @@ current_sample = next((sample for sample in all_samples
                        if sample["frame"] == observed_frame), None)
 if current_sample is None:
     raise RuntimeError("same-tick diagnostic sample is unavailable")
+evidence_sample = next((sample for sample in all_samples
+                        if sample["frame"] == EVIDENCE_LAST_FRAME), None)
+if evidence_sample is None:
+    raise RuntimeError("fixed evidence-frame diagnostic sample is unavailable")
+for key in ("round1_player_x", "round1_player_z", "round1_player_facing",
+            "round1_player_source_action", "round1_player_controller_updates"):
+    state[key] = evidence_sample[key]
 state["frame"] = EVIDENCE_LAST_FRAME
 samples = [sample for sample in all_samples
            if sample["frame"] <= EVIDENCE_LAST_FRAME]
@@ -185,11 +199,11 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_entry_gate8236"] == 0 and
         state["round1_entry_gate81af"] == 1 and
         state["round1_control_enabled"] == 1 and
-        state["round1_player_x"] == 1081 and
+        state["round1_player_x"] == 1074 and
         state["round1_player_z"] == 320 and
         state["round1_player_facing"] == 1 and
         state["round1_player_source_action"] == 0 and
-        state["round1_player_controller_updates"] == 304 and
+        state["round1_player_controller_updates"] == 301 and
         state["round1_presentation_ready"] == 1 and
         state["round1_presentation_seen"] == 1 and
         state["round1_presentation_commands_peak"] == 2):
