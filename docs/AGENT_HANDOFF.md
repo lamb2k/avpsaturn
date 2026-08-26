@@ -40,10 +40,11 @@ mutations, sixteen target suppressions, paired Emulator, Fast, Oracle, and direc
 frame-191 inspection pass. Initial transition execution remains blocked because
 SPEC-02 omits predicates, timers, writes, movement, and RNG order. Commit
 `45a1aaf` implements the exact route-4 global rectangle for bound x/z `720/256`:
-x `752..1072`, z `272..400`; 21 host mutations, 17 target suppressions, paired
-Emulator, Fast, Oracle, and direct frame-191 inspection pass. Coffee Shop
-minimum-penetration, terrain-record interpretation, and camera target arithmetic
+x `752..1072`, z `272..400`. Commit `888732d` adds the exact walk/10-tick
+stop/cleanup/neutral transition, preserves right-facing release, and corrects
+the route-4 duplicate-CDDA-start adapter bug. Twenty-three host mutations,
+21 Target suppressions, normal and paired Emulator, Fast, Oracle, and direct
+frames 180/182/472 inspection pass. Coffee Shop minimum-penetration, terrain-record interpretation, and camera target arithmetic
 are blocked because their SPEC-02 fixtures omit the implementation-required
-geometry/arithmetic. Preserve both blockers; implement the SPEC-02 Predator
-Warrior walking-to-stop-to-neutral transition next.
+geometry/arithmetic. Preserve both blockers; implement the SPEC-02 neutral Button3 jump, airborne movement, landing, and return-to-control body next.
 USER-09 remains changes-requested, SALVAGE-08 inactive, and Saturn `UNRUN`.

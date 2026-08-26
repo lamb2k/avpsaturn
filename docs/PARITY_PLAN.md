@@ -256,12 +256,18 @@ also exact-bound with 3010 target validations. Initial transition execution is
 blocked because SPEC-02 omits its predicates, timer guards, writes, movement
 arithmetic, and RNG order. The first stable route-4 global rectangle is now
 native and source-bound: bound x/z `720/256`, x `752..1072`, z `272..400`,
-with 301 paired applications and one x-max clamp. Coffee Shop minimum
+with 301 paired applications. The Predator Warrior source locomotion bridge now
+implements walk, the exact 10-tick stop, cleanup, and neutral return while
+preserving the last directional facing. A discovered duplicate Track-2 start
+at the native route-4 handoff is corrected; normal and paired emulator images
+continue with coherent actors, audio ownership, camera, HUD, and both planes.
+Coffee Shop minimum
 penetration, the terrain-record interpreter, and camera target arithmetic are
 separately blocked because the accepted SPEC-02 fixture omits their required
 geometry and update rules. The dependency-safe next vertical body is the
-Predator Warrior walking-to-stop-to-neutral action transition. Movement,
-damage, and dynamic spawn remain pending; frame 2328 is not gameplay authority.
+Predator Warrior neutral Button3 jump through source air movement, landing,
+and return to control. Enemy movement, damage, and dynamic spawn remain
+pending; frame 2328 is not gameplay authority.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

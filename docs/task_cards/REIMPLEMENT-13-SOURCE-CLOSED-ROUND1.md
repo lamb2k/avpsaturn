@@ -109,9 +109,15 @@ seventeen Target suppressions, paired Emulator, Fast, Oracle, and direct
 frame-191 inspection pass. Coffee Shop minimum penetration, terrain-record
 interpretation, and camera target updates are blocked because SPEC-02 omits
 their required box geometry and branch/update arithmetic. Preserve both
-blockers and implement the dependency-safe Predator Warrior
-walking-to-stop-to-neutral transition from SPEC-02 next. Frame 2328 remains
-evidence, not gameplay authority.
+blockers. Commit `888732d` implements the SPEC-02 walk-to-stop transition:
+action `0x0202`, exact 10-tick `0x0204` motion/facing hold, `0x0200` cleanup,
+and neutral return with the last directional facing preserved. A discovered
+normal-profile duplicate CDDA start at native route state 4 is corrected by
+preserving the already-active Track 2 owner. Twenty-three host mutations,
+21 Target suppressions, normal and paired Emulator, Fast, Oracle, and direct
+frames 180/182/472 inspection pass. Implement the dependency-safe neutral
+Button3 jump, airborne movement, landing, and return-to-control fixture next.
+Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json`.
 
 ## Next eligible cards
