@@ -31,10 +31,19 @@ required `SOURCE_CLOSED`; 112 first occur after stable Round 2 entry and are
 zero unowned events, and zero orphan authoritative writers.
 
 SPEC-02 is accepted with 26 required field contracts, zero required UNKNOWN or
-adapted fields, deterministic fixtures, and ten passing mutation controls.
-Implement vertically from stable Round 1 entry using only SPEC-02, its generated
-fixtures, accepted Port V2 interfaces, and approved assets. Do not consume raw
-traces, disassembly notes, or guesses; preserve the per-body differential,
-Target, paired-emulator, rendered-inspection, commit, and push cycle.
+adapted fields, deterministic fixtures, and ten passing mutation controls. The
+first REIMPLEMENT-13 body now provides the SPEC-02-bound stable-entry state and
+exact fixed actor-pool initialization in portable C. It passes its host
+differential, four real mutations, both applicable Target profiles, paired
+emulator regression, rendered legacy-scene inspection, Fast, and Oracle.
+
+This body is deliberately recorded as diagnostic-only: it is compiled into the
+target but is not yet exposed through target readback or rendered progression.
+Connect it to the direct diagnostic boot and accepted presentation adapters,
+then advance into the first route segment. Continue using only SPEC-02, its
+generated fixtures, accepted Port V2 interfaces, and approved assets. Do not
+consume raw traces, disassembly notes, or guesses; preserve the per-body
+differential, Target, paired-emulator, rendered-inspection, commit, and push
+cycle.
 Do not write runtime, infer USER-09 approval, activate SALVAGE-08 before
 accepted USER-10, or advance physical Saturn beyond `UNRUN`.

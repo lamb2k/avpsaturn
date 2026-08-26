@@ -69,6 +69,16 @@ No per-segment review. QA-13 must pass before USER-10.
 - SPEC-02 violation, required UNKNOWN, guessed behavior, objective discrepancy,
   target/emulator failure, nondeterminism, fallback, or approved-lock regression.
 
+## Active vertical checkpoint
+
+The SPEC-02-bound stable-entry state and exact fixed actor-pool initialization
+are implemented in portable C and pass the host differential, four real
+mutations, both applicable Target profiles, paired-emulator regression,
+rendered legacy-scene inspection, Fast, and Oracle. This is a native diagnostic
+substrate, not yet a playable segment: connect it to the direct diagnostic boot,
+target readback, and accepted presentation adapters before advancing into the
+first route segment. Evidence: `data/reimplement13_round1_stable_entry.json`.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2

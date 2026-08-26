@@ -136,7 +136,7 @@ ifneq ($(AVSP_PLAYABLE_SLICE),)
 SRCS += src/port_v2/integration/slice/slice.c
 endif
 ifneq ($(AVSP_LIVE_ENCOUNTER),)
-SRCS += src/port_v2/gameplay/player_action/player_action.c src/port_v2/gameplay/street_alien_ai/street_alien_ai.c src/port_v2/integration/live_encounter/live_encounter.c
+SRCS += src/port_v2/gameplay/player_action/player_action.c src/port_v2/gameplay/street_alien_ai/street_alien_ai.c src/port_v2/gameplay/round1/round1.c src/port_v2/integration/live_encounter/live_encounter.c
 endif
 ifneq ($(AVSP_PROBE3),)
 SRCS += tests/hardware/probe3/probe3.c

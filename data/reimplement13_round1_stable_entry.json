@@ -1,0 +1,53 @@
+{
+  "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
+  "checkpoint": "stable-round1-entry-native-substrate",
+  "status": "PASS_DIAGNOSTIC_ONLY",
+  "implementation_source": {
+    "spec02_sha256": "6cb1208a190b4977f2f73eb48b181fda08063266e45f1d8efcbc47b7fdc264a4",
+    "raw_trace_or_disassembly_consumed": false,
+    "authored_fallback_count": 0
+  },
+  "native_state": {
+    "route_state": 2,
+    "rng_seed": 36335,
+    "player": {
+      "active": 1,
+      "class": 0,
+      "type": 0,
+      "state": 0,
+      "substate": 0,
+      "health": 101
+    },
+    "actor_pools": [
+      {"record_type": 12, "capacity": 20, "stride": 192, "source_base": 38272, "last_slot": 41920},
+      {"record_type": 16, "capacity": 20, "stride": 128, "source_base": 42112, "last_slot": 44544},
+      {"record_type": 20, "capacity": 16, "stride": 128, "source_base": 44672, "last_slot": 46592},
+      {"record_type": 24, "capacity": 32, "stride": 128, "source_base": 46720, "last_slot": 50688}
+    ],
+    "canaries": "PASS"
+  },
+  "checks": {
+    "host_differential": "PASS",
+    "real_mutations_rejected": 4,
+    "target_live_encounter": "PASS_BUILD_ONLY",
+    "target_live_encounter_bench": "PASS_BUILD_ONLY",
+    "paired_emulator_regression": "PASS",
+    "paired_emulator_iso_sha256": "c270dd7ad8c1fde27b36ccbbb9d40e5751b2243ddc94f78274f074a73dbb15bc",
+    "rendered_regression_inspection": "PASS",
+    "fast": "PASS",
+    "oracle": "PASS"
+  },
+  "rendered_boundary": {
+    "new_round1_runtime_presented": false,
+    "legacy_live_encounter_regression_coherent": true,
+    "interactive_visual_sha256": "b9b796f27c7e088f80aca38deb1a8e06f77caf4900795f976bae9c54d7f4b3a3",
+    "post_clear_visual_sha256": "68fc77a42a907610ab42ab425f888130f914e5d86154ca4b441f843d7e8dae30",
+    "objective_discrepancy": "The new stable-entry state is compiled and host-validated but is not yet connected to target readback or rendered progression.",
+    "exact_correction": "Connect the native Round 1 runtime to the direct diagnostic boot, target readback, and existing presentation adapters before calling stable entry a playable stage segment."
+  },
+  "preserved": {
+    "user09": "CHANGES_REQUESTED",
+    "salvage08": "INACTIVE",
+    "physical_saturn": "UNRUN"
+  }
+}
