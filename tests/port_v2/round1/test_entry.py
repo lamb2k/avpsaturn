@@ -52,6 +52,7 @@ for before, after in (
     ("actor->assembly = presentation->assembly;", "actor->assembly = 0UL;"),
     ("actor->dispatch_entry = AVSP_ROUND1_CLASS1F_DISPATCH_ENTRY;", "actor->dispatch_entry = 0UL;"),
     ("avsp_round1_apply_player_global_bounds(runtime);", "/* bounds suppressed */"),
+    ("avsp_round1_update_player_locomotion(runtime, applied_direction,\n                                        was_stopping, &view);", "/* locomotion transition suppressed */"),
 ):
     assert before in source
     run(source.replace(before, after), header, False)
@@ -62,6 +63,7 @@ for before, after in (
     ("{ 0x0012e8ecUL, 0x0012f5deUL,", "{ 0x0012e8ecUL, 0x0012f994UL,"),
     ("{ 0x0200u, 0x1400u },", "{ 0x0200u, 0x1401u },"),
     ("    720, 256, 752, 1072,", "    720, 256, 752, 1200,"),
+    ("    10u,\n    {255u, 2u, 6u, 255u,", "    9u,\n    {255u, 2u, 6u, 255u,"),
 ):
     assert before in generated
     changed = generated.replace(before, after, 1)
@@ -79,4 +81,4 @@ for before, after in (
                    f"'{wsl(temp / 'test')}'")
         result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
         assert result.returncode != 0
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/global-bounds differential: PASS (21 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/global-bounds/neutral-stop differential: PASS (23 real mutations)")

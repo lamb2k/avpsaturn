@@ -85,6 +85,15 @@ typedef struct
 
 typedef struct
 {
+    unsigned short walking_action;
+    unsigned short stop_action;
+    unsigned short cleanup_action;
+    unsigned short stop_ticks;
+    unsigned char direction_resolver[16];
+} AvspRound1PlayerLocomotionSpec;
+
+typedef struct
+{
     unsigned char record_type;
     signed char actor_class;
     unsigned short pool_slot;
@@ -176,6 +185,13 @@ typedef struct
     short navigation_bound_z;
     unsigned long navigation_applications;
     unsigned long navigation_clamps;
+    unsigned short player_locomotion_action;
+    unsigned short player_stop_ticks;
+    unsigned char player_was_directional;
+    unsigned char player_cleanup_pending;
+    unsigned long player_stop_entries;
+    unsigned long player_stop_completions;
+    unsigned long player_stop_motion_suppressions;
     unsigned long failure_count;
     unsigned long fallback_count;
     unsigned long tail_canary;

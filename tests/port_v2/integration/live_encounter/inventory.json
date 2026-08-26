@@ -80,6 +80,10 @@
     ,"avsp_diag_round1_navigation_bound_z"
     ,"avsp_diag_round1_navigation_applications"
     ,"avsp_diag_round1_navigation_clamps"
+    ,"avsp_diag_round1_player_stop_ticks"
+    ,"avsp_diag_round1_player_stop_entries"
+    ,"avsp_diag_round1_player_stop_completions"
+    ,"avsp_diag_round1_player_stop_motion_suppressions"
     ,"failed_asset"
   ]
 }

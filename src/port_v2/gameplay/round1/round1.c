@@ -166,6 +166,86 @@ static void avsp_round1_apply_player_global_bounds(AvspRound1Runtime *runtime)
     }
 }
 
+static unsigned char avsp_round1_source_direction(
+    const unsigned short direction_mask)
+{
+    unsigned int index = 0u;
+    if ((direction_mask & AVSP_PW_INPUT_RIGHT) != 0u)
+        index |= 1u;
+    if ((direction_mask & AVSP_PW_INPUT_LEFT) != 0u)
+        index |= 2u;
+    if ((direction_mask & AVSP_PW_INPUT_DOWN) != 0u)
+        index |= 4u;
+    if ((direction_mask & AVSP_PW_INPUT_UP) != 0u)
+        index |= 8u;
+    return avsp_round1_player_locomotion.direction_resolver[index];
+}
+
+static void avsp_round1_update_player_locomotion(
+    AvspRound1Runtime *runtime,
+    const unsigned short applied_direction,
+    const unsigned char was_stopping,
+    const AvspPwView *view)
+{
+    unsigned char direction;
+    if (view->state != AVSP_PW_STATE_CONTROL)
+    {
+        runtime->player_stop_ticks = 0u;
+        runtime->player_was_directional = 0u;
+        runtime->player_cleanup_pending = 0u;
+        runtime->player_locomotion_action = view->source_action;
+        return;
+    }
+    direction = avsp_round1_source_direction(applied_direction);
+    if (was_stopping)
+    {
+        if (runtime->player_stop_ticks == 0u)
+        {
+            ++runtime->failure_count;
+            return;
+        }
+        --runtime->player_stop_ticks;
+        if (runtime->player_stop_ticks == 0u)
+        {
+            runtime->player_locomotion_action =
+                avsp_round1_player_locomotion.cleanup_action;
+            runtime->player.source_action =
+                avsp_round1_player_locomotion.cleanup_action;
+            runtime->player_cleanup_pending = 1u;
+            ++runtime->player_stop_completions;
+        }
+        else
+            runtime->player_locomotion_action =
+                avsp_round1_player_locomotion.stop_action;
+        return;
+    }
+    if (runtime->player_cleanup_pending)
+    {
+        runtime->player_cleanup_pending = 0u;
+        runtime->player_locomotion_action =
+            avsp_round1_player_locomotion.walking_action;
+        runtime->player_was_directional = (unsigned char)(direction != 255u);
+        return;
+    }
+    if (direction != 255u)
+    {
+        runtime->player_locomotion_action =
+            avsp_round1_player_locomotion.walking_action;
+        runtime->player_was_directional = 1u;
+    }
+    else if (runtime->player_was_directional)
+    {
+        runtime->player_was_directional = 0u;
+        runtime->player_stop_ticks = avsp_round1_player_locomotion.stop_ticks;
+        runtime->player_locomotion_action =
+            avsp_round1_player_locomotion.stop_action;
+        ++runtime->player_stop_entries;
+    }
+    else
+        runtime->player_locomotion_action =
+            avsp_round1_player_locomotion.walking_action;
+}
+
 int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
 {
     unsigned int order_index;
@@ -349,6 +429,11 @@ int avsp_round1_step_first_entry(AvspRound1Runtime *runtime)
             runtime->navigation_bounds_active = 1u;
             runtime->navigation_bound_x = avsp_round1_first_segment_bounds.bound_x;
             runtime->navigation_bound_z = avsp_round1_first_segment_bounds.bound_z;
+            runtime->player_locomotion_action =
+                avsp_round1_player_locomotion.cleanup_action;
+            runtime->player.source_action =
+                avsp_round1_player_locomotion.cleanup_action;
+            runtime->player_cleanup_pending = 1u;
         }
         return avsp_round1_entry_valid(runtime);
     }
@@ -436,6 +521,13 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
 {
     AvspPwInput input;
     AvspPwView view;
+    unsigned short applied_direction;
+    unsigned char was_stopping;
+    long prior_x_numerator;
+    long prior_lane_numerator;
+    short prior_x;
+    short prior_lane;
+    short prior_facing;
     if (runtime == 0 || runtime->route_state != 4 ||
         runtime->entry.control_enabled != 1u ||
         !avsp_round1_canaries_ok(runtime) || runtime->failure_count != 0u ||
@@ -443,12 +535,38 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
         return 0;
     input.mask = input_mask;
     input.received_damage = received_damage;
+    applied_direction = runtime->player_action.direction_history[
+        AVSP_PW_DIRECTION_LATENCY - 1];
+    was_stopping = (unsigned char)(runtime->player_stop_ticks != 0u);
+    prior_x_numerator = runtime->player_action.x_numerator;
+    prior_lane_numerator = runtime->player_action.lane_numerator;
+    prior_x = runtime->player_action.x;
+    prior_lane = runtime->player_action.lane;
+    prior_facing = runtime->player_action.facing;
     avsp_pw_step(&runtime->player_action, &input);
+    if (was_stopping)
+    {
+        if (runtime->player_action.x != prior_x ||
+            runtime->player_action.lane != prior_lane ||
+            runtime->player_action.facing != prior_facing ||
+            runtime->player_action.x_numerator != prior_x_numerator ||
+            runtime->player_action.lane_numerator != prior_lane_numerator)
+            ++runtime->player_stop_motion_suppressions;
+        runtime->player_action.x_numerator = prior_x_numerator;
+        runtime->player_action.lane_numerator = prior_lane_numerator;
+        runtime->player_action.x = prior_x;
+        runtime->player_action.lane = prior_lane;
+        runtime->player_action.facing = prior_facing;
+    }
     avsp_round1_apply_player_global_bounds(runtime);
     avsp_pw_view(&runtime->player_action, &view);
+    avsp_round1_update_player_locomotion(runtime, applied_direction,
+                                        was_stopping, &view);
+    if (runtime->failure_count != 0u)
+        return 0;
     runtime->player.state = AVSP_ROUND1_PLAYER_CONTROL_STATE;
     runtime->player.substate = view.source_substate;
-    runtime->player.source_action = view.source_action;
+    runtime->player.source_action = runtime->player_locomotion_action;
     runtime->player.facing = (unsigned char)view.facing;
     runtime->player.x = view.x;
     runtime->player.y = view.lane;
@@ -528,6 +646,26 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
             return 0;
     }
     if (runtime->route_state == 4)
+    {
+        int locomotion_valid = 1;
+        if (runtime->player_action.state == AVSP_PW_STATE_CONTROL)
+        {
+            if (runtime->player_stop_ticks != 0u)
+                locomotion_valid = runtime->player_locomotion_action ==
+                    avsp_round1_player_locomotion.stop_action &&
+                    runtime->player_cleanup_pending == 0u &&
+                    runtime->player_stop_ticks <=
+                        avsp_round1_player_locomotion.stop_ticks;
+            else if (runtime->player_cleanup_pending)
+                locomotion_valid = runtime->player_locomotion_action ==
+                    avsp_round1_player_locomotion.cleanup_action;
+            else
+                locomotion_valid = runtime->player_locomotion_action ==
+                    avsp_round1_player_locomotion.walking_action;
+        }
+        else if (runtime->player_stop_ticks != 0u ||
+                 runtime->player_cleanup_pending)
+            locomotion_valid = 0;
         return runtime->entry.terminal_seen == 1u &&
             runtime->entry.control_enabled == 1u &&
             runtime->entry.gate8236 == 0u &&
@@ -541,7 +679,10 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
             runtime->player.state == AVSP_ROUND1_PLAYER_CONTROL_STATE &&
             runtime->player_action.health == runtime->player.health &&
             runtime->player_action.x == runtime->player.x &&
-            runtime->player_action.lane == runtime->player.z;
+            runtime->player_action.lane == runtime->player.z &&
+            runtime->player.source_action ==
+                runtime->player_locomotion_action && locomotion_valid;
+    }
     if (runtime->entry.control_enabled ||
         runtime->player.state != AVSP_ROUND1_PLAYER_ENTRY_STATE)
         return 0;

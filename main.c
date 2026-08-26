@@ -513,6 +513,7 @@ typedef struct
     int round1_navigation_bound_z;
     int round1_navigation_applications;
     int round1_navigation_clamps;
+    unsigned int round1_player_stop_state;
 } LiveEncounterDiagSample;
 static AvspLiveEncounterRuntime live_encounter_runtime;
 static AvspLiveEncounterFrame live_encounter_frame;
@@ -601,6 +602,10 @@ volatile int avsp_diag_round1_navigation_bound_x;
 volatile int avsp_diag_round1_navigation_bound_z;
 volatile int avsp_diag_round1_navigation_applications;
 volatile int avsp_diag_round1_navigation_clamps;
+volatile int avsp_diag_round1_player_stop_ticks;
+volatile int avsp_diag_round1_player_stop_entries;
+volatile int avsp_diag_round1_player_stop_completions;
+volatile int avsp_diag_round1_player_stop_motion_suppressions;
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
 static int live_autotest_phase;
 static int live_autotest_release;
@@ -6911,7 +6916,12 @@ static int live_encounter_audio_step(void)
     if (!avsp_port_v2_pcm_step(&playable_slice_runtime.pcm, &pcm_input,
                                &playable_slice_frame.pcm)) return 0;
     memset(&cdda_input, 0, sizeof(cdda_input));
-    cdda_input.command = live_encounter_frame.frame == 0UL ?
+    /* Native Round 1 entry resets the retained encounter substrate when
+     * route state 4 enables control. Track 2 is already active at that
+     * boundary, so preserve its owner instead of issuing an invalid second
+     * START for the reset encounter frame zero. */
+    cdda_input.command = live_encounter_frame.frame == 0UL &&
+        !playable_slice_runtime.cdda.active ?
         AVSP_PORT_V2_CDDA_START : AVSP_PORT_V2_CDDA_NONE;
     cdda_input.track = AVSP_PORT_V2_CDDA_TRACK_STAGE1;
     cdda_input.source_frame = AVSP_PORT_V2_CDDA_SOURCE_FRAME_STAGE1;
@@ -6996,6 +7006,12 @@ static void live_encounter_publish(void)
             (int)round1_runtime.navigation_applications;
         sample->round1_navigation_clamps =
             (int)round1_runtime.navigation_clamps;
+        sample->round1_player_stop_state =
+            ((unsigned int)round1_runtime.player_stop_ticks & 0x0fu) |
+            (((unsigned int)round1_runtime.player_stop_entries & 0xffu) << 4) |
+            (((unsigned int)round1_runtime.player_stop_completions & 0xffu) << 12) |
+            (((unsigned int)round1_runtime.player_stop_motion_suppressions &
+              0x0fffu) << 20);
         avsp_diag_live_sample_count = (int)live_encounter_frame.frame + 1;
     }
     avsp_diag_live_interface_version = AVSP_LIVE_ENCOUNTER_INTERFACE_VERSION;
@@ -7103,11 +7119,19 @@ static void live_encounter_publish(void)
         (int)round1_runtime.navigation_applications;
     avsp_diag_round1_navigation_clamps =
         (int)round1_runtime.navigation_clamps;
+    avsp_diag_round1_player_stop_ticks = round1_runtime.player_stop_ticks;
+    avsp_diag_round1_player_stop_entries =
+        (int)round1_runtime.player_stop_entries;
+    avsp_diag_round1_player_stop_completions =
+        (int)round1_runtime.player_stop_completions;
+    avsp_diag_round1_player_stop_motion_suppressions =
+        (int)round1_runtime.player_stop_motion_suppressions;
 }
 
 static void live_encounter_frame_callback(void)
 {
     AvspLiveEncounterInput input;
+    unsigned short round1_player_mask;
     AvspPortV2PcmAudioOps pcm_operations;
     AvspPortV2CddaAudioOps cdda_operations;
     AvspPortV2HudRenderOps hud_operations;
@@ -7145,8 +7169,16 @@ static void live_encounter_frame_callback(void)
 #else
     input.player_mask = live_encounter_real_input();
 #endif
+    round1_player_mask = input.player_mask;
+#ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
     if (round1_runtime.route_state == 4 &&
-        !avsp_round1_step_player(&round1_runtime, input.player_mask, 0))
+        round1_runtime.player_controller_updates < 15u)
+        round1_player_mask =
+            round1_runtime.player_controller_updates != 2u ?
+            AVSP_PW_INPUT_RIGHT : 0u;
+#endif
+    if (round1_runtime.route_state == 4 &&
+        !avsp_round1_step_player(&round1_runtime, round1_player_mask, 0))
     {
         avsp_diag_live_frame_stage = -9;
         runtime_ready = 0;

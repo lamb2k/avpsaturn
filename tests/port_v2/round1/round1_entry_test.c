@@ -19,7 +19,21 @@ int main(void)
     while (!runtime.entry.control_enabled && calls < 1000u)
     {
         if (!avsp_round1_step_first_entry(&runtime))
+        {
+            fprintf(stderr,
+                    "entry step failed calls=%u route=%u terminal=%u action=%u player_action=%u cleanup=%u player=%d/%d controller=%d/%d health=%d/%d nav=%u/%d/%d failures=%lu\n",
+                    calls, runtime.route_state, runtime.entry.terminal_seen,
+                    runtime.player_locomotion_action,
+                    runtime.player.source_action,
+                    runtime.player_cleanup_pending,
+                    runtime.player.x, runtime.player.z,
+                    runtime.player_action.x, runtime.player_action.lane,
+                    runtime.player.health, runtime.player_action.health,
+                    runtime.navigation_bounds_active,
+                    runtime.navigation_bound_x, runtime.navigation_bound_z,
+                    runtime.failure_count);
             return 3;
+        }
         ++calls;
         if (runtime.route_state == 4 && !runtime.entry.terminal_seen)
             return 4;
@@ -124,9 +138,9 @@ int main(void)
     runtime.player_action.x = -1000;
     runtime.player_action.lane = -1000;
     if (!avsp_round1_step_player(&runtime, 0u, 0) ||
-        runtime.player.x != 864 || runtime.player.z != 272 ||
+        runtime.player.x != 752 || runtime.player.z != 272 ||
         runtime.navigation_applications != 7u ||
-        runtime.navigation_clamps != 2u)
+        runtime.navigation_clamps != 3u)
     {
         fprintf(stderr,
                 "low clamp x=%d z=%d action_x=%d lane=%d applications=%lu clamps=%lu\n",
@@ -135,9 +149,26 @@ int main(void)
                 runtime.navigation_applications, runtime.navigation_clamps);
         return 12;
     }
+    for (calls = 0u; calls < 9u; ++calls)
+        if (!avsp_round1_step_player(&runtime, 0u, 0))
+            return 13;
+    if (runtime.player_stop_ticks != 0u ||
+        runtime.player.source_action != 512u ||
+        runtime.player_cleanup_pending != 1u ||
+        runtime.player_stop_entries != 1u ||
+        runtime.player_stop_completions != 1u)
+        return 14;
+    if (!avsp_round1_step_player(&runtime, 0u, 0) ||
+        runtime.player.source_action != 514u ||
+        runtime.player_cleanup_pending != 0u ||
+        runtime.player.facing != 1u ||
+        runtime.navigation_applications != 17u ||
+        runtime.navigation_clamps != 3u ||
+        runtime.player_stop_motion_suppressions != 10u)
+        return 15;
     runtime.entry.gate8236 = 1u;
     if (avsp_round1_entry_valid(&runtime))
-        return 13;
-    puts("REIMPLEMENT-13 native entry/player/scheduler/class1f/global-bounds: PASS");
+        return 16;
+    puts("REIMPLEMENT-13 native entry/player/scheduler/class1f/global-bounds/neutral-stop: PASS");
     return 0;
 }

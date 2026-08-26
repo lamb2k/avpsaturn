@@ -328,4 +328,13 @@ static const AvspRound1NavigationBoundsSpec avsp_round1_first_segment_bounds =
     272, 400
 };
 
+static const AvspRound1PlayerLocomotionSpec avsp_round1_player_locomotion =
+{
+    514u,
+    516u,
+    512u,
+    10u,
+    {255u, 2u, 6u, 255u, 4u, 3u, 5u, 255u, 0u, 1u, 7u, 255u, 255u, 255u, 255u, 255u}
+};
+
 #endif

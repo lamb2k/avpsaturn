@@ -53,6 +53,10 @@ def build() -> str:
                       for context in class1f["state_phase_contexts"]]
     navigation = fixtures["authority_data"]["navigation"]
     global_bounds = navigation["global_bounds"]
+    locomotion = fixtures["authority_data"]["player"]["locomotion_neutral_facing"]
+    input_decode = locomotion["input_decode"]
+    release = locomotion["release_transition"]
+    direction_resolver = input_decode["resolver_table"]
     first_segment_bounds = next(
         run for run in global_bounds["baseline_bound_runs"]
         if run["route"] == 4 and run["bound_x"] == 720 and
@@ -80,6 +84,20 @@ def build() -> str:
         navigation["coordinate_contract"]["up_world_z_delta_sign"] != 1 or
         navigation["coordinate_contract"]["down_world_z_delta_sign"] != -1):
         raise ValueError("SPEC-02 first-segment global bounds drift")
+    if (direction_resolver != [255, 2, 6, 255, 4, 3, 5, 255,
+                              0, 1, 7, 255, 255, 255, 255, 255] or
+        release["walking_action"] != "0x0202" or
+        release["stop_action"] != "0x0204" or
+        release["stop_timer"]["ticks"] != 10 or
+        release["stop_guard"] !=
+            "+0x0c direction becomes negative when no valid direction is held" or
+        release["cleanup_writer"] !=
+            "0x01a3fa writes inner/action long 0x02000000" or
+        release["idle_phase_writer"] !=
+            "0x0198de writes action low byte 0x02 on the next update" or
+        release["facing_rule"] !=
+            "neutral performs no +0x0f write and preserves the last directional facing"):
+        raise ValueError("SPEC-02 locomotion-to-neutral transition drift")
 
     cursor = int(player["initial_cursor"], 16)
     step_rows = []
@@ -176,6 +194,14 @@ def build() -> str:
         "{",
         f"    {bound_x}, {bound_z}, {bound_x + 0x20}, {bound_x + 0x160},",
         f"    {bound_z + 0x10}, {bound_z + 0x90}",
+        "};", "",
+        "static const AvspRound1PlayerLocomotionSpec avsp_round1_player_locomotion =",
+        "{",
+        f"    {int(release['walking_action'], 16)}u,",
+        f"    {int(release['stop_action'], 16)}u,",
+        "    512u,",
+        f"    {release['stop_timer']['ticks']}u,",
+        "    {" + ", ".join(f"{value}u" for value in direction_resolver) + "}",
         "};", "", "#endif", ""])
     return "\n".join(lines)
 

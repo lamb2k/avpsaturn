@@ -42,7 +42,7 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_player_x"] == 1072
     assert report["state"]["round1_player_z"] == 320
     assert report["state"]["round1_player_facing"] == 1
-    assert report["state"]["round1_player_source_action"] == 0
+    assert report["state"]["round1_player_source_action"] == 514
     assert report["state"]["round1_player_controller_updates"] == 301
     assert report["state"]["round1_scheduler_frames"] == 301
     assert report["state"]["round1_scheduler_dispatches"] == 3010
@@ -54,7 +54,11 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_navigation_bound_x"] == 720
     assert report["state"]["round1_navigation_bound_z"] == 256
     assert report["state"]["round1_navigation_applications"] == 301
-    assert report["state"]["round1_navigation_clamps"] == 1
+    assert report["state"]["round1_navigation_clamps"] == 0
+    assert report["state"]["round1_player_stop_ticks"] == 0
+    assert report["state"]["round1_player_stop_entries"] == 1
+    assert report["state"]["round1_player_stop_completions"] == 1
+    assert report["state"]["round1_player_stop_motion_suppressions"] == 10
     assert report["state"]["round1_presentation_ready"] == 1
     assert report["state"]["round1_presentation_seen"] == 1
     assert report["state"]["round1_presentation_commands_peak"] == 2
