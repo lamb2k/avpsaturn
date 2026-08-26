@@ -251,9 +251,12 @@ paired frame 470 has 3010 visits, ten active class-0x1F actors, and hash
 `0x836e161c`. Those ten records now dispatch exact SPEC-02 presentation bindings:
 all 190 class-0x1F animation records map to their assembly, hurt selector, and
 attack selector with zero orphans, and paired frame 470 reports 3010 bindings.
-The next vertical body implements the initial class-0x1F state/substate
-transition guards. Movement, damage, and dynamic spawn remain pending until
-their source guards are represented; frame 2328 itself is not gameplay authority.
+Source entry `0x060532` and all 59 route-reachable state/substate contexts are
+also exact-bound with 3010 target validations. Initial transition execution is
+blocked because SPEC-02 omits its predicates, timer guards, writes, movement
+arithmetic, and RNG order. The dependency-safe next vertical body implements
+first-segment navigation, terrain, obstacles, and camera boundaries. Movement,
+damage, and dynamic spawn remain pending; frame 2328 is not gameplay authority.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

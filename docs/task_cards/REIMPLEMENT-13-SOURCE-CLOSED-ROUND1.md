@@ -93,8 +93,15 @@ assembly, hurt selector, and attack selector: 190 source records, zero orphans,
 3010 paired target bindings. Seventeen host mutations, fifteen target
 suppressions, Target, paired Emulator, Fast, Oracle, and direct frame-191
 inspection pass. This does not yet implement class-0x1F movement, damage,
-state transitions, or dynamic spawn. Implement source state/substate guards
-next; frame 2328 remains evidence, not gameplay authority.
+state transitions, or dynamic spawn. The source dispatch entry `0x060532` and
+all 59 route-reachable state/substate contexts are now exact-bound and reject
+unsupported contexts; nineteen host mutations, sixteen target suppressions,
+paired Emulator, Fast, Oracle, and direct frame-191 inspection pass. Execution
+of the initial `0200:1000/1200/1400` transitions is blocked because SPEC-02 does
+not provide their predicates, timer guards, writes, movement arithmetic, or RNG
+order. Preserve that blocker and implement the dependency-safe first-segment
+navigation/terrain/obstacle/camera boundary next. Frame 2328 remains evidence,
+not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json`.
 
 ## Next eligible cards

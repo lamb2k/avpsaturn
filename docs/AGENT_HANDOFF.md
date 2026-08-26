@@ -36,12 +36,11 @@ terminator, gate clear, route `2 -> 4`, control enable, current input, and neutr
 facing. The fixed-pool scheduler visits 12/16/20/24 in ascending-slot order;
 paired frame 470 has 3010 visits and hash `0x836e161c`. Commit `6c00cbb` binds
 all 190 exact class-0x1F animation records to assembly, hurt selector, and attack
-selector with zero orphans and 3010 paired target bindings. Seventeen host
-mutations, fifteen target suppressions, Target, paired Emulator, Fast, Oracle,
-and direct frame-191 inspection pass with coherent VDP2, camera, HUD, palette,
-priority, player, and alien. The retained actor handoff remains substrate.
-Movement, damage, state transitions, and dynamic spawn remain pending.
-Implement initial class-0x1F state/substate guards from SPEC-02 fixtures and
-accepted interfaces only; keep fixed-frame authority and dynamic spawn out
-until source predicates exist. USER-09 is changes-requested, SALVAGE-08 is
+selector with zero orphans and 3010 paired target bindings. Commit `cde43c5`
+binds source entry `0x060532` and all 59 route-reachable contexts; nineteen host
+mutations, sixteen target suppressions, paired Emulator, Fast, Oracle, and direct
+frame-191 inspection pass. Initial transition execution is blocked because
+SPEC-02 omits predicates, timers, writes, movement, and RNG order. Preserve that
+blocker; implement the dependency-safe first-segment navigation/terrain/obstacle/
+camera body next from SPEC-02 and accepted interfaces. USER-09 is changes-requested, SALVAGE-08 is
 inactive, and Saturn remains `UNRUN`.
