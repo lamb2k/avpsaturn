@@ -13,6 +13,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RAW_A = ROOT / ".deps/mame/oracle11_round1_route_a"
 RAW_B = ROOT / ".deps/mame/oracle11_round1_route_b"
+ENTRY_A = ROOT / ".deps/mame/oracle11_round1_entry_a6"
+ENTRY_B = ROOT / ".deps/mame/oracle11_round1_entry_b6"
+ENTRY_SUPPRESS = ROOT / ".deps/mame/oracle11_round1_entry_suppress6"
 ROUTE = ROOT / "data/oracle10_round1_route.json"
 OPCODES = ROOT / ".deps/mame/actorprobe/decrypted_opcodes_2m.bin"
 OUT = ROOT / "data/oracle11_round1_encounter_route_authority.json"
@@ -21,6 +24,8 @@ ORACLE10_EVENTS = (ROOT / ".deps/mame/oracle10_round1_system_census_e" /
 FILES = ("route_samples.tsv", "route_writes.tsv", "route_writer_summary.tsv",
          "lifecycle_writes.tsv", "route_rng.tsv", "samples.tsv",
          "dispatches.tsv", "projectiles.tsv", "score_writes.tsv", "result.tsv")
+ENTRY_FILES = ("entry_samples.tsv", "entry_actors.tsv", "entry_writes.tsv",
+               "entry_calls.tsv", "entry_player_writes.tsv", "entry_script.tsv")
 ROUTE_EDGES = (
     (2237, "00c170", 4, "(u8(g8236) & u8(g81af)) == 0"),
     (5452, "008418", 6, "u8(g81f3) != 0"),
@@ -79,6 +84,10 @@ def identity(path: Path) -> dict[str, object]:
             "files": {name: manifest["sha256"][name] for name in FILES}}
 
 
+def entry_identity(path: Path) -> dict[str, object]:
+    return {"files": {name: digest(path / name) for name in ENTRY_FILES}}
+
+
 def window(image: bytes, pc: int, before: int = 16, after: int = 32) -> dict[str, object]:
     first, last = max(0, pc-before), min(len(image), pc+after)
     return {"first": f"0x{first:06x}", "last_exclusive": f"0x{last:06x}",
@@ -88,6 +97,9 @@ def window(image: bytes, pc: int, before: int = 16, after: int = 32) -> dict[str
 def build_report() -> dict[str, object]:
     id_a, id_b = identity(RAW_A), identity(RAW_B)
     require(id_a["files"] == id_b["files"], "route completion captures differ")
+    entry_a, entry_b = entry_identity(ENTRY_A), entry_identity(ENTRY_B)
+    require(entry_a["files"] == entry_b["files"],
+            "entry correction captures differ")
     final = next(rows(RAW_A / "result.tsv"))
     require(int(final["final_route"]) == 4, "route capture did not reach Round 2")
     route = json.loads(ROUTE.read_text(encoding="utf-8"))
@@ -215,6 +227,173 @@ def build_report() -> dict[str, object]:
             {item["route_segment"] for item in segment_bindings} ==
             {item["id"] for item in segments}, "route segment coverage drift")
 
+    entry_calls = list(rows(ENTRY_A / "entry_calls.tsv"))
+    entry_actors = list(rows(ENTRY_A / "entry_actors.tsv"))
+    require(len(entry_calls) == 1 and len(entry_actors) == 10,
+            "entry source-table capture drift")
+    call = entry_calls[0]
+    table_bytes = bytes.fromhex(call["table_hex"])
+    require(len(table_bytes) == 80 and call["a1"] == "028bd4" and
+            call["a6"] == "ffd180" and call["controller_active"] == "1" and
+            call["controller_class"] == "01" and
+            call["controller_type"] == "32" and
+            call["controller_state"] == "514" and
+            call["controller_phase"] == "0", "entry controller/table drift")
+
+    def word(offset: int) -> int:
+        return int.from_bytes(table_bytes[offset:offset+2], "big")
+
+    entry_rows = []
+    for sequence, actor in enumerate(entry_actors):
+        offset = sequence * 8
+        class_variant = word(offset + 4)
+        require(int(actor["sequence"]) == sequence and
+                int(actor["x"]) == word(offset) and
+                int(actor["z"]) == word(offset + 2) and
+                int(actor["y"]) == word(offset + 2) and
+                int(actor["class"], 16) == class_variant >> 8 and
+                int(actor["active"]) == 1 and int(actor["type"]) == 12,
+                f"entry source row {sequence} does not match post-init actor")
+        entry_rows.append({
+            "sequence": sequence, "slot": f"0x{actor['slot']}",
+            "x": word(offset), "y": word(offset + 2),
+            "z": word(offset + 2), "class": f"0x{class_variant >> 8:02x}",
+            "variant": class_variant & 0xff, "source_action": word(offset + 6),
+            "record_type": int(actor["type"]),
+            "post_initial_dispatch": {
+                "state": int(actor["state"]), "substate": int(actor["phase"]),
+                "facing": int(actor["facing"]),
+                "animation_record": f"0x{int(actor['anim'], 16):08x}",
+                "health": int(actor["health"]),
+            },
+        })
+    require([item["slot"] for item in entry_rows] ==
+            [item["slot"] for item in enemy_spawns[:10]],
+            "entry allocation sequence drift")
+
+    base_samples = {int(row["frame"]): row
+                    for row in rows(ENTRY_A / "entry_samples.tsv")}
+    suppress_samples = {int(row["frame"]): row
+                        for row in rows(ENTRY_SUPPRESS / "entry_samples.tsv")}
+    base_gate = [row for row in rows(ENTRY_A / "entry_writes.tsv")
+                 if row["pc"] == "02151e"]
+    suppress_gate = [row for row in rows(ENTRY_SUPPRESS / "entry_writes.tsv")
+                     if row["pc"] == "02151e"]
+    require(len(base_gate) == len(suppress_gate) == 1 and
+            base_gate[0]["frame"] == suppress_gate[0]["frame"] == "2236" and
+            base_gate[0]["suppressed"] == "0" and
+            suppress_gate[0]["suppressed"] == "1" and
+            base_samples[2237]["gate8236"] == "00" and
+            base_samples[2238]["route"] == "0004" and
+            suppress_samples[2238]["gate8236"] == "01" and
+            suppress_samples[2238]["route"] == "0002" and
+            suppress_samples[2300]["route"] == "0002" and
+            suppress_samples[2300]["player_state"] == "2048",
+            "entry gate suppression did not discriminate route authority")
+    script_rows = {int(row["frame"]): row
+                   for row in rows(ENTRY_A / "entry_script.tsv")}
+    require(script_rows[2072]["cursor"] == "128faa" and
+            script_rows[2237]["cursor"] == "128fc2" and
+            script_rows[2237]["bytes32"].startswith("ffff"),
+            "entry animation terminator drift")
+    entry_program = image[0x128faa:0x128fc4]
+    expected_entry_program = bytes.fromhex(
+        "0a0003b00140060018000000003c0000003c16020000002cffff")
+    require(entry_program == expected_entry_program,
+            "entry animation source program drift")
+    player_writes = list(rows(ENTRY_A / "entry_player_writes.tsv"))
+    timer_loads = [row for row in player_writes
+                   if row["offset"] == "c8" and row["pc"] == "02155e"]
+    timer_ticks = [row for row in player_writes
+                   if row["offset"] == "c8" and row["pc"] == "02177a"]
+    timer_completions = [row for row in player_writes
+                         if row["offset"] in ("c0", "c2") and
+                         row["pc"] in ("021780", "021784")]
+    require([int(row["data"], 16) for row in timer_loads] == [60, 60, 44] and
+            len(timer_ticks) == 164 and len(timer_completions) == 6,
+            "entry animation timer semantics drift")
+    first_entry_body = {
+        "classification": "SOURCE_CLOSED",
+        "capture_identity": {
+            "completion_a": entry_a, "completion_b": entry_b,
+            "byte_identical": True,
+            "suppression": entry_identity(ENTRY_SUPPRESS),
+        },
+        "controller": {
+            "record": "0xffd180", "record_type": 32, "class": "0x01",
+            "state": 514, "substate": 0,
+            "transition_guard": ("active class-0x01/type-32 controller dispatches "
+                                 "the ten-row source table body; each row requires "
+                                 "allocate_record12 success"),
+        },
+        "spawn_table": {
+            "address": "0x128bd4", "bytes": len(table_bytes),
+            "sha256": hashlib.sha256(table_bytes).hexdigest(),
+            "routine": "0x028874..0x0288b8", "source_window": window(image, 0x28886),
+            "rows": entry_rows,
+        },
+        "player_entry_script": {
+            "player_state": 2048, "player_substate": 0,
+            "position": {"x": 944, "y": 320, "z": 320},
+            "animation_record": "0x0015f1f4",
+            "initial_cursor": "0x128faa", "terminal_cursor": "0x128fc2",
+            "terminal_token": "0xffff",
+            "decoder": "0x0214dc..0x021526",
+            "decoder_sha256": hashlib.sha256(image[0x214dc:0x21528]).hexdigest(),
+            "source_program": {
+                "first": "0x128faa", "last_exclusive": "0x128fc4",
+                "bytes": len(entry_program), "hex": entry_program.hex(),
+                "sha256": hashlib.sha256(entry_program).hexdigest(),
+                "commands": [
+                    {"opcode": "0x0a", "arguments_hex": "0003b00140",
+                     "effect": "set player x=944 and y=z=320",
+                     "handler": "0x0215e8..0x021600"},
+                    {"opcode": "0x06", "arguments_hex": "00",
+                     "effect": "enter animation subhandler 8",
+                     "handler": "0x0215a8..0x0215bc"},
+                    {"opcode": "0x18", "arguments_hex": "00",
+                     "effect": "execute the exact source command before the first dwell",
+                     "handler_cursor_writer_pc": "0x021692"},
+                    {"opcode": "0x00", "arguments_hex": "00003c",
+                     "effect": "load animation countdown 60"},
+                    {"opcode": "0x00", "arguments_hex": "00003c",
+                     "effect": "load animation countdown 60"},
+                    {"opcode": "0x16", "arguments_hex": "02",
+                     "effect": "write source global animation byte g8209=2",
+                     "handler_cursor_writer_pc": "0x021688"},
+                    {"opcode": "0x00", "arguments_hex": "00002c",
+                     "effect": "load animation countdown 44"},
+                    {"opcode": "0xff", "arguments_hex": "ff",
+                     "effect": "signed terminal command"},
+                ],
+            },
+            "timer_semantics": {
+                "field": "player+0xc8:u16", "load_writer_pc": "0x02155e",
+                "loads": [60, 60, 44], "decrement_writer_pc": "0x02177a",
+                "scheduler_decrements": 164,
+                "completion_writers": ["0x021780:clear player+0xc1:u8",
+                                       "0x021784:clear player+0xc2:u16"],
+                "rule": ("source animation scheduler decrements c8 to zero, clears "
+                         "the timed subhandler, then decodes the next command; video "
+                         "frame number is not an input"),
+            },
+            "gate_writer_pc": "0x02151e", "gate_field": "0xff8236:u8",
+            "gate_bit_field": "player+0xd2:u8", "gate_bit": 0,
+            "transition_guard": ("signed animation command byte is negative; "
+                                 "clear player+0xd2-selected bit in g8236"),
+            "route_consumer": {
+                "writer_pc": "0x00c170", "value": 4,
+                "guard": "(u8(g8236) & u8(g81af)) == 0",
+            },
+        },
+        "suppression_control": {
+            "mutation": "retain the old g8236 word only at writer 0x02151e",
+            "baseline_route_at_2238": 4, "mutant_route_at_2238": 2,
+            "mutant_route_at_2300": 2, "mutant_player_state_at_2300": 2048,
+            "fixed_frame_substitute": False,
+        },
+    }
+
     controls = route["targeted_counterfactuals"]
     counterfactuals = {name: {
         "status": controls[name]["status"],
@@ -243,6 +422,7 @@ def build_report() -> dict[str, object]:
         },
         "route_entry": {"frame": 1972, "state": 2,
                         "classification": "SOURCE_CLOSED_STABLE_ENTRY"},
+        "first_entry_body": first_entry_body,
         "route_state_edges": edge_rows,
         "route_writer_transactions": writer_transactions,
         "enemy_spawns": enemy_spawns,
@@ -310,6 +490,27 @@ def validate(report: dict[str, object]) -> None:
     require(len(report["enemy_spawns"]) == 56 and
             all(item["writer_pc"][2:] in SPAWN_GUARDS and item["transition_guard"]
                 for item in report["enemy_spawns"]), "unclosed encounter spawn")
+    first_entry = report["first_entry_body"]
+    require(first_entry["classification"] == "SOURCE_CLOSED" and
+            first_entry["capture_identity"]["byte_identical"] is True and
+            len(first_entry["spawn_table"]["rows"]) == 10 and
+            first_entry["spawn_table"]["sha256"] ==
+            "09597bb7aba137d087df015819b54af0e1de66ce68d5e69518843f58b42eb17b" and
+            first_entry["spawn_table"]["rows"][0]["slot"] == "0xffa3c0" and
+            first_entry["spawn_table"]["rows"][0]["x"] == 656 and
+            first_entry["spawn_table"]["rows"][9]["slot"] == "0xff9d00" and
+            first_entry["player_entry_script"]["decoder_sha256"] ==
+            "34a876e11fbd2cb7a012f75a8975e825ce561388d07c43e6d633b63a76c2cb99" and
+            first_entry["player_entry_script"]["source_program"]["sha256"] ==
+            "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba" and
+            first_entry["player_entry_script"]["timer_semantics"]["loads"] ==
+            [60, 60, 44] and
+            first_entry["player_entry_script"]["timer_semantics"]["scheduler_decrements"] == 164 and
+            first_entry["player_entry_script"]["gate_writer_pc"] == "0x02151e" and
+            first_entry["suppression_control"]["fixed_frame_substitute"] is False and
+            first_entry["suppression_control"]["baseline_route_at_2238"] == 4 and
+            first_entry["suppression_control"]["mutant_route_at_2300"] == 2,
+            "entry executable boundary is not source closed")
     require(report["negative_controls"] == {
         "presentation_signature_can_advance_gameplay": False,
         "fixed_frame_can_spawn_or_clear": False,
@@ -337,6 +538,18 @@ def mutation_self_test(report: dict[str, object]) -> None:
     missing = copy.deepcopy(report)
     missing["segment_bindings"] = missing["segment_bindings"][:-1]
     mutations.append(missing)
+    wrong_row = copy.deepcopy(report)
+    wrong_row["first_entry_body"]["spawn_table"]["rows"][0]["x"] += 1
+    mutations.append(wrong_row)
+    wrong_gate = copy.deepcopy(report)
+    wrong_gate["first_entry_body"]["player_entry_script"]["gate_writer_pc"] = "0x0abdd2"
+    mutations.append(wrong_gate)
+    wrong_timer = copy.deepcopy(report)
+    wrong_timer["first_entry_body"]["player_entry_script"]["timer_semantics"]["loads"][0] = 59
+    mutations.append(wrong_timer)
+    fixed_frame = copy.deepcopy(report)
+    fixed_frame["first_entry_body"]["suppression_control"]["fixed_frame_substitute"] = True
+    mutations.append(fixed_frame)
     for mutant in mutations:
         try:
             validate(mutant)

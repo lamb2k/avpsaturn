@@ -71,8 +71,13 @@ None. SPEC-02 acceptance is technical and cannot infer USER-10 acceptance.
 
 ## Accepted result
 
-- `data/spec02_round1_executable_contract.json` binds 26 implementation fields
+- `data/spec02_round1_executable_contract.json` binds 27 implementation fields
   across all ten required authority families with zero required UNKNOWN or
   adapted fields. `data/spec02_round1_generated_fixtures.json` contains only
   accepted Oracle-derived content and accepted Port V2 interface contracts.
   Deterministic regeneration and ten mutation controls pass in Fast and Oracle.
+  A corrective entry contract now includes the exact ten-row source table,
+  post-init actor records, 26-byte entry-animation command program, timer loads
+  `60, 60, 44`, all 164 scheduler decrements, signed terminator, selected gate
+  bit, exact route consumer, two byte-identical captures, and a discriminating
+  writer-only suppression. No fixed frame or presentation label owns the edge.

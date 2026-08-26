@@ -166,6 +166,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/auxiliary/archetypes", "current class/state owns lifecycle, presentation, collision, player effect, and RNG consumption",
           ["actor.class:s8", "actor.state:u16", "player.position:s16"], ["actor.state:u16", "actor.active:u8", "player.health:s16", "player.resource:s16"],
           "/archetypes/0/counterfactual", "corrected class/type suppression removes actors and changes the causal state"),
+        f("route.first_entry_body", "encounters-waves-scripted-triggers", "entry_spawn_and_guard_table", True,
+          "route", "/first_entry_body", "0x028874 ten-row spawn table and 0x0214dc player entry-script decoder",
+          "/authority_data/route/first_entry_body", "active class-0x01/type-32 controller dispatches the ten-row table; the signed player animation terminator clears the selected g8236 bit before the exact route guard advances state",
+          ["controller.state:u16", "pool.free_count:u8", "player.script_cursor:u32", "g8236:u8", "g81af:u8"], ["enemy.record[10]", "pool.free_count:u8", "player.state:u16", "route.state:s16"],
+          "/first_entry_body/suppression_control", "suppressing only writer 0x02151e retains entry state and prevents route state 4"),
         f("route.segments_edges", "encounters-waves-scripted-triggers", "route_table", True,
           "route", "/segment_bindings", "94 source segments and 14 exact route-state writer edges",
           "/authority_data/route", "source route/controller guards, never presentation labels, frames, or actor count alone, own transitions",
@@ -259,7 +264,7 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                           "player_side_contract": copy.deepcopy(source["auxiliary"]["player_side_contract"]),
                           "navigation_body_geometry_contract": copy.deepcopy(source["auxiliary"]["navigation_body_geometry_contract"])},
             "route": {key: copy.deepcopy(source["route"][key]) for key in
-                      ("route_entry", "data_contract", "segment_bindings",
+                      ("route_entry", "first_entry_body", "data_contract", "segment_bindings",
                        "route_state_edges", "enemy_spawns")},
             "boss": {key: copy.deepcopy(source["boss"][key]) for key in
                      ("boss_actor_contract", "controller_contract", "boss_room_spawns",

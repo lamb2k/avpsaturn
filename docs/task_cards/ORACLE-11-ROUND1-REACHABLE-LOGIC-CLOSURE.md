@@ -200,7 +200,16 @@ card only for a genuinely independent body or source-evidence hard stop.
   contains zero orphan route edges, route writers, or enemy spawns and admits
   no fixed-frame or actor-count clear substitute. Boss phase/clear
   orchestration, stage clear/Round 2 handoff, and global RNG consumption remain
-  separate active ORACLE-11 families.
+  separate active ORACLE-11 families. A later executable-contract audit found
+  that the original entry rows named their writers but did not carry the
+  implementation values or the producer of the first route gate. The bounded
+  correction now adds two byte-identical entry captures, the exact 80-byte
+  ten-row table at `0x128bd4`, its class-`0x01` type-32 controller, post-init
+  actor records, and the player animation-script terminator at `0x128fc2`.
+  Suppressing only gate writer `0x02151e` retains both gate bits, player entry
+  state `0x0800`, and route state 2 through frame 2300; the baseline reaches
+  route state 4. This closes the executable edge without frame or presentation
+  ownership.
 - `round1-boss-phase-clear-orchestration`: `SOURCE_CLOSED`. Two independent
   completions are byte-identical and bind the already closed class-`0x06`
   actor at `0xffa3c0` to the class-`0x02`, type-32 controller at `0xffd180`,
@@ -249,6 +258,13 @@ card only for a genuinely independent body or source-evidence hard stop.
   reports zero required `OBSERVED`, `PARTIAL`, or `UNKNOWN`; zero unmapped
   actor pairs or route edges; zero unowned spawn, damage, audio, load, release,
   or RNG events; and zero orphan authoritative writers. SPEC-02 is eligible.
+- `oracle11-first-entry-executable-correction`: `SOURCE_CLOSED`. Two refreshed
+  byte-identical entry captures bind the 26-byte source animation program at
+  `0x128faa..0x128fc4`, its exact command order, the three source timer loads
+  `60, 60, 44`, and all 164 `player+0xc8` scheduler decrements at `0x02177a`.
+  The timer-completion writers clear the timed subhandler before the signed
+  terminator reaches the selected `g8236` bit writer. Video frame number is not
+  an input, and suppressing only `0x02151e` still holds route state 2.
 
 ## Owned paths
 

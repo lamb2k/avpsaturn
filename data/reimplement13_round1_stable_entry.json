@@ -3,7 +3,7 @@
   "checkpoint": "stable-round1-entry-native-substrate",
   "status": "PASS_RENDERED_ENTRY_PRESENTATION",
   "implementation_source": {
-    "spec02_sha256": "6cb1208a190b4977f2f73eb48b181fda08063266e45f1d8efcbc47b7fdc264a4",
+    "spec02_sha256": "3cfa5410fee3942a9bd6bb515f10aefdd293ee4cd628fb503d9685bce4c7c3f8",
     "raw_trace_or_disassembly_consumed": false,
     "authored_fallback_count": 0
   },
@@ -31,8 +31,9 @@
     "real_mutations_rejected": 4,
     "target_live_encounter": "PASS_BUILD_ONLY",
     "target_live_encounter_bench": "PASS_BUILD_ONLY",
+    "spec02_entry_correction_revalidated": "PASS",
     "paired_emulator_regression": "PASS",
-    "paired_emulator_iso_sha256": "82ed3588d379191d5b7429f460b7836bff5b6f40b86bfc9b84b5cfb600f0e1ed",
+    "paired_emulator_iso_sha256": "80bac41cfbd9de702ead6d816c223d20fef68a7818e50804923145d7e65f18a8",
     "target_readback_binding": "PASS",
     "round1_title_objects_loaded": 2,
     "round1_title_vdp1_commands_peak": 2,

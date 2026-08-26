@@ -226,10 +226,14 @@ after stable Round 2 entry and are `NOT_REQUIRED_FOR_ROUND1`. The matrix now has
 zero required `OBSERVED`, `PARTIAL`, or `UNKNOWN`, zero unmapped actor pairs or
 route edges, zero unowned events, and zero orphan authoritative writers.
 ORACLE-11 is accepted and its zero-gap gate remains locked.
-SPEC-02 is now accepted. Its 26 required field contracts cover all ten
+SPEC-02 is now accepted. Its 27 required field contracts cover all ten
 authority families with zero required UNKNOWN or adapted fields, and its
 generated fixtures contain the source-derived Round 1 content plus accepted
-Port V2 interface identities. REIMPLEMENT-13 has implemented and validated the
+Port V2 interface identities. The corrected entry fixture binds the exact
+ten-row table, 26-byte player animation program, three timer loads, 164 source
+scheduler decrements, and animation-terminator gate; suppressing only its source
+writer holds route state 2, so neither a frame nor presentation can own the
+first edge. REIMPLEMENT-13 has implemented and validated the
 native stable-entry state and exact fixed actor pools. The direct diagnostic
 boot and target readback now expose the exact state with paired-emulator
 agreement and zero fallback. The first source-derived Round 1 title view now

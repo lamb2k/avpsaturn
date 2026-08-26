@@ -28,6 +28,10 @@ for label,change in (
     ('actor-count',lambda x:x['coverage'].__setitem__('actor_count_clear_substitutes',1)),
     ('presentation',lambda x:x['negative_controls'].__setitem__('presentation_signature_can_advance_gameplay',True)),
     ('spec',lambda x:x['protected_boundaries'].__setitem__('spec02_active',True)),
+    ('entry-row',lambda x:x['first_entry_body']['spawn_table']['rows'][0].__setitem__('x',657)),
+    ('entry-gate',lambda x:x['first_entry_body']['player_entry_script'].__setitem__('gate_writer_pc','0x0abdd2')),
+    ('entry-timer',lambda x:x['first_entry_body']['player_entry_script']['timer_semantics']['loads'].__setitem__(0,59)),
+    ('entry-fixed-frame',lambda x:x['first_entry_body']['suppression_control'].__setitem__('fixed_frame_substitute',True)),
 ):
     mutant=copy.deepcopy(report);change(mutant);reject(mutant,label)
-print('ORACLE-11 encounter/route authority tests: PASS (9 mutations rejected)')
+print('ORACLE-11 encounter/route authority tests: PASS (13 mutations rejected)')

@@ -20,13 +20,16 @@ ORACLE-11 is accepted. All ten authority families are `SOURCE_CLOSED` or
 narrowly `NOT_REQUIRED_FOR_ROUND1`, including Predator Warrior and its 38
 player-audio edges, navigation, actors, route, boss, handoff, global audio, and RNG.
 Preserve `0x0abdd2` as packed-BCD score authority, never audio authority.
-
 All 1,517 baseline writer PCs are reconciled. The sole 94 x 10 matrix reports
 zero required gaps, unmapped actor pairs/route edges, unowned events, or orphan
 authoritative writers.
 
-SPEC-02 is accepted with 26 required field contracts, zero required UNKNOWN or
-adapted fields, deterministic fixtures, and ten passing mutation controls. The
+SPEC-02 is accepted with 27 required field contracts, zero required UNKNOWN or
+adapted fields, deterministic fixtures, and ten passing mutation controls. Its
+corrective first-entry body binds the exact ten-row table, controller identity,
+26-byte player entry-animation program, timer loads `60, 60, 44`, 164 source
+scheduler decrements, signed terminator, selected gate bit, and route consumer;
+exact-writer suppression holds state 2 and rejects fixed-frame ownership. The
 first REIMPLEMENT-13 body now provides the SPEC-02-bound stable-entry state and
 exact fixed actor pools in portable C. Direct diagnostic boot and target
 readback pass host, nine mutations/suppressions, Target, paired Emulator, Fast,

@@ -67,8 +67,8 @@
         "data/oracle11_round1_encounter_route_authority.json",
         "data/oracle10_round1_route.json"
       ],
-      "counterfactual": "two byte-identical completing captures bind all 94 route segments, 14 global route-state edges, 609 route-writer transactions and 56 Round 1 enemy spawns; completing and non-completing offense, class removal and route perturbations discriminate the source guards",
-      "exact_next_experiment": "Retain the closed encounter/wave/scripted-trigger and 94-segment route map while boss phase/clear orchestration is source-closed.",
+      "counterfactual": "two byte-identical completing captures bind all 94 route segments, 14 global route-state edges, 609 route-writer transactions and 56 Round 1 enemy spawns; completing and non-completing offense, class removal and route perturbations discriminate the source guards. A corrective byte-identical entry capture also binds the ten-row source table and player animation terminator; suppressing only writer 0x02151e holds route state 2 through frame 2300",
+      "exact_next_experiment": "Consume the corrected first-entry body in REIMPLEMENT-13, preserving the closed 94-segment route map and rejecting frame or presentation ownership.",
       "id": "encounters-waves-scripted-triggers",
       "status": "SOURCE_CLOSED"
     },

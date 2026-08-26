@@ -257,10 +257,14 @@ def main():
           'two byte-identical completing captures bind all 94 route segments, '
           '14 global route-state edges, 609 route-writer transactions and 56 '
           'Round 1 enemy spawns; completing and non-completing offense, class '
-          'removal and route perturbations discriminate the source guards')
+          'removal and route perturbations discriminate the source guards. A '
+          'corrective byte-identical entry capture also binds the ten-row '
+          'source table and player animation terminator; suppressing only '
+          'writer 0x02151e holds route state 2 through frame 2300')
         body['exact_next_experiment']=(
-          'Retain the closed encounter/wave/scripted-trigger and 94-segment '
-          'route map while boss phase/clear orchestration is source-closed.')
+          'Consume the corrected first-entry body in REIMPLEMENT-13, preserving '
+          'the closed 94-segment route map and rejecting frame or presentation '
+          'ownership.')
     if BOSS.exists():
         boss=json.loads(BOSS.read_text(encoding='ascii'))
         body=next(item for item in coverage['bodies'] if item['id']=='round1-boss')
