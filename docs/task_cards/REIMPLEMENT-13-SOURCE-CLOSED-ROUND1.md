@@ -115,8 +115,17 @@ and neutral return with the last directional facing preserved. A discovered
 normal-profile duplicate CDDA start at native route state 4 is corrected by
 preserving the already-active Track 2 owner. Twenty-three host mutations,
 21 Target suppressions, normal and paired Emulator, Fast, Oracle, and direct
-frames 180/182/472 inspection pass. Implement the dependency-safe neutral
-Button3 jump, airborne movement, landing, and return-to-control fixture next.
+frames 180/182/472 inspection pass. The neutral Button3 jump is blocked because
+SPEC-02 omits the exact numeric signed 16.16 vectors, input/facing selector
+mapping, and branch order behind table `0x0243d2`. Commit `882b15b` implements
+the dependency-safe Button2 melee body: exact source edge, selectors 1..4,
+strike records/assemblies/collision selectors, 30-tick follow-up, held-edge
+rejection, and HIT/KO interruption preservation. Thirty-two host mutations,
+26 Target suppressions, paired Emulator, and direct selector-2/4 inspection
+pass with continuous staff ownership and zero regression. Preserve all fixture
+blockers and inspect the Button1 weapon/projectile/resource fixture next;
+implement only fields sufficient for a source translation and do not guess
+omitted motion, presentation, or lifecycle values.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json`.
 

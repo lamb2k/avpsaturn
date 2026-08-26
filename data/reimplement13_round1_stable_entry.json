@@ -1,8 +1,8 @@
 {
   "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
-  "checkpoint": "native-round1-player-neutral-stop-transition",
-  "status": "PASS_ENTRY_PLAYER_SCHEDULER_PRESENTATION_STATE_CONTEXT_GLOBAL_BOUNDS_AND_NEUTRAL_STOP",
-  "implementation_commit": "888732def72d987fda2c420bb4608facfffa64a9",
+  "checkpoint": "native-round1-player-route-melee",
+  "status": "PASS_ENTRY_PLAYER_SCHEDULER_PRESENTATION_STATE_CONTEXT_GLOBAL_BOUNDS_NEUTRAL_STOP_AND_MELEE",
+  "implementation_commit": "882b15b52362383165b43ee81441086a316e66ee",
   "diagnostic_correction_commit": "4fbc919235f61d962daf342efbfb4cd8f743ab60",
   "implementation_source": {
     "spec02_sha256": "3cfa5410fee3942a9bd6bb515f10aefdd293ee4cd628fb503d9685bce4c7c3f8",
@@ -41,7 +41,7 @@
     },
     "current_input_player": {
       "evidence_frame": 470,
-      "x": 1072,
+      "x": 1049,
       "z": 320,
       "facing": 1,
       "source_action": 514,
@@ -56,11 +56,35 @@
       "stop_ticks": 10,
       "direction_resolver": [255, 2, 6, 255, 4, 3, 5, 255, 0, 1, 7, 255, 255, 255, 255, 255],
       "evidence_frame": 470,
-      "entries": 1,
+      "entries": 2,
       "completions": 1,
       "motion_suppressions": 10,
       "facing_after_release": 1,
-      "attack_hit_ko_interruptions_preserved": true
+      "attack_hit_ko_interruptions_preserved": true,
+      "second_stop_interrupted_by_melee_edge": true
+    },
+    "player_route_melee": {
+      "input_guard": "new Button2 edge",
+      "common_action": 1536,
+      "contextual_action": 5120,
+      "source_dispatch_entry": "0x022588",
+      "followup_window_ticks": 30,
+      "selectors": [1, 2, 3, 4],
+      "selector_steps": [0, 1, 2, 3],
+      "held_button_does_not_chain": true,
+      "rng_consumption": "none",
+      "evidence_frame": 470,
+      "entries": 4,
+      "completions": 4,
+      "selector_mask": 15,
+      "presentation_mask": 15,
+      "interruptions": 0,
+      "strike_presentations": [
+        {"selector": 1, "animation_record": "0x1600f8", "assembly": "0x162a04", "hurt_selector": 8, "attack_selector": 1},
+        {"selector": 2, "animation_record": "0x16014c", "assembly": "0x162a82", "hurt_selector": 8, "attack_selector": 2},
+        {"selector": 3, "animation_record": "0x1601c0", "assembly": "0x1614a4", "hurt_selector": 8, "attack_selector": 3},
+        {"selector": 4, "animation_record": "0x160234", "assembly": "0x162b26", "hurt_selector": 19, "attack_selector": 4}
+      ]
     },
     "fixed_pool_scheduler": {
       "required_pool_order": [12, 16, 20, 24],
@@ -119,14 +143,15 @@
   },
   "checks": {
     "host_differential": "PASS",
-    "real_mutations_rejected": 23,
-    "target_wiring_suppressions_rejected": 21,
+    "real_mutations_rejected": 32,
+    "target_wiring_suppressions_rejected": 26,
     "target_live_encounter": "PASS",
     "target_live_encounter_bench": "PASS",
     "spec02_entry_correction_revalidated": "PASS",
     "paired_emulator_regression": "PASS",
-    "paired_emulator_iso_sha256": "172c73ce2982a36160a43b279e8f04fd38033a3a0f42b79c0cfaf765e11fba0f",
-    "paired_native_player_ledgers": "PASS: 471 byte-identical synchronized samples; frame 470 is x=1072/z=320/facing=1/source_action=514/controller_updates=301; neutral stop is 1 entry/1 completion/10 suppressed-motion ticks",
+    "paired_emulator_iso_sha256": "67776e06863149c131f30df432e032fff656421e6c03b17c6201cfd233616c18",
+    "paired_native_player_ledgers": "PASS: 471 byte-identical synchronized samples; frame 470 is x=1049/z=320/facing=1/source_action=514/controller_updates=301; neutral stop is 2 entries/1 completion/10 suppressed-motion ticks because the second stop is interrupted by a melee edge",
+    "paired_native_melee_ledgers": "PASS: four source-owned Button2 edges complete selectors 1..4 in order with exact presentation mask 15; held Button2 does not chain, no RNG is consumed, and no fallback or unsupported action fires",
     "paired_native_scheduler_ledgers": "PASS: frame 470 has 301 scheduler frames, 3010 ordered visits, 10 active type-12/class-0x1f actors, and order hash 0x836e161c",
     "paired_native_presentation_ledgers": "PASS: frame 470 has 3010 class-0x1f handler dispatches and 3010 exact animation-to-assembly/hurt/attack bindings",
     "paired_native_state_context_ledgers": "PASS: frame 470 has 3010 exact class-0x1f current-state/substate bindings to source dispatch entry 0x060532",
@@ -136,7 +161,9 @@
     "round1_title_vdp1_commands_peak": 2,
     "rendered_regression_inspection": "PASS: route-owned title clear, coherent post-unlock street, responsive player movement and camera, intact VDP2 planes/HUD/palette/priority",
     "fast": "PASS",
-    "oracle": "PASS"
+    "oracle": "PASS",
+    "target_bss_end": "0x060bff40",
+    "target_bss_headroom_bytes": 192
   },
   "rendered_boundary": {
     "new_round1_runtime_presented": true,
@@ -203,6 +230,15 @@
       "normal_interactive_sha256": "37b7a61c469c616dd5579c78d57fde21f59bb557dc6262a1705df99c793e2986",
       "inspection": "PASS: right-facing Predator continuity, reviewed staff/attack presentation, class-0x1F actor coherence, camera, both VDP2 planes, HUD, palette, and priority remain intact before and after unlock"
     },
+    "player_route_melee_visuals": {
+      "selector2_frame": 258,
+      "selector2_path": "build/feedback/REIMPLEMENT-13-R1-MELEE/target-frame-258-selector2.png",
+      "selector2_sha256": "1de1ec3f231abb632ef9755e753d77107ec93dbc3476815b0ee59f2e6f71774e",
+      "selector4_frame": 310,
+      "selector4_path": "build/feedback/REIMPLEMENT-13-R1-MELEE/target-frame-310-selector4.png",
+      "selector4_sha256": "887ce52b59712afedbf0834401a541eb2101081c12672dc85c75aef67b0c01de",
+      "inspection": "PASS: selectors 2 and 4 preserve the reviewed attack assembly sequence, continuous staff ownership, player/alien contact coherence, camera, both VDP2 planes, HUD, palette, and priority"
+    },
     "objective_discrepancy": {
       "observed": "The normal interactive profile stopped before actor rendering when native entry changed route state 2 to 4.",
       "cause": "The retained encounter reset to frame zero and requested a duplicate CDDA START while Track 2 ownership was already active.",
@@ -213,7 +249,9 @@
     "unblock_condition": "A corrective SPEC-02 fixture derived from accepted Oracle evidence must bind each required initial transition guard, reads, writes, timer semantics, movement arithmetic, and RNG order without fixed-frame authority.",
     "navigation_blocker": "The accepted SPEC-02 fixture provides the exact global-bound formula but gives the Coffee Shop obstacle only a source block identity/minimum-penetration label without source box geometry or per-axis resolution arithmetic; terrain records provide bytes and writer identities without the record interpreter; camera runs provide observed endpoints and writer identity without the target-update arithmetic. Implementing any of those bodies now would require raw-disassembly use or a plausible guess.",
     "navigation_unblock_condition": "A corrective SPEC-02 fixture derived from accepted Oracle evidence must bind Coffee Shop player/obstacle box geometry and minimum-penetration branch arithmetic, the six terrain-record field semantics and interpreter transitions, and camera target/position update arithmetic and route guards.",
-    "exact_next_body": "Implement the dependency-safe Predator Warrior neutral Button3 jump through source airborne movement, landing, and return to control from the existing SPEC-02 normal-jump fixture, preserving the reviewed attack sequence and both recorded blockers."
+    "jump_blocker": "The accepted SPEC-02 normal-jump fixture identifies vector table 0x0243d2 and route witnesses but omits the numeric vector entries, initial signed 16.16 velocity/acceleration values, input/facing selector mapping, and branch order required for a native translation.",
+    "jump_unblock_condition": "A corrective accepted SPEC-02 fixture must provide the exact numeric source-vector entries, selector mapping, branch order, and signed fixed-point initialization without requiring raw disassembly or a fitted witness.",
+    "exact_next_body": "Preserve the class-0x1F, navigation, and jump fixture blockers; inspect and implement only the dependency-safe source-complete portion of the Predator Warrior Button1 weapon/projectile/resource fixture without inventing projectile motion, presentation, or lifecycle fields."
   },
   "preserved": {
     "user09": "CHANGES_REQUESTED",

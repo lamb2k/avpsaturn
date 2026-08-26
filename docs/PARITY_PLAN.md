@@ -244,7 +244,7 @@ scheduler decrements, signed terminator, selected gate clear, route state
 controller-moved street frames with intact camera, both VDP2 planes, HUD,
 palette, and priority. The accepted Predator Warrior controller now consumes
 current Saturn input after route state 4 and preserves neutral facing. Paired
-471-frame ledgers bind native frame 470 to x 1072, z 320, facing right, neutral
+471-frame ledgers bind native frame 470 to x 1049, z 320, facing right, neutral
 source action, and 301 controller updates. The SPEC-02-bound scheduler now
 visits active records in pool order 12/16/20/24 and ascending source-slot order;
 paired frame 470 has 3010 visits, ten active class-0x1F actors, and hash
@@ -264,9 +264,16 @@ continue with coherent actors, audio ownership, camera, HUD, and both planes.
 Coffee Shop minimum
 penetration, the terrain-record interpreter, and camera target arithmetic are
 separately blocked because the accepted SPEC-02 fixture omits their required
-geometry and update rules. The dependency-safe next vertical body is the
-Predator Warrior neutral Button3 jump through source air movement, landing,
-and return to control. Enemy movement, damage, and dynamic spawn remain
+geometry and update rules. The neutral Button3 jump is blocked independently:
+SPEC-02 names vector table `0x0243d2` and route witnesses but omits the exact
+numeric signed 16.16 vectors, selector mapping, and branch order. Commit
+`882b15b` implements the source-owned Button2 melee sequence with selectors
+1..4, exact strike presentations, the 30-tick follow-up window, held-edge
+rejection, and interruption preservation. Thirty-two host mutations, 26 Target
+suppressions, paired Emulator, and direct selector-2/4 inspection pass. The
+next vertical body is the source-complete portion of Predator Warrior Button1
+weapon/projectile/resource authority; omitted projectile fields must remain
+blocked rather than guessed. Enemy movement, damage, and dynamic spawn remain
 pending; frame 2328 is not gameplay authority.
 
 | Sequence | Card or card family | Result |

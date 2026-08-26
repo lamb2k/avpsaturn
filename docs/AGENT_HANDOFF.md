@@ -28,23 +28,20 @@ corrective first-entry body binds the exact ten-row table, controller identity,
 26-byte player entry-animation program, timer loads `60, 60, 44`, 164 source
 scheduler decrements, signed terminator, selected gate bit, and route consumer;
 exact-writer suppression holds state 2 and rejects fixed-frame ownership.
-REIMPLEMENT-13 owns the source-closed first entry in portable C: exact pools,
-ten LIFO spawns, entry steps, `60, 60, 44` dwells, 164 decrements, signed
-terminator, gate clear, route `2 -> 4`, control enable, current input, and neutral
-facing. The fixed-pool scheduler visits 12/16/20/24 in ascending-slot order;
-paired frame 470 has 3010 visits and hash `0x836e161c`. Commit `6c00cbb` binds
-all 190 exact class-0x1F animation records to assembly, hurt selector, and attack
-selector with zero orphans and 3010 paired target bindings. Commit `cde43c5`
-binds source entry `0x060532` and all 59 route-reachable contexts; nineteen host
-mutations, sixteen target suppressions, paired Emulator, Fast, Oracle, and direct
-frame-191 inspection pass. Initial transition execution remains blocked because
-SPEC-02 omits predicates, timers, writes, movement, and RNG order. Commit
-`45a1aaf` implements the exact route-4 global rectangle for bound x/z `720/256`:
-x `752..1072`, z `272..400`. Commit `888732d` adds the exact walk/10-tick
-stop/cleanup/neutral transition, preserves right-facing release, and corrects
-the route-4 duplicate-CDDA-start adapter bug. Twenty-three host mutations,
-21 Target suppressions, normal and paired Emulator, Fast, Oracle, and direct
-frames 180/182/472 inspection pass. Coffee Shop minimum-penetration, terrain-record interpretation, and camera target arithmetic
-are blocked because their SPEC-02 fixtures omit the implementation-required
-geometry/arithmetic. Preserve both blockers; implement the SPEC-02 neutral Button3 jump, airborne movement, landing, and return-to-control body next.
+REIMPLEMENT-13 owns exact first-entry pools/spawns/script/timers, signed
+terminator, gate clear, route `2 -> 4`, control, and neutral facing. Its fixed
+scheduler visits 12/16/20/24 ascending slots; frame 470 has 3010 visits and hash
+`0x836e161c`. Commits `6c00cbb`/`cde43c5` bind 190 class-0x1F presentations and
+all 59 reachable contexts. Initial transitions remain blocked because SPEC-02
+omits predicates, timers, writes, movement, and RNG order. Commit `45a1aaf`
+implements route-4 bounds x `752..1072`, z `272..400`; commit `888732d` adds
+walk/10-tick-stop/cleanup/neutral with facing continuity and fixes duplicate
+Track-2 start. Coffee Shop geometry, terrain interpretation, and camera arithmetic
+remain fixture-blocked. Button3 jump is also blocked: table `0x0243d2` lacks
+numeric signed 16.16 vectors, selector mapping, and branch order. Commit
+`882b15b` implements Button2 melee selectors 1..4, exact strike bindings,
+30-tick follow-up, held-edge rejection, and interruption preservation. Thirty-two
+host mutations, 26 Target suppressions, paired Emulator, and selector-2/4 visual
+inspection pass. Preserve all blockers; inspect only the source-complete portion
+of Button1 weapon/projectile/resource next without guessing omitted fields.
 USER-09 remains changes-requested, SALVAGE-08 inactive, and Saturn `UNRUN`.
