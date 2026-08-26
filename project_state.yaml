@@ -509,6 +509,7 @@ repair11_live_background_presentation:
   physical_saturn: UNRUN
 source_closure:
   status: ACTIVE
+  active_checkpoint: ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE
   prototype_harness_retained: true
   preserved_infrastructure: [rendering, HUD, camera, audio, collision, readback, emulator, visual-QA]
   active_card: ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE

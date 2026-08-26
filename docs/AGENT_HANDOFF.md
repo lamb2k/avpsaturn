@@ -31,15 +31,24 @@ the source class-`0x0e` temporary-resource grant, interaction completion and
 interruption, packed-BCD score award, and player-to-route load/release edges
 are now also closed. Every route-observed player phase is mapped. Static and
 dynamic evidence corrected `0x0abdd2` from a former audio label to score
-authority; the real player-to-global gameplay-audio trigger boundary keeps the
-player family `PARTIAL`. The latest evidence is in
-`data/oracle11_predator_route_ownership.json`
-and the sole route-segment x authority-family matrix plus SPEC-02 zero-gap gate
-are in `data/round1_system_coverage.yaml`.
+authority. Predator Warrior is `SOURCE_CLOSED`, including all 38
+player-origin audio trigger edges across 47 state/action/substate contexts.
+The accepted player evidence is retained unchanged in
+`data/oracle11_predator_player_audio.json` and
+`data/oracle11_predator_warrior_authority.json`.
 
-Continue the same card and Goal by identifying the real main-to-QSound command
-boundary and binding every player-origin gameplay-audio trigger, retaining the
-closed pickup/resource/score/load edges. Do not activate SPEC-02
+Global gameplay-audio/load/release remains `PARTIAL`. The main-CPU queue drain,
+audio-CPU 16-byte shared-command ingress, and guarded QSound write primitive
+are source closed in `data/oracle11_global_audio_load_release.json`. The active
+experiment is the intervening audio-CPU command dispatcher/handler/table
+boundary, followed by the 175 non-player trigger provenance groups and four
+route load/release boundaries. Individual low/high/register writes are not
+logical sound events; group them by their owning command/handler transaction.
+The sole route-segment x authority-family matrix and SPEC-02 zero-gap gate
+remain in `data/round1_system_coverage.yaml`.
+
+Continue the same ORACLE-11 card and Goal from
+`cde8cea67fe4fed69f6511d0df30a221a4a72b93`. Do not activate SPEC-02
 until every completion-route authority is closed or narrowly adapted with
 mutation controls. Do not write production runtime, infer USER-09 approval,
 activate SALVAGE-08 before explicit USER-10 acceptance, or advance physical
