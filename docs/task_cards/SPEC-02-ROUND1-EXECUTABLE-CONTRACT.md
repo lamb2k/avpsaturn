@@ -2,7 +2,7 @@
 
 TASK: SPEC-02-ROUND1-EXECUTABLE-CONTRACT
 KIND: SPEC
-STATUS: BLOCKED
+STATUS: READY
 CHECKPOINT: spec-round1-executable-contract
 BASE: project_state.production_head
 BRANCH: project_state.production_branch

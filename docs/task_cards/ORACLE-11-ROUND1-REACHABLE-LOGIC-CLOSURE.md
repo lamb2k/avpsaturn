@@ -2,7 +2,7 @@
 
 TASK: ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE
 KIND: ORACLE
-STATUS: READY
+STATUS: ACCEPTED
 CHECKPOINT: oracle-round1-reachable-logic-closure
 BASE: project_state.production_head
 BRANCH: project_state.production_branch
@@ -237,6 +237,18 @@ card only for a genuinely independent body or source-evidence hard stop.
   seeds; freezing the shared seed at `0x8def` prevents completion. Evidence is
   in `data/oracle11_round1_rng.json`. Only exact authoritative-writer ownership
   reconciliation remains before the zero-gap gate.
+- `round1-authoritative-writer-reconciliation`: `SOURCE_CLOSED`. The complete
+  1,517-PC baseline writer universe is identity-bound, only explicit writer
+  lists from accepted authority reports are subtracted, and each of the 374
+  residual PCs is individually assigned to exactly one accepted authority,
+  source window, observed write domain, and evidence artifact. Of those, 262
+  are required `SOURCE_CLOSED` writers and 112 first occur after stable Round 2
+  entry and are narrowly `NOT_REQUIRED_FOR_ROUND1`. There are zero orphan,
+  duplicate, or unproven owners in
+  `data/oracle11_round1_writer_reconciliation.json`. The sole 94 x 10 matrix
+  reports zero required `OBSERVED`, `PARTIAL`, or `UNKNOWN`; zero unmapped
+  actor pairs or route edges; zero unowned spawn, damage, audio, load, release,
+  or RNG events; and zero orphan authoritative writers. SPEC-02 is eligible.
 
 ## Owned paths
 

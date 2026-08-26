@@ -135,10 +135,13 @@ def validate(route: dict, coverage: dict) -> None:
             "coverage ledger is not accepted")
     require(set(coverage["classification_vocabulary"]) == CLASSIFICATIONS,
             "coverage classification vocabulary drifted")
+    spec02_eligible = coverage.get("spec02_closure_gate", {}).get(
+        "spec02_eligible", False)
+    expected_next = ("SPEC-02-ROUND1-EXECUTABLE-CONTRACT" if spec02_eligible
+                     else "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE")
     require(coverage["pending_oracle10_controls"] == [] and
-            coverage["next_card"] ==
-            "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE",
-            "ORACLE-10 did not close or route to ORACLE-11")
+            coverage["next_card"] == expected_next,
+            "accepted census did not route through the current zero-gap gate")
     require(coverage["production_runtime_writes"] == 0 and
             coverage["frontend_active"] is False and
             coverage["user09_status"] == "CHANGES_REQUESTED" and
@@ -169,6 +172,9 @@ def main() -> None:
     mutations.append((mutated, copy.deepcopy(coverage)))
     mutated_coverage = copy.deepcopy(coverage)
     mutated_coverage["production_runtime_writes"] = 1
+    mutations.append((copy.deepcopy(route), mutated_coverage))
+    mutated_coverage = copy.deepcopy(coverage)
+    mutated_coverage["next_card"] = "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE"
     mutations.append((copy.deepcopy(route), mutated_coverage))
 
     for index, (mutated_route, mutated_coverage) in enumerate(mutations):

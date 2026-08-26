@@ -16,34 +16,23 @@
 
 ## Current task and next action
 
-Resume the AvP salvage Goal at `ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE`.
-Scheduler/lifecycle and Predator Warrior are `SOURCE_CLOSED`, including all 38
-player-origin audio edges. Air phases `0x0408/12/14` are
-`NOT_REQUIRED_FOR_ROUND1`; `0x0abdd2` is packed-BCD score authority, not audio.
+Resume the AvP salvage Goal at `SPEC-02-ROUND1-EXECUTABLE-CONTRACT`.
+ORACLE-11 is accepted. All ten authority families are `SOURCE_CLOSED` or
+narrowly `NOT_REQUIRED_FOR_ROUND1`, including scheduler/lifecycle, Predator
+Warrior and its 38 player-audio edges, navigation/camera, enemies, auxiliary
+actors, encounter/route, boss, handoff, global audio/load/release, and RNG.
+Preserve `0x0abdd2` as packed-BCD score authority, never audio authority.
 
-Global gameplay-audio/load/release is `SOURCE_CLOSED`. All 1,161 commands, 72
-identities, 175 non-player trigger groups, and four load/release boundaries are
-bound with zero family orphans. Individual QSound bus writes remain grouped by
-their owning command/handler transaction.
+The final reconciliation binds all 1,517 baseline writer PCs. Every one of the
+374 residual PCs has exactly one accepted authority and source window: 262 are
+required `SOURCE_CLOSED`; 112 first occur after stable Round 2 entry and are
+`NOT_REQUIRED_FOR_ROUND1`. The sole 94 x 10 matrix reports zero required
+`OBSERVED`, `PARTIAL`, or `UNKNOWN`, zero unmapped actor pairs or route edges,
+zero unowned events, and zero orphan authoritative writers.
 
-Navigation/terrain/obstacle/camera is `SOURCE_CLOSED` in
-`data/oracle11_round1_navigation.json`, including all 19 camera runs. Type-20
-damage/destruction and presentation remain assigned to their existing families.
-Type-12 enemies and all source-dispatched auxiliary pickup/projectile/hazard/
-destructible actors are `SOURCE_CLOSED` in `data/oracle11_round1_enemy_archetypes.json`
-and `data/oracle11_round1_auxiliary_authority.json`. The corrected auxiliary
-controls remove every distinct class/type; zero-removal captures are rejected.
-Encounter/wave/scripted-route authority is `SOURCE_CLOSED` in
-`data/oracle11_round1_encounter_route_authority.json`: two identical completions
-bind all 94 segments, 14 route edges, 609 writer transactions, 451 writer PCs,
-and 56 enemy spawns with zero orphans or fixed-frame/count substitutes. Round 1
-boss orchestration and the stage-clear/Round 2 handoff are `SOURCE_CLOSED`:
-three player clear phases and all four post-clear route edges reach stable
-Round 2 control without fixed-frame or presentation-label authority. Next
-reconcile the 374 remaining writer PCs; global RNG is `SOURCE_CLOSED` with
-2,280 ordered calls on 1,023 frames and zero recurrence or ownership gaps.
-The sole route-segment x authority-family matrix and SPEC-02 zero-gap gate
-remain in `data/round1_system_coverage.yaml`.
-Continue the same ORACLE-11 card and Goal; SPEC-02 requires zero-gap closure.
+Generate only `data/spec02_round1_executable_contract.json` and declared
+fixtures from accepted Oracle evidence hashes. Bind every required field to
+classification, source routine/table/frame, type/signedness, transition guard,
+reads/writes, and a real mutation control. Do not consume raw traces or guesses.
 Do not write runtime, infer USER-09 approval, activate SALVAGE-08 before
 accepted USER-10, or advance physical Saturn beyond `UNRUN`.

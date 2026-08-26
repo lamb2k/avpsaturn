@@ -16,6 +16,7 @@ ENCOUNTERS=ROOT/'data/oracle11_round1_encounter_route_authority.json'
 BOSS=ROOT/'data/oracle11_round1_boss_orchestration.json'
 HANDOFF=ROOT/'data/oracle11_round1_handoff.json'
 RNG=ROOT/'data/oracle11_round1_rng.json'
+RECONCILIATION=ROOT/'data/oracle11_round1_writer_reconciliation.json'
 FAMILIES=(
  'predator-warrior-player-authority','round1-navigation-terrain-camera',
  'actor-scheduler-allocation-lifecycle','round1-enemy-archetypes',
@@ -116,6 +117,12 @@ def build(coverage,route):
         rng_report=json.loads(RNG.read_text(encoding='ascii'))
     if rng_report and rng_report['status']=='SOURCE_CLOSED':
         writer_pcs.difference_update(rng_report['owned_authoritative_writer_pcs'])
+    reconciliation_report=None
+    if RECONCILIATION.exists():
+        reconciliation_report=json.loads(RECONCILIATION.read_text(encoding='ascii'))
+    if reconciliation_report and reconciliation_report['status']=='SOURCE_CLOSED':
+        writer_pcs.difference_update(
+            reconciliation_report['owned_authoritative_writer_pcs'])
     events={
       'spawn':len(unmapped_pairs),'damage':1 if counts['PARTIAL'] else 0,
       'audio':len(route['audio_change_frames']) if bodies[FAMILIES[8]]['status']!='SOURCE_CLOSED' else 0,
@@ -312,6 +319,8 @@ def main():
           'the sole 94 x 10 zero-gap gate.')
     coverage['route_segment_authority_matrix']=build(coverage,route)
     coverage['spec02_closure_gate']=coverage['route_segment_authority_matrix']['closure_gate']
+    if coverage['spec02_closure_gate']['spec02_eligible']:
+        coverage['next_card']='SPEC-02-ROUND1-EXECUTABLE-CONTRACT'
     COVERAGE.write_bytes((json.dumps(coverage,sort_keys=True,indent=2)+'\n').encode('ascii'))
     gate=coverage['spec02_closure_gate']
     print('Round 1 authority matrix: segments=%d cells=%d eligible=%s' % (

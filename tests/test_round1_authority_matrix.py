@@ -24,6 +24,6 @@ zeros=(gate['required_observed']==0 and gate['required_partial']==0 and
  gate['unmapped_route_edges']==0 and not any(gate['unowned_events'].values()) and
  gate['orphan_authoritative_writers']==0)
 assert gate['spec02_eligible']==zeros
-assert c['next_card']=='ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE'
-assert gate['spec02_eligible'] is False,'SPEC-02 activated with open ORACLE-11 gaps'
-print('Round 1 authority matrix: PASS; SPEC-02 correctly ineligible')
+assert gate['spec02_eligible'] is True,'zero-gap ORACLE-11 gate did not open SPEC-02'
+assert c['next_card']=='SPEC-02-ROUND1-EXECUTABLE-CONTRACT'
+print('Round 1 authority matrix: PASS; SPEC-02 zero-gap gate eligible')

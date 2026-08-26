@@ -65,9 +65,9 @@ Saturn proof. It is HIT/KO only, not loading, controller input, actor rendering,
 stage, palette, HUD, PCM, diagnostics, or the read-only Oracle cards. Goal Mode
 has now advanced through the dependency-safe presentation promotions.
 
-CURRENT_TASK: ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE
+CURRENT_TASK: SPEC-02-ROUND1-EXECUTABLE-CONTRACT
 
-ACTIVE_SOFTWARE_TASK: ROUND1_REACHABLE_LOGIC_CLOSURE
+ACTIVE_SOFTWARE_TASK: ROUND1_EXECUTABLE_CONTRACT
 
 ## 4. Current salvage queue and production extension
 
@@ -150,9 +150,8 @@ class/type archetypes, 26 route events, route/camera/RNG state, and actor,
 audio, and load writer evidence. ORACLE-11 now uses that census as its sole
 backlog and closes one authority family at a time. No production runtime changed.
 
-ORACLE-11 currently retains one generated 94-segment x 10-family coverage
-matrix in `data/round1_system_coverage.yaml`; SPEC-02 is mechanically blocked
-until every declared zero-gap counter is zero. Predator Warrior locomotion,
+ORACLE-11 retains one generated 94-segment x 10-family coverage matrix
+in `data/round1_system_coverage.yaml`. Predator Warrior locomotion,
 melee, weapon/projectile/resource, and all route-reachable directional and
 airborne phases are source closed. Unwitnessed air-table phases
 `0x0408/12/14` are explicit `NOT_REQUIRED_FOR_ROUND1`. Nonlethal HIT, lethal
@@ -216,15 +215,17 @@ the stable Round 2 handoff are `SOURCE_CLOSED`: the three player stage-clear
 phases and four route edges `4->6->0->2->4` are bound to source guards and
 writers, the four accepted load/release boundaries retain ownership, and the
 capture continues under interactive Round 2 state. Presentation labels and
-fixed frames are not authoritative. The matrix now has 23 required
-`OBSERVED`, zero required `PARTIAL` or `UNKNOWN`, zero unmapped pairs or route
-edges, 374 orphan writers, and the same sole 1,023-frame RNG event backlog.
-Global RNG is also `SOURCE_CLOSED`: two byte-identical ledgers bind the exact
+fixed frames are not authoritative. Global RNG is also `SOURCE_CLOSED`: two
+byte-identical ledgers bind the exact
 `0x017c5e` recurrence and all 2,280 calls on 1,023 seed-change frames to enemy,
 auxiliary/transient-child, and global route/controller owners with no gaps.
-The matrix has zero required `OBSERVED`, `PARTIAL`, or `UNKNOWN`, zero unmapped
-pairs/edges/events, and 374 orphan writer PCs. ORACLE-11 remains active for
-exact writer reconciliation; SPEC-02 remains ineligible.
+The final writer reconciliation binds the complete 1,517-PC baseline universe
+and assigns each of the 374 residual PCs individually to one accepted authority
+and source window; 262 are required `SOURCE_CLOSED` writers and 112 begin only
+after stable Round 2 entry and are `NOT_REQUIRED_FOR_ROUND1`. The matrix now has
+zero required `OBSERVED`, `PARTIAL`, or `UNKNOWN`, zero unmapped actor pairs or
+route edges, zero unowned events, and zero orphan authoritative writers.
+ORACLE-11 is accepted and SPEC-02 is the active card.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

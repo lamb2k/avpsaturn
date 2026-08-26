@@ -787,7 +787,7 @@
     "segments": 94
   },
   "frontend_active": false,
-  "next_card": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE",
+  "next_card": "SPEC-02-ROUND1-EXECUTABLE-CONTRACT",
   "oracle10_exit": "PASS",
   "pending_oracle10_controls": [],
   "physical_saturn": "UNRUN",
@@ -814,11 +814,11 @@
     ],
     "cell_count": 940,
     "closure_gate": {
-      "orphan_authoritative_writers": 374,
+      "orphan_authoritative_writers": 0,
       "required_observed": 0,
       "required_partial": 0,
       "required_unknown": 0,
-      "spec02_eligible": false,
+      "spec02_eligible": true,
       "unmapped_actor_class_type_pairs": 0,
       "unmapped_route_edges": 0,
       "unowned_events": {
@@ -20438,11 +20438,11 @@
   "schema": "round1-system-coverage-v1",
   "source_set": "avspu",
   "spec02_closure_gate": {
-    "orphan_authoritative_writers": 374,
+    "orphan_authoritative_writers": 0,
     "required_observed": 0,
     "required_partial": 0,
     "required_unknown": 0,
-    "spec02_eligible": false,
+    "spec02_eligible": true,
     "unmapped_actor_class_type_pairs": 0,
     "unmapped_route_edges": 0,
     "unowned_events": {
