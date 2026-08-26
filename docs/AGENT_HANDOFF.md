@@ -41,9 +41,9 @@ Emulator/Fast/Oracle pass; paired frame 470 is x 1074/z 320/facing right/neutral
 Direct inspection at paused post-unlock frame 190 and after real controller
 movement shows coherent player/alien presentation, camera, both VDP2 planes,
 HUD, palette, and priority. The retained live-encounter actor handoff remains
-technical substrate, not completed Round 1 authority. Replace it next with the
-SPEC-02-bound fixed-pool scheduler and source-owned dispatch for the ten initial
-actors through the first dynamic spawn guard represented by source frame 2328;
-the frame is not gameplay authority. Use only SPEC-02, generated fixtures,
+technical substrate, not completed Round 1 authority. The fixed-pool scheduler
+now visits active records in 12/16/20/24 and ascending-slot order; paired frame
+470 has 3010 visits and hash `0x836e161c`. Bind the ten initial class-0x1F
+state/substate handlers next; keep the dynamic spawn owner guard pending. Use only SPEC-02, generated fixtures,
 accepted interfaces and assets. Preserve each validation/commit/push cycle. Keep
 USER-09 changes-requested, SALVAGE-08 inactive, and Saturn `UNRUN`.

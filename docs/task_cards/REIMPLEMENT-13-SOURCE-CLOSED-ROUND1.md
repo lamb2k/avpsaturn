@@ -84,10 +84,13 @@ movement shows coherent player/alien presentation, camera, both VDP2 planes,
 HUD, palette, and priority. Paired 471-frame ledgers bind native frame 470 to
 player x 1074, z 320, facing right, neutral source action, and 301 controller
 updates. This is not the complete first encounter: the retained live-encounter
-actor handoff is still technical substrate. Replace it next with the SPEC-02-
-bound fixed-pool scheduler and source-owned dispatch for the ten initial actors
-through the first dynamic spawn guard represented by source frame 2328; the
-frame itself is evidence, not gameplay authority.
+actor handoff is still technical substrate. The SPEC-02-bound fixed-pool
+scheduler now visits active records in pool order 12/16/20/24 and ascending
+source-slot order, rejects unsupported route-reachable class dispatches, and
+produces 3010 deterministic visits through evidence frame 470. It does not yet
+run the ten initial class-0x1F behavior handlers or the first dynamic spawn
+guard. Bind those source-owned handlers next; frame 2328 remains evidence, not
+gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json`.
 
 ## Next eligible cards
