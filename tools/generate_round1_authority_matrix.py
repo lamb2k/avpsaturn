@@ -11,6 +11,7 @@ PLAYER=ROOT/'data/oracle11_predator_warrior_authority.json'
 GLOBAL_AUDIO=ROOT/'data/oracle11_global_audio_load_release.json'
 NAVIGATION=ROOT/'data/oracle11_round1_navigation.json'
 ENEMIES=ROOT/'data/oracle11_round1_enemy_archetypes.json'
+AUXILIARY=ROOT/'data/oracle11_round1_auxiliary_authority.json'
 FAMILIES=(
  'predator-warrior-player-authority','round1-navigation-terrain-camera',
  'actor-scheduler-allocation-lifecycle','round1-enemy-archetypes',
@@ -33,6 +34,15 @@ def build(coverage,route):
         if enemy_report['status']=='SOURCE_CLOSED':
             closed_pairs.update((item['class'],item['type'])
                 for item in enemy_report['archetypes'])
+    auxiliary_report=None
+    if AUXILIARY.exists():
+        auxiliary_report=json.loads(AUXILIARY.read_text(encoding='ascii'))
+        if auxiliary_report['status']=='SOURCE_CLOSED':
+            closed_pairs.update((item['class'],item['type'])
+                for item in auxiliary_report['archetypes'])
+            for item in auxiliary_report['phantom_census_aliases']:
+                parts=item['id'].split('-')
+                closed_pairs.add((f"0x{parts[2]}",int(parts[4])))
     bodies={x['id']:x for x in coverage['bodies']}
     if 'rng-consumption' not in bodies:
         bodies['rng-consumption']={'status':'OBSERVED','accepted_evidence':['data/oracle10_round1_route.json']}
@@ -79,6 +89,8 @@ def build(coverage,route):
     for value in route['baseline_writer_bindings']['actor'].values():writer_pcs.update(value['writer_pcs'])
     if enemy_report and enemy_report['status']=='SOURCE_CLOSED':
         writer_pcs.difference_update(enemy_report['owned_authoritative_writer_pcs'])
+    if auxiliary_report and auxiliary_report['status']=='SOURCE_CLOSED':
+        writer_pcs.difference_update(auxiliary_report['owned_authoritative_writer_pcs'])
     events={
       'spawn':len(unmapped_pairs),'damage':1 if counts['PARTIAL'] else 0,
       'audio':len(route['audio_change_frames']) if bodies[FAMILIES[8]]['status']!='SOURCE_CLOSED' else 0,
@@ -178,6 +190,26 @@ def main():
           'Retain all four source-closed enemy actor contracts while pickups, '
           'hazards, destructibles, encounters, boss orchestration, route '
           'handoff and RNG ownership are closed in their declared families.')
+    if AUXILIARY.exists():
+        auxiliary=json.loads(AUXILIARY.read_text(encoding='ascii'))
+        body=next(item for item in coverage['bodies']
+            if item['id']=='pickups-equipment-weapons-projectiles-hazards-destructibles')
+        body['status']=auxiliary['status']
+        evidence=body.setdefault('accepted_evidence',[])
+        for item in ('data/oracle11_round1_auxiliary_authority.json',
+                     'data/oracle11_predator_weapon_projectile_resource.json',
+                     'data/oracle11_round1_navigation.json'):
+            if item not in evidence:evidence.append(item)
+        body['counterfactual']=(
+          'two byte-identical auxiliary completions plus twelve corrected '
+          'full-route class/type suppressions bind every dispatched type-16, '
+          'type-20 and type-24 actor; four generic-census half-stride aliases '
+          'are proven NOT_REQUIRED, while the original zero-removal controls '
+          'are explicitly rejected and preserved outside accepted evidence')
+        body['exact_next_experiment']=(
+          'Retain the closed player and auxiliary content contracts while '
+          'encounter/wave/scripted trigger, boss orchestration, route handoff '
+          'and global RNG ownership are source-closed.')
     coverage['route_segment_authority_matrix']=build(coverage,route)
     coverage['spec02_closure_gate']=coverage['route_segment_authority_matrix']['closure_gate']
     COVERAGE.write_bytes((json.dumps(coverage,sort_keys=True,indent=2)+'\n').encode('ascii'))

@@ -30,13 +30,12 @@ Navigation/terrain/obstacle/camera is `SOURCE_CLOSED` in
 `data/oracle11_round1_navigation.json`, including all 19 camera runs. Type-20
 damage/destruction and presentation remain assigned to their existing families.
 
-All route-reachable type-12 enemy archetypes are `SOURCE_CLOSED` in
-`data/oracle11_round1_enemy_archetypes.json`. Two byte-identical completions
-bind classes `0x1f`, `0x00`, `0x01`, and boss actor `0x06` across every live
-state/phase, writer, RNG call, source presentation/collision record, and damage
-edge. Boss encounter orchestration remains separate. Next close the pickup,
-equipment, weapon, projectile, hazard, and destructible family from the sole
-matrix without reopening the accepted player-side weapon/resource contract.
+Type-12 enemies and all source-dispatched auxiliary pickup/projectile/hazard/
+destructible actors are `SOURCE_CLOSED` in `data/oracle11_round1_enemy_archetypes.json`
+and `data/oracle11_round1_auxiliary_authority.json`. The corrected auxiliary
+controls remove every distinct class/type; zero-removal captures are rejected.
+Boss orchestration remains separate. Next close encounter, wave, scripted
+trigger, and route-edge ownership across all 94 segments.
 The sole route-segment x authority-family matrix and SPEC-02 zero-gap gate
 remain in `data/round1_system_coverage.yaml`.
 

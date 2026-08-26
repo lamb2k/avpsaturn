@@ -196,11 +196,16 @@ two byte-identical completions plus class-removal, offense-suppression, and
 accepted ORACLE-09 controls. The source contract covers class entries, every
 live state/phase and writer, RNG, animation/assembly/collision selectors,
 damage, HIT, and KO. Boss encounter orchestration stays separate from the
-closed class-`0x06` actor. The generated 94 x 10 matrix remains ineligible with
-203 required `OBSERVED`, 182 required `PARTIAL`, zero required `UNKNOWN`, 15 unmapped actor
-class/type pairs, 94 unmapped route edges, 1,020 orphan authoritative writers,
+closed class-`0x06` actor. The pickup/equipment/weapon/projectile/hazard/
+destructible family is also `SOURCE_CLOSED`: two byte-identical completions and
+twelve real class/type suppressions bind all source-dispatched auxiliary
+actors. A zero-removal notifier attempt is rejected and preserved outside
+acceptance; four generic census aliases are `NOT_REQUIRED_FOR_ROUND1`. The
+generated 94 x 10 matrix remains ineligible with 203 required `OBSERVED`, 88
+required `PARTIAL`, zero required `UNKNOWN`, zero unmapped actor class/type
+pairs, 94 unmapped route edges, 830 orphan authoritative writers,
 and unowned audio/damage/load/release/RNG/spawn counts of
-0/1/0/15/1,023/15. ORACLE-11 remains active and SPEC-02 remains ineligible.
+0/1/0/0/1,023/0. ORACLE-11 remains active and SPEC-02 remains ineligible.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

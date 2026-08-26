@@ -173,6 +173,21 @@ card only for a genuinely independent body or source-evidence hard stop.
   guards remain explicitly assigned to their separate families. No generic
   enemy behavior tree, independent assembly selection, shared player/enemy
   clamp, semantic sound name, or fixed-frame attack/death substitute is used.
+- `round1-pickups-equipment-weapons-projectiles-hazards-destructibles`:
+  `SOURCE_CLOSED`. Two full-route auxiliary captures are byte-identical across
+  120,620 samples, 59,865 exact class entries, 428,764 actor writes, 1,348 RNG
+  calls, and two source-owned player-health effects. Twelve corrected full-route
+  suppressions each remove a distinct source-dispatched type-16, type-20, or
+  type-24 class and preserve the resulting native completion state. The first
+  suppression attempt is explicitly rejected because a local notifier handle
+  was garbage-collected and removed zero actors; those captures are preserved
+  but excluded. Exact state/phase, writer, RNG, presentation, collision
+  selector, player effect, lifecycle, and corrected suppression evidence is in
+  `data/oracle11_round1_auxiliary_authority.json`. Four ORACLE-10 generic-census
+  class/type pairs are proven player or half-stride aliases with no scheduler
+  dispatch and are `NOT_REQUIRED_FOR_ROUND1`. Player-side weapon/projectile/
+  resource and type-20 navigation geometry contracts remain consumed from
+  their accepted evidence rather than reopened.
 
 ## Owned paths
 

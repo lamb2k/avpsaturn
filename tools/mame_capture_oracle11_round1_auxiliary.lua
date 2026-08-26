@@ -1,0 +1,28 @@
+-- ORACLE-11 route-wide projectile/pickup/hazard/destructible actor census.
+local machine=manager.machine;local cpu=machine.devices[":maincpu"]
+local program=cpu.spaces["program"];local opcodes=cpu.spaces["opcodes"]
+local root=assert(os.getenv("AVSP_ORACLE11_AUX_ROOT"));local frame=0
+local first,last=1972,15193;local player=0xff8380
+local pools={{type=16,base=0xffa480,stride=0x80,count=20},{type=20,base=0xffae80,stride=0x80,count=16},{type=24,base=0xffb680,stride=0x80,count=32}}
+local dispatch={{16,6,0x03537e},{20,7,0x06d1aa},{20,8,0x06d53c},{20,9,0x06d926},{20,10,0x06de92},
+ {24,16,0x079ffc},{24,61,0x0887c8},{24,67,0x08ce44},{24,69,0x08dc1c},{24,73,0x08f080},{24,75,0x08f86e},{24,78,0x0927f6}}
+local samples=assert(io.open(root.."/aux_samples.tsv","w"));local entries=assert(io.open(root.."/aux_entries.tsv","w"))
+local writes=assert(io.open(root.."/aux_writes.tsv","w"));local rng=assert(io.open(root.."/aux_rng.tsv","w"))
+local effects=assert(io.open(root.."/aux_player_effects.tsv","w"))
+samples:write("frame\ttype\tslot\tclass\tstate\tphase\tfacing\tx\ty\tz\tanim\tassembly\thurt\tattack\ttimer\thealth\ttarget\n")
+entries:write("frame\ttype\tclass\tentry\tslot\tstate\tphase\tfacing\tx\tz\tanim\tassembly\thurt\tattack\ttimer\thealth\ttarget\trng\treturn0\treturn1\treturn2\n")
+writes:write("frame\ttype\tslot\tclass\tstate\tphase\toffset\tpc\ta6\told\tdata\tmask\treturn0\treturn1\treturn2\n")
+rng:write("frame\ttype\tslot\tclass\tstate\tphase\tpc\tseed\treturn0\treturn1\treturn2\n")
+effects:write("frame\tfield\tpc\towner_type\towner_slot\towner_class\towner_state\towner_phase\told\tdata\tmask\treturn0\treturn1\treturn2\n")
+local function u8(a)return program:read_u8(a)end;local function u16(a)return program:read_u16(a)end
+local function u32(a)return program:read_u32(a)end;local function s16(v)return v>=0x8000 and v-0x10000 or v end
+local function stack()local sr=cpu.state["SR"].value&0xffff;local sp=(sr&0x2000)~=0 and (cpu.state["SP"].value&0xffffff) or (cpu.state["USP"].value&0xffffff);return u32(sp)&0xffffff,u32(sp+4)&0xffffff,u32(sp+8)&0xffffff end
+local function locate(b)for _,p in ipairs(pools)do if b>=p.base and b<p.base+p.count*p.stride and ((b-p.base)%p.stride)==0 and u8(b+8)==p.type then return p end end end
+local function entry(out,b,p,address)local anim=u32(b+0x1c);local r0,r1,r2=stack();out:write(string.format("%d\t%d\t%02x\t%06x\t%06x\t%d\t%d\t%d\t%d\t%d\t%08x\t%08x\t%d\t%d\t%d\t%d\t%04x\t%04x\t%06x\t%06x\t%06x\n",frame,p.type,u8(b+2),address,b,u16(b+4),u16(b+6),u8(b+0x0f),s16(u16(b+0x10)),s16(u16(b+0x18)),anim,anim~=0 and u32(anim+4)or 0,anim~=0 and u8(anim+8)or 0,anim~=0 and u8(anim+9)or 0,u16(b+0x2a),s16(u16(b+0x40)),u16(b+0x28),u16(0xff81a8),r0,r1,r2))end
+oracle11_aux_entry_taps={};for _,d in ipairs(dispatch)do local typ,class,address=d[1],d[2],d[3];oracle11_aux_entry_taps[#oracle11_aux_entry_taps+1]=opcodes:install_read_tap(address,address+1,"oracle11_aux_entry_"..typ.."_"..class,function()if frame<first or frame>last then return end;local b=cpu.state["A6"].value&0xffffff;local p=locate(b);if p and p.type==typ and u8(b+2)==class then entry(entries,b,p,address)end end)end
+oracle11_aux_write_taps={};for _,p in ipairs(pools)do oracle11_aux_write_taps[#oracle11_aux_write_taps+1]=program:install_write_tap(p.base,p.base+p.count*p.stride-1,"oracle11_aux_write_"..p.type,function(offset,data,mask)if frame<first or frame>last then return end;local b=p.base+math.floor((offset-p.base)/p.stride)*p.stride;if not locate(b)then return end;local r0,r1,r2=stack();writes:write(string.format("%d\t%d\t%06x\t%02x\t%d\t%d\t%02x\t%06x\t%06x\t%08x\t%08x\t%08x\t%06x\t%06x\t%06x\n",frame,p.type,b,u8(b+2),u16(b+4),u16(b+6),(offset-b)&0xff,cpu.state["PC"].value&0xffffff,cpu.state["A6"].value&0xffffff,u32(offset&0xfffffc),data&0xffffffff,mask&0xffffffff,r0,r1,r2))end)end
+oracle11_aux_rng=opcodes:install_read_tap(0x017c5e,0x017c5f,"oracle11_aux_rng",function()if frame<first or frame>last then return end;local b=cpu.state["A6"].value&0xffffff;local p=locate(b);if not p then return end;local r0,r1,r2=stack();rng:write(string.format("%d\t%d\t%06x\t%02x\t%d\t%d\t%06x\t%04x\t%06x\t%06x\t%06x\n",frame,p.type,b,u8(b+2),u16(b+4),u16(b+6),cpu.state["PC"].value&0xffffff,u16(0xff81a8),r0,r1,r2))end)
+local function effecttap(address,lastaddr,name)return program:install_write_tap(address,lastaddr,"oracle11_aux_effect_"..name,function(offset,data,mask)if frame<first or frame>last then return end;local b=cpu.state["A6"].value&0xffffff;local p=locate(b);if not p then return end;local r0,r1,r2=stack();effects:write(string.format("%d\t%s\t%06x\t%d\t%06x\t%02x\t%d\t%d\t%08x\t%08x\t%08x\t%06x\t%06x\t%06x\n",frame,name,cpu.state["PC"].value&0xffffff,p.type,b,u8(b+2),u16(b+4),u16(b+6),u32(offset&0xfffffc),data&0xffffffff,mask&0xffffffff,r0,r1,r2))end)end
+oracle11_aux_health=effecttap(player+0x40,player+0x43,"player_health");oracle11_aux_resource=effecttap(player+0x66,player+0x67,"player_resource")
+oracle11_aux_frame=emu.add_machine_frame_notifier(function()frame=frame+1;if frame>=first and frame<=last then for _,p in ipairs(pools)do for i=0,p.count-1 do local b=p.base+i*p.stride;if u8(b)~=0 and u8(b+8)==p.type then local anim=u32(b+0x1c);samples:write(string.format("%d\t%d\t%06x\t%02x\t%d\t%d\t%d\t%d\t%d\t%d\t%08x\t%08x\t%d\t%d\t%d\t%d\t%04x\n",frame,p.type,b,u8(b+2),u16(b+4),u16(b+6),u8(b+0x0f),s16(u16(b+0x10)),s16(u16(b+0x14)),s16(u16(b+0x18)),anim,anim~=0 and u32(anim+4)or 0,anim~=0 and u8(anim+8)or 0,anim~=0 and u8(anim+9)or 0,u16(b+0x2a),s16(u16(b+0x40)),u16(b+0x28)))end end end end;if frame==18000 then samples:close();entries:close();writes:close();rng:close();effects:close()end end)
+dofile("tools/mame_capture_oracle11_player_audio.lua")

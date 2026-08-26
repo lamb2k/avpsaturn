@@ -52,12 +52,14 @@
     {
       "accepted_evidence": [
         "data/oracle07_predator_warrior_action_graph_equipment.json",
-        "data/oracle11_predator_weapon_projectile_resource.json"
+        "data/oracle11_predator_weapon_projectile_resource.json",
+        "data/oracle11_round1_auxiliary_authority.json",
+        "data/oracle11_round1_navigation.json"
       ],
-      "counterfactual": "Button1 resource sufficiency, held/repeated input, special health gate, range, allocation, collision target removal, lifetime, recharge, class-0x54 removal, projectile scheduler removal and pre-dispatch facing controls are accepted",
-      "exact_next_experiment": "Retain the closed player weapon/projectile/resource contract while later archetype-specific projectiles, route pickups, hazards and destructibles are closed in their owning families.",
+      "counterfactual": "two byte-identical auxiliary completions plus twelve corrected full-route class/type suppressions bind every dispatched type-16, type-20 and type-24 actor; four generic-census half-stride aliases are proven NOT_REQUIRED, while the original zero-removal controls are explicitly rejected and preserved outside accepted evidence",
+      "exact_next_experiment": "Retain the closed player and auxiliary content contracts while encounter/wave/scripted trigger, boss orchestration, route handoff and global RNG ownership are source-closed.",
       "id": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-      "status": "PARTIAL"
+      "status": "SOURCE_CLOSED"
     },
     {
       "accepted_evidence": [
@@ -799,20 +801,20 @@
     ],
     "cell_count": 940,
     "closure_gate": {
-      "orphan_authoritative_writers": 1020,
+      "orphan_authoritative_writers": 830,
       "required_observed": 203,
-      "required_partial": 182,
+      "required_partial": 88,
       "required_unknown": 0,
       "spec02_eligible": false,
-      "unmapped_actor_class_type_pairs": 15,
+      "unmapped_actor_class_type_pairs": 0,
       "unmapped_route_edges": 94,
       "unowned_events": {
         "audio": 0,
         "damage": 1,
         "load": 0,
-        "release": 15,
+        "release": 0,
         "rng": 1023,
-        "spawn": 15
+        "spawn": 0
       }
     },
     "coverage_universe": {
@@ -907,7 +909,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -917,10 +919,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -1100,7 +1104,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1110,10 +1114,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -1293,7 +1299,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1303,10 +1309,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -1486,7 +1494,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1496,10 +1504,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -1679,7 +1689,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1689,10 +1699,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -1872,7 +1884,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -1882,10 +1894,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -2065,7 +2079,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2075,10 +2089,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -2258,7 +2274,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2268,10 +2284,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -2451,7 +2469,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2461,10 +2479,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -2644,7 +2664,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2654,10 +2674,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -2837,7 +2859,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -2847,10 +2869,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -3030,7 +3054,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3040,10 +3064,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -3223,7 +3249,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3233,10 +3259,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -3416,7 +3444,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3426,10 +3454,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -3609,7 +3639,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3619,10 +3649,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -3802,7 +3834,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -3812,10 +3844,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -3995,7 +4029,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4005,10 +4039,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -4188,7 +4224,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4198,10 +4234,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -4381,7 +4419,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4391,10 +4429,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -4574,7 +4614,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4584,10 +4624,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -4767,7 +4809,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4777,10 +4819,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -4960,7 +5004,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -4970,10 +5014,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -5153,7 +5199,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5163,10 +5209,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -5346,7 +5394,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5356,10 +5404,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -5539,7 +5589,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5549,10 +5599,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -5732,7 +5784,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5742,10 +5794,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -5925,7 +5979,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -5935,10 +5989,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -6118,7 +6174,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6128,10 +6184,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -6311,7 +6369,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6321,10 +6379,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -6504,7 +6564,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6514,10 +6574,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -6697,7 +6759,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6707,10 +6769,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -6890,7 +6954,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -6900,10 +6964,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -7083,7 +7149,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7093,10 +7159,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -7276,7 +7344,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7286,10 +7354,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -7469,7 +7539,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7479,10 +7549,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -7662,7 +7734,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7672,10 +7744,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -7855,7 +7929,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -7865,10 +7939,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -8048,7 +8124,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8058,10 +8134,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -8241,7 +8319,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8251,10 +8329,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -8434,7 +8514,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8444,10 +8524,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -8627,7 +8709,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8637,10 +8719,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -8820,7 +8904,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -8830,10 +8914,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -9013,7 +9099,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9023,10 +9109,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -9206,7 +9294,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9216,10 +9304,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -9399,7 +9489,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9409,10 +9499,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -9592,7 +9684,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9602,10 +9694,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -9785,7 +9879,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9795,10 +9889,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -9978,7 +10074,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -9988,10 +10084,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -10171,7 +10269,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10181,10 +10279,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -10364,7 +10464,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10374,10 +10474,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -10557,7 +10659,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10567,10 +10669,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -10750,7 +10854,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10760,10 +10864,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -10943,7 +11049,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -10953,10 +11059,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -11136,7 +11244,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11146,10 +11254,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -11329,7 +11439,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11339,10 +11449,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -11522,7 +11634,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11532,10 +11644,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -11715,7 +11829,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11725,10 +11839,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -11908,7 +12024,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -11918,10 +12034,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -12101,7 +12219,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12111,10 +12229,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -12294,7 +12414,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12304,10 +12424,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -12487,7 +12609,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12497,10 +12619,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -12680,7 +12804,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12690,10 +12814,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -12873,7 +12999,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -12883,10 +13009,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -13066,7 +13194,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13076,10 +13204,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -13259,7 +13389,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13269,10 +13399,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -13452,7 +13584,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13462,10 +13594,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -13645,7 +13779,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13655,10 +13789,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -13838,7 +13974,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -13848,10 +13984,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -14031,7 +14169,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14041,10 +14179,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -14224,7 +14364,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14234,10 +14374,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -14417,7 +14559,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14427,10 +14569,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -14610,7 +14754,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14620,10 +14764,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -14803,7 +14949,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -14813,10 +14959,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -14996,7 +15144,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15006,10 +15154,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -15189,7 +15339,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15199,10 +15349,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -15382,7 +15534,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15392,10 +15544,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -15575,7 +15729,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15585,10 +15739,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -15768,7 +15924,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15778,10 +15934,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -15961,7 +16119,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -15971,10 +16129,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -16154,7 +16314,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16164,10 +16324,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -16347,7 +16509,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16357,10 +16519,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -16540,7 +16704,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16550,10 +16714,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -16733,7 +16899,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16743,10 +16909,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -16926,7 +17094,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -16936,10 +17104,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -17119,7 +17289,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17129,10 +17299,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -17312,7 +17484,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17322,10 +17494,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -17505,7 +17679,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17515,10 +17689,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -17698,7 +17874,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17708,10 +17884,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -17891,7 +18069,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -17901,10 +18079,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -18084,7 +18264,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -18094,10 +18274,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -18277,7 +18459,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -18287,10 +18469,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -18470,7 +18654,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -18480,10 +18664,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -18663,7 +18849,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -18673,10 +18859,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -18856,7 +19044,7 @@
           },
           {
             "authority_family": "pickups-equipment-weapons-projectiles-hazards-destructibles",
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "coverage_universe": [
               "baseline-completion-a",
               "baseline-completion-b",
@@ -18866,10 +19054,12 @@
             ],
             "evidence": [
               "data/oracle07_predator_warrior_action_graph_equipment.json",
-              "data/oracle11_predator_weapon_projectile_resource.json"
+              "data/oracle11_predator_weapon_projectile_resource.json",
+              "data/oracle11_round1_auxiliary_authority.json",
+              "data/oracle11_round1_navigation.json"
             ],
             "required": true,
-            "unresolved": true
+            "unresolved": false
           },
           {
             "authority_family": "encounters-waves-scripted-triggers",
@@ -18971,83 +19161,7 @@
     ],
     "schema": "round1-route-authority-matrix-v1",
     "segment_count": 94,
-    "unmapped_actor_class_type_pairs": [
-      {
-        "class": "0x00",
-        "id": "actor-class-00-type-0",
-        "type": 0
-      },
-      {
-        "class": "0x00",
-        "id": "actor-class-00-type-240",
-        "type": 240
-      },
-      {
-        "class": "0x06",
-        "id": "actor-class-06-type-16",
-        "type": 16
-      },
-      {
-        "class": "0x07",
-        "id": "actor-class-07-type-20",
-        "type": 20
-      },
-      {
-        "class": "0x08",
-        "id": "actor-class-08-type-20",
-        "type": 20
-      },
-      {
-        "class": "0x09",
-        "id": "actor-class-09-type-20",
-        "type": 20
-      },
-      {
-        "class": "0x0a",
-        "id": "actor-class-0a-type-20",
-        "type": 20
-      },
-      {
-        "class": "0x3d",
-        "id": "actor-class-3d-type-24",
-        "type": 24
-      },
-      {
-        "class": "0x43",
-        "id": "actor-class-43-type-24",
-        "type": 24
-      },
-      {
-        "class": "0x45",
-        "id": "actor-class-45-type-24",
-        "type": 24
-      },
-      {
-        "class": "0x49",
-        "id": "actor-class-49-type-24",
-        "type": 24
-      },
-      {
-        "class": "0x4b",
-        "id": "actor-class-4b-type-24",
-        "type": 24
-      },
-      {
-        "class": "0x4e",
-        "id": "actor-class-4e-type-24",
-        "type": 24
-      },
-      {
-        "class": "0x80",
-        "id": "actor-class-80-type-0",
-        "type": 0
-      },
-      {
-        "class": "0x80",
-        "id": "actor-class-80-type-240",
-        "type": 240
-      }
-    ],
+    "unmapped_actor_class_type_pairs": [],
     "unmapped_route_edges": [
       {
         "segment": "round1-title",
@@ -19748,20 +19862,20 @@
   "schema": "round1-system-coverage-v1",
   "source_set": "avspu",
   "spec02_closure_gate": {
-    "orphan_authoritative_writers": 1020,
+    "orphan_authoritative_writers": 830,
     "required_observed": 203,
-    "required_partial": 182,
+    "required_partial": 88,
     "required_unknown": 0,
     "spec02_eligible": false,
-    "unmapped_actor_class_type_pairs": 15,
+    "unmapped_actor_class_type_pairs": 0,
     "unmapped_route_edges": 94,
     "unowned_events": {
       "audio": 0,
       "damage": 1,
       "load": 0,
-      "release": 15,
+      "release": 0,
       "rng": 1023,
-      "spawn": 15
+      "spawn": 0
     }
   },
   "status": "ACCEPTED",
