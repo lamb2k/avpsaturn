@@ -274,6 +274,32 @@ int avsp_frontend_load_title_objects(AvspFrontend *frontend)
     return 1;
 }
 
+int avsp_frontend_load_round1_text(AvspFrontend *frontend)
+{
+    int index;
+    if (frontend->r1text_ready) return 1;
+    for (index = 0; index < AVSP_FRONTEND_R1TEXT_OBJECT_COUNT; ++index)
+    {
+        const AvspFrontendTransitionObject *object =
+            &avsp_frontend_r1text_objects[index];
+        frontend->r1text_sprites[index] = add_sprite(
+            frontend, object->filename, object->bytes,
+            object->width, object->height);
+        if (frontend->r1text_sprites[index] < 0) return 0;
+    }
+    if (frontend->r1text_fade == JO_NULL)
+    {
+        frontend->r1text_fade = (unsigned short *)frontend_read(
+            frontend, AVSP_FRONTEND_R1TEXT_PALETTE_FILE,
+            AVSP_FRONTEND_R1TEXT_FADE_ROWS *
+                AVSP_FRONTEND_R1TEXT_FADE_ROW_BYTES);
+        if (frontend->r1text_fade == JO_NULL) return 0;
+    }
+    frontend->r1text_fade_row = -1;
+    frontend->r1text_ready = 1;
+    return 1;
+}
+
 void avsp_frontend_release_title_objects(AvspFrontend *frontend)
 {
     if (!frontend->title_objects_ready) return;
@@ -316,25 +342,7 @@ int avsp_frontend_enter_select(AvspFrontend *frontend)
             object->width, object->height);
         if (frontend->transition_sprites[index] < 0) return 0;
     }
-    for (index = 0; index < AVSP_FRONTEND_R1TEXT_OBJECT_COUNT; ++index)
-    {
-        const AvspFrontendTransitionObject *object =
-            &avsp_frontend_r1text_objects[index];
-        frontend->r1text_sprites[index] = add_sprite(
-            frontend, object->filename, object->bytes,
-            object->width, object->height);
-        if (frontend->r1text_sprites[index] < 0) return 0;
-    }
-    if (frontend->r1text_fade == JO_NULL)
-    {
-        frontend->r1text_fade = (unsigned short *)frontend_read(
-            frontend, AVSP_FRONTEND_R1TEXT_PALETTE_FILE,
-            AVSP_FRONTEND_R1TEXT_FADE_ROWS *
-                AVSP_FRONTEND_R1TEXT_FADE_ROW_BYTES);
-        if (frontend->r1text_fade == JO_NULL) return 0;
-    }
-    frontend->r1text_fade_row = -1;
-    frontend->r1text_ready = 1;
+    if (!avsp_frontend_load_round1_text(frontend)) return 0;
     frontend->select_surface_ready = 1;
     frontend->cursor_objects_ready = 1;
     return 1;

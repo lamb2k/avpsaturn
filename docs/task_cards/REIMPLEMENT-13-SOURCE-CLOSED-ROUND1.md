@@ -76,8 +76,10 @@ are implemented in portable C, connected to the direct diagnostic boot, and
 visible through target readback. They pass the host differential, nine bounded
 mutations/suppressions, Target, paired-emulator evidence, rendered legacy-scene
 inspection, Fast, and Oracle. This remains a native diagnostic substrate, not
-yet a playable segment: render the first source-derived Round 1 route view
-through the accepted presentation adapters before advancing into route logic.
+yet a playable segment. The first source-derived Round 1 title view now renders
+through the accepted presentation adapter and passed direct paused-frame
+inspection. Implement the first exact route-state guard, title-owned spawn
+boundary, and controllable street segment next.
 Evidence: `data/reimplement13_round1_stable_entry.json`.
 
 ## Next eligible cards

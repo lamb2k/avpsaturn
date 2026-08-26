@@ -32,6 +32,9 @@ for build,normal,report in zip(builds,normals,reads):
     assert [report["state"][f"round1_pool{kind}_free"]
             for kind in (12,16,20,24)] == [20,20,16,32]
     assert report["state"]["round1_fallback_count"] == 0
+    assert report["state"]["round1_presentation_ready"] == 1
+    assert report["state"]["round1_presentation_seen"] == 1
+    assert report["state"]["round1_presentation_commands_peak"] == 2
     assert report["chronology"] == {
         "alien_contacts":1, "misses":1, "player_contacts":4,
         "player_damage_events":1, "unlock_frame":450}

@@ -232,9 +232,10 @@ generated fixtures contain the source-derived Round 1 content plus accepted
 Port V2 interface identities. REIMPLEMENT-13 has implemented and validated the
 native stable-entry state and exact fixed actor pools. The direct diagnostic
 boot and target readback now expose the exact state with paired-emulator
-agreement and zero fallback. It remains a diagnostic substrate until the first
-source-derived Round 1 route view is rendered through accepted presentation
-adapters; that view is the active vertical checkpoint before route logic.
+agreement and zero fallback. The first source-derived Round 1 title view now
+renders through the accepted presentation adapter and passes direct paused-frame
+inspection. The first exact route-state guard, title-owned spawn boundary, and
+controllable street segment are the active vertical checkpoint.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

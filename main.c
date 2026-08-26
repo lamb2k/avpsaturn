@@ -559,6 +559,9 @@ volatile int avsp_diag_round1_pool20_free;
 volatile int avsp_diag_round1_pool24_free;
 volatile int avsp_diag_round1_fallback_count;
 volatile int avsp_diag_round1_canaries_ok;
+volatile int avsp_diag_round1_presentation_ready;
+volatile int avsp_diag_round1_presentation_seen;
+volatile int avsp_diag_round1_presentation_commands_peak;
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
 static int live_autotest_phase;
 static int live_autotest_release;
@@ -6996,6 +6999,7 @@ static void live_encounter_publish(void)
     avsp_diag_round1_pool24_free = round1_runtime.pools[3].free_count;
     avsp_diag_round1_fallback_count = (int)round1_runtime.fallback_count;
     avsp_diag_round1_canaries_ok = avsp_round1_canaries_ok(&round1_runtime);
+    avsp_diag_round1_presentation_ready = frontend_runtime.r1text_ready;
 }
 
 static void live_encounter_frame_callback(void)
@@ -7057,7 +7061,18 @@ static void live_encounter_frame_callback(void)
         return;
     }
     avsp_diag_live_frame_stage = 5;
-    playable_slice_draw_actors();
+    frontend_runtime.vdp1_commands_last_frame = 0;
+    if (round1_runtime.frame < AVSP_FRONTEND_R1TEXT_CLEAR_FRAME)
+    {
+        avsp_frontend_draw_round1_text(&frontend_runtime);
+        avsp_diag_round1_presentation_seen = 1;
+        if (frontend_runtime.vdp1_commands_last_frame >
+            avsp_diag_round1_presentation_commands_peak)
+            avsp_diag_round1_presentation_commands_peak =
+                frontend_runtime.vdp1_commands_last_frame;
+    }
+    else
+        playable_slice_draw_actors();
     avsp_diag_live_frame_stage = 6;
     hud_operations.submit_frame = hud_port_submit_frame;
     if (!avsp_port_v2_hud_submit(&playable_slice_frame.hud,
@@ -7072,6 +7087,7 @@ static void live_encounter_frame_callback(void)
     }
     avsp_diag_live_frame_stage = 7;
     live_encounter_publish();
+    ++round1_runtime.frame;
     avsp_diag_runtime_ready = runtime_ready;
 }
 #endif
@@ -8015,6 +8031,14 @@ void jo_main(void)
     hud_pcm_bench_init();
     runtime_ready = playable_slice_init();
 #ifdef AVSP_LIVE_ENCOUNTER
+    avsp_frontend_init(&frontend_runtime, avsp_fs_read_file_in_dir,
+                       background_bitmap, &frontend_palettes[0],
+                       &frontend_palettes[1]);
+    runtime_ready = runtime_ready &&
+        avsp_frontend_load_round1_text(&frontend_runtime);
+    if (runtime_ready)
+        avsp_frontend_set_r1text_fade(
+            &frontend_runtime, AVSP_FRONTEND_R1TEXT_FADE_ROWS - 1);
     avsp_live_encounter_init(&live_encounter_runtime);
     avsp_round1_init(&round1_runtime);
     avsp_diag_live_frame_stage = 0;

@@ -49,6 +49,7 @@ void avsp_frontend_init(AvspFrontend *frontend,
                         jo_palette *select_palette);
 int avsp_frontend_load_title_surface(AvspFrontend *frontend);
 int avsp_frontend_load_title_objects(AvspFrontend *frontend);
+int avsp_frontend_load_round1_text(AvspFrontend *frontend);
 int avsp_frontend_enter_select(AvspFrontend *frontend);
 void avsp_frontend_activate_title(AvspFrontend *frontend);
 void avsp_frontend_activate_select(AvspFrontend *frontend);

@@ -54,6 +54,9 @@
     ,"avsp_diag_round1_pool24_free"
     ,"avsp_diag_round1_fallback_count"
     ,"avsp_diag_round1_canaries_ok"
+    ,"avsp_diag_round1_presentation_ready"
+    ,"avsp_diag_round1_presentation_seen"
+    ,"avsp_diag_round1_presentation_commands_peak"
     ,"failed_asset"
   ]
 }

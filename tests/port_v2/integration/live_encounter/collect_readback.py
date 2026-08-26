@@ -140,7 +140,10 @@ mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_
            "round1_pool20_free":"avsp_diag_round1_pool20_free",
            "round1_pool24_free":"avsp_diag_round1_pool24_free",
            "round1_fallback_count":"avsp_diag_round1_fallback_count",
-           "round1_canaries_ok":"avsp_diag_round1_canaries_ok"}
+           "round1_canaries_ok":"avsp_diag_round1_canaries_ok",
+           "round1_presentation_ready":"avsp_diag_round1_presentation_ready",
+           "round1_presentation_seen":"avsp_diag_round1_presentation_seen",
+           "round1_presentation_commands_peak":"avsp_diag_round1_presentation_commands_peak"}
 state = {key:signed(mcp,syms[symbol]) for key,symbol in mapping.items()}
 observed_frame = state["frame"]
 current_sample = next((sample for sample in all_samples
@@ -162,7 +165,10 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_route_state"] == 2 and state["round1_rng_seed"] == 0x8DEF and
         state["round1_player_health"] == 101 and
         [state[f"round1_pool{kind}_free"] for kind in (12,16,20,24)] ==
-        [20,20,16,32] and state["round1_fallback_count"] == 0):
+        [20,20,16,32] and state["round1_fallback_count"] == 0 and
+        state["round1_presentation_ready"] == 1 and
+        state["round1_presentation_seen"] == 1 and
+        state["round1_presentation_commands_peak"] == 2):
     raise RuntimeError(f"Round 1 stable-entry target binding failed: {state}")
 if (len(samples) != EVIDENCE_LAST_FRAME + 1 or
         any(sample["frame"] != index for index,sample in enumerate(samples))):
