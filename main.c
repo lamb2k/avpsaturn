@@ -562,6 +562,13 @@ volatile int avsp_diag_round1_canaries_ok;
 volatile int avsp_diag_round1_presentation_ready;
 volatile int avsp_diag_round1_presentation_seen;
 volatile int avsp_diag_round1_presentation_commands_peak;
+volatile int avsp_diag_round1_entry_spawn_count;
+volatile int avsp_diag_round1_entry_step;
+volatile int avsp_diag_round1_entry_timer_decrements;
+volatile int avsp_diag_round1_entry_gate8236;
+volatile int avsp_diag_round1_entry_gate81af;
+volatile int avsp_diag_round1_control_enabled;
+volatile int avsp_diag_round1_failure_count;
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
 static int live_autotest_phase;
 static int live_autotest_release;
@@ -7000,6 +7007,15 @@ static void live_encounter_publish(void)
     avsp_diag_round1_fallback_count = (int)round1_runtime.fallback_count;
     avsp_diag_round1_canaries_ok = avsp_round1_canaries_ok(&round1_runtime);
     avsp_diag_round1_presentation_ready = frontend_runtime.r1text_ready;
+    avsp_diag_round1_entry_spawn_count = round1_runtime.entry.spawn_count;
+    avsp_diag_round1_entry_step = round1_runtime.entry.step_index;
+    avsp_diag_round1_entry_timer_decrements =
+        round1_runtime.entry.timer_decrements;
+    avsp_diag_round1_entry_gate8236 = round1_runtime.entry.gate8236;
+    avsp_diag_round1_entry_gate81af = round1_runtime.entry.gate81af;
+    avsp_diag_round1_control_enabled =
+        round1_runtime.entry.control_enabled;
+    avsp_diag_round1_failure_count = (int)round1_runtime.failure_count;
 }
 
 static void live_encounter_frame_callback(void)
@@ -7008,6 +7024,9 @@ static void live_encounter_frame_callback(void)
     AvspPortV2PcmAudioOps pcm_operations;
     AvspPortV2CddaAudioOps cdda_operations;
     AvspPortV2HudRenderOps hud_operations;
+#ifndef AVSP_LIVE_ENCOUNTER_AUTOTEST
+    int round1_route_before;
+#endif
     if (!runtime_ready)
     {
         if (avsp_diag_live_frame_stage == 0)
@@ -7016,6 +7035,23 @@ static void live_encounter_frame_callback(void)
     }
     avsp_diag_live_frame_stage = 1;
     street_test_frame();
+#ifndef AVSP_LIVE_ENCOUNTER_AUTOTEST
+    round1_route_before = round1_runtime.route_state;
+#endif
+    if (!avsp_round1_step_first_entry(&round1_runtime))
+    {
+        avsp_diag_live_frame_stage = -8;
+        runtime_ready = 0;
+        return;
+    }
+#ifndef AVSP_LIVE_ENCOUNTER_AUTOTEST
+    if (round1_route_before != 4 && round1_runtime.route_state == 4)
+    {
+        avsp_live_encounter_init(&live_encounter_runtime);
+        live_encounter_runtime.player.x = round1_runtime.player.x;
+        live_encounter_runtime.player.lane = round1_runtime.player.z;
+    }
+#endif
     input.frame = live_encounter_runtime.frame;
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
     input.player_mask = live_encounter_autotest_input();
@@ -7062,7 +7098,7 @@ static void live_encounter_frame_callback(void)
     }
     avsp_diag_live_frame_stage = 5;
     frontend_runtime.vdp1_commands_last_frame = 0;
-    if (round1_runtime.frame < AVSP_FRONTEND_R1TEXT_CLEAR_FRAME)
+    if (round1_runtime.route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE)
     {
         avsp_frontend_draw_round1_text(&frontend_runtime);
         avsp_diag_round1_presentation_seen = 1;
@@ -8052,7 +8088,8 @@ void jo_main(void)
 #endif
     avsp_diag_live_physical_saturn = 0;
     runtime_ready = runtime_ready && avsp_diag_live_contract_flags == 127 &&
-        avsp_round1_entry_valid(&round1_runtime);
+        avsp_round1_entry_valid(&round1_runtime) &&
+        avsp_round1_begin_first_entry(&round1_runtime);
 #endif
     if (!runtime_ready) failed_asset = "PLAYABLE SLICE FAILED";
     JO_UNUSED_ARG(index);

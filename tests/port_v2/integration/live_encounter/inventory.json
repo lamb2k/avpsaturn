@@ -57,6 +57,13 @@
     ,"avsp_diag_round1_presentation_ready"
     ,"avsp_diag_round1_presentation_seen"
     ,"avsp_diag_round1_presentation_commands_peak"
+    ,"avsp_diag_round1_entry_spawn_count"
+    ,"avsp_diag_round1_entry_step"
+    ,"avsp_diag_round1_entry_timer_decrements"
+    ,"avsp_diag_round1_entry_gate8236"
+    ,"avsp_diag_round1_entry_gate81af"
+    ,"avsp_diag_round1_control_enabled"
+    ,"avsp_diag_round1_failure_count"
     ,"failed_asset"
   ]
 }

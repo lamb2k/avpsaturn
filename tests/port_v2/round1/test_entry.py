@@ -13,6 +13,8 @@ assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
 header = (ROOT / "src/port_v2/gameplay/round1/round1.h").read_text()
+generated = (ROOT / "src/port_v2/gameplay/round1/spec02_round1_entry_data.h").read_text()
+subprocess.run(["python", str(ROOT / "tools/gen_spec02_round1_entry.py"), "--check"], check=True)
 
 def wsl(path):
     return subprocess.run(["wsl.exe", "wslpath", "-a", str(path).replace("\\", "/")],
@@ -22,6 +24,7 @@ def run(body, header_body, passes):
     with tempfile.TemporaryDirectory(prefix="round1-entry-") as name:
         temp = Path(name); (temp / "round1.c").write_text(body)
         (temp / "round1.h").write_text(header_body)
+        (temp / "spec02_round1_entry_data.h").write_text(generated)
         command = (f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra -Werror "
                    f"-I '{wsl(temp)}' '{wsl(temp / 'round1.c')}' "
                    f"tests/port_v2/round1/round1_entry_test.c -o '{wsl(temp / 'test')}' && "
@@ -35,7 +38,28 @@ for before, after in (
     ("{20u, 20u, 16u, 32u}", "{20u, 20u, 16u, 31u}"),
     ("{192u, 128u, 128u, 128u}", "{128u, 128u, 128u, 128u}"),
     ("runtime->rng_seed = AVSP_ROUND1_INITIAL_RNG;", "runtime->rng_seed = 1u;"),
+    ("runtime->entry.gate8236 & runtime->entry.gate81af", "runtime->entry.gate8236 | runtime->entry.gate81af"),
+    ("--runtime->entry.animation_c8;", "runtime->entry.animation_c8 = 0u;"),
+    ("++runtime->entry.timer_decrements;", "runtime->entry.timer_decrements += 2u;"),
+    ("pool->free_stack[pool->free_count - 1u]", "pool->free_stack[0]"),
 ):
     assert before in source
     run(source.replace(before, after), header, False)
-print("REIMPLEMENT-13 stable entry host differential: PASS (4 real mutations)")
+for before, after in (
+    ("{ 0xffa3c0u, 12u, 656, 312, 312,", "{ 0xffa3c0u, 12u, 657, 312, 312,"),
+    ("{ AVSP_ROUND1_ENTRY_DWELL, 0x00u, 0u, 60u,", "{ AVSP_ROUND1_ENTRY_DWELL, 0x00u, 0u, 59u,"),
+):
+    assert before in generated
+    changed = generated.replace(before, after, 1)
+    with tempfile.TemporaryDirectory(prefix="round1-generated-mutation-") as name:
+        temp = Path(name)
+        (temp / "round1.c").write_text(source)
+        (temp / "round1.h").write_text(header)
+        (temp / "spec02_round1_entry_data.h").write_text(changed)
+        command = (f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra -Werror "
+                   f"-I '{wsl(temp)}' '{wsl(temp / 'round1.c')}' "
+                   f"tests/port_v2/round1/round1_entry_test.c -o '{wsl(temp / 'test')}' && "
+                   f"'{wsl(temp / 'test')}'")
+        result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
+        assert result.returncode != 0
+print("REIMPLEMENT-13 first entry host differential: PASS (10 real mutations)")

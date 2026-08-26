@@ -9,10 +9,14 @@ REQUIRED = (
     '#include "src/port_v2/gameplay/round1/round1.h"',
     "static AvspRound1Runtime round1_runtime;",
     "avsp_round1_init(&round1_runtime);",
+    "avsp_round1_begin_first_entry(&round1_runtime);",
+    "avsp_round1_step_first_entry(&round1_runtime)",
     "avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);",
     "avsp_diag_round1_route_state = round1_runtime.route_state;",
     "avsp_diag_round1_rng_seed = round1_runtime.rng_seed;",
     "avsp_diag_round1_canaries_ok = avsp_round1_canaries_ok(&round1_runtime);",
+    "avsp_diag_round1_entry_spawn_count = round1_runtime.entry.spawn_count;",
+    "avsp_diag_round1_control_enabled =",
     "avsp_frontend_load_round1_text(&frontend_runtime);",
 )
 
@@ -22,6 +26,7 @@ def accepts(body):
 assert accepts(MAIN)
 for token in REQUIRED[2:]:
     assert not accepts(MAIN.replace(token, "/* suppressed Round 1 binding */", 1))
-assert "if (round1_runtime.frame < AVSP_FRONTEND_R1TEXT_CLEAR_FRAME)" in MAIN
+assert "if (round1_runtime.route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE)" in MAIN
 assert "avsp_frontend_draw_round1_text(&frontend_runtime);" in MAIN
-print("REIMPLEMENT-13 target entry wiring: PASS (6 suppressions rejected)")
+assert "round1_runtime.frame < AVSP_FRONTEND_R1TEXT_CLEAR_FRAME" not in MAIN
+print("REIMPLEMENT-13 target first-entry wiring: PASS (9 suppressions rejected)")

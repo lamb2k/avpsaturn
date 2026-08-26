@@ -143,7 +143,14 @@ mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_
            "round1_canaries_ok":"avsp_diag_round1_canaries_ok",
            "round1_presentation_ready":"avsp_diag_round1_presentation_ready",
            "round1_presentation_seen":"avsp_diag_round1_presentation_seen",
-           "round1_presentation_commands_peak":"avsp_diag_round1_presentation_commands_peak"}
+           "round1_presentation_commands_peak":"avsp_diag_round1_presentation_commands_peak",
+           "round1_entry_spawn_count":"avsp_diag_round1_entry_spawn_count",
+           "round1_entry_step":"avsp_diag_round1_entry_step",
+           "round1_entry_timer_decrements":"avsp_diag_round1_entry_timer_decrements",
+           "round1_entry_gate8236":"avsp_diag_round1_entry_gate8236",
+           "round1_entry_gate81af":"avsp_diag_round1_entry_gate81af",
+           "round1_control_enabled":"avsp_diag_round1_control_enabled",
+           "round1_failure_count":"avsp_diag_round1_failure_count"}
 state = {key:signed(mcp,syms[symbol]) for key,symbol in mapping.items()}
 observed_frame = state["frame"]
 current_sample = next((sample for sample in all_samples
@@ -162,10 +169,17 @@ if not (state["runtime_ready"] == state["canaries_ok"] == 1 and
         state["physical_saturn"] == 0): raise RuntimeError(f"live state failed: {state}")
 if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_canaries_ok"] == 1 and
-        state["round1_route_state"] == 2 and state["round1_rng_seed"] == 0x8DEF and
+        state["round1_route_state"] == 4 and state["round1_rng_seed"] == 0x8DEF and
         state["round1_player_health"] == 101 and
         [state[f"round1_pool{kind}_free"] for kind in (12,16,20,24)] ==
-        [20,20,16,32] and state["round1_fallback_count"] == 0 and
+        [10,20,16,32] and state["round1_fallback_count"] == 0 and
+        state["round1_failure_count"] == 0 and
+        state["round1_entry_spawn_count"] == 10 and
+        state["round1_entry_step"] == 8 and
+        state["round1_entry_timer_decrements"] == 164 and
+        state["round1_entry_gate8236"] == 0 and
+        state["round1_entry_gate81af"] == 1 and
+        state["round1_control_enabled"] == 1 and
         state["round1_presentation_ready"] == 1 and
         state["round1_presentation_seen"] == 1 and
         state["round1_presentation_commands_peak"] == 2):

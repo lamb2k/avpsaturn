@@ -26,12 +26,19 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_spec_bound"] == 1
     assert report["state"]["round1_entry_valid"] == 1
     assert report["state"]["round1_canaries_ok"] == 1
-    assert report["state"]["round1_route_state"] == 2
+    assert report["state"]["round1_route_state"] == 4
     assert report["state"]["round1_rng_seed"] == 0x8DEF
     assert report["state"]["round1_player_health"] == 101
     assert [report["state"][f"round1_pool{kind}_free"]
-            for kind in (12,16,20,24)] == [20,20,16,32]
+            for kind in (12,16,20,24)] == [10,20,16,32]
     assert report["state"]["round1_fallback_count"] == 0
+    assert report["state"]["round1_failure_count"] == 0
+    assert report["state"]["round1_entry_spawn_count"] == 10
+    assert report["state"]["round1_entry_step"] == 8
+    assert report["state"]["round1_entry_timer_decrements"] == 164
+    assert report["state"]["round1_entry_gate8236"] == 0
+    assert report["state"]["round1_entry_gate81af"] == 1
+    assert report["state"]["round1_control_enabled"] == 1
     assert report["state"]["round1_presentation_ready"] == 1
     assert report["state"]["round1_presentation_seen"] == 1
     assert report["state"]["round1_presentation_commands_peak"] == 2
