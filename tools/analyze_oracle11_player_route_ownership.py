@@ -238,7 +238,7 @@ def build_report() -> dict[str, object]:
     report = {
         "schema": "oracle11-predator-route-ownership-v1",
         "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE",
-        "status": "SOURCE_CLOSED",
+        "status": "PARTIAL",
         "scope": ("Predator Warrior route-reachable action-phase, target, health "
                   "pickup, temporary-resource grant, interaction interruption, "
                   "resource-meter, player-owned audio-call and load/release-edge "
@@ -318,16 +318,22 @@ def build_report() -> dict[str, object]:
             "remaining_unknowns": [],
         },
         "audio_ownership": {
-            "classification": "SOURCE_CLOSED_FOR_PLAYER_EDGE",
-            "health_max_alternate_call": "0x0bc5fc..0x0bc664 jumps 0x0abdd2",
-            "player_action_calls": ["0x019bcc", "0x019bde", "0x019c26",
-                                    "0x01e89e", "0x01f260", "0x01fffe"],
-            "weapon_audio": ("retained from the accepted weapon artifact, "
-                             "including the character-indexed empty fallback"),
+            "classification": "PARTIAL_CROSS_FAMILY",
+            "health_max_score_award": ("0x0bc5fc..0x0bc664 jumps 0x0abdd2; "
+                                       "this is BCD score authority, not audio"),
+            "score_award": {
+                "routine": "0x0abdd2..0x0abe18",
+                "amount_index": "D0 u8 indexes 0x0abf1c",
+                "player_index": "D1 low two bits select A5+0x380 plus index*0x100",
+                "arithmetic": "four ABCD operations into score bytes +0xe0..+0xe3",
+                "maximum_guard": "unsigned compare against packed BCD 0x09999999",
+            },
             "route_audio_owner": "gameplay-audio-load-release",
             "causal_scope_guard": ("the empty main-program audio-write tap is not "
                                    "used to infer silence or route-wide ownership"),
-            "remaining_player_unknowns": [],
+            "remaining_player_unknowns": [
+                "identify every player-origin gameplay-audio trigger through the real main-to-QSound command boundary"
+            ],
         },
         "load_release_ownership": {
             "classification": "SOURCE_CLOSED_FOR_PLAYER_EDGE",
@@ -354,6 +360,7 @@ def build_report() -> dict[str, object]:
             "target_scan": source_window(opcodes, 0x01CE98, 0x01CECE),
             "interaction_dispatch": source_window(opcodes, 0x019FEC, 0x01A1D8),
             "health_item": source_window(opcodes, 0x0BC5FC, 0x0BC664),
+            "bcd_score_award": source_window(opcodes, 0x0ABDD2, 0x0ABE18),
             "interaction_effect": source_window(opcodes, 0x01ABFC, 0x01AC48),
             "record28_scheduler": source_window(opcodes, 0x01BCDA, 0x01BD48),
             "class54_display": source_window(opcodes, 0x094B3A, 0x094BF0),
@@ -372,7 +379,9 @@ def build_report() -> dict[str, object]:
                         "display actor separation", "interaction interruption",
                         "action-phase mapping", "audio edge", "load edge"],
         },
-        "remaining_player_unknowns": [],
+        "remaining_player_unknowns": [
+            "player-to-global gameplay-audio trigger ownership pending real dispatcher closure"
+        ],
         "protected_boundaries": {
             "production_runtime_writes": 0, "yaba_runs": 0,
             "frontend_active": False, "user09_status": "CHANGES_REQUESTED",
@@ -384,7 +393,7 @@ def build_report() -> dict[str, object]:
 
 
 def validate(report: dict[str, object]) -> None:
-    require(report["status"] == "SOURCE_CLOSED", "route ownership status drift")
+    require(report["status"] == "PARTIAL", "route ownership status drift")
     require(report["action_phase_reconciliation"]["unmapped_player_phases"] == [],
             "unmapped player action phase")
     require(report["health_pickup"]["classification"] == "SOURCE_CLOSED" and
@@ -398,15 +407,16 @@ def validate(report: dict[str, object]) -> None:
             "interaction completion drift")
     require(report["audio_ownership"]["route_audio_owner"] ==
             "gameplay-audio-load-release" and
-            report["audio_ownership"]["remaining_player_unknowns"] == [],
+            len(report["audio_ownership"]["remaining_player_unknowns"]) == 1 and
+            "BCD score" in report["audio_ownership"]["health_max_score_award"],
             "audio edge drift")
     require(report["load_release_ownership"]["bulk_loader_uses_player_actor_base"]
             is False and
             report["load_release_ownership"]["remaining_player_unknowns"] == [],
             "load/release edge drift")
-    require(report["remaining_player_unknowns"] == [] and
+    require(len(report["remaining_player_unknowns"]) == 1 and
             report["mutation_controls"]["count"] == 10,
-            "route ownership is not closed")
+            "route ownership backlog drift")
     require(report["protected_boundaries"] == {
         "production_runtime_writes": 0, "yaba_runs": 0,
         "frontend_active": False, "user09_status": "CHANGES_REQUESTED",
@@ -417,7 +427,7 @@ def validate(report: dict[str, object]) -> None:
 def main() -> None:
     report = build_report()
     OUT.write_bytes(canonical(report))
-    print("ORACLE-11 Predator route pickup/resource/audio/load ownership: SOURCE_CLOSED")
+    print("ORACLE-11 Predator route pickup/resource/load ownership closed; real audio trigger boundary PARTIAL")
 
 
 if __name__ == "__main__":

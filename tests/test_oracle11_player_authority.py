@@ -94,8 +94,9 @@ mutant["normal_jump_air_landing"]["counterfactuals"] \
 reject(mutant, "directional jump widened into normal authority")
 
 mutant = copy.deepcopy(report)
-mutant["status"] = "PARTIAL"
-reject(mutant, "closed player family downgraded")
+mutant["status"] = "SOURCE_CLOSED"
+mutant["remaining_player_backlog"] = []
+reject(mutant, "premature player-family closure")
 
 mutant = copy.deepcopy(report)
 mutant["directional_airborne_interruption"]["status"] = "PARTIAL"

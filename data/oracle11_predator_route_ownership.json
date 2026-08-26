@@ -93,19 +93,19 @@
   },
   "audio_ownership": {
     "causal_scope_guard": "the empty main-program audio-write tap is not used to infer silence or route-wide ownership",
-    "classification": "SOURCE_CLOSED_FOR_PLAYER_EDGE",
-    "health_max_alternate_call": "0x0bc5fc..0x0bc664 jumps 0x0abdd2",
-    "player_action_calls": [
-      "0x019bcc",
-      "0x019bde",
-      "0x019c26",
-      "0x01e89e",
-      "0x01f260",
-      "0x01fffe"
+    "classification": "PARTIAL_CROSS_FAMILY",
+    "health_max_score_award": "0x0bc5fc..0x0bc664 jumps 0x0abdd2; this is BCD score authority, not audio",
+    "remaining_player_unknowns": [
+      "identify every player-origin gameplay-audio trigger through the real main-to-QSound command boundary"
     ],
-    "remaining_player_unknowns": [],
     "route_audio_owner": "gameplay-audio-load-release",
-    "weapon_audio": "retained from the accepted weapon artifact, including the character-indexed empty fallback"
+    "score_award": {
+      "amount_index": "D0 u8 indexes 0x0abf1c",
+      "arithmetic": "four ABCD operations into score bytes +0xe0..+0xe3",
+      "maximum_guard": "unsigned compare against packed BCD 0x09999999",
+      "player_index": "D1 low two bits select A5+0x380 plus index*0x100",
+      "routine": "0x0abdd2..0x0abe18"
+    }
   },
   "capture_identity": {
     "interaction": {
@@ -379,7 +379,9 @@
     "user09_status": "CHANGES_REQUESTED",
     "yaba_runs": 0
   },
-  "remaining_player_unknowns": [],
+  "remaining_player_unknowns": [
+    "player-to-global gameplay-audio trigger ownership pending real dispatcher closure"
+  ],
   "resource_meter": {
     "authority": "debit/recharge remains bound by the accepted weapon artifact; pickup grant is independently bound above",
     "classification": "SOURCE_CLOSED",
@@ -394,6 +396,12 @@
   "schema": "oracle11-predator-route-ownership-v1",
   "scope": "Predator Warrior route-reachable action-phase, target, health pickup, temporary-resource grant, interaction interruption, resource-meter, player-owned audio-call and load/release-edge ownership; other actors and route systems remain separate ORACLE-11 authority families",
   "source_identity": {
+    "bcd_score_award": {
+      "bytes": 70,
+      "end_exclusive": "0x0abe18",
+      "sha256": "a9e95f5b79c5c303fe3cf6b91c09671935e8bad629d232154670896d67b8e0de",
+      "start": "0x0abdd2"
+    },
     "class54_display": {
       "bytes": 182,
       "end_exclusive": "0x094bf0",
@@ -433,7 +441,7 @@
       "start": "0x01ce98"
     }
   },
-  "status": "SOURCE_CLOSED",
+  "status": "PARTIAL",
   "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE",
   "temporary_resource_pickup": {
     "classification": "SOURCE_CLOSED",

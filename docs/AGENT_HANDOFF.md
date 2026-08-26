@@ -28,16 +28,18 @@ reconciles the full-route phase census with input-only counterfactuals: required
 phases `0x0400/02/04/06/0a/0c/0e/10` are closed, while unwitnessed
 `0x0408/12/14` are explicit `NOT_REQUIRED_FOR_ROUND1`. Natural health pickup,
 the source class-`0x0e` temporary-resource grant, interaction completion and
-interruption, player-owned audio calls, and player-to-route load/release edges
-are now also closed. Every route-observed player phase is mapped and the player
-family is `SOURCE_CLOSED`; the latest evidence is in
+interruption, packed-BCD score award, and player-to-route load/release edges
+are now also closed. Every route-observed player phase is mapped. Static and
+dynamic evidence corrected `0x0abdd2` from a former audio label to score
+authority; the real player-to-global gameplay-audio trigger boundary keeps the
+player family `PARTIAL`. The latest evidence is in
 `data/oracle11_predator_route_ownership.json`
 and the sole route-segment x authority-family matrix plus SPEC-02 zero-gap gate
 are in `data/round1_system_coverage.yaml`.
 
-Continue the same card and Goal with the global gameplay-audio/load/release
-family, retaining the exact external ownership edges established by the player
-checkpoint. Do not activate SPEC-02
+Continue the same card and Goal by identifying the real main-to-QSound command
+boundary and binding every player-origin gameplay-audio trigger, retaining the
+closed pickup/resource/score/load edges. Do not activate SPEC-02
 until every completion-route authority is closed or narrowly adapted with
 mutation controls. Do not write production runtime, infer USER-09 approval,
 activate SALVAGE-08 before explicit USER-10 acceptance, or advance physical
