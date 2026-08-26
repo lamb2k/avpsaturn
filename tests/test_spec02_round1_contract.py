@@ -13,6 +13,14 @@ spec02 = importlib.util.module_from_spec(SPEC); SPEC.loader.exec_module(spec02)
 contract = json.loads(spec02.OUT.read_text(encoding="ascii"))
 fixtures = json.loads(spec02.FIXTURES.read_text(encoding="ascii"))
 spec02.validate(contract, fixtures)
+weapon = fixtures["authority_data"]["player"][
+    "weapon_projectile_resource"]["implementation_contract"]
+assert weapon["source_input"]["button1_mask"] == "0x0010"
+assert weapon["sufficient_volley"]["spawn_tick_offsets"] == list(range(0, 48, 4))
+assert weapon["sufficient_volley"]["cleanup_tick_offset"] == 49
+assert weapon["empty_fallback"]["cleanup_tick_offset"] == 17
+assert weapon["projectile_lifecycle_implementation_blocker"][
+    "spec_executable"] is False
 rebuilt_contract, rebuilt_fixtures = spec02.build_artifacts()
 assert spec02.canonical(rebuilt_contract) == spec02.OUT.read_bytes()
 assert spec02.canonical(rebuilt_fixtures) == spec02.FIXTURES.read_bytes()
@@ -33,6 +41,7 @@ m = copy.deepcopy(contract); m["field_contracts"][3]["source"]["json_pointer"] =
 m = copy.deepcopy(contract); m["field_contracts"][4]["mutation_control"]["json_pointer"] = "/missing"; mutations.append((m, fixtures, "missing real mutation"))
 m = copy.deepcopy(contract); m["coverage_gate"]["orphan_authoritative_writers"] = 1; mutations.append((m, fixtures, "weakened gate"))
 f = copy.deepcopy(fixtures); f["authority_data"]["rng"]["algorithm"]["recurrence"] = "guess"; mutations.append((contract, f, "fixture mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["sufficient_volley"]["cadence_reload"] = 3; mutations.append((contract, f, "weapon cadence mutation"))
 m = copy.deepcopy(contract); m["protected_boundaries"]["physical_saturn"] = "PASS"; mutations.append((m, fixtures, "hardware overclaim"))
 m = copy.deepcopy(contract); m["next_card"] = "SALVAGE-08-FRONTEND"; mutations.append((m, fixtures, "frontend bypass"))
 for args in mutations:

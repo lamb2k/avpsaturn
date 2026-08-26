@@ -8,7 +8,7 @@ MAIN = (ROOT / "main.c").read_text()
 REQUIRED = (
     '#include "src/port_v2/gameplay/round1/round1.h"',
     "static AvspRound1Runtime round1_runtime;",
-    "#define AVSP_LIVE_DIAG_SAMPLES 510",
+    "#define AVSP_LIVE_DIAG_SAMPLES 471",
     "avsp_round1_init(&round1_runtime);",
     "avsp_round1_begin_first_entry(&round1_runtime);",
     "avsp_round1_step_first_entry(&round1_runtime)",
@@ -28,6 +28,18 @@ REQUIRED = (
     "avsp_diag_round1_player_stop_entries =",
     "avsp_diag_round1_player_melee_entries =",
     "avsp_diag_round1_player_melee_presentation_mask =",
+    "if (jo_is_pad1_key_down(JO_KEY_A)) mask |= AVSP_ROUND1_INPUT_BUTTON1;",
+    "round1_runtime.player_controller_updates == 210u",
+    "avsp_diag_round1_player_weapon_entries =",
+    "avsp_diag_round1_player_weapon_completions =",
+    "avsp_diag_round1_player_weapon_attempts =",
+    "avsp_diag_round1_player_weapon_allocations =",
+    "avsp_diag_round1_player_weapon_resource_debits =",
+    "avsp_diag_round1_player_weapon_presentation_bindings =",
+    "avsp_diag_round1_player_resource = round1_runtime.player_resource;",
+    "avsp_diag_round1_player_weapon_projectile_free =",
+    "sample->round1_player_weapon_state0 =",
+    "sample->round1_player_weapon_state1 =",
     "round1_runtime.player_controller_updates < 15u",
     "round1_runtime.player_controller_updates != 2u ?",
     "round1_runtime.player_controller_updates == 30u ||",
@@ -45,4 +57,4 @@ for token in REQUIRED[2:]:
 assert "if (round1_runtime.route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE)" in MAIN
 assert "avsp_frontend_draw_round1_text(&frontend_runtime);" in MAIN
 assert "round1_runtime.frame < AVSP_FRONTEND_R1TEXT_CLEAR_FRAME" not in MAIN
-print("REIMPLEMENT-13 target entry/player/scheduler/class1f/global-bounds/neutral-stop/melee wiring: PASS (26 suppressions rejected)")
+print(f"REIMPLEMENT-13 target entry/player/scheduler/class1f/global-bounds/neutral-stop/melee/Button1 wiring: PASS ({len(REQUIRED) - 2} suppressions rejected)")

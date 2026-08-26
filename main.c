@@ -461,9 +461,9 @@ volatile int avsp_diag_slice_enemy_tile_identity;
 #endif
 
 #ifdef AVSP_LIVE_ENCOUNTER
-/* The accepted evidence window ends at frame 470. Keep a bounded reserve while
- * leaving work RAM for per-checkpoint Round 1 authority state. */
-#define AVSP_LIVE_DIAG_SAMPLES 510
+/* The accepted evidence window ends at frame 470. Retain exactly its inclusive
+ * 0..470 ledger while leaving work RAM for source-bound Round 1 state. */
+#define AVSP_LIVE_DIAG_SAMPLES 471
 typedef struct
 {
     int frame;
@@ -511,11 +511,11 @@ typedef struct
     int round1_actor_handler_dispatches;
     int round1_presentation_bindings;
     int round1_state_context_bindings;
-    int round1_navigation_bound_x;
-    int round1_navigation_bound_z;
     int round1_navigation_applications;
     int round1_navigation_clamps;
     unsigned int round1_player_stop_state;
+    unsigned int round1_player_weapon_state0;
+    unsigned int round1_player_weapon_state1;
 } LiveEncounterDiagSample;
 static AvspLiveEncounterRuntime live_encounter_runtime;
 static AvspLiveEncounterFrame live_encounter_frame;
@@ -613,6 +613,18 @@ volatile int avsp_diag_round1_player_melee_completions;
 volatile int avsp_diag_round1_player_melee_selector_mask;
 volatile int avsp_diag_round1_player_melee_presentation_mask;
 volatile int avsp_diag_round1_player_melee_interruptions;
+volatile int avsp_diag_round1_player_weapon_entries;
+volatile int avsp_diag_round1_player_weapon_completions;
+volatile int avsp_diag_round1_player_weapon_attempts;
+volatile int avsp_diag_round1_player_weapon_allocations;
+volatile int avsp_diag_round1_player_weapon_allocation_failures;
+volatile int avsp_diag_round1_player_weapon_resource_debits;
+volatile int avsp_diag_round1_player_weapon_presentation_bindings;
+volatile int avsp_diag_round1_player_weapon_empty_requests;
+volatile int avsp_diag_round1_player_weapon_interruptions;
+volatile int avsp_diag_round1_player_resource;
+volatile int avsp_diag_round1_player_resource_recharge;
+volatile int avsp_diag_round1_player_weapon_projectile_free;
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
 static int live_autotest_phase;
 static int live_autotest_release;
@@ -6600,6 +6612,7 @@ static unsigned short live_encounter_real_input(void)
     if (jo_is_pad1_key_pressed(JO_KEY_RIGHT)) mask |= AVSP_PW_INPUT_RIGHT;
     if (jo_is_pad1_key_pressed(JO_KEY_UP)) mask |= AVSP_PW_INPUT_UP;
     if (jo_is_pad1_key_pressed(JO_KEY_DOWN)) mask |= AVSP_PW_INPUT_DOWN;
+    if (jo_is_pad1_key_down(JO_KEY_A)) mask |= AVSP_ROUND1_INPUT_BUTTON1;
     if (jo_is_pad1_key_down(JO_KEY_B)) mask |= AVSP_PW_INPUT_ATTACK;
     return mask;
 }
@@ -7007,8 +7020,6 @@ static void live_encounter_publish(void)
             (int)round1_runtime.presentation_bindings;
         sample->round1_state_context_bindings =
             (int)round1_runtime.state_context_bindings;
-        sample->round1_navigation_bound_x = round1_runtime.navigation_bound_x;
-        sample->round1_navigation_bound_z = round1_runtime.navigation_bound_z;
         sample->round1_navigation_applications =
             (int)round1_runtime.navigation_applications;
         sample->round1_navigation_clamps =
@@ -7019,6 +7030,20 @@ static void live_encounter_publish(void)
             (((unsigned int)round1_runtime.player_stop_completions & 0xffu) << 12) |
             (((unsigned int)round1_runtime.player_stop_motion_suppressions &
               0x0fffu) << 20);
+        sample->round1_player_weapon_state0 =
+            ((unsigned int)round1_runtime.player_weapon_entries & 0x0fu) |
+            (((unsigned int)round1_runtime.player_weapon_completions & 0x0fu) << 4) |
+            (((unsigned int)round1_runtime.player_weapon_attempts_total & 0x3fu) << 8) |
+            (((unsigned int)round1_runtime.player_weapon_allocations & 0x1fu) << 14) |
+            (((unsigned int)round1_runtime.player_weapon_allocation_failures & 0x1fu) << 19) |
+            (((unsigned int)round1_runtime.player_weapon_resource_debits & 0x1fu) << 24);
+        sample->round1_player_weapon_state1 =
+            ((unsigned int)round1_runtime.player_weapon_presentation_bindings & 0x7fu) |
+            (((unsigned int)round1_runtime.player_weapon_empty_auxiliary_requests & 0x0fu) << 7) |
+            (((unsigned int)round1_runtime.player_weapon_interruptions & 0x0fu) << 11) |
+            (((unsigned int)round1_runtime.player_resource & 0x7fu) << 15) |
+            (((unsigned int)round1_runtime.player_resource_recharge & 0x0fu) << 22) |
+            (((unsigned int)round1_runtime.player_weapon_projectile_free_count & 0x1fu) << 26);
         avsp_diag_live_sample_count = (int)live_encounter_frame.frame + 1;
     }
     avsp_diag_live_interface_version = AVSP_LIVE_ENCOUNTER_INTERFACE_VERSION;
@@ -7077,8 +7102,8 @@ static void live_encounter_publish(void)
     avsp_diag_slice_canaries_ok = playable_slice_frame.canaries_ok;
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
-        AVSP_ROUND1_SPEC02_SHA256[0] == '3' &&
-        AVSP_ROUND1_SPEC02_SHA256[63] == '8';
+        AVSP_ROUND1_SPEC02_SHA256[0] == 'b' &&
+        AVSP_ROUND1_SPEC02_SHA256[63] == '0';
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
     avsp_diag_round1_rng_seed = round1_runtime.rng_seed;
@@ -7143,6 +7168,29 @@ static void live_encounter_publish(void)
         (int)round1_runtime.player_melee_presentation_mask;
     avsp_diag_round1_player_melee_interruptions =
         (int)round1_runtime.player_melee_interruptions;
+    avsp_diag_round1_player_weapon_entries =
+        (int)round1_runtime.player_weapon_entries;
+    avsp_diag_round1_player_weapon_completions =
+        (int)round1_runtime.player_weapon_completions;
+    avsp_diag_round1_player_weapon_attempts =
+        (int)round1_runtime.player_weapon_attempts_total;
+    avsp_diag_round1_player_weapon_allocations =
+        (int)round1_runtime.player_weapon_allocations;
+    avsp_diag_round1_player_weapon_allocation_failures =
+        (int)round1_runtime.player_weapon_allocation_failures;
+    avsp_diag_round1_player_weapon_resource_debits =
+        (int)round1_runtime.player_weapon_resource_debits;
+    avsp_diag_round1_player_weapon_presentation_bindings =
+        (int)round1_runtime.player_weapon_presentation_bindings;
+    avsp_diag_round1_player_weapon_empty_requests =
+        (int)round1_runtime.player_weapon_empty_auxiliary_requests;
+    avsp_diag_round1_player_weapon_interruptions =
+        (int)round1_runtime.player_weapon_interruptions;
+    avsp_diag_round1_player_resource = round1_runtime.player_resource;
+    avsp_diag_round1_player_resource_recharge =
+        round1_runtime.player_resource_recharge;
+    avsp_diag_round1_player_weapon_projectile_free =
+        round1_runtime.player_weapon_projectile_free_count;
 }
 
 static void live_encounter_frame_callback(void)
@@ -7196,12 +7244,15 @@ static void live_encounter_frame_callback(void)
     else if (round1_runtime.route_state == 4)
     {
         round1_player_mask = (unsigned short)(round1_player_mask &
-            (unsigned short)~AVSP_PW_INPUT_ATTACK);
+            (unsigned short)~(AVSP_PW_INPUT_ATTACK |
+                              AVSP_ROUND1_INPUT_BUTTON1));
         if (round1_runtime.player_controller_updates == 30u ||
             round1_runtime.player_controller_updates == 72u ||
             round1_runtime.player_controller_updates == 114u ||
             round1_runtime.player_controller_updates == 161u)
             round1_player_mask |= AVSP_PW_INPUT_ATTACK;
+        if (round1_runtime.player_controller_updates == 210u)
+            round1_player_mask |= AVSP_ROUND1_INPUT_BUTTON1;
     }
 #endif
     if (round1_runtime.route_state == 4 &&

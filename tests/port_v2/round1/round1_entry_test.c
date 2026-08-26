@@ -213,9 +213,130 @@ int main(void)
     if (!avsp_pw_can_control(&runtime.player_action) ||
         !avsp_round1_entry_valid(&runtime))
         return 25;
+    {
+        AvspRound1Runtime weapon_runtime = runtime;
+        short weapon_x = weapon_runtime.player.x;
+        short weapon_z = weapon_runtime.player.z;
+        unsigned long debit_count;
+        if (!avsp_round1_step_player(&weapon_runtime,
+                AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_RIGHT, 0) ||
+            weapon_runtime.player_weapon_active != 1u ||
+            weapon_runtime.player_weapon_tick != 1u ||
+            weapon_runtime.player.source_action != 0x0c00u ||
+            weapon_runtime.player.substate != 0u ||
+            weapon_runtime.player.animation_record != 0x001642f4UL ||
+            weapon_runtime.player.assembly != 0x00165694UL ||
+            weapon_runtime.player_weapon_entries != 1u ||
+            weapon_runtime.player_weapon_attempts_total != 1u ||
+            weapon_runtime.player_weapon_allocations != 1u ||
+            weapon_runtime.player_weapon_resource_debits != 1u ||
+            weapon_runtime.player_resource != 61u ||
+            weapon_runtime.player_resource_recharge != 11u ||
+            weapon_runtime.player.x != weapon_x ||
+            weapon_runtime.player.z != weapon_z)
+            return 26;
+        if (!avsp_round1_step_player(&weapon_runtime, 0u, 0) ||
+            weapon_runtime.player.source_action != 0x0c02u ||
+            weapon_runtime.player.animation_record != 0x00165400UL)
+            return 27;
+        while (weapon_runtime.player_weapon_tick < 48u)
+            if (!avsp_round1_step_player(&weapon_runtime, 0u, 0))
+                return 28;
+        if (!avsp_round1_step_player(&weapon_runtime,
+                AVSP_ROUND1_INPUT_BUTTON1, 0) ||
+            weapon_runtime.player_weapon_recovery_pending != 1u ||
+            weapon_runtime.player_weapon_tick != 49u ||
+            !avsp_round1_step_player(&weapon_runtime,
+                AVSP_ROUND1_INPUT_BUTTON1, 0) ||
+            weapon_runtime.player_weapon_active != 0u ||
+            weapon_runtime.player_weapon_cleanup_pending != 1u ||
+            weapon_runtime.player.source_action != 0u ||
+            weapon_runtime.player_weapon_completions != 1u ||
+            weapon_runtime.player_weapon_allocations != 12u ||
+            weapon_runtime.player_resource != 28u ||
+            !avsp_round1_step_player(&weapon_runtime,
+                AVSP_ROUND1_INPUT_BUTTON1, 0) ||
+            weapon_runtime.player_weapon_active != 1u ||
+            weapon_runtime.player_weapon_tick != 1u ||
+            weapon_runtime.player.source_action != 0x0c00u ||
+            weapon_runtime.player_weapon_entries != 2u)
+            return 29;
+        if (!avsp_round1_step_player(&weapon_runtime, 0u, 0))
+            return 30;
+        while (weapon_runtime.player_weapon_active)
+            if (!avsp_round1_step_player(&weapon_runtime, 0u, 0))
+                return 31;
+        if (weapon_runtime.player_weapon_completions != 2u ||
+            weapon_runtime.player_weapon_allocations != 24u ||
+            weapon_runtime.player_weapon_projectile_free_count != 0u ||
+            weapon_runtime.player_weapon_projectiles[7].variant != 1u ||
+            weapon_runtime.player_weapon_projectiles[19].variant != 1u ||
+            weapon_runtime.player_weapon_projectiles[23].source_slot !=
+                0x9200u ||
+            weapon_runtime.player_weapon_projectiles[23].owner != 0x8380u ||
+            weapon_runtime.player_weapon_projectiles[23].attack_table !=
+                0x03136aUL)
+            return 32;
+        if (!avsp_round1_step_player(&weapon_runtime, 0u, 0))
+            return 33;
+        weapon_runtime.player_resource = 64u;
+        weapon_runtime.player_resource_recharge = 12u;
+        weapon_runtime.player_resource_depleted = 0u;
+        debit_count = weapon_runtime.player_weapon_resource_debits;
+        if (!avsp_round1_step_player(&weapon_runtime,
+                AVSP_ROUND1_INPUT_BUTTON1, 0) ||
+            !avsp_round1_step_player(&weapon_runtime, 0u, 0))
+            return 34;
+        while (weapon_runtime.player_weapon_active)
+            if (!avsp_round1_step_player(&weapon_runtime, 0u, 0))
+                return 35;
+        if (weapon_runtime.player_weapon_attempts_total != 36u ||
+            weapon_runtime.player_weapon_allocation_failures != 12u ||
+            weapon_runtime.player_weapon_allocations != 24u ||
+            weapon_runtime.player_weapon_resource_debits != debit_count ||
+            weapon_runtime.player_resource != 64u)
+            return 36;
+        if (!avsp_round1_step_player(&weapon_runtime, 0u, 0))
+            return 37;
+        weapon_runtime.player_resource = 0u;
+        weapon_runtime.player_resource_recharge = 12u;
+        weapon_runtime.player_resource_depleted = 1u;
+        if (!avsp_round1_step_player(&weapon_runtime,
+                AVSP_ROUND1_INPUT_BUTTON1, 0) ||
+            weapon_runtime.player.source_action != 0x1a00u ||
+            weapon_runtime.player_weapon_empty != 1u ||
+            weapon_runtime.player_weapon_empty_auxiliary_requests != 1u ||
+            weapon_runtime.player_weapon_allocations != 24u)
+            return 38;
+        if (!avsp_round1_step_player(&weapon_runtime, 0u, 0) ||
+            weapon_runtime.player.source_action != 0x1a02u ||
+            weapon_runtime.player.animation_record != 0x001645d4UL ||
+            weapon_runtime.player.assembly != 0x00166bf8UL)
+            return 39;
+        while (weapon_runtime.player_weapon_active)
+            if (!avsp_round1_step_player(&weapon_runtime, 0u, 0))
+                return 40;
+        if (weapon_runtime.player_weapon_completions != 4u ||
+            weapon_runtime.player.source_action != 0u ||
+            !avsp_round1_step_player(&weapon_runtime, 0u, 0) ||
+            weapon_runtime.player.source_action != 2u)
+            return 41;
+        weapon_runtime.player_resource = 64u;
+        weapon_runtime.player_resource_recharge = 12u;
+        weapon_runtime.player_resource_depleted = 0u;
+        if (!avsp_round1_step_player(&weapon_runtime,
+                AVSP_ROUND1_INPUT_BUTTON1, 0) ||
+            !avsp_round1_step_player(&weapon_runtime, 0u, 8) ||
+            weapon_runtime.player_weapon_active != 0u ||
+            weapon_runtime.player_weapon_interruptions != 1u ||
+            weapon_runtime.player_action.state != AVSP_PW_STATE_HIT ||
+            weapon_runtime.player.source_action != 514u ||
+            !avsp_round1_entry_valid(&weapon_runtime))
+            return 42;
+    }
     runtime.entry.gate8236 = 1u;
     if (avsp_round1_entry_valid(&runtime))
-        return 26;
-    puts("REIMPLEMENT-13 native entry/player/scheduler/class1f/global-bounds/neutral-stop/melee: PASS");
+        return 43;
+    puts("REIMPLEMENT-13 native entry/player/scheduler/class1f/global-bounds/neutral-stop/melee/Button1-resource-allocation: PASS");
     return 0;
 }

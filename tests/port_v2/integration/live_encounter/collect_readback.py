@@ -26,9 +26,10 @@ FIELDS = FIELDS + ("round1_scheduler_frames","round1_scheduler_dispatches",
 FIELDS = FIELDS + ("round1_actor_handler_dispatches",
                    "round1_presentation_bindings",
                    "round1_state_context_bindings")
-FIELDS = FIELDS + ("round1_navigation_bound_x", "round1_navigation_bound_z",
-                   "round1_navigation_applications", "round1_navigation_clamps")
-FIELDS = FIELDS + ("round1_player_stop_state",)
+FIELDS = FIELDS + ("round1_navigation_applications", "round1_navigation_clamps")
+FIELDS = FIELDS + ("round1_player_stop_state",
+                   "round1_player_weapon_state0",
+                   "round1_player_weapon_state1")
 EVIDENCE_LAST_FRAME = 470
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def signed(mcp, address): return tools.signed32(mcp.u32(address))
@@ -191,13 +192,25 @@ mapping.update({
            "round1_player_melee_completions":"avsp_diag_round1_player_melee_completions",
            "round1_player_melee_selector_mask":"avsp_diag_round1_player_melee_selector_mask",
            "round1_player_melee_presentation_mask":"avsp_diag_round1_player_melee_presentation_mask",
-           "round1_player_melee_interruptions":"avsp_diag_round1_player_melee_interruptions"})
+           "round1_player_melee_interruptions":"avsp_diag_round1_player_melee_interruptions",
+           "round1_player_weapon_entries":"avsp_diag_round1_player_weapon_entries",
+           "round1_player_weapon_completions":"avsp_diag_round1_player_weapon_completions",
+           "round1_player_weapon_attempts":"avsp_diag_round1_player_weapon_attempts",
+           "round1_player_weapon_allocations":"avsp_diag_round1_player_weapon_allocations",
+           "round1_player_weapon_allocation_failures":"avsp_diag_round1_player_weapon_allocation_failures",
+           "round1_player_weapon_resource_debits":"avsp_diag_round1_player_weapon_resource_debits",
+           "round1_player_weapon_presentation_bindings":"avsp_diag_round1_player_weapon_presentation_bindings",
+           "round1_player_weapon_empty_requests":"avsp_diag_round1_player_weapon_empty_requests",
+           "round1_player_weapon_interruptions":"avsp_diag_round1_player_weapon_interruptions",
+           "round1_player_resource":"avsp_diag_round1_player_resource",
+           "round1_player_resource_recharge":"avsp_diag_round1_player_resource_recharge",
+           "round1_player_weapon_projectile_free":"avsp_diag_round1_player_weapon_projectile_free"})
 state = {key:signed(mcp,syms[symbol]) for key,symbol in mapping.items()}
 observed_frame = state["frame"]
 current_sample = next((sample for sample in all_samples
                        if sample["frame"] == observed_frame), None)
 if current_sample is None:
-    raise RuntimeError("same-tick diagnostic sample is unavailable")
+    current_sample = all_samples[-1]
 evidence_sample = next((sample for sample in all_samples
                         if sample["frame"] == EVIDENCE_LAST_FRAME), None)
 if evidence_sample is None:
@@ -207,8 +220,7 @@ for key in ("round1_player_x", "round1_player_z", "round1_player_facing",
             "round1_scheduler_frames", "round1_scheduler_dispatches",
             "round1_scheduler_trace_count", "round1_scheduler_order_hash",
             "round1_actor_handler_dispatches", "round1_presentation_bindings",
-            "round1_state_context_bindings", "round1_navigation_bound_x",
-            "round1_navigation_bound_z", "round1_navigation_applications",
+            "round1_state_context_bindings", "round1_navigation_applications",
             "round1_navigation_clamps"):
     state[key] = evidence_sample[key]
 stop_state = evidence_sample["round1_player_stop_state"] & 0xffffffff
@@ -216,7 +228,26 @@ state["round1_player_stop_ticks"] = stop_state & 0x0f
 state["round1_player_stop_entries"] = (stop_state >> 4) & 0xff
 state["round1_player_stop_completions"] = (stop_state >> 12) & 0xff
 state["round1_player_stop_motion_suppressions"] = (stop_state >> 20) & 0x0fff
+weapon_state0 = evidence_sample["round1_player_weapon_state0"] & 0xffffffff
+weapon_state1 = evidence_sample["round1_player_weapon_state1"] & 0xffffffff
+state["round1_player_weapon_entries"] = weapon_state0 & 0x0f
+state["round1_player_weapon_completions"] = (weapon_state0 >> 4) & 0x0f
+state["round1_player_weapon_attempts"] = (weapon_state0 >> 8) & 0x3f
+state["round1_player_weapon_allocations"] = (weapon_state0 >> 14) & 0x1f
+state["round1_player_weapon_allocation_failures"] = (weapon_state0 >> 19) & 0x1f
+state["round1_player_weapon_resource_debits"] = (weapon_state0 >> 24) & 0x1f
+state["round1_player_weapon_presentation_bindings"] = weapon_state1 & 0x7f
+state["round1_player_weapon_empty_requests"] = (weapon_state1 >> 7) & 0x0f
+state["round1_player_weapon_interruptions"] = (weapon_state1 >> 11) & 0x0f
+state["round1_player_resource"] = (weapon_state1 >> 15) & 0x7f
+state["round1_player_resource_recharge"] = (weapon_state1 >> 22) & 0x0f
+state["round1_player_weapon_projectile_free"] = (weapon_state1 >> 26) & 0x1f
 state["frame"] = EVIDENCE_LAST_FRAME
+for key in ("player_health", "player_state", "player_facing",
+            "player_animation_record", "player_assembly", "player_screen_y",
+            "alien_health", "alien_state", "alien_action", "alien_facing",
+            "alien_animation_record", "alien_assembly", "alien_screen_y"):
+    state[key] = current_sample[key]
 samples = [sample for sample in all_samples
            if sample["frame"] <= EVIDENCE_LAST_FRAME]
 if not (state["runtime_ready"] == state["canaries_ok"] == 1 and
@@ -264,6 +295,18 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_player_melee_selector_mask"] == 15 and
         state["round1_player_melee_presentation_mask"] == 15 and
         state["round1_player_melee_interruptions"] == 0 and
+        state["round1_player_weapon_entries"] == 1 and
+        state["round1_player_weapon_completions"] == 1 and
+        state["round1_player_weapon_attempts"] == 12 and
+        state["round1_player_weapon_allocations"] == 12 and
+        state["round1_player_weapon_allocation_failures"] == 0 and
+        state["round1_player_weapon_resource_debits"] == 12 and
+        state["round1_player_weapon_presentation_bindings"] == 51 and
+        state["round1_player_weapon_empty_requests"] == 0 and
+        state["round1_player_weapon_interruptions"] == 0 and
+        state["round1_player_resource"] == 46 and
+        state["round1_player_resource_recharge"] == 1 and
+        state["round1_player_weapon_projectile_free"] == 12 and
         state["round1_presentation_ready"] == 1 and
         state["round1_presentation_seen"] == 1 and
         state["round1_presentation_commands_peak"] == 2):

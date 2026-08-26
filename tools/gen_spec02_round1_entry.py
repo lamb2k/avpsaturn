@@ -64,6 +64,15 @@ def build() -> str:
     melee_selectors = close_combo["attack_selectors"]
     melee_steps = close_combo["step_values"]
     melee_strikes = []
+    weapon = fixtures["authority_data"]["player"][
+        "weapon_projectile_resource"]["implementation_contract"]
+    weapon_states = weapon["state_dispatch"]
+    weapon_volley = weapon["sufficient_volley"]
+    weapon_resource = weapon["resource_tick"]
+    weapon_empty = weapon["empty_fallback"]
+    weapon_frames = weapon["presentation_timeline"]
+    empty_frames = weapon_empty["presentation_timeline"]
+    weapon_return_frame = weapon["return_frame"]
     first_segment_bounds = next(
         run for run in global_bounds["baseline_bound_runs"]
         if run["route"] == 4 and run["bound_x"] == 720 and
@@ -126,6 +135,76 @@ def build() -> str:
         if len(strikes) != 1:
             raise ValueError("SPEC-02 melee strike presentation drift")
         melee_strikes.append(strikes[0])
+    if (weapon["classification"] != "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        weapon["source_input"]["button1_mask"] != "0x0010" or
+        weapon_states != {
+            "sufficient_entry_action": "0x0c00",
+            "sufficient_active_action": "0x0c02",
+            "empty_entry_action": "0x1a00",
+            "empty_active_action": "0x1a02",
+            "cleanup_action": "0x0000",
+            "return_locomotion_action": "0x0002"} or
+        weapon_volley["attempt_counter_type"] != "s8" or
+        weapon_volley["attempt_counter_initial"] != 12 or
+        weapon_volley["cadence_counter_type"] != "u8" or
+        weapon_volley["cadence_initial"] != 1 or
+        weapon_volley["cadence_reload"] != 4 or
+        weapon_volley["spawn_tick_offsets"] != list(range(0, 48, 4)) or
+        weapon_volley["cleanup_tick_offset"] != 49 or
+        weapon_volley["return_to_locomotion_tick_offset"] != 50 or
+        weapon_volley["recovery_edge"] != {
+            "input_tick_offset": 48,
+            "cleanup_tick_offset": 49,
+            "second_entry_tick_offset": 50} or
+        weapon_volley["resource_debit"] != 3 or
+        weapon_volley["resource_clamp_min"] != 0 or
+        weapon_volley["resource_capacity"] != 64 or
+        weapon_volley["recharge_countdown_after_success"] != 12 or
+        weapon_volley["rng_calls"] != 0 or
+        weapon_resource["normal_recharge_reload"] != 2 or
+        weapon_resource["depleted_recharge_reload"] != 6 or
+        weapon_empty["timer_type"] != "u8" or
+        weapon_empty["timer_initial"] != 16 or
+        weapon_empty["cleanup_tick_offset"] != 17 or
+        weapon_empty["return_to_locomotion_tick_offset"] != 18 or
+        weapon_empty["damaging_projectile_count"] != 0 or
+        weapon["movement_facing"]["baseline_invariant"] is not True):
+        raise ValueError("SPEC-02 Button1 action/resource contract drift")
+    allocation = weapon_volley["successful_allocation_writes"]
+    blocker = weapon["projectile_lifecycle_implementation_blocker"]
+    if (allocation != {
+            "active_increment": 1,
+            "attack_table": "0x03136a",
+            "class": "0x05",
+            "facing": "copy player facing",
+            "owner": "player low-word pointer",
+            "position": "copy player x/y/z",
+            "variant": "0 except attempt counter 4 writes 1"} or
+        blocker["spec_executable"] is not False or
+        len(blocker["missing_fields"]) != 5):
+        raise ValueError("SPEC-02 projectile allocation/blocker drift")
+    projectile_authority = fixtures["authority_data"]["player"][
+        "weapon_projectile_resource"]["authority_separation"][
+            "projectile_lifecycle"]
+    if (projectile_authority["pool"] !=
+            "record type 4; base 0xff8680; capacity 24; stride 0x80" or
+        projectile_authority["allocator"] != "0x01773e" or
+        projectile_authority["class"] != "0x05"):
+        raise ValueError("SPEC-02 projectile allocator identity drift")
+    if ([row["tick"] for row in weapon_frames] != list(range(50)) or
+        [row["tick"] for row in empty_frames] != list(range(18)) or
+        weapon_frames[0]["action"] != 0x0c00 or
+        any(row["action"] != 0x0c02 for row in weapon_frames[1:49]) or
+        weapon_frames[49]["action"] != 0 or
+        empty_frames[0]["action"] != 0x1a00 or
+        any(row["action"] != 0x1a02 for row in empty_frames[1:17]) or
+        empty_frames[17]["action"] != 0 or
+        weapon_return_frame != {
+            "tick": 50, "action": 2, "substate": 2,
+            "animation_record": "0x00163158",
+            "assembly": "0x00165488", "hurt_selector": 1,
+            "attack_selector": 0}):
+        raise ValueError("SPEC-02 Button1 presentation timeline drift")
 
     cursor = int(player["initial_cursor"], 16)
     step_rows = []
@@ -248,7 +327,62 @@ def build() -> str:
             "    { %sUL, %sUL, %du, %du }," % (
                 row["record"], row["assembly"], row["hurt_selector"],
                 row["attack_selector"]))
-    lines.extend(["};", "", "#endif", ""])
+    lines.extend([
+        "};", "",
+        "static const AvspRound1PlayerWeaponSpec avsp_round1_player_weapon =",
+        "{",
+        f"    {int(weapon_states['sufficient_entry_action'], 16)}u,",
+        f"    {int(weapon_states['sufficient_active_action'], 16)}u,",
+        f"    {int(weapon_states['empty_entry_action'], 16)}u,",
+        f"    {int(weapon_states['empty_active_action'], 16)}u,",
+        f"    {int(weapon_states['cleanup_action'], 16)}u,",
+        f"    {int(weapon_states['return_locomotion_action'], 16)}u,",
+        f"    {weapon_volley['attempt_counter_initial']},",
+        f"    {weapon_volley['cadence_initial']}u,",
+        f"    {weapon_volley['cadence_reload']}u,",
+        f"    {weapon_empty['timer_initial']}u,",
+        f"    {weapon_volley['resource_capacity']}u,",
+        f"    {weapon_volley['resource_debit']}u,",
+        f"    {weapon_volley['recharge_countdown_after_success']}u,",
+        f"    {weapon_resource['normal_recharge_reload']}u,",
+        f"    {weapon_resource['depleted_recharge_reload']}u,",
+        "    0x05,",
+        "    0x8680u,",
+        "    0x0080u,",
+        "    0x8380u,",
+        "    0x03136aUL",
+        "};", "",
+        "static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_frames[AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in weapon_frames:
+        lines.append(
+            "    { %du, %du, %sUL, %sUL, %du, %du }," % (
+                row["action"], row["substate"], row["animation_record"],
+                row["assembly"], row["hurt_selector"],
+                row["attack_selector"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_empty_frames[AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in empty_frames:
+        lines.append(
+            "    { %du, %du, %sUL, %sUL, %du, %du }," % (
+                row["action"], row["substate"], row["animation_record"],
+                row["assembly"], row["hurt_selector"],
+                row["attack_selector"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_return_frame =",
+        "{",
+        "    %du, %du, %sUL, %sUL, %du, %du" % (
+            weapon_return_frame["action"], weapon_return_frame["substate"],
+            weapon_return_frame["animation_record"],
+            weapon_return_frame["assembly"],
+            weapon_return_frame["hurt_selector"],
+            weapon_return_frame["attack_selector"]),
+        "};", "", "#endif", ""])
     return "\n".join(lines)
 
 

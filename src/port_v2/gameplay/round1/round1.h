@@ -4,7 +4,7 @@
 #include "../player_action/player_action.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "3cfa5410fee3942a9bd6bb515f10aefdd293ee4cd628fb503d9685bce4c7c3f8"
+    "b4680e6fe10abf2ddcdb431a06ed03210344eff92c3d4674797df8e482f8d4a0"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -21,6 +21,10 @@
 #define AVSP_ROUND1_PLAYER_ENTRY_STATE 2048u
 #define AVSP_ROUND1_PLAYER_CONTROL_STATE 512u
 #define AVSP_ROUND1_PLAYER_MELEE_COUNT 4u
+#define AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT 50u
+#define AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT 18u
+#define AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY 24u
+#define AVSP_ROUND1_INPUT_BUTTON1 0x0010u
 
 #define AVSP_ROUND1_ENTRY_SET_POSITION 1u
 #define AVSP_ROUND1_ENTRY_SET_SUBHANDLER 2u
@@ -102,6 +106,54 @@ typedef struct
     unsigned char selectors[AVSP_ROUND1_PLAYER_MELEE_COUNT];
     unsigned char step_values[AVSP_ROUND1_PLAYER_MELEE_COUNT];
 } AvspRound1PlayerMeleeSpec;
+
+typedef struct
+{
+    unsigned short action;
+    unsigned short substate;
+    unsigned long animation_record;
+    unsigned long assembly;
+    unsigned char hurt_selector;
+    unsigned char attack_selector;
+} AvspRound1PlayerWeaponFrameSpec;
+
+typedef struct
+{
+    unsigned short sufficient_entry_action;
+    unsigned short sufficient_active_action;
+    unsigned short empty_entry_action;
+    unsigned short empty_active_action;
+    unsigned short cleanup_action;
+    unsigned short return_action;
+    signed char attempt_initial;
+    unsigned char cadence_initial;
+    unsigned char cadence_reload;
+    unsigned char empty_timer_initial;
+    unsigned char resource_capacity;
+    unsigned char resource_debit;
+    unsigned char recharge_after_success;
+    unsigned char normal_recharge_reload;
+    unsigned char depleted_recharge_reload;
+    signed char projectile_class;
+    unsigned short projectile_source_base;
+    unsigned short projectile_stride;
+    unsigned short player_owner;
+    unsigned long projectile_attack_table;
+} AvspRound1PlayerWeaponSpec;
+
+typedef struct
+{
+    unsigned char active;
+    signed char actor_class;
+    unsigned char variant;
+    unsigned char facing;
+    unsigned short source_slot;
+    unsigned short owner;
+    short x;
+    short y;
+    short z;
+    unsigned long attack_table;
+} AvspRound1WeaponProjectileAllocation;
 
 typedef struct
 {
@@ -208,6 +260,34 @@ typedef struct
     unsigned long player_melee_selector_mask;
     unsigned long player_melee_presentation_mask;
     unsigned long player_melee_interruptions;
+    unsigned char player_weapon_active;
+    unsigned char player_weapon_empty;
+    unsigned char player_weapon_tick;
+    unsigned char player_weapon_cadence;
+    signed char player_weapon_attempts;
+    unsigned char player_weapon_empty_timer;
+    unsigned char player_weapon_previous_pressed;
+    unsigned char player_weapon_cleanup_pending;
+    unsigned char player_weapon_return_pending;
+    unsigned char player_weapon_recovery_pending;
+    unsigned char player_resource;
+    unsigned char player_resource_recharge;
+    unsigned char player_resource_depleted;
+    unsigned char player_weapon_projectile_free_count;
+    AvspRound1WeaponProjectileAllocation player_weapon_projectiles[
+        AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY];
+    unsigned long player_weapon_entries;
+    unsigned long player_weapon_completions;
+    unsigned long player_weapon_attempts_total;
+    unsigned long player_weapon_allocations;
+    unsigned long player_weapon_allocation_failures;
+    unsigned long player_weapon_resource_debits;
+    unsigned long player_weapon_held_suppressions;
+    unsigned long player_weapon_motion_suppressions;
+    unsigned long player_weapon_interruptions;
+    unsigned long player_weapon_presentation_bindings;
+    unsigned long player_weapon_empty_auxiliary_requests;
+    unsigned long player_resource_recharges;
     unsigned long failure_count;
     unsigned long fallback_count;
     unsigned long tail_canary;

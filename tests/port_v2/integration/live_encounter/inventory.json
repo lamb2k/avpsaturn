@@ -89,6 +89,18 @@
     ,"avsp_diag_round1_player_melee_selector_mask"
     ,"avsp_diag_round1_player_melee_presentation_mask"
     ,"avsp_diag_round1_player_melee_interruptions"
+    ,"avsp_diag_round1_player_weapon_entries"
+    ,"avsp_diag_round1_player_weapon_completions"
+    ,"avsp_diag_round1_player_weapon_attempts"
+    ,"avsp_diag_round1_player_weapon_allocations"
+    ,"avsp_diag_round1_player_weapon_allocation_failures"
+    ,"avsp_diag_round1_player_weapon_resource_debits"
+    ,"avsp_diag_round1_player_weapon_presentation_bindings"
+    ,"avsp_diag_round1_player_weapon_empty_requests"
+    ,"avsp_diag_round1_player_weapon_interruptions"
+    ,"avsp_diag_round1_player_resource"
+    ,"avsp_diag_round1_player_resource_recharge"
+    ,"avsp_diag_round1_player_weapon_projectile_free"
     ,"failed_asset"
   ]
 }

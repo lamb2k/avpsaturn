@@ -26,7 +26,7 @@
         "guard": "0x01a6f4 source edge/resource checks",
         "phase": "0x0406",
         "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
-        "resource_artifact_sha256": "fcd693b2d71848b946c813448ec16951f2b94fc57d9bd30e8d0b22408fe2d50c",
+        "resource_artifact_sha256": "b0c0e1e86d862f7570df28db1305306b5c6295d4b4dc9b05acaa7c30e4207fab",
         "resource_status": "SOURCE_CLOSED",
         "spawn_branch": "0x023858",
         "writer": "0x023860"
@@ -8162,6 +8162,736 @@
         "qsound.tsv"
       ],
       "independent_cold_runs": 2
+    },
+    "implementation_contract": {
+      "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+      "empty_fallback": {
+        "auxiliary_actor": {
+          "class": "0x10",
+          "facing": "copy player facing",
+          "position": "copy player x/y",
+          "record_type": 24
+        },
+        "cleanup_tick_offset": 17,
+        "damaging_projectile_count": 0,
+        "presentation_timeline": [
+          {
+            "action": 6656,
+            "animation_record": "0x001642f4",
+            "assembly": "0x00165694",
+            "attack_selector": 0,
+            "hurt_selector": 0,
+            "substate": 0,
+            "tick": 0
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 1
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 2
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 3
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 4
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 5
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 6
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 7
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 8
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 9
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 10
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 11
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 12
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 13
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 14
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 15
+          },
+          {
+            "action": 6658,
+            "animation_record": "0x001645d4",
+            "assembly": "0x00166bf8",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 2,
+            "tick": 16
+          },
+          {
+            "action": 0,
+            "animation_record": "0x00163158",
+            "assembly": "0x00165488",
+            "attack_selector": 0,
+            "hurt_selector": 1,
+            "substate": 0,
+            "tick": 17
+          }
+        ],
+        "return_to_locomotion_tick_offset": 18,
+        "timer_initial": 16,
+        "timer_type": "u8"
+      },
+      "movement_facing": {
+        "baseline_invariant": true,
+        "rule": "hold x/y/z and facing for the complete Button1 action"
+      },
+      "mutation_controls": [
+        "reject Button1 held redispatch",
+        "reject cadence other than ticks 0..44 step 4",
+        "reject debit without allocation",
+        "reject debit other than 3 or missing zero clamp",
+        "reject recovery before tick 49",
+        "reject movement or facing during action",
+        "reject recharge before action update",
+        "reject fixed-frame projectile hit or removal"
+      ],
+      "presentation_timeline": [
+        {
+          "action": 3072,
+          "animation_record": "0x001642f4",
+          "assembly": "0x00165694",
+          "attack_selector": 0,
+          "hurt_selector": 0,
+          "substate": 0,
+          "tick": 0
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165400",
+          "assembly": "0x00166bf8",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 1
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165410",
+          "assembly": "0x00166c22",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 2
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165410",
+          "assembly": "0x00166c22",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 3
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165420",
+          "assembly": "0x00166c4c",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 4
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165400",
+          "assembly": "0x00166bf8",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 5
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165410",
+          "assembly": "0x00166c22",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 6
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165410",
+          "assembly": "0x00166c22",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 7
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165420",
+          "assembly": "0x00166c4c",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 8
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165444",
+          "assembly": "0x00166c76",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 9
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165454",
+          "assembly": "0x00166c9a",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 10
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165454",
+          "assembly": "0x00166c9a",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 11
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165464",
+          "assembly": "0x00166cbe",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 12
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165444",
+          "assembly": "0x00166c76",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 13
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165454",
+          "assembly": "0x00166c9a",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 14
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165454",
+          "assembly": "0x00166c9a",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 15
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165464",
+          "assembly": "0x00166cbe",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 16
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165048",
+          "assembly": "0x001666be",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 17
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165058",
+          "assembly": "0x001666dc",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 18
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165058",
+          "assembly": "0x001666dc",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 19
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165068",
+          "assembly": "0x001666fa",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 20
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x0016508c",
+          "assembly": "0x00166718",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 21
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x0016509c",
+          "assembly": "0x00166736",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 22
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x0016509c",
+          "assembly": "0x00166736",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 23
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x001650ac",
+          "assembly": "0x00166754",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 24
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x0016508c",
+          "assembly": "0x00166718",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 25
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x0016509c",
+          "assembly": "0x00166736",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 26
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x0016509c",
+          "assembly": "0x00166736",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 27
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x001650ac",
+          "assembly": "0x00166754",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 28
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165048",
+          "assembly": "0x001666be",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 29
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165058",
+          "assembly": "0x001666dc",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 30
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165058",
+          "assembly": "0x001666dc",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 31
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165068",
+          "assembly": "0x001666fa",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 32
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165444",
+          "assembly": "0x00166c76",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 33
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165454",
+          "assembly": "0x00166c9a",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 34
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165454",
+          "assembly": "0x00166c9a",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 35
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165464",
+          "assembly": "0x00166cbe",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 36
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165444",
+          "assembly": "0x00166c76",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 37
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165454",
+          "assembly": "0x00166c9a",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 38
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165454",
+          "assembly": "0x00166c9a",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 39
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165464",
+          "assembly": "0x00166cbe",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 40
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165400",
+          "assembly": "0x00166bf8",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 41
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165410",
+          "assembly": "0x00166c22",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 42
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165410",
+          "assembly": "0x00166c22",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 43
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165420",
+          "assembly": "0x00166c4c",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 44
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165400",
+          "assembly": "0x00166bf8",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 45
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165410",
+          "assembly": "0x00166c22",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 46
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165410",
+          "assembly": "0x00166c22",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 47
+        },
+        {
+          "action": 3074,
+          "animation_record": "0x00165420",
+          "assembly": "0x00166c4c",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 2,
+          "tick": 48
+        },
+        {
+          "action": 0,
+          "animation_record": "0x00163158",
+          "assembly": "0x00165488",
+          "attack_selector": 0,
+          "hurt_selector": 1,
+          "substate": 0,
+          "tick": 49
+        }
+      ],
+      "projectile_lifecycle_implementation_blocker": {
+        "missing_fields": [
+          "class-0x05 per-state timers and fixed-point motion arithmetic",
+          "target-to-vector branch/table values",
+          "per-state animation/assembly identity",
+          "collision-result-to-impact initialization writes",
+          "exact removal bounds arithmetic and release timing"
+        ],
+        "spec_executable": false,
+        "unblock": "amend this existing Oracle/SPEC fixture with only those bounded class-0x05 fields before native projectile motion or damage is claimed"
+      },
+      "resource_tick": {
+        "depleted_recharge_reload": 6,
+        "normal_recharge_reload": 2,
+        "order": "after player action/projectile allocation and before HUD projection",
+        "rule": "when meter is below 64, decrement u8 countdown; zero increments meter by one and reloads by depleted latch"
+      },
+      "return_frame": {
+        "action": 2,
+        "animation_record": "0x00163158",
+        "assembly": "0x00165488",
+        "attack_selector": 0,
+        "hurt_selector": 1,
+        "substate": 2,
+        "tick": 50
+      },
+      "source_input": {
+        "button1_mask": "0x0010",
+        "guard": "new Button1 edge after B1+B2 guard; normal player state and no conflicting action latch"
+      },
+      "state_dispatch": {
+        "cleanup_action": "0x0000",
+        "empty_active_action": "0x1a02",
+        "empty_entry_action": "0x1a00",
+        "return_locomotion_action": "0x0002",
+        "sufficient_active_action": "0x0c02",
+        "sufficient_entry_action": "0x0c00"
+      },
+      "sufficient_volley": {
+        "allocation_failure_rule": "advance cadence without resource debit",
+        "allocator_guard": "record-type-4 allocator returns nonzero",
+        "attempt_counter_initial": 12,
+        "attempt_counter_rule": "decrement before allocation; signed negative completes without allocation",
+        "attempt_counter_type": "s8",
+        "cadence_counter_type": "u8",
+        "cadence_initial": 1,
+        "cadence_reload": 4,
+        "cleanup_tick_offset": 49,
+        "recharge_countdown_after_success": 12,
+        "recovery_edge": {
+          "cleanup_tick_offset": 49,
+          "input_tick_offset": 48,
+          "second_entry_tick_offset": 50
+        },
+        "resource_capacity": 64,
+        "resource_clamp_min": 0,
+        "resource_debit": 3,
+        "return_to_locomotion_tick_offset": 50,
+        "rng_calls": 0,
+        "scheduler_position": "record type 4 at 0x01b846 before 8/12/16/20/24/28/36",
+        "spawn_tick_offsets": [
+          0,
+          4,
+          8,
+          12,
+          16,
+          20,
+          24,
+          28,
+          32,
+          36,
+          40,
+          44
+        ],
+        "successful_allocation_writes": {
+          "active_increment": 1,
+          "attack_table": "0x03136a",
+          "class": "0x05",
+          "facing": "copy player facing",
+          "owner": "player low-word pointer",
+          "position": "copy player x/y/z",
+          "variant": "0 except attempt counter 4 writes 1"
+        }
+      }
     },
     "mutation_controls": {
       "all_downstream_effects_asserted": true,

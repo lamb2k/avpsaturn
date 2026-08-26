@@ -64,6 +64,18 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_player_melee_selector_mask"] == 15
     assert report["state"]["round1_player_melee_presentation_mask"] == 15
     assert report["state"]["round1_player_melee_interruptions"] == 0
+    assert report["state"]["round1_player_weapon_entries"] == 1
+    assert report["state"]["round1_player_weapon_completions"] == 1
+    assert report["state"]["round1_player_weapon_attempts"] == 12
+    assert report["state"]["round1_player_weapon_allocations"] == 12
+    assert report["state"]["round1_player_weapon_allocation_failures"] == 0
+    assert report["state"]["round1_player_weapon_resource_debits"] == 12
+    assert report["state"]["round1_player_weapon_presentation_bindings"] == 51
+    assert report["state"]["round1_player_weapon_empty_requests"] == 0
+    assert report["state"]["round1_player_weapon_interruptions"] == 0
+    assert report["state"]["round1_player_resource"] == 46
+    assert report["state"]["round1_player_resource_recharge"] == 1
+    assert report["state"]["round1_player_weapon_projectile_free"] == 12
     assert report["state"]["round1_presentation_ready"] == 1
     assert report["state"]["round1_presentation_seen"] == 1
     assert report["state"]["round1_presentation_commands_peak"] == 2

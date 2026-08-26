@@ -4,7 +4,7 @@
       "guard": "0x01a6f4 source edge/resource checks",
       "phase": "0x0406",
       "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
-      "resource_artifact_sha256": "fcd693b2d71848b946c813448ec16951f2b94fc57d9bd30e8d0b22408fe2d50c",
+      "resource_artifact_sha256": "b0c0e1e86d862f7570df28db1305306b5c6295d4b4dc9b05acaa7c30e4207fab",
       "resource_status": "SOURCE_CLOSED",
       "spawn_branch": "0x023858",
       "writer": "0x023860"

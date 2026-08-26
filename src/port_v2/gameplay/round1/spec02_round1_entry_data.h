@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=3cfa5410fee3942a9bd6bb515f10aefdd293ee4cd628fb503d9685bce4c7c3f8 */
-/* fixtures_sha256=24b74c91fa23c082d3ef6e7554c399d58552f7debae772e8492b422f8387b223 */
+/* contract_sha256=b4680e6fe10abf2ddcdb431a06ed03210344eff92c3d4674797df8e482f8d4a0 */
+/* fixtures_sha256=d4d34eaede744e30e941743e680f273ec1e1cc6b21a19753089309270e32257c */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -353,6 +353,111 @@ static const AvspRound1PresentationSpec avsp_round1_player_melee_strikes[AVSP_RO
     { 0x16014cUL, 0x162a82UL, 8u, 2u },
     { 0x1601c0UL, 0x1614a4UL, 8u, 3u },
     { 0x160234UL, 0x162b26UL, 19u, 4u },
+};
+
+static const AvspRound1PlayerWeaponSpec avsp_round1_player_weapon =
+{
+    3072u,
+    3074u,
+    6656u,
+    6658u,
+    0u,
+    2u,
+    12,
+    1u,
+    4u,
+    16u,
+    64u,
+    3u,
+    12u,
+    2u,
+    6u,
+    0x05,
+    0x8680u,
+    0x0080u,
+    0x8380u,
+    0x03136aUL
+};
+
+static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_frames[AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT] =
+{
+    { 3072u, 0u, 0x001642f4UL, 0x00165694UL, 0u, 0u },
+    { 3074u, 2u, 0x00165400UL, 0x00166bf8UL, 1u, 0u },
+    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
+    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
+    { 3074u, 2u, 0x00165420UL, 0x00166c4cUL, 1u, 0u },
+    { 3074u, 2u, 0x00165400UL, 0x00166bf8UL, 1u, 0u },
+    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
+    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
+    { 3074u, 2u, 0x00165420UL, 0x00166c4cUL, 1u, 0u },
+    { 3074u, 2u, 0x00165444UL, 0x00166c76UL, 1u, 0u },
+    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
+    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
+    { 3074u, 2u, 0x00165464UL, 0x00166cbeUL, 1u, 0u },
+    { 3074u, 2u, 0x00165444UL, 0x00166c76UL, 1u, 0u },
+    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
+    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
+    { 3074u, 2u, 0x00165464UL, 0x00166cbeUL, 1u, 0u },
+    { 3074u, 2u, 0x00165048UL, 0x001666beUL, 1u, 0u },
+    { 3074u, 2u, 0x00165058UL, 0x001666dcUL, 1u, 0u },
+    { 3074u, 2u, 0x00165058UL, 0x001666dcUL, 1u, 0u },
+    { 3074u, 2u, 0x00165068UL, 0x001666faUL, 1u, 0u },
+    { 3074u, 2u, 0x0016508cUL, 0x00166718UL, 1u, 0u },
+    { 3074u, 2u, 0x0016509cUL, 0x00166736UL, 1u, 0u },
+    { 3074u, 2u, 0x0016509cUL, 0x00166736UL, 1u, 0u },
+    { 3074u, 2u, 0x001650acUL, 0x00166754UL, 1u, 0u },
+    { 3074u, 2u, 0x0016508cUL, 0x00166718UL, 1u, 0u },
+    { 3074u, 2u, 0x0016509cUL, 0x00166736UL, 1u, 0u },
+    { 3074u, 2u, 0x0016509cUL, 0x00166736UL, 1u, 0u },
+    { 3074u, 2u, 0x001650acUL, 0x00166754UL, 1u, 0u },
+    { 3074u, 2u, 0x00165048UL, 0x001666beUL, 1u, 0u },
+    { 3074u, 2u, 0x00165058UL, 0x001666dcUL, 1u, 0u },
+    { 3074u, 2u, 0x00165058UL, 0x001666dcUL, 1u, 0u },
+    { 3074u, 2u, 0x00165068UL, 0x001666faUL, 1u, 0u },
+    { 3074u, 2u, 0x00165444UL, 0x00166c76UL, 1u, 0u },
+    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
+    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
+    { 3074u, 2u, 0x00165464UL, 0x00166cbeUL, 1u, 0u },
+    { 3074u, 2u, 0x00165444UL, 0x00166c76UL, 1u, 0u },
+    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
+    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
+    { 3074u, 2u, 0x00165464UL, 0x00166cbeUL, 1u, 0u },
+    { 3074u, 2u, 0x00165400UL, 0x00166bf8UL, 1u, 0u },
+    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
+    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
+    { 3074u, 2u, 0x00165420UL, 0x00166c4cUL, 1u, 0u },
+    { 3074u, 2u, 0x00165400UL, 0x00166bf8UL, 1u, 0u },
+    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
+    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
+    { 3074u, 2u, 0x00165420UL, 0x00166c4cUL, 1u, 0u },
+    { 0u, 0u, 0x00163158UL, 0x00165488UL, 1u, 0u },
+};
+
+static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_empty_frames[AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT] =
+{
+    { 6656u, 0u, 0x001642f4UL, 0x00165694UL, 0u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
+    { 0u, 0u, 0x00163158UL, 0x00165488UL, 1u, 0u },
+};
+
+static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_return_frame =
+{
+    2u, 2u, 0x00163158UL, 0x00165488UL, 1u, 0u
 };
 
 #endif

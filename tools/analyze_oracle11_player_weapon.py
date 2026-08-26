@@ -8,6 +8,7 @@ ROOT=Path(__file__).resolve().parents[1]
 RAW=ROOT/'.deps/mame/oracle11_player_weapon_a'
 RAW_ZERO=ROOT/'.deps/mame/oracle11_player_weapon_zero_a'
 OPCODES=ROOT/'.deps/mame/actorprobe/decrypted_opcodes_2m.bin'
+PROGRAM=ROOT/'.deps/mame/actorprobe/decrypted_program_2m.bin'
 AUTH=ROOT/'data/oracle11_predator_warrior_authority.json'
 OUT=ROOT/'data/oracle11_predator_weapon_projectile_resource.json'
 VARIANTS=('cold_run_1','cold_run_2','resource_empty','b1_held','repeat_startup',
@@ -28,6 +29,14 @@ def actor_classes(r,kind): return {x['class'] for x in r['actors.tsv'] if x['kin
 def spawned(r,kind,klass,pc):
     return [x for x in r['writes.tsv'] if x['kind']==kind and x['data']==klass+klass and x['mask']=='ff00' and x['pc']==pc]
 def window(blob,a,b): return {'start':f'0x{a:06x}','end_exclusive':f'0x{b:06x}','bytes':b-a,'sha256':hashlib.sha256(blob[a:b]).hexdigest()}
+def first_frame(samples,predicate):
+    return int(next(x['frame'] for x in samples if predicate(x)))
+def presentation(program,row,origin):
+    address=int(row['anim'],16)
+    return {'tick':int(row['frame'])-origin,'action':int(row['action']),
+      'substate':int(row['inner']),'animation_record':f'0x{address:08x}',
+      'assembly':f'0x{int.from_bytes(program[address+4:address+8],"big"):08x}',
+      'hurt_selector':program[address+8],'attack_selector':program[address+9]}
 
 manifest=json.loads((RAW/'input_manifest.json').read_text(encoding='utf-8-sig'))
 require(tuple(x['name'] for x in manifest['variants'])==VARIANTS,'variant inventory drift')
@@ -59,6 +68,69 @@ require(min(int(x['resource']) for x in r['recharge_writer_frozen']['samples.tsv
 require(not spawned(r['projectile_class_removed'],'record4','05','0257f4'),'scheduler-class removal ineffective')
 
 op=OPCODES.read_bytes()
+program=PROGRAM.read_bytes()
+base_samples=b['samples.tsv']
+entry=first_frame(base_samples,lambda x:int(x['action'])==0x0c00)
+complete=first_frame(base_samples,lambda x:int(x['frame'])>entry and int(x['action'])==0)
+returned=first_frame(base_samples,lambda x:int(x['frame'])>complete and int(x['action'])==2)
+spawn_frames=[int(x['frame']) for x in spawned(b,'record4','05','0257f4')]
+require([x-entry for x in spawn_frames]==list(range(0,48,4)),
+        'Button1 source cadence implementation boundary drift')
+require(complete-entry==49 and returned-entry==50,
+        'Button1 recovery implementation boundary drift')
+repeat_samples=r['repeat_recovery']['samples.tsv']
+repeat_second_entry=first_frame(repeat_samples,lambda x:
+  int(x['frame'])>entry and int(x['action'])==0x0c00)
+repeat_edge=first_frame(repeat_samples,lambda x:
+  int(x['frame'])>entry and int(x['input'])&0x10 and
+  not (int(repeat_samples[repeat_samples.index(x)-1]['input'])&0x10))
+require(repeat_edge-entry==48 and repeat_second_entry-entry==50,
+        'Button1 recovery-edge redispatch boundary drift')
+weapon_rows=[x for x in base_samples if entry<=int(x['frame'])<=complete]
+require(len({(x['x'],x['y'],x['z'],x['facing']) for x in weapon_rows})==1,
+        'Button1 movement/facing hold drift')
+empty_samples=r['resource_empty']['samples.tsv']
+empty_entry=first_frame(empty_samples,lambda x:int(x['action'])==0x1a00)
+empty_complete=first_frame(empty_samples,lambda x:int(x['frame'])>empty_entry and int(x['action'])==0)
+empty_return=first_frame(empty_samples,lambda x:int(x['frame'])>empty_complete and int(x['action'])==2)
+require(empty_complete-empty_entry==17 and empty_return-empty_entry==18,
+        'empty-resource recovery implementation boundary drift')
+implementation_contract={
+ 'classification':'SOURCE_CLOSED_IMPLEMENTATION_FIELDS',
+ 'source_input':{'button1_mask':'0x0010','guard':'new Button1 edge after B1+B2 guard; normal player state and no conflicting action latch'},
+ 'state_dispatch':{'sufficient_entry_action':'0x0c00','sufficient_active_action':'0x0c02','empty_entry_action':'0x1a00','empty_active_action':'0x1a02','cleanup_action':'0x0000','return_locomotion_action':'0x0002'},
+ 'sufficient_volley':{'attempt_counter_type':'s8','attempt_counter_initial':12,
+   'attempt_counter_rule':'decrement before allocation; signed negative completes without allocation',
+   'cadence_counter_type':'u8','cadence_initial':1,'cadence_reload':4,
+   'spawn_tick_offsets':[x-entry for x in spawn_frames],
+   'cleanup_tick_offset':complete-entry,'return_to_locomotion_tick_offset':returned-entry,
+   'recovery_edge':{'input_tick_offset':repeat_edge-entry,
+     'cleanup_tick_offset':complete-entry,
+     'second_entry_tick_offset':repeat_second_entry-entry},
+   'allocator_guard':'record-type-4 allocator returns nonzero','allocation_failure_rule':'advance cadence without resource debit',
+   'successful_allocation_writes':{'active_increment':1,'class':'0x05','variant':'0 except attempt counter 4 writes 1','position':'copy player x/y/z','facing':'copy player facing','owner':'player low-word pointer','attack_table':'0x03136a'},
+   'resource_debit':3,'resource_clamp_min':0,'resource_capacity':64,
+   'recharge_countdown_after_success':12,'rng_calls':0,
+   'scheduler_position':'record type 4 at 0x01b846 before 8/12/16/20/24/28/36'},
+ 'resource_tick':{'order':'after player action/projectile allocation and before HUD projection',
+   'normal_recharge_reload':2,'depleted_recharge_reload':6,
+   'rule':'when meter is below 64, decrement u8 countdown; zero increments meter by one and reloads by depleted latch'},
+ 'empty_fallback':{'timer_type':'u8','timer_initial':16,
+   'cleanup_tick_offset':empty_complete-empty_entry,
+   'return_to_locomotion_tick_offset':empty_return-empty_entry,
+   'auxiliary_actor':{'record_type':24,'class':'0x10','position':'copy player x/y','facing':'copy player facing'},
+   'damaging_projectile_count':0,
+   'presentation_timeline':[presentation(program,x,empty_entry) for x in empty_samples
+     if empty_entry<=int(x['frame'])<=empty_complete]},
+ 'movement_facing':{'rule':'hold x/y/z and facing for the complete Button1 action','baseline_invariant':True},
+ 'presentation_timeline':[presentation(program,x,entry) for x in weapon_rows],
+ 'return_frame':presentation(program,next(x for x in base_samples
+   if int(x['frame'])==returned),entry),
+ 'projectile_lifecycle_implementation_blocker':{
+   'spec_executable':False,
+   'missing_fields':['class-0x05 per-state timers and fixed-point motion arithmetic','target-to-vector branch/table values','per-state animation/assembly identity','collision-result-to-impact initialization writes','exact removal bounds arithmetic and release timing'],
+   'unblock':'amend this existing Oracle/SPEC fixture with only those bounded class-0x05 fields before native projectile motion or damage is claimed'},
+ 'mutation_controls':['reject Button1 held redispatch','reject cadence other than ticks 0..44 step 4','reject debit without allocation','reject debit other than 3 or missing zero clamp','reject recovery before tick 49','reject movement or facing during action','reject recharge before action update','reject fixed-frame projectile hit or removal']}
 report={
  'schema':1,'task':'ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE','status':'SOURCE_CLOSED',
  'scope':'one-player Predator Warrior Round 1 route-reachable Button1 volley, empty-resource fallback, B1+B2 special, projectile/effect actors, resource meter/recharge, temporary resource award, collision/damage and gameplay audio ownership',
@@ -81,6 +153,7 @@ report={
   'empty':{'dispatch_frame':4492,'action':'0x1a00','auxiliary_class':'0x10','damaging_projectile_count':0,'depleted_recharge_observed':'one unit each 6-countdown cycle'},
   'normal_recharge_observed':'after the volley, one unit each 2-countdown cycle on the selected PW route',
   'hud_dependency':'0x0ade9e..0x0ae00e both draws the meter and mutates +0x8b/+0x8c/+0x8d; native translation must separate the gameplay tick from rendering without changing order'},
+ 'implementation_contract':implementation_contract,
  'special_causal_trace':{'guard':'at least two new/current B1/B2/B3 bits, health nonzero, normal player state and no conflicting latch','action':'0x0800','player_routine':'0x024f04','health_cost':'six via +0x9f event count and 0x01b492; values 1..5 clamp to zero','zero_health':'special rejected; Button1 independently falls through to 0x0c00','actors':['type24 class0x20','type24 class0x47'],'rng':'class0x47 consumes source RNG for visual particle motion; player damage selector does not consume it'},
  'counterfactuals':[
   {'class':'resource_sufficient_vs_insufficient','result':'0x0c00/class5 versus 0x1a00/class10'},

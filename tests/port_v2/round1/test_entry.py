@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "3cfa5410fee3942a9bd6bb515f10aefdd293ee4cd628fb503d9685bce4c7c3f8"
+EXPECTED = "b4680e6fe10abf2ddcdb431a06ed03210344eff92c3d4674797df8e482f8d4a0"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -52,12 +52,19 @@ for before, after in (
     ("actor->assembly = presentation->assembly;", "actor->assembly = 0UL;"),
     ("actor->dispatch_entry = AVSP_ROUND1_CLASS1F_DISPATCH_ENTRY;", "actor->dispatch_entry = 0UL;"),
     ("avsp_round1_apply_player_global_bounds(runtime);", "/* bounds suppressed */"),
-    ("avsp_round1_update_player_locomotion(runtime, applied_direction,\n                                        was_stopping, &view);", "/* locomotion transition suppressed */"),
+    ("avsp_round1_update_player_locomotion(runtime, applied_direction,\n                                            was_stopping, &view);", "/* locomotion transition suppressed */"),
     ("avsp_round1_observe_player_melee(runtime, prior_state, prior_selector,\n                                    prior_attack_edges);", "/* melee observation suppressed */"),
     ("++runtime->player_melee_entries;", "runtime->player_melee_entries += 2u;"),
     ("runtime->player_melee_selector_mask |= 1UL << (selector - 1u);", "runtime->player_melee_selector_mask = 0UL;"),
     ("++runtime->player_melee_completions;", "runtime->player_melee_completions += 2u;"),
     ("runtime->player_melee_presentation_mask |= 1UL << index;", "runtime->player_melee_presentation_mask = 0UL;"),
+    ("runtime->player_weapon_cadence =\n                    avsp_round1_player_weapon.cadence_reload;", "runtime->player_weapon_cadence = 3u;"),
+    ("runtime->player_weapon_attempts =\n        avsp_round1_player_weapon.attempt_initial;", "runtime->player_weapon_attempts = 11;"),
+    ("runtime->player_weapon_recovery_pending = 1u;", "runtime->player_weapon_recovery_pending = 0u;"),
+    ("runtime->player_resource_recharge =\n                            avsp_round1_player_weapon.recharge_after_success;", "runtime->player_resource_recharge = 11u;"),
+    ("++runtime->player_weapon_resource_debits;", "runtime->player_weapon_resource_debits += 2u;"),
+    ("++runtime->player_weapon_allocation_failures;", "runtime->player_weapon_allocation_failures += 2u;"),
+    ("avsp_round1_tick_player_resource(runtime);", "/* resource tick suppressed */"),
 ):
     assert before in source
     run(source.replace(before, after), header, False)
@@ -73,6 +80,10 @@ for before, after in (
     ("    1536u,\n    5120u,\n    30u,", "    1536u,\n    5120u,\n    29u,"),
     ("{ 0x1600f8UL, 0x162a04UL, 8u, 1u },", "{ 0x1600f8UL, 0x162a82UL, 8u, 1u },"),
     ("{ 0x1601c0UL, 0x1614a4UL, 8u, 3u },", "{ 0x1601c0UL, 0x1614a4UL, 8u, 2u },"),
+    ("    12,\n    1u,\n    4u,", "    11,\n    1u,\n    4u,"),
+    ("    3u,\n    12u,\n    2u,", "    2u,\n    12u,\n    2u,"),
+    ("{ 3074u, 2u, 0x00165400UL, 0x00166bf8UL, 1u, 0u },", "{ 3074u, 2u, 0x00165410UL, 0x00166bf8UL, 1u, 0u },"),
+    ("{ 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },", "{ 6658u, 2u, 0x001645d4UL, 0x00166c22UL, 1u, 0u },"),
 ):
     assert before in generated
     changed = generated.replace(before, after, 1)
@@ -89,5 +100,5 @@ for before, after in (
                    f"tests/port_v2/round1/round1_entry_test.c -o '{wsl(temp / 'test')}' && "
                    f"'{wsl(temp / 'test')}'")
         result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
-        assert result.returncode != 0
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/global-bounds/neutral-stop/melee differential: PASS (32 real mutations)")
+        assert result.returncode != 0, f"generated mutation escaped: {before}"
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/global-bounds/neutral-stop/melee/Button1 differential: PASS (43 real mutations)")
