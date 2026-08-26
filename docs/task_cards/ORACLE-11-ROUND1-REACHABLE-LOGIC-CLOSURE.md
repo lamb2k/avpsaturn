@@ -201,6 +201,20 @@ card only for a genuinely independent body or source-evidence hard stop.
   no fixed-frame or actor-count clear substitute. Boss phase/clear
   orchestration, stage clear/Round 2 handoff, and global RNG consumption remain
   separate active ORACLE-11 families.
+- `round1-boss-phase-clear-orchestration`: `SOURCE_CLOSED`. Two independent
+  completions are byte-identical and bind the already closed class-`0x06`
+  actor at `0xffa3c0` to the class-`0x02`, type-32 controller at `0xffd180`,
+  all 11 controller phases, eight exact boss-room spawn events, the six-state
+  boss KO/death tail, and all 216 boss-owned RNG calls. The terminal source
+  guard decrements controller `+0x26:u16` to zero in state `0x0400`, advances
+  it to `0x0600`, and writes `1` to `0xff81f3`; route consumer `0x008418`
+  then advances the global route state. Suppressing only that exact writer
+  leaves the defeated boss/controller and player frozen in Round 1 through
+  frame 18,000, while both baselines reach stable Round 2. The accepted
+  class-removal and offense controls remain discriminating. Evidence is in
+  `data/oracle11_round1_boss_orchestration.json`. Post-clear results and the
+  stable Round 2 handoff remain separate, as does route-wide global RNG
+  ownership.
 
 ## Owned paths
 

@@ -210,9 +210,16 @@ fixed-frame or actor-count clear substitutes. The generated 94 x 10 matrix
 remains ineligible with 203 required `OBSERVED`, zero required `PARTIAL`, zero
 required `UNKNOWN`, zero unmapped actor class/type pairs, zero unmapped route
 edges, 379 orphan authoritative writers, and unowned
-audio/damage/load/release/RNG/spawn counts of 0/0/0/0/1,023/0. ORACLE-11 remains
-active; boss orchestration is the exact next family and SPEC-02 remains
-ineligible.
+audio/damage/load/release/RNG/spawn counts of 0/0/0/0/1,023/0. Round 1 boss
+orchestration is now also `SOURCE_CLOSED`: two byte-identical completions bind
+the class-`0x06` actor to 11 controller phases, eight exact boss-room spawns,
+216 boss RNG calls, and the terminal `0xff81f3` clear writer. Suppressing that
+single source write holds the defeated boss route in Round 1; removing
+class-`0x06` also cannot fabricate completion. The matrix now has 117 required
+`OBSERVED`, zero required `PARTIAL` or `UNKNOWN`, zero unmapped pairs or route
+edges, 379 orphan writers, and the same sole 1,023-frame RNG event backlog.
+ORACLE-11 remains active; stage clear/results/Round 2 handoff is the exact next
+family and SPEC-02 remains ineligible.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

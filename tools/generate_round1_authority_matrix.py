@@ -13,6 +13,7 @@ NAVIGATION=ROOT/'data/oracle11_round1_navigation.json'
 ENEMIES=ROOT/'data/oracle11_round1_enemy_archetypes.json'
 AUXILIARY=ROOT/'data/oracle11_round1_auxiliary_authority.json'
 ENCOUNTERS=ROOT/'data/oracle11_round1_encounter_route_authority.json'
+BOSS=ROOT/'data/oracle11_round1_boss_orchestration.json'
 FAMILIES=(
  'predator-warrior-player-authority','round1-navigation-terrain-camera',
  'actor-scheduler-allocation-lifecycle','round1-enemy-archetypes',
@@ -240,6 +241,23 @@ def main():
         body['exact_next_experiment']=(
           'Retain the closed encounter/wave/scripted-trigger and 94-segment '
           'route map while boss phase/clear orchestration is source-closed.')
+    if BOSS.exists():
+        boss=json.loads(BOSS.read_text(encoding='ascii'))
+        body=next(item for item in coverage['bodies'] if item['id']=='round1-boss')
+        body['status']=boss['status']
+        evidence=body.setdefault('accepted_evidence',[])
+        for item in ('data/oracle11_round1_boss_orchestration.json',
+                     'data/oracle11_round1_enemy_archetypes.json',
+                     'data/oracle11_round1_encounter_route_authority.json'):
+            if item not in evidence:evidence.append(item)
+        body['counterfactual']=(
+          'two byte-identical completions bind the class-0x06 actor to all 11 '
+          'controller phases, eight boss-room spawns, 216 boss RNG calls and '
+          'the exact terminal clear writer; suppressing that writer holds the '
+          'completed boss sequence in Round 1, and removing class 0x06 cannot clear')
+        body['exact_next_experiment']=(
+          'Retain the closed boss actor/controller/clear contract while stage '
+          'clear, results and the stable Round 2 handoff are source-closed.')
     coverage['route_segment_authority_matrix']=build(coverage,route)
     coverage['spec02_closure_gate']=coverage['route_segment_authority_matrix']['closure_gate']
     COVERAGE.write_bytes((json.dumps(coverage,sort_keys=True,indent=2)+'\n').encode('ascii'))
