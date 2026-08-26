@@ -41,7 +41,7 @@ local projectiles = assert(io.open(root .. "/projectiles.tsv", "w"))
 local score_writes = assert(io.open(root .. "/score_writes.tsv", "w"))
 local result = assert(io.open(root .. "/result.tsv", "w"))
 samples:write("frame\tvariant\tinput\troute\tactive\tstate\taction\tinner\tfacing\tx\tz\thealth\thit\tresource\trecharge\tdepleted\taward\tscore\tprojectile_count\n")
-dispatches:write("frame\tvariant\tsequence\tqueue_address\twrite_pc\tcapture_pc\tshared_dispatch\ta6\tsp\tusp\tsr\treturn0\treturn1\treturn2\td1\td2\td3\tcommand\tplayer_active\tplayer_state\tplayer_action\tplayer_inner\tplayer_facing\tplayer_health\tplayer_hit\tplayer_resource\tplayer_recharge\tplayer_depleted\tplayer_award\tplayer_score\tsuppressed\n")
+dispatches:write("frame\tvariant\tsequence\tqueue_address\twrite_pc\tcapture_pc\tshared_dispatch\ta6\tsp\tusp\tsr\treturn0\treturn1\treturn2\td1\td2\td3\tcommand\torigin_active\torigin_class\torigin_state\torigin_phase\torigin_type\torigin_facing\torigin_health\tplayer_active\tplayer_state\tplayer_action\tplayer_inner\tplayer_facing\tplayer_health\tplayer_hit\tplayer_resource\tplayer_recharge\tplayer_depleted\tplayer_award\tplayer_score\tsuppressed\n")
 qsound:write("frame\tvariant\tpc\tport\tbyte\tregister\tvalue\n")
 projectiles:write("frame\tvariant\tslot\tactive\tclass\ttype\tstate\taction\tx\ty\tz\thealth\towner\n")
 score_writes:write("frame\tvariant\taddress\tdata\tmask\tpc\ta6\n")
@@ -130,6 +130,7 @@ oracle11_player_audio_queue = program:install_write_tap(
         local d1 = maincpu.state["D1"].value & 0xffffffff
         local d2 = maincpu.state["D2"].value & 0xffffffff
         local d3 = maincpu.state["D3"].value & 0xffffffff
+        local origin = maincpu.state["A6"].value & 0xffffff
         local state, action, inner = u16(player + 4), u16(player + 6), u8(player + 7)
         local command = d1 & 0xffff
         local legacy_suppress = suppress_caller ~= nil and suppress_command ~= nil and
@@ -152,7 +153,9 @@ oracle11_player_audio_queue = program:install_write_tap(
             string.format("%06x", return0 & 0xffffff),
             string.format("%06x", return1 & 0xffffff), string.format("%06x", return2 & 0xffffff),
             string.format("%08x", d1), string.format("%08x", d2), string.format("%08x", d3),
-            string.format("%04x", command), u8(player), state, action, inner, u8(player + 0x0f),
+            string.format("%04x", command), u8(origin), string.format("%02x", u8(origin + 2)),
+            u16(origin + 4), u16(origin + 6), u8(origin + 8), u8(origin + 0x0f),
+            s16(u16(origin + 0x40)), u8(player), state, action, inner, u8(player + 0x0f),
             s16(u16(player + 0x40)), s16(u16(player + 0x46)), u8(player + 0x8c),
             u8(player + 0x8d), u8(player + 0x8b), u16(player + 0xae),
             string.format("%08x", u32(player + 0xe0)), suppress and 1 or 0}, "\t") .. "\n")

@@ -8,7 +8,8 @@ param(
     [string]$SuppressState = '',
     [string]$SuppressAction = '',
     [string]$SuppressInner = '',
-    [int]$SuppressLimit = 1
+    [int]$SuppressLimit = 1,
+    [switch]$CompactQsound
 )
 $ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
@@ -34,6 +35,7 @@ $env:AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_STATE = $SuppressState
 $env:AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_ACTION = $SuppressAction
 $env:AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_INNER = $SuppressInner
 $env:AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_LIMIT = [string]$SuppressLimit
+$env:AVSP_ORACLE11_PLAYER_AUDIO_COMPACT_QSOUND = if ($CompactQsound) { '1' } else { '' }
 Push-Location $projectRoot
 try {
     & $mame 'avspu' '-rompath' $RomRoot '-video' 'none' '-sound' 'none' `
@@ -51,6 +53,7 @@ finally {
     Remove-Item Env:\AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_ACTION -ErrorAction SilentlyContinue
     Remove-Item Env:\AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_INNER -ErrorAction SilentlyContinue
     Remove-Item Env:\AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_LIMIT -ErrorAction SilentlyContinue
+    Remove-Item Env:\AVSP_ORACLE11_PLAYER_AUDIO_COMPACT_QSOUND -ErrorAction SilentlyContinue
     Pop-Location
 }
 $manifest = [ordered]@{

@@ -114,13 +114,15 @@ def main():
         if item not in evidence:evidence.append(item)
         item='data/oracle11_global_audio_handlers.json'
         if item not in evidence:evidence.append(item)
+        item='data/oracle11_global_audio_trigger_owners.json'
+        if item not in evidence:evidence.append(item)
         body['counterfactual']=(
           'the shared main queue, audio-CPU command dispatcher/table/handlers, '
-          'and grouped QSound transaction effects are source-closed; '
-          'non-player trigger provenance and four load/release edges remain open')
+          'grouped QSound effects, and all 175 non-player trigger owners/guards '
+          'are source-closed; four load/release edges remain open')
         body['exact_next_experiment']=(
-          'Bind all 175 non-player trigger groups to their source owners and '
-          'guards, then bind the four load/release boundary guards.')
+          'Bind the four load/release boundary guards, loader callers, package '
+          'identity, ownership, legal windows, results, and next route state.')
     coverage['route_segment_authority_matrix']=build(coverage,route)
     coverage['spec02_closure_gate']=coverage['route_segment_authority_matrix']['closure_gate']
     COVERAGE.write_bytes((json.dumps(coverage,sort_keys=True,indent=2)+'\n').encode('ascii'))

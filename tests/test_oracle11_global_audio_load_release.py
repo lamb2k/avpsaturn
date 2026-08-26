@@ -48,7 +48,11 @@ reject(mutant, "semantic sound name inferred")
 
 mutant = copy.deepcopy(report)
 mutant["remaining_audio_trigger_backlog"]["provenance_groups"] = 174
-reject(mutant, "trigger backlog hidden")
+reject(mutant, "closed trigger group hidden")
+
+mutant = copy.deepcopy(report)
+mutant["remaining_audio_trigger_backlog"]["orphan_trigger_groups"] = 1
+reject(mutant, "orphan trigger owner hidden")
 
 mutant = copy.deepcopy(report)
 mutant["accepted_audio_cpu_subcheckpoints"][0]["transactions_in_each_completion"] = 1160
@@ -78,4 +82,4 @@ mutant = copy.deepcopy(report)
 mutant["protected_boundaries"]["spec02_active"] = True
 reject(mutant, "SPEC-02 activated")
 
-print("ORACLE-11 global audio/load/release tests: PASS (12 mutations rejected)")
+print("ORACLE-11 global audio/load/release tests: PASS (13 mutations rejected)")

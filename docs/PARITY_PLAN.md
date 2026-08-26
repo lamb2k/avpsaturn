@@ -174,9 +174,12 @@ source-close the intervening audio-CPU dispatcher, 909-entry command table,
 route-reachable handler paths, and grouped QSound transaction effects for all
 1,161 commands and 72 identities. The accepted 29 player command controls and
 43 global command controls leave zero orphan shared commands, handler paths, or
-QSound transaction groups. Semantic sound names remain `UNKNOWN`. The 175
-non-player trigger-provenance groups and four load/release boundaries remain
-open. The generated 94 x 10
+QSound transaction groups. Two byte-identical origin-census completions then
+bind all 783 non-player dispatches and 175 trigger groups to live owner
+class/type/state/substate contexts, 50 exact source callsites, guard tails, and
+accepted command-handler controls with zero orphans. Semantic sound names
+remain `UNKNOWN`. Only four load/release boundaries remain open in this family.
+The generated 94 x 10
 matrix remains ineligible with 291 required `OBSERVED`, 307 required `PARTIAL`,
 zero required `UNKNOWN`, 18 unmapped actor
 class/type pairs, 94 unmapped route edges, 1,517 orphan authoritative writers,

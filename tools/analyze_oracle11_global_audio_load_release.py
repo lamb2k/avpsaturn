@@ -20,6 +20,7 @@ OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
 ROUTE = ROOT / "data" / "oracle10_round1_route.json"
 PLAYER_AUDIO = ROOT / "data" / "oracle11_predator_player_audio.json"
 HANDLERS = ROOT / "data" / "oracle11_global_audio_handlers.json"
+OWNERS = ROOT / "data" / "oracle11_global_audio_trigger_owners.json"
 OUT = ROOT / "data" / "oracle11_global_audio_load_release.json"
 IDENTICAL_FILES = ("samples.tsv", "dispatches.tsv", "qsound.tsv",
                    "projectiles.tsv", "score_writes.tsv", "result.tsv")
@@ -154,6 +155,7 @@ def build_report() -> dict[str, object]:
     route = json.loads(ROUTE.read_text(encoding="utf-8"))
     player_audio = json.loads(PLAYER_AUDIO.read_text(encoding="ascii"))
     handlers = json.loads(HANDLERS.read_text(encoding="ascii"))
+    owners = json.loads(OWNERS.read_text(encoding="ascii"))
     require(player_audio["status"] == "SOURCE_CLOSED" and
             player_audio["boundary"]["global_backlog_begins"].startswith(
                 "0x001880"), "player/global boundary drift")
@@ -163,6 +165,20 @@ def build_report() -> dict[str, object]:
             handlers["coverage"]["orphan_qsound_transaction_groups"] == 0 and
             handlers["handler_paths"]["orphan_paths"] == 0,
             "audio command handler checkpoint drift")
+    require(owners["status"] == "SOURCE_CLOSED" and
+            owners["coverage"]["trigger_groups"] == 175 and
+            owners["coverage"]["orphan_trigger_groups"] == 0 and
+            owners["coverage"]["orphan_source_callers"] == 0,
+            "non-player trigger-owner checkpoint drift")
+    owner_keys = {(item["origin_a6"], item["shared_wrapper_return"],
+                   item["command"]): item for item in owners["trigger_groups"]}
+    for item in trigger_backlog:
+        key = (item["origin_a6"], item["shared_wrapper_return"], item["command"])
+        require(key in owner_keys, f"unbound trigger owner {key}")
+        item["classification"] = "SOURCE_CLOSED"
+        item["source_owner_families"] = owner_keys[key]["source_owner_families"]
+        item["evidence"] = "data/oracle11_global_audio_trigger_owners.json"
+        item["exact_next_experiment"] = None
     opcodes = OPCODES.read_bytes()
     load_frames = route["load_release_boundary_frames"]
     require(load_frames == [5565, 5566, 6200, 12799],
@@ -262,8 +278,10 @@ def build_report() -> dict[str, object]:
             },
         ],
         "remaining_audio_trigger_backlog": {
+            "classification": "SOURCE_CLOSED",
             "dispatch_occurrences": len(nonplayer),
             "provenance_groups": len(trigger_backlog),
+            "orphan_trigger_groups": 0,
             "groups": trigger_backlog,
         },
         "remaining_transport_backlog": {
@@ -323,8 +341,10 @@ def validate(report: dict[str, object]) -> None:
     backlog = report["remaining_audio_trigger_backlog"]
     require(backlog["dispatch_occurrences"] == 783 and
             backlog["provenance_groups"] == 175 and
+            backlog["classification"] == "SOURCE_CLOSED" and
+            backlog["orphan_trigger_groups"] == 0 and
             len(backlog["groups"]) == 175 and
-            all(group["classification"] == "OBSERVED"
+            all(group["classification"] == "SOURCE_CLOSED"
                 for group in backlog["groups"]),
             "global trigger backlog drift")
     audio_cpu = report["accepted_audio_cpu_subcheckpoints"]
@@ -362,8 +382,8 @@ def validate(report: dict[str, object]) -> None:
 def main() -> None:
     report = build_report()
     OUT.write_bytes(canonical(report))
-    print("ORACLE-11 global audio/load/release: PARTIAL; command handlers "
-          "SOURCE_CLOSED; 175 trigger groups and 4 load/release edges remain")
+    print("ORACLE-11 global audio/load/release: PARTIAL; 175 trigger groups "
+          "SOURCE_CLOSED; 4 load/release edges remain")
 
 
 if __name__ == "__main__":

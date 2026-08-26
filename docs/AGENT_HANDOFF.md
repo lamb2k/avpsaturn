@@ -32,8 +32,10 @@ are source closed in
 `data/oracle11_global_audio_load_release.json` and
 `data/oracle11_global_audio_handlers.json`. All 1,161 commands, 72 identities,
 and handler paths are bound with zero orphans; individual bus writes are not
-logical events. Next bind all 175 non-player trigger groups to source
-owners/guards, then the four load/release boundaries.
+logical events. All 175 non-player groups are now source-closed to live owner
+contexts, 50 callers, guards, and command controls in
+`data/oracle11_global_audio_trigger_owners.json`. Next bind only the four route
+load/release boundaries and their loader/package/ownership transitions.
 The sole route-segment x authority-family matrix and SPEC-02 zero-gap gate
 remain in `data/round1_system_coverage.yaml`.
 

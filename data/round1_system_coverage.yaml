@@ -88,10 +88,11 @@
       "accepted_evidence": [
         "data/stage1_route.json",
         "data/oracle11_global_audio_load_release.json",
-        "data/oracle11_global_audio_handlers.json"
+        "data/oracle11_global_audio_handlers.json",
+        "data/oracle11_global_audio_trigger_owners.json"
       ],
-      "counterfactual": "the shared main queue, audio-CPU command dispatcher/table/handlers, and grouped QSound transaction effects are source-closed; non-player trigger provenance and four load/release edges remain open",
-      "exact_next_experiment": "Bind all 175 non-player trigger groups to their source owners and guards, then bind the four load/release boundary guards.",
+      "counterfactual": "the shared main queue, audio-CPU command dispatcher/table/handlers, grouped QSound effects, and all 175 non-player trigger owners/guards are source-closed; four load/release edges remain open",
+      "exact_next_experiment": "Bind the four load/release boundary guards, loader callers, package identity, ownership, legal windows, results, and next route state.",
       "id": "gameplay-audio-load-release",
       "status": "PARTIAL"
     },
@@ -975,7 +976,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -1162,7 +1164,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -1349,7 +1352,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -1536,7 +1540,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -1723,7 +1728,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -1910,7 +1916,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -2097,7 +2104,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -2284,7 +2292,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -2471,7 +2480,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -2658,7 +2668,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -2845,7 +2856,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -3032,7 +3044,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -3219,7 +3232,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -3406,7 +3420,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -3593,7 +3608,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -3780,7 +3796,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -3967,7 +3984,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -4154,7 +4172,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -4341,7 +4360,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -4528,7 +4548,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -4715,7 +4736,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -4902,7 +4924,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -5089,7 +5112,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -5276,7 +5300,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -5463,7 +5488,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -5650,7 +5676,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -5837,7 +5864,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -6024,7 +6052,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -6211,7 +6240,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -6398,7 +6428,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -6585,7 +6616,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -6772,7 +6804,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -6959,7 +6992,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -7146,7 +7180,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -7333,7 +7368,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -7520,7 +7556,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -7707,7 +7744,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -7894,7 +7932,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -8081,7 +8120,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -8268,7 +8308,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -8455,7 +8496,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -8642,7 +8684,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -8829,7 +8872,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -9016,7 +9060,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -9203,7 +9248,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -9390,7 +9436,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -9577,7 +9624,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -9764,7 +9812,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -9951,7 +10000,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -10138,7 +10188,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -10325,7 +10376,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -10512,7 +10564,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -10699,7 +10752,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -10886,7 +10940,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -11073,7 +11128,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -11260,7 +11316,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -11447,7 +11504,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -11634,7 +11692,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -11821,7 +11880,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -12008,7 +12068,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -12195,7 +12256,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -12382,7 +12444,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -12569,7 +12632,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -12756,7 +12820,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -12943,7 +13008,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -13130,7 +13196,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -13317,7 +13384,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -13504,7 +13572,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -13691,7 +13760,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -13878,7 +13948,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -14065,7 +14136,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -14252,7 +14324,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -14439,7 +14512,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -14626,7 +14700,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -14813,7 +14888,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -15000,7 +15076,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -15187,7 +15264,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -15374,7 +15452,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -15561,7 +15640,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -15748,7 +15828,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -15935,7 +16016,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -16122,7 +16204,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -16309,7 +16392,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -16496,7 +16580,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -16683,7 +16768,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -16870,7 +16956,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -17057,7 +17144,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -17244,7 +17332,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -17431,7 +17520,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -17618,7 +17708,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -17805,7 +17896,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -17992,7 +18084,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false
@@ -18179,7 +18272,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": true,
             "unresolved": true
@@ -18366,7 +18460,8 @@
             "evidence": [
               "data/stage1_route.json",
               "data/oracle11_global_audio_load_release.json",
-              "data/oracle11_global_audio_handlers.json"
+              "data/oracle11_global_audio_handlers.json",
+              "data/oracle11_global_audio_trigger_owners.json"
             ],
             "required": false,
             "unresolved": false

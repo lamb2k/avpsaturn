@@ -124,14 +124,17 @@ card only for a genuinely independent body or source-evidence hard stop.
   as logical events, and there are zero orphan shared commands, command
   identities, handler paths, or QSound transaction groups. Evidence is in
   `data/oracle11_global_audio_handlers.json`.
-  The remaining backlog contains 783 non-player dispatches grouped into 175
-  exact origin-A6/shared-return/command provenance bodies, plus the four route
-  load/release boundaries at frames 5,565, 5,566, 6,200, and 12,799. Evidence
-  and mutation controls are in
-  `data/oracle11_global_audio_load_release.json`. The exact next experiment is
-  to bind all 175 groups to source owners and guards, followed by the four
-  load/release boundaries. No semantic sound names are inferred, and the
-  packed-BCD score routines remain rejected as audio owners.
+  Two byte-identical origin-census completions bind all 783 non-player
+  dispatches and all 175 exact origin-A6/shared-return/command groups to their
+  live class/type/state/substate owner contexts, 50 exact source callsites,
+  local guard tails, arguments, and accepted command-handler transaction
+  controls. Enemy, projectile, pickup, route, encounter, boss, and presentation
+  owners are source-derived rather than appearance-inferred, with zero orphan
+  groups, callers, or handler transactions. Evidence is in
+  `data/oracle11_global_audio_trigger_owners.json`. Only the four route
+  load/release boundaries at frames 5,565, 5,566, 6,200, and 12,799 remain in
+  this family. No semantic sound names are inferred, and the packed-BCD score
+  routines remain rejected as audio owners.
 
 ## Owned paths
 
