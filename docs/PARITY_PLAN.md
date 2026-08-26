@@ -242,10 +242,13 @@ also owns the exact ten-row spawn, semantic player-entry sequence, 164 source
 scheduler decrements, signed terminator, selected gate clear, route state
 `2 -> 4`, and control enable. Direct inspection proves coherent post-unlock and
 controller-moved street frames with intact camera, both VDP2 planes, HUD,
-palette, and priority. The next vertical body replaces the retained harness
-handoff with the SPEC-02-bound Predator Warrior controller and fixed-pool
-scheduler for the ten initial actors through the first dynamic spawn boundary
-at source frame 2328.
+palette, and priority. The accepted Predator Warrior controller now consumes
+current Saturn input after route state 4 and preserves neutral facing. Paired
+471-frame ledgers bind native frame 470 to x 1074, z 320, facing right, neutral
+source action, and 301 controller updates. The next vertical body replaces the
+retained actor handoff with the SPEC-02-bound fixed-pool scheduler and source-
+owned dispatch for the ten initial actors through the first dynamic spawn guard
+represented by source frame 2328; the frame itself is not gameplay authority.
 
 | Sequence | Card or card family | Result |
 |---:|---|---|

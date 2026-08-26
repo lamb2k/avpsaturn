@@ -75,15 +75,19 @@ The SPEC-02-bound first entry is implemented in portable C: exact fixed pools,
 the ten-row LIFO spawn table, the 26-byte command-derived semantic program,
 `60, 60, 44` dwell loads, 164 source scheduler decrements, signed terminator,
 selected gate clear, route state `2 -> 4`, and control enable. No raw 68000 is
-interpreted at runtime. Ten host mutations and nine target-wiring suppressions
-are rejected; Target, paired Emulator, Fast, and Oracle pass with zero fallback
+interpreted at runtime. The accepted Port V2 Predator Warrior controller now
+consumes current Saturn input after route state 4 and preserves source neutral
+facing. Eleven host mutations and twelve target-wiring suppressions are
+rejected; Target, paired Emulator, Fast, and Oracle pass with zero fallback
 or failure. Direct inspection at post-unlock frame 190 and after real controller
 movement shows coherent player/alien presentation, camera, both VDP2 planes,
-HUD, palette, and priority. This is the first controllable street-entry body,
-not the complete first encounter: the retained live-encounter actor handoff is
-still technical substrate. Replace it next with the SPEC-02-bound Predator
-Warrior controller and fixed-pool scheduler for the ten initial actors through
-the first dynamic spawn boundary at source frame 2328.
+HUD, palette, and priority. Paired 471-frame ledgers bind native frame 470 to
+player x 1074, z 320, facing right, neutral source action, and 301 controller
+updates. This is not the complete first encounter: the retained live-encounter
+actor handoff is still technical substrate. Replace it next with the SPEC-02-
+bound fixed-pool scheduler and source-owned dispatch for the ten initial actors
+through the first dynamic spawn guard represented by source frame 2328; the
+frame itself is evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json`.
 
 ## Next eligible cards

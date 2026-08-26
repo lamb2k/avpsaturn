@@ -1,8 +1,9 @@
 {
   "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
-  "checkpoint": "native-round1-first-entry-spawn-control",
-  "status": "PASS_FIRST_CONTROLLABLE_STREET_ENTRY",
-  "implementation_commit": "35620a9df12e2f56ffeb1dcdbae179977846bc34",
+  "checkpoint": "native-round1-player-current-input",
+  "status": "PASS_FIRST_ENTRY_AND_CURRENT_INPUT_PLAYER",
+  "implementation_commit": "0af0d68f90d8d87ca1a1bf68535bb2854e73133c",
+  "diagnostic_correction_commit": "4fbc919235f61d962daf342efbfb4cd8f743ab60",
   "implementation_source": {
     "spec02_sha256": "3cfa5410fee3942a9bd6bb515f10aefdd293ee4cd628fb503d9685bce4c7c3f8",
     "raw_trace_or_disassembly_consumed": false,
@@ -38,17 +39,28 @@
       "failure_count": 0,
       "fallback_count": 0
     },
+    "current_input_player": {
+      "evidence_frame": 470,
+      "x": 1074,
+      "z": 320,
+      "facing": 1,
+      "source_action": 0,
+      "controller_updates": 301,
+      "neutral_release_facing_preserved": true,
+      "legacy_actor_handoff_replaced": false
+    },
     "canaries": "PASS"
   },
   "checks": {
     "host_differential": "PASS",
-    "real_mutations_rejected": 10,
-    "target_wiring_suppressions_rejected": 9,
+    "real_mutations_rejected": 11,
+    "target_wiring_suppressions_rejected": 12,
     "target_live_encounter": "PASS",
     "target_live_encounter_bench": "PASS",
     "spec02_entry_correction_revalidated": "PASS",
     "paired_emulator_regression": "PASS",
-    "paired_emulator_iso_sha256": "03f07be2bd82ba2accf1f5216a8a9bb44032259d95b53906fa4ed33724928f9d",
+    "paired_emulator_iso_sha256": "fd4a6745ee39bdb6f4df05ac1ace1070e2523e408c9e11b6348eb1e48079421c",
+    "paired_native_player_ledgers": "PASS: 471 byte-identical synchronized samples; frame 470 is x=1074/z=320/facing=1/source_action=0/controller_updates=301",
     "target_readback_binding": "PASS",
     "round1_title_objects_loaded": 2,
     "round1_title_vdp1_commands_peak": 2,
@@ -79,8 +91,14 @@
       "sha256": "f250ed5f5c358f91953b2c3f73861aa4724583b6f8b8a076030ea3e7c15da34a",
       "inspection": "PASS: real keyboard-backed Saturn controller input advances the player after native control enable; the camera follows and both background planes remain coherent"
     },
+    "native_player_visual": {
+      "gameplay_frame": 190,
+      "path": "build/round1-native-player-frame-190.png",
+      "sha256": "0b1c5a59d7bf17c4a2c2ebb453d1c13ada91d5351ce07a63e57759a007a6e105",
+      "inspection": "PASS: current-input native Predator state advances behind the retained presentation substrate; player, alien, both street planes, HUD, palette, and priority remain coherent"
+    },
     "objective_discrepancy": null,
-    "exact_next_body": "Replace the retained harness handoff with the SPEC-02-bound Predator Warrior controller and fixed-pool scheduler for the ten initial street actors through the first dynamic spawn boundary at source frame 2328."
+    "exact_next_body": "Replace the retained actor handoff with the SPEC-02-bound fixed-pool scheduler and source-owned dispatch for the ten initial street actors through the first dynamic spawn guard represented by source frame 2328; do not use frame 2328 itself as gameplay authority."
   },
   "preserved": {
     "user09": "CHANGES_REQUESTED",
