@@ -113,14 +113,25 @@ card only for a genuinely independent body or source-evidence hard stop.
   16-byte shared-command ingress at audio ROM `0x0038..0x0074` and the guarded
   three-port QSound write primitive at `0x0abc..0x0adb`; the former processes
   1,161 commands and the latter writes 489,834 exact low/high/register triples
-  per completion. This does not close the intervening audio-CPU command
-  handlers, state updates, or command tables.
+  per completion. Two further byte-identical detailed completions and two
+  byte-identical compact completions source-close the intervening audio-CPU
+  dispatcher/table/handler boundary at `0x01bd..0x0294`: all 1,161 copied
+  16-byte payloads are preserved, all 72 route-reachable command identities
+  resolve through the 909-entry command table, and the 29 accepted player
+  command controls plus 43 new global controls produce discriminating grouped
+  QSound transaction differences. Null table entries retain their measured
+  dispatch-timing effect. Individual low/high/register writes are not treated
+  as logical events, and there are zero orphan shared commands, command
+  identities, handler paths, or QSound transaction groups. Evidence is in
+  `data/oracle11_global_audio_handlers.json`.
   The remaining backlog contains 783 non-player dispatches grouped into 175
   exact origin-A6/shared-return/command provenance bodies, plus the four route
   load/release boundaries at frames 5,565, 5,566, 6,200, and 12,799. Evidence
   and mutation controls are in
-  `data/oracle11_global_audio_load_release.json`. No semantic sound names are
-  inferred, and the packed-BCD score routines remain rejected as audio owners.
+  `data/oracle11_global_audio_load_release.json`. The exact next experiment is
+  to bind all 175 groups to source owners and guards, followed by the four
+  load/release boundaries. No semantic sound names are inferred, and the
+  packed-BCD score routines remain rejected as audio owners.
 
 ## Owned paths
 

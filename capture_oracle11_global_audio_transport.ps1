@@ -47,7 +47,9 @@ finally {
     Pop-Location
 }
 $files = @('samples.tsv','dispatches.tsv','qsound.tsv','projectiles.tsv',
-  'score_writes.tsv','result.tsv','audio_shared_reads.tsv','audio_bus_writers.tsv')
+  'score_writes.tsv','result.tsv','audio_shared_reads.tsv','audio_bus_writers.tsv',
+  'audio_queue_reads.tsv','audio_state_writers.tsv','audio_shared_commands.tsv',
+  'audio_command_dispatches.tsv')
 $manifest = [ordered]@{
     schema = 1
     task = 'ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE'

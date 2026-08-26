@@ -12,7 +12,10 @@ local suppress_command = tonumber(os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS
 local suppress_state = tonumber(os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_STATE") or "")
 local suppress_action = tonumber(os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_ACTION") or "")
 local suppress_inner = tonumber(os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_INNER") or "")
+local suppress_a6 = tonumber(os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_A6") or "")
+local suppress_return0 = tonumber(os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_RETURN0") or "")
 local suppress_limit = tonumber(os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_LIMIT") or "") or 1
+local compact_qsound = os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_COMPACT_QSOUND") == "1"
 
 local in0 = machine.ioport.ports[":IN0"].fields
 local in2 = machine.ioport.ports[":IN2"].fields
@@ -129,11 +132,16 @@ oracle11_player_audio_queue = program:install_write_tap(
         local d3 = maincpu.state["D3"].value & 0xffffffff
         local state, action, inner = u16(player + 4), u16(player + 6), u8(player + 7)
         local command = d1 & 0xffff
-        local suppress = suppress_caller ~= nil and suppress_command ~= nil and
+        local legacy_suppress = suppress_caller ~= nil and suppress_command ~= nil and
             return1 == suppress_caller and command == suppress_command and
             (suppress_state == nil or state == suppress_state) and
             (suppress_action == nil or action == suppress_action) and
-            (suppress_inner == nil or inner == suppress_inner) and
+            (suppress_inner == nil or inner == suppress_inner)
+        local global_suppress = suppress_a6 ~= nil and suppress_return0 ~= nil and
+            suppress_command ~= nil and
+            (maincpu.state["A6"].value & 0xffffff) == suppress_a6 and
+            return0 == suppress_return0 and command == suppress_command
+        local suppress = (legacy_suppress or global_suppress) and
             suppression_count < suppress_limit
         if suppress then suppression_count = suppression_count + 1 end
         dispatch_sequence = dispatch_sequence + 1
@@ -173,9 +181,11 @@ oracle11_player_audio_qsound = audio_program:install_write_tap(
         else
             register, value = string.format("%02x", byte), string.format("%04x", qsound_latch)
         end
-        qsound:write(string.format("%d\t%s\t%04x\t%04x\t%02x\t%s\t%s\n",
-            frame, variant, audio_cpu.state["PC"].value & 0xffff,
-            port, byte, register, value))
+        if not compact_qsound then
+            qsound:write(string.format("%d\t%s\t%04x\t%04x\t%02x\t%s\t%s\n",
+                frame, variant, audio_cpu.state["PC"].value & 0xffff,
+                port, byte, register, value))
+        end
     end)
 
 oracle11_player_audio_subscription = emu.add_machine_frame_notifier(function()

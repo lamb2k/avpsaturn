@@ -35,6 +35,23 @@
       "semantic_sound_names_inferred": false,
       "source_routine": "audio ROM 0x0abc..0x0adb",
       "writes_per_port_in_each_completion": 489834
+    },
+    {
+      "accepted_player_command_controls": 29,
+      "classification": "SOURCE_CLOSED",
+      "command_identities": 72,
+      "copied_and_dispatched_commands": 1161,
+      "evidence": "data/oracle11_global_audio_handlers.json",
+      "evidence_sha256": "2673695a91dced1cb9e778026ba132fe22309a2e370092291a2414dc232c0066",
+      "id": "audio-command-dispatcher-table-handlers",
+      "individual_bus_writes_are_logical_events": false,
+      "logical_event_owner": "audio command plus handler transaction",
+      "new_global_command_controls": 43,
+      "orphan_handler_paths": 0,
+      "orphan_qsound_transaction_groups": 0,
+      "orphan_shared_commands": 0,
+      "semantic_sound_names_inferred": false,
+      "source_routine": "audio ROM 0x01bd..0x0294"
     }
   ],
   "accepted_subcheckpoint": {
@@ -5875,8 +5892,11 @@
     "provenance_groups": 175
   },
   "remaining_transport_backlog": {
-    "classification": "PARTIAL",
-    "exact_next_experiment": "bind each copied command to its audio-CPU dispatch/table path and exact QSound-bus argument effects without semantic names",
+    "classification": "SOURCE_CLOSED",
+    "exact_next_experiment": null,
+    "orphan_handler_paths": 0,
+    "orphan_qsound_transaction_groups": 0,
+    "orphan_shared_commands": 0,
     "scope": "audio-CPU command dispatch, state updates and command tables"
   },
   "schema": "oracle11-global-gameplay-audio-load-release-v1",

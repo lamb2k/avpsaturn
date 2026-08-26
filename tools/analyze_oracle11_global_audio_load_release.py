@@ -19,6 +19,7 @@ TRANSPORT_B = ROOT / ".deps" / "mame" / "oracle11_global_audio_transport_c"
 OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
 ROUTE = ROOT / "data" / "oracle10_round1_route.json"
 PLAYER_AUDIO = ROOT / "data" / "oracle11_predator_player_audio.json"
+HANDLERS = ROOT / "data" / "oracle11_global_audio_handlers.json"
 OUT = ROOT / "data" / "oracle11_global_audio_load_release.json"
 IDENTICAL_FILES = ("samples.tsv", "dispatches.tsv", "qsound.tsv",
                    "projectiles.tsv", "score_writes.tsv", "result.tsv")
@@ -152,9 +153,16 @@ def build_report() -> dict[str, object]:
 
     route = json.loads(ROUTE.read_text(encoding="utf-8"))
     player_audio = json.loads(PLAYER_AUDIO.read_text(encoding="ascii"))
+    handlers = json.loads(HANDLERS.read_text(encoding="ascii"))
     require(player_audio["status"] == "SOURCE_CLOSED" and
             player_audio["boundary"]["global_backlog_begins"].startswith(
                 "0x001880"), "player/global boundary drift")
+    require(handlers["status"] == "SOURCE_CLOSED" and
+            handlers["coverage"]["orphan_shared_commands"] == 0 and
+            handlers["coverage"]["orphan_command_identities"] == 0 and
+            handlers["coverage"]["orphan_qsound_transaction_groups"] == 0 and
+            handlers["handler_paths"]["orphan_paths"] == 0,
+            "audio command handler checkpoint drift")
     opcodes = OPCODES.read_bytes()
     load_frames = route["load_release_boundary_frames"]
     require(load_frames == [5565, 5566, 6200, 12799],
@@ -235,6 +243,23 @@ def build_report() -> dict[str, object]:
                 "writes_per_port_in_each_completion": 489834,
                 "semantic_sound_names_inferred": False,
             },
+            {
+                "id": "audio-command-dispatcher-table-handlers",
+                "classification": "SOURCE_CLOSED",
+                "source_routine": "audio ROM 0x01bd..0x0294",
+                "evidence": "data/oracle11_global_audio_handlers.json",
+                "evidence_sha256": digest(HANDLERS),
+                "copied_and_dispatched_commands": 1161,
+                "command_identities": 72,
+                "accepted_player_command_controls": 29,
+                "new_global_command_controls": 43,
+                "orphan_shared_commands": 0,
+                "orphan_handler_paths": 0,
+                "orphan_qsound_transaction_groups": 0,
+                "logical_event_owner": "audio command plus handler transaction",
+                "individual_bus_writes_are_logical_events": False,
+                "semantic_sound_names_inferred": False,
+            },
         ],
         "remaining_audio_trigger_backlog": {
             "dispatch_occurrences": len(nonplayer),
@@ -242,11 +267,12 @@ def build_report() -> dict[str, object]:
             "groups": trigger_backlog,
         },
         "remaining_transport_backlog": {
-            "classification": "PARTIAL",
+            "classification": "SOURCE_CLOSED",
             "scope": "audio-CPU command dispatch, state updates and command tables",
-            "exact_next_experiment": (
-                "bind each copied command to its audio-CPU dispatch/table path "
-                "and exact QSound-bus argument effects without semantic names"),
+            "orphan_shared_commands": 0,
+            "orphan_handler_paths": 0,
+            "orphan_qsound_transaction_groups": 0,
+            "exact_next_experiment": None,
         },
         "load_release_backlog": {
             "classification": "OBSERVED",
@@ -302,15 +328,21 @@ def validate(report: dict[str, object]) -> None:
                 for group in backlog["groups"]),
             "global trigger backlog drift")
     audio_cpu = report["accepted_audio_cpu_subcheckpoints"]
-    require(len(audio_cpu) == 2 and
+    require(len(audio_cpu) == 3 and
             all(item["classification"] == "SOURCE_CLOSED" for item in audio_cpu)
             and audio_cpu[0]["transactions_in_each_completion"] == 1161 and
             audio_cpu[1]["writes_per_port_in_each_completion"] == 489834 and
-            audio_cpu[1]["semantic_sound_names_inferred"] is False,
+            audio_cpu[1]["semantic_sound_names_inferred"] is False and
+            audio_cpu[2]["copied_and_dispatched_commands"] == 1161 and
+            audio_cpu[2]["command_identities"] == 72 and
+            audio_cpu[2]["orphan_shared_commands"] == 0 and
+            audio_cpu[2]["orphan_handler_paths"] == 0 and
+            audio_cpu[2]["orphan_qsound_transaction_groups"] == 0 and
+            audio_cpu[2]["individual_bus_writes_are_logical_events"] is False,
             "audio-CPU subcheckpoint drift")
     require(report["capture_identity"]["audio_transport_byte_identical"] is True
             and report["remaining_transport_backlog"]["classification"] ==
-            "PARTIAL" and
+            "SOURCE_CLOSED" and
             report["load_release_backlog"]["classification"] == "OBSERVED" and
             report["load_release_backlog"]["boundary_frames"] ==
             [5565, 5566, 6200, 12799], "remaining boundary backlog drift")
@@ -330,7 +362,7 @@ def validate(report: dict[str, object]) -> None:
 def main() -> None:
     report = build_report()
     OUT.write_bytes(canonical(report))
-    print("ORACLE-11 global audio/load/release: PARTIAL; main queue transport "
+    print("ORACLE-11 global audio/load/release: PARTIAL; command handlers "
           "SOURCE_CLOSED; 175 trigger groups and 4 load/release edges remain")
 
 

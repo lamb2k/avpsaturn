@@ -59,8 +59,12 @@ mutant["accepted_audio_cpu_subcheckpoints"][1]["writes_per_port_in_each_completi
 reject(mutant, "QSound-bus primitive write dropped")
 
 mutant = copy.deepcopy(report)
-mutant["remaining_transport_backlog"]["classification"] = "SOURCE_CLOSED"
-reject(mutant, "audio command handlers falsely closed")
+mutant["remaining_transport_backlog"]["classification"] = "PARTIAL"
+reject(mutant, "closed audio command handlers reopened")
+
+mutant = copy.deepcopy(report)
+mutant["accepted_audio_cpu_subcheckpoints"][2]["orphan_handler_paths"] = 1
+reject(mutant, "orphan audio handler hidden")
 
 mutant = copy.deepcopy(report)
 mutant["load_release_backlog"]["boundary_frames"].pop()
@@ -74,4 +78,4 @@ mutant = copy.deepcopy(report)
 mutant["protected_boundaries"]["spec02_active"] = True
 reject(mutant, "SPEC-02 activated")
 
-print("ORACLE-11 global audio/load/release tests: PASS (11 mutations rejected)")
+print("ORACLE-11 global audio/load/release tests: PASS (12 mutations rejected)")

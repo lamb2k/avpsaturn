@@ -2,8 +2,7 @@
 
 `project_state.yaml` is the machine-readable source of truth and
 `docs/PARITY_PLAN.md` is the only roadmap. Continue sequentially on
-`codex/avp-playable-loop-pivot`; preserve dirty/private worktrees, ignored
-evidence, recovery patches, ROMs, captures, and component-scoped user locks.
+`codex/avp-playable-loop-pivot`; preserve all private evidence and user locks.
 
 ## Workflow pivot / Preserved evidence work
 
@@ -17,33 +16,24 @@ evidence, recovery patches, ROMs, captures, and component-scoped user locks.
 
 ## Current task and next action
 
-Resume the AvP salvage Goal at
-`ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE`; it remains active. Actor
-scheduler/lifecycle and Predator Warrior locomotion/neutral/facing, melee,
-normal jump, directional/airborne actions, interruption cancellation, and
-weapon/projectile/resource ownership are source closed. Player nonlethal HIT,
-lethal KO, failure/continue, respawn initialization, and return-to-control are
-also source closed. The latest checkpoint
-reconciles the full-route phase census with input-only counterfactuals: required
-phases `0x0400/02/04/06/0a/0c/0e/10` are closed, while unwitnessed
-`0x0408/12/14` are explicit `NOT_REQUIRED_FOR_ROUND1`. Natural health pickup,
-the source class-`0x0e` temporary-resource grant, interaction completion and
-interruption, packed-BCD score award, and player-to-route load/release edges
-are now also closed. Every route-observed player phase is mapped. Static and
-dynamic evidence corrected `0x0abdd2` from a former audio label to score
-authority. Predator Warrior is `SOURCE_CLOSED`, including all 38
-player-origin audio trigger edges across 47 state/action/substate contexts.
-The accepted player evidence is retained unchanged in
+Resume the AvP salvage Goal at `ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE`.
+Scheduler/lifecycle and all required Predator Warrior locomotion, facing,
+melee, directional/airborne/interruption, weapon/resource, HIT/KO, continue,
+respawn, pickup, and route ownership are source closed. Unwitnessed air phases
+`0x0408/12/14` are `NOT_REQUIRED_FOR_ROUND1`. `0x0abdd2` is packed-BCD score
+authority, not audio. Predator Warrior is `SOURCE_CLOSED`, including all 38
+player-origin audio edges across 47 state/action/substate contexts. Preserve:
 `data/oracle11_predator_player_audio.json` and
 `data/oracle11_predator_warrior_authority.json`.
 
-Global gameplay-audio/load/release remains `PARTIAL`. The main-CPU queue drain,
-audio-CPU 16-byte shared-command ingress, and guarded QSound write primitive
-are source closed in `data/oracle11_global_audio_load_release.json`. The active
-experiment is the intervening audio-CPU command dispatcher/handler/table
-boundary, followed by the 175 non-player trigger provenance groups and four
-route load/release boundaries. Individual low/high/register writes are not
-logical sound events; group them by their owning command/handler transaction.
+Global gameplay-audio/load/release remains `PARTIAL`. The main queue drain,
+audio ingress, dispatcher/909-entry table/handlers, and grouped QSound effects
+are source closed in
+`data/oracle11_global_audio_load_release.json` and
+`data/oracle11_global_audio_handlers.json`. All 1,161 commands, 72 identities,
+and handler paths are bound with zero orphans; individual bus writes are not
+logical events. Next bind all 175 non-player trigger groups to source
+owners/guards, then the four load/release boundaries.
 The sole route-segment x authority-family matrix and SPEC-02 zero-gap gate
 remain in `data/round1_system_coverage.yaml`.
 
