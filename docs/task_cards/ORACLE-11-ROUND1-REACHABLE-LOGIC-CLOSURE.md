@@ -104,6 +104,18 @@ card only for a genuinely independent body or source-evidence hard stop.
   stage-clear phases, and HUD/route presentation remain explicit external
   authority edges. ORACLE-11 remains active and SPEC-02 remains blocked by the
   complete matrix zero-gap gate.
+- `global-gameplay-audio-load-release`: `PARTIAL`. The shared main-CPU queue
+  drain `0x001880..0x001914` is `SOURCE_CLOSED`: both byte-identical completion
+  captures contain 1,161 enqueues, and all twelve shared-RAM payload writers
+  execute exactly 1,161 times with the source queue guards, 16-byte entry,
+  `0x03f0` pointer wrap, ready-byte handshake, and consumer advance bound.
+  This does not close the audio-CPU command handling or QSound-bus transport.
+  The remaining backlog contains 783 non-player dispatches grouped into 175
+  exact origin-A6/shared-return/command provenance bodies, plus the four route
+  load/release boundaries at frames 5,565, 5,566, 6,200, and 12,799. Evidence
+  and mutation controls are in
+  `data/oracle11_global_audio_load_release.json`. No semantic sound names are
+  inferred, and the packed-BCD score routines remain rejected as audio owners.
 
 ## Owned paths
 

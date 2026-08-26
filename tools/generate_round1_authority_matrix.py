@@ -8,6 +8,7 @@ ROOT=Path(__file__).resolve().parents[1]
 COVERAGE=ROOT/'data/round1_system_coverage.yaml'
 ROUTE=ROOT/'data/oracle10_round1_route.json'
 PLAYER=ROOT/'data/oracle11_predator_warrior_authority.json'
+GLOBAL_AUDIO=ROOT/'data/oracle11_global_audio_load_release.json'
 FAMILIES=(
  'predator-warrior-player-authority','round1-navigation-terrain-camera',
  'actor-scheduler-allocation-lifecycle','round1-enemy-archetypes',
@@ -96,6 +97,28 @@ def main():
         for item in ('data/oracle11_predator_warrior_authority.json',
                      'data/oracle11_predator_player_audio.json'):
             if item not in evidence:evidence.append(item)
+        body['counterfactual']=(
+          'all required player bodies and every route-reachable player-origin '
+          'gameplay-audio trigger are source-closed; score-only packed-BCD '
+          'routines are rejected as audio ownership')
+        body['exact_next_experiment']=(
+          'Retain the closed Predator Warrior contract while global audio, '
+          'route, actor and encounter families are closed.')
+    if GLOBAL_AUDIO.exists():
+        global_audio=json.loads(GLOBAL_AUDIO.read_text(encoding='ascii'))
+        body=next(item for item in coverage['bodies']
+            if item['id']=='gameplay-audio-load-release')
+        body['status']=global_audio['status']
+        evidence=body.setdefault('accepted_evidence',[])
+        item='data/oracle11_global_audio_load_release.json'
+        if item not in evidence:evidence.append(item)
+        body['counterfactual']=(
+          'the shared main queue-to-QSound-RAM transport is source-closed; '
+          'non-player trigger provenance, audio-CPU transport and four '
+          'load/release edges remain open')
+        body['exact_next_experiment']=(
+          'Bind the 175 non-player trigger provenance groups, shared-RAM to '
+          'audio-CPU/QSound transport, and four load/release boundary guards.')
     coverage['route_segment_authority_matrix']=build(coverage,route)
     coverage['spec02_closure_gate']=coverage['route_segment_authority_matrix']['closure_gate']
     COVERAGE.write_bytes((json.dumps(coverage,sort_keys=True,indent=2)+'\n').encode('ascii'))

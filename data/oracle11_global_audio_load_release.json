@@ -1,0 +1,5827 @@
+{
+  "accepted_subcheckpoint": {
+    "all_payload_writer_counts_match_transactions": true,
+    "classification": "SOURCE_CLOSED",
+    "entry_guard": "read pointer 0xff816e differs from write pointer 0xff8170 and QSound shared ready byte 0x61801f equals 0xff",
+    "id": "main-queue-to-qsound-shared-ram-transport",
+    "mutation_evidence": "the accepted 38 player-edge suppressions each change the downstream QSound bus through this data-independent transport",
+    "queue": {
+      "argument_writers": [
+        "0x00193c",
+        "0x001940",
+        "0x001944"
+      ],
+      "base": "A5-0x7578 (0xff0bd8 in the captured route)",
+      "consumer_pointer_writer": "0x001910",
+      "entry_size": 16,
+      "pointer_mask": "0x03f0",
+      "producer": "0x001922..0x001956"
+    },
+    "ready_release_writer": "0x001900 -> 0x61801f = 0",
+    "routine_sha256": "d2dfb639714a0d424fff25dcd1910b7fe2265e67126996c6ce01dd70a01e689b",
+    "semantic_sound_names_inferred": false,
+    "shared_payload_writers": {
+      "0x618000": {
+        "count": 1161,
+        "first_frame": 2031,
+        "last_frame": 17976,
+        "pc": "0x0018be"
+      },
+      "0x618002": {
+        "count": 1161,
+        "first_frame": 2031,
+        "last_frame": 17976,
+        "pc": "0x0018c6"
+      },
+      "0x618006": {
+        "count": 1161,
+        "first_frame": 2031,
+        "last_frame": 17976,
+        "pc": "0x0018ae"
+      },
+      "0x618008": {
+        "count": 1161,
+        "first_frame": 2031,
+        "last_frame": 17976,
+        "pc": "0x0018b6"
+      },
+      "0x61800c": {
+        "count": 1161,
+        "first_frame": 2031,
+        "last_frame": 17976,
+        "pc": "0x0018ce"
+      },
+      "0x61800e": {
+        "count": 1161,
+        "first_frame": 2031,
+        "last_frame": 17976,
+        "pc": "0x0018d6"
+      },
+      "0x618010": {
+        "count": 1161,
+        "first_frame": 2031,
+        "last_frame": 17976,
+        "pc": "0x0018de"
+      },
+      "0x618012": {
+        "count": 1161,
+        "first_frame": 2031,
+        "last_frame": 17976,
+        "pc": "0x0018f6"
+      },
+      "0x618014": {
+        "count": 1161,
+        "first_frame": 2031,
+        "last_frame": 17976,
+        "pc": "0x0018fe"
+      },
+      "0x618016": {
+        "count": 1161,
+        "first_frame": 2031,
+        "last_frame": 17976,
+        "pc": "0x0018e6"
+      },
+      "0x618018": {
+        "count": 1161,
+        "first_frame": 2031,
+        "last_frame": 17976,
+        "pc": "0x0018ee"
+      },
+      "0x61801e": {
+        "count": 1161,
+        "first_frame": 2031,
+        "last_frame": 17976,
+        "pc": "0x001908"
+      }
+    },
+    "source_opcode_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
+    "source_routine": "0x001880..0x001914",
+    "transactions_in_each_completion": 1161
+  },
+  "capture_identity": {
+    "byte_identical": true,
+    "completion_a": {
+      "files": {
+        "dispatches.tsv": "fd6a80c560d4af8dfaac5c56d035b2ffad3ccdcc006be769d67494168817da0c",
+        "projectiles.tsv": "f309394a466774a0b25daf32bb3e3008869dc350f0fcb52860e84fdeab2f657f",
+        "qsound.tsv": "ec59a4a62c20d20293f9af5389eccbb3c48ba0a2867a602498f2b7b409d37ba0",
+        "result.tsv": "3237763674ad14fdf2fe0a88666a5a066470710cc8527641e546b26c5ec1338d",
+        "samples.tsv": "cb8b55d0de06315073530c9dac497fa45cef7a129da3cb59a4972c43d57a708f",
+        "score_writes.tsv": "adb98eb7b0ca9ff8305361ea055045e9f4bedae79e368a9b04781c38f55076a4"
+      },
+      "manifest_sha256": "52368057a4ad08129fbc3f986e371f2217460d72866e34c09f4b667caa35a60e"
+    },
+    "completion_b": {
+      "files": {
+        "dispatches.tsv": "fd6a80c560d4af8dfaac5c56d035b2ffad3ccdcc006be769d67494168817da0c",
+        "projectiles.tsv": "f309394a466774a0b25daf32bb3e3008869dc350f0fcb52860e84fdeab2f657f",
+        "qsound.tsv": "ec59a4a62c20d20293f9af5389eccbb3c48ba0a2867a602498f2b7b409d37ba0",
+        "result.tsv": "3237763674ad14fdf2fe0a88666a5a066470710cc8527641e546b26c5ec1338d",
+        "samples.tsv": "cb8b55d0de06315073530c9dac497fa45cef7a129da3cb59a4972c43d57a708f",
+        "score_writes.tsv": "adb98eb7b0ca9ff8305361ea055045e9f4bedae79e368a9b04781c38f55076a4"
+      },
+      "manifest_sha256": "52368057a4ad08129fbc3f986e371f2217460d72866e34c09f4b667caa35a60e"
+    }
+  },
+  "load_release_backlog": {
+    "boundary_frames": [
+      5565,
+      5566,
+      6200,
+      12799
+    ],
+    "classification": "OBSERVED",
+    "exact_next_experiment": "capture exact writers, callers, guards, data ownership, and paired suppressions for each of the four route boundaries"
+  },
+  "player_boundary": {
+    "classification": "SOURCE_CLOSED",
+    "dispatch_occurrences": 378,
+    "evidence": "data/oracle11_predator_player_audio.json",
+    "ownership_ends_at": "0x001922 main-side enqueue entry"
+  },
+  "protected_boundaries": {
+    "frontend_active": false,
+    "oracle11_active": true,
+    "physical_saturn": "UNRUN",
+    "production_runtime_writes": 0,
+    "salvage08_active": false,
+    "spec02_active": false,
+    "user09_status": "CHANGES_REQUESTED",
+    "yaba_runs": 0
+  },
+  "remaining_audio_trigger_backlog": {
+    "dispatch_occurrences": 783,
+    "groups": [
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0fffff07",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0xff07",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 5523,
+        "last_frame": 15061,
+        "occurrences": 2,
+        "origin_a6": "0xff00d8",
+        "return_chain_variants": [
+          [
+            "0x001a34",
+            "0x0094ca",
+            "0x0080a2"
+          ],
+          [
+            "0x001a34",
+            "0x00c874",
+            "0x00c808"
+          ]
+        ],
+        "shared_wrapper_return": "0x001a34"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000001",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0001",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 6199,
+        "last_frame": 12798,
+        "occurrences": 2,
+        "origin_a6": "0xff00d8",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003c04",
+            "0x008bd4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000000f",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x000f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 6691,
+        "last_frame": 13291,
+        "occurrences": 2,
+        "origin_a6": "0xff00d8",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003c04",
+            "0x009138"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000016",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0016",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 15057,
+        "last_frame": 15057,
+        "occurrences": 1,
+        "origin_a6": "0xff00d8",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003c04",
+            "0x009272"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000254",
+            "d2": "0x00070020",
+            "d3": "0x00000100"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0254",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2030,
+        "last_frame": 15150,
+        "occurrences": 2,
+        "origin_a6": "0xff00d8",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x00c0f6",
+            "0x00bfdc"
+          ],
+          [
+            "0x003a8e",
+            "0x00c28a",
+            "0x00bfdc"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000257",
+            "d2": "0x00071020",
+            "d3": "0x00000100"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0257",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2070,
+        "last_frame": 2070,
+        "occurrences": 1,
+        "origin_a6": "0xff00d8",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x00c0e4",
+            "0x00bfdc"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000258",
+            "d2": "0x00071020",
+            "d3": "0x00000100"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0258",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 15190,
+        "last_frame": 15190,
+        "occurrences": 1,
+        "origin_a6": "0xff00d8",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x00bfdc",
+            "0x0080a2"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000034",
+            "d2": "0x00001000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0034",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 14627,
+        "last_frame": 14925,
+        "occurrences": 17,
+        "origin_a6": "0xff1b1e",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x0ac764",
+            "0x01bde6"
+          ],
+          [
+            "0x003a8e",
+            "0x0ad1d2",
+            "0x0ac764"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000030",
+            "d2": "0x00001000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0030",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2105,
+        "last_frame": 13836,
+        "occurrences": 7,
+        "origin_a6": "0xff8186",
+        "return_chain_variants": [
+          [
+            "0x001a78",
+            "0x001744",
+            "0x000e76"
+          ]
+        ],
+        "shared_wrapper_return": "0x001a78"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000006",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0006",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 15192,
+        "last_frame": 15192,
+        "occurrences": 1,
+        "origin_a6": "0xff8480",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003c04",
+            "0x00c2c6"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000007",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0007",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2072,
+        "last_frame": 2072,
+        "occurrences": 1,
+        "origin_a6": "0xff8480",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003c04",
+            "0x00c132"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000001f",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x001f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 5563,
+        "last_frame": 5563,
+        "occurrences": 1,
+        "origin_a6": "0xff8480",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003c04",
+            "0x00c054"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00050e06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00061c06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4099,
+        "last_frame": 17395,
+        "occurrences": 18,
+        "origin_a6": "0xff8680",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004e",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 10840,
+        "last_frame": 16555,
+        "occurrences": 2,
+        "origin_a6": "0xff8680",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004f",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4138,
+        "last_frame": 5170,
+        "occurrences": 2,
+        "origin_a6": "0xff8680",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000118",
+            "d2": "0x00061f06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x00000118",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0118",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 5131,
+        "last_frame": 17023,
+        "occurrences": 10,
+        "origin_a6": "0xff8680",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000119",
+            "d2": "0x00061e06",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0119",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 7546,
+        "last_frame": 7546,
+        "occurrences": 1,
+        "origin_a6": "0xff8680",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000011a",
+            "d2": "0x00050306",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000011a",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x011a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2389,
+        "last_frame": 17142,
+        "occurrences": 5,
+        "origin_a6": "0xff8680",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00061c06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2962,
+        "last_frame": 17659,
+        "occurrences": 15,
+        "origin_a6": "0xff8700",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004e",
+            "d2": "0x00050006",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000004e",
+            "d2": "0x00061b06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000004e",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2287,
+        "last_frame": 13548,
+        "occurrences": 6,
+        "origin_a6": "0xff8700",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004f",
+            "d2": "0x00050406",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000004f",
+            "d2": "0x00061f06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000004f",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2383,
+        "last_frame": 13513,
+        "occurrences": 6,
+        "origin_a6": "0xff8700",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000118",
+            "d2": "0x00061b06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x00000118",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0118",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3361,
+        "last_frame": 17391,
+        "occurrences": 18,
+        "origin_a6": "0xff8700",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000119",
+            "d2": "0x00061706",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x00000119",
+            "d2": "0x00061e06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x00000119",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0119",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 7838,
+        "last_frame": 17590,
+        "occurrences": 10,
+        "origin_a6": "0xff8700",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000011a",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x011a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 17154,
+        "last_frame": 17154,
+        "occurrences": 1,
+        "origin_a6": "0xff8700",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00061606",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00061c06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3367,
+        "last_frame": 17214,
+        "occurrences": 17,
+        "origin_a6": "0xff8780",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004e",
+            "d2": "0x00061e06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000004e",
+            "d2": "0x00061f06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000004e",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4131,
+        "last_frame": 9278,
+        "occurrences": 7,
+        "origin_a6": "0xff8780",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004f",
+            "d2": "0x00061c06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000004f",
+            "d2": "0x00061f06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000004f",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 5762,
+        "last_frame": 16599,
+        "occurrences": 3,
+        "origin_a6": "0xff8780",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000118",
+            "d2": "0x00050006",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x00000118",
+            "d2": "0x00061b06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x00000118",
+            "d2": "0x00061d06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x00000118",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0118",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2293,
+        "last_frame": 16561,
+        "occurrences": 21,
+        "origin_a6": "0xff8780",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000119",
+            "d2": "0x00061e06",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0119",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 11619,
+        "last_frame": 11619,
+        "occurrences": 1,
+        "origin_a6": "0xff8780",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000011a",
+            "d2": "0x00050506",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000011a",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x011a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2377,
+        "last_frame": 13385,
+        "occurrences": 6,
+        "origin_a6": "0xff8780",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00050006",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00061106",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00061c06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2299,
+        "last_frame": 17614,
+        "occurrences": 17,
+        "origin_a6": "0xff8800",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004e",
+            "d2": "0x00061c06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000004e",
+            "d2": "0x00061e06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000004e",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2950,
+        "last_frame": 17018,
+        "occurrences": 11,
+        "origin_a6": "0xff8800",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004f",
+            "d2": "0x00050606",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000004f",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2371,
+        "last_frame": 13391,
+        "occurrences": 7,
+        "origin_a6": "0xff8800",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000118",
+            "d2": "0x00050c06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x00000118",
+            "d2": "0x00061b06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x00000118",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0118",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3373,
+        "last_frame": 17652,
+        "occurrences": 20,
+        "origin_a6": "0xff8800",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000119",
+            "d2": "0x00061e06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x00000119",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0119",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4075,
+        "last_frame": 14214,
+        "occurrences": 8,
+        "origin_a6": "0xff8800",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000011a",
+            "d2": "0x00061d06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000011a",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x011a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 5768,
+        "last_frame": 16605,
+        "occurrences": 2,
+        "origin_a6": "0xff8800",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00050006",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00061c06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2493,
+        "last_frame": 13560,
+        "occurrences": 13,
+        "origin_a6": "0xff8880",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004e",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 9725,
+        "last_frame": 14260,
+        "occurrences": 4,
+        "origin_a6": "0xff8880",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004f",
+            "d2": "0x00061e06",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 5774,
+        "last_frame": 5774,
+        "occurrences": 1,
+        "origin_a6": "0xff8880",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000118",
+            "d2": "0x00050006",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x00000118",
+            "d2": "0x00050d06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x00000118",
+            "d2": "0x00061b06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x00000118",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0118",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2305,
+        "last_frame": 16573,
+        "occurrences": 17,
+        "origin_a6": "0xff8880",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000119",
+            "d2": "0x00061e06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x00000119",
+            "d2": "0x00061f06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x00000119",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0119",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3832,
+        "last_frame": 16059,
+        "occurrences": 3,
+        "origin_a6": "0xff8880",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000011a",
+            "d2": "0x00061f06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000011a",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x011a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4143,
+        "last_frame": 13507,
+        "occurrences": 4,
+        "origin_a6": "0xff8880",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00050006",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00061106",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00061a06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00061c06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2311,
+        "last_frame": 17386,
+        "occurrences": 18,
+        "origin_a6": "0xff8900",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004e",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 11874,
+        "last_frame": 17634,
+        "occurrences": 3,
+        "origin_a6": "0xff8900",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004f",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 5157,
+        "last_frame": 17147,
+        "occurrences": 3,
+        "origin_a6": "0xff8900",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000118",
+            "d2": "0x00050006",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x00000118",
+            "d2": "0x00061b06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x00000118",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0118",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2487,
+        "last_frame": 17596,
+        "occurrences": 17,
+        "origin_a6": "0xff8900",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000119",
+            "d2": "0x00050706",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x00000119",
+            "d2": "0x00061206",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x00000119",
+            "d2": "0x00061e06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x00000119",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0119",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2364,
+        "last_frame": 16839,
+        "occurrences": 6,
+        "origin_a6": "0xff8900",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000011a",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x011a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 6819,
+        "last_frame": 13519,
+        "occurrences": 2,
+        "origin_a6": "0xff8900",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00061c06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00061e06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3423,
+        "last_frame": 17646,
+        "occurrences": 21,
+        "origin_a6": "0xff8980",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004e",
+            "d2": "0x00061e06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000004e",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 8679,
+        "last_frame": 17378,
+        "occurrences": 4,
+        "origin_a6": "0xff8980",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004f",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 6801,
+        "last_frame": 6801,
+        "occurrences": 1,
+        "origin_a6": "0xff8980",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000118",
+            "d2": "0x00061b06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x00000118",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0118",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2968,
+        "last_frame": 17608,
+        "occurrences": 15,
+        "origin_a6": "0xff8980",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000119",
+            "d2": "0x00061e06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x00000119",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0119",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3354,
+        "last_frame": 11379,
+        "occurrences": 4,
+        "origin_a6": "0xff8980",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000011a",
+            "d2": "0x00061f06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x0000011a",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x011a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2931,
+        "last_frame": 7557,
+        "occurrences": 4,
+        "origin_a6": "0xff8980",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00061c06",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 16666,
+        "last_frame": 17602,
+        "occurrences": 3,
+        "origin_a6": "0xff8a00",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004f",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 17135,
+        "last_frame": 17135,
+        "occurrences": 1,
+        "origin_a6": "0xff8a00",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000118",
+            "d2": "0x00061806",
+            "d3": "0x01bd002d"
+          },
+          {
+            "d1": "0x00000118",
+            "d2": "0x00062006",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0118",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 16842,
+        "last_frame": 17640,
+        "occurrences": 4,
+        "origin_a6": "0xff8a00",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000119",
+            "d2": "0x00061f06",
+            "d3": "0x01bd002b"
+          },
+          {
+            "d1": "0x00000119",
+            "d2": "0x00062006",
+            "d3": "0x01bd002b"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0119",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 5151,
+        "last_frame": 17094,
+        "occurrences": 3,
+        "origin_a6": "0xff8a00",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01b86e",
+            "0x0084a4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001d00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4755,
+        "last_frame": 4755,
+        "occurrences": 1,
+        "origin_a6": "0xff9c40",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000d00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4445,
+        "last_frame": 5234,
+        "occurrences": 2,
+        "origin_a6": "0xff9c40",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00001000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4431,
+        "last_frame": 5220,
+        "occurrences": 2,
+        "origin_a6": "0xff9c40",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001d00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0108",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4395,
+        "last_frame": 4395,
+        "occurrences": 1,
+        "origin_a6": "0xff9c40",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000d00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0109",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4805,
+        "last_frame": 4805,
+        "occurrences": 1,
+        "origin_a6": "0xff9c40",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00001000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x010a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4791,
+        "last_frame": 4791,
+        "occurrences": 1,
+        "origin_a6": "0xff9c40",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0109",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2380,
+        "last_frame": 2380,
+        "occurrences": 1,
+        "origin_a6": "0xff9d00",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ec90",
+            "0x01ea58"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x010a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2366,
+        "last_frame": 2366,
+        "occurrences": 1,
+        "origin_a6": "0xff9d00",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ebaa",
+            "0x01ea58"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001d00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4034,
+        "last_frame": 4575,
+        "occurrences": 2,
+        "origin_a6": "0xff9dc0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01e8bc"
+          ],
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000600",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000d00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00001200",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2461,
+        "last_frame": 4985,
+        "occurrences": 5,
+        "origin_a6": "0xff9dc0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ec90",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000900",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00001000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00001400",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2447,
+        "last_frame": 4971,
+        "occurrences": 5,
+        "origin_a6": "0xff9dc0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ebaa",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000100",
+            "d2": "0x00000800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000100",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0100",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3752,
+        "last_frame": 3987,
+        "occurrences": 2,
+        "origin_a6": "0xff9dc0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x040dca",
+            "0x040bcc"
+          ],
+          [
+            "0x003a8e",
+            "0x040ea6",
+            "0x040bcc"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000108",
+            "d2": "0x00000900",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001d00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0108",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2830,
+        "last_frame": 4935,
+        "occurrences": 3,
+        "origin_a6": "0xff9dc0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000d00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0109",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4625,
+        "last_frame": 4625,
+        "occurrences": 1,
+        "origin_a6": "0xff9dc0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00001000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x010a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4611,
+        "last_frame": 4611,
+        "occurrences": 1,
+        "origin_a6": "0xff9dc0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000035",
+            "d2": "0x00001800",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0035",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3822,
+        "last_frame": 3822,
+        "occurrences": 1,
+        "origin_a6": "0xff9e80",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x040dca",
+            "0x040bcc"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4396,
+        "last_frame": 4396,
+        "occurrences": 1,
+        "origin_a6": "0xff9e80",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000d00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4806,
+        "last_frame": 4806,
+        "occurrences": 1,
+        "origin_a6": "0xff9e80",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00001000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4792,
+        "last_frame": 4792,
+        "occurrences": 1,
+        "origin_a6": "0xff9e80",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001700",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001d00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0108",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3891,
+        "last_frame": 4756,
+        "occurrences": 2,
+        "origin_a6": "0xff9e80",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000600",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000900",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0109",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3941,
+        "last_frame": 4446,
+        "occurrences": 2,
+        "origin_a6": "0xff9e80",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000c00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x010a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3927,
+        "last_frame": 4432,
+        "occurrences": 2,
+        "origin_a6": "0xff9e80",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000035",
+            "d2": "0x00000f00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000035",
+            "d2": "0x00001f00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0035",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3578,
+        "last_frame": 3763,
+        "occurrences": 2,
+        "origin_a6": "0xffa000",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x040dca",
+            "0x040bcc"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001600",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4239,
+        "last_frame": 4239,
+        "occurrences": 1,
+        "origin_a6": "0xffa000",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2397,
+        "last_frame": 3914,
+        "occurrences": 2,
+        "origin_a6": "0xffa000",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ec90",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2383,
+        "last_frame": 3900,
+        "occurrences": 2,
+        "origin_a6": "0xffa000",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ebaa",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000500",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0109",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4289,
+        "last_frame": 4289,
+        "occurrences": 1,
+        "origin_a6": "0xffa000",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000700",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x010a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4275,
+        "last_frame": 4275,
+        "occurrences": 1,
+        "origin_a6": "0xffa000",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000035",
+            "d2": "0x00001a00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0035",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 16387,
+        "last_frame": 16387,
+        "occurrences": 1,
+        "origin_a6": "0xffa0c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x067abc",
+            "0x067a40"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00000a00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001a00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001d00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2832,
+        "last_frame": 16655,
+        "occurrences": 4,
+        "origin_a6": "0xffa0c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01e8bc"
+          ],
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000400",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000900",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4626,
+        "last_frame": 16146,
+        "occurrences": 2,
+        "origin_a6": "0xffa0c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ec90",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000600",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000d00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00001d00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4612,
+        "last_frame": 16691,
+        "occurrences": 3,
+        "origin_a6": "0xffa0c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ebaa",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000100",
+            "d2": "0x00001300",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0100",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 17902,
+        "last_frame": 17902,
+        "occurrences": 1,
+        "origin_a6": "0xffa0c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x03f7a2",
+            "0x03f4a8"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001400",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0108",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4576,
+        "last_frame": 4576,
+        "occurrences": 1,
+        "origin_a6": "0xffa0c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000a00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000d00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0109",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2882,
+        "last_frame": 16705,
+        "occurrences": 4,
+        "origin_a6": "0xffa0c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ec90",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000100",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000b00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00001000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x010a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2868,
+        "last_frame": 16132,
+        "occurrences": 3,
+        "origin_a6": "0xffa0c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ebaa",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000013c",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x013c",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 16655,
+        "last_frame": 16655,
+        "occurrences": 1,
+        "origin_a6": "0xffa0c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x046aec",
+            "0x01b9ac"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000014b",
+            "d2": "0x00051b05",
+            "d3": "0x0200003e"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x014b",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 16655,
+        "last_frame": 16655,
+        "occurrences": 1,
+        "origin_a6": "0xffa0c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x046af2",
+            "0x01b9ac"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001400",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001700",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 7835,
+        "last_frame": 17524,
+        "occurrences": 3,
+        "origin_a6": "0xffa180",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01e8bc"
+          ],
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2377,
+        "last_frame": 17193,
+        "occurrences": 3,
+        "origin_a6": "0xffa180",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ec90",
+            "0x01ea58"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000b00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000f00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2363,
+        "last_frame": 17559,
+        "occurrences": 4,
+        "origin_a6": "0xffa180",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ebaa",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000071",
+            "d2": "0x00001000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000071",
+            "d2": "0x00001700",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0071",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 8019,
+        "last_frame": 17524,
+        "occurrences": 2,
+        "origin_a6": "0xffa180",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x040274",
+            "0x03f0a0"
+          ],
+          [
+            "0x003a8e",
+            "0x046aec",
+            "0x01b9ac"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000083",
+            "d2": "0x00051005",
+            "d3": "0x0200003e"
+          },
+          {
+            "d1": "0x00000083",
+            "d2": "0x00051705",
+            "d3": "0x0200003e"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0083",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 8019,
+        "last_frame": 17524,
+        "occurrences": 2,
+        "origin_a6": "0xffa180",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x04027a",
+            "0x03f0a0"
+          ],
+          [
+            "0x003a8e",
+            "0x046af2",
+            "0x01b9ac"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001a00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0108",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 15735,
+        "last_frame": 16296,
+        "occurrences": 3,
+        "origin_a6": "0xffa180",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01e8bc"
+          ],
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000200",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000400",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000600",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000c00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0109",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 7886,
+        "last_frame": 17573,
+        "occurrences": 5,
+        "origin_a6": "0xffa180",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ec90",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000400",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000600",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000b00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x010a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 7872,
+        "last_frame": 17179,
+        "occurrences": 4,
+        "origin_a6": "0xffa180",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ebaa",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000013c",
+            "d2": "0x00001a00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x013c",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 16096,
+        "last_frame": 16096,
+        "occurrences": 1,
+        "origin_a6": "0xffa180",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x046aec",
+            "0x01b9ac"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000014b",
+            "d2": "0x00051a05",
+            "d3": "0x0200003e"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x014b",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 16096,
+        "last_frame": 16096,
+        "occurrences": 1,
+        "origin_a6": "0xffa180",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x046af2",
+            "0x01b9ac"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000035",
+            "d2": "0x00001200",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000035",
+            "d2": "0x00001500",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000035",
+            "d2": "0x00001800",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0035",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2742,
+        "last_frame": 11900,
+        "occurrences": 3,
+        "origin_a6": "0xffa240",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x03f7a2",
+            "0x03f4a8"
+          ],
+          [
+            "0x003a8e",
+            "0x040dca",
+            "0x040bcc"
+          ],
+          [
+            "0x003a8e",
+            "0x0608d8",
+            "0x060792"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001400",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001500",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001600",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2805,
+        "last_frame": 17375,
+        "occurrences": 5,
+        "origin_a6": "0xffa240",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01e8bc"
+          ],
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000600",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00001500",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00001e00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4459,
+        "last_frame": 17425,
+        "occurrences": 6,
+        "origin_a6": "0xffa240",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ec90",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000d00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00001800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00001900",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00001f00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4445,
+        "last_frame": 17232,
+        "occurrences": 5,
+        "origin_a6": "0xffa240",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ebaa",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000004d",
+            "d2": "0x00050b06",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x004d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2255,
+        "last_frame": 2255,
+        "occurrences": 1,
+        "origin_a6": "0xffa240",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x060bc0",
+            "0x060792"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000071",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0071",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 16656,
+        "last_frame": 16656,
+        "occurrences": 1,
+        "origin_a6": "0xffa240",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x040274",
+            "0x03f0a0"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000083",
+            "d2": "0x00062005",
+            "d3": "0x0200003e"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0083",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 16656,
+        "last_frame": 16656,
+        "occurrences": 1,
+        "origin_a6": "0xffa240",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x04027a",
+            "0x03f0a0"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000100",
+            "d2": "0x00001200",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000100",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0100",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 6195,
+        "last_frame": 17173,
+        "occurrences": 2,
+        "origin_a6": "0xffa240",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x03f614",
+            "0x03f4a8"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001200",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001700",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001f00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0108",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4409,
+        "last_frame": 17195,
+        "occurrences": 5,
+        "origin_a6": "0xffa240",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01e8bc"
+          ],
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000300",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000500",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000b00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00001700",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00001e00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00001f00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0109",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2855,
+        "last_frame": 17246,
+        "occurrences": 8,
+        "origin_a6": "0xffa240",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ec90",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000500",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000600",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000700",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000900",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000d00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00001e00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00001f00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x010a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2841,
+        "last_frame": 17411,
+        "occurrences": 10,
+        "origin_a6": "0xffa240",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ebaa",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000013c",
+            "d2": "0x00001200",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000013c",
+            "d2": "0x00001400",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000013c",
+            "d2": "0x00001800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000013c",
+            "d2": "0x00001f00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x013c",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 6928,
+        "last_frame": 17375,
+        "occurrences": 4,
+        "origin_a6": "0xffa240",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x040274",
+            "0x03f0a0"
+          ],
+          [
+            "0x003a8e",
+            "0x041f16",
+            "0x0407b4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000014b",
+            "d2": "0x00051205",
+            "d3": "0x0200003e"
+          },
+          {
+            "d1": "0x0000014b",
+            "d2": "0x00051405",
+            "d3": "0x0200003e"
+          },
+          {
+            "d1": "0x0000014b",
+            "d2": "0x00051805",
+            "d3": "0x0200003e"
+          },
+          {
+            "d1": "0x0000014b",
+            "d2": "0x00061f05",
+            "d3": "0x0200003e"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x014b",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 6928,
+        "last_frame": 17375,
+        "occurrences": 4,
+        "origin_a6": "0xffa240",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x04027a",
+            "0x03f0a0"
+          ],
+          [
+            "0x003a8e",
+            "0x041f1c",
+            "0x0407b4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000035",
+            "d2": "0x00001100",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000035",
+            "d2": "0x00001800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000035",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000035",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0035",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 6148,
+        "last_frame": 17370,
+        "occurrences": 4,
+        "origin_a6": "0xffa300",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x03f614",
+            "0x03f4a8"
+          ],
+          [
+            "0x003a8e",
+            "0x040dca",
+            "0x040bcc"
+          ],
+          [
+            "0x003a8e",
+            "0x067abc",
+            "0x067a40"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001400",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001700",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001d00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 9275,
+        "last_frame": 16835,
+        "occurrences": 5,
+        "origin_a6": "0xffa300",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01e8bc"
+          ],
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000500",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000600",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000900",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 6789,
+        "last_frame": 16156,
+        "occurrences": 5,
+        "origin_a6": "0xffa300",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ec90",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000600",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000c00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00001900",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 6760,
+        "last_frame": 17413,
+        "occurrences": 9,
+        "origin_a6": "0xffa300",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ebaa",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000071",
+            "d2": "0x00001700",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000071",
+            "d2": "0x00001c00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000071",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0071",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 6794,
+        "last_frame": 16106,
+        "occurrences": 4,
+        "origin_a6": "0xffa300",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x040274",
+            "0x03f0a0"
+          ],
+          [
+            "0x003a8e",
+            "0x041f16",
+            "0x0407b4"
+          ],
+          [
+            "0x003a8e",
+            "0x046aec",
+            "0x01b9ac"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000083",
+            "d2": "0x00051705",
+            "d3": "0x0200003e"
+          },
+          {
+            "d1": "0x00000083",
+            "d2": "0x00061c05",
+            "d3": "0x0200003e"
+          },
+          {
+            "d1": "0x00000083",
+            "d2": "0x00062005",
+            "d3": "0x0200003e"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0083",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 6794,
+        "last_frame": 16106,
+        "occurrences": 4,
+        "origin_a6": "0xffa300",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x04027a",
+            "0x03f0a0"
+          ],
+          [
+            "0x003a8e",
+            "0x041f1c",
+            "0x0407b4"
+          ],
+          [
+            "0x003a8e",
+            "0x046af2",
+            "0x01b9ac"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000100",
+            "d2": "0x00001000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000100",
+            "d2": "0x00001100",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000100",
+            "d2": "0x00001400",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000100",
+            "d2": "0x00001800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000100",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0100",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 6073,
+        "last_frame": 12789,
+        "occurrences": 5,
+        "origin_a6": "0xffa300",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x03f614",
+            "0x03f4a8"
+          ],
+          [
+            "0x003a8e",
+            "0x03f7a2",
+            "0x03f4a8"
+          ],
+          [
+            "0x003a8e",
+            "0x040dca",
+            "0x040bcc"
+          ],
+          [
+            "0x003a8e",
+            "0x040ea6",
+            "0x040bcc"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001400",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0108",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 11262,
+        "last_frame": 17376,
+        "occurrences": 2,
+        "origin_a6": "0xffa300",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01e8bc"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000600",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000e00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00001700",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0109",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 5902,
+        "last_frame": 17427,
+        "occurrences": 9,
+        "origin_a6": "0xffa300",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ec90",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00001300",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x010a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 5888,
+        "last_frame": 16142,
+        "occurrences": 6,
+        "origin_a6": "0xffa300",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ebaa",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000118",
+            "d2": "0x00050806",
+            "d3": "0x01bd002d"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0118",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2249,
+        "last_frame": 2249,
+        "occurrences": 1,
+        "origin_a6": "0xffa300",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x060bc0",
+            "0x060792"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000013c",
+            "d2": "0x00001400",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x013c",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 15376,
+        "last_frame": 15376,
+        "occurrences": 1,
+        "origin_a6": "0xffa300",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x040274",
+            "0x03f0a0"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000014b",
+            "d2": "0x00061405",
+            "d3": "0x0200003e"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x014b",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 15376,
+        "last_frame": 15376,
+        "occurrences": 1,
+        "origin_a6": "0xffa300",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x04027a",
+            "0x03f0a0"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000035",
+            "d2": "0x00001c00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000035",
+            "d2": "0x00001d00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0035",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4128,
+        "last_frame": 17489,
+        "occurrences": 2,
+        "origin_a6": "0xffa3c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x03f614",
+            "0x03f4a8"
+          ],
+          [
+            "0x003a8e",
+            "0x0608d8",
+            "0x060792"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001d00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003d",
+            "d2": "0x00001e00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 4757,
+        "last_frame": 13755,
+        "occurrences": 4,
+        "origin_a6": "0xffa3c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01e8bc"
+          ],
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000100",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000200",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000300",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000400",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000600",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000900",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000b00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000e00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00000f00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00001400",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00001a00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00001d00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00001f00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003e",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003e",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 5881,
+        "last_frame": 17571,
+        "occurrences": 32,
+        "origin_a6": "0xffa3c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ec90",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ],
+          [
+            "0x003a8e",
+            "0x049c1a",
+            "0x049b9e"
+          ],
+          [
+            "0x003a8e",
+            "0x04a488",
+            "0x04a400"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000400",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000700",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00000900",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00001200",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00001c00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00001d00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000003f",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x003f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 5867,
+        "last_frame": 13792,
+        "occurrences": 11,
+        "origin_a6": "0xffa3c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ebaa",
+            "0x01ea58"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000071",
+            "d2": "0x00001c00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0071",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 15737,
+        "last_frame": 15737,
+        "occurrences": 1,
+        "origin_a6": "0xffa3c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x040274",
+            "0x03f0a0"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000072",
+            "d2": "0x00000200",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000072",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0072",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 7752,
+        "last_frame": 11053,
+        "occurrences": 2,
+        "origin_a6": "0xffa3c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x049838",
+            "0x0496f4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000073",
+            "d2": "0x00001300",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0073",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 13935,
+        "last_frame": 13935,
+        "occurrences": 1,
+        "origin_a6": "0xffa3c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x049588",
+            "0x01b9ac"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000079",
+            "d2": "0x00000100",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0079",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 7051,
+        "last_frame": 7051,
+        "occurrences": 1,
+        "origin_a6": "0xffa3c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x0496f4",
+            "0x049570"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000083",
+            "d2": "0x00051c05",
+            "d3": "0x0200003e"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0083",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 15737,
+        "last_frame": 15737,
+        "occurrences": 1,
+        "origin_a6": "0xffa3c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x04027a",
+            "0x03f0a0"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000100",
+            "d2": "0x00000900",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000100",
+            "d2": "0x00001500",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000100",
+            "d2": "0x00001c00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0100",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3178,
+        "last_frame": 17442,
+        "occurrences": 3,
+        "origin_a6": "0xffa3c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x03f614",
+            "0x03f4a8"
+          ],
+          [
+            "0x003a8e",
+            "0x040ea6",
+            "0x040bcc"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000108",
+            "d2": "0x00000e00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001100",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001300",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001500",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001600",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001900",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00001c00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000108",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0108",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 6915,
+        "last_frame": 17525,
+        "occurrences": 11,
+        "origin_a6": "0xffa3c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01e8bc"
+          ],
+          [
+            "0x003a8e",
+            "0x003b5a",
+            "0x01f276"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000100",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000200",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000300",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000400",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000500",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000600",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000700",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000a00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000b00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00000f00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00001000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00001200",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00001900",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00001c00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x00000109",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0109",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2447,
+        "last_frame": 13806,
+        "occurrences": 30,
+        "origin_a6": "0xffa3c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ec90",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f4f0",
+            "0x01f32e"
+          ],
+          [
+            "0x003a8e",
+            "0x049c1a",
+            "0x049b9e"
+          ],
+          [
+            "0x003a8e",
+            "0x04a488",
+            "0x04a400"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000300",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000500",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000800",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000d00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00000e00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00001100",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00001300",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00001700",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000010a",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x010a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2433,
+        "last_frame": 17557,
+        "occurrences": 12,
+        "origin_a6": "0xffa3c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01ebaa",
+            "0x01ea58"
+          ],
+          [
+            "0x003a8e",
+            "0x01f408",
+            "0x01f32e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000013d",
+            "d2": "0x00000200",
+            "d3": "0x00000000"
+          },
+          {
+            "d1": "0x0000013d",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x013d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 7817,
+        "last_frame": 11118,
+        "occurrences": 2,
+        "origin_a6": "0xffa3c0",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x049838",
+            "0x0496f4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000083",
+            "d2": "0x00051e05",
+            "d3": "0x0200003e"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0083",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3892,
+        "last_frame": 3892,
+        "occurrences": 1,
+        "origin_a6": "0xffac00",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x035568",
+            "0x01b8e4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000014a",
+            "d2": "0x00050b04",
+            "d3": "0x023d0051"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x014a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3855,
+        "last_frame": 3855,
+        "occurrences": 1,
+        "origin_a6": "0xffac00",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x035430",
+            "0x01b8e4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000082",
+            "d2": "0x00050b04",
+            "d3": "0x023d0051"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0082",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3850,
+        "last_frame": 3850,
+        "occurrences": 1,
+        "origin_a6": "0xffac80",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x035430",
+            "0x01b8e4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000014b",
+            "d2": "0x00052005",
+            "d3": "0x0200003e"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x014b",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3895,
+        "last_frame": 3895,
+        "occurrences": 1,
+        "origin_a6": "0xffac80",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x035568",
+            "0x01b8e4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000082",
+            "d2": "0x00050b04",
+            "d3": "0x023d0051"
+          },
+          {
+            "d1": "0x00000082",
+            "d2": "0x00051704",
+            "d3": "0x023d0051"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0082",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3262,
+        "last_frame": 3860,
+        "occurrences": 2,
+        "origin_a6": "0xffad00",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x035430",
+            "0x01b8e4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000083",
+            "d2": "0x00052005",
+            "d3": "0x0200003e"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0083",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3290,
+        "last_frame": 3290,
+        "occurrences": 1,
+        "origin_a6": "0xffad00",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x035568",
+            "0x01b8e4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000014a",
+            "d2": "0x00050a04",
+            "d3": "0x023d0051"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x014a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3826,
+        "last_frame": 3826,
+        "occurrences": 1,
+        "origin_a6": "0xffad00",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x035430",
+            "0x01b8e4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000014b",
+            "d2": "0x00051b05",
+            "d3": "0x0200003e"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x014b",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3888,
+        "last_frame": 3888,
+        "occurrences": 1,
+        "origin_a6": "0xffad00",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x035568",
+            "0x01b8e4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000082",
+            "d2": "0x00050a04",
+            "d3": "0x023d0051"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0082",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3831,
+        "last_frame": 3831,
+        "occurrences": 1,
+        "origin_a6": "0xffad80",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x035430",
+            "0x01b8e4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000083",
+            "d2": "0x00051d05",
+            "d3": "0x0200003e"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0083",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3868,
+        "last_frame": 3868,
+        "occurrences": 1,
+        "origin_a6": "0xffad80",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x035568",
+            "0x01b8e4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000014a",
+            "d2": "0x00051704",
+            "d3": "0x023d0051"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x014a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3257,
+        "last_frame": 3257,
+        "occurrences": 1,
+        "origin_a6": "0xffad80",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x035430",
+            "0x01b8e4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000082",
+            "d2": "0x00051704",
+            "d3": "0x023d0051"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0082",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3252,
+        "last_frame": 3252,
+        "occurrences": 1,
+        "origin_a6": "0xffae00",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x035430",
+            "0x01b8e4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000014a",
+            "d2": "0x00050a04",
+            "d3": "0x023d0051"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x014a",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3836,
+        "last_frame": 3836,
+        "occurrences": 1,
+        "origin_a6": "0xffae00",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x035430",
+            "0x01b8e4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000014b",
+            "d2": "0x00051905",
+            "d3": "0x0200003e"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x014b",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3864,
+        "last_frame": 3864,
+        "occurrences": 1,
+        "origin_a6": "0xffae00",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x035568",
+            "0x01b8e4"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000077",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0077",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2906,
+        "last_frame": 2906,
+        "occurrences": 1,
+        "origin_a6": "0xffb200",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x06d5c0",
+            "0x01bc70"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000074",
+            "d2": "0x00001800",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0074",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3891,
+        "last_frame": 3891,
+        "occurrences": 1,
+        "origin_a6": "0xffb280",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x06ca72",
+            "0x01bc70"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000077",
+            "d2": "0x00001d00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0077",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2805,
+        "last_frame": 2805,
+        "occurrences": 1,
+        "origin_a6": "0xffb300",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01bc70",
+            "0x0084bc"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000142",
+            "d2": "0x00001b00",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0142",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2805,
+        "last_frame": 2805,
+        "occurrences": 1,
+        "origin_a6": "0xffb380",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x06df48",
+            "0x01bc70"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000076",
+            "d2": "0x00001700",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0076",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 17015,
+        "last_frame": 17015,
+        "occurrences": 1,
+        "origin_a6": "0xffb400",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x06cdea",
+            "0x01bc70"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000139",
+            "d2": "0x00000500",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0139",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 3605,
+        "last_frame": 3605,
+        "occurrences": 1,
+        "origin_a6": "0xffb400",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01bc70",
+            "0x0084bc"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000006d",
+            "d2": "0x00000500",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x006d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2328,
+        "last_frame": 2328,
+        "occurrences": 1,
+        "origin_a6": "0xffb580",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x01bc70",
+            "0x0084bc"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000088",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0088",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 15202,
+        "last_frame": 15227,
+        "occurrences": 2,
+        "origin_a6": "0xffc600",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x077344",
+            "0x077324"
+          ],
+          [
+            "0x003a8e",
+            "0x077370",
+            "0x077324"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000ff05",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0xff05",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 14405,
+        "last_frame": 14405,
+        "occurrences": 1,
+        "origin_a6": "0xffd180",
+        "return_chain_variants": [
+          [
+            "0x001a34",
+            "0x028e28",
+            "0x01bde6"
+          ]
+        ],
+        "shared_wrapper_return": "0x001a34"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0222ff07",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0xff07",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 13936,
+        "last_frame": 13936,
+        "occurrences": 1,
+        "origin_a6": "0xffd180",
+        "return_chain_variants": [
+          [
+            "0x001a34",
+            "0x028de4",
+            "0x01bde6"
+          ]
+        ],
+        "shared_wrapper_return": "0x001a34"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000004",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0004",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 14405,
+        "last_frame": 14405,
+        "occurrences": 1,
+        "origin_a6": "0xffd180",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003c04",
+            "0x028e3e"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000000f",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x000f",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 5719,
+        "last_frame": 5719,
+        "occurrences": 1,
+        "origin_a6": "0xffd180",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x003c04",
+            "0x028d20"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000007d",
+            "d2": "0x00002000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x007d",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 2320,
+        "last_frame": 16918,
+        "occurrences": 24,
+        "origin_a6": "0xffd180",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x020bb6",
+            "0x01bde6"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x00000266",
+            "d2": "0x00070020",
+            "d3": "0x00000120"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0x0266",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 14465,
+        "last_frame": 14465,
+        "occurrences": 1,
+        "origin_a6": "0xffd180",
+        "return_chain_variants": [
+          [
+            "0x003a8e",
+            "0x0ac638",
+            "0x028e62"
+          ]
+        ],
+        "shared_wrapper_return": "0x003a8e"
+      },
+      {
+        "argument_variants": [
+          {
+            "d1": "0x0000ff00",
+            "d2": "0x00000000",
+            "d3": "0x00000000"
+          }
+        ],
+        "classification": "OBSERVED",
+        "command": "0xff00",
+        "exact_next_experiment": "bind origin class/type/state and the first source-side caller, then suppress this trigger and compare downstream audio and gameplay invariants",
+        "first_frame": 5559,
+        "last_frame": 15090,
+        "occurrences": 6,
+        "origin_a6": "0xffea80",
+        "return_chain_variants": [
+          [
+            "0x001a34",
+            "0x0080a2",
+            "0x000000"
+          ],
+          [
+            "0x001a34",
+            "0x0083ba",
+            "0x0080a2"
+          ],
+          [
+            "0x001a34",
+            "0x00855c",
+            "0x0080a2"
+          ]
+        ],
+        "shared_wrapper_return": "0x001a34"
+      }
+    ],
+    "provenance_groups": 175
+  },
+  "remaining_transport_backlog": {
+    "classification": "OBSERVED",
+    "exact_next_experiment": "bind the audio-CPU shared-RAM reader, command dispatch tables, and exact downstream QSound-bus arguments without semantic names",
+    "scope": "QSound shared RAM to audio-CPU command handling and QSound bus"
+  },
+  "schema": "oracle11-global-gameplay-audio-load-release-v1",
+  "scope": "global Round 1 gameplay-audio/load/release authority",
+  "score_negative_control": {
+    "accepted_as_audio_owner": false,
+    "classification": "PACKED_BCD_SCORE_AUTHORITY",
+    "excluded_routines": [
+      "0x0abdd2..0x0abe18",
+      "0x0abe2a..0x0abf16"
+    ],
+    "status": "PASS",
+    "timing_or_temporal_adjacency_used": false
+  },
+  "status": "PARTIAL",
+  "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE"
+}

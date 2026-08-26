@@ -166,8 +166,12 @@ player-origin caller/command edges close the player-to-shared-dispatch boundary
 without changing score, health, damage, resource, projectile, or route state.
 Predator Warrior is now `SOURCE_CLOSED`. The shared queue drain and
 dispatcher-to-QSound transport remain in the global gameplay-audio/load/release
-backlog. The generated 94 x 10 matrix remains ineligible with 322 required
-`OBSERVED`, 276 required `PARTIAL`, zero required `UNKNOWN`, 18 unmapped actor
+backlog. Its first global subcheckpoint source-closes the data-independent
+main-CPU queue drain to QSound shared RAM across all 1,161 captured route
+transactions; audio-CPU command handling, 175 non-player trigger-provenance
+groups, and four load/release boundaries remain open. The generated 94 x 10
+matrix remains ineligible with 291 required `OBSERVED`, 307 required `PARTIAL`,
+zero required `UNKNOWN`, 18 unmapped actor
 class/type pairs, 94 unmapped route edges, 1,517 orphan authoritative writers,
 and unowned audio/damage/load/release/RNG/spawn counts of
 874/1/4/18/1,023/18. ORACLE-11 remains active and SPEC-02 remains ineligible.
