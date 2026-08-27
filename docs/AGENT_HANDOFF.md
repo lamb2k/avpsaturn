@@ -38,12 +38,12 @@ first-segment 21-composite/218-tile residency split. Paired cold runs at ISO
 are identical: peak tile union 170, pin exhaustion 0, overflow 0, texture
 mismatches 0, sprite high-water 242/255. Exact frames 177..196 preserve
 Predator identity through Button1 and neutral. Fast, Oracle, Target and paired
-Emulator pass; the current working tree is ready for its coherent commit.
+Emulator pass at accepted runtime checkpoint `c48c1cd`.
 
 ## Exact next experiment
 
-Commit and push the coherent Button1/renderer correction, then replace the
-retained first-encounter class-0x1F gameplay boundary from accepted SPEC-02.
+Replace the retained first-encounter class-0x1F gameplay boundary from accepted
+SPEC-02, then commit and push that coherent enemy-authority checkpoint.
 Native Round 1 must become sole first-encounter gameplay authority; retained
 code may remain presentation-only. Do not leave the first segment until the
 complete interactive regression gate passes.

@@ -4,6 +4,7 @@
   "status": "PASS_FIRST_SEGMENT_PREDATOR_BUTTON1_CHARACTER_IDENTITY_AND_RENDERER_INTEGRITY",
   "implementation_base_commit": "52714b420d3ca1ca0437d66de61735fa1a2ba36d",
   "diagnostic_correction_commit": "4fbc919235f61d962daf342efbfb4cd8f743ab60",
+  "button1_renderer_correction_commit": "c48c1cdd9e6fb1256ee901d6e1b6379c1195f277",
   "implementation_source": {
     "spec02_sha256": "3f6e179fc41ad9ac0fdb6318c929ac74297b35a1f4627b58325e408d424af6fc",
     "raw_trace_or_disassembly_consumed": false,
