@@ -4506,20 +4506,21 @@ static void street_test_frame(void)
             street_out_of(street_plane[1].world_x0);
         const int scy1 = s3y + 16 - street_plane[1].row0 * 32;
 #ifdef AVSP_LIVE_ENCOUNTER
-        /* The live encounter owns the camera after load.  The approved stage
-         * port still owns both VDP2 submissions and their priority/palette
-         * locks. Translate source scroll2 world X through each strip origin;
-         * derive scroll3 from the captured register relationship. */
-        const int live_scroll2_x =
-            round1_runtime.route_state == 4 ?
-            round1_runtime.camera_scroll2_x :
-            live_encounter_runtime.camera_world_x;
-        const int live_scroll3_x =
-            street_scroll3_for_scroll2(live_scroll2_x);
-        scx0 = street_out_of(live_scroll2_x + 64) -
-            street_out_of(street_plane[0].world_x0);
-        scx1 = street_out_of(live_scroll3_x + 64) -
-            street_out_of(street_plane[1].world_x0);
+        /* Before native handoff, s2x/s3x are the source chronology and the
+         * retained encounter is deliberately uninitialized.  Substituting
+         * its zero camera exposed an empty PNT page at the right edge.  Once
+         * route state 4 owns gameplay, translate only the native scroll2
+         * value and preserve the measured scroll2-to-scroll3 relationship. */
+        if (round1_runtime.route_state == 4)
+        {
+            const int live_scroll2_x = round1_runtime.camera_scroll2_x;
+            const int live_scroll3_x =
+                street_scroll3_for_scroll2(live_scroll2_x);
+            scx0 = street_out_of(live_scroll2_x + 64) -
+                street_out_of(street_plane[0].world_x0);
+            scx1 = street_out_of(live_scroll3_x + 64) -
+                street_out_of(street_plane[1].world_x0);
+        }
 #endif
 #ifdef AVSP_CAMERA_STAGE_PROMOTION_BENCH
         AvspPortV2CameraInput camera_input;

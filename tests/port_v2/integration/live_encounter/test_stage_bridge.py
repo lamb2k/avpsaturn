@@ -48,6 +48,45 @@ def plane_scrolls(camera_world_x: int) -> tuple[int, int]:
     )
 
 
+def bridge_contract(source: str) -> None:
+    frame_start = source.index("static void street_test_frame(void)")
+    frame_end = source.index("static void draw_world(void)", frame_start)
+    frame_body = source[frame_start:frame_end]
+    require(re.search(
+        r"static int street_scroll3_for_scroll2\(const int scroll2_x\)",
+        source) is not None, "scroll3 mapping helper missing")
+    patterns = (
+        r"if \(round1_runtime\.route_state == 4\)",
+        r"const int live_scroll2_x = round1_runtime\.camera_scroll2_x",
+        r"street_scroll3_for_scroll2\(live_scroll2_x\)",
+        r"street_out_of\(live_scroll2_x \+ 64\)\s*-\s*"
+        r"street_out_of\(street_plane\[0\]\.world_x0\)",
+        r"street_out_of\(live_scroll3_x \+ 64\)\s*-\s*"
+        r"street_out_of\(street_plane\[1\]\.world_x0\)",
+    )
+    for pattern in patterns:
+        require(re.search(pattern, frame_body) is not None,
+                f"live stage bridge missing: {pattern}")
+    require("live_encounter_runtime.camera_world_x" not in frame_body,
+            "pre-handoff retained camera authority returned")
+
+
+def require_mutation_rejected(label: str, source: str) -> None:
+    try:
+        bridge_contract(source)
+    except (AssertionError, ValueError):
+        return
+    raise AssertionError(f"mutation was not rejected: {label}")
+
+
+def mutate_frame_body(old: str, new: str) -> str:
+    frame_start = MAIN.index("static void street_test_frame(void)")
+    frame_end = MAIN.index("static void draw_world(void)", frame_start)
+    frame_body = MAIN[frame_start:frame_end]
+    require(old in frame_body, f"mutation target missing: {old}")
+    return MAIN[:frame_start] + frame_body.replace(old, new, 1) + MAIN[frame_end:]
+
+
 def main() -> None:
     require(MANIFEST["planes"]["scroll2"]["world_x0"] == 832 and
             MANIFEST["planes"]["scroll3"]["world_x0"] == 160,
@@ -59,20 +98,16 @@ def main() -> None:
     require(plane_scrolls(768) != (768, 384),
             "raw-camera corruption control did not reject")
 
-    patterns = (
-        r"static int street_scroll3_for_scroll2\(const int scroll2_x\)",
-        r"street_scroll3_for_scroll2\(live_scroll2_x\)",
-        r"street_out_of\(live_scroll2_x \+ 64\)\s*-\s*"
-        r"street_out_of\(street_plane\[0\]\.world_x0\)",
-        r"street_out_of\(live_scroll3_x \+ 64\)\s*-\s*"
-        r"street_out_of\(street_plane\[1\]\.world_x0\)",
-    )
-    for pattern in patterns:
-        require(re.search(pattern, MAIN) is not None,
-                f"live stage bridge missing: {pattern}")
-    require("scx0 = live_encounter_runtime.camera_world_x;" not in MAIN and
-            "scx1 = live_encounter_runtime.camera_world_x / 2;" not in MAIN,
-            "raw-camera corruption bridge returned")
+    bridge_contract(MAIN)
+    require_mutation_rejected(
+        "unconditional native camera before handoff",
+        mutate_frame_body("if (round1_runtime.route_state == 4)", "if (1)"))
+    require_mutation_rejected(
+        "retained camera restored before handoff",
+        mutate_frame_body(
+            "const int live_scroll2_x = round1_runtime.camera_scroll2_x;",
+            "const int live_scroll2_x = "
+            "live_encounter_runtime.camera_world_x;"))
     print("REPAIR-11 live stage bridge: PASS")
 
 
