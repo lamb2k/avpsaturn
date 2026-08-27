@@ -5,7 +5,7 @@ roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 production_head: 236eef0c42aaa5c39b105420f8130fcde308e34e
-candidate_head: 8f9506aa713404966c9def44ebe58bc30ccbc84d
+candidate_head: d04a65a2253175c6e820140feefc35419e2cca07
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-playable-loop-pivot
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
@@ -529,7 +529,7 @@ source_closure:
   button3_checkpoint: PASS / accepted Oracle-SPEC table 0x0243d2 signed 16.16 vectors and exact selector-branch-interruption-landing-presentation-collision rules / 113 host mutations / 78 Target suppressions / debug-release Target PASS / paired Emulator 467 samples exact / ISO 48e76ef310f0832344290656912565dbfa292ddc0d1ea134fde5dcc23568a080 / entry-motion-landing-completion 1-35-1-1 / 38 source-render frames / zero decode-fallback-failure / real WGC takeoff-apex-descent-landing-neutral PASS / corrected height-canceling projection bridge
   button1_character_identity_correction: PASS / user-observed Major Schaefer sprite traced to the prior Oracle input changing player +0xd2 from 0 to 1 / two corrected cold captures are byte-identical with character 0, Predator 0x15e540-series records, one 40-resource debit, one record-type-4 class-0x00 parent and five class-0x04 children / character and normalized object-stream gates reject the Major class-0x05 and type-24-class-0x3a path / paired Emulator exact / real cadence-1 frames 177-196 preserve Predator identity / same-frame VDP1 tile-cache replacement repaired with a measured 21-composite-218-tile residency gate
   first_encounter_class1f_checkpoint: PASS / native Round 1 sole gameplay authority / retained gameplay steps 0 / 469 current-state updates / contacts player-alien 4-1 / damage player-alien 1-4 / HIT-KO 3-1 / lifecycle release and encounter clear 1-1 / pool12 free 11 / paired 575-sample Emulator exact / ISO ff8f0a288aa1e75dca47983ec3c3a799e32edad16a7b8106a5e9c73f2da27847 / current-state emit-tile union complete / real WGC frames 38-254-329-469-470 PASS / source intro population confirmed against MAME frame 2078 / zero fallback-failure-decode error
-  candidate_pointer_note: 8f9506aa713404966c9def44ebe58bc30ccbc84d is the implementation parent of the staged native first-encounter class-0x1f checkpoint; c48c1cdd9e6fb1256ee901d6e1b6379c1195f277 remains the accepted Predator Button1/renderer checkpoint and fe49adcba008b91f2f4eafbcc6473fa137c7d778 remains the background-bridge correction.
+  candidate_pointer_note: d04a65a2253175c6e820140feefc35419e2cca07 is the accepted native first-encounter class-0x1f runtime checkpoint; 8f9506aa713404966c9def44ebe58bc30ccbc84d is its implementation parent, c48c1cdd9e6fb1256ee901d6e1b6379c1195f277 is the preserved Predator Button1/renderer checkpoint, and fe49adcba008b91f2f4eafbcc6473fa137c7d778 is the background-bridge correction.
   exact_next_experiment: Keep REIMPLEMENT-13 active; implement the first segment encounter-clear and dynamic route-progression boundary from accepted SPEC-02, including exact post-clear guards and continued native authority. Retained code remains presentation-only; do not leave the first segment.
   frontend_activation_allowed: false
   physical_saturn: UNRUN
