@@ -92,4 +92,41 @@ mutant = copy.deepcopy(report)
 mutant["protected_boundaries"]["spec02_active"] = True
 reject(mutant, "SPEC-02 activated")
 
-print("ORACLE-11 Round 1 navigation tests: PASS (15 mutations rejected)")
+mutant = copy.deepcopy(report)
+mutant["obstacle_response"]["implementation_contract"]["obstacle_box"]["x_half_u8"] = 16
+reject(mutant, "wrong Coffee Shop obstacle box admitted")
+
+mutant = copy.deepcopy(report)
+mutant["obstacle_response"]["implementation_contract"]["minimum_penetration"]["axis_guard"] = \
+    "always resolve x"
+reject(mutant, "minimum-penetration axis branch replaced")
+
+mutant = copy.deepcopy(report)
+record = next(item for item in mutant["terrain_resolver"]["records"]
+              if item["address"] == "0x0b218e")
+record["decoded_six_fields"]["z_parameter_s8"] = -8
+reject(mutant, "terrain record sign changed")
+
+mutant = copy.deepcopy(report)
+mutant["terrain_resolver"]["implementation_contract"]["six_fields"][4]["type"] = "u8"
+reject(mutant, "kind-dependent terrain field signedness removed")
+
+mutant = copy.deepcopy(report)
+mutant["terrain_resolver"]["implementation_contract"]["selection"]["bounded_packed_grid"]["packed_bytes_hex"] = "00" * 104
+reject(mutant, "bounded source-derived terrain grid changed")
+
+mutant = copy.deepcopy(report)
+mutant["camera"]["implementation_contract"]["x_target_arithmetic"]["narrow_right_delta"] = \
+    "max_x-x_target-0x00c0"
+reject(mutant, "wrong camera target arithmetic admitted")
+
+mutant = copy.deepcopy(report)
+mutant["camera"]["implementation_contract"]["coffee_shop_guard"]["phase2_unlock_guard"] = \
+    "frame >= 4992"
+reject(mutant, "fixed-frame Coffee Shop unlock admitted")
+
+mutant = copy.deepcopy(report)
+mutant["camera"]["implementation_contract"]["world_to_plane_order"]["raw_pattern_name_offset_forbidden"] = False
+reject(mutant, "raw camera coordinate submitted as plane offset")
+
+print("ORACLE-11 Round 1 navigation tests: PASS (23 mutations rejected)")

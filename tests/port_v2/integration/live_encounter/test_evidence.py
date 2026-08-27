@@ -31,7 +31,7 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_rng_seed"] == 0x3318
     assert report["state"]["round1_player_health"] == 101
     assert [report["state"][f"round1_pool{kind}_free"]
-            for kind in (12,16,20,24)] == [10,20,14,2]
+            for kind in (12,16,20,24)] == [10,20,13,2]
     assert report["state"]["round1_fallback_count"] == 0
     assert report["state"]["round1_failure_count"] == 0
     assert report["state"]["round1_entry_spawn_count"] == 10
@@ -46,16 +46,28 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_player_source_action"] == 514
     assert report["state"]["round1_player_controller_updates"] == 468
     assert report["state"]["round1_scheduler_frames"] == 638
-    assert report["state"]["round1_scheduler_dispatches"] == 8497
-    assert report["state"]["round1_scheduler_trace_count"] == 13
-    assert report["state"]["round1_scheduler_order_hash"] == -665664999
+    assert report["state"]["round1_scheduler_dispatches"] == 9126
+    assert report["state"]["round1_scheduler_trace_count"] == 14
+    assert report["state"]["round1_scheduler_order_hash"] == -203734367
     assert report["state"]["round1_actor_handler_dispatches"] == 6380
     assert report["state"]["round1_presentation_bindings"] == 6380
     assert report["state"]["round1_state_context_bindings"] == 6380
-    assert report["state"]["round1_navigation_bound_x"] == 720
+    assert report["state"]["round1_navigation_bound_x"] == 801
     assert report["state"]["round1_navigation_bound_z"] == 256
     assert report["state"]["round1_navigation_applications"] == 468
     assert report["state"]["round1_navigation_clamps"] == 0
+    assert report["state"]["round1_navigation_obstacle_responses"] == 0
+    assert report["state"]["round1_navigation_terrain_responses"] == 0
+    assert report["state"]["round1_navigation_terrain_retries"] == 0
+    assert report["state"]["round1_camera_x_position"] == 801
+    assert report["state"]["round1_camera_x_target"] == 801
+    assert report["state"]["round1_camera_x_lower"] == 640
+    assert report["state"]["round1_camera_x_upper"] == 832
+    assert report["state"]["round1_camera_scroll2_x"] == 737
+    assert report["state"]["round1_camera_phase"] == 0
+    assert report["state"]["round1_camera_countdown"] == 1200
+    assert report["state"]["round1_camera_locks"] == 0
+    assert report["state"]["round1_camera_unlocks"] == 0
     assert report["state"]["round1_player_stop_ticks"] == 0
     assert report["state"]["round1_player_stop_entries"] == 4
     assert report["state"]["round1_player_stop_completions"] == 3

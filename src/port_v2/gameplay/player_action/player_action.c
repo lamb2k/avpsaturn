@@ -211,7 +211,8 @@ static void avsp_pw_apply_fraction(long *numerator, short *position,
 }
 
 static void avsp_pw_apply_movement(AvspPwRuntime *runtime,
-                                   const unsigned short mask)
+                                   const unsigned short mask,
+                                   const int apply_retained_navigation)
 {
     if ((mask & AVSP_PW_INPUT_LEFT) != 0u &&
         (mask & AVSP_PW_INPUT_RIGHT) == 0u)
@@ -231,7 +232,8 @@ static void avsp_pw_apply_movement(AvspPwRuntime *runtime,
     else if ((mask & AVSP_PW_INPUT_DOWN) != 0u &&
              (mask & AVSP_PW_INPUT_UP) == 0u)
         avsp_pw_apply_fraction(&runtime->lane_numerator, &runtime->lane, -12);
-    avsp_pw_resolve_navigation(&runtime->x, &runtime->lane);
+    if (apply_retained_navigation)
+        avsp_pw_resolve_navigation(&runtime->x, &runtime->lane);
 }
 
 static void avsp_pw_begin_attack(AvspPwRuntime *runtime)
@@ -341,7 +343,9 @@ void avsp_pw_init(AvspPwRuntime *runtime)
     runtime->contact_reports = 0UL;
 }
 
-void avsp_pw_step(AvspPwRuntime *runtime, const AvspPwInput *input)
+static void avsp_pw_step_internal(AvspPwRuntime *runtime,
+                                  const AvspPwInput *input,
+                                  const int apply_retained_navigation)
 {
     unsigned short direction_mask;
     unsigned short delayed_direction;
@@ -388,7 +392,8 @@ void avsp_pw_step(AvspPwRuntime *runtime, const AvspPwInput *input)
 
     if (runtime->state == AVSP_PW_STATE_CONTROL)
     {
-        avsp_pw_apply_movement(runtime, delayed_direction);
+        avsp_pw_apply_movement(runtime, delayed_direction,
+                               apply_retained_navigation);
         if (attack_edge) avsp_pw_begin_attack(runtime);
         else
         {
@@ -429,6 +434,16 @@ void avsp_pw_step(AvspPwRuntime *runtime, const AvspPwInput *input)
     }
     else if (attack_edge) ++runtime->rejected_attack_edges;
     runtime->previous_mask = runtime->current_mask;
+}
+
+void avsp_pw_step(AvspPwRuntime *runtime, const AvspPwInput *input)
+{
+    avsp_pw_step_internal(runtime, input, 1);
+}
+
+void avsp_pw_step_round1(AvspPwRuntime *runtime, const AvspPwInput *input)
+{
+    avsp_pw_step_internal(runtime, input, 0);
 }
 
 void avsp_pw_view(const AvspPwRuntime *runtime, AvspPwView *view)

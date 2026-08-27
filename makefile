@@ -161,6 +161,12 @@ endif
 # with a small first-stage loader if later bodies cannot remain inside the
 # envelope.
 avsp_frontend.o: CCFLAGS += -Os
+main.o: CCFLAGS += -Os
+
+# The source-closed Round 1 authority is table-heavy and must coexist with the
+# accepted 255-command VDP1 capacity. Size-optimize this translation unit; its
+# host differential and Target readback remain the semantic gate.
+src/port_v2/gameplay/round1/round1.o: CCFLAGS += -Os
 
 JO_ENGINE_ROOT ?= .deps/joengine
 JO_ENGINE_SRC_DIR = $(JO_ENGINE_ROOT)/jo_engine

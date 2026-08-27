@@ -64,6 +64,18 @@ def build() -> str:
                       for context in class1f["state_phase_contexts"]]
     navigation = fixtures["authority_data"]["navigation"]
     global_bounds = navigation["global_bounds"]
+    terrain = navigation["terrain_resolver"]["implementation_contract"]
+    terrain_records = terrain["implementation_records"]
+    terrain_map = terrain["selection"]["captured_first_segment_map"]
+    terrain_selectors = bytes.fromhex(terrain_map["selector_bytes_hex"])
+    terrain_grid = terrain["selection"]["bounded_packed_grid"]
+    terrain_packed = bytes.fromhex(terrain_grid["packed_bytes_hex"])
+    obstacle = navigation["obstacle_response"]["implementation_contract"]
+    obstacle_actor = obstacle["source_actor"]
+    obstacle_box = obstacle["obstacle_box"]
+    camera = navigation["camera"]["implementation_contract"]
+    camera_guard = camera["coffee_shop_guard"]
+    camera_operands = camera_guard["captured_first_segment_operands"]
     locomotion = fixtures["authority_data"]["player"]["locomotion_neutral_facing"]
     input_decode = locomotion["input_decode"]
     release = locomotion["release_transition"]
@@ -166,6 +178,60 @@ def build() -> str:
         navigation["coordinate_contract"]["up_world_z_delta_sign"] != 1 or
         navigation["coordinate_contract"]["down_world_z_delta_sign"] != -1):
         raise ValueError("SPEC-02 first-segment global bounds drift")
+    if (terrain["classification"] != "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        terrain["selection"]["cell_address"] !=
+            "0x904000 + (((~world_z)&0x0300)<<4) + (((~world_z)&0x00f0)>>2) + ((world_x<<2)&0x0fc0)" or
+        len(terrain_selectors) != 0x1000 or
+        hashlib.sha256(terrain_selectors).hexdigest() !=
+            terrain_map["selector_sha256"] or
+        terrain_grid["classification"] != "SOURCE_DERIVED_CONTENT_DATA" or
+        terrain_grid["world_x_inclusive"] != [640, 1360] or
+        terrain_grid["world_z_inclusive"] != [272, 400] or
+        terrain_grid["tile_size"] != 16 or
+        terrain_grid["width"] != 46 or terrain_grid["height"] != 9 or
+        terrain_grid["cell_count"] != 414 or
+        terrain_grid["bits_per_cell"] != 2 or
+        terrain_grid["selector_code_u8"] != [0, 24, 56] or
+        terrain_grid["packed_bytes"] != 104 or len(terrain_packed) != 104 or
+        hashlib.sha256(terrain_packed).hexdigest() !=
+            terrain_grid["packed_sha256"] or
+        [row["selector_u8"] for row in terrain_records] !=
+            [0, 8, 24, 56, 96, 100, 164] or
+        [row["record_bytes"] for row in terrain_records] != [
+            "0080808080808080", "0202808010100080",
+            "020280801010ff80", "0202808010080080",
+            "0604020100008080",
+            "0604020100088080", "0402020100088080"]):
+        raise ValueError("SPEC-02 Coffee Shop terrain implementation drift")
+    if (obstacle_actor != {
+            "animation_record": "0x06e136", "assembly": "0x06e196",
+            "attack_selector_u8": 1, "class": "0x0a", "facing_u8": 0,
+            "hurt_selector_u8": 1,
+            "position_s16": {"x": 1123, "y": 323, "z": 323},
+            "slot": "0xffb380", "state_u16": 0x0200,
+            "substate_u16": 0, "table_set": "0x06e210", "type": 20} or
+        obstacle["player_geometry"]["classification"] != "SOURCE_POINT_PROBE" or
+        obstacle_box != {
+            "address": "0x06e22c", "flags_u16": 0xff00,
+            "x_center_s8": 0, "x_half_u8": 32,
+            "y_center_s8": 0, "y_half_u8": 127,
+            "z_center_s8": 0, "z_half_u8": 6} or
+        obstacle["minimum_penetration"]["axis_guard"] !=
+            "resolve z only when unsigned z_penetration < unsigned x_penetration; otherwise resolve x"):
+        raise ValueError("SPEC-02 Coffee Shop obstacle implementation drift")
+    if (camera["x_target_arithmetic"]["speed_table_u16"] !=
+            [0, 1, 1, 2, 3, 4, 5, 6, 7, 7,
+             8, 8, 9, 9, 10, 10, 11, 11, 11, 11] or
+        camera_operands != {
+            "countdown_initial_u16": 1200,
+            "countdown_tick_rule":
+                "decrement once per controller update while phase is 2",
+            "counter_u16": 0, "snapshot_u16": 0,
+            "threshold_byte_u8": 1, "threshold_ticks": 16} or
+        camera_guard["fixed_frame_authority"] is not False or
+        camera["world_to_plane_order"]["raw_pattern_name_offset_forbidden"]
+            is not True):
+        raise ValueError("SPEC-02 Coffee Shop camera implementation drift")
     if (direction_resolver != [255, 2, 6, 255, 4, 3, 5, 255,
                               0, 1, 7, 255, 255, 255, 255, 255] or
         release["walking_action"] != "0x0202" or
@@ -569,6 +635,49 @@ def build() -> str:
         "{",
         f"    {bound_x}, {bound_z}, {bound_x + 0x20}, {bound_x + 0x160},",
         f"    {bound_z + 0x10}, {bound_z + 0x90}",
+        "};", "",
+        "static const AvspRound1TerrainRecordSpec avsp_round1_first_segment_terrain_records[AVSP_ROUND1_TERRAIN_RECORD_COUNT] =",
+        "{",
+    ])
+    for row in terrain_records:
+        blob = bytes.fromhex(row["record_bytes"])
+        lines.append("    { " + ", ".join(f"0x{value:02X}u" for value in blob) + " },")
+    lines.extend([
+        "};", "",
+        "static const unsigned char avsp_round1_first_segment_terrain_packed[AVSP_ROUND1_TERRAIN_PACKED_BYTES] =",
+        "{",
+    ])
+    for offset in range(0, len(terrain_packed), 32):
+        chunk = terrain_packed[offset:offset + 32]
+        lines.append("    " + ", ".join(f"0x{value:02X}u" for value in chunk) +
+                     ("," if offset + 32 < len(terrain_packed) else ""))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1ObstacleSpec avsp_round1_coffee_shop_obstacle =",
+        "{",
+        "    %sUL, 0x%02X, %du, 0x%04Xu, 0x%04Xu," % (
+            obstacle_actor["slot"], int(obstacle_actor["class"], 16),
+            obstacle_actor["type"], obstacle_actor["state_u16"],
+            obstacle_actor["substate_u16"]),
+        "    %d, %d, %d, %du, %sUL, %sUL, %du, %du," % (
+            obstacle_actor["position_s16"]["x"],
+            obstacle_actor["position_s16"]["y"],
+            obstacle_actor["position_s16"]["z"],
+            obstacle_actor["facing_u8"], obstacle_actor["animation_record"],
+            obstacle_actor["assembly"], obstacle_actor["hurt_selector_u8"],
+            obstacle_actor["attack_selector_u8"]),
+        "    { %d, %d, %du, %du, %d, %du, 0, 0u, 0u }" % (
+            obstacle_box["x_center_s8"], obstacle_box["y_center_s8"],
+            obstacle_box["x_half_u8"], obstacle_box["y_half_u8"],
+            obstacle_box["z_center_s8"], obstacle_box["z_half_u8"]),
+        "};", "",
+        "static const AvspRound1CameraSpec avsp_round1_coffee_shop_camera =",
+        "{",
+        "    640, 256, 640, 832, 256, 256, 0x40u, 0x20u,",
+        "    0x00C0, 0x00E0, 0x00A0, 0x0050, 0x0060, 0x0040,",
+        f"    {camera_operands['threshold_byte_u8']}u, {camera_operands['countdown_initial_u16']}u,",
+        "    {" + ", ".join(f"{value}u" for value in
+                              camera["x_target_arithmetic"]["speed_table_u16"]) + "}",
         "};", "",
         "static const AvspRound1PlayerLocomotionSpec avsp_round1_player_locomotion =",
         "{",

@@ -317,6 +317,196 @@
     "classification": "SOURCE_CLOSED",
     "controller_block_sha256": "705abbd0a9a7d7a72c00baaea0fe929befb87f5f245fd11512cbd75b953fba34",
     "edge_guard_rule": "retain the exact source camera-target writer and route-state transition; no x-only, kill-count, or fixed-frame substitute is admitted",
+    "implementation_contract": {
+      "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+      "coffee_shop_guard": {
+        "captured_first_segment_operands": {
+          "countdown_initial_u16": 1200,
+          "countdown_tick_rule": "decrement once per controller update while phase is 2",
+          "counter_u16": 0,
+          "snapshot_u16": 0,
+          "threshold_byte_u8": 1,
+          "threshold_ticks": 16
+        },
+        "controller_dispatch": "0x028860",
+        "controller_slot": "0xffd180",
+        "fixed_frame_authority": false,
+        "phase0_lock_guard": "u16(A5+0x278) >= 0x0340",
+        "phase0_writes": [
+          "x_lower=0x0340",
+          "x_upper=0x0340",
+          "controller+0x44=u16(A5-0x65e6)"
+        ],
+        "phase2_unlock_guard": "unsigned(u16(A5-0x65e6)-u16(controller+0x44)) >= (u8(A5+0x020e)<<4), OR controller+0x46 countdown reaches zero",
+        "phase2_writes": [
+          "x_upper=0x03f0",
+          "controller+0x06 += 2"
+        ],
+        "phase4_follow": "x_lower=u16(A5+0x278) each tick; clamp at 0x03f0 before the next phase",
+        "phase_dispatch": "u8(controller+0x06) indexes 0x028908"
+      },
+      "dynamic_checkpoints": [
+        {
+          "frame": 3572,
+          "global_x": 640,
+          "player_x": 0,
+          "player_z": 0,
+          "position_x": 640,
+          "route": 2,
+          "scroll2_x": 65456,
+          "target_x": 640,
+          "x_lower": 0,
+          "x_upper": 0
+        },
+        {
+          "frame": 3714,
+          "global_x": 640,
+          "player_x": 944,
+          "player_z": 320,
+          "position_x": 640,
+          "route": 2,
+          "scroll2_x": 576,
+          "target_x": 640,
+          "x_lower": 640,
+          "x_upper": 640
+        },
+        {
+          "frame": 3792,
+          "global_x": 832,
+          "player_x": 1091,
+          "player_z": 320,
+          "position_x": 832,
+          "route": 4,
+          "scroll2_x": 768,
+          "target_x": 832,
+          "x_lower": 640,
+          "x_upper": 832
+        },
+        {
+          "frame": 4992,
+          "global_x": 832,
+          "player_x": 1091,
+          "player_z": 320,
+          "position_x": 832,
+          "route": 4,
+          "scroll2_x": 768,
+          "target_x": 832,
+          "x_lower": 832,
+          "x_upper": 832
+        },
+        {
+          "frame": 4993,
+          "global_x": 836,
+          "player_x": 1091,
+          "player_z": 320,
+          "position_x": 836,
+          "route": 4,
+          "scroll2_x": 768,
+          "target_x": 836,
+          "x_lower": 832,
+          "x_upper": 1008
+        },
+        {
+          "frame": 5016,
+          "global_x": 867,
+          "player_x": 1091,
+          "player_z": 320,
+          "position_x": 867,
+          "route": 4,
+          "scroll2_x": 802,
+          "target_x": 867,
+          "x_lower": 867,
+          "x_upper": 1008
+        }
+      ],
+      "initialization": {
+        "entry": "0x0b04bc",
+        "override_guard": "u8(A5+0x1b0) != 0",
+        "override_reads": [
+          "camera+0x10:s16",
+          "camera+0x14:s16"
+        ],
+        "route_table_bounds": "0x0b0526 indexes four signed bounds by u16(A5+0x1e8)<<2",
+        "writes": [
+          "x position/target/history from D0",
+          "z position/target/history from D1"
+        ]
+      },
+      "player_follow_guard": {
+        "eligible": "active byte nonzero and player+0x54 != 0xfe",
+        "enabled": "u8(A5+0x1af) != 0",
+        "players": "three 0x100-byte records at A5+0x380, ascending slot order",
+        "x_extrema": "0x0b0c22 returns unsigned max/min actor+0x10",
+        "z_extrema": "0x0b0c5e returns unsigned max/min actor+0x18"
+      },
+      "record": {
+        "source_base": "0xff8268",
+        "x_lower": "+0x34:s16",
+        "x_position": "+0x10:s16",
+        "x_previous": "+0x08:s16",
+        "x_target": "+0x20:s16",
+        "x_target_previous": "+0x28:s16",
+        "x_upper": "+0x36:s16",
+        "z_lower": "+0x32:s16",
+        "z_position": "+0x14:s16",
+        "z_target": "+0x24:s16",
+        "z_target_previous": "+0x2c:s16",
+        "z_upper": "+0x30:s16"
+      },
+      "source_blocks": {
+        "coffee_guard_sha256": "7ed56d59a9a97a2370659aad691f50042bb5aad88ec747b6e1c7e91cf2b567a8",
+        "initializer_sha256": "e0ac3295f4bd2bbd8411a1bbd5169a07225edadf649f839ba10c794083e60b4b",
+        "player_extrema_sha256": "44e2627b78bb85065547b2820f5d3d36324d1f1540d4115234e05148f22eccca",
+        "x_controller_sha256": "a50052f1a5df52a9f9b78ba6e60b16853ed492e688b734f43b9a88b8d774e469",
+        "z_controller_sha256": "9aa03797abfc968357fc8e449895614a0ee60cf15a9211b6e43d7348d5282add"
+      },
+      "world_to_plane_order": {
+        "accepted_bridge": "data/repair11_live_background_presentation.json",
+        "raw_pattern_name_offset_forbidden": true,
+        "rule": "finish player/navigation, encounter camera-bound writes, and camera controller; then translate source scroll2 through the accepted strip origin and derive scroll3 through the accepted measured scroll2-to-scroll3 bridge; submit both VDP2 planes last",
+        "scroll2_relation_at_locks": "CPS scroll2_x = camera position x - 0x40"
+      },
+      "x_target_arithmetic": {
+        "clamp_order": "apply signed delta to target, clamp upper at +0x36, then lower at +0x34",
+        "commit_order": "target +0x20 -> position +0x10 -> A5+0x278 global bound -> A5+0x32 camera position",
+        "narrow_left_delta": "min_x-x_target-0x00a0",
+        "narrow_right_delta": "max_x-x_target-0x00e0",
+        "speed_quantization": "index=((abs(delta)+7)&0x00f8)>>2; speed=u16(table+index)&0x000f",
+        "speed_table_u16": [
+          0,
+          1,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          7,
+          8,
+          8,
+          9,
+          9,
+          10,
+          10,
+          11,
+          11,
+          11,
+          11
+        ],
+        "spread_guard": "unsigned(max_x-min_x) >= 0x40",
+        "wide_target_delta": "((max_x+min_x)>>1)-x_target-0x00c0"
+      },
+      "z_target_arithmetic": {
+        "clamp_order": "apply signed delta, clamp upper at +0x30, then lower at +0x32",
+        "commit_order": "target +0x24 -> position +0x14 -> A5+0x34 camera z",
+        "narrow_lower_delta": "min_z-z_target-0x0040",
+        "narrow_upper_delta": "max_z-z_target-0x0060",
+        "spread_guard": "unsigned(max_z-min_z) >= 0x20",
+        "step": "clamp absolute delta to 1",
+        "wide_target_delta": "((max_z+min_z)>>1)-z_target-0x0050"
+      }
+    },
     "orphan_camera_edges": 0,
     "primary_writer": "0x0b0706",
     "source_writers_and_callers": [
@@ -440,6 +630,29 @@
       "manifest_sha256": "8b7cabb30a390edd9cb9e63d9bb3b8131e11151316a2fd9a0ddf904e85ec1563",
       "nvram_baseline_sha256": "35720ff0054bb7ba233da6d00ccbe92473c8a87e2c53c134c83ac2721f7d0ebf",
       "variant": "baseline"
+    },
+    "corrective_byte_identical": true,
+    "corrective_implementation_fields_a": {
+      "files": {
+        "camera_bound_writes.tsv": "6304b13be7a1435116181e1c13b309296c1c1ca27a7c53061a55946cd6fa76c3",
+        "navigation_fields.tsv": "7625912bf3db2e81236ca088d57f6a4b4d529a23e0b80ec674150064668058c6",
+        "navigation_resolves.tsv": "909bee012a8ddbf6e6c7eff6ed8ecd98756ae8041743c5ba1636baf15469fdb5",
+        "terrain_map.bin": "348eeb44428a6d3fb443d43d423712bb75ee0f055fee32206d804a99c8fcb359"
+      },
+      "mame_sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
+      "manifest_sha256": "bd9af2e017d909cabf92a5fb27568a2658c9afea525d3059beb2cb784892db50",
+      "nvram_baseline_sha256": "35720ff0054bb7ba233da6d00ccbe92473c8a87e2c53c134c83ac2721f7d0ebf"
+    },
+    "corrective_implementation_fields_b": {
+      "files": {
+        "camera_bound_writes.tsv": "6304b13be7a1435116181e1c13b309296c1c1ca27a7c53061a55946cd6fa76c3",
+        "navigation_fields.tsv": "7625912bf3db2e81236ca088d57f6a4b4d529a23e0b80ec674150064668058c6",
+        "navigation_resolves.tsv": "909bee012a8ddbf6e6c7eff6ed8ecd98756ae8041743c5ba1636baf15469fdb5",
+        "terrain_map.bin": "348eeb44428a6d3fb443d43d423712bb75ee0f055fee32206d804a99c8fcb359"
+      },
+      "mame_sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
+      "manifest_sha256": "bd9af2e017d909cabf92a5fb27568a2658c9afea525d3059beb2cb784892db50",
+      "nvram_baseline_sha256": "35720ff0054bb7ba233da6d00ccbe92473c8a87e2c53c134c83ac2721f7d0ebf"
     },
     "perturbation_completed_round1": true,
     "perturbation_discriminated_navigation": true,
@@ -9341,6 +9554,68 @@
     "accepted_oracle08_removal_control": true,
     "classification": "SOURCE_CLOSED",
     "coffee_shop_actor": "class 0x0a/type 20 at 0xffb380",
+    "implementation_contract": {
+      "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+      "dynamic_control": {
+        "capture_sha256": "894934d32cf1913eee19e0387a049bfaca464a00cdbe0e89f7a187eb88dd5ca3",
+        "half_x": 32,
+        "half_z": 6,
+        "right_edge": 1091,
+        "rows": 745
+      },
+      "minimum_penetration": {
+        "axis_guard": "resolve z only when unsigned z_penetration < unsigned x_penetration; otherwise resolve x",
+        "contact_bits": "x sets bit 2/3; z sets bit 0/1 in player+0x5d from penetration sign",
+        "velocity_writes": [
+          "player+0x12=0",
+          "player+0x1a=0"
+        ],
+        "x": "x_half-abs_x; negate when obstacle center delta was negative",
+        "x_write": "player_x -= signed x_penetration at 0x01d980 (tap PC 0x01d986)",
+        "z": "z_half-abs_z; negate when obstacle center delta was negative",
+        "z_write": "player_z -= signed z_penetration at 0x01d994 (tap PC 0x01d998)"
+      },
+      "obstacle_box": {
+        "address": "0x06e22c",
+        "flags_u16": 65280,
+        "x_center_s8": 0,
+        "x_half_u8": 32,
+        "y_center_s8": 0,
+        "y_half_u8": 127,
+        "z_center_s8": 0,
+        "z_half_u8": 6
+      },
+      "overlap_guard": "abs((obstacle_x + signed x_center)-player_x) < x_half AND abs((obstacle_z + signed z_center)-player_z) < z_half",
+      "player_geometry": {
+        "box": null,
+        "classification": "SOURCE_POINT_PROBE",
+        "rule": "0x01db8a reads no player rectangle; substituting a player hurt box is forbidden",
+        "x": "player+0x10:s16",
+        "z": "player+0x18:s16"
+      },
+      "source_actor": {
+        "animation_record": "0x06e136",
+        "assembly": "0x06e196",
+        "attack_selector_u8": 1,
+        "class": "0x0a",
+        "facing_u8": 0,
+        "hurt_selector_u8": 1,
+        "position_s16": {
+          "x": 1123,
+          "y": 323,
+          "z": 323
+        },
+        "slot": "0xffb380",
+        "state_u16": 512,
+        "substate_u16": 0,
+        "table_set": "0x06e210",
+        "type": 20
+      },
+      "source_blocks": {
+        "overlap_sha256": "6c43872704a3160082409db468206771f44d2541e7e8ca42a75f1de54505977b",
+        "response_sha256": "6bee54af5376bb74f15f0e9020bfd8e364f0dc8b980ef576a4266c2dd8b46bf1"
+      }
+    },
     "minimum_penetration_x_writer": "0x01d986",
     "shared_player_enemy_rectangle_rejected": true,
     "source_block": "0x01d930..0x01d99a",
@@ -9365,6 +9640,192 @@
   "terrain_resolver": {
     "classification": "SOURCE_CLOSED",
     "constraint_response_writer": "0x0b1c68",
+    "implementation_contract": {
+      "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+      "control_bytes": [
+        {
+          "name": "retry_selector",
+          "offset": 6,
+          "rule": "copied to A5-0x6144; 0xff repeats record selection",
+          "type": "u8"
+        },
+        {
+          "name": "reserved",
+          "offset": 7,
+          "rule": "not read by 0x0b1baa..0x0b1c08 or the reachable handlers",
+          "type": "u8"
+        }
+      ],
+      "first_segment_geometry_universe": {
+        "selectors_u8": [
+          0,
+          24,
+          56
+        ],
+        "world_x_inclusive": [
+          640,
+          1360
+        ],
+        "world_z_inclusive": [
+          272,
+          400
+        ]
+      },
+      "handlers": {
+        "0": {
+          "entry": "0x0b1c14",
+          "movement_rule": "no position write",
+          "parameter_signedness": "none"
+        },
+        "2": {
+          "entry": "0x0b1c16",
+          "movement_rule": "remainder=(~world_z)&15; penetration=u8(field5)-remainder; if penetration>0 then world_z-=penetration, z_velocity=0, response=1",
+          "parameter_signedness": "fields 4 and 5 are u8",
+          "selected_entry": "0x0b1c54"
+        },
+        "4": {
+          "entry": "0x0b1cac",
+          "movement_rule": "x_remainder=(orientation==2?world_x:~world_x)&15; candidate=(x_remainder>>shift)+u8(field5)+1; z_remainder=(~world_z)&15; penetration=candidate-z_remainder; if penetration>0 then world_z-=penetration, z_velocity=0, response=1",
+          "parameter_signedness": "fields 3, 4 and 5 are u8",
+          "selected_entry": "0x0b1d0e"
+        },
+        "6": {
+          "entry": "0x0b1dc0",
+          "movement_rule": "z_remainder=(orientation==1?world_z:~world_z)&15; slope=z_remainder-s8(field5); if slope<0 then world_x-=((world_x&15)+1), x_velocity=0, set retry selector 0xff, and restart selection; otherwise candidate=slope<<shift; x_remainder=world_x&15; if x_remainder>=candidate then world_x-=(x_remainder-candidate+1), x_velocity=0, response=1",
+          "parameter_signedness": "field 3 is u8; fields 4 and 5 are s8",
+          "selected_entry": "0x0b1e9c"
+        }
+      },
+      "implementation_records": [
+        {
+          "address": "0x0b20c6",
+          "record_bytes": "0080808080808080",
+          "selector_u8": 0
+        },
+        {
+          "address": "0x0b20d6",
+          "record_bytes": "0202808010100080",
+          "selector_u8": 8
+        },
+        {
+          "address": "0x0b20f6",
+          "record_bytes": "020280801010ff80",
+          "selector_u8": 24
+        },
+        {
+          "address": "0x0b2136",
+          "record_bytes": "0202808010080080",
+          "selector_u8": 56
+        },
+        {
+          "address": "0x0b2186",
+          "record_bytes": "0604020100008080",
+          "selector_u8": 96
+        },
+        {
+          "address": "0x0b218e",
+          "record_bytes": "0604020100088080",
+          "selector_u8": 100
+        },
+        {
+          "address": "0x0b220e",
+          "record_bytes": "0402020100088080",
+          "selector_u8": 164
+        }
+      ],
+      "scheduler_order": "player movement -> global bounds -> actor/obstacle response -> terrain resolver -> camera/route controller -> world-to-plane submission",
+      "selection": {
+        "bounded_packed_grid": {
+          "bits_per_cell": 2,
+          "cell_count": 414,
+          "classification": "SOURCE_DERIVED_CONTENT_DATA",
+          "derivation": "row-major source cells sampled at each 16-pixel tile origin; four 2-bit selector codes packed least-significant code first",
+          "height": 9,
+          "packed_bytes": 104,
+          "packed_bytes_hex": "00000000000000000000000000000000000000000000000000000000000000000000a0aaaaaaaaaaaaaaaa2a000055555555555555555501005055555555555555551500005555555555555555550100505555555555555555150000555555555555555555010000",
+          "packed_sha256": "0c978ddd237e7cbff74794b92990ffeea03b0ac93e99b1d6c7d971eb54058b74",
+          "selector_code_u8": [
+            0,
+            24,
+            56
+          ],
+          "tile_size": 16,
+          "width": 46,
+          "world_x_inclusive": [
+            640,
+            1360
+          ],
+          "world_z_inclusive": [
+            272,
+            400
+          ]
+        },
+        "captured_first_segment_map": {
+          "base": "0x904000",
+          "bytes": 16384,
+          "classification": "SOURCE_DERIVED_CONTENT_DATA",
+          "selector_bytes": 4096,
+          "selector_bytes_hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000141414141414141414140000000000001414141414141414141400000000000014141414141414141414000000000000141414141414141414140000000000001414141414141414141400000000000014141414141414141414000000000000141414141414141414140000000000001414141414141414141400000000000014141414141414141414000000000000141414141414141414140000000000001414141414141414141400000000000014141414141414141414000000000000141414141414141414140000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000141414141414141414140000000000001414141414141414141400000000000014141414141414141414000000000000141414141414141414140000000000001414141414141414141400000000000014141414141414141414000000000000141414141414141414140000000000001414141414141414141400000000000014141414141414141414000000000000141414141414141414140000000000001414141414141414141400000000000014141414141414141414000000000000141414141414141414140000000000001414141414141414141400000000000014141414141414141414000000000000141414141414141414140000000000001414141414141414141400000000000014141414141414141414000000000000141414141414141414140000000000001414141414141414141400000000000014141414141414141414000000000000141414141414141414140000000000001414141414141414141400000000000014141414141414141414000000000000141414141414141414140000000000001414141414141414141400000000000014141414141414141414000000000000141414141414141414140000000000001414141414141414141400000000000014141414141414141414000000000000141414141414141414140000000000001414141414141414141400000000000014141414141414141414000000000000141414141414141414141818181818181818181818380000000018181818181818181818183800000000181818181818181818181838000000001818181818181818181818380000000018181818181818181818183800000000181818181818181818181838000000001818181818181818181818380000000018181818181818181818183800000000181818181818181818181838000000001818181818181818181818380000000018181818181818181818183800000000181818181818181818181838000000001818181818181818181818380000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001818181818181818181818380000000018181818181818181818183800000000181818181818181818181838000000001818181818181818181818380000000018181818181818181818183800000000181818181818181818181838000000001818181818181818181818380000000018181818181818181818183800000000181818181818181818181838000000001818181818181818181818380000000018181818181818181818183800000000181818181818181818181838000000001818181818181818181818380000000018181818181818181818183800000000181818181818181818181838000000001818181818181818181818380000000018181818181818181818183800000000181818181818181818181838000000001818181818181818181818380000000018181818181818181818183800000000181818181818181818181838000000001818181818181818181818380000000018181818181818181818183800000000181818181818181818181838000000001818181818181818181818380000000018181818181818181818183800000000181818181818181818181838000000001818181818181818181818380000000018181818181818181818183800000000181818181818181818181838000000001818181818181818181818380000000018181818181818181818183800000000181818181818181818181838000000001818181818181818181818380000000000000414141414141414000000000000000004141414141414140000000000000000041414141414141400000000000000000414141414141414000000000000000004141414141414140000000000000000041414141414141400000000000000000414141414141414000000000000000004141414141414140000000000000000041414141414141400000000000000000414141414141414000000000000000004141414141414140000000000000000041414141414141400000000000000000414141414141414000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000414141414141414000000000000000004141414141414140000000000000000041414141414141400000000000000000414141414141414000000000000000004141414141414140000000000000000041414141414141400000000000000000414141414141414000000000000000004141414141414140000000000000000041414141414141400000000000000000414141414141414000000000000000004141414141414140000000000000000041414141414141400000000000000000414141414141414000000000000000004141414141414140000000000000000041414141414141400000000000000000414141414141414000000000000000004141414141414140000000000000000041414141414141400000000000000000414141414141414000000000000000004141414141414140000000000000000041414141414141400000000000000000414141414141414000000000000000004141414141414140000000000000000041414141414141400000000000000000414141414141414000000000000000004141414141414140000000000000000041414141414141400000000000000000414141414141414000000000000000004141414141414140000000000000000041414141414141400000000000000000414141414141414000000000000000004141414141414140000000000000000041414141414141400000000000000000414141414141414000000000000",
+          "selector_sha256": "79f594e0b0f2476ad1d3c53e3bab84811ce66cd34859f13915d27768978f7054",
+          "sha256": "348eeb44428a6d3fb443d43d423712bb75ee0f055fee32206d804a99c8fcb359"
+        },
+        "cell_address": "0x904000 + (((~world_z)&0x0300)<<4) + (((~world_z)&0x00f0)>>2) + ((world_x<<2)&0x0fc0)",
+        "cell_selector": "u8(cell+2) & 0xfc",
+        "collision_flags_clear_first": "actor+0x5d &= 0xf0",
+        "entry": "0x0b208c",
+        "record_address": "0x0b20c6 + 2 * (u8(cell+2) & 0xfc)",
+        "world_reads": [
+          "actor+0x10:s16",
+          "actor+0x18:s16"
+        ]
+      },
+      "six_fields": [
+        {
+          "name": "kind",
+          "offset": 0,
+          "rule": "even byte offset into 0x0b1c0a handler table",
+          "type": "u8"
+        },
+        {
+          "name": "branch_selector",
+          "offset": 1,
+          "rule": "byte offset into the selected kind table; bit index is selector >> 1 when nonnegative",
+          "type": "u8"
+        },
+        {
+          "name": "orientation",
+          "offset": 2,
+          "rule": "kind-4/kind-6 axis orientation selector; kind-2 does not read it",
+          "type": "u8"
+        },
+        {
+          "name": "shift",
+          "offset": 3,
+          "rule": "variable word shift count for kind-4/kind-6",
+          "type": "u8"
+        },
+        {
+          "name": "x_parameter",
+          "offset": 4,
+          "rule": "zero-extended for kind-2/kind-4; sign-extended for kind-6",
+          "type": "u8_or_s8_by_kind"
+        },
+        {
+          "name": "z_parameter",
+          "offset": 5,
+          "rule": "zero-extended for kind-2/kind-4; sign-extended for kind-6",
+          "type": "u8_or_s8_by_kind"
+        }
+      ],
+      "source_blocks": {
+        "cell_address_sha256": "455f94a16fe73e500a4551bbc26d5e4e7ce5e60ebbc77145806115be67cdacfe",
+        "dispatcher_sha256": "400993824cf3f869d8e61e20eb74e9bbfefebd9b2e580dc1f3dd3f1ea050a099",
+        "kind2_sha256": "6aeb76cb799d0316febd6f4129eb20745420312c291836cf80da1942336ace68",
+        "kind4_sha256": "710786d3940cfa7bd55a847a27148bb59e664f1883dc1feb82b5f7548c2edf52",
+        "kind6_sha256": "32a5c22afdc3a1384fdd0609c1551a631212945a2fc7c835f3cb88a054c92a3a",
+        "selector_sha256": "db9bd8e5c7c58a3d9ce311b2595b41a8bdae4522d423e270dce0c296baff0a70"
+      }
+    },
     "orphan_route_reachable_records": 0,
     "position_sync_writer": "0x0b1c08",
     "records": [
@@ -9375,11 +9836,24 @@
           "0x0b1c68": 0
         },
         "classification": "SOURCE_CLOSED",
+        "control_bytes": {
+          "reserved_u8": 128,
+          "retry_selector_u8": 128
+        },
+        "decoded_six_fields": {
+          "branch_selector_u8": 128,
+          "kind_u8": 0,
+          "orientation_u8": 128,
+          "shift_u8": 128,
+          "x_parameter_u8": 128,
+          "z_parameter_u8": 128
+        },
         "perturbed_calls": {
           "0x0b1c08": 4303,
           "0x0b1c68": 0
         },
         "record_bytes": "0080808080808080",
+        "selected_handler": "0x0b1c14",
         "source_program_match": true
       },
       {
@@ -9389,11 +9863,24 @@
           "0x0b1c68": 0
         },
         "classification": "SOURCE_CLOSED",
+        "control_bytes": {
+          "reserved_u8": 128,
+          "retry_selector_u8": 0
+        },
+        "decoded_six_fields": {
+          "branch_selector_u8": 2,
+          "kind_u8": 2,
+          "orientation_u8": 128,
+          "shift_u8": 128,
+          "x_parameter_u8": 16,
+          "z_parameter_u8": 16
+        },
         "perturbed_calls": {
           "0x0b1c08": 54,
           "0x0b1c68": 54
         },
         "record_bytes": "0202808010100080",
+        "selected_handler": "0x0b1c54",
         "source_program_match": true
       },
       {
@@ -9403,11 +9890,24 @@
           "0x0b1c68": 0
         },
         "classification": "SOURCE_CLOSED",
+        "control_bytes": {
+          "reserved_u8": 128,
+          "retry_selector_u8": 0
+        },
+        "decoded_six_fields": {
+          "branch_selector_u8": 2,
+          "kind_u8": 2,
+          "orientation_u8": 128,
+          "shift_u8": 128,
+          "x_parameter_u8": 16,
+          "z_parameter_u8": 8
+        },
         "perturbed_calls": {
           "0x0b1c08": 1568,
           "0x0b1c68": 31
         },
         "record_bytes": "0202808010080080",
+        "selected_handler": "0x0b1c54",
         "source_program_match": true
       },
       {
@@ -9417,11 +9917,24 @@
           "0x0b1c68": 0
         },
         "classification": "SOURCE_CLOSED",
+        "control_bytes": {
+          "reserved_u8": 128,
+          "retry_selector_u8": 128
+        },
+        "decoded_six_fields": {
+          "branch_selector_u8": 4,
+          "kind_u8": 6,
+          "orientation_u8": 2,
+          "shift_u8": 1,
+          "x_parameter_s8": 0,
+          "z_parameter_s8": 0
+        },
         "perturbed_calls": {
           "0x0b1c08": 1586,
           "0x0b1c68": 0
         },
         "record_bytes": "0604020100008080",
+        "selected_handler": "0x0b1e9c",
         "source_program_match": true
       },
       {
@@ -9431,11 +9944,24 @@
           "0x0b1c68": 0
         },
         "classification": "SOURCE_CLOSED",
+        "control_bytes": {
+          "reserved_u8": 128,
+          "retry_selector_u8": 128
+        },
+        "decoded_six_fields": {
+          "branch_selector_u8": 4,
+          "kind_u8": 6,
+          "orientation_u8": 2,
+          "shift_u8": 1,
+          "x_parameter_s8": 0,
+          "z_parameter_s8": 8
+        },
         "perturbed_calls": {
           "0x0b1c08": 1557,
           "0x0b1c68": 0
         },
         "record_bytes": "0604020100088080",
+        "selected_handler": "0x0b1e9c",
         "source_program_match": true
       },
       {
@@ -9445,11 +9971,24 @@
           "0x0b1c68": 0
         },
         "classification": "SOURCE_CLOSED",
+        "control_bytes": {
+          "reserved_u8": 128,
+          "retry_selector_u8": 128
+        },
+        "decoded_six_fields": {
+          "branch_selector_u8": 2,
+          "kind_u8": 4,
+          "orientation_u8": 2,
+          "shift_u8": 1,
+          "x_parameter_u8": 0,
+          "z_parameter_u8": 8
+        },
         "perturbed_calls": {
           "0x0b1c08": 7,
           "0x0b1c68": 0
         },
         "record_bytes": "0402020100088080",
+        "selected_handler": "0x0b1d0e",
         "source_program_match": true
       }
     ],

@@ -181,11 +181,30 @@ contact cannot trigger gameplay PCM, and native state owns P1 HUD. Paired
 startup traces have zero hidden contact/damage, orphan PCM, duplicate CDDA,
 fallback, or failure; direct scanout review matches the source P1 top and
 weapon-meter assets. Fast, Oracle, release Target, and paired Emulator pass.
-Close the Coffee Shop obstacle, six-field terrain interpreter, and camera
-target/position arithmetic blocker next, using accepted Oracle evidence to
-amend only the existing SPEC fixture and the smallest bounded Oracle follow-up
-only if an exact implementation field is genuinely absent. Then return to the
-preserved Button3 vector/branch blocker. Do not leave the first segment.
+The Coffee Shop obstacle, terrain, and camera blocker is now closed. Accepted
+Oracle evidence plus the bounded corrective capture bind the type-20 attack box
+and point-probe minimum-penetration arithmetic, seven required eight-byte
+terrain records and exact kind-0/2/4/6 interpreter/retry behavior, camera
+target/speed/phase guards, and world-to-plane ordering. The bounded 46 x 9
+selector projection is losslessly packed into 104 source-derived bytes for the
+Target. Host rejects 93 real mutations and Target wiring rejects 67
+suppressions. A clean rebuild exposed stale Jo Engine configuration objects;
+the bounded disc-stream burst was reduced from 31 to 24 sectors without
+changing byte order or ownership. The clean debug Target ends at `0x060be7d0`
+and release Target at `0x060bbe60`; two byte-identical pinned emulator runs
+normalize to
+`f40d51362371d59866ea4283704880b56272e446d91b1db7b8acbdaa7e02fbf2`
+with dynamic camera/bound x 801, scroll2 737, zero fallback/failure, and P1-only
+HUD. Direct live frames 31 and 205 preserve both Coffee Shop planes, visible
+edges, actors, projectiles, palette, and priority. Current scanout disproves the
+stale pre-checkpoint images that still showed an active P2 panel.
+
+Close the preserved Button3 vector/branch blocker next. Bind table `0x0243d2`
+numeric signed 16.16 vectors, input/facing selector mapping, branch order,
+landing/interruption guards, presentation, collision selectors, and mutations
+by amending only the existing SPEC fixture. Use the smallest bounded Oracle
+follow-up only if accepted evidence genuinely lacks an exact required field.
+Do not leave the first segment.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.

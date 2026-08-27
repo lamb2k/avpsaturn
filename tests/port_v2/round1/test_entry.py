@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "36cfbb29f0a826f1313699e8a13f0844188ee6cfcfecf29390d61622a648c8e5"
+EXPECTED = "bdef78c4006354510998a6d5428960a525180d33d9f9122bb54a3e40d25202d6"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -35,7 +35,10 @@ def run(body, header_body, passes):
                    f"tests/port_v2/round1/round1_entry_test.c -o '{wsl(temp / 'test')}' && "
                    f"'{wsl(temp / 'test')}'")
         result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
-        assert (result.returncode == 0) == passes, result.stderr.decode(errors="replace")
+        assert (result.returncode == 0) == passes, (
+            f"returncode={result.returncode}\n" +
+            result.stdout.decode(errors="replace") +
+            result.stderr.decode(errors="replace"))
 
 run(source, header, True)
 for before, after in (
@@ -47,7 +50,7 @@ for before, after in (
     ("--runtime->entry.animation_c8;", "runtime->entry.animation_c8 = 0u;"),
     ("++runtime->entry.timer_decrements;", "runtime->entry.timer_decrements += 2u;"),
     ("pool->free_stack[pool->free_count - 1u]", "pool->free_stack[0]"),
-    ("avsp_pw_step(&runtime->player_action, &input);", "input.mask = 0u; avsp_pw_step(&runtime->player_action, &input);"),
+    ("avsp_pw_step_round1(&runtime->player_action, &input);", "input.mask = 0u; avsp_pw_step_round1(&runtime->player_action, &input);"),
     ("if (actor->active == 0u)\n                continue;", "if (actor->active != 0u)\n                continue;"),
     ("pool_index = order_index;", "pool_index = (order_index + 1u) % AVSP_ROUND1_POOL_COUNT;"),
     ("!avsp_round1_dispatch_supported(actor->type,\n                                                actor->actor_class)", "0"),
@@ -87,6 +90,18 @@ for before, after in (
     ("runtime->class1f_effect_guard = 0u;", "runtime->class1f_effect_guard = 1u;"),
     ("actor->effect_timer = 3u;", "actor->effect_timer = 2u;"),
     ("table_offset = 28u;", "table_offset = 24u;"),
+    ("avsp_round1_apply_coffee_shop_obstacle(runtime);",
+     "/* Coffee Shop obstacle suppressed */"),
+    ("if (z_penetration < x_penetration)",
+     "if (z_penetration <= x_penetration)"),
+    ("else if (code == 1u)\n        *selector = 24u;",
+     "else if (code == 1u)\n        *selector = 8u;"),
+    ("!avsp_round1_apply_first_segment_terrain(runtime)", "0"),
+    ("!avsp_round1_step_coffee_shop_camera(runtime)", "0"),
+    ("--runtime->camera_guard_countdown;",
+     "runtime->camera_guard_countdown = runtime->camera_guard_countdown;"),
+    ("unsigned short index = (unsigned short)(byte_offset >> 1);",
+     "unsigned short index = (unsigned short)(byte_offset >> 2);"),
 ):
     assert before in source
     run(source.replace(before, after), header, False)
@@ -99,7 +114,14 @@ for before, after in (
     ("{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x8000, 216u,", "{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 15u, 0x8000, 216u,"),
     ("{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x8000, 216u,", "{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x0000, 216u,"),
     ("{ 0x0200u, 0x1400u },", "{ 0x0200u, 0x1401u },"),
-    ("    720, 256, 752, 1072,", "    720, 256, 752, 1200,"),
+    ("    640, 256, 640, 832, 256, 256, 0x40u, 0x20u,",
+     "    640, 256, 640, 831, 256, 256, 0x40u, 0x20u,"),
+    ("    { 0, 0, 32u, 127u, 0, 6u, 0, 0u, 0u }",
+     "    { 0, 0, 31u, 127u, 0, 6u, 0, 0u, 0u }"),
+    ("{ 0x02u, 0x02u, 0x80u, 0x80u, 0x10u, 0x10u, 0xFFu, 0x80u },",
+     "{ 0x02u, 0x02u, 0x80u, 0x80u, 0x10u, 0x10u, 0x00u, 0x80u },"),
+    ("    1u, 1200u,", "    1u, 1199u,"),
+    ("7u, 7u, 8u, 8u, 9u, 9u", "7u, 7u, 7u, 8u, 9u, 9u"),
     ("    10u,\n    {255u, 2u, 6u, 255u,", "    9u,\n    {255u, 2u, 6u, 255u,"),
     ("    1536u,\n    5120u,\n    30u,", "    1538u,\n    5120u,\n    30u,"),
     ("    1536u,\n    5120u,\n    30u,", "    1536u,\n    5120u,\n    29u,"),
@@ -143,4 +165,4 @@ for before, after in (
                    f"'{wsl(temp / 'test')}'")
         result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/global-bounds/neutral-stop/melee/Button1 differential: PASS (82 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1 differential: PASS (93 real mutations)")

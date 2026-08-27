@@ -50,12 +50,19 @@ int main(void)
         runtime.entry.source_global_8209 != 2u ||
         runtime.entry.script_cursor != 0x00128FC4UL ||
         runtime.navigation_bounds_active != 1u ||
-        runtime.navigation_bound_x != 720 || runtime.navigation_bound_z != 256 ||
+        runtime.navigation_bound_x != 640 || runtime.navigation_bound_z != 256 ||
+        runtime.camera_x_position != 640 ||
+        runtime.camera_x_target != 640 ||
+        runtime.camera_x_lower != 640 || runtime.camera_x_upper != 832 ||
+        runtime.camera_z_position != 256 ||
+        runtime.camera_z_lower != 256 || runtime.camera_z_upper != 256 ||
+        runtime.camera_scroll2_x != 576 ||
+        runtime.camera_guard_countdown != 1200u ||
         runtime.pools[0].free_count != 10u ||
-        runtime.pools[2].free_count != 14u ||
+        runtime.pools[2].free_count != 13u ||
         runtime.pools[3].free_count != 2u ||
         runtime.scheduler_frames != 171u ||
-        runtime.scheduler_dispatches != 2223u ||
+        runtime.scheduler_dispatches != 2394u ||
         runtime.class1f_initializations != 10u ||
         runtime.class1f_initial_rng_calls != 10u ||
         runtime.class09_initializations != 2u ||
@@ -105,9 +112,9 @@ int main(void)
         !avsp_round1_entry_valid(&runtime))
         return 6;
     if (!avsp_round1_step_scheduler(&runtime) ||
-        runtime.scheduler_trace_count != 13u ||
+        runtime.scheduler_trace_count != 14u ||
         runtime.scheduler_frames != 172u ||
-        runtime.scheduler_dispatches != 2236u ||
+        runtime.scheduler_dispatches != 2408u ||
         runtime.actor_handler_dispatches != 1720u ||
         runtime.presentation_bindings != 1720u ||
         runtime.state_context_bindings != 1720u ||
@@ -136,7 +143,7 @@ int main(void)
     runtime.pools[2].records[0].actor_class = 0x07;
     runtime.pools[2].records[0].type = 20u;
     runtime.pools[2].records[0].source_slot = 0x00ffae80UL;
-    runtime.pools[2].free_count = 13u;
+    runtime.pools[2].free_count = 12u;
     runtime.pools[3].records[0].active = 1u;
     runtime.pools[3].records[0].actor_class = 0x10;
     runtime.pools[3].records[0].type = 24u;
@@ -145,17 +152,17 @@ int main(void)
     runtime.pools[3].records[0].source_slot = 0x00ffb680UL;
     runtime.pools[3].free_count = 2u;
     if (!avsp_round1_step_scheduler(&runtime) ||
-        runtime.scheduler_trace_count != 16u ||
+        runtime.scheduler_trace_count != 17u ||
         runtime.scheduler_frames != 173u ||
-        runtime.scheduler_dispatches != 2252u ||
+        runtime.scheduler_dispatches != 2425u ||
         runtime.actor_handler_dispatches != 1730u ||
         runtime.presentation_bindings != 1730u ||
         runtime.state_context_bindings != 1730u ||
         runtime.scheduler_trace[10].record_type != 16u ||
         runtime.scheduler_trace[11].record_type != 20u ||
         runtime.scheduler_trace[12].record_type != 20u ||
-        runtime.scheduler_trace[14].record_type != 24u ||
-        runtime.scheduler_trace[15].actor_class != 0x44 ||
+        runtime.scheduler_trace[15].record_type != 24u ||
+        runtime.scheduler_trace[16].actor_class != 0x44 ||
         runtime.pools[0].records[10].scheduler_updates != 173u ||
         runtime.pools[0].records[10].handler_updates != 173u ||
         runtime.pools[0].records[10].state_handler_updates != 173u)
@@ -173,7 +180,7 @@ int main(void)
     runtime.player_action.x = 2000;
     runtime.player_action.lane = 1000;
     if (!avsp_round1_step_player(&runtime, 0u, 0) ||
-        runtime.player.x != 1072 || runtime.player.z != 327)
+        runtime.player.x != 1028 || runtime.player.z != 327)
     {
         fprintf(stderr,
                 "high clamp x=%d z=%d action_x=%d lane=%d applications=%lu clamps=%lu\n",
@@ -185,9 +192,9 @@ int main(void)
     runtime.player_action.x = -1000;
     runtime.player_action.lane = -1000;
     if (!avsp_round1_step_player(&runtime, 0u, 0) ||
-        runtime.player.x != 752 || runtime.player.z != 272 ||
+        runtime.player.x != 719 || runtime.player.z != 272 ||
         runtime.navigation_applications != 7u ||
-        runtime.navigation_clamps != 3u)
+        runtime.navigation_clamps != 4u)
     {
         fprintf(stderr,
                 "low clamp x=%d z=%d action_x=%d lane=%d applications=%lu clamps=%lu\n",
@@ -210,9 +217,162 @@ int main(void)
         runtime.player_cleanup_pending != 0u ||
         runtime.player.facing != 1u ||
         runtime.navigation_applications != 17u ||
-        runtime.navigation_clamps != 3u ||
-        runtime.player_stop_motion_suppressions != 10u)
+        runtime.navigation_clamps != 4u ||
+        runtime.player_stop_motion_suppressions != 0u)
+    {
+        fprintf(stderr, "neutral action=%u cleanup=%u facing=%u apps=%lu clamps=%lu suppress=%lu failure=%lu\n",
+                runtime.player.source_action, runtime.player_cleanup_pending,
+                runtime.player.facing, runtime.navigation_applications,
+                runtime.navigation_clamps,
+                runtime.player_stop_motion_suppressions,
+                runtime.failure_count);
         return 15;
+    }
+    {
+        AvspRound1Runtime navigation_runtime = runtime;
+        navigation_runtime.navigation_bound_x = 832;
+        navigation_runtime.navigation_bound_z = 256;
+        navigation_runtime.camera_x_position = 832;
+        navigation_runtime.camera_x_target = 832;
+        navigation_runtime.camera_x_lower = 832;
+        navigation_runtime.camera_x_upper = 1008;
+        navigation_runtime.camera_z_position = 256;
+        navigation_runtime.camera_z_target = 256;
+        navigation_runtime.camera_z_lower = 256;
+        navigation_runtime.camera_z_upper = 256;
+        navigation_runtime.camera_scroll2_x = 768;
+        navigation_runtime.camera_coffee_phase = 4u;
+        navigation_runtime.player_action.x = 1092;
+        navigation_runtime.player_action.lane = 323;
+        navigation_runtime.player_action.x_numerator = 0;
+        navigation_runtime.player_action.lane_numerator = 0;
+        navigation_runtime.player_action.direction_history[0] = 0u;
+        navigation_runtime.player_action.direction_history[1] = 0u;
+        if (!avsp_round1_step_player(&navigation_runtime, 0u, 0) ||
+            navigation_runtime.player.x != 1091 ||
+            navigation_runtime.player.z != 323 ||
+            navigation_runtime.navigation_obstacle_responses !=
+                runtime.navigation_obstacle_responses + 1u)
+            return 76;
+        navigation_runtime = runtime;
+        navigation_runtime.navigation_bound_x = 832;
+        navigation_runtime.navigation_bound_z = 256;
+        navigation_runtime.camera_x_position = 832;
+        navigation_runtime.camera_x_target = 832;
+        navigation_runtime.camera_x_lower = 832;
+        navigation_runtime.camera_x_upper = 1008;
+        navigation_runtime.camera_z_position = 256;
+        navigation_runtime.camera_z_target = 256;
+        navigation_runtime.camera_z_lower = 256;
+        navigation_runtime.camera_z_upper = 256;
+        navigation_runtime.camera_scroll2_x = 768;
+        navigation_runtime.camera_coffee_phase = 4u;
+        navigation_runtime.player_action.x = 1093;
+        navigation_runtime.player_action.lane = 319;
+        navigation_runtime.player_action.x_numerator = 0;
+        navigation_runtime.player_action.lane_numerator = 0;
+        navigation_runtime.player_action.direction_history[0] = 0u;
+        navigation_runtime.player_action.direction_history[1] = 0u;
+        if (!avsp_round1_step_player(&navigation_runtime, 0u, 0) ||
+            navigation_runtime.player.x != 1091 ||
+            navigation_runtime.player.z != 319)
+            return 77;
+        navigation_runtime = runtime;
+        navigation_runtime.navigation_bound_x = 832;
+        navigation_runtime.navigation_bound_z = 256;
+        navigation_runtime.camera_x_position = 832;
+        navigation_runtime.camera_x_target = 832;
+        navigation_runtime.camera_x_lower = 832;
+        navigation_runtime.camera_x_upper = 1008;
+        navigation_runtime.camera_z_position = 256;
+        navigation_runtime.camera_z_target = 256;
+        navigation_runtime.camera_z_lower = 256;
+        navigation_runtime.camera_z_upper = 256;
+        navigation_runtime.camera_scroll2_x = 768;
+        navigation_runtime.camera_coffee_phase = 4u;
+        navigation_runtime.player_action.x = 1028;
+        navigation_runtime.player_action.lane = 400;
+        navigation_runtime.player_action.x_numerator = 0;
+        navigation_runtime.player_action.lane_numerator = 0;
+        navigation_runtime.player_action.direction_history[0] = 0u;
+        navigation_runtime.player_action.direction_history[1] = 0u;
+        if (!avsp_round1_step_player(&navigation_runtime, 0u, 0) ||
+            navigation_runtime.player.x != 1028 ||
+            navigation_runtime.player.z != 327 ||
+            navigation_runtime.navigation_terrain_retries ==
+                runtime.navigation_terrain_retries)
+            return 78;
+    }
+    {
+        AvspRound1Runtime camera_runtime = runtime;
+        unsigned int camera_steps = 0u;
+        unsigned int locked_steps = 0u;
+        camera_runtime.player_action.x = 944;
+        camera_runtime.player_action.lane = 320;
+        camera_runtime.player_action.x_numerator = 0;
+        camera_runtime.player_action.lane_numerator = 0;
+        camera_runtime.player_action.direction_history[0] = 0u;
+        camera_runtime.player_action.direction_history[1] = 0u;
+        camera_runtime.camera_x_previous = 640;
+        camera_runtime.camera_x_position = 640;
+        camera_runtime.camera_x_target = 640;
+        camera_runtime.camera_x_target_previous = 640;
+        camera_runtime.camera_x_lower = 640;
+        camera_runtime.camera_x_upper = 832;
+        camera_runtime.camera_z_position = 256;
+        camera_runtime.camera_z_target = 256;
+        camera_runtime.camera_z_lower = 256;
+        camera_runtime.camera_z_upper = 256;
+        camera_runtime.camera_scroll2_x = 576;
+        camera_runtime.camera_coffee_phase = 0u;
+        camera_runtime.camera_guard_counter = 0u;
+        camera_runtime.camera_guard_snapshot = 0u;
+        camera_runtime.camera_guard_countdown = 1200u;
+        camera_runtime.navigation_bound_x = 640;
+        camera_runtime.navigation_bound_z = 256;
+        if (!avsp_round1_step_player(&camera_runtime, 0u, 0) ||
+            camera_runtime.camera_x_position != 648 ||
+            camera_runtime.camera_scroll2_x != 584)
+            return 79;
+        while (camera_runtime.camera_coffee_phase == 0u &&
+               camera_steps < 500u)
+        {
+            if (!avsp_round1_step_player(&camera_runtime,
+                    AVSP_PW_INPUT_RIGHT, 0))
+                return 79;
+            ++camera_steps;
+        }
+        if (camera_runtime.camera_coffee_phase != 2u ||
+            camera_runtime.camera_x_position != 832 ||
+            camera_runtime.camera_x_lower != 832 ||
+            camera_runtime.camera_x_upper != 832 ||
+            camera_runtime.camera_guard_countdown != 1200u ||
+            camera_runtime.camera_locks != runtime.camera_locks + 1u)
+        {
+            fprintf(stderr, "camera lock phase=%u x=%d player=%d low=%d high=%d countdown=%u locks=%lu base=%lu steps=%u\n",
+                    camera_runtime.camera_coffee_phase,
+                    camera_runtime.camera_x_position,
+                    camera_runtime.player_action.x,
+                    camera_runtime.camera_x_lower,
+                    camera_runtime.camera_x_upper,
+                    camera_runtime.camera_guard_countdown,
+                    camera_runtime.camera_locks, runtime.camera_locks,
+                    camera_steps);
+            return 80;
+        }
+        while (camera_runtime.camera_coffee_phase == 2u &&
+               locked_steps < 1300u)
+        {
+            if (!avsp_round1_step_player(&camera_runtime, 0u, 0))
+                return 80;
+            ++locked_steps;
+        }
+        if (locked_steps != 1200u ||
+            camera_runtime.camera_coffee_phase != 4u ||
+            camera_runtime.camera_x_upper != 1008 ||
+            camera_runtime.camera_unlocks != runtime.camera_unlocks + 1u)
+            return 81;
+    }
     for (selector = 1u; selector <= AVSP_ROUND1_PLAYER_MELEE_COUNT;
          ++selector)
     {

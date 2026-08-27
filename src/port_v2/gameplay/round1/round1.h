@@ -4,7 +4,7 @@
 #include "../player_action/player_action.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "36cfbb29f0a826f1313699e8a13f0844188ee6cfcfecf29390d61622a648c8e5"
+    "bdef78c4006354510998a6d5428960a525180d33d9f9122bb54a3e40d25202d6"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -46,6 +46,17 @@
 #define AVSP_ROUND1_CLASS4E_JITTER_COUNT 8u
 #define AVSP_ROUND1_CLASS4E_PRESENTATION_COUNT 5u
 #define AVSP_ROUND1_CLASS44_PRESENTATION_COUNT 2u
+#define AVSP_ROUND1_TERRAIN_RECORD_COUNT 7u
+#define AVSP_ROUND1_TERRAIN_GRID_X_MIN 640
+#define AVSP_ROUND1_TERRAIN_GRID_X_MAX 1360
+#define AVSP_ROUND1_TERRAIN_GRID_Z_MIN 272
+#define AVSP_ROUND1_TERRAIN_GRID_Z_MAX 400
+#define AVSP_ROUND1_TERRAIN_GRID_TILE_SIZE 16u
+#define AVSP_ROUND1_TERRAIN_GRID_WIDTH 46u
+#define AVSP_ROUND1_TERRAIN_GRID_HEIGHT 9u
+#define AVSP_ROUND1_TERRAIN_GRID_CELL_COUNT 414u
+#define AVSP_ROUND1_TERRAIN_PACKED_BYTES 104u
+#define AVSP_ROUND1_CAMERA_SPEED_COUNT 20u
 #define AVSP_ROUND1_INPUT_BUTTON1 0x0010u
 
 #define AVSP_ROUND1_ENTRY_SET_POSITION 1u
@@ -274,6 +285,57 @@ typedef struct
 
 typedef struct
 {
+    unsigned char kind;
+    unsigned char branch_selector;
+    unsigned char orientation;
+    unsigned char shift;
+    unsigned char x_parameter;
+    unsigned char z_parameter;
+    unsigned char retry_selector;
+    unsigned char reserved;
+} AvspRound1TerrainRecordSpec;
+
+typedef struct
+{
+    unsigned long source_slot;
+    signed char actor_class;
+    unsigned char type;
+    unsigned short state;
+    unsigned short substate;
+    short x;
+    short y;
+    short z;
+    unsigned char facing;
+    unsigned long animation_record;
+    unsigned long assembly;
+    unsigned char hurt_selector;
+    unsigned char attack_selector;
+    AvspRound1CollisionBoxSpec attack_box;
+} AvspRound1ObstacleSpec;
+
+typedef struct
+{
+    short initial_x;
+    short initial_z;
+    short initial_x_lower;
+    short initial_x_upper;
+    short initial_z_upper;
+    short initial_z_lower;
+    unsigned short x_spread;
+    unsigned short z_spread;
+    short x_wide_offset;
+    short x_right_offset;
+    short x_left_offset;
+    short z_wide_offset;
+    short z_upper_offset;
+    short z_lower_offset;
+    unsigned char guard_threshold_byte;
+    unsigned short guard_countdown;
+    unsigned short x_speed[AVSP_ROUND1_CAMERA_SPEED_COUNT];
+} AvspRound1CameraSpec;
+
+typedef struct
+{
     unsigned short walking_action;
     unsigned short stop_action;
     unsigned short cleanup_action;
@@ -469,6 +531,31 @@ typedef struct
     short navigation_bound_z;
     unsigned long navigation_applications;
     unsigned long navigation_clamps;
+    unsigned long navigation_obstacle_tests;
+    unsigned long navigation_obstacle_responses;
+    unsigned long navigation_terrain_tests;
+    unsigned long navigation_terrain_responses;
+    unsigned long navigation_terrain_retries;
+    unsigned char navigation_contact_bits;
+    short camera_x_previous;
+    short camera_x_position;
+    short camera_z_position;
+    short camera_x_target;
+    short camera_z_target;
+    short camera_x_target_previous;
+    short camera_z_target_previous;
+    short camera_z_upper;
+    short camera_z_lower;
+    short camera_x_lower;
+    short camera_x_upper;
+    short camera_scroll2_x;
+    unsigned char camera_coffee_phase;
+    unsigned short camera_guard_counter;
+    unsigned short camera_guard_snapshot;
+    unsigned short camera_guard_countdown;
+    unsigned long camera_updates;
+    unsigned long camera_locks;
+    unsigned long camera_unlocks;
     unsigned short player_locomotion_action;
     unsigned short player_stop_ticks;
     unsigned char player_was_directional;

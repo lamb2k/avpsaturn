@@ -276,6 +276,18 @@ mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_
            "round1_navigation_bound_z":"avsp_diag_round1_navigation_bound_z",
            "round1_navigation_applications":"avsp_diag_round1_navigation_applications",
            "round1_navigation_clamps":"avsp_diag_round1_navigation_clamps",
+           "round1_navigation_obstacle_responses":"avsp_diag_round1_navigation_obstacle_responses",
+           "round1_navigation_terrain_responses":"avsp_diag_round1_navigation_terrain_responses",
+           "round1_navigation_terrain_retries":"avsp_diag_round1_navigation_terrain_retries",
+           "round1_camera_x_position":"avsp_diag_round1_camera_x_position",
+           "round1_camera_x_target":"avsp_diag_round1_camera_x_target",
+           "round1_camera_x_lower":"avsp_diag_round1_camera_x_lower",
+           "round1_camera_x_upper":"avsp_diag_round1_camera_x_upper",
+           "round1_camera_scroll2_x":"avsp_diag_round1_camera_scroll2_x",
+           "round1_camera_phase":"avsp_diag_round1_camera_phase",
+           "round1_camera_countdown":"avsp_diag_round1_camera_countdown",
+           "round1_camera_locks":"avsp_diag_round1_camera_locks",
+           "round1_camera_unlocks":"avsp_diag_round1_camera_unlocks",
            "round1_player_stop_ticks":"avsp_diag_round1_player_stop_ticks",
            "round1_player_stop_entries":"avsp_diag_round1_player_stop_entries",
            "round1_player_stop_completions":"avsp_diag_round1_player_stop_completions",
@@ -434,7 +446,7 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_route_state"] == 4 and state["round1_rng_seed"] == 0x3318 and
         state["round1_player_health"] == 101 and
         [state[f"round1_pool{kind}_free"] for kind in (12,16,20,24)] ==
-        [10,20,14,2] and state["round1_fallback_count"] == 0 and
+        [10,20,13,2] and state["round1_fallback_count"] == 0 and
         state["round1_failure_count"] == 0 and
         state["round1_entry_spawn_count"] == 10 and
         state["round1_entry_step"] == 8 and
@@ -448,16 +460,28 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_player_source_action"] == 514 and
         state["round1_player_controller_updates"] == 468 and
         state["round1_scheduler_frames"] == 638 and
-        state["round1_scheduler_dispatches"] == 8497 and
-        state["round1_scheduler_trace_count"] == 13 and
-        state["round1_scheduler_order_hash"] == -665664999 and
+        state["round1_scheduler_dispatches"] == 9126 and
+        state["round1_scheduler_trace_count"] == 14 and
+        state["round1_scheduler_order_hash"] == -203734367 and
         state["round1_actor_handler_dispatches"] == 6380 and
         state["round1_presentation_bindings"] == 6380 and
         state["round1_state_context_bindings"] == 6380 and
-        state["round1_navigation_bound_x"] == 720 and
+        state["round1_navigation_bound_x"] == 801 and
         state["round1_navigation_bound_z"] == 256 and
         state["round1_navigation_applications"] == 468 and
         state["round1_navigation_clamps"] == 0 and
+        state["round1_navigation_obstacle_responses"] == 0 and
+        state["round1_navigation_terrain_responses"] == 0 and
+        state["round1_navigation_terrain_retries"] == 0 and
+        state["round1_camera_x_position"] == 801 and
+        state["round1_camera_x_target"] == 801 and
+        state["round1_camera_x_lower"] == 640 and
+        state["round1_camera_x_upper"] == 832 and
+        state["round1_camera_scroll2_x"] == 737 and
+        state["round1_camera_phase"] == 0 and
+        state["round1_camera_countdown"] == 1200 and
+        state["round1_camera_locks"] == 0 and
+        state["round1_camera_unlocks"] == 0 and
         state["round1_player_stop_ticks"] == 0 and
         state["round1_player_stop_entries"] == 4 and
         state["round1_player_stop_completions"] == 3 and

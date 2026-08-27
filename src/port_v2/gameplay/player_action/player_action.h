@@ -114,6 +114,7 @@ unsigned long avsp_pw_assembly_for_record(unsigned long animation_record);
 void avsp_pw_resolve_navigation(short *world_x, short *world_z);
 void avsp_pw_init(AvspPwRuntime *runtime);
 void avsp_pw_step(AvspPwRuntime *runtime, const AvspPwInput *input);
+void avsp_pw_step_round1(AvspPwRuntime *runtime, const AvspPwInput *input);
 void avsp_pw_view(const AvspPwRuntime *runtime, AvspPwView *view);
 void avsp_pw_report_contact(AvspPwRuntime *runtime);
 int avsp_pw_can_control(const AvspPwRuntime *runtime);

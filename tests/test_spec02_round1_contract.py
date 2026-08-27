@@ -45,6 +45,18 @@ dependencies = fixtures["authority_data"]["auxiliary"]["first_segment_dependenci
 assert dependencies["class_0x09_type20_rng_owner"]["first_segment_calls_before_class4e"] == 44
 assert dependencies["class_0x4e_type24_variant4_effect"]["allocation_pop_order"] == [
     "0x00ffc500", "0x00ffc480"]
+navigation = fixtures["authority_data"]["navigation"]
+assert len(navigation["terrain_resolver"]["records"]) == 6
+assert navigation["terrain_resolver"]["implementation_contract"]["handlers"]["6"][
+    "selected_entry"] == "0x0b1e9c"
+assert navigation["obstacle_response"]["implementation_contract"]["player_geometry"][
+    "box"] is None
+assert navigation["obstacle_response"]["implementation_contract"]["obstacle_box"][
+    "x_half_u8"] == 32
+assert navigation["camera"]["implementation_contract"]["coffee_shop_guard"][
+    "fixed_frame_authority"] is False
+assert navigation["camera"]["implementation_contract"]["x_target_arithmetic"][
+    "speed_table_u16"][-4:] == [11, 11, 11, 11]
 rebuilt_contract, rebuilt_fixtures = spec02.build_artifacts()
 assert spec02.canonical(rebuilt_contract) == spec02.OUT.read_bytes()
 assert spec02.canonical(rebuilt_fixtures) == spec02.FIXTURES.read_bytes()
@@ -76,6 +88,9 @@ f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["actors"][0]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "class1f presentation priority mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x09_type20_rng_owner"]["selector_table_u16"][0] = 1; mutations.append((contract, f, "class09 RNG selector mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["allocation_pop_order"].reverse(); mutations.append((contract, f, "class4e allocation-order mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["terrain_resolver"]["records"][4]["decoded_six_fields"]["z_parameter_s8"] = -8; mutations.append((contract, f, "terrain record sign mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["obstacle_response"]["implementation_contract"]["obstacle_box"]["x_half_u8"] = 16; mutations.append((contract, f, "obstacle box mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["camera"]["implementation_contract"]["coffee_shop_guard"]["phase2_unlock_guard"] = "frame >= 4992"; mutations.append((contract, f, "camera unlock guard mutation"))
 m = copy.deepcopy(contract); m["protected_boundaries"]["physical_saturn"] = "PASS"; mutations.append((m, fixtures, "hardware overclaim"))
 m = copy.deepcopy(contract); m["next_card"] = "SALVAGE-08-FRONTEND"; mutations.append((m, fixtures, "frontend bypass"))
 for args in mutations:

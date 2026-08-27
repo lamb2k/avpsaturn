@@ -623,6 +623,18 @@ volatile int avsp_diag_round1_navigation_bound_x;
 volatile int avsp_diag_round1_navigation_bound_z;
 volatile int avsp_diag_round1_navigation_applications;
 volatile int avsp_diag_round1_navigation_clamps;
+volatile int avsp_diag_round1_navigation_obstacle_responses;
+volatile int avsp_diag_round1_navigation_terrain_responses;
+volatile int avsp_diag_round1_navigation_terrain_retries;
+volatile int avsp_diag_round1_camera_x_position;
+volatile int avsp_diag_round1_camera_x_target;
+volatile int avsp_diag_round1_camera_x_lower;
+volatile int avsp_diag_round1_camera_x_upper;
+volatile int avsp_diag_round1_camera_scroll2_x;
+volatile int avsp_diag_round1_camera_phase;
+volatile int avsp_diag_round1_camera_countdown;
+volatile int avsp_diag_round1_camera_locks;
+volatile int avsp_diag_round1_camera_unlocks;
 volatile int avsp_diag_round1_player_stop_ticks;
 volatile int avsp_diag_round1_player_stop_entries;
 volatile int avsp_diag_round1_player_stop_completions;
@@ -1155,11 +1167,15 @@ static int visual_enemy_frame;
  * it refills with a single-sector GFS_Fread regardless of the configured
  * buffer size, so enlarging jo's stream buffer serves garbage.
  * All disc reads in this file go through here. */
-/* 31 sectors, not 32: the encounter profile's BSS crossed the
- * 0x060C0000 user work-RAM limit by 0x5a0 bytes after the RP3 carve
- * rework, and one sector off this burst buffer reclaims 2 KiB without
- * changing behavior (the read loop accepts any burst size). */
-#define AVSP_FS_STAGING_SECTORS 31
+/* 24 sectors, not 32: a clean Target rebuild with the accepted 255-entry
+ * VDP1 configuration exposed the true Jo Engine BSS footprint (older
+ * incremental objects had hidden 0x2970 bytes).  This bounded streaming
+ * buffer is the safe capacity lever: the read loop accepts any positive
+ * burst size and preserves byte order, destination ownership, legal-read
+ * windows, and completion semantics.  Reclaiming 16 KiB leaves useful
+ * first-segment implementation headroom without reducing sprite capacity,
+ * the allocator, diagnostics, or gameplay state. */
+#define AVSP_FS_STAGING_SECTORS 24
 #define AVSP_FS_SECTOR_BYTES 2048
 #define AVSP_FS_STAGING_BYTES (AVSP_FS_STAGING_SECTORS * AVSP_FS_SECTOR_BYTES)
 static unsigned char avsp_fs_staging[AVSP_FS_STAGING_BYTES];
@@ -4494,7 +4510,10 @@ static void street_test_frame(void)
          * port still owns both VDP2 submissions and their priority/palette
          * locks. Translate source scroll2 world X through each strip origin;
          * derive scroll3 from the captured register relationship. */
-        const int live_scroll2_x = live_encounter_runtime.camera_world_x;
+        const int live_scroll2_x =
+            round1_runtime.route_state == 4 ?
+            round1_runtime.camera_scroll2_x :
+            live_encounter_runtime.camera_world_x;
         const int live_scroll3_x =
             street_scroll3_for_scroll2(live_scroll2_x);
         scx0 = street_out_of(live_scroll2_x + 64) -
@@ -7107,6 +7126,11 @@ static void live_encounter_build_slice_frame(void)
     AvspPortV2CameraInput camera_input;
     AvspPortV2HudInput hud_input;
     int source_frame;
+    const int camera_scroll2 = round1_runtime.route_state == 4 ?
+        round1_runtime.camera_scroll2_x :
+        live_encounter_frame.camera_world_x;
+    const int camera_scroll3 = round1_runtime.route_state == 4 ?
+        street_scroll3_for_scroll2(camera_scroll2) : camera_scroll2 / 2;
     memset(&playable_slice_frame, 0, sizeof(playable_slice_frame));
     scene = &playable_slice_frame.scene;
     scene->source_event_index = -1;
@@ -7147,12 +7171,14 @@ static void live_encounter_build_slice_frame(void)
         (int)(live_encounter_frame.frame % AVSP_PORT_V2_ENEMY_WALK_FRAMES);
     scene->player_world_x = live_encounter_frame.player.x;
     scene->enemy_world_x = live_encounter_frame.alien.x;
-    scene->camera_world_x = live_encounter_frame.camera_world_x;
+    scene->camera_world_x = camera_scroll2;
     scene->aperture_origin_x = AVSP_LIVE_ENCOUNTER_APERTURE_ORIGIN_X;
-    scene->player_screen_x = live_encounter_frame.player_screen_x;
-    scene->enemy_screen_x = live_encounter_frame.alien_screen_x;
-    scene->layer_scroll_x[0] = live_encounter_frame.camera_world_x;
-    scene->layer_scroll_x[1] = live_encounter_frame.camera_world_x / 2;
+    scene->player_screen_x = (short)(live_encounter_frame.player.x -
+        camera_scroll2 + AVSP_LIVE_ENCOUNTER_APERTURE_ORIGIN_X);
+    scene->enemy_screen_x = (short)(live_encounter_frame.alien.x -
+        camera_scroll2 + AVSP_LIVE_ENCOUNTER_APERTURE_ORIGIN_X);
+    scene->layer_scroll_x[0] = camera_scroll2;
+    scene->layer_scroll_x[1] = camera_scroll3;
     scene->player_action_frame = live_encounter_frame.player.action_elapsed;
     scene->player_attack_active = live_encounter_frame.player.attack_active;
     if (live_encounter_frame.player.state == AVSP_PW_STATE_ATTACK)
@@ -7265,8 +7291,8 @@ static void live_encounter_build_slice_frame(void)
              scene->enemy_action == AVSP_PORT_V2_SLICE_ACTION_KO)
         scene->defender_id = AVSP_PORT_V2_SLICE_ACTOR_STREET_ALIEN;
     memset(&camera_input, 0, sizeof(camera_input));
-    camera_input.scroll_x[0] = live_encounter_frame.camera_world_x;
-    camera_input.scroll_x[1] = live_encounter_frame.camera_world_x / 2;
+    camera_input.scroll_x[0] = camera_scroll2;
+    camera_input.scroll_x[1] = camera_scroll3;
     avsp_port_v2_camera_step(&playable_slice_runtime.camera, &camera_input);
     avsp_port_v2_camera_view(&playable_slice_runtime.camera,
                              &playable_slice_frame.camera);
@@ -7354,6 +7380,18 @@ static void round1_apply_native_player_and_hud(const int retained_stepped)
     const int enemy_visible = retained_stepped &&
         !live_encounter_frame.alien.removed;
     int source_frame;
+
+    if (round1_runtime.route_state == 4)
+    {
+        scene->camera_world_x = round1_runtime.camera_scroll2_x;
+        scene->layer_scroll_x[0] = round1_runtime.camera_scroll2_x;
+        scene->layer_scroll_x[1] = street_scroll3_for_scroll2(
+            round1_runtime.camera_scroll2_x);
+        if (retained_stepped)
+            scene->enemy_screen_x = (short)(live_encounter_frame.alien.x -
+                scene->camera_world_x +
+                AVSP_LIVE_ENCOUNTER_APERTURE_ORIGIN_X);
+    }
 
     playable_slice_frame.frame = (int)round1_runtime.frame;
     playable_slice_frame.actors.actor_count =
@@ -7763,8 +7801,8 @@ static void live_encounter_publish(void)
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
         sizeof(AVSP_ROUND1_SPEC02_SHA256) == 65u &&
-        AVSP_ROUND1_SPEC02_SHA256[0] == '3' &&
-        AVSP_ROUND1_SPEC02_SHA256[63] == '5';
+        AVSP_ROUND1_SPEC02_SHA256[0] == 'b' &&
+        AVSP_ROUND1_SPEC02_SHA256[63] == '6';
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
     avsp_diag_round1_rng_seed = round1_runtime.rng_seed;
@@ -7812,6 +7850,23 @@ static void live_encounter_publish(void)
         (int)round1_runtime.navigation_applications;
     avsp_diag_round1_navigation_clamps =
         (int)round1_runtime.navigation_clamps;
+    avsp_diag_round1_navigation_obstacle_responses =
+        (int)round1_runtime.navigation_obstacle_responses;
+    avsp_diag_round1_navigation_terrain_responses =
+        (int)round1_runtime.navigation_terrain_responses;
+    avsp_diag_round1_navigation_terrain_retries =
+        (int)round1_runtime.navigation_terrain_retries;
+    avsp_diag_round1_camera_x_position =
+        round1_runtime.camera_x_position;
+    avsp_diag_round1_camera_x_target = round1_runtime.camera_x_target;
+    avsp_diag_round1_camera_x_lower = round1_runtime.camera_x_lower;
+    avsp_diag_round1_camera_x_upper = round1_runtime.camera_x_upper;
+    avsp_diag_round1_camera_scroll2_x = round1_runtime.camera_scroll2_x;
+    avsp_diag_round1_camera_phase = round1_runtime.camera_coffee_phase;
+    avsp_diag_round1_camera_countdown =
+        round1_runtime.camera_guard_countdown;
+    avsp_diag_round1_camera_locks = (int)round1_runtime.camera_locks;
+    avsp_diag_round1_camera_unlocks = (int)round1_runtime.camera_unlocks;
     avsp_diag_round1_player_stop_ticks = round1_runtime.player_stop_ticks;
     avsp_diag_round1_player_stop_entries =
         (int)round1_runtime.player_stop_entries;

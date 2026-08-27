@@ -197,31 +197,351 @@ static int avsp_round1_class1f_state_context_supported(unsigned short state,
 
 static void avsp_round1_apply_player_global_bounds(AvspRound1Runtime *runtime)
 {
-    const AvspRound1NavigationBoundsSpec *bounds =
-        &avsp_round1_first_segment_bounds;
+    short x_min;
+    short x_max;
+    short z_min;
+    short z_max;
     if (!runtime->navigation_bounds_active)
         return;
+    x_min = (short)(runtime->navigation_bound_x + 0x20);
+    x_max = (short)(runtime->navigation_bound_x + 0x160);
+    z_min = (short)(runtime->navigation_bound_z + 0x10);
+    z_max = (short)(runtime->navigation_bound_z + 0x90);
     ++runtime->navigation_applications;
-    if (runtime->player_action.x < bounds->x_min)
+    if (runtime->player_action.x < x_min)
     {
-        runtime->player_action.x = bounds->x_min;
+        runtime->player_action.x = x_min;
         ++runtime->navigation_clamps;
     }
-    else if (runtime->player_action.x > bounds->x_max)
+    else if (runtime->player_action.x > x_max)
     {
-        runtime->player_action.x = bounds->x_max;
+        runtime->player_action.x = x_max;
         ++runtime->navigation_clamps;
     }
-    if (runtime->player_action.lane < bounds->z_min)
+    if (runtime->player_action.lane < z_min)
     {
-        runtime->player_action.lane = bounds->z_min;
+        runtime->player_action.lane = z_min;
         ++runtime->navigation_clamps;
     }
-    else if (runtime->player_action.lane > bounds->z_max)
+    else if (runtime->player_action.lane > z_max)
     {
-        runtime->player_action.lane = bounds->z_max;
+        runtime->player_action.lane = z_max;
         ++runtime->navigation_clamps;
     }
+}
+
+static long avsp_round1_abs_long(const long value)
+{
+    return value < 0 ? -value : value;
+}
+
+static void avsp_round1_apply_coffee_shop_obstacle(
+    AvspRound1Runtime *runtime)
+{
+    const AvspRound1ObstacleSpec *obstacle =
+        &avsp_round1_coffee_shop_obstacle;
+    long dx = (long)obstacle->x + obstacle->attack_box.x_center -
+        runtime->player_action.x;
+    long dz = (long)obstacle->z + obstacle->attack_box.z_center -
+        runtime->player_action.lane;
+    unsigned short x_penetration;
+    unsigned short z_penetration;
+    short signed_penetration;
+    ++runtime->navigation_obstacle_tests;
+    if (avsp_round1_abs_long(dx) >= obstacle->attack_box.x_half ||
+        avsp_round1_abs_long(dz) >= obstacle->attack_box.z_half)
+        return;
+    x_penetration = (unsigned short)(obstacle->attack_box.x_half -
+        avsp_round1_abs_long(dx));
+    z_penetration = (unsigned short)(obstacle->attack_box.z_half -
+        avsp_round1_abs_long(dz));
+    if (z_penetration < x_penetration)
+    {
+        signed_penetration = (short)z_penetration;
+        if (dz < 0)
+            signed_penetration = (short)-signed_penetration;
+        runtime->player_action.lane = (short)(
+            runtime->player_action.lane - signed_penetration);
+        runtime->player_action.lane_numerator = 0;
+        runtime->navigation_contact_bits = (unsigned char)(
+            runtime->navigation_contact_bits |
+            (signed_penetration < 0 ? 0x02u : 0x01u));
+    }
+    else
+    {
+        signed_penetration = (short)x_penetration;
+        if (dx < 0)
+            signed_penetration = (short)-signed_penetration;
+        runtime->player_action.x = (short)(
+            runtime->player_action.x - signed_penetration);
+        runtime->player_action.x_numerator = 0;
+        runtime->navigation_contact_bits = (unsigned char)(
+            runtime->navigation_contact_bits |
+            (signed_penetration < 0 ? 0x08u : 0x04u));
+    }
+    ++runtime->navigation_obstacle_responses;
+}
+
+static const AvspRound1TerrainRecordSpec *avsp_round1_terrain_record(
+    const unsigned char selector)
+{
+    switch (selector)
+    {
+    case 0u: return &avsp_round1_first_segment_terrain_records[0];
+    case 8u: return &avsp_round1_first_segment_terrain_records[1];
+    case 24u: return &avsp_round1_first_segment_terrain_records[2];
+    case 56u: return &avsp_round1_first_segment_terrain_records[3];
+    case 96u: return &avsp_round1_first_segment_terrain_records[4];
+    case 100u: return &avsp_round1_first_segment_terrain_records[5];
+    case 164u: return &avsp_round1_first_segment_terrain_records[6];
+    default: return 0;
+    }
+}
+
+static int avsp_round1_terrain_selector(const short world_x,
+                                        const short world_z,
+                                        unsigned char *selector)
+{
+    unsigned short column;
+    unsigned short row;
+    unsigned short index;
+    unsigned char code;
+    if (world_x < AVSP_ROUND1_TERRAIN_GRID_X_MIN ||
+        world_x > AVSP_ROUND1_TERRAIN_GRID_X_MAX ||
+        world_z < AVSP_ROUND1_TERRAIN_GRID_Z_MIN ||
+        world_z > AVSP_ROUND1_TERRAIN_GRID_Z_MAX)
+        return 0;
+    column = (unsigned short)(
+        (world_x - AVSP_ROUND1_TERRAIN_GRID_X_MIN) >> 4);
+    row = (unsigned short)(
+        (world_z - AVSP_ROUND1_TERRAIN_GRID_Z_MIN) >> 4);
+    index = (unsigned short)(row * AVSP_ROUND1_TERRAIN_GRID_WIDTH + column);
+    code = (unsigned char)((
+        avsp_round1_first_segment_terrain_packed[index >> 2] >>
+        ((index & 3u) * 2u)) & 3u);
+    if (code == 0u)
+        *selector = 0u;
+    else if (code == 1u)
+        *selector = 24u;
+    else if (code == 2u)
+        *selector = 56u;
+    else
+        return 0;
+    return 1;
+}
+
+static int avsp_round1_apply_first_segment_terrain(
+    AvspRound1Runtime *runtime)
+{
+    unsigned char retry;
+    unsigned long responses_before = runtime->navigation_terrain_responses;
+    runtime->navigation_contact_bits &= 0xf0u;
+    do
+    {
+        const AvspRound1TerrainRecordSpec *record;
+        unsigned char selector;
+        unsigned short remainder;
+        unsigned short penetration;
+        retry = 0u;
+        if (!avsp_round1_terrain_selector(runtime->player_action.x,
+                                          runtime->player_action.lane,
+                                          &selector))
+            return 0;
+        record = avsp_round1_terrain_record(selector);
+        ++runtime->navigation_terrain_tests;
+        if (record == 0)
+            return 0;
+        retry = record->retry_selector;
+        if (retry == 0xffu)
+            ++runtime->navigation_terrain_retries;
+        if ((signed char)record->branch_selector >= 0 && record->kind != 8u)
+            runtime->navigation_contact_bits = (unsigned char)(
+                runtime->navigation_contact_bits |
+                (1u << (record->branch_selector >> 1)));
+        if (record->kind == 0u)
+            continue;
+        if (record->kind == 2u && record->branch_selector == 2u)
+        {
+            remainder = (unsigned short)(
+                (~(unsigned short)runtime->player_action.lane) & 15u);
+            if ((unsigned short)record->z_parameter > remainder)
+            {
+                penetration = (unsigned short)(record->z_parameter - remainder);
+                runtime->player_action.lane = (short)(
+                    runtime->player_action.lane - (short)penetration);
+                runtime->player_action.lane_numerator = 0;
+                ++runtime->navigation_terrain_responses;
+            }
+            continue;
+        }
+        if (record->kind == 4u && record->branch_selector == 2u)
+        {
+            unsigned short x_remainder;
+            unsigned short candidate;
+            if (record->orientation == 0u)
+                continue;
+            x_remainder = record->orientation == 2u ?
+                (unsigned short)(runtime->player_action.x & 15) :
+                (unsigned short)((~(unsigned short)runtime->player_action.x) & 15u);
+            candidate = (unsigned short)((x_remainder >> record->shift) +
+                record->z_parameter + 1u);
+            remainder = (unsigned short)(
+                (~(unsigned short)runtime->player_action.lane) & 15u);
+            if (candidate > remainder)
+            {
+                penetration = (unsigned short)(candidate - remainder);
+                runtime->player_action.lane = (short)(
+                    runtime->player_action.lane - (short)penetration);
+                runtime->player_action.lane_numerator = 0;
+                ++runtime->navigation_terrain_responses;
+            }
+            continue;
+        }
+        if (record->kind == 6u && record->branch_selector == 4u)
+        {
+            short slope;
+            unsigned short candidate;
+            unsigned short x_remainder;
+            if (record->orientation == 0u)
+                continue;
+            remainder = record->orientation == 1u ?
+                (unsigned short)(runtime->player_action.lane & 15) :
+                (unsigned short)((~(unsigned short)runtime->player_action.lane) & 15u);
+            slope = (short)((short)remainder -
+                            (short)(signed char)record->z_parameter);
+            if (slope < 0)
+            {
+                penetration = (unsigned short)(
+                    (runtime->player_action.x & 15) + 1);
+                runtime->player_action.x = (short)(
+                    runtime->player_action.x - (short)penetration);
+                runtime->player_action.x_numerator = 0;
+                retry = 0xffu;
+                if (record->retry_selector != 0xffu)
+                    ++runtime->navigation_terrain_retries;
+                continue;
+            }
+            candidate = (unsigned short)((unsigned short)slope << record->shift);
+            x_remainder = (unsigned short)(runtime->player_action.x & 15);
+            if (x_remainder >= candidate)
+            {
+                penetration = (unsigned short)(x_remainder - candidate + 1u);
+                runtime->player_action.x = (short)(
+                    runtime->player_action.x - (short)penetration);
+                runtime->player_action.x_numerator = 0;
+                ++runtime->navigation_terrain_responses;
+            }
+            continue;
+        }
+        return 0;
+    } while (retry == 0xffu);
+    if (runtime->navigation_terrain_responses == responses_before)
+        runtime->navigation_contact_bits &= 0xf0u;
+    return 1;
+}
+
+static int avsp_round1_camera_x_speed(const short delta,
+                                      unsigned short *speed)
+{
+    unsigned short magnitude = (unsigned short)avsp_round1_abs_long(delta);
+    unsigned short byte_offset = (unsigned short)(
+        ((magnitude + 7u) & 0x00f8u) >> 2);
+    unsigned short index = (unsigned short)(byte_offset >> 1);
+    if (index >= AVSP_ROUND1_CAMERA_SPEED_COUNT)
+        return 0;
+    *speed = avsp_round1_coffee_shop_camera.x_speed[index] & 0x000fu;
+    return 1;
+}
+
+static int avsp_round1_step_coffee_shop_camera(AvspRound1Runtime *runtime)
+{
+    short delta;
+    unsigned short speed;
+    if (runtime->camera_coffee_phase == 0u &&
+        (unsigned short)runtime->camera_x_position >= 0x0340u)
+    {
+        runtime->camera_x_lower = 0x0340;
+        runtime->camera_x_upper = 0x0340;
+        runtime->camera_guard_snapshot = runtime->camera_guard_counter;
+        runtime->camera_coffee_phase = 2u;
+        ++runtime->camera_locks;
+    }
+    else if (runtime->camera_coffee_phase == 2u)
+    {
+        unsigned short elapsed = (unsigned short)(
+            runtime->camera_guard_counter - runtime->camera_guard_snapshot);
+        int unlock = elapsed >= (unsigned short)(
+            avsp_round1_coffee_shop_camera.guard_threshold_byte << 4);
+        if (!unlock && runtime->camera_guard_countdown != 0u)
+        {
+            --runtime->camera_guard_countdown;
+            unlock = runtime->camera_guard_countdown == 0u;
+        }
+        if (unlock)
+        {
+            runtime->camera_x_upper = 0x03f0;
+            runtime->camera_coffee_phase = 4u;
+            ++runtime->camera_unlocks;
+        }
+    }
+    else if (runtime->camera_coffee_phase == 4u)
+    {
+        runtime->camera_x_lower = runtime->camera_x_position;
+        if (runtime->camera_x_lower >= 0x03f0)
+            runtime->camera_x_lower = 0x03f0;
+    }
+
+    runtime->camera_x_previous = runtime->camera_x_position;
+    runtime->camera_x_target_previous = runtime->camera_x_target;
+    delta = (short)(runtime->player_action.x - runtime->camera_x_target -
+                    avsp_round1_coffee_shop_camera.x_right_offset);
+    if (delta < 0)
+    {
+        delta = (short)(runtime->player_action.x - runtime->camera_x_target -
+                        avsp_round1_coffee_shop_camera.x_left_offset);
+        if (delta > 0)
+            delta = 0;
+    }
+    if (delta != 0)
+    {
+        if (!avsp_round1_camera_x_speed(delta, &speed))
+            return 0;
+        if (delta < 0)
+            runtime->camera_x_target = (short)(runtime->camera_x_target - speed);
+        else
+            runtime->camera_x_target = (short)(runtime->camera_x_target + speed);
+    }
+    if (runtime->camera_x_target > runtime->camera_x_upper)
+        runtime->camera_x_target = runtime->camera_x_upper;
+    if (runtime->camera_x_target < runtime->camera_x_lower)
+        runtime->camera_x_target = runtime->camera_x_lower;
+    runtime->camera_x_position = runtime->camera_x_target;
+
+    runtime->camera_z_target_previous = runtime->camera_z_target;
+    delta = (short)(runtime->player_action.lane - runtime->camera_z_target -
+                    avsp_round1_coffee_shop_camera.z_upper_offset);
+    if (delta < 0)
+    {
+        delta = (short)(runtime->player_action.lane - runtime->camera_z_target -
+                        avsp_round1_coffee_shop_camera.z_lower_offset);
+        if (delta > 0)
+            delta = 0;
+    }
+    if (delta > 1)
+        delta = 1;
+    else if (delta < -1)
+        delta = -1;
+    runtime->camera_z_target = (short)(runtime->camera_z_target + delta);
+    if (runtime->camera_z_target > runtime->camera_z_upper)
+        runtime->camera_z_target = runtime->camera_z_upper;
+    if (runtime->camera_z_target < runtime->camera_z_lower)
+        runtime->camera_z_target = runtime->camera_z_lower;
+    runtime->camera_z_position = runtime->camera_z_target;
+    runtime->navigation_bound_x = runtime->camera_x_position;
+    runtime->navigation_bound_z = runtime->camera_z_position;
+    runtime->camera_scroll2_x = (short)(runtime->camera_x_position - 0x40);
+    ++runtime->camera_updates;
+    return 1;
 }
 
 static unsigned char avsp_round1_source_direction(
@@ -986,12 +1306,42 @@ static int avsp_round1_seed_first_segment_dependencies(
             return 0;
         ++runtime->class09_initializations;
     }
+    {
+        const AvspRound1ObstacleSpec *spec =
+            &avsp_round1_coffee_shop_obstacle;
+        unsigned short slot = (unsigned short)spec->source_slot;
+        unsigned int index;
+        AvspRound1ActorCore *actor;
+        if (slot < pool20->source_base ||
+            ((unsigned int)(slot - pool20->source_base) % pool20->stride) != 0u)
+            return 0;
+        index = (unsigned int)(slot - pool20->source_base) / pool20->stride;
+        if (index >= pool20->capacity)
+            return 0;
+        actor = &pool20->records[index];
+        memset(actor, 0, sizeof(*actor));
+        actor->active = 1u;
+        actor->actor_class = spec->actor_class;
+        actor->type = spec->type;
+        actor->source_slot = spec->source_slot;
+        actor->state = spec->state;
+        actor->substate = spec->substate;
+        actor->x = spec->x;
+        actor->y = spec->y;
+        actor->z = spec->z;
+        actor->facing = spec->facing;
+        actor->animation_record = spec->animation_record;
+        actor->assembly = spec->assembly;
+        actor->hurt_selector = spec->hurt_selector;
+        actor->attack_selector = spec->attack_selector;
+    }
     for (slot_index = 0u; slot_index < pool20->capacity; ++slot_index)
     {
         unsigned short slot = (unsigned short)(pool20->source_base +
                                                slot_index * pool20->stride);
         if (slot == (unsigned short)avsp_round1_class09_initial_actors[0].source_slot ||
-            slot == (unsigned short)avsp_round1_class09_initial_actors[1].source_slot)
+            slot == (unsigned short)avsp_round1_class09_initial_actors[1].source_slot ||
+            slot == (unsigned short)avsp_round1_coffee_shop_obstacle.source_slot)
             continue;
         pool20->free_stack[free_index++] = slot;
     }
@@ -1912,8 +2262,34 @@ int avsp_round1_step_first_entry(AvspRound1Runtime *runtime)
             runtime->player.state = AVSP_ROUND1_PLAYER_CONTROL_STATE;
             runtime->entry.control_enabled = 1u;
             runtime->navigation_bounds_active = 1u;
-            runtime->navigation_bound_x = avsp_round1_first_segment_bounds.bound_x;
-            runtime->navigation_bound_z = avsp_round1_first_segment_bounds.bound_z;
+            runtime->camera_x_previous =
+                avsp_round1_coffee_shop_camera.initial_x;
+            runtime->camera_x_position =
+                avsp_round1_coffee_shop_camera.initial_x;
+            runtime->camera_z_position =
+                avsp_round1_coffee_shop_camera.initial_z;
+            runtime->camera_x_target =
+                avsp_round1_coffee_shop_camera.initial_x;
+            runtime->camera_z_target =
+                avsp_round1_coffee_shop_camera.initial_z;
+            runtime->camera_x_target_previous =
+                avsp_round1_coffee_shop_camera.initial_x;
+            runtime->camera_z_target_previous =
+                avsp_round1_coffee_shop_camera.initial_z;
+            runtime->camera_x_lower =
+                avsp_round1_coffee_shop_camera.initial_x_lower;
+            runtime->camera_x_upper =
+                avsp_round1_coffee_shop_camera.initial_x_upper;
+            runtime->camera_z_upper =
+                avsp_round1_coffee_shop_camera.initial_z_upper;
+            runtime->camera_z_lower =
+                avsp_round1_coffee_shop_camera.initial_z_lower;
+            runtime->camera_guard_countdown =
+                avsp_round1_coffee_shop_camera.guard_countdown;
+            runtime->camera_scroll2_x = (short)(
+                runtime->camera_x_position - 0x40);
+            runtime->navigation_bound_x = runtime->camera_x_position;
+            runtime->navigation_bound_z = runtime->camera_z_position;
             runtime->player_locomotion_action =
                 avsp_round1_player_locomotion.cleanup_action;
             runtime->player.source_action =
@@ -2076,7 +2452,7 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     prior_state = runtime->player_action.state;
     prior_selector = runtime->player_action.selector;
     prior_attack_edges = runtime->player_action.accepted_attack_edges;
-    avsp_pw_step(&runtime->player_action, &input);
+    avsp_pw_step_round1(&runtime->player_action, &input);
     avsp_round1_observe_player_melee(runtime, prior_state, prior_selector,
                                     prior_attack_edges);
     if (was_stopping || weapon_motion_hold)
@@ -2102,6 +2478,13 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
         runtime, weapon_pressed, weapon_edge);
     avsp_round1_tick_player_resource(runtime);
     avsp_round1_apply_player_global_bounds(runtime);
+    avsp_round1_apply_coffee_shop_obstacle(runtime);
+    if (!avsp_round1_apply_first_segment_terrain(runtime) ||
+        !avsp_round1_step_coffee_shop_camera(runtime))
+    {
+        ++runtime->failure_count;
+        return 0;
+    }
     avsp_pw_view(&runtime->player_action, &view);
     if (!weapon_owned && !weapon_return_owned)
         avsp_round1_update_player_locomotion(runtime, applied_direction,
@@ -2271,7 +2654,7 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
         return runtime->pools[0].free_count == 20u &&
             runtime->entry.spawn_count == 0u &&
             runtime->player.state == AVSP_ROUND1_PLAYER_ENTRY_STATE &&
-            runtime->pools[2].free_count == 14u &&
+            runtime->pools[2].free_count == 13u &&
             runtime->pools[3].free_count == 2u &&
             runtime->class09_initializations == 2u;
     if (runtime->pools[0].free_count != 10u ||
@@ -2333,10 +2716,16 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
             runtime->entry.timer_decrements == 164u &&
             runtime->entry.step_index == AVSP_ROUND1_ENTRY_STEP_COUNT &&
             runtime->navigation_bounds_active == 1u &&
-            runtime->navigation_bound_x ==
-                avsp_round1_first_segment_bounds.bound_x &&
-            runtime->navigation_bound_z ==
-                avsp_round1_first_segment_bounds.bound_z &&
+            runtime->navigation_bound_x == runtime->camera_x_position &&
+            runtime->navigation_bound_z == runtime->camera_z_position &&
+            runtime->camera_x_position == runtime->camera_x_target &&
+            runtime->camera_z_position == runtime->camera_z_target &&
+            runtime->camera_scroll2_x ==
+                (short)(runtime->camera_x_position - 0x40) &&
+            runtime->camera_x_lower <= runtime->camera_x_position &&
+            runtime->camera_x_position <= runtime->camera_x_upper &&
+            runtime->camera_z_lower <= runtime->camera_z_position &&
+            runtime->camera_z_position <= runtime->camera_z_upper &&
             runtime->player.state == AVSP_ROUND1_PLAYER_CONTROL_STATE &&
             runtime->player_action.health == runtime->player.health &&
             runtime->player_action.x == runtime->player.x &&

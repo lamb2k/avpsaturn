@@ -1,11 +1,11 @@
 {
   "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
-  "checkpoint": "native-round1-class1f-initial-transitions-projectile-renderer-integrity",
-  "status": "PASS_ENTRY_PLAYER_SCHEDULER_PRESENTATION_STATE_CONTEXT_CLASS1F_INITIAL_TRANSITIONS_GLOBAL_BOUNDS_NEUTRAL_STOP_MELEE_BUTTON1_PROJECTILE_IMPACT_COLLISION_RENDERER_INTEGRITY",
+  "checkpoint": "native-round1-coffee-shop-navigation-terrain-camera",
+  "status": "PASS_FIRST_SEGMENT_ENTRY_PLAYER_SCHEDULER_CLASS1F_NEUTRAL_MELEE_BUTTON1_PROJECTILE_NAVIGATION_TERRAIN_CAMERA",
   "implementation_base_commit": "52714b420d3ca1ca0437d66de61735fa1a2ba36d",
   "diagnostic_correction_commit": "4fbc919235f61d962daf342efbfb4cd8f743ab60",
   "implementation_source": {
-    "spec02_sha256": "5700f7c21d7820f0272f788b8177227de9a8047025817771efeed12cb421fe47",
+    "spec02_sha256": "bdef78c4006354510998a6d5428960a525180d33d9f9122bb54a3e40d25202d6",
     "raw_trace_or_disassembly_consumed": false,
     "authored_fallback_count": 0
   },
@@ -23,7 +23,7 @@
     "actor_pools": [
       {"record_type": 12, "capacity": 20, "free": 10, "stride": 192, "source_base": 38272, "last_slot": 41920},
       {"record_type": 16, "capacity": 20, "stride": 128, "source_base": 42112, "last_slot": 44544},
-      {"record_type": 20, "capacity": 16, "stride": 128, "source_base": 44672, "last_slot": 46592},
+      {"record_type": 20, "capacity": 16, "free": 13, "stride": 128, "source_base": 44672, "last_slot": 46592},
       {"record_type": 24, "capacity": 32, "stride": 128, "source_base": 46720, "last_slot": 50688}
     ],
     "first_entry": {
@@ -210,10 +210,10 @@
     },
     "first_segment_global_bounds": {
       "route_state_guard": 4,
-      "bound_x": 720,
+      "bound_x": 801,
       "bound_z": 256,
-      "x_min": 752,
-      "x_max": 1072,
+      "x_min": 833,
+      "x_max": 1153,
       "z_min": 272,
       "z_max": 400,
       "source_formula": ["bound_x + 0x20", "bound_x + 0x160", "bound_z + 0x10", "bound_z + 0x90"],
@@ -222,9 +222,14 @@
       "applications": 468,
       "clamps": 0,
       "accepted_encounter_navigation_composed_first": true,
-      "terrain_records_implemented": false,
-      "coffee_shop_obstacle_response_implemented": false,
-      "camera_lock_unlock_implemented": false
+      "terrain_records_implemented": true,
+      "coffee_shop_obstacle_response_implemented": true,
+      "camera_lock_unlock_implemented": true,
+      "obstacle": {"slot": "0xffb380", "class": "0x0a", "type": 20, "attack_box_half": [32, 127, 6], "player_geometry": "point probe", "minimum_penetration_axis_guard": "unsigned z penetration < x penetration; equal resolves x"},
+      "terrain": {"cell_address_entry": "0x0b2672", "record_base": "0x0b20c6", "record_selectors": [0, 8, 24, 56, 96, 100, 164], "handlers": [0, 2, 4, 6], "bounded_grid": [46, 9], "packed_bytes": 104, "retry_bound": true},
+      "camera": {"x_position": 801, "x_target": 801, "x_lower": 640, "x_upper": 832, "scroll2_x": 737, "phase": 0, "guard_countdown": 1200, "fixed_frame_authority": false},
+      "native_implemented": true,
+      "differential_pass": true
     },
     "renderer_integrity": {
       "root_cause": "Jo Engine sprites.o and 3d.o retained 128-entry JO_MAX_SPRITE arrays while the application linked against a 255-entry configuration, overlapping __jo_sprite_pic and __jo_sprite_def and corrupting live VDP1 texture definitions",
@@ -246,30 +251,34 @@
   },
   "checks": {
     "host_differential": "PASS",
-    "real_mutations_rejected": 82,
-    "target_wiring_suppressions_rejected": 61,
+    "real_mutations_rejected": 93,
+    "target_wiring_suppressions_rejected": 67,
     "target_live_encounter": "PASS",
     "target_live_encounter_bench": "PASS",
     "spec02_entry_correction_revalidated": "PASS",
     "paired_emulator_regression": "PASS",
-    "paired_emulator_iso_sha256": "059b7b3422eedd19f47761d01d88e0a6e082db85ad9eeb6142928b165e77ebf5",
+    "paired_emulator_iso_sha256": "f40d51362371d59866ea4283704880b56272e446d91b1db7b8acbdaa7e02fbf2",
     "paired_vdp1_texture_integrity": "PASS: two byte-identical cold runs each compare all 208 live tile-cache mappings to TILES.BIN with zero mismatches; cache SHA-256 b6493d7a2e7e9668377b52f9f1812ef12aedefde6aa2653dbc74a933c68f7fa9; sprite arrays are 2040 bytes apart; high-water 225/255",
     "paired_native_player_ledgers": "PASS: 471 byte-identical synchronized samples; frame 470 is x=1031/z=320/facing=1/source_action=514/controller_updates=301; neutral stop is 2 entries/1 completion/10 suppressed-motion ticks because the second stop is interrupted by a melee edge",
     "paired_native_melee_ledgers": "PASS: four source-owned Button2 edges complete selectors 1..4 in order with exact presentation mask 15; held Button2 does not chain, no RNG is consumed, and no fallback or unsupported action fires",
     "paired_native_button1_ledgers": "PASS: two byte-identical release-live target runs bind two exact Button1 entries, 12 signed attempts, four-tick cadence, 12 successful type-4/class-5 allocations, 12 resource debits, 70 player presentation bindings, one exact type-24/class-0x10 empty-effect lifecycle, 49 class-0x05 projectile-render frames, 40 class-0x3a impact-render frames, three current-state collision writes, three source-table damage writes, resource 32/recharge 6, zero fallback/decode failures/gameplay PCM",
-    "paired_native_scheduler_ledgers": "PASS: final readback has 468 scheduler frames, 4928 ordered dispatches including class-0x05/class-0x10/class-0x3a lifecycles, 10 active type-12/class-0x1f actors, and order hash 0x836e161c",
+    "paired_native_scheduler_ledgers": "PASS: final readback has 638 scheduler frames, 9126 ordered dispatches including the static Coffee Shop type-20 obstacle, a 14-entry trace, and order hash 0xf3db3fa1",
     "paired_native_presentation_ledgers": "PASS: final readback has 4680 class-0x1f handler dispatches and 4680 exact animation-to-assembly/hurt/attack bindings",
     "paired_native_state_context_ledgers": "PASS: final readback has 4680 exact class-0x1f current-state/substate bindings to source dispatch entry 0x060532",
     "paired_native_class1f_initial_transition_ledgers": "PASS: two byte-identical runs bind ten source-slot initializations, ten ordered RNG calls, ten completed 0x1000/0x1200/0x1400 transitions, two class-0x4e effect allocations and releases, two refused allocations, one class-0x44 guard clear, two command identities ending at 0x004d, and 158 dependency-owned class-0x09 RNG calls with zero fallback or scheduler failure",
-    "paired_native_global_bounds_ledgers": "PASS: final readback binds source route-4 bounds x=720/z=256 and 468 applications; the accepted encounter resolver remains composed ahead of the global rectangle",
+    "paired_native_global_bounds_ledgers": "PASS: final readback binds dynamic source route-4 bounds x=801/z=256 and 468 applications; obstacle, terrain, and camera execute in exact source scheduler order with no fallback",
+    "paired_native_navigation_camera_ledgers": "PASS: two byte-identical runs bind pool-20 free 13, camera position/target/bound x 801, scroll2 737, phase 0/countdown 1200, zero route-witness obstacle or terrain response, and focused host witnesses cover obstacle, equal-axis, retry, lock, and unlock branches",
     "target_readback_binding": "PASS",
     "round1_title_objects_loaded": 2,
     "round1_title_vdp1_commands_peak": 2,
     "rendered_regression_inspection": "PASS: route-owned title clear, coherent post-unlock street, responsive player movement and camera, intact VDP2 planes/HUD/palette/priority",
     "fast": "PASS",
     "oracle": "PASS",
-    "target_bss_end": "0x060bfcb0",
-    "target_bss_headroom_bytes": 848
+    "target_bss_end": "0x060bbe60",
+    "target_bss_headroom_bytes": 16800,
+    "clean_debug_target_bss_end": "0x060be7d0",
+    "clean_debug_target_bss_headroom_bytes": 6192,
+    "filesystem_staging_sectors": 24
   },
   "rendered_boundary": {
     "new_round1_runtime_presented": true,
@@ -363,6 +372,13 @@
       "class1f_tracking_changed": false,
       "audio_regression_observed": false
     },
+    "coffee_shop_navigation_camera_visual_inspection": {
+      "capture_method": "direct Computer Use inspection of the exact paired pinned-Yaba release image",
+      "paused_live_frames": [31, 180, 205],
+      "inspection": "PASS: the refreshed f40d5136 release scanout at frame 180 and prior boundary frames has P1-only HUD, coherent Predator, class-0x1F actors and projectile population, clean Coffee Shop NBG0/NBG1 planes at both visible edges, and unchanged palette and priority; the lower WARRIOR strip is part of the accepted P1 HUDTOP texture, not the absent right-side Maj. Schaefer P2 panel; camera-relative composition remains coherent with the source scroll bridge",
+      "stale_screenshot_rejection": "The run-1 JPG and Button1 PNG files dated before this navigation build still show the old active-P2 shell and are not current evidence; current state telemetry and current direct scanout both show P2 absent.",
+      "audio_inspection": "PASS: paired execution emits zero orphan gameplay PCM and preserves the single startup CDDA owner; command identities remain semantic-name unknown where the accepted contract does not bind a payload"
+    },
     "objective_discrepancy": {
       "observed": "The normal interactive profile stopped before actor rendering when native entry changed route state 2 to 4.",
       "cause": "The retained encounter reset to frame zero and requested a duplicate CDDA START while Track 2 ownership was already active.",
@@ -370,13 +386,12 @@
       "status": "CORRECTED"
     },
     "class1f_initial_transition_checkpoint": "SOURCE-CLOSED/SPEC-executable/native-implemented/differential-pass for the initial 0x0200:1000/1200/1400 bodies, their 0x1402/1404/1406/1408 airborne substates, source animation records/selectors, signed 16.16 movement, facing, timers, collision selectors, ten ordered RNG calls, class-0x09/class-0x44/class-0x4e dependencies, exact command identities, and return to 0x0200:0000.",
-    "navigation_blocker": "The accepted SPEC-02 fixture provides the exact global-bound formula but gives the Coffee Shop obstacle only a source block identity/minimum-penetration label without source box geometry or per-axis resolution arithmetic; terrain records provide bytes and writer identities without the record interpreter; camera runs provide observed endpoints and writer identity without the target-update arithmetic. Implementing any of those bodies now would require raw-disassembly use or a plausible guess.",
-    "navigation_unblock_condition": "A corrective SPEC-02 fixture derived from accepted Oracle evidence must bind Coffee Shop player/obstacle box geometry and minimum-penetration branch arithmetic, the six terrain-record field semantics and interpreter transitions, and camera target/position update arithmetic and route guards.",
+    "navigation_checkpoint": "SOURCE-CLOSED/SPEC-executable/native-implemented/differential-pass for Coffee Shop obstacle geometry/minimum penetration, all required six-field terrain records and kind-0/2/4/6 retry arithmetic, camera target/speed/phase guards, and world-to-plane ordering. The 46x9 bounded selector projection is losslessly packed into 104 source-derived bytes.",
     "jump_blocker": "The accepted SPEC-02 normal-jump fixture identifies vector table 0x0243d2 and route witnesses but omits the numeric vector entries, initial signed 16.16 velocity/acceleration values, input/facing selector mapping, and branch order required for a native translation.",
     "jump_unblock_condition": "A corrective accepted SPEC-02 fixture must provide the exact numeric source-vector entries, selector mapping, branch order, and signed fixed-point initialization without requiring raw disassembly or a fitted witness.",
     "projectile_lifecycle_checkpoint": "SOURCE-CLOSED/SPEC-executable/native-implemented/differential-pass for class-0x05 states 0/2/4/6, type-24/class-0x3a states 0/2/4, current-state collision writer attack table 0x03136a, source-table damage, presentation, and pool release. Audio command identities 0x007e/0x0148 remain semantic-name unknown telemetry with no inferred Saturn PCM mapping.",
     "projectile_lifecycle_build_guard": "PASS: main.o and round1.o explicitly depend on the SPEC-bound headers, and the focused differential asserts the complete accepted contract hash is present in round1.h.",
-    "exact_next_body": "Keep REIMPLEMENT-13 active. Close the Coffee Shop obstacle, six-field terrain interpreter, and camera target/position arithmetic blocker by amending only the existing SPEC-02 fixture from accepted Oracle evidence, with the smallest bounded Oracle follow-up only for genuinely absent source fields. Then return to the preserved Button3 vector/branch blocker. Do not leave the first segment."
+    "exact_next_body": "Keep REIMPLEMENT-13 active. Close the preserved Button3 jump blocker by binding table 0x0243d2 numeric signed 16.16 vectors, input/facing selector mapping, branch order, landing/interruption guards, presentation, collision selectors, and mutations in the existing SPEC-02 fixture. Use the smallest bounded Oracle follow-up only if accepted evidence genuinely lacks an exact required field. Do not leave the first segment."
   },
   "preserved": {
     "user09": "CHANGES_REQUESTED",
