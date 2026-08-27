@@ -10715,6 +10715,394 @@
     "orphan_write_rows": 0,
     "required_dispatched_pairs": 12
   },
+  "first_segment_dependencies": {
+    "class_0x09_type20_rng_owner": {
+      "animation_sequences": [
+        {
+          "records": [
+            {
+              "animation_record": "0x0006dbda",
+              "assembly": "0x0006dd26",
+              "attack_selector_u8": 1,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "record_sha256": "837ff7efe8a2376a9b8e3079003f78cc8b101ee46ca6afad7180d87b18b382d0",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0006dbea",
+              "assembly": "0x0006dd26",
+              "attack_selector_u8": 1,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 1,
+              "record_sha256": "25483d07c54a0b5015479dcf5a6f35eecdc57b9f7fdfe300a11600d2a1ea7890",
+              "timer_u16": 8
+            }
+          ],
+          "selector_u8": 0,
+          "terminal_rule": "negative branch is consumed by state 0x0200 before generic animation update"
+        },
+        {
+          "records": [
+            {
+              "animation_record": "0x0006dbfe",
+              "assembly": "0x0006dd44",
+              "attack_selector_u8": 1,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "record_sha256": "5a65f54df1cdfe61cc8c940a60449ad205706bd8a8418d94aebe3269599b0789",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0006dc0e",
+              "assembly": "0x0006dd44",
+              "attack_selector_u8": 1,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 1,
+              "record_sha256": "76611f37a3afec750f60a39663f176bf3346ab2c1ab47e57463dead8c0bfac45",
+              "timer_u16": 8
+            }
+          ],
+          "selector_u8": 7,
+          "terminal_rule": "negative branch is consumed by state 0x0200 before generic animation update"
+        },
+        {
+          "records": [
+            {
+              "animation_record": "0x0006dc22",
+              "assembly": "0x0006dd68",
+              "attack_selector_u8": 1,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "record_sha256": "02ee1be84f864973f511e633f0fc6218854e5ba5289796dd9b591fb7922f82a2",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0006dc32",
+              "assembly": "0x0006dd68",
+              "attack_selector_u8": 1,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 1,
+              "record_sha256": "b7f5b62a1be6b631cfff69bf721140688b445c6bd460520c2b42c9699c1cafe6",
+              "timer_u16": 8
+            }
+          ],
+          "selector_u8": 8,
+          "terminal_rule": "negative branch is consumed by state 0x0200 before generic animation update"
+        },
+        {
+          "records": [
+            {
+              "animation_record": "0x0006dc46",
+              "assembly": "0x0006dd8c",
+              "attack_selector_u8": 1,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "record_sha256": "499423a9fb16df1db70fe94867fe0b05e5eb3b359e70051ed9f0f6a69d3d46d0",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0006dc56",
+              "assembly": "0x0006dd8c",
+              "attack_selector_u8": 1,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 1,
+              "record_sha256": "93c820e656b83a5a270a86a540a96221c6668e8cff34a0c6411e440b1b6ee3fb",
+              "timer_u16": 8
+            }
+          ],
+          "selector_u8": 9,
+          "terminal_rule": "negative branch is consumed by state 0x0200 before generic animation update"
+        },
+        {
+          "records": [
+            {
+              "animation_record": "0x0006dc6a",
+              "assembly": "0x0006ddb0",
+              "attack_selector_u8": 1,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "record_sha256": "d5c7a9f290540c6edbd66bef319a9dd76d7b9021fa44283f8a63581289120fbd",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0006dc7a",
+              "assembly": "0x0006ddb0",
+              "attack_selector_u8": 1,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 1,
+              "record_sha256": "36d15c17b9f10308bb871b22fbb7e21c98a2c1d63ceaf2566d59615a94bd0801",
+              "timer_u16": 8
+            }
+          ],
+          "selector_u8": 10,
+          "terminal_rule": "negative branch is consumed by state 0x0200 before generic animation update"
+        }
+      ],
+      "dispatch": "0x06d926",
+      "first_segment_calls_before_class4e": 44,
+      "fixed_frame_substitute_forbidden": true,
+      "movement_result": "x/y/z unchanged in the accepted first-segment window",
+      "rng_call_pc": "0x06d974",
+      "rng_entry": "0x017c5e",
+      "rng_mask_u16": "0x000e",
+      "scheduler_order": "type-20 ascending source slot: 0xffb480 then 0xffb500",
+      "seed_after_first_call": "0x44fb",
+      "seed_after_last_call": "0x99e8",
+      "selector_table_address": "0x06d9a4",
+      "selector_table_u16": [
+        0,
+        7,
+        8,
+        9,
+        10,
+        8,
+        9,
+        10
+      ],
+      "source_slots": [
+        {
+          "animation_record": "0x0006dbda",
+          "facing_u8": 0,
+          "source_slot": "0x00ffb480",
+          "state_u16": 512,
+          "substate_u16": 0,
+          "x_s16": 992,
+          "y_s16": 240,
+          "z_s16": 240
+        },
+        {
+          "animation_record": "0x0006dbda",
+          "facing_u8": 0,
+          "source_slot": "0x00ffb500",
+          "state_u16": 512,
+          "substate_u16": 0,
+          "x_s16": 940,
+          "y_s16": 240,
+          "z_s16": 240
+        }
+      ],
+      "source_window": {
+        "first": "0x06d966",
+        "last_exclusive": "0x06d97e",
+        "sha256": "774d77197bc0f1373e512623c2e1b3856c8da4b236b20675ca2d59974decbfd8"
+      },
+      "state": "0x0200",
+      "state_guard": "signed animation branch at actor+0x24 is negative"
+    },
+    "class_0x44_type24_command_guard_owner": {
+      "animation_records": [
+        {
+          "animation_record": "0x0008daf2",
+          "assembly": "0x0008db2e",
+          "attack_selector_u8": 0,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 0,
+          "record_sha256": "32667001324946ef1d7749bcb1742c4258ed25dd0b81b2597beb2e7a448216d1",
+          "timer_u16": 4095
+        },
+        {
+          "animation_record": "0x0008db1a",
+          "assembly": "0x0008db6a",
+          "attack_selector_u8": 0,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 0,
+          "record_sha256": "931ead28c2c2ea4e10713f3b2d19c642af4775d5a405f2136da92c47a0c8e4bc",
+          "timer_u16": 4095
+        }
+      ],
+      "collision_or_damage_writes": 0,
+      "dispatch": "0x08d9a4",
+      "first_guard_set_frame": 2249,
+      "fixed_frame_guard_reset_forbidden": true,
+      "guard_clear_frame": 2250,
+      "initial_position_s16": [
+        792,
+        296,
+        296
+      ],
+      "initial_state_u16": 512,
+      "rng_calls": 0,
+      "second_player_origin_command_frame": 2255,
+      "source_slot": "0x00ffc580",
+      "source_window": {
+        "first": "0x08d99c",
+        "last_exclusive": "0x08d9b4",
+        "sha256": "b8f7d54a912828575667b508e795e570acc398022d7d22504035a64ddab90753"
+      },
+      "state0_presentation_actor": {
+        "coordinate_mode_u8": 0,
+        "facing_u8": 0,
+        "object_or_u16": "0x8000",
+        "object_or_write_frame": 2072,
+        "object_or_write_mask": "0x0000ffff",
+        "object_or_writer_pc": "0x08d9d8",
+        "palette_u8": 0,
+        "zero_fields_source": "accepted zero-initialized type-24 record; generic allocation writes preserve coordinate mode, palette and facing at zero"
+      },
+      "state_0x0200_guard": "global 0xff9a10_u8 nonzero advances state to 0x0400",
+      "state_0x0400_substate_0_writes": [
+        "global 0xff9a10_u8 = 0",
+        "actor substate += 2",
+        "actor+0x2a_u8 = 3"
+      ],
+      "state_0x0402_guard": "predecrement actor+0x2a_u8; zero advances substate to 0x0404 and binds second presentation record",
+      "state_0x0404_result": "holds source presentation in the accepted first-segment window; does not clear the second command guard",
+      "state_sequence_u16": [
+        512,
+        1024,
+        1026,
+        1028
+      ]
+    },
+    "class_0x4e_type24_variant4_effect": {
+      "allocation_pop_order": [
+        "0x00ffc500",
+        "0x00ffc480"
+      ],
+      "allocation_routine": "0x0177da",
+      "animation_records": [
+        {
+          "animation_record": "0x000929b0",
+          "assembly": "0x00092c58",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b8008ed87cb839e9d647cd0b7291a227baaa4a5cd620a7c6f515aaae7c36f4c6",
+          "timer_u16": 2
+        },
+        {
+          "animation_record": "0x000929c0",
+          "assembly": "0x00092c66",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "123ae1f7c5c12e04ab4bcbff8523f8b173b185394f8e75eb7471fe1444f24c8b",
+          "timer_u16": 2
+        },
+        {
+          "animation_record": "0x000929d0",
+          "assembly": "0x00092c74",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "58cb533163b1e83396660cc244c90f1be61b549703b40deadd2e29f22df2f58c",
+          "timer_u16": 2
+        },
+        {
+          "animation_record": "0x000929e0",
+          "assembly": "0x00092c82",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "215b3ade40c9f197e7e1b482f5a98d2051f75402f283fbf414d76ebbfa0a1185",
+          "timer_u16": 2
+        },
+        {
+          "animation_record": "0x000929f0",
+          "assembly": "0x00092c90",
+          "attack_selector_u8": 0,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 0,
+          "record_sha256": "806a46a2184db27ec08dda67d55dbda7f43a1db24d3f7f038e48d74b6b029072",
+          "timer_u16": 4095
+        }
+      ],
+      "available_source_slots": [
+        "0x00ffc480",
+        "0x00ffc500"
+      ],
+      "collision_or_damage_writes": 0,
+      "dispatch": "0x0927f6",
+      "fixed_frame_release_forbidden": true,
+      "initial_positions_before_rng": [
+        {
+          "source_slot": "0x00ffc500",
+          "x_s16": 816,
+          "y_s16": 384,
+          "z_s16": 296
+        },
+        {
+          "source_slot": "0x00ffc480",
+          "x_s16": 848,
+          "y_s16": 424,
+          "z_s16": 296
+        }
+      ],
+      "jitter_table_s16": [
+        [
+          0,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          4,
+          -4
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          -4,
+          0
+        ],
+        [
+          -4,
+          -4
+        ],
+        [
+          -4,
+          4
+        ],
+        [
+          -8,
+          8
+        ]
+      ],
+      "later_same-window_allocation_attempts": "fail while both source free-list entries are active",
+      "release_routine": "0x0177f0",
+      "rng_call_pc": "0x09282a",
+      "rng_entry": "0x017c5e",
+      "rng_mask_u16": "0x001c",
+      "scheduler_order": [
+        "0x00ffc480",
+        "0x00ffc500"
+      ],
+      "seed_after_by_scheduler_slot": [
+        {
+          "seed": "0xcdb5",
+          "source_slot": "0x00ffc480",
+          "table_index": 28
+        },
+        {
+          "seed": "0x691e",
+          "source_slot": "0x00ffc500",
+          "table_index": 24
+        }
+      ],
+      "source_window": {
+        "first": "0x0927ee",
+        "last_exclusive": "0x092806",
+        "sha256": "08bcb0eb6aa28184b5c91dba6813cca524e34d2b70143751d26edfd1d948efa2"
+      },
+      "state0_writes": {
+        "coordinate_mode_u8": 2,
+        "object_or_u16": "0x8000"
+      },
+      "state_sequence_u16": [
+        0,
+        512,
+        1024
+      ],
+      "terminal_guard": "signed actor+0x24 becomes negative, then state advances to 0x0400 and the next scheduler visit releases the record",
+      "variant_u8": 4
+    },
+    "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+  },
   "navigation_body_geometry_contract": {
     "classification": "SOURCE_CLOSED",
     "evidence": "data/oracle11_round1_navigation.json"

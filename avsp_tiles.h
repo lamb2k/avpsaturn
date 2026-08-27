@@ -72,4 +72,13 @@ typedef struct
 int avsp_entry_tiles(unsigned short y, unsigned short code,
                      unsigned short attr, AvspEntryTile *out, int max_out);
 
+/* Compose one expanded CPS2 object entry into a single VDP1 4bpp texture.
+ * The result preserves the source tile order and both per-tile flip axes.
+ * Returns the byte count written, -1 for a missing source tile, or 0 when
+ * the destination is too small/invalid. */
+long avsp_compose_entry_texture(const AvspTileArchive *archive,
+                                unsigned short y, unsigned short code,
+                                unsigned short attr, unsigned char *out,
+                                unsigned long out_bytes);
+
 #endif

@@ -32,6 +32,19 @@ assert damage["baseline"]["damage"] == 24
 assert damage["mutation"]["damage"] == 31
 assert damage["suppression"]["mutated_writes"] == 4
 assert weapon["empty_effect_variant1_contract"]["spec_executable"] is True
+class1f = next(item for item in fixtures["authority_data"]["enemies"]["archetypes"]
+               if item["class"] == "0x1f")
+initial = class1f["initial_transition_contract"]
+assert initial["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+assert [row["entry_delay_u8"] for row in initial["actors"][-3:]] == [9, 3, 16]
+assert [row["coordinate_mode_u8"] for row in initial["actors"]] == [1] * 10
+assert [row["palette_u8"] for row in initial["actors"]] == [16, 17, 17, 18, 17, 16, 18, 17, 19, 19]
+assert [row["object_or_u16"] for row in initial["actors"]] == ["0x8000"] * 10
+assert [row["selector_u8"] for row in initial["animation_sequences"]] == [0, 1, 52, 60, 62, 76]
+dependencies = fixtures["authority_data"]["auxiliary"]["first_segment_dependencies"]
+assert dependencies["class_0x09_type20_rng_owner"]["first_segment_calls_before_class4e"] == 44
+assert dependencies["class_0x4e_type24_variant4_effect"]["allocation_pop_order"] == [
+    "0x00ffc500", "0x00ffc480"]
 rebuilt_contract, rebuilt_fixtures = spec02.build_artifacts()
 assert spec02.canonical(rebuilt_contract) == spec02.OUT.read_bytes()
 assert spec02.canonical(rebuilt_fixtures) == spec02.FIXTURES.read_bytes()
@@ -57,6 +70,12 @@ f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_re
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["projectile_lifecycle_contract"]["current_state_interfaces"]["collision"]["damage"]["mutation"]["damage"] = 24; mutations.append((contract, f, "projectile damage lookup mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["projectile_lifecycle_contract"]["initialization"]["presentation_actor_fields"]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "projectile presentation object priority mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["projectile_lifecycle_contract"]["impact_actor_contract"]["initialization"]["presentation_actor_fields"]["palette_u8"] = 1; mutations.append((contract, f, "impact presentation palette mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["phase_0x1400"]["substates"][1]["writes"]["x_velocity_s32_16_16"] = 0x20000; mutations.append((contract, f, "class1f transition motion mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["actors"][0]["coordinate_mode_u8"] = 0; mutations.append((contract, f, "class1f presentation mode mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["actors"][0]["palette_u8"] = 15; mutations.append((contract, f, "class1f presentation palette mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["actors"][0]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "class1f presentation priority mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x09_type20_rng_owner"]["selector_table_u16"][0] = 1; mutations.append((contract, f, "class09 RNG selector mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["allocation_pop_order"].reverse(); mutations.append((contract, f, "class4e allocation-order mutation"))
 m = copy.deepcopy(contract); m["protected_boundaries"]["physical_saturn"] = "PASS"; mutations.append((m, fixtures, "hardware overclaim"))
 m = copy.deepcopy(contract); m["next_card"] = "SALVAGE-08-FRONTEND"; mutations.append((m, fixtures, "frontend bypass"))
 for args in mutations:

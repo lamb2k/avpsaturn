@@ -588,6 +588,28 @@ try {
             throw 'Could not locate __bend in the GAME.BIN map.'
         }
         $gameBssEnd = [Convert]::ToUInt32($gameBssMatch.Groups[1].Value, 16)
+        $spritePicMatch = [regex]::Match(
+            $gameMapText, '0x([0-9a-fA-F]{8})\s+__jo_sprite_pic\s*$',
+            [System.Text.RegularExpressions.RegexOptions]::Multiline)
+        $spriteDefMatch = [regex]::Match(
+            $gameMapText, '0x([0-9a-fA-F]{8})\s+__jo_sprite_def\s*$',
+            [System.Text.RegularExpressions.RegexOptions]::Multiline)
+        if (-not $spritePicMatch.Success -or -not $spriteDefMatch.Success) {
+            throw 'Could not locate Jo sprite array symbols in the GAME.BIN map.'
+        }
+        $spritePicAddress = [Convert]::ToUInt32(
+            $spritePicMatch.Groups[1].Value, 16)
+        $spriteDefAddress = [Convert]::ToUInt32(
+            $spriteDefMatch.Groups[1].Value, 16)
+        $spriteArrayDistance = [Math]::Abs(
+            [Int64]$spriteDefAddress - [Int64]$spritePicAddress)
+        $requiredSpriteArrayBytes = 255 * 8
+        if ($spriteArrayDistance -lt $requiredSpriteArrayBytes) {
+            throw ('Jo sprite arrays are only {0} bytes apart; JO_MAX_SPRITE=255 ' +
+                'requires at least {1}. Rebuild sprites.o with the active ' +
+                'project configuration before linking.') -f `
+                $spriteArrayDistance, $requiredSpriteArrayBytes
+        }
         # Hard bound: JO_WORK_RAM_SORT_LIST / JO_WORK_RAM_USER_PROGRAM_AND_DATA_END.
         # Anything at or past 0x060c0000 is outside Jo's user work-RAM area and
         # inside SGL's sort-list region. Jo's own jo_sprite_init() bounds-checks

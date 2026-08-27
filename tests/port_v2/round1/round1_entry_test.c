@@ -35,6 +35,8 @@ int main(void)
                     runtime.failure_count);
             return 3;
         }
+        if (runtime.entry.spawned && !avsp_round1_step_scheduler(&runtime))
+            return 3;
         ++calls;
         if (runtime.route_state == 4 && !runtime.entry.terminal_seen)
             return 4;
@@ -50,8 +52,48 @@ int main(void)
         runtime.navigation_bounds_active != 1u ||
         runtime.navigation_bound_x != 720 || runtime.navigation_bound_z != 256 ||
         runtime.pools[0].free_count != 10u ||
+        runtime.pools[2].free_count != 14u ||
+        runtime.pools[3].free_count != 2u ||
+        runtime.scheduler_frames != 171u ||
+        runtime.scheduler_dispatches != 2223u ||
+        runtime.class1f_initializations != 10u ||
+        runtime.class1f_initial_rng_calls != 10u ||
+        runtime.class09_initializations != 2u ||
+        runtime.class09_rng_calls != 42u ||
+        runtime.rng_seed != 0x111cu ||
         !avsp_round1_entry_valid(&runtime))
         return 5;
+    if (runtime.pools[0].records[10].coordinate_mode != 1u ||
+        runtime.pools[0].records[10].palette != 16u ||
+        runtime.pools[0].records[10].object_or != 0x8000u ||
+        runtime.pools[0].records[11].coordinate_mode != 1u ||
+        runtime.pools[0].records[11].palette != 17u ||
+        runtime.pools[0].records[11].object_or != 0x8000u ||
+        runtime.pools[0].records[12].coordinate_mode != 1u ||
+        runtime.pools[0].records[12].palette != 17u ||
+        runtime.pools[0].records[12].object_or != 0x8000u ||
+        runtime.pools[0].records[13].coordinate_mode != 1u ||
+        runtime.pools[0].records[13].palette != 18u ||
+        runtime.pools[0].records[13].object_or != 0x8000u ||
+        runtime.pools[0].records[14].coordinate_mode != 1u ||
+        runtime.pools[0].records[14].palette != 17u ||
+        runtime.pools[0].records[14].object_or != 0x8000u ||
+        runtime.pools[0].records[15].coordinate_mode != 1u ||
+        runtime.pools[0].records[15].palette != 16u ||
+        runtime.pools[0].records[15].object_or != 0x8000u ||
+        runtime.pools[0].records[16].coordinate_mode != 1u ||
+        runtime.pools[0].records[16].palette != 18u ||
+        runtime.pools[0].records[16].object_or != 0x8000u ||
+        runtime.pools[0].records[17].coordinate_mode != 1u ||
+        runtime.pools[0].records[17].palette != 17u ||
+        runtime.pools[0].records[17].object_or != 0x8000u ||
+        runtime.pools[0].records[18].coordinate_mode != 1u ||
+        runtime.pools[0].records[18].palette != 19u ||
+        runtime.pools[0].records[18].object_or != 0x8000u ||
+        runtime.pools[0].records[19].coordinate_mode != 1u ||
+        runtime.pools[0].records[19].palette != 19u ||
+        runtime.pools[0].records[19].object_or != 0x8000u)
+        return 54;
     if (!avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
         !avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
         !avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
@@ -63,16 +105,16 @@ int main(void)
         !avsp_round1_entry_valid(&runtime))
         return 6;
     if (!avsp_round1_step_scheduler(&runtime) ||
-        runtime.scheduler_trace_count != 10u ||
-        runtime.scheduler_frames != 1u ||
-        runtime.scheduler_dispatches != 10u ||
-        runtime.actor_handler_dispatches != 10u ||
-        runtime.presentation_bindings != 10u ||
-        runtime.state_context_bindings != 10u ||
-        runtime.pools[0].records[10].assembly != 0x0012F5DEUL ||
+        runtime.scheduler_trace_count != 13u ||
+        runtime.scheduler_frames != 172u ||
+        runtime.scheduler_dispatches != 2236u ||
+        runtime.actor_handler_dispatches != 1720u ||
+        runtime.presentation_bindings != 1720u ||
+        runtime.state_context_bindings != 1720u ||
+        runtime.pools[0].records[10].assembly != 0x0012FA0CUL ||
         runtime.pools[0].records[10].hurt_selector != 2u ||
         runtime.pools[0].records[10].attack_selector != 0u ||
-        runtime.pools[0].records[16].assembly != 0x0012F994UL ||
+        runtime.pools[0].records[16].assembly != 0x0012F9BCUL ||
         runtime.pools[0].records[16].hurt_selector != 1u ||
         runtime.pools[0].records[10].dispatch_entry != 0x00060532UL)
         return 7;
@@ -94,37 +136,39 @@ int main(void)
     runtime.pools[2].records[0].actor_class = 0x07;
     runtime.pools[2].records[0].type = 20u;
     runtime.pools[2].records[0].source_slot = 0x00ffae80UL;
-    runtime.pools[2].free_count = 15u;
+    runtime.pools[2].free_count = 13u;
     runtime.pools[3].records[0].active = 1u;
     runtime.pools[3].records[0].actor_class = 0x10;
     runtime.pools[3].records[0].type = 24u;
     runtime.pools[3].records[0].variant = 1u;
     runtime.pools[3].records[0].source_facing_selector = 1u;
     runtime.pools[3].records[0].source_slot = 0x00ffb680UL;
-    runtime.pools[3].free_count = 31u;
+    runtime.pools[3].free_count = 2u;
     if (!avsp_round1_step_scheduler(&runtime) ||
-        runtime.scheduler_trace_count != 13u ||
-        runtime.scheduler_frames != 2u ||
-        runtime.scheduler_dispatches != 23u ||
-        runtime.actor_handler_dispatches != 20u ||
-        runtime.presentation_bindings != 20u ||
-        runtime.state_context_bindings != 20u ||
+        runtime.scheduler_trace_count != 16u ||
+        runtime.scheduler_frames != 173u ||
+        runtime.scheduler_dispatches != 2252u ||
+        runtime.actor_handler_dispatches != 1730u ||
+        runtime.presentation_bindings != 1730u ||
+        runtime.state_context_bindings != 1730u ||
         runtime.scheduler_trace[10].record_type != 16u ||
         runtime.scheduler_trace[11].record_type != 20u ||
-        runtime.scheduler_trace[12].record_type != 24u ||
-        runtime.pools[0].records[10].scheduler_updates != 2u ||
-        runtime.pools[0].records[10].handler_updates != 2u ||
-        runtime.pools[0].records[10].state_handler_updates != 2u)
+        runtime.scheduler_trace[12].record_type != 20u ||
+        runtime.scheduler_trace[14].record_type != 24u ||
+        runtime.scheduler_trace[15].actor_class != 0x44 ||
+        runtime.pools[0].records[10].scheduler_updates != 173u ||
+        runtime.pools[0].records[10].handler_updates != 173u ||
+        runtime.pools[0].records[10].state_handler_updates != 173u)
         return 9;
     first = &runtime.pools[0].records[19];
     last = &runtime.pools[0].records[10];
-    if (first->source_slot != 0x00FFA3C0UL || first->x != 656 ||
+    if (first->source_slot != 0x00FFA3C0UL || first->x != 713 ||
         first->z != 312 || first->variant != 8u ||
-        first->source_action != 16u || first->substate != 5120u ||
-        first->animation_record != 0x0012E8ECUL || first->health != 87 ||
+        first->source_action != 16u || first->state != 0x0200u ||
+        first->substate != 0x1404u || first->health != 87 ||
         last->source_slot != 0x00FF9D00UL || last->x != 632 ||
         last->z != 296 || last->variant != 6u ||
-        last->substate != 4096u || last->animation_record != 0x0012E8ECUL)
+        last->substate != 4096u || last->transition_timer != 44u)
         return 10;
     runtime.player_action.x = 2000;
     runtime.player_action.lane = 1000;
@@ -357,19 +401,27 @@ int main(void)
         {
             if (!avsp_round1_step_first_entry(&effect_runtime))
                 return 43;
+            if (effect_runtime.entry.spawned &&
+                !avsp_round1_step_scheduler(&effect_runtime))
+                return 43;
             ++effect_entry_calls;
         }
         if (effect_runtime.route_state != 4)
             return 43;
+        for (index = 17; index < 20; ++index)
+        {
+            effect_runtime.pools[0].records[index].state = 0u;
+            effect_runtime.pools[0].records[index].substate = 0u;
+        }
         effect_runtime.player_resource = 0u;
         effect_runtime.player_resource_depleted = 1u;
         if (!avsp_round1_step_player(&effect_runtime,
                 AVSP_ROUND1_INPUT_BUTTON1, 0) ||
             effect_runtime.player_weapon_empty_auxiliary_requests != 1u ||
             effect_runtime.player_weapon_empty_auxiliary_allocations != 1u ||
-            effect_runtime.pools[3].free_count != 31u)
+            effect_runtime.pools[3].free_count != 1u)
             return 43;
-        effect = &effect_runtime.pools[3].records[31];
+        effect = &effect_runtime.pools[3].records[29];
         if (!avsp_round1_step_scheduler(&effect_runtime) ||
             effect->state != 2u || effect->variant != 1u ||
             effect->x != effect_runtime.player.x ||
@@ -394,7 +446,7 @@ int main(void)
             !avsp_round1_step_scheduler(&effect_runtime) ||
             effect->state != 4u ||
             !avsp_round1_step_scheduler(&effect_runtime) ||
-            effect_runtime.pools[3].free_count != 32u ||
+            effect_runtime.pools[3].free_count != 2u ||
             effect_runtime.player_weapon_empty_auxiliary_releases != 1u)
             return 48;
     }
@@ -410,7 +462,15 @@ int main(void)
         {
             if (!avsp_round1_step_first_entry(&projectile_runtime))
                 return 50;
+            if (projectile_runtime.entry.spawned &&
+                !avsp_round1_step_scheduler(&projectile_runtime))
+                return 50;
             ++entry_calls;
+        }
+        for (entry_calls = 17u; entry_calls < 20u; ++entry_calls)
+        {
+            projectile_runtime.pools[0].records[entry_calls].state = 0u;
+            projectile_runtime.pools[0].records[entry_calls].substate = 0u;
         }
         target = &projectile_runtime.pools[0].records[12];
         target->health = 63;
@@ -467,7 +527,15 @@ int main(void)
         {
             if (!avsp_round1_step_first_entry(&mutation_runtime))
                 return 54;
+            if (mutation_runtime.entry.spawned &&
+                !avsp_round1_step_scheduler(&mutation_runtime))
+                return 54;
             ++entry_calls;
+        }
+        for (entry_calls = 17u; entry_calls < 20u; ++entry_calls)
+        {
+            mutation_runtime.pools[0].records[entry_calls].state = 0u;
+            mutation_runtime.pools[0].records[entry_calls].substate = 0u;
         }
         target = &mutation_runtime.pools[0].records[12];
         target->health = 39;
@@ -498,7 +566,23 @@ int main(void)
         {
             if (!avsp_round1_step_first_entry(&impact_runtime))
                 return 57;
+            if (impact_runtime.entry.spawned &&
+                !avsp_round1_step_scheduler(&impact_runtime))
+                return 57;
             ++entry_calls;
+        }
+        for (index = 17u; index < 20u; ++index)
+        {
+            impact_runtime.pools[0].records[index].state = 0u;
+            impact_runtime.pools[0].records[index].substate = 0u;
+        }
+        impact_runtime.pools[3].free_count = impact_runtime.pools[3].capacity;
+        for (index = 0u; index < impact_runtime.pools[3].capacity; ++index)
+        {
+            impact_runtime.pools[3].records[index].active = 0u;
+            impact_runtime.pools[3].free_stack[index] = (unsigned short)
+                (impact_runtime.pools[3].source_base +
+                 index * impact_runtime.pools[3].stride);
         }
         for (index = 0u; index < impact_runtime.pools[0].capacity; ++index)
         {
@@ -612,6 +696,157 @@ int main(void)
                 impact_runtime.player_weapon_projectile_damage_writes);
             return 60;
         }
+    }
+    {
+        AvspRound1Runtime transition_runtime;
+        unsigned int entry_calls = 0u;
+        unsigned int tick;
+        AvspRound1ActorCore *effect_a;
+        AvspRound1ActorCore *effect_b;
+        AvspRound1ActorCore *guard;
+        avsp_round1_init(&transition_runtime);
+        if (!avsp_round1_begin_first_entry(&transition_runtime))
+            return 61;
+        while (!transition_runtime.entry.control_enabled && entry_calls < 1000u)
+        {
+            if (!avsp_round1_step_first_entry(&transition_runtime) ||
+                (transition_runtime.entry.spawned &&
+                 !avsp_round1_step_scheduler(&transition_runtime)))
+                return 61;
+            ++entry_calls;
+        }
+        if (transition_runtime.class1f_initializations != 10u ||
+            transition_runtime.class1f_initial_rng_calls != 10u ||
+            transition_runtime.class09_rng_calls != 42u ||
+            transition_runtime.rng_seed != 0x111cu)
+            return 62;
+        effect_a = &transition_runtime.pools[3].records[28];
+        effect_b = &transition_runtime.pools[3].records[29];
+        guard = &transition_runtime.pools[3].records[30];
+        if (guard->coordinate_mode != 0u || guard->palette != 0u ||
+            guard->facing != 0u || guard->object_or != 0x8000u)
+            return 75;
+        for (tick = 1u; tick <= 130u; ++tick)
+        {
+            if (!avsp_round1_step_scheduler(&transition_runtime))
+                return 63;
+            if (tick == 6u &&
+                (transition_runtime.class09_rng_calls != 44u ||
+                 transition_runtime.rng_seed != 0x99e8u))
+                return 64;
+            if (tick == 12u &&
+                (transition_runtime.class1f_effect_requests != 2u ||
+                 transition_runtime.class1f_effect_allocations != 2u ||
+                 transition_runtime.class4e_initializations != 2u ||
+                 transition_runtime.class4e_rng_calls != 2u ||
+                 transition_runtime.class1f_audio_events != 1u ||
+                 transition_runtime.class1f_audio_command != 0x0118u ||
+                 transition_runtime.pools[3].free_count != 0u ||
+                 effect_a->x != 840 || effect_a->y != 432 ||
+                 effect_b->x != 812 || effect_b->y != 388 ||
+                 guard->state != 0x0400u))
+                return 65;
+            if (tick == 13u &&
+                (transition_runtime.class44_guard_clears != 1u ||
+                 transition_runtime.class1f_effect_guard != 0u ||
+                 guard->substate != 0x0402u || guard->effect_timer != 3u))
+                return 66;
+            if (tick == 18u &&
+                (transition_runtime.class1f_audio_events != 2u ||
+                 transition_runtime.class1f_audio_command != 0x004du ||
+                 transition_runtime.class1f_effect_requests != 4u ||
+                 transition_runtime.class1f_effect_allocations != 2u ||
+                 transition_runtime.class1f_effect_allocation_failures != 2u ||
+                 transition_runtime.class1f_effect_guard != 1u))
+                return 67;
+        }
+        if (transition_runtime.class1f_transition_completions != 10u ||
+            transition_runtime.class1f_audio_events != 2u ||
+            transition_runtime.class4e_releases != 2u ||
+            transition_runtime.pools[3].free_count != 2u ||
+            transition_runtime.player_weapon_projectile_collision_writes != 0u ||
+            transition_runtime.player_weapon_projectile_damage_writes != 0u ||
+            transition_runtime.failure_count != 0u ||
+            transition_runtime.fallback_count != 0u)
+            return 68;
+        for (tick = 10u; tick < 20u; ++tick)
+            if (transition_runtime.pools[0].records[tick].state != 0x0200u ||
+                transition_runtime.pools[0].records[tick].substate != 0u)
+                return 69;
+        for (tick = 131u; tick <= 467u; ++tick)
+        {
+            if (!avsp_round1_step_scheduler(&transition_runtime))
+            {
+                fprintf(stderr,
+                    "transition tail failed tick=%u scheduler=%lu dispatch=%lu seed=%04x class09=%lu failures=%lu\n",
+                    tick, transition_runtime.scheduler_frames,
+                    transition_runtime.scheduler_dispatches,
+                    transition_runtime.rng_seed,
+                    transition_runtime.class09_rng_calls,
+                    transition_runtime.failure_count);
+                return 70;
+            }
+        }
+        if (transition_runtime.class1f_transition_completions != 10u ||
+            transition_runtime.class1f_audio_events != 2u ||
+            transition_runtime.class4e_releases != 2u ||
+            transition_runtime.class44_guard_clears != 1u ||
+            transition_runtime.failure_count != 0u ||
+            transition_runtime.fallback_count != 0u)
+            return 71;
+    }
+    {
+        AvspRound1Runtime integrated_runtime;
+        unsigned int entry_calls = 0u;
+        unsigned int tick;
+        avsp_round1_init(&integrated_runtime);
+        if (!avsp_round1_begin_first_entry(&integrated_runtime))
+            return 72;
+        while (!integrated_runtime.entry.control_enabled && entry_calls < 1000u)
+        {
+            if (!avsp_round1_step_first_entry(&integrated_runtime) ||
+                (integrated_runtime.entry.spawned &&
+                 !avsp_round1_step_scheduler(&integrated_runtime)))
+                return 72;
+            ++entry_calls;
+        }
+        for (tick = 0u; tick < 467u; ++tick)
+        {
+            unsigned short mask = 0u;
+            if (integrated_runtime.player_controller_updates < 15u)
+                mask = integrated_runtime.player_controller_updates != 2u ?
+                    AVSP_PW_INPUT_RIGHT : 0u;
+            else if (integrated_runtime.player_controller_updates == 30u ||
+                     integrated_runtime.player_controller_updates == 72u ||
+                     integrated_runtime.player_controller_updates == 114u ||
+                     integrated_runtime.player_controller_updates == 161u)
+                mask = AVSP_PW_INPUT_ATTACK;
+            if (integrated_runtime.player_controller_updates == 210u)
+                mask = AVSP_ROUND1_INPUT_BUTTON1;
+            if (integrated_runtime.player_controller_updates == 270u)
+            {
+                integrated_runtime.player_resource = 0u;
+                integrated_runtime.player_resource_recharge = 12u;
+                integrated_runtime.player_resource_depleted = 1u;
+                mask = AVSP_ROUND1_INPUT_BUTTON1;
+            }
+            if (!avsp_round1_step_player(&integrated_runtime, mask, 0) ||
+                !avsp_round1_step_scheduler(&integrated_runtime))
+            {
+                fprintf(stderr,
+                    "integrated tail failed tick=%u player=%lu scheduler=%lu dispatch=%lu seed=%04x pool24=%u failures=%lu\n",
+                    tick, integrated_runtime.player_controller_updates,
+                    integrated_runtime.scheduler_frames,
+                    integrated_runtime.scheduler_dispatches,
+                    integrated_runtime.rng_seed,
+                    integrated_runtime.pools[3].free_count,
+                    integrated_runtime.failure_count);
+                return 73;
+            }
+        }
+        if (integrated_runtime.failure_count != 0u ||
+            integrated_runtime.fallback_count != 0u)
+            return 74;
     }
     runtime.entry.gate8236 = 1u;
     if (avsp_round1_entry_valid(&runtime))

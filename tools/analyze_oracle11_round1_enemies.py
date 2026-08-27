@@ -5,16 +5,22 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tools"))
+from census_full_route import RouteState  # noqa: E402
+
 BASE_A = ROOT / ".deps" / "mame" / "oracle11_round1_enemies_a"
 BASE_B = ROOT / ".deps" / "mame" / "oracle11_round1_enemies_b"
+FULL_ROUTE = ROOT / ".deps" / "mame" / "full_route"
 ROUTE = ROOT / "data" / "oracle10_round1_route.json"
 SCHEDULER = ROOT / "data" / "oracle11_actor_scheduler_lifecycle.json"
 ORACLE09 = ROOT / "data" / "oracle09_street_alien_state_facing_presentation.json"
+AUDIO = ROOT / "data" / "oracle11_global_audio_trigger_owners.json"
 OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
 PROGRAM = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_program_2m.bin"
 OUT = ROOT / "data" / "oracle11_round1_enemy_archetypes.json"
@@ -113,6 +119,233 @@ def animation_records(capture: list[dict[str, str]], class_id: str,
             "classification": "SOURCE_CLOSED",
         }
     return [observed[key] for key in sorted(observed)]
+
+
+def animation_record(program: bytes, address: int) -> dict[str, object]:
+    record = program[address:address + 16]
+    require(len(record) == 16, f"animation record {address:08x} outside program")
+    return {
+        "animation_record": f"0x{address:08x}",
+        "timer_u16": int.from_bytes(record[0:2], "big"),
+        "branch_s16": int.from_bytes(record[2:4], "big", signed=True),
+        "assembly": f"0x{int.from_bytes(record[4:8], 'big'):08x}",
+        "hurt_selector_u8": record[8], "attack_selector_u8": record[9],
+        "record_sha256": hashlib.sha256(record).hexdigest(),
+    }
+
+
+def initial_class1f_presentation_fields(
+        slots: tuple[tuple[str, int, int, int, int], ...]
+) -> dict[str, dict[str, object]]:
+    """Read implementation fields from the accepted cadence-1 route capture."""
+    state = RouteState(FULL_ROUTE)
+    workram = None
+    try:
+        for record in state.frames():
+            if record["frame"] == 2092:
+                workram = state.current["workram"]
+                break
+    finally:
+        state.close()
+    require(workram is not None, "accepted class-0x1f presentation frame missing")
+    expected_palettes = [16, 17, 17, 18, 17, 16, 18, 17, 19, 19]
+    result: dict[str, dict[str, object]] = {}
+    for (slot, phase, x, yz, _delay), palette in zip(slots,
+                                                     expected_palettes):
+        offset = int(slot, 16) & 0xFFFF
+        raw = workram[offset:offset + 0xC0]
+        require(len(raw) == 0xC0, f"class-0x1f presentation {slot} short read")
+        u8 = lambda inner: raw[inner]
+        u16 = lambda inner: int.from_bytes(raw[inner:inner + 2], "big")
+        require(u8(0x00) == 1 and u8(0x02) == 0x1F and u8(0x08) == 12 and
+                u16(0x04) == 0x0200 and u16(0x06) == phase and
+                u16(0x10) == x and u16(0x14) == yz and u16(0x18) == yz and
+                u8(0x0D) == 1 and u8(0x0E) == palette and
+                u8(0x0F) == 1 and u16(0x2E) == 0x8000,
+                f"class-0x1f presentation fields drift at {slot}")
+        result[slot] = {
+            "source_frame": 2092,
+            "coordinate_mode_u8": u8(0x0D),
+            "palette_u8": u8(0x0E),
+            "object_or_u16": f"0x{u16(0x2E):04x}",
+            "source_record_sha256": hashlib.sha256(raw).hexdigest(),
+        }
+    return result
+
+
+def initial_class1f_transition_contract(samples: list[dict[str, str]],
+                                        rng: list[dict[str, str]],
+                                        opcodes: bytes,
+                                        program: bytes) -> dict[str, object]:
+    slots = (
+        ("ff9d00", 0x1000, 632, 296, 0), ("ff9dc0", 0x1000, 616, 304, 0),
+        ("ff9e80", 0x1000, 640, 256, 0), ("ff9f40", 0x1200, 696, 264, 0),
+        ("ffa000", 0x1200, 600, 300, 0), ("ffa0c0", 0x1200, 648, 280, 0),
+        ("ffa180", 0x1200, 640, 320, 0), ("ffa240", 0x1400, 744, 280, 9),
+        ("ffa300", 0x1400, 704, 296, 3), ("ffa3c0", 0x1400, 656, 312, 16),
+    )
+    presentation_fields = initial_class1f_presentation_fields(slots)
+    actors = []
+    for slot, phase, x, yz, delay in slots:
+        row = next((item for item in samples if item["slot"] == slot and
+                    item["class"] == "1f" and int(item["frame"]) == 2074), None)
+        require(row is not None and int(row["state"]) == 0x0200 and
+                int(row["phase"]) == phase and int(row["facing"]) == 1 and
+                int(row["x"]) == x and int(row["y"]) == yz and
+                int(row["z"]) == yz and int(row["timer"]) == delay,
+                f"class-0x1f initial actor {slot} drift")
+        fields = presentation_fields[slot]
+        actors.append({"source_slot": f"0x00{slot}", "state_u16": 0x0200,
+                       "substate_u16": phase, "facing_u8": 1,
+                       "x_s16": x, "y_s16": yz, "z_s16": yz,
+                       "entry_delay_u8": delay,
+                       "coordinate_mode_u8": fields["coordinate_mode_u8"],
+                       "palette_u8": fields["palette_u8"],
+                       "object_or_u16": fields["object_or_u16"],
+                       "presentation_source_frame": fields["source_frame"],
+                       "presentation_source_record_sha256":
+                           fields["source_record_sha256"]})
+    first_rng = [item for item in rng if item["class"] == "1f" and
+                 item["pc"] == "0605be" and int(item["frame"]) == 2073]
+    expected_seeds = ["a998", "fc94", "f589", "e069", "a10a",
+                      "e3ed", "ab98", "029a", "07a1", "16b7"]
+    require([(item["slot"], item["seed"]) for item in first_rng] ==
+            [(item[0], seed) for item, seed in zip(slots, expected_seeds)],
+            "class-0x1f initialization RNG order drift")
+    audio = json.loads(AUDIO.read_text(encoding="ascii"))
+    audio_edges = []
+    for group in audio["trigger_groups"]:
+        contexts = group["transition_guard"]["contexts"]
+        if any(context["class_u8"] == "0x1f" and
+               context["source_call"]["address"] == "0x060bba" and
+               context["substate_u16"] == 0x1404 for context in contexts):
+            audio_edges.append({"origin_record": group["origin_a6"],
+                                "source_frame": group["first_frame"],
+                                "command": group["command"],
+                                "arguments": group["argument_variants"][0],
+                                "source_call": "0x060bba",
+                                "semantic_sound_name": "UNKNOWN"})
+    require([(edge["origin_record"], edge["source_frame"], edge["command"])
+             for edge in audio_edges] == [("0xffa240", 2255, "0x004d"),
+                                          ("0xffa300", 2249, "0x0118")],
+            "class-0x1f initial audio edge drift")
+    def sequence(selector: int, start: int, count: int, terminal: str):
+        return {"selector_u8": selector, "terminal_rule": terminal,
+                "records": [animation_record(program, start + 16 * index)
+                            for index in range(count)]}
+    sequences = [
+        sequence(0, 0x12e8a8, 4, "negative branch loops to selector first record"),
+        sequence(1, 0x12e8ec, 4, "negative branch loops to selector first record"),
+        sequence(52, 0x12e65c, 4, "negative branch self-loops while substate timer owns release"),
+        sequence(60, 0x12e944, 3, "state guard advances before terminal record timer is animated"),
+        sequence(62, 0x12e9cc, 2, "state guard advances before terminal record timer is animated"),
+        sequence(76, 0x12ea24, 5, "terminal record holds until landing guard"),
+    ]
+    return {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "accepted_audio_evidence_sha256": digest(AUDIO),
+        "scope": "initial 0x0200:1000, 0x0200:1200 and 0x0200:1400 bodies",
+        "actors": actors,
+        "initialization": {
+            "dispatch": "0x060532", "common_entry": "0x0605be",
+            "rng_entry": "0x017c5e", "rng_calls": 10,
+            "rng_seed_after_each_source_slot": [f"0x{seed}" for seed in expected_seeds],
+            "scheduler_order": "type-12 ascending fixed-pool source slot",
+            "phase_0x1000": {"entry": "0x0606aa", "reads": ["actor+0x06 state/substate"],
+                "writes": {"actor+0xa5_u8": 1, "actor+0xa6_u8": 1,
+                           "actor+0xa4_u8": 1, "actor+0xaa_u8": 216,
+                           "actor+0x85_u8": 1}, "animation_selector_u8": 1},
+            "phase_0x1200": {"entry": "0x0606d4", "reads": ["actor+0x06 state/substate"],
+                "writes": {"actor+0xa5_u8": 1, "actor+0xa6_u8": 1,
+                           "actor+0xa4_u8": 1, "actor+0xaa_u8": 216,
+                           "actor+0x85_u8": 0}, "animation_selector_u8": 0},
+            "phase_0x1400": {"entry": "0x0606fc", "reads": ["actor+0x2b_u8 entry delay"],
+                "writes": {"actor+0xa5_u8": 1, "actor+0xa6_u8": 1,
+                           "actor+0xa4_u8": 1, "actor+0xaa_u8": "actor+0x2b_u8",
+                           "actor+0x85_u8": 1}, "animation_selector_u8": 1},
+            "common_presentation_entry": "0x06113a",
+            "presentation_field_offsets": {
+                "coordinate_mode_u8": "actor+0x0d",
+                "palette_u8": "actor+0x0e",
+                "object_or_u16": "actor+0x2e",
+            },
+            "accepted_presentation_frame": 2092,
+            "fixed_frame_initialization_forbidden": True,
+        },
+        "phase_0x1000_and_0x1200": {
+            "entries": ["0x060b1a", "0x060b28"],
+            "guard": "predecrement actor+0xaa_u8; zero clears actor+0x06_u16",
+            "reads": ["actor+0xaa_u8", "current animation record"],
+            "writes": ["actor+0xaa_u8", "actor+0x06_u16 on zero",
+                       "animation timer/branch/record/assembly/hurt/attack while nonzero"],
+            "movement": "x/y/z unchanged", "collision_selectors": [0],
+            "next_state_substate": "0x0200:0000", "rng_calls": 0,
+            "source_observed_clear_frame": 2287,
+            "source_observed_next_dispatch": {
+                "frame": 2288, "state_u16": 0x0200,
+                "substate_u16": 0x1600,
+            },
+        },
+        "phase_0x1400": {
+            "dispatch": "0x060b36", "substate_offset_u8": "actor+0x07",
+            "substates": [
+                {"substate_u16": 0x1400, "entry": "0x060b4c",
+                 "guard": "global route byte 0xff8209 equals 2, then predecrement actor+0xaa_u8 equals zero",
+                 "reads": ["global 0xff8209_u8", "actor+0xaa_u8"],
+                 "writes": ["actor+0xaa_u8", "actor+0x07_u8 += 2"],
+                 "animation_selector_u8": 60, "next_substate_u16": 0x1402},
+                {"substate_u16": 0x1402, "entry": "0x060b68",
+                 "guard": "signed animation branch actor+0x24 is negative",
+                 "writes": {"actor+0x07_u8_add": 2, "actor+0x5c_u8": 1,
+                            "x_velocity_s32_16_16": 0x00030000,
+                            "y_velocity_s32_16_16": 0x00091000,
+                            "y_acceleration_s32_16_16": -0x00005000,
+                            "actor+0x2a_u8": 42},
+                 "facing_rule": "if actor+0x0f_u8 equals 0, negate x velocity",
+                 "animation_selector_u8": 76, "next_substate_u16": 0x1404},
+                {"substate_u16": 0x1404, "entry": "0x060bae",
+                 "guard": "predecrement actor+0x2a_u8 equals zero and global 0xff9a10_u8 equals zero",
+                 "reads": ["actor+0x2a_u8", "global 0xff9a10_u8", "actor position/facing"],
+                 "writes": ["actor+0x2a_u8", "global 0xff9a10_u8 = 1",
+                            "two type-24 class-0x4e variant-4 allocation attempts"],
+                 "audio_edges": audio_edges,
+                 "movement_arithmetic": "x_fp += x_velocity; y_fp += y_velocity; y_velocity += y_acceleration; signed 16.16 high words own x/y",
+                 "landing_guard": "unsigned compare: continue while z_u16 < y_u16; otherwise y = z",
+                 "landing_writes": {"actor+0x07_u8_add": 2, "actor+0x5c_u8": 0},
+                 "animation_selector_u8_on_landing": 62,
+                 "next_substate_u16": 0x1406},
+                {"substate_u16": 0x1406, "entry": "0x060c04",
+                 "guard": "signed animation branch actor+0x24 is negative",
+                 "writes": {"actor+0xaa_u16": 64, "actor+0x07_u8_add": 2},
+                 "animation_selector_u8": 52, "next_substate_u16": 0x1408},
+                {"substate_u16": 0x1408, "entry": "0x060c1c",
+                 "guard": "predecrement actor+0xaa_u16 equals zero",
+                 "writes": ["actor+0xaa_u16", "actor+0x06_u16 = 0 on zero",
+                            "animation timer/branch/record/assembly/hurt/attack while nonzero"],
+                 "next_state_substate": "0x0200:0000",
+                 "source_observed_clear": {
+                     "slot": "0x00ffa3c0", "frame": 2351,
+                     "state_u16": 0x0200, "substate_u16": 0,
+                 },
+                 "source_observed_next_dispatch": {
+                     "slot": "0x00ffa3c0", "frame": 2352,
+                     "state_u16": 0x0200, "substate_u16": 0x0600,
+                 }},
+            ],
+            "collision_selectors_by_animation": {"60": [2, 10], "76": [0],
+                "62": [11, 2], "52": [1, 4, 2]},
+            "rng_calls_inside_transition": 0,
+            "effect_dependency": "data/oracle11_round1_auxiliary_authority.json#/first_segment_dependencies/class_0x4e_type24_variant4_effect",
+        },
+        "animation_sequences": sequences,
+        "mutation_controls": ["wrong route-global guard", "fixed-frame delay",
+                              "wrong timer width", "wrong facing sign",
+                              "wrong fixed-point branch order", "wrong selector",
+                              "wrong RNG order", "wrong effect allocation order",
+                              "wrong audio command", "wrong presentation mode",
+                              "wrong presentation palette",
+                              "wrong presentation object priority"],
+    }
 
 
 def counterfactuals(route: dict[str, object], class_id: str,
@@ -226,6 +459,9 @@ def build_report() -> dict[str, object]:
             "counterfactuals": counterfactuals(route, class_id, oracle09),
             "semantic_name_inferred": False,
         })
+        if class_id == "0x1f":
+            reports[-1]["initial_transition_contract"] = \
+                initial_class1f_transition_contract(samples, rng, opcodes, program)
 
     report = {
         "schema": "oracle11-round1-enemy-archetypes-v1",
@@ -306,6 +542,55 @@ def validate(report: dict[str, object]) -> None:
                     EXPECTED[class_id]["damage"] and
                 item["semantic_name_inferred"] is False,
                 f"{class_id}: enemy authority drift")
+        if class_id == "0x1f":
+            contract = item["initial_transition_contract"]
+            require(contract["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+                    contract["accepted_audio_evidence_sha256"] == digest(AUDIO) and
+                    len(contract["actors"]) == 10 and
+                    [actor["entry_delay_u8"] for actor in contract["actors"][-3:]] ==
+                        [9, 3, 16] and
+                    [actor["coordinate_mode_u8"] for actor in
+                     contract["actors"]] == [1] * 10 and
+                    [actor["palette_u8"] for actor in contract["actors"]] ==
+                        [16, 17, 17, 18, 17, 16, 18, 17, 19, 19] and
+                    [actor["object_or_u16"] for actor in contract["actors"]] ==
+                        ["0x8000"] * 10 and
+                    all(actor["presentation_source_frame"] == 2092 and
+                        len(actor["presentation_source_record_sha256"]) == 64
+                        for actor in contract["actors"]) and
+                    contract["initialization"]["rng_calls"] == 10 and
+                    contract["initialization"]["rng_seed_after_each_source_slot"][-1] ==
+                        "0x16b7" and
+                    contract["initialization"]["fixed_frame_initialization_forbidden"] is True and
+                    contract["phase_0x1000_and_0x1200"]["source_observed_clear_frame"] == 2287 and
+                    contract["phase_0x1000_and_0x1200"]["next_state_substate"] ==
+                        "0x0200:0000" and
+                    contract["phase_0x1000_and_0x1200"]["source_observed_next_dispatch"] ==
+                        {"frame": 2288, "state_u16": 0x0200,
+                         "substate_u16": 0x1600} and
+                    [body["substate_u16"] for body in
+                     contract["phase_0x1400"]["substates"]] ==
+                        [0x1400, 0x1402, 0x1404, 0x1406, 0x1408] and
+                    contract["phase_0x1400"]["substates"][1]["writes"]
+                        ["y_acceleration_s32_16_16"] == -0x5000 and
+                    contract["phase_0x1400"]["substates"][4]
+                        ["next_state_substate"] == "0x0200:0000" and
+                    contract["phase_0x1400"]["substates"][4]
+                        ["source_observed_next_dispatch"]["substate_u16"] ==
+                            0x0600 and
+                    [edge["command"] for edge in contract["phase_0x1400"]
+                     ["substates"][2]["audio_edges"]] == ["0x004d", "0x0118"] and
+                    [sequence["selector_u8"] for sequence in
+                     contract["animation_sequences"]] == [0, 1, 52, 60, 62, 76] and
+                    contract["initialization"]["presentation_field_offsets"] == {
+                        "coordinate_mode_u8": "actor+0x0d",
+                        "palette_u8": "actor+0x0e",
+                        "object_or_u16": "actor+0x2e",
+                    } and
+                    contract["initialization"]["accepted_presentation_frame"] ==
+                        2092 and
+                    len(contract["mutation_controls"]) == 12,
+                    "class-0x1f initial transition contract drift")
     require(all(value == 0 for key, value in report["coverage"].items()
                 if key.startswith("orphan_")) and
             report["coverage"]["required_class_type_pairs"] == 4 and

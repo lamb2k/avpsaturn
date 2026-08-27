@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """RP4 fixture/production separation gate.
 
-The captured street object schedule and strips (STRIPS.BIN) are a
-validation fixture: they exist to prove the two-plane renderer against
-source truth and must never become production runtime payload. This gate
-fails if:
+STRIPS.BIN is a hybrid source-derived stage package.  Its two background
+planes, palette/scroll records, and patches are retained presentation data for
+the playable slice.  Its captured foreground object schedule remains a
+validation fixture and must never become production gameplay authority.  This
+gate fails if:
 
   1. any reference to the fixture in main.c lies outside an
      AVSP_STREET_TEST conditional block;
   2. the tracked manifest loses its fixture_role classification;
-  3. a non-StreetTest build profile has the fixture staged into the ISO
-     content root (build/avsp_cd/ST1).
+  3. a profile which does not own the street presentation package has it
+     staged into the ISO content root (build/avsp_cd/ST1);
+  4. the playable slice loses the compile-time guard which prevents the
+     captured object schedule from being replayed.
 """
 from __future__ import annotations
 
@@ -48,19 +51,39 @@ def main() -> None:
 
     manifest = json.loads(
         (ROOT / "data" / "rp4_street_planes.json").read_text())
-    if "VALIDATION FIXTURE ONLY" not in manifest.get("fixture_role", ""):
+    role = manifest.get("fixture_role", "")
+    if ("HYBRID SOURCE-DERIVED STAGE PACKAGE" not in role or
+            "captured foreground object schedule remains validation-only" not
+            in role):
         fail("rp4_street_planes.json lost its fixture_role classification")
+
+    joined_source = "\n".join(source)
+    if ("#ifndef AVSP_PLAYABLE_SLICE\n"
+            "    objects = street_object_frame_offset[rel];" not in
+            joined_source):
+        fail("playable slice can replay the captured foreground object schedule")
 
     profile_stamp = ROOT / "build" / "last_compile_profile.txt"
     staged = ROOT / "build" / "avsp_cd" / "ST1" / "STRIPS.BIN"
     if profile_stamp.exists():
         profile = profile_stamp.read_text().strip()
-        if "street-test" not in profile and staged.exists():
-            fail(f"fixture staged into the ISO root under profile "
-                 f"'{profile}'")
+        presentation_profiles = (
+            "street-test",
+            "camera-stage-salvage-bench",
+            "camera-stage-promotion-bench",
+            "playable-slice",
+            "normal-release",
+            "live-encounter",
+            "live-encounter-bench",
+        )
+        owns_stage_package = any(
+            profile.endswith(f"-{name}") for name in presentation_profiles)
+        if owns_stage_package != staged.exists():
+            condition = "missing from" if owns_stage_package else "staged into"
+            fail(f"street presentation package {condition} profile '{profile}'")
 
-    print("fixture separation OK: fixture references are StreetTest-only, "
-          "manifest classified, staging matches the build profile")
+    print("fixture separation OK: captured actors remain validation-only, "
+          "manifest classified, presentation staging matches the build profile")
 
 
 if __name__ == "__main__":

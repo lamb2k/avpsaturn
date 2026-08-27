@@ -49,6 +49,17 @@ def build() -> str:
     presentation = class1f["presentation_and_collision"]
     presentation_rows = presentation["records"]
     dispatch_entry = int(class1f["dispatch_entry"], 16)
+    class1f_initial = class1f["initial_transition_contract"]
+    class1f_initial_actors = class1f_initial["actors"]
+    class1f_initialization = class1f_initial["initialization"]
+    class1f_sequences = class1f_initial["animation_sequences"]
+    class1f_phase1400 = class1f_initial["phase_0x1400"]
+    class1f_audio_edges = class1f_phase1400["substates"][2]["audio_edges"]
+    auxiliary_dependencies = fixtures["authority_data"]["auxiliary"][
+        "first_segment_dependencies"]
+    class09 = auxiliary_dependencies["class_0x09_type20_rng_owner"]
+    class4e = auxiliary_dependencies["class_0x4e_type24_variant4_effect"]
+    class44 = auxiliary_dependencies["class_0x44_type24_command_guard_owner"]
     state_contexts = [tuple(int(part, 16) for part in context.split(":"))
                       for context in class1f["state_phase_contexts"]]
     navigation = fixtures["authority_data"]["navigation"]
@@ -98,6 +109,56 @@ def build() -> str:
     if (dispatch_entry != 0x060532 or state_contexts != sorted(state_contexts) or
         len(state_contexts) != len(set(state_contexts))):
         raise ValueError("SPEC-02 class-0x1f state context drift")
+    if (class1f_initial["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        len(class1f_initial_actors) != 10 or
+        [row["substate_u16"] for row in class1f_initial_actors] !=
+            [0x1000] * 3 + [0x1200] * 4 + [0x1400] * 3 or
+        [row["entry_delay_u8"] for row in class1f_initial_actors[-3:]] !=
+            [9, 3, 16] or
+        [row["coordinate_mode_u8"] for row in class1f_initial_actors] !=
+            [1] * 10 or
+        [row["palette_u8"] for row in class1f_initial_actors] !=
+            [16, 17, 17, 18, 17, 16, 18, 17, 19, 19] or
+        [row["object_or_u16"] for row in class1f_initial_actors] !=
+            ["0x8000"] * 10 or
+        class1f_initialization["rng_calls"] != 10 or
+        class1f_initialization["rng_seed_after_each_source_slot"][-1] !=
+            "0x16b7" or
+        [row["selector_u8"] for row in class1f_sequences] !=
+            [0, 1, 52, 60, 62, 76] or
+        [len(row["records"]) for row in class1f_sequences] !=
+            [4, 4, 4, 3, 2, 5] or
+        [row["command"] for row in class1f_audio_edges] !=
+            ["0x004d", "0x0118"]):
+        raise ValueError("SPEC-02 class-0x1f initial transition drift")
+    if (auxiliary_dependencies["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        len(class09["source_slots"]) != 2 or
+        class09["selector_table_u16"] != [0, 7, 8, 9, 10, 8, 9, 10] or
+        class09["first_segment_calls_before_class4e"] != 44 or
+        len(class09["animation_sequences"]) != 5 or
+        any(len(row["records"]) != 2 for row in class09["animation_sequences"]) or
+        class4e["allocation_pop_order"] !=
+            ["0x00ffc500", "0x00ffc480"] or
+        class4e["scheduler_order"] !=
+            ["0x00ffc480", "0x00ffc500"] or
+        [row["table_index"] for row in class4e["seed_after_by_scheduler_slot"]] !=
+            [28, 24] or len(class4e["jitter_table_s16"]) != 8 or
+        len(class4e["animation_records"]) != 5 or
+        class44["dispatch"] != "0x08d9a4" or
+        class44["source_slot"] != "0x00ffc580" or
+        class44["state_sequence_u16"] != [0x0200, 0x0400, 0x0402, 0x0404] or
+        class44["state0_presentation_actor"] != {
+            "coordinate_mode_u8": 0, "palette_u8": 0, "facing_u8": 0,
+            "object_or_u16": "0x8000", "object_or_writer_pc": "0x08d9d8",
+            "object_or_write_frame": 2072,
+            "object_or_write_mask": "0x0000ffff",
+            "zero_fields_source": "accepted zero-initialized type-24 record; generic allocation writes preserve coordinate mode, palette and facing at zero"} or
+        len(class44["animation_records"]) != 2 or
+        class44["guard_clear_frame"] != 2250 or
+        class44["second_player_origin_command_frame"] != 2255):
+        raise ValueError("SPEC-02 first-segment actor dependency drift")
     if (global_bounds["x_min"] != "bound_x + 0x20" or
         global_bounds["x_max"] != "bound_x + 0x160" or
         global_bounds["z_min"] != "bound_z + 0x10" or
@@ -368,6 +429,138 @@ def build() -> str:
     ])
     for state, substate in state_contexts:
         lines.append(f"    {{ 0x{state:04X}u, 0x{substate:04X}u }},")
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Class1fInitialSpec avsp_round1_class1f_initial_actors[AVSP_ROUND1_CLASS1F_INITIAL_ACTOR_COUNT] =",
+        "{",
+    ])
+    init_by_phase = {
+        0x1000: class1f_initialization["phase_0x1000"],
+        0x1200: class1f_initialization["phase_0x1200"],
+        0x1400: class1f_initialization["phase_0x1400"],
+    }
+    for row in class1f_initial_actors:
+        phase = row["substate_u16"]
+        initializer = init_by_phase[phase]
+        writes = initializer["writes"]
+        source_flags = ((writes["actor+0xa5_u8"] & 1) |
+                        ((writes["actor+0xa6_u8"] & 1) << 1) |
+                        ((writes["actor+0xa4_u8"] & 1) << 2) |
+                        ((writes["actor+0x85_u8"] & 1) << 3))
+        timer = 216 if phase in (0x1000, 0x1200) else row["entry_delay_u8"]
+        lines.append(
+            "    { %sUL, 0x%04Xu, 0x%04Xu, %d, %d, %d, %du, %du, %du, %s, %du, 0x%02Xu, %du }," % (
+                row["source_slot"], row["state_u16"], phase,
+                row["x_s16"], row["y_s16"], row["z_s16"],
+                row["facing_u8"], row["coordinate_mode_u8"],
+                row["palette_u8"], row["object_or_u16"], timer, source_flags,
+                initializer["animation_selector_u8"]))
+    terminal_policies = {0: "AVSP_ROUND1_ANIMATION_TERMINAL_LOOP_FIRST",
+                         1: "AVSP_ROUND1_ANIMATION_TERMINAL_LOOP_FIRST",
+                         52: "AVSP_ROUND1_ANIMATION_TERMINAL_SELF_LOOP",
+                         60: "AVSP_ROUND1_ANIMATION_TERMINAL_STATE_GUARD",
+                         62: "AVSP_ROUND1_ANIMATION_TERMINAL_STATE_GUARD",
+                         76: "AVSP_ROUND1_ANIMATION_TERMINAL_STATE_GUARD"}
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationSequenceSpec avsp_round1_class1f_initial_sequences[AVSP_ROUND1_CLASS1F_INITIAL_SEQUENCE_COUNT] =",
+        "{",
+    ])
+    for sequence in class1f_sequences:
+        rendered = []
+        for row in sequence["records"]:
+            rendered.append("{ %du, %d, %sUL, %sUL, %du, %du }" % (
+                row["timer_u16"], row["branch_s16"], row["animation_record"],
+                row["assembly"], row["hurt_selector_u8"],
+                row["attack_selector_u8"]))
+        while len(rendered) < 5:
+            rendered.append("{ 0u, 0, 0UL, 0UL, 0u, 0u }")
+        lines.append("    { %du, %du, %s, { %s } }," % (
+            sequence["selector_u8"], len(sequence["records"]),
+            terminal_policies[sequence["selector_u8"]], ", ".join(rendered)))
+    audio_by_slot = {int(row["origin_record"], 16): int(row["command"], 16)
+                     for row in class1f_audio_edges}
+    lines.extend([
+        "};", "",
+        "static const unsigned short avsp_round1_class1f_initial_audio_commands[AVSP_ROUND1_CLASS1F_AIRBORNE_ACTOR_COUNT] =",
+        "{",
+        "    " + ", ".join(f"0x{audio_by_slot.get(int(row['source_slot'], 16), 0):04X}u"
+                            for row in class1f_initial_actors[-3:]),
+        "};", "",
+        "static const AvspRound1Class09InitialSpec avsp_round1_class09_initial_actors[AVSP_ROUND1_CLASS09_INITIAL_ACTOR_COUNT] =",
+        "{",
+    ])
+    for row in class09["source_slots"]:
+        lines.append("    { %sUL, %d, %d, %d, 0x%04Xu, 0x%04Xu, %du, %sUL }," % (
+            row["source_slot"], row["x_s16"], row["y_s16"], row["z_s16"],
+            row["state_u16"], row["substate_u16"], row["facing_u8"],
+            row["animation_record"]))
+    lines.extend([
+        "};", "",
+        "static const unsigned char avsp_round1_class09_selector_table[8] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in class09["selector_table_u16"]),
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class09_sequences[AVSP_ROUND1_CLASS09_SEQUENCE_COUNT][AVSP_ROUND1_CLASS09_SEQUENCE_RECORDS] =",
+        "{",
+    ])
+    for sequence in class09["animation_sequences"]:
+        rendered = ["{ %du, %d, %sUL, %sUL, %du, %du }" % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]) for row in sequence["records"]]
+        lines.append("    { " + ", ".join(rendered) + " },")
+    lines.extend([
+        "};", "",
+        "static const unsigned char avsp_round1_class09_sequence_selectors[AVSP_ROUND1_CLASS09_SEQUENCE_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{row['selector_u8']}u" for row in class09["animation_sequences"]),
+        "};", "",
+        "static const AvspRound1Class4eSpawnSpec avsp_round1_class4e_initial_spawns[AVSP_ROUND1_CLASS09_INITIAL_ACTOR_COUNT] =",
+        "{",
+    ])
+    for row in class4e["initial_positions_before_rng"]:
+        lines.append("    { %sUL, %d, %d, %d }," % (
+            row["source_slot"], row["x_s16"], row["y_s16"], row["z_s16"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1VecS16 avsp_round1_class4e_jitter[AVSP_ROUND1_CLASS4E_JITTER_COUNT] =",
+        "{",
+    ])
+    for x, y in class4e["jitter_table_s16"]:
+        lines.append(f"    {{ {x}, {y} }},")
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class4e_records[AVSP_ROUND1_CLASS4E_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class4e["animation_records"]:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Class44GuardSpec avsp_round1_class44_guard =",
+        "{",
+        "    %sUL, %d, %d, %d, 0x%04Xu, 0x0000u, %sUL, %du, %du, %du, %su" % (
+            class44["source_slot"], class44["initial_position_s16"][0],
+            class44["initial_position_s16"][1],
+            class44["initial_position_s16"][2],
+            class44["initial_state_u16"], class44["dispatch"],
+            class44["state0_presentation_actor"]["coordinate_mode_u8"],
+            class44["state0_presentation_actor"]["palette_u8"],
+            class44["state0_presentation_actor"]["facing_u8"],
+            class44["state0_presentation_actor"]["object_or_u16"]),
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class44_records[AVSP_ROUND1_CLASS44_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class44["animation_records"]:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
     bound_x = first_segment_bounds["bound_x"]
     bound_z = first_segment_bounds["bound_z"]
     lines.extend([

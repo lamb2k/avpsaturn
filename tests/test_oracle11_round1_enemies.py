@@ -31,4 +31,20 @@ mutant=copy.deepcopy(report);mutant['archetypes'][0]['semantic_name_inferred']=T
 mutant=copy.deepcopy(report);mutant['scope_boundary']['boss_encounter_orchestration_closed_here']=True;reject(mutant,'boss encounter silently absorbed')
 mutant=copy.deepcopy(report);mutant['negative_controls']['generic_enemy_behavior_tree_forbidden']=False;reject(mutant,'generic behavior tree admitted')
 mutant=copy.deepcopy(report);mutant['protected_boundaries']['spec02_active']=True;reject(mutant,'SPEC-02 activated')
-print('ORACLE-11 Round 1 enemy tests: PASS (13 mutations rejected)')
+class1f=next(item for item in report['archetypes'] if item['class']=='0x1f')
+for label,mutate in [
+    ('initial-delay',lambda x:x['actors'][-1].__setitem__('entry_delay_u8',15)),
+    ('presentation-mode',lambda x:x['actors'][0].__setitem__('coordinate_mode_u8',0)),
+    ('presentation-palette',lambda x:x['actors'][0].__setitem__('palette_u8',0)),
+    ('presentation-object-priority',lambda x:x['actors'][0].__setitem__('object_or_u16','0x0000')),
+    ('initial-rng',lambda x:x['initialization']['rng_seed_after_each_source_slot'].__setitem__(-1,'0x0000')),
+    ('fixed-frame-init',lambda x:x['initialization'].__setitem__('fixed_frame_initialization_forbidden',False)),
+    ('post-clear-main-state',lambda x:x['phase_0x1000_and_0x1200'].__setitem__('next_state_substate','0x0000:0000')),
+    ('substate-map',lambda x:x['phase_0x1400']['substates'][1].__setitem__('substate_u16',0x1404)),
+    ('motion-sign',lambda x:x['phase_0x1400']['substates'][1]['writes'].__setitem__('y_acceleration_s32_16_16',0x5000)),
+    ('audio-command',lambda x:x['phase_0x1400']['substates'][2]['audio_edges'][0].__setitem__('command','0x0118')),
+    ('animation-selector',lambda x:x['animation_sequences'][0].__setitem__('selector_u8',1)),
+    ('mutation-control',lambda x:x['mutation_controls'].pop()),
+]:
+    mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['initial_transition_contract'];mutate(target);reject(mutant,label)
+print('ORACLE-11 Round 1 enemy tests: PASS (25 mutations rejected)')

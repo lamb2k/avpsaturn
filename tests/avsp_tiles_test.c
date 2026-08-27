@@ -148,6 +148,49 @@ int main(void)
             }
         }
     }
+    {
+        /* A synthetic two-tile archive proves both local pixel mirroring and
+         * the flipped block's reversed tile-code order. */
+        unsigned char synthetic[0x50 + 8 + 256];
+        AvspTileArchive source;
+        unsigned char composite[256];
+        long bytes;
+        unsigned long p;
+        for (p = 0; p < sizeof(synthetic); ++p) synthetic[p] = 0;
+        synthetic[0] = 'A'; synthetic[1] = 'V';
+        synthetic[2] = 'T'; synthetic[3] = 'L';
+        synthetic[7] = 2;       /* two tiles */
+        synthetic[11] = 1;      /* one palette slot */
+        synthetic[15] = 0x50;   /* code table offset */
+        synthetic[0x10] = 0;    /* bank zero -> slot zero */
+        synthetic[0x53] = 1;    /* code 1 */
+        synthetic[0x57] = 2;    /* code 2 */
+        for (p = 0; p < 128; ++p)
+        {
+            synthetic[0x58 + p] = 0x12;
+            synthetic[0x58 + 128 + p] = 0x34;
+        }
+        if (!avsp_tiles_open(&source, synthetic, sizeof(synthetic)))
+        {
+            printf("FAIL: synthetic composite archive rejected\n");
+            return 1;
+        }
+        bytes = avsp_compose_entry_texture(&source, 0, 1, 0x0120,
+                                           composite, sizeof(composite));
+        if (bytes != 256 || composite[0] != 0x43 ||
+            composite[8] != 0x21)
+        {
+            printf("FAIL: flipped composite texture mismatch (%ld, %02X, "
+                   "%02X)\n", bytes, composite[0], composite[8]);
+            return 1;
+        }
+        if (avsp_compose_entry_texture(&source, 0, 1, 0x0120,
+                                       composite, 255) != 0)
+        {
+            printf("FAIL: undersized composite destination accepted\n");
+            return 1;
+        }
+    }
     printf("avsp_tiles_test: PASS (%lu tiles, %lu ranks spot-checked, %lu "
            "oracle entries covered)\n",
            archive.tile_count, checked,

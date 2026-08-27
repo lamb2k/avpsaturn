@@ -6,9 +6,10 @@ carry cannot be resolved, so any object referencing it is a miss. This measures
 the distance between what the archive ships and what the captured routes
 reference - bank indices and counts only, no colour values, no ROM bytes.
 
-WHY IT IS NOT A LIVE DEFECT TODAY. The tile path currently renders street
-aliens only, and their banks (0x10-0x13) are shipped. The gap opens when S3
-widens the tile path to the rest of the cast.
+WHY IT IS NOT A LIVE DEFECT TODAY. The tile path renders the bounded street
+population plus the accepted SPEC-02 Button1 projectile/impact presentation.
+Their banks are shipped. The remaining gap opens only when the tile path is
+widened beyond the currently implemented first-segment bodies.
 
 WHAT THE CONSTRAINT ACTUALLY IS. Not colour RAM: avsp_tiles.c accepts up to 32
 palette slots and the measured peak CONCURRENT demand is far below that. The
@@ -116,6 +117,11 @@ def main() -> int:
         print("palette coverage: SKIPPED - decoder unavailable (%s)" % exc)
         return 0
 
+    tile_manifest = json.loads(TILES_MANIFEST.read_text())
+    spec_route = tile_manifest.get("routes", {}).get(
+        "spec02_round1_button1_presentations", {})
+    spec_banks = sorted(int(value, 16) for value in
+                        spec_route.get("palette_banks", []))
     shipped_set = set(shipped)
     routes = [r for r in (scan_route(name, shipped_set, decode_object_entries)
                           for name in ROUTES) if r]
@@ -133,6 +139,8 @@ def main() -> int:
         "shipped_bank_count": len(shipped),
         "shipped_palette_label": json.loads(
             TILES_MANIFEST.read_text()).get("palette", {}).get("label"),
+        "source_bound_spec02_banks": ["0x%02X" % bank
+                                      for bank in spec_banks],
         "archive_format_slot_limit": 32,
         "finding": "the archive ships a single-frame ADAPTED palette; the "
                    "routes reference more banks than it carries. This is not "
@@ -140,7 +148,10 @@ def main() -> int:
                    "aliens only (their banks are shipped), and it is NOT a "
                    "colour-RAM limit - avsp_tiles.c accepts 32 slots. The "
                    "binding constraint is archive content, which resolves "
-                   "with the tile-region budget under S3 phase loading.",
+                   "with the tile-region budget under later phase loading. "
+                   "The SPEC-02 banks listed here are sourced from the "
+                   "generated implementation fixture, not inferred from "
+                   "rendered appearance.",
         "recommendation": "defer regeneration to S3, when the full-cast tile "
                           "path is the consumer; the paired test pins this "
                           "gap open so scope cannot widen silently.",

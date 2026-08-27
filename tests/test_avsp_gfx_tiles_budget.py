@@ -15,6 +15,7 @@ inputs).
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -47,6 +48,51 @@ def main() -> int:
     before_manifest = json.loads(MANIFEST.read_text())
     if before_manifest["scope"] != "street":
         print("FAIL: baseline manifest scope is not 'street'")
+        return 1
+    residency = before_manifest["presentation_residency"]
+    if (residency["source_peak_unique_tiles"] != 374 or
+        residency["source_peak_frame"] != 2357 or
+        residency["projectile_simultaneous_bound"] != 12 or
+        residency["max_tiles_per_projectile"] != 4 or
+        residency["max_tiles_per_impact"] != 2 or
+        residency["per_tile_scanout_requirement"] != 446 or
+        residency["composite_tile_threshold"] != 35 or
+        residency["spec02_composite_unique_entries"] != 5 or
+        residency["spec02_composite_texture_bytes"] != 36736 or
+        residency["spec02_composite_max_texture_bytes"] != 11648 or
+        residency["configured_composite_slots"] != 5 or
+        residency["configured_composite_texture_budget"] != 36736 or
+        residency["configured_composite_max_texture_bytes"] != 11648 or
+        residency["startup_source_frame_range"] != [2074, 2253] or
+        residency["startup_peak_noncomposite_tiles"] != 162 or
+        residency["startup_peak_noncomposite_frame"] != 2208 or
+        residency["retained_tile_sprite_pool"] != 208 or
+        residency["mid_frame_lru_replacement_allowed"] is not False):
+        print("FAIL: first-segment presentation residency drifted")
+        return 1
+    makefile = (ROOT / "makefile").read_text(encoding="utf-8")
+    jo_max_match = re.search(r"^JO_MAX_SPRITE\s*=\s*(\d+)$", makefile,
+                             re.MULTILINE)
+    if (jo_max_match is None or int(jo_max_match.group(1)) != 255 or
+        int(jo_max_match.group(1)) <
+            residency["configured_composite_slots"] +
+            residency["retained_tile_sprite_pool"] + 32):
+        print("FAIL: Jo sprite-definition bound/headroom drifted")
+        return 1
+    if ("$(JO_ENGINE_SRC_DIR)/sprites.o "
+            "$(JO_ENGINE_SRC_DIR)/3d.o: makefile" not in makefile):
+        print("FAIL: JO_MAX_SPRITE-dependent engine objects can become stale")
+        return 1
+    build_script = (ROOT / "build.ps1").read_text(encoding="utf-8")
+    if ("$requiredSpriteArrayBytes = 255 * 8" not in build_script or
+            "$spriteArrayDistance -lt $requiredSpriteArrayBytes" not in
+            build_script):
+        print("FAIL: target link does not reject overlapping Jo sprite arrays")
+        return 1
+    required_sprite_array_bytes = int(jo_max_match.group(1)) * 8
+    if (abs(0x060BE97C - 0x060BED7C) >= required_sprite_array_bytes or
+            abs(0x060BE568 - 0x060BED60) < required_sprite_array_bytes):
+        print("FAIL: stale-array mutation control is non-discriminating")
         return 1
 
     refused = run(["--scope", "round1"])

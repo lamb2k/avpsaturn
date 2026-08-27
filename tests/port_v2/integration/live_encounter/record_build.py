@@ -20,7 +20,8 @@ if profile != inventory["compile_profile"] or manifest.get("profile") != invento
     raise ValueError("INTEGRATE-04A build profile drifted")
 artifacts = {}
 for key, relative in {"game_iso":"game.iso", "game_cue":"game.cue", "game_elf":"game.elf",
-                      "game_map":"game.map", "manifest":"build/hardware_release_manifest.txt"}.items():
+                      "game_map":"game.map", "manifest":"build/hardware_release_manifest.txt",
+                      "tile_archive":"build/avsp_cd/SPR4/TILES.BIN"}.items():
     target = ROOT / relative
     artifacts[key] = {"path":relative, "bytes":target.stat().st_size, "sha256":sha(target)}
 if manifest["iso_sha256"] != artifacts["game_iso"]["sha256"]:

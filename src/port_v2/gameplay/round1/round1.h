@@ -4,7 +4,7 @@
 #include "../player_action/player_action.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "5700f7c21d7820f0272f788b8177227de9a8047025817771efeed12cb421fe47"
+    "36cfbb29f0a826f1313699e8a13f0844188ee6cfcfecf29390d61622a648c8e5"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -36,6 +36,16 @@
 #define AVSP_ROUND1_WEAPON_DAMAGE_MATRIX_COUNT 2u
 #define AVSP_ROUND1_EMPTY_EFFECT_VARIANT_COUNT 4u
 #define AVSP_ROUND1_EMPTY_EFFECT_PRESENTATION_COUNT 10u
+#define AVSP_ROUND1_CLASS1F_INITIAL_ACTOR_COUNT 10u
+#define AVSP_ROUND1_CLASS1F_AIRBORNE_ACTOR_COUNT 3u
+#define AVSP_ROUND1_CLASS1F_INITIAL_SEQUENCE_COUNT 6u
+#define AVSP_ROUND1_CLASS1F_INITIAL_SEQUENCE_MAX_RECORDS 5u
+#define AVSP_ROUND1_CLASS09_INITIAL_ACTOR_COUNT 2u
+#define AVSP_ROUND1_CLASS09_SEQUENCE_COUNT 5u
+#define AVSP_ROUND1_CLASS09_SEQUENCE_RECORDS 2u
+#define AVSP_ROUND1_CLASS4E_JITTER_COUNT 8u
+#define AVSP_ROUND1_CLASS4E_PRESENTATION_COUNT 5u
+#define AVSP_ROUND1_CLASS44_PRESENTATION_COUNT 2u
 #define AVSP_ROUND1_INPUT_BUTTON1 0x0010u
 
 #define AVSP_ROUND1_ENTRY_SET_POSITION 1u
@@ -44,6 +54,10 @@
 #define AVSP_ROUND1_ENTRY_DWELL 4u
 #define AVSP_ROUND1_ENTRY_SOURCE_16 5u
 #define AVSP_ROUND1_ENTRY_TERMINATE 6u
+
+#define AVSP_ROUND1_ANIMATION_TERMINAL_LOOP_FIRST 1u
+#define AVSP_ROUND1_ANIMATION_TERMINAL_SELF_LOOP 2u
+#define AVSP_ROUND1_ANIMATION_TERMINAL_STATE_GUARD 3u
 
 typedef struct
 {
@@ -60,6 +74,15 @@ typedef struct
     unsigned char hurt_selector;
     unsigned char attack_selector;
 } AvspRound1AnimationStateSpec;
+
+typedef struct
+{
+    unsigned char selector;
+    unsigned char record_count;
+    unsigned char terminal_policy;
+    AvspRound1AnimationStateSpec records[
+        AVSP_ROUND1_CLASS1F_INITIAL_SEQUENCE_MAX_RECORDS];
+} AvspRound1AnimationSequenceSpec;
 
 typedef struct
 {
@@ -144,7 +167,10 @@ typedef struct
     unsigned char attack_selector;
     unsigned short object_or;
     unsigned char source_facing_selector;
+    unsigned char source_flags;
+    unsigned char effect_timer;
     unsigned char animation_index;
+    unsigned short transition_timer;
     unsigned short animation_timer;
     short animation_branch;
     unsigned long dispatch_entry;
@@ -152,6 +178,69 @@ typedef struct
     unsigned long handler_updates;
     unsigned long state_handler_updates;
 } AvspRound1ActorCore;
+
+typedef struct
+{
+    unsigned long source_slot;
+    unsigned short state;
+    unsigned short substate;
+    short x;
+    short y;
+    short z;
+    unsigned char facing;
+    unsigned char coordinate_mode;
+    unsigned char palette;
+    unsigned short object_or;
+    unsigned short transition_timer_initial;
+    unsigned char source_flags;
+    unsigned char animation_selector;
+} AvspRound1Class1fInitialSpec;
+
+typedef struct
+{
+    unsigned long source_slot;
+    short x;
+    short y;
+    short z;
+    unsigned short state;
+    unsigned short substate;
+    unsigned char facing;
+    unsigned long animation_record;
+} AvspRound1Class09InitialSpec;
+
+typedef struct
+{
+    unsigned long source_slot;
+    short x;
+    short y;
+    short z;
+} AvspRound1Class4eSpawnSpec;
+
+typedef struct
+{
+    unsigned long source_slot;
+    short x;
+    short y;
+    short z;
+    unsigned short state;
+    unsigned short substate;
+    unsigned long dispatch;
+    unsigned char coordinate_mode;
+    unsigned char palette;
+    unsigned char facing;
+    unsigned short object_or;
+} AvspRound1Class44GuardSpec;
+
+typedef struct
+{
+    unsigned long source_slot;
+    long x_fp;
+    long y_fp;
+    long x_velocity;
+    long y_velocity;
+    long y_acceleration;
+    unsigned char active;
+} AvspRound1Class1fTransitionRuntime;
 
 typedef struct
 {
@@ -356,6 +445,25 @@ typedef struct
     unsigned long actor_handler_dispatches;
     unsigned long presentation_bindings;
     unsigned long state_context_bindings;
+    AvspRound1Class1fTransitionRuntime class1f_transition[
+        AVSP_ROUND1_CLASS1F_AIRBORNE_ACTOR_COUNT];
+    unsigned char class1f_effect_guard;
+    unsigned short class1f_audio_command;
+    unsigned long class1f_initializations;
+    unsigned long class1f_initial_rng_calls;
+    unsigned long class1f_transition_updates;
+    unsigned long class1f_transition_completions;
+    unsigned long class1f_effect_requests;
+    unsigned long class1f_effect_allocations;
+    unsigned long class1f_effect_allocation_failures;
+    unsigned long class1f_audio_events;
+    unsigned long class09_initializations;
+    unsigned long class09_rng_calls;
+    unsigned long class4e_initializations;
+    unsigned long class4e_rng_calls;
+    unsigned long class4e_releases;
+    unsigned long class44_guard_updates;
+    unsigned long class44_guard_clears;
     unsigned char navigation_bounds_active;
     short navigation_bound_x;
     short navigation_bound_z;
@@ -421,6 +529,11 @@ typedef struct
     unsigned short player_weapon_impact_audio_command;
     unsigned char player_weapon_impact_audio_selector;
     unsigned long player_resource_recharges;
+    unsigned short scheduler_failure_code;
+    unsigned short scheduler_failure_source_slot;
+    unsigned short scheduler_failure_state;
+    unsigned short scheduler_failure_substate;
+    unsigned long scheduler_failure_animation_record;
     unsigned long failure_count;
     unsigned long fallback_count;
     unsigned long tail_canary;

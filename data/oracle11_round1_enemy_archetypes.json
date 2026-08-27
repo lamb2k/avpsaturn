@@ -34180,6 +34180,650 @@
         0,
         1
       ],
+      "initial_transition_contract": {
+        "accepted_audio_evidence_sha256": "50f48bf1dd2cbc5007108a12674af5d531add385886b7debcbe51cbf47fea06f",
+        "actors": [
+          {
+            "coordinate_mode_u8": 1,
+            "entry_delay_u8": 0,
+            "facing_u8": 1,
+            "object_or_u16": "0x8000",
+            "palette_u8": 16,
+            "presentation_source_frame": 2092,
+            "presentation_source_record_sha256": "4729e5b90f77c11925f5331118ddc33f14443d7b0a53e56ad0f99405cecdbfe6",
+            "source_slot": "0x00ff9d00",
+            "state_u16": 512,
+            "substate_u16": 4096,
+            "x_s16": 632,
+            "y_s16": 296,
+            "z_s16": 296
+          },
+          {
+            "coordinate_mode_u8": 1,
+            "entry_delay_u8": 0,
+            "facing_u8": 1,
+            "object_or_u16": "0x8000",
+            "palette_u8": 17,
+            "presentation_source_frame": 2092,
+            "presentation_source_record_sha256": "cac0ef802b52065ebf2bf356ca7d404c80a12cf62c78592dc48230646914cb6e",
+            "source_slot": "0x00ff9dc0",
+            "state_u16": 512,
+            "substate_u16": 4096,
+            "x_s16": 616,
+            "y_s16": 304,
+            "z_s16": 304
+          },
+          {
+            "coordinate_mode_u8": 1,
+            "entry_delay_u8": 0,
+            "facing_u8": 1,
+            "object_or_u16": "0x8000",
+            "palette_u8": 17,
+            "presentation_source_frame": 2092,
+            "presentation_source_record_sha256": "fbf2f0e94db4141a1675899c0ceece94d6fbe57a1bb5caf0e72538cbfe0e396c",
+            "source_slot": "0x00ff9e80",
+            "state_u16": 512,
+            "substate_u16": 4096,
+            "x_s16": 640,
+            "y_s16": 256,
+            "z_s16": 256
+          },
+          {
+            "coordinate_mode_u8": 1,
+            "entry_delay_u8": 0,
+            "facing_u8": 1,
+            "object_or_u16": "0x8000",
+            "palette_u8": 18,
+            "presentation_source_frame": 2092,
+            "presentation_source_record_sha256": "9ad2e23c2aa04234a60b3f255e7db8708936ed944f0c37c82849429a28cc827d",
+            "source_slot": "0x00ff9f40",
+            "state_u16": 512,
+            "substate_u16": 4608,
+            "x_s16": 696,
+            "y_s16": 264,
+            "z_s16": 264
+          },
+          {
+            "coordinate_mode_u8": 1,
+            "entry_delay_u8": 0,
+            "facing_u8": 1,
+            "object_or_u16": "0x8000",
+            "palette_u8": 17,
+            "presentation_source_frame": 2092,
+            "presentation_source_record_sha256": "9d3a7328729971a3967665e108e3f5e26c91c153bab1e761d5584d2c9edef676",
+            "source_slot": "0x00ffa000",
+            "state_u16": 512,
+            "substate_u16": 4608,
+            "x_s16": 600,
+            "y_s16": 300,
+            "z_s16": 300
+          },
+          {
+            "coordinate_mode_u8": 1,
+            "entry_delay_u8": 0,
+            "facing_u8": 1,
+            "object_or_u16": "0x8000",
+            "palette_u8": 16,
+            "presentation_source_frame": 2092,
+            "presentation_source_record_sha256": "b2bd1c9332a58081792e71bfd94914ba9f3359a2924534e9c069e185d84c2fd9",
+            "source_slot": "0x00ffa0c0",
+            "state_u16": 512,
+            "substate_u16": 4608,
+            "x_s16": 648,
+            "y_s16": 280,
+            "z_s16": 280
+          },
+          {
+            "coordinate_mode_u8": 1,
+            "entry_delay_u8": 0,
+            "facing_u8": 1,
+            "object_or_u16": "0x8000",
+            "palette_u8": 18,
+            "presentation_source_frame": 2092,
+            "presentation_source_record_sha256": "e9e44f59b9e3d466e4d2f53955825a8d74e24a2fa468a98b3ca39a662dd6c521",
+            "source_slot": "0x00ffa180",
+            "state_u16": 512,
+            "substate_u16": 4608,
+            "x_s16": 640,
+            "y_s16": 320,
+            "z_s16": 320
+          },
+          {
+            "coordinate_mode_u8": 1,
+            "entry_delay_u8": 9,
+            "facing_u8": 1,
+            "object_or_u16": "0x8000",
+            "palette_u8": 17,
+            "presentation_source_frame": 2092,
+            "presentation_source_record_sha256": "58bf70017278dacb794f7bbec9f86585412f9ec5e29df9364c89233a02cd8e45",
+            "source_slot": "0x00ffa240",
+            "state_u16": 512,
+            "substate_u16": 5120,
+            "x_s16": 744,
+            "y_s16": 280,
+            "z_s16": 280
+          },
+          {
+            "coordinate_mode_u8": 1,
+            "entry_delay_u8": 3,
+            "facing_u8": 1,
+            "object_or_u16": "0x8000",
+            "palette_u8": 19,
+            "presentation_source_frame": 2092,
+            "presentation_source_record_sha256": "01915c892b4ba51d7fd1a8a9038370a7223a87b6a4b68c0af8517709088f6887",
+            "source_slot": "0x00ffa300",
+            "state_u16": 512,
+            "substate_u16": 5120,
+            "x_s16": 704,
+            "y_s16": 296,
+            "z_s16": 296
+          },
+          {
+            "coordinate_mode_u8": 1,
+            "entry_delay_u8": 16,
+            "facing_u8": 1,
+            "object_or_u16": "0x8000",
+            "palette_u8": 19,
+            "presentation_source_frame": 2092,
+            "presentation_source_record_sha256": "ce5af8ff54116a71d6e502b3fd9a951c912cb475ac14843718d7edb4b9673899",
+            "source_slot": "0x00ffa3c0",
+            "state_u16": 512,
+            "substate_u16": 5120,
+            "x_s16": 656,
+            "y_s16": 312,
+            "z_s16": 312
+          }
+        ],
+        "animation_sequences": [
+          {
+            "records": [
+              {
+                "animation_record": "0x0012e8a8",
+                "assembly": "0x0012f994",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "4878fc426df34aafa95222bd157261988a4e022d0e0d5c1952520a0e687e099d",
+                "timer_u16": 9
+              },
+              {
+                "animation_record": "0x0012e8b8",
+                "assembly": "0x0012f9bc",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "c4670630d0c8684d0dfaa520e4bd0e0b2b4784f0a1cd844b5ad1584ef8aa15da",
+                "timer_u16": 9
+              },
+              {
+                "animation_record": "0x0012e8c8",
+                "assembly": "0x0012f9e4",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "46771582ed2f16f4869a6df8ac12f938610bebcd6bd917d067283d19870c01b0",
+                "timer_u16": 9
+              },
+              {
+                "animation_record": "0x0012e8d8",
+                "assembly": "0x0012f9bc",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 1,
+                "record_sha256": "77c5a6e93018a6790459157a3f16e4c0a420658b1a591b50ed6a1558643ead72",
+                "timer_u16": 9
+              }
+            ],
+            "selector_u8": 0,
+            "terminal_rule": "negative branch loops to selector first record"
+          },
+          {
+            "records": [
+              {
+                "animation_record": "0x0012e8ec",
+                "assembly": "0x0012f5de",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 2,
+                "record_sha256": "fcfb86f0585f33c718f086cfa68cdb307e7a8af5a8b1011525ac78353c76d883",
+                "timer_u16": 9
+              },
+              {
+                "animation_record": "0x0012e8fc",
+                "assembly": "0x0012fa0c",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 2,
+                "record_sha256": "497e26122b4a6a717f407f4a16b5bd1ab657d6ceccb483128614a8aa56905b50",
+                "timer_u16": 9
+              },
+              {
+                "animation_record": "0x0012e90c",
+                "assembly": "0x0012fa2a",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 2,
+                "record_sha256": "b3fda47757d3a55b27840323f4715e4f355ab32a57808515aec430dafb459762",
+                "timer_u16": 9
+              },
+              {
+                "animation_record": "0x0012e91c",
+                "assembly": "0x0012fa0c",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 2,
+                "record_sha256": "33142ec3f7787a40fca903f90d7337454e5d211b8a06d66519ad575f9755fcb4",
+                "timer_u16": 9
+              }
+            ],
+            "selector_u8": 1,
+            "terminal_rule": "negative branch loops to selector first record"
+          },
+          {
+            "records": [
+              {
+                "animation_record": "0x0012e65c",
+                "assembly": "0x0012f712",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "5c8061ac95964b5d62ab61fc927cd82ad7661da2295b64ae0b55c336a129db19",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0012e66c",
+                "assembly": "0x0012f930",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 4,
+                "record_sha256": "371422b81d607fab28e311f0a0ed197dec7dd8264e8e10df8334274f38a84816",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0012e67c",
+                "assembly": "0x0012f5de",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 2,
+                "record_sha256": "a0de20e9075e39f4be2af9a0f0f7d6dfd8fec51494aedc94ba9cb7a59552e775",
+                "timer_u16": 4
+              },
+              {
+                "animation_record": "0x0012e68c",
+                "assembly": "0x0012f5de",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 2,
+                "record_sha256": "b0b826483693bfa990426869cd1920515ed0bf4f387b1f7d6b5db6aca71d36ef",
+                "timer_u16": 6
+              }
+            ],
+            "selector_u8": 52,
+            "terminal_rule": "negative branch self-loops while substate timer owns release"
+          },
+          {
+            "records": [
+              {
+                "animation_record": "0x0012e944",
+                "assembly": "0x0012f5de",
+                "attack_selector_u8": 0,
+                "branch_s16": 1,
+                "hurt_selector_u8": 2,
+                "record_sha256": "587dfc9fd0f287f7cb6cb1a44d4923e3f8ecb4acd48c6e6cbfa3972721ffa3c2",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0012e954",
+                "assembly": "0x0012fce2",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 10,
+                "record_sha256": "e0e510efc0a5db5b75320e43455e03dc9655b88c781f1785cb17565e763c0e67",
+                "timer_u16": 5
+              },
+              {
+                "animation_record": "0x0012e964",
+                "assembly": "0x0012fce2",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 10,
+                "record_sha256": "0ab8a95debcc4ab010b903ad2f32a1b6d30821eddecb378c4929a04b573f91f0",
+                "timer_u16": 8
+              }
+            ],
+            "selector_u8": 60,
+            "terminal_rule": "state guard advances before terminal record timer is animated"
+          },
+          {
+            "records": [
+              {
+                "animation_record": "0x0012e9cc",
+                "assembly": "0x0012fc92",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 11,
+                "record_sha256": "2a114e0613150943166f6ef81ec96ec2fd0937d1fd5f397fc903f6de654af114",
+                "timer_u16": 4
+              },
+              {
+                "animation_record": "0x0012e9dc",
+                "assembly": "0x0012f5fc",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 2,
+                "record_sha256": "de7ed2177c484c38f50a6e21c715c8db380d9d80ee2614a147f79e87f84edca9",
+                "timer_u16": 4095
+              }
+            ],
+            "selector_u8": 62,
+            "terminal_rule": "state guard advances before terminal record timer is animated"
+          },
+          {
+            "records": [
+              {
+                "animation_record": "0x0012ea24",
+                "assembly": "0x0012fb60",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 0,
+                "record_sha256": "52b53fbc96c8ccdf707b44b258f5579e6cdb955ebdf0922457cfda762953e623",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0012ea34",
+                "assembly": "0x0012fbfc",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 0,
+                "record_sha256": "7893bab76263d8eab8988b4dc1508276b02ea6d5a6f7aab0c594dc54767680ec",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0012ea44",
+                "assembly": "0x0012fc74",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 0,
+                "record_sha256": "8eb3873972a7db8fa64047a68af27ebecc25de503fc9ddbdead09142a1c86e0a",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0012ea54",
+                "assembly": "0x0012fc24",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 0,
+                "record_sha256": "d854743ff0a24d72a255d813ce492c795b26ad0e594e1f2f0c4bfdf0182738b8",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0012ea64",
+                "assembly": "0x0012fb98",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "74aec07993d71dc956837dae73f27ac0778b9b71131341f55385e76eda13dc6d",
+                "timer_u16": 4095
+              }
+            ],
+            "selector_u8": 76,
+            "terminal_rule": "terminal record holds until landing guard"
+          }
+        ],
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "initialization": {
+          "accepted_presentation_frame": 2092,
+          "common_entry": "0x0605be",
+          "common_presentation_entry": "0x06113a",
+          "dispatch": "0x060532",
+          "fixed_frame_initialization_forbidden": true,
+          "phase_0x1000": {
+            "animation_selector_u8": 1,
+            "entry": "0x0606aa",
+            "reads": [
+              "actor+0x06 state/substate"
+            ],
+            "writes": {
+              "actor+0x85_u8": 1,
+              "actor+0xa4_u8": 1,
+              "actor+0xa5_u8": 1,
+              "actor+0xa6_u8": 1,
+              "actor+0xaa_u8": 216
+            }
+          },
+          "phase_0x1200": {
+            "animation_selector_u8": 0,
+            "entry": "0x0606d4",
+            "reads": [
+              "actor+0x06 state/substate"
+            ],
+            "writes": {
+              "actor+0x85_u8": 0,
+              "actor+0xa4_u8": 1,
+              "actor+0xa5_u8": 1,
+              "actor+0xa6_u8": 1,
+              "actor+0xaa_u8": 216
+            }
+          },
+          "phase_0x1400": {
+            "animation_selector_u8": 1,
+            "entry": "0x0606fc",
+            "reads": [
+              "actor+0x2b_u8 entry delay"
+            ],
+            "writes": {
+              "actor+0x85_u8": 1,
+              "actor+0xa4_u8": 1,
+              "actor+0xa5_u8": 1,
+              "actor+0xa6_u8": 1,
+              "actor+0xaa_u8": "actor+0x2b_u8"
+            }
+          },
+          "presentation_field_offsets": {
+            "coordinate_mode_u8": "actor+0x0d",
+            "object_or_u16": "actor+0x2e",
+            "palette_u8": "actor+0x0e"
+          },
+          "rng_calls": 10,
+          "rng_entry": "0x017c5e",
+          "rng_seed_after_each_source_slot": [
+            "0xa998",
+            "0xfc94",
+            "0xf589",
+            "0xe069",
+            "0xa10a",
+            "0xe3ed",
+            "0xab98",
+            "0x029a",
+            "0x07a1",
+            "0x16b7"
+          ],
+          "scheduler_order": "type-12 ascending fixed-pool source slot"
+        },
+        "mutation_controls": [
+          "wrong route-global guard",
+          "fixed-frame delay",
+          "wrong timer width",
+          "wrong facing sign",
+          "wrong fixed-point branch order",
+          "wrong selector",
+          "wrong RNG order",
+          "wrong effect allocation order",
+          "wrong audio command",
+          "wrong presentation mode",
+          "wrong presentation palette",
+          "wrong presentation object priority"
+        ],
+        "phase_0x1000_and_0x1200": {
+          "collision_selectors": [
+            0
+          ],
+          "entries": [
+            "0x060b1a",
+            "0x060b28"
+          ],
+          "guard": "predecrement actor+0xaa_u8; zero clears actor+0x06_u16",
+          "movement": "x/y/z unchanged",
+          "next_state_substate": "0x0200:0000",
+          "reads": [
+            "actor+0xaa_u8",
+            "current animation record"
+          ],
+          "rng_calls": 0,
+          "source_observed_clear_frame": 2287,
+          "source_observed_next_dispatch": {
+            "frame": 2288,
+            "state_u16": 512,
+            "substate_u16": 5632
+          },
+          "writes": [
+            "actor+0xaa_u8",
+            "actor+0x06_u16 on zero",
+            "animation timer/branch/record/assembly/hurt/attack while nonzero"
+          ]
+        },
+        "phase_0x1400": {
+          "collision_selectors_by_animation": {
+            "52": [
+              1,
+              4,
+              2
+            ],
+            "60": [
+              2,
+              10
+            ],
+            "62": [
+              11,
+              2
+            ],
+            "76": [
+              0
+            ]
+          },
+          "dispatch": "0x060b36",
+          "effect_dependency": "data/oracle11_round1_auxiliary_authority.json#/first_segment_dependencies/class_0x4e_type24_variant4_effect",
+          "rng_calls_inside_transition": 0,
+          "substate_offset_u8": "actor+0x07",
+          "substates": [
+            {
+              "animation_selector_u8": 60,
+              "entry": "0x060b4c",
+              "guard": "global route byte 0xff8209 equals 2, then predecrement actor+0xaa_u8 equals zero",
+              "next_substate_u16": 5122,
+              "reads": [
+                "global 0xff8209_u8",
+                "actor+0xaa_u8"
+              ],
+              "substate_u16": 5120,
+              "writes": [
+                "actor+0xaa_u8",
+                "actor+0x07_u8 += 2"
+              ]
+            },
+            {
+              "animation_selector_u8": 76,
+              "entry": "0x060b68",
+              "facing_rule": "if actor+0x0f_u8 equals 0, negate x velocity",
+              "guard": "signed animation branch actor+0x24 is negative",
+              "next_substate_u16": 5124,
+              "substate_u16": 5122,
+              "writes": {
+                "actor+0x07_u8_add": 2,
+                "actor+0x2a_u8": 42,
+                "actor+0x5c_u8": 1,
+                "x_velocity_s32_16_16": 196608,
+                "y_acceleration_s32_16_16": -20480,
+                "y_velocity_s32_16_16": 593920
+              }
+            },
+            {
+              "animation_selector_u8_on_landing": 62,
+              "audio_edges": [
+                {
+                  "arguments": [
+                    "0000004d",
+                    "00050b06",
+                    "01bd002d"
+                  ],
+                  "command": "0x004d",
+                  "origin_record": "0xffa240",
+                  "semantic_sound_name": "UNKNOWN",
+                  "source_call": "0x060bba",
+                  "source_frame": 2255
+                },
+                {
+                  "arguments": [
+                    "00000118",
+                    "00050806",
+                    "01bd002d"
+                  ],
+                  "command": "0x0118",
+                  "origin_record": "0xffa300",
+                  "semantic_sound_name": "UNKNOWN",
+                  "source_call": "0x060bba",
+                  "source_frame": 2249
+                }
+              ],
+              "entry": "0x060bae",
+              "guard": "predecrement actor+0x2a_u8 equals zero and global 0xff9a10_u8 equals zero",
+              "landing_guard": "unsigned compare: continue while z_u16 < y_u16; otherwise y = z",
+              "landing_writes": {
+                "actor+0x07_u8_add": 2,
+                "actor+0x5c_u8": 0
+              },
+              "movement_arithmetic": "x_fp += x_velocity; y_fp += y_velocity; y_velocity += y_acceleration; signed 16.16 high words own x/y",
+              "next_substate_u16": 5126,
+              "reads": [
+                "actor+0x2a_u8",
+                "global 0xff9a10_u8",
+                "actor position/facing"
+              ],
+              "substate_u16": 5124,
+              "writes": [
+                "actor+0x2a_u8",
+                "global 0xff9a10_u8 = 1",
+                "two type-24 class-0x4e variant-4 allocation attempts"
+              ]
+            },
+            {
+              "animation_selector_u8": 52,
+              "entry": "0x060c04",
+              "guard": "signed animation branch actor+0x24 is negative",
+              "next_substate_u16": 5128,
+              "substate_u16": 5126,
+              "writes": {
+                "actor+0x07_u8_add": 2,
+                "actor+0xaa_u16": 64
+              }
+            },
+            {
+              "entry": "0x060c1c",
+              "guard": "predecrement actor+0xaa_u16 equals zero",
+              "next_state_substate": "0x0200:0000",
+              "source_observed_clear": {
+                "frame": 2351,
+                "slot": "0x00ffa3c0",
+                "state_u16": 512,
+                "substate_u16": 0
+              },
+              "source_observed_next_dispatch": {
+                "frame": 2352,
+                "slot": "0x00ffa3c0",
+                "state_u16": 512,
+                "substate_u16": 1536
+              },
+              "substate_u16": 5128,
+              "writes": [
+                "actor+0xaa_u16",
+                "actor+0x06_u16 = 0 on zero",
+                "animation timer/branch/record/assembly/hurt/attack while nonzero"
+              ]
+            }
+          ]
+        },
+        "scope": "initial 0x0200:1000, 0x0200:1200 and 0x0200:1400 bodies"
+      },
       "instance_count": 47,
       "orphan_write_rows": 0,
       "presentation_and_collision": {

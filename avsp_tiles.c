@@ -127,3 +127,58 @@ int avsp_entry_tiles(unsigned short y, unsigned short code,
     }
     return count;
 }
+
+long avsp_compose_entry_texture(const AvspTileArchive *archive,
+                                unsigned short y, unsigned short code,
+                                unsigned short attr, unsigned char *out,
+                                unsigned long out_bytes)
+{
+    AvspEntryTile tiles[256];
+    int nx = ((attr >> 8) & 0xF) + 1;
+    int ny = ((attr >> 12) & 0xF) + 1;
+    int width = nx * 16;
+    int height = ny * 16;
+    unsigned long need = (unsigned long)width *
+                         (unsigned long)height / 2UL;
+    int count;
+    int tile;
+    unsigned long clear;
+
+    if (archive == 0 || out == 0 || out_bytes < need) return 0;
+    count = avsp_entry_tiles(y, code, attr, tiles, 256);
+    if (count <= 0) return 0;
+    for (clear = 0; clear < need; ++clear) out[clear] = 0;
+    for (tile = 0; tile < count; ++tile)
+    {
+        long rank = avsp_tiles_find(archive, tiles[tile].code);
+        const unsigned char *source;
+        int py;
+        int px;
+        if (rank < 0) return -1;
+        source = avsp_tiles_texture(archive, rank);
+        if (source == 0) return -1;
+        for (py = 0; py < 16; ++py)
+        {
+            int source_y = tiles[tile].flip_y ? 15 - py : py;
+            int dest_y = (int)tiles[tile].dy + py;
+            for (px = 0; px < 16; ++px)
+            {
+                int source_x = tiles[tile].flip_x ? 15 - px : px;
+                int dest_x = (int)tiles[tile].dx + px;
+                unsigned char packed = source[source_y * 8 + source_x / 2];
+                unsigned char pixel = (source_x & 1) ?
+                    (unsigned char)(packed & 0x0F) :
+                    (unsigned char)(packed >> 4);
+                unsigned long dest = (unsigned long)dest_y *
+                                     (unsigned long)(width / 2) +
+                                     (unsigned long)(dest_x / 2);
+                if (dest_x & 1)
+                    out[dest] = (unsigned char)((out[dest] & 0xF0) | pixel);
+                else
+                    out[dest] = (unsigned char)((out[dest] & 0x0F) |
+                                                (pixel << 4));
+            }
+        }
+    }
+    return (long)need;
+}

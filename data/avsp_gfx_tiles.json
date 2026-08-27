@@ -1,8 +1,8 @@
 {
  "archive": {
-  "bytes": 301788,
+  "bytes": 332708,
   "file": "build/avsp_cd/SPR4/TILES.BIN",
-  "sha256": "6a4f25c33eeeb2c6ea5f49e19979e06ea3a509e557eb50e0afe65bfcfb370d73"
+  "sha256": "276164f656d2cfd2e3e9a2cbc92c40142492663382b46bba41b16cc30dd1972f"
  },
  "classification": "tile archive manifest - no ROM bytes",
  "facing_union": true,
@@ -20,10 +20,41 @@
    "0x12",
    "0x13",
    "0x1B",
-   "0x1D"
+   "0x1D",
+   "0x1E"
   ],
   "label": "ADAPTED single-frame palette",
   "source": ".deps/mame/enemy_actions/palette_05140.tsv"
+ },
+ "presentation_residency": {
+  "composite_tile_threshold": 35,
+  "configured_composite_max_texture_bytes": 11648,
+  "configured_composite_slots": 5,
+  "configured_composite_texture_budget": 36736,
+  "max_tiles_per_impact": 2,
+  "max_tiles_per_projectile": 4,
+  "mid_frame_lru_replacement_allowed": false,
+  "per_tile_scanout_requirement": 446,
+  "projectile_simultaneous_bound": 12,
+  "retained_tile_sprite_pool": 208,
+  "source_capture": ".deps/mame/full_route",
+  "source_frame_range": [
+   2074,
+   3473
+  ],
+  "source_peak_actors": 14,
+  "source_peak_frame": 2357,
+  "source_peak_object_entries": 37,
+  "source_peak_unique_tiles": 374,
+  "spec02_composite_max_texture_bytes": 11648,
+  "spec02_composite_texture_bytes": 36736,
+  "spec02_composite_unique_entries": 5,
+  "startup_peak_noncomposite_frame": 2208,
+  "startup_peak_noncomposite_tiles": 162,
+  "startup_source_frame_range": [
+   2074,
+   2253
+  ]
  },
  "routes": {
   "enemy_actions": {
@@ -35,17 +66,29 @@
    "frames_sampled": 201
   },
   "spec02_round1_button1_presentations": {
-   "decoded_variants": 20,
-   "fixture_sha256": "589a5f597217663be9798bc8e4bd3b4a1d72a7b5a1ebb0f40c99637318cad76d",
-   "tiles_added": 30,
-   "unique_assemblies": 12
+   "decoded_variants": 96,
+   "fixture_sha256": "5b33c96e96850cd403763c4b27c0fec4c675f1c78147143b1c0ef80343579890",
+   "palette_banks": [
+    "0x00",
+    "0x05",
+    "0x0C",
+    "0x0F",
+    "0x10",
+    "0x11",
+    "0x12",
+    "0x13",
+    "0x1D",
+    "0x1E"
+   ],
+   "tiles_added": 264,
+   "unique_assemblies": 40
   }
  },
  "sample_stride": 1,
  "schema": 1,
  "scope": "street",
  "tile_bytes": 128,
- "tile_count": 2283,
- "tile_region_budget_bytes": 327680,
- "tile_region_budget_used_pct": 92.1
+ "tile_count": 2517,
+ "tile_region_budget_bytes": 360448,
+ "tile_region_budget_used_pct": 92.3
 }

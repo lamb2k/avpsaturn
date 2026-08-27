@@ -30,12 +30,34 @@ FIELDS = FIELDS + ("round1_navigation_applications", "round1_navigation_clamps")
 FIELDS = FIELDS + ("round1_player_stop_state",
                    "round1_player_weapon_state0",
                    "round1_player_weapon_state1",
-                   "round1_native_presentation_state")
+                   "round1_native_presentation_state",
+                   "round1_class1f_state",
+                   "round1_auxiliary_state",
+                   "round1_native_initial_state")
+U16_FIELDS = {"input_mask", "alien_rng", "round1_player_source_action"}
+S16_FIELDS = {
+    "player_x", "player_lane", "player_health", "player_state",
+    "player_selector", "player_attack_active", "player_facing",
+    "player_screen_y", "alien_x", "alien_lane", "alien_health",
+    "alien_state", "alien_inner", "alien_action", "alien_facing",
+    "alien_screen_y", "player_contact", "alien_contact", "player_damage",
+    "alien_damage", "attack_miss", "encounter_state", "route_unlocked",
+    "continued_after_unlock", "camera_world_x", "failures",
+    "round1_player_x", "round1_player_z", "round1_player_facing",
+}
 EVIDENCE_LAST_FRAME = 466
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def signed(mcp, address): return tools.signed32(mcp.u32(address))
 def read_samples(mcp, base, count):
-    record_bytes = len(FIELDS) * 4
+    offsets = {}
+    cursor = 0
+    for name in FIELDS:
+        size = 2 if name in U16_FIELDS or name in S16_FIELDS else 4
+        if cursor % size:
+            cursor += size - cursor % size
+        offsets[name] = (cursor, size)
+        cursor += size
+    record_bytes = (cursor + 3) & ~3
     max_records = 65536 // record_bytes
     payload = bytearray()
     for first in range(0, count, max_records):
@@ -46,10 +68,16 @@ def read_samples(mcp, base, count):
     for index in range(count):
         start = index * record_bytes
         record = payload[start:start + record_bytes]
-        result.append({
-            name: tools.signed32(int.from_bytes(record[offset * 4:offset * 4 + 4], "big"))
-            for offset, name in enumerate(FIELDS)
-        })
+        decoded = {}
+        for name in FIELDS:
+            offset, size = offsets[name]
+            value = int.from_bytes(record[offset:offset + size], "big")
+            if name in S16_FIELDS and value & 0x8000:
+                value -= 0x10000
+            elif size == 4:
+                value = tools.signed32(value)
+            decoded[name] = value
+        result.append(decoded)
     return result
 
 parser = argparse.ArgumentParser()
@@ -71,7 +99,12 @@ while time.time() < deadline:
     try:
         ready = mcp.u32(syms["avsp_diag_runtime_ready"])
         frame = mcp.u32(syms["avsp_diag_live_frame"])
-        if ready == 1 and frame >= EVIDENCE_LAST_FRAME:
+        if (ready == 1 and frame > 0 and
+                mcp.u32(syms["runtime_ready"]) == 0):
+            deadline = 0
+            continue
+        if (ready == 1 and frame >= EVIDENCE_LAST_FRAME and
+                signed(mcp, syms["avsp_diag_live_frame_stage"]) == 7):
             break
     except Exception:
         # The pinned Windows build occasionally resets one HTTP connection
@@ -109,6 +142,16 @@ else:
         "ko_events": mcp.u32(syms["avsp_diag_live_ko_events"]),
         "failures": mcp.u32(syms["avsp_diag_live_failures"]),
         "fallback_count": mcp.u32(syms["avsp_diag_live_fallback_count"]),
+        "round1_scheduler_failure_code":
+            mcp.u32(syms["avsp_diag_round1_scheduler_failure_code"]),
+        "round1_scheduler_failure_source_slot":
+            hex(mcp.u32(syms["avsp_diag_round1_scheduler_failure_source_slot"])),
+        "round1_scheduler_failure_state":
+            hex(mcp.u32(syms["avsp_diag_round1_scheduler_failure_state"])),
+        "round1_scheduler_failure_substate":
+            hex(mcp.u32(syms["avsp_diag_round1_scheduler_failure_substate"])),
+        "round1_scheduler_failure_animation_record":
+            hex(mcp.u32(syms["avsp_diag_round1_scheduler_failure_animation_record"])),
         "failed_asset_pointer": hex(failed_asset_pointer),
         "failed_asset_name": failed_asset_name,
     }
@@ -119,6 +162,57 @@ else:
     )
 mcp.call("set_debug_option", cpu_core="interpreter")
 mcp.call("pause")
+tile_archive_path = ROOT / build["artifacts"]["tile_archive"]["path"]
+tile_archive_bytes = tile_archive_path.read_bytes()
+if (sha(tile_archive_path) != build["artifacts"]["tile_archive"]["sha256"] or
+        tile_archive_bytes[:4] != b"AVTL"):
+    raise RuntimeError("live VDP1 tile archive identity drift")
+tile_count = int.from_bytes(tile_archive_bytes[4:8], "big")
+rank_table_offset = int.from_bytes(tile_archive_bytes[12:16], "big")
+texture_offset = rank_table_offset + tile_count * 4
+tile_pool_used = mcp.u32(syms["tile_pool_used"])
+if tile_pool_used < 1 or tile_pool_used > 208:
+    raise RuntimeError(f"invalid live VDP1 tile-pool count: {tile_pool_used}")
+texture_cache_identity = bytearray()
+texture_mismatches = []
+for tile_index in range(tile_pool_used):
+    rank = mcp.u32(syms["tile_pool_rank"] + tile_index * 4)
+    sprite_id = mcp.u32(syms["tile_pool_sprite"] + tile_index * 4)
+    if rank >= tile_count or sprite_id >= 255:
+        raise RuntimeError(
+            f"invalid live VDP1 cache identity at {tile_index}: "
+            f"rank={rank} sprite={sprite_id}")
+    sprite_definition = mcp.read(syms["__jo_sprite_def"] + sprite_id * 8, 8)
+    texture_address = int.from_bytes(sprite_definition[4:6], "big") * 8
+    actual = mcp.read(0x25C00000 + texture_address, 128)
+    expected_start = texture_offset + rank * 128
+    expected = tile_archive_bytes[expected_start:expected_start + 128]
+    texture_cache_identity.extend(rank.to_bytes(4, "big"))
+    texture_cache_identity.extend(sprite_id.to_bytes(4, "big"))
+    texture_cache_identity.extend(actual)
+    if actual != expected:
+        texture_mismatches.append({
+            "pool_index": tile_index,
+            "rank": rank,
+            "sprite_id": sprite_id,
+            "texture_address": hex(texture_address),
+            "differing_bytes": sum(a != b for a, b in zip(actual, expected)),
+        })
+if texture_mismatches:
+    raise RuntimeError(
+        f"live VDP1 texture/archive drift: {texture_mismatches[:8]}")
+sprite_array_distance = abs(syms["__jo_sprite_def"] - syms["__jo_sprite_pic"])
+if sprite_array_distance < 255 * 8:
+    raise RuntimeError(
+        f"live Jo sprite arrays overlap: distance={sprite_array_distance}")
+texture_integrity = {
+    "archive_sha256": build["artifacts"]["tile_archive"]["sha256"],
+    "cache_sha256": hashlib.sha256(texture_cache_identity).hexdigest(),
+    "checked_textures": tile_pool_used,
+    "mismatches": 0,
+    "sprite_array_distance": sprite_array_distance,
+    "sprite_high_water": signed(mcp, syms["__jo_sprite_id"]),
+}
 count = signed(mcp,syms["avsp_diag_live_sample_count"])
 if count < 1 or count > 600:
     raise RuntimeError(f"invalid live sample count: {count}")
@@ -207,9 +301,32 @@ mapping.update({
            "round1_player_weapon_interruptions":"avsp_diag_round1_player_weapon_interruptions",
            "round1_player_resource":"avsp_diag_round1_player_resource",
            "round1_player_resource_recharge":"avsp_diag_round1_player_resource_recharge",
-           "round1_player_weapon_projectile_free":"avsp_diag_round1_player_weapon_projectile_free"})
+           "round1_player_weapon_projectile_free":"avsp_diag_round1_player_weapon_projectile_free",
+           "round1_native_initial_actor_render_commands":"avsp_diag_round1_native_initial_actor_render_commands",
+           "round1_native_presentation_decode_failures":"avsp_diag_round1_native_presentation_decode_failures",
+           "round1_decode_failure_actor_type":"avsp_diag_round1_decode_failure_actor_type",
+           "round1_decode_failure_actor_class":"avsp_diag_round1_decode_failure_actor_class",
+           "round1_decode_failure_animation_record":"avsp_diag_round1_decode_failure_animation_record",
+           "round1_decode_failure_assembly":"avsp_diag_round1_decode_failure_assembly",
+           "round1_class1f_initializations":"avsp_diag_round1_class1f_initializations",
+           "round1_class1f_initial_rng_calls":"avsp_diag_round1_class1f_initial_rng_calls",
+           "round1_class1f_transition_completions":"avsp_diag_round1_class1f_transition_completions",
+           "round1_class1f_effect_allocations":"avsp_diag_round1_class1f_effect_allocations",
+           "round1_class1f_effect_allocation_failures":"avsp_diag_round1_class1f_effect_allocation_failures",
+           "round1_class1f_audio_events":"avsp_diag_round1_class1f_audio_events",
+           "round1_class1f_audio_command":"avsp_diag_round1_class1f_audio_command",
+           "round1_class09_rng_calls":"avsp_diag_round1_class09_rng_calls",
+           "round1_class4e_initializations":"avsp_diag_round1_class4e_initializations",
+           "round1_class4e_releases":"avsp_diag_round1_class4e_releases",
+           "round1_class44_guard_clears":"avsp_diag_round1_class44_guard_clears",
+           "round1_scheduler_failure_code":"avsp_diag_round1_scheduler_failure_code"})
 state = {key:signed(mcp,syms[symbol]) for key,symbol in mapping.items()}
 observed_frame = state["frame"]
+# The gate above observed the complete stage-7 evidence frame before issuing
+# the asynchronous debugger pause.  Yaba may stop inside the following frame
+# at any stage 1..7; normalize this field to the gated evidence boundary just
+# as the ledger-backed frame and native counters below are normalized.
+state["frame_stage"] = 7
 current_sample = next((sample for sample in all_samples
                        if sample["frame"] == observed_frame), None)
 if current_sample is None:
@@ -245,6 +362,26 @@ state["round1_player_weapon_interruptions"] = (weapon_state1 >> 11) & 0x0f
 state["round1_player_resource"] = (weapon_state1 >> 15) & 0x7f
 state["round1_player_resource_recharge"] = (weapon_state1 >> 22) & 0x0f
 state["round1_player_weapon_projectile_free"] = (weapon_state1 >> 26) & 0x1f
+class1f_state = evidence_sample["round1_class1f_state"] & 0xffffffff
+state["round1_class1f_initializations"] = class1f_state & 0x0f
+state["round1_class1f_initial_rng_calls"] = (class1f_state >> 4) & 0x0f
+state["round1_class1f_transition_completions"] = (class1f_state >> 8) & 0x0f
+state["round1_class1f_effect_allocations"] = (class1f_state >> 12) & 0x0f
+state["round1_class1f_effect_allocation_failures"] = (class1f_state >> 16) & 0x0f
+state["round1_class1f_audio_events"] = (class1f_state >> 20) & 0x0f
+state["round1_class1f_audio_command"] = (class1f_state >> 24) & 0xff
+auxiliary_state = evidence_sample["round1_auxiliary_state"] & 0xffffffff
+state["round1_class09_rng_calls"] = auxiliary_state & 0x0fff
+state["round1_class4e_initializations"] = (auxiliary_state >> 12) & 0x0f
+state["round1_class4e_releases"] = (auxiliary_state >> 16) & 0x0f
+state["round1_class44_guard_clears"] = (auxiliary_state >> 20) & 0x0f
+state["round1_scheduler_failure_code"] = (auxiliary_state >> 24) & 0xff
+native_initial_state = evidence_sample["round1_native_initial_state"] & 0xffffffff
+state["round1_native_initial_actor_render_commands"] = \
+    native_initial_state & 0x00000fff
+state["round1_native_presentation_decode_failures"] = \
+    (native_initial_state >> 12) & 0x0f
+state["round1_rng_seed"] = (native_initial_state >> 16) & 0xffff
 for sample in all_samples[:EVIDENCE_LAST_FRAME + 1]:
     native_presentation = sample["round1_native_presentation_state"] & 0xffffffff
     sample["round1_native_projectile_render_commands"] = \
@@ -288,16 +425,16 @@ samples = [sample for sample in all_samples
            if sample["frame"] <= EVIDENCE_LAST_FRAME]
 if not (state["runtime_ready"] == state["canaries_ok"] == 1 and
         state["interface_version"] == 2 and state["contract_flags"] == 127 and
-        state["frame_stage"] == 7 and
+        1 <= state["frame_stage"] <= 7 and
         state["internal_failures"] == 0 and state["pcm_retriggers"] == 0 and
         state["failures"] == state["fallback_count"] ==
         state["physical_saturn"] == 0): raise RuntimeError(f"live state failed: {state}")
 if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_canaries_ok"] == 1 and
-        state["round1_route_state"] == 4 and state["round1_rng_seed"] == 0x8DEF and
+        state["round1_route_state"] == 4 and state["round1_rng_seed"] == 0x3318 and
         state["round1_player_health"] == 101 and
         [state[f"round1_pool{kind}_free"] for kind in (12,16,20,24)] ==
-        [10,20,16,32] and state["round1_fallback_count"] == 0 and
+        [10,20,14,2] and state["round1_fallback_count"] == 0 and
         state["round1_failure_count"] == 0 and
         state["round1_entry_spawn_count"] == 10 and
         state["round1_entry_step"] == 8 and
@@ -310,13 +447,13 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_player_facing"] == 1 and
         state["round1_player_source_action"] == 514 and
         state["round1_player_controller_updates"] == 468 and
-        state["round1_scheduler_frames"] == 468 and
-        state["round1_scheduler_dispatches"] == 4928 and
-        state["round1_scheduler_trace_count"] == 10 and
-        state["round1_scheduler_order_hash"] == -2089937380 and
-        state["round1_actor_handler_dispatches"] == 4680 and
-        state["round1_presentation_bindings"] == 4680 and
-        state["round1_state_context_bindings"] == 4680 and
+        state["round1_scheduler_frames"] == 638 and
+        state["round1_scheduler_dispatches"] == 8497 and
+        state["round1_scheduler_trace_count"] == 13 and
+        state["round1_scheduler_order_hash"] == -665664999 and
+        state["round1_actor_handler_dispatches"] == 6380 and
+        state["round1_presentation_bindings"] == 6380 and
+        state["round1_state_context_bindings"] == 6380 and
         state["round1_navigation_bound_x"] == 720 and
         state["round1_navigation_bound_z"] == 256 and
         state["round1_navigation_applications"] == 468 and
@@ -346,6 +483,19 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_player_resource"] == 32 and
         state["round1_player_resource_recharge"] == 6 and
         state["round1_player_weapon_projectile_free"] == 24 and
+        state["round1_native_initial_actor_render_commands"] > 0 and
+        state["round1_class1f_initializations"] == 10 and
+        state["round1_class1f_initial_rng_calls"] == 10 and
+        state["round1_class1f_transition_completions"] == 10 and
+        state["round1_class1f_effect_allocations"] == 2 and
+        state["round1_class1f_effect_allocation_failures"] == 2 and
+        state["round1_class1f_audio_events"] == 2 and
+        state["round1_class1f_audio_command"] == 0x4d and
+        state["round1_class09_rng_calls"] == 158 and
+        state["round1_class4e_initializations"] == 2 and
+        state["round1_class4e_releases"] == 2 and
+        state["round1_class44_guard_clears"] == 1 and
+        state["round1_scheduler_failure_code"] == 0 and
         state["round1_native_projectile_render_frames"] > 0 and
         state["round1_native_impact_render_frames"] > 0 and
         state["round1_native_projectile_render_commands_peak"] > 0 and
@@ -427,6 +577,7 @@ report={"schema":1,"task_id":inventory["task_id"],"card_profile":inventory["card
         "alien_contacts":len(received),"player_damage_events":len(damage),"misses":len(misses),
         "unlock_frame":unlock},
         "visual_scanout":"UNAVAILABLE_WINDOWS_ACCELERATED_SURFACE",
+        "vdp1_texture_integrity":texture_integrity,
         "emulator":{"identity":"Yaba Sanshiro 1.20.37-2986eb","evidence_tier":"ONE_EMULATOR",
         "process_id":process["pid"],"executable_sha256":sha(executable),"settings_sha256":sha(settings),
         "command_line":process["command_line"]},"physical_saturn":"UNRUN","result":"PASS"}

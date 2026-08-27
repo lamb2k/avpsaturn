@@ -39,6 +39,19 @@ The focused lane rejects 64 mutations; Fast, Oracle, release Target, and paired
 Emulator pass. Explicit header dependencies and a complete-hash assertion prevent
 stale target binding after SPEC regeneration.
 
+The renderer-integrity checkpoint is also complete. The corruption was not a
+VDP2 plane defect: stale Jo Engine `sprites.o`/`3d.o` objects provided 128-entry
+arrays to a 255-entry caller configuration, overlapping sprite pictures and
+definitions. The build now makes those objects configuration-dependent and
+rejects less than 2,040 bytes of linked array separation. Standard Jo DMA upload
+is retained. Two cold runs at ISO
+`059b7b3422eedd19f47761d01d88e0a6e082db85ad9eeb6142928b165e77ebf5`
+match all 208 live textures with zero mismatches and high-water 225/255. Direct
+inspection is clean; Fast, Oracle, Target, paired Emulator, and 82 focused
+mutations pass. STRIPS.BIN owns retained source-derived background/scroll
+presentation only; its captured foreground schedule remains excluded from
+playable gameplay authority.
+
 Next, close only the preserved class-0x1F initial `0x0200:1000/1200/1400`
 transitions from accepted Oracle evidence. Amend the existing SPEC fixture; run
 the smallest bounded Oracle follow-up only for a genuinely absent exact field.

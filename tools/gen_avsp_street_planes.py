@@ -430,10 +430,12 @@ def main() -> None:
         "schema": "rp4-street-planes-v0",
         "classification": "tracked manifest of the private STRIPS.BIN; "
                           "dimensions, counts and hashes only",
-        "fixture_role": "VALIDATION FIXTURE ONLY: the captured object "
-                        "schedule and strips ship solely in the "
-                        "AVSP_STREET_TEST profile and must never become "
-                        "a production scene or gameplay payload",
+        "fixture_role": "HYBRID SOURCE-DERIVED STAGE PACKAGE: the two "
+                        "background planes, palette/scroll records, and "
+                        "patches are retained playable-slice presentation "
+                        "data; the captured foreground object schedule "
+                        "remains validation-only and is excluded from "
+                        "AVSP_PLAYABLE_SLICE gameplay authority",
         "interval": {"first_frame": FIRST_FRAME, "last_frame": LAST_FRAME},
         "strips_bin_sha256": hashlib.sha256(blob).hexdigest(),
         "strips_bin_bytes": len(blob),

@@ -2,11 +2,10 @@
 
 data/avsp_palette_coverage.json records that the shipped archive carries a
 single-frame ADAPTED palette while the captured routes reference more banks
-than it holds. That is correctly harmless today - the ROM tile path renders
-street aliens only, and their banks are shipped - and it is deliberately NOT
-fixed now, because the consumer that needs full coverage is the S3 full-cast
-tile path, and regenerating ahead of a consumer is how this project has
-previously produced correct-but-unusable data.
+than it holds. The bounded first-segment archive also includes banks required
+by accepted SPEC-02 projectile/impact presentation. Those source-bound banks
+are valid shipped provenance even if the older enemy/stalker capture pair does
+not reference them.
 
 The risk that creates is silent drift: someone widens the archive scope, the
 palette stays a single-frame snapshot, and actors render with resolved-to-wrong
@@ -58,7 +57,9 @@ def main() -> int:
         print("\n%d check(s) failed" % len(FAILURES))
         return 1
 
-    referenced: set[int] = set()
+    referenced: set[int] = {
+        int(b, 16) for b in coverage.get("source_bound_spec02_banks", [])
+    }
     uncovered: set[int] = set()
     sampled = 0
     for route in routes:
@@ -69,6 +70,13 @@ def main() -> int:
     # C - non-vacuous
     check(sampled > 0, "no frames were sampled; the artifact proves nothing")
     check(bool(referenced), "no colour banks were referenced in any route")
+    manifest_spec_banks = {
+        int(b, 16) for b in tiles.get("routes", {}).get(
+            "spec02_round1_button1_presentations", {}).get(
+                "palette_banks", [])
+    }
+    check(referenced.issuperset(manifest_spec_banks),
+          "coverage dropped accepted SPEC-02 palette-bank provenance")
 
     # A - shipped banks must be real
     stale = sorted(shipped - referenced)

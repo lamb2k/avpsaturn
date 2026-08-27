@@ -98,7 +98,7 @@ def decode_route_sample(rom, root):
 
 
 def load_spec02_round1_presentations():
-    """The exact route-reachable Button1 assemblies, derived from SPEC-02.
+    """The exact short-lived Round 1 assemblies, derived from SPEC-02.
 
     These actors are shorter-lived than the retained capture-corpus sampling
     window.  Keeping their source addresses in the accepted fixture and
@@ -107,7 +107,8 @@ def load_spec02_round1_presentations():
     """
     fixture_bytes = SPEC_FIXTURE_PATH.read_bytes()
     fixture = json.loads(fixture_bytes)
-    lifecycle = fixture["authority_data"]["player"][
+    authority = fixture["authority_data"]
+    lifecycle = authority["player"][
         "weapon_projectile_resource"]["implementation_contract"][
             "projectile_lifecycle_contract"]
     initialization = lifecycle["initialization"]
@@ -126,6 +127,9 @@ def load_spec02_round1_presentations():
                     seen.add(key)
                     result.append({
                         "kind": "projectile",
+                        "animation_record": int(
+                            presentations[sequence][phase]
+                                ["animation_record"], 16),
                         "assembly": assembly,
                         "facing": facing,
                         "coordinate_mode": actor_fields[
@@ -142,31 +146,99 @@ def load_spec02_round1_presentations():
             seen.add(key)
             result.append({
                 "kind": "impact",
+                "animation_record": int(record["animation_record"], 16),
                 "assembly": assembly,
                 "facing": 0,
                 "coordinate_mode": impact_fields["coordinate_mode_u8"],
                 "palette": impact_fields["palette_u8"],
                 "object_or": int(impact_fields["object_or_u16"], 16),
             })
+    def add_records(kind, records, facings, modes, object_or, palettes=(0,)):
+        for record in records:
+            assembly = int(record["assembly"], 16)
+            animation_record = int(record["animation_record"], 16)
+            for facing in facings:
+                for mode in modes:
+                    for palette in palettes:
+                        key = (kind, assembly, facing, mode, palette)
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        result.append({
+                            "kind": kind,
+                            "animation_record": animation_record,
+                            "assembly": assembly,
+                            "facing": facing,
+                            "coordinate_mode": mode,
+                            "palette": palette,
+                            "object_or": object_or,
+                        })
+
+    class1f = authority["enemies"]["archetypes"][3][
+        "initial_transition_contract"]
+    add_records("class1f-initial",
+                [record for sequence in class1f["animation_sequences"]
+                 for record in sequence["records"]], (1,), (1,), 0x8000,
+                tuple(sorted({actor["palette_u8"]
+                              for actor in class1f["actors"]})))
+    dependencies = authority["auxiliary"]["first_segment_dependencies"]
+    class09 = dependencies["class_0x09_type20_rng_owner"]
+    add_records("class09-initial",
+                [record for sequence in class09["animation_sequences"]
+                 for record in sequence["records"]], (0,), (0,), 0)
+    class4e = dependencies["class_0x4e_type24_variant4_effect"]
+    add_records("class4e-initial", class4e["animation_records"],
+                (0,), (2,), 0x8000)
+    class44 = dependencies["class_0x44_type24_command_guard_owner"]
+    class44_actor = class44["state0_presentation_actor"]
+    add_records("class44-initial", class44["animation_records"],
+                (class44_actor["facing_u8"],),
+                (class44_actor["coordinate_mode_u8"],),
+                int(class44_actor["object_or_u16"], 16))
     return result, hashlib.sha256(fixture_bytes).hexdigest()
 
 
+class FixturePoseRom:
+    """Supply one synthetic pose record while preserving assembly reads."""
+
+    def __init__(self, rom, assembly):
+        self.rom = rom
+        self.assembly = assembly
+        self.d = rom.d
+
+    def u16(self, offset):
+        if offset == 0x120002:
+            return 0
+        return self.rom.u16(offset)
+
+    def u32(self, offset):
+        if offset == 0x120004:
+            return self.assembly
+        return self.rom.u32(offset)
+
+
 def decode_spec02_presentations(rom, presentations):
-    """Decode fixture-owned family-2 assemblies through the supplied ROM."""
+    """Decode fixture-owned assemblies through the proven generic walker."""
     results = []
     for item in presentations:
-        assembly = item["assembly"]
-        top = rom.u16(assembly)
-        if top != 0x0002:
-            raise AssertionError("SPEC-02 assembly 0x%06x is not family 2" %
-                                 assembly)
-        entry = decode_family2_entry(
-            rom, assembly + 4, 944, 320, item["facing"], item["palette"],
-            item["object_or"], 720, 256,
-            item["coordinate_mode"] > 0)
-        results.append((item["kind"], assembly, item["facing"],
-                        tuple(int(entry[name], 16)
-                              for name in ("x", "y", "code", "attr"))))
+        work = bytearray(0x8000)
+        slot = V.ACTOR_ANCHOR - V.WORKRAM_BASE
+        work[slot] = 1
+        work[slot + 0x0d] = item["coordinate_mode"]
+        work[slot + 0x0e] = item["palette"]
+        work[slot + 0x0f] = item["facing"]
+        work[slot + 0x10:slot + 0x12] = (944).to_bytes(2, "big")
+        work[slot + 0x14:slot + 0x16] = (320).to_bytes(2, "big")
+        work[slot + 0x1c:slot + 0x20] = (0x120000).to_bytes(4, "big")
+        work[slot + 0x2e:slot + 0x30] = item["object_or"].to_bytes(2, "big")
+        flat, reason = V.decode_actor_entries(
+            FixturePoseRom(rom, item["assembly"]), bytes(work), slot,
+            720, 256)
+        if flat is None:
+            raise AssertionError("SPEC-02 assembly 0x%06x rejected: %s" %
+                                 (item["assembly"], reason))
+        results.append((item["kind"], item["assembly"], item["facing"],
+                        tuple(flat)))
     return results
 
 

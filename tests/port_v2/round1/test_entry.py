@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "5700f7c21d7820f0272f788b8177227de9a8047025817771efeed12cb421fe47"
+EXPECTED = "36cfbb29f0a826f1313699e8a13f0844188ee6cfcfecf29390d61622a648c8e5"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -35,7 +35,7 @@ def run(body, header_body, passes):
                    f"tests/port_v2/round1/round1_entry_test.c -o '{wsl(temp / 'test')}' && "
                    f"'{wsl(temp / 'test')}'")
         result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
-        assert (result.returncode == 0) == passes
+        assert (result.returncode == 0) == passes, result.stderr.decode(errors="replace")
 
 run(source, header, True)
 for before, after in (
@@ -74,10 +74,19 @@ for before, after in (
     ("++runtime->player_weapon_empty_auxiliary_releases;", "runtime->player_weapon_empty_auxiliary_releases += 2u;"),
     ("projectile->collision_result = -1;", "projectile->collision_result = 0;"),
     ("target->substate = 0x0200u;", "target->substate = 2u;"),
+    ("actor->substate = 0u;\n            ++runtime->class1f_transition_completions;", "actor->state = 0u;\n            actor->substate = 0u;\n            ++runtime->class1f_transition_completions;"),
     ("(runtime->player_weapon_impact_audio_selector + 2u) & 2u", "(runtime->player_weapon_impact_audio_selector + 0u) & 2u"),
-    ("runtime->route_state != 4 &&\n             pool->free_stack[pool->capacity - 1u] != last_slots[index]", "runtime->route_state == 4 &&\n             pool->free_stack[pool->capacity - 1u] != last_slots[index]"),
+    ("!runtime->entry.started &&\n             pool->free_stack[pool->capacity - 1u] != last_slots[index]", "runtime->entry.started &&\n             pool->free_stack[pool->capacity - 1u] != last_slots[index]"),
     ("projectile->y_fp += (long)motion->y * 256L;", "projectile->y_fp += (long)motion->y * 0L;"),
     ("projectile->assembly = record->assembly;", "projectile->assembly = 0UL;"),
+    ("(unsigned long)old_seed * 3UL &", "(unsigned long)old_seed * 2UL &"),
+    ("!(runtime->route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE &&\n           runtime->entry.spawned)", "!(runtime->route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE &&\n           0u)"),
+    ("transition->x_velocity = actor->facing == 0u ? -0x00030000L :\n            0x00030000L;", "transition->x_velocity = actor->facing == 0u ? -0x00020000L :\n            0x00020000L;"),
+    ("transition->y_acceleration = -0x00005000L;", "transition->y_acceleration = 0x00005000L;"),
+    ("actor->effect_timer = 42u;", "actor->effect_timer = 41u;"),
+    ("runtime->class1f_effect_guard = 0u;", "runtime->class1f_effect_guard = 1u;"),
+    ("actor->effect_timer = 3u;", "actor->effect_timer = 2u;"),
+    ("table_offset = 28u;", "table_offset = 24u;"),
 ):
     assert before in source
     run(source.replace(before, after), header, False)
@@ -85,7 +94,10 @@ for before, after in (
     ("{ 0xffa3c0u, 12u, 656, 312, 312,", "{ 0xffa3c0u, 12u, 657, 312, 312,"),
     ("{ AVSP_ROUND1_ENTRY_DWELL, 0x00u, 0u, 60u,", "{ AVSP_ROUND1_ENTRY_DWELL, 0x00u, 0u, 59u,"),
     ("    12u, 16u, 20u, 24u", "    16u, 12u, 20u, 24u"),
-    ("{ 0x0012e8ecUL, 0x0012f5deUL,", "{ 0x0012e8ecUL, 0x0012f994UL,"),
+    ("{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x8000, 216u,", "{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x8000, 215u,"),
+    ("{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x8000, 216u,", "{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 0u, 16u, 0x8000, 216u,"),
+    ("{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x8000, 216u,", "{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 15u, 0x8000, 216u,"),
+    ("{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x8000, 216u,", "{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x0000, 216u,"),
     ("{ 0x0200u, 0x1400u },", "{ 0x0200u, 0x1401u },"),
     ("    720, 256, 752, 1072,", "    720, 256, 752, 1200,"),
     ("    10u,\n    {255u, 2u, 6u, 255u,", "    9u,\n    {255u, 2u, 6u, 255u,"),
@@ -107,6 +119,12 @@ for before, after in (
     ("    0u, 0u, 0x8000u\n};\n\nstatic const AvspRound1CollisionBoxSpec avsp_round1_weapon_projectile_hurt_box", "    0u, 0u, 0x0000u\n};\n\nstatic const AvspRound1CollisionBoxSpec avsp_round1_weapon_projectile_hurt_box"),
     ("    0u, 0u, 0x8000u,\n    { 0x007eu, 0x0148u }", "    0u, 1u, 0x8000u,\n    { 0x007eu, 0x0148u }"),
     ("{ 2u, -32768, 0x0008701cUL, 0x000871aaUL, 0u, 0u },", "{ 2u, -32767, 0x0008701cUL, 0x000871aaUL, 0u, 0u },"),
+    ("{ 0x00ffa300UL, 0x0200u, 0x1400u, 704, 296, 296, 1u, 1u, 19u, 0x8000, 3u,", "{ 0x00ffa300UL, 0x0200u, 0x1400u, 704, 296, 296, 1u, 1u, 19u, 0x8000, 4u,"),
+    ("{ 60u, 3u, AVSP_ROUND1_ANIMATION_TERMINAL_STATE_GUARD, { { 8u, 1,", "{ 60u, 3u, AVSP_ROUND1_ANIMATION_TERMINAL_STATE_GUARD, { { 7u, 1,"),
+    ("    0x004Du, 0x0118u, 0x0000u", "    0x004Du, 0x0119u, 0x0000u"),
+    ("    { -8, 8 },", "    { -7, 8 },"),
+    ("0x00ffc580UL, 792, 296, 296, 0x0200u, 0x0000u, 0x08d9a4UL", "0x00ffc580UL, 792, 296, 296, 0x0202u, 0x0000u, 0x08d9a4UL"),
+    ("0x08d9a4UL, 0u, 0u, 0u, 0x8000u", "0x08d9a4UL, 0u, 0u, 0u, 0x0000u"),
 ):
     assert before in generated
     changed = generated.replace(before, after, 1)
@@ -125,4 +143,4 @@ for before, after in (
                    f"'{wsl(temp / 'test')}'")
         result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/global-bounds/neutral-stop/melee/Button1 differential: PASS (64 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/global-bounds/neutral-stop/melee/Button1 differential: PASS (82 real mutations)")

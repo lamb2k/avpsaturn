@@ -48,6 +48,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 import extract_avspu_stage1 as avsp        # noqa: E402
 from decode_avsp_object_stream import Rom  # noqa: E402
 import verify_avsp_object_corpus as V      # noqa: E402
+from census_full_route import RouteState   # noqa: E402
 from gen_avsp_emit_windows import (       # noqa: E402
     decode_spec02_presentations,
     load_spec02_round1_presentations,
@@ -83,6 +84,18 @@ TILE_BYTES = 128
 # by the free-running interpreter that the captured routes never visited;
 # closing it needs an actor-state-free assembly part walker.
 SAMPLE_STRIDE = 1
+FIRST_SEGMENT_SOURCE = ROOT / ".deps" / "mame" / "full_route"
+FIRST_SEGMENT_FIRST_FRAME = 2074
+FIRST_SEGMENT_LAST_EXCLUSIVE = 3474
+STARTUP_RESIDENCY_LAST_EXCLUSIVE = 2254
+SOURCE_POOL_LAYOUTS = (
+    (0x9580, 0xC0, 20),
+    (0xA480, 0x80, 20),
+    (0xAE80, 0x80, 16),
+    (0xB680, 0x80, 32),
+)
+NATIVE_INITIAL_FAMILIES = {(12, 0x1F), (20, 0x09),
+                           (24, 0x4E), (24, 0x44)}
 
 
 def entry_tile_codes(code: int, y: int, attr: int) -> set[int]:
@@ -119,6 +132,169 @@ def entry_tile_codes_exact(code: int, y: int, attr: int) -> set[int]:
                         + 0x10 * out_y)
             codes.add(tile)
     return codes
+
+
+def read_tile_sprite_pool() -> int:
+    text = MAIN_C.read_text(encoding="utf-8", errors="ignore")
+    match = re.search(r"#define\s+AVSP_TILE_SPRITE_POOL\s+(\d+)", text)
+    if not match:
+        raise SystemExit("AVSP_TILE_SPRITE_POOL not found in main.c")
+    return int(match.group(1))
+
+
+def read_main_define(name: str) -> int:
+    text = MAIN_C.read_text(encoding="utf-8", errors="ignore")
+    match = re.search(r"#define\s+%s\s+(\d+)(?:UL)?" % re.escape(name),
+                      text)
+    if not match:
+        raise SystemExit("%s not found in main.c" % name)
+    return int(match.group(1))
+
+
+def measure_spec02_composites(results, threshold: int) -> dict[str, int]:
+    """Measure SPEC entries too large for the bounded per-tile walker."""
+    entries = set()
+    max_bytes = 0
+    for _kind, _assembly, _facing, flat in results:
+        for index in range(0, len(flat), 4):
+            _x, y, code, attr = flat[index:index + 4]
+            nx = ((attr >> 8) & 0xF) + 1
+            ny = ((attr >> 12) & 0xF) + 1
+            if nx * ny <= threshold:
+                continue
+            entries.add((y & 0x6000, code, attr & 0xFFE0))
+            max_bytes = max(max_bytes, nx * ny * TILE_BYTES)
+    texture_bytes = sum(
+        ((((attr >> 8) & 0xF) + 1) *
+         (((attr >> 12) & 0xF) + 1) * TILE_BYTES)
+        for _y_bits, _code, attr in entries)
+    return {"spec02_composite_unique_entries": len(entries),
+            "spec02_composite_texture_bytes": texture_bytes,
+            "spec02_composite_max_texture_bytes": max_bytes}
+
+
+def measure_first_segment_presentation_peak(rom: Rom) -> dict[str, int]:
+    """Measure the exact live-tile union for the native initial families."""
+    route = RouteState(FIRST_SEGMENT_SOURCE)
+    peak_tiles = 0
+    peak_frame = 0
+    peak_actors = 0
+    peak_entries = 0
+    try:
+        for frame in route.frames():
+            number = frame["frame"]
+            if number < FIRST_SEGMENT_FIRST_FRAME:
+                continue
+            if number >= FIRST_SEGMENT_LAST_EXCLUSIVE:
+                break
+            work = route.current["workram"]
+            presentations = []
+            for base, stride, capacity in SOURCE_POOL_LAYOUTS:
+                for index in range(capacity):
+                    offset = base + index * stride
+                    if (work[offset] != 1 or
+                        (work[offset + 8], work[offset + 2]) not in
+                            NATIVE_INITIAL_FAMILIES):
+                        continue
+                    animation = int.from_bytes(
+                        work[offset + 0x1C:offset + 0x20], "big")
+                    assembly = rom.u32(animation + 4) if animation else 0
+                    if assembly == 0 or rom.u16(assembly) == 0x0008:
+                        continue
+                    presentations.append({
+                        "kind": "first-segment-source",
+                        "animation_record": animation,
+                        "assembly": assembly,
+                        "facing": work[offset + 0x0F],
+                        "coordinate_mode": work[offset + 0x0D],
+                        "palette": work[offset + 0x0E],
+                        "object_or": int.from_bytes(
+                            work[offset + 0x2E:offset + 0x30], "big"),
+                    })
+            if not presentations:
+                continue
+            decoded = decode_spec02_presentations(rom, presentations)
+            codes: set[int] = set()
+            entries = 0
+            for _kind, _assembly, _facing, flat in decoded:
+                entries += len(flat) // 4
+                for word in range(0, len(flat), 4):
+                    _x, y, code, attr = flat[word:word + 4]
+                    codes |= entry_tile_codes_exact(code, y, attr)
+            if len(codes) > peak_tiles:
+                peak_tiles = len(codes)
+                peak_frame = number
+                peak_actors = len(presentations)
+                peak_entries = entries
+    finally:
+        route.close()
+    if peak_tiles == 0:
+        raise SystemExit("first-segment presentation peak was not measured")
+    return {"source_peak_unique_tiles": peak_tiles,
+            "source_peak_frame": peak_frame,
+            "source_peak_actors": peak_actors,
+            "source_peak_object_entries": peak_entries}
+
+
+def measure_startup_noncomposite_peak(rom: Rom, threshold: int) -> dict:
+    """Measure ordinary tiles in the accepted boot-to-handoff window."""
+    route = RouteState(FIRST_SEGMENT_SOURCE)
+    peak_tiles = 0
+    peak_frame = 0
+    try:
+        for frame in route.frames():
+            number = frame["frame"]
+            if number < FIRST_SEGMENT_FIRST_FRAME:
+                continue
+            if number >= STARTUP_RESIDENCY_LAST_EXCLUSIVE:
+                break
+            work = route.current["workram"]
+            presentations = []
+            for base, stride, capacity in SOURCE_POOL_LAYOUTS:
+                for index in range(capacity):
+                    offset = base + index * stride
+                    if (work[offset] != 1 or
+                        (work[offset + 8], work[offset + 2]) not in
+                            NATIVE_INITIAL_FAMILIES):
+                        continue
+                    animation = int.from_bytes(
+                        work[offset + 0x1C:offset + 0x20], "big")
+                    assembly = rom.u32(animation + 4) if animation else 0
+                    if assembly == 0 or rom.u16(assembly) == 0x0008:
+                        continue
+                    presentations.append({
+                        "kind": "startup-source",
+                        "animation_record": animation,
+                        "assembly": assembly,
+                        "facing": work[offset + 0x0F],
+                        "coordinate_mode": work[offset + 0x0D],
+                        "palette": work[offset + 0x0E],
+                        "object_or": int.from_bytes(
+                            work[offset + 0x2E:offset + 0x30], "big"),
+                    })
+            tiles: set[int] = set()
+            if presentations:
+                decoded = decode_spec02_presentations(rom, presentations)
+                for _kind, _assembly, _facing, flat in decoded:
+                    for word in range(0, len(flat), 4):
+                        _x, y, code, attr = flat[word:word + 4]
+                        nx = ((attr >> 8) & 0xF) + 1
+                        ny = ((attr >> 12) & 0xF) + 1
+                        if nx * ny <= threshold:
+                            tiles |= entry_tile_codes_exact(code, y, attr)
+            if len(tiles) > peak_tiles:
+                peak_tiles = len(tiles)
+                peak_frame = number
+    finally:
+        route.close()
+    if peak_tiles == 0:
+        raise SystemExit("startup non-composite peak was not measured")
+    return {
+        "startup_source_frame_range": [FIRST_SEGMENT_FIRST_FRAME,
+                                         STARTUP_RESIDENCY_LAST_EXCLUSIVE - 1],
+        "startup_peak_noncomposite_tiles": peak_tiles,
+        "startup_peak_noncomposite_frame": peak_frame,
+    }
 
 
 def collect_full_route_entries(spec, tiles, banks):
@@ -291,6 +467,7 @@ def main() -> int:
     gfx = avsp.load_gfx_region()
     avsp.verify_loaded_gfx_region(gfx)
     schedule_sha256 = None
+    presentation_residency = None
     if args.probe3_schedule:
         schedule_path = args.probe3_schedule.resolve()
         schedule_bytes = schedule_path.read_bytes()
@@ -322,17 +499,89 @@ def main() -> int:
             load_spec02_round1_presentations())
         spec_results = decode_spec02_presentations(rom, spec_presentations)
         spec_tile_count_before = len(tiles)
+        spec_palette_banks: set[int] = set()
         for _kind, _assembly, _facing, flat in spec_results:
-            _x, y, code, attr = flat
-            tiles |= entry_tile_codes_exact(code, y, attr)
-            banks.add(attr & 0x1F)
+            for index in range(0, len(flat), 4):
+                _x, y, code, attr = flat[index:index + 4]
+                tiles |= entry_tile_codes_exact(code, y, attr)
+                spec_palette_banks.add(attr & 0x1F)
+                banks.add(attr & 0x1F)
         per_route["spec02_round1_button1_presentations"] = {
             "fixture_sha256": spec_fixture_sha256,
             "decoded_variants": len(spec_results),
             "unique_assemblies": len({item["assembly"]
                                       for item in spec_presentations}),
             "tiles_added": len(tiles) - spec_tile_count_before,
+            "palette_banks": ["0x%02X" % bank for bank in
+                              sorted(spec_palette_banks)],
         }
+        presentation_residency = measure_first_segment_presentation_peak(rom)
+        fixture = json.loads((ROOT / "data" /
+                              "spec02_round1_generated_fixtures.json")
+                             .read_text(encoding="ascii"))
+        attempts = fixture["authority_data"]["player"][
+            "weapon_projectile_resource"]["implementation_contract"][
+                "sufficient_volley"]["attempt_counter_initial"]
+        projectile_max = max(
+            len({tile for index in range(0, len(flat), 4)
+                 for tile in entry_tile_codes_exact(
+                     flat[index + 2], flat[index + 1], flat[index + 3])})
+            for kind, _assembly, _facing, flat in spec_results
+            if kind == "projectile")
+        impact_max = max(
+            len({tile for index in range(0, len(flat), 4)
+                 for tile in entry_tile_codes_exact(
+                     flat[index + 2], flat[index + 1], flat[index + 3])})
+            for kind, _assembly, _facing, flat in spec_results
+            if kind == "impact")
+        per_tile_required = (
+            presentation_residency["source_peak_unique_tiles"] +
+            attempts * (projectile_max + impact_max))
+        composite_threshold = read_main_define(
+            "AVSP_COMPOSITE_TILE_THRESHOLD")
+        composite = measure_spec02_composites(spec_results,
+                                               composite_threshold)
+        startup_residency = measure_startup_noncomposite_peak(
+            rom, composite_threshold)
+        configured_tiles = read_tile_sprite_pool()
+        configured_composites = read_main_define(
+            "AVSP_COMPOSITE_SPRITE_POOL")
+        composite_budget = read_main_define(
+            "AVSP_COMPOSITE_TEXTURE_BUDGET")
+        composite_max = read_main_define(
+            "AVSP_COMPOSITE_MAX_TEXTURE_BYTES")
+        presentation_residency.update({
+            "source_capture": str(FIRST_SEGMENT_SOURCE.relative_to(ROOT))
+                .replace("\\", "/"),
+            "source_frame_range": [FIRST_SEGMENT_FIRST_FRAME,
+                                   FIRST_SEGMENT_LAST_EXCLUSIVE - 1],
+            "projectile_simultaneous_bound": attempts,
+            "max_tiles_per_projectile": projectile_max,
+            "max_tiles_per_impact": impact_max,
+            "per_tile_scanout_requirement": per_tile_required,
+            "retained_tile_sprite_pool": configured_tiles,
+            "configured_composite_slots": configured_composites,
+            "configured_composite_texture_budget": composite_budget,
+            "configured_composite_max_texture_bytes": composite_max,
+            "composite_tile_threshold": composite_threshold,
+            **composite,
+            **startup_residency,
+            "mid_frame_lru_replacement_allowed": False,
+        })
+        if configured_tiles < startup_residency[
+                "startup_peak_noncomposite_tiles"]:
+            raise SystemExit(
+                "REFUSING to build: retained tile pool cannot hold the "
+                "accepted startup non-composite peak")
+        if (configured_composites <
+                composite["spec02_composite_unique_entries"] or
+            composite_budget <
+                composite["spec02_composite_texture_bytes"] or
+            composite_max <
+                composite["spec02_composite_max_texture_bytes"]):
+            raise SystemExit(
+                "REFUSING to build: native object-entry composite budget "
+                "cannot hold the accepted SPEC-02 presentation union")
         palette_path = pick_palette_frame()
         scope = args.scope
         facing_union = True
@@ -386,6 +635,8 @@ def main() -> int:
         "routes": per_route,
         "gfx_region_sha256": hashlib.sha256(bytes(gfx)).hexdigest(),
     }
+    if presentation_residency is not None:
+        manifest["presentation_residency"] = presentation_residency
     if schedule_sha256 is not None:
         manifest["probe3_schedule"] = {
             "file": str(schedule_path.relative_to(ROOT)).replace("\\", "/"),

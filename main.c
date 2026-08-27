@@ -98,11 +98,13 @@
    (202,564 bytes) is what currently fits; widening to stalkers/boss
    needs more PCM moved to phase-boundary loads first (S3 enabler,
    tracked in the handoff), not a bigger carve alone. */
-/* Widened from 0x40000 for the RP4 street archive (297,764 bytes with the
- * representative-interval object tiles). Scene loading boundaries are the
- * residency lever: the carve holds one scene-scope archive at a time and is
- * reloaded during transitions, when data-track reads are legal. */
-#define AVSP_TILE_REGION_BYTES 0x50000
+/* Widened from 0x40000 for the RP4 street archive and to the smallest aligned
+ * carve that co-resides the SPEC-02-bound initial Round 1 presentations with
+ * the accepted combat overlay (332,708 + 24,236 bytes). Scene loading
+ * boundaries are the residency lever: the carve holds one scene-scope
+ * archive at a time and is reloaded during transitions, when data-track
+ * reads are legal. */
+#define AVSP_TILE_REGION_BYTES 0x58000
 
 /* RP4 street test: the interval strip bundle is staged after the tile
  * carve, outside the allocator, only in that build profile. */
@@ -135,11 +137,16 @@ char avsp_diag_print_buffer[128];
 #define BITMAP_SCENE_FRONTEND_BASE 100
 #define BITMAP_SCENE_ROUTE_BASE 200
 #define AVSP_VDP1_TEXTURE_BUDGET 458488
-/* S2 Body E: resident VDP1 pool of 16x16 ROM tile textures, LRU-replaced
-   in place, so the per-frame cost is command-table-only (the reference
-   port's measured model: per-16x16-tile normal sprites in colour-bank
-   mode). */
-#define AVSP_TILE_SPRITE_POOL 96
+/* S2 Body E retains the proven per-tile renderer.  Only CPS2 entries larger
+   than its measured 35-tile startup threshold become one source-derived
+   composite.  The accepted startup window needs five such entries (36,736
+   bytes) and peaks at 162 remaining tiles, so 208 resident tile definitions
+   leave measured headroom without crossing SGL's 255-definition boundary. */
+#define AVSP_TILE_SPRITE_POOL 208
+#define AVSP_COMPOSITE_TILE_THRESHOLD 35
+#define AVSP_COMPOSITE_SPRITE_POOL 5
+#define AVSP_COMPOSITE_TEXTURE_BUDGET 36736UL
+#define AVSP_COMPOSITE_MAX_TEXTURE_BYTES 11648UL
 #define AVSP_VDP1_TEXTURE_BYTES \
     (2 * CEL_BYTES + \
      AVSP_PLAYER_ACTION_LAYERS * AVSP_PLAYER_ACTION_DECODED_BYTES + \
@@ -147,6 +154,7 @@ char avsp_diag_print_buffer[128];
      AVSP_BOSS_DECODED_BYTES + \
      AVSP_HUD_TEXTURE_BYTES + \
      AVSP_TILE_SPRITE_POOL * AVSP_TILE_BYTES + \
+     AVSP_COMPOSITE_TEXTURE_BUDGET + \
      AVSP_FRONTEND_VDP1_MAX_BYTES)
 
 #if JO_TV_WIDTH != CAP_VIEW_WIDTH || JO_TV_HEIGHT != 224
@@ -472,42 +480,42 @@ volatile int avsp_diag_slice_enemy_tile_identity;
 typedef struct
 {
     int frame;
-    int input_mask;
-    int player_x;
-    int player_lane;
-    int player_health;
-    int player_state;
-    int player_selector;
-    int player_attack_active;
-    int player_facing;
+    unsigned short input_mask;
+    short player_x;
+    short player_lane;
+    short player_health;
+    short player_state;
+    short player_selector;
+    short player_attack_active;
+    short player_facing;
     int player_animation_record;
     int player_assembly;
-    int player_screen_y;
-    int alien_x;
-    int alien_lane;
-    int alien_health;
-    int alien_state;
-    int alien_inner;
-    int alien_action;
-    int alien_facing;
+    short player_screen_y;
+    short alien_x;
+    short alien_lane;
+    short alien_health;
+    short alien_state;
+    short alien_inner;
+    short alien_action;
+    short alien_facing;
     int alien_animation_record;
     int alien_assembly;
-    int alien_screen_y;
-    int alien_rng;
-    int player_contact;
-    int alien_contact;
-    int player_damage;
-    int alien_damage;
-    int attack_miss;
-    int encounter_state;
-    int route_unlocked;
-    int continued_after_unlock;
-    int camera_world_x;
-    int failures;
-    int round1_player_x;
-    int round1_player_z;
-    int round1_player_facing;
-    int round1_player_source_action;
+    short alien_screen_y;
+    unsigned short alien_rng;
+    short player_contact;
+    short alien_contact;
+    short player_damage;
+    short alien_damage;
+    short attack_miss;
+    short encounter_state;
+    short route_unlocked;
+    short continued_after_unlock;
+    short camera_world_x;
+    short failures;
+    short round1_player_x;
+    short round1_player_z;
+    short round1_player_facing;
+    unsigned short round1_player_source_action;
     int round1_player_controller_updates;
     int round1_scheduler_frames;
     int round1_scheduler_dispatches;
@@ -522,6 +530,9 @@ typedef struct
     unsigned int round1_player_weapon_state0;
     unsigned int round1_player_weapon_state1;
     unsigned int round1_native_presentation_state;
+    unsigned int round1_class1f_state;
+    unsigned int round1_auxiliary_state;
+    unsigned int round1_native_initial_state;
 } LiveEncounterDiagSample;
 static AvspLiveEncounterRuntime live_encounter_runtime;
 static AvspLiveEncounterFrame live_encounter_frame;
@@ -639,7 +650,28 @@ volatile int avsp_diag_round1_player_resource_recharge;
 volatile int avsp_diag_round1_player_weapon_projectile_free;
 volatile int avsp_diag_round1_native_projectile_render_commands;
 volatile int avsp_diag_round1_native_impact_render_commands;
+volatile int avsp_diag_round1_native_initial_actor_render_commands;
 volatile int avsp_diag_round1_native_presentation_decode_failures;
+volatile int avsp_diag_round1_decode_failure_actor_type;
+volatile int avsp_diag_round1_decode_failure_actor_class;
+volatile unsigned long avsp_diag_round1_decode_failure_animation_record;
+volatile unsigned long avsp_diag_round1_decode_failure_assembly;
+volatile int avsp_diag_round1_class1f_initializations;
+volatile int avsp_diag_round1_class1f_initial_rng_calls;
+volatile int avsp_diag_round1_class1f_transition_completions;
+volatile int avsp_diag_round1_class1f_effect_allocations;
+volatile int avsp_diag_round1_class1f_effect_allocation_failures;
+volatile int avsp_diag_round1_class1f_audio_events;
+volatile int avsp_diag_round1_class1f_audio_command;
+volatile int avsp_diag_round1_class09_rng_calls;
+volatile int avsp_diag_round1_class4e_initializations;
+volatile int avsp_diag_round1_class4e_releases;
+volatile int avsp_diag_round1_class44_guard_clears;
+volatile int avsp_diag_round1_scheduler_failure_code;
+volatile int avsp_diag_round1_scheduler_failure_source_slot;
+volatile int avsp_diag_round1_scheduler_failure_state;
+volatile int avsp_diag_round1_scheduler_failure_substate;
+volatile unsigned long avsp_diag_round1_scheduler_failure_animation_record;
 /* Boot-to-first-control chronology. One packed u32 per state transition:
  *  0..3 route, 4 initialized, 5 visible, 6 P1 HUD, 7 P2 HUD,
  *  8 control, 9 retained step, 10 contact, 11 damage, 12 PCM event,
@@ -2682,6 +2714,21 @@ static void rom_actor_prepare(void)
         world.enemies[index].rom_box_x_lo = 0;
         world.enemies[index].rom_box_x_hi = 0;
     }
+    /* Native Round 1 actors can become visible before the quarantined
+     * retained encounter enters either street-wave presentation state.
+     * Initialize the shared, read-only presentation views independently of
+     * retained encounter state so those source actors never depend on the
+     * old shell to make their assemblies decodable. */
+    if (rom_actor_script.spans == 0)
+    {
+        rom_actor_script.rom = 0;
+        rom_actor_script.base = 0;
+        rom_actor_script.size = 0;
+        rom_actor_script.spans = avsp_anim_spans;
+        rom_actor_script.span_count = avsp_anim_span_count;
+        rom_actor_view.spans = avsp_emit_windows;
+        rom_actor_view.span_count = AVSP_EMIT_WINDOW_COUNT;
+    }
     /* Run only in the two street-wave combat states: outside them enemy
      * slots can be mid-initialization, and a reported freeze at the
      * character-confirm transition traced to ticking against one. */
@@ -2694,16 +2741,6 @@ static void rom_actor_prepare(void)
             rom_actor_entry_counts[index] = 0;
         }
         return;
-    }
-    if (rom_actor_script.spans == 0)
-    {
-        rom_actor_script.rom = 0;
-        rom_actor_script.base = 0;
-        rom_actor_script.size = 0;
-        rom_actor_script.spans = avsp_anim_spans;
-        rom_actor_script.span_count = avsp_anim_span_count;
-        rom_actor_view.spans = avsp_emit_windows;
-        rom_actor_view.span_count = AVSP_EMIT_WINDOW_COUNT;
     }
     for (index = 0; index < CAP_MAX_ENEMIES; ++index)
     {
@@ -2946,6 +2983,10 @@ static const AvspTileArchive *tile_pool_archive[AVSP_TILE_SPRITE_POOL];
 static unsigned long tile_pool_stamp[AVSP_TILE_SPRITE_POOL];
 static unsigned long tile_pool_clock;
 static int tile_pool_used;
+#ifdef AVSP_LIVE_ENCOUNTER
+static unsigned long round1_composite_texture_bytes;
+static int round1_composite_sprite_count;
+#endif
 #ifdef AVSP_PROBE3
 typedef void (*Probe3InterruptHandler)(void);
 typedef void (*Probe3SetScuHandler)(unsigned long, void *);
@@ -3059,6 +3100,10 @@ static int load_tile_archive(void)
 #endif
     tile_pool_used = 0;
     tile_pool_clock = 0;
+#ifdef AVSP_LIVE_ENCOUNTER
+    round1_composite_sprite_count = 0;
+    round1_composite_texture_bytes = 0UL;
+#endif
     tile_archive_ready = 1;
     return 1;
 }
@@ -3144,7 +3189,8 @@ static int tile_sprite_for_archive_rank(const AvspTileArchive *archive,
 #else
     if (tile_pool_used < AVSP_TILE_SPRITE_POOL)
     {
-        int sprite_id = jo_sprite_add_4bits_image(&img);
+        int sprite_id;
+        sprite_id = jo_sprite_add_4bits_image(&img);
         if (sprite_id < 0) return -1;
         tile_pool_sprite[tile_pool_used] = sprite_id;
         tile_pool_rank[tile_pool_used] = rank;
@@ -3301,6 +3347,78 @@ static int draw_rom_actor_tiles(const CapActor *actor, const int slot)
 }
 
 #ifdef AVSP_LIVE_ENCOUNTER
+static void street_object_palette(const int bank_slot, const int priority);
+
+typedef struct
+{
+    unsigned short y_code_bits;
+    unsigned short code;
+    unsigned short texture_attr;
+    unsigned short width;
+    unsigned short height;
+    int sprite_id;
+} AvspRound1CompositeSprite;
+
+static AvspRound1CompositeSprite
+    round1_composite_sprites[AVSP_COMPOSITE_SPRITE_POOL];
+static unsigned char
+    round1_composite_scratch[AVSP_COMPOSITE_MAX_TEXTURE_BYTES];
+static int round1_composite_sprite_for_entry(const AvspObjectEntry *entry,
+                                              int *width_out,
+                                              int *height_out)
+{
+    const unsigned short y_code_bits = entry->y & 0x6000u;
+    const unsigned short texture_attr = entry->attr & 0xffe0u;
+    const int width = ((((int)entry->attr >> 8) & 0x0f) + 1) * 16;
+    const int height = ((((int)entry->attr >> 12) & 0x0f) + 1) * 16;
+    int index;
+    long bytes;
+    jo_img_4bits image;
+
+    *width_out = width;
+    *height_out = height;
+    if ((width / 16) * (height / 16) <=
+        AVSP_COMPOSITE_TILE_THRESHOLD)
+        return -2;
+    for (index = 0; index < round1_composite_sprite_count; ++index)
+    {
+        const AvspRound1CompositeSprite *cached =
+            &round1_composite_sprites[index];
+        if (cached->y_code_bits == y_code_bits &&
+            cached->code == entry->code &&
+            cached->texture_attr == texture_attr)
+            return cached->sprite_id;
+    }
+    if (round1_composite_sprite_count >= AVSP_COMPOSITE_SPRITE_POOL)
+        return -2;
+    bytes = avsp_compose_entry_texture(
+        &tile_archive, entry->y, entry->code, entry->attr,
+        round1_composite_scratch, AVSP_COMPOSITE_MAX_TEXTURE_BYTES);
+    if (bytes < 0) return -1;
+    if (bytes == 0 ||
+        round1_composite_texture_bytes + (unsigned long)bytes >
+            AVSP_COMPOSITE_TEXTURE_BUDGET)
+        return -2;
+    image.width = width;
+    image.height = height;
+    image.data = round1_composite_scratch;
+    index = jo_sprite_add_4bits_image(&image);
+    if (index < 0) return -2;
+    round1_composite_sprites[round1_composite_sprite_count].y_code_bits =
+        y_code_bits;
+    round1_composite_sprites[round1_composite_sprite_count].code = entry->code;
+    round1_composite_sprites[round1_composite_sprite_count].texture_attr =
+        texture_attr;
+    round1_composite_sprites[round1_composite_sprite_count].width =
+        (unsigned short)width;
+    round1_composite_sprites[round1_composite_sprite_count].height =
+        (unsigned short)height;
+    round1_composite_sprites[round1_composite_sprite_count].sprite_id = index;
+    ++round1_composite_sprite_count;
+    round1_composite_texture_bytes += (unsigned long)bytes;
+    return index;
+}
+
 static int draw_round1_source_actor(const short world_x,
                                     const short world_y,
                                     const short world_z,
@@ -3308,6 +3426,9 @@ static int draw_round1_source_actor(const short world_x,
                                     const unsigned char coordinate_mode,
                                     const unsigned char palette,
                                     const unsigned short object_or,
+                                    const unsigned char actor_type,
+                                    const unsigned char actor_class,
+                                    const unsigned long animation_record,
                                     const unsigned long assembly)
 {
     AvspEmitActor actor;
@@ -3342,59 +3463,91 @@ static int draw_round1_source_actor(const short world_x,
     if (count <= 0 || count > 16)
     {
         ++avsp_diag_round1_native_presentation_decode_failures;
+        avsp_diag_round1_decode_failure_actor_type = (int)actor_type;
+        avsp_diag_round1_decode_failure_actor_class = (int)actor_class;
+        avsp_diag_round1_decode_failure_animation_record = animation_record;
+        avsp_diag_round1_decode_failure_assembly = assembly;
         return 0;
     }
     for (index = count - 1; index >= 0; --index)
     {
         const AvspObjectEntry *entry = &entries[index];
-        AvspEntryTile tiles[64];
+        AvspEntryTile tiles[AVSP_COMPOSITE_TILE_THRESHOLD];
         int offset_x = wrap_signed_10bit((int)(entry->x & 0x3ff) -
                                          (emit_origin_cps_x & 0x3ff));
         int offset_y = wrap_signed_10bit((int)(entry->y & 0x3ff) -
                                          origin_dec_y);
         int bank_slot = avsp_tiles_bank_slot(&tile_archive,
                                              entry->attr & 0x1f);
-        int tile_count = avsp_entry_tiles(entry->y, entry->code,
-                                          entry->attr, tiles, 64);
-        int tile_index;
-        if (tile_count <= 0 || bank_slot < 0)
+        int tile_count = avsp_entry_tiles(
+            entry->y, entry->code, entry->attr, tiles,
+            AVSP_COMPOSITE_TILE_THRESHOLD);
+        int width;
+        int height;
+        int sprite_id;
+        int jo_x;
+        int jo_y;
+        if (bank_slot < 0)
         {
             ++tile_diag_no_bank;
             continue;
         }
-        jo_sprite_set_palette_4bits(tile_palette.id, bank_slot);
-        for (tile_index = 0; tile_index < tile_count; ++tile_index)
+        street_object_palette(bank_slot, (entry->x >> 13) & 7);
+        if (tile_count > 0)
         {
-            long rank = avsp_tiles_find(&tile_archive,
-                                        tiles[tile_index].code);
-            int sprite_id;
-            int jo_x;
-            int jo_y;
-            if (rank < 0)
+            int tile_index;
+            for (tile_index = 0; tile_index < tile_count; ++tile_index)
             {
-                ++tile_diag_no_rank;
-                continue;
+                long rank = avsp_tiles_find(&tile_archive,
+                                            tiles[tile_index].code);
+                if (rank < 0)
+                {
+                    ++tile_diag_no_rank;
+                    continue;
+                }
+                sprite_id = tile_sprite_for_archive_rank(&tile_archive, rank);
+                if (sprite_id < 0)
+                {
+                    ++tile_diag_no_sprite;
+                    continue;
+                }
+                jo_x = screen_x + fit_352(offset_x +
+                                          tiles[tile_index].dx + 8);
+                jo_y = anchor_jo_y + offset_y +
+                    tiles[tile_index].dy + 8;
+                if (tiles[tile_index].flip_x)
+                    jo_sprite_enable_horizontal_flip();
+                if (tiles[tile_index].flip_y)
+                    jo_sprite_enable_vertical_flip();
+                jo_sprite_draw3D(sprite_id, jo_x, jo_y, depth);
+                ++rendered;
+                if (tiles[tile_index].flip_x)
+                    jo_sprite_disable_horizontal_flip();
+                if (tiles[tile_index].flip_y)
+                    jo_sprite_disable_vertical_flip();
             }
-            sprite_id = tile_sprite_for_archive_rank(&tile_archive, rank);
-            if (sprite_id < 0)
-            {
-                ++tile_diag_no_sprite;
-                continue;
-            }
-            jo_x = screen_x + fit_352(offset_x +
-                                      tiles[tile_index].dx + 8);
-            jo_y = anchor_jo_y + offset_y + tiles[tile_index].dy + 8;
-            if (tiles[tile_index].flip_x)
-                jo_sprite_enable_horizontal_flip();
-            if (tiles[tile_index].flip_y)
-                jo_sprite_enable_vertical_flip();
-            jo_sprite_draw3D(sprite_id, jo_x, jo_y, depth);
-            ++rendered;
-            if (tiles[tile_index].flip_x)
-                jo_sprite_disable_horizontal_flip();
-            if (tiles[tile_index].flip_y)
-                jo_sprite_disable_vertical_flip();
+            continue;
         }
+        sprite_id = round1_composite_sprite_for_entry(entry, &width,
+                                                       &height);
+        if (sprite_id == -1)
+        {
+            ++tile_diag_no_rank;
+            continue;
+        }
+        if (sprite_id < 0)
+        {
+            ++tile_diag_no_sprite;
+            continue;
+        }
+        jo_x = screen_x + fit_352(offset_x + width / 2);
+        jo_y = anchor_jo_y + offset_y + height / 2;
+        jo_sprite_change_sprite_scale_xy_fixed(
+            (jo_fixed)((JO_NO_ZOOM * (long)CAP_VIEW_WIDTH) /
+                       CAP_CPS2_VIEW_WIDTH), JO_NO_ZOOM);
+        jo_sprite_draw3D(sprite_id, jo_x, jo_y, depth);
+        jo_sprite_restore_sprite_scale();
+        ++rendered;
     }
     return rendered;
 }
@@ -3413,6 +3566,7 @@ static int draw_round1_weapon_projectiles(void)
             projectile->x, projectile->y, projectile->z,
             projectile->facing, projectile->coordinate_mode,
             projectile->palette, projectile->object_or,
+            5u, 0x05u, projectile->animation_record,
             projectile->assembly);
     }
     return rendered;
@@ -3432,7 +3586,37 @@ static int draw_round1_weapon_impacts(void)
         rendered += draw_round1_source_actor(
             actor->x, actor->y, actor->z, actor->facing,
             actor->coordinate_mode, actor->palette, actor->object_or,
+            actor->type, actor->actor_class, actor->animation_record,
             actor->assembly);
+    }
+    return rendered;
+}
+
+static int draw_round1_initial_source_actors(void)
+{
+    unsigned int pool_index;
+    int rendered = 0;
+    for (pool_index = 0u; pool_index < AVSP_ROUND1_POOL_COUNT; ++pool_index)
+    {
+        const AvspRound1Pool *pool = &round1_runtime.pools[pool_index];
+        unsigned int actor_index;
+        for (actor_index = 0u; actor_index < pool->capacity; ++actor_index)
+        {
+            const AvspRound1ActorCore *actor = &pool->records[actor_index];
+            int initial_source_actor =
+                (actor->type == 12u && actor->actor_class == 0x1f) ||
+                (actor->type == 20u && actor->actor_class == 0x09) ||
+                (actor->type == 24u && actor->actor_class == 0x4e) ||
+                (actor->type == 24u && actor->actor_class == 0x44);
+            if (!actor->active || !initial_source_actor ||
+                actor->assembly == 0UL)
+                continue;
+            rendered += draw_round1_source_actor(
+                actor->x, actor->y, actor->z, actor->facing,
+                actor->coordinate_mode, actor->palette, actor->object_or,
+                actor->type, actor->actor_class, actor->animation_record,
+                actor->assembly);
+        }
     }
     return rendered;
 }
@@ -6762,6 +6946,8 @@ static void playable_slice_draw_actors(void)
             ((unsigned long)(unsigned int)player_action_sprites[1] << 8);
     }
 #ifdef AVSP_LIVE_ENCOUNTER
+    avsp_diag_round1_native_initial_actor_render_commands =
+        draw_round1_initial_source_actors();
     avsp_diag_round1_native_projectile_render_commands =
         draw_round1_weapon_projectiles();
 #endif
@@ -7496,6 +7682,28 @@ static void live_encounter_publish(void)
             (((unsigned int)
                 round1_runtime.player_weapon_projectile_damage_writes &
                 0x003fu) << 26);
+        sample->round1_class1f_state =
+            ((unsigned int)round1_runtime.class1f_initializations & 0x0fu) |
+            (((unsigned int)round1_runtime.class1f_initial_rng_calls & 0x0fu) << 4) |
+            (((unsigned int)round1_runtime.class1f_transition_completions & 0x0fu) << 8) |
+            (((unsigned int)round1_runtime.class1f_effect_allocations & 0x0fu) << 12) |
+            (((unsigned int)round1_runtime.class1f_effect_allocation_failures & 0x0fu) << 16) |
+            (((unsigned int)round1_runtime.class1f_audio_events & 0x0fu) << 20) |
+            (((unsigned int)round1_runtime.class1f_audio_command & 0xffu) << 24);
+        sample->round1_auxiliary_state =
+            ((unsigned int)round1_runtime.class09_rng_calls & 0x0fffu) |
+            (((unsigned int)round1_runtime.class4e_initializations & 0x0fu) << 12) |
+            (((unsigned int)round1_runtime.class4e_releases & 0x0fu) << 16) |
+            (((unsigned int)round1_runtime.class44_guard_clears & 0x0fu) << 20) |
+            (((unsigned int)round1_runtime.scheduler_failure_code & 0xffu) << 24);
+        sample->round1_native_initial_state =
+            ((unsigned int)
+                avsp_diag_round1_native_initial_actor_render_commands &
+                0x00000fffu) |
+            (((unsigned int)
+                avsp_diag_round1_native_presentation_decode_failures &
+                0x0fu) << 12) |
+            (((unsigned int)round1_runtime.rng_seed & 0xffffu) << 16);
         avsp_diag_live_sample_count = (int)live_encounter_frame.frame + 1;
     }
     avsp_diag_live_interface_version = AVSP_LIVE_ENCOUNTER_INTERFACE_VERSION;
@@ -7554,8 +7762,9 @@ static void live_encounter_publish(void)
     avsp_diag_slice_canaries_ok = playable_slice_frame.canaries_ok;
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
-        AVSP_ROUND1_SPEC02_SHA256[0] == '5' &&
-        AVSP_ROUND1_SPEC02_SHA256[63] == '7';
+        sizeof(AVSP_ROUND1_SPEC02_SHA256) == 65u &&
+        AVSP_ROUND1_SPEC02_SHA256[0] == '3' &&
+        AVSP_ROUND1_SPEC02_SHA256[63] == '5';
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
     avsp_diag_round1_rng_seed = round1_runtime.rng_seed;
@@ -7652,6 +7861,38 @@ static void live_encounter_publish(void)
         round1_runtime.player_resource_recharge;
     avsp_diag_round1_player_weapon_projectile_free =
         round1_runtime.player_weapon_projectile_free_count;
+    avsp_diag_round1_class1f_initializations =
+        (int)round1_runtime.class1f_initializations;
+    avsp_diag_round1_class1f_initial_rng_calls =
+        (int)round1_runtime.class1f_initial_rng_calls;
+    avsp_diag_round1_class1f_transition_completions =
+        (int)round1_runtime.class1f_transition_completions;
+    avsp_diag_round1_class1f_effect_allocations =
+        (int)round1_runtime.class1f_effect_allocations;
+    avsp_diag_round1_class1f_effect_allocation_failures =
+        (int)round1_runtime.class1f_effect_allocation_failures;
+    avsp_diag_round1_class1f_audio_events =
+        (int)round1_runtime.class1f_audio_events;
+    avsp_diag_round1_class1f_audio_command =
+        (int)round1_runtime.class1f_audio_command;
+    avsp_diag_round1_class09_rng_calls =
+        (int)round1_runtime.class09_rng_calls;
+    avsp_diag_round1_class4e_initializations =
+        (int)round1_runtime.class4e_initializations;
+    avsp_diag_round1_class4e_releases =
+        (int)round1_runtime.class4e_releases;
+    avsp_diag_round1_class44_guard_clears =
+        (int)round1_runtime.class44_guard_clears;
+    avsp_diag_round1_scheduler_failure_code =
+        round1_runtime.scheduler_failure_code;
+    avsp_diag_round1_scheduler_failure_source_slot =
+        round1_runtime.scheduler_failure_source_slot;
+    avsp_diag_round1_scheduler_failure_state =
+        round1_runtime.scheduler_failure_state;
+    avsp_diag_round1_scheduler_failure_substate =
+        round1_runtime.scheduler_failure_substate;
+    avsp_diag_round1_scheduler_failure_animation_record =
+        round1_runtime.scheduler_failure_animation_record;
 }
 
 static void live_encounter_frame_callback(void)
@@ -7732,9 +7973,21 @@ static void live_encounter_frame_callback(void)
         runtime_ready = 0;
         return;
     }
-    if (round1_runtime.route_state == 4 &&
+    if (round1_runtime.entry.spawned &&
         !avsp_round1_step_scheduler(&round1_runtime))
     {
+        avsp_diag_round1_scheduler_failure_code =
+            round1_runtime.scheduler_failure_code;
+        avsp_diag_round1_scheduler_failure_source_slot =
+            round1_runtime.scheduler_failure_source_slot;
+        avsp_diag_round1_scheduler_failure_state =
+            round1_runtime.scheduler_failure_state;
+        avsp_diag_round1_scheduler_failure_substate =
+            round1_runtime.scheduler_failure_substate;
+        avsp_diag_round1_scheduler_failure_animation_record =
+            round1_runtime.scheduler_failure_animation_record;
+        avsp_diag_round1_failure_count =
+            (int)round1_runtime.failure_count;
         avsp_diag_live_frame_stage = -10;
         runtime_ready = 0;
         return;

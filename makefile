@@ -12,7 +12,7 @@ JO_COMPILE_WITH_SPRITE_HASHTABLE = 0
 JO_PSEUDO_SATURN_KAI_SUPPORT = 0
 JO_COMPILE_WITH_RAM_CARD_MODULE = 1
 JO_GLOBAL_MEMORY_SIZE_FOR_MALLOC = 262144
-JO_MAX_SPRITE = 128
+JO_MAX_SPRITE = 255
 JO_MAX_FILE_IN_IMAGE_PACK = 64
 # Jo sizes __jo_fs_dirname[JO_FS_MAX_FILES] (24 bytes each) in BSS, and BSS
 # must end below 0x060c0000 or jo_sprite_init() fails its bounds check and
@@ -165,6 +165,12 @@ avsp_frontend.o: CCFLAGS += -Os
 JO_ENGINE_ROOT ?= .deps/joengine
 JO_ENGINE_SRC_DIR = $(JO_ENGINE_ROOT)/jo_engine
 COMPILER_DIR = $(JO_ENGINE_ROOT)/Compiler
+
+# These Jo Engine translation units own arrays whose ABI depends on
+# JO_MAX_SPRITE.  The bundled rules do not treat the project makefile as an
+# input, so a profile-size change can otherwise link stale 128-entry arrays
+# against 255-entry callers.  Make that configuration dependency explicit.
+$(JO_ENGINE_SRC_DIR)/sprites.o $(JO_ENGINE_SRC_DIR)/3d.o: makefile
 
 include $(COMPILER_DIR)/COMMON/jo_engine_makefile
 

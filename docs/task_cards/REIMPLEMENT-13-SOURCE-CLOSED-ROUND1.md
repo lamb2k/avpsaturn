@@ -147,6 +147,22 @@ VDP2 planes, palette, and priority. Audio command identities `0x007e` and
 `0x0148` remain semantic-name unknown telemetry; no PCM mapping is inferred.
 The build explicitly depends on the SPEC header, and the focused lane checks
 the complete hash, preventing stale target binding after fixture regeneration.
+The renderer-integrity checkpoint then corrected an objective Target-only
+defect without changing gameplay authority: Jo Engine `sprites.o` and `3d.o`
+had retained 128-entry sprite arrays while callers used `JO_MAX_SPRITE=255`, so
+`__jo_sprite_pic` overlapped `__jo_sprite_def` and produced horizontal texture
+stripes. Those objects now explicitly depend on the project makefile, the link
+rejects less than 2,040 bytes of array separation, and the standard Jo DMA
+upload path remains in use. Two cold release-live runs normalize to ISO
+`059b7b3422eedd19f47761d01d88e0a6e082db85ad9eeb6142928b165e77ebf5`
+and compare all 208 live cache textures with zero mismatches; sprite high-water
+is 225/255. Direct reset/run/pause inspection is clean across both Coffee Shop
+planes, visible edges, actors, staff, projectile/impact population, P1-only HUD,
+palette, and priority. Fast, Oracle, Target, paired Emulator, and 82 focused
+mutations pass. STRIPS.BIN is now accurately classified as a hybrid
+source-derived stage package: background/scroll presentation is retained, while
+the captured foreground schedule remains compile-time excluded from playable
+gameplay authority.
 Preserve the class-0x1F, Coffee Shop, and Button3 blockers. The startup-authority
 correction binds source frames
 2040/2072/2075/2238/2520 to title, P1 HUD/player initialization, player

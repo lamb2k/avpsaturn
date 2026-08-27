@@ -1,7 +1,7 @@
 {
   "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
-  "checkpoint": "native-round1-player-class05-projectile-impact-collision",
-  "status": "PASS_ENTRY_PLAYER_SCHEDULER_PRESENTATION_STATE_CONTEXT_GLOBAL_BOUNDS_NEUTRAL_STOP_MELEE_BUTTON1_PROJECTILE_IMPACT_COLLISION",
+  "checkpoint": "native-round1-player-class05-projectile-impact-collision-renderer-integrity",
+  "status": "PASS_ENTRY_PLAYER_SCHEDULER_PRESENTATION_STATE_CONTEXT_GLOBAL_BOUNDS_NEUTRAL_STOP_MELEE_BUTTON1_PROJECTILE_IMPACT_COLLISION_RENDERER_INTEGRITY",
   "implementation_base_commit": "52714b420d3ca1ca0437d66de61735fa1a2ba36d",
   "diagnostic_correction_commit": "4fbc919235f61d962daf342efbfb4cd8f743ab60",
   "implementation_source": {
@@ -200,17 +200,34 @@
       "coffee_shop_obstacle_response_implemented": false,
       "camera_lock_unlock_implemented": false
     },
+    "renderer_integrity": {
+      "root_cause": "Jo Engine sprites.o and 3d.o retained 128-entry JO_MAX_SPRITE arrays while the application linked against a 255-entry configuration, overlapping __jo_sprite_pic and __jo_sprite_def and corrupting live VDP1 texture definitions",
+      "correction": "JO_MAX_SPRITE is 255; the two configuration-dependent Jo objects explicitly depend on the project makefile; the Target link rejects a sprite-array distance below 2040 bytes; the standard Jo DMA texture upload path is retained",
+      "tile_sprite_pool": 208,
+      "composite_sprite_slots": 5,
+      "composite_texture_budget_bytes": 36736,
+      "checked_textures": 208,
+      "texture_mismatches": 0,
+      "tile_archive_sha256": "276164f656d2cfd2e3e9a2cbc92c40142492663382b46bba41b16cc30dd1972f",
+      "live_texture_cache_sha256": "b6493d7a2e7e9668377b52f9f1812ef12aedefde6aa2653dbc74a933c68f7fa9",
+      "sprite_array_distance_bytes": 2040,
+      "sprite_high_water": 225,
+      "sprite_capacity": 255,
+      "captured_foreground_schedule_gameplay_authority": false,
+      "source_derived_stage_presentation_staged": true
+    },
     "canaries": "PASS"
   },
   "checks": {
     "host_differential": "PASS",
-    "real_mutations_rejected": 64,
+    "real_mutations_rejected": 82,
     "target_wiring_suppressions_rejected": 61,
     "target_live_encounter": "PASS",
     "target_live_encounter_bench": "PASS",
     "spec02_entry_correction_revalidated": "PASS",
     "paired_emulator_regression": "PASS",
-    "paired_emulator_iso_sha256": "b319b797080b00175aea3d21e12f096d7b3c60f031e67c55d85ce47ab0cce59f",
+    "paired_emulator_iso_sha256": "059b7b3422eedd19f47761d01d88e0a6e082db85ad9eeb6142928b165e77ebf5",
+    "paired_vdp1_texture_integrity": "PASS: two byte-identical cold runs each compare all 208 live tile-cache mappings to TILES.BIN with zero mismatches; cache SHA-256 b6493d7a2e7e9668377b52f9f1812ef12aedefde6aa2653dbc74a933c68f7fa9; sprite arrays are 2040 bytes apart; high-water 225/255",
     "paired_native_player_ledgers": "PASS: 471 byte-identical synchronized samples; frame 470 is x=1031/z=320/facing=1/source_action=514/controller_updates=301; neutral stop is 2 entries/1 completion/10 suppressed-motion ticks because the second stop is interrupted by a melee edge",
     "paired_native_melee_ledgers": "PASS: four source-owned Button2 edges complete selectors 1..4 in order with exact presentation mask 15; held Button2 does not chain, no RNG is consumed, and no fallback or unsupported action fires",
     "paired_native_button1_ledgers": "PASS: two byte-identical release-live target runs bind two exact Button1 entries, 12 signed attempts, four-tick cadence, 12 successful type-4/class-5 allocations, 12 resource debits, 70 player presentation bindings, one exact type-24/class-0x10 empty-effect lifecycle, 49 class-0x05 projectile-render frames, 40 class-0x3a impact-render frames, three current-state collision writes, three source-table damage writes, resource 32/recharge 6, zero fallback/decode failures/gameplay PCM",
@@ -224,8 +241,8 @@
     "rendered_regression_inspection": "PASS: route-owned title clear, coherent post-unlock street, responsive player movement and camera, intact VDP2 planes/HUD/palette/priority",
     "fast": "PASS",
     "oracle": "PASS",
-    "target_bss_end": "0x060bf920",
-    "target_bss_headroom_bytes": 1760
+    "target_bss_end": "0x060bfcb0",
+    "target_bss_headroom_bytes": 848
   },
   "rendered_boundary": {
     "new_round1_runtime_presented": true,
@@ -311,6 +328,13 @@
       "empty_effect_sha256": "5bd670decfdbe55887dd09c2028c318b06ddb73999f1fd4759bc1c32c9a730e2",
       "inspection": "PASS: direct paused live scanout at native controller update 212 shows the bright source projectile assembly and trail; direct paused scanout at about update 253 shows the cyan source class-0x3a impact assemblies. Player, alien, stage composition, P1-only HUD, both VDP2 planes, camera, palette, and priority remain coherent. Paired telemetry binds 49 projectile-render frames, 40 impact-render frames, three collision writes, three damage writes, and zero decode failures or gameplay PCM.",
       "reset_transition_note": "One capture taken during emulator Reset showed transient pre-stabilization VRAM contents; the next stable gameplay capture was coherent and is the only gameplay result used."
+    },
+    "renderer_integrity_visual_inspection": {
+      "capture_method": "direct Computer Use inspection of the exact paired Yaba Sanshiro image after cold launch, pause, Reset, Run, and repause",
+      "inspection": "PASS: no horizontal VDP1 texture striping remains; Predator, staff, alien, projectile/impact population, props, both Coffee Shop VDP2 planes, visible left/right edges, camera-relative composition, P1 HUD, palette, and priority are coherent. The WARRIOR row is the P1 weapon/energy strip; the active P2 visibility flag remains false.",
+      "reviewed_attack_sequence_changed": false,
+      "class1f_tracking_changed": false,
+      "audio_regression_observed": false
     },
     "objective_discrepancy": {
       "observed": "The normal interactive profile stopped before actor rendering when native entry changed route state 2 to 4.",
