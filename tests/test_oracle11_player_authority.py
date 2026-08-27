@@ -126,6 +126,17 @@ mutant["route_pickup_resource_audio_load_ownership"] \
     ["audio_ownership"]["route_audio_owner"] = "predator-warrior-player-authority"
 reject(mutant, "global route audio assigned to player")
 
+mutant = copy.deepcopy(report)
+mutant["weapon_projectile_resource"]["character_identity"] \
+    ["required_character_u8"] = 1
+reject(mutant, "Major capture accepted as Predator weapon authority")
+
+mutant = copy.deepcopy(report)
+mutant["weapon_projectile_resource"]["authority_separation"] \
+    ["projectile_lifecycle"]["children"] = \
+    "twelve record type 4 class 5 actors"
+reject(mutant, "Major projectile family accepted for Predator")
+
 rebuilt = oracle11.build_report()
 assert oracle11.canonical(rebuilt) == ARTIFACT.read_bytes(), "derived report drift"
 print("ORACLE-11 player authority tests: PASS (21 mutations rejected)")

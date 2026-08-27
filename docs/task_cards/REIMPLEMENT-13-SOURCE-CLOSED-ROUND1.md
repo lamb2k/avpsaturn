@@ -122,47 +122,24 @@ the dependency-safe Button2 melee body: exact source edge, selectors 1..4,
 strike records/assemblies/collision selectors, 30-tick follow-up, held-edge
 rejection, and HIT/KO interruption preservation. Thirty-two host mutations,
 26 Target suppressions, paired Emulator, and direct selector-2/4 inspection
-pass with continuous staff ownership and zero regression. Commit `f6cab22`
-implements the source-complete Button1 boundary: exact sufficient/empty action
-states, signed 12-attempt volley, four-tick cadence, recovery-edge timing,
-50-frame presentation, successful-allocation resource debit/recharge ordering,
-and the known type-4/class-5 allocation writes. Forty-three host mutations,
-38 Target suppressions, Target, paired Emulator, Fast, Oracle, and direct
-pinned-window inspection pass. Commit `09c8a28` amends only the existing
-SPEC-02 fixture from accepted Oracle evidence and implements the executable
-type-24/class-0x10 empty-request effect: exact variant-1 allocation, offset,
-ten presentation records, timers/branches, low-byte movement guard, and pool
-release. The same fixture binds class-0x05 allocation angle/selector tables,
-all 64 signed motion pairs, presentation records, state-2 arithmetic/bounds,
-state-4 impact allocation, and state-6 release. The current checkpoint
-implements that body plus the exact type-24/class-0x3a state 0/2/4 five-record
-impact presentation/release handler and current-state collision/damage writer
-for attack table `0x03136a`. Sixty-four host mutations, release Target, paired
-Emulator, Fast, and Oracle pass. Byte-identical target runs record 49 projectile
-render frames, 40 impact render frames, three collision writes, three damage
-writes, and zero fallback, decode failure, or gameplay PCM. Direct paused
-scanout inspection at native controller updates 212 and about 253 preserves the
-source projectile/impact assemblies, coherent actors, P1-only HUD, camera, both
-VDP2 planes, palette, and priority. Audio command identities `0x007e` and
-`0x0148` remain semantic-name unknown telemetry; no PCM mapping is inferred.
-The build explicitly depends on the SPEC header, and the focused lane checks
-the complete hash, preventing stale target binding after fixture regeneration.
-The renderer-integrity checkpoint then corrected an objective Target-only
-defect without changing gameplay authority: Jo Engine `sprites.o` and `3d.o`
-had retained 128-entry sprite arrays while callers used `JO_MAX_SPRITE=255`, so
-`__jo_sprite_pic` overlapped `__jo_sprite_def` and produced horizontal texture
-stripes. Those objects now explicitly depend on the project makefile, the link
-rejects less than 2,040 bytes of array separation, and the standard Jo DMA
-upload path remains in use. Two cold release-live runs normalize to ISO
-`059b7b3422eedd19f47761d01d88e0a6e082db85ad9eeb6142928b165e77ebf5`
-and compare all 208 live cache textures with zero mismatches; sprite high-water
-is 225/255. Direct reset/run/pause inspection is clean across both Coffee Shop
-planes, visible edges, actors, staff, projectile/impact population, P1-only HUD,
-palette, and priority. Fast, Oracle, Target, paired Emulator, and 82 focused
-mutations pass. STRIPS.BIN is now accurately classified as a hybrid
-source-derived stage package: background/scroll presentation is retained, while
-the captured foreground schedule remains compile-time excluded from playable
-gameplay authority.
+pass with continuous staff ownership and zero regression. Commits `f6cab22`
+and `09c8a28` then implemented a Button1/class-0x05 body that was internally
+consistent but later proven to be character 1 Major Schaefer evidence. It is
+retained only as a negative control. The corrected source/SPEC/native body
+requires character 0 Predator Warrior, records `0x15e540..0x15e580`, one
+40-resource debit, one type-4/class-0 parent and five type-4/class-4 children.
+Character plus normalized emitted-object identity are asserted per frame.
+Fast, Oracle, 123 real host mutations, 131 Target suppressions, and two
+byte-identical paired-emulator runs pass at ISO
+`9db09d765122a56e9bdefac73e762cefcfb379d9be92933fd1d4281d6bbb9ffc`.
+Exact Windows cadence-1 frames 177..196 preserve Predator through Button1 and
+neutral. The renderer correction pins each referenced tile for the complete
+frame, clips wholly offscreen entries before allocation, and gates the measured
+first-segment residency at 21 composites plus 218 tile slots. Peak unique tile
+use is 170; pin exhaustion, overflow and texture mismatches are zero; sprite
+high-water is 242/255. STRIPS.BIN remains a hybrid source-derived stage package:
+background/scroll presentation is retained, while the captured foreground
+schedule remains excluded from playable gameplay authority.
 The initial class-0x1F blocker is closed in the same source-bound body: all ten
 source slots initialize in scheduler order with ten RNG calls; `0x1000` and
 `0x1200` use the exact predecrement timer/animation guards; `0x1400` proceeds
@@ -239,11 +216,31 @@ frames verify takeoff, apex, descent, landing and neutral return with unchanged
 source assemblies, staff continuity, P1-only HUD, Coffee Shop planes, camera,
 palette and priority.
 
-Replace the retained first-encounter class-0x1f gameplay boundary next with the
-existing SPEC-02 source-bound current-state enemy AI, collision/damage, HIT/KO
-and dynamic lifecycle contracts. Preserve the accepted presentation/tracking
-and every completed player/navigation/camera/HUD/audio lock. Do not leave the
-first segment.
+The objective Button1 player-family regression is corrected. Direct inspection
+had shown Major Schaefer because the earlier Oracle selection input changed
+source actor `+0xd2` from character `0` to `1`; the analyzer had not asserted
+that field. Two independent corrected source captures are byte-identical with
+character `0`, Predator records `0x15e540..0x15e580`, one 40-resource debit,
+one record-type-4 class-`0x00` parent, and five class-`0x04` children. Character
+identity and normalized emitted-object identity are now mandatory per-frame
+differentials, and the Major class-`0x05`/type-24-class-`0x3a` path is a
+negative control. Native C, SPEC-02, and generated fixtures bind that corrected
+body. A renderer defect exposed by the correction is also closed: live VDP1
+tiles are pinned for their entire frame, wholly offscreen objects are clipped
+before texture allocation, and the measured first-segment residency is 21
+composites plus 218 tile slots. Paired runs are byte-identical at normalized
+ISO `9db09d765122a56e9bdefac73e762cefcfb379d9be92933fd1d4281d6bbb9ffc`;
+tile-union peak is 170, pin exhaustion/overflow/texture mismatches are zero,
+and sprite high-water is 242/255. Exact real Windows frames 177..196 preserve
+Predator identity through action and neutral. Fast, Oracle, Target, paired
+Emulator, host mutations, target suppressions, and visual inspection pass.
+
+The next body is the retained first-encounter class-`0x1f` gameplay boundary.
+Replace its AI, targeting, movement/lane, facing, transition, attack,
+collision/damage, HIT/KO, effect, removal, dynamic-spawn, lifecycle and
+encounter authority from the accepted SPEC-02 contracts. Retained code may
+remain only as a presentation adapter. Do not leave the first segment until
+the complete interactive regression gate passes.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.

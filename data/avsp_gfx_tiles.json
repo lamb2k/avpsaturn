@@ -1,8 +1,8 @@
 {
  "archive": {
-  "bytes": 372308,
+  "bytes": 501536,
   "file": "build/avsp_cd/SPR4/TILES.BIN",
-  "sha256": "329272986c4ae56cda67d992c59142d1c5de2b270ec55197711d1ac0723fccb2"
+  "sha256": "0a394f0832ad5a2813cfa7d24dd47407369063550669b38c558d962d33f61829"
  },
  "classification": "tile archive manifest - no ROM bytes",
  "facing_union": true,
@@ -27,16 +27,21 @@
   "source": ".deps/mame/enemy_actions/palette_05140.tsv"
  },
  "presentation_residency": {
-  "composite_tile_threshold": 35,
+  "child_tiles_at_peak": 55,
+  "composite_tile_threshold": 32,
   "configured_composite_max_texture_bytes": 11648,
-  "configured_composite_slots": 5,
-  "configured_composite_texture_budget": 36736,
-  "max_tiles_per_impact": 2,
-  "max_tiles_per_projectile": 4,
+  "configured_composite_slots": 21,
+  "configured_composite_texture_budget": 126592,
+  "first_segment_composite_max_texture_bytes": 11648,
+  "first_segment_composite_texture_bytes": 126592,
+  "first_segment_composite_unique_entries": 21,
+  "max_tiles_per_impact": 0,
+  "max_tiles_per_projectile": 55,
   "mid_frame_lru_replacement_allowed": false,
-  "per_tile_scanout_requirement": 446,
-  "projectile_simultaneous_bound": 12,
-  "retained_tile_sprite_pool": 208,
+  "parent_tiles_at_peak": 4,
+  "per_tile_scanout_requirement": 653,
+  "projectile_simultaneous_bound": 6,
+  "retained_tile_sprite_pool": 218,
   "source_capture": ".deps/mame/full_route",
   "source_frame_range": [
    2074,
@@ -47,8 +52,8 @@
   "source_peak_object_entries": 37,
   "source_peak_unique_tiles": 374,
   "spec02_composite_max_texture_bytes": 11648,
-  "spec02_composite_texture_bytes": 36736,
-  "spec02_composite_unique_entries": 5,
+  "spec02_composite_texture_bytes": 117376,
+  "spec02_composite_unique_entries": 19,
   "startup_peak_noncomposite_frame": 2208,
   "startup_peak_noncomposite_tiles": 162,
   "startup_source_frame_range": [
@@ -66,12 +71,13 @@
    "frames_sampled": 201
   },
   "spec02_round1_native_presentations": {
-   "decoded_variants": 128,
-   "fixture_sha256": "6ddcb21e488da3411137003a979766875ec9b308eb0e77d962ccc03dbff719af",
+   "decoded_variants": 231,
+   "fixture_sha256": "4940aed67c5bce1263f290113a5ae41815e530654515d0cb86283fd065dceb5b",
    "palette_banks": [
     "0x00",
     "0x05",
     "0x0C",
+    "0x0E",
     "0x0F",
     "0x10",
     "0x11",
@@ -80,15 +86,15 @@
     "0x1D",
     "0x1E"
    ],
-   "tiles_added": 564,
-   "unique_assemblies": 56
+   "tiles_added": 1543,
+   "unique_assemblies": 107
   }
  },
  "sample_stride": 1,
  "schema": 1,
  "scope": "street",
  "tile_bytes": 128,
- "tile_count": 2817,
- "tile_region_budget_bytes": 397312,
- "tile_region_budget_used_pct": 93.71
+ "tile_count": 3796,
+ "tile_region_budget_bytes": 528384,
+ "tile_region_budget_used_pct": 94.92
 }

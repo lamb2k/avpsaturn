@@ -34827,9 +34827,39 @@
       "instance_count": 47,
       "orphan_write_rows": 0,
       "presentation_and_collision": {
+        "accepted_hit_ko_records": {
+          "accepted_port_v2_contract": "tests/port_v2/combat/hit_ko/approved_contract.json",
+          "accepted_port_v2_contract_sha256": "6adf803d6be237de652d35e4227f50b759d9ba7d6e75b7bc1c13ea1dcabea61a",
+          "accepted_writer_manifest": "data/avsp_hit_ko_writer_set.json",
+          "accepted_writer_manifest_sha256": "fce4e7b91ce6c16a0ffdb83c5620709f058c0c02473ce95f28bec1c2f5eb61cc",
+          "fixed_frame_presentation_forbidden": true,
+          "implementation_fields": [
+            "assembly",
+            "hurt_selector",
+            "attack_selector"
+          ],
+          "record_addresses": [
+            "0x0012dd50",
+            "0x0012d2f8",
+            "0x0012e214",
+            "0x0012e224",
+            "0x0012e234",
+            "0x0012e244",
+            "0x0012e254",
+            "0x0012e268"
+          ]
+        },
         "orphan_records": 0,
-        "record_count": 190,
+        "record_count": 192,
         "records": [
+          {
+            "animation_record": "0x0012d2f8",
+            "assembly": "0x0012f994",
+            "attack_selector": 0,
+            "classification": "SOURCE_CLOSED",
+            "hurt_selector": 1,
+            "record_sha256": "dbe147dc66a4fba5ef1b0e2359542db0692d1b5d237650d2a494ab0d6fc05719"
+          },
           {
             "animation_record": "0x0012d380",
             "assembly": "0x0012f638",
@@ -35349,6 +35379,14 @@
             "classification": "SOURCE_CLOSED",
             "hurt_selector": 1,
             "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1"
+          },
+          {
+            "animation_record": "0x0012dd50",
+            "assembly": "0x00130248",
+            "attack_selector": 0,
+            "classification": "SOURCE_CLOSED",
+            "hurt_selector": 1,
+            "record_sha256": "46f05a782871576320b852da9843ec4f64376753db8adc397ab26a169c9e62a3"
           },
           {
             "animation_record": "0x0012dd78",

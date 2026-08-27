@@ -1,154 +1,183 @@
 #!/usr/bin/env python3
-"""Committed ORACLE-11 weapon/projectile/resource contract controls."""
-import copy, json
+"""Committed controls for the corrected Predator Warrior Button1 contract."""
+import copy
+import json
 from pathlib import Path
 
-ROOT=Path(__file__).resolve().parents[1]
-ART=ROOT/'data/oracle11_predator_weapon_projectile_resource.json'
+ROOT = Path(__file__).resolve().parents[1]
+ART = ROOT / "data/oracle11_predator_weapon_projectile_resource.json"
 
-def validate(d):
-    assert d['status']=='SOURCE_CLOSED'
-    assert d['determinism']['byte_identical'] is True
-    assert d['mutation_controls']=={'all_downstream_effects_asserted':True,'count':13,'no_fixed_frame_result':True,'no_visible_weapon_inference_from_0xad':True}
-    p=d['authority_separation']['projectile_lifecycle']
-    assert p['class']=='0x05' and p['volley'].startswith('12 attempts')
-    assert p['resource_debit'].startswith('3 per successful')
-    e=d['authority_separation']['equipment_resource']
-    assert e['capacity']==64 and e['action_latch'].endswith('not ownership')
-    assert d['resource_causal_trace']['empty']['damaging_projectile_count']==0
-    assert d['resource_causal_trace']['sufficient']['spawn_count']==12
-    assert d['special_causal_trace']['zero_health'].startswith('special rejected')
-    implementation=d['implementation_contract']
-    assert implementation['classification']=='SOURCE_CLOSED_IMPLEMENTATION_FIELDS'
-    assert implementation['source_input']['button1_mask']=='0x0010'
-    volley=implementation['sufficient_volley']
-    assert volley['attempt_counter_type']=='s8'
-    assert volley['attempt_counter_initial']==12
-    assert volley['cadence_counter_type']=='u8'
-    assert volley['cadence_initial']==1 and volley['cadence_reload']==4
-    assert volley['spawn_tick_offsets']==list(range(0,48,4))
-    assert volley['cleanup_tick_offset']==49
-    assert volley['return_to_locomotion_tick_offset']==50
-    assert volley['recovery_edge']=={'input_tick_offset':48,
-        'cleanup_tick_offset':49,'second_entry_tick_offset':50}
-    assert volley['resource_debit']==3 and volley['resource_clamp_min']==0
-    assert volley['resource_capacity']==64 and volley['rng_calls']==0
-    assert implementation['resource_tick']['order'].startswith('after player action')
-    assert implementation['resource_tick']['normal_recharge_reload']==2
-    assert implementation['resource_tick']['depleted_recharge_reload']==6
-    empty=implementation['empty_fallback']
-    assert empty['timer_type']=='u8' and empty['timer_initial']==16
-    assert empty['cleanup_tick_offset']==17
-    assert empty['return_to_locomotion_tick_offset']==18
-    assert empty['damaging_projectile_count']==0
-    assert len(empty['presentation_timeline'])==18
-    assert empty['presentation_timeline'][1]['animation_record']=='0x001645d4'
-    assert implementation['movement_facing']['baseline_invariant'] is True
-    assert len(implementation['presentation_timeline'])==50
-    assert implementation['return_frame']=={
-        'tick':50,'action':2,'substate':2,
-        'animation_record':'0x00163158','assembly':'0x00165488',
-        'hurt_selector':1,'attack_selector':0}
-    projectile=implementation['projectile_lifecycle_contract']
-    assert projectile['spec_executable'] is True
-    assert projectile['state_sequence']==[0,2,4,6] and projectile['rng_calls']==0
-    init=projectile['initialization']
-    assert init['writes']['motion_table']=='0x001fc1c0'
-    assert init['writes']['attack_table']=='0x0003136a'
-    assert init['parent_presentation_selector']['spawn_offsets_s16'][0]==[-21,84]
-    assert init['parent_presentation_selector']['spawn_offsets_s16'][15]==[-47,79]
-    assert init['parent_presentation_selector']['animation_selector_u8']==list(range(15,-1,-1))
-    assert init['angle']['facing0_u8']==[40,42,44,46,48,50,49,47,45,43,41,40]
-    assert init['angle']['facing1_u8']==[24,22,20,18,16,14,15,17,19,21,23,24]
-    assert init['player_presentation_selector_u8']==[6,6,5,5,4,3,3,4,5,5,6,6]
-    actor_fields=init['presentation_actor_fields']
-    assert actor_fields['coordinate_mode_u8']==0
-    assert actor_fields['palette_u8']==0
-    assert actor_fields['object_or_u16']=='0x8000'
-    assert actor_fields['determinism']=={
-        'actors_tsv_byte_identical':True,'cold_runs':2}
-    assert actor_fields['mutation']['projectile_facing_before']==0
-    assert actor_fields['mutation']['projectile_facing_after']==1
-    assert actor_fields['mutation']['first_projectile_x_before']==1181
-    assert actor_fields['mutation']['first_projectile_x_after']==1213
-    active=projectile['active_state']
-    assert active['motion']['vectors_s16'][16]==[3072,0]
-    assert active['motion']['vectors_s16'][48]==[-3072,0]
-    assert active['bounds_guards'][0]['expression']=='u16(x_high - A5+0x278 + 0x50) > 0x0220'
-    assert active['bounds_guards'][1]['expression']=='u16(y_high - A5+0x27c + 0x10) > 0x0120'
-    assert active['update_order']==['collision guard','x bounds','y bounds','ground guard','motion','animation','visibility']
-    assert projectile['impact_state']['writes']['impact_class']=='0x3a'
-    assert projectile['impact_actor_contract']['spec_executable'] is True
-    impact_audio=projectile['impact_actor_contract']['initialization']['audio']
-    assert impact_audio['alternating_command_u16']==[0x007e,0x0148]
-    assert impact_audio['selector']['route_initial']==0
-    assert impact_audio['selector']['write_rule'].endswith('& 2 after the table read')
-    impact_fields=projectile['impact_actor_contract']['initialization'][
-        'presentation_actor_fields']
-    assert impact_fields['coordinate_mode_u8']==0
-    assert impact_fields['palette_u8']==0
-    assert impact_fields['object_or_u16']=='0x8000'
-    assert projectile['implementation_blocker'] is None
-    damage=projectile['current_state_interfaces']['collision']['damage']
-    assert damage['routine']=='0x01d504'
-    assert damage['route_current_guards']=={
-        'A5_minus_0x6762_u16':0,'A5_plus_0x244_u8':0,
-        'defender_plus_0x08_u8':12,'defender_plus_0x73_u8':0}
-    assert damage['baseline']=={
-        'attack_selector':6,'attacker_class_index':0,'damage':24,
-        'defender_class_index':16,'defense':33,
-        'defense_address':'0x11420a','health_after':39,'health_before':63,
-        'matrix_address':'0x115326','offense':0,
-        'offense_address':'0x11542a','route_index':10}
-    assert damage['mutation']['damage']==31
-    assert damage['mutation']['matrix_address']=='0x11532a'
-    assert damage['suppression']['baseline_writes']==8
-    assert damage['suppression']['mutated_writes']==4
-    empty_effect=implementation['empty_effect_variant1_contract']
-    assert empty_effect['spec_executable'] is True
-    assert empty_effect['state_sequence']==[0,2,4] and empty_effect['variant']==1
-    assert empty_effect['initialization']['variant_offsets_s16'][1]==[0,78]
-    assert [(x['timer'],x['branch']) for x in empty_effect['active_state']['presentation_records']]==[(1,0)]*8+[(8,1),(4095,-32767)]
-    assert empty_effect['capture_projection']['movement_frames']==list(range(4494,4502))
-    assert len(d['counterfactuals'])==13
-    assert d['physical_saturn']=='UNRUN' and d['saturn_emulator']=='UNRUN'
 
-def reject(mut,label):
-    try:validate(mut)
-    except AssertionError:return
-    raise AssertionError('accepted mutation: '+label)
+def validate(data):
+    assert data["schema"] == 2 and data["status"] == "SOURCE_CLOSED"
+    assert data["determinism"] == {
+        "byte_identical": True,
+        "identical_files": [
+            "samples.tsv", "writes.tsv", "actors.tsv", "qsound.tsv",
+            "damage.tsv", "impact_audio.tsv", "objects.tsv",
+            "character_samples.tsv",
+        ],
+        "independent_cold_runs": 2,
+    }
+    identity = data["character_identity"]
+    assert identity["required_character_u8"] == 0
+    assert identity["required_character"] == "predator_warrior"
+    assert identity["rejected_character_u8"] == 1
+    assert identity["rejected_character"] == "major_schaefer"
+    assert identity["captured_field"] == "player +0xd2 u8"
+    assert identity["per_frame_asserted"] is True
+    assert identity["normalized_object_stream_asserted"] is True
+    assert identity["required_probe"]["character"] == "0"
+    assert identity["required_probe"]["animation"] == "0015e560"
+    assert identity["required_probe"]["assembly"] == "00161a0a"
+    assert identity["rejected_probe"]["character"] == "1"
+    assert identity["required_object_stream"]["sha256"] != \
+        identity["rejected_object_stream"]["sha256"]
+    assert identity["required_object_stream"]["row_count"] > 400
 
-d=json.loads(ART.read_text(encoding='ascii'));validate(d)
-for path,value,label in [
- (('mutation_controls','count'),12,'counterfactual removed'),
- (('authority_separation','projectile_lifecycle','class'),'0x00','wrong projectile class'),
- (('authority_separation','equipment_resource','capacity'),63,'fitted resource capacity'),
- (('resource_causal_trace','empty','damaging_projectile_count'),1,'empty fallback damage'),
- (('special_causal_trace','zero_health'),'special accepted','zero-health guard removed'),
- (('mutation_controls','no_visible_weapon_inference_from_0xad'),False,'action latch treated as equipment'),
- (('implementation_contract','source_input','button1_mask'),'0x0020','wrong Button1 mask'),
- (('implementation_contract','sufficient_volley','attempt_counter_type'),'u8','lost signed attempt counter'),
- (('implementation_contract','sufficient_volley','cadence_reload'),3,'guessed volley cadence'),
- (('implementation_contract','sufficient_volley','spawn_tick_offsets'),list(range(1,49,4)),'fixed-frame shifted volley'),
- (('implementation_contract','sufficient_volley','recovery_edge','second_entry_tick_offset'),49,'early recovery redispatch'),
- (('implementation_contract','sufficient_volley','resource_debit'),2,'wrong successful-allocation debit'),
- (('implementation_contract','resource_tick','normal_recharge_reload'),1,'wrong normal recharge'),
- (('implementation_contract','empty_fallback','timer_initial'),15,'wrong empty timer'),
- (('implementation_contract','movement_facing','baseline_invariant'),False,'movement during weapon action'),
- (('implementation_contract','projectile_lifecycle_contract','initialization','angle','facing1_u8',0),25,'wrong facing angle mapping'),
- (('implementation_contract','projectile_lifecycle_contract','initialization','presentation_actor_fields','object_or_u16'),'0x0000','wrong projectile object priority'),
- (('implementation_contract','projectile_lifecycle_contract','initialization','presentation_actor_fields','mutation','projectile_facing_after'),0,'nondiscriminating projectile facing mutation'),
- (('implementation_contract','projectile_lifecycle_contract','active_state','motion','vectors_s16',48,0),-3071,'wrong signed 16.16 motion vector'),
- (('implementation_contract','projectile_lifecycle_contract','active_state','bounds_guards',0,'expression'),'u16(x) > 0x0220','wrong bounds arithmetic'),
- (('implementation_contract','projectile_lifecycle_contract','impact_state','writes','impact_class'),'0x39','wrong impact class'),
- (('implementation_contract','projectile_lifecycle_contract','impact_actor_contract','initialization','presentation_actor_fields','palette_u8'),1,'wrong impact palette'),
- (('implementation_contract','projectile_lifecycle_contract','spec_executable'),False,'projectile contract reopened'),
- (('implementation_contract','projectile_lifecycle_contract','current_state_interfaces','collision','damage','baseline','damage'),23,'fitted baseline damage'),
- (('implementation_contract','projectile_lifecycle_contract','current_state_interfaces','collision','damage','mutation','damage'),24,'damage table mutation ignored'),
- (('implementation_contract','empty_effect_variant1_contract','variant'),0,'wrong class-0x10 variant'),
- (('implementation_contract','empty_effect_variant1_contract','initialization','variant_offsets_s16',1,1),79,'wrong empty-effect y offset'),
- (('implementation_contract','empty_effect_variant1_contract','active_state','presentation_records',9,'branch'),-32768,'wrong empty-effect terminal branch')]:
-    m=copy.deepcopy(d);x=m
-    for k in path[:-1]:x=x[k]
-    x[path[-1]]=value;reject(m,label)
-print('ORACLE-11 weapon/projectile/resource tests: PASS (28 invariant mutations rejected)')
+    separation = data["authority_separation"]
+    assert separation["projectile_lifecycle"] == {
+        "children": "five record type 4 class 4 actors at six-frame cadence",
+        "forbidden_rejected_path": "record type 4 class 5 and type-24 class 0x3a belong to Major Schaefer's rejected capture",
+        "parent": "record type 4 class 0",
+    }
+    assert separation["resource"].startswith("one 40-unit debit")
+    resource = data["resource_causal_trace"]
+    assert resource["sufficient"] == {
+        "child_count": 5, "debit": 40, "dispatch_frame": 4422,
+        "parent_allocation_count": 1, "resource_after_entry": 24,
+        "resource_start": 64,
+    }
+    assert resource["allocation_unavailable"]["parent_allocation_count"] == 0
+    assert resource["allocation_unavailable"]["resource_after_entry"] == 24
+
+    contract = data["implementation_contract"]
+    assert contract["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+    assert contract["source_input"]["button1_mask"] == "0x0010"
+    action = contract["sufficient_action"]
+    assert action["cleanup_tick"] == 19 and action["return_tick"] == 20
+    assert action["resource_capacity_u8"] == 64
+    assert action["resource_debit_u8"] == 40
+    assert action["recharge_countdown_after_entry_u8"] == 12
+    assert action["player_position_and_facing_latched"] is True
+    assert action["rng_calls"] == []
+    timeline = action["presentation_timeline"]
+    assert len(timeline) == 20
+    assert [timeline[index]["animation_record"] for index in range(8)] == [
+        "0x0015f1f4", "0x0015e540", "0x0015e540", "0x0015e540",
+        "0x0015e550", "0x0015e560", "0x0015e560", "0x0015e570",
+    ]
+    assert timeline[-2]["animation_record"] == "0x0015e580"
+    assert timeline[-1]["animation_record"] == "0x0015f1f4"
+    assert timeline[5]["assembly"] == "0x00161a0a"
+
+    parent = contract["record4_parent_class0"]
+    assert parent["spec_executable"] is True
+    assert parent["record_type_u8"] == 4 and parent["class_u8"] == 0
+    assert parent["dispatch"] == "0x02f870"
+    assert parent["state_sequence_u8"] == [0, 2, 4, 6]
+    assert parent["allocation_writes"]["angle_u8"] == "copy player +0x8a"
+    init = parent["initialization"]
+    assert init["motion_table_u32"] == "0x001fb7c0"
+    assert init["collision_table_u32"] == "0x0002fc3c"
+    assert init["object_or_u16"] == "0x8000"
+    assert len(init["presentation_records"]) == 7
+    active = parent["active_state"]
+    assert active["angle_u8_route_values"] == {
+        "cold_run_1": [17], "facing_reversed": [47],
+        "target_inside": [35], "target_outside": [35],
+    }
+    assert len(active["low_nibble_motion_pointer_u32"]) == 16
+    assert len(active["high_nibble_motion_pointer_u32"]) == 13
+    assert active["low_nibble_motion_pointer_u32"][1] == "0x001fa7c0"
+    assert active["high_nibble_motion_pointer_u32"][2] == "0x001fb7c0"
+    assert len(active["route_motion_vectors_s16"]["low"]["17"]) == 16
+    assert len(active["route_motion_vectors_s16"]["high"]["47"]) == 13
+    emitter = parent["child_emitter_state"]
+    assert emitter["initial_child_count_u8"] == 5
+    assert emitter["cadence_reload_u8"] == 6
+    assert emitter["spawn_ticks_from_parent_state4"] == [1, 7, 13, 19, 25]
+    assert emitter["child_spawn_source_frames"] == [4445, 4451, 4457, 4463, 4469]
+    assert [row["variant_u8"] for row in emitter["normal_rows"]] == [0, 0, 0, 0, 1]
+    assert [row["variant_u8"] for row in emitter["collision_rows"]] == [2, 2, 2, 2, 1]
+    parent_box = parent["collision_table"]
+    assert parent_box["table"] == "0x0002fc3c"
+    assert parent_box["attack_entries"][1]["damage_selector_u8"] == 25
+    assert parent_box["attack_entries"][1]["hit_value_u8"] == 8
+
+    child = contract["record4_child_class4"]
+    assert child["spec_executable"] is True
+    assert child["record_type_u8"] == 4 and child["class_u8"] == 4
+    assert child["dispatch"] == "0x0306fe"
+    assert child["state_sequence_u8"] == [0, 2, 4]
+    assert child["initialization"]["variant_offsets_u16"] == [8, 284, 448]
+    assert [len(child["initialization"]["variant_presentation_sequences"][str(index)])
+            for index in range(3)] == [17, 10, 16]
+    assert child["collision_table"]["table"] == "0x00030cb6"
+    assert child["collision_table"]["attack_entries"][1]["damage_selector_u8"] == 14
+    assert child["capture_projection"]["spawn_cadence_frames"] == 6
+
+    damage = contract["current_state_collision_damage"]
+    assert damage["parent_contact"] == {
+        "attack_record": "0x0002fc58", "attack_selector_u8": 25,
+        "attacker": "0xff8680", "damage_u8": 127, "frame": 4424,
+    }
+    assert damage["child_contact"] == {
+        "attack_record": "0x00030cd2", "attack_selector_u8": 14,
+        "attacker": "0xff8700", "damage_u8": 31, "frame": 4427,
+    }
+    empty = contract["empty_fallback"]
+    assert empty["cleanup_tick"] == 17 and empty["return_tick"] == 18
+    assert empty["damaging_record4_count"] == 0
+    assert {row["animation_record"] for row in empty["presentation_timeline"][1:17]} == {
+        "0x0015fcfc"}
+    assert contract["empty_effect_variant1_contract"]["class"] == "0x10"
+    assert contract["implementation_blocker"] is None
+    assert data["mutation_controls"]["wrong_character_rejected"] is True
+    assert data["mutation_controls"]["count"] == 13
+    assert len(data["counterfactuals"]) == 13
+    assert data["physical_saturn"] == "UNRUN"
+    assert data["saturn_emulator"] == "UNRUN"
+
+
+def reject(mutant, label):
+    try:
+        validate(mutant)
+    except AssertionError:
+        return
+    raise AssertionError("accepted mutation: " + label)
+
+
+data = json.loads(ART.read_text(encoding="ascii"))
+validate(data)
+for path, value, label in [
+    (("character_identity", "required_character_u8"), 1, "wrong character"),
+    (("character_identity", "per_frame_asserted"), False, "identity not sampled"),
+    (("character_identity", "required_probe", "animation"), "00165410", "Major animation admitted"),
+    (("character_identity", "required_object_stream", "sha256"),
+     data["character_identity"]["rejected_object_stream"]["sha256"], "Major object stream admitted"),
+    (("resource_causal_trace", "sufficient", "debit"), 3, "Major resource debit"),
+    (("implementation_contract", "sufficient_action", "cleanup_tick"), 49, "Major action duration"),
+    (("implementation_contract", "sufficient_action", "resource_debit_u8"), 3, "Major resource rule"),
+    (("implementation_contract", "sufficient_action", "presentation_timeline", 5, "animation_record"), "0x00165410", "Major presentation"),
+    (("implementation_contract", "record4_parent_class0", "class_u8"), 5, "Major projectile class"),
+    (("implementation_contract", "record4_parent_class0", "dispatch"), "0x030d34", "Major dispatcher"),
+    (("implementation_contract", "record4_parent_class0", "state_sequence_u8"), [0, 2, 4, 6, 8], "invented parent state"),
+    (("implementation_contract", "record4_parent_class0", "active_state", "angle_u8_route_values", "cold_run_1"), [16], "wrong target angle"),
+    (("implementation_contract", "record4_parent_class0", "child_emitter_state", "cadence_reload_u8"), 5, "wrong child cadence"),
+    (("implementation_contract", "record4_parent_class0", "child_emitter_state", "normal_rows", 4, "variant_u8"), 0, "wrong terminal child variant"),
+    (("implementation_contract", "record4_parent_class0", "collision_table", "table"), "0x0003136a", "Major collision table"),
+    (("implementation_contract", "record4_child_class4", "class_u8"), 5, "wrong child class"),
+    (("implementation_contract", "record4_child_class4", "initialization", "variant_offsets_u16", 1), 285, "wrong child presentation offset"),
+    (("implementation_contract", "record4_child_class4", "collision_table", "attack_entries", 1, "damage_selector_u8"), 6, "Major damage selector"),
+    (("implementation_contract", "current_state_collision_damage", "parent_contact", "damage_u8"), 24, "Major damage"),
+    (("implementation_contract", "empty_fallback", "presentation_timeline", 1, "animation_record"), "0x001645d4", "Major empty pose"),
+    (("mutation_controls", "wrong_character_rejected"), False, "identity rejection disabled"),
+]:
+    mutant = copy.deepcopy(data)
+    cursor = mutant
+    for key in path[:-1]:
+        cursor = cursor[key]
+    cursor[path[-1]] = value
+    reject(mutant, label)
+print("ORACLE-11 corrected Predator Button1 tests: PASS (21 mutations rejected)")

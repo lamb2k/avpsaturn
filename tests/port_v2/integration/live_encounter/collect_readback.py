@@ -26,7 +26,7 @@ FIELDS = FIELDS + ("round1_scheduler_frames","round1_scheduler_dispatches",
 FIELDS = FIELDS + ("round1_actor_handler_dispatches",
                    "round1_presentation_bindings",
                    "round1_state_context_bindings")
-FIELDS = FIELDS + ("round1_navigation_applications", "round1_navigation_clamps")
+FIELDS = FIELDS + ("round1_navigation_applications",)
 FIELDS = FIELDS + ("round1_player_stop_state",
                    "round1_player_weapon_state0",
                    "round1_player_weapon_state1",
@@ -34,7 +34,8 @@ FIELDS = FIELDS + ("round1_player_stop_state",
                    "round1_class1f_state",
                    "round1_auxiliary_state",
                    "round1_native_initial_state",
-                   "round1_player_jump_state")
+                   "round1_player_jump_state",
+                   "round1_player_identity_state")
 U16_FIELDS = {"input_mask", "alien_rng", "round1_player_source_action"}
 S16_FIELDS = {
     "player_x", "player_lane", "player_health", "player_state",
@@ -46,7 +47,7 @@ S16_FIELDS = {
     "continued_after_unlock", "camera_world_x", "failures",
     "round1_player_x", "round1_player_z", "round1_player_facing",
 }
-EVIDENCE_LAST_FRAME = 466
+EVIDENCE_LAST_FRAME = 574
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def signed(mcp, address): return tools.signed32(mcp.u32(address))
 def read_samples(mcp, base, count):
@@ -78,6 +79,20 @@ def read_samples(mcp, base, count):
             elif size == 4:
                 value = tools.signed32(value)
             decoded[name] = value
+        navigation_state = decoded["round1_navigation_applications"] & 0xffffffff
+        decoded["round1_navigation_applications"] = navigation_state & 0x0fff
+        decoded["round1_navigation_obstacle_responses"] = \
+            (navigation_state >> 12) & 0xff
+        decoded["round1_navigation_terrain_responses"] = \
+            (navigation_state >> 20) & 0x0f
+        decoded["round1_navigation_terrain_retries"] = \
+            (navigation_state >> 24) & 0x0f
+        camera_state = decoded["round1_scheduler_trace_count"] & 0xffffffff
+        decoded["round1_scheduler_trace_count"] = camera_state & 0xff
+        decoded["round1_camera_countdown"] = (camera_state >> 8) & 0x07ff
+        decoded["round1_camera_phase"] = (camera_state >> 19) & 0x0f
+        decoded["round1_camera_locks"] = (camera_state >> 23) & 0x0f
+        decoded["round1_camera_unlocks"] = (camera_state >> 27) & 0x0f
         result.append(decoded)
     return result
 
@@ -172,7 +187,7 @@ tile_count = int.from_bytes(tile_archive_bytes[4:8], "big")
 rank_table_offset = int.from_bytes(tile_archive_bytes[12:16], "big")
 texture_offset = rank_table_offset + tile_count * 4
 tile_pool_used = mcp.u32(syms["tile_pool_used"])
-if tile_pool_used < 1 or tile_pool_used > 208:
+if tile_pool_used < 1 or tile_pool_used > 218:
     raise RuntimeError(f"invalid live VDP1 tile-pool count: {tile_pool_used}")
 texture_cache_identity = bytearray()
 texture_mismatches = []
@@ -315,7 +330,28 @@ mapping.update({
            "round1_player_resource":"avsp_diag_round1_player_resource",
            "round1_player_resource_recharge":"avsp_diag_round1_player_resource_recharge",
            "round1_player_weapon_projectile_free":"avsp_diag_round1_player_weapon_projectile_free",
+           "round1_player_weapon_impact_requests":"avsp_diag_round1_player_weapon_impact_requests",
+           "round1_player_weapon_impact_allocations":"avsp_diag_round1_player_weapon_impact_allocations",
+           "round1_player_weapon_impact_allocation_failures":"avsp_diag_round1_player_weapon_impact_allocation_failures",
+           "round1_player_weapon_impact_audio_events":"avsp_diag_round1_player_weapon_impact_audio_events",
+           "round1_player_weapon_impact_releases":"avsp_diag_round1_player_weapon_impact_releases",
+           "round1_player_weapon_impact_presentation_bindings":"avsp_diag_round1_player_weapon_impact_presentation_bindings",
+           "round1_native_weapon_forbidden_identity":"avsp_diag_round1_native_weapon_forbidden_identity",
+           "round1_native_tile_pin_exhaustions":"avsp_diag_round1_native_tile_pin_exhaustions",
+           "round1_native_tile_unique_peak":"avsp_diag_round1_native_tile_unique_peak",
+           "round1_native_tile_unique_peak_frame":"avsp_diag_round1_native_tile_unique_peak_frame",
+           "round1_native_tile_unique_overflow":"avsp_diag_round1_native_tile_unique_overflow",
+           "round1_first_encounter_scheduler_updates":"avsp_diag_round1_first_encounter_scheduler_updates",
+           "round1_first_encounter_player_contacts":"avsp_diag_round1_first_encounter_player_contacts",
+           "round1_first_encounter_alien_contacts":"avsp_diag_round1_first_encounter_alien_contacts",
+           "round1_first_encounter_player_damage_events":"avsp_diag_round1_first_encounter_player_damage_events",
+           "round1_first_encounter_alien_damage_events":"avsp_diag_round1_first_encounter_alien_damage_events",
+           "round1_first_encounter_lifecycle_releases":"avsp_diag_round1_first_encounter_lifecycle_releases",
+           "round1_first_encounter_clear_events":"avsp_diag_round1_first_encounter_clear_events",
+           "round1_first_encounter_reaction_active":"avsp_diag_round1_first_encounter_reaction_active",
+           "round1_first_encounter_reaction_elapsed":"avsp_diag_round1_first_encounter_reaction_elapsed",
            "round1_native_initial_actor_render_commands":"avsp_diag_round1_native_initial_actor_render_commands",
+           "round1_native_empty_effect_render_frames":"avsp_diag_round1_native_empty_effect_render_frames",
            "round1_native_presentation_decode_failures":"avsp_diag_round1_native_presentation_decode_failures",
            "round1_decode_failure_actor_type":"avsp_diag_round1_decode_failure_actor_type",
            "round1_decode_failure_actor_class":"avsp_diag_round1_decode_failure_actor_class",
@@ -354,8 +390,16 @@ for key in ("round1_player_x", "round1_player_z", "round1_player_facing",
             "round1_scheduler_trace_count", "round1_scheduler_order_hash",
             "round1_actor_handler_dispatches", "round1_presentation_bindings",
             "round1_state_context_bindings", "round1_navigation_applications",
-            "round1_navigation_clamps"):
+            "round1_navigation_obstacle_responses",
+            "round1_navigation_terrain_responses",
+            "round1_navigation_terrain_retries", "round1_camera_countdown",
+            "round1_camera_phase", "round1_camera_locks",
+            "round1_camera_unlocks",
+            ):
     state[key] = evidence_sample[key]
+state["round1_camera_scroll2_x"] = evidence_sample["camera_world_x"]
+state["round1_camera_x_position"] = evidence_sample["camera_world_x"] + 64
+state["round1_camera_x_target"] = state["round1_camera_x_position"]
 stop_state = evidence_sample["round1_player_stop_state"] & 0xffffffff
 state["round1_player_stop_ticks"] = stop_state & 0x0f
 state["round1_player_stop_entries"] = (stop_state >> 4) & 0xff
@@ -418,10 +462,13 @@ state["round1_native_player_render_frames"] = sum(
     for sample in all_samples[:EVIDENCE_LAST_FRAME + 1])
 for sample in all_samples[:EVIDENCE_LAST_FRAME + 1]:
     native_presentation = sample["round1_native_presentation_state"] & 0xffffffff
-    sample["round1_native_projectile_render_commands"] = \
+    sample["round1_native_weapon_parent_render_commands"] = \
         native_presentation & 0x00ff
-    sample["round1_native_impact_render_commands"] = \
+    sample["round1_native_weapon_child_render_commands"] = \
         (native_presentation >> 8) & 0x00ff
+    sample["round1_native_projectile_render_commands"] = \
+        sample["round1_native_weapon_parent_render_commands"] + \
+        sample["round1_native_weapon_child_render_commands"]
     sample["round1_native_presentation_decode_failures"] = \
         (native_presentation >> 16) & 0x000f
     sample["round1_native_projectile_collision_writes"] = \
@@ -431,14 +478,20 @@ for sample in all_samples[:EVIDENCE_LAST_FRAME + 1]:
 state["round1_native_projectile_render_frames"] = sum(
     sample["round1_native_projectile_render_commands"] > 0
     for sample in all_samples[:EVIDENCE_LAST_FRAME + 1])
-state["round1_native_impact_render_frames"] = sum(
-    sample["round1_native_impact_render_commands"] > 0
+state["round1_native_weapon_parent_render_frames"] = sum(
+    sample["round1_native_weapon_parent_render_commands"] > 0
+    for sample in all_samples[:EVIDENCE_LAST_FRAME + 1])
+state["round1_native_weapon_child_render_frames"] = sum(
+    sample["round1_native_weapon_child_render_commands"] > 0
     for sample in all_samples[:EVIDENCE_LAST_FRAME + 1])
 state["round1_native_projectile_render_commands_peak"] = max(
     sample["round1_native_projectile_render_commands"]
     for sample in all_samples[:EVIDENCE_LAST_FRAME + 1])
-state["round1_native_impact_render_commands_peak"] = max(
-    sample["round1_native_impact_render_commands"]
+state["round1_native_weapon_parent_render_commands_peak"] = max(
+    sample["round1_native_weapon_parent_render_commands"]
+    for sample in all_samples[:EVIDENCE_LAST_FRAME + 1])
+state["round1_native_weapon_child_render_commands_peak"] = max(
+    sample["round1_native_weapon_child_render_commands"]
     for sample in all_samples[:EVIDENCE_LAST_FRAME + 1])
 state["round1_native_presentation_decode_failures"] = max(
     sample["round1_native_presentation_decode_failures"]
@@ -448,6 +501,30 @@ state["round1_native_projectile_collision_writes"] = max(
     for sample in all_samples[:EVIDENCE_LAST_FRAME + 1])
 state["round1_native_projectile_damage_writes"] = max(
     sample["round1_native_projectile_damage_writes"]
+    for sample in all_samples[:EVIDENCE_LAST_FRAME + 1])
+for sample in all_samples[:EVIDENCE_LAST_FRAME + 1]:
+    identity_state = sample["round1_player_identity_state"] & 0xffffffff
+    sample["round1_player_character_id"] = identity_state & 0xff
+    sample["round1_weapon_parent_active"] = (identity_state >> 8) & 0xff
+    sample["round1_weapon_child_active"] = (identity_state >> 16) & 0xff
+    sample["round1_weapon_forbidden_actor_active"] = \
+        (identity_state >> 24) & 0x01
+    sample["round1_weapon_forbidden_render_seen"] = \
+        (identity_state >> 25) & 0x01
+state["round1_player_character_id"] = max(
+    sample["round1_player_character_id"]
+    for sample in all_samples[:EVIDENCE_LAST_FRAME + 1])
+state["round1_weapon_parent_active_peak"] = max(
+    sample["round1_weapon_parent_active"]
+    for sample in all_samples[:EVIDENCE_LAST_FRAME + 1])
+state["round1_weapon_child_active_peak"] = max(
+    sample["round1_weapon_child_active"]
+    for sample in all_samples[:EVIDENCE_LAST_FRAME + 1])
+state["round1_weapon_forbidden_actor_active"] = max(
+    sample["round1_weapon_forbidden_actor_active"]
+    for sample in all_samples[:EVIDENCE_LAST_FRAME + 1])
+state["round1_weapon_forbidden_render_seen"] = max(
+    sample["round1_weapon_forbidden_render_seen"]
     for sample in all_samples[:EVIDENCE_LAST_FRAME + 1])
 state["frame"] = EVIDENCE_LAST_FRAME
 for key in ("player_health", "player_state", "player_facing",
@@ -460,15 +537,17 @@ samples = [sample for sample in all_samples
 if not (state["runtime_ready"] == state["canaries_ok"] == 1 and
         state["interface_version"] == 2 and state["contract_flags"] == 127 and
         1 <= state["frame_stage"] <= 7 and
+        state["hit_events"] == 3 and state["ko_events"] == 1 and
+        state["route_unlocked"] == state["continued"] == 1 and
         state["internal_failures"] == 0 and state["pcm_retriggers"] == 0 and
         state["failures"] == state["fallback_count"] ==
         state["physical_saturn"] == 0): raise RuntimeError(f"live state failed: {state}")
 if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_canaries_ok"] == 1 and
-        state["round1_route_state"] == 4 and state["round1_rng_seed"] == 0x3318 and
-        state["round1_player_health"] == 101 and
+        state["round1_route_state"] == 4 and state["round1_rng_seed"] == 0x82fd and
+        state["round1_player_health"] == 93 and
         [state[f"round1_pool{kind}_free"] for kind in (12,16,20,24)] ==
-        [10,20,13,2] and state["round1_fallback_count"] == 0 and
+        [11,20,13,2] and state["round1_fallback_count"] == 0 and
         state["round1_failure_count"] == 0 and
         state["round1_entry_spawn_count"] == 10 and
         state["round1_entry_step"] == 8 and
@@ -476,58 +555,58 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_entry_gate8236"] == 0 and
         state["round1_entry_gate81af"] == 1 and
         state["round1_control_enabled"] == 1 and
-        state["round1_player_x"] == 1024 and
+        state["round1_player_x"] == 1091 and
         state["round1_player_z"] == 320 and
         state["round1_player_facing"] == 1 and
         state["round1_player_source_action"] == 514 and
-        state["round1_player_controller_updates"] == 468 and
-        state["round1_scheduler_frames"] == 638 and
-        state["round1_scheduler_dispatches"] == 9126 and
-        state["round1_scheduler_trace_count"] == 14 and
-        state["round1_scheduler_order_hash"] == -203734367 and
-        state["round1_actor_handler_dispatches"] == 6380 and
-        state["round1_presentation_bindings"] == 6380 and
-        state["round1_state_context_bindings"] == 6380 and
-        state["round1_navigation_bound_x"] == 800 and
+        state["round1_player_controller_updates"] == 621 and
+        state["round1_scheduler_frames"] == 791 and
+        state["round1_scheduler_dispatches"] == 11245 and
+        state["round1_scheduler_trace_count"] == 13 and
+        state["round1_scheduler_order_hash"] == -1628184524 and
+        state["round1_actor_handler_dispatches"] == 7803 and
+        state["round1_presentation_bindings"] == 7802 and
+        state["round1_state_context_bindings"] == 7802 and
+        state["round1_navigation_bound_x"] == 832 and
         state["round1_navigation_bound_z"] == 256 and
-        state["round1_navigation_applications"] == 468 and
+        state["round1_navigation_applications"] == 621 and
         state["round1_navigation_clamps"] == 0 and
-        state["round1_navigation_obstacle_responses"] == 0 and
+        state["round1_navigation_obstacle_responses"] == 55 and
         state["round1_navigation_terrain_responses"] == 0 and
         state["round1_navigation_terrain_retries"] == 0 and
-        state["round1_camera_x_position"] == 800 and
-        state["round1_camera_x_target"] == 800 and
-        state["round1_camera_x_lower"] == 640 and
+        state["round1_camera_x_position"] == 832 and
+        state["round1_camera_x_target"] == 832 and
+        state["round1_camera_x_lower"] == 832 and
         state["round1_camera_x_upper"] == 832 and
-        state["round1_camera_scroll2_x"] == 736 and
-        state["round1_camera_phase"] == 0 and
-        state["round1_camera_countdown"] == 1200 and
-        state["round1_camera_locks"] == 0 and
+        state["round1_camera_scroll2_x"] == 768 and
+        state["round1_camera_phase"] == 2 and
+        state["round1_camera_countdown"] == 1138 and
+        state["round1_camera_locks"] == 1 and
         state["round1_camera_unlocks"] == 0 and
         state["round1_player_stop_ticks"] == 0 and
-        state["round1_player_stop_entries"] == 4 and
-        state["round1_player_stop_completions"] == 3 and
-        state["round1_player_stop_motion_suppressions"] == 19 and
-        state["round1_player_melee_entries"] == 4 and
-        state["round1_player_melee_completions"] == 4 and
+        state["round1_player_stop_entries"] == 2 and
+        state["round1_player_stop_completions"] == 2 and
+        state["round1_player_stop_motion_suppressions"] == 10 and
+        state["round1_player_melee_entries"] == 5 and
+        state["round1_player_melee_completions"] == 5 and
         state["round1_player_melee_selector_mask"] == 15 and
         state["round1_player_melee_presentation_mask"] == 15 and
         state["round1_player_melee_interruptions"] == 0 and
         state["round1_player_weapon_entries"] == 2 and
         state["round1_player_weapon_completions"] == 2 and
-        state["round1_player_weapon_attempts"] == 12 and
-        state["round1_player_weapon_allocations"] == 12 and
+        state["round1_player_weapon_attempts"] == 1 and
+        state["round1_player_weapon_allocations"] == 6 and
         state["round1_player_weapon_allocation_failures"] == 0 and
-        state["round1_player_weapon_resource_debits"] == 12 and
-        state["round1_player_weapon_presentation_bindings"] == 70 and
+        state["round1_player_weapon_resource_debits"] == 1 and
+        state["round1_player_weapon_presentation_bindings"] == 40 and
         state["round1_player_weapon_empty_requests"] == 1 and
         state["round1_player_weapon_empty_allocations"] == 1 and
         state["round1_player_weapon_empty_allocation_failures"] == 0 and
         state["round1_player_weapon_empty_releases"] == 1 and
         state["round1_player_weapon_empty_presentation_bindings"] == 10 and
         state["round1_player_weapon_interruptions"] == 0 and
-        state["round1_player_resource"] == 32 and
-        state["round1_player_resource_recharge"] == 6 and
+        state["round1_player_resource"] == 16 and
+        state["round1_player_resource_recharge"] == 1 and
         state["round1_player_weapon_projectile_free"] == 24 and
         state["round1_player_jump_entries"] == 1 and
         state["round1_player_jump_completions"] == 1 and
@@ -539,6 +618,10 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_player_jump_height"] == 0 and
         state["round1_native_player_render_frames"] > 0 and
         state["round1_native_initial_actor_render_commands"] > 0 and
+        state["round1_native_empty_effect_render_frames"] == 0 and
+        state["round1_native_tile_pin_exhaustions"] == 0 and
+        state["round1_native_tile_unique_peak"] <= 218 and
+        state["round1_native_tile_unique_overflow"] == 0 and
         state["round1_class1f_initializations"] == 10 and
         state["round1_class1f_initial_rng_calls"] == 10 and
         state["round1_class1f_transition_completions"] == 10 and
@@ -546,18 +629,41 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_class1f_effect_allocation_failures"] == 2 and
         state["round1_class1f_audio_events"] == 2 and
         state["round1_class1f_audio_command"] == 0x4d and
-        state["round1_class09_rng_calls"] == 158 and
+        state["round1_class09_rng_calls"] == 196 and
         state["round1_class4e_initializations"] == 2 and
         state["round1_class4e_releases"] == 2 and
         state["round1_class44_guard_clears"] == 1 and
         state["round1_scheduler_failure_code"] == 0 and
+        state["round1_player_weapon_impact_requests"] == 0 and
+        state["round1_player_weapon_impact_allocations"] == 0 and
+        state["round1_player_weapon_impact_allocation_failures"] == 0 and
+        state["round1_player_weapon_impact_audio_events"] == 0 and
+        state["round1_player_weapon_impact_releases"] == 0 and
+        state["round1_player_weapon_impact_presentation_bindings"] == 0 and
+        state["round1_first_encounter_scheduler_updates"] == 468 and
+        state["round1_first_encounter_player_contacts"] == 4 and
+        state["round1_first_encounter_alien_contacts"] == 1 and
+        state["round1_first_encounter_player_damage_events"] == 1 and
+        state["round1_first_encounter_alien_damage_events"] == 4 and
+        state["round1_first_encounter_lifecycle_releases"] == 1 and
+        state["round1_first_encounter_clear_events"] == 1 and
+        state["round1_first_encounter_reaction_active"] == 0 and
+        state["round1_first_encounter_reaction_elapsed"] == 139 and
         state["round1_native_projectile_render_frames"] > 0 and
-        state["round1_native_impact_render_frames"] > 0 and
+        state["round1_native_weapon_parent_render_frames"] > 0 and
+        state["round1_native_weapon_child_render_frames"] > 0 and
         state["round1_native_projectile_render_commands_peak"] > 0 and
-        state["round1_native_impact_render_commands_peak"] > 0 and
+        state["round1_native_weapon_parent_render_commands_peak"] > 0 and
+        state["round1_native_weapon_child_render_commands_peak"] > 0 and
+        state["round1_player_character_id"] == 0 and
+        state["round1_weapon_parent_active_peak"] == 1 and
+        state["round1_weapon_child_active_peak"] > 0 and
+        state["round1_weapon_forbidden_actor_active"] == 0 and
+        state["round1_weapon_forbidden_render_seen"] == 0 and
+        state["round1_native_weapon_forbidden_identity"] == 0 and
         state["round1_native_presentation_decode_failures"] == 0 and
-        state["round1_native_projectile_collision_writes"] > 0 and
-        state["round1_native_projectile_damage_writes"] > 0 and
+        state["round1_native_projectile_collision_writes"] == 0 and
+        state["round1_native_projectile_damage_writes"] == 0 and
         state["round1_presentation_ready"] == 1 and
         state["round1_presentation_seen"] == 1 and
         state["round1_presentation_commands_peak"] == 2):
@@ -595,6 +701,16 @@ player_assemblies = {
     0x15FC4C:0x162EE2, 0x15FCE8:0x16212C,
     0x15FC60:0x162EE2,
 }
+spec_fixture = json.loads(
+    (ROOT / "data/spec02_round1_generated_fixtures.json").read_text())
+weapon_contract = spec_fixture["authority_data"]["player"][
+    "weapon_projectile_resource"]["implementation_contract"]
+for timeline in (weapon_contract["sufficient_action"]["presentation_timeline"],
+                 weapon_contract["empty_fallback"]["presentation_timeline"]):
+    for frame in timeline:
+        record = int(str(frame["animation_record"]), 0)
+        assembly = int(str(frame["assembly"]), 0)
+        player_assemblies[record] = assembly
 alien_assemblies = {
     0x12DDB0:0x130346,
     0x12EC04:0x12F7CC, 0x12EC14:0x12F7E4, 0x12EC24:0x12F7FC,
@@ -606,10 +722,18 @@ alien_assemblies = {
     0x12E224:0x13020C, 0x12E234:0x13020C, 0x12E244:0x13020C,
     0x12E254:0x130294, 0x12E268:0x130346,
 }
-if any((s["player_animation_record"] != 0 or s["player_assembly"] != 0) and
-       player_assemblies.get(s["player_animation_record"]) != s["player_assembly"]
-       for s in samples):
-    raise RuntimeError("player animation-record/assembly ownership drift")
+player_identity_drift = [
+    {"frame":s["frame"], "state":s["player_state"],
+     "record":hex(s["player_animation_record"]),
+     "assembly":hex(s["player_assembly"]),
+     "expected":hex(player_assemblies.get(s["player_animation_record"], 0))}
+    for s in samples
+    if (s["player_animation_record"] != 0 or s["player_assembly"] != 0) and
+    player_assemblies.get(s["player_animation_record"]) != s["player_assembly"]
+]
+if player_identity_drift:
+    raise RuntimeError(
+        f"player animation-record/assembly ownership drift: {player_identity_drift[:12]}")
 alien_identity_drift = [
     {"frame":s["frame"], "state":s["alien_state"],
      "action":hex(s["alien_action"]),

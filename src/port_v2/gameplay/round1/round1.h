@@ -2,9 +2,11 @@
 #define AVSP_PORT_V2_ROUND1_H
 
 #include "../player_action/player_action.h"
+#include "../street_alien_ai/street_alien_ai.h"
+#include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "a98a56e1c372fbd1bb15ea8334c66e96a66063ae00ffba2c7aaa97044cc3b659"
+    "3f6e179fc41ad9ac0fdb6318c929ac74297b35a1f4627b58325e408d424af6fc"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -25,19 +27,18 @@
 #define AVSP_ROUND1_PLAYER_JUMP_DOWN_VECTOR_COUNT 2u
 #define AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_COUNT 9u
 #define AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_MAX_RECORDS 8u
-#define AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT 50u
+#define AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT 20u
 #define AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT 18u
 #define AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY 24u
-#define AVSP_ROUND1_WEAPON_PROJECTILE_PRESENTATION_COUNT 16u
-#define AVSP_ROUND1_WEAPON_PROJECTILE_ANGLE_COUNT 12u
-#define AVSP_ROUND1_WEAPON_PROJECTILE_MOTION_COUNT 64u
+#define AVSP_ROUND1_WEAPON_PARENT_PRESENTATION_COUNT 7u
+#define AVSP_ROUND1_WEAPON_PARENT_SELECTOR_COUNT 6u
+#define AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT 3u
+#define AVSP_ROUND1_WEAPON_PARENT_LOW_MOTION_COUNT 16u
+#define AVSP_ROUND1_WEAPON_PARENT_HIGH_MOTION_COUNT 13u
+#define AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT 5u
+#define AVSP_ROUND1_WEAPON_CHILD_VARIANT_COUNT 3u
+#define AVSP_ROUND1_WEAPON_CHILD_PRESENTATION_MAX 17u
 #define AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT 3u
-#define AVSP_ROUND1_WEAPON_IMPACT_VARIANT_COUNT 5u
-#define AVSP_ROUND1_WEAPON_IMPACT_PRESENTATION_COUNT 5u
-#define AVSP_ROUND1_WEAPON_IMPACT_AUDIO_COMMAND_COUNT 2u
-#define AVSP_ROUND1_WEAPON_DAMAGE_OFFENSE_COUNT 2u
-#define AVSP_ROUND1_WEAPON_DAMAGE_DEFENSE_COUNT 1u
-#define AVSP_ROUND1_WEAPON_DAMAGE_MATRIX_COUNT 2u
 #define AVSP_ROUND1_EMPTY_EFFECT_VARIANT_COUNT 4u
 #define AVSP_ROUND1_EMPTY_EFFECT_PRESENTATION_COUNT 10u
 #define AVSP_ROUND1_CLASS1F_INITIAL_ACTOR_COUNT 10u
@@ -63,6 +64,11 @@
 #define AVSP_ROUND1_CAMERA_SPEED_COUNT 20u
 #define AVSP_ROUND1_INPUT_BUTTON1 0x0010u
 #define AVSP_ROUND1_INPUT_BUTTON3 0x0040u
+#define AVSP_ROUND1_FIRST_ENCOUNTER_SLOT 0xA000u
+#define AVSP_ROUND1_FIRST_ENCOUNTER_ENTRY_X 1003
+#define AVSP_ROUND1_FIRST_ENCOUNTER_WAIT_ENTRY 0u
+#define AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE 1u
+#define AVSP_ROUND1_FIRST_ENCOUNTER_CLEARED 2u
 
 #define AVSP_ROUND1_ENTRY_SET_POSITION 1u
 #define AVSP_ROUND1_ENTRY_SET_SUBHANDLER 2u
@@ -83,6 +89,14 @@ typedef struct
 
 typedef struct
 {
+    short x;
+    short y;
+    short z;
+    unsigned char variant;
+} AvspRound1WeaponChildSpawnSpec;
+
+typedef struct
+{
     unsigned short timer;
     short branch;
     unsigned long animation_record;
@@ -90,6 +104,13 @@ typedef struct
     unsigned char hurt_selector;
     unsigned char attack_selector;
 } AvspRound1AnimationStateSpec;
+
+typedef struct
+{
+    unsigned char record_count;
+    AvspRound1AnimationStateSpec records[
+        AVSP_ROUND1_WEAPON_CHILD_PRESENTATION_MAX];
+} AvspRound1WeaponChildSequenceSpec;
 
 typedef struct
 {
@@ -131,34 +152,25 @@ typedef struct
 {
     unsigned char initial_state;
     unsigned char active_state;
-    unsigned char impact_state;
+    unsigned char emitter_state;
     unsigned char release_state;
-    unsigned char target_pointer_high;
     short x_bound_bias;
     unsigned short x_bound_span;
     short y_bound_bias;
     unsigned short y_bound_span;
-    signed char impact_class;
-    unsigned char impact_variant;
-    unsigned char coordinate_mode;
-    unsigned char palette;
+    signed char parent_class;
+    signed char child_class;
+    unsigned char child_count;
+    unsigned char child_cadence_initial;
+    unsigned char child_cadence_reload;
     unsigned short object_or;
+    unsigned long parent_dispatch;
+    unsigned long child_dispatch;
+    unsigned long parent_attack_table;
+    unsigned long child_attack_table;
+    unsigned char parent_damage;
+    unsigned char child_damage;
 } AvspRound1WeaponProjectileSpec;
-
-typedef struct
-{
-    unsigned char record_type;
-    signed char actor_class;
-    unsigned char variant;
-    unsigned char initial_state;
-    unsigned char active_state;
-    unsigned char release_state;
-    unsigned long dispatch;
-    unsigned char coordinate_mode;
-    unsigned char palette;
-    unsigned short object_or;
-    unsigned short audio_commands[AVSP_ROUND1_WEAPON_IMPACT_AUDIO_COMMAND_COUNT];
-} AvspRound1WeaponImpactSpec;
 
 typedef struct
 {
@@ -399,20 +411,19 @@ typedef struct
     unsigned short empty_active_action;
     unsigned short cleanup_action;
     unsigned short return_action;
-    signed char attempt_initial;
-    unsigned char cadence_initial;
-    unsigned char cadence_reload;
     unsigned char empty_timer_initial;
     unsigned char resource_capacity;
     unsigned char resource_debit;
     unsigned char recharge_after_success;
     unsigned char normal_recharge_reload;
     unsigned char depleted_recharge_reload;
-    signed char projectile_class;
+    signed char parent_class;
+    signed char child_class;
     unsigned short projectile_source_base;
     unsigned short projectile_stride;
     unsigned short player_owner;
-    unsigned long projectile_attack_table;
+    unsigned long parent_attack_table;
+    unsigned long child_attack_table;
 } AvspRound1PlayerWeaponSpec;
 
 typedef struct
@@ -439,6 +450,10 @@ typedef struct
     unsigned char active_collision;
     unsigned char parent_presentation_selector;
     unsigned char presentation_index;
+    unsigned char presentation_count;
+    unsigned char child_count;
+    unsigned char child_cadence;
+    unsigned char progress;
     unsigned short animation_timer;
     short animation_branch;
     short collision_result;
@@ -516,6 +531,55 @@ typedef struct
 
 typedef struct
 {
+    AvspAlienRuntime alien;
+    AvspPortV2HitKoRuntime reaction;
+    unsigned char initialized;
+    unsigned char encounter_state;
+    unsigned char target_ko_observed;
+    unsigned char route_unlocked;
+    unsigned char continued_after_unlock;
+    unsigned char attack_latched;
+    unsigned char pending_player_damage;
+    unsigned char player_contact;
+    unsigned char alien_contact;
+    unsigned char player_damage;
+    unsigned char alien_damage;
+    unsigned char semantic_hit;
+    unsigned char semantic_ko;
+    short health_before;
+    short health_after;
+    short unlock_player_x;
+    unsigned long scheduler_updates;
+    unsigned long player_contacts;
+    unsigned long alien_contacts;
+    unsigned long player_damage_events;
+    unsigned long alien_damage_events;
+    unsigned long hit_events;
+    unsigned long ko_events;
+    unsigned long lifecycle_releases;
+    unsigned long clear_events;
+} AvspRound1FirstEncounterRuntime;
+
+typedef struct
+{
+    AvspAlienView alien;
+    AvspPortV2HitKoActorState reaction;
+    unsigned char initialized;
+    unsigned char encounter_state;
+    unsigned char route_unlocked;
+    unsigned char continued_after_unlock;
+    unsigned char player_contact;
+    unsigned char alien_contact;
+    unsigned char player_damage;
+    unsigned char alien_damage;
+    unsigned char semantic_hit;
+    unsigned char semantic_ko;
+    short health_before;
+    short health_after;
+} AvspRound1FirstEncounterView;
+
+typedef struct
+{
     unsigned long head_canary;
     short route_state;
     unsigned short rng_seed;
@@ -547,6 +611,7 @@ typedef struct
     unsigned long class1f_effect_allocations;
     unsigned long class1f_effect_allocation_failures;
     unsigned long class1f_audio_events;
+    AvspRound1FirstEncounterRuntime first_encounter;
     unsigned long class09_initializations;
     unsigned long class09_rng_calls;
     unsigned long class4e_initializations;
@@ -685,7 +750,16 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
                             unsigned short input_mask,
                             short received_damage);
 int avsp_round1_step_scheduler(AvspRound1Runtime *runtime);
+void avsp_round1_first_encounter_view(
+    const AvspRound1Runtime *runtime,
+    AvspRound1FirstEncounterView *view);
 int avsp_round1_is_weapon_impact_actor(const AvspRound1ActorCore *actor);
+int avsp_round1_is_weapon_parent_projectile(
+    const AvspRound1WeaponProjectileAllocation *projectile);
+int avsp_round1_is_weapon_child_projectile(
+    const AvspRound1WeaponProjectileAllocation *projectile);
+int avsp_round1_player_native_presentation_active(
+    const AvspRound1Runtime *runtime);
 int avsp_round1_entry_valid(const AvspRound1Runtime *runtime);
 int avsp_round1_canaries_ok(const AvspRound1Runtime *runtime);
 

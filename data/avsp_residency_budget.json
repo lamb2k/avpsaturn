@@ -1,15 +1,15 @@
 {
  "cartridge": {
   "dram1_bytes": 2097152,
-  "jo_zone_bytes": 1441792,
+  "jo_zone_bytes": 1273856,
   "note": "strips carve exists only in the street-test profile; the jo zone figure above applies to that profile, other profiles get dram1 - tile_carve",
   "status": "MEASURED",
   "strips_carve_bytes": 294912,
   "strips_carve_headroom": 25258,
   "strips_file_bytes": 269654,
-  "tile_archive_bytes": 332708,
-  "tile_carve_bytes": 360448,
-  "tile_carve_headroom": 27740
+  "tile_archive_bytes": 501536,
+  "tile_carve_bytes": 528384,
+  "tile_carve_headroom": 26848
  },
  "classification": "pessimistic residency ledger; sizes, addresses and counts only",
  "cram": {
@@ -61,11 +61,11 @@
    "1": 2,
    "2": 446
   },
-  "headroom_bytes": 191580,
+  "headroom_bytes": 22752,
   "live_command_sample": 449,
   "note": "command sample from one paused street frame; a route-wide command high-water is a GAP until a soak instrument runs",
   "status": "MEASURED",
-  "texture_archive_bytes": 332708
+  "texture_archive_bytes": 501536
  },
  "vdp2": {
   "capacity_bytes": 524288,
@@ -121,8 +121,8 @@
    "status": "MEASURED"
   },
   "release-live-encounter-bench": {
-   "bend": "0x060bb9e0",
-   "headroom_bytes": 17952,
+   "bend": "0x060be080",
+   "headroom_bytes": 8064,
    "limit": "0x060c0000",
    "profile": "release-live-encounter-bench",
    "status": "MEASURED"

@@ -16,7 +16,8 @@
  *     X = ((origin_x + dx) & 0x3FF) | or_value, attr low byte
  *     = (raw & 0xE0) + palette
  *   both: Y = (origin_y + dy) & 0x3FF; width = 16*(((raw>>8)&0xF)+1);
- *   A2 walk: dx,dy then A2 += advance (the part's trailing u16).
+ *   A2 walk: dx,dy then A2 += signed advance (the part's trailing s16,
+ *   sign-extended by the source LEA (A2,D2.W),A2 loops).
  *
  *   origin (0x0AA59A..0x0AA5E6): D2 = header's trailing u32;
  *     origin_y = anchor_y - world_y + 0x100 -/+ D2.lo  (facing bit 1)

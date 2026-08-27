@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=a98a56e1c372fbd1bb15ea8334c66e96a66063ae00ffba2c7aaa97044cc3b659 */
-/* fixtures_sha256=6ddcb21e488da3411137003a979766875ec9b308eb0e77d962ccc03dbff719af */
+/* contract_sha256=3f6e179fc41ad9ac0fdb6318c929ac74297b35a1f4627b58325e408d424af6fc */
+/* fixtures_sha256=02cddeb60f970fe1b582fc3a1a387bfa38bbfe65db2b5c43eec599eb01e6f5d8 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -62,9 +62,10 @@ static const AvspRound1DispatchSpec avsp_round1_required_dispatches[AVSP_ROUND1_
     { 24u, 0x4E },
 };
 
-#define AVSP_ROUND1_CLASS1F_PRESENTATION_COUNT 190u
+#define AVSP_ROUND1_CLASS1F_PRESENTATION_COUNT 192u
 static const AvspRound1PresentationSpec avsp_round1_class1f_presentation[AVSP_ROUND1_CLASS1F_PRESENTATION_COUNT] =
 {
+    { 0x0012d2f8UL, 0x0012f994UL, 1u, 0u },
     { 0x0012d380UL, 0x0012f638UL, 1u, 0u },
     { 0x0012d390UL, 0x0012f670UL, 1u, 0u },
     { 0x0012d3a0UL, 0x0012f6a8UL, 1u, 0u },
@@ -130,6 +131,7 @@ static const AvspRound1PresentationSpec avsp_round1_class1f_presentation[AVSP_RO
     { 0x0012db04UL, 0x0012ffd8UL, 1u, 0u },
     { 0x0012db14UL, 0x0013000aUL, 1u, 0u },
     { 0x0012db24UL, 0x0012f5acUL, 1u, 0u },
+    { 0x0012dd50UL, 0x00130248UL, 1u, 0u },
     { 0x0012dd78UL, 0x0013020cUL, 14u, 0u },
     { 0x0012dd88UL, 0x00130294UL, 2u, 0u },
     { 0x0012dd9cUL, 0x00130294UL, 0u, 0u },
@@ -518,291 +520,168 @@ static const AvspRound1PlayerPresentationActorSpec avsp_round1_player_jump_actor
 static const AvspRound1PlayerWeaponSpec avsp_round1_player_weapon =
 {
     3072u,
-    3074u,
+    0x0c02u,
     6656u,
     6658u,
     0u,
     2u,
-    12,
-    1u,
-    4u,
     16u,
     64u,
-    3u,
+    40u,
     12u,
     2u,
     6u,
-    0x05,
+    0,
+    4,
     0x8680u,
     0x0080u,
     0x8380u,
-    0x03136aUL
+    0x0002fc3cUL,
+    0x00030cb6UL
 };
 
 static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_frames[AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT] =
 {
-    { 3072u, 0u, 0x001642f4UL, 0x00165694UL, 0u, 0u },
-    { 3074u, 2u, 0x00165400UL, 0x00166bf8UL, 1u, 0u },
-    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
-    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
-    { 3074u, 2u, 0x00165420UL, 0x00166c4cUL, 1u, 0u },
-    { 3074u, 2u, 0x00165400UL, 0x00166bf8UL, 1u, 0u },
-    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
-    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
-    { 3074u, 2u, 0x00165420UL, 0x00166c4cUL, 1u, 0u },
-    { 3074u, 2u, 0x00165444UL, 0x00166c76UL, 1u, 0u },
-    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
-    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
-    { 3074u, 2u, 0x00165464UL, 0x00166cbeUL, 1u, 0u },
-    { 3074u, 2u, 0x00165444UL, 0x00166c76UL, 1u, 0u },
-    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
-    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
-    { 3074u, 2u, 0x00165464UL, 0x00166cbeUL, 1u, 0u },
-    { 3074u, 2u, 0x00165048UL, 0x001666beUL, 1u, 0u },
-    { 3074u, 2u, 0x00165058UL, 0x001666dcUL, 1u, 0u },
-    { 3074u, 2u, 0x00165058UL, 0x001666dcUL, 1u, 0u },
-    { 3074u, 2u, 0x00165068UL, 0x001666faUL, 1u, 0u },
-    { 3074u, 2u, 0x0016508cUL, 0x00166718UL, 1u, 0u },
-    { 3074u, 2u, 0x0016509cUL, 0x00166736UL, 1u, 0u },
-    { 3074u, 2u, 0x0016509cUL, 0x00166736UL, 1u, 0u },
-    { 3074u, 2u, 0x001650acUL, 0x00166754UL, 1u, 0u },
-    { 3074u, 2u, 0x0016508cUL, 0x00166718UL, 1u, 0u },
-    { 3074u, 2u, 0x0016509cUL, 0x00166736UL, 1u, 0u },
-    { 3074u, 2u, 0x0016509cUL, 0x00166736UL, 1u, 0u },
-    { 3074u, 2u, 0x001650acUL, 0x00166754UL, 1u, 0u },
-    { 3074u, 2u, 0x00165048UL, 0x001666beUL, 1u, 0u },
-    { 3074u, 2u, 0x00165058UL, 0x001666dcUL, 1u, 0u },
-    { 3074u, 2u, 0x00165058UL, 0x001666dcUL, 1u, 0u },
-    { 3074u, 2u, 0x00165068UL, 0x001666faUL, 1u, 0u },
-    { 3074u, 2u, 0x00165444UL, 0x00166c76UL, 1u, 0u },
-    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
-    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
-    { 3074u, 2u, 0x00165464UL, 0x00166cbeUL, 1u, 0u },
-    { 3074u, 2u, 0x00165444UL, 0x00166c76UL, 1u, 0u },
-    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
-    { 3074u, 2u, 0x00165454UL, 0x00166c9aUL, 1u, 0u },
-    { 3074u, 2u, 0x00165464UL, 0x00166cbeUL, 1u, 0u },
-    { 3074u, 2u, 0x00165400UL, 0x00166bf8UL, 1u, 0u },
-    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
-    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
-    { 3074u, 2u, 0x00165420UL, 0x00166c4cUL, 1u, 0u },
-    { 3074u, 2u, 0x00165400UL, 0x00166bf8UL, 1u, 0u },
-    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
-    { 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },
-    { 3074u, 2u, 0x00165420UL, 0x00166c4cUL, 1u, 0u },
-    { 0u, 0u, 0x00163158UL, 0x00165488UL, 1u, 0u },
+    { 3072u, 0u, 0x0015f1f4UL, 0x001626a4UL, 1u, 0u },
+    { 3074u, 2u, 0x0015e540UL, 0x00161772UL, 1u, 0u },
+    { 3074u, 2u, 0x0015e540UL, 0x00161772UL, 1u, 0u },
+    { 3074u, 2u, 0x0015e540UL, 0x00161772UL, 1u, 0u },
+    { 3076u, 4u, 0x0015e550UL, 0x001618b2UL, 1u, 0u },
+    { 3076u, 4u, 0x0015e560UL, 0x00161a0aUL, 1u, 0u },
+    { 3076u, 4u, 0x0015e560UL, 0x00161a0aUL, 1u, 0u },
+    { 3076u, 4u, 0x0015e570UL, 0x001618b2UL, 1u, 0u },
+    { 3076u, 4u, 0x0015e580UL, 0x00161772UL, 1u, 0u },
+    { 3076u, 4u, 0x0015e580UL, 0x00161772UL, 1u, 0u },
+    { 3076u, 4u, 0x0015e580UL, 0x00161772UL, 1u, 0u },
+    { 3076u, 4u, 0x0015e580UL, 0x00161772UL, 1u, 0u },
+    { 3076u, 4u, 0x0015e580UL, 0x00161772UL, 1u, 0u },
+    { 3076u, 4u, 0x0015e580UL, 0x00161772UL, 1u, 0u },
+    { 3076u, 4u, 0x0015e580UL, 0x00161772UL, 1u, 0u },
+    { 3076u, 4u, 0x0015e580UL, 0x00161772UL, 1u, 0u },
+    { 3076u, 4u, 0x0015e580UL, 0x00161772UL, 1u, 0u },
+    { 3076u, 4u, 0x0015e580UL, 0x00161772UL, 1u, 0u },
+    { 3076u, 4u, 0x0015e580UL, 0x00161772UL, 1u, 0u },
+    { 0u, 0u, 0x0015f1f4UL, 0x001626a4UL, 1u, 0u },
 };
 
 static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_empty_frames[AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT] =
 {
-    { 6656u, 0u, 0x001642f4UL, 0x00165694UL, 0u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },
-    { 0u, 0u, 0x00163158UL, 0x00165488UL, 1u, 0u },
+    { 6656u, 0u, 0x0015f1f4UL, 0x001626a4UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },
+    { 0u, 0u, 0x0015f1f4UL, 0x001626a4UL, 1u, 0u },
 };
 
 static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_return_frame =
 {
-    2u, 2u, 0x00163158UL, 0x00165488UL, 1u, 0u
+    2u, 2u, 0x0015f1f4UL, 0x001626a4UL, 1u, 0u
 };
 
-static const AvspRound1VecS16 avsp_round1_weapon_projectile_spawn_offsets[AVSP_ROUND1_WEAPON_PROJECTILE_PRESENTATION_COUNT] =
+static const AvspRound1VecS16 avsp_round1_weapon_parent_selector_offsets[AVSP_ROUND1_WEAPON_PARENT_SELECTOR_COUNT] =
 {
-    { -21, 84 },
-    { 22, 79 },
-    { 36, 68 },
-    { 43, 55 },
-    { 43, 38 },
-    { 32, 26 },
-    { 16, 16 },
-    { -10, 12 },
-    { -24, 11 },
-    { -46, 14 },
-    { -54, 17 },
-    { -66, 25 },
-    { -75, 37 },
-    { -76, 51 },
-    { -70, 64 },
-    { -47, 79 },
+    { 5, 86 },
+    { -35, 76 },
+    { -6, 90 },
+    { -6, 53 },
+    { 8, 49 },
+    { 19, 54 },
 };
 
-static const unsigned char avsp_round1_weapon_projectile_animation_selectors[AVSP_ROUND1_WEAPON_PROJECTILE_PRESENTATION_COUNT] =
+static const AvspRound1AnimationStateSpec avsp_round1_weapon_parent_presentations[AVSP_ROUND1_WEAPON_PARENT_PRESENTATION_COUNT] =
 {
-    15u, 14u, 13u, 12u, 11u, 10u, 9u, 8u, 7u, 6u, 5u, 4u, 3u, 2u, 1u, 0u
+    { 4u, 0, 0x0002fb48UL, 0x0002fbccUL, 0u, 1u },
+    { 4u, 0, 0x0002fb58UL, 0x0002fbdaUL, 0u, 1u },
+    { 4u, 0, 0x0002fb68UL, 0x0002fbe8UL, 0u, 1u },
+    { 4u, 0, 0x0002fb78UL, 0x0002fbf6UL, 0u, 1u },
+    { 4u, 0, 0x0002fb88UL, 0x0002fc04UL, 0u, 1u },
+    { 4u, 0, 0x0002fb98UL, 0x0002fc12UL, 0u, 1u },
+    { 4u, 0, 0x0002fba8UL, 0x0002fc20UL, 0u, 1u },
 };
 
-static const unsigned char avsp_round1_weapon_projectile_angles_facing0[AVSP_ROUND1_WEAPON_PROJECTILE_ANGLE_COUNT] =
+static const unsigned char avsp_round1_weapon_parent_route_angles[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT] =
 {
-    40u, 42u, 44u, 46u, 48u, 50u, 49u, 47u, 45u, 43u, 41u, 40u
+    17u, 35u, 47u
 };
 
-static const unsigned char avsp_round1_weapon_projectile_angles_facing1[AVSP_ROUND1_WEAPON_PROJECTILE_ANGLE_COUNT] =
+static const AvspRound1VecS16 avsp_round1_weapon_parent_motion_low[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT][AVSP_ROUND1_WEAPON_PARENT_LOW_MOTION_COUNT] =
 {
-    24u, 22u, 20u, 18u, 16u, 14u, 15u, 17u, 19u, 21u, 23u, 24u
+    { { 0, 0 }, { 15, -1 }, { 31, -3 }, { 47, -5 }, { 63, -7 }, { 79, -8 }, { 95, -10 }, { 111, -12 }, { 127, -14 }, { 143, -16 }, { 159, -17 }, { 175, -19 }, { 191, -21 }, { 206, -23 }, { 222, -25 }, { 238, -26 } },
+    { { 0, 0 }, { -4, -17 }, { -9, -34 }, { -13, -52 }, { -18, -69 }, { -23, -87 }, { -27, -104 }, { -32, -122 }, { -37, -139 }, { -41, -157 }, { -46, -174 }, { -51, -192 }, { -55, -209 }, { -60, -227 }, { -64, -244 }, { -69, -262 } },
+    { { 0, 0 }, { -15, -1 }, { -31, -3 }, { -47, -5 }, { -63, -7 }, { -79, -8 }, { -95, -10 }, { -111, -12 }, { -127, -14 }, { -143, -16 }, { -159, -17 }, { -175, -19 }, { -191, -21 }, { -206, -23 }, { -222, -25 }, { -238, -26 } },
 };
 
-static const unsigned char avsp_round1_weapon_projectile_player_selectors[AVSP_ROUND1_WEAPON_PROJECTILE_ANGLE_COUNT] =
+static const AvspRound1VecS16 avsp_round1_weapon_parent_motion_high[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT][AVSP_ROUND1_WEAPON_PARENT_HIGH_MOTION_COUNT] =
 {
-    6u, 6u, 5u, 5u, 4u, 3u, 3u, 4u, 5u, 5u, 6u, 6u
+    { { 0, 0 }, { 254, -28 }, { 509, -57 }, { 764, -85 }, { 1018, -114 }, { 1273, -143 }, { 1528, -171 }, { 1782, -200 }, { 2037, -229 }, { 2292, -257 }, { 2546, -286 }, { 2801, -315 }, { 3056, -343 } },
+    { { 0, 0 }, { -74, -279 }, { -148, -559 }, { -222, -838 }, { -296, -1118 }, { -370, -1398 }, { -445, -1677 }, { -519, -1957 }, { -593, -2237 }, { -667, -2516 }, { -741, -2796 }, { -816, -3076 }, { -890, -3355 } },
+    { { 0, 0 }, { -254, -28 }, { -509, -57 }, { -764, -85 }, { -1018, -114 }, { -1273, -143 }, { -1528, -171 }, { -1782, -200 }, { -2037, -229 }, { -2292, -257 }, { -2546, -286 }, { -2801, -315 }, { -3056, -343 } },
 };
 
-static const AvspRound1VecS16 avsp_round1_weapon_projectile_motion[AVSP_ROUND1_WEAPON_PROJECTILE_MOTION_COUNT] =
+static const AvspRound1WeaponChildSpawnSpec avsp_round1_weapon_child_spawn_normal[AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT] =
 {
-    { 0, 3510 },
-    { 300, 3492 },
-    { 598, 3440 },
-    { 890, 3355 },
-    { 1173, 3240 },
-    { 1446, 3092 },
-    { 1704, 2916 },
-    { 1947, 2713 },
-    { 2171, 2481 },
-    { 2374, 2225 },
-    { 2552, 1948 },
-    { 2706, 1653 },
-    { 2835, 1340 },
-    { 2936, 1017 },
-    { 3010, 684 },
-    { 3056, 343 },
-    { 3072, 0 },
-    { 3056, -343 },
-    { 3010, -684 },
-    { 2936, -1017 },
-    { 2835, -1340 },
-    { 2706, -1653 },
-    { 2552, -1948 },
-    { 2374, -2225 },
-    { 2171, -2481 },
-    { 1947, -2713 },
-    { 1704, -2916 },
-    { 1446, -3092 },
-    { 1173, -3240 },
-    { 890, -3355 },
-    { 598, -3440 },
-    { 300, -3492 },
-    { 0, -3510 },
-    { -300, -3492 },
-    { -598, -3440 },
-    { -890, -3355 },
-    { -1173, -3240 },
-    { -1446, -3092 },
-    { -1704, -2916 },
-    { -1947, -2713 },
-    { -2171, -2481 },
-    { -2374, -2225 },
-    { -2552, -1948 },
-    { -2706, -1653 },
-    { -2835, -1340 },
-    { -2936, -1017 },
-    { -3010, -684 },
-    { -3056, -343 },
-    { -3072, 0 },
-    { -3056, 343 },
-    { -3010, 684 },
-    { -2936, 1017 },
-    { -2835, 1340 },
-    { -2706, 1653 },
-    { -2552, 1948 },
-    { -2374, 2225 },
-    { -2171, 2481 },
-    { -1947, 2713 },
-    { -1704, 2916 },
-    { -1446, 3092 },
-    { -1173, 3240 },
-    { -890, 3355 },
-    { -598, 3440 },
-    { -300, 3492 },
+    { 32, -16, -16, 0u },
+    { -48, -16, -16, 0u },
+    { -32, 16, 16, 0u },
+    { 48, 16, 16, 0u },
+    { 0, 0, 0, 1u },
 };
 
-static const AvspRound1AnimationStateSpec avsp_round1_weapon_projectile_presentations[AVSP_ROUND1_WEAPON_PROJECTILE_PRESENTATION_COUNT][2] =
+static const AvspRound1WeaponChildSpawnSpec avsp_round1_weapon_child_spawn_collision[AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT] =
 {
-    { { 8u, 0, 0x00030f6aUL, 0x000311aaUL, 0u, 1u }, { 8u, -32768, 0x00030f7aUL, 0x0003128aUL, 0u, 1u } },
-    { { 8u, 0, 0x00030f8eUL, 0x000311b8UL, 0u, 1u }, { 8u, -32768, 0x00030f9eUL, 0x00031298UL, 0u, 1u } },
-    { { 8u, 0, 0x00030fb2UL, 0x000311c6UL, 0u, 1u }, { 8u, -32768, 0x00030fc2UL, 0x000312a6UL, 0u, 1u } },
-    { { 8u, 0, 0x00030fd6UL, 0x000311d4UL, 0u, 1u }, { 8u, -32768, 0x00030fe6UL, 0x000312b4UL, 0u, 1u } },
-    { { 8u, 0, 0x00030ffaUL, 0x000311e2UL, 0u, 1u }, { 8u, -32768, 0x0003100aUL, 0x000312c2UL, 0u, 1u } },
-    { { 8u, 0, 0x0003101eUL, 0x000311f0UL, 0u, 1u }, { 2u, -32768, 0x0003102eUL, 0x000312d0UL, 0u, 1u } },
-    { { 8u, 0, 0x00031042UL, 0x000311feUL, 0u, 1u }, { 8u, -32768, 0x00031052UL, 0x000312deUL, 0u, 1u } },
-    { { 8u, 0, 0x00031066UL, 0x0003120cUL, 0u, 1u }, { 8u, -32768, 0x00031076UL, 0x000312ecUL, 0u, 1u } },
-    { { 8u, 0, 0x0003108aUL, 0x0003121aUL, 0u, 1u }, { 8u, -32768, 0x0003109aUL, 0x000312faUL, 0u, 1u } },
-    { { 8u, 0, 0x000310aeUL, 0x00031228UL, 0u, 2u }, { 8u, -32768, 0x000310beUL, 0x00031308UL, 0u, 2u } },
-    { { 8u, 0, 0x000310d2UL, 0x00031236UL, 0u, 2u }, { 8u, -32768, 0x000310e2UL, 0x00031316UL, 0u, 2u } },
-    { { 8u, 0, 0x000310f6UL, 0x00031244UL, 0u, 2u }, { 8u, -32768, 0x00031106UL, 0x00031324UL, 0u, 2u } },
-    { { 8u, 0, 0x0003111aUL, 0x00031252UL, 0u, 2u }, { 8u, -32768, 0x0003112aUL, 0x00031332UL, 0u, 2u } },
-    { { 8u, 0, 0x0003113eUL, 0x00031260UL, 0u, 2u }, { 8u, -32768, 0x0003114eUL, 0x00031340UL, 0u, 2u } },
-    { { 8u, 0, 0x00031162UL, 0x0003126eUL, 0u, 2u }, { 8u, -32768, 0x00031172UL, 0x0003134eUL, 0u, 2u } },
-    { { 8u, 0, 0x00031186UL, 0x0003127cUL, 0u, 2u }, { 8u, -32768, 0x00031196UL, 0x0003135cUL, 0u, 2u } },
+    { 64, -16, -16, 2u },
+    { 48, 16, 16, 2u },
+    { 32, -8, -8, 2u },
+    { 16, 8, 8, 2u },
+    { 0, 0, 0, 1u },
+};
+
+static const AvspRound1WeaponChildSequenceSpec avsp_round1_weapon_child_sequences[AVSP_ROUND1_WEAPON_CHILD_VARIANT_COUNT] =
+{
+    { 17u, { { 2u, 0, 0x0003078cUL, 0x00030a48UL, 0u, 1u }, { 2u, 0, 0x0003079cUL, 0x00030a56UL, 0u, 1u }, { 2u, 0, 0x000307acUL, 0x00030a64UL, 0u, 1u }, { 2u, 0, 0x000307bcUL, 0x00030a72UL, 0u, 2u }, { 2u, 0, 0x000307ccUL, 0x00030a80UL, 0u, 2u }, { 2u, 0, 0x000307dcUL, 0x00030a8eUL, 0u, 2u }, { 2u, 0, 0x000307ecUL, 0x00030a9cUL, 0u, 2u }, { 2u, 0, 0x000307fcUL, 0x00030aaaUL, 0u, 2u }, { 2u, 0, 0x0003080cUL, 0x00030ab8UL, 0u, 0u }, { 2u, 0, 0x0003081cUL, 0x00030ac6UL, 0u, 0u }, { 2u, 0, 0x0003082cUL, 0x00030ad4UL, 0u, 0u }, { 2u, 0, 0x0003083cUL, 0x00030ae2UL, 0u, 0u }, { 2u, 0, 0x0003084cUL, 0x00030af0UL, 0u, 0u }, { 2u, 0, 0x0003085cUL, 0x00030afeUL, 0u, 0u }, { 2u, 0, 0x0003086cUL, 0x00030b0cUL, 0u, 0u }, { 2u, 0, 0x0003087cUL, 0x00030b1aUL, 0u, 0u }, { 2u, -32768, 0x0003088cUL, 0x00030b28UL, 0u, 0u } } },
+    { 10u, { { 4u, 0, 0x000308a0UL, 0x00030b36UL, 0u, 1u }, { 4u, 0, 0x000308b0UL, 0x00030b44UL, 0u, 3u }, { 4u, 0, 0x000308c0UL, 0x00030b52UL, 0u, 3u }, { 4u, 0, 0x000308d0UL, 0x00030b60UL, 0u, 4u }, { 4u, 0, 0x000308e0UL, 0x00030b78UL, 0u, 0u }, { 4u, 0, 0x000308f0UL, 0x00030b90UL, 0u, 0u }, { 4u, 0, 0x00030900UL, 0x00030b9eUL, 0u, 0u }, { 4u, 0, 0x00030910UL, 0x00030bacUL, 0u, 0u }, { 4u, 0, 0x00030920UL, 0x00030bbaUL, 0u, 0u }, { 4u, -32768, 0x00030930UL, 0x00030bc8UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
+    { 16u, { { 2u, 0, 0x00030944UL, 0x00030bd6UL, 0u, 1u }, { 2u, 0, 0x00030954UL, 0x00030be4UL, 0u, 5u }, { 2u, 0, 0x00030964UL, 0x00030bf2UL, 0u, 5u }, { 2u, 0, 0x00030974UL, 0x00030c00UL, 0u, 5u }, { 2u, 0, 0x00030984UL, 0x00030c0eUL, 0u, 6u }, { 2u, 0, 0x00030994UL, 0x00030c1cUL, 0u, 6u }, { 2u, 0, 0x000309a4UL, 0x00030c2aUL, 0u, 6u }, { 2u, 0, 0x000309b4UL, 0x00030c38UL, 0u, 6u }, { 2u, 0, 0x000309c4UL, 0x00030c46UL, 0u, 0u }, { 2u, 0, 0x000309d4UL, 0x00030c54UL, 0u, 0u }, { 2u, 0, 0x000309e4UL, 0x00030c62UL, 0u, 0u }, { 2u, 0, 0x000309f4UL, 0x00030c70UL, 0u, 0u }, { 2u, 0, 0x00030a04UL, 0x00030c7eUL, 0u, 0u }, { 2u, 0, 0x00030a14UL, 0x00030c8cUL, 0u, 0u }, { 2u, 0, 0x00030a24UL, 0x00030c9aUL, 0u, 0u }, { 2u, -32768, 0x00030a34UL, 0x00030ca8UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
 };
 
 static const AvspRound1WeaponProjectileSpec avsp_round1_weapon_projectile =
 {
-    0u, 2u, 4u, 6u, 0x80u,
-    0x50, 0x0220u, 0x10, 0x0120u, 0x3a, 0u,
-    0u, 0u, 0x8000u
+    0u, 2u, 4u, 6u, 0x50, 0x0220u, 0x10, 0x0120u,
+    0, 4,
+    5u,
+    1u,
+    6u, 0x8000u,
+    0x02f870UL, 0x0306feUL,
+    0x0002fc3cUL,
+    0x00030cb6UL,
+    127u,
+    31u
 };
 
-static const AvspRound1CollisionBoxSpec avsp_round1_weapon_projectile_hurt_box =
-{
-    0, 0, 0u, 0u, 0, 0u, 0, 0u, 0u
-};
-
-static const AvspRound1CollisionBoxSpec avsp_round1_weapon_projectile_attack_boxes[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =
+static const AvspRound1CollisionBoxSpec avsp_round1_weapon_parent_attack_boxes[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =
 {
     { 0, 0, 0u, 0u, 0, 0u, 0, 0u, 0u },
-    { 16, 0, 18u, 5u, 0, 8u, -1, 0u, 6u },
-    { 16, 0, 18u, 5u, 0, 8u, 0, 0u, 6u },
+    { 0, -8, 4u, 12u, 0, 8u, 0, 8u, 25u },
+    { 70, 31, 52u, 229u, -86, 141u, -125, 57u, 130u },
 };
 
-static const AvspRound1DamageClassValueSpec avsp_round1_weapon_damage_offense[AVSP_ROUND1_WEAPON_DAMAGE_OFFENSE_COUNT] =
+static const AvspRound1CollisionBoxSpec avsp_round1_weapon_child_attack_boxes[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =
 {
-    { 0u, 10u, 0u },
-    { 2u, 10u, 4u }
-};
-
-static const AvspRound1DamageClassValueSpec avsp_round1_weapon_damage_defense[AVSP_ROUND1_WEAPON_DAMAGE_DEFENSE_COUNT] =
-{
-    { 16u, 10u, 33u }
-};
-
-static const AvspRound1DamageMatrixValueSpec avsp_round1_weapon_damage_matrix[AVSP_ROUND1_WEAPON_DAMAGE_MATRIX_COUNT] =
-{
-    { 33u, 6u, 24u },
-    { 33u, 10u, 31u }
-};
-
-static const AvspRound1WeaponImpactSpec avsp_round1_weapon_impact =
-{
-    24u, 0x3a, 0u, 0u, 2u, 4u, 0x086f62UL,
-    0u, 0u, 0x8000u,
-    { 0x007eu, 0x0148u }
-};
-
-static const short avsp_round1_weapon_impact_variant_offsets[AVSP_ROUND1_WEAPON_IMPACT_VARIANT_COUNT] =
-{
-    12, 96, 196, 248, 348
-};
-
-static const AvspRound1AnimationStateSpec avsp_round1_weapon_impact_variant0_records[AVSP_ROUND1_WEAPON_IMPACT_PRESENTATION_COUNT] =
-{
-    { 2u, 0, 0x00086fdcUL, 0x00087180UL, 0u, 0u },
-    { 2u, 0, 0x00086fecUL, 0x0008718eUL, 0u, 0u },
-    { 2u, 0, 0x00086ffcUL, 0x0008719cUL, 0u, 0u },
-    { 2u, 0, 0x0008700cUL, 0x000871aaUL, 0u, 0u },
-    { 2u, -32768, 0x0008701cUL, 0x000871aaUL, 0u, 0u },
+    { 0, 0, 0u, 0u, 0, 0u, 0, 0u, 0u },
+    { 0, 10, 16u, 10u, 0, 8u, 1, 8u, 14u },
+    { 0, 24, 16u, 24u, 0, 8u, 1, 8u, 14u },
 };
 
 static const AvspRound1VecS16 avsp_round1_empty_effect_variant_offsets[AVSP_ROUND1_EMPTY_EFFECT_VARIANT_COUNT] =

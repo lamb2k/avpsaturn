@@ -330,7 +330,10 @@ def decode_group_entries(rom: Rom, header_addr: int, origin_x: int, origin_y: in
         # retained tag-4 write-tap + ROM bytes): identical to family 6 but
         # parts are 4 bytes (code, attr) with NO advance word - fixed A2
         # stride of one dx/dy pair per part.
-        advance = rom.u16(a0 + 4) if has_advance else 0
+        # The source loops at 0x0AA19C/0x0AA1D0/0x0AA214 load this word
+        # then use LEA (A2,D2.W),A2.  The indexed word is sign-extended;
+        # Button1 assemblies 0x166C76/9A/BE exercise negative advances.
+        advance = s16(rom.u16(a0 + 4)) if has_advance else 0
         if mode_positive:
             attr = (attr_raw & 0xFF00) | ((((attr_raw & 0xE0) + palette_byte)
                                            ^ flip_byte) & 0xFF)

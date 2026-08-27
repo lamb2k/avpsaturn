@@ -137,8 +137,8 @@ static int emit_group_ex(const AvspRomView *view,
     for (i = 0; i < count; ++i) {
         unsigned int code = vrd16(view, a0, &ok);
         unsigned int attr_raw = vrd16(view, a0 + 2ul, &ok);
-        unsigned int advance = has_advance
-            ? vrd16(view, a0 + 4ul, &ok) : 0u;
+        short advance = has_advance
+            ? (short)vrd16(view, a0 + 4ul, &ok) : (short)0;
         unsigned int dx = vrd16(view, a2, &ok);
         unsigned int dy = vrd16(view, a2 + 2ul, &ok);
         unsigned int attr;
@@ -167,7 +167,8 @@ static int emit_group_ex(const AvspRomView *view,
         }
 
         a0 += has_advance ? 6ul : 4ul;
-        a2 += 4ul + (unsigned long)advance;
+        /* Source uses LEA (A2,D2.W),A2: the trailing word is signed. */
+        a2 = (unsigned long)((long)a2 + 4l + (long)advance);
     }
 
     return (int)count;

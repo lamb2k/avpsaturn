@@ -229,6 +229,23 @@ int main(void)
                    want, 3);
     }
 
+    /* SPEC-02 Button1 assembly 0x166C76. Its second source part has advance
+     * 0xFFEC, which the 0x0AA1D0 LEA (A2,D2.W),A2 loop sign-extends. This
+     * rejects the former unsigned walk that ran beyond the source ROM. */
+    actor.world_x = 944; actor.world_y = 320;
+    actor.facing = 0; actor.palette = 0x00; actor.mode = 0;
+    actor.anchor_x = 720; actor.anchor_y = 256;
+    {
+        static const unsigned short want[] = {
+            0x80F9, 0x007B, 0xE110, 0x4401,
+            0x8109, 0x006B, 0xE0C6, 0x0201,
+            0x80F9, 0x008B, 0xEECA, 0x1301,
+            0x8119, 0x006B, 0xEECE, 0x1101,
+        };
+        check_pose(rom, rom_size, "button1 signed A2 (4)", 0x166C76ul,
+                   &actor, want, 4);
+    }
+
     /* Family-A (inline dx/dy parts), palette mode, stalker route. */
     actor.world_x = 1133; actor.world_y = 309;
     actor.facing = 0; actor.palette = 0x1B; actor.mode = 1;

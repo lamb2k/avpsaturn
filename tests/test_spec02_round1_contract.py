@@ -16,24 +16,44 @@ spec02.validate(contract, fixtures)
 weapon = fixtures["authority_data"]["player"][
     "weapon_projectile_resource"]["implementation_contract"]
 assert weapon["source_input"]["button1_mask"] == "0x0010"
-assert weapon["sufficient_volley"]["spawn_tick_offsets"] == list(range(0, 48, 4))
-assert weapon["sufficient_volley"]["cleanup_tick_offset"] == 49
-assert weapon["empty_fallback"]["cleanup_tick_offset"] == 17
-projectile = weapon["projectile_lifecycle_contract"]
-assert projectile["spec_executable"] is True
-assert projectile["implementation_blocker"] is None
-assert projectile["impact_actor_contract"]["spec_executable"] is True
-assert projectile["initialization"]["presentation_actor_fields"][
-    "object_or_u16"] == "0x8000"
-assert projectile["impact_actor_contract"]["initialization"][
-    "presentation_actor_fields"]["coordinate_mode_u8"] == 0
-damage = projectile["current_state_interfaces"]["collision"]["damage"]
-assert damage["baseline"]["damage"] == 24
-assert damage["mutation"]["damage"] == 31
-assert damage["suppression"]["mutated_writes"] == 4
+assert weapon["sufficient_action"]["cleanup_tick"] == 19
+assert weapon["sufficient_action"]["resource_debit_u8"] == 40
+assert weapon["empty_fallback"]["cleanup_tick"] == 17
+parent = weapon["record4_parent_class0"]
+child = weapon["record4_child_class4"]
+assert parent["spec_executable"] is True and parent["class_u8"] == 0
+assert child["spec_executable"] is True and child["class_u8"] == 4
+assert parent["collision_table"]["table"] == "0x0002fc3c"
+assert child["collision_table"]["table"] == "0x00030cb6"
+assert parent["child_emitter_state"]["spawn_ticks_from_parent_state4"] == [
+    1, 7, 13, 19, 25]
+assert [len(child["initialization"]["variant_presentation_sequences"][str(i)])
+        for i in range(3)] == [17, 10, 16]
+damage = weapon["current_state_collision_damage"]
+assert damage["parent_contact"]["damage_u8"] == 127
+assert damage["child_contact"]["damage_u8"] == 31
 assert weapon["empty_effect_variant1_contract"]["spec_executable"] is True
+assert weapon["empty_effect_variant1_contract"]["initialization"][
+    "presentation_actor_fields"] == {
+        "coordinate_mode_u8": 0, "palette_u8": 0, "facing_u8": 0,
+        "object_or_u16": "0x8000",
+        "source_fields": {
+            "coordinate_mode": "zero-initialized actor +0x0d u8",
+            "palette": "zero-initialized actor +0x0e u8",
+            "facing": "clr.b actor +0x0f at 0x07a020",
+            "object_or": "move.w #0x8000 to actor +0x2e at 0x07a014"}}
 class1f = next(item for item in fixtures["authority_data"]["enemies"]["archetypes"]
                if item["class"] == "0x1f")
+class1f_records = {row["animation_record"]: row for row in
+                   class1f["presentation_and_collision"]["records"]}
+assert (class1f_records["0x0012dd50"]["assembly"],
+        class1f_records["0x0012dd50"]["hurt_selector"],
+        class1f_records["0x0012dd50"]["attack_selector"]) == \
+       ("0x00130248", 1, 0)
+assert (class1f_records["0x0012e214"]["assembly"],
+        class1f_records["0x0012e214"]["hurt_selector"],
+        class1f_records["0x0012e214"]["attack_selector"]) == \
+       ("0x0013020c", 14, 0)
 initial = class1f["initial_transition_contract"]
 assert initial["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
 assert [row["entry_delay_u8"] for row in initial["actors"][-3:]] == [9, 3, 16]
@@ -92,15 +112,18 @@ m = copy.deepcopy(contract); m["field_contracts"][3]["source"]["json_pointer"] =
 m = copy.deepcopy(contract); m["field_contracts"][4]["mutation_control"]["json_pointer"] = "/missing"; mutations.append((m, fixtures, "missing real mutation"))
 m = copy.deepcopy(contract); m["coverage_gate"]["orphan_authoritative_writers"] = 1; mutations.append((m, fixtures, "weakened gate"))
 f = copy.deepcopy(fixtures); f["authority_data"]["rng"]["algorithm"]["recurrence"] = "guess"; mutations.append((contract, f, "fixture mutation"))
-f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["sufficient_volley"]["cadence_reload"] = 3; mutations.append((contract, f, "weapon cadence mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_parent_class0"]["child_emitter_state"]["cadence_reload_u8"] = 5; mutations.append((contract, f, "weapon cadence mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["empty_effect_variant1_contract"]["variant"] = 0; mutations.append((contract, f, "empty effect variant mutation"))
-f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["projectile_lifecycle_contract"]["current_state_interfaces"]["collision"]["damage"]["mutation"]["damage"] = 24; mutations.append((contract, f, "projectile damage lookup mutation"))
-f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["projectile_lifecycle_contract"]["initialization"]["presentation_actor_fields"]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "projectile presentation object priority mutation"))
-f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["projectile_lifecycle_contract"]["impact_actor_contract"]["initialization"]["presentation_actor_fields"]["palette_u8"] = 1; mutations.append((contract, f, "impact presentation palette mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["empty_effect_variant1_contract"]["initialization"]["presentation_actor_fields"]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "empty effect priority mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["current_state_collision_damage"]["child_contact"]["damage_u8"] = 30; mutations.append((contract, f, "projectile damage lookup mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_parent_class0"]["initialization"]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "projectile presentation object priority mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_child_class4"]["class_u8"] = 5; mutations.append((contract, f, "projectile child class mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["phase_0x1400"]["substates"][1]["writes"]["x_velocity_s32_16_16"] = 0x20000; mutations.append((contract, f, "class1f transition motion mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["actors"][0]["coordinate_mode_u8"] = 0; mutations.append((contract, f, "class1f presentation mode mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["actors"][0]["palette_u8"] = 15; mutations.append((contract, f, "class1f presentation palette mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["actors"][0]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "class1f presentation priority mutation"))
+f = copy.deepcopy(fixtures); next(row for row in next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["presentation_and_collision"]["records"] if row["animation_record"] == "0x0012dd50")["assembly"] = "0x0013020c"; mutations.append((contract, f, "class1f HIT presentation mutation"))
+f = copy.deepcopy(fixtures); next(row for row in next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["presentation_and_collision"]["records"] if row["animation_record"] == "0x0012e214")["hurt_selector"] = 1; mutations.append((contract, f, "class1f KO selector mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x09_type20_rng_owner"]["selector_table_u16"][0] = 1; mutations.append((contract, f, "class09 RNG selector mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["allocation_pop_order"].reverse(); mutations.append((contract, f, "class4e allocation-order mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["terrain_resolver"]["records"][4]["decoded_six_fields"]["z_parameter_s8"] = -8; mutations.append((contract, f, "terrain record sign mutation"))

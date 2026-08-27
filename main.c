@@ -99,12 +99,13 @@
    needs more PCM moved to phase-boundary loads first (S3 enabler,
    tracked in the handoff), not a bigger carve alone. */
 /* Widened from 0x40000 for the RP4 street archive and to the smallest aligned
- * carve that co-resides the SPEC-02-bound first-segment presentations with
- * the accepted combat overlay (372,308 + 24,236 bytes). Scene loading
+ * carve that co-resides the corrected SPEC-02 Predator parent/child
+ * presentation union (501,536 bytes) followed by the accepted combat overlay
+ * (24,236 bytes): 525,772 bytes total, 2,612 bytes of headroom. Scene loading
  * boundaries are the residency lever: the carve holds one scene-scope
  * archive at a time and is reloaded during transitions, when data-track
  * reads are legal. */
-#define AVSP_TILE_REGION_BYTES 0x61000
+#define AVSP_TILE_REGION_BYTES 0x81000
 
 /* RP4 street test: the interval strip bundle is staged after the tile
  * carve, outside the allocator, only in that build profile. */
@@ -112,6 +113,17 @@
 #define AVSP_STRIPS_REGION_BYTES 0x48000
 #else
 #define AVSP_STRIPS_REGION_BYTES 0
+#endif
+
+/* The source-closed Round 1 actor pools are persistent gameplay state, not
+ * transient diagnostic storage. Reserve one aligned block immediately after
+ * the existing tile/strip carve so debug and release use the same 4 MB-cart
+ * ownership without consuming Saturn work RAM. */
+#ifdef AVSP_LIVE_ENCOUNTER
+#define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x3000
+#define AVSP_ROUND1_RUNTIME_BASE ((AvspRound1Runtime *)(AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES + AVSP_STRIPS_REGION_BYTES))
+#else
+#define AVSP_ROUND1_RUNTIME_REGION_BYTES 0
 #endif
 
 #ifdef AVSP_STREET_TEST
@@ -137,21 +149,35 @@ char avsp_diag_print_buffer[128];
 #define BITMAP_SCENE_FRONTEND_BASE 100
 #define BITMAP_SCENE_ROUTE_BASE 200
 #define AVSP_VDP1_TEXTURE_BUDGET 458488
-/* S2 Body E retains the proven per-tile renderer.  Only CPS2 entries larger
-   than its measured 35-tile startup threshold become one source-derived
-   composite.  The accepted startup window needs five such entries (36,736
-   bytes) and peaks at 162 remaining tiles, so 208 resident tile definitions
-   leave measured headroom without crossing SGL's 255-definition boundary. */
-#define AVSP_TILE_SPRITE_POOL 208
-#define AVSP_COMPOSITE_TILE_THRESHOLD 35
-#define AVSP_COMPOSITE_SPRITE_POOL 5
-#define AVSP_COMPOSITE_TEXTURE_BUDGET 36736UL
+/* S2 Body E retains the proven per-tile renderer.  The corrected Predator
+   Button1 parent/child family is bounded with the smallest threshold that
+   keeps the complete source-derived union inside the measured VDP1 texture
+   budget: entries larger than 32 tiles become 21 measured composites.
+   The per-tile pool uses the remaining measured Jo sprite-definition budget
+   while preserving 21 composite slots and sixteen non-archive definitions.
+   Every texture referenced by the current frame is pinned until VDP1 consumes
+   the command list; entries wholly outside the 352x224 aperture are clipped
+   before they can claim a slot. */
+#define AVSP_TILE_SPRITE_POOL 218
+#define AVSP_COMPOSITE_TILE_THRESHOLD 32
+#define AVSP_COMPOSITE_SPRITE_POOL 21
+#define AVSP_COMPOSITE_TEXTURE_BUDGET 126592UL
 #define AVSP_COMPOSITE_MAX_TEXTURE_BYTES 11648UL
+#ifdef AVSP_LIVE_ENCOUNTER
+/* Native Round 1 renders enemies from source object entries. The retained
+ * decoded enemy/boss cel slots are not created in this profile. */
+#define AVSP_LEGACY_ENEMY_TEXTURE_BYTES 0
+#define AVSP_LEGACY_BOSS_TEXTURE_BYTES 0
+#else
+#define AVSP_LEGACY_ENEMY_TEXTURE_BYTES \
+    (CAP_MAX_ENEMIES * AVSP_ENEMY_DECODED_BYTES)
+#define AVSP_LEGACY_BOSS_TEXTURE_BYTES AVSP_BOSS_DECODED_BYTES
+#endif
 #define AVSP_VDP1_TEXTURE_BYTES \
     (2 * CEL_BYTES + \
      AVSP_PLAYER_ACTION_LAYERS * AVSP_PLAYER_ACTION_DECODED_BYTES + \
-     CAP_MAX_ENEMIES * AVSP_ENEMY_DECODED_BYTES + \
-     AVSP_BOSS_DECODED_BYTES + \
+     AVSP_LEGACY_ENEMY_TEXTURE_BYTES + \
+     AVSP_LEGACY_BOSS_TEXTURE_BYTES + \
      AVSP_HUD_TEXTURE_BYTES + \
      AVSP_TILE_SPRITE_POOL * AVSP_TILE_BYTES + \
      AVSP_COMPOSITE_TEXTURE_BUDGET + \
@@ -473,7 +499,7 @@ volatile int avsp_diag_slice_enemy_tile_identity;
  * samples from its superseded post-route gameplay choreography are reclaimed
  * for native startup chronology. The retained shell no longer supplies
  * gameplay authority, so frames 467..470 cannot be an acceptance dependency. */
-#define AVSP_LIVE_DIAG_SAMPLES 467
+#define AVSP_LIVE_DIAG_SAMPLES 575
 #define AVSP_ROUND1_STARTUP_TRACE_SAMPLES 16
 #define AVSP_ROUND1_DIAGNOSTIC_SOURCE_BASE_FRAME 2040
 #define AVSP_ROUND1_NATIVE_ENTRY_STEP_FRAME 28
@@ -525,7 +551,6 @@ typedef struct
     int round1_presentation_bindings;
     int round1_state_context_bindings;
     int round1_navigation_applications;
-    int round1_navigation_clamps;
     unsigned int round1_player_stop_state;
     unsigned int round1_player_weapon_state0;
     unsigned int round1_player_weapon_state1;
@@ -534,10 +559,13 @@ typedef struct
     unsigned int round1_auxiliary_state;
     unsigned int round1_native_initial_state;
     unsigned int round1_player_jump_state;
+    unsigned int round1_player_identity_state;
 } LiveEncounterDiagSample;
 static AvspLiveEncounterRuntime live_encounter_runtime;
 static AvspLiveEncounterFrame live_encounter_frame;
-static AvspRound1Runtime round1_runtime;
+#define round1_runtime (*AVSP_ROUND1_RUNTIME_BASE)
+typedef char AvspRound1RuntimeFitsReservedCartRegion[
+    sizeof(AvspRound1Runtime) <= AVSP_ROUND1_RUNTIME_REGION_BYTES ? 1 : -1];
 static int round1_retained_initialized;
 static int round1_cdda_started;
 volatile LiveEncounterDiagSample avsp_diag_live_samples[
@@ -661,8 +689,31 @@ volatile int avsp_diag_round1_player_weapon_interruptions;
 volatile int avsp_diag_round1_player_resource;
 volatile int avsp_diag_round1_player_resource_recharge;
 volatile int avsp_diag_round1_player_weapon_projectile_free;
+volatile int avsp_diag_round1_player_weapon_impact_requests;
+volatile int avsp_diag_round1_player_weapon_impact_allocations;
+volatile int avsp_diag_round1_player_weapon_impact_allocation_failures;
+volatile int avsp_diag_round1_player_weapon_impact_audio_events;
+volatile int avsp_diag_round1_player_weapon_impact_releases;
+volatile int avsp_diag_round1_player_weapon_impact_presentation_bindings;
+volatile int avsp_diag_round1_first_encounter_scheduler_updates;
+volatile int avsp_diag_round1_first_encounter_player_contacts;
+volatile int avsp_diag_round1_first_encounter_alien_contacts;
+volatile int avsp_diag_round1_first_encounter_player_damage_events;
+volatile int avsp_diag_round1_first_encounter_alien_damage_events;
+volatile int avsp_diag_round1_first_encounter_lifecycle_releases;
+volatile int avsp_diag_round1_first_encounter_clear_events;
+volatile int avsp_diag_round1_first_encounter_reaction_active;
+volatile int avsp_diag_round1_first_encounter_reaction_elapsed;
 volatile int avsp_diag_round1_native_projectile_render_commands;
 volatile int avsp_diag_round1_native_impact_render_commands;
+volatile int avsp_diag_round1_native_weapon_parent_render_commands;
+volatile int avsp_diag_round1_native_weapon_child_render_commands;
+volatile int avsp_diag_round1_native_weapon_forbidden_identity;
+volatile int avsp_diag_round1_native_tile_pin_exhaustions;
+volatile int avsp_diag_round1_native_tile_unique_peak;
+volatile int avsp_diag_round1_native_tile_unique_peak_frame;
+volatile int avsp_diag_round1_native_tile_unique_overflow;
+volatile int avsp_diag_round1_native_empty_effect_render_frames;
 volatile int avsp_diag_round1_native_initial_actor_render_commands;
 volatile int avsp_diag_round1_native_player_render_commands;
 volatile int avsp_diag_round1_native_presentation_decode_failures;
@@ -710,7 +761,12 @@ volatile int avsp_diag_round1_startup_source_frame;
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
 static int live_autotest_phase;
 static int live_autotest_release;
+static int live_autotest_live_volley_done;
+static int live_autotest_post_clear_volley_done;
+static int live_autotest_empty_done;
+static int live_autotest_jump_done;
 #endif
+static unsigned long round1_native_capture_frame;
 #endif
 
 #ifdef AVSP_ENEMY_SALVAGE_BENCH
@@ -2999,6 +3055,19 @@ static int tile_pool_sprite[AVSP_TILE_SPRITE_POOL];
 static long tile_pool_rank[AVSP_TILE_SPRITE_POOL];
 static const AvspTileArchive *tile_pool_archive[AVSP_TILE_SPRITE_POOL];
 static unsigned long tile_pool_stamp[AVSP_TILE_SPRITE_POOL];
+/* VDP1 consumes the command list after CPU submission. A texture referenced
+ * by an earlier command must therefore remain immutable until the next frame;
+ * ordinary cross-frame LRU replacement is legal, same-frame replacement is
+ * not. */
+static unsigned char tile_pool_frame_pinned[AVSP_TILE_SPRITE_POOL];
+#ifdef AVSP_LIVE_ENCOUNTER
+#define AVSP_TILE_FRAME_UNIQUE_LIMIT 4096
+static unsigned char tile_frame_unique_main[
+    AVSP_TILE_FRAME_UNIQUE_LIMIT / 8];
+static unsigned char tile_frame_unique_overlay[
+    AVSP_TILE_FRAME_UNIQUE_LIMIT / 8];
+static int tile_frame_unique_count;
+#endif
 static unsigned long tile_pool_clock;
 static int tile_pool_used;
 #ifdef AVSP_LIVE_ENCOUNTER
@@ -3130,8 +3199,34 @@ static int tile_sprite_for_archive_rank(const AvspTileArchive *archive,
                                         const long rank)
 {
     int index;
-    int victim = 0;
+    int victim = -1;
     jo_img_4bits img;
+
+#ifdef AVSP_LIVE_ENCOUNTER
+    if (rank >= 0 && rank < AVSP_TILE_FRAME_UNIQUE_LIMIT)
+    {
+        unsigned char *seen = archive == &tile_archive ?
+            tile_frame_unique_main : tile_frame_unique_overlay;
+        const unsigned int byte_index = (unsigned int)rank >> 3;
+        const unsigned char bit =
+            (unsigned char)(1u << ((unsigned int)rank & 7u));
+        if ((seen[byte_index] & bit) == 0u)
+        {
+            seen[byte_index] = (unsigned char)(seen[byte_index] | bit);
+            ++tile_frame_unique_count;
+            if (tile_frame_unique_count >
+                avsp_diag_round1_native_tile_unique_peak)
+            {
+                avsp_diag_round1_native_tile_unique_peak =
+                    tile_frame_unique_count;
+                avsp_diag_round1_native_tile_unique_peak_frame =
+                    (int)round1_runtime.frame;
+            }
+        }
+    }
+    else
+        ++avsp_diag_round1_native_tile_unique_overflow;
+#endif
 
     for (index = 0; index < tile_pool_used; ++index)
     {
@@ -3139,6 +3234,7 @@ static int tile_sprite_for_archive_rank(const AvspTileArchive *archive,
             tile_pool_rank[index] == rank)
         {
             tile_pool_stamp[index] = ++tile_pool_clock;
+            tile_pool_frame_pinned[index] = 1u;
             return tile_pool_sprite[index];
         }
     }
@@ -3170,19 +3266,30 @@ static int tile_sprite_for_archive_rank(const AvspTileArchive *archive,
             tile_pool_rank[tile_pool_used] = rank;
             tile_pool_archive[tile_pool_used] = archive;
             tile_pool_stamp[tile_pool_used] = ++tile_pool_clock;
+            tile_pool_frame_pinned[tile_pool_used] = 1u;
             ++tile_pool_used;
         }
         else
         {
-            for (index = 1; index < AVSP_TILE_SPRITE_POOL; ++index)
-                if (tile_pool_stamp[index] < tile_pool_stamp[victim])
+            for (index = 0; index < AVSP_TILE_SPRITE_POOL; ++index)
+                if (!tile_pool_frame_pinned[index] &&
+                    (victim < 0 ||
+                     tile_pool_stamp[index] < tile_pool_stamp[victim]))
                     victim = index;
+            if (victim < 0)
+            {
+#ifdef AVSP_LIVE_ENCOUNTER
+                ++avsp_diag_round1_native_tile_pin_exhaustions;
+#endif
+                return -1;
+            }
             if (jo_sprite_replace_4bits_image(&img,
                                                tile_pool_sprite[victim]) < 0)
                 return -1;
             tile_pool_rank[victim] = rank;
             tile_pool_archive[victim] = archive;
             tile_pool_stamp[victim] = ++tile_pool_clock;
+            tile_pool_frame_pinned[victim] = 1u;
             sprite_id = tile_pool_sprite[victim];
         }
         destination = (unsigned long)JO_VDP1_VRAM +
@@ -3214,16 +3321,37 @@ static int tile_sprite_for_archive_rank(const AvspTileArchive *archive,
         tile_pool_rank[tile_pool_used] = rank;
         tile_pool_archive[tile_pool_used] = archive;
         tile_pool_stamp[tile_pool_used] = ++tile_pool_clock;
+        tile_pool_frame_pinned[tile_pool_used] = 1u;
         return tile_pool_sprite[tile_pool_used++];
     }
-    for (index = 1; index < AVSP_TILE_SPRITE_POOL; ++index)
-        if (tile_pool_stamp[index] < tile_pool_stamp[victim]) victim = index;
+    for (index = 0; index < AVSP_TILE_SPRITE_POOL; ++index)
+        if (!tile_pool_frame_pinned[index] &&
+            (victim < 0 || tile_pool_stamp[index] < tile_pool_stamp[victim]))
+            victim = index;
+    if (victim < 0)
+    {
+#ifdef AVSP_LIVE_ENCOUNTER
+        ++avsp_diag_round1_native_tile_pin_exhaustions;
+#endif
+        return -1;
+    }
     if (jo_sprite_replace_4bits_image(&img, tile_pool_sprite[victim]) < 0)
         return -1;
     tile_pool_rank[victim] = rank;
     tile_pool_archive[victim] = archive;
     tile_pool_stamp[victim] = ++tile_pool_clock;
+    tile_pool_frame_pinned[victim] = 1u;
     return tile_pool_sprite[victim];
+#endif
+}
+
+static void tile_pool_begin_frame(void)
+{
+    memset(tile_pool_frame_pinned, 0, sizeof(tile_pool_frame_pinned));
+#ifdef AVSP_LIVE_ENCOUNTER
+    memset(tile_frame_unique_main, 0, sizeof(tile_frame_unique_main));
+    memset(tile_frame_unique_overlay, 0, sizeof(tile_frame_unique_overlay));
+    tile_frame_unique_count = 0;
 #endif
 }
 
@@ -3506,6 +3634,21 @@ static int draw_round1_source_actor(const short world_x,
         int sprite_id;
         int jo_x;
         int jo_y;
+        int entry_left;
+        int entry_right;
+        int entry_top;
+        int entry_bottom;
+        width = ((((int)entry->attr >> 8) & 0x0f) + 1) * 16;
+        height = ((((int)entry->attr >> 12) & 0x0f) + 1) * 16;
+        entry_left = screen_x + fit_352(offset_x);
+        entry_right = screen_x + fit_352(offset_x + width);
+        entry_top = anchor_jo_y + offset_y;
+        entry_bottom = entry_top + height;
+        if (entry_right <= -JO_TV_WIDTH / 2 ||
+            entry_left >= JO_TV_WIDTH / 2 ||
+            entry_bottom <= -JO_TV_HEIGHT / 2 ||
+            entry_top >= JO_TV_HEIGHT / 2)
+            continue;
         if (bank_slot < 0)
         {
             ++tile_diag_no_bank;
@@ -3575,18 +3718,34 @@ static int draw_round1_weapon_projectiles(void)
 {
     unsigned int index;
     int rendered = 0;
+    avsp_diag_round1_native_weapon_parent_render_commands = 0;
+    avsp_diag_round1_native_weapon_child_render_commands = 0;
     for (index = 0u; index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY; ++index)
     {
         const AvspRound1WeaponProjectileAllocation *projectile =
             &round1_runtime.player_weapon_projectiles[index];
+        int actor_rendered;
         if (!projectile->active || projectile->assembly == 0UL)
             continue;
-        rendered += draw_round1_source_actor(
+        if (!avsp_round1_is_weapon_parent_projectile(projectile) &&
+            !avsp_round1_is_weapon_child_projectile(projectile))
+        {
+            ++avsp_diag_round1_native_weapon_forbidden_identity;
+            continue;
+        }
+        actor_rendered = draw_round1_source_actor(
             projectile->x, projectile->y, projectile->z, 0,
             projectile->facing, projectile->coordinate_mode,
             projectile->palette, projectile->object_or,
-            5u, 0x05u, projectile->animation_record,
+            4u, projectile->actor_class, projectile->animation_record,
             projectile->assembly);
+        rendered += actor_rendered;
+        if (avsp_round1_is_weapon_parent_projectile(projectile))
+            avsp_diag_round1_native_weapon_parent_render_commands +=
+                actor_rendered;
+        else
+            avsp_diag_round1_native_weapon_child_render_commands +=
+                actor_rendered;
     }
     return rendered;
 }
@@ -3600,6 +3759,27 @@ static int draw_round1_weapon_impacts(void)
     {
         const AvspRound1ActorCore *actor = &pool->records[index];
         if (!avsp_round1_is_weapon_impact_actor(actor) ||
+            actor->assembly == 0UL)
+            continue;
+        rendered += draw_round1_source_actor(
+            actor->x, actor->y, actor->z, 0, actor->facing,
+            actor->coordinate_mode, actor->palette, actor->object_or,
+            actor->type, actor->actor_class, actor->animation_record,
+            actor->assembly);
+    }
+    return rendered;
+}
+
+static int draw_round1_empty_effects(void)
+{
+    const AvspRound1Pool *pool = &round1_runtime.pools[3];
+    unsigned int index;
+    int rendered = 0;
+    for (index = 0u; index < pool->capacity; ++index)
+    {
+        const AvspRound1ActorCore *actor = &pool->records[index];
+        if (!actor->active || actor->type != 24u ||
+            actor->actor_class != 0x10 || actor->variant != 1u ||
             actor->assembly == 0UL)
             continue;
         rendered += draw_round1_source_actor(
@@ -6921,7 +7101,12 @@ static void playable_slice_draw_actors(void)
     memset(enemy, 0, sizeof(*enemy));
     enemy->active = enemy_visible;
 #ifdef AVSP_LIVE_ENCOUNTER
-    enemy->active = enemy_visible && !live_encounter_frame.alien.removed;
+    /* The logical enemy count feeds the accepted scene/HUD diagnostics, but
+     * the visible class-0x1f actor now comes from the native fixed pool. */
+    if (round1_runtime.first_encounter.initialized)
+        enemy->active = 0;
+    else
+        enemy->active = enemy_visible && !live_encounter_frame.alien.removed;
 #endif
     enemy->kind = CAP_ACTOR_ALIEN;
     enemy->variant = 1;
@@ -6958,7 +7143,7 @@ static void playable_slice_draw_actors(void)
     if (player.active)
     {
 #ifdef AVSP_LIVE_ENCOUNTER
-        if (round1_runtime.player_jump_active)
+        if (avsp_round1_player_native_presentation_active(&round1_runtime))
             avsp_diag_round1_native_player_render_commands =
                 draw_round1_source_actor(
                     round1_runtime.player.x, round1_runtime.player.y,
@@ -6982,7 +7167,7 @@ static void playable_slice_draw_actors(void)
     if (player.active && !playable_slice_frame.scene.player_presentation_active)
     {
 #ifdef AVSP_LIVE_ENCOUNTER
-        if (!round1_runtime.player_jump_active)
+        if (!avsp_round1_player_native_presentation_active(&round1_runtime))
 #endif
         {
         playable_slice_frame.scene.player_identity.emitted_object_identity =
@@ -7010,6 +7195,8 @@ static void playable_slice_draw_actors(void)
 #ifdef AVSP_LIVE_ENCOUNTER
     avsp_diag_round1_native_impact_render_commands =
         draw_round1_weapon_impacts();
+    if (draw_round1_empty_effects() > 0)
+        ++avsp_diag_round1_native_empty_effect_render_frames;
 #endif
     jo_sprite_restore_sprite_scale();
     rom_actor_advance();
@@ -7064,9 +7251,10 @@ static unsigned short live_encounter_real_input(void)
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
 static int live_encounter_near_target(void)
 {
-    int dx = live_encounter_runtime.alien.x - live_encounter_runtime.player.x;
-    int dz = live_encounter_runtime.alien.lane -
-        live_encounter_runtime.player.lane;
+    int dx = round1_runtime.first_encounter.alien.x -
+        round1_runtime.player_action.x;
+    int dz = round1_runtime.first_encounter.alien.lane -
+        round1_runtime.player_action.lane;
     if (dx < 0) dx = -dx;
     if (dz < 0) dz = -dz;
     return dx <= 52 && dz <= 6;
@@ -7080,25 +7268,27 @@ static unsigned short live_encounter_autotest_input(void)
         live_autotest_release = 0;
         return 0u;
     }
-    if (live_encounter_runtime.route_unlocked)
+    if (round1_runtime.first_encounter.route_unlocked)
         return AVSP_PW_INPUT_RIGHT;
+    if (round1_runtime.first_encounter.ko_events > 0UL)
+        return 0u;
     if (live_autotest_phase == 0)
     {
-        if (live_encounter_runtime.encounter_state ==
-            AVSP_LIVE_ENCOUNTER_WAIT_ENTRY)
+        if (round1_runtime.first_encounter.encounter_state ==
+            AVSP_ROUND1_FIRST_ENCOUNTER_WAIT_ENTRY)
             return AVSP_PW_INPUT_RIGHT;
         live_autotest_phase = 1;
     }
     if (live_autotest_phase == 1)
     {
-        if (live_encounter_runtime.alien_contacts == 0UL) return 0u;
+        if (round1_runtime.first_encounter.alien_contacts == 0UL) return 0u;
         live_autotest_phase = 2;
     }
     if (live_autotest_phase == 2)
     {
-        if (live_encounter_runtime.player.x > 914)
+        if (round1_runtime.player_action.x > 914)
             return AVSP_PW_INPUT_LEFT;
-        if (avsp_pw_can_control(&live_encounter_runtime.player))
+        if (avsp_pw_can_control(&round1_runtime.player_action))
         {
             live_autotest_phase = 3;
             live_autotest_release = 1;
@@ -7106,19 +7296,19 @@ static unsigned short live_encounter_autotest_input(void)
         }
         return 0u;
     }
-    if (live_encounter_runtime.player.state != AVSP_PW_STATE_CONTROL)
+    if (round1_runtime.player_action.state != AVSP_PW_STATE_CONTROL)
         return 0u;
-    if (live_encounter_runtime.player.x <
-        live_encounter_runtime.alien.x - 42)
+    if (round1_runtime.player_action.x <
+        round1_runtime.first_encounter.alien.x - 42)
         mask |= AVSP_PW_INPUT_RIGHT;
-    else if (live_encounter_runtime.player.x >
-             live_encounter_runtime.alien.x + 42)
+    else if (round1_runtime.player_action.x >
+             round1_runtime.first_encounter.alien.x + 42)
         mask |= AVSP_PW_INPUT_LEFT;
-    if (live_encounter_runtime.player.lane <
-        live_encounter_runtime.alien.lane - 4)
+    if (round1_runtime.player_action.lane <
+        round1_runtime.first_encounter.alien.lane - 4)
         mask |= AVSP_PW_INPUT_UP;
-    else if (live_encounter_runtime.player.lane >
-             live_encounter_runtime.alien.lane + 4)
+    else if (round1_runtime.player_action.lane >
+             round1_runtime.first_encounter.alien.lane + 4)
         mask |= AVSP_PW_INPUT_DOWN;
     if (live_encounter_near_target())
     {
@@ -7219,7 +7409,7 @@ static void live_encounter_build_slice_frame(void)
     {
         scene->player_action = AVSP_PORT_V2_SLICE_ACTION_HIT;
         scene->player_action_frame =
-            16 - (int)live_encounter_runtime.player.hit_timer;
+            16 - (int)round1_runtime.player_action.hit_timer;
     }
     else if (live_encounter_frame.player.state == AVSP_PW_STATE_KO)
     {
@@ -7305,7 +7495,7 @@ static void live_encounter_build_slice_frame(void)
     scene->enemy_action_frame =
         (live_encounter_frame.alien.state == AVSP_ALIEN_STATE_HIT ||
          live_encounter_frame.alien.state == AVSP_ALIEN_STATE_KO) ?
-        live_encounter_runtime.reaction_elapsed :
+        round1_runtime.first_encounter.reaction.elapsed :
         live_encounter_frame.alien.presentation_index;
     scene->enemy_source_action = live_encounter_frame.alien.source_action;
     scene->enemy_source_substate = live_encounter_frame.alien.inner_state;
@@ -7343,11 +7533,11 @@ static void live_encounter_build_slice_frame(void)
     hud_input.players[AVSP_PORT_V2_HUD_P2].visible = 0;
     avsp_port_v2_hud_build_frame(&hud_input, &playable_slice_frame.hud);
     playable_slice_frame.combat_event_count =
-        (int)live_encounter_runtime.player_contacts;
+        (int)round1_runtime.first_encounter.player_contacts;
     playable_slice_frame.asset_failures =
-        (int)live_encounter_runtime.failures;
+        (int)(round1_runtime.failure_count + live_encounter_runtime.failures);
     playable_slice_frame.fallback_used =
-        (int)live_encounter_runtime.fallback_count;
+        (int)round1_runtime.fallback_count;
     playable_slice_frame.canaries_ok =
         avsp_live_encounter_canaries_ok(&live_encounter_runtime) &&
         avsp_port_v2_slice_canaries_ok(&playable_slice_runtime);
@@ -7403,13 +7593,63 @@ static void round1_build_startup_slice_frame(void)
         avsp_port_v2_slice_canaries_ok(&playable_slice_runtime);
 }
 
-static void round1_apply_native_player_and_hud(const int retained_stepped)
+static void round1_build_native_first_encounter_frame(
+    const unsigned short input_mask)
+{
+    AvspRound1FirstEncounterView encounter;
+    memset(&live_encounter_frame, 0, sizeof(live_encounter_frame));
+    avsp_round1_first_encounter_view(&round1_runtime, &encounter);
+    /* Contiguous evidence index only. Native scheduler, player, and actor
+     * counters remain the gameplay clocks after the encounter actor exits. */
+    live_encounter_frame.frame = round1_native_capture_frame++;
+    live_encounter_frame.input_mask = input_mask;
+    avsp_pw_view(&round1_runtime.player_action,
+                 &live_encounter_frame.player);
+    live_encounter_frame.player.animation_record =
+        round1_runtime.player.animation_record;
+    live_encounter_frame.player.assembly = round1_runtime.player.assembly;
+    live_encounter_frame.player.x = round1_runtime.player.x;
+    live_encounter_frame.player.lane = round1_runtime.player.z;
+    live_encounter_frame.player.health = round1_runtime.player.health;
+    live_encounter_frame.player.facing = round1_runtime.player.facing;
+    live_encounter_frame.alien = encounter.alien;
+    live_encounter_frame.alien_presentation = encounter.reaction;
+    live_encounter_frame.encounter_state = encounter.encounter_state;
+    live_encounter_frame.player_contact = encounter.player_contact;
+    live_encounter_frame.alien_contact = encounter.alien_contact;
+    live_encounter_frame.player_damage = encounter.player_damage;
+    live_encounter_frame.alien_damage = encounter.alien_damage;
+    live_encounter_frame.semantic_hit = encounter.semantic_hit;
+    live_encounter_frame.semantic_ko = encounter.semantic_ko;
+    live_encounter_frame.route_unlocked = encounter.route_unlocked;
+    live_encounter_frame.continued_after_unlock =
+        encounter.continued_after_unlock;
+    live_encounter_frame.health_before = encounter.health_before;
+    live_encounter_frame.health_after = encounter.health_after;
+    live_encounter_frame.camera_world_x =
+        round1_runtime.camera_scroll2_x;
+    live_encounter_frame.player_screen_x = (short)(
+        round1_runtime.player.x - round1_runtime.camera_scroll2_x +
+        AVSP_LIVE_ENCOUNTER_APERTURE_ORIGIN_X);
+    live_encounter_frame.alien_screen_x = (short)(
+        encounter.alien.x - round1_runtime.camera_scroll2_x +
+        AVSP_LIVE_ENCOUNTER_APERTURE_ORIGIN_X);
+    live_encounter_frame.player_screen_y =
+        avsp_live_encounter_project_screen_y(
+            round1_runtime.player.z, round1_runtime.player_action.height);
+    live_encounter_frame.alien_screen_y =
+        avsp_live_encounter_project_screen_y(encounter.alien.lane, 0);
+    live_encounter_frame.canaries_ok = (unsigned short)
+        avsp_round1_canaries_ok(&round1_runtime);
+}
+
+static void round1_apply_native_player_and_hud(const int enemy_visible_now)
 {
     AvspPortV2SliceSceneTrace *scene = &playable_slice_frame.scene;
     AvspPortV2PlayerCombatPresentation presentation;
     AvspPortV2HudInput hud_input;
     const int player_visible = round1_startup_player_visible();
-    const int enemy_visible = retained_stepped &&
+    const int enemy_visible = enemy_visible_now &&
         !live_encounter_frame.alien.removed;
     int source_frame;
 
@@ -7419,7 +7659,7 @@ static void round1_apply_native_player_and_hud(const int retained_stepped)
         scene->layer_scroll_x[0] = round1_runtime.camera_scroll2_x;
         scene->layer_scroll_x[1] = street_scroll3_for_scroll2(
             round1_runtime.camera_scroll2_x);
-        if (retained_stepped)
+        if (enemy_visible_now)
             scene->enemy_screen_x = (short)(live_encounter_frame.alien.x -
                 scene->camera_world_x +
                 AVSP_LIVE_ENCOUNTER_APERTURE_ORIGIN_X);
@@ -7706,7 +7946,16 @@ static void live_encounter_publish(void)
         sample->round1_scheduler_dispatches =
             (int)round1_runtime.scheduler_dispatches;
         sample->round1_scheduler_trace_count =
-            (int)round1_runtime.scheduler_trace_count;
+            (int)(((unsigned int)round1_runtime.scheduler_trace_count &
+                   0x00ffu) |
+                  (((unsigned int)round1_runtime.camera_guard_countdown &
+                    0x07ffu) << 8) |
+                  (((unsigned int)round1_runtime.camera_coffee_phase &
+                    0x000fu) << 19) |
+                  (((unsigned int)round1_runtime.camera_locks &
+                    0x000fu) << 23) |
+                  (((unsigned int)round1_runtime.camera_unlocks &
+                    0x000fu) << 27));
         sample->round1_scheduler_order_hash =
             (int)round1_runtime.scheduler_order_hash;
         sample->round1_actor_handler_dispatches =
@@ -7716,9 +7965,14 @@ static void live_encounter_publish(void)
         sample->round1_state_context_bindings =
             (int)round1_runtime.state_context_bindings;
         sample->round1_navigation_applications =
-            (int)round1_runtime.navigation_applications;
-        sample->round1_navigation_clamps =
-            (int)round1_runtime.navigation_clamps;
+            (int)(((unsigned int)round1_runtime.navigation_applications &
+                   0x0fffu) |
+                  (((unsigned int)round1_runtime.navigation_obstacle_responses &
+                    0x00ffu) << 12) |
+                  (((unsigned int)round1_runtime.navigation_terrain_responses &
+                    0x000fu) << 20) |
+                  (((unsigned int)round1_runtime.navigation_terrain_retries &
+                    0x000fu) << 24));
         sample->round1_player_stop_state =
             ((unsigned int)round1_runtime.player_stop_ticks & 0x0fu) |
             (((unsigned int)round1_runtime.player_stop_entries & 0xffu) << 4) |
@@ -7741,9 +7995,11 @@ static void live_encounter_publish(void)
             (((unsigned int)round1_runtime.player_weapon_projectile_free_count & 0x1fu) << 26);
         sample->round1_native_presentation_state =
             ((unsigned int)
-                avsp_diag_round1_native_projectile_render_commands & 0x00ffu) |
+                avsp_diag_round1_native_weapon_parent_render_commands &
+                0x00ffu) |
             (((unsigned int)
-                avsp_diag_round1_native_impact_render_commands & 0x00ffu) << 8) |
+                avsp_diag_round1_native_weapon_child_render_commands &
+                0x00ffu) << 8) |
             (((unsigned int)
                 avsp_diag_round1_native_presentation_decode_failures &
                 0x000fu) << 16) |
@@ -7793,6 +8049,34 @@ static void live_encounter_publish(void)
                 << 23) |
             ((avsp_diag_round1_native_player_render_commands > 0 ? 1UL : 0UL)
                 << 31);
+        {
+            unsigned int identity_index;
+            unsigned int parent_count = 0u;
+            unsigned int child_count = 0u;
+            unsigned int forbidden_count = 0u;
+            for (identity_index = 0u;
+                 identity_index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY;
+                 ++identity_index)
+            {
+                const AvspRound1WeaponProjectileAllocation *projectile =
+                    &round1_runtime.player_weapon_projectiles[identity_index];
+                if (!projectile->active)
+                    continue;
+                if (avsp_round1_is_weapon_parent_projectile(projectile))
+                    ++parent_count;
+                else if (avsp_round1_is_weapon_child_projectile(projectile))
+                    ++child_count;
+                else
+                    ++forbidden_count;
+            }
+            sample->round1_player_identity_state =
+                ((unsigned int)(unsigned char)round1_runtime.player.actor_class) |
+                ((parent_count & 0xffu) << 8) |
+                ((child_count & 0xffu) << 16) |
+                ((forbidden_count != 0u ? 1u : 0u) << 24) |
+                ((avsp_diag_round1_native_weapon_forbidden_identity != 0 ?
+                    1u : 0u) << 25);
+        }
         avsp_diag_live_sample_count = (int)live_encounter_frame.frame + 1;
     }
     avsp_diag_live_interface_version = AVSP_LIVE_ENCOUNTER_INTERFACE_VERSION;
@@ -7826,8 +8110,10 @@ static void live_encounter_publish(void)
     avsp_diag_live_player_damage = live_encounter_frame.player_damage;
     avsp_diag_live_alien_damage = live_encounter_frame.alien_damage;
     avsp_diag_live_attack_miss = live_encounter_frame.attack_miss;
-    avsp_diag_live_hit_events = (int)live_encounter_runtime.hit_events;
-    avsp_diag_live_ko_events = (int)live_encounter_runtime.ko_events;
+    avsp_diag_live_hit_events =
+        (int)round1_runtime.first_encounter.hit_events;
+    avsp_diag_live_ko_events =
+        (int)round1_runtime.first_encounter.ko_events;
     avsp_diag_live_encounter_state = live_encounter_frame.encounter_state;
     avsp_diag_live_route_unlocked = live_encounter_frame.route_unlocked;
     avsp_diag_live_continued_after_unlock =
@@ -7835,25 +8121,27 @@ static void live_encounter_publish(void)
     avsp_diag_live_camera_world_x = live_encounter_frame.camera_world_x;
     avsp_diag_live_player_screen_x = live_encounter_frame.player_screen_x;
     avsp_diag_live_alien_screen_x = live_encounter_frame.alien_screen_x;
-    avsp_diag_live_failures = (int)live_encounter_runtime.failures;
+    avsp_diag_live_failures = (int)round1_runtime.failure_count;
     avsp_diag_live_fallback_count =
-        (int)live_encounter_runtime.fallback_count;
+        (int)round1_runtime.fallback_count;
     avsp_diag_live_canaries_ok = playable_slice_frame.canaries_ok;
     avsp_diag_slice_frame = (int)live_encounter_frame.frame;
     avsp_diag_slice_enemy_health = live_encounter_frame.alien.health;
-    avsp_diag_slice_hit_count = (int)live_encounter_runtime.hit_events;
-    avsp_diag_slice_ko_count = (int)live_encounter_runtime.ko_events;
+    avsp_diag_slice_hit_count =
+        (int)round1_runtime.first_encounter.hit_events;
+    avsp_diag_slice_ko_count =
+        (int)round1_runtime.first_encounter.ko_events;
     avsp_diag_slice_combat_events =
-        (int)live_encounter_runtime.player_contacts;
-    avsp_diag_slice_asset_failures = (int)live_encounter_runtime.failures;
+        (int)round1_runtime.first_encounter.player_contacts;
+    avsp_diag_slice_asset_failures = (int)round1_runtime.failure_count;
     avsp_diag_slice_fallback_used =
-        (int)live_encounter_runtime.fallback_count;
+        (int)round1_runtime.fallback_count;
     avsp_diag_slice_canaries_ok = playable_slice_frame.canaries_ok;
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
         sizeof(AVSP_ROUND1_SPEC02_SHA256) == 65u &&
-        AVSP_ROUND1_SPEC02_SHA256[0] == 'a' &&
-        AVSP_ROUND1_SPEC02_SHA256[63] == '9';
+        AVSP_ROUND1_SPEC02_SHA256[0] == '5' &&
+        AVSP_ROUND1_SPEC02_SHA256[63] == '7';
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
     avsp_diag_round1_rng_seed = round1_runtime.rng_seed;
@@ -7967,6 +8255,36 @@ static void live_encounter_publish(void)
         round1_runtime.player_resource_recharge;
     avsp_diag_round1_player_weapon_projectile_free =
         round1_runtime.player_weapon_projectile_free_count;
+    avsp_diag_round1_player_weapon_impact_requests =
+        (int)round1_runtime.player_weapon_impact_requests;
+    avsp_diag_round1_player_weapon_impact_allocations =
+        (int)round1_runtime.player_weapon_impact_allocations;
+    avsp_diag_round1_player_weapon_impact_allocation_failures =
+        (int)round1_runtime.player_weapon_impact_allocation_failures;
+    avsp_diag_round1_player_weapon_impact_audio_events =
+        (int)round1_runtime.player_weapon_impact_audio_events;
+    avsp_diag_round1_player_weapon_impact_releases =
+        (int)round1_runtime.player_weapon_impact_releases;
+    avsp_diag_round1_player_weapon_impact_presentation_bindings =
+        (int)round1_runtime.player_weapon_impact_presentation_bindings;
+    avsp_diag_round1_first_encounter_scheduler_updates =
+        (int)round1_runtime.first_encounter.scheduler_updates;
+    avsp_diag_round1_first_encounter_player_contacts =
+        (int)round1_runtime.first_encounter.player_contacts;
+    avsp_diag_round1_first_encounter_alien_contacts =
+        (int)round1_runtime.first_encounter.alien_contacts;
+    avsp_diag_round1_first_encounter_player_damage_events =
+        (int)round1_runtime.first_encounter.player_damage_events;
+    avsp_diag_round1_first_encounter_alien_damage_events =
+        (int)round1_runtime.first_encounter.alien_damage_events;
+    avsp_diag_round1_first_encounter_lifecycle_releases =
+        (int)round1_runtime.first_encounter.lifecycle_releases;
+    avsp_diag_round1_first_encounter_clear_events =
+        (int)round1_runtime.first_encounter.clear_events;
+    avsp_diag_round1_first_encounter_reaction_active =
+        round1_runtime.first_encounter.reaction.active;
+    avsp_diag_round1_first_encounter_reaction_elapsed =
+        round1_runtime.first_encounter.reaction.elapsed;
     avsp_diag_round1_class1f_initializations =
         (int)round1_runtime.class1f_initializations;
     avsp_diag_round1_class1f_initial_rng_calls =
@@ -8010,7 +8328,7 @@ static void live_encounter_frame_callback(void)
     AvspPortV2HudRenderOps hud_operations;
     int round1_route_before;
     int retained_stepped = 0;
-    int handoff_frame = 0;
+    int native_encounter_visible = 0;
     int source_frame;
     if (!runtime_ready)
     {
@@ -8034,7 +8352,6 @@ static void live_encounter_frame_callback(void)
         live_encounter_runtime.player.x = round1_runtime.player.x;
         live_encounter_runtime.player.lane = round1_runtime.player.z;
         round1_retained_initialized = 1;
-        handoff_frame = 1;
         ++avsp_diag_round1_startup_retained_initializations;
     }
     memset(&input, 0, sizeof(input));
@@ -8054,26 +8371,77 @@ static void live_encounter_frame_callback(void)
     else if (round1_runtime.route_state == 4)
     {
         round1_player_mask = (unsigned short)(round1_player_mask &
-            (unsigned short)~(AVSP_PW_INPUT_ATTACK |
-                              AVSP_ROUND1_INPUT_BUTTON1 |
+            (unsigned short)~(AVSP_ROUND1_INPUT_BUTTON1 |
                               AVSP_ROUND1_INPUT_BUTTON3));
-        if (round1_runtime.player_controller_updates == 30u ||
-            round1_runtime.player_controller_updates == 72u ||
-            round1_runtime.player_controller_updates == 114u ||
-            round1_runtime.player_controller_updates == 161u)
-            round1_player_mask |= AVSP_PW_INPUT_ATTACK;
-        if (round1_runtime.player_controller_updates == 210u)
+        if (!live_autotest_live_volley_done &&
+            round1_runtime.first_encounter.encounter_state ==
+                AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE &&
+            round1_runtime.first_encounter.alien.x >=
+                round1_runtime.player_action.x + 80 &&
+            round1_runtime.first_encounter.alien.x <=
+                round1_runtime.player_action.x + 180 &&
+            round1_runtime.first_encounter.alien.lane >=
+                round1_runtime.player_action.lane - 6 &&
+            round1_runtime.first_encounter.alien.lane <=
+                round1_runtime.player_action.lane + 6 &&
+            round1_runtime.first_encounter.pending_player_damage == 0u &&
+            round1_runtime.first_encounter.hit_events == 0UL &&
+            round1_runtime.player_action.state == AVSP_PW_STATE_CONTROL &&
+            round1_runtime.player_action.facing == 1u &&
+            !round1_runtime.player_weapon_active)
+        {
+            round1_player_mask = (unsigned short)(round1_player_mask &
+                (unsigned short)~(AVSP_PW_INPUT_LEFT | AVSP_PW_INPUT_RIGHT |
+                                  AVSP_PW_INPUT_UP | AVSP_PW_INPUT_DOWN |
+                                  AVSP_PW_INPUT_ATTACK));
             round1_player_mask |= AVSP_ROUND1_INPUT_BUTTON1;
-        if (round1_runtime.player_controller_updates == 270u)
+            live_autotest_live_volley_done = 1;
+        }
+        else if (live_autotest_live_volley_done &&
+                 !live_autotest_empty_done &&
+                 round1_runtime.first_encounter.route_unlocked &&
+                 round1_runtime.player_weapon_completions >= 1UL &&
+                 round1_runtime.pools[3].free_count == 2u &&
+                 round1_runtime.player_action.state == AVSP_PW_STATE_CONTROL &&
+                 !round1_runtime.player_weapon_active)
         {
             round1_runtime.player_resource = 0u;
             round1_runtime.player_resource_recharge = 12u;
             round1_runtime.player_resource_depleted = 1u;
+            round1_player_mask = (unsigned short)(round1_player_mask &
+                (unsigned short)~(AVSP_PW_INPUT_LEFT | AVSP_PW_INPUT_RIGHT |
+                                  AVSP_PW_INPUT_UP | AVSP_PW_INPUT_DOWN |
+                                  AVSP_PW_INPUT_ATTACK));
             round1_player_mask |= AVSP_ROUND1_INPUT_BUTTON1;
+            live_autotest_empty_done = 1;
         }
-        if (round1_runtime.player_controller_updates == 330u)
+        else if (!live_autotest_jump_done &&
+                 round1_runtime.first_encounter.ko_events > 0UL &&
+                 round1_runtime.player_action.state == AVSP_PW_STATE_CONTROL &&
+                 !round1_runtime.player_weapon_active)
+        {
+            round1_player_mask = (unsigned short)(round1_player_mask &
+                (unsigned short)~(AVSP_PW_INPUT_LEFT | AVSP_PW_INPUT_RIGHT |
+                                  AVSP_PW_INPUT_UP | AVSP_PW_INPUT_DOWN |
+                                  AVSP_PW_INPUT_ATTACK));
             round1_player_mask |= AVSP_ROUND1_INPUT_BUTTON3;
-        if (round1_runtime.player_controller_updates == 330u ||
+            live_autotest_jump_done = 1;
+        }
+        else if (round1_runtime.first_encounter.route_unlocked &&
+                 live_autotest_live_volley_done &&
+                 !live_autotest_empty_done &&
+                 !live_autotest_post_clear_volley_done &&
+                 round1_runtime.player_action.state == AVSP_PW_STATE_CONTROL &&
+                 !round1_runtime.player_weapon_active)
+        {
+            round1_player_mask = (unsigned short)(round1_player_mask &
+                (unsigned short)~(AVSP_PW_INPUT_LEFT | AVSP_PW_INPUT_RIGHT |
+                                  AVSP_PW_INPUT_UP | AVSP_PW_INPUT_DOWN |
+                                  AVSP_PW_INPUT_ATTACK));
+            round1_player_mask |= AVSP_ROUND1_INPUT_BUTTON1;
+            live_autotest_post_clear_volley_done = 1;
+        }
+        if ((round1_player_mask & AVSP_ROUND1_INPUT_BUTTON3) != 0u ||
             round1_runtime.player_jump_active)
             round1_player_mask = (unsigned short)(round1_player_mask &
                 (unsigned short)~(AVSP_PW_INPUT_LEFT |
@@ -8108,32 +8476,21 @@ static void live_encounter_frame_callback(void)
         runtime_ready = 0;
         return;
     }
-    if (round1_runtime.route_state == 4 && !handoff_frame)
+    if (round1_runtime.route_state == 4 &&
+        round1_runtime.first_encounter.initialized)
     {
-        /* The old encounter is now a quarantined presentation substrate. It
-         * receives the native player transform, never writes native state,
-         * and owns neither HUD nor audio. */
-        live_encounter_runtime.player.x = round1_runtime.player.x;
-        live_encounter_runtime.player.lane = round1_runtime.player.z;
-        input.frame = live_encounter_runtime.frame;
-        input.player_mask = 0u;
-        if (!avsp_live_encounter_step(&live_encounter_runtime, &input,
-                                      &live_encounter_frame))
-        {
-            avsp_diag_live_frame_stage = -2;
-            avsp_diag_live_internal_failures =
-                (int)live_encounter_runtime.failures;
-            runtime_ready = 0;
-            return;
-        }
-        retained_stepped = 1;
+        /* The retained shell is presentation-only after handoff. Native
+         * Round 1 owns the actor scheduler, AI, collision, damage, HIT/KO,
+         * lifecycle and route-unlock state; no retained gameplay is stepped. */
+        round1_build_native_first_encounter_frame(round1_player_mask);
+        native_encounter_visible = 1;
     }
     avsp_diag_live_frame_stage = 2;
-    if (retained_stepped)
+    if (native_encounter_visible)
         live_encounter_build_slice_frame();
     else
         round1_build_startup_slice_frame();
-    round1_apply_native_player_and_hud(retained_stepped);
+    round1_apply_native_player_and_hud(native_encounter_visible);
     avsp_diag_live_frame_stage = 3;
     source_frame = AVSP_ROUND1_DIAGNOSTIC_SOURCE_BASE_FRAME +
         (int)round1_runtime.frame;
@@ -8193,7 +8550,7 @@ static void live_encounter_frame_callback(void)
     }
     avsp_diag_live_frame_stage = 7;
     round1_record_startup_chronology(retained_stepped);
-    if (round1_retained_initialized)
+    if (round1_runtime.first_encounter.initialized)
         live_encounter_publish();
     ++round1_runtime.frame;
     avsp_diag_runtime_ready = runtime_ready;
@@ -8413,6 +8770,7 @@ static void frame_callback(void)
 {
     CapInput input;
     CapClipRequest clip_request;
+    tile_pool_begin_frame();
 #ifdef AVSP_PROBE3
     probe3_frame_callback();
     return;
@@ -9094,9 +9452,11 @@ void jo_main(void)
            first AVSP_TILE_REGION_BYTES are carved out for the ROM tile
            archive and stay outside the allocator. */
         jo_add_memory_zone(AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES +
-                               AVSP_STRIPS_REGION_BYTES,
+                               AVSP_STRIPS_REGION_BYTES +
+                               AVSP_ROUND1_RUNTIME_REGION_BYTES,
                            AVSP_CART_DRAM1_BYTES - AVSP_TILE_REGION_BYTES -
-                               AVSP_STRIPS_REGION_BYTES);
+                               AVSP_STRIPS_REGION_BYTES -
+                               AVSP_ROUND1_RUNTIME_REGION_BYTES);
     }
 #ifndef AVSP_PROBE3
     set_actor_palette();
@@ -9152,6 +9512,7 @@ void jo_main(void)
     round1_cdda_started = 0;
     memset(&live_encounter_runtime, 0, sizeof(live_encounter_runtime));
     memset(&live_encounter_frame, 0, sizeof(live_encounter_frame));
+    round1_native_capture_frame = 0UL;
     memset((void *)avsp_diag_round1_startup_trace, 0,
            sizeof(avsp_diag_round1_startup_trace));
     avsp_diag_round1_startup_trace_count = 0;
@@ -9177,6 +9538,10 @@ void jo_main(void)
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
     live_autotest_phase = 0;
     live_autotest_release = 0;
+    live_autotest_live_volley_done = 0;
+    live_autotest_post_clear_volley_done = 0;
+    live_autotest_empty_done = 0;
+    live_autotest_jump_done = 0;
 #endif
     avsp_diag_live_physical_saturn = 0;
     runtime_ready = runtime_ready && avsp_diag_live_contract_flags == 127 &&

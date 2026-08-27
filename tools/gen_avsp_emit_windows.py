@@ -112,51 +112,37 @@ def load_spec02_round1_presentations():
     fixture_bytes = SPEC_FIXTURE_PATH.read_bytes()
     fixture = json.loads(fixture_bytes)
     authority = fixture["authority_data"]
-    lifecycle = authority["player"][
-        "weapon_projectile_resource"]["implementation_contract"][
-            "projectile_lifecycle_contract"]
-    initialization = lifecycle["initialization"]
-    actor_fields = initialization["presentation_actor_fields"]
-    selectors = initialization["parent_presentation_selector"]
-    presentations = selectors["presentation_sequences"]
+    weapon = authority["player"][
+        "weapon_projectile_resource"]["implementation_contract"]
+    parent = weapon["record4_parent_class0"]
+    child = weapon["record4_child_class4"]
     result = []
     seen = set()
-    for parent_selector in selectors["route_reachable_values"]:
-        sequence = selectors["animation_selector_u8"][parent_selector]
-        for phase in ("first", "terminal"):
-            assembly = int(presentations[sequence][phase]["assembly"], 16)
+    for kind, records, object_or in (
+            ("projectile-parent",
+             parent["initialization"]["presentation_records"],
+             int(parent["initialization"]["object_or_u16"], 16)),
+            ("projectile-child",
+             [record for sequence in child["initialization"][
+                 "variant_presentation_sequences"].values()
+              for record in sequence],
+             int(child["initialization"]["object_or_u16"], 16))):
+        for record in records:
+            assembly = int(record["assembly"], 16)
             for facing in (0, 1):
-                key = ("projectile", assembly, facing)
-                if key not in seen:
-                    seen.add(key)
-                    result.append({
-                        "kind": "projectile",
-                        "animation_record": int(
-                            presentations[sequence][phase]
-                                ["animation_record"], 16),
-                        "assembly": assembly,
-                        "facing": facing,
-                        "coordinate_mode": actor_fields[
-                            "coordinate_mode_u8"],
-                        "palette": actor_fields["palette_u8"],
-                        "object_or": int(actor_fields["object_or_u16"], 16),
-                    })
-    impact = lifecycle["impact_actor_contract"]["initialization"]
-    impact_fields = impact["presentation_actor_fields"]
-    for record in impact["variant0_presentation_records"]:
-        assembly = int(record["assembly"], 16)
-        key = ("impact", assembly, 0)
-        if key not in seen:
-            seen.add(key)
-            result.append({
-                "kind": "impact",
-                "animation_record": int(record["animation_record"], 16),
-                "assembly": assembly,
-                "facing": 0,
-                "coordinate_mode": impact_fields["coordinate_mode_u8"],
-                "palette": impact_fields["palette_u8"],
-                "object_or": int(impact_fields["object_or_u16"], 16),
-            })
+                key = (kind, assembly, facing)
+                if key in seen:
+                    continue
+                seen.add(key)
+                result.append({
+                    "kind": kind,
+                    "animation_record": int(record["animation_record"], 16),
+                    "assembly": assembly,
+                    "facing": facing,
+                    "coordinate_mode": 0,
+                    "palette": 0,
+                    "object_or": object_or,
+                })
     def add_records(kind, records, facings, modes, object_or, palettes=(0,)):
         for record in records:
             assembly = int(record["assembly"], 16)
@@ -182,12 +168,42 @@ def load_spec02_round1_presentations():
         "directional_airborne_interruption"]["directional_actions"][
             "implementation_contract"]
     jump_actor = jump["presentation_actor_fields"]
+    add_records("player-button1",
+                weapon["sufficient_action"]["presentation_timeline"],
+                (0, 1), (jump_actor["coordinate_mode_u8"],),
+                int(jump_actor["object_or_u16"], 16),
+                (jump_actor["palette_u8"],))
+    add_records("player-button1-empty",
+                weapon["empty_fallback"]["presentation_timeline"],
+                (0, 1), (jump_actor["coordinate_mode_u8"],),
+                int(jump_actor["object_or_u16"], 16),
+                (jump_actor["palette_u8"],))
+    empty_effect = weapon["empty_effect_variant1_contract"]
+    empty_actor = empty_effect["initialization"][
+        "presentation_actor_fields"]
+    add_records("class10-empty-effect",
+                empty_effect["active_state"]["presentation_records"],
+                (empty_actor["facing_u8"],),
+                (empty_actor["coordinate_mode_u8"],),
+                int(empty_actor["object_or_u16"], 16),
+                (empty_actor["palette_u8"],))
     add_records(
         "player-button3",
         [{"animation_record": record["record"],
           "assembly": record["assembly"]} for sequence in
          jump["presentation_selector_sequences"].values()
          for record in sequence],
+        (0, 1),
+        (jump_actor["coordinate_mode_u8"],),
+        int(jump_actor["object_or_u16"], 16),
+        (jump_actor["palette_u8"],))
+    locomotion = authority["player"]["locomotion_neutral_facing"]
+    add_records(
+        "player-button3-cleanup",
+        [{"animation_record": record["animation_record"],
+          "assembly": record["assembly"]} for record in
+         locomotion["release_transition"]["presentation"]
+         if record["animation_record"].lower() == "0x15f1f4"],
         (0, 1),
         (jump_actor["coordinate_mode_u8"],),
         int(jump_actor["object_or_u16"], 16),

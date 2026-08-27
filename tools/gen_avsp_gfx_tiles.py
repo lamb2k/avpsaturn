@@ -173,6 +173,71 @@ def measure_spec02_composites(results, threshold: int) -> dict[str, int]:
             "spec02_composite_max_texture_bytes": max_bytes}
 
 
+def measure_first_segment_composites(rom: Rom, results,
+                                     threshold: int) -> dict[str, int]:
+    """Measure the persistent composite union used by native Round 1."""
+    entries = set()
+
+    def retain(flat) -> None:
+        for index in range(0, len(flat), 4):
+            _x, y, code, attr = flat[index:index + 4]
+            nx = ((attr >> 8) & 0xF) + 1
+            ny = ((attr >> 12) & 0xF) + 1
+            if nx * ny > threshold:
+                entries.add((y & 0x6000, code, attr & 0xFFE0))
+
+    for _kind, _assembly, _facing, flat in results:
+        retain(flat)
+    route = RouteState(FIRST_SEGMENT_SOURCE)
+    try:
+        for frame in route.frames():
+            number = frame["frame"]
+            if number < FIRST_SEGMENT_FIRST_FRAME:
+                continue
+            if number >= FIRST_SEGMENT_LAST_EXCLUSIVE:
+                break
+            work = route.current["workram"]
+            presentations = []
+            for base, stride, capacity in SOURCE_POOL_LAYOUTS:
+                for index in range(capacity):
+                    offset = base + index * stride
+                    if (work[offset] != 1 or
+                        (work[offset + 8], work[offset + 2]) not in
+                            NATIVE_INITIAL_FAMILIES):
+                        continue
+                    animation = int.from_bytes(
+                        work[offset + 0x1C:offset + 0x20], "big")
+                    assembly = rom.u32(animation + 4) if animation else 0
+                    if assembly == 0 or rom.u16(assembly) == 0x0008:
+                        continue
+                    presentations.append({
+                        "kind": "first-segment-source",
+                        "animation_record": animation,
+                        "assembly": assembly,
+                        "facing": work[offset + 0x0F],
+                        "coordinate_mode": work[offset + 0x0D],
+                        "palette": work[offset + 0x0E],
+                        "object_or": int.from_bytes(
+                            work[offset + 0x2E:offset + 0x30], "big"),
+                    })
+            if presentations:
+                decoded = decode_spec02_presentations(rom, presentations)
+                for _kind, _assembly, _facing, flat in decoded:
+                    retain(flat)
+    finally:
+        route.close()
+    sizes = [
+        ((((attr >> 8) & 0xF) + 1) *
+         (((attr >> 12) & 0xF) + 1) * TILE_BYTES)
+        for _y_bits, _code, attr in entries
+    ]
+    return {
+        "first_segment_composite_unique_entries": len(entries),
+        "first_segment_composite_texture_bytes": sum(sizes),
+        "first_segment_composite_max_texture_bytes": max(sizes or [0]),
+    }
+
+
 def measure_first_segment_presentation_peak(rom: Rom) -> dict[str, int]:
     """Measure the exact live-tile union for the native initial families."""
     route = RouteState(FIRST_SEGMENT_SOURCE)
@@ -519,28 +584,33 @@ def main() -> int:
         fixture = json.loads((ROOT / "data" /
                               "spec02_round1_generated_fixtures.json")
                              .read_text(encoding="ascii"))
-        attempts = fixture["authority_data"]["player"][
-            "weapon_projectile_resource"]["implementation_contract"][
-                "sufficient_volley"]["attempt_counter_initial"]
-        projectile_max = max(
+        weapon_contract = fixture["authority_data"]["player"][
+            "weapon_projectile_resource"]["implementation_contract"]
+        child_count = weapon_contract["record4_parent_class0"][
+            "child_emitter_state"]["initial_child_count_u8"]
+        parent_max = max(
             len({tile for index in range(0, len(flat), 4)
                  for tile in entry_tile_codes_exact(
                      flat[index + 2], flat[index + 1], flat[index + 3])})
             for kind, _assembly, _facing, flat in spec_results
-            if kind == "projectile")
-        impact_max = max(
+            if kind == "projectile-parent")
+        child_max = max(
             len({tile for index in range(0, len(flat), 4)
                  for tile in entry_tile_codes_exact(
                      flat[index + 2], flat[index + 1], flat[index + 3])})
             for kind, _assembly, _facing, flat in spec_results
-            if kind == "impact")
+            if kind == "projectile-child")
+        projectile_max = max(parent_max, child_max)
+        impact_max = 0
         per_tile_required = (
             presentation_residency["source_peak_unique_tiles"] +
-            attempts * (projectile_max + impact_max))
+            parent_max + child_count * child_max)
         composite_threshold = read_main_define(
             "AVSP_COMPOSITE_TILE_THRESHOLD")
         composite = measure_spec02_composites(spec_results,
                                                composite_threshold)
+        first_segment_composite = measure_first_segment_composites(
+            rom, spec_results, composite_threshold)
         startup_residency = measure_startup_noncomposite_peak(
             rom, composite_threshold)
         configured_tiles = read_tile_sprite_pool()
@@ -555,7 +625,9 @@ def main() -> int:
                 .replace("\\", "/"),
             "source_frame_range": [FIRST_SEGMENT_FIRST_FRAME,
                                    FIRST_SEGMENT_LAST_EXCLUSIVE - 1],
-            "projectile_simultaneous_bound": attempts,
+            "projectile_simultaneous_bound": child_count + 1,
+            "parent_tiles_at_peak": parent_max,
+            "child_tiles_at_peak": child_max,
             "max_tiles_per_projectile": projectile_max,
             "max_tiles_per_impact": impact_max,
             "per_tile_scanout_requirement": per_tile_required,
@@ -565,6 +637,7 @@ def main() -> int:
             "configured_composite_max_texture_bytes": composite_max,
             "composite_tile_threshold": composite_threshold,
             **composite,
+            **first_segment_composite,
             **startup_residency,
             "mid_frame_lru_replacement_allowed": False,
         })
@@ -573,12 +646,12 @@ def main() -> int:
             raise SystemExit(
                 "REFUSING to build: retained tile pool cannot hold the "
                 "accepted startup non-composite peak")
-        if (configured_composites <
-                composite["spec02_composite_unique_entries"] or
-            composite_budget <
-                composite["spec02_composite_texture_bytes"] or
-            composite_max <
-                composite["spec02_composite_max_texture_bytes"]):
+        if (configured_composites < first_segment_composite[
+                "first_segment_composite_unique_entries"] or
+            composite_budget < first_segment_composite[
+                "first_segment_composite_texture_bytes"] or
+            composite_max < first_segment_composite[
+                "first_segment_composite_max_texture_bytes"]):
             raise SystemExit(
                 "REFUSING to build: native object-entry composite budget "
                 "cannot hold the accepted SPEC-02 presentation union")

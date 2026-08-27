@@ -21,6 +21,7 @@ ROUTE = ROOT / "data" / "oracle10_round1_route.json"
 SCHEDULER = ROOT / "data" / "oracle11_actor_scheduler_lifecycle.json"
 ORACLE09 = ROOT / "data" / "oracle09_street_alien_state_facing_presentation.json"
 AUDIO = ROOT / "data" / "oracle11_global_audio_trigger_owners.json"
+HIT_KO_CONTRACT = ROOT / "tests" / "port_v2" / "combat" / "hit_ko" / "approved_contract.json"
 OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
 PROGRAM = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_program_2m.bin"
 OUT = ROOT / "data" / "oracle11_round1_enemy_archetypes.json"
@@ -39,6 +40,10 @@ EXPECTED = {
     "0x1f": {"samples": 28481, "entries": 29361, "writes": 153166,
              "rng": 352, "damage": 3},
 }
+CLASS1F_HIT_KO_RECORDS = (
+    0x12DD50, 0x12D2F8, 0x12E214, 0x12E224,
+    0x12E234, 0x12E244, 0x12E254, 0x12E268,
+)
 
 
 def require(condition: bool, message: str) -> None:
@@ -131,6 +136,39 @@ def animation_record(program: bytes, address: int) -> dict[str, object]:
         "assembly": f"0x{int.from_bytes(record[4:8], 'big'):08x}",
         "hurt_selector_u8": record[8], "attack_selector_u8": record[9],
         "record_sha256": hashlib.sha256(record).hexdigest(),
+    }
+
+
+def accepted_class1f_hit_ko_records(program: bytes) -> tuple[list[dict[str, object]], dict[str, object]]:
+    """Bind accepted Port V2 HIT/KO records to exact source record fields."""
+    contract = json.loads(HIT_KO_CONTRACT.read_text(encoding="ascii"))
+    manifest_path = ROOT / contract["source_manifest"]
+    require(contract["source_manifest_schema"] == 4 and
+            digest(manifest_path) == contract["source_manifest_sha256"] and
+            contract["target"] == {"set": "avspu", "revision": "USA 940520",
+                                   "type": 12, "class": 31} and
+            contract["hit"]["anim_record"] == CLASS1F_HIT_KO_RECORDS[0] and
+            contract["ko"]["anim_record"] == CLASS1F_HIT_KO_RECORDS[2],
+            "accepted class-0x1f HIT/KO interface drift")
+    records = []
+    for address in CLASS1F_HIT_KO_RECORDS:
+        source = animation_record(program, address)
+        records.append({
+            "animation_record": source["animation_record"],
+            "assembly": source["assembly"],
+            "hurt_selector": source["hurt_selector_u8"],
+            "attack_selector": source["attack_selector_u8"],
+            "record_sha256": source["record_sha256"],
+            "classification": "SOURCE_CLOSED",
+        })
+    return records, {
+        "accepted_port_v2_contract": HIT_KO_CONTRACT.relative_to(ROOT).as_posix(),
+        "accepted_port_v2_contract_sha256": digest(HIT_KO_CONTRACT),
+        "accepted_writer_manifest": contract["source_manifest"],
+        "accepted_writer_manifest_sha256": contract["source_manifest_sha256"],
+        "record_addresses": [row["animation_record"] for row in records],
+        "implementation_fields": ["assembly", "hurt_selector", "attack_selector"],
+        "fixed_frame_presentation_forbidden": True,
     }
 
 
@@ -413,6 +451,14 @@ def build_report() -> dict[str, object]:
         damage_pcs = {f"0x{row['pc']}" for row in class_damage}
         owned_pcs.update(writer_pcs | rng_pcs | damage_pcs | {f"0x{entry:06x}"})
         records = animation_records(samples, class_id, program)
+        hit_ko_presentation = None
+        if class_id == "0x1f":
+            hit_ko_records, hit_ko_presentation = \
+                accepted_class1f_hit_ko_records(program)
+            by_address = {row["animation_record"]: row for row in records}
+            by_address.update({row["animation_record"]: row
+                               for row in hit_ko_records})
+            records = [by_address[address] for address in sorted(by_address)]
         actor = archetypes[(class_id, 12)]
         reports.append({
             "class": class_id, "type": 12, "classification": "SOURCE_CLOSED",
@@ -462,6 +508,8 @@ def build_report() -> dict[str, object]:
         if class_id == "0x1f":
             reports[-1]["initial_transition_contract"] = \
                 initial_class1f_transition_contract(samples, rng, opcodes, program)
+            reports[-1]["presentation_and_collision"][
+                "accepted_hit_ko_records"] = hit_ko_presentation
 
     report = {
         "schema": "oracle11-round1-enemy-archetypes-v1",
@@ -543,6 +591,16 @@ def validate(report: dict[str, object]) -> None:
                 item["semantic_name_inferred"] is False,
                 f"{class_id}: enemy authority drift")
         if class_id == "0x1f":
+            expected_hit_ko, expected_hit_ko_binding = \
+                accepted_class1f_hit_ko_records(PROGRAM.read_bytes())
+            records_by_address = {
+                row["animation_record"]: row
+                for row in item["presentation_and_collision"]["records"]}
+            require(item["presentation_and_collision"]["accepted_hit_ko_records"] ==
+                    expected_hit_ko_binding and
+                    all(records_by_address.get(row["animation_record"]) == row
+                        for row in expected_hit_ko),
+                    "0x1f: accepted HIT/KO presentation fields drift")
             contract = item["initial_transition_contract"]
             require(contract["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
                     contract["accepted_audio_evidence_sha256"] == digest(AUDIO) and

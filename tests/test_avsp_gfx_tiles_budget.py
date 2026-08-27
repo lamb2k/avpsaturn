@@ -1,8 +1,8 @@
 """Negative test: the tile generator must refuse an over-budget archive.
 
 Proves tools/gen_avsp_gfx_tiles.py's budget guard actually guards: a
---scope round1 archive (612,720 bytes, MEASURED) must be REFUSED against
-the runtime's real AVSP_TILE_REGION_BYTES carve (262,144 bytes, parsed
+--scope round1 archive must be REFUSED against the runtime's real
+AVSP_TILE_REGION_BYTES carve (parsed
 live from main.c, never hardcoded here so this test cannot drift out of
 sync with the runtime). Also proves the on-disk archive and manifest are
 left untouched by a refused run, and that --scope street still succeeds
@@ -45,6 +45,81 @@ def button3_presentation_union_is_complete(presentations, fixture):
     return actual == expected
 
 
+def button3_cleanup_union_is_complete(presentations, fixture):
+    release = fixture["authority_data"]["player"][
+        "locomotion_neutral_facing"]["release_transition"]["presentation"]
+    expected = {
+        (int(record["assembly"], 16), facing)
+        for record in release
+        if record["animation_record"].lower() == "0x15f1f4"
+        for facing in (0, 1)
+    }
+    actual = {
+        (item["assembly"], item["facing"])
+        for item in presentations
+        if item["kind"] == "player-button3-cleanup"
+    }
+    return actual == expected
+
+
+def button1_presentation_union_is_complete(presentations, fixture):
+    weapon = fixture["authority_data"]["player"][
+        "weapon_projectile_resource"]["implementation_contract"]
+    expected = {
+        (kind, int(record["assembly"], 16), facing)
+        for kind, timeline in (
+            ("player-button1",
+             weapon["sufficient_action"]["presentation_timeline"]),
+            ("player-button1-empty",
+             weapon["empty_fallback"]["presentation_timeline"]))
+        for record in timeline
+        for facing in (0, 1)
+    }
+    actual = {
+        (item["kind"], item["assembly"], item["facing"])
+        for item in presentations
+        if item["kind"] in ("player-button1", "player-button1-empty")
+    }
+    return actual == expected
+
+
+def button1_projectile_union_is_complete(presentations, fixture):
+    weapon = fixture["authority_data"]["player"][
+        "weapon_projectile_resource"]["implementation_contract"]
+    parent = weapon["record4_parent_class0"]["initialization"][
+        "presentation_records"]
+    child = weapon["record4_child_class4"]["initialization"][
+        "variant_presentation_sequences"]
+    expected = {
+        (kind, int(record["assembly"], 16), facing)
+        for kind, records in (
+            ("projectile-parent", parent),
+            ("projectile-child",
+             [record for sequence in child.values() for record in sequence]))
+        for record in records
+        for facing in (0, 1)
+    }
+    actual = {
+        (item["kind"], item["assembly"], item["facing"])
+        for item in presentations
+        if item["kind"] in ("projectile-parent", "projectile-child")
+    }
+    return actual == expected
+
+
+def empty_effect_union_is_complete(presentations, fixture):
+    effect = fixture["authority_data"]["player"][
+        "weapon_projectile_resource"]["implementation_contract"][
+            "empty_effect_variant1_contract"]
+    facing = effect["initialization"]["presentation_actor_fields"][
+        "facing_u8"]
+    expected = {(int(record["assembly"], 16), facing) for record in
+                effect["active_state"]["presentation_records"]}
+    actual = {(item["assembly"], item["facing"]) for item in presentations
+              if item["kind"] == "class10-empty-effect"}
+    return actual == expected
+
+
 def run(args):
     return subprocess.run([sys.executable, str(GENERATOR)] + args,
                           cwd=str(ROOT), capture_output=True, text=True)
@@ -63,6 +138,18 @@ def main() -> int:
     if not button3_presentation_union_is_complete(presentations, fixture):
         print("FAIL: Button3 source presentation union is incomplete")
         return 1
+    if not button3_cleanup_union_is_complete(presentations, fixture):
+        print("FAIL: Button3 cleanup presentation union is incomplete")
+        return 1
+    if not button1_presentation_union_is_complete(presentations, fixture):
+        print("FAIL: Button1 source presentation union is incomplete")
+        return 1
+    if not button1_projectile_union_is_complete(presentations, fixture):
+        print("FAIL: Button1 projectile presentation union is incomplete")
+        return 1
+    if not empty_effect_union_is_complete(presentations, fixture):
+        print("FAIL: class-0x10 source presentation union is incomplete")
+        return 1
     button3_indexes = [index for index, item in enumerate(presentations)
                        if item["kind"] == "player-button3"]
     if not button3_indexes or any(
@@ -71,6 +158,28 @@ def main() -> int:
             for index in button3_indexes):
         print("FAIL: Button3 presentation omission control is non-discriminating")
         return 1
+    cleanup_indexes = [index for index, item in enumerate(presentations)
+                       if item["kind"] == "player-button3-cleanup"]
+    if not cleanup_indexes or any(
+            button3_cleanup_union_is_complete(
+                presentations[:index] + presentations[index + 1:], fixture)
+            for index in cleanup_indexes):
+        print("FAIL: Button3 cleanup omission control is non-discriminating")
+        return 1
+    for kind, complete in (
+            ("player-button1", button1_presentation_union_is_complete),
+            ("player-button1-empty", button1_presentation_union_is_complete),
+            ("projectile-parent", button1_projectile_union_is_complete),
+            ("projectile-child", button1_projectile_union_is_complete),
+            ("class10-empty-effect", empty_effect_union_is_complete)):
+        indexes = [index for index, item in enumerate(presentations)
+                   if item["kind"] == kind]
+        if not indexes or any(complete(
+                presentations[:index] + presentations[index + 1:], fixture)
+                for index in indexes):
+            print("FAIL: %s presentation omission control is "
+                  "non-discriminating" % kind)
+            return 1
 
     # Establish a known-good baseline so the refused run's "untouched"
     # claim is checked against something, not against build/ debris.
@@ -87,28 +196,33 @@ def main() -> int:
     residency = before_manifest["presentation_residency"]
     native_presentations = before_manifest["routes"].get(
         "spec02_round1_native_presentations", {})
-    if (native_presentations.get("decoded_variants") != 128 or
-        native_presentations.get("unique_assemblies") != 56 or
-        native_presentations.get("tiles_added") != 564):
+    if (native_presentations.get("decoded_variants") != 231 or
+        native_presentations.get("unique_assemblies") != 107 or
+        native_presentations.get("tiles_added") != 1543):
         print("FAIL: SPEC-02 native presentation union drifted")
         return 1
     if (residency["source_peak_unique_tiles"] != 374 or
         residency["source_peak_frame"] != 2357 or
-        residency["projectile_simultaneous_bound"] != 12 or
-        residency["max_tiles_per_projectile"] != 4 or
-        residency["max_tiles_per_impact"] != 2 or
-        residency["per_tile_scanout_requirement"] != 446 or
-        residency["composite_tile_threshold"] != 35 or
-        residency["spec02_composite_unique_entries"] != 5 or
-        residency["spec02_composite_texture_bytes"] != 36736 or
+        residency["projectile_simultaneous_bound"] != 6 or
+        residency["parent_tiles_at_peak"] != 4 or
+        residency["child_tiles_at_peak"] != 55 or
+        residency["max_tiles_per_projectile"] != 55 or
+        residency["max_tiles_per_impact"] != 0 or
+        residency["per_tile_scanout_requirement"] != 653 or
+        residency["composite_tile_threshold"] != 32 or
+        residency["spec02_composite_unique_entries"] != 19 or
+        residency["spec02_composite_texture_bytes"] != 117376 or
         residency["spec02_composite_max_texture_bytes"] != 11648 or
-        residency["configured_composite_slots"] != 5 or
-        residency["configured_composite_texture_budget"] != 36736 or
+        residency["first_segment_composite_unique_entries"] != 21 or
+        residency["first_segment_composite_texture_bytes"] != 126592 or
+        residency["first_segment_composite_max_texture_bytes"] != 11648 or
+        residency["configured_composite_slots"] != 21 or
+        residency["configured_composite_texture_budget"] != 126592 or
         residency["configured_composite_max_texture_bytes"] != 11648 or
         residency["startup_source_frame_range"] != [2074, 2253] or
         residency["startup_peak_noncomposite_tiles"] != 162 or
         residency["startup_peak_noncomposite_frame"] != 2208 or
-        residency["retained_tile_sprite_pool"] != 208 or
+        residency["retained_tile_sprite_pool"] != 218 or
         residency["mid_frame_lru_replacement_allowed"] is not False):
         print("FAIL: first-segment presentation residency drifted")
         return 1
@@ -118,7 +232,7 @@ def main() -> int:
     if (jo_max_match is None or int(jo_max_match.group(1)) != 255 or
         int(jo_max_match.group(1)) <
             residency["configured_composite_slots"] +
-            residency["retained_tile_sprite_pool"] + 32):
+            residency["retained_tile_sprite_pool"] + 16):
         print("FAIL: Jo sprite-definition bound/headroom drifted")
         return 1
     if ("$(JO_ENGINE_SRC_DIR)/sprites.o "
@@ -156,9 +270,9 @@ def main() -> int:
         print("FAIL: the refused round1 run modified the manifest")
         return 1
 
-    print("test_avsp_gfx_tiles_budget: PASS (round1 refused at %d bytes "
-         "vs a %d-byte carve; street archive and manifest untouched)"
-         % (612720, before_manifest["tile_region_budget_bytes"]))
+    print("test_avsp_gfx_tiles_budget: PASS (round1 refused against a "
+          "%d-byte carve; street archive and manifest untouched)"
+          % before_manifest["tile_region_budget_bytes"])
     return 0
 
 

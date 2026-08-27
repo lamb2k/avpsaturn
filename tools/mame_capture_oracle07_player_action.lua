@@ -24,7 +24,7 @@ local allowed = {
     baseline=true, single_attack=true, long_idle=true,
     delayed_second_60=true, delayed_second_120=true, hold_attack=true,
     startup_repeat=true, recovery_repeat=true, movement_attack=true,
-    reverse_attack=true, gun_only=true, special_only=true,
+    reverse_attack=true, gun_only=true, isolated_gun=true, special_only=true,
     hit_overlap=true, no_gameplay_buttons=true,
     isolated_combo_48=true, isolated_combo_49=true,
     close_combo_delay_50=true, close_combo_delay_51=true,
@@ -175,7 +175,7 @@ local function apply_schedule(f)
         attack_on = pulse(f, 4420, 5) or pulse(f, 4465, 5)
         left_on = f >= 4412 and f < 4440
         right_on = f >= 4440 and f < 4490
-    elseif variant == "gun_only" and f >= 4420 then
+    elseif (variant == "gun_only" or variant == "isolated_gun") and f >= 4420 then
         attack_on = false; gun_on = pulse(f, 4420, 5)
     elseif variant == "special_only" and f >= 4420 then
         attack_on = pulse(f, 4420, 5); gun_on = pulse(f, 4420, 5)
@@ -310,6 +310,7 @@ oracle07_subscription = emu.add_machine_frame_notifier(function()
     frame = frame + 1
     local input_word = apply_schedule(frame)
     if variant == "isolated_combo_48" or variant == "isolated_combo_49" or
+            variant == "isolated_gun" or
             variant == "air_cold" or variant:match("^isolated_dash_") or
             variant:match("^air_button") or variant == "air_special_combo" or
             variant == "dash_right_jump_reverse" then

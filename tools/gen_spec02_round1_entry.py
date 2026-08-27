@@ -96,17 +96,17 @@ def build() -> str:
     weapon = fixtures["authority_data"]["player"][
         "weapon_projectile_resource"]["implementation_contract"]
     weapon_states = weapon["state_dispatch"]
-    weapon_volley = weapon["sufficient_volley"]
+    weapon_action = weapon["sufficient_action"]
     weapon_resource = weapon["resource_tick"]
     weapon_empty = weapon["empty_fallback"]
-    weapon_projectile = weapon["projectile_lifecycle_contract"]
-    weapon_impact = weapon_projectile["impact_actor_contract"]
-    weapon_collision = weapon_projectile["current_state_interfaces"]["collision"]
-    weapon_damage = weapon_collision["damage"]
+    weapon_parent = weapon["record4_parent_class0"]
+    weapon_child = weapon["record4_child_class4"]
+    weapon_damage = weapon["current_state_collision_damage"]
     weapon_empty_effect = weapon["empty_effect_variant1_contract"]
-    weapon_frames = weapon["presentation_timeline"]
+    weapon_frames = weapon_action["presentation_timeline"]
     empty_frames = weapon_empty["presentation_timeline"]
-    weapon_return_frame = weapon["return_frame"]
+    weapon_return_frame = dict(weapon_frames[0])
+    weapon_return_frame.update({"action_u16": 2, "substate_u8": 2})
     first_segment_bounds = next(
         run for run in global_bounds["baseline_bound_runs"]
         if run["route"] == 4 and run["bound_x"] == 720 and
@@ -324,145 +324,105 @@ def build() -> str:
         jump["rng_calls"] != []):
         raise ValueError("SPEC-02 Button3 implementation contract drift")
     if (weapon["classification"] != "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        weapon["implementation_blocker"] is not None or
         weapon["source_input"]["button1_mask"] != "0x0010" or
         weapon_states != {
             "sufficient_entry_action": "0x0c00",
-            "sufficient_active_action": "0x0c02",
+            "sufficient_active_action": "0x0c02 then 0x0c04",
             "empty_entry_action": "0x1a00",
             "empty_active_action": "0x1a02",
             "cleanup_action": "0x0000",
             "return_locomotion_action": "0x0002"} or
-        weapon_volley["attempt_counter_type"] != "s8" or
-        weapon_volley["attempt_counter_initial"] != 12 or
-        weapon_volley["cadence_counter_type"] != "u8" or
-        weapon_volley["cadence_initial"] != 1 or
-        weapon_volley["cadence_reload"] != 4 or
-        weapon_volley["spawn_tick_offsets"] != list(range(0, 48, 4)) or
-        weapon_volley["cleanup_tick_offset"] != 49 or
-        weapon_volley["return_to_locomotion_tick_offset"] != 50 or
-        weapon_volley["recovery_edge"] != {
-            "input_tick_offset": 48,
-            "cleanup_tick_offset": 49,
-            "second_entry_tick_offset": 50} or
-        weapon_volley["resource_debit"] != 3 or
-        weapon_volley["resource_clamp_min"] != 0 or
-        weapon_volley["resource_capacity"] != 64 or
-        weapon_volley["recharge_countdown_after_success"] != 12 or
-        weapon_volley["rng_calls"] != 0 or
-        weapon_resource["normal_recharge_reload"] != 2 or
-        weapon_resource["depleted_recharge_reload"] != 6 or
+        weapon_action["entry_tick"] != 0 or
+        weapon_action["cleanup_tick"] != 19 or
+        weapon_action["return_tick"] != 20 or
+        weapon_action["resource_debit_u8"] != 40 or
+        weapon_action["resource_clamp_min_u8"] != 0 or
+        weapon_action["resource_capacity_u8"] != 64 or
+        weapon_action["recharge_countdown_after_entry_u8"] != 12 or
+        weapon_action["rng_calls"] != [] or
+        weapon_resource["normal_recharge_reload_u8"] != 2 or
+        weapon_resource["depleted_recharge_reload_u8"] != 6 or
         weapon_empty["timer_type"] != "u8" or
         weapon_empty["timer_initial"] != 16 or
-        weapon_empty["cleanup_tick_offset"] != 17 or
-        weapon_empty["return_to_locomotion_tick_offset"] != 18 or
-        weapon_empty["damaging_projectile_count"] != 0 or
-        weapon["movement_facing"]["baseline_invariant"] is not True):
-        raise ValueError("SPEC-02 Button1 action/resource contract drift")
-    allocation = weapon_volley["successful_allocation_writes"]
-    if (allocation != {
-            "active_increment": 1,
-            "attack_table": "0x03136a",
-            "class": "0x05",
-            "facing": "copy player facing",
-            "owner": "player low-word pointer",
-            "position": "copy player x/y/z",
-            "variant": "0 except attempt counter 4 writes 1"} or
-        weapon_projectile["spec_executable"] is not True or
-        weapon_projectile["implementation_blocker"] is not None or
-        weapon_impact["spec_executable"] is not True or
-        weapon_empty_effect["spec_executable"] is not True):
-        raise ValueError("SPEC-02 projectile implementation readiness drift")
-    projectile_init = weapon_projectile["initialization"]
-    projectile_active = weapon_projectile["active_state"]
-    projectile_presentation_actor = projectile_init["presentation_actor_fields"]
-    projectile_spawn_offsets = projectile_init["parent_presentation_selector"]["spawn_offsets_s16"]
-    projectile_animation_selectors = projectile_init["parent_presentation_selector"]["animation_selector_u8"]
-    projectile_presentations = projectile_init["parent_presentation_selector"]["presentation_sequences"]
-    projectile_angles0 = projectile_init["angle"]["facing0_u8"]
-    projectile_angles1 = projectile_init["angle"]["facing1_u8"]
-    projectile_player_selectors = projectile_init["player_presentation_selector_u8"]
-    projectile_motion = projectile_active["motion"]["vectors_s16"]
-    projectile_boxes = weapon_collision["projectile_table"]
-    projectile_hurt_boxes = projectile_boxes["hurt_entries"]
-    projectile_attack_boxes = projectile_boxes["attack_entries"]
-    impact_offsets = weapon_impact["initialization"]["variant_offsets_s16"]
-    impact_records = weapon_impact["initialization"]["variant0_presentation_records"]
-    impact_presentation_actor = weapon_impact["initialization"][
-        "presentation_actor_fields"]
-    impact_audio = weapon_impact["initialization"]["audio"]["alternating_command_u16"]
-    impact_audio_selector = weapon_impact["initialization"]["audio"]["selector"]
+        weapon_empty["cleanup_tick"] != 17 or
+        weapon_empty["return_tick"] != 18 or
+        weapon_empty["damaging_record4_count"] != 0):
+        raise ValueError("SPEC-02 corrected Predator Button1 action/resource drift")
+    if (weapon_parent["spec_executable"] is not True or
+        weapon_child["spec_executable"] is not True or
+        weapon_empty_effect["spec_executable"] is not True or
+        weapon_parent["record_type_u8"] != 4 or
+        weapon_parent["class_u8"] != 0 or
+        weapon_parent["allocator"] != "0x01773e" or
+        weapon_parent["dispatch"] != "0x02f870" or
+        weapon_parent["state_sequence_u8"] != [0, 2, 4, 6] or
+        weapon_parent["collision_table"]["table"] != "0x0002fc3c" or
+        weapon_child["record_type_u8"] != 4 or
+        weapon_child["class_u8"] != 4 or
+        weapon_child["dispatch"] != "0x0306fe" or
+        weapon_child["state_sequence_u8"] != [0, 2, 4] or
+        weapon_child["collision_table"]["table"] != "0x00030cb6"):
+        raise ValueError("SPEC-02 corrected Predator projectile identity drift")
+    parent_init = weapon_parent["initialization"]
+    parent_active = weapon_parent["active_state"]
+    parent_emitter = weapon_parent["child_emitter_state"]
+    parent_presentations = parent_init["presentation_records"]
+    parent_selector_offsets = parent_init["selector_offsets_s16"]
+    parent_route_angles = sorted(
+        int(value) for value in parent_active["route_motion_vectors_s16"]["low"])
+    parent_motion_low = parent_active["route_motion_vectors_s16"]["low"]
+    parent_motion_high = parent_active["route_motion_vectors_s16"]["high"]
+    parent_child_rows = parent_emitter["normal_rows"]
+    parent_collision_child_rows = parent_emitter["collision_rows"]
+    child_init = weapon_child["initialization"]
+    child_sequences = child_init["variant_presentation_sequences"]
+    parent_boxes = weapon_parent["collision_table"]
+    child_boxes = weapon_child["collision_table"]
+    parent_attack_boxes = parent_boxes["attack_entries"]
+    child_attack_boxes = child_boxes["attack_entries"]
     empty_effect_offsets = weapon_empty_effect["initialization"]["variant_offsets_s16"]
     empty_effect_records = weapon_empty_effect["active_state"]["presentation_records"]
-    if (len(projectile_spawn_offsets) != 16 or
-        len(projectile_animation_selectors) != 16 or
-        len(projectile_presentations) != 16 or
-        len(projectile_angles0) != 12 or len(projectile_angles1) != 12 or
-        len(projectile_player_selectors) != 12 or
-        len(projectile_motion) != 64 or len(projectile_hurt_boxes) != 1 or
-        len(projectile_attack_boxes) != 3 or len(impact_offsets) != 5 or
-        len(impact_records) != 5 or len(impact_audio) != 2 or
+    if (len(parent_presentations) != 7 or
+        len(parent_selector_offsets) != 6 or
+        parent_route_angles != [17, 35, 47] or
+        any(len(parent_motion_low[str(angle)]) != 16
+            for angle in parent_route_angles) or
+        any(len(parent_motion_high[str(angle)]) != 13
+            for angle in parent_route_angles) or
+        len(parent_child_rows) != 5 or
+        len(parent_collision_child_rows) != 5 or
+        [len(child_sequences[str(index)]) for index in range(3)] !=
+            [17, 10, 16] or
+        len(parent_attack_boxes) != 3 or len(child_attack_boxes) != 3 or
         len(empty_effect_offsets) != 4 or
         len(empty_effect_records) != 10):
-        raise ValueError("SPEC-02 projectile/effect table cardinality drift")
-    if (projectile_boxes["table_set"] != "0x03136a" or
-        projectile_boxes["hurt_relative_s16"] != 4 or
-        projectile_boxes["attack_relative_s16"] != 12 or
-        weapon_impact["record_type"] != 24 or
-        weapon_impact["class"] != "0x3a" or
-        weapon_impact["variant"] != 0 or
-        weapon_impact["dispatch"] != "0x086f62" or
-        weapon_impact["state_sequence"] != [0, 2, 4] or
-        projectile_presentation_actor["coordinate_mode_u8"] != 0 or
-        projectile_presentation_actor["palette_u8"] != 0 or
-        projectile_presentation_actor["object_or_u16"] != "0x8000" or
-        impact_presentation_actor != projectile_presentation_actor or
-        impact_audio != [0x007e, 0x0148] or
-        impact_audio_selector != {
-            "storage": "A5-0x7126 u8", "route_initial": 0,
-            "read_rule": "use selector value 0 or 2 as byte offset into the two-word command table",
-            "write_rule": "selector = u8(selector + 2) & 2 after the table read",
-            "capture_projection": {"frame_4534": [0, 0],
-                                   "frame_4535": [2, 1],
-                                   "frame_4537": [0, 4]}} or
-        weapon_damage["route_current_guards"] != {
-            "A5_minus_0x6762_u16": 0,
-            "A5_plus_0x244_u8": 0,
-            "defender_plus_0x08_u8": 12,
-            "defender_plus_0x73_u8": 0} or
-        weapon_damage["baseline"] != {
-            "attack_selector": 6, "attacker_class_index": 0,
-            "damage": 24, "defender_class_index": 16,
-            "defense": 33, "defense_address": "0x11420a",
-            "health_after": 39, "health_before": 63,
-            "matrix_address": "0x115326", "offense": 0,
-            "offense_address": "0x11542a", "route_index": 10} or
-        weapon_damage["mutation"]["damage"] != 31 or
-        weapon_damage["mutation"]["offense"] != 4 or
-        weapon_damage["suppression"]["baseline_writes"] != 8 or
-        weapon_damage["suppression"]["mutated_writes"] != 4):
-        raise ValueError("SPEC-02 projectile impact/collision/damage drift")
-    projectile_authority = fixtures["authority_data"]["player"][
-        "weapon_projectile_resource"]["authority_separation"][
-            "projectile_lifecycle"]
-    if (projectile_authority["pool"] !=
-            "record type 4; base 0xff8680; capacity 24; stride 0x80" or
-        projectile_authority["allocator"] != "0x01773e" or
-        projectile_authority["class"] != "0x05"):
-        raise ValueError("SPEC-02 projectile allocator identity drift")
-    if ([row["tick"] for row in weapon_frames] != list(range(50)) or
+        raise ValueError("SPEC-02 corrected projectile/effect cardinality drift")
+    if (parent_init["object_or_u16"] != "0x8000" or
+        child_init["object_or_u16"] != "0x8000" or
+        parent_emitter["initial_cadence_u8"] != 1 or
+        parent_emitter["cadence_reload_u8"] != 6 or
+        parent_emitter["initial_child_count_u8"] != 5 or
+        parent_emitter["spawn_ticks_from_parent_state4"] != [1, 7, 13, 19, 25] or
+        weapon_damage["parent_contact"]["attack_selector_u8"] != 25 or
+        weapon_damage["parent_contact"]["damage_u8"] != 127 or
+        weapon_damage["child_contact"]["attack_selector_u8"] != 14 or
+        weapon_damage["child_contact"]["damage_u8"] != 31):
+        raise ValueError("SPEC-02 corrected projectile collision/damage drift")
+    if ([row["tick"] for row in weapon_frames] != list(range(20)) or
         [row["tick"] for row in empty_frames] != list(range(18)) or
-        weapon_frames[0]["action"] != 0x0c00 or
-        any(row["action"] != 0x0c02 for row in weapon_frames[1:49]) or
-        weapon_frames[49]["action"] != 0 or
-        empty_frames[0]["action"] != 0x1a00 or
-        any(row["action"] != 0x1a02 for row in empty_frames[1:17]) or
-        empty_frames[17]["action"] != 0 or
-        weapon_return_frame != {
-            "tick": 50, "action": 2, "substate": 2,
-            "animation_record": "0x00163158",
-            "assembly": "0x00165488", "hurt_selector": 1,
-            "attack_selector": 0}):
-        raise ValueError("SPEC-02 Button1 presentation timeline drift")
+        weapon_frames[0]["action_u16"] != 0x0c00 or
+        any(row["action_u16"] not in (0x0c02, 0x0c04)
+            for row in weapon_frames[1:19]) or
+        weapon_frames[19]["action_u16"] != 0 or
+        empty_frames[0]["action_u16"] != 0x1a00 or
+        any(row["action_u16"] != 0x1a02 for row in empty_frames[1:17]) or
+        empty_frames[17]["action_u16"] != 0 or
+        weapon_return_frame["action_u16"] != 2 or
+        weapon_return_frame["substate_u8"] != 2 or
+        weapon_return_frame["animation_record"] != "0x0015f1f4" or
+        weapon_return_frame["assembly"] != "0x001626a4"):
+        raise ValueError("SPEC-02 corrected Predator presentation timeline drift")
 
     cursor = int(player["initial_cursor"], 16)
     step_rows = []
@@ -807,25 +767,24 @@ def build() -> str:
         "static const AvspRound1PlayerWeaponSpec avsp_round1_player_weapon =",
         "{",
         f"    {int(weapon_states['sufficient_entry_action'], 16)}u,",
-        f"    {int(weapon_states['sufficient_active_action'], 16)}u,",
+        "    0x0c02u,",
         f"    {int(weapon_states['empty_entry_action'], 16)}u,",
         f"    {int(weapon_states['empty_active_action'], 16)}u,",
         f"    {int(weapon_states['cleanup_action'], 16)}u,",
         f"    {int(weapon_states['return_locomotion_action'], 16)}u,",
-        f"    {weapon_volley['attempt_counter_initial']},",
-        f"    {weapon_volley['cadence_initial']}u,",
-        f"    {weapon_volley['cadence_reload']}u,",
         f"    {weapon_empty['timer_initial']}u,",
-        f"    {weapon_volley['resource_capacity']}u,",
-        f"    {weapon_volley['resource_debit']}u,",
-        f"    {weapon_volley['recharge_countdown_after_success']}u,",
-        f"    {weapon_resource['normal_recharge_reload']}u,",
-        f"    {weapon_resource['depleted_recharge_reload']}u,",
-        "    0x05,",
+        f"    {weapon_action['resource_capacity_u8']}u,",
+        f"    {weapon_action['resource_debit_u8']}u,",
+        f"    {weapon_action['recharge_countdown_after_entry_u8']}u,",
+        f"    {weapon_resource['normal_recharge_reload_u8']}u,",
+        f"    {weapon_resource['depleted_recharge_reload_u8']}u,",
+        f"    {weapon_parent['class_u8']},",
+        f"    {weapon_child['class_u8']},",
         "    0x8680u,",
         "    0x0080u,",
         "    0x8380u,",
-        "    0x03136aUL",
+        f"    {weapon_parent['collision_table']['table']}UL,",
+        f"    {weapon_child['collision_table']['table']}UL",
         "};", "",
         "static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_frames[AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT] =",
         "{",
@@ -833,9 +792,9 @@ def build() -> str:
     for row in weapon_frames:
         lines.append(
             "    { %du, %du, %sUL, %sUL, %du, %du }," % (
-                row["action"], row["substate"], row["animation_record"],
-                row["assembly"], row["hurt_selector"],
-                row["attack_selector"]))
+                row["action_u16"], row["substate_u8"], row["animation_record"],
+                row["assembly"], row["hurt_selector_u8"],
+                row["attack_selector_u8"]))
     lines.extend([
         "};", "",
         "static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_empty_frames[AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT] =",
@@ -844,128 +803,122 @@ def build() -> str:
     for row in empty_frames:
         lines.append(
             "    { %du, %du, %sUL, %sUL, %du, %du }," % (
-                row["action"], row["substate"], row["animation_record"],
-                row["assembly"], row["hurt_selector"],
-                row["attack_selector"]))
+                row["action_u16"], row["substate_u8"], row["animation_record"],
+                row["assembly"], row["hurt_selector_u8"],
+                row["attack_selector_u8"]))
     lines.extend([
         "};", "",
         "static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_return_frame =",
         "{",
         "    %du, %du, %sUL, %sUL, %du, %du" % (
-            weapon_return_frame["action"], weapon_return_frame["substate"],
+            weapon_return_frame["action_u16"], weapon_return_frame["substate_u8"],
             weapon_return_frame["animation_record"],
             weapon_return_frame["assembly"],
-            weapon_return_frame["hurt_selector"],
-            weapon_return_frame["attack_selector"]),
+            weapon_return_frame["hurt_selector_u8"],
+            weapon_return_frame["attack_selector_u8"]),
         "};", "",
-        "static const AvspRound1VecS16 avsp_round1_weapon_projectile_spawn_offsets[AVSP_ROUND1_WEAPON_PROJECTILE_PRESENTATION_COUNT] =",
+        "static const AvspRound1VecS16 avsp_round1_weapon_parent_selector_offsets[AVSP_ROUND1_WEAPON_PARENT_SELECTOR_COUNT] =",
         "{",
     ])
-    for x, y in projectile_spawn_offsets:
+    for x, y in parent_selector_offsets:
         lines.append(f"    {{ {x}, {y} }},")
     lines.extend([
         "};", "",
-        "static const unsigned char avsp_round1_weapon_projectile_animation_selectors[AVSP_ROUND1_WEAPON_PROJECTILE_PRESENTATION_COUNT] =",
-        "{",
-        "    " + ", ".join(f"{value}u" for value in projectile_animation_selectors),
-        "};", "",
-        "static const unsigned char avsp_round1_weapon_projectile_angles_facing0[AVSP_ROUND1_WEAPON_PROJECTILE_ANGLE_COUNT] =",
-        "{",
-        "    " + ", ".join(f"{value}u" for value in projectile_angles0),
-        "};", "",
-        "static const unsigned char avsp_round1_weapon_projectile_angles_facing1[AVSP_ROUND1_WEAPON_PROJECTILE_ANGLE_COUNT] =",
-        "{",
-        "    " + ", ".join(f"{value}u" for value in projectile_angles1),
-        "};", "",
-        "static const unsigned char avsp_round1_weapon_projectile_player_selectors[AVSP_ROUND1_WEAPON_PROJECTILE_ANGLE_COUNT] =",
-        "{",
-        "    " + ", ".join(f"{value}u" for value in projectile_player_selectors),
-        "};", "",
-        "static const AvspRound1VecS16 avsp_round1_weapon_projectile_motion[AVSP_ROUND1_WEAPON_PROJECTILE_MOTION_COUNT] =",
+        "static const AvspRound1AnimationStateSpec avsp_round1_weapon_parent_presentations[AVSP_ROUND1_WEAPON_PARENT_PRESENTATION_COUNT] =",
         "{",
     ])
-    for x, y in projectile_motion:
-        lines.append(f"    {{ {x}, {y} }},")
+    for row in parent_presentations:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"], row["attack_selector_u8"]))
     lines.extend([
         "};", "",
-        "static const AvspRound1AnimationStateSpec avsp_round1_weapon_projectile_presentations[AVSP_ROUND1_WEAPON_PROJECTILE_PRESENTATION_COUNT][2] =",
+        "static const unsigned char avsp_round1_weapon_parent_route_angles[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in parent_route_angles),
+        "};", "",
+        "static const AvspRound1VecS16 avsp_round1_weapon_parent_motion_low[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT][AVSP_ROUND1_WEAPON_PARENT_LOW_MOTION_COUNT] =",
         "{",
     ])
-    for sequence in projectile_presentations:
-        records = [sequence["first"], sequence["terminal"]]
-        rendered = []
-        for row in records:
-            rendered.append("{ %du, %d, %sUL, %sUL, %du, %du }" % (
-                row["timer"], row["branch"], row["animation_record"],
-                row["assembly"], row["hurt_selector"], row["attack_selector"]))
-        lines.append("    { " + ", ".join(rendered) + " },")
+    for angle in parent_route_angles:
+        rows = ", ".join("{ %d, %d }" % tuple(row)
+                         for row in parent_motion_low[str(angle)])
+        lines.append("    { " + rows + " },")
+    lines.extend([
+        "};", "",
+        "static const AvspRound1VecS16 avsp_round1_weapon_parent_motion_high[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT][AVSP_ROUND1_WEAPON_PARENT_HIGH_MOTION_COUNT] =",
+        "{",
+    ])
+    for angle in parent_route_angles:
+        rows = ", ".join("{ %d, %d }" % tuple(row)
+                         for row in parent_motion_high[str(angle)])
+        lines.append("    { " + rows + " },")
+    lines.extend([
+        "};", "",
+        "static const AvspRound1WeaponChildSpawnSpec avsp_round1_weapon_child_spawn_normal[AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT] =",
+        "{",
+    ])
+    for row in parent_child_rows:
+        lines.append("    { %d, %d, %d, %du }," % (
+            row["x_s16"], row["y_s16"], row["z_s16"], row["variant_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1WeaponChildSpawnSpec avsp_round1_weapon_child_spawn_collision[AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT] =",
+        "{",
+    ])
+    for row in parent_collision_child_rows:
+        lines.append("    { %d, %d, %d, %du }," % (
+            row["x_s16"], row["y_s16"], row["z_s16"], row["variant_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1WeaponChildSequenceSpec avsp_round1_weapon_child_sequences[AVSP_ROUND1_WEAPON_CHILD_VARIANT_COUNT] =",
+        "{",
+    ])
+    for variant in range(3):
+        records = child_sequences[str(variant)]
+        rendered = ["{ %du, %d, %sUL, %sUL, %du, %du }" % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]) for row in records]
+        while len(rendered) < 17:
+            rendered.append("{ 0u, 0, 0UL, 0UL, 0u, 0u }")
+        lines.append("    { %du, { %s } }," % (
+            len(records), ", ".join(rendered)))
     lines.extend([
         "};", "",
         "static const AvspRound1WeaponProjectileSpec avsp_round1_weapon_projectile =",
         "{",
-        "    0u, 2u, 4u, 6u, 0x80u,",
-        "    0x50, 0x0220u, 0x10, 0x0120u, 0x3a, 0u,",
-        "    %du, %du, %su" % (
-            projectile_presentation_actor["coordinate_mode_u8"],
-            projectile_presentation_actor["palette_u8"],
-            projectile_presentation_actor["object_or_u16"]),
+        "    0u, 2u, 4u, 6u, 0x50, 0x0220u, 0x10, 0x0120u,",
+        f"    {weapon_parent['class_u8']}, {weapon_child['class_u8']},",
+        f"    {parent_emitter['initial_child_count_u8']}u,",
+        f"    {parent_emitter['initial_cadence_u8']}u,",
+        f"    {parent_emitter['cadence_reload_u8']}u, 0x8000u,",
+        f"    {weapon_parent['dispatch']}UL, {weapon_child['dispatch']}UL,",
+        f"    {weapon_parent['collision_table']['table']}UL,",
+        f"    {weapon_child['collision_table']['table']}UL,",
+        f"    {weapon_damage['parent_contact']['damage_u8']}u,",
+        f"    {weapon_damage['child_contact']['damage_u8']}u",
         "};", "",
-        "static const AvspRound1CollisionBoxSpec avsp_round1_weapon_projectile_hurt_box =",
-        "{",
-        "    %d, %d, %du, %du, %d, %du, 0, 0u, 0u" % (
-            projectile_hurt_boxes[0]["x_center"],
-            projectile_hurt_boxes[0]["y_center"],
-            projectile_hurt_boxes[0]["x_half"],
-            projectile_hurt_boxes[0]["y_half"],
-            projectile_hurt_boxes[0]["z_center"],
-            projectile_hurt_boxes[0]["z_half"]),
-        "};", "",
-        "static const AvspRound1CollisionBoxSpec avsp_round1_weapon_projectile_attack_boxes[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =",
+        "static const AvspRound1CollisionBoxSpec avsp_round1_weapon_parent_attack_boxes[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =",
         "{",
     ])
-    for box in projectile_attack_boxes:
+    for box in parent_attack_boxes:
         lines.append("    { %d, %d, %du, %du, %d, %du, %d, %du, %du }," % (
-            box["x_center"], box["y_center"], box["x_half"], box["y_half"],
-            box["z_center"], box["z_half"], box["knockback_mode"],
-            box["hit_value"], box["unknown_bytes"]["0x09"]))
-    baseline_damage = weapon_damage["baseline"]
-    mutated_damage = weapon_damage["mutation"]
+            box["x_center_s8"], box["y_center_s8"], box["x_half_u8"],
+            box["y_half_u8"], box["z_center_s8"], box["z_half_u8"],
+            box["knockback_mode_s8"], box["hit_value_u8"],
+            box["damage_selector_u8"]))
     lines.extend([
         "};", "",
-        "static const AvspRound1DamageClassValueSpec avsp_round1_weapon_damage_offense[AVSP_ROUND1_WEAPON_DAMAGE_OFFENSE_COUNT] =",
-        "{",
-        "    { %du, %du, %du }," % (baseline_damage["attacker_class_index"], baseline_damage["route_index"], baseline_damage["offense"]),
-        "    { 2u, %du, %du }" % (baseline_damage["route_index"], mutated_damage["offense"]),
-        "};", "",
-        "static const AvspRound1DamageClassValueSpec avsp_round1_weapon_damage_defense[AVSP_ROUND1_WEAPON_DAMAGE_DEFENSE_COUNT] =",
-        "{",
-        "    { %du, %du, %du }" % (baseline_damage["defender_class_index"], baseline_damage["route_index"], baseline_damage["defense"]),
-        "};", "",
-        "static const AvspRound1DamageMatrixValueSpec avsp_round1_weapon_damage_matrix[AVSP_ROUND1_WEAPON_DAMAGE_MATRIX_COUNT] =",
-        "{",
-        "    { %du, %du, %du }," % (baseline_damage["defense"], baseline_damage["offense"] + baseline_damage["attack_selector"], baseline_damage["damage"]),
-        "    { %du, %du, %du }" % (baseline_damage["defense"], mutated_damage["offense"] + baseline_damage["attack_selector"], mutated_damage["damage"]),
-        "};", "",
-        "static const AvspRound1WeaponImpactSpec avsp_round1_weapon_impact =",
-        "{",
-        "    24u, 0x3a, 0u, 0u, 2u, 4u, 0x086f62UL,",
-        "    %du, %du, %su," % (
-            impact_presentation_actor["coordinate_mode_u8"],
-            impact_presentation_actor["palette_u8"],
-            impact_presentation_actor["object_or_u16"]),
-        "    { " + ", ".join(f"0x{value:04x}u" for value in impact_audio) + " }",
-        "};", "",
-        "static const short avsp_round1_weapon_impact_variant_offsets[AVSP_ROUND1_WEAPON_IMPACT_VARIANT_COUNT] =",
-        "{",
-        "    " + ", ".join(f"{value}" for value in impact_offsets),
-        "};", "",
-        "static const AvspRound1AnimationStateSpec avsp_round1_weapon_impact_variant0_records[AVSP_ROUND1_WEAPON_IMPACT_PRESENTATION_COUNT] =",
+        "static const AvspRound1CollisionBoxSpec avsp_round1_weapon_child_attack_boxes[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =",
         "{",
     ])
-    for row in impact_records:
-        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
-            row["timer"], row["branch"], row["animation_record"],
-            row["assembly"], row["hurt_selector"], row["attack_selector"]))
+    for box in child_attack_boxes:
+        lines.append("    { %d, %d, %du, %du, %d, %du, %d, %du, %du }," % (
+            box["x_center_s8"], box["y_center_s8"], box["x_half_u8"],
+            box["y_half_u8"], box["z_center_s8"], box["z_half_u8"],
+            box["knockback_mode_s8"], box["hit_value_u8"],
+            box["damage_selector_u8"]))
     lines.extend([
         "};", "",
         "static const AvspRound1VecS16 avsp_round1_empty_effect_variant_offsets[AVSP_ROUND1_EMPTY_EFFECT_VARIANT_COUNT] =",

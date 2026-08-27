@@ -1,5 +1,7 @@
 #include "round1.h"
 #include "spec02_round1_entry_data.h"
+#include "../../integration/combat/combat.h"
+#include "../../../../avsp_actor.h"
 #include "../../../../avsp_collision.h"
 
 #include <string.h>
@@ -134,9 +136,6 @@ static int avsp_round1_dispatch_supported(unsigned char record_type,
                                            signed char actor_class)
 {
     unsigned int index;
-    if (record_type == avsp_round1_weapon_impact.record_type &&
-        actor_class == avsp_round1_weapon_impact.actor_class)
-        return 1;
     if (record_type == 24u && actor_class == 0x44)
         return 1;
     for (index = 0u; index < AVSP_ROUND1_REQUIRED_DISPATCH_COUNT; ++index)
@@ -193,6 +192,212 @@ static int avsp_round1_class1f_state_context_supported(unsigned short state,
             return 1;
     }
     return 0;
+}
+
+static short avsp_round1_first_encounter_damage(
+    const unsigned short selector)
+{
+    AvspPortV2CombatSourceEvent source;
+    if (selector < 1u || selector > AVSP_PORT_V2_COMBAT_SOURCE_EVENT_COUNT ||
+        !avsp_port_v2_combat_source_event((int)selector - 1, &source))
+        return 0;
+    return (short)(source.health_before - source.health_after);
+}
+
+static int avsp_round1_first_encounter_overlap(
+    const AvspRound1Runtime *runtime, const AvspRound1ActorCore *actor,
+    unsigned char *hit_value)
+{
+    AvspActor player;
+    AvspActor alien;
+    memset(&player, 0, sizeof(player));
+    memset(&alien, 0, sizeof(alien));
+    player.state = 1u;
+    player.table_set = AVSP_PORT_V2_COMBAT_PLAYER_TABLE_SET;
+    player.sel_attack = (unsigned char)runtime->player_action.selector;
+    player.facing = (unsigned char)runtime->player_action.facing;
+    player.world_x = (unsigned short)runtime->player_action.x;
+    player.world_y = (unsigned short)(runtime->player_action.lane +
+        runtime->player_action.height);
+    player.world_z = (unsigned short)runtime->player_action.lane;
+    player.attacker_id = 155u;
+    player.latch_index = 0u;
+    alien.state = 1u;
+    alien.table_set = AVSP_PORT_V2_COMBAT_ENEMY_TABLE_SET;
+    alien.sel_hurt = AVSP_PORT_V2_COMBAT_ENEMY_HURT_SELECTOR;
+    alien.facing = actor->facing;
+    alien.world_x = (unsigned short)actor->x;
+    alien.world_y = (unsigned short)actor->y;
+    alien.world_z = (unsigned short)actor->z;
+    return avsp_collision_overlap(&player, &alien, hit_value) &&
+        !avsp_collision_guarded(&player, &alien);
+}
+
+static int avsp_round1_first_encounter_begin_reaction(
+    AvspRound1FirstEncounterRuntime *encounter, const int ko)
+{
+    memset(&encounter->reaction, 0, sizeof(encounter->reaction));
+    if (ko)
+        return avsp_port_v2_hit_ko_begin(&encounter->reaction,
+            AVSP_PORT_V2_HIT_KO_KO, &avsp_port_v2_ko_source_before);
+    return avsp_port_v2_hit_ko_begin(&encounter->reaction,
+        AVSP_PORT_V2_HIT_KO_HIT, &avsp_port_v2_hit_source_before);
+}
+
+static int avsp_round1_first_encounter_sync_actor(
+    AvspRound1ActorCore *actor,
+    const AvspRound1FirstEncounterRuntime *encounter)
+{
+    const AvspRound1PresentationSpec *presentation;
+    unsigned long animation_record = encounter->alien.animation_record;
+    unsigned short state = 0x0200u;
+    unsigned short substate = encounter->alien.source_action;
+    if (encounter->reaction.active ||
+        encounter->alien.state == AVSP_ALIEN_STATE_HIT ||
+        encounter->alien.state == AVSP_ALIEN_STATE_KO)
+    {
+        animation_record = encounter->reaction.actor.anim_record;
+        state = encounter->reaction.actor.sub_state;
+        substate = encounter->reaction.actor.action;
+    }
+    presentation = avsp_round1_find_class1f_presentation(animation_record);
+    if (presentation == 0 ||
+        !avsp_round1_class1f_state_context_supported(state, substate))
+        return 0;
+    actor->state = state;
+    actor->substate = substate;
+    actor->source_action = encounter->alien.source_action;
+    actor->x = encounter->alien.x;
+    actor->y = encounter->alien.lane;
+    actor->z = encounter->alien.lane;
+    actor->health = encounter->alien.health;
+    actor->facing = (unsigned char)encounter->alien.facing;
+    actor->animation_record = animation_record;
+    actor->assembly = presentation->assembly;
+    actor->hurt_selector = presentation->hurt_selector;
+    actor->attack_selector = presentation->attack_selector;
+    return 1;
+}
+
+static int avsp_round1_step_first_encounter_actor(
+    AvspRound1Runtime *runtime, AvspRound1Pool *pool,
+    AvspRound1ActorCore *actor)
+{
+    AvspRound1FirstEncounterRuntime *encounter = &runtime->first_encounter;
+    AvspAlienInput input;
+    unsigned char hit_value = 0u;
+    short damage = 0;
+    short health_before;
+    int overlap;
+    if (!encounter->initialized)
+    {
+        memset(encounter, 0, sizeof(*encounter));
+        avsp_alien_ai_init(&encounter->alien, 0x7301u);
+        encounter->initialized = 1u;
+        if (!avsp_round1_first_encounter_sync_actor(actor, encounter))
+            return 0;
+    }
+    encounter->player_contact = 0u;
+    encounter->alien_contact = 0u;
+    encounter->alien_damage = 0u;
+    encounter->semantic_hit = 0u;
+    encounter->semantic_ko = 0u;
+    encounter->health_before = encounter->alien.health;
+    encounter->health_after = encounter->alien.health;
+    if (encounter->encounter_state == AVSP_ROUND1_FIRST_ENCOUNTER_WAIT_ENTRY &&
+        runtime->player_action.x >= AVSP_ROUND1_FIRST_ENCOUNTER_ENTRY_X)
+        encounter->encounter_state = AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE;
+    memset(&input, 0, sizeof(input));
+    input.target.active = (unsigned short)(
+        encounter->encounter_state == AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE &&
+        runtime->player_action.state != AVSP_PW_STATE_KO);
+    input.target.id = 1u;
+    input.target.x = runtime->player_action.x;
+    input.target.lane = runtime->player_action.lane;
+    if (encounter->encounter_state == AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE &&
+        runtime->player_action.attack_active && !encounter->attack_latched &&
+        encounter->alien.state != AVSP_ALIEN_STATE_KO &&
+        encounter->alien.state != AVSP_ALIEN_STATE_INACTIVE)
+    {
+        overlap = avsp_round1_first_encounter_overlap(runtime, actor,
+                                                       &hit_value);
+        encounter->attack_latched = 1u;
+        if (overlap && runtime->player_action.selector >= 1u &&
+            runtime->player_action.selector <= AVSP_PW_ACTION_COUNT &&
+            hit_value == (unsigned char)avsp_pw_action_defs[
+                runtime->player_action.selector - 1u].box.hit_value)
+        {
+            damage = avsp_round1_first_encounter_damage(
+                runtime->player_action.selector);
+            if (damage <= 0)
+                return 0;
+            input.incoming_damage = damage;
+            encounter->player_contact = 1u;
+            encounter->alien_damage = (unsigned char)damage;
+            encounter->health_before = encounter->alien.health;
+            encounter->health_after = (short)(encounter->alien.health - damage);
+            ++encounter->player_contacts;
+            ++encounter->alien_damage_events;
+            avsp_pw_report_contact(&runtime->player_action);
+        }
+    }
+    if (!runtime->player_action.attack_active)
+        encounter->attack_latched = 0u;
+    health_before = encounter->alien.health;
+    if (encounter->encounter_state == AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE)
+        avsp_alien_ai_step(&encounter->alien, &input);
+    if (input.incoming_damage > 0)
+    {
+        if (encounter->alien.state == AVSP_ALIEN_STATE_KO)
+        {
+            encounter->target_ko_observed = 1u;
+            encounter->semantic_ko = 1u;
+            ++encounter->ko_events;
+            if (!avsp_round1_first_encounter_begin_reaction(encounter, 1))
+                return 0;
+        }
+        else
+        {
+            encounter->semantic_hit = 1u;
+            ++encounter->hit_events;
+            if (!avsp_round1_first_encounter_begin_reaction(encounter, 0))
+                return 0;
+        }
+    }
+    else if (encounter->reaction.active &&
+             !avsp_port_v2_hit_ko_step(&encounter->reaction))
+        return 0;
+    if (encounter->alien.contact && encounter->alien.contact_damage > 0u &&
+        runtime->player_action.state != AVSP_PW_STATE_KO)
+    {
+        encounter->alien_contact = 1u;
+        encounter->pending_player_damage =
+            (unsigned char)encounter->alien.contact_damage;
+        ++encounter->alien_contacts;
+    }
+    if (encounter->alien_damage != 0u)
+    {
+        encounter->health_before = health_before;
+        encounter->health_after = encounter->alien.health;
+    }
+    ++encounter->scheduler_updates;
+    if (encounter->encounter_state == AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE &&
+        encounter->target_ko_observed &&
+        encounter->alien.state == AVSP_ALIEN_STATE_INACTIVE &&
+        !encounter->reaction.active)
+    {
+        encounter->encounter_state = AVSP_ROUND1_FIRST_ENCOUNTER_CLEARED;
+        encounter->route_unlocked = 1u;
+        encounter->unlock_player_x = runtime->player_action.x;
+        ++encounter->clear_events;
+        if (!avsp_round1_release_pool_actor(pool, actor))
+            return 0;
+        ++encounter->lifecycle_releases;
+        return 2;
+    }
+    if (!avsp_round1_first_encounter_sync_actor(actor, encounter))
+        return 0;
+    return 1;
 }
 
 static void avsp_round1_apply_player_global_bounds(AvspRound1Runtime *runtime)
@@ -701,54 +906,44 @@ static int avsp_round1_player_weapon_contract_valid(void)
         avsp_round1_player_weapon.empty_active_action != 0x1a02u ||
         avsp_round1_player_weapon.cleanup_action != 0u ||
         avsp_round1_player_weapon.return_action != 2u ||
-        avsp_round1_player_weapon.attempt_initial != 12 ||
-        avsp_round1_player_weapon.cadence_initial != 1u ||
-        avsp_round1_player_weapon.cadence_reload != 4u ||
         avsp_round1_player_weapon.empty_timer_initial != 16u ||
         avsp_round1_player_weapon.resource_capacity != 64u ||
-        avsp_round1_player_weapon.resource_debit != 3u ||
+        avsp_round1_player_weapon.resource_debit != 40u ||
         avsp_round1_player_weapon.recharge_after_success != 12u ||
         avsp_round1_player_weapon.normal_recharge_reload != 2u ||
         avsp_round1_player_weapon.depleted_recharge_reload != 6u ||
-        avsp_round1_player_weapon.projectile_class != 0x05 ||
+        avsp_round1_player_weapon.parent_class != 0 ||
+        avsp_round1_player_weapon.child_class != 4 ||
         avsp_round1_player_weapon.projectile_source_base != 0x8680u ||
         avsp_round1_player_weapon.projectile_stride != 0x0080u ||
         avsp_round1_player_weapon.player_owner != 0x8380u ||
-        avsp_round1_player_weapon.projectile_attack_table != 0x03136aUL ||
+        avsp_round1_player_weapon.parent_attack_table != 0x0002fc3cUL ||
+        avsp_round1_player_weapon.child_attack_table != 0x00030cb6UL ||
         avsp_round1_player_weapon_return_frame.action != 2u ||
         avsp_round1_player_weapon_return_frame.substate != 2u ||
         avsp_round1_player_weapon_return_frame.animation_record !=
-            0x00163158UL ||
-        avsp_round1_player_weapon_return_frame.assembly != 0x00165488UL ||
-        avsp_round1_weapon_projectile_angles_facing0[0] != 40u ||
-        avsp_round1_weapon_projectile_angles_facing0[11] != 40u ||
-        avsp_round1_weapon_projectile_angles_facing1[0] != 24u ||
-        avsp_round1_weapon_projectile_angles_facing1[11] != 24u ||
-        avsp_round1_weapon_projectile_player_selectors[0] != 6u ||
-        avsp_round1_weapon_projectile_player_selectors[11] != 6u ||
+            0x0015f1f4UL ||
+        avsp_round1_player_weapon_return_frame.assembly != 0x001626a4UL ||
+        avsp_round1_weapon_parent_route_angles[0] != 17u ||
+        avsp_round1_weapon_parent_route_angles[1] != 35u ||
+        avsp_round1_weapon_parent_route_angles[2] != 47u ||
         avsp_round1_weapon_projectile.initial_state != 0u ||
         avsp_round1_weapon_projectile.active_state != 2u ||
-        avsp_round1_weapon_projectile.impact_state != 4u ||
+        avsp_round1_weapon_projectile.emitter_state != 4u ||
         avsp_round1_weapon_projectile.release_state != 6u ||
-        avsp_round1_weapon_projectile_attack_boxes[1].x_center != 16 ||
-        avsp_round1_weapon_projectile_attack_boxes[1].x_half != 18u ||
-        avsp_round1_weapon_projectile_attack_boxes[1].damage_selector != 6u ||
-        avsp_round1_weapon_projectile.coordinate_mode != 0u ||
-        avsp_round1_weapon_projectile.palette != 0u ||
         avsp_round1_weapon_projectile.object_or != 0x8000u ||
-        avsp_round1_weapon_damage_offense[0].value != 0u ||
-        avsp_round1_weapon_damage_offense[1].value != 4u ||
-        avsp_round1_weapon_damage_defense[0].value != 33u ||
-        avsp_round1_weapon_damage_matrix[0].damage != 24u ||
-        avsp_round1_weapon_damage_matrix[1].damage != 31u ||
-        avsp_round1_weapon_impact.actor_class != 0x3a ||
-        avsp_round1_weapon_impact.coordinate_mode != 0u ||
-        avsp_round1_weapon_impact.palette != 0u ||
-        avsp_round1_weapon_impact.object_or != 0x8000u ||
-        avsp_round1_weapon_impact.audio_commands[0] != 0x007eu ||
-        avsp_round1_weapon_impact.audio_commands[1] != 0x0148u ||
-        avsp_round1_weapon_impact_variant0_records[0].timer != 2u ||
-        avsp_round1_weapon_impact_variant0_records[4].branch != -32768 ||
+        avsp_round1_weapon_projectile.parent_dispatch != 0x02f870UL ||
+        avsp_round1_weapon_projectile.child_dispatch != 0x0306feUL ||
+        avsp_round1_weapon_projectile.child_count != 5u ||
+        avsp_round1_weapon_projectile.child_cadence_initial != 1u ||
+        avsp_round1_weapon_projectile.child_cadence_reload != 6u ||
+        avsp_round1_weapon_parent_attack_boxes[1].damage_selector != 25u ||
+        avsp_round1_weapon_child_attack_boxes[1].damage_selector != 14u ||
+        avsp_round1_weapon_projectile.parent_damage != 127u ||
+        avsp_round1_weapon_projectile.child_damage != 31u ||
+        avsp_round1_weapon_child_sequences[0].record_count != 17u ||
+        avsp_round1_weapon_child_sequences[1].record_count != 10u ||
+        avsp_round1_weapon_child_sequences[2].record_count != 16u ||
         avsp_round1_empty_effect_variant_offsets[1].x != 0 ||
         avsp_round1_empty_effect_variant_offsets[1].y != 78 ||
         avsp_round1_empty_effect_variant1_records[0].timer != 1u ||
@@ -761,8 +956,9 @@ static int avsp_round1_player_weapon_contract_valid(void)
         const AvspRound1PlayerWeaponFrameSpec *frame =
             &avsp_round1_player_weapon_frames[index];
         if ((index == 0u && frame->action != 0x0c00u) ||
-            (index > 0u && index < 49u && frame->action != 0x0c02u) ||
-            (index == 49u && frame->action != 0u))
+            (index > 0u && index < 4u && frame->action != 0x0c02u) ||
+            (index >= 4u && index < 19u && frame->action != 0x0c04u) ||
+            (index == 19u && frame->action != 0u))
             return 0;
     }
     for (index = 0u;
@@ -813,10 +1009,8 @@ static int avsp_round1_allocate_player_weapon_projectile(
     projectile = &runtime->player_weapon_projectiles[index];
     memset(projectile, 0, sizeof(*projectile));
     projectile->active = 1u;
-    projectile->actor_class =
-        avsp_round1_player_weapon.projectile_class;
-    projectile->variant =
-        (unsigned char)(runtime->player_weapon_attempts == 4 ? 1u : 0u);
+    projectile->actor_class = avsp_round1_player_weapon.parent_class;
+    projectile->variant = 0u;
     projectile->facing = runtime->player.facing;
     projectile->source_slot = (unsigned short)(
         avsp_round1_player_weapon.projectile_source_base +
@@ -826,17 +1020,14 @@ static int avsp_round1_allocate_player_weapon_projectile(
     projectile->y = runtime->player.y;
     projectile->z = runtime->player.z;
     projectile->attack_table =
-        avsp_round1_player_weapon.projectile_attack_table;
+        avsp_round1_player_weapon.parent_attack_table;
     projectile->state = 0u;
     projectile->damage_class_index = 0u;
-    projectile->angle = runtime->player.facing ?
-        avsp_round1_weapon_projectile_angles_facing1[
-            (unsigned char)runtime->player_weapon_attempts] :
-        avsp_round1_weapon_projectile_angles_facing0[
-            (unsigned char)runtime->player_weapon_attempts];
-    projectile->parent_presentation_selector =
-        avsp_round1_weapon_projectile_player_selectors[
-            (unsigned char)runtime->player_weapon_attempts];
+    projectile->angle = runtime->player.facing ? 17u : 47u;
+    projectile->parent_presentation_selector = 0u;
+    projectile->child_count = avsp_round1_weapon_projectile.child_count;
+    projectile->child_cadence =
+        avsp_round1_weapon_projectile.child_cadence_initial;
     projectile->x_fp = (long)runtime->player.x * 65536L;
     projectile->y_fp = (long)runtime->player.y * 65536L;
     projectile->z_fp = (long)runtime->player.z * 65536L;
@@ -1688,17 +1879,44 @@ static int avsp_round1_seed_first_segment_dependencies(
 static void avsp_round1_bind_projectile_animation(
     AvspRound1WeaponProjectileAllocation *projectile)
 {
-    unsigned char sequence =
-        avsp_round1_weapon_projectile_animation_selectors[
-            projectile->parent_presentation_selector];
-    const AvspRound1AnimationStateSpec *record =
-        &avsp_round1_weapon_projectile_presentations[sequence]
-            [projectile->presentation_index];
+    const AvspRound1AnimationStateSpec *record;
+    if (projectile->actor_class == avsp_round1_weapon_projectile.parent_class)
+    {
+        if (projectile->presentation_index >=
+            AVSP_ROUND1_WEAPON_PARENT_PRESENTATION_COUNT)
+            return;
+        record = &avsp_round1_weapon_parent_presentations[
+            projectile->presentation_index];
+    }
+    else
+    {
+        const AvspRound1WeaponChildSequenceSpec *sequence;
+        if (projectile->variant >= AVSP_ROUND1_WEAPON_CHILD_VARIANT_COUNT)
+            return;
+        sequence = &avsp_round1_weapon_child_sequences[projectile->variant];
+        if (projectile->presentation_index >= sequence->record_count)
+            return;
+        record = &sequence->records[projectile->presentation_index];
+    }
     projectile->animation_timer = record->timer;
     projectile->animation_branch = record->branch;
     projectile->animation_record = record->animation_record;
     projectile->assembly = record->assembly;
     projectile->attack_selector = record->attack_selector;
+}
+
+static int avsp_round1_weapon_angle_index(unsigned char angle,
+                                          unsigned int *angle_index)
+{
+    unsigned int index;
+    for (index = 0u; index < AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT;
+         ++index)
+        if (avsp_round1_weapon_parent_route_angles[index] == angle)
+        {
+            *angle_index = index;
+            return 1;
+        }
+    return 0;
 }
 
 static int avsp_round1_release_player_weapon_projectile(
@@ -1720,25 +1938,45 @@ static int avsp_round1_release_player_weapon_projectile(
     return 1;
 }
 
-static int avsp_round1_begin_weapon_impact(AvspRound1Runtime *runtime,
-                                           short x, short y, short z)
+static int avsp_round1_allocate_weapon_child(
+    AvspRound1Runtime *runtime,
+    const AvspRound1WeaponProjectileAllocation *parent,
+    const AvspRound1WeaponChildSpawnSpec *row)
 {
-    AvspRound1ActorCore *actor;
-    ++runtime->player_weapon_impact_requests;
-    actor = avsp_round1_allocate_pool_actor(runtime, 3u);
-    if (actor == 0)
+    unsigned int index;
+    AvspRound1WeaponProjectileAllocation *child;
+    short x_offset;
+    if (runtime->player_weapon_projectile_free_count == 0u)
     {
-        ++runtime->player_weapon_impact_allocation_failures;
+        ++runtime->player_weapon_allocation_failures;
         return 0;
     }
-    actor->actor_class = avsp_round1_weapon_impact.actor_class;
-    actor->variant = avsp_round1_weapon_impact.variant;
-    actor->state = avsp_round1_weapon_impact.initial_state;
-    actor->substate = 0u;
-    actor->x = x;
-    actor->y = y;
-    actor->z = z;
-    ++runtime->player_weapon_impact_allocations;
+    --runtime->player_weapon_projectile_free_count;
+    index = runtime->player_weapon_projectile_free_stack[
+        runtime->player_weapon_projectile_free_count];
+    if (index >= AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY)
+        return 0;
+    child = &runtime->player_weapon_projectiles[index];
+    memset(child, 0, sizeof(*child));
+    x_offset = parent->facing == 0u ? (short)-row->x : row->x;
+    child->active = 1u;
+    child->actor_class = avsp_round1_player_weapon.child_class;
+    child->variant = row->variant;
+    child->facing = parent->facing;
+    child->source_slot = (unsigned short)(
+        avsp_round1_player_weapon.projectile_source_base +
+        index * avsp_round1_player_weapon.projectile_stride);
+    child->owner = parent->source_slot;
+    child->x = (short)(parent->x + x_offset);
+    child->y = (short)(parent->y + row->y);
+    child->z = (short)(parent->z + row->z);
+    child->x_fp = (long)child->x * 65536L;
+    child->y_fp = (long)child->y * 65536L;
+    child->z_fp = (long)child->z * 65536L;
+    child->attack_table = avsp_round1_player_weapon.child_attack_table;
+    child->state = avsp_round1_weapon_projectile.initial_state;
+    child->damage_class_index = 0u;
+    ++runtime->player_weapon_allocations;
     return 1;
 }
 
@@ -1747,31 +1985,52 @@ static int avsp_round1_step_weapon_projectile(
 {
     AvspRound1WeaponProjectileAllocation *projectile =
         &runtime->player_weapon_projectiles[index];
-    const AvspRound1VecS16 *motion;
+    const AvspRound1VecS16 *low_motion;
+    const AvspRound1VecS16 *high_motion;
+    unsigned int angle_index;
+    unsigned int low_index;
+    unsigned int high_index;
     unsigned short x_distance;
     unsigned short y_distance;
     if (projectile->state == avsp_round1_weapon_projectile.initial_state)
     {
         const AvspRound1VecS16 *offset;
+        if (projectile->actor_class == avsp_round1_weapon_projectile.child_class)
+        {
+            const AvspRound1WeaponChildSequenceSpec *sequence;
+            if (projectile->variant >= AVSP_ROUND1_WEAPON_CHILD_VARIANT_COUNT)
+                return 0;
+            sequence = &avsp_round1_weapon_child_sequences[projectile->variant];
+            projectile->collision_result = 0;
+            projectile->active_collision = 1u;
+            projectile->object_or = avsp_round1_weapon_projectile.object_or;
+            projectile->presentation_index = 0u;
+            projectile->presentation_count = sequence->record_count;
+            projectile->state = avsp_round1_weapon_projectile.active_state;
+            avsp_round1_bind_projectile_animation(projectile);
+            ++runtime->player_weapon_projectile_initializations;
+            return 1;
+        }
         if (projectile->parent_presentation_selector >=
-            AVSP_ROUND1_WEAPON_PROJECTILE_PRESENTATION_COUNT)
+            AVSP_ROUND1_WEAPON_PARENT_SELECTOR_COUNT)
             return 0;
-        offset = &avsp_round1_weapon_projectile_spawn_offsets[
+        offset = &avsp_round1_weapon_parent_selector_offsets[
             projectile->parent_presentation_selector];
         projectile->x = (short)(projectile->x +
             (projectile->facing == 0u ? -offset->x : offset->x));
         projectile->y = (short)(projectile->y + offset->y);
-        projectile->z = (short)(projectile->z + 1);
+        projectile->z = (short)(projectile->z - 1);
         projectile->x_fp = (long)projectile->x * 65536L;
         projectile->y_fp = (long)projectile->y * 65536L;
         projectile->z_fp = (long)projectile->z * 65536L;
         projectile->collision_result = 0;
         projectile->active_collision = 1u;
-        projectile->coordinate_mode =
-            avsp_round1_weapon_projectile.coordinate_mode;
-        projectile->palette = avsp_round1_weapon_projectile.palette;
+        projectile->coordinate_mode = 0u;
+        projectile->palette = 0u;
         projectile->object_or = avsp_round1_weapon_projectile.object_or;
         projectile->presentation_index = 0u;
+        projectile->presentation_count = 5u;
+        projectile->progress = 0u;
         avsp_round1_bind_projectile_animation(projectile);
         projectile->state = avsp_round1_weapon_projectile.active_state;
         ++runtime->player_weapon_projectile_initializations;
@@ -1779,9 +2038,28 @@ static int avsp_round1_step_weapon_projectile(
     }
     if (projectile->state == avsp_round1_weapon_projectile.active_state)
     {
+        if (projectile->actor_class == avsp_round1_weapon_projectile.child_class)
+        {
+            if (projectile->animation_branch < 0)
+                projectile->state = avsp_round1_weapon_projectile.emitter_state;
+            else if (projectile->animation_timer > 0u)
+                --projectile->animation_timer;
+            if (projectile->state == avsp_round1_weapon_projectile.active_state &&
+                projectile->animation_timer == 0u)
+            {
+                if (projectile->presentation_index + 1u >=
+                    projectile->presentation_count)
+                    return 0;
+                ++projectile->presentation_index;
+                avsp_round1_bind_projectile_animation(projectile);
+            }
+            return 1;
+        }
         if (projectile->collision_result < 0)
         {
-            projectile->state = avsp_round1_weapon_projectile.release_state;
+            projectile->state = avsp_round1_weapon_projectile.emitter_state;
+            projectile->child_cadence =
+                avsp_round1_weapon_projectile.child_cadence_initial;
             return 1;
         }
         x_distance = (unsigned short)(projectile->x -
@@ -1798,70 +2076,77 @@ static int avsp_round1_step_weapon_projectile(
                                                                  index);
         if ((unsigned short)projectile->y < (unsigned short)projectile->z)
         {
-            projectile->state = avsp_round1_weapon_projectile.impact_state;
-            avsp_round1_begin_weapon_impact(runtime, projectile->x,
-                projectile->y, projectile->z);
-            projectile->state = avsp_round1_weapon_projectile.release_state;
+            projectile->state = avsp_round1_weapon_projectile.emitter_state;
+            projectile->child_cadence =
+                avsp_round1_weapon_projectile.child_cadence_initial;
             return 1;
         }
-        motion = &avsp_round1_weapon_projectile_motion[projectile->angle & 0x3fu];
-        projectile->x_fp += (long)motion->x * 256L;
-        projectile->y_fp += (long)motion->y * 256L;
+        if (!avsp_round1_weapon_angle_index(projectile->angle, &angle_index))
+            return 0;
+        low_index = projectile->progress & 0x0fu;
+        high_index = projectile->progress >> 4;
+        if (high_index >= AVSP_ROUND1_WEAPON_PARENT_HIGH_MOTION_COUNT)
+            high_index = AVSP_ROUND1_WEAPON_PARENT_HIGH_MOTION_COUNT - 1u;
+        low_motion = &avsp_round1_weapon_parent_motion_low[angle_index][low_index];
+        high_motion = &avsp_round1_weapon_parent_motion_high[angle_index][high_index];
+        projectile->x_fp += (long)(low_motion->x + high_motion->x) * 256L;
+        projectile->y_fp += (long)(low_motion->y + high_motion->y) * 256L;
         projectile->x = avsp_round1_fixed_high_word(projectile->x_fp);
         projectile->y = avsp_round1_fixed_high_word(projectile->y_fp);
         ++runtime->player_weapon_projectile_motion_updates;
         if (projectile->animation_timer > 0u)
             --projectile->animation_timer;
-        if (projectile->animation_timer == 0u &&
-            projectile->presentation_index == 0u)
+        if (projectile->progress < 0xc0u)
+            projectile->progress = (unsigned char)(projectile->progress + 8u);
+        if (projectile->animation_timer == 0u)
         {
-            projectile->presentation_index = 1u;
-            avsp_round1_bind_projectile_animation(projectile);
+            if (projectile->presentation_index + 1u >=
+                projectile->presentation_count)
+            {
+                projectile->state = avsp_round1_weapon_projectile.emitter_state;
+                projectile->child_cadence =
+                    avsp_round1_weapon_projectile.child_cadence_initial;
+            }
+            else
+            {
+                ++projectile->presentation_index;
+                avsp_round1_bind_projectile_animation(projectile);
+            }
         }
         return 1;
     }
-    if (projectile->state == avsp_round1_weapon_projectile.impact_state)
+    if (projectile->state == avsp_round1_weapon_projectile.emitter_state)
     {
-        avsp_round1_begin_weapon_impact(runtime, projectile->x,
-            projectile->y, projectile->z);
-        projectile->state = avsp_round1_weapon_projectile.release_state;
+        const AvspRound1WeaponChildSpawnSpec *rows =
+            projectile->collision_result < 0 ?
+                avsp_round1_weapon_child_spawn_collision :
+                avsp_round1_weapon_child_spawn_normal;
+        if (projectile->actor_class == avsp_round1_weapon_projectile.child_class)
+            projectile->state = avsp_round1_weapon_projectile.release_state;
+        else
+        {
+            if (projectile->child_cadence > 0u)
+                --projectile->child_cadence;
+            if (projectile->child_cadence == 0u)
+            {
+                if (projectile->child_count == 0u)
+                    projectile->state = avsp_round1_weapon_projectile.release_state;
+                else
+                {
+                    unsigned int row_index = projectile->child_count - 1u;
+                    --projectile->child_count;
+                    if (!avsp_round1_allocate_weapon_child(runtime, projectile,
+                            &rows[row_index]))
+                        ++runtime->failure_count;
+                    projectile->child_cadence =
+                        avsp_round1_weapon_projectile.child_cadence_reload;
+                }
+            }
+        }
         return 1;
     }
     if (projectile->state == avsp_round1_weapon_projectile.release_state)
         return avsp_round1_release_player_weapon_projectile(runtime, index);
-    return 0;
-}
-
-static int avsp_round1_damage_value(unsigned char attacker_class_index,
-                                    unsigned char defender_class_index,
-                                    unsigned short route_index,
-                                    unsigned char attack_selector,
-                                    unsigned char *damage)
-{
-    unsigned int index;
-    int offense = -1;
-    int defense = -1;
-    for (index = 0u; index < AVSP_ROUND1_WEAPON_DAMAGE_OFFENSE_COUNT; ++index)
-        if (avsp_round1_weapon_damage_offense[index].class_index ==
-                attacker_class_index &&
-            avsp_round1_weapon_damage_offense[index].route_index == route_index)
-            offense = avsp_round1_weapon_damage_offense[index].value;
-    for (index = 0u; index < AVSP_ROUND1_WEAPON_DAMAGE_DEFENSE_COUNT; ++index)
-        if (avsp_round1_weapon_damage_defense[index].class_index ==
-                defender_class_index &&
-            avsp_round1_weapon_damage_defense[index].route_index == route_index)
-            defense = avsp_round1_weapon_damage_defense[index].value;
-    if (offense < 0 || defense < 0)
-        return 0;
-    for (index = 0u; index < AVSP_ROUND1_WEAPON_DAMAGE_MATRIX_COUNT; ++index)
-        if (avsp_round1_weapon_damage_matrix[index].defense ==
-                (unsigned char)defense &&
-            avsp_round1_weapon_damage_matrix[index].damage_index ==
-                (unsigned char)(offense + attack_selector))
-        {
-            *damage = avsp_round1_weapon_damage_matrix[index].damage;
-            return 1;
-        }
     return 0;
 }
 
@@ -1881,8 +2166,14 @@ static int avsp_round1_projectile_collision_pass(
         projectile->attack_selector >=
             AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT)
         return 1;
-    box = &avsp_round1_weapon_projectile_attack_boxes[
-        projectile->attack_selector];
+    box = projectile->actor_class ==
+            avsp_round1_weapon_projectile.parent_class ?
+        &avsp_round1_weapon_parent_attack_boxes[projectile->attack_selector] :
+        &avsp_round1_weapon_child_attack_boxes[projectile->attack_selector];
+    damage = projectile->actor_class ==
+            avsp_round1_weapon_projectile.parent_class ?
+        avsp_round1_weapon_projectile.parent_damage :
+        avsp_round1_weapon_projectile.child_damage;
     memset(&attack, 0, sizeof(attack));
     attack.box.x_center = box->x_center;
     attack.box.y_center = box->y_center;
@@ -1915,9 +2206,6 @@ static int avsp_round1_projectile_collision_pass(
         if (!avsp_collision_overlap_boxes(&attacker, &attack, &defender,
                                           &hurt, 0))
             continue;
-        if (!avsp_round1_damage_value(projectile->damage_class_index, 16u,
-                                      10u, box->damage_selector, &damage))
-            return 0;
         projectile->collision_result = -1;
         ++runtime->player_weapon_projectile_collision_writes;
         health = (short)(target->health - (short)damage);
@@ -2013,70 +2301,33 @@ static int avsp_round1_step_empty_effect(AvspRound1Runtime *runtime,
     return 0;
 }
 
-static int avsp_round1_step_weapon_impact(AvspRound1Runtime *runtime,
-                                          AvspRound1Pool *pool,
-                                          AvspRound1ActorCore *actor)
+int avsp_round1_is_weapon_impact_actor(const AvspRound1ActorCore *actor)
 {
-    const AvspRound1AnimationStateSpec *record;
-    if (actor->variant != avsp_round1_weapon_impact.variant)
-        return 0;
-    if (actor->state == avsp_round1_weapon_impact.initial_state)
-    {
-        unsigned char command_index =
-            (unsigned char)(runtime->player_weapon_impact_audio_selector >> 1);
-        if (command_index >= AVSP_ROUND1_WEAPON_IMPACT_AUDIO_COMMAND_COUNT)
-            return 0;
-        actor->state = avsp_round1_weapon_impact.active_state;
-        actor->substate = 0u;
-        actor->facing = 0u;
-        actor->coordinate_mode = avsp_round1_weapon_impact.coordinate_mode;
-        actor->palette = avsp_round1_weapon_impact.palette;
-        actor->object_or = avsp_round1_weapon_impact.object_or;
-        actor->dispatch_entry = avsp_round1_weapon_impact.dispatch;
-        actor->animation_index = 0u;
-        avsp_round1_bind_animation_state(actor,
-            &avsp_round1_weapon_impact_variant0_records[0]);
-        runtime->player_weapon_impact_audio_command =
-            avsp_round1_weapon_impact.audio_commands[command_index];
-        runtime->player_weapon_impact_audio_selector = (unsigned char)(
-            (runtime->player_weapon_impact_audio_selector + 2u) & 2u);
-        ++runtime->player_weapon_impact_audio_events;
-        ++runtime->player_weapon_impact_presentation_bindings;
-    }
-    if (actor->state == avsp_round1_weapon_impact.active_state)
-    {
-        if (actor->animation_branch < 0)
-            actor->state = avsp_round1_weapon_impact.release_state;
-        if (actor->animation_timer > 0u)
-            --actor->animation_timer;
-        if (actor->animation_timer == 0u &&
-            actor->animation_index + 1u <
-                AVSP_ROUND1_WEAPON_IMPACT_PRESENTATION_COUNT)
-        {
-            ++actor->animation_index;
-            record = &avsp_round1_weapon_impact_variant0_records[
-                actor->animation_index];
-            avsp_round1_bind_animation_state(actor, record);
-            ++runtime->player_weapon_impact_presentation_bindings;
-        }
-        return 1;
-    }
-    if (actor->state == avsp_round1_weapon_impact.release_state ||
-        actor->state == 6u)
-    {
-        if (!avsp_round1_release_pool_actor(pool, actor))
-            return 0;
-        ++runtime->player_weapon_impact_releases;
-        return 1;
-    }
+    (void)actor;
     return 0;
 }
 
-int avsp_round1_is_weapon_impact_actor(const AvspRound1ActorCore *actor)
+int avsp_round1_is_weapon_parent_projectile(
+    const AvspRound1WeaponProjectileAllocation *projectile)
 {
-    return actor != 0 && actor->active &&
-        actor->type == avsp_round1_weapon_impact.record_type &&
-        actor->actor_class == avsp_round1_weapon_impact.actor_class;
+    return projectile != 0 && projectile->active &&
+        projectile->actor_class == avsp_round1_player_weapon.parent_class;
+}
+
+int avsp_round1_is_weapon_child_projectile(
+    const AvspRound1WeaponProjectileAllocation *projectile)
+{
+    return projectile != 0 && projectile->active &&
+        projectile->actor_class == avsp_round1_player_weapon.child_class;
+}
+
+int avsp_round1_player_native_presentation_active(
+    const AvspRound1Runtime *runtime)
+{
+    return runtime != 0 && (runtime->player_jump_active ||
+        runtime->player_weapon_active ||
+        runtime->player.source_action ==
+            avsp_round1_player_weapon.return_action);
 }
 
 static void avsp_round1_tick_player_resource(AvspRound1Runtime *runtime)
@@ -2107,12 +2358,11 @@ static void avsp_round1_begin_player_weapon(AvspRound1Runtime *runtime)
 {
     runtime->player_weapon_active = 1u;
     runtime->player_weapon_empty =
-        (unsigned char)(runtime->player_resource == 0u);
+        (unsigned char)(runtime->player_resource <
+            avsp_round1_player_weapon.resource_debit);
     runtime->player_weapon_tick = 0u;
-    runtime->player_weapon_cadence =
-        avsp_round1_player_weapon.cadence_initial;
-    runtime->player_weapon_attempts =
-        avsp_round1_player_weapon.attempt_initial;
+    runtime->player_weapon_cadence = 0u;
+    runtime->player_weapon_attempts = 0;
     runtime->player_weapon_empty_timer =
         avsp_round1_player_weapon.empty_timer_initial;
     runtime->player_weapon_cleanup_pending = 0u;
@@ -2125,6 +2375,22 @@ static void avsp_round1_begin_player_weapon(AvspRound1Runtime *runtime)
         runtime->player_resource_depleted = 1u;
         ++runtime->player_weapon_empty_auxiliary_requests;
         avsp_round1_begin_empty_effect(runtime);
+    }
+    else
+    {
+        ++runtime->player_weapon_attempts_total;
+        avsp_round1_allocate_player_weapon_projectile(runtime);
+        if (runtime->player_resource > avsp_round1_player_weapon.resource_debit)
+            runtime->player_resource = (unsigned char)(runtime->player_resource -
+                avsp_round1_player_weapon.resource_debit);
+        else
+        {
+            runtime->player_resource = 0u;
+            runtime->player_resource_depleted = 1u;
+        }
+        runtime->player_resource_recharge =
+            avsp_round1_player_weapon.recharge_after_success;
+        ++runtime->player_weapon_resource_debits;
     }
 }
 
@@ -2145,10 +2411,7 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
     }
     if (weapon_edge && runtime->player_weapon_tick != 0u)
     {
-        if (!runtime->player_weapon_empty && runtime->player_weapon_tick == 48u)
-            runtime->player_weapon_recovery_pending = 1u;
-        else
-            ++runtime->player_weapon_held_suppressions;
+        ++runtime->player_weapon_held_suppressions;
     }
     else if (weapon_pressed && runtime->player_weapon_tick != 0u)
         ++runtime->player_weapon_held_suppressions;
@@ -2187,44 +2450,11 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
         frame = &avsp_round1_player_weapon_frames[
             runtime->player_weapon_tick];
         avsp_round1_bind_player_weapon_frame(runtime, frame);
-        if (runtime->player_weapon_tick == 49u)
+        if (runtime->player_weapon_tick == 19u)
         {
-            if (runtime->player_weapon_attempts >= 0)
-                ++runtime->failure_count;
             runtime->player_weapon_active = 0u;
             runtime->player_weapon_cleanup_pending = 1u;
             ++runtime->player_weapon_completions;
-        }
-        else
-        {
-            if (runtime->player_weapon_cadence > 0u)
-                --runtime->player_weapon_cadence;
-            if (runtime->player_weapon_cadence == 0u)
-            {
-                runtime->player_weapon_cadence =
-                    avsp_round1_player_weapon.cadence_reload;
-                --runtime->player_weapon_attempts;
-                if (runtime->player_weapon_attempts >= 0)
-                {
-                    ++runtime->player_weapon_attempts_total;
-                    if (avsp_round1_allocate_player_weapon_projectile(runtime))
-                    {
-                        if (runtime->player_resource >
-                            avsp_round1_player_weapon.resource_debit)
-                            runtime->player_resource = (unsigned char)(
-                                runtime->player_resource -
-                                avsp_round1_player_weapon.resource_debit);
-                        else
-                        {
-                            runtime->player_resource = 0u;
-                            runtime->player_resource_depleted = 1u;
-                        }
-                        runtime->player_resource_recharge =
-                            avsp_round1_player_weapon.recharge_after_success;
-                        ++runtime->player_weapon_resource_debits;
-                    }
-                }
-            }
         }
     }
     ++runtime->player_weapon_tick;
@@ -2262,8 +2492,10 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
         AvspRound1SchedulerVisit *visit;
         if (!projectile->active)
             continue;
-        if (projectile->actor_class !=
-                avsp_round1_player_weapon.projectile_class ||
+        if ((projectile->actor_class !=
+                avsp_round1_player_weapon.parent_class &&
+             projectile->actor_class !=
+                avsp_round1_player_weapon.child_class) ||
             projectile->source_slot != (unsigned short)(
                 avsp_round1_player_weapon.projectile_source_base +
                 slot_index * avsp_round1_player_weapon.projectile_stride) ||
@@ -2398,22 +2630,9 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
                 }
                 continue;
             }
-            if (actor->type == avsp_round1_weapon_impact.record_type &&
-                actor->actor_class == avsp_round1_weapon_impact.actor_class)
-            {
-                ++actor->scheduler_updates;
-                ++runtime->scheduler_dispatches;
-                if (!avsp_round1_step_weapon_impact(runtime,
-                        &runtime->pools[pool_index], actor))
-                {
-                    runtime->scheduler_failure_code = 13u;
-                    ++runtime->failure_count;
-                    return 0;
-                }
-                continue;
-            }
             if (actor->type == 12u && actor->actor_class == 0x1f)
             {
+                int first_encounter_result = 1;
                 if (actor->handler_updates == 0u ||
                     actor->substate == 0x1000u || actor->substate == 0x1200u ||
                     actor->substate == 0x1400u || actor->substate == 0x1402u ||
@@ -2425,6 +2644,30 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
                         runtime->scheduler_failure_code = 9u;
                         ++runtime->failure_count;
                         return 0;
+                    }
+                }
+                if (runtime->route_state == 4 &&
+                    (unsigned short)actor->source_slot ==
+                        AVSP_ROUND1_FIRST_ENCOUNTER_SLOT &&
+                    (runtime->first_encounter.initialized ||
+                     actor->substate == 0u))
+                {
+                    first_encounter_result =
+                        avsp_round1_step_first_encounter_actor(runtime,
+                            &runtime->pools[pool_index], actor);
+                    if (first_encounter_result == 0)
+                    {
+                        runtime->scheduler_failure_code = 15u;
+                        runtime->scheduler_failure_source_slot =
+                            AVSP_ROUND1_FIRST_ENCOUNTER_SLOT;
+                        ++runtime->failure_count;
+                        return 0;
+                    }
+                    if (first_encounter_result == 2)
+                    {
+                        ++runtime->actor_handler_dispatches;
+                        ++runtime->scheduler_dispatches;
+                        continue;
                     }
                 }
                 presentation = avsp_round1_find_class1f_presentation(
@@ -2464,6 +2707,31 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
     runtime->scheduler_order_hash = hash;
     ++runtime->scheduler_frames;
     return 1;
+}
+
+void avsp_round1_first_encounter_view(
+    const AvspRound1Runtime *runtime,
+    AvspRound1FirstEncounterView *view)
+{
+    const AvspRound1FirstEncounterRuntime *encounter;
+    if (runtime == 0 || view == 0)
+        return;
+    memset(view, 0, sizeof(*view));
+    encounter = &runtime->first_encounter;
+    view->initialized = encounter->initialized;
+    view->encounter_state = encounter->encounter_state;
+    view->route_unlocked = encounter->route_unlocked;
+    view->continued_after_unlock = encounter->continued_after_unlock;
+    view->player_contact = encounter->player_contact;
+    view->alien_contact = encounter->alien_contact;
+    view->player_damage = encounter->player_damage;
+    view->alien_damage = encounter->alien_damage;
+    view->semantic_hit = encounter->semantic_hit;
+    view->semantic_ko = encounter->semantic_ko;
+    view->health_before = encounter->health_before;
+    view->health_after = encounter->health_after;
+    avsp_alien_ai_view(&encounter->alien, &view->alien);
+    view->reaction = encounter->reaction.actor;
 }
 
 int avsp_round1_canaries_ok(const AvspRound1Runtime *runtime)
@@ -2714,6 +2982,26 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
         !avsp_round1_canaries_ok(runtime) || runtime->failure_count != 0u ||
         runtime->fallback_count != 0u)
         return 0;
+    runtime->first_encounter.player_damage = 0u;
+    if (runtime->first_encounter.pending_player_damage != 0u)
+    {
+        if (received_damage != 0)
+        {
+            ++runtime->failure_count;
+            return 0;
+        }
+        received_damage =
+            (short)runtime->first_encounter.pending_player_damage;
+        runtime->first_encounter.player_damage =
+            runtime->first_encounter.pending_player_damage;
+        runtime->first_encounter.pending_player_damage = 0u;
+        ++runtime->first_encounter.player_damage_events;
+    }
+    if (runtime->first_encounter.route_unlocked &&
+        !runtime->first_encounter.continued_after_unlock &&
+        runtime->player_action.x >
+            runtime->first_encounter.unlock_player_x + 8)
+        runtime->first_encounter.continued_after_unlock = 1u;
     jump_pressed = (unsigned char)(
         (input_mask & AVSP_ROUND1_INPUT_BUTTON3) != 0u);
     jump_edge = (unsigned char)(jump_pressed &&
@@ -2803,6 +3091,9 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
         runtime->player_action.x = prior_x;
         runtime->player_action.lane = prior_lane;
         runtime->player_action.facing = prior_facing;
+        if ((runtime->player_weapon_active || weapon_return_owned) &&
+            received_damage <= 0)
+            runtime->player_action.state = prior_state;
     }
     if (jump_owned && !avsp_round1_step_player_jump(runtime, input_mask))
     {
@@ -2877,8 +3168,8 @@ static int avsp_round1_player_weapon_runtime_valid(
             runtime->player_weapon_projectile_releases +
             runtime->player_weapon_projectile_free_count !=
             AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY ||
-        runtime->player_weapon_resource_debits !=
-            runtime->player_weapon_allocations ||
+        runtime->player_weapon_resource_debits >
+            runtime->player_weapon_entries ||
         runtime->player_weapon_empty_auxiliary_requests !=
             runtime->player_weapon_empty_auxiliary_allocations +
             runtime->player_weapon_empty_auxiliary_allocation_failures ||
@@ -2893,14 +3184,22 @@ static int avsp_round1_player_weapon_runtime_valid(
         if (!projectile->active)
             continue;
         if (projectile->active != 1u ||
-            projectile->actor_class !=
-                avsp_round1_player_weapon.projectile_class ||
+            (projectile->actor_class !=
+                avsp_round1_player_weapon.parent_class &&
+             projectile->actor_class !=
+                avsp_round1_player_weapon.child_class) ||
             projectile->source_slot != (unsigned short)(
                 avsp_round1_player_weapon.projectile_source_base +
                 index * avsp_round1_player_weapon.projectile_stride) ||
-            projectile->owner != avsp_round1_player_weapon.player_owner ||
+            projectile->owner !=
+                (projectile->actor_class ==
+                    avsp_round1_player_weapon.parent_class ?
+                    avsp_round1_player_weapon.player_owner : 0x8680u) ||
             projectile->attack_table !=
-                avsp_round1_player_weapon.projectile_attack_table)
+                (projectile->actor_class ==
+                    avsp_round1_player_weapon.parent_class ?
+                    avsp_round1_player_weapon.parent_attack_table :
+                    avsp_round1_player_weapon.child_attack_table))
             return 0;
     }
     if (runtime->player_weapon_active)
@@ -3064,7 +3363,9 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
             runtime->pools[2].free_count == 13u &&
             runtime->pools[3].free_count == 2u &&
             runtime->class09_initializations == 2u;
-    if (runtime->pools[0].free_count != 10u ||
+    if (runtime->pools[0].free_count !=
+            (unsigned char)(10u +
+                (runtime->first_encounter.lifecycle_releases != 0u ? 1u : 0u)) ||
         runtime->entry.spawn_count != AVSP_ROUND1_FIRST_SPAWN_COUNT)
         return 0;
     for (spawn_index = 0u; spawn_index < AVSP_ROUND1_FIRST_SPAWN_COUNT;
@@ -3078,6 +3379,16 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
             runtime->pools[0].stride;
         const AvspRound1ActorCore *actor =
             &runtime->pools[0].records[record_index];
+        if (slot == AVSP_ROUND1_FIRST_ENCOUNTER_SLOT &&
+            runtime->first_encounter.lifecycle_releases == 1u)
+        {
+            if (actor->active != 0u ||
+                runtime->first_encounter.encounter_state !=
+                    AVSP_ROUND1_FIRST_ENCOUNTER_CLEARED ||
+                runtime->first_encounter.route_unlocked != 1u)
+                return 0;
+            continue;
+        }
         if (actor->active != 1u || actor->actor_class != (signed char)spec->actor_class ||
             actor->type != spec->record_type || actor->source_slot != spec->source_slot)
             return 0;

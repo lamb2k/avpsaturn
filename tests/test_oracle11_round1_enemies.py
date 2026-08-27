@@ -32,6 +32,8 @@ mutant=copy.deepcopy(report);mutant['scope_boundary']['boss_encounter_orchestrat
 mutant=copy.deepcopy(report);mutant['negative_controls']['generic_enemy_behavior_tree_forbidden']=False;reject(mutant,'generic behavior tree admitted')
 mutant=copy.deepcopy(report);mutant['protected_boundaries']['spec02_active']=True;reject(mutant,'SPEC-02 activated')
 class1f=next(item for item in report['archetypes'] if item['class']=='0x1f')
+mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['presentation_and_collision'];target['records']=[row for row in target['records'] if row['animation_record']!='0x0012dd50'];target['record_count']-=1;reject(mutant,'accepted HIT presentation record dropped')
+mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['presentation_and_collision'];next(row for row in target['records'] if row['animation_record']=='0x0012e214')['hurt_selector']=1;reject(mutant,'accepted KO hurt selector changed')
 for label,mutate in [
     ('initial-delay',lambda x:x['actors'][-1].__setitem__('entry_delay_u8',15)),
     ('presentation-mode',lambda x:x['actors'][0].__setitem__('coordinate_mode_u8',0)),
@@ -47,4 +49,4 @@ for label,mutate in [
     ('mutation-control',lambda x:x['mutation_controls'].pop()),
 ]:
     mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['initial_transition_contract'];mutate(target);reject(mutant,label)
-print('ORACLE-11 Round 1 enemy tests: PASS (25 mutations rejected)')
+print('ORACLE-11 Round 1 enemy tests: PASS (27 mutations rejected)')

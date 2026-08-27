@@ -5,7 +5,7 @@ roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 production_head: 236eef0c42aaa5c39b105420f8130fcde308e34e
-candidate_head: fe49adcba008b91f2f4eafbcc6473fa137c7d778
+candidate_head: a7bae6e6700605c9f30be18f055243d59a4d0834
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-playable-loop-pivot
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
@@ -527,7 +527,9 @@ source_closure:
   navigation_camera_checkpoint: PASS / source-derived 46x9 terrain projection / exact obstacle minimum penetration / kind-0-2-4-6 terrain and retry / exact camera target-speed-phase guards / clean debug Target 0x060be7d0 / release Target 0x060bbe60 / paired Emulator exact f40d51362371d59866ea4283704880b56272e446d91b1db7b8acbdaa7e02fbf2 / P1-only direct scanout
   regression_audit_checkpoint: PASS / frozen ac126c0 versus parent 0a3fe67 and ancestors 6f78667-137f9eb-52714b / first bad 62f3fa5 retained-camera pre-handoff ownership / right-edge empty PNT page at source frame 2097 / corrected by preserving source s2x-s3x until native route state 4 / Fast-Oracle-Target-paired Emulator PASS / paired ISO 69a6a39679840ba1a4e819cc829681abd301fc330ac6e71957d9e532f07ebecc / 467 identical cadence-1 samples / exact interactive ISO 79ad385d3449c093d873c4e535a700b4b4f7836fd96a684623d2ff7f258644a5 / real WGC startup-action-navigation PASS / obstacle 7 terrain 6 retry 5 lock-unlock 1-1 / correction fe49adcba008b91f2f4eafbcc6473fa137c7d778
   button3_checkpoint: PASS / accepted Oracle-SPEC table 0x0243d2 signed 16.16 vectors and exact selector-branch-interruption-landing-presentation-collision rules / 113 host mutations / 78 Target suppressions / debug-release Target PASS / paired Emulator 467 samples exact / ISO 48e76ef310f0832344290656912565dbfa292ddc0d1ea134fde5dcc23568a080 / entry-motion-landing-completion 1-35-1-1 / 38 source-render frames / zero decode-fallback-failure / real WGC takeoff-apex-descent-landing-neutral PASS / corrected height-canceling projection bridge
-  exact_next_experiment: Keep REIMPLEMENT-13 active; replace the retained first-encounter class-0x1f gameplay boundary with the existing SPEC-02 source-bound current-state enemy AI, collision/damage, HIT/KO and dynamic lifecycle contracts. Preserve accepted presentation/tracking and every completed player, navigation, camera, HUD and audio lock. Do not advance beyond the first segment.
+  button1_character_identity_correction: PASS / user-observed Major Schaefer sprite traced to the prior Oracle input changing player +0xd2 from 0 to 1 / two corrected cold captures are byte-identical with character 0, Predator 0x15e540-series records, one 40-resource debit, one record-type-4 class-0x00 parent and five class-0x04 children / character and normalized object-stream gates reject the Major class-0x05 and type-24-class-0x3a path / paired Emulator exact / real cadence-1 frames 177-196 preserve Predator identity / same-frame VDP1 tile-cache replacement repaired with a measured 21-composite-218-tile residency gate
+  candidate_pointer_note: a7bae6e6700605c9f30be18f055243d59a4d0834 is the latest committed REIMPLEMENT-13 checkpoint while this fully accepted Button1/renderer correction is staged for its coherent commit; fe49adcba008b91f2f4eafbcc6473fa137c7d778 is only the earlier background-bridge correction.
+  exact_next_experiment: Keep REIMPLEMENT-13 active; replace the retained first-encounter class-0x1f gameplay boundary with the accepted SPEC-02 current-state AI, targeting, movement, facing, transition, attack, collision/damage, HIT/KO, effect, removal, dynamic-spawn and encounter-participation contracts. Retained code may remain presentation-only; do not leave the first segment.
   frontend_activation_allowed: false
   physical_saturn: UNRUN
 current_checkpoint: reimplement-source-closed-round1

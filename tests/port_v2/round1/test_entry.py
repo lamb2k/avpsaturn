@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "a98a56e1c372fbd1bb15ea8334c66e96a66063ae00ffba2c7aaa97044cc3b659"
+EXPECTED = "3f6e179fc41ad9ac0fdb6318c929ac74297b35a1f4627b58325e408d424af6fc"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -21,22 +21,41 @@ def wsl(path):
     return subprocess.run(["wsl.exe", "wslpath", "-a", str(path).replace("\\", "/")],
                           check=True, capture_output=True, text=True).stdout.strip()
 
-def run(body, header_body, passes):
+def run(body, header_body, passes, label="baseline"):
     with tempfile.TemporaryDirectory(prefix="round1-entry-") as name:
-        temp = Path(name); (temp / "round1.c").write_text(body)
-        (temp / "round1.h").write_text(header_body.replace(
-            '#include "../player_action/player_action.h"', '#include "player_action.h"'))
+        temp = Path(name)
+        temp_body = body.replace(
+            '#include "../../integration/combat/combat.h"', '#include "combat.h"')
+        temp_body = temp_body.replace(
+            '#include "../../../../avsp_actor.h"', '#include "avsp_actor.h"')
+        temp_body = temp_body.replace(
+            '#include "../../../../avsp_collision.h"', '#include "avsp_collision.h"')
+        (temp / "round1.c").write_text(temp_body)
+        temp_header = header_body.replace(
+            '#include "../player_action/player_action.h"', '#include "player_action.h"')
+        temp_header = temp_header.replace(
+            '#include "../street_alien_ai/street_alien_ai.h"', '#include "street_alien_ai.h"')
+        temp_header = temp_header.replace(
+            '#include "../../combat/hit_ko/hit_ko.h"', '#include "hit_ko.h"')
+        (temp / "round1.h").write_text(temp_header)
         (temp / "spec02_round1_entry_data.h").write_text(generated)
         command = (f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra -Werror "
-                   f"-I '{wsl(temp)}' -I src/port_v2/gameplay/player_action "
+                   f"-I '{wsl(temp)}' -I . -I src/port_v2/gameplay/player_action "
+                   f"-I src/port_v2/gameplay/street_alien_ai -I src/port_v2/combat/hit_ko "
+                   f"-I src/port_v2/integration/combat "
                    f"'{wsl(temp / 'round1.c')}' "
                    f"avsp_actor.c avsp_collision.c "
                    f"src/port_v2/gameplay/player_action/player_action.c "
+                   f"src/port_v2/gameplay/street_alien_ai/street_alien_ai.c "
+                   f"src/port_v2/combat/hit_ko/hit_ko.c "
+                   f"src/port_v2/player/player.c src/port_v2/enemy/enemy.c "
+                   f"src/port_v2/integration/player_enemy/player_enemy.c "
+                   f"src/port_v2/integration/combat/combat.c "
                    f"tests/port_v2/round1/round1_entry_test.c -o '{wsl(temp / 'test')}' && "
                    f"'{wsl(temp / 'test')}'")
         result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
         assert (result.returncode == 0) == passes, (
-            f"returncode={result.returncode}\n" +
+            f"label={label}\nreturncode={result.returncode}\n" +
             result.stdout.decode(errors="replace") +
             result.stderr.decode(errors="replace"))
 
@@ -63,10 +82,12 @@ for before, after in (
     ("runtime->player_melee_selector_mask |= 1UL << (selector - 1u);", "runtime->player_melee_selector_mask = 0UL;"),
     ("++runtime->player_melee_completions;", "runtime->player_melee_completions += 2u;"),
     ("runtime->player_melee_presentation_mask |= 1UL << index;", "runtime->player_melee_presentation_mask = 0UL;"),
-    ("runtime->player_weapon_cadence =\n                    avsp_round1_player_weapon.cadence_reload;", "runtime->player_weapon_cadence = 3u;"),
-    ("runtime->player_weapon_attempts =\n        avsp_round1_player_weapon.attempt_initial;", "runtime->player_weapon_attempts = 11;"),
-    ("runtime->player_weapon_recovery_pending = 1u;", "runtime->player_weapon_recovery_pending = 0u;"),
-    ("runtime->player_resource_recharge =\n                            avsp_round1_player_weapon.recharge_after_success;", "runtime->player_resource_recharge = 11u;"),
+    ("projectile->angle = runtime->player.facing ? 17u : 47u;",
+     "projectile->angle = 35u;"),
+    ("projectile->actor_class = avsp_round1_player_weapon.parent_class;",
+     "projectile->actor_class = avsp_round1_player_weapon.child_class;"),
+    ("runtime->player_action.state = prior_state;", "runtime->player_action.state = AVSP_PW_STATE_ATTACK;"),
+    ("runtime->player_resource_recharge =\n            avsp_round1_player_weapon.recharge_after_success;", "runtime->player_resource_recharge = 11u;"),
     ("++runtime->player_weapon_resource_debits;", "runtime->player_weapon_resource_debits += 2u;"),
     ("++runtime->player_weapon_allocation_failures;", "runtime->player_weapon_allocation_failures += 2u;"),
     ("avsp_round1_tick_player_resource(runtime);", "/* resource tick suppressed */"),
@@ -78,9 +99,10 @@ for before, after in (
     ("projectile->collision_result = -1;", "projectile->collision_result = 0;"),
     ("target->substate = 0x0200u;", "target->substate = 2u;"),
     ("actor->substate = 0u;\n            ++runtime->class1f_transition_completions;", "actor->state = 0u;\n            actor->substate = 0u;\n            ++runtime->class1f_transition_completions;"),
-    ("(runtime->player_weapon_impact_audio_selector + 2u) & 2u", "(runtime->player_weapon_impact_audio_selector + 0u) & 2u"),
-    ("!runtime->entry.started &&\n             pool->free_stack[pool->capacity - 1u] != last_slots[index]", "runtime->entry.started &&\n             pool->free_stack[pool->capacity - 1u] != last_slots[index]"),
-    ("projectile->y_fp += (long)motion->y * 256L;", "projectile->y_fp += (long)motion->y * 0L;"),
+    ("projectile->y_fp += (long)(low_motion->y + high_motion->y) * 256L;",
+     "projectile->y_fp += (long)(low_motion->y + high_motion->y) * 0L;"),
+    ("projectile->child_cadence =\n                        avsp_round1_weapon_projectile.child_cadence_reload;",
+     "projectile->child_cadence = 5u;"),
     ("projectile->assembly = record->assembly;", "projectile->assembly = 0UL;"),
     ("(unsigned long)old_seed * 3UL &", "(unsigned long)old_seed * 2UL &"),
     ("!(runtime->route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE &&\n           runtime->entry.spawned)", "!(runtime->route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE &&\n           0u)"),
@@ -128,9 +150,33 @@ for before, after in (
      "++runtime->player_jump_entries;\n    avsp_round1_source_rng(runtime);\n    return avsp_round1_bind_player_jump_sequence(runtime, 3u);"),
     ("if (runtime->player_jump_active && received_damage > 0)\n        avsp_round1_interrupt_player_jump(runtime);",
      "if (runtime->player_jump_active && received_damage < 0)\n        avsp_round1_interrupt_player_jump(runtime);"),
+    ("avsp_alien_ai_init(&encounter->alien, 0x7301u);",
+     "avsp_alien_ai_init(&encounter->alien, 0x0001u);"),
+    ("runtime->player_action.x >= AVSP_ROUND1_FIRST_ENCOUNTER_ENTRY_X",
+     "runtime->player_action.x > AVSP_ROUND1_FIRST_ENCOUNTER_ENTRY_X"),
+    ("alien.sel_hurt = AVSP_PORT_V2_COMBAT_ENEMY_HURT_SELECTOR;",
+     "alien.sel_hurt = 0u;"),
+    ("return avsp_collision_overlap(&player, &alien, hit_value) &&\n        !avsp_collision_guarded(&player, &alien);",
+     "return 0;"),
+    ("!avsp_port_v2_combat_source_event((int)selector - 1, &source)",
+     "!avsp_port_v2_combat_source_event((int)selector, &source)"),
+    ("runtime->player_action.attack_active && !encounter->attack_latched &&",
+     "runtime->player_action.attack_active && encounter->attack_latched &&"),
+    ("encounter->pending_player_damage =\n            (unsigned char)encounter->alien.contact_damage;",
+     "encounter->pending_player_damage = 0u;"),
+    ("AVSP_PORT_V2_HIT_KO_HIT, &avsp_port_v2_hit_source_before);",
+     "AVSP_PORT_V2_HIT_KO_KO, &avsp_port_v2_hit_source_before);"),
+    ("!avsp_port_v2_hit_ko_step(&encounter->reaction)",
+     "0"),
+    ("encounter->alien.state == AVSP_ALIEN_STATE_INACTIVE &&\n        !encounter->reaction.active)",
+     "encounter->alien.state == AVSP_ALIEN_STATE_KO &&\n        !encounter->reaction.active)"),
+    ("encounter->route_unlocked = 1u;",
+     "encounter->route_unlocked = 0u;"),
+    ("AVSP_ROUND1_FIRST_ENCOUNTER_SLOT &&\n                    (runtime->first_encounter.initialized ||",
+     "(AVSP_ROUND1_FIRST_ENCOUNTER_SLOT + 1u) &&\n                    (runtime->first_encounter.initialized ||"),
 ):
     assert before in source
-    run(source.replace(before, after), header, False)
+    run(source.replace(before, after), header, False, before)
 for before, after in (
     ("{ 0xffa3c0u, 12u, 656, 312, 312,", "{ 0xffa3c0u, 12u, 657, 312, 312,"),
     ("{ AVSP_ROUND1_ENTRY_DWELL, 0x00u, 0u, 60u,", "{ AVSP_ROUND1_ENTRY_DWELL, 0x00u, 0u, 59u,"),
@@ -153,20 +199,22 @@ for before, after in (
     ("    1536u,\n    5120u,\n    30u,", "    1536u,\n    5120u,\n    29u,"),
     ("{ 0x1600f8UL, 0x162a04UL, 8u, 1u },", "{ 0x1600f8UL, 0x162a82UL, 8u, 1u },"),
     ("{ 0x1601c0UL, 0x1614a4UL, 8u, 3u },", "{ 0x1601c0UL, 0x1614a4UL, 8u, 2u },"),
-    ("    12,\n    1u,\n    4u,", "    11,\n    1u,\n    4u,"),
-    ("    3u,\n    12u,\n    2u,", "    2u,\n    12u,\n    2u,"),
-    ("{ 3074u, 2u, 0x00165400UL, 0x00166bf8UL, 1u, 0u },", "{ 3074u, 2u, 0x00165410UL, 0x00166bf8UL, 1u, 0u },"),
-    ("{ 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },", "{ 6658u, 2u, 0x001645d4UL, 0x00166c22UL, 1u, 0u },"),
-    ("    40u, 42u, 44u, 46u, 48u, 50u, 49u, 47u, 45u, 43u, 41u, 40u", "    39u, 42u, 44u, 46u, 48u, 50u, 49u, 47u, 45u, 43u, 41u, 40u"),
+    ("    40u,\n    12u,\n    2u,", "    39u,\n    12u,\n    2u,"),
+    ("{ 3074u, 2u, 0x0015e540UL, 0x00161772UL, 1u, 0u },",
+     "{ 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },"),
+    ("{ 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },",
+     "{ 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },"),
+    ("    17u, 35u, 47u", "    17u, 34u, 47u"),
+    ("    { 5, 86 },", "    { 6, 86 },"),
     ("    { 0, 78 },", "    { 0, 77 },"),
     ("{ 4095u, -32767, 0x0007a12cUL, 0x0007a3a0UL, 0u, 0u },", "{ 4095u, -32768, 0x0007a12cUL, 0x0007a3a0UL, 0u, 0u },"),
-    ("{ 16, 0, 18u, 5u, 0, 8u, 0, 0u, 6u },", "{ 16, 0, 18u, 5u, 0, 8u, 0, 0u, 5u },"),
-    ("{ 2u, 10u, 4u }", "{ 2u, 10u, 3u }"),
-    ("{ 33u, 6u, 24u },", "{ 33u, 6u, 23u },"),
-    ("{ 0x007eu, 0x0148u }", "{ 0x007eu, 0x0147u }"),
-    ("    0u, 0u, 0x8000u\n};\n\nstatic const AvspRound1CollisionBoxSpec avsp_round1_weapon_projectile_hurt_box", "    0u, 0u, 0x0000u\n};\n\nstatic const AvspRound1CollisionBoxSpec avsp_round1_weapon_projectile_hurt_box"),
-    ("    0u, 0u, 0x8000u,\n    { 0x007eu, 0x0148u }", "    0u, 1u, 0x8000u,\n    { 0x007eu, 0x0148u }"),
-    ("{ 2u, -32768, 0x0008701cUL, 0x000871aaUL, 0u, 0u },", "{ 2u, -32767, 0x0008701cUL, 0x000871aaUL, 0u, 0u },"),
+    ("{ 0, -8, 4u, 12u, 0, 8u, 0, 8u, 25u },",
+     "{ 0, -8, 4u, 12u, 0, 8u, 0, 8u, 24u },"),
+    ("{ 0, 10, 16u, 10u, 0, 8u, 1, 8u, 14u },",
+     "{ 0, 10, 16u, 10u, 0, 8u, 1, 8u, 13u },"),
+    ("    0, 4,\n    5u,\n    1u,\n    6u, 0x8000u,",
+     "    0, 5,\n    5u,\n    1u,\n    6u, 0x8000u,"),
+    ("    127u,\n    31u", "    126u,\n    31u"),
     ("{ 0x00ffa300UL, 0x0200u, 0x1400u, 704, 296, 296, 1u, 1u, 19u, 0x8000, 3u,", "{ 0x00ffa300UL, 0x0200u, 0x1400u, 704, 296, 296, 1u, 1u, 19u, 0x8000, 4u,"),
     ("{ 60u, 3u, AVSP_ROUND1_ANIMATION_TERMINAL_STATE_GUARD, { { 8u, 1,", "{ 60u, 3u, AVSP_ROUND1_ANIMATION_TERMINAL_STATE_GUARD, { { 7u, 1,"),
     ("    0x004Du, 0x0118u, 0x0000u", "    0x004Du, 0x0119u, 0x0000u"),
@@ -187,22 +235,44 @@ for before, after in (
      "{ 41u, 2u, { { 4u, 0, 0x15fc3cUL, 0x162ee2UL, 9u, 21u }"),
     ("{ 60u, 1u, { { 4095u, -32768, 0x15fc60UL, 0x162ee2UL, 9u, 35u }",
      "{ 60u, 1u, { { 4095u, -32768, 0x15fc60UL, 0x162ee2UL, 9u, 34u }"),
+    ("{ 0x0012dd50UL, 0x00130248UL, 1u, 0u },",
+     "{ 0x0012dd50UL, 0x0013020cUL, 1u, 0u },"),
+    ("{ 0x0012e214UL, 0x0013020cUL, 14u, 0u },",
+     "{ 0x0012e214UL, 0x0013020cUL, 1u, 0u },"),
 ):
     assert before in generated
     changed = generated.replace(before, after, 1)
     with tempfile.TemporaryDirectory(prefix="round1-generated-mutation-") as name:
         temp = Path(name)
-        (temp / "round1.c").write_text(source)
-        (temp / "round1.h").write_text(header.replace(
-            '#include "../player_action/player_action.h"', '#include "player_action.h"'))
+        temp_body = source.replace(
+            '#include "../../integration/combat/combat.h"', '#include "combat.h"')
+        temp_body = temp_body.replace(
+            '#include "../../../../avsp_actor.h"', '#include "avsp_actor.h"')
+        temp_body = temp_body.replace(
+            '#include "../../../../avsp_collision.h"', '#include "avsp_collision.h"')
+        (temp / "round1.c").write_text(temp_body)
+        temp_header = header.replace(
+            '#include "../player_action/player_action.h"', '#include "player_action.h"')
+        temp_header = temp_header.replace(
+            '#include "../street_alien_ai/street_alien_ai.h"', '#include "street_alien_ai.h"')
+        temp_header = temp_header.replace(
+            '#include "../../combat/hit_ko/hit_ko.h"', '#include "hit_ko.h"')
+        (temp / "round1.h").write_text(temp_header)
         (temp / "spec02_round1_entry_data.h").write_text(changed)
         command = (f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra -Werror "
-                   f"-I '{wsl(temp)}' -I src/port_v2/gameplay/player_action "
+                   f"-I '{wsl(temp)}' -I . -I src/port_v2/gameplay/player_action "
+                   f"-I src/port_v2/gameplay/street_alien_ai -I src/port_v2/combat/hit_ko "
+                   f"-I src/port_v2/integration/combat "
                    f"'{wsl(temp / 'round1.c')}' "
                    f"avsp_actor.c avsp_collision.c "
                    f"src/port_v2/gameplay/player_action/player_action.c "
+                   f"src/port_v2/gameplay/street_alien_ai/street_alien_ai.c "
+                   f"src/port_v2/combat/hit_ko/hit_ko.c "
+                   f"src/port_v2/player/player.c src/port_v2/enemy/enemy.c "
+                   f"src/port_v2/integration/player_enemy/player_enemy.c "
+                   f"src/port_v2/integration/combat/combat.c "
                    f"tests/port_v2/round1/round1_entry_test.c -o '{wsl(temp / 'test')}' && "
                    f"'{wsl(temp / 'test')}'")
         result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3 differential: PASS (113 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/first-encounter differential: PASS (123 real mutations)")

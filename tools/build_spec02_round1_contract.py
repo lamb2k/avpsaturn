@@ -391,6 +391,29 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             button3["presentation_actor_fields"]["object_or_u16"] == "0x8000" and
             button3["rng_calls"] == [],
             "Button3 implementation fixture incomplete or drifted")
+    class1f = next(item for item in
+                   fixtures["authority_data"]["enemies"]["archetypes"]
+                   if item["class"] == "0x1f")
+    class1f_records = {row["animation_record"]: row for row in
+                       class1f["presentation_and_collision"]["records"]}
+    expected_hit_ko = {
+        "0x0012d2f8": ("0x0012f994", 1, 0),
+        "0x0012dd50": ("0x00130248", 1, 0),
+        "0x0012e214": ("0x0013020c", 14, 0),
+        "0x0012e224": ("0x0013020c", 14, 0),
+        "0x0012e234": ("0x0013020c", 14, 0),
+        "0x0012e244": ("0x0013020c", 14, 0),
+        "0x0012e254": ("0x00130294", 0, 0),
+        "0x0012e268": ("0x00130346", 0, 0),
+    }
+    require(all(address in class1f_records and
+                (class1f_records[address]["assembly"],
+                 class1f_records[address]["hurt_selector"],
+                 class1f_records[address]["attack_selector"]) == fields
+                for address, fields in expected_hit_ko.items()) and
+            class1f["presentation_and_collision"]["accepted_hit_ko_records"]
+                ["fixed_frame_presentation_forbidden"] is True,
+            "class-0x1f HIT/KO presentation fixture incomplete or drifted")
     ids = set()
     families = set()
     required = {"id", "authority_family", "classification", "type", "signed",

@@ -271,23 +271,24 @@ numeric signed 16.16 vectors, selector mapping, and branch order. Commit
 1..4, exact strike presentations, the 30-tick follow-up window, held-edge
 rejection, and interruption preservation. Thirty-two host mutations, 26 Target
 suppressions, paired Emulator, and direct selector-2/4 inspection pass. Commit
-`f6cab22` then implements the source-owned Button1 action/resource/allocation
-boundary. Commit `09c8a28` implements the exact type-24/class-0x10 depleted
-effect allocation, ten-record presentation, guarded movement, and release.
-The current checkpoint completes class-0x05 states 0/2/4/6 from the amended
-SPEC fixture: angle/selector tables, all 64 signed motion pairs, arithmetic,
-bounds, presentation, impact allocation, and release. It also implements the
-type-24/class-0x3a state 0/2/4 five-record impact presentation/release handler
-and the current-state collision/damage writer for attack table `0x03136a`.
-Sixty-four host mutations, release Target, Fast, Oracle, and two byte-identical
-paired-emulator runs pass. The paired target records 49 projectile-render frames,
-40 impact-render frames, three collision writes, three damage writes, and zero
-fallback, decode failure, or gameplay PCM. Direct paused scanout inspection at
-native controller updates 212 and about 253 preserves coherent actors, P1-only
-HUD, camera, both VDP2 planes, palette, and priority. Source audio command
-identities `0x007e`/`0x0148` remain telemetry without guessed semantic names or
-Saturn PCM bindings. Contract-header dependencies and a focused identity check
-now prevent stale target binding after deterministic SPEC regeneration.
+`f6cab22` and `09c8a28` implemented an internally consistent Button1 and empty
+effect body, but later direct inspection proved its Oracle input had selected
+character 1 (Major Schaefer), not character 0 (Predator Warrior). That
+class-0x05/type-24-class-0x3a evidence is now a rejected character-identity
+control, not Predator authority. The corrected checkpoint uses two
+byte-identical character-0 captures, Predator records `0x15e540..0x15e580`,
+one 40-resource debit, one record-type-4 class-0 parent, and five class-4
+children at six-frame cadence. Per-frame character and normalized CPS-object
+identity are mandatory. The native body and deterministic SPEC fixture match
+that contract; Fast, Oracle, 123 host mutations, 131 Target suppressions, and
+two byte-identical paired-emulator runs pass at ISO
+`9db09d765122a56e9bdefac73e762cefcfb379d9be92933fd1d4281d6bbb9ffc`.
+Exact real Windows frames 177..196 preserve Predator identity through action
+and neutral. The renderer now pins every referenced tile for the frame, clips
+wholly offscreen objects before lookup, and gates the measured persistent
+first-segment union at 21 composites plus 218 tile slots. Peak union is 170;
+pin exhaustion, overflow, and all 218 texture comparisons are zero; sprite
+high-water is 242/255.
 Enemy movement, damage, dynamic spawn, and the preserved first-segment blockers
 remain pending; frame 2328 is not gameplay authority.
 

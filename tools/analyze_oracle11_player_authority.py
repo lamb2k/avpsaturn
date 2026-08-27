@@ -566,8 +566,20 @@ def validate(report: dict[str, object]) -> None:
         weapon = report["weapon_projectile_resource"]
         require(weapon["status"] == "SOURCE_CLOSED" and
                 weapon["mutation_controls"]["count"] == 13 and
-                weapon["authority_separation"]["equipment_resource"]
-                ["action_latch"].endswith("not ownership"),
+                weapon["character_identity"]["required_character_u8"] == 0 and
+                weapon["character_identity"]["rejected_character_u8"] == 1 and
+                weapon["character_identity"]
+                ["normalized_object_stream_asserted"] is True and
+                "40-unit debit" in
+                weapon["authority_separation"]["resource"] and
+                weapon["authority_separation"]["projectile_lifecycle"]
+                ["parent"] == "record type 4 class 0" and
+                weapon["authority_separation"]["projectile_lifecycle"]
+                ["children"] ==
+                "five record type 4 class 4 actors at six-frame cadence" and
+                "Major Schaefer" in
+                weapon["authority_separation"]["projectile_lifecycle"]
+                ["forbidden_rejected_path"],
                 "weapon/projectile/resource authority drift")
     if "directional_airborne_interruption" in report:
         air = report["directional_airborne_interruption"]
