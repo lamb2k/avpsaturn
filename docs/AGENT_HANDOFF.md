@@ -52,7 +52,15 @@ mutations pass. STRIPS.BIN owns retained source-derived background/scroll
 presentation only; its captured foreground schedule remains excluded from
 playable gameplay authority.
 
-Next, close only the preserved class-0x1F initial `0x0200:1000/1200/1400`
-transitions from accepted Oracle evidence. Amend the existing SPEC fixture; run
-the smallest bounded Oracle follow-up only for a genuinely absent exact field.
-Do not leave the first segment.
+The initial class-0x1F transition body is now closed: ten source slots and ten
+ordered RNG calls traverse exact `0x1000/1200/1400/1402/1404/1406/1408`
+timer, animation, signed-motion, facing, landing, effect, guard, audio-command,
+and return-to-`0x0200:0000` rules. Paired runs record ten completions, two
+class-0x4e allocations/releases, two refused allocations, one class-0x44 guard
+clear, two command events, 158 class-0x09 RNG calls, and zero fallback/failure.
+
+Next, close the Coffee Shop obstacle, six-field terrain interpreter, and camera
+target/position arithmetic blocker from accepted Oracle evidence. Amend only
+the existing SPEC fixture and run the smallest bounded Oracle follow-up only for
+a genuinely absent exact field. Then return to Button3 vectors/branches. Do not
+leave the first segment.

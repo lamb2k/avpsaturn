@@ -1,7 +1,7 @@
 {
   "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
-  "checkpoint": "native-round1-player-class05-projectile-impact-collision-renderer-integrity",
-  "status": "PASS_ENTRY_PLAYER_SCHEDULER_PRESENTATION_STATE_CONTEXT_GLOBAL_BOUNDS_NEUTRAL_STOP_MELEE_BUTTON1_PROJECTILE_IMPACT_COLLISION_RENDERER_INTEGRITY",
+  "checkpoint": "native-round1-class1f-initial-transitions-projectile-renderer-integrity",
+  "status": "PASS_ENTRY_PLAYER_SCHEDULER_PRESENTATION_STATE_CONTEXT_CLASS1F_INITIAL_TRANSITIONS_GLOBAL_BOUNDS_NEUTRAL_STOP_MELEE_BUTTON1_PROJECTILE_IMPACT_COLLISION_RENDERER_INTEGRITY",
   "implementation_base_commit": "52714b420d3ca1ca0437d66de61735fa1a2ba36d",
   "diagnostic_correction_commit": "4fbc919235f61d962daf342efbfb4cd8f743ab60",
   "implementation_source": {
@@ -157,7 +157,8 @@
       "scheduler_dispatches": 4928,
       "last_trace_count": 10,
       "order_hash": "0x836e161c",
-      "actor_behavior_dispatched": false,
+      "initial_transition_behavior_dispatched": true,
+      "post_initial_actor_behavior_dispatched": false,
       "dynamic_spawn_guard_implemented": false
     },
     "class1f_presentation_binding": {
@@ -181,6 +182,31 @@
       "state_context_bindings": 4680,
       "invalid_context_rejected": true,
       "state_transition_predicates_implemented": false
+    },
+    "class1f_initial_transition_execution": {
+      "states": ["0x0200:1000", "0x0200:1200", "0x0200:1400", "0x0200:1402", "0x0200:1404", "0x0200:1406", "0x0200:1408"],
+      "source_dispatch_entry": "0x060532",
+      "initializations": 10,
+      "initial_rng_calls": 10,
+      "transition_completions": 10,
+      "phase1000_1200_predecrement_timer_u8": 216,
+      "airborne_entry_delays_u8": [9, 3, 16],
+      "signed_motion_16_16": {"x_velocity": 196608, "y_velocity": 593920, "y_acceleration": -20480},
+      "effect_requests": 4,
+      "effect_allocations": 2,
+      "effect_allocation_failures": 2,
+      "effect_class": "type-24/class-0x4e variant-4",
+      "effect_initializations": 2,
+      "effect_releases": 2,
+      "guard_class": "type-24/class-0x44",
+      "guard_clears": 1,
+      "audio_events": 2,
+      "last_audio_command": "0x004d",
+      "semantic_audio_names": "UNKNOWN",
+      "class09_rng_calls_at_evidence_frame": 158,
+      "fixed_frame_authority": false,
+      "native_implemented": true,
+      "differential_pass": true
     },
     "first_segment_global_bounds": {
       "route_state_guard": 4,
@@ -234,6 +260,7 @@
     "paired_native_scheduler_ledgers": "PASS: final readback has 468 scheduler frames, 4928 ordered dispatches including class-0x05/class-0x10/class-0x3a lifecycles, 10 active type-12/class-0x1f actors, and order hash 0x836e161c",
     "paired_native_presentation_ledgers": "PASS: final readback has 4680 class-0x1f handler dispatches and 4680 exact animation-to-assembly/hurt/attack bindings",
     "paired_native_state_context_ledgers": "PASS: final readback has 4680 exact class-0x1f current-state/substate bindings to source dispatch entry 0x060532",
+    "paired_native_class1f_initial_transition_ledgers": "PASS: two byte-identical runs bind ten source-slot initializations, ten ordered RNG calls, ten completed 0x1000/0x1200/0x1400 transitions, two class-0x4e effect allocations and releases, two refused allocations, one class-0x44 guard clear, two command identities ending at 0x004d, and 158 dependency-owned class-0x09 RNG calls with zero fallback or scheduler failure",
     "paired_native_global_bounds_ledgers": "PASS: final readback binds source route-4 bounds x=720/z=256 and 468 applications; the accepted encounter resolver remains composed ahead of the global rectangle",
     "target_readback_binding": "PASS",
     "round1_title_objects_loaded": 2,
@@ -342,15 +369,14 @@
       "correction": "The route/audio adapter now preserves the active CDDA owner and starts only from an inactive frame-zero boundary; a Target suppression control locks the guard.",
       "status": "CORRECTED"
     },
-    "blocker": "The accepted SPEC-02 fixture enumerates 59 class-0x1f state/substate contexts and source dispatch entry 0x060532 but supplies no transition predicate, timer guard, writes, or RNG order for the initial 0x0200:1000/1200/1400 bodies.",
-    "unblock_condition": "A corrective SPEC-02 fixture derived from accepted Oracle evidence must bind each required initial transition guard, reads, writes, timer semantics, movement arithmetic, and RNG order without fixed-frame authority.",
+    "class1f_initial_transition_checkpoint": "SOURCE-CLOSED/SPEC-executable/native-implemented/differential-pass for the initial 0x0200:1000/1200/1400 bodies, their 0x1402/1404/1406/1408 airborne substates, source animation records/selectors, signed 16.16 movement, facing, timers, collision selectors, ten ordered RNG calls, class-0x09/class-0x44/class-0x4e dependencies, exact command identities, and return to 0x0200:0000.",
     "navigation_blocker": "The accepted SPEC-02 fixture provides the exact global-bound formula but gives the Coffee Shop obstacle only a source block identity/minimum-penetration label without source box geometry or per-axis resolution arithmetic; terrain records provide bytes and writer identities without the record interpreter; camera runs provide observed endpoints and writer identity without the target-update arithmetic. Implementing any of those bodies now would require raw-disassembly use or a plausible guess.",
     "navigation_unblock_condition": "A corrective SPEC-02 fixture derived from accepted Oracle evidence must bind Coffee Shop player/obstacle box geometry and minimum-penetration branch arithmetic, the six terrain-record field semantics and interpreter transitions, and camera target/position update arithmetic and route guards.",
     "jump_blocker": "The accepted SPEC-02 normal-jump fixture identifies vector table 0x0243d2 and route witnesses but omits the numeric vector entries, initial signed 16.16 velocity/acceleration values, input/facing selector mapping, and branch order required for a native translation.",
     "jump_unblock_condition": "A corrective accepted SPEC-02 fixture must provide the exact numeric source-vector entries, selector mapping, branch order, and signed fixed-point initialization without requiring raw disassembly or a fitted witness.",
     "projectile_lifecycle_checkpoint": "SOURCE-CLOSED/SPEC-executable/native-implemented/differential-pass for class-0x05 states 0/2/4/6, type-24/class-0x3a states 0/2/4, current-state collision writer attack table 0x03136a, source-table damage, presentation, and pool release. Audio command identities 0x007e/0x0148 remain semantic-name unknown telemetry with no inferred Saturn PCM mapping.",
     "projectile_lifecycle_build_guard": "PASS: main.o and round1.o explicitly depend on the SPEC-bound headers, and the focused differential asserts the complete accepted contract hash is present in round1.h.",
-    "exact_next_body": "Keep REIMPLEMENT-13 active. Close the preserved class-0x1f initial 0x0200:1000/1200/1400 transition-execution blocker from accepted Oracle evidence; amend only the existing SPEC-02 fixture and use the smallest bounded Oracle follow-up only if exact implementation fields are genuinely absent. Do not leave the first segment."
+    "exact_next_body": "Keep REIMPLEMENT-13 active. Close the Coffee Shop obstacle, six-field terrain interpreter, and camera target/position arithmetic blocker by amending only the existing SPEC-02 fixture from accepted Oracle evidence, with the smallest bounded Oracle follow-up only for genuinely absent source fields. Then return to the preserved Button3 vector/branch blocker. Do not leave the first segment."
   },
   "preserved": {
     "user09": "CHANGES_REQUESTED",

@@ -163,7 +163,16 @@ mutations pass. STRIPS.BIN is now accurately classified as a hybrid
 source-derived stage package: background/scroll presentation is retained, while
 the captured foreground schedule remains compile-time excluded from playable
 gameplay authority.
-Preserve the class-0x1F, Coffee Shop, and Button3 blockers. The startup-authority
+The initial class-0x1F blocker is closed in the same source-bound body: all ten
+source slots initialize in scheduler order with ten RNG calls; `0x1000` and
+`0x1200` use the exact predecrement timer/animation guards; `0x1400` proceeds
+through `0x1402/1404/1406/1408` with signed 16.16 motion, facing, landing,
+collision-selector, class-0x4e effect-allocation, class-0x44 guard, class-0x09
+RNG, exact command-identity, and return-to-`0x0200:0000` rules. Paired Target
+readbacks record ten completions, two effect allocations/releases, two refused
+allocations, one guard clear, two audio commands, 158 class-0x09 RNG calls, and
+zero scheduler failure or fallback. Preserve the Coffee Shop and Button3
+blockers. The startup-authority
 correction binds source frames
 2040/2072/2075/2238/2520 to title, P1 HUD/player initialization, player
 visibility, control, and one Track-2 start. Retained gameplay is not initialized
@@ -172,10 +181,11 @@ contact cannot trigger gameplay PCM, and native state owns P1 HUD. Paired
 startup traces have zero hidden contact/damage, orphan PCM, duplicate CDDA,
 fallback, or failure; direct scanout review matches the source P1 top and
 weapon-meter assets. Fast, Oracle, release Target, and paired Emulator pass.
-Close the preserved class-0x1F initial `0x0200:1000/1200/1400` transition body
-next, using accepted Oracle evidence to amend only the existing SPEC fixture and
-the smallest bounded Oracle follow-up only if an exact implementation field is
-genuinely absent. Do not leave the first segment.
+Close the Coffee Shop obstacle, six-field terrain interpreter, and camera
+target/position arithmetic blocker next, using accepted Oracle evidence to
+amend only the existing SPEC fixture and the smallest bounded Oracle follow-up
+only if an exact implementation field is genuinely absent. Then return to the
+preserved Button3 vector/branch blocker. Do not leave the first segment.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.
