@@ -65,7 +65,73 @@ mutant = copy.deepcopy(report)
 mutant["protected_boundaries"]["yaba_run"] = True
 reject(mutant, "Yaba workflow violation")
 
+mutant = copy.deepcopy(report)
+mutant["directional_actions"]["implementation_contract"]["vector_table"][2][
+    "x_velocity_s32_16_16"]["raw_s32"] = -0x000e0000
+reject(mutant, "directional vector magnitude guessed")
+
+mutant = copy.deepcopy(report)
+mutant["directional_actions"]["implementation_contract"]["vector_table"][4][
+    "x_acceleration_s32_16_16"]["raw_s32"] = 0x00002000
+reject(mutant, "directional vector sign inverted")
+
+mutant = copy.deepcopy(report)
+mutant["directional_actions"]["implementation_contract"]["input_facing_mapping"][3][
+    "entry_index"] = 2
+reject(mutant, "facing-relative table mapping collapsed")
+
+mutant = copy.deepcopy(report)
+mutant["directional_actions"]["implementation_contract"]["branch_order"][0:2] = [
+    "horizontal bits", "down bit"]
+reject(mutant, "Button3 branch order changed")
+
+mutant = copy.deepcopy(report)
+mutant["directional_actions"]["implementation_contract"]["initialization"][
+    "non_down"]["opposite_facing_horizontal"]["collision_level_u8"] = 2
+reject(mutant, "air collision selector guessed")
+
+mutant = copy.deepcopy(report)
+mutant["directional_actions"]["implementation_contract"]["initialization"][
+    "down"]["presentation_horizontal_u8"] = 60
+reject(mutant, "Down+horizontal presentation collapsed")
+
+mutant = copy.deepcopy(report)
+mutant["directional_actions"]["implementation_contract"]["motion_and_landing"][
+    "landing_0x023630"]["presentation_selector_u8"] = 9
+reject(mutant, "landing presentation selector changed")
+
+mutant = copy.deepcopy(report)
+mutant["directional_actions"]["implementation_contract"]["motion_and_landing"][
+    "phase_0x040a"]["negative_velocity_transition"]["phase_timer_s16"] = 9
+reject(mutant, "Down+Button3 recovery timer changed")
+
+mutant = copy.deepcopy(report)
+mutant["directional_actions"]["implementation_contract"][
+    "presentation_selector_sequences"]["60"][0][
+    "attack_selector_u8"] = 0
+reject(mutant, "Down attack selector removed")
+
+mutant = copy.deepcopy(report)
+mutant["directional_actions"]["implementation_contract"][
+    "presentation_selector_sequences"]["6"][0]["record"] = "0x15f344"
+reject(mutant, "facing-1 same-direction presentation collapsed")
+
+mutant = copy.deepcopy(report)
+mutant["directional_actions"]["implementation_contract"][
+    "presentation_selector_sequences"]["41"][1]["attack_selector_u8"] = 22
+reject(mutant, "Down+horizontal presentation attack selector collapsed")
+
+mutant = copy.deepcopy(report)
+mutant["directional_actions"]["implementation_contract"][
+    "presentation_actor_fields"]["object_or_u16"] = "0x0000"
+reject(mutant, "Button3 presentation actor priority removed")
+
+mutant = copy.deepcopy(report)
+mutant["directional_actions"]["implementation_contract"]["rng_calls"] = [
+    "plausible presentation selection"]
+reject(mutant, "Button3 RNG invented")
+
 rebuilt = oracle11.build_report()
 assert oracle11.canonical(rebuilt) == ARTIFACT.read_bytes(), \
     "derived air authority report drift"
-print("ORACLE-11 player air authority tests: PASS (9 mutations rejected)")
+print("ORACLE-11 player air authority tests: PASS (22 mutations rejected)")

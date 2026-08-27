@@ -40,7 +40,7 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_entry_gate8236"] == 0
     assert report["state"]["round1_entry_gate81af"] == 1
     assert report["state"]["round1_control_enabled"] == 1
-    assert report["state"]["round1_player_x"] == 1025
+    assert report["state"]["round1_player_x"] == 1024
     assert report["state"]["round1_player_z"] == 320
     assert report["state"]["round1_player_facing"] == 1
     assert report["state"]["round1_player_source_action"] == 514
@@ -52,18 +52,18 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_actor_handler_dispatches"] == 6380
     assert report["state"]["round1_presentation_bindings"] == 6380
     assert report["state"]["round1_state_context_bindings"] == 6380
-    assert report["state"]["round1_navigation_bound_x"] == 801
+    assert report["state"]["round1_navigation_bound_x"] == 800
     assert report["state"]["round1_navigation_bound_z"] == 256
     assert report["state"]["round1_navigation_applications"] == 468
     assert report["state"]["round1_navigation_clamps"] == 0
     assert report["state"]["round1_navigation_obstacle_responses"] == 0
     assert report["state"]["round1_navigation_terrain_responses"] == 0
     assert report["state"]["round1_navigation_terrain_retries"] == 0
-    assert report["state"]["round1_camera_x_position"] == 801
-    assert report["state"]["round1_camera_x_target"] == 801
+    assert report["state"]["round1_camera_x_position"] == 800
+    assert report["state"]["round1_camera_x_target"] == 800
     assert report["state"]["round1_camera_x_lower"] == 640
     assert report["state"]["round1_camera_x_upper"] == 832
-    assert report["state"]["round1_camera_scroll2_x"] == 737
+    assert report["state"]["round1_camera_scroll2_x"] == 736
     assert report["state"]["round1_camera_phase"] == 0
     assert report["state"]["round1_camera_countdown"] == 1200
     assert report["state"]["round1_camera_locks"] == 0
@@ -93,6 +93,15 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_player_resource"] == 32
     assert report["state"]["round1_player_resource_recharge"] == 6
     assert report["state"]["round1_player_weapon_projectile_free"] == 24
+    assert report["state"]["round1_player_jump_entries"] == 1
+    assert report["state"]["round1_player_jump_completions"] == 1
+    assert report["state"]["round1_player_jump_landings"] == 1
+    assert report["state"]["round1_player_jump_motion_updates"] == 35
+    assert report["state"]["round1_player_jump_active"] == 0
+    assert report["state"]["round1_player_jump_collision_selector"] == 3
+    assert report["state"]["round1_player_jump_presentation_selector"] == 10
+    assert report["state"]["round1_player_jump_height"] == 0
+    assert report["state"]["round1_native_player_render_frames"] > 0
     assert report["state"]["round1_native_initial_actor_render_commands"] > 0
     assert report["state"]["round1_class1f_initializations"] == 10
     assert report["state"]["round1_class1f_initial_rng_calls"] == 10

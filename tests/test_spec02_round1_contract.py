@@ -57,6 +57,21 @@ assert navigation["camera"]["implementation_contract"]["coffee_shop_guard"][
     "fixed_frame_authority"] is False
 assert navigation["camera"]["implementation_contract"]["x_target_arithmetic"][
     "speed_table_u16"][-4:] == [11, 11, 11, 11]
+button3 = fixtures["authority_data"]["player"][
+    "directional_airborne_interruption"]["directional_actions"][
+        "implementation_contract"]
+assert button3["spec_executable"] is True
+assert [entry["x_velocity_s32_16_16"]["raw_s32"]
+        for entry in button3["vector_table"]] == [
+            0, 0, -0x000f0000, -0x00090000, 0x00090000, 0x00088000]
+assert [entry["entry_index"] for entry in button3["input_facing_mapping"][:10]] == [
+    0, 1, 2, 4, 4, 2, 3, 5, 5, 3]
+assert button3["initialization"]["down"]["collision_selector_u8"] == 7
+assert button3["motion_and_landing"]["phase_0x040a"][
+    "negative_velocity_transition"]["phase_timer_s16"] == 10
+assert button3["presentation_records"][-2]["attack_selector_u8"] == 35
+assert button3["presentation_actor_fields"]["object_or_u16"] == "0x8000"
+assert button3["rng_calls"] == []
 rebuilt_contract, rebuilt_fixtures = spec02.build_artifacts()
 assert spec02.canonical(rebuilt_contract) == spec02.OUT.read_bytes()
 assert spec02.canonical(rebuilt_fixtures) == spec02.FIXTURES.read_bytes()
@@ -91,6 +106,12 @@ f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dep
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["terrain_resolver"]["records"][4]["decoded_six_fields"]["z_parameter_s8"] = -8; mutations.append((contract, f, "terrain record sign mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["obstacle_response"]["implementation_contract"]["obstacle_box"]["x_half_u8"] = 16; mutations.append((contract, f, "obstacle box mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["camera"]["implementation_contract"]["coffee_shop_guard"]["phase2_unlock_guard"] = "frame >= 4992"; mutations.append((contract, f, "camera unlock guard mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["directional_actions"]["implementation_contract"]["vector_table"][2]["x_velocity_s32_16_16"]["raw_s32"] = -0x000e0000; mutations.append((contract, f, "Button3 vector mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["directional_actions"]["implementation_contract"]["input_facing_mapping"][3]["entry_index"] = 2; mutations.append((contract, f, "Button3 facing map mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["directional_actions"]["implementation_contract"]["initialization"]["non_down"]["opposite_facing_horizontal"]["collision_level_u8"] = 2; mutations.append((contract, f, "Button3 collision selector mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["directional_actions"]["implementation_contract"]["motion_and_landing"]["phase_0x040a"]["negative_velocity_transition"]["phase_timer_s16"] = 9; mutations.append((contract, f, "Button3 timer mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["directional_actions"]["implementation_contract"]["rng_calls"] = ["guess"]; mutations.append((contract, f, "Button3 RNG mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["directional_actions"]["implementation_contract"]["presentation_actor_fields"]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "Button3 presentation actor mutation"))
 m = copy.deepcopy(contract); m["protected_boundaries"]["physical_saturn"] = "PASS"; mutations.append((m, fixtures, "hardware overclaim"))
 m = copy.deepcopy(contract); m["next_card"] = "SALVAGE-08-FRONTEND"; mutations.append((m, fixtures, "frontend bypass"))
 for args in mutations:

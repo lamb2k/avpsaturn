@@ -24,20 +24,23 @@ Coffee Shop navigation/camera remains source-closed and passing: obstacle,
 six-field terrain/retry, camera guards, world-to-plane order, 93 mutations, 67
 Target suppressions, paired Emulator, and P1-only scanout are locked.
 
-Regression correction `fe49adcba008b91f2f4eafbcc6473fa137c7d778` fixes the
-right-edge empty PNT page seen in `ac126c0`, parent `0a3fe67`, and baseline
-`52714b`; first bad is `62f3fa5`. Pre-handoff source `s2x/s3x` now remain
-authoritative until route state 4 transfers ownership to the native camera.
-Fast, Oracle, all Target profiles, two identical 467-sample Emulator runs, and
-real Windows Graphics Capture pass. Two exact navigation routes repeat
-obstacle/terrain/retry/lock/unlock `7/6/5/1/1`, camera 1008, scroll2 944, and
-phase 4. Button3 was not staged into the correction.
+Regression correction `fe49adc` fixes the first-bad `62f3fa5` right-edge empty
+PNT page by retaining source `s2x/s3x` until route-state-4 camera handoff. All
+lanes and real Windows Graphics Capture pass; exact navigation repeats
+obstacle/terrain/retry/lock/unlock `7/6/5/1/1`, camera 1008 and scroll2 944.
+
+Button3 is now source-closed through differential-pass: exact table `0x0243d2`
+vectors, mapping, branches, interruptions, landing, presentation and collision.
+All lanes, 113 host mutations, 78 Target suppressions, and two identical
+467-sample runs pass at ISO `48e76ef310f0832344290656912565dbfa292ddc0d1ea134fde5dcc23568a080`.
+Real capture verifies takeoff through neutral after correcting height cancellation
+in the projection bridge without changing gameplay state or assemblies.
 
 ## Exact next experiment
 
-Keep `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` active. Close the preserved Button3
-jump blocker by binding table `0x0243d2` numeric signed 16.16 vectors, input/
-facing selector mapping, branch order, landing/interruption guards, presentation,
-collision selectors, and mutation controls from accepted Oracle evidence. Amend
-the existing SPEC fixture; run only the smallest bounded Oracle follow-up if an
-exact required field is genuinely absent. Do not leave the first segment.
+Keep `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` active. Replace the retained
+first-encounter class-0x1f gameplay boundary with the existing SPEC-02
+source-bound current-state enemy AI, collision/damage, HIT/KO and dynamic
+lifecycle contracts. Preserve the accepted presentation/tracking and all
+completed player, navigation, camera, HUD and audio locks. Do not leave the
+first segment.

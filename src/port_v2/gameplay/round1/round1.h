@@ -4,7 +4,7 @@
 #include "../player_action/player_action.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "bdef78c4006354510998a6d5428960a525180d33d9f9122bb54a3e40d25202d6"
+    "a98a56e1c372fbd1bb15ea8334c66e96a66063ae00ffba2c7aaa97044cc3b659"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -21,6 +21,10 @@
 #define AVSP_ROUND1_PLAYER_ENTRY_STATE 2048u
 #define AVSP_ROUND1_PLAYER_CONTROL_STATE 512u
 #define AVSP_ROUND1_PLAYER_MELEE_COUNT 4u
+#define AVSP_ROUND1_PLAYER_JUMP_VECTOR_COUNT 6u
+#define AVSP_ROUND1_PLAYER_JUMP_DOWN_VECTOR_COUNT 2u
+#define AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_COUNT 9u
+#define AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_MAX_RECORDS 8u
 #define AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT 50u
 #define AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT 18u
 #define AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY 24u
@@ -58,6 +62,7 @@
 #define AVSP_ROUND1_TERRAIN_PACKED_BYTES 104u
 #define AVSP_ROUND1_CAMERA_SPEED_COUNT 20u
 #define AVSP_ROUND1_INPUT_BUTTON1 0x0010u
+#define AVSP_ROUND1_INPUT_BUTTON3 0x0040u
 
 #define AVSP_ROUND1_ENTRY_SET_POSITION 1u
 #define AVSP_ROUND1_ENTRY_SET_SUBHANDLER 2u
@@ -355,6 +360,29 @@ typedef struct
 
 typedef struct
 {
+    long x_velocity;
+    long x_acceleration;
+    long y_velocity;
+    long y_acceleration;
+} AvspRound1PlayerJumpVectorSpec;
+
+typedef struct
+{
+    unsigned char selector;
+    unsigned char record_count;
+    AvspRound1AnimationStateSpec records[
+        AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_MAX_RECORDS];
+} AvspRound1PlayerJumpSequenceSpec;
+
+typedef struct
+{
+    unsigned char coordinate_mode;
+    unsigned char palette;
+    unsigned short object_or;
+} AvspRound1PlayerPresentationActorSpec;
+
+typedef struct
+{
     unsigned short action;
     unsigned short substate;
     unsigned long animation_record;
@@ -568,6 +596,30 @@ typedef struct
     unsigned long player_melee_selector_mask;
     unsigned long player_melee_presentation_mask;
     unsigned long player_melee_interruptions;
+    unsigned char player_jump_active;
+    unsigned char player_jump_cleanup_pending;
+    unsigned char player_jump_previous_pressed;
+    unsigned char player_jump_direction_class;
+    unsigned char player_jump_collision_selector;
+    unsigned char player_jump_presentation_selector;
+    unsigned char player_jump_animation_index;
+    unsigned char player_jump_airborne_latch;
+    unsigned short player_jump_phase;
+    unsigned short player_jump_phase_timer;
+    unsigned short player_jump_animation_timer;
+    short player_jump_animation_branch;
+    long player_jump_x_fp;
+    long player_jump_y_fp;
+    long player_jump_x_velocity;
+    long player_jump_y_velocity;
+    long player_jump_x_acceleration;
+    long player_jump_y_acceleration;
+    unsigned long player_jump_entries;
+    unsigned long player_jump_completions;
+    unsigned long player_jump_landings;
+    unsigned long player_jump_interruptions;
+    unsigned long player_jump_motion_updates;
+    unsigned long player_jump_presentation_bindings;
     unsigned char player_weapon_active;
     unsigned char player_weapon_empty;
     unsigned char player_weapon_tick;

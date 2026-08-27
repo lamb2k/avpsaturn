@@ -119,7 +119,7 @@ def main() -> int:
 
     tile_manifest = json.loads(TILES_MANIFEST.read_text())
     spec_route = tile_manifest.get("routes", {}).get(
-        "spec02_round1_button1_presentations", {})
+        "spec02_round1_native_presentations", {})
     spec_banks = sorted(int(value, 16) for value in
                         spec_route.get("palette_banks", []))
     shipped_set = set(shipped)

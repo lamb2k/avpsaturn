@@ -114,6 +114,932 @@
     },
     "entry": "0x0233e6",
     "facing": "latched from +0x0f; direction-specific fixed-point vectors are selected before airborne updates",
+    "implementation_contract": {
+      "actor_fields": {
+        "airborne_latch_u8": "0x005c",
+        "animation_event_u8": "0x006e",
+        "collision_selector_u8": "0x0092",
+        "direction_class_u8": "0x000c",
+        "facing_u8": "0x000f",
+        "phase_timer_s16": "0x002a",
+        "phase_u16": "0x0006",
+        "subphase_u8": "0x0007",
+        "terrain_mode_u8": "0x0074",
+        "timer_s16": "0x0024",
+        "world_y_s32_16_16": "0x0014",
+        "world_z_s32_16_16": "0x0018",
+        "x_acceleration_s32_16_16": "0x0038",
+        "x_position_s32_16_16": "0x0010",
+        "x_velocity_s32_16_16": "0x0030",
+        "z_acceleration_s32_16_16": "0x003c",
+        "z_velocity_s32_16_16": "0x0034"
+      },
+      "branch_order": [
+        "down bit",
+        "horizontal bits",
+        "up bit",
+        "horizontal direction versus facing",
+        "facing sign transform"
+      ],
+      "down_vector_table": {
+        "vertical_only": {
+          "source_address": "0x024432",
+          "x_acceleration_s32_16_16": {
+            "hex": "0xffff8000",
+            "pixels_per_tick": -0.5,
+            "raw_s32": -32768
+          },
+          "x_velocity_s32_16_16": {
+            "hex": "0x00060000",
+            "pixels_per_tick": 6.0,
+            "raw_s32": 393216
+          }
+        },
+        "with_horizontal": {
+          "source_address": "0x024442",
+          "x_acceleration_s32_16_16": {
+            "hex": "0xffff6000",
+            "pixels_per_tick": -0.625,
+            "raw_s32": -40960
+          },
+          "x_velocity_s32_16_16": {
+            "hex": "0x000c0000",
+            "pixels_per_tick": 12.0,
+            "raw_s32": 786432
+          }
+        }
+      },
+      "initialization": {
+        "down": {
+          "airborne_latch_u8": 0,
+          "collision_selector_u8": 7,
+          "next_phase_u16": "0x040a",
+          "presentation_horizontal_u8": 41,
+          "presentation_vertical_u8": 60
+        },
+        "non_down": {
+          "airborne_latch_u8": 1,
+          "default_collision_selector_u8": 3,
+          "next_phase_u16": "0x0402",
+          "opposite_facing_horizontal": {
+            "collision_level_u8": 8,
+            "collision_up_u8": 4,
+            "presentation_level_u8": 15,
+            "presentation_up_u8": 6
+          },
+          "presentation_selector_neutral_u8": 4,
+          "same_facing_horizontal": {
+            "collision_level_u8": 2,
+            "collision_up_u8": 1,
+            "presentation": "facing + 5"
+          }
+        }
+      },
+      "input_facing_mapping": [
+        {
+          "entry_index": 0,
+          "facing": "either",
+          "input": "neutral",
+          "negate_x_pair": false
+        },
+        {
+          "entry_index": 1,
+          "facing": "either",
+          "input": "up",
+          "negate_x_pair": false
+        },
+        {
+          "entry_index": 2,
+          "facing": 0,
+          "input": "left",
+          "negate_x_pair": false
+        },
+        {
+          "entry_index": 4,
+          "facing": 1,
+          "input": "left",
+          "negate_x_pair": true
+        },
+        {
+          "entry_index": 4,
+          "facing": 0,
+          "input": "right",
+          "negate_x_pair": false
+        },
+        {
+          "entry_index": 2,
+          "facing": 1,
+          "input": "right",
+          "negate_x_pair": true
+        },
+        {
+          "entry_index": 3,
+          "facing": 0,
+          "input": "up_left",
+          "negate_x_pair": false
+        },
+        {
+          "entry_index": 5,
+          "facing": 1,
+          "input": "up_left",
+          "negate_x_pair": true
+        },
+        {
+          "entry_index": 5,
+          "facing": 0,
+          "input": "up_right",
+          "negate_x_pair": false
+        },
+        {
+          "entry_index": 3,
+          "facing": 1,
+          "input": "up_right",
+          "negate_x_pair": true
+        },
+        {
+          "down_entry": "vertical_only",
+          "facing": "retained",
+          "input": "down"
+        },
+        {
+          "down_entry": "with_horizontal",
+          "facing_write": 0,
+          "input": "down_left"
+        },
+        {
+          "down_entry": "with_horizontal",
+          "facing_write": 1,
+          "input": "down_right"
+        }
+      ],
+      "motion_and_landing": {
+        "cleanup": "0x01a3fa clears action then 0x0198de returns to idle/locomotion",
+        "landing_0x023630": {
+          "airborne_latch_u8": 0,
+          "next_phase_u16": "0x0404",
+          "presentation_selector_u8": 10,
+          "terrain_mode_zero_write": "world_y high word = world_z high word"
+        },
+        "phase_0x0402": {
+          "landing_guard": "carry clear after signed world_y versus world_z comparison",
+          "motion_routine": "0x01a8e6",
+          "post_motion_interruption_order": [
+            "Button2 edge 0x01a6c4",
+            "special edge path",
+            "air reversal 0x01a932",
+            "Button1 edge/resource 0x01a6f4"
+          ]
+        },
+        "phase_0x0404": {
+          "timer_negative": "0x01a3e2 common reset",
+          "timer_nonnegative": "0x01656e animation update"
+        },
+        "phase_0x040a": {
+          "negative_velocity_transition": {
+            "next_phase_u16": "0x040c",
+            "phase_timer_s16": 10,
+            "presentation_selector_u8": 42
+          },
+          "velocity_step": "x_velocity += x_acceleration",
+          "x_step": "signed x_velocity; negate before add when facing == 0"
+        },
+        "phase_0x040c": {
+          "timer_step": "predecrement phase_timer_s16",
+          "zero_transition": "0x01a3e2 common reset"
+        }
+      },
+      "mutation_controls": [
+        "reject vector magnitude or sign mutation",
+        "reject input/facing table-index mutation",
+        "reject x-pair sign transform mutation",
+        "reject collision selector mutation",
+        "reject presentation selector or record mutation",
+        "reject landing comparison polarity or terrain-mode guard mutation",
+        "reject phase or timer transition mutation",
+        "reject interruption branch reordering",
+        "reject added RNG consumption"
+      ],
+      "observed_record_sequences": {
+        "down": [
+          "0x15f2cc",
+          "0x15f2dc",
+          "0x15fc60",
+          "0x15fce8",
+          "0x15f1f4"
+        ],
+        "left_facing_0": [
+          "0x15f2cc",
+          "0x15f2dc",
+          "0x15f344",
+          "0x15f354",
+          "0x15f364",
+          "0x15f374",
+          "0x15f384",
+          "0x15f394",
+          "0x15f3a4",
+          "0x15f2cc",
+          "0x15f2dc",
+          "0x15f1f4"
+        ],
+        "neutral_or_up": [
+          "0x15f2cc",
+          "0x15f2dc",
+          "0x15f2f0",
+          "0x15f300",
+          "0x15f310",
+          "0x15f320",
+          "0x15f330",
+          "0x15f2cc",
+          "0x15f2dc",
+          "0x15f1f4"
+        ],
+        "right_facing_0": [
+          "0x15f2cc",
+          "0x15f2dc",
+          "0x15f43c",
+          "0x15f44c",
+          "0x15f45c",
+          "0x15f2cc",
+          "0x15f2dc",
+          "0x15f1f4"
+        ]
+      },
+      "presentation_actor_fields": {
+        "capture_scope": [
+          "neutral",
+          "right",
+          "left",
+          "up",
+          "down"
+        ],
+        "coordinate_mode_u8": 0,
+        "object_or_u16": "0x8000",
+        "palette_u8": 0,
+        "source_fields": {
+          "coordinate_mode": "actor +0x0d u8",
+          "facing": "actor +0x0f u8",
+          "object_or": "actor +0x2e u16",
+          "palette": "actor +0x0e u8"
+        }
+      },
+      "presentation_records": [
+        {
+          "assembly": "0x160bc6",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 1,
+          "record": "0x15f2cc",
+          "timer_u16": 1
+        },
+        {
+          "assembly": "0x160bc6",
+          "attack_selector_u8": 0,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 1,
+          "record": "0x15f2dc",
+          "timer_u16": 1
+        },
+        {
+          "assembly": "0x160cda",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 2,
+          "record": "0x15f2f0",
+          "timer_u16": 8
+        },
+        {
+          "assembly": "0x160d02",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 2,
+          "record": "0x15f300",
+          "timer_u16": 5
+        },
+        {
+          "assembly": "0x160d2a",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 2,
+          "record": "0x15f310",
+          "timer_u16": 5
+        },
+        {
+          "assembly": "0x160d52",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 2,
+          "record": "0x15f320",
+          "timer_u16": 5
+        },
+        {
+          "assembly": "0x160d86",
+          "attack_selector_u8": 0,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 2,
+          "record": "0x15f330",
+          "timer_u16": 4095
+        },
+        {
+          "assembly": "0x160bee",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 2,
+          "record": "0x15f344",
+          "timer_u16": 10
+        },
+        {
+          "assembly": "0x160c16",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 2,
+          "record": "0x15f354",
+          "timer_u16": 3
+        },
+        {
+          "assembly": "0x160c3e",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 13,
+          "record": "0x15f364",
+          "timer_u16": 3
+        },
+        {
+          "assembly": "0x160c66",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 14,
+          "record": "0x15f374",
+          "timer_u16": 6
+        },
+        {
+          "assembly": "0x160c84",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 15,
+          "record": "0x15f384",
+          "timer_u16": 6
+        },
+        {
+          "assembly": "0x160cac",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 16,
+          "record": "0x15f394",
+          "timer_u16": 8
+        },
+        {
+          "assembly": "0x160bee",
+          "attack_selector_u8": 0,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 2,
+          "record": "0x15f3a4",
+          "timer_u16": 4095
+        },
+        {
+          "assembly": "0x160bee",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 2,
+          "record": "0x15f3b8",
+          "timer_u16": 2
+        },
+        {
+          "assembly": "0x160cac",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 16,
+          "record": "0x15f3c8",
+          "timer_u16": 10
+        },
+        {
+          "assembly": "0x160c84",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 15,
+          "record": "0x15f3d8",
+          "timer_u16": 3
+        },
+        {
+          "assembly": "0x160c66",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 14,
+          "record": "0x15f3e8",
+          "timer_u16": 3
+        },
+        {
+          "assembly": "0x160c3e",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 13,
+          "record": "0x15f3f8",
+          "timer_u16": 6
+        },
+        {
+          "assembly": "0x160c16",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 2,
+          "record": "0x15f408",
+          "timer_u16": 6
+        },
+        {
+          "assembly": "0x160bee",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 2,
+          "record": "0x15f418",
+          "timer_u16": 6
+        },
+        {
+          "assembly": "0x160bee",
+          "attack_selector_u8": 0,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 2,
+          "record": "0x15f428",
+          "timer_u16": 4095
+        },
+        {
+          "assembly": "0x162baa",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 18,
+          "record": "0x15f43c",
+          "timer_u16": 4
+        },
+        {
+          "assembly": "0x162bc8",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 18,
+          "record": "0x15f44c",
+          "timer_u16": 10
+        },
+        {
+          "assembly": "0x162baa",
+          "attack_selector_u8": 0,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 18,
+          "record": "0x15f45c",
+          "timer_u16": 4095
+        },
+        {
+          "assembly": "0x162ee2",
+          "attack_selector_u8": 22,
+          "branch_s16": 0,
+          "hurt_selector_u8": 9,
+          "record": "0x15fc3c",
+          "timer_u16": 4
+        },
+        {
+          "assembly": "0x162ee2",
+          "attack_selector_u8": 23,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 9,
+          "record": "0x15fc4c",
+          "timer_u16": 4095
+        },
+        {
+          "assembly": "0x162ee2",
+          "attack_selector_u8": 35,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 9,
+          "record": "0x15fc60",
+          "timer_u16": 4095
+        },
+        {
+          "assembly": "0x16212c",
+          "attack_selector_u8": 0,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 7,
+          "record": "0x15fce8",
+          "timer_u16": 4095
+        }
+      ],
+      "presentation_selector_sequences": {
+        "10": [
+          {
+            "assembly": "0x160bc6",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 1,
+            "record": "0x15f2cc",
+            "timer_u16": 1
+          },
+          {
+            "assembly": "0x160bc6",
+            "attack_selector_u8": 0,
+            "branch_s16": -32768,
+            "hurt_selector_u8": 1,
+            "record": "0x15f2dc",
+            "timer_u16": 1
+          }
+        ],
+        "15": [
+          {
+            "assembly": "0x162baa",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 18,
+            "record": "0x15f43c",
+            "timer_u16": 4
+          },
+          {
+            "assembly": "0x162bc8",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 18,
+            "record": "0x15f44c",
+            "timer_u16": 10
+          },
+          {
+            "assembly": "0x162baa",
+            "attack_selector_u8": 0,
+            "branch_s16": -32768,
+            "hurt_selector_u8": 18,
+            "record": "0x15f45c",
+            "timer_u16": 4095
+          }
+        ],
+        "3": [
+          {
+            "assembly": "0x160bc6",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 1,
+            "record": "0x15f2cc",
+            "timer_u16": 1
+          },
+          {
+            "assembly": "0x160bc6",
+            "attack_selector_u8": 0,
+            "branch_s16": -32768,
+            "hurt_selector_u8": 1,
+            "record": "0x15f2dc",
+            "timer_u16": 1
+          }
+        ],
+        "4": [
+          {
+            "assembly": "0x160cda",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 2,
+            "record": "0x15f2f0",
+            "timer_u16": 8
+          },
+          {
+            "assembly": "0x160d02",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 2,
+            "record": "0x15f300",
+            "timer_u16": 5
+          },
+          {
+            "assembly": "0x160d2a",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 2,
+            "record": "0x15f310",
+            "timer_u16": 5
+          },
+          {
+            "assembly": "0x160d52",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 2,
+            "record": "0x15f320",
+            "timer_u16": 5
+          },
+          {
+            "assembly": "0x160d86",
+            "attack_selector_u8": 0,
+            "branch_s16": -32768,
+            "hurt_selector_u8": 2,
+            "record": "0x15f330",
+            "timer_u16": 4095
+          }
+        ],
+        "41": [
+          {
+            "assembly": "0x162ee2",
+            "attack_selector_u8": 22,
+            "branch_s16": 0,
+            "hurt_selector_u8": 9,
+            "record": "0x15fc3c",
+            "timer_u16": 4
+          },
+          {
+            "assembly": "0x162ee2",
+            "attack_selector_u8": 23,
+            "branch_s16": -32768,
+            "hurt_selector_u8": 9,
+            "record": "0x15fc4c",
+            "timer_u16": 4095
+          }
+        ],
+        "42": [
+          {
+            "assembly": "0x16212c",
+            "attack_selector_u8": 0,
+            "branch_s16": -32768,
+            "hurt_selector_u8": 7,
+            "record": "0x15fce8",
+            "timer_u16": 4095
+          }
+        ],
+        "5": [
+          {
+            "assembly": "0x160bee",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 2,
+            "record": "0x15f344",
+            "timer_u16": 10
+          },
+          {
+            "assembly": "0x160c16",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 2,
+            "record": "0x15f354",
+            "timer_u16": 3
+          },
+          {
+            "assembly": "0x160c3e",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 13,
+            "record": "0x15f364",
+            "timer_u16": 3
+          },
+          {
+            "assembly": "0x160c66",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 14,
+            "record": "0x15f374",
+            "timer_u16": 6
+          },
+          {
+            "assembly": "0x160c84",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 15,
+            "record": "0x15f384",
+            "timer_u16": 6
+          },
+          {
+            "assembly": "0x160cac",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 16,
+            "record": "0x15f394",
+            "timer_u16": 8
+          },
+          {
+            "assembly": "0x160bee",
+            "attack_selector_u8": 0,
+            "branch_s16": -32768,
+            "hurt_selector_u8": 2,
+            "record": "0x15f3a4",
+            "timer_u16": 4095
+          }
+        ],
+        "6": [
+          {
+            "assembly": "0x160bee",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 2,
+            "record": "0x15f3b8",
+            "timer_u16": 2
+          },
+          {
+            "assembly": "0x160cac",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 16,
+            "record": "0x15f3c8",
+            "timer_u16": 10
+          },
+          {
+            "assembly": "0x160c84",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 15,
+            "record": "0x15f3d8",
+            "timer_u16": 3
+          },
+          {
+            "assembly": "0x160c66",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 14,
+            "record": "0x15f3e8",
+            "timer_u16": 3
+          },
+          {
+            "assembly": "0x160c3e",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 13,
+            "record": "0x15f3f8",
+            "timer_u16": 6
+          },
+          {
+            "assembly": "0x160c16",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 2,
+            "record": "0x15f408",
+            "timer_u16": 6
+          },
+          {
+            "assembly": "0x160bee",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 2,
+            "record": "0x15f418",
+            "timer_u16": 6
+          },
+          {
+            "assembly": "0x160bee",
+            "attack_selector_u8": 0,
+            "branch_s16": -32768,
+            "hurt_selector_u8": 2,
+            "record": "0x15f428",
+            "timer_u16": 4095
+          }
+        ],
+        "60": [
+          {
+            "assembly": "0x162ee2",
+            "attack_selector_u8": 35,
+            "branch_s16": -32768,
+            "hurt_selector_u8": 9,
+            "record": "0x15fc60",
+            "timer_u16": 4095
+          }
+        ]
+      },
+      "rng_calls": [],
+      "scheduler": "player actor slot is updated once in fixed actor-pool scheduler order before current-state collision and presentation submission",
+      "source_input": {
+        "button3_mask_u8": "0x40",
+        "current_u8_offset": "0x00ee",
+        "direction_masks_u8": {
+          "down": "0x04",
+          "left": "0x02",
+          "right": "0x01",
+          "up": "0x08"
+        },
+        "entry_guard": "new Button3 edge; state dispatcher writes 0x0400 and initialization runs only when timer_s16_at_0x24 < 0",
+        "previous_u8_offset": "0x00ef"
+      },
+      "spec_executable": true,
+      "vector_table": [
+        {
+          "source_address": "0x0243d2",
+          "x_acceleration_s32_16_16": {
+            "hex": "0x00000000",
+            "pixels_per_tick": 0.0,
+            "raw_s32": 0
+          },
+          "x_velocity_s32_16_16": {
+            "hex": "0x00000000",
+            "pixels_per_tick": 0.0,
+            "raw_s32": 0
+          },
+          "z_acceleration_s32_16_16": {
+            "hex": "0xffff8000",
+            "pixels_per_tick": -0.5,
+            "raw_s32": -32768
+          },
+          "z_velocity_s32_16_16": {
+            "hex": "0x00088000",
+            "pixels_per_tick": 8.5,
+            "raw_s32": 557056
+          }
+        },
+        {
+          "source_address": "0x0243e2",
+          "x_acceleration_s32_16_16": {
+            "hex": "0x00000000",
+            "pixels_per_tick": 0.0,
+            "raw_s32": 0
+          },
+          "x_velocity_s32_16_16": {
+            "hex": "0x00000000",
+            "pixels_per_tick": 0.0,
+            "raw_s32": 0
+          },
+          "z_acceleration_s32_16_16": {
+            "hex": "0xffff8000",
+            "pixels_per_tick": -0.5,
+            "raw_s32": -32768
+          },
+          "z_velocity_s32_16_16": {
+            "hex": "0x000c0000",
+            "pixels_per_tick": 12.0,
+            "raw_s32": 786432
+          }
+        },
+        {
+          "source_address": "0x0243f2",
+          "x_acceleration_s32_16_16": {
+            "hex": "0x00006800",
+            "pixels_per_tick": 0.40625,
+            "raw_s32": 26624
+          },
+          "x_velocity_s32_16_16": {
+            "hex": "0xfff10000",
+            "pixels_per_tick": -15.0,
+            "raw_s32": -983040
+          },
+          "z_acceleration_s32_16_16": {
+            "hex": "0xffffc800",
+            "pixels_per_tick": -0.21875,
+            "raw_s32": -14336
+          },
+          "z_velocity_s32_16_16": {
+            "hex": "0x00040000",
+            "pixels_per_tick": 4.0,
+            "raw_s32": 262144
+          }
+        },
+        {
+          "source_address": "0x024402",
+          "x_acceleration_s32_16_16": {
+            "hex": "0x00002400",
+            "pixels_per_tick": 0.140625,
+            "raw_s32": 9216
+          },
+          "x_velocity_s32_16_16": {
+            "hex": "0xfff70000",
+            "pixels_per_tick": -9.0,
+            "raw_s32": -589824
+          },
+          "z_acceleration_s32_16_16": {
+            "hex": "0xffff7800",
+            "pixels_per_tick": -0.53125,
+            "raw_s32": -34816
+          },
+          "z_velocity_s32_16_16": {
+            "hex": "0x000c0000",
+            "pixels_per_tick": 12.0,
+            "raw_s32": 786432
+          }
+        },
+        {
+          "source_address": "0x024412",
+          "x_acceleration_s32_16_16": {
+            "hex": "0xffffe000",
+            "pixels_per_tick": -0.125,
+            "raw_s32": -8192
+          },
+          "x_velocity_s32_16_16": {
+            "hex": "0x00090000",
+            "pixels_per_tick": 9.0,
+            "raw_s32": 589824
+          },
+          "z_acceleration_s32_16_16": {
+            "hex": "0xffff8000",
+            "pixels_per_tick": -0.5,
+            "raw_s32": -32768
+          },
+          "z_velocity_s32_16_16": {
+            "hex": "0x00040000",
+            "pixels_per_tick": 4.0,
+            "raw_s32": 262144
+          }
+        },
+        {
+          "source_address": "0x024422",
+          "x_acceleration_s32_16_16": {
+            "hex": "0xffffdc00",
+            "pixels_per_tick": -0.140625,
+            "raw_s32": -9216
+          },
+          "x_velocity_s32_16_16": {
+            "hex": "0x00088000",
+            "pixels_per_tick": 8.5,
+            "raw_s32": 557056
+          },
+          "z_acceleration_s32_16_16": {
+            "hex": "0xffff7800",
+            "pixels_per_tick": -0.53125,
+            "raw_s32": -34816
+          },
+          "z_velocity_s32_16_16": {
+            "hex": "0x000c0000",
+            "pixels_per_tick": 12.0,
+            "raw_s32": 786432
+          }
+        }
+      ]
+    },
     "input_guard": "new Button3 edge at actor +0xee/+0xef bit 6",
     "landing_guard": "0x01a8e6 signed world-Y versus world-Z comparison; carry clear enters 0x023630",
     "landing_phase": "0x0404",
@@ -258,6 +1184,18 @@
       "end_exclusive": "0x0233c4",
       "sha256": "b8bcc247f79422f4b321a8e329d9ad82ca2b58aff5b72097dff87ab9979e0819",
       "start": "0x02331e"
+    },
+    "jump_vector_table": {
+      "bytes": 128,
+      "end_exclusive": "0x024452",
+      "sha256": "db817965d13803770807c9dd681d5117b33da0f187e7fa645d19ee81e82078dd",
+      "start": "0x0243d2"
+    },
+    "player_animation_selector_table": {
+      "bytes": 122,
+      "end_exclusive": "0x15e2ba",
+      "sha256": "663b9f690a52420adc6970d12a080f3e0edbfbe2a6ee1ee67f252af2f0a1db58",
+      "start": "0x15e240"
     }
   },
   "state_dispatch": {

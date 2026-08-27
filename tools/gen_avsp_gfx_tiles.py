@@ -506,7 +506,7 @@ def main() -> int:
                 tiles |= entry_tile_codes_exact(code, y, attr)
                 spec_palette_banks.add(attr & 0x1F)
                 banks.add(attr & 0x1F)
-        per_route["spec02_round1_button1_presentations"] = {
+        per_route["spec02_round1_native_presentations"] = {
             "fixture_sha256": spec_fixture_sha256,
             "decoded_variants": len(spec_results),
             "unique_assemblies": len({item["assembly"]

@@ -35,6 +35,38 @@ STATE_TABLE = {
     0x0C: 0x02358E, 0x0E: 0x02359C, 0x10: 0x0235BC,
     0x12: 0x0235EC, 0x14: 0x02360C,
 }
+VECTOR_TABLE_BASE = 0x0243D2
+VECTOR_TABLE_END = 0x024452
+AIR_RECORDS = {
+    0x15F2CC: (0x160BC6, 1, 0), 0x15F2DC: (0x160BC6, 1, 0),
+    0x15F2F0: (0x160CDA, 2, 0), 0x15F300: (0x160D02, 2, 0),
+    0x15F310: (0x160D2A, 2, 0), 0x15F320: (0x160D52, 2, 0),
+    0x15F330: (0x160D86, 2, 0), 0x15F344: (0x160BEE, 2, 0),
+    0x15F354: (0x160C16, 2, 0), 0x15F364: (0x160C3E, 13, 0),
+    0x15F374: (0x160C66, 14, 0), 0x15F384: (0x160C84, 15, 0),
+    0x15F394: (0x160CAC, 16, 0), 0x15F3A4: (0x160BEE, 2, 0),
+    0x15F3B8: (0x160BEE, 2, 0), 0x15F3C8: (0x160CAC, 16, 0),
+    0x15F3D8: (0x160C84, 15, 0), 0x15F3E8: (0x160C66, 14, 0),
+    0x15F3F8: (0x160C3E, 13, 0), 0x15F408: (0x160C16, 2, 0),
+    0x15F418: (0x160BEE, 2, 0), 0x15F428: (0x160BEE, 2, 0),
+    0x15F43C: (0x162BAA, 18, 0), 0x15F44C: (0x162BC8, 18, 0),
+    0x15F45C: (0x162BAA, 18, 0), 0x15FC3C: (0x162EE2, 9, 22),
+    0x15FC4C: (0x162EE2, 9, 23), 0x15FC60: (0x162EE2, 9, 35),
+    0x15FCE8: (0x16212C, 7, 0),
+}
+AIR_SELECTOR_RECORDS = {
+    3: [0x15F2CC, 0x15F2DC],
+    4: [0x15F2F0, 0x15F300, 0x15F310, 0x15F320, 0x15F330],
+    5: [0x15F344, 0x15F354, 0x15F364, 0x15F374, 0x15F384,
+        0x15F394, 0x15F3A4],
+    6: [0x15F3B8, 0x15F3C8, 0x15F3D8, 0x15F3E8, 0x15F3F8,
+        0x15F408, 0x15F418, 0x15F428],
+    10: [0x15F2CC, 0x15F2DC],
+    15: [0x15F43C, 0x15F44C, 0x15F45C],
+    41: [0x15FC3C, 0x15FC4C],
+    42: [0x15FCE8],
+    60: [0x15FC60],
+}
 
 
 def require(condition: bool, message: str) -> None:
@@ -63,6 +95,77 @@ def source_window(data: bytes, start: int, end: int) -> dict[str, object]:
     return {"start": f"0x{start:06x}", "end_exclusive": f"0x{end:06x}",
             "bytes": end - start,
             "sha256": hashlib.sha256(data[start:end]).hexdigest()}
+
+
+def u32be(data: bytes, offset: int) -> int:
+    return int.from_bytes(data[offset:offset + 4], "big", signed=False)
+
+
+def s32be(data: bytes, offset: int) -> int:
+    return int.from_bytes(data[offset:offset + 4], "big", signed=True)
+
+
+def fixed(value: int) -> dict[str, object]:
+    return {"raw_s32": value, "hex": f"0x{value & 0xffffffff:08x}",
+            "pixels_per_tick": value / 65536.0}
+
+
+def vector_entry(program: bytes, address: int) -> dict[str, object]:
+    values = [s32be(program, address + offset) for offset in range(0, 16, 4)]
+    return {
+        "source_address": f"0x{address:06x}",
+        "x_velocity_s32_16_16": fixed(values[0]),
+        "x_acceleration_s32_16_16": fixed(values[1]),
+        "z_velocity_s32_16_16": fixed(values[2]),
+        "z_acceleration_s32_16_16": fixed(values[3]),
+    }
+
+
+def record_identity(program: bytes, address: int) -> dict[str, object]:
+    expected = AIR_RECORDS[address]
+    actual = (u32be(program, address + 4), program[address + 8],
+              program[address + 9])
+    require(actual == expected, f"air presentation record drift: {address:06x}")
+    return {"record": f"0x{address:06x}",
+            "timer_u16": int.from_bytes(program[address:address + 2], "big"),
+            "branch_s16": int.from_bytes(program[address + 2:address + 4],
+                                           "big", signed=True),
+            "assembly": f"0x{actual[0]:06x}",
+            "hurt_selector_u8": actual[1], "attack_selector_u8": actual[2]}
+
+
+def selector_sequences(program: bytes) -> dict[str, object]:
+    base = 0x15E240
+    result = {}
+    for selector, expected_records in AIR_SELECTOR_RECORDS.items():
+        offset = int.from_bytes(program[base + selector * 2:
+                                        base + selector * 2 + 2], "big")
+        address = base + offset
+        actual = []
+        while True:
+            actual.append(address)
+            if int.from_bytes(program[address + 2:address + 4],
+                              "big", signed=True) < 0:
+                break
+            address += 16
+            require(len(actual) <= 16, "unbounded air selector sequence")
+        require(actual == expected_records,
+                f"air selector {selector} record sequence drift")
+        result[str(selector)] = [record_identity(program, item)
+                                 for item in actual]
+    return result
+
+
+def observed_record_sequence(sample_path: Path, first: int,
+                             last: int) -> list[str]:
+    sequence: list[str] = []
+    for row in rows(sample_path):
+        frame = int(row["frame"])
+        if first <= frame <= last:
+            record = f"0x{int(row['p_anim'], 16):06x}"
+            if not sequence or sequence[-1] != record:
+                sequence.append(record)
+    return sequence
 
 
 def manifest_identity(root: Path) -> dict[str, object]:
@@ -162,6 +265,77 @@ def build_report() -> dict[str, object]:
     require(COUNTERFACTUAL_REQUIRED <= counterfactual_phases,
             "targeted counterfactual phase coverage drift")
 
+    vectors = [vector_entry(program, VECTOR_TABLE_BASE + index * 0x10)
+               for index in range(6)]
+    require([[item[key]["raw_s32"] for key in
+              ("x_velocity_s32_16_16", "x_acceleration_s32_16_16",
+               "z_velocity_s32_16_16", "z_acceleration_s32_16_16")]
+             for item in vectors] == [
+                 [0, 0, 0x00088000, -0x00008000],
+                 [0, 0, 0x000c0000, -0x00008000],
+                 [-0x000f0000, 0x00006800, 0x00040000, -0x00003800],
+                 [-0x00090000, 0x00002400, 0x000c0000, -0x00008800],
+                 [0x00090000, -0x00002000, 0x00040000, -0x00008000],
+                 [0x00088000, -0x00002400, 0x000c0000, -0x00008800],
+             ], "Button3 vector table drift")
+    down_vectors = {
+        "vertical_only": {
+            "source_address": "0x024432",
+            "x_velocity_s32_16_16": fixed(s32be(program, 0x024432)),
+            "x_acceleration_s32_16_16": fixed(s32be(program, 0x024436)),
+        },
+        "with_horizontal": {
+            "source_address": "0x024442",
+            "x_velocity_s32_16_16": fixed(s32be(program, 0x024442)),
+            "x_acceleration_s32_16_16": fixed(s32be(program, 0x024446)),
+        },
+    }
+    require([down_vectors[name][field]["raw_s32"] for name in
+             ("vertical_only", "with_horizontal") for field in
+             ("x_velocity_s32_16_16", "x_acceleration_s32_16_16")] ==
+            [0x00060000, -0x00008000, 0x000c0000, -0x0000a000],
+            "Down+Button3 vector table drift")
+    presentation_records = [record_identity(program, address)
+                            for address in AIR_RECORDS]
+    presentation_sequences = selector_sequences(program)
+    observed_sequences = {
+        "neutral_or_up": observed_record_sequence(
+            RAW / "dash_up" / "samples.tsv", 4422, 4475),
+        "left_facing_0": observed_record_sequence(
+            RAW / "dash_left" / "samples.tsv", 4422, 4464),
+        "right_facing_0": observed_record_sequence(
+            RAW / "dash_right" / "samples.tsv", 4422, 4443),
+        "down": observed_record_sequence(
+            RAW / "dash_down" / "samples.tsv", 4422, 4447),
+    }
+    require(observed_sequences == {
+        "neutral_or_up": ["0x15f2cc", "0x15f2dc", "0x15f2f0",
+                           "0x15f300", "0x15f310", "0x15f320",
+                           "0x15f330", "0x15f2cc", "0x15f2dc",
+                           "0x15f1f4"],
+        "left_facing_0": ["0x15f2cc", "0x15f2dc", "0x15f344",
+                           "0x15f354", "0x15f364", "0x15f374",
+                           "0x15f384", "0x15f394", "0x15f3a4",
+                           "0x15f2cc", "0x15f2dc", "0x15f1f4"],
+        "right_facing_0": ["0x15f2cc", "0x15f2dc", "0x15f43c",
+                            "0x15f44c", "0x15f45c", "0x15f2cc",
+                            "0x15f2dc", "0x15f1f4"],
+        "down": ["0x15f2cc", "0x15f2dc", "0x15fc60", "0x15fce8",
+                 "0x15f1f4"],
+    }, "Button3 presentation sequence drift")
+    presentation_actor_fields = set()
+    for name in ("air_cold_1", "dash_right", "dash_left", "dash_up",
+                 "dash_down"):
+        for row in rows(RAW / name / "samples.tsv"):
+            if int(row["p_action"]) >> 8 != 4:
+                continue
+            actor = bytes.fromhex(row["actor_hex"])
+            presentation_actor_fields.add((actor[0x0d], actor[0x0e],
+                                           int.from_bytes(
+                                               actor[0x2e:0x30], "big")))
+    require(presentation_actor_fields == {(0, 0, 0x8000)},
+            "Button3 presentation actor field drift")
+
     weapon = json.loads(WEAPON.read_text(encoding="ascii"))
     report = {
         "schema": "oracle11-predator-air-authority-v1",
@@ -183,6 +357,10 @@ def build_report() -> dict[str, object]:
             "decrypted_program_sha256": hashlib.sha256(program).hexdigest(),
             "jump_dispatch_and_vector_setup": source_window(
                 opcodes, 0x02331E, 0x0233C4),
+            "jump_vector_table": source_window(
+                program, VECTOR_TABLE_BASE, VECTOR_TABLE_END),
+            "player_animation_selector_table": source_window(
+                program, 0x15E240, 0x15E2BA),
             "air_state_dispatch_and_bodies": source_window(
                 opcodes, 0x0233C4, 0x02370C),
             "air_vector_table_resolver": source_window(
@@ -221,6 +399,134 @@ def build_report() -> dict[str, object]:
             "cleanup": "0x01a3fa clears action; 0x0198de returns to source idle/locomotion dispatch",
             "facing": "latched from +0x0f; direction-specific fixed-point vectors are selected before airborne updates",
             "rng_consumption": "none",
+            "implementation_contract": {
+                "spec_executable": True,
+                "source_input": {
+                    "current_u8_offset": "0x00ee",
+                    "previous_u8_offset": "0x00ef",
+                    "button3_mask_u8": "0x40",
+                    "direction_masks_u8": {"right": "0x01", "left": "0x02",
+                                           "down": "0x04", "up": "0x08"},
+                    "entry_guard": "new Button3 edge; state dispatcher writes 0x0400 and initialization runs only when timer_s16_at_0x24 < 0",
+                },
+                "actor_fields": {
+                    "phase_u16": "0x0006", "subphase_u8": "0x0007",
+                    "direction_class_u8": "0x000c", "facing_u8": "0x000f",
+                    "x_position_s32_16_16": "0x0010",
+                    "world_y_s32_16_16": "0x0014",
+                    "world_z_s32_16_16": "0x0018",
+                    "timer_s16": "0x0024", "phase_timer_s16": "0x002a",
+                    "x_velocity_s32_16_16": "0x0030",
+                    "z_velocity_s32_16_16": "0x0034",
+                    "x_acceleration_s32_16_16": "0x0038",
+                    "z_acceleration_s32_16_16": "0x003c",
+                    "airborne_latch_u8": "0x005c",
+                    "animation_event_u8": "0x006e",
+                    "terrain_mode_u8": "0x0074",
+                    "collision_selector_u8": "0x0092",
+                },
+                "branch_order": [
+                    "down bit", "horizontal bits", "up bit",
+                    "horizontal direction versus facing", "facing sign transform"],
+                "vector_table": vectors,
+                "down_vector_table": down_vectors,
+                "input_facing_mapping": [
+                    {"input": "neutral", "facing": "either", "entry_index": 0,
+                     "negate_x_pair": False},
+                    {"input": "up", "facing": "either", "entry_index": 1,
+                     "negate_x_pair": False},
+                    {"input": "left", "facing": 0, "entry_index": 2,
+                     "negate_x_pair": False},
+                    {"input": "left", "facing": 1, "entry_index": 4,
+                     "negate_x_pair": True},
+                    {"input": "right", "facing": 0, "entry_index": 4,
+                     "negate_x_pair": False},
+                    {"input": "right", "facing": 1, "entry_index": 2,
+                     "negate_x_pair": True},
+                    {"input": "up_left", "facing": 0, "entry_index": 3,
+                     "negate_x_pair": False},
+                    {"input": "up_left", "facing": 1, "entry_index": 5,
+                     "negate_x_pair": True},
+                    {"input": "up_right", "facing": 0, "entry_index": 5,
+                     "negate_x_pair": False},
+                    {"input": "up_right", "facing": 1, "entry_index": 3,
+                     "negate_x_pair": True},
+                    {"input": "down", "facing": "retained", "down_entry": "vertical_only"},
+                    {"input": "down_left", "facing_write": 0,
+                     "down_entry": "with_horizontal"},
+                    {"input": "down_right", "facing_write": 1,
+                     "down_entry": "with_horizontal"},
+                ],
+                "initialization": {
+                    "non_down": {"next_phase_u16": "0x0402",
+                                 "airborne_latch_u8": 1,
+                                 "default_collision_selector_u8": 3,
+                                 "presentation_selector_neutral_u8": 4,
+                                 "same_facing_horizontal": {
+                                     "collision_up_u8": 1, "collision_level_u8": 2,
+                                     "presentation": "facing + 5"},
+                                 "opposite_facing_horizontal": {
+                                     "collision_up_u8": 4, "collision_level_u8": 8,
+                                     "presentation_up_u8": 6,
+                                     "presentation_level_u8": 15}},
+                    "down": {"next_phase_u16": "0x040a",
+                             "airborne_latch_u8": 0,
+                             "collision_selector_u8": 7,
+                             "presentation_vertical_u8": 60,
+                             "presentation_horizontal_u8": 41},
+                },
+                "motion_and_landing": {
+                    "phase_0x0402": {
+                        "motion_routine": "0x01a8e6",
+                        "landing_guard": "carry clear after signed world_y versus world_z comparison",
+                        "post_motion_interruption_order": [
+                            "Button2 edge 0x01a6c4", "special edge path",
+                            "air reversal 0x01a932", "Button1 edge/resource 0x01a6f4"],
+                    },
+                    "landing_0x023630": {
+                        "next_phase_u16": "0x0404", "airborne_latch_u8": 0,
+                        "terrain_mode_zero_write": "world_y high word = world_z high word",
+                        "presentation_selector_u8": 10},
+                    "phase_0x0404": {
+                        "timer_negative": "0x01a3e2 common reset",
+                        "timer_nonnegative": "0x01656e animation update"},
+                    "phase_0x040a": {
+                        "x_step": "signed x_velocity; negate before add when facing == 0",
+                        "velocity_step": "x_velocity += x_acceleration",
+                        "negative_velocity_transition": {"next_phase_u16": "0x040c",
+                                                         "phase_timer_s16": 10,
+                                                         "presentation_selector_u8": 42}},
+                    "phase_0x040c": {
+                        "timer_step": "predecrement phase_timer_s16",
+                        "zero_transition": "0x01a3e2 common reset"},
+                    "cleanup": "0x01a3fa clears action then 0x0198de returns to idle/locomotion",
+                },
+                "presentation_records": presentation_records,
+                "presentation_selector_sequences": presentation_sequences,
+                "presentation_actor_fields": {
+                    "coordinate_mode_u8": 0, "palette_u8": 0,
+                    "object_or_u16": "0x8000",
+                    "source_fields": {"coordinate_mode": "actor +0x0d u8",
+                                      "palette": "actor +0x0e u8",
+                                      "facing": "actor +0x0f u8",
+                                      "object_or": "actor +0x2e u16"},
+                    "capture_scope": ["neutral", "right", "left", "up", "down"],
+                },
+                "observed_record_sequences": observed_sequences,
+                "scheduler": "player actor slot is updated once in fixed actor-pool scheduler order before current-state collision and presentation submission",
+                "rng_calls": [],
+                "mutation_controls": [
+                    "reject vector magnitude or sign mutation",
+                    "reject input/facing table-index mutation",
+                    "reject x-pair sign transform mutation",
+                    "reject collision selector mutation",
+                    "reject presentation selector or record mutation",
+                    "reject landing comparison polarity or terrain-mode guard mutation",
+                    "reject phase or timer transition mutation",
+                    "reject interruption branch reordering",
+                    "reject added RNG consumption",
+                ],
+            },
         },
         "airborne_actions": {
             "classification": "SOURCE_CLOSED",
@@ -312,6 +618,63 @@ def validate(report: dict[str, object]) -> None:
             report["airborne_actions"]["rng_consumption"].startswith("none") and
             report["interruption"]["rng_consumption"] == "none",
             "unsourced player-air RNG introduced")
+    implementation = report["directional_actions"]["implementation_contract"]
+    require(implementation["spec_executable"] is True and
+            implementation["source_input"]["button3_mask_u8"] == "0x40" and
+            implementation["branch_order"] == [
+                "down bit", "horizontal bits", "up bit",
+                "horizontal direction versus facing", "facing sign transform"],
+            "Button3 input/branch contract drift")
+    expected_vectors = [
+        [0, 0, 0x00088000, -0x00008000],
+        [0, 0, 0x000c0000, -0x00008000],
+        [-0x000f0000, 0x00006800, 0x00040000, -0x00003800],
+        [-0x00090000, 0x00002400, 0x000c0000, -0x00008800],
+        [0x00090000, -0x00002000, 0x00040000, -0x00008000],
+        [0x00088000, -0x00002400, 0x000c0000, -0x00008800],
+    ]
+    require([[entry[field]["raw_s32"] for field in
+              ("x_velocity_s32_16_16", "x_acceleration_s32_16_16",
+               "z_velocity_s32_16_16", "z_acceleration_s32_16_16")]
+             for entry in implementation["vector_table"]] == expected_vectors,
+            "Button3 numeric vector contract drift")
+    require([(entry.get("input"), entry.get("facing"),
+              entry.get("entry_index"), entry.get("negate_x_pair"))
+             for entry in implementation["input_facing_mapping"][:10]] == [
+                 ("neutral", "either", 0, False), ("up", "either", 1, False),
+                 ("left", 0, 2, False), ("left", 1, 4, True),
+                 ("right", 0, 4, False), ("right", 1, 2, True),
+                 ("up_left", 0, 3, False), ("up_left", 1, 5, True),
+                 ("up_right", 0, 5, False), ("up_right", 1, 3, True)],
+            "Button3 input/facing mapping drift")
+    require(implementation["initialization"]["non_down"][
+                "opposite_facing_horizontal"]["collision_level_u8"] == 8 and
+            implementation["initialization"]["down"][
+                "presentation_horizontal_u8"] == 41 and
+            implementation["motion_and_landing"]["landing_0x023630"][
+                "presentation_selector_u8"] == 10 and
+            implementation["motion_and_landing"]["phase_0x040a"][
+                "negative_velocity_transition"]["phase_timer_s16"] == 10,
+            "Button3 state/presentation/collision contract drift")
+    sequences = implementation["presentation_selector_sequences"]
+    require(len(implementation["presentation_records"]) == len(AIR_RECORDS) and
+            set(sequences) == {str(item) for item in AIR_SELECTOR_RECORDS} and
+            [row["record"] for row in sequences["6"]] ==
+                [f"0x{item:06x}" for item in AIR_SELECTOR_RECORDS[6]] and
+            sequences["41"][0]["attack_selector_u8"] == 22 and
+            sequences["41"][1]["attack_selector_u8"] == 23 and
+            sequences["60"][0]["attack_selector_u8"] == 35 and
+            implementation["presentation_actor_fields"] == {
+                "coordinate_mode_u8": 0, "palette_u8": 0,
+                "object_or_u16": "0x8000",
+                "source_fields": {"coordinate_mode": "actor +0x0d u8",
+                                  "palette": "actor +0x0e u8",
+                                  "facing": "actor +0x0f u8",
+                                  "object_or": "actor +0x2e u16"},
+                "capture_scope": ["neutral", "right", "left", "up", "down"]} and
+            implementation["rng_calls"] == [] and
+            len(implementation["mutation_controls"]) == 9,
+            "Button3 presentation/RNG/mutation contract drift")
     require(set(report["not_required_for_round1"]["phases"]) ==
             {f"0x{x:04x}" for x in NOT_REQUIRED},
             "NOT_REQUIRED phase inventory drift")

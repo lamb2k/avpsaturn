@@ -370,6 +370,27 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
     require(fixtures["classification"] == "GENERATED_ONLY_FROM_ACCEPTED_ORACLE_AND_PORT_V2" and
             fixtures["optional_unknowns"]["required_for_round1"] is False,
             "fixture scope drift")
+    button3 = fixtures["authority_data"]["player"][
+        "directional_airborne_interruption"]["directional_actions"][
+            "implementation_contract"]
+    require(button3["spec_executable"] is True and
+            button3["source_input"]["button3_mask_u8"] == "0x40" and
+            [entry["x_velocity_s32_16_16"]["raw_s32"]
+             for entry in button3["vector_table"]] ==
+            [0, 0, -0x000f0000, -0x00090000,
+             0x00090000, 0x00088000] and
+            button3["input_facing_mapping"][3]["entry_index"] == 4 and
+            button3["initialization"]["non_down"][
+                "opposite_facing_horizontal"]["collision_level_u8"] == 8 and
+            button3["motion_and_landing"]["landing_0x023630"][
+                "presentation_selector_u8"] == 10 and
+            button3["motion_and_landing"]["phase_0x040a"][
+                "negative_velocity_transition"]["phase_timer_s16"] == 10 and
+            button3["presentation_actor_fields"]["coordinate_mode_u8"] == 0 and
+            button3["presentation_actor_fields"]["palette_u8"] == 0 and
+            button3["presentation_actor_fields"]["object_or_u16"] == "0x8000" and
+            button3["rng_calls"] == [],
+            "Button3 implementation fixture incomplete or drifted")
     ids = set()
     families = set()
     required = {"id", "authority_family", "classification", "type", "signed",

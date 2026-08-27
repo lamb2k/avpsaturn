@@ -87,6 +87,12 @@ def build() -> str:
     melee_selectors = close_combo["attack_selectors"]
     melee_steps = close_combo["step_values"]
     melee_strikes = []
+    jump = fixtures["authority_data"]["player"][
+        "directional_airborne_interruption"]["directional_actions"][
+            "implementation_contract"]
+    jump_vectors = jump["vector_table"]
+    jump_down_vectors = jump["down_vector_table"]
+    jump_sequences = jump["presentation_selector_sequences"]
     weapon = fixtures["authority_data"]["player"][
         "weapon_projectile_resource"]["implementation_contract"]
     weapon_states = weapon["state_dispatch"]
@@ -267,6 +273,56 @@ def build() -> str:
         if len(strikes) != 1:
             raise ValueError("SPEC-02 melee strike presentation drift")
         melee_strikes.append(strikes[0])
+    if (jump["spec_executable"] is not True or
+        jump["source_input"]["button3_mask_u8"] != "0x40" or
+        jump["branch_order"] != [
+            "down bit", "horizontal bits", "up bit",
+            "horizontal direction versus facing", "facing sign transform"] or
+        len(jump_vectors) != 6 or
+        [row["x_velocity_s32_16_16"]["raw_s32"]
+         for row in jump_vectors] !=
+            [0, 0, -0x000f0000, -0x00090000, 0x00090000, 0x00088000] or
+        [row["x_acceleration_s32_16_16"]["raw_s32"]
+         for row in jump_vectors] !=
+            [0, 0, 0x00006800, 0x00002400, -0x00002000, -0x00002400] or
+        [row["z_velocity_s32_16_16"]["raw_s32"]
+         for row in jump_vectors] !=
+            [0x00088000, 0x000c0000, 0x00040000,
+             0x000c0000, 0x00040000, 0x000c0000] or
+        [row["z_acceleration_s32_16_16"]["raw_s32"]
+         for row in jump_vectors] !=
+            [-0x00008000, -0x00008000, -0x00003800,
+             -0x00008800, -0x00008000, -0x00008800] or
+        jump_down_vectors["vertical_only"]["x_velocity_s32_16_16"]["raw_s32"] !=
+            0x00060000 or
+        jump_down_vectors["vertical_only"]["x_acceleration_s32_16_16"]["raw_s32"] !=
+            -0x00008000 or
+        jump_down_vectors["with_horizontal"]["x_velocity_s32_16_16"]["raw_s32"] !=
+            0x000c0000 or
+        jump_down_vectors["with_horizontal"]["x_acceleration_s32_16_16"]["raw_s32"] !=
+            -0x0000a000 or
+        sorted(int(key) for key in jump_sequences) !=
+            [3, 4, 5, 6, 10, 15, 41, 42, 60] or
+        [len(jump_sequences[str(selector)]) for selector in
+         (3, 4, 5, 6, 10, 15, 41, 42, 60)] !=
+            [2, 5, 7, 8, 2, 3, 2, 1, 1] or
+        jump["initialization"]["non_down"][
+            "opposite_facing_horizontal"]["collision_level_u8"] != 8 or
+        jump["initialization"]["down"]["collision_selector_u8"] != 7 or
+        jump["motion_and_landing"]["landing_0x023630"][
+            "presentation_selector_u8"] != 10 or
+        jump["motion_and_landing"]["phase_0x040a"][
+            "negative_velocity_transition"]["phase_timer_s16"] != 10 or
+        jump["presentation_actor_fields"] != {
+            "coordinate_mode_u8": 0, "palette_u8": 0,
+            "object_or_u16": "0x8000",
+            "source_fields": {"coordinate_mode": "actor +0x0d u8",
+                              "palette": "actor +0x0e u8",
+                              "facing": "actor +0x0f u8",
+                              "object_or": "actor +0x2e u16"},
+            "capture_scope": ["neutral", "right", "left", "up", "down"]} or
+        jump["rng_calls"] != []):
+        raise ValueError("SPEC-02 Button3 implementation contract drift")
     if (weapon["classification"] != "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         weapon["source_input"]["button1_mask"] != "0x0010" or
         weapon_states != {
@@ -705,6 +761,48 @@ def build() -> str:
                 row["record"], row["assembly"], row["hurt_selector"],
                 row["attack_selector"]))
     lines.extend([
+        "};", "",
+        "static const AvspRound1PlayerJumpVectorSpec avsp_round1_player_jump_vectors[AVSP_ROUND1_PLAYER_JUMP_VECTOR_COUNT] =",
+        "{",
+    ])
+    for row in jump_vectors:
+        lines.append("    { %dL, %dL, %dL, %dL }," % (
+            row["x_velocity_s32_16_16"]["raw_s32"],
+            row["x_acceleration_s32_16_16"]["raw_s32"],
+            row["z_velocity_s32_16_16"]["raw_s32"],
+            row["z_acceleration_s32_16_16"]["raw_s32"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1PlayerJumpVectorSpec avsp_round1_player_jump_down_vectors[AVSP_ROUND1_PLAYER_JUMP_DOWN_VECTOR_COUNT] =",
+        "{",
+        "    { %dL, %dL, 0L, 0L }," % (
+            jump_down_vectors["vertical_only"]["x_velocity_s32_16_16"]["raw_s32"],
+            jump_down_vectors["vertical_only"]["x_acceleration_s32_16_16"]["raw_s32"]),
+        "    { %dL, %dL, 0L, 0L }" % (
+            jump_down_vectors["with_horizontal"]["x_velocity_s32_16_16"]["raw_s32"],
+            jump_down_vectors["with_horizontal"]["x_acceleration_s32_16_16"]["raw_s32"]),
+        "};", "",
+        "static const AvspRound1PlayerJumpSequenceSpec avsp_round1_player_jump_sequences[AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_COUNT] =",
+        "{",
+    ])
+    for selector in (3, 4, 5, 6, 10, 15, 41, 42, 60):
+        records = jump_sequences[str(selector)]
+        rendered = ["{ %du, %d, %sUL, %sUL, %du, %du }" % (
+            row["timer_u16"], row["branch_s16"], row["record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]) for row in records]
+        while len(rendered) < 8:
+            rendered.append("{ 0u, 0, 0UL, 0UL, 0u, 0u }")
+        lines.append("    { %du, %du, { %s } }," % (
+            selector, len(records), ", ".join(rendered)))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1PlayerPresentationActorSpec avsp_round1_player_jump_actor =",
+        "{",
+        "    %du, %du, %su" % (
+            jump["presentation_actor_fields"]["coordinate_mode_u8"],
+            jump["presentation_actor_fields"]["palette_u8"],
+            jump["presentation_actor_fields"]["object_or_u16"]),
         "};", "",
         "static const AvspRound1PlayerWeaponSpec avsp_round1_player_weapon =",
         "{",

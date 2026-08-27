@@ -33,7 +33,8 @@ FIELDS = FIELDS + ("round1_player_stop_state",
                    "round1_native_presentation_state",
                    "round1_class1f_state",
                    "round1_auxiliary_state",
-                   "round1_native_initial_state")
+                   "round1_native_initial_state",
+                   "round1_player_jump_state")
 U16_FIELDS = {"input_mask", "alien_rng", "round1_player_source_action"}
 S16_FIELDS = {
     "player_x", "player_lane", "player_health", "player_state",
@@ -395,6 +396,27 @@ state["round1_native_presentation_decode_failures"] = \
     (native_initial_state >> 12) & 0x0f
 state["round1_rng_seed"] = (native_initial_state >> 16) & 0xffff
 for sample in all_samples[:EVIDENCE_LAST_FRAME + 1]:
+    jump_state = sample["round1_player_jump_state"] & 0xffffffff
+    sample["round1_player_jump_entries"] = jump_state & 0x03
+    sample["round1_player_jump_completions"] = (jump_state >> 2) & 0x03
+    sample["round1_player_jump_landings"] = (jump_state >> 4) & 0x03
+    sample["round1_player_jump_motion_updates"] = (jump_state >> 6) & 0x3f
+    sample["round1_player_jump_active"] = (jump_state >> 12) & 0x01
+    sample["round1_player_jump_collision_selector"] = (jump_state >> 13) & 0x0f
+    sample["round1_player_jump_presentation_selector"] = (jump_state >> 17) & 0x3f
+    sample["round1_player_jump_height"] = (jump_state >> 23) & 0xff
+    sample["round1_native_player_rendered"] = (jump_state >> 31) & 0x01
+jump_evidence = all_samples[EVIDENCE_LAST_FRAME]
+for key in ("round1_player_jump_entries", "round1_player_jump_completions",
+            "round1_player_jump_landings", "round1_player_jump_motion_updates",
+            "round1_player_jump_active", "round1_player_jump_collision_selector",
+            "round1_player_jump_presentation_selector",
+            "round1_player_jump_height"):
+    state[key] = jump_evidence[key]
+state["round1_native_player_render_frames"] = sum(
+    sample["round1_native_player_rendered"]
+    for sample in all_samples[:EVIDENCE_LAST_FRAME + 1])
+for sample in all_samples[:EVIDENCE_LAST_FRAME + 1]:
     native_presentation = sample["round1_native_presentation_state"] & 0xffffffff
     sample["round1_native_projectile_render_commands"] = \
         native_presentation & 0x00ff
@@ -454,7 +476,7 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_entry_gate8236"] == 0 and
         state["round1_entry_gate81af"] == 1 and
         state["round1_control_enabled"] == 1 and
-        state["round1_player_x"] == 1025 and
+        state["round1_player_x"] == 1024 and
         state["round1_player_z"] == 320 and
         state["round1_player_facing"] == 1 and
         state["round1_player_source_action"] == 514 and
@@ -466,18 +488,18 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_actor_handler_dispatches"] == 6380 and
         state["round1_presentation_bindings"] == 6380 and
         state["round1_state_context_bindings"] == 6380 and
-        state["round1_navigation_bound_x"] == 801 and
+        state["round1_navigation_bound_x"] == 800 and
         state["round1_navigation_bound_z"] == 256 and
         state["round1_navigation_applications"] == 468 and
         state["round1_navigation_clamps"] == 0 and
         state["round1_navigation_obstacle_responses"] == 0 and
         state["round1_navigation_terrain_responses"] == 0 and
         state["round1_navigation_terrain_retries"] == 0 and
-        state["round1_camera_x_position"] == 801 and
-        state["round1_camera_x_target"] == 801 and
+        state["round1_camera_x_position"] == 800 and
+        state["round1_camera_x_target"] == 800 and
         state["round1_camera_x_lower"] == 640 and
         state["round1_camera_x_upper"] == 832 and
-        state["round1_camera_scroll2_x"] == 737 and
+        state["round1_camera_scroll2_x"] == 736 and
         state["round1_camera_phase"] == 0 and
         state["round1_camera_countdown"] == 1200 and
         state["round1_camera_locks"] == 0 and
@@ -507,6 +529,15 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_player_resource"] == 32 and
         state["round1_player_resource_recharge"] == 6 and
         state["round1_player_weapon_projectile_free"] == 24 and
+        state["round1_player_jump_entries"] == 1 and
+        state["round1_player_jump_completions"] == 1 and
+        state["round1_player_jump_landings"] == 1 and
+        state["round1_player_jump_motion_updates"] == 35 and
+        state["round1_player_jump_active"] == 0 and
+        state["round1_player_jump_collision_selector"] == 3 and
+        state["round1_player_jump_presentation_selector"] == 10 and
+        state["round1_player_jump_height"] == 0 and
+        state["round1_native_player_render_frames"] > 0 and
         state["round1_native_initial_actor_render_commands"] > 0 and
         state["round1_class1f_initializations"] == 10 and
         state["round1_class1f_initial_rng_calls"] == 10 and
@@ -548,6 +579,21 @@ player_assemblies = {
     0x160204:0x162ABE, 0x160214:0x162AD6, 0x160224:0x162AFE,
     0x160234:0x162B26, 0x160244:0x162B5A, 0x160254:0x162B82,
     0x160264:0x162AA6, 0x160274:0x162AA6,
+    0x15F2CC:0x160BC6, 0x15F2DC:0x160BC6,
+    0x15F2F0:0x160CDA, 0x15F300:0x160D02,
+    0x15F310:0x160D2A, 0x15F320:0x160D52,
+    0x15F330:0x160D86, 0x15F344:0x160BEE,
+    0x15F354:0x160C16, 0x15F364:0x160C3E,
+    0x15F374:0x160C66, 0x15F384:0x160C84,
+    0x15F394:0x160CAC, 0x15F3A4:0x160BEE,
+    0x15F3B8:0x160BEE, 0x15F3C8:0x160CAC,
+    0x15F3D8:0x160C84, 0x15F3E8:0x160C66,
+    0x15F3F8:0x160C3E, 0x15F408:0x160C16,
+    0x15F418:0x160BEE, 0x15F428:0x160BEE,
+    0x15F43C:0x162BAA, 0x15F44C:0x162BC8,
+    0x15F45C:0x162BAA, 0x15FC3C:0x162EE2,
+    0x15FC4C:0x162EE2, 0x15FCE8:0x16212C,
+    0x15FC60:0x162EE2,
 }
 alien_assemblies = {
     0x12DDB0:0x130346,

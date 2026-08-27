@@ -2,9 +2,9 @@
 
 Measures the exact source addresses the corpus decode touches (poses,
 assemblies, dx/dy tables) by running the proven decoder over sampled frames
-of every paired capture route with an address-recording Rom wrapper, rounds
-the touched set to 256-byte pages, merges adjacent pages into windows, and
-emits:
+of every paired capture route with an address-recording Rom wrapper. It groups
+adjacent touched 256-byte pages into windows, then trims each window's exposed
+edges to the first and last byte actually read, and emits:
 
   * generated/avsp_emit_windows.h - the window bytes (git-ignored, contains
     bytes from the private program image), as AvspRomSpan initializers.
@@ -38,15 +38,19 @@ class RecordingRom(Rom):
     def __init__(self, data):
         super().__init__(data)
         self.touched = set()
+        self.touched_bytes = set()
+
+    def _record(self, offset, size):
+        self.touched.add(offset // PAGE)
+        self.touched.add((offset + size - 1) // PAGE)
+        self.touched_bytes.update(range(offset, offset + size))
 
     def u16(self, o):
-        self.touched.add(o // PAGE)
-        self.touched.add((o + 1) // PAGE)
+        self._record(o, 2)
         return super().u16(o)
 
     def u32(self, o):
-        self.touched.add(o // PAGE)
-        self.touched.add((o + 3) // PAGE)
+        self._record(o, 4)
         return super().u32(o)
 
 
@@ -174,6 +178,21 @@ def load_spec02_round1_presentations():
                             "object_or": object_or,
                         })
 
+    jump = authority["player"][
+        "directional_airborne_interruption"]["directional_actions"][
+            "implementation_contract"]
+    jump_actor = jump["presentation_actor_fields"]
+    add_records(
+        "player-button3",
+        [{"animation_record": record["record"],
+          "assembly": record["assembly"]} for sequence in
+         jump["presentation_selector_sequences"].values()
+         for record in sequence],
+        (0, 1),
+        (jump_actor["coordinate_mode_u8"],),
+        int(jump_actor["object_or_u16"], 16),
+        (jump_actor["palette_u8"],))
+
     class1f = authority["enemies"]["archetypes"][3][
         "initial_transition_contract"]
     add_records("class1f-initial",
@@ -267,6 +286,15 @@ def main() -> int:
         windows.append((start * PAGE, (prev - start + 1) * PAGE))
         start = prev = p
     windows.append((start * PAGE, (prev - start + 1) * PAGE))
+    trimmed = []
+    for base, size in windows:
+        end = base + size
+        used = [offset for offset in rec.touched_bytes
+                if base <= offset < end]
+        trimmed_base = min(used)
+        trimmed_end = max(used) + 1
+        trimmed.append((trimmed_base, trimmed_end - trimmed_base))
+    windows = trimmed
     blobs = [(base, data[base:base + size]) for base, size in windows]
     total = sum(size for _, size in windows)
     print("windows: %d, total bytes: %d" % (len(windows), total))

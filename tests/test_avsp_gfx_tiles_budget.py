@@ -27,6 +27,24 @@ MANIFEST = ROOT / "data" / "avsp_gfx_tiles.json"
 CAPTURE_ROOT = ROOT / ".deps" / "mame" / "enemy_actions"
 
 
+def button3_presentation_union_is_complete(presentations, fixture):
+    sequences = fixture["authority_data"]["player"][
+        "directional_airborne_interruption"]["directional_actions"][
+            "implementation_contract"]["presentation_selector_sequences"]
+    expected = {
+        (int(record["assembly"], 16), facing)
+        for sequence in sequences.values()
+        for record in sequence
+        for facing in (0, 1)
+    }
+    actual = {
+        (item["assembly"], item["facing"])
+        for item in presentations
+        if item["kind"] == "player-button3"
+    }
+    return actual == expected
+
+
 def run(args):
     return subprocess.run([sys.executable, str(GENERATOR)] + args,
                           cwd=str(ROOT), capture_output=True, text=True)
@@ -36,6 +54,23 @@ def main() -> int:
     if not CAPTURE_ROOT.is_dir():
         print("test_avsp_gfx_tiles_budget: SKIP (private captures absent)")
         return 0
+
+    sys.path.insert(0, str(ROOT / "tools"))
+    from gen_avsp_emit_windows import load_spec02_round1_presentations
+    presentations, _fixture_sha = load_spec02_round1_presentations()
+    fixture = json.loads((ROOT / "data" /
+                          "spec02_round1_generated_fixtures.json").read_text())
+    if not button3_presentation_union_is_complete(presentations, fixture):
+        print("FAIL: Button3 source presentation union is incomplete")
+        return 1
+    button3_indexes = [index for index, item in enumerate(presentations)
+                       if item["kind"] == "player-button3"]
+    if not button3_indexes or any(
+            button3_presentation_union_is_complete(
+                presentations[:index] + presentations[index + 1:], fixture)
+            for index in button3_indexes):
+        print("FAIL: Button3 presentation omission control is non-discriminating")
+        return 1
 
     # Establish a known-good baseline so the refused run's "untouched"
     # claim is checked against something, not against build/ debris.
@@ -50,6 +85,13 @@ def main() -> int:
         print("FAIL: baseline manifest scope is not 'street'")
         return 1
     residency = before_manifest["presentation_residency"]
+    native_presentations = before_manifest["routes"].get(
+        "spec02_round1_native_presentations", {})
+    if (native_presentations.get("decoded_variants") != 128 or
+        native_presentations.get("unique_assemblies") != 56 or
+        native_presentations.get("tiles_added") != 564):
+        print("FAIL: SPEC-02 native presentation union drifted")
+        return 1
     if (residency["source_peak_unique_tiles"] != 374 or
         residency["source_peak_frame"] != 2357 or
         residency["projectile_simultaneous_bound"] != 12 or

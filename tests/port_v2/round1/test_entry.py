@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "bdef78c4006354510998a6d5428960a525180d33d9f9122bb54a3e40d25202d6"
+EXPECTED = "a98a56e1c372fbd1bb15ea8334c66e96a66063ae00ffba2c7aaa97044cc3b659"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -102,6 +102,32 @@ for before, after in (
      "runtime->camera_guard_countdown = runtime->camera_guard_countdown;"),
     ("unsigned short index = (unsigned short)(byte_offset >> 1);",
      "unsigned short index = (unsigned short)(byte_offset >> 2);"),
+    ("if (up)\n            index += 1u;",
+     "if (up)\n            index += 2u;"),
+    ("if ((unsigned char)(right ^ facing) != 0u)\n                index += 2u;",
+     "if ((unsigned char)(right ^ facing) != 0u)\n                index += 1u;"),
+    ("if (facing != 0u)\n        {\n            runtime->player_jump_x_velocity =\n                -runtime->player_jump_x_velocity;",
+     "if (facing == 0u)\n        {\n            runtime->player_jump_x_velocity =\n                -runtime->player_jump_x_velocity;"),
+    ("runtime->player_jump_collision_selector = up ? 1u : 2u;",
+     "runtime->player_jump_collision_selector = up ? 2u : 1u;"),
+    ("runtime->player_jump_collision_selector = up ? 4u : 8u;",
+     "runtime->player_jump_collision_selector = up ? 8u : 4u;"),
+    ("runtime->player_jump_phase = 0x040au;",
+     "runtime->player_jump_phase = 0x0402u;"),
+    ("runtime->player_jump_y_fp += runtime->player_jump_y_velocity;",
+     "runtime->player_jump_y_fp -= runtime->player_jump_y_velocity;"),
+    ("runtime->player_jump_y_velocity += runtime->player_jump_y_acceleration;",
+     "runtime->player_jump_y_velocity -= runtime->player_jump_y_acceleration;"),
+    ("avsp_round1_fixed_high_word(runtime->player_jump_y_fp) <=\n            runtime->player_action.lane",
+     "avsp_round1_fixed_high_word(runtime->player_jump_y_fp) <\n            runtime->player_action.lane"),
+    ("runtime->player_jump_phase_timer = 10u;",
+     "runtime->player_jump_phase_timer = 9u;"),
+    ("--runtime->player_jump_phase_timer;",
+     "runtime->player_jump_phase_timer -= 2u;"),
+    ("++runtime->player_jump_entries;\n    return avsp_round1_bind_player_jump_sequence(runtime, 3u);",
+     "++runtime->player_jump_entries;\n    avsp_round1_source_rng(runtime);\n    return avsp_round1_bind_player_jump_sequence(runtime, 3u);"),
+    ("if (runtime->player_jump_active && received_damage > 0)\n        avsp_round1_interrupt_player_jump(runtime);",
+     "if (runtime->player_jump_active && received_damage < 0)\n        avsp_round1_interrupt_player_jump(runtime);"),
 ):
     assert before in source
     run(source.replace(before, after), header, False)
@@ -147,6 +173,20 @@ for before, after in (
     ("    { -8, 8 },", "    { -7, 8 },"),
     ("0x00ffc580UL, 792, 296, 296, 0x0200u, 0x0000u, 0x08d9a4UL", "0x00ffc580UL, 792, 296, 296, 0x0202u, 0x0000u, 0x08d9a4UL"),
     ("0x08d9a4UL, 0u, 0u, 0u, 0x8000u", "0x08d9a4UL, 0u, 0u, 0u, 0x0000u"),
+    ("{ 0L, 0L, 557056L, -32768L },",
+     "{ 0L, 0L, 524288L, -32768L },"),
+    ("{ -983040L, 26624L, 262144L, -14336L },",
+     "{ -917504L, 26624L, 262144L, -14336L },"),
+    ("{ 786432L, -40960L, 0L, 0L }",
+     "{ 786432L, -32768L, 0L, 0L }"),
+    ("{ 4u, 5u, { { 8u, 0, 0x15f2f0UL, 0x160cdaUL, 2u, 0u }",
+     "{ 4u, 5u, { { 7u, 0, 0x15f2f0UL, 0x160cdaUL, 2u, 0u }"),
+    ("{ 6u, 8u, { { 2u, 0, 0x15f3b8UL, 0x160beeUL, 2u, 0u }",
+     "{ 6u, 8u, { { 2u, 0, 0x15f3c8UL, 0x160beeUL, 2u, 0u }"),
+    ("{ 41u, 2u, { { 4u, 0, 0x15fc3cUL, 0x162ee2UL, 9u, 22u }",
+     "{ 41u, 2u, { { 4u, 0, 0x15fc3cUL, 0x162ee2UL, 9u, 21u }"),
+    ("{ 60u, 1u, { { 4095u, -32768, 0x15fc60UL, 0x162ee2UL, 9u, 35u }",
+     "{ 60u, 1u, { { 4095u, -32768, 0x15fc60UL, 0x162ee2UL, 9u, 34u }"),
 ):
     assert before in generated
     changed = generated.replace(before, after, 1)
@@ -165,4 +205,4 @@ for before, after in (
                    f"'{wsl(temp / 'test')}'")
         result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1 differential: PASS (93 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3 differential: PASS (113 real mutations)")

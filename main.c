@@ -99,12 +99,12 @@
    needs more PCM moved to phase-boundary loads first (S3 enabler,
    tracked in the handoff), not a bigger carve alone. */
 /* Widened from 0x40000 for the RP4 street archive and to the smallest aligned
- * carve that co-resides the SPEC-02-bound initial Round 1 presentations with
- * the accepted combat overlay (332,708 + 24,236 bytes). Scene loading
+ * carve that co-resides the SPEC-02-bound first-segment presentations with
+ * the accepted combat overlay (372,308 + 24,236 bytes). Scene loading
  * boundaries are the residency lever: the carve holds one scene-scope
  * archive at a time and is reloaded during transitions, when data-track
  * reads are legal. */
-#define AVSP_TILE_REGION_BYTES 0x58000
+#define AVSP_TILE_REGION_BYTES 0x61000
 
 /* RP4 street test: the interval strip bundle is staged after the tile
  * carve, outside the allocator, only in that build profile. */
@@ -533,6 +533,7 @@ typedef struct
     unsigned int round1_class1f_state;
     unsigned int round1_auxiliary_state;
     unsigned int round1_native_initial_state;
+    unsigned int round1_player_jump_state;
 } LiveEncounterDiagSample;
 static AvspLiveEncounterRuntime live_encounter_runtime;
 static AvspLiveEncounterFrame live_encounter_frame;
@@ -663,6 +664,7 @@ volatile int avsp_diag_round1_player_weapon_projectile_free;
 volatile int avsp_diag_round1_native_projectile_render_commands;
 volatile int avsp_diag_round1_native_impact_render_commands;
 volatile int avsp_diag_round1_native_initial_actor_render_commands;
+volatile int avsp_diag_round1_native_player_render_commands;
 volatile int avsp_diag_round1_native_presentation_decode_failures;
 volatile int avsp_diag_round1_decode_failure_actor_type;
 volatile int avsp_diag_round1_decode_failure_actor_class;
@@ -3438,6 +3440,7 @@ static int round1_composite_sprite_for_entry(const AvspObjectEntry *entry,
 static int draw_round1_source_actor(const short world_x,
                                     const short world_y,
                                     const short world_z,
+                                    const short projection_height,
                                     const unsigned char facing,
                                     const unsigned char coordinate_mode,
                                     const unsigned char palette,
@@ -3457,7 +3460,7 @@ static int draw_round1_source_actor(const short world_x,
         playable_slice_frame.scene.camera_world_x +
         AVSP_LIVE_ENCOUNTER_APERTURE_ORIGIN_X;
     const int projected_lane = avsp_live_encounter_project_screen_y(
-        world_z, 0) + 200 - JO_TV_HEIGHT / 2 - 88;
+        world_z, projection_height) + 200 - JO_TV_HEIGHT / 2 - 88;
     const int anchor_jo_y = projected_lane - 200 + 88;
     const int depth = 330 - projected_lane;
     int count;
@@ -3579,7 +3582,7 @@ static int draw_round1_weapon_projectiles(void)
         if (!projectile->active || projectile->assembly == 0UL)
             continue;
         rendered += draw_round1_source_actor(
-            projectile->x, projectile->y, projectile->z,
+            projectile->x, projectile->y, projectile->z, 0,
             projectile->facing, projectile->coordinate_mode,
             projectile->palette, projectile->object_or,
             5u, 0x05u, projectile->animation_record,
@@ -3600,7 +3603,7 @@ static int draw_round1_weapon_impacts(void)
             actor->assembly == 0UL)
             continue;
         rendered += draw_round1_source_actor(
-            actor->x, actor->y, actor->z, actor->facing,
+            actor->x, actor->y, actor->z, 0, actor->facing,
             actor->coordinate_mode, actor->palette, actor->object_or,
             actor->type, actor->actor_class, actor->animation_record,
             actor->assembly);
@@ -3628,7 +3631,7 @@ static int draw_round1_initial_source_actors(void)
                 actor->assembly == 0UL)
                 continue;
             rendered += draw_round1_source_actor(
-                actor->x, actor->y, actor->z, actor->facing,
+                actor->x, actor->y, actor->z, 0, actor->facing,
                 actor->coordinate_mode, actor->palette, actor->object_or,
                 actor->type, actor->actor_class, actor->animation_record,
                 actor->assembly);
@@ -6953,9 +6956,35 @@ static void playable_slice_draw_actors(void)
     jo_sprite_change_sprite_scale_xy(
         (float)CAP_VIEW_WIDTH / (float)CAP_CPS2_VIEW_WIDTH, 1.0f);
     if (player.active)
-        draw_player(&player, playable_slice_frame.scene.player_screen_x);
+    {
+#ifdef AVSP_LIVE_ENCOUNTER
+        if (round1_runtime.player_jump_active)
+            avsp_diag_round1_native_player_render_commands =
+                draw_round1_source_actor(
+                    round1_runtime.player.x, round1_runtime.player.y,
+                    round1_runtime.player.z,
+                    round1_runtime.player_action.height,
+                    round1_runtime.player.facing,
+                    round1_runtime.player.coordinate_mode,
+                    round1_runtime.player.palette,
+                    round1_runtime.player.object_or, 0u, 0u,
+                    round1_runtime.player.animation_record,
+                    round1_runtime.player.assembly);
+        else
+#endif
+        {
+#ifdef AVSP_LIVE_ENCOUNTER
+            avsp_diag_round1_native_player_render_commands = 0;
+#endif
+            draw_player(&player, playable_slice_frame.scene.player_screen_x);
+        }
+    }
     if (player.active && !playable_slice_frame.scene.player_presentation_active)
     {
+#ifdef AVSP_LIVE_ENCOUNTER
+        if (!round1_runtime.player_jump_active)
+#endif
+        {
         playable_slice_frame.scene.player_identity.emitted_object_identity =
             2166136261UL ^ (unsigned long)(unsigned int)
                 playable_slice_frame.scene.player_action ^
@@ -6964,6 +6993,7 @@ static void playable_slice_draw_actors(void)
             2166136261UL ^
             (unsigned long)(unsigned int)player_action_sprites[0] ^
             ((unsigned long)(unsigned int)player_action_sprites[1] << 8);
+        }
     }
 #ifdef AVSP_LIVE_ENCOUNTER
     avsp_diag_round1_native_initial_actor_render_commands =
@@ -7027,6 +7057,7 @@ static unsigned short live_encounter_real_input(void)
     if (jo_is_pad1_key_pressed(JO_KEY_DOWN)) mask |= AVSP_PW_INPUT_DOWN;
     if (jo_is_pad1_key_down(JO_KEY_A)) mask |= AVSP_ROUND1_INPUT_BUTTON1;
     if (jo_is_pad1_key_down(JO_KEY_B)) mask |= AVSP_PW_INPUT_ATTACK;
+    if (jo_is_pad1_key_down(JO_KEY_C)) mask |= AVSP_ROUND1_INPUT_BUTTON3;
     return mask;
 }
 
@@ -7405,7 +7436,8 @@ static void round1_apply_native_player_and_hud(const int retained_stepped)
         (player_visible ? 2 : 0) + (enemy_visible ? 32 : 0);
     playable_slice_frame.actors.player.world_x = round1_runtime.player.x;
     playable_slice_frame.actors.player.lane =
-        avsp_live_encounter_project_screen_y(round1_runtime.player.z, 0) +
+        avsp_live_encounter_project_screen_y(round1_runtime.player.z,
+            round1_runtime.player_action.height) +
         200 - JO_TV_HEIGHT / 2 - 88;
     playable_slice_frame.actors.player.facing =
         avsp_pw_render_facing(round1_runtime.player.facing);
@@ -7419,7 +7451,7 @@ static void round1_apply_native_player_and_hud(const int retained_stepped)
     scene->player_attack_active = round1_runtime.player_action.attack_active;
     scene->player_presentation_active = 0;
     scene->player_source_pose = 0;
-    scene->player_source_height = 0;
+    scene->player_source_height = round1_runtime.player_action.height;
     scene->player_identity.animation_record =
         round1_runtime.player.animation_record;
     if (round1_runtime.player_action.state == AVSP_PW_STATE_ATTACK)
@@ -7743,6 +7775,24 @@ static void live_encounter_publish(void)
                 avsp_diag_round1_native_presentation_decode_failures &
                 0x0fu) << 12) |
             (((unsigned int)round1_runtime.rng_seed & 0xffffu) << 16);
+        sample->round1_player_jump_state =
+            ((unsigned int)round1_runtime.player_jump_entries & 0x03u) |
+            (((unsigned int)round1_runtime.player_jump_completions & 0x03u)
+                << 2) |
+            (((unsigned int)round1_runtime.player_jump_landings & 0x03u)
+                << 4) |
+            (((unsigned int)round1_runtime.player_jump_motion_updates & 0x3fu)
+                << 6) |
+            (((unsigned int)round1_runtime.player_jump_active & 0x01u)
+                << 12) |
+            (((unsigned int)round1_runtime.player_jump_collision_selector &
+                0x0fu) << 13) |
+            (((unsigned int)round1_runtime.player_jump_presentation_selector &
+                0x3fu) << 17) |
+            (((unsigned int)round1_runtime.player_action.height & 0xffu)
+                << 23) |
+            ((avsp_diag_round1_native_player_render_commands > 0 ? 1UL : 0UL)
+                << 31);
         avsp_diag_live_sample_count = (int)live_encounter_frame.frame + 1;
     }
     avsp_diag_live_interface_version = AVSP_LIVE_ENCOUNTER_INTERFACE_VERSION;
@@ -7802,8 +7852,8 @@ static void live_encounter_publish(void)
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
         sizeof(AVSP_ROUND1_SPEC02_SHA256) == 65u &&
-        AVSP_ROUND1_SPEC02_SHA256[0] == 'b' &&
-        AVSP_ROUND1_SPEC02_SHA256[63] == '6';
+        AVSP_ROUND1_SPEC02_SHA256[0] == 'a' &&
+        AVSP_ROUND1_SPEC02_SHA256[63] == '9';
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
     avsp_diag_round1_rng_seed = round1_runtime.rng_seed;
@@ -8005,7 +8055,8 @@ static void live_encounter_frame_callback(void)
     {
         round1_player_mask = (unsigned short)(round1_player_mask &
             (unsigned short)~(AVSP_PW_INPUT_ATTACK |
-                              AVSP_ROUND1_INPUT_BUTTON1));
+                              AVSP_ROUND1_INPUT_BUTTON1 |
+                              AVSP_ROUND1_INPUT_BUTTON3));
         if (round1_runtime.player_controller_updates == 30u ||
             round1_runtime.player_controller_updates == 72u ||
             round1_runtime.player_controller_updates == 114u ||
@@ -8020,6 +8071,15 @@ static void live_encounter_frame_callback(void)
             round1_runtime.player_resource_depleted = 1u;
             round1_player_mask |= AVSP_ROUND1_INPUT_BUTTON1;
         }
+        if (round1_runtime.player_controller_updates == 330u)
+            round1_player_mask |= AVSP_ROUND1_INPUT_BUTTON3;
+        if (round1_runtime.player_controller_updates == 330u ||
+            round1_runtime.player_jump_active)
+            round1_player_mask = (unsigned short)(round1_player_mask &
+                (unsigned short)~(AVSP_PW_INPUT_LEFT |
+                                  AVSP_PW_INPUT_RIGHT |
+                                  AVSP_PW_INPUT_UP |
+                                  AVSP_PW_INPUT_DOWN));
     }
 #endif
     if (round1_runtime.route_state == 4 &&

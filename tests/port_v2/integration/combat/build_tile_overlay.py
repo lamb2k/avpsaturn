@@ -102,10 +102,10 @@ def build() -> dict:
     fixture_path = ROOT / "data/spec02_round1_generated_fixtures.json"
     fixture_sha = hashlib.sha256(fixture_path.read_bytes()).hexdigest()
     extension = base_manifest["routes"].get(
-        "spec02_round1_button1_presentations", {})
+        "spec02_round1_native_presentations", {})
     if extension.get("fixture_sha256") != fixture_sha or \
             extension.get("tiles_added", 0) <= 0:
-        raise SystemExit("SPEC-02 Button1 tile extension is unbound")
+        raise SystemExit("SPEC-02 native presentation tile union is unbound")
     legacy_tiles, legacy_banks, _routes = collect_entries(
         Rom(ROM_PATH.read_bytes()), ROUTES_BY_SCOPE["street"])
     legacy_blob, _slots = build_archive_blob(

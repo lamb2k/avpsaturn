@@ -72,7 +72,7 @@ def main() -> int:
     check(bool(referenced), "no colour banks were referenced in any route")
     manifest_spec_banks = {
         int(b, 16) for b in tiles.get("routes", {}).get(
-            "spec02_round1_button1_presentations", {}).get(
+            "spec02_round1_native_presentations", {}).get(
                 "palette_banks", [])
     }
     check(referenced.issuperset(manifest_spec_banks),

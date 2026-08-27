@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=bdef78c4006354510998a6d5428960a525180d33d9f9122bb54a3e40d25202d6 */
-/* fixtures_sha256=154eda9d8aa7e6e124c97fd50ae4eb69048b1d7e9962b147f3a32e83b6c3d461 */
+/* contract_sha256=a98a56e1c372fbd1bb15ea8334c66e96a66063ae00ffba2c7aaa97044cc3b659 */
+/* fixtures_sha256=6ddcb21e488da3411137003a979766875ec9b308eb0e77d962ccc03dbff719af */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -479,6 +479,40 @@ static const AvspRound1PresentationSpec avsp_round1_player_melee_strikes[AVSP_RO
     { 0x16014cUL, 0x162a82UL, 8u, 2u },
     { 0x1601c0UL, 0x1614a4UL, 8u, 3u },
     { 0x160234UL, 0x162b26UL, 19u, 4u },
+};
+
+static const AvspRound1PlayerJumpVectorSpec avsp_round1_player_jump_vectors[AVSP_ROUND1_PLAYER_JUMP_VECTOR_COUNT] =
+{
+    { 0L, 0L, 557056L, -32768L },
+    { 0L, 0L, 786432L, -32768L },
+    { -983040L, 26624L, 262144L, -14336L },
+    { -589824L, 9216L, 786432L, -34816L },
+    { 589824L, -8192L, 262144L, -32768L },
+    { 557056L, -9216L, 786432L, -34816L },
+};
+
+static const AvspRound1PlayerJumpVectorSpec avsp_round1_player_jump_down_vectors[AVSP_ROUND1_PLAYER_JUMP_DOWN_VECTOR_COUNT] =
+{
+    { 393216L, -32768L, 0L, 0L },
+    { 786432L, -40960L, 0L, 0L }
+};
+
+static const AvspRound1PlayerJumpSequenceSpec avsp_round1_player_jump_sequences[AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_COUNT] =
+{
+    { 3u, 2u, { { 1u, 0, 0x15f2ccUL, 0x160bc6UL, 1u, 0u }, { 1u, -32768, 0x15f2dcUL, 0x160bc6UL, 1u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
+    { 4u, 5u, { { 8u, 0, 0x15f2f0UL, 0x160cdaUL, 2u, 0u }, { 5u, 0, 0x15f300UL, 0x160d02UL, 2u, 0u }, { 5u, 0, 0x15f310UL, 0x160d2aUL, 2u, 0u }, { 5u, 0, 0x15f320UL, 0x160d52UL, 2u, 0u }, { 4095u, -32768, 0x15f330UL, 0x160d86UL, 2u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
+    { 5u, 7u, { { 10u, 0, 0x15f344UL, 0x160beeUL, 2u, 0u }, { 3u, 0, 0x15f354UL, 0x160c16UL, 2u, 0u }, { 3u, 0, 0x15f364UL, 0x160c3eUL, 13u, 0u }, { 6u, 0, 0x15f374UL, 0x160c66UL, 14u, 0u }, { 6u, 0, 0x15f384UL, 0x160c84UL, 15u, 0u }, { 8u, 0, 0x15f394UL, 0x160cacUL, 16u, 0u }, { 4095u, -32768, 0x15f3a4UL, 0x160beeUL, 2u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
+    { 6u, 8u, { { 2u, 0, 0x15f3b8UL, 0x160beeUL, 2u, 0u }, { 10u, 0, 0x15f3c8UL, 0x160cacUL, 16u, 0u }, { 3u, 0, 0x15f3d8UL, 0x160c84UL, 15u, 0u }, { 3u, 0, 0x15f3e8UL, 0x160c66UL, 14u, 0u }, { 6u, 0, 0x15f3f8UL, 0x160c3eUL, 13u, 0u }, { 6u, 0, 0x15f408UL, 0x160c16UL, 2u, 0u }, { 6u, 0, 0x15f418UL, 0x160beeUL, 2u, 0u }, { 4095u, -32768, 0x15f428UL, 0x160beeUL, 2u, 0u } } },
+    { 10u, 2u, { { 1u, 0, 0x15f2ccUL, 0x160bc6UL, 1u, 0u }, { 1u, -32768, 0x15f2dcUL, 0x160bc6UL, 1u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
+    { 15u, 3u, { { 4u, 0, 0x15f43cUL, 0x162baaUL, 18u, 0u }, { 10u, 0, 0x15f44cUL, 0x162bc8UL, 18u, 0u }, { 4095u, -32768, 0x15f45cUL, 0x162baaUL, 18u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
+    { 41u, 2u, { { 4u, 0, 0x15fc3cUL, 0x162ee2UL, 9u, 22u }, { 4095u, -32768, 0x15fc4cUL, 0x162ee2UL, 9u, 23u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
+    { 42u, 1u, { { 4095u, -32768, 0x15fce8UL, 0x16212cUL, 7u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
+    { 60u, 1u, { { 4095u, -32768, 0x15fc60UL, 0x162ee2UL, 9u, 35u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
+};
+
+static const AvspRound1PlayerPresentationActorSpec avsp_round1_player_jump_actor =
+{
+    0u, 0u, 0x8000u
 };
 
 static const AvspRound1PlayerWeaponSpec avsp_round1_player_weapon =

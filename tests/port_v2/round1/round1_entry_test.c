@@ -2,6 +2,15 @@
 
 #include <stdio.h>
 
+static int initialize_jump(AvspRound1Runtime *runtime,
+                           unsigned short direction_mask)
+{
+    unsigned short mask = (unsigned short)(
+        AVSP_ROUND1_INPUT_BUTTON3 | direction_mask);
+    return avsp_round1_step_player(runtime, mask, 0) &&
+        avsp_round1_step_player(runtime, mask, 0);
+}
+
 int main(void)
 {
     AvspRound1Runtime runtime;
@@ -11,7 +20,9 @@ int main(void)
     const AvspRound1ActorCore *last;
     avsp_round1_init(&runtime);
     if (!avsp_round1_entry_valid(&runtime))
+    {
         return 1;
+    }
     if (!avsp_round1_begin_first_entry(&runtime) ||
         runtime.player.state != AVSP_ROUND1_PLAYER_ENTRY_STATE ||
         runtime.entry.script_cursor != 0x00128FAAUL ||
@@ -372,6 +383,144 @@ int main(void)
             camera_runtime.camera_x_upper != 1008 ||
             camera_runtime.camera_unlocks != runtime.camera_unlocks + 1u)
             return 81;
+    }
+    {
+        static const unsigned short masks[10] = {
+            0u, AVSP_PW_INPUT_UP, AVSP_PW_INPUT_LEFT,
+            AVSP_PW_INPUT_LEFT, AVSP_PW_INPUT_RIGHT,
+            AVSP_PW_INPUT_RIGHT,
+            AVSP_PW_INPUT_UP | AVSP_PW_INPUT_LEFT,
+            AVSP_PW_INPUT_UP | AVSP_PW_INPUT_LEFT,
+            AVSP_PW_INPUT_UP | AVSP_PW_INPUT_RIGHT,
+            AVSP_PW_INPUT_UP | AVSP_PW_INPUT_RIGHT };
+        static const unsigned char facings[10] =
+            {0u, 0u, 0u, 1u, 0u, 1u, 0u, 1u, 0u, 1u};
+        static const long x_velocity[10] = {
+            0L, 0L, -0x000f0000L, -0x00090000L, 0x00090000L,
+            0x000f0000L, -0x00090000L, -0x00088000L,
+            0x00088000L, 0x00090000L };
+        static const long x_acceleration[10] = {
+            0L, 0L, 0x00006800L, 0x00002000L, -0x00002000L,
+            -0x00006800L, 0x00002400L, 0x00002400L,
+            -0x00002400L, -0x00002400L };
+        static const long y_velocity[10] = {
+            0x00088000L, 0x000c0000L, 0x00040000L, 0x00040000L,
+            0x00040000L, 0x00040000L, 0x000c0000L, 0x000c0000L,
+            0x000c0000L, 0x000c0000L };
+        static const long y_acceleration[10] = {
+            -0x00008000L, -0x00008000L, -0x00003800L, -0x00008000L,
+            -0x00008000L, -0x00003800L, -0x00008800L, -0x00008800L,
+            -0x00008800L, -0x00008800L };
+        static const unsigned char selectors[10] =
+            {4u, 4u, 5u, 15u, 15u, 6u, 5u, 6u, 6u, 6u};
+        static const unsigned char collisions[10] =
+            {3u, 3u, 2u, 8u, 8u, 2u, 1u, 4u, 4u, 1u};
+        static const unsigned long records[10] = {
+            0x0015f2f0UL, 0x0015f2f0UL, 0x0015f344UL,
+            0x0015f43cUL, 0x0015f43cUL, 0x0015f3b8UL,
+            0x0015f344UL, 0x0015f3b8UL, 0x0015f3b8UL,
+            0x0015f3b8UL };
+        unsigned int jump_index;
+        for (jump_index = 0u; jump_index < 10u; ++jump_index)
+        {
+            AvspRound1Runtime jump_runtime = runtime;
+            jump_runtime.player.x = 850;
+            jump_runtime.player_action.x = 850;
+            jump_runtime.player.facing = facings[jump_index];
+            jump_runtime.player_action.facing = facings[jump_index];
+            if (!initialize_jump(&jump_runtime, masks[jump_index]) ||
+                jump_runtime.player_jump_phase != 0x0402u ||
+                jump_runtime.player.source_action != 0x0402u ||
+                jump_runtime.player_jump_x_velocity != x_velocity[jump_index] ||
+                jump_runtime.player_jump_x_acceleration !=
+                    x_acceleration[jump_index] ||
+                jump_runtime.player_jump_y_velocity != y_velocity[jump_index] ||
+                jump_runtime.player_jump_y_acceleration !=
+                    y_acceleration[jump_index] ||
+                jump_runtime.player_jump_presentation_selector !=
+                    selectors[jump_index] ||
+                jump_runtime.player_jump_collision_selector !=
+                    collisions[jump_index] ||
+                jump_runtime.player.animation_record != records[jump_index] ||
+                jump_runtime.player_jump_airborne_latch != 1u ||
+                jump_runtime.player_jump_entries != 1u ||
+                jump_runtime.rng_seed != runtime.rng_seed ||
+                !avsp_round1_entry_valid(&jump_runtime))
+                return 82;
+        }
+    }
+    {
+        AvspRound1Runtime jump_runtime = runtime;
+        unsigned int jump_calls = 2u;
+        short maximum_height = 0;
+        if (!initialize_jump(&jump_runtime, 0u) ||
+            jump_runtime.player.animation_record != 0x0015f2f0UL ||
+            jump_runtime.player_jump_animation_timer != 8u)
+            return 83;
+        while (jump_runtime.player_jump_active && jump_calls < 80u)
+        {
+            if (!avsp_round1_step_player(&jump_runtime, 0u, 0))
+                return 83;
+            if (jump_runtime.player_action.height > maximum_height)
+                maximum_height = jump_runtime.player_action.height;
+            ++jump_calls;
+        }
+        if (jump_calls != 39u || maximum_height != 76 ||
+            jump_runtime.player_jump_completions != 1u ||
+            jump_runtime.player_jump_landings != 1u ||
+            jump_runtime.player_jump_motion_updates != 35u ||
+            jump_runtime.rng_seed != runtime.rng_seed ||
+            jump_runtime.player_jump_cleanup_pending != 1u ||
+            jump_runtime.player.source_action != 0u ||
+            jump_runtime.player.animation_record != 0x0015f1f4UL ||
+            jump_runtime.player_action.height != 0 ||
+            !avsp_round1_entry_valid(&jump_runtime) ||
+            !avsp_round1_step_player(&jump_runtime, 0u, 0) ||
+            jump_runtime.player_jump_cleanup_pending != 0u)
+            return 84;
+    }
+    {
+        AvspRound1Runtime jump_runtime = runtime;
+        unsigned int down_calls = 2u;
+        if (!initialize_jump(&jump_runtime, AVSP_PW_INPUT_DOWN) ||
+            jump_runtime.player_jump_phase != 0x040au ||
+            jump_runtime.player_jump_presentation_selector != 60u ||
+            jump_runtime.player.attack_selector != 35u ||
+            jump_runtime.player_jump_x_velocity != 0x00060000L ||
+            jump_runtime.player_jump_x_acceleration != -0x00008000L)
+            return 85;
+        while (jump_runtime.player_jump_active)
+        {
+            if (!avsp_round1_step_player(&jump_runtime, 0u, 0))
+                return 85;
+            ++down_calls;
+        }
+        if (down_calls != 25u ||
+            jump_runtime.player_jump_completions != 1u ||
+            jump_runtime.player_jump_landings != 0u ||
+            jump_runtime.player_jump_motion_updates != 13u)
+            return 85;
+    }
+    {
+        AvspRound1Runtime jump_runtime = runtime;
+        if (!initialize_jump(&jump_runtime,
+                             AVSP_PW_INPUT_DOWN | AVSP_PW_INPUT_RIGHT) ||
+            jump_runtime.player.facing != 1u ||
+            jump_runtime.player_jump_presentation_selector != 41u ||
+            jump_runtime.player.attack_selector != 22u ||
+            jump_runtime.player_jump_x_velocity != 0x000c0000L ||
+            jump_runtime.player_jump_x_acceleration != -0x0000a000L)
+            return 86;
+    }
+    {
+        AvspRound1Runtime jump_runtime = runtime;
+        if (!initialize_jump(&jump_runtime, AVSP_PW_INPUT_UP) ||
+            !avsp_round1_step_player(&jump_runtime, 0u, 8) ||
+            jump_runtime.player_jump_active != 0u ||
+            jump_runtime.player_jump_interruptions != 1u ||
+            jump_runtime.player_action.state != AVSP_PW_STATE_HIT ||
+            jump_runtime.player_action.height != 0)
+            return 87;
     }
     for (selector = 1u; selector <= AVSP_ROUND1_PLAYER_MELEE_COUNT;
          ++selector)

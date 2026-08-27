@@ -1,11 +1,11 @@
 {
   "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
-  "checkpoint": "native-round1-coffee-shop-navigation-terrain-camera",
-  "status": "PASS_FIRST_SEGMENT_ENTRY_PLAYER_SCHEDULER_CLASS1F_NEUTRAL_MELEE_BUTTON1_PROJECTILE_NAVIGATION_TERRAIN_CAMERA",
+  "checkpoint": "native-round1-player-button3-airborne",
+  "status": "PASS_FIRST_SEGMENT_ENTRY_PLAYER_SCHEDULER_CLASS1F_NEUTRAL_MELEE_BUTTON1_PROJECTILE_NAVIGATION_TERRAIN_CAMERA_BUTTON3",
   "implementation_base_commit": "52714b420d3ca1ca0437d66de61735fa1a2ba36d",
   "diagnostic_correction_commit": "4fbc919235f61d962daf342efbfb4cd8f743ab60",
   "implementation_source": {
-    "spec02_sha256": "bdef78c4006354510998a6d5428960a525180d33d9f9122bb54a3e40d25202d6",
+    "spec02_sha256": "a98a56e1c372fbd1bb15ea8334c66e96a66063ae00ffba2c7aaa97044cc3b659",
     "raw_trace_or_disassembly_consumed": false,
     "authored_fallback_count": 0
   },
@@ -41,7 +41,7 @@
     },
     "current_input_player": {
       "evidence_frame": 466,
-      "x": 1025,
+      "x": 1024,
       "z": 320,
       "facing": 1,
       "source_action": 514,
@@ -257,9 +257,10 @@
     "target_live_encounter_bench": "PASS",
     "spec02_entry_correction_revalidated": "PASS",
     "paired_emulator_regression": "PASS",
-    "paired_emulator_iso_sha256": "f40d51362371d59866ea4283704880b56272e446d91b1db7b8acbdaa7e02fbf2",
+    "paired_emulator_iso_sha256": "48e76ef310f0832344290656912565dbfa292ddc0d1ea134fde5dcc23568a080",
     "paired_vdp1_texture_integrity": "PASS: two byte-identical cold runs each compare all 208 live tile-cache mappings to TILES.BIN with zero mismatches; cache SHA-256 b6493d7a2e7e9668377b52f9f1812ef12aedefde6aa2653dbc74a933c68f7fa9; sprite arrays are 2040 bytes apart; high-water 225/255",
-    "paired_native_player_ledgers": "PASS: 471 byte-identical synchronized samples; frame 470 is x=1031/z=320/facing=1/source_action=514/controller_updates=301; neutral stop is 2 entries/1 completion/10 suppressed-motion ticks because the second stop is interrupted by a melee edge",
+    "paired_native_player_ledgers": "PASS: 467 synchronized samples are byte-identical across both cold runs; final native state is x=1024/z=320/facing=1/source_action=514/controller_updates=468; the neutral Button3 diagnostic does not inherit a retained direction bit",
+    "paired_native_button3_ledgers": "PASS: one neutral Button3 edge enters, executes 35 signed 16.16 motion updates, lands once, completes once, restores height/active to zero, and binds final collision/presentation selectors 3/10; 38 frames use the source actor renderer with zero presentation decode failure, fallback, scheduler failure, or authored PCM",
     "paired_native_melee_ledgers": "PASS: four source-owned Button2 edges complete selectors 1..4 in order with exact presentation mask 15; held Button2 does not chain, no RNG is consumed, and no fallback or unsupported action fires",
     "paired_native_button1_ledgers": "PASS: two byte-identical release-live target runs bind two exact Button1 entries, 12 signed attempts, four-tick cadence, 12 successful type-4/class-5 allocations, 12 resource debits, 70 player presentation bindings, one exact type-24/class-0x10 empty-effect lifecycle, 49 class-0x05 projectile-render frames, 40 class-0x3a impact-render frames, three current-state collision writes, three source-table damage writes, resource 32/recharge 6, zero fallback/decode failures/gameplay PCM",
     "paired_native_scheduler_ledgers": "PASS: final readback has 638 scheduler frames, 9126 ordered dispatches including the static Coffee Shop type-20 obstacle, a 14-entry trace, and order hash 0xf3db3fa1",
@@ -387,11 +388,20 @@
     },
     "class1f_initial_transition_checkpoint": "SOURCE-CLOSED/SPEC-executable/native-implemented/differential-pass for the initial 0x0200:1000/1200/1400 bodies, their 0x1402/1404/1406/1408 airborne substates, source animation records/selectors, signed 16.16 movement, facing, timers, collision selectors, ten ordered RNG calls, class-0x09/class-0x44/class-0x4e dependencies, exact command identities, and return to 0x0200:0000.",
     "navigation_checkpoint": "SOURCE-CLOSED/SPEC-executable/native-implemented/differential-pass for Coffee Shop obstacle geometry/minimum penetration, all required six-field terrain records and kind-0/2/4/6 retry arithmetic, camera target/speed/phase guards, and world-to-plane ordering. The 46x9 bounded selector projection is losslessly packed into 104 source-derived bytes.",
-    "jump_blocker": "The accepted SPEC-02 normal-jump fixture identifies vector table 0x0243d2 and route witnesses but omits the numeric vector entries, initial signed 16.16 velocity/acceleration values, input/facing selector mapping, and branch order required for a native translation.",
-    "jump_unblock_condition": "A corrective accepted SPEC-02 fixture must provide the exact numeric source-vector entries, selector mapping, branch order, and signed fixed-point initialization without requiring raw disassembly or a fitted witness.",
+    "button3_jump_checkpoint": "SOURCE-CLOSED/SPEC-executable/native-implemented/differential-pass for the table-0x0243d2 signed 16.16 vector entries, exact input/facing selector mapping and branch order, phase 0x0400/0402/0404/040a/040c motion and landing, interruption ordering, presentation records/assemblies, collision selectors, and zero RNG. The source actor renderer now applies the native height exactly once at the accepted screen-projection boundary rather than canceling it against the emit origin.",
+    "button3_visual_inspection": {
+      "capture_method": "direct Windows Graphics Capture of pinned Yaba Sanshiro 1.20.37 normal interactive Round 1",
+      "path": "build/feedback/REIMPLEMENT-13-BUTTON3-corrected",
+      "frame_count": 13,
+      "takeoff_sha256": "54b88f1003f326cee5024d52996ff0d393237ff6d10ce055f06db45a5dd7c829",
+      "apex_sha256": "59669685c1303279b9cba38ef0497530470e5b8c9e6442f250339a7db5ac6962",
+      "landing_sha256": "bd0a364478abb929e4dbffd7b6994d1ba4e3d2021522f9890f37104d4626d25b",
+      "neutral_sha256": "979d4ca5a8275b7c7975b19df0f5bbb842e164f6d355dcca5839d213c53275c5",
+      "inspection": "PASS: visible takeoff, apex, descent, landing and neutral return; source assemblies and staff continuity remain coherent; P1-only HUD, both Coffee Shop planes and visible edges, camera, palette and priority remain intact"
+    },
     "projectile_lifecycle_checkpoint": "SOURCE-CLOSED/SPEC-executable/native-implemented/differential-pass for class-0x05 states 0/2/4/6, type-24/class-0x3a states 0/2/4, current-state collision writer attack table 0x03136a, source-table damage, presentation, and pool release. Audio command identities 0x007e/0x0148 remain semantic-name unknown telemetry with no inferred Saturn PCM mapping.",
     "projectile_lifecycle_build_guard": "PASS: main.o and round1.o explicitly depend on the SPEC-bound headers, and the focused differential asserts the complete accepted contract hash is present in round1.h.",
-    "exact_next_body": "Keep REIMPLEMENT-13 active. Close the preserved Button3 jump blocker by binding table 0x0243d2 numeric signed 16.16 vectors, input/facing selector mapping, branch order, landing/interruption guards, presentation, collision selectors, and mutations in the existing SPEC-02 fixture. Use the smallest bounded Oracle follow-up only if accepted evidence genuinely lacks an exact required field. Do not leave the first segment."
+    "exact_next_body": "Keep REIMPLEMENT-13 active. Replace the retained first-encounter class-0x1f gameplay boundary with the existing SPEC-02 source-bound current-state enemy AI, collision/damage, HIT/KO and dynamic lifecycle contracts. Preserve the accepted presentation/tracking and all completed player, navigation, camera, HUD and audio locks. Do not leave the first segment."
   },
   "preserved": {
     "user09": "CHANGES_REQUESTED",

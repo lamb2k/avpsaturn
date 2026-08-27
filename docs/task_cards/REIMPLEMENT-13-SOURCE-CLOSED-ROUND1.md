@@ -222,12 +222,28 @@ only final x and elapsed frame; authoritative counters/state and the paired
 cadence-1 emulator ledger are deterministic. Button3 remained paused and was
 not staged into this correction.
 
-Close the preserved Button3 vector/branch blocker next. Bind table `0x0243d2`
-numeric signed 16.16 vectors, input/facing selector mapping, branch order,
-landing/interruption guards, presentation, collision selectors, and mutations
-by amending only the existing SPEC fixture. Use the smallest bounded Oracle
-follow-up only if accepted evidence genuinely lacks an exact required field.
-Do not leave the first segment.
+The preserved Button3 blocker is now closed. Accepted Oracle evidence amends
+the existing SPEC fixture with table `0x0243d2`, all signed 16.16 vector pairs,
+exact input/facing mapping, branch and interruption order, phases
+`0x0400/0402/0404/040a/040c`, landing, presentation records/assemblies,
+collision selectors, and zero RNG consumption. The native body produces one
+entry, 35 motion updates, one landing, one completion, final selectors `3/10`,
+and 38 source-rendered frames in each of two byte-identical 467-sample cold
+runs. Host rejects 113 real mutations and Target rejects 78 suppressions.
+Fast, Oracle, debug/release Target, and paired Emulator pass at normalized ISO
+`48e76ef310f0832344290656912565dbfa292ddc0d1ea134fde5dcc23568a080`.
+Direct Windows Graphics Capture found and corrected one objective integration
+defect: the source-actor emit origin had canceled native jump height at screen
+projection. The bounded bridge now applies height exactly once. Thirteen real
+frames verify takeoff, apex, descent, landing and neutral return with unchanged
+source assemblies, staff continuity, P1-only HUD, Coffee Shop planes, camera,
+palette and priority.
+
+Replace the retained first-encounter class-0x1f gameplay boundary next with the
+existing SPEC-02 source-bound current-state enemy AI, collision/damage, HIT/KO
+and dynamic lifecycle contracts. Preserve the accepted presentation/tracking
+and every completed player/navigation/camera/HUD/audio lock. Do not leave the
+first segment.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.
