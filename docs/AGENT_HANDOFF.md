@@ -20,24 +20,18 @@ all private evidence and user locks.
 
 ## Current checkpoint
 
-Coffee Shop navigation and camera are now source-closed, SPEC-executable,
-native-implemented, and differentially passing. The fixture binds the type-20
-obstacle attack box and point-probe minimum penetration, exact six-field terrain
-interpreter including retry, exact camera target/speed/phase guards, and
-world-to-plane ordering. The 414-cell first-segment selector projection is
-source-derived and losslessly packed into 104 bytes; no fallback exists.
+Coffee Shop navigation/camera remains source-closed and passing: obstacle,
+six-field terrain/retry, camera guards, world-to-plane order, 93 mutations, 67
+Target suppressions, paired Emulator, and P1-only scanout are locked.
 
-Host rejects 93 real mutations and Target wiring rejects 67 suppressions. The
-clean debug Target ends at `0x060be7d0` and release Target at `0x060bbe60`,
-below the work-RAM ceiling, with the accepted 255-command VDP1 capacity
-unchanged. Two pinned emulator runs are byte-identical at normalized ISO
-`f40d51362371d59866ea4283704880b56272e446d91b1db7b8acbdaa7e02fbf2`:
-pool-20 free 13, 14-entry scheduler trace, dynamic camera/bound x 801, scroll2
-737, zero fallback/failure/decode errors, and zero orphan gameplay PCM. Direct
-paused inspection at live frames 31 and 205 shows P1-only HUD, coherent player,
-class-0x1F actors and projectiles, clean Coffee Shop planes and visible edges,
-and unchanged palette/priority. Stale pre-checkpoint screenshots showing P2 are
-not evidence; current target state and scanout both show P2 absent.
+Regression correction `fe49adcba008b91f2f4eafbcc6473fa137c7d778` fixes the
+right-edge empty PNT page seen in `ac126c0`, parent `0a3fe67`, and baseline
+`52714b`; first bad is `62f3fa5`. Pre-handoff source `s2x/s3x` now remain
+authoritative until route state 4 transfers ownership to the native camera.
+Fast, Oracle, all Target profiles, two identical 467-sample Emulator runs, and
+real Windows Graphics Capture pass. Two exact navigation routes repeat
+obstacle/terrain/retry/lock/unlock `7/6/5/1/1`, camera 1008, scroll2 944, and
+phase 4. Button3 was not staged into the correction.
 
 ## Exact next experiment
 

@@ -5,7 +5,7 @@ roadmap: docs/PARITY_PLAN.md
 migration_map: data/port_v2_migration_map.yaml
 foundation_head: eef350a3de6e44d1648a861ab98215c3d61ce20c
 production_head: 236eef0c42aaa5c39b105420f8130fcde308e34e
-candidate_head: 0a3fe676e3c5ee0dd4eaaff7288eca3f2ce6ba98
+candidate_head: fe49adcba008b91f2f4eafbcc6473fa137c7d778
 evidence_candidate_head: 597f4ed517d4e715d814ff841bd00d3977803f85
 production_branch: codex/avp-playable-loop-pivot
 # Deprecated compatibility aliases for cards/tools created before ARCH-01.
@@ -525,6 +525,7 @@ source_closure:
   latest_evidence: data/reimplement13_round1_stable_entry.json
   startup_authority_checkpoint: PASS / source frames 2040,2072,2075,2238,2520 / retained-before-handoff 0 / active-P2 0 / hidden contact-damage 0 / orphan PCM 0 / duplicate CDDA 0 / paired Emulator exact
   navigation_camera_checkpoint: PASS / source-derived 46x9 terrain projection / exact obstacle minimum penetration / kind-0-2-4-6 terrain and retry / exact camera target-speed-phase guards / clean debug Target 0x060be7d0 / release Target 0x060bbe60 / paired Emulator exact f40d51362371d59866ea4283704880b56272e446d91b1db7b8acbdaa7e02fbf2 / P1-only direct scanout
+  regression_audit_checkpoint: PASS / frozen ac126c0 versus parent 0a3fe67 and ancestors 6f78667-137f9eb-52714b / first bad 62f3fa5 retained-camera pre-handoff ownership / right-edge empty PNT page at source frame 2097 / corrected by preserving source s2x-s3x until native route state 4 / Fast-Oracle-Target-paired Emulator PASS / paired ISO 69a6a39679840ba1a4e819cc829681abd301fc330ac6e71957d9e532f07ebecc / 467 identical cadence-1 samples / exact interactive ISO 79ad385d3449c093d873c4e535a700b4b4f7836fd96a684623d2ff7f258644a5 / real WGC startup-action-navigation PASS / obstacle 7 terrain 6 retry 5 lock-unlock 1-1 / correction fe49adcba008b91f2f4eafbcc6473fa137c7d778
   exact_next_experiment: Keep REIMPLEMENT-13 active; close the preserved Button3 jump blocker by binding table 0x0243d2 numeric signed 16.16 vectors, input/facing selector mapping, branch order, landing/interruption guards, presentation, collision selectors, and mutation controls from accepted Oracle evidence. Amend only the existing SPEC-02 fixture and use the smallest bounded Oracle follow-up only if an exact required field is genuinely absent. Do not advance beyond the first segment.
   frontend_activation_allowed: false
   physical_saturn: UNRUN

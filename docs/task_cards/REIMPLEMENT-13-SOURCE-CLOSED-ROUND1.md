@@ -199,6 +199,29 @@ HUD. Direct live frames 31 and 205 preserve both Coffee Shop planes, visible
 edges, actors, projectiles, palette, and priority. Current scanout disproves the
 stale pre-checkpoint images that still showed an active P2 panel.
 
+The bounded regression audit then froze `ac126c0`, compared it with parent
+`0a3fe67` under identical clean builds, and expanded backward only because both
+showed the objective right-edge background corruption. The symptom is present
+at requested oldest baseline `52714b` and first appears in `62f3fa5`, where the
+retained live-encounter camera began overriding source-owned `s2x/s3x` before
+native route-state-4 handoff. Commit `fe49adc` preserves captured source plane
+positions before handoff and enables native camera-to-plane ownership only at
+route state 4. Two real mutations reject an unconditional native camera and a
+restored retained camera. Fast, Oracle, release/debug/bench Target, and two
+byte-identical 467-sample Emulator passes succeed at normalized ISO
+`69a6a39679840ba1a4e819cc829681abd301fc330ac6e71957d9e532f07ebecc`.
+The normal interactive ISO is
+`79ad385d3449c093d873c4e535a700b4b4f7836fd96a684623d2ff7f258644a5`.
+Windows Graphics Capture directly verifies the corrected startup frame, a
+60-frame full-speed action strip, and the navigation endpoint with coherent
+planes, visible edges, actors, HUD, palette, and priority. Two exact navigation
+runs have identical semantic endpoints: obstacle responses 7, terrain responses
+6, terrain retries 5, camera locks/unlocks 1/1, phase 4, target/position 1008,
+scroll2 944, and final terrain z 327. The auxiliary wall-clock driver varies
+only final x and elapsed frame; authoritative counters/state and the paired
+cadence-1 emulator ledger are deterministic. Button3 remained paused and was
+not staged into this correction.
+
 Close the preserved Button3 vector/branch blocker next. Bind table `0x0243d2`
 numeric signed 16.16 vectors, input/facing selector mapping, branch order,
 landing/interruption guards, presentation, collision selectors, and mutations
