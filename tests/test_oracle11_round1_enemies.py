@@ -49,4 +49,18 @@ for label,mutate in [
     ('mutation-control',lambda x:x['mutation_controls'].pop()),
 ]:
     mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['initial_transition_contract'];mutate(target);reject(mutant,label)
-print('ORACLE-11 Round 1 enemy tests: PASS (27 mutations rejected)')
+for label,mutate in [
+    ('current-dynamic-slot',lambda x:x['spawn']['bounded_current_state_dynamic'].__setitem__('slot','0xff9c40')),
+    ('current-dynamic-writer',lambda x:x['spawn']['bounded_current_state_dynamic'].__setitem__('writer_pc','0x06b3fe')),
+    ('current-spawn-reload',lambda x:x['spawn']['controller']['writes'].__setitem__(-1,'owner.timer = 359')),
+    ('current-approach-x',lambda x:x['actions']['approach_0x1600'].__setitem__('x_delta_s16',110)),
+    ('current-approach-z',lambda x:x['actions']['approach_0x1600'].__setitem__('z_delta_s16',-22)),
+    ('current-contact-tick',lambda x:x['actions']['attack_0x1800']['contact_offsets_u16'].__setitem__(0,47)),
+    ('current-damage',lambda x:x['actions']['attack_0x1800'].__setitem__('damage_s16',7)),
+    ('current-hit-timer',lambda x:x['damage_hit_ko_removal'].__setitem__('hit_ticks_u16',38)),
+    ('current-ko-timer',lambda x:x['damage_hit_ko_removal'].__setitem__('ko_ticks_u16',140)),
+    ('current-retained-authority',lambda x:x['authority_boundary'].__setitem__('retained_gameplay_authority_forbidden',False)),
+    ('current-mutation-control',lambda x:x['mutation_controls'].pop()),
+]:
+    mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['current_state_implementation_contract'];mutate(target);reject(mutant,label)
+print('ORACLE-11 Round 1 enemy tests: PASS (38 mutations rejected)')

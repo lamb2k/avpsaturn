@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=3f6e179fc41ad9ac0fdb6318c929ac74297b35a1f4627b58325e408d424af6fc */
-/* fixtures_sha256=02cddeb60f970fe1b582fc3a1a387bfa38bbfe65db2b5c43eec599eb01e6f5d8 */
+/* contract_sha256=ae6814e233a3245a46d6892171ab1692c054fb3bad7ba7a57ce1106b3aff6a8f */
+/* fixtures_sha256=6a46ee959a16745bcebbf64669d3d88cdb83b5c88b2c14aa9a34106324942769 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -322,6 +322,22 @@ static const AvspRound1StateContextSpec avsp_round1_class1f_state_contexts[AVSP_
     { 0x0402u, 0x0600u },
     { 0x0404u, 0x0000u },
     { 0x0600u, 0x0000u },
+};
+
+static const AvspRound1Class1fCurrentSpec avsp_round1_class1f_current =
+{
+    0x00ffb580UL, 0xffa000UL, 20u, 0x01, 960, 343, 343, 87, 111, -23, 38u, 120u, 48u, 119u, 8u, 39u, 141u,
+    { 8u, 8u, 10u, 12u },
+};
+
+static const unsigned long avsp_round1_class1f_approach_records[AVSP_ROUND1_CLASS1F_APPROACH_RECORD_COUNT] =
+{
+    0x12ec04UL, 0x12ec14UL, 0x12ec24UL, 0x12ec34UL, 0x12ec44UL, 0x12ec54UL, 0x12ec64UL, 0x12ec74UL
+};
+
+static const unsigned long avsp_round1_class1f_attack_records[AVSP_ROUND1_CLASS1F_ATTACK_RECORD_COUNT] =
+{
+    0x12e8ecUL, 0x12e8fcUL, 0x12e90cUL, 0x12e91cUL
 };
 
 static const AvspRound1Class1fInitialSpec avsp_round1_class1f_initial_actors[AVSP_ROUND1_CLASS1F_INITIAL_ACTOR_COUNT] =

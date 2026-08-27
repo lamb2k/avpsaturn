@@ -1,12 +1,12 @@
 {
   "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
-  "checkpoint": "native-round1-predator-button1-character-and-renderer-correction",
-  "status": "PASS_FIRST_SEGMENT_PREDATOR_BUTTON1_CHARACTER_IDENTITY_AND_RENDERER_INTEGRITY",
+  "checkpoint": "native-round1-first-encounter-class1f-authority",
+  "status": "PASS_FIRST_ENCOUNTER_NATIVE_CLASS1F_AUTHORITY",
   "implementation_base_commit": "52714b420d3ca1ca0437d66de61735fa1a2ba36d",
   "diagnostic_correction_commit": "4fbc919235f61d962daf342efbfb4cd8f743ab60",
   "button1_renderer_correction_commit": "c48c1cdd9e6fb1256ee901d6e1b6379c1195f277",
   "implementation_source": {
-    "spec02_sha256": "3f6e179fc41ad9ac0fdb6318c929ac74297b35a1f4627b58325e408d424af6fc",
+    "spec02_sha256": "ae6814e233a3245a46d6892171ab1692c054fb3bad7ba7a57ce1106b3aff6a8f",
     "raw_trace_or_disassembly_consumed": false,
     "authored_fallback_count": 0
   },
@@ -48,7 +48,7 @@
       "source_action": 514,
       "controller_updates": 468,
       "neutral_release_facing_preserved": true,
-      "legacy_actor_handoff_replaced": false
+      "legacy_actor_handoff_replaced": true
     },
     "player_neutral_stop_transition": {
       "walking_action": 514,
@@ -163,8 +163,8 @@
       "last_trace_count": 10,
       "order_hash": "0x836e161c",
       "initial_transition_behavior_dispatched": true,
-      "post_initial_actor_behavior_dispatched": false,
-      "dynamic_spawn_guard_implemented": false
+      "post_initial_actor_behavior_dispatched": true,
+      "dynamic_spawn_guard_implemented": true
     },
     "class1f_presentation_binding": {
       "source_animation_records": 190,
@@ -174,10 +174,10 @@
       "actor_handler_dispatches": 4680,
       "presentation_bindings": 4680,
       "exact_fields": ["assembly", "hurt_selector", "attack_selector"],
-      "actor_movement_implemented": false,
-      "state_transitions_implemented": false,
-      "damage_implemented": false,
-      "dynamic_spawn_guard_implemented": false
+      "actor_movement_implemented": true,
+      "state_transitions_implemented": true,
+      "damage_implemented": true,
+      "dynamic_spawn_guard_implemented": true
     },
     "class1f_state_context_dispatch": {
       "source_dispatch_entry": "0x060532",
@@ -186,7 +186,7 @@
       "evidence_frame": 466,
       "state_context_bindings": 4680,
       "invalid_context_rejected": true,
-      "state_transition_predicates_implemented": false
+      "state_transition_predicates_implemented": true
     },
     "class1f_initial_transition_execution": {
       "states": ["0x0200:1000", "0x0200:1200", "0x0200:1400", "0x0200:1402", "0x0200:1404", "0x0200:1406", "0x0200:1408"],
@@ -414,7 +414,63 @@
     "button1_character_identity_checkpoint": "SOURCE-CLOSED/SPEC-executable/native-implemented/differential-pass for character-0 Predator Warrior action 0x0c00/0x0c04, records 0x15e540..0x15e580, one 40-resource debit, record-type-4 class-0 parent and five class-4 children, target/facing motion, current-state collision/damage selectors, presentation, and pool release. Character-1 Major class-5/type-24-class-0x3a is rejected as a negative control.",
     "superseded_projectile_lifecycle_checkpoint": "The prior class-0x05/type-24-class-0x3a checkpoint was internally valid Major Schaefer evidence but was incorrectly attributed to Predator Warrior. It remains evidence only as a rejected character-identity control and is not native Predator gameplay authority.",
     "projectile_lifecycle_build_guard": "PASS: main.o and round1.o explicitly depend on the SPEC-bound headers, and the focused differential asserts the complete accepted contract hash is present in round1.h.",
-    "exact_next_body": "Keep REIMPLEMENT-13 active. Replace the retained first-encounter class-0x1f gameplay boundary with the existing SPEC-02 source-bound current-state enemy AI, collision/damage, HIT/KO and dynamic lifecycle contracts. Preserve the accepted presentation/tracking and all completed player, navigation, camera, HUD and audio locks. Do not leave the first segment."
+    "first_encounter_class1f_authority_checkpoint": {
+      "legacy_actor_handoff_replaced": true,
+      "post_initial_actor_behavior_dispatched": true,
+      "dynamic_spawn_guard_implemented": true,
+      "actor_movement_implemented": true,
+      "state_transitions_implemented": true,
+      "damage_implemented": true,
+      "retained_gameplay_steps": 0,
+      "scheduler_updates": 469,
+      "player_contacts": 4,
+      "alien_contacts": 1,
+      "player_damage_events": 1,
+      "alien_damage_events": 4,
+      "hit_events": 3,
+      "ko_events": 1,
+      "lifecycle_releases": 1,
+      "encounter_clear_events": 1,
+      "pool12_free_after_release": 11,
+      "route_unlock_frame": 469,
+      "continued_after_unlock": true,
+      "native_presentation_bindings": 7814,
+      "native_presentation_decode_failures": 0,
+      "fallback_count": 0,
+      "failure_count": 0,
+      "paired_emulator_samples": 575,
+      "paired_iso_sha256": "ff8f0a288aa1e75dca47983ec3c3a799e32edad16a7b8106a5e9c73f2da27847",
+      "host_real_mutations": 123,
+      "target_suppressions": 131,
+      "fast": "PASS",
+      "oracle": "PASS",
+      "target": "PASS",
+      "paired_emulator": "PASS"
+    },
+    "class1f_asset_union_correction": {
+      "cause": "The native current-state class-0x1f animation records were present in SPEC-02 but absent from the Saturn emit-window and tile working-set union.",
+      "correction": "Generate the exact spawn, approach, attack, reposition, HIT and KO records for both facing transforms from the accepted class-0x1f contract.",
+      "sampled_decodes": 2701,
+      "emit_windows": 41,
+      "tile_count": 3853,
+      "tile_bytes": 493184,
+      "tile_region_bytes": 509092,
+      "tile_region_budget_bytes": 528384,
+      "tile_region_budget_percent": 96.3,
+      "tile_archive_sha256": "be2190395592c2e4f0961e046ad881c5f13356f478411bb9a231734aa730464c",
+      "combat_overlay_tiles": 126,
+      "combat_overlay_sha256": "171f0dfa25d8a1fe94d2889f89c78e71bd3b1cfffa9fd5ff11964b1fc23815fe",
+      "mutation_control": "PASS: omission of the class1f-current union is rejected"
+    },
+    "first_encounter_visual_inspection": {
+      "capture_method": "window-targeted Windows Graphics Capture of pinned windowed Yaba Sanshiro 1.20.37",
+      "inspected_native_frames": [38, 254, 329, 469, 470],
+      "source_frame_alignment": "native frame 38 maps to MAME source frame 2078",
+      "inspection": "PASS: live P1 remains Predator Warrior; the dynamic class-0x1f actor is coherent through approach, attack, HIT, KO and removal; the lower WARRIOR strip is the P1 weapon/equipment meter and the Maj.Schaefer P2 asset is absent; both VDP2 planes, palette and priority remain coherent.",
+      "source_intro_population_control": "MAME frames 2078/2092/2328/2409/3982 contain the same crowded alien and gray-prop intro population. Those source-table actors are not VDP1 corruption or released dynamic-actor residue.",
+      "disproven_hypothesis": "A temporary VDP1 erase-window diagnostic changed neither registers nor image and was removed before acceptance."
+    },
+    "exact_next_body": "Keep REIMPLEMENT-13 active. Implement and verify the first segment encounter-clear and dynamic route-progression boundary from accepted SPEC-02, including source-owned post-clear guards and continued native authority. Retained code remains presentation-only. Do not leave the first segment."
   },
   "preserved": {
     "user09": "CHANGES_REQUESTED",

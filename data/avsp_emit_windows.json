@@ -9,10 +9,10 @@
   "sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9"
  },
  "spec02_round1_presentations": {
-  "decoded_variants": 231,
+  "decoded_variants": 265,
   "fixture": "data/spec02_round1_generated_fixtures.json",
-  "fixture_sha256": "4940aed67c5bce1263f290113a5ae41815e530654515d0cb86283fd065dceb5b",
-  "unique_assemblies": 107,
+  "fixture_sha256": "6a46ee959a16745bcebbf64669d3d88cdb83b5c88b2c14aa9a34106324942769",
+  "unique_assemblies": 120,
   "verified_identical": true
  },
  "total_bytes": 25944,

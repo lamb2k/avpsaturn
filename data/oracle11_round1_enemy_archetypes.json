@@ -27574,6 +27574,347 @@
         "samples": 28481,
         "writes": 153166
       },
+      "current_state_implementation_contract": {
+        "accepted_encounter_authority_sha256": "d7e59a13d6a2692b10924df04095c7e479663db5186707be9db41c9880ca2a30",
+        "accepted_oracle09_sha256": "a3027c3ffcd19af2656c515e0dfc0e9c56086b1bf3dd029e854d74be372c847f",
+        "actions": {
+          "above_lane_0x0600": {
+            "animation_record": "0x12d5e4",
+            "facing_u8": 0,
+            "inner_state_u8": 8,
+            "state_u16": 512
+          },
+          "approach_0x1600": {
+            "facing_u8": 1,
+            "inner_state_u8": 0,
+            "movement_rule": "signed rational accumulator distributes +111 x and -23 z over 38 scheduler updates in source branch order",
+            "next_action": "0x1800",
+            "records": [
+              {
+                "animation_record": "0x12ec04",
+                "animation_record_sha256": "cedb68f1b2b0948658eb71c576dc111f07ab8462b0b46d5b9c5cee10fbb800ef",
+                "assembly": "0x12f7cc",
+                "assembly_source_window_sha256": "62c0f00ef4d315db829669c1bbaaad7fe98ba0c468df3ab2474be7dd4e6732e2",
+                "attack_selector": 0,
+                "hurt_selector": 2
+              },
+              {
+                "animation_record": "0x12ec14",
+                "animation_record_sha256": "b09da558f00555b52b7e6751133331898e814264d3888bc9bfac74b3196610a0",
+                "assembly": "0x12f7e4",
+                "assembly_source_window_sha256": "4c57dee1f5d3107bf9a4ca7d6da7daccaeeecc8d7372c3ae8d1af422042bb6ea",
+                "attack_selector": 0,
+                "hurt_selector": 2
+              },
+              {
+                "animation_record": "0x12ec24",
+                "animation_record_sha256": "26042c8c7b83e0abac6f68fefccacc0599e28d9b062264fef37a3d0a4bbdcd20",
+                "assembly": "0x12f7fc",
+                "assembly_source_window_sha256": "7ed1d9e92ac4bd85dcd92c46eb27e01d9eba6b1606bf1fb1d0f0d3818c573abd",
+                "attack_selector": 0,
+                "hurt_selector": 2
+              },
+              {
+                "animation_record": "0x12ec34",
+                "animation_record_sha256": "6a87c25376d3cfdf0745b3e575385841335a0eda058a0d254d4e399b64424a09",
+                "assembly": "0x12f814",
+                "assembly_source_window_sha256": "8cbf8760a92b1514e01ba97b3b6c6fe6a4659c6d8a83c17f25f2c3494359c0f8",
+                "attack_selector": 0,
+                "hurt_selector": 2
+              },
+              {
+                "animation_record": "0x12ec44",
+                "animation_record_sha256": "665e5c8d1ced48cb342750ea1c002c9d0a5929c9ff4476c9136083f2ab38a196",
+                "assembly": "0x12f82c",
+                "assembly_source_window_sha256": "27a15eee7e6661fb372a5902f6c61e9aec6be3e01bef017724b5c4ecf26cec4d",
+                "attack_selector": 0,
+                "hurt_selector": 2
+              },
+              {
+                "animation_record": "0x12ec54",
+                "animation_record_sha256": "c9d06e96fcaa5883f2893046eaa0e50feec165671f1b84f12b11eeada41e0b8a",
+                "assembly": "0x12f85e",
+                "assembly_source_window_sha256": "5d073a9a8eb7df94ea30caa04d42ee29b755585e2c8857ac358f193ce9f2ab8d",
+                "attack_selector": 0,
+                "hurt_selector": 2
+              },
+              {
+                "animation_record": "0x12ec64",
+                "animation_record_sha256": "2a1c00e6ea21e7484a12923cc1fc252e55acde6ec80fae2ec669956ded6590e8",
+                "assembly": "0x12f890",
+                "assembly_source_window_sha256": "1fd7c6e72911d166689239a83190c645a860cec17e3040790828aec0a52af94e",
+                "attack_selector": 0,
+                "hurt_selector": 2
+              },
+              {
+                "animation_record": "0x12ec74",
+                "animation_record_sha256": "6ec04cfd0f156ff86d535c115bfad714e3a11ad872f4728b85062895d43febac",
+                "assembly": "0x12f8b8",
+                "assembly_source_window_sha256": "645ce510ddcf3ea80bc7ca774623962a52e7611d901b40139be4ba6a5090c1e9",
+                "attack_selector": 0,
+                "hurt_selector": 2
+              }
+            ],
+            "state_u16": 512,
+            "ticks": 38,
+            "x_delta_s16": 111,
+            "z_delta_s16": -23
+          },
+          "attack_0x1800": {
+            "completion_branches": [
+              "P1.x < enemy.x -> 0x1a00 facing 0",
+              "else P1.z > enemy.z -> 0x0600 inner 8 facing 0",
+              "else -> 0x1600 facing 1"
+            ],
+            "contact_guard": "abs(P1.x-enemy.x) <= 68 && P1.z == enemy.z",
+            "contact_offsets_u16": [
+              48,
+              119
+            ],
+            "damage_s16": 8,
+            "inner_state_u8": 0,
+            "records": [
+              {
+                "animation_record": "0x12e8ec",
+                "animation_record_sha256": "fcfb86f0585f33c718f086cfa68cdb307e7a8af5a8b1011525ac78353c76d883",
+                "assembly": "0x12f5de",
+                "assembly_source_window_sha256": "813da58896e0b7b72ee673fa568a38b5f8d2bb87972aa6c75aab2d6da41cf124",
+                "attack_selector": 0,
+                "hurt_selector": 2
+              },
+              {
+                "animation_record": "0x12e8fc",
+                "animation_record_sha256": "497e26122b4a6a717f407f4a16b5bd1ab657d6ceccb483128614a8aa56905b50",
+                "assembly": "0x12fa0c",
+                "assembly_source_window_sha256": "df6b80cf8f24ec1a7719da9e8c26510b650aac3a70968facf589c322f10a11b2",
+                "attack_selector": 0,
+                "hurt_selector": 2
+              },
+              {
+                "animation_record": "0x12e90c",
+                "animation_record_sha256": "b3fda47757d3a55b27840323f4715e4f355ab32a57808515aec430dafb459762",
+                "assembly": "0x12fa2a",
+                "assembly_source_window_sha256": "4f7845196c99156e35548a62897b71ffa1eff2b0ec8f1db7fad2dbb16422b793",
+                "attack_selector": 0,
+                "hurt_selector": 2
+              },
+              {
+                "animation_record": "0x12e91c",
+                "animation_record_sha256": "33142ec3f7787a40fca903f90d7337454e5d211b8a06d66519ad575f9755fcb4",
+                "assembly": "0x12fa0c",
+                "assembly_source_window_sha256": "df6b80cf8f24ec1a7719da9e8c26510b650aac3a70968facf589c322f10a11b2",
+                "attack_selector": 0,
+                "hurt_selector": 2
+              }
+            ],
+            "rng_algorithm": "high=low16(3*seed)>>8; low=(low8(seed)+high)&0xff; result=(high<<8)|low",
+            "rng_entry": "0x017c5e",
+            "rng_seed_after": "0x595a",
+            "rng_seed_before": "0x7301",
+            "state_u16": 512,
+            "timer_table_rule": "low byte < 0x40 selects 30; otherwise 120",
+            "timer_u16": 120
+          },
+          "reposition_0x1a00": {
+            "animation_record": "0x12d5e4",
+            "facing_u8": 0,
+            "immediate_crossing_flip_forbidden": true,
+            "inner_state_u8": 0,
+            "state_u16": 512,
+            "timer_u16": 160
+          }
+        },
+        "authority_boundary": {
+          "native_fixed_pool_actor_owns": [
+            "world position",
+            "facing",
+            "AI state",
+            "animation selection",
+            "collision",
+            "damage",
+            "HIT",
+            "KO",
+            "spawn",
+            "removal",
+            "encounter participation"
+          ],
+          "presentation_adapter_may_read_native_actor": true,
+          "retained_gameplay_authority_forbidden": true
+        },
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "damage_hit_ko_removal": {
+          "damage_by_player_selector_s16": [
+            8,
+            8,
+            10,
+            12
+          ],
+          "health_s16": true,
+          "hit_state_u16": 1024,
+          "hit_ticks_u16": 39,
+          "ko_state_u16": 1536,
+          "ko_ticks_u16": 141,
+          "player_attack_guard": "current player attack selector overlaps current enemy hurt selector and guarded collision latch is clear",
+          "presentation_owned_removal_forbidden": true,
+          "release_order": "type-12 LIFO fixed-pool release",
+          "removal_guard": "KO presentation completes and source release 0x0176b4 executes"
+        },
+        "dispatch": {
+          "entry": "0x060532",
+          "inner_state_table": {
+            "0x0000": "0x060772 action dispatch",
+            "0x0200": "0x06105a shared HIT tail",
+            "0x0400": "0x061134",
+            "0x0600": "0x061134",
+            "0x0800": "0x0610f6",
+            "0x0a00": "0x060e26"
+          },
+          "outer_state_table": {
+            "0x0000": "0x060546 initialization",
+            "0x0200": "0x06075a current state",
+            "0x0400": "0x061146 HIT",
+            "0x0600": "0x06114c KO removal"
+          },
+          "scheduler": "0x01b974",
+          "scheduler_order": "type-12 ascending fixed-pool source slot",
+          "unsupported_dispatch_forbidden": true
+        },
+        "mutation_controls": [
+          "wrong first dynamic slot",
+          "fixed-frame spawn",
+          "missing living-count guard",
+          "wrong spawn reload",
+          "shadow actor position",
+          "face target every frame",
+          "wrong approach arithmetic",
+          "random assembly",
+          "wrong RNG algorithm",
+          "wrong RNG consumption order",
+          "wrong attack timer",
+          "wrong contact tick",
+          "wrong contact x guard",
+          "wrong lane guard",
+          "wrong damage",
+          "wrong HIT duration",
+          "wrong KO duration",
+          "presentation-owned removal",
+          "retained encounter gameplay step"
+        ],
+        "scope": "bounded first-segment class-0x1f current-state and first dynamic spawn",
+        "spawn": {
+          "bounded_current_state_dynamic": {
+            "caller_chain": [
+              "0x0288fa",
+              "0x028860",
+              "0x01bde6"
+            ],
+            "class": "0x1f",
+            "classification": "SOURCE_CLOSED",
+            "frame": 3982,
+            "slot": "0xffa000",
+            "source_window": {
+              "first": "0x028a2e",
+              "last_exclusive": "0x028a5e",
+              "sha256": "1919a10a1698cc21f6febdddacacf0936f9f34969434d78af297a6aac6712463"
+            },
+            "transition_guard": "living-enemy count < 8 && (u8(g8019) & 7)==0 && allocate_record12 succeeds",
+            "type": 12,
+            "writer_pc": "0x028a3e",
+            "writes": [
+              "active:u8",
+              "class:u8",
+              "type:u8",
+              "state:u16",
+              "substate:u16",
+              "x:s16",
+              "y:s16",
+              "z:s16"
+            ]
+          },
+          "bounded_current_state_guard_fields": {
+            "caller": "0x0288fa",
+            "fixed_frame_substitute_forbidden": true,
+            "guard": "living enemy count < 8 && (u8(g8019) & 7) == 0 && allocate_record12 succeeds",
+            "source_global_phase_counter": "0xff8019_u8",
+            "writer": "0x028a3e"
+          },
+          "controller": {
+            "allocation": "0x01769e",
+            "dispatch": "0x06b2fa",
+            "fixed_frame_spawn_forbidden": true,
+            "initial_spawn_guard": "signed animation branch owner+0x24 is negative",
+            "owner_class": "0x01",
+            "owner_source_slot": "0x00ffb580",
+            "owner_type": 20,
+            "remaining_count_offset": "owner+0x66_u8",
+            "repeat_spawn_guard": "owner x >= camera x && remaining count != 0 && timer == 0 && living enemy count < 6 && allocation succeeds",
+            "source_window": {
+              "first": "0x06b3ea",
+              "last_exclusive": "0x06b402",
+              "sha256": "28a36b9be1abee22c8f004a395da09afb22266371957328403ae8d58cb2140e9"
+            },
+            "spawn_body": "0x06b3f2",
+            "state_byte_offset": "owner+0x05",
+            "timer_offset": "owner+0x2a_u16",
+            "writer": "0x06b3fe",
+            "writes": [
+              "new.active += 1",
+              "new.class = 0x1f",
+              "new.x/y/z = owner.x/y/z",
+              "new.variant = 5",
+              "new.timer = 0",
+              "living enemy count += 1",
+              "owner.remaining count -= 1",
+              "owner.timer = 360"
+            ]
+          },
+          "first_dynamic": {
+            "caller_chain": [
+              "0x06b3a8",
+              "0x01bc70",
+              "0x0084bc"
+            ],
+            "class": "0x1f",
+            "classification": "SOURCE_CLOSED",
+            "frame": 2328,
+            "slot": "0xff9c40",
+            "source_window": {
+              "first": "0x06b3ee",
+              "last_exclusive": "0x06b41e",
+              "sha256": "1a6a0c10af4c6fd570f96b8350c41f75acb20e981847a0392f68cddfee372924"
+            },
+            "transition_guard": "owner state/timer permits spawn && living-enemy count < 6 && allocate_record12 succeeds",
+            "type": 12,
+            "writer_pc": "0x06b3fe",
+            "writes": [
+              "active:u8",
+              "class:u8",
+              "type:u8",
+              "state:u16",
+              "substate:u16",
+              "x:s16",
+              "y:s16",
+              "z:s16"
+            ]
+          },
+          "initial_actor": {
+            "animation_record": "0x12ddb0",
+            "facing_u8": 1,
+            "health_s16": 87,
+            "state_u16": 512,
+            "substate_u16": 5632,
+            "x_s16": 960,
+            "y_s16": 343,
+            "z_s16": 343
+          }
+        },
+        "targeting": {
+          "multiplayer_targeting": "NOT_REQUIRED_FOR_ROUND1",
+          "required_target": "active P1",
+          "selection_guard": "current state owns target selection; no face-target-every-frame rule",
+          "target_pointer": "actor+0x28 low word"
+        }
+      },
       "damage_hit_ko": {
         "current_state_owner_bound": true,
         "enemy_health_writer_pcs": {

@@ -44,19 +44,19 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_player_z"] == 320
     assert report["state"]["round1_player_facing"] == 1
     assert report["state"]["round1_player_source_action"] == 514
-    assert report["state"]["round1_player_controller_updates"] == 621
-    assert report["state"]["round1_scheduler_frames"] == 791
-    assert report["state"]["round1_scheduler_dispatches"] == 11245
+    assert report["state"]["round1_player_controller_updates"] == 622
+    assert report["state"]["round1_scheduler_frames"] == 792
+    assert report["state"]["round1_scheduler_dispatches"] == 11261
     assert report["state"]["round1_scheduler_trace_count"] == 13
     assert report["state"]["round1_scheduler_order_hash"] == -1628184524
-    assert report["state"]["round1_actor_handler_dispatches"] == 7803
-    assert report["state"]["round1_presentation_bindings"] == 7802
-    assert report["state"]["round1_state_context_bindings"] == 7802
+    assert report["state"]["round1_actor_handler_dispatches"] == 7815
+    assert report["state"]["round1_presentation_bindings"] == 7814
+    assert report["state"]["round1_state_context_bindings"] == 7814
     assert report["state"]["round1_navigation_bound_x"] == 832
     assert report["state"]["round1_navigation_bound_z"] == 256
-    assert report["state"]["round1_navigation_applications"] == 621
+    assert report["state"]["round1_navigation_applications"] == 622
     assert report["state"]["round1_navigation_clamps"] == 0
-    assert report["state"]["round1_navigation_obstacle_responses"] == 55
+    assert report["state"]["round1_navigation_obstacle_responses"] == 53
     assert report["state"]["round1_navigation_terrain_responses"] == 0
     assert report["state"]["round1_navigation_terrain_retries"] == 0
     assert report["state"]["round1_camera_x_position"] == 832
@@ -65,7 +65,7 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_camera_x_upper"] == 832
     assert report["state"]["round1_camera_scroll2_x"] == 768
     assert report["state"]["round1_camera_phase"] == 2
-    assert report["state"]["round1_camera_countdown"] == 1138
+    assert report["state"]["round1_camera_countdown"] == 1140
     assert report["state"]["round1_camera_locks"] == 1
     assert report["state"]["round1_camera_unlocks"] == 0
     assert report["state"]["round1_player_stop_ticks"] == 0
@@ -97,7 +97,7 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_player_weapon_impact_releases"] == 0
     assert report["state"]["round1_player_weapon_impact_presentation_bindings"] == 0
     assert report["state"]["round1_player_resource"] == 16
-    assert report["state"]["round1_player_resource_recharge"] == 1
+    assert report["state"]["round1_player_resource_recharge"] == 3
     assert report["state"]["round1_player_weapon_projectile_free"] == 24
     assert report["state"]["round1_player_jump_entries"] == 1
     assert report["state"]["round1_player_jump_completions"] == 1
@@ -136,13 +136,13 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_native_weapon_forbidden_identity"] == 0
     assert report["state"]["round1_native_tile_pin_exhaustions"] == 0
     assert report["state"]["round1_native_tile_unique_peak"] == 170
-    assert report["state"]["round1_native_tile_unique_peak_frame"] == 472
+    assert report["state"]["round1_native_tile_unique_peak_frame"] == 475
     assert report["state"]["round1_native_tile_unique_overflow"] == 0
     assert report["state"]["round1_native_tile_unique_overflow"] == 0
     assert report["state"]["round1_native_presentation_decode_failures"] == 0
     assert report["state"]["round1_native_projectile_collision_writes"] == 0
     assert report["state"]["round1_native_projectile_damage_writes"] == 0
-    assert report["state"]["round1_first_encounter_scheduler_updates"] == 468
+    assert report["state"]["round1_first_encounter_scheduler_updates"] == 469
     assert report["state"]["round1_first_encounter_player_contacts"] == 4
     assert report["state"]["round1_first_encounter_alien_contacts"] == 1
     assert report["state"]["round1_first_encounter_player_damage_events"] == 1
@@ -151,12 +151,17 @@ for build,normal,report in zip(builds,normals,reads):
     assert report["state"]["round1_first_encounter_clear_events"] == 1
     assert report["state"]["round1_first_encounter_reaction_active"] == 0
     assert report["state"]["round1_first_encounter_reaction_elapsed"] == 139
+    assert report["state"]["alien_health"] == -1
+    assert report["state"]["alien_state"] == 0
+    assert report["state"]["alien_action"] == 0
+    assert report["state"]["alien_animation_record"] == 0
+    assert report["state"]["alien_assembly"] == 0
     assert report["state"]["round1_presentation_ready"] == 1
     assert report["state"]["round1_presentation_seen"] == 1
     assert report["state"]["round1_presentation_commands_peak"] == 2
     assert report["chronology"] == {
         "alien_contacts":1, "misses":0, "player_contacts":4,
-        "player_damage_events":1, "unlock_frame":467}
+        "player_damage_events":1, "unlock_frame":469}
     assert report["vdp1_texture_integrity"]["checked_textures"] == 218
     assert report["vdp1_texture_integrity"]["mismatches"] == 0
     assert report["vdp1_texture_integrity"]["sprite_array_distance"] >= 255 * 8

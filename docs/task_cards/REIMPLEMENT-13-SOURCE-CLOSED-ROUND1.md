@@ -235,12 +235,31 @@ and sprite high-water is 242/255. Exact real Windows frames 177..196 preserve
 Predator identity through action and neutral. Fast, Oracle, Target, paired
 Emulator, host mutations, target suppressions, and visual inspection pass.
 
-The next body is the retained first-encounter class-`0x1f` gameplay boundary.
-Replace its AI, targeting, movement/lane, facing, transition, attack,
-collision/damage, HIT/KO, effect, removal, dynamic-spawn, lifecycle and
-encounter authority from the accepted SPEC-02 contracts. Retained code may
-remain only as a presentation adapter. Do not leave the first segment until
-the complete interactive regression gate passes.
+The retained first-encounter class-`0x1f` gameplay boundary is now replaced.
+Native Round 1 owns its AI, targeting, movement/lane, facing, state/substate
+transitions, attack timing, current-state collision/damage, HIT/KO, effect
+allocation, dynamic spawn, removal, fixed-pool release, encounter clear, and
+route unlock. The retained shell is presentation-only and is never stepped as
+gameplay authority. Two byte-identical 575-sample pinned-emulator runs at ISO
+`ff8f0a288aa1e75dca47983ec3c3a799e32edad16a7b8106a5e9c73f2da27847`
+record 469 native updates, three HITs, one KO, one lifecycle release, one clear,
+continued play, and zero fallback/failure/decode error. Fast, Oracle, Target,
+123 host mutations, and 131 target suppressions pass.
+
+Direct window-targeted Graphics Capture at native frames 38/254/329/469/470
+verifies coherent Predator and class-0x1F presentation through attack, HIT, KO,
+and removal. MAME source frame 2078 confirms that the crowded alien and gray
+prop population is the source intro composition rather than background or VDP1
+corruption. The `WARRIOR` row is the P1 equipment meter; the separate
+`Maj.Schaefer` P2 panel remains absent. The current-state class-0x1F assembly
+union is now included in the Saturn emit/tile working set, with omission locked
+by a real mutation control.
+
+The next body is the first segment encounter-clear and dynamic route-progression
+boundary. Implement its source-owned post-clear guards and continued native
+authority from accepted SPEC-02. Retained code remains presentation-only. Do
+not leave the first segment until the complete interactive regression gate
+passes.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.

@@ -880,7 +880,16 @@ int main(void)
             return 55;
         for (entry_calls = 0u; entry_calls < 100u; ++entry_calls)
             if (!avsp_round1_step_scheduler(&projectile_runtime))
+            {
+                fprintf(stderr, "projectile tail scheduler failed i=%u code=%u slot=%u state=%u/%u record=%08lx failures=%lu\n",
+                    entry_calls, projectile_runtime.scheduler_failure_code,
+                    projectile_runtime.scheduler_failure_source_slot,
+                    projectile_runtime.scheduler_failure_state,
+                    projectile_runtime.scheduler_failure_substate,
+                    projectile_runtime.scheduler_failure_animation_record,
+                    projectile_runtime.failure_count);
                 return 56;
+            }
         if (projectile_runtime.player_weapon_allocations != 6u ||
             projectile_runtime.player_weapon_projectile_releases != 6u ||
             projectile_runtime.player_weapon_projectile_free_count != 24u ||
@@ -977,8 +986,11 @@ int main(void)
         for (tick = 10u; tick < 20u; ++tick)
             if (transition_runtime.pools[0].records[tick].state != 0x0200u ||
                 (tick == 14u ?
-                    transition_runtime.pools[0].records[tick].substate !=
-                        0x1600u :
+                    (!transition_runtime.first_encounter.dynamic_spawned ||
+                     transition_runtime.first_encounter.actor_source_slot !=
+                        0x00ffa000UL ||
+                     transition_runtime.pools[0].records[tick].actor_class !=
+                        0x1f) :
                     transition_runtime.pools[0].records[tick].substate != 0u))
                 return 69;
         for (tick = 131u; tick <= 467u; ++tick)
@@ -1087,21 +1099,21 @@ int main(void)
         if (!encounter_runtime.first_encounter.initialized ||
             encounter_runtime.first_encounter.encounter_state !=
                 AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE ||
-            encounter_runtime.first_encounter.alien.x != 962 ||
-            encounter_runtime.first_encounter.alien.lane != 343)
+            encounter_runtime.first_encounter.presentation.x != 960 ||
+            encounter_runtime.first_encounter.presentation.lane != 343)
             return 82;
-        while (encounter_runtime.first_encounter.alien.state !=
-                   AVSP_ALIEN_STATE_ATTACK && tick < 400u)
+        while (encounter_runtime.first_encounter.presentation.source_action !=
+                   0x1800u && tick < 400u)
         {
             if (!avsp_round1_step_player(&encounter_runtime, 0u, 0) ||
                 !avsp_round1_step_scheduler(&encounter_runtime))
                 return 83;
             ++tick;
         }
-        if (encounter_runtime.first_encounter.alien.x != 1071 ||
-            encounter_runtime.first_encounter.alien.lane != 320 ||
-            encounter_runtime.first_encounter.alien.rng_seed != 0x595au ||
-            encounter_runtime.first_encounter.alien.attack_timer != 120u)
+        if (encounter_runtime.first_encounter.presentation.x != 1071 ||
+            encounter_runtime.first_encounter.presentation.lane != 320 ||
+            encounter_runtime.first_encounter.presentation.rng_seed != 0x595au ||
+            encounter_runtime.first_encounter.presentation.attack_timer != 120u)
             return 84;
         while (encounter_runtime.first_encounter.alien_contacts < 2u &&
                tick < 600u)
@@ -1109,9 +1121,9 @@ int main(void)
             if (!avsp_round1_step_player(&encounter_runtime, 0u, 0))
                 return 85;
             encounter_runtime.player_action.x = (short)(
-                encounter_runtime.first_encounter.alien.x - 68);
+                encounter_runtime.first_encounter.presentation.x - 68);
             encounter_runtime.player_action.lane =
-                encounter_runtime.first_encounter.alien.lane;
+                encounter_runtime.first_encounter.presentation.lane;
             encounter_runtime.player.x = encounter_runtime.player_action.x;
             encounter_runtime.player.y = encounter_runtime.player_action.lane;
             encounter_runtime.player.z = encounter_runtime.player_action.lane;
@@ -1129,8 +1141,8 @@ int main(void)
                 encounter_runtime.player.health,
                 encounter_runtime.first_encounter.pending_player_damage,
                 tick,
-                encounter_runtime.first_encounter.alien.state,
-                encounter_runtime.first_encounter.alien.attack_elapsed);
+                encounter_runtime.first_encounter.presentation.state,
+                encounter_runtime.first_encounter.presentation.attack_elapsed);
             return 86;
         }
         if (!avsp_round1_step_player(&encounter_runtime, 0u, 0))
@@ -1148,8 +1160,8 @@ int main(void)
         }
         for (selector = 1u; selector <= 4u; ++selector)
         {
-            while (encounter_runtime.first_encounter.alien.state ==
-                       AVSP_ALIEN_STATE_HIT && tick < 1000u)
+            while (encounter_runtime.first_encounter.hit_timer != 0u &&
+                   tick < 1000u)
             {
                 if (!avsp_round1_step_player(&encounter_runtime, 0u, 0) ||
                     !avsp_round1_step_scheduler(&encounter_runtime))
@@ -1157,9 +1169,9 @@ int main(void)
                 ++tick;
             }
             encounter_runtime.player_action.x =
-                encounter_runtime.first_encounter.alien.x;
+                encounter_runtime.first_encounter.presentation.x;
             encounter_runtime.player_action.lane =
-                encounter_runtime.first_encounter.alien.lane;
+                encounter_runtime.first_encounter.presentation.lane;
             encounter_runtime.player.x = encounter_runtime.player_action.x;
             encounter_runtime.player.y = encounter_runtime.player_action.lane;
             encounter_runtime.player.z = encounter_runtime.player_action.lane;
@@ -1174,8 +1186,8 @@ int main(void)
                     encounter_runtime.failure_count,
                     encounter_runtime.pools[0].records[14].state,
                     encounter_runtime.pools[0].records[14].substate,
-                    encounter_runtime.first_encounter.alien.state,
-                    encounter_runtime.first_encounter.alien.health,
+                    encounter_runtime.first_encounter.presentation.state,
+                    encounter_runtime.first_encounter.presentation.health,
                     encounter_runtime.pools[0].records[14].animation_record);
                 return 90;
             }
@@ -1211,9 +1223,8 @@ int main(void)
         if (encounter_runtime.first_encounter.hit_events != 3u ||
             encounter_runtime.first_encounter.ko_events != 1u ||
             encounter_runtime.first_encounter.alien_damage_events != 4u ||
-            encounter_runtime.first_encounter.alien.health != -1 ||
-            encounter_runtime.first_encounter.alien.state !=
-                AVSP_ALIEN_STATE_INACTIVE ||
+            encounter_runtime.first_encounter.presentation.health != -1 ||
+            encounter_runtime.first_encounter.presentation.removed != 1u ||
             encounter_runtime.first_encounter.lifecycle_releases != 1u ||
             encounter_runtime.first_encounter.clear_events != 1u ||
             encounter_runtime.first_encounter.encounter_state !=
@@ -1228,7 +1239,7 @@ int main(void)
                 encounter_runtime.first_encounter.hit_events,
                 encounter_runtime.first_encounter.ko_events,
                 encounter_runtime.first_encounter.alien_damage_events,
-                encounter_runtime.first_encounter.alien.health,
+                encounter_runtime.first_encounter.presentation.health,
                 encounter_runtime.first_encounter.lifecycle_releases,
                 encounter_runtime.first_encounter.clear_events,
                 encounter_runtime.first_encounter.encounter_state,
@@ -1236,7 +1247,7 @@ int main(void)
                 encounter_runtime.pools[0].free_count,
                 encounter_runtime.failure_count,
                 encounter_runtime.fallback_count, tick,
-                encounter_runtime.first_encounter.alien.state,
+                encounter_runtime.first_encounter.presentation.state,
                 encounter_runtime.first_encounter.reaction.active,
                 encounter_runtime.first_encounter.reaction.elapsed);
             return 92;

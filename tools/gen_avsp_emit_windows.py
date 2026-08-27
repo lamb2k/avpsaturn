@@ -216,6 +216,45 @@ def load_spec02_round1_presentations():
                  for record in sequence["records"]], (1,), (1,), 0x8000,
                 tuple(sorted({actor["palette_u8"]
                               for actor in class1f["actors"]})))
+    class1f_authority = authority["enemies"]["archetypes"][3]
+    class1f_current = class1f_authority[
+        "current_state_implementation_contract"]
+    def address_key(value):
+        return "0x%08x" % int(str(value), 16)
+
+    class1f_records = {
+        address_key(record["animation_record"]): record
+        for record in class1f_authority["presentation_and_collision"][
+            "records"]
+    }
+    current_addresses = {
+        address_key(class1f_current["spawn"]["initial_actor"][
+            "animation_record"]),
+        address_key(class1f_current["actions"]["above_lane_0x0600"][
+            "animation_record"]),
+        address_key(class1f_current["actions"]["reposition_0x1a00"][
+            "animation_record"]),
+    }
+    for action in ("approach_0x1600", "attack_0x1800"):
+        current_addresses.update(
+            address_key(record["animation_record"])
+            for record in class1f_current["actions"][action]["records"])
+    current_addresses.update(
+        address_key(address) for address in
+        class1f_authority["presentation_and_collision"][
+            "accepted_hit_ko_records"]["record_addresses"])
+    missing_current = sorted(current_addresses - class1f_records.keys())
+    if missing_current:
+        raise AssertionError(
+            "class-0x1f current presentation records are absent: %s" %
+            ", ".join(missing_current))
+    # The current actor can be struck on either side in a perturbed route.
+    # Preserve both source facing transforms; this is presentation residency,
+    # not a new facing rule.
+    add_records("class1f-current",
+                [class1f_records[address]
+                 for address in sorted(current_addresses)],
+                (0, 1), (1,), 0x8000, (0x15,))
     dependencies = authority["auxiliary"]["first_segment_dependencies"]
     class09 = dependencies["class_0x09_type20_rng_owner"]
     add_records("class09-initial",

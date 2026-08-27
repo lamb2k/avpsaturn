@@ -244,38 +244,150 @@ static int avsp_round1_first_encounter_begin_reaction(
         AVSP_PORT_V2_HIT_KO_HIT, &avsp_port_v2_hit_source_before);
 }
 
-static int avsp_round1_first_encounter_sync_actor(
-    AvspRound1ActorCore *actor,
-    const AvspRound1FirstEncounterRuntime *encounter)
+static unsigned short avsp_round1_class1f_rng_step(unsigned short seed)
 {
-    const AvspRound1PresentationSpec *presentation;
-    unsigned long animation_record = encounter->alien.animation_record;
-    unsigned short state = 0x0200u;
-    unsigned short substate = encounter->alien.source_action;
-    if (encounter->reaction.active ||
-        encounter->alien.state == AVSP_ALIEN_STATE_HIT ||
-        encounter->alien.state == AVSP_ALIEN_STATE_KO)
-    {
-        animation_record = encounter->reaction.actor.anim_record;
-        state = encounter->reaction.actor.sub_state;
-        substate = encounter->reaction.actor.action;
-    }
-    presentation = avsp_round1_find_class1f_presentation(animation_record);
-    if (presentation == 0 ||
-        !avsp_round1_class1f_state_context_supported(state, substate))
+    unsigned short high = (unsigned short)(
+        (((unsigned long)3u * seed) & 0xffffu) >> 8);
+    unsigned short low = (unsigned short)(
+        ((seed & 0xffu) + high) & 0xffu);
+    return (unsigned short)((high << 8) | low);
+}
+
+static short avsp_round1_class1f_abs(short value)
+{
+    return value < 0 ? (short)-value : value;
+}
+
+static void avsp_round1_class1f_fraction(long *numerator, short *position,
+                                         int amount)
+{
+    long before = *numerator /
+        (long)avsp_round1_class1f_current.approach_ticks;
+    long after;
+    *numerator += amount;
+    after = *numerator /
+        (long)avsp_round1_class1f_current.approach_ticks;
+    *position = (short)(*position + (short)(after - before));
+}
+
+static AvspRound1ActorCore *avsp_round1_find_record12_actor(
+    AvspRound1Runtime *runtime, unsigned short source_slot)
+{
+    AvspRound1Pool *pool = &runtime->pools[0];
+    unsigned int index;
+    if (source_slot < pool->source_base ||
+        ((unsigned int)(source_slot - pool->source_base) % pool->stride) != 0u)
         return 0;
-    actor->state = state;
-    actor->substate = substate;
-    actor->source_action = encounter->alien.source_action;
-    actor->x = encounter->alien.x;
-    actor->y = encounter->alien.lane;
-    actor->z = encounter->alien.lane;
-    actor->health = encounter->alien.health;
-    actor->facing = (unsigned char)encounter->alien.facing;
-    actor->animation_record = animation_record;
+    index = (unsigned int)(source_slot - pool->source_base) / pool->stride;
+    if (index >= pool->capacity || !pool->records[index].active)
+        return 0;
+    return &pool->records[index];
+}
+
+static void avsp_round1_first_encounter_cache_presentation(
+    AvspRound1FirstEncounterRuntime *encounter,
+    const AvspRound1ActorCore *actor)
+{
+    AvspAlienView *view = &encounter->presentation;
+    memset(view, 0, sizeof(*view));
+    if (actor == 0 || !actor->active)
+        return;
+    view->class_id = (unsigned short)(unsigned char)actor->actor_class;
+    view->state = actor->state;
+    view->inner_state = actor->substate;
+    view->target_id = encounter->target_id;
+    view->x = actor->x;
+    view->lane = actor->z;
+    view->health = actor->health;
+    view->facing = actor->facing;
+    view->approach_elapsed = encounter->approach_elapsed;
+    view->attack_elapsed = encounter->attack_elapsed;
+    view->attack_timer = encounter->attack_timer;
+    view->rng_seed = encounter->rng_seed;
+    view->rng_cursor = encounter->rng_cursor;
+    view->contact = encounter->alien_contact;
+    view->contact_damage = encounter->pending_player_damage;
+    view->removed = 0u;
+    view->source_action = actor->source_action;
+    view->presentation_index = encounter->presentation_index;
+    view->animation_record = actor->animation_record;
+    view->assembly = actor->assembly;
+}
+
+static int avsp_round1_class1f_bind_record(AvspRound1ActorCore *actor,
+                                           unsigned long record)
+{
+    const AvspRound1PresentationSpec *presentation =
+        avsp_round1_find_class1f_presentation(record);
+    if (presentation == 0)
+        return 0;
+    actor->animation_record = record;
     actor->assembly = presentation->assembly;
     actor->hurt_selector = presentation->hurt_selector;
     actor->attack_selector = presentation->attack_selector;
+    return 1;
+}
+
+static int avsp_round1_first_encounter_sync_reaction(
+    AvspRound1ActorCore *actor,
+    const AvspRound1FirstEncounterRuntime *encounter)
+{
+    if (!avsp_round1_class1f_bind_record(
+            actor, encounter->reaction.actor.anim_record))
+        return 0;
+    actor->state = encounter->reaction.actor.sub_state;
+    actor->substate = encounter->reaction.actor.action;
+    return avsp_round1_class1f_state_context_supported(
+        actor->state, actor->substate);
+}
+
+static int avsp_round1_spawn_bounded_class1f(AvspRound1Runtime *runtime)
+{
+    AvspRound1FirstEncounterRuntime *encounter = &runtime->first_encounter;
+    AvspRound1Pool *pool = &runtime->pools[0];
+    AvspRound1ActorCore *scripted;
+    AvspRound1ActorCore *actor;
+    unsigned int living = 0u;
+    unsigned int index;
+    if (runtime->route_state != 4 || encounter->dynamic_spawned)
+        return 1;
+    ++encounter->controller_timer;
+    if ((encounter->controller_timer & 7u) != 0u)
+        return 1;
+    for (index = 0u; index < pool->capacity; ++index)
+        if (pool->records[index].active &&
+            pool->records[index].actor_class == 0x1f &&
+            pool->records[index].source_slot < 0x9d00UL)
+            ++living;
+    if (living >= 8u)
+        return 1;
+    scripted = avsp_round1_find_record12_actor(runtime,
+        (unsigned short)avsp_round1_class1f_current.bounded_dynamic_source_slot);
+    if (scripted == 0 || scripted->actor_class != 0x1f ||
+        scripted->substate != 0u)
+        return 1;
+    if (!avsp_round1_release_pool_actor(pool, scripted))
+        return 0;
+    actor = avsp_round1_allocate_pool_actor(runtime, 0u);
+    if (actor == 0 || (unsigned short)actor->source_slot !=
+            (unsigned short)avsp_round1_class1f_current.bounded_dynamic_source_slot)
+        return 0;
+    actor->source_slot =
+        avsp_round1_class1f_current.bounded_dynamic_source_slot;
+    actor->actor_class = 0x1f;
+    actor->variant = 5u;
+    actor->state = 0u;
+    actor->substate = 0u;
+    actor->x = avsp_round1_class1f_current.start_x;
+    actor->y = avsp_round1_class1f_current.start_y;
+    actor->z = avsp_round1_class1f_current.start_z;
+    actor->facing = 1u;
+    encounter->actor_source_slot = actor->source_slot;
+    encounter->dynamic_spawned = 1u;
+    encounter->encounter_state = AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE;
+    encounter->controller_state = 6u;
+    encounter->controller_remaining = 0u;
+    encounter->controller_timer = 360u;
     return 1;
 }
 
@@ -284,40 +396,37 @@ static int avsp_round1_step_first_encounter_actor(
     AvspRound1ActorCore *actor)
 {
     AvspRound1FirstEncounterRuntime *encounter = &runtime->first_encounter;
-    AvspAlienInput input;
     unsigned char hit_value = 0u;
     short damage = 0;
     short health_before;
     int overlap;
     if (!encounter->initialized)
     {
-        memset(encounter, 0, sizeof(*encounter));
-        avsp_alien_ai_init(&encounter->alien, 0x7301u);
+        actor->state = 0x0200u;
+        actor->substate = 0x1600u;
+        actor->source_action = 0x1600u;
+        actor->health = avsp_round1_class1f_current.start_health;
+        actor->facing = 1u;
+        encounter->target_id = 1u;
+        encounter->rng_seed = 0x7301u;
+        encounter->actor_source_slot = actor->source_slot;
         encounter->initialized = 1u;
-        if (!avsp_round1_first_encounter_sync_actor(actor, encounter))
+        encounter->encounter_state = AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE;
+        if (!avsp_round1_class1f_bind_record(actor, 0x0012ddb0UL))
             return 0;
+        avsp_round1_first_encounter_cache_presentation(encounter, actor);
+        return 1;
     }
     encounter->player_contact = 0u;
     encounter->alien_contact = 0u;
     encounter->alien_damage = 0u;
     encounter->semantic_hit = 0u;
     encounter->semantic_ko = 0u;
-    encounter->health_before = encounter->alien.health;
-    encounter->health_after = encounter->alien.health;
-    if (encounter->encounter_state == AVSP_ROUND1_FIRST_ENCOUNTER_WAIT_ENTRY &&
-        runtime->player_action.x >= AVSP_ROUND1_FIRST_ENCOUNTER_ENTRY_X)
-        encounter->encounter_state = AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE;
-    memset(&input, 0, sizeof(input));
-    input.target.active = (unsigned short)(
-        encounter->encounter_state == AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE &&
-        runtime->player_action.state != AVSP_PW_STATE_KO);
-    input.target.id = 1u;
-    input.target.x = runtime->player_action.x;
-    input.target.lane = runtime->player_action.lane;
+    encounter->health_before = actor->health;
+    encounter->health_after = actor->health;
     if (encounter->encounter_state == AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE &&
         runtime->player_action.attack_active && !encounter->attack_latched &&
-        encounter->alien.state != AVSP_ALIEN_STATE_KO &&
-        encounter->alien.state != AVSP_ALIEN_STATE_INACTIVE)
+        actor->state != 0x0600u)
     {
         overlap = avsp_round1_first_encounter_overlap(runtime, actor,
                                                        &hit_value);
@@ -331,11 +440,11 @@ static int avsp_round1_step_first_encounter_actor(
                 runtime->player_action.selector);
             if (damage <= 0)
                 return 0;
-            input.incoming_damage = damage;
             encounter->player_contact = 1u;
             encounter->alien_damage = (unsigned char)damage;
-            encounter->health_before = encounter->alien.health;
-            encounter->health_after = (short)(encounter->alien.health - damage);
+            encounter->health_before = actor->health;
+            actor->health = (short)(actor->health - damage);
+            encounter->health_after = actor->health;
             ++encounter->player_contacts;
             ++encounter->alien_damage_events;
             avsp_pw_report_contact(&runtime->player_action);
@@ -343,15 +452,19 @@ static int avsp_round1_step_first_encounter_actor(
     }
     if (!runtime->player_action.attack_active)
         encounter->attack_latched = 0u;
-    health_before = encounter->alien.health;
-    if (encounter->encounter_state == AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE)
-        avsp_alien_ai_step(&encounter->alien, &input);
-    if (input.incoming_damage > 0)
+    health_before = encounter->health_before;
+    if (damage > 0)
     {
-        if (encounter->alien.state == AVSP_ALIEN_STATE_KO)
+        encounter->approach_elapsed = 0u;
+        encounter->attack_elapsed = 0u;
+        encounter->attack_timer = 0u;
+        encounter->x_numerator = 0L;
+        encounter->lane_numerator = 0L;
+        if (actor->health <= 0)
         {
             encounter->target_ko_observed = 1u;
             encounter->semantic_ko = 1u;
+            encounter->ko_timer = avsp_round1_class1f_current.ko_ticks;
             ++encounter->ko_events;
             if (!avsp_round1_first_encounter_begin_reaction(encounter, 1))
                 return 0;
@@ -359,33 +472,144 @@ static int avsp_round1_step_first_encounter_actor(
         else
         {
             encounter->semantic_hit = 1u;
+            encounter->hit_timer = avsp_round1_class1f_current.hit_ticks;
             ++encounter->hit_events;
             if (!avsp_round1_first_encounter_begin_reaction(encounter, 0))
                 return 0;
         }
     }
-    else if (encounter->reaction.active &&
-             !avsp_port_v2_hit_ko_step(&encounter->reaction))
+    if (encounter->reaction.active &&
+        !avsp_port_v2_hit_ko_step(&encounter->reaction))
         return 0;
-    if (encounter->alien.contact && encounter->alien.contact_damage > 0u &&
-        runtime->player_action.state != AVSP_PW_STATE_KO)
+    if (encounter->ko_timer != 0u)
     {
-        encounter->alien_contact = 1u;
-        encounter->pending_player_damage =
-            (unsigned char)encounter->alien.contact_damage;
-        ++encounter->alien_contacts;
+        --encounter->ko_timer;
+        if (!avsp_round1_first_encounter_sync_reaction(actor, encounter))
+            return 0;
+    }
+    else if (encounter->hit_timer != 0u)
+    {
+        --encounter->hit_timer;
+        if (!avsp_round1_first_encounter_sync_reaction(actor, encounter))
+            return 0;
+        if (encounter->hit_timer == 0u)
+        {
+            actor->state = 0x0200u;
+            actor->substate = 0x1a00u;
+            actor->source_action = 0x1a00u;
+            actor->facing = 0u;
+            if (!avsp_round1_class1f_bind_record(actor, 0x0012d5e4UL))
+                return 0;
+        }
+    }
+    else if (damage == 0)
+    {
+        if (actor->source_action == 0x1600u)
+        {
+            actor->state = 0x0200u;
+            actor->substate = 0x1600u;
+            actor->facing = 1u;
+            avsp_round1_class1f_fraction(&encounter->x_numerator, &actor->x,
+                avsp_round1_class1f_current.approach_x_delta);
+            avsp_round1_class1f_fraction(&encounter->lane_numerator, &actor->z,
+                avsp_round1_class1f_current.approach_z_delta);
+            actor->y = actor->z;
+            encounter->presentation_index = (unsigned short)(
+                encounter->approach_elapsed & 7u);
+            if (!avsp_round1_class1f_bind_record(actor,
+                    avsp_round1_class1f_approach_records[
+                        encounter->presentation_index]))
+                return 0;
+            ++encounter->approach_elapsed;
+            if (encounter->approach_elapsed >=
+                    avsp_round1_class1f_current.approach_ticks)
+            {
+                encounter->approach_elapsed = 0u;
+                encounter->x_numerator = 0L;
+                encounter->lane_numerator = 0L;
+                encounter->rng_seed =
+                    avsp_round1_class1f_rng_step(encounter->rng_seed);
+                ++encounter->rng_cursor;
+                encounter->attack_timer =
+                    (encounter->rng_seed & 0xffu) < 0x40u ? 30u :
+                    avsp_round1_class1f_current.attack_ticks;
+                encounter->attack_elapsed = 0u;
+                actor->source_action = 0x1800u;
+                actor->substate = 0x1800u;
+                if (!avsp_round1_class1f_bind_record(actor,
+                        avsp_round1_class1f_attack_records[0]))
+                    return 0;
+            }
+        }
+        else if (actor->source_action == 0x1800u)
+        {
+            ++encounter->attack_elapsed;
+            encounter->presentation_index = (unsigned short)(
+                encounter->attack_elapsed & 3u);
+            if (!avsp_round1_class1f_bind_record(actor,
+                    avsp_round1_class1f_attack_records[
+                        encounter->presentation_index]))
+                return 0;
+            if ((encounter->attack_elapsed ==
+                    avsp_round1_class1f_current.contact_tick_a ||
+                 encounter->attack_elapsed ==
+                    avsp_round1_class1f_current.contact_tick_b) &&
+                avsp_round1_class1f_abs((short)(
+                    runtime->player_action.x - actor->x)) <= 68 &&
+                runtime->player_action.lane == actor->z &&
+                runtime->player_action.state != AVSP_PW_STATE_KO)
+            {
+                encounter->alien_contact = 1u;
+                encounter->pending_player_damage = (unsigned char)
+                    avsp_round1_class1f_current.contact_damage;
+                ++encounter->alien_contacts;
+            }
+            if (encounter->attack_elapsed >= encounter->attack_timer)
+            {
+                encounter->attack_elapsed = 0u;
+                encounter->attack_timer = 0u;
+                if (runtime->player_action.x < actor->x)
+                {
+                    actor->source_action = 0x1a00u;
+                    actor->substate = 0x1a00u;
+                    actor->facing = 0u;
+                    if (!avsp_round1_class1f_bind_record(
+                            actor, 0x0012d5e4UL))
+                        return 0;
+                }
+                else if (runtime->player_action.lane > actor->z)
+                {
+                    actor->source_action = 0x0600u;
+                    actor->substate = 0x0600u;
+                    actor->facing = 0u;
+                    if (!avsp_round1_class1f_bind_record(
+                            actor, 0x0012d5e4UL))
+                        return 0;
+                }
+                else
+                {
+                    actor->source_action = 0x1600u;
+                    actor->substate = 0x1600u;
+                    actor->facing = 1u;
+                    if (!avsp_round1_class1f_bind_record(actor,
+                            avsp_round1_class1f_approach_records[0]))
+                        return 0;
+                }
+            }
+        }
     }
     if (encounter->alien_damage != 0u)
     {
         encounter->health_before = health_before;
-        encounter->health_after = encounter->alien.health;
+        encounter->health_after = actor->health;
     }
     ++encounter->scheduler_updates;
     if (encounter->encounter_state == AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE &&
         encounter->target_ko_observed &&
-        encounter->alien.state == AVSP_ALIEN_STATE_INACTIVE &&
+        encounter->ko_timer == 0u &&
         !encounter->reaction.active)
     {
+        short final_health = actor->health;
         encounter->encounter_state = AVSP_ROUND1_FIRST_ENCOUNTER_CLEARED;
         encounter->route_unlocked = 1u;
         encounter->unlock_player_x = runtime->player_action.x;
@@ -393,10 +617,15 @@ static int avsp_round1_step_first_encounter_actor(
         if (!avsp_round1_release_pool_actor(pool, actor))
             return 0;
         ++encounter->lifecycle_releases;
+        avsp_round1_first_encounter_cache_presentation(encounter, 0);
+        encounter->presentation.removed = 1u;
+        encounter->presentation.health = final_health;
         return 2;
     }
-    if (!avsp_round1_first_encounter_sync_actor(actor, encounter))
+    if (!avsp_round1_class1f_state_context_supported(
+            actor->state, actor->substate))
         return 0;
+    avsp_round1_first_encounter_cache_presentation(encounter, actor);
     return 1;
 }
 
@@ -2484,6 +2713,12 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
     runtime->scheduler_failure_substate = 0u;
     runtime->scheduler_failure_animation_record = 0u;
     runtime->scheduler_trace_count = 0u;
+    if (!avsp_round1_spawn_bounded_class1f(runtime))
+    {
+        runtime->scheduler_failure_code = 15u;
+        ++runtime->failure_count;
+        return 0;
+    }
     for (slot_index = 0u;
          slot_index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY; ++slot_index)
     {
@@ -2633,11 +2868,16 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
             if (actor->type == 12u && actor->actor_class == 0x1f)
             {
                 int first_encounter_result = 1;
-                if (actor->handler_updates == 0u ||
+                int current_encounter_actor =
+                    runtime->first_encounter.dynamic_spawned &&
+                    actor->source_slot ==
+                        runtime->first_encounter.actor_source_slot;
+                if (!current_encounter_actor &&
+                    (actor->handler_updates == 0u ||
                     actor->substate == 0x1000u || actor->substate == 0x1200u ||
                     actor->substate == 0x1400u || actor->substate == 0x1402u ||
                     actor->substate == 0x1404u || actor->substate == 0x1406u ||
-                    actor->substate == 0x1408u)
+                    actor->substate == 0x1408u))
                 {
                     if (!avsp_round1_step_initial_class1f(runtime, actor))
                     {
@@ -2646,11 +2886,7 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
                         return 0;
                     }
                 }
-                if (runtime->route_state == 4 &&
-                    (unsigned short)actor->source_slot ==
-                        AVSP_ROUND1_FIRST_ENCOUNTER_SLOT &&
-                    (runtime->first_encounter.initialized ||
-                     actor->substate == 0u))
+                if (runtime->route_state == 4 && current_encounter_actor)
                 {
                     first_encounter_result =
                         avsp_round1_step_first_encounter_actor(runtime,
@@ -2730,7 +2966,7 @@ void avsp_round1_first_encounter_view(
     view->semantic_ko = encounter->semantic_ko;
     view->health_before = encounter->health_before;
     view->health_after = encounter->health_after;
-    avsp_alien_ai_view(&encounter->alien, &view->alien);
+    view->alien = encounter->presentation;
     view->reaction = encounter->reaction.actor;
 }
 

@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "3f6e179fc41ad9ac0fdb6318c929ac74297b35a1f4627b58325e408d424af6fc"
+    "ae6814e233a3245a46d6892171ab1692c054fb3bad7ba7a57ce1106b3aff6a8f"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -45,6 +45,8 @@
 #define AVSP_ROUND1_CLASS1F_AIRBORNE_ACTOR_COUNT 3u
 #define AVSP_ROUND1_CLASS1F_INITIAL_SEQUENCE_COUNT 6u
 #define AVSP_ROUND1_CLASS1F_INITIAL_SEQUENCE_MAX_RECORDS 5u
+#define AVSP_ROUND1_CLASS1F_APPROACH_RECORD_COUNT 8u
+#define AVSP_ROUND1_CLASS1F_ATTACK_RECORD_COUNT 4u
 #define AVSP_ROUND1_CLASS09_INITIAL_ACTOR_COUNT 2u
 #define AVSP_ROUND1_CLASS09_SEQUENCE_COUNT 5u
 #define AVSP_ROUND1_CLASS09_SEQUENCE_RECORDS 2u
@@ -223,6 +225,28 @@ typedef struct
     unsigned char source_flags;
     unsigned char animation_selector;
 } AvspRound1Class1fInitialSpec;
+
+typedef struct
+{
+    unsigned long controller_source_slot;
+    unsigned long bounded_dynamic_source_slot;
+    unsigned char controller_type;
+    signed char controller_class;
+    short start_x;
+    short start_y;
+    short start_z;
+    short start_health;
+    short approach_x_delta;
+    short approach_z_delta;
+    unsigned short approach_ticks;
+    unsigned short attack_ticks;
+    unsigned short contact_tick_a;
+    unsigned short contact_tick_b;
+    unsigned short contact_damage;
+    unsigned short hit_ticks;
+    unsigned short ko_ticks;
+    unsigned short player_damage[AVSP_ROUND1_PLAYER_MELEE_COUNT];
+} AvspRound1Class1fCurrentSpec;
 
 typedef struct
 {
@@ -531,9 +555,26 @@ typedef struct
 
 typedef struct
 {
-    AvspAlienRuntime alien;
     AvspPortV2HitKoRuntime reaction;
+    /* Read-only presentation cache; the fixed-pool actor remains authoritative. */
+    AvspAlienView presentation;
+    unsigned long actor_source_slot;
+    unsigned short target_id;
+    unsigned short approach_elapsed;
+    unsigned short attack_elapsed;
+    unsigned short attack_timer;
+    unsigned short hit_timer;
+    unsigned short ko_timer;
+    unsigned short rng_seed;
+    unsigned short rng_cursor;
+    unsigned short presentation_index;
+    unsigned short controller_timer;
+    unsigned char controller_state;
+    unsigned char controller_remaining;
+    long x_numerator;
+    long lane_numerator;
     unsigned char initialized;
+    unsigned char dynamic_spawned;
     unsigned char encounter_state;
     unsigned char target_ko_observed;
     unsigned char route_unlocked;

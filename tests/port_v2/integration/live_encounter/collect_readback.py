@@ -542,6 +542,10 @@ if not (state["runtime_ready"] == state["canaries_ok"] == 1 and
         state["internal_failures"] == 0 and state["pcm_retriggers"] == 0 and
         state["failures"] == state["fallback_count"] ==
         state["physical_saturn"] == 0): raise RuntimeError(f"live state failed: {state}")
+if not (state["alien_health"] == -1 and state["alien_state"] == 0 and
+        state["alien_action"] == 0 and state["alien_animation_record"] == 0 and
+        state["alien_assembly"] == 0):
+    raise RuntimeError(f"released class-0x1f presentation remained live: {state}")
 if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_canaries_ok"] == 1 and
         state["round1_route_state"] == 4 and state["round1_rng_seed"] == 0x82fd and
@@ -559,19 +563,19 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_player_z"] == 320 and
         state["round1_player_facing"] == 1 and
         state["round1_player_source_action"] == 514 and
-        state["round1_player_controller_updates"] == 621 and
-        state["round1_scheduler_frames"] == 791 and
-        state["round1_scheduler_dispatches"] == 11245 and
+        state["round1_player_controller_updates"] == 622 and
+        state["round1_scheduler_frames"] == 792 and
+        state["round1_scheduler_dispatches"] == 11261 and
         state["round1_scheduler_trace_count"] == 13 and
         state["round1_scheduler_order_hash"] == -1628184524 and
-        state["round1_actor_handler_dispatches"] == 7803 and
-        state["round1_presentation_bindings"] == 7802 and
-        state["round1_state_context_bindings"] == 7802 and
+        state["round1_actor_handler_dispatches"] == 7815 and
+        state["round1_presentation_bindings"] == 7814 and
+        state["round1_state_context_bindings"] == 7814 and
         state["round1_navigation_bound_x"] == 832 and
         state["round1_navigation_bound_z"] == 256 and
-        state["round1_navigation_applications"] == 621 and
+        state["round1_navigation_applications"] == 622 and
         state["round1_navigation_clamps"] == 0 and
-        state["round1_navigation_obstacle_responses"] == 55 and
+        state["round1_navigation_obstacle_responses"] == 53 and
         state["round1_navigation_terrain_responses"] == 0 and
         state["round1_navigation_terrain_retries"] == 0 and
         state["round1_camera_x_position"] == 832 and
@@ -580,7 +584,7 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_camera_x_upper"] == 832 and
         state["round1_camera_scroll2_x"] == 768 and
         state["round1_camera_phase"] == 2 and
-        state["round1_camera_countdown"] == 1138 and
+        state["round1_camera_countdown"] == 1140 and
         state["round1_camera_locks"] == 1 and
         state["round1_camera_unlocks"] == 0 and
         state["round1_player_stop_ticks"] == 0 and
@@ -606,7 +610,7 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_player_weapon_empty_presentation_bindings"] == 10 and
         state["round1_player_weapon_interruptions"] == 0 and
         state["round1_player_resource"] == 16 and
-        state["round1_player_resource_recharge"] == 1 and
+        state["round1_player_resource_recharge"] == 3 and
         state["round1_player_weapon_projectile_free"] == 24 and
         state["round1_player_jump_entries"] == 1 and
         state["round1_player_jump_completions"] == 1 and
@@ -640,7 +644,7 @@ if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_player_weapon_impact_audio_events"] == 0 and
         state["round1_player_weapon_impact_releases"] == 0 and
         state["round1_player_weapon_impact_presentation_bindings"] == 0 and
-        state["round1_first_encounter_scheduler_updates"] == 468 and
+        state["round1_first_encounter_scheduler_updates"] == 469 and
         state["round1_first_encounter_player_contacts"] == 4 and
         state["round1_first_encounter_alien_contacts"] == 1 and
         state["round1_first_encounter_player_damage_events"] == 1 and

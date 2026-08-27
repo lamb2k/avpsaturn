@@ -61,6 +61,15 @@ assert [row["coordinate_mode_u8"] for row in initial["actors"]] == [1] * 10
 assert [row["palette_u8"] for row in initial["actors"]] == [16, 17, 17, 18, 17, 16, 18, 17, 19, 19]
 assert [row["object_or_u16"] for row in initial["actors"]] == ["0x8000"] * 10
 assert [row["selector_u8"] for row in initial["animation_sequences"]] == [0, 1, 52, 60, 62, 76]
+current = class1f["current_state_implementation_contract"]
+assert current["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+assert current["authority_boundary"]["retained_gameplay_authority_forbidden"] is True
+assert current["spawn"]["first_dynamic"]["slot"] == "0xff9c40"
+assert current["spawn"]["bounded_current_state_dynamic"]["slot"] == "0xffa000"
+assert current["spawn"]["bounded_current_state_dynamic"]["writer_pc"] == "0x028a3e"
+assert current["actions"]["approach_0x1600"]["x_delta_s16"] == 111
+assert current["actions"]["attack_0x1800"]["contact_offsets_u16"] == [48, 119]
+assert current["damage_hit_ko_removal"]["damage_by_player_selector_s16"] == [8, 8, 10, 12]
 dependencies = fixtures["authority_data"]["auxiliary"]["first_segment_dependencies"]
 assert dependencies["class_0x09_type20_rng_owner"]["first_segment_calls_before_class4e"] == 44
 assert dependencies["class_0x4e_type24_variant4_effect"]["allocation_pop_order"] == [
@@ -122,6 +131,10 @@ f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["actors"][0]["coordinate_mode_u8"] = 0; mutations.append((contract, f, "class1f presentation mode mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["actors"][0]["palette_u8"] = 15; mutations.append((contract, f, "class1f presentation palette mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["actors"][0]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "class1f presentation priority mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["spawn"]["bounded_current_state_dynamic"]["writer_pc"] = "0x06b3fe"; mutations.append((contract, f, "class1f current spawn writer mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["actions"]["approach_0x1600"]["x_delta_s16"] = 110; mutations.append((contract, f, "class1f current movement mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["actions"]["attack_0x1800"]["contact_offsets_u16"][0] = 47; mutations.append((contract, f, "class1f current contact mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["ko_ticks_u16"] = 140; mutations.append((contract, f, "class1f current KO mutation"))
 f = copy.deepcopy(fixtures); next(row for row in next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["presentation_and_collision"]["records"] if row["animation_record"] == "0x0012dd50")["assembly"] = "0x0013020c"; mutations.append((contract, f, "class1f HIT presentation mutation"))
 f = copy.deepcopy(fixtures); next(row for row in next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["presentation_and_collision"]["records"] if row["animation_record"] == "0x0012e214")["hurt_selector"] = 1; mutations.append((contract, f, "class1f KO selector mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x09_type20_rng_owner"]["selector_table_u16"][0] = 1; mutations.append((contract, f, "class09 RNG selector mutation"))

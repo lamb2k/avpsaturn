@@ -20,6 +20,7 @@ FULL_ROUTE = ROOT / ".deps" / "mame" / "full_route"
 ROUTE = ROOT / "data" / "oracle10_round1_route.json"
 SCHEDULER = ROOT / "data" / "oracle11_actor_scheduler_lifecycle.json"
 ORACLE09 = ROOT / "data" / "oracle09_street_alien_state_facing_presentation.json"
+ENCOUNTERS = ROOT / "data" / "oracle11_round1_encounter_route_authority.json"
 AUDIO = ROOT / "data" / "oracle11_global_audio_trigger_owners.json"
 HIT_KO_CONTRACT = ROOT / "tests" / "port_v2" / "combat" / "hit_ko" / "approved_contract.json"
 OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
@@ -386,6 +387,150 @@ def initial_class1f_transition_contract(samples: list[dict[str, str]],
     }
 
 
+def class1f_current_state_contract(oracle09: dict[str, object],
+                                   opcodes: bytes) -> dict[str, object]:
+    """Project the accepted bounded street-alien evidence into native fields."""
+    state = oracle09["bounded_state_contract"]
+    spawn = state["spawn"]
+    approach = state["authored_approach_0x1600"]
+    attack = state["rng_attack_0x1800"]
+    crossing = state["right_to_left_crossing_0x1a00"]
+    above = state["above_lane_reposition_inner_8"]
+    encounters = json.loads(ENCOUNTERS.read_text(encoding="ascii"))
+    first_spawn = next(item for item in encounters["enemy_spawns"]
+                       if item["frame"] == 2328 and
+                       item["class"] == "0x1f" and item["type"] == 12)
+    bounded_spawn = next(item for item in encounters["enemy_spawns"]
+                         if item["frame"] == 3982 and
+                         item["slot"] == "0xffa000" and
+                         item["class"] == "0x1f" and item["type"] == 12)
+    require(first_spawn["slot"] == "0xff9c40" and
+            first_spawn["writer_pc"] == "0x06b3fe" and
+            first_spawn["caller_chain"] ==
+                ["0x06b3a8", "0x01bc70", "0x0084bc"],
+            "class-0x1f first dynamic spawn drift")
+    require(spawn["world"] == {"x": 960, "y": 343, "z": 343} and
+            spawn["health"] == 87 and spawn["action"] == "0x0000" and
+            approach["measured_motion_window"] == {
+                "frames": [4214, 4252], "from": {"x": 1181, "z": 297},
+                "to": {"x": 1292, "z": 274}, "facing": 1} and
+            attack["contact_offsets"] == [48, 119] and
+            attack["damage_each_native_health_units"] == 8 and
+            attack["rng"]["seed_before"] == "0x7301" and
+            attack["rng"]["seed_after"] == "0x595a" and
+            attack["first_sample"]["timer"] == 120,
+            "class-0x1f bounded current-state evidence drift")
+    return {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "scope": "bounded first-segment class-0x1f current-state and first dynamic spawn",
+        "accepted_oracle09_sha256": digest(ORACLE09),
+        "accepted_encounter_authority_sha256": digest(ENCOUNTERS),
+        "authority_boundary": {
+            "native_fixed_pool_actor_owns": ["world position", "facing", "AI state",
+                "animation selection", "collision", "damage", "HIT", "KO",
+                "spawn", "removal", "encounter participation"],
+            "retained_gameplay_authority_forbidden": True,
+            "presentation_adapter_may_read_native_actor": True,
+        },
+        "dispatch": {
+            "entry": "0x060532", "scheduler": "0x01b974",
+            "scheduler_order": "type-12 ascending fixed-pool source slot",
+            "outer_state_table": {"0x0000": "0x060546 initialization",
+                "0x0200": "0x06075a current state", "0x0400": "0x061146 HIT",
+                "0x0600": "0x06114c KO removal"},
+            "inner_state_table": {"0x0000": "0x060772 action dispatch",
+                "0x0200": "0x06105a shared HIT tail", "0x0400": "0x061134",
+                "0x0600": "0x061134", "0x0800": "0x0610f6",
+                "0x0a00": "0x060e26"},
+            "unsupported_dispatch_forbidden": True,
+        },
+        "spawn": {
+            "initial_actor": {"x_s16": spawn["world"]["x"],
+                "y_s16": spawn["world"]["y"], "z_s16": spawn["world"]["z"],
+                "health_s16": spawn["health"], "facing_u8": spawn["facing"],
+                "state_u16": 0x0200, "substate_u16": 0x1600,
+                "animation_record": spawn["animation_record"]},
+            "first_dynamic": first_spawn,
+            "bounded_current_state_dynamic": bounded_spawn,
+            "bounded_current_state_guard_fields": {
+                "guard": "living enemy count < 8 && (u8(g8019) & 7) == 0 && allocate_record12 succeeds",
+                "source_global_phase_counter": "0xff8019_u8",
+                "writer": "0x028a3e", "caller": "0x0288fa",
+                "fixed_frame_substitute_forbidden": True,
+            },
+            "controller": {
+                "dispatch": "0x06b2fa", "spawn_body": "0x06b3f2",
+                "allocation": "0x01769e", "writer": "0x06b3fe",
+                "owner_source_slot": "0x00ffb580", "owner_type": 20,
+                "owner_class": "0x01", "state_byte_offset": "owner+0x05",
+                "remaining_count_offset": "owner+0x66_u8",
+                "timer_offset": "owner+0x2a_u16",
+                "initial_spawn_guard": "signed animation branch owner+0x24 is negative",
+                "repeat_spawn_guard": "owner x >= camera x && remaining count != 0 && timer == 0 && living enemy count < 6 && allocation succeeds",
+                "writes": ["new.active += 1", "new.class = 0x1f",
+                    "new.x/y/z = owner.x/y/z", "new.variant = 5",
+                    "new.timer = 0", "living enemy count += 1",
+                    "owner.remaining count -= 1", "owner.timer = 360"],
+                "source_window": source_window(opcodes, 0x06B3F2),
+                "fixed_frame_spawn_forbidden": True,
+            },
+        },
+        "targeting": {
+            "target_pointer": "actor+0x28 low word", "required_target": "active P1",
+            "selection_guard": "current state owns target selection; no face-target-every-frame rule",
+            "multiplayer_targeting": "NOT_REQUIRED_FOR_ROUND1",
+        },
+        "actions": {
+            "approach_0x1600": {
+                "state_u16": 0x0200, "inner_state_u8": 0,
+                "facing_u8": 1, "ticks": 38,
+                "movement_rule": "signed rational accumulator distributes +111 x and -23 z over 38 scheduler updates in source branch order",
+                "x_delta_s16": 111, "z_delta_s16": -23,
+                "records": approach["presentation_cycle"],
+                "next_action": "0x1800"},
+            "attack_0x1800": {
+                "state_u16": 0x0200, "inner_state_u8": 0,
+                "rng_entry": "0x017c5e", "rng_algorithm": "high=low16(3*seed)>>8; low=(low8(seed)+high)&0xff; result=(high<<8)|low",
+                "rng_seed_before": attack["rng"]["seed_before"],
+                "rng_seed_after": attack["rng"]["seed_after"],
+                "timer_table_rule": "low byte < 0x40 selects 30; otherwise 120",
+                "timer_u16": attack["first_sample"]["timer"],
+                "contact_offsets_u16": attack["contact_offsets"],
+                "contact_guard": "abs(P1.x-enemy.x) <= 68 && P1.z == enemy.z",
+                "damage_s16": attack["damage_each_native_health_units"],
+                "records": attack["presentation_cycle"],
+                "completion_branches": ["P1.x < enemy.x -> 0x1a00 facing 0",
+                    "else P1.z > enemy.z -> 0x0600 inner 8 facing 0",
+                    "else -> 0x1600 facing 1"]},
+            "reposition_0x1a00": {"state_u16": 0x0200, "inner_state_u8": 0,
+                "timer_u16": crossing["first_sample"]["timer"],
+                "facing_u8": crossing["first_sample"]["facing"],
+                "animation_record": crossing["first_sample"]["animation_record"],
+                "immediate_crossing_flip_forbidden": True},
+            "above_lane_0x0600": {"state_u16": 0x0200, "inner_state_u8": 8,
+                "facing_u8": above["first_sample"]["facing"],
+                "animation_record": above["first_sample"]["animation_record"]},
+        },
+        "damage_hit_ko_removal": {
+            "player_attack_guard": "current player attack selector overlaps current enemy hurt selector and guarded collision latch is clear",
+            "damage_by_player_selector_s16": [8, 8, 10, 12],
+            "health_s16": True, "hit_state_u16": 0x0400,
+            "hit_ticks_u16": 39, "ko_state_u16": 0x0600,
+            "ko_ticks_u16": 141,
+            "removal_guard": "KO presentation completes and source release 0x0176b4 executes",
+            "release_order": "type-12 LIFO fixed-pool release",
+            "presentation_owned_removal_forbidden": True,
+        },
+        "mutation_controls": ["wrong first dynamic slot", "fixed-frame spawn",
+            "missing living-count guard", "wrong spawn reload", "shadow actor position",
+            "face target every frame", "wrong approach arithmetic", "random assembly",
+            "wrong RNG algorithm", "wrong RNG consumption order", "wrong attack timer",
+            "wrong contact tick", "wrong contact x guard", "wrong lane guard",
+            "wrong damage", "wrong HIT duration", "wrong KO duration",
+            "presentation-owned removal", "retained encounter gameplay step"],
+    }
+
+
 def counterfactuals(route: dict[str, object], class_id: str,
                     oracle09: dict[str, object]) -> dict[str, object]:
     names = {"0x00": ["remove_class_00", "suppress_warehouse_offense"],
@@ -508,6 +653,8 @@ def build_report() -> dict[str, object]:
         if class_id == "0x1f":
             reports[-1]["initial_transition_contract"] = \
                 initial_class1f_transition_contract(samples, rng, opcodes, program)
+            reports[-1]["current_state_implementation_contract"] = \
+                class1f_current_state_contract(oracle09, opcodes)
             reports[-1]["presentation_and_collision"][
                 "accepted_hit_ko_records"] = hit_ko_presentation
 
@@ -648,7 +795,37 @@ def validate(report: dict[str, object]) -> None:
                     contract["initialization"]["accepted_presentation_frame"] ==
                         2092 and
                     len(contract["mutation_controls"]) == 12,
-                    "class-0x1f initial transition contract drift")
+                    "0x1f: initial transition implementation contract drift")
+            current = item["current_state_implementation_contract"]
+            require(current["classification"] ==
+                        "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+                    current["accepted_oracle09_sha256"] == digest(ORACLE09) and
+                    current["accepted_encounter_authority_sha256"] ==
+                        digest(ENCOUNTERS) and
+                    current["authority_boundary"]
+                        ["retained_gameplay_authority_forbidden"] is True and
+                    current["spawn"]["first_dynamic"]["slot"] == "0xff9c40" and
+                    current["spawn"]["first_dynamic"]["writer_pc"] ==
+                        "0x06b3fe" and
+                    current["spawn"]["bounded_current_state_dynamic"]
+                        ["slot"] == "0xffa000" and
+                    current["spawn"]["bounded_current_state_dynamic"]
+                        ["writer_pc"] == "0x028a3e" and
+                    current["spawn"]["controller"]["timer_offset"] ==
+                        "owner+0x2a_u16" and
+                    current["spawn"]["controller"]["writes"][-1] ==
+                        "owner.timer = 360" and
+                    current["actions"]["approach_0x1600"]
+                        ["x_delta_s16"] == 111 and
+                    current["actions"]["approach_0x1600"]
+                        ["z_delta_s16"] == -23 and
+                    current["actions"]["attack_0x1800"]
+                        ["contact_offsets_u16"] == [48, 119] and
+                    current["actions"]["attack_0x1800"]["damage_s16"] == 8 and
+                    current["damage_hit_ko_removal"]["hit_ticks_u16"] == 39 and
+                    current["damage_hit_ko_removal"]["ko_ticks_u16"] == 141 and
+                    len(current["mutation_controls"]) == 19,
+                    "0x1f: current-state implementation contract drift")
     require(all(value == 0 for key, value in report["coverage"].items()
                 if key.startswith("orphan_")) and
             report["coverage"]["required_class_type_pairs"] == 4 and

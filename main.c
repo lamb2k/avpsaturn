@@ -7251,9 +7251,9 @@ static unsigned short live_encounter_real_input(void)
 #ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
 static int live_encounter_near_target(void)
 {
-    int dx = round1_runtime.first_encounter.alien.x -
+    int dx = round1_runtime.first_encounter.presentation.x -
         round1_runtime.player_action.x;
-    int dz = round1_runtime.first_encounter.alien.lane -
+    int dz = round1_runtime.first_encounter.presentation.lane -
         round1_runtime.player_action.lane;
     if (dx < 0) dx = -dx;
     if (dz < 0) dz = -dz;
@@ -7299,16 +7299,16 @@ static unsigned short live_encounter_autotest_input(void)
     if (round1_runtime.player_action.state != AVSP_PW_STATE_CONTROL)
         return 0u;
     if (round1_runtime.player_action.x <
-        round1_runtime.first_encounter.alien.x - 42)
+        round1_runtime.first_encounter.presentation.x - 42)
         mask |= AVSP_PW_INPUT_RIGHT;
     else if (round1_runtime.player_action.x >
-             round1_runtime.first_encounter.alien.x + 42)
+             round1_runtime.first_encounter.presentation.x + 42)
         mask |= AVSP_PW_INPUT_LEFT;
     if (round1_runtime.player_action.lane <
-        round1_runtime.first_encounter.alien.lane - 4)
+        round1_runtime.first_encounter.presentation.lane - 4)
         mask |= AVSP_PW_INPUT_UP;
     else if (round1_runtime.player_action.lane >
-             round1_runtime.first_encounter.alien.lane + 4)
+             round1_runtime.first_encounter.presentation.lane + 4)
         mask |= AVSP_PW_INPUT_DOWN;
     if (live_encounter_near_target())
     {
@@ -8140,8 +8140,8 @@ static void live_encounter_publish(void)
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
         sizeof(AVSP_ROUND1_SPEC02_SHA256) == 65u &&
-        AVSP_ROUND1_SPEC02_SHA256[0] == '5' &&
-        AVSP_ROUND1_SPEC02_SHA256[63] == '7';
+        AVSP_ROUND1_SPEC02_SHA256[0] == 'a' &&
+        AVSP_ROUND1_SPEC02_SHA256[63] == 'f';
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
     avsp_diag_round1_rng_seed = round1_runtime.rng_seed;
@@ -8376,13 +8376,13 @@ static void live_encounter_frame_callback(void)
         if (!live_autotest_live_volley_done &&
             round1_runtime.first_encounter.encounter_state ==
                 AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE &&
-            round1_runtime.first_encounter.alien.x >=
+            round1_runtime.first_encounter.presentation.x >=
                 round1_runtime.player_action.x + 80 &&
-            round1_runtime.first_encounter.alien.x <=
+            round1_runtime.first_encounter.presentation.x <=
                 round1_runtime.player_action.x + 180 &&
-            round1_runtime.first_encounter.alien.lane >=
+            round1_runtime.first_encounter.presentation.lane >=
                 round1_runtime.player_action.lane - 6 &&
-            round1_runtime.first_encounter.alien.lane <=
+            round1_runtime.first_encounter.presentation.lane <=
                 round1_runtime.player_action.lane + 6 &&
             round1_runtime.first_encounter.pending_player_damage == 0u &&
             round1_runtime.first_encounter.hit_events == 0UL &&

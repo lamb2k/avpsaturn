@@ -23,27 +23,24 @@ Resume the AvP salvage Goal; preserve `SALVAGE-00-OLD-BUILD-BASELINE`,
 - USER-09 is `CHANGES_REQUESTED`; SALVAGE-08 is inactive; physical Saturn is
   `UNRUN`.
 
-## Accepted Button1/renderer correction
+## Accepted native first-encounter authority
 
-The old Button1 Oracle input selected character 1 (Major Schaefer). Two cold
-captures instead bind required character 0 (Predator Warrior), records
-`0x15e540..0x15e580`, one 40-resource debit, a type-4/class-0 parent, and five
-type-4/class-4 children. Character and emitted-object identity are mandatory;
-the Major class-5 path is a negative control, not Predator authority.
-
-The Target renderer pins every current-frame tile until VDP1 consumption,
-clips wholly invisible entries before texture lookup, and uses the measured
-first-segment 21-composite/218-tile residency split. Paired cold runs at ISO
-`9db09d765122a56e9bdefac73e762cefcfb379d9be92933fd1d4281d6bbb9ffc`
-are identical: peak tile union 170, pin exhaustion 0, overflow 0, texture
-mismatches 0, sprite high-water 242/255. Exact frames 177..196 preserve
-Predator identity through Button1 and neutral. Fast, Oracle, Target and paired
-Emulator pass at accepted runtime checkpoint `c48c1cd`.
+Native Round 1 now solely owns first-encounter class-0x1F AI, movement/facing,
+RNG, transitions, attack, collision/damage, HIT/KO, effects, spawn/removal,
+pool release, clear and unlock; retained code is presentation-only. Paired
+575-sample runs at ISO `ff8f0a288aa1e75dca47983ec3c3a799e32edad16a7b8106a5e9c73f2da27847`
+record 469 updates, contacts 4/1, damage 1/4, HIT/KO 3/1, release/clear 1/1,
+and zero fallback, failure, decode error, or retained authority. The Saturn
+working set now includes every current-state class-0x1F pose for both facings.
+WGC frames 38/254/329/469/470 preserve Predator and alien identity; MAME 2078
+proves the crowded intro actors/props are source content, `WARRIOR` is the P1
+equipment meter, and the `Maj.Schaefer` P2 panel is absent. Fast, Oracle,
+Target, 123 host mutations, 131 suppressions, paired Emulator, and visual QA
+pass; preserve the Button1 and 21-composite/218-tile locks from `c48c1cd`.
 
 ## Exact next experiment
 
-Replace the retained first-encounter class-0x1F gameplay boundary from accepted
-SPEC-02, then commit and push that coherent enemy-authority checkpoint.
-Native Round 1 must become sole first-encounter gameplay authority; retained
-code may remain presentation-only. Do not leave the first segment until the
-complete interactive regression gate passes.
+Keep REIMPLEMENT-13 active and implement the first segment's source-owned
+encounter-clear and dynamic route-progression boundary from accepted SPEC-02.
+Retained code remains presentation-only. Do not leave the first segment until
+the complete interactive regression gate passes.

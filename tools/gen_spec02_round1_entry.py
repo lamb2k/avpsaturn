@@ -50,6 +50,10 @@ def build() -> str:
     presentation_rows = presentation["records"]
     dispatch_entry = int(class1f["dispatch_entry"], 16)
     class1f_initial = class1f["initial_transition_contract"]
+    class1f_current = class1f["current_state_implementation_contract"]
+    class1f_current_spawn = class1f_current["spawn"]
+    class1f_current_actions = class1f_current["actions"]
+    class1f_current_damage = class1f_current["damage_hit_ko_removal"]
     class1f_initial_actors = class1f_initial["actors"]
     class1f_initialization = class1f_initial["initialization"]
     class1f_sequences = class1f_initial["animation_sequences"]
@@ -150,6 +154,31 @@ def build() -> str:
         [row["command"] for row in class1f_audio_edges] !=
             ["0x004d", "0x0118"]):
         raise ValueError("SPEC-02 class-0x1f initial transition drift")
+    if (class1f_current["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class1f_current["authority_boundary"]
+            ["retained_gameplay_authority_forbidden"] is not True or
+        class1f_current_spawn["first_dynamic"]["slot"] != "0xff9c40" or
+        class1f_current_spawn["first_dynamic"]["writer_pc"] != "0x06b3fe" or
+        class1f_current_spawn["bounded_current_state_dynamic"]["slot"] !=
+            "0xffa000" or
+        class1f_current_spawn["bounded_current_state_dynamic"]["writer_pc"] !=
+            "0x028a3e" or
+        class1f_current_spawn["controller"]["owner_source_slot"] !=
+            "0x00ffb580" or
+        class1f_current_spawn["controller"]["writes"][-1] !=
+            "owner.timer = 360" or
+        class1f_current_actions["approach_0x1600"]["ticks"] != 38 or
+        class1f_current_actions["approach_0x1600"]["x_delta_s16"] != 111 or
+        class1f_current_actions["approach_0x1600"]["z_delta_s16"] != -23 or
+        class1f_current_actions["attack_0x1800"]["contact_offsets_u16"] !=
+            [48, 119] or
+        class1f_current_actions["attack_0x1800"]["damage_s16"] != 8 or
+        class1f_current_damage["damage_by_player_selector_s16"] !=
+            [8, 8, 10, 12] or
+        class1f_current_damage["hit_ticks_u16"] != 39 or
+        class1f_current_damage["ko_ticks_u16"] != 141):
+        raise ValueError("SPEC-02 class-0x1f current-state drift")
     if (auxiliary_dependencies["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         len(class09["source_slots"]) != 2 or
@@ -511,7 +540,37 @@ def build() -> str:
     ])
     for state, substate in state_contexts:
         lines.append(f"    {{ 0x{state:04X}u, 0x{substate:04X}u }},")
+    current_initial = class1f_current_spawn["initial_actor"]
+    approach_current = class1f_current_actions["approach_0x1600"]
+    attack_current = class1f_current_actions["attack_0x1800"]
     lines.extend([
+        "};", "",
+        "static const AvspRound1Class1fCurrentSpec avsp_round1_class1f_current =",
+        "{",
+        "    %sUL, %sUL, 20u, 0x01, %d, %d, %d, %d, %d, %d, %du, %du, %du, %du, %du, %du, %du," % (
+            class1f_current_spawn["controller"]["owner_source_slot"],
+            class1f_current_spawn["bounded_current_state_dynamic"]["slot"],
+            current_initial["x_s16"], current_initial["y_s16"],
+            current_initial["z_s16"], current_initial["health_s16"],
+            approach_current["x_delta_s16"], approach_current["z_delta_s16"],
+            approach_current["ticks"], attack_current["timer_u16"],
+            attack_current["contact_offsets_u16"][0],
+            attack_current["contact_offsets_u16"][1],
+            attack_current["damage_s16"],
+            class1f_current_damage["hit_ticks_u16"],
+            class1f_current_damage["ko_ticks_u16"]),
+        "    { " + ", ".join(f"{value}u" for value in
+            class1f_current_damage["damage_by_player_selector_s16"]) + " },",
+        "};", "",
+        "static const unsigned long avsp_round1_class1f_approach_records[AVSP_ROUND1_CLASS1F_APPROACH_RECORD_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{row['animation_record']}UL" for row in
+            approach_current["records"]),
+        "};", "",
+        "static const unsigned long avsp_round1_class1f_attack_records[AVSP_ROUND1_CLASS1F_ATTACK_RECORD_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{row['animation_record']}UL" for row in
+            attack_current["records"]),
         "};", "",
         "static const AvspRound1Class1fInitialSpec avsp_round1_class1f_initial_actors[AVSP_ROUND1_CLASS1F_INITIAL_ACTOR_COUNT] =",
         "{",

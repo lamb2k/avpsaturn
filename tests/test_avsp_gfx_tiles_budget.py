@@ -120,6 +120,38 @@ def empty_effect_union_is_complete(presentations, fixture):
     return actual == expected
 
 
+def class1f_current_union_is_complete(presentations, fixture):
+    class1f = next(item for item in fixture["authority_data"]["enemies"]
+                   ["archetypes"] if item["class"] == "0x1f")
+    current = class1f["current_state_implementation_contract"]
+    def address_key(value):
+        return "0x%08x" % int(str(value), 16)
+
+    record_map = {
+        address_key(record["animation_record"]): int(record["assembly"], 16)
+        for record in class1f["presentation_and_collision"]["records"]
+    }
+    addresses = {
+        address_key(current["spawn"]["initial_actor"]["animation_record"]),
+        address_key(current["actions"]["above_lane_0x0600"][
+            "animation_record"]),
+        address_key(current["actions"]["reposition_0x1a00"][
+            "animation_record"]),
+    }
+    for action in ("approach_0x1600", "attack_0x1800"):
+        addresses.update(address_key(record["animation_record"])
+                         for record in current["actions"][action]["records"])
+    addresses.update(address_key(address) for address in
+                     class1f["presentation_and_collision"]
+                     ["accepted_hit_ko_records"]["record_addresses"])
+    expected = {(record_map[address], facing)
+                for address in addresses for facing in (0, 1)}
+    actual = {(item["assembly"], item["facing"])
+              for item in presentations
+              if item["kind"] == "class1f-current"}
+    return actual == expected
+
+
 def run(args):
     return subprocess.run([sys.executable, str(GENERATOR)] + args,
                           cwd=str(ROOT), capture_output=True, text=True)
@@ -150,6 +182,9 @@ def main() -> int:
     if not empty_effect_union_is_complete(presentations, fixture):
         print("FAIL: class-0x10 source presentation union is incomplete")
         return 1
+    if not class1f_current_union_is_complete(presentations, fixture):
+        print("FAIL: class-0x1f current presentation union is incomplete")
+        return 1
     button3_indexes = [index for index, item in enumerate(presentations)
                        if item["kind"] == "player-button3"]
     if not button3_indexes or any(
@@ -171,7 +206,8 @@ def main() -> int:
             ("player-button1-empty", button1_presentation_union_is_complete),
             ("projectile-parent", button1_projectile_union_is_complete),
             ("projectile-child", button1_projectile_union_is_complete),
-            ("class10-empty-effect", empty_effect_union_is_complete)):
+            ("class10-empty-effect", empty_effect_union_is_complete),
+            ("class1f-current", class1f_current_union_is_complete)):
         indexes = [index for index, item in enumerate(presentations)
                    if item["kind"] == kind]
         if not indexes or any(complete(
@@ -196,9 +232,9 @@ def main() -> int:
     residency = before_manifest["presentation_residency"]
     native_presentations = before_manifest["routes"].get(
         "spec02_round1_native_presentations", {})
-    if (native_presentations.get("decoded_variants") != 231 or
-        native_presentations.get("unique_assemblies") != 107 or
-        native_presentations.get("tiles_added") != 1543):
+    if (native_presentations.get("decoded_variants") != 265 or
+        native_presentations.get("unique_assemblies") != 120 or
+        native_presentations.get("tiles_added") != 1600):
         print("FAIL: SPEC-02 native presentation union drifted")
         return 1
     if (residency["source_peak_unique_tiles"] != 374 or

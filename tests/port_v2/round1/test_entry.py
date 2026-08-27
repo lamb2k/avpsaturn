@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "3f6e179fc41ad9ac0fdb6318c929ac74297b35a1f4627b58325e408d424af6fc"
+EXPECTED = "ae6814e233a3245a46d6892171ab1692c054fb3bad7ba7a57ce1106b3aff6a8f"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -150,10 +150,10 @@ for before, after in (
      "++runtime->player_jump_entries;\n    avsp_round1_source_rng(runtime);\n    return avsp_round1_bind_player_jump_sequence(runtime, 3u);"),
     ("if (runtime->player_jump_active && received_damage > 0)\n        avsp_round1_interrupt_player_jump(runtime);",
      "if (runtime->player_jump_active && received_damage < 0)\n        avsp_round1_interrupt_player_jump(runtime);"),
-    ("avsp_alien_ai_init(&encounter->alien, 0x7301u);",
-     "avsp_alien_ai_init(&encounter->alien, 0x0001u);"),
-    ("runtime->player_action.x >= AVSP_ROUND1_FIRST_ENCOUNTER_ENTRY_X",
-     "runtime->player_action.x > AVSP_ROUND1_FIRST_ENCOUNTER_ENTRY_X"),
+    ("encounter->rng_seed = 0x7301u;",
+     "encounter->rng_seed = 0x0001u;"),
+    ("if ((encounter->controller_timer & 7u) != 0u)\n        return 1;",
+     "if (1)\n        return 1;"),
     ("alien.sel_hurt = AVSP_PORT_V2_COMBAT_ENEMY_HURT_SELECTOR;",
      "alien.sel_hurt = 0u;"),
     ("return avsp_collision_overlap(&player, &alien, hit_value) &&\n        !avsp_collision_guarded(&player, &alien);",
@@ -162,18 +162,18 @@ for before, after in (
      "!avsp_port_v2_combat_source_event((int)selector, &source)"),
     ("runtime->player_action.attack_active && !encounter->attack_latched &&",
      "runtime->player_action.attack_active && encounter->attack_latched &&"),
-    ("encounter->pending_player_damage =\n            (unsigned char)encounter->alien.contact_damage;",
+    ("encounter->pending_player_damage = (unsigned char)\n                    avsp_round1_class1f_current.contact_damage;",
      "encounter->pending_player_damage = 0u;"),
     ("AVSP_PORT_V2_HIT_KO_HIT, &avsp_port_v2_hit_source_before);",
      "AVSP_PORT_V2_HIT_KO_KO, &avsp_port_v2_hit_source_before);"),
     ("!avsp_port_v2_hit_ko_step(&encounter->reaction)",
      "0"),
-    ("encounter->alien.state == AVSP_ALIEN_STATE_INACTIVE &&\n        !encounter->reaction.active)",
-     "encounter->alien.state == AVSP_ALIEN_STATE_KO &&\n        !encounter->reaction.active)"),
+    ("encounter->target_ko_observed &&\n        encounter->ko_timer == 0u",
+     "0 &&\n        encounter->ko_timer == 0u"),
     ("encounter->route_unlocked = 1u;",
      "encounter->route_unlocked = 0u;"),
-    ("AVSP_ROUND1_FIRST_ENCOUNTER_SLOT &&\n                    (runtime->first_encounter.initialized ||",
-     "(AVSP_ROUND1_FIRST_ENCOUNTER_SLOT + 1u) &&\n                    (runtime->first_encounter.initialized ||"),
+    ("actor->source_slot ==\n                        runtime->first_encounter.actor_source_slot;",
+     "actor->source_slot ==\n                        runtime->first_encounter.actor_source_slot + 1u;"),
 ):
     assert before in source
     run(source.replace(before, after), header, False, before)
