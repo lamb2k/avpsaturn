@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "data/spec02_round1_generated_fixtures.json"
 CONTRACT = ROOT / "data/spec02_round1_executable_contract.json"
+ROUTE_CENSUS = ROOT / "data/round1_route_census.json"
 OUT = ROOT / "src/port_v2/gameplay/round1/spec02_round1_entry_data.h"
 
 KINDS = (
@@ -32,13 +33,50 @@ def sha(path: Path) -> str:
 
 def build() -> str:
     fixtures = json.loads(FIXTURES.read_text(encoding="ascii"))
+    route_census = json.loads(ROUTE_CENSUS.read_text(encoding="ascii"))
+    scene_input_runs = []
+    for group in route_census["groups"]:
+        cursor = group["first_frame"]
+        for input_word, frames in group["input_word_runs"]:
+            native_input = 0
+            if input_word & 0x04:
+                native_input |= 0x0008
+            if input_word & 0x08:
+                native_input |= 0x0010
+            if input_word & 0x10:
+                native_input |= 0x0020
+            if input_word & 0x20:
+                native_input |= 0x0040
+            run_first = cursor
+            run_last = cursor + frames - 1
+            cursor += frames
+            clipped_first = max(run_first, 2040)
+            clipped_last = min(run_last, 5566)
+            if clipped_first > clipped_last:
+                continue
+            if (scene_input_runs and
+                    scene_input_runs[-1][2] == native_input and
+                    scene_input_runs[-1][1] + 1 == clipped_first):
+                scene_input_runs[-1] = (
+                    scene_input_runs[-1][0], clipped_last, native_input)
+            else:
+                scene_input_runs.append(
+                    (clipped_first, clipped_last, native_input))
+    if (not scene_input_runs or scene_input_runs[0][0] != 2040 or
+            scene_input_runs[-1][1] != 5566 or
+            any(first != scene_input_runs[index - 1][1] + 1
+                for index, (first, _last, _word) in
+                enumerate(scene_input_runs[1:], 1))):
+        raise ValueError("Coffee Shop input ledger does not tile 2040..5566")
     body = fixtures["authority_data"]["route"]["first_entry_body"]
     spawns = body["spawn_table"]["rows"]
     player = body["player_entry_script"]
     commands = player["source_program"]["commands"]
     program = bytes.fromhex(player["source_program"]["hex"])
     scheduler = fixtures["authority_data"]["scheduler"]
-    scheduler_order = scheduler["frame_scheduler"]["required_round1_order"]
+    scheduler_order = [row["record_type"] for row in
+                       scheduler["frame_scheduler"]["full_order"]
+                       if row["record_type"] in (12, 16, 20, 24, 28, 36)]
     dispatches = []
     for pool in scheduler["pools"]:
         for dispatch in pool["required_round1_dispatch"]:
@@ -66,6 +104,8 @@ def build() -> str:
     action_attack_timers = class1f_actions["attack_timer_table_u8"]
     action_programs = class1f_actions["action_programs"]
     action_bounds = action_programs["source_bounds"]
+    action_animation_movement = action_programs[
+        "animation_movement_helper_0x0165c4"]
     action_direction = action_programs["direction_helper_0x061032"]
     action_zero = action_programs["action_0x00"]
     action_fall = action_programs["action_0x0c"]
@@ -78,6 +118,7 @@ def build() -> str:
     recurring_gate = recurring_controller["intro_gate_transition"]
     recurring_primary = recurring["primary_writer"]
     recurring_auxiliary = recurring["auxiliary_writer"]
+    recurring_progress = recurring["progress_increment_boundary"]
     recurring_tables = recurring_primary["tables"]
     class1f_initial_actors = class1f_initial["actors"]
     class1f_initialization = class1f_initial["initialization"]
@@ -88,7 +129,38 @@ def build() -> str:
         "first_segment_dependencies"]
     class09 = auxiliary_dependencies["class_0x09_type20_rng_owner"]
     class4e = auxiliary_dependencies["class_0x4e_type24_variant4_effect"]
+    class4e_variant1 = class4e["variant1_collision_effect"]
+    class4e_rng = class4e["seed_transaction_by_scheduler_slot"]
     class44 = auxiliary_dependencies["class_0x44_type24_command_guard_owner"]
+    class45 = auxiliary_dependencies["class_0x45_type24_scene_population"]
+    class47 = auxiliary_dependencies[
+        "class_0x47_type24_class02_child_presentation"]
+    special_effects = auxiliary_dependencies[
+        "predator_special_type24_effects"]
+    class4b = special_effects["class_0x4b"]
+    class3d = special_effects["class_0x3d"]
+    class16 = auxiliary_dependencies[
+        "class_0x1f_type16_0x06_projectile"]
+    scene_components = fixtures["authority_data"]["auxiliary"][
+        "coffee_shop_scene_component_identities"]
+    class01 = next(item for item in scene_components["components"]
+                   if item["type"] == 20 and item["class"] == "0x01")
+    class02 = next(item for item in scene_components["components"]
+                   if item["type"] == 20 and item["class"] == "0x02")
+    class01_contract = class01["implementation_contract"]
+    class02_contract = class02["implementation_contract"]
+    coffee_scene_records = sorted(
+        class01_contract["stage_records"] +
+        class02_contract["stage_records"],
+        key=lambda row: int(row["address"], 16))
+    class01_records = class01_contract["initialization"][
+        "animation_records"]
+    class02_records = class02_contract["initialization"][
+        "animation_records"]
+    class02_collision = class02_contract["collision_damage"]
+    coffee_stage_setup = fixtures["authority_data"]["rng"]["owner_partition"][
+        "global_route_and_controller"]["groups"][0][
+            "coffee_shop_entry_transaction"]
     state_contexts = sorted(set(
         tuple(int(part, 16) for part in context.split(":"))
         for context in (class1f["state_phase_contexts"] +
@@ -103,6 +175,16 @@ def build() -> str:
     terrain_grid = terrain["selection"]["bounded_packed_grid"]
     terrain_packed = bytes.fromhex(terrain_grid["packed_bytes_hex"])
     obstacle = navigation["obstacle_response"]["implementation_contract"]
+    obstacle_lifecycle = navigation["obstacle_response"]["lifecycle_contract"]
+    obstacle_parent_records = obstacle_lifecycle["presentation"]["records"]
+    obstacle_child = obstacle_lifecycle["child_presentation"]
+    obstacle_child_sequences = obstacle_child["variant_sequences"]
+    obstacle_scene_record = obstacle_lifecycle["source_scene_record"]
+    obstacle_initializer = obstacle_lifecycle["initializer"]
+    obstacle_state_program = obstacle_lifecycle["state_program"]
+    obstacle_collision = obstacle_lifecycle["collision_damage"]
+    obstacle_player_attack = obstacle_collision["player_attack_record"]
+    obstacle_hurt = obstacle_collision["obstacle_hurt_record"]
     obstacle_actor = obstacle["source_actor"]
     obstacle_box = obstacle["obstacle_box"]
     camera = navigation["camera"]["implementation_contract"]
@@ -130,6 +212,8 @@ def build() -> str:
             "record4_class03"]
     weapon = fixtures["authority_data"]["player"][
         "weapon_projectile_resource"]["implementation_contract"]
+    player_special = fixtures["authority_data"]["player"][
+        "weapon_projectile_resource"]["special_implementation_contract"]
     weapon_states = weapon["state_dispatch"]
     weapon_action = weapon["sufficient_action"]
     weapon_resource = weapon["resource_tick"]
@@ -148,11 +232,23 @@ def build() -> str:
         run["bound_z"] == 256 and run["frames"] == 333)
     if len(spawns) != 10 or len(commands) != len(KINDS):
         raise ValueError("SPEC-02 entry cardinality drift")
+    if (coffee_stage_setup["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+            coffee_stage_setup["source_frame"] != 2072 or
+            coffee_stage_setup["guard"] != {
+                "route_state_s16": 2,
+                "player_variant_u16": 1,
+                "stage_record_type_u8": "0x1c",
+                "stage_record_pointer": "0x0011759a",
+            } or
+            coffee_stage_setup["writes"]["stage_parameter_s16"] != 8 or
+            coffee_stage_setup["writes"]["rng_seed_u16"] != "0xa998"):
+        raise ValueError("SPEC-02 Coffee Shop stage setup drift")
     if [int(row["sequence"]) for row in spawns] != list(range(10)):
         raise ValueError("SPEC-02 entry spawn order drift")
     if sum(LENGTHS) != len(program) or player["timer_semantics"]["loads"] != [60, 60, 44]:
         raise ValueError("SPEC-02 entry program/timer drift")
-    if scheduler_order != [12, 16, 20, 24] or len(dispatches) != 16:
+    if scheduler_order != [12, 16, 20, 24, 28, 36] or len(dispatches) != 16:
         raise ValueError("SPEC-02 Round 1 scheduler/dispatch drift")
     records = [int(row["animation_record"], 16) for row in presentation_rows]
     if (presentation["orphan_records"] != 0 or
@@ -230,15 +326,26 @@ def build() -> str:
         action_movement_tables[1]["vectors"][8] != {
             "direction_u8": 8, "x_delta_s16": 2048,
             "y_delta_s16": 0} or
-        action_bounds != {
-            "x_max_u16": 0x05f0,
-            "camera_relative_bias_u16": 0x0070,
-            "camera_relative_span_u16": 0x0260,
-            "failure_outer_state_u16": 0x0600,
-            "comparison": "unsigned word"} or
+        action_bounds["activation_field_u8"] != "actor+0x01" or
+        action_bounds["latched_field_u8"] != "actor+0xa2" or
+        action_bounds["camera_operand_u16"] != "0xff8278" or
+        action_bounds["phase_guard_field_u8"] != "0xff8019" or
+        action_bounds["x_max_u16"] != 0x05f0 or
+        action_bounds["camera_relative_bias_u16"] != 0x0070 or
+        action_bounds["camera_relative_span_u16"] != 0x0260 or
+        action_bounds["failure_outer_state_u16"] != 0x0600 or
+        action_bounds["comparison"] != "unsigned word" or
+        action_bounds["coffee_shop_observation"]["result"] !=
+            "pass after x_max; camera-relative test skipped" or
+        action_animation_movement["source_body_sha256"] !=
+            "b35c9aaf0a5328ff35e6ccb5c9d278fef7f898201fc6e005e69d11bd566a970b" or
+        action_animation_movement["movement_cadence"] !=
+            "only on timer expiry after binding the next animation record" or
+        action_animation_movement["movement_record"] !=
+            "newly bound next animation record" or
         action_direction["upper_directions_by_a5_u8"] != [0x16, 0x0a] or
         action_direction["lower_directions_by_a5_u8"] != [0x1a, 0x06] or
-        action_jump["x_velocity_table_s32_16_16"] !=
+        action_jump["z_velocity_table_s32_16_16"] !=
             [-0x00010000, -0x00014000, -0x00018000, -0x00020000] or
         action_attack["selector_groups_u16"] !=
             [[55], [56], [43, 43, 43, 55], [43, 43, 56]] or
@@ -293,7 +400,19 @@ def build() -> str:
             "class_u8": 0x1f, "variant_u8": 4, "timer_u16": 0,
             "x_s16": 976, "y_s16": 344, "z_s16": 344,
             "selector83_u8": 0} or
-        recurring_auxiliary["rng_calls"] != 0):
+        recurring_auxiliary["rng_calls"] != 0 or
+        recurring_progress["writer_pc"] != "0x061070" or
+        recurring_progress["transition_guard"] != {
+            "record_type_u8": 12, "class_u8": "0x1f",
+            "state_u16": 0x0402, "substate_u16": 0,
+            "health_s16": -1} or
+        recurring_progress["increment_u16"] != 1 or
+        len(recurring_progress["observed_transactions"]) != 20 or
+        recurring_progress["observed_transactions"][-1] != {
+            "frame": 5150, "slot": "0xff9c40",
+            "progress_before_u16": 19, "progress_after_u16": 20} or
+        recurring_progress["mutation_control"]["fixed_frame_substitute"] is not
+            False):
         raise ValueError("SPEC-02 first-segment recurring spawn drift")
     if (auxiliary_dependencies["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
@@ -306,9 +425,23 @@ def build() -> str:
             ["0x00ffc500", "0x00ffc480"] or
         class4e["scheduler_order"] !=
             ["0x00ffc480", "0x00ffc500"] or
-        [row["table_index"] for row in class4e["seed_after_by_scheduler_slot"]] !=
-            [28, 24] or len(class4e["jitter_table_s16"]) != 8 or
+        [(row["seed_before"], row["seed_after"], row["table_index"])
+         for row in class4e_rng] !=
+            [("0xcdb5", "0x691e", 28), ("0x691e", "0x3b59", 24)] or
+        len(class4e["jitter_table_s16"]) != 8 or
         len(class4e["animation_records"]) != 5 or
+        class4e_variant1["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class4e_variant1["scene_lifetime_count_u16"] != 23 or
+        class4e_variant1["first_collision"]["attacker_attack_record"] !=
+            "0x00030cd2" or
+        class4e_variant1["allocation"]["variant_u8"] != 1 or
+        class4e_variant1["allocation"]["first_spawn_position_s16"] !=
+            [717, 336, 309] or
+        class4e_variant1["state0"]["first_seed_before"] != "0x19c4" or
+        class4e_variant1["state0"]["first_seed_after"] != "0x4d11" or
+        len(class4e_variant1["active_state"]["animation_records"]) != 3 or
+        class4e_variant1["fixed_frame_substitute_forbidden"] is not True or
         class44["dispatch"] != "0x08d9a4" or
         class44["source_slot"] != "0x00ffc580" or
         class44["state_sequence_u16"] != [0x0200, 0x0400, 0x0402, 0x0404] or
@@ -320,7 +453,50 @@ def build() -> str:
             "zero_fields_source": "accepted zero-initialized type-24 record; generic allocation writes preserve coordinate mode, palette and facing at zero"} or
         len(class44["animation_records"]) != 2 or
         class44["guard_clear_frame"] != 2250 or
-        class44["second_player_origin_command_frame"] != 2255):
+        class44["second_player_origin_command_frame"] != 2255 or
+        class45["dispatch"] != "0x08dc1c" or
+        len(class45["source_slots_scheduler_order"]) != 28 or
+        class45["source_slots_scheduler_order"][0] != "0x00ffb680" or
+        class45["source_slots_scheduler_order"][-1] != "0x00ffc400" or
+        len(class45["spawn_owner"]["groups"]) != 3 or
+        len(class45["state0"]["animation_selector_table_u8"]) != 32 or
+        len(class45["state0"]["animation_records"]) != 5 or
+        len(class45["state0"]["motion_table"]) != 8 or
+        class45["rng_calls_per_actor_u8"] != 7 or
+        class45["fixed_frame_substitute_forbidden"] is not True or
+        class47["classification"] != "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class47["dispatch"] != "0x08eb86" or
+        class47["spawn_routine"] != "0x08eb1c" or
+        class47["record_type_u8"] != 24 or
+        class47["class_u8"] != "0x47" or
+        class47["variant_u8"] != 0 or
+        class47["spawn_owner"]["source_slot"] != "0x00ffb300" or
+        class47["spawn_owner"]["caller_pc"] != "0x06b61a" or
+        class47["spawn_owner"]["attempts_u16"] != 4 or
+        len(class47["source_slots_scheduler_order"]) != 4 or
+        len(class47["state0"]["animation_selector_table_u8"]) != 32 or
+        len(class47["state0"]["animation_records"]) != 9 or
+        len(class47["state0"]["motion_table"]) != 8 or
+        class47["rng_calls_per_actor_u8"] != 7 or
+        class47["rng_calls_total_u16"] != 28 or
+        class47["fixed_frame_substitute_forbidden"] is not True or
+        class16["classification"] != "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class16["spec_executable"] is not True or
+        class16["record_type_u8"] != 16 or
+        class16["class_u8"] != "0x06" or
+        class16["dispatch"] != "0x03537e" or
+        class16["state_sequence_u16"] != [0, 0x0200, 0x0400, 0x0600] or
+        len(class16["initialization"]["variant_motion_16_16"]) != 3 or
+        len(class16["spawn_owner"]["parent_animation_records"]) != 11 or
+        len(class16["active_state"]["animation_records"]) != 4 or
+        len(class16["terminal_state"]["animation_records"]) != 7 or
+        class16["current_state_collision"]["attack_record"]["address"] !=
+            "0x0003589e" or
+        class16["current_state_collision"]["player_hurt_record"]["address"] !=
+            "0x0011ae8e" or
+        class16["current_state_collision"]["route_character_damage_s16"] != 17 or
+        class16["rng_calls"] != 0 or
+        class16["fixed_frame_substitute_forbidden"] is not True):
         raise ValueError("SPEC-02 first-segment actor dependency drift")
     if (global_bounds["x_min"] != "bound_x + 0x20" or
         global_bounds["x_max"] != "bound_x + 0x160" or
@@ -370,6 +546,34 @@ def build() -> str:
         obstacle["minimum_penetration"]["axis_guard"] !=
             "resolve z only when unsigned z_penetration < unsigned x_penetration; otherwise resolve x"):
         raise ValueError("SPEC-02 Coffee Shop obstacle implementation drift")
+    if (obstacle_lifecycle["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        obstacle_lifecycle["source_scene_record"]["camera_threshold_u16"] != 688 or
+        obstacle_lifecycle["spawn"]["slot"] != "0xffb380" or
+        obstacle_lifecycle["initializer"]["child_allocation"]["variant_order_u8"] !=
+            [3, 2, 1, 0] or
+        obstacle_lifecycle["initializer"]["child_allocation"]["source_slots_in_allocation_order"] !=
+            ["0xffe240", "0xffe200", "0xffe1c0", "0xffe180"] or
+        [len(obstacle_child_sequences[str(index)]) for index in range(4)] !=
+            [5, 8, 6, 6] or
+        obstacle_child["release_record"]["animation_record"] != "0x09bd90" or
+        obstacle_child["dispatch_table"]["offsets_u16"] != [8, 48, 82, 82] or
+        obstacle_child["state_program"]["state_0200"]["guard"] !=
+            "u8(parent+0x04) >= 4" or
+        obstacle_player_attack != {
+            "address": "0x11af76", "x_center_s8": 0,
+            "y_center_s8": 48, "x_half_u8": 88,
+            "y_half_u8": 48, "z_center_s8": 0,
+            "z_half_u8": 40, "hit_value_u8": 3,
+            "knockback_mode_s8": 1, "damage_s16": 25} or
+        obstacle_hurt != {
+            "address": "0x06e21c", "x_center_s8": 0,
+            "y_center_s8": 64, "x_half_u8": 16,
+            "y_half_u8": 64, "z_center_s8": 0,
+            "z_half_u8": 6} or
+        obstacle_lifecycle["transition_suppression"]["suppressed_writes"] != 18 or
+        obstacle_lifecycle["fixed_frame_substitute_forbidden"] is not True):
+        raise ValueError("SPEC-02 Coffee Shop obstacle lifecycle drift")
     if (camera["x_target_arithmetic"]["speed_table_u16"] !=
             [0, 1, 1, 2, 3, 4, 5, 6, 7, 7,
              8, 8, 9, 9, 10, 10, 11, 11, 11, 11] or
@@ -471,6 +675,7 @@ def build() -> str:
     if (weapon["classification"] != "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         weapon["implementation_blocker"] is not None or
         weapon["source_input"]["button1_mask"] != "0x0010" or
+        weapon["source_input"]["native_input_pipeline_updates_u8"] != 1 or
         weapon_states != {
             "sufficient_entry_action": "0x0c00",
             "sufficient_active_action": "0x0c02 then 0x0c04",
@@ -484,6 +689,8 @@ def build() -> str:
         weapon_action["resource_debit_u8"] != 40 or
         weapon_action["resource_clamp_min_u8"] != 0 or
         weapon_action["resource_capacity_u8"] != 64 or
+        weapon_action["resource_debit_tick"] != 1 or
+        weapon_action["parent_allocation_tick"] != 2 or
         weapon_action["recharge_countdown_after_entry_u8"] != 12 or
         weapon_action["rng_calls"] != [] or
         weapon_resource["normal_recharge_reload_u8"] != 2 or
@@ -511,6 +718,7 @@ def build() -> str:
         raise ValueError("SPEC-02 corrected Predator projectile identity drift")
     parent_init = weapon_parent["initialization"]
     parent_active = weapon_parent["active_state"]
+    parent_target = parent_active["target_selection"]
     parent_emitter = weapon_parent["child_emitter_state"]
     parent_presentations = parent_init["presentation_records"]
     parent_selector_offsets = parent_init["selector_offsets_s16"]
@@ -518,6 +726,9 @@ def build() -> str:
         int(value) for value in parent_active["route_motion_vectors_s16"]["low"])
     parent_motion_low = parent_active["route_motion_vectors_s16"]["low"]
     parent_motion_high = parent_active["route_motion_vectors_s16"]["high"]
+    parent_base_motion = parent_active["base_motion_vectors_s16"]
+    parent_target_thresholds = parent_target["distance_thresholds_u16"]
+    parent_target_presentations = parent_target["presentation_selectors_u8"]
     parent_child_rows = parent_emitter["normal_rows"]
     parent_collision_child_rows = parent_emitter["collision_rows"]
     air_class03_init = air_class03["initialization"]
@@ -540,9 +751,18 @@ def build() -> str:
     child_attack_boxes = child_boxes["attack_entries"]
     empty_effect_offsets = weapon_empty_effect["initialization"]["variant_offsets_s16"]
     empty_effect_records = weapon_empty_effect["active_state"]["presentation_records"]
-    if (len(parent_presentations) != 7 or
+    if (len(parent_presentations) != 8 or
+        parent_presentations[-1]["animation_record"] != "0x0002fbb8" or
+        parent_presentations[-1]["branch_s16"] >= 0 or
         len(parent_selector_offsets) != 6 or
-        parent_route_angles != [17, 35, 47] or
+        parent_route_angles != list(range(17, 48)) or
+        sorted(map(int, parent_base_motion)) != list(range(17, 48)) or
+        len(parent_target_thresholds) != 16 or
+        parent_target_thresholds != sorted(parent_target_thresholds) or
+        parent_target_presentations !=
+            [7, 7, 7, 7, 6, 6, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4] or
+        parent_emitter.get("position_rule") !=
+            "child x uses parent x plus facing-adjusted row x; child y and z both use parent z plus their signed row field" or
         any(len(parent_motion_low[str(angle)]) != 16
             for angle in parent_route_angles) or
         any(len(parent_motion_high[str(angle)]) != 13
@@ -603,6 +823,80 @@ def build() -> str:
         weapon_return_frame["animation_record"] != "0x0015f1f4" or
         weapon_return_frame["assembly"] != "0x001626a4"):
         raise ValueError("SPEC-02 corrected Predator presentation timeline drift")
+    special_records = player_special["initialization"]["presentation_records"]
+    special_durations = [row["visible_duration_u16"] for row in
+                         player_special["initialization"]
+                             ["visible_presentation_runs"]]
+    class4b_records = class4b["state0"]["animation_records"]
+    class3d_records = class3d["state0"]["animation_records"]
+    class3d_offsets = class3d["state_0x0200"]["movement_offsets_s16"]
+    if (player_special["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        player_special["source_input"]["guard_routine"] != "0x01a7e6" or
+        player_special["source_input"]["action_writer"] != "0x01a89a" or
+        player_special["state_dispatch"]["entry"] != "0x023132" or
+        player_special["state_dispatch"]["route_state_sequence_u16"] !=
+            [0x0800, 0x0802, 0x0804] or
+        len(special_records) != 17 or
+        special_durations !=
+            [4, 4, 3, 1, 5, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 16, 1] or
+        special_records[4]["attack_selector_u8"] != 11 or
+        special_records[-1]["branch_s16"] != -32768 or
+        player_special["active_state"]["source_audio_commands"] !=
+            ["0x0091", "0x0096"] or
+        player_special["completion"]["health_cost_s16"] != 6 or
+        special_effects["player_dispatch_entry"] != "0x023132" or
+        special_effects["record_type_u8"] != 24 or
+        class4b["class_u8"] != "0x4b" or
+        class4b["dispatch"] != "0x08f86e" or
+        class4b["state_sequence_u16"] != [0, 0x0200, 0x0400] or
+        len(class4b_records) != 32 or
+        [row["branch_s16"] for row in class4b_records[:16]] !=
+            list(range(16)) or
+        class4b_records[-1]["branch_s16"] != -32753 or
+        class3d["class_u8"] != "0x3d" or
+        class3d["dispatch"] != "0x0887c8" or
+        class3d["state_sequence_u16"] != [0, 0x0200, 0x0400] or
+        class3d["unwritten_field_retention"]["prior_y_s16"] != 343 or
+        class3d["unwritten_field_retention"]["first_class3d_y_s16"] != 343 or
+        len(class3d_records) != 9 or
+        class3d_records[-1]["branch_s16"] != -32768 or
+        len(class3d_offsets) != 16 or
+        class3d_offsets[0] != [-61, -13] or
+        class3d_offsets[8] != [61, 13] or
+        special_effects["fixed_frame_substitute_forbidden"] is not True):
+        raise ValueError("SPEC-02 Predator special scene population drift")
+    if (class01["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class01["implementation_status"] != "SPEC_EXECUTABLE" or
+        class02["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class02["implementation_status"] != "SPEC_EXECUTABLE" or
+        [(row["address"], row["observed_source_slot"],
+          row["camera_threshold_u16"], row["class_u8"], row["variant_u8"])
+         for row in coffee_scene_records] != [
+            ("0x0015c108", "0x00ffb600", 512, 2, 0),
+            ("0x0015c128", "0x00ffb580", 512, 1, 0),
+            ("0x0015c158", "0x00ffb400", 672, 1, 1),
+            ("0x0015c178", "0x00ffb300", 736, 2, 0)] or
+        [row["animation_record"] for row in class01_records] !=
+            ["0x0006b45a", "0x0006b46a", "0x0006b47a"] or
+        [row["animation_record"] for row in class02_records] !=
+            ["0x0006b66c", "0x0006b680"] or
+        class01_contract["rng"] != {"calls": 0, "consumption_order": []} or
+        class02_contract["rng"] != {"calls": 0, "consumption_order": []} or
+        class01_contract["route_interaction"]["clear_writer"] !=
+            "0x0289fc (captured successor 0x028a02) in recurring controller writes 0" or
+        class02_collision["attack_record"] != "0x0011af76" or
+        class02_collision["hurt_record"]["address"] != "0x0006b6f4" or
+        class02_collision["reaction_direction"]["attack_mode_guard"] !=
+            "attack_record+0x0a:s8 is +1; zero preserves the copied attacker facing and negative XORs it" or
+        class02_collision["reaction_direction"]["observed_inputs"] !=
+            {"source_frame": 2804, "attacker_x_u16": 1091,
+             "defender_x_u16": 1152, "attack_mode_s8": 1} or
+        class02_collision["reaction_direction"]["result_u8"] != 1 or
+        class02_collision["health_after_clamp_s16"] != -1):
+        raise ValueError("SPEC-02 Coffee Shop component implementation drift")
 
     cursor = int(player["initial_cursor"], 16)
     step_rows = []
@@ -656,7 +950,14 @@ def build() -> str:
                 int(row["class"], 16), row["variant"], row["source_action"],
                 post["state"], post["substate"], post["facing"],
                 post["animation_record"], post["health"]))
-    lines.extend(["};", "", "static const AvspRound1EntryStepSpec avsp_round1_entry_steps[AVSP_ROUND1_ENTRY_STEP_COUNT] =", "{"])
+    lines.extend([
+        "};", "",
+        "static const AvspRound1CoffeeStageSetupSpec avsp_round1_coffee_stage_setup =",
+        "{",
+        "    2, 1u, 0x1Cu, 14, 25u, 14u, 22u, -4, -8, 0, 0x18u, 0, 0,",
+        "    8, 16, 0x8DEFu, 0xA998u, 8",
+        "};", "",
+        "static const AvspRound1EntryStepSpec avsp_round1_entry_steps[AVSP_ROUND1_ENTRY_STEP_COUNT] =", "{"])
     for kind, opcode, arg0, arg1, arg2, first, last in step_rows:
         lines.append(
             f"    {{ {kind}, 0x{opcode:02X}u, {arg0}u, {arg1}u, {arg2}u, 0x{first:08X}UL, 0x{last:08X}UL }},")
@@ -741,13 +1042,18 @@ def build() -> str:
             recurring_auxiliary["write_values"]["z_s16"],
             recurring_auxiliary["write_values"]["variant_u8"],
             recurring_auxiliary["write_values"]["selector83_u8"]),
-        "    %du, %du, 0x%04Xu, 0x%02X, %du, 0x%04Xu" % (
+        "    %du, %du, 0x%04Xu, 0x%02X, %du, 0x%04Xu," % (
             recurring_gate["write_values"]["conditional_phase_0x2e_u8"],
             recurring_gate["write_values"]["conditional_local_0x2c_u8"],
             int(recurring_gate["gate_owner"]["record"], 16) & 0xffff,
             int(recurring_gate["gate_owner"]["class_u8"], 16),
             recurring_gate["gate_owner"]["record_type_u8"],
             recurring_gate["gate_owner"]["state_u16"]),
+        "    0x%04Xu, 0x%04Xu, %d, %du" % (
+            recurring_progress["transition_guard"]["state_u16"],
+            recurring_progress["transition_guard"]["substate_u16"],
+            recurring_progress["transition_guard"]["health_s16"],
+            recurring_progress["increment_u16"]),
         "};", "",
         "static const short avsp_round1_recurring_lane_offsets[AVSP_ROUND1_RECURRING_LANE_OFFSET_COUNT] =",
         "{",
@@ -895,12 +1201,16 @@ def build() -> str:
             action_zero["movement_selector_base_by_style_u8"][0],
             action_zero["movement_selector_base_by_style_u8"][1]),
         "    { " + ", ".join("%dL" % value for value in
-            action_jump["x_velocity_table_s32_16_16"]) + " },",
+            action_jump["z_velocity_table_s32_16_16"]) + " },",
         "    %dL, %dL, %d, %dL," % (
             action_jump["y_velocity_s32_16_16"],
             action_jump["y_acceleration_s32_16_16"],
             action_jump["initial_y_add_s16"],
             action_fall["y_delta_s32_16_16"]),
+        "    %du, %du, %du," % (
+            action_jump["initial_selector_u8"],
+            action_jump["landing_selector_u8"],
+            action_jump["terminal_style85_u8"]),
         "    { " + ", ".join(f"{value}u" for value in
             action_attack["rng_group_table_u16"]) + " },",
         "    { 0u, 1u, 2u, 6u },",
@@ -972,6 +1282,73 @@ def build() -> str:
         "    " + ", ".join(f"0x{audio_by_slot.get(int(row['source_slot'], 16), 0):04X}u"
                             for row in class1f_initial_actors[-3:]),
         "};", "",
+        "static const AvspRound1Type16Spec avsp_round1_type16 =",
+        "{",
+    ])
+    type16_collision = class16["current_state_collision"]
+    type16_attack = type16_collision["attack_record"]
+    type16_hurt = type16_collision["player_hurt_record"]
+    lines.extend([
+        "    %sUL, %sUL, %sUL, %sUL, %sUL, %sUL, %sUL, %sUL," % (
+            class16["dispatch"], class16["spawn_owner"]["routine"],
+            class16["spawn_owner"]["allocator"],
+            class16["release_state"]["release_routine"],
+            class16["initialization"]["collision_table"],
+            type16_attack["address"], type16_collision["player_table"],
+            type16_hurt["address"]),
+        "    %d, %d, 0x0058u, 0x0232u, %d, %du, 0x%02X, %du, %du," % (
+            class16["spawn_owner"]["position_offset_s16"][0],
+            class16["spawn_owner"]["position_offset_s16"][1],
+            type16_collision["route_character_damage_s16"],
+            class16["record_type_u8"], int(class16["class_u8"], 16),
+            class16["current_state_collision"]["attack_selector_u8"],
+            type16_attack["hit_value_u8"]),
+        "    { %d, %d, %du, %du, %d, %du, %d, %du, %du }," % (
+            type16_attack["x_center_s8"], type16_attack["y_center_s8"],
+            type16_attack["x_half_u8"], type16_attack["y_half_u8"],
+            type16_attack["z_center_s8"], type16_attack["z_half_u8"],
+            type16_attack["knockback_mode_s8"],
+            type16_attack["hit_value_u8"],
+            type16_attack["damage_selector_u8"]),
+        "    { %d, %d, %du, %du, %d, %du, 0, 0u, 0u }" % (
+            type16_hurt["x_center_s8"], type16_hurt["y_center_s8"],
+            type16_hurt["x_half_u8"], type16_hurt["y_half_u8"],
+            type16_hurt["z_center_s8"], type16_hurt["z_half_u8"]),
+        "};", "",
+        "static const AvspRound1Type16MotionSpec avsp_round1_type16_motion[AVSP_ROUND1_TYPE16_MOTION_COUNT] =",
+        "{",
+    ])
+    for row in class16["initialization"]["variant_motion_16_16"]:
+        values = [row[name] for name in
+                  ("x_velocity_16_16", "x_acceleration_16_16",
+                   "y_velocity_16_16", "y_acceleration_16_16",
+                   "z_velocity_16_16")]
+        values = [value - 0x100000000 if value >= 0x80000000 else value
+                  for value in values]
+        lines.append("    { %dL, %dL, %dL, %dL, %dL }," % tuple(values))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_type16_parent_records[AVSP_ROUND1_TYPE16_PARENT_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class16["spawn_owner"]["parent_animation_records"]:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_type16_records[AVSP_ROUND1_TYPE16_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in (class16["active_state"]["animation_records"] +
+                class16["terminal_state"]["animation_records"]):
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
         "static const AvspRound1Class09InitialSpec avsp_round1_class09_initial_actors[AVSP_ROUND1_CLASS09_INITIAL_ACTOR_COUNT] =",
         "{",
     ])
@@ -1009,6 +1386,15 @@ def build() -> str:
             row["source_slot"], row["x_s16"], row["y_s16"], row["z_s16"]))
     lines.extend([
         "};", "",
+        "static const AvspRound1Class4eRngSpec avsp_round1_class4e_rng[AVSP_ROUND1_CLASS09_INITIAL_ACTOR_COUNT] =",
+        "{",
+    ])
+    for row in class4e_rng:
+        lines.append("    { %sUL, %su, %su, %du }," % (
+            row["source_slot"], row["seed_before"], row["seed_after"],
+            row["table_index"]))
+    lines.extend([
+        "};", "",
         "static const AvspRound1VecS16 avsp_round1_class4e_jitter[AVSP_ROUND1_CLASS4E_JITTER_COUNT] =",
         "{",
     ])
@@ -1020,6 +1406,16 @@ def build() -> str:
         "{",
     ])
     for row in class4e["animation_records"]:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class4e_variant1_records[AVSP_ROUND1_CLASS4E_VARIANT1_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class4e_variant1["active_state"]["animation_records"]:
         lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
             row["timer_u16"], row["branch_s16"], row["animation_record"],
             row["assembly"], row["hurt_selector_u8"],
@@ -1046,6 +1442,91 @@ def build() -> str:
             row["timer_u16"], row["branch_s16"], row["animation_record"],
             row["assembly"], row["hurt_selector_u8"],
             row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const unsigned long avsp_round1_class45_source_slots[AVSP_ROUND1_CLASS45_SCENE_ACTOR_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{slot}UL" for slot in
+                              class45["source_slots_scheduler_order"]),
+        "};", "",
+        "static const AvspRound1Class45SpawnGroupSpec avsp_round1_class45_spawn_groups[AVSP_ROUND1_CLASS45_SPAWN_GROUP_COUNT] =",
+        "{",
+    ])
+    for group in class45["spawn_owner"]["groups"]:
+        attempts = group["attempts_u16"]
+        attempts_value = 0xffff if isinstance(attempts, str) else attempts
+        lines.append("    { %du, %d, %d, %d }," % (
+            attempts_value, group["x_offset_s16"], group["y_offset_s16"],
+            group["z_offset_s16"]))
+    lines.extend([
+        "};", "",
+        "static const unsigned char avsp_round1_class45_animation_selectors[AVSP_ROUND1_CLASS45_SELECTOR_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in
+                              class45["state0"]["animation_selector_table_u8"]),
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class45_records[AVSP_ROUND1_CLASS45_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class45["state0"]["animation_records"]:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Class45MotionSpec avsp_round1_class45_motion[AVSP_ROUND1_CLASS45_MOTION_COUNT] =",
+        "{",
+    ])
+    for row in class45["state0"]["motion_table"]:
+        lines.append("    { %d, %d, %d, %d, %d, %d }," % (
+            row["primary_x_velocity_s16"],
+            row["primary_y_velocity_s16"],
+            row["primary_y_acceleration_s16"],
+            row["alternate_x_velocity_s16"],
+            row["alternate_y_velocity_s16"],
+            row["alternate_y_acceleration_s16"]))
+    lines.extend([
+        "};", "",
+        "static const unsigned long avsp_round1_class47_source_slots[AVSP_ROUND1_CLASS47_SCENE_ACTOR_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{slot}UL" for slot in
+                              class47["source_slots_scheduler_order"]),
+        "};", "",
+        "static const AvspRound1Class47Spec avsp_round1_class47 =",
+        "{",
+        "    %s, %du, %du, %du, %d, %d, %sUL" % (
+            class47["class_u8"], class47["variant_u8"],
+            class47["spawn_owner"]["attempts_u16"],
+            class47["rng_calls_per_actor_u8"],
+            80, -1, class47["dispatch"]),
+        "};", "",
+        "static const unsigned char avsp_round1_class47_animation_selectors[AVSP_ROUND1_CLASS47_SELECTOR_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in
+                              class47["state0"]["animation_selector_table_u8"]),
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class47_records[AVSP_ROUND1_CLASS47_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class47["state0"]["animation_records"]:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Class45MotionSpec avsp_round1_class47_motion[AVSP_ROUND1_CLASS47_MOTION_COUNT] =",
+        "{",
+    ])
+    for row in class47["state0"]["motion_table"]:
+        lines.append("    { %d, %d, %d, %d, %d, %d }," % (
+            row["primary_x_velocity_s16"],
+            row["primary_y_velocity_s16"],
+            row["primary_y_acceleration_s16"],
+            row["alternate_x_velocity_s16"],
+            row["alternate_y_velocity_s16"],
+            row["alternate_y_acceleration_s16"]))
     bound_x = first_segment_bounds["bound_x"]
     bound_z = first_segment_bounds["bound_z"]
     lines.extend([
@@ -1071,6 +1552,80 @@ def build() -> str:
         lines.append("    " + ", ".join(f"0x{value:02X}u" for value in chunk) +
                      ("," if offset + 32 < len(terrain_packed) else ""))
     lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_coffee_shop_obstacle_records[AVSP_ROUND1_OBSTACLE_PARENT_RECORD_COUNT] =",
+        "{",
+    ])
+    for row in obstacle_parent_records:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1ObstacleChildSequenceSpec avsp_round1_coffee_shop_obstacle_child_sequences[AVSP_ROUND1_OBSTACLE_CHILD_VARIANTS] =",
+        "{",
+    ])
+    for variant in range(4):
+        sequence = obstacle_child_sequences[str(variant)]
+        rendered = ["{ %du, %d, %sUL, %sUL, %du, %du }" % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]) for row in sequence]
+        while len(rendered) < 8:
+            rendered.append("{ 0u, 0, 0UL, 0UL, 0u, 0u }")
+        lines.append("    { %du, { %s } }," % (
+            len(sequence), ", ".join(rendered)))
+    release_record = obstacle_child["release_record"]
+    physics = obstacle_state_program["state_0404"]["initial_fields_s16"]
+    child_alloc = obstacle_initializer["child_allocation"]
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_coffee_shop_obstacle_child_release =",
+        "{ %du, %d, %sUL, %sUL, %du, %du };" % (
+            release_record["timer_u16"], release_record["branch_s16"],
+            release_record["animation_record"], release_record["assembly"],
+            release_record["hurt_selector_u8"],
+            release_record["attack_selector_u8"]),
+        "", "static const AvspRound1ObstacleLifecycleSpec avsp_round1_coffee_shop_obstacle_lifecycle =",
+        "{",
+        "    %sUL, %sUL, 0x06DE92UL, %sUL," % (
+            obstacle_scene_record["address"], obstacle_lifecycle["spawn"]["slot"],
+            obstacle_state_program["state_0200"]["player_trigger"]["attack_record"]),
+        "    %du, %d, %d, %d, %d," % (
+            obstacle_scene_record["camera_threshold_u16"],
+            obstacle_scene_record["x_s16"], obstacle_scene_record["y_s16"],
+            obstacle_scene_record["y_s16"], obstacle_initializer["writes"]["health_s16"]),
+        "    0x0200u, 0x0400u, 0x0402u, 0x0404u, 0x0604u,",
+        "    0x8000u, 0x1Du, %du, 0x%02X, %du," % (
+            child_alloc["record_type_u8"], child_alloc["class_u8"],
+            child_alloc["count"]),
+        "    { " + ", ".join(f"{value}u" for value in
+            child_alloc["variant_order_u8"]) + " },",
+        "    %du, %du, %du, %du, %d," % (
+            obstacle_state_program["state_0400"]["timer_high_byte_u8"],
+            obstacle_state_program["state_0200"]["player_trigger"]["damage_s16"],
+            obstacle_state_program["state_0200"]["player_trigger"]["edge_to_damage_ticks_u8"],
+            obstacle_player_attack["hit_value_u8"],
+            obstacle_player_attack["knockback_mode_s8"]),
+        "    { %d, %d, %du, %du, %d, %du, %d, %du, %du }," % (
+            obstacle_player_attack["x_center_s8"],
+            obstacle_player_attack["y_center_s8"],
+            obstacle_player_attack["x_half_u8"],
+            obstacle_player_attack["y_half_u8"],
+            obstacle_player_attack["z_center_s8"],
+            obstacle_player_attack["z_half_u8"],
+            obstacle_player_attack["knockback_mode_s8"],
+            obstacle_player_attack["hit_value_u8"],
+            obstacle_player_attack["damage_s16"]),
+        "    { %d, %d, %du, %du, %d, %du, 0, 0u, 0u }," % (
+            obstacle_hurt["x_center_s8"], obstacle_hurt["y_center_s8"],
+            obstacle_hurt["x_half_u8"], obstacle_hurt["y_half_u8"],
+            obstacle_hurt["z_center_s8"], obstacle_hurt["z_half_u8"]),
+        "    { %d, %d, %d, %d, %d, %d, %d, %d }" % (
+            physics["field30"], physics["field34"], physics["field38"],
+            physics["field3c"], physics["field32"], physics["field36"],
+            physics["field3a"], physics["field3e"]),
         "};", "",
         "static const AvspRound1ObstacleSpec avsp_round1_coffee_shop_obstacle =",
         "{",
@@ -1167,6 +1722,61 @@ def build() -> str:
             jump["presentation_actor_fields"]["palette_u8"],
             jump["presentation_actor_fields"]["object_or_u16"]),
         "};", "",
+        "static const AvspRound1PlayerSpecialSpec avsp_round1_player_special =",
+        "{",
+        "    0x0800u, 0x0802u, 0x0804u, 0x0804u, 0x0000u,",
+        "    %du, %du, %du, %du, 0x%02X, %du, 0x%02X," % (
+            player_special["initialization"]["presentation_selector_u8"],
+            player_special["active_state"]["contact_attack_selector_u8"],
+            player_special["completion"]["health_cost_s16"],
+            player_special["active_state"]["class4b_record_type_u8"],
+            int(player_special["active_state"]["class4b_class_u8"], 16),
+            player_special["active_state"]["class3d_record_type_u8"],
+            int(player_special["active_state"]["class3d_class_u8"], 16)),
+        "    %su, %su" % tuple(
+            player_special["active_state"]["source_audio_commands"]),
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_player_special_records[AVSP_ROUND1_PLAYER_SPECIAL_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in special_records:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"],
+            row["animation_record"], row["assembly"],
+            row["hurt_selector_u8"], row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const unsigned char avsp_round1_player_special_visible_durations[AVSP_ROUND1_PLAYER_SPECIAL_PRESENTATION_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in special_durations),
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class4b_records[AVSP_ROUND1_CLASS4B_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class4b_records:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"],
+            row["animation_record"], row["assembly"],
+            row["hurt_selector_u8"], row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class3d_records[AVSP_ROUND1_CLASS3D_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class3d_records:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"],
+            row["animation_record"], row["assembly"],
+            row["hurt_selector_u8"], row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1VecS16 avsp_round1_class3d_offsets[AVSP_ROUND1_CLASS3D_OFFSET_COUNT] =",
+        "{",
+    ])
+    for x, z in class3d_offsets:
+        lines.append(f"    {{ {x}, {z} }},")
+    lines.extend([
+        "};", "",
         "static const AvspRound1PlayerWeaponSpec avsp_round1_player_weapon =",
         "{",
         f"    {int(weapon_states['sufficient_entry_action'], 16)}u,",
@@ -1236,6 +1846,14 @@ def build() -> str:
             row["assembly"], row["hurt_selector_u8"], row["attack_selector_u8"]))
     lines.extend([
         "};", "",
+        "static const unsigned short avsp_round1_weapon_target_distance_thresholds[AVSP_ROUND1_WEAPON_TARGET_DISTANCE_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in parent_target_thresholds),
+        "};", "",
+        "static const unsigned char avsp_round1_weapon_target_presentation_selectors[AVSP_ROUND1_WEAPON_TARGET_DISTANCE_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in parent_target_presentations),
+        "};", "",
         "static const unsigned char avsp_round1_weapon_parent_route_angles[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT] =",
         "{",
         "    " + ", ".join(f"{value}u" for value in parent_route_angles),
@@ -1256,6 +1874,13 @@ def build() -> str:
         rows = ", ".join("{ %d, %d }" % tuple(row)
                          for row in parent_motion_high[str(angle)])
         lines.append("    { " + rows + " },")
+    lines.extend([
+        "};", "",
+        "static const AvspRound1VecS16 avsp_round1_weapon_parent_base_motion[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT] =",
+        "{",
+    ])
+    for angle in parent_route_angles:
+        lines.append("    { %d, %d }," % tuple(parent_base_motion[str(angle)]))
     lines.extend([
         "};", "",
         "static const AvspRound1VecS16 avsp_round1_air_weapon_selector_offsets[AVSP_ROUND1_AIR_WEAPON_SELECTOR_COUNT] =",
@@ -1424,6 +2049,80 @@ def build() -> str:
         lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
             row["timer"], row["branch"], row["animation_record"],
             row["assembly"], row["hurt_selector"], row["attack_selector"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1CoffeeSceneRecordSpec avsp_round1_coffee_scene_records[AVSP_ROUND1_COFFEE_SCENE_RECORD_COUNT] =",
+        "{",
+    ])
+    for row in coffee_scene_records:
+        lines.append(
+            "    { %sUL, %sUL, %du, %du, %d, %d, %du, 0x%02X, %du, %d, %du, %du, %du, %du }," % (
+                row["address"], row["observed_source_slot"],
+                row["observed_source_frame"], row["camera_threshold_u16"],
+                row["x_s16"], row["y_s16"], row["allocator_u16"],
+                row["class_u8"], row["variant_u8"], row["guard_0a_s8"],
+                row["guard_0b_u8"], row["facing_u8"],
+                row["field_0d_u8"], row["timer_u16"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class01_records[AVSP_ROUND1_CLASS01_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class01_records:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class02_records[AVSP_ROUND1_CLASS02_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class02_records:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    class01_audio = class01_contract["audio_transactions"]
+    attack_box = class02_collision["attack_box"]
+    hurt_box = class02_collision["hurt_record"]
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Class01Spec avsp_round1_class01 =",
+        "{",
+        "    0x06B2FAUL, 0x06B520UL, 240u, 60u, 360u, 192u, 40u,",
+        "    5u, 6u, 0x1F, 5u, %su, %su" % (
+            class01_audio[0]["command_u16"],
+            class01_audio[1]["command_u16"]),
+        "};", "",
+        "static const AvspRound1Class02Spec avsp_round1_class02 =",
+        "{",
+        "    0x06B534UL, 0x06B6EAUL, %sUL, %sUL," % (
+            class02_collision["attack_record"],
+            class02_collision["hurt_record"]["address"]),
+        "    16u, 0x01A0u, 5u, 28u, 0x05, 1u, 8, 64, -8, %d, %d, %su, 1u, 0u," % (
+            class02_collision["damage_s16"],
+            class02_collision["health_after_clamp_s16"],
+            class02_contract["audio_transactions"][0]["command_u16"]),
+        "    { %d, %d, %du, %du, %d, %du, %d, %du, 0u }," % (
+            attack_box["x_center_s8"], attack_box["y_center_s8"],
+            attack_box["x_half_u8"], attack_box["y_half_u8"],
+            attack_box["z_center_s8"], attack_box["z_half_u8"],
+            attack_box["knockback_mode_s8"], attack_box["hit_value_u8"]),
+        "    { %d, %d, %du, %du, %d, %du, 0, 0u, 0u }" % (
+            hurt_box["x_center_s8"], hurt_box["y_center_s8"],
+            hurt_box["x_half_u8"], hurt_box["y_half_u8"],
+            hurt_box["z_center_s8"], hurt_box["z_half_u8"]),
+        "};", "",
+        "/* Diagnostic-only replay of the accepted ORACLE-10 Coffee Shop",
+        " * controller ledger. Native gameplay remains controller-driven;",
+        " * this table exists only for source/native scene differential runs. */",
+        f"#define AVSP_ROUND1_COFFEE_SHOP_INPUT_RUN_COUNT {len(scene_input_runs)}",
+        "static const AvspRound1SceneInputRun avsp_round1_coffee_shop_input_runs[AVSP_ROUND1_COFFEE_SHOP_INPUT_RUN_COUNT] =",
+        "{",
+    ])
+    for first, last, word in scene_input_runs:
+        lines.append(f"    {{ {first}u, {last}u, 0x{word:04X}u }},")
     lines.extend(["};", "", "#endif", ""])
     return "\n".join(lines)
 

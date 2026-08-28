@@ -15,6 +15,9 @@ BASE_B = ROOT / ".deps" / "mame" / "oracle11_round1_navigation_b"
 PERTURBED = ROOT / ".deps" / "mame" / "oracle11_round1_navigation_perturbed"
 CORRECTIVE_A = ROOT / ".deps" / "mame" / "reimplement13_navigation_fields_g"
 CORRECTIVE_B = ROOT / ".deps" / "mame" / "reimplement13_navigation_fields_h"
+OBSTACLE_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs21a"
+OBSTACLE_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs21b"
+OBSTACLE_MUTANT = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs21s"
 ORACLE08 = ROOT / "data" / "oracle08_round1_navigation_bounds.json"
 ORACLE10 = ROOT / "data" / "oracle10_round1_route.json"
 SCHEDULER = ROOT / "data" / "oracle11_actor_scheduler_lifecycle.json"
@@ -44,6 +47,13 @@ TYPE20_ROUTINES = {
     "0x09": (0x06D926, 0x06DBDA),
     "0x0a": (0x06DE92, 0x06E136),
 }
+OBSTACLE_CAPTURE_FILES = (
+    "coffee_shop_obstacle_trace.tsv", "coffee_shop_obstacle_writes.tsv",
+    "coffee_shop_obstacle_guard.tsv", "coffee_shop_type36_writes.tsv",
+    "coffee_shop_scene_actors.tsv", "coffee_shop_scene_frames.tsv",
+    "coffee_shop_scene_health_writes.tsv", "coffee_shop_rng_calls.tsv",
+    "dispatches.tsv", "progression_result.tsv",
+)
 
 
 def require(condition: bool, message: str) -> None:
@@ -105,6 +115,267 @@ def parse_result(path: Path) -> dict[str, object]:
     row = rows(path / "result.tsv")[0]
     return {key: int(value) if key not in ("variant", "final_score") else value
             for key, value in row.items()}
+
+
+def coffee_shop_obstacle_lifecycle(opcodes: bytes,
+                                   program: bytes) -> dict[str, object]:
+    def animation_record(address: int) -> dict[str, object]:
+        blob = program[address:address + 16]
+        require(len(blob) == 16, "Coffee Shop animation record outside program")
+        return {
+            "animation_record": f"0x{address:06x}",
+            "timer_u16": int.from_bytes(blob[0:2], "big"),
+            "branch_s16": int.from_bytes(blob[2:4], "big", signed=True),
+            "assembly": f"0x{int.from_bytes(blob[4:8], 'big'):06x}",
+            "hurt_selector_u8": blob[8], "attack_selector_u8": blob[9],
+            "record_sha256": hashlib.sha256(blob).hexdigest(),
+        }
+    identity_a = {name: digest(OBSTACLE_A / name)
+                  for name in OBSTACLE_CAPTURE_FILES}
+    identity_b = {name: digest(OBSTACLE_B / name)
+                  for name in OBSTACLE_CAPTURE_FILES}
+    identity_mutant = {name: digest(OBSTACLE_MUTANT / name)
+                       for name in OBSTACLE_CAPTURE_FILES}
+    require(identity_a == identity_b,
+            "Coffee Shop obstacle lifecycle baselines differ")
+    trace = rows(OBSTACLE_A / "coffee_shop_obstacle_trace.tsv")
+    writes = rows(OBSTACLE_A / "coffee_shop_obstacle_writes.tsv")
+    guard_writes = rows(OBSTACLE_A / "coffee_shop_obstacle_guard.tsv")
+    actors = rows(OBSTACLE_A / "coffee_shop_scene_actors.tsv")
+    baseline_result = rows(OBSTACLE_A / "progression_result.tsv")[0]
+    mutant_result = rows(OBSTACLE_MUTANT / "progression_result.tsv")[0]
+    obstacle = [row for row in actors if row["slot"] == "ffb380" and
+                row["type"] == "20" and row["class"] == "0a"]
+    children = [row for row in actors if row["type"] == "36" and
+                row["class"] == "05"]
+    require(len(obstacle) == 603 and int(obstacle[0]["frame"]) == 2246 and
+            int(obstacle[-1]["frame"]) == 2848,
+            "Coffee Shop obstacle lifetime drift")
+    require({row["state"] for row in obstacle} ==
+            {"0200", "0400", "0402", "0404", "0604"} and
+            {row["substate"] for row in obstacle} ==
+            {"0000", "0200", "0300"},
+            "Coffee Shop obstacle state coverage drift")
+    require(len(children) == 2244 and
+            {row["slot"] for row in children} ==
+            {"ffe180", "ffe1c0", "ffe200", "ffe240"} and
+            {row["variant"] for row in children} ==
+            {"00", "01", "02", "03"} and
+            min(int(row["frame"]) for row in children) == 2246 and
+            max(int(row["frame"]) for row in children) == 2806,
+            "Coffee Shop obstacle child lifetimes drift")
+    spawn_writes = [row for row in writes if row["frame"] == "2245" and
+                    row["pc"].startswith("01bf")]
+    require([row["pc"] for row in spawn_writes] ==
+            ["01bf1e", "01bf22", "01bf28", "01bf2e", "01bf34",
+             "01bf3a", "01bf40"], "Coffee Shop obstacle spawn writes drift")
+    init_guards = [row for row in trace if row["pc"] == "06dea6"]
+    require(len(init_guards) == 1 and init_guards[0]["frame"] == "2245" and
+            init_guards[0]["guard_ffee8f"] == "40",
+            "Coffee Shop obstacle type-36 guard drift")
+    child_allocations = [row for row in guard_writes
+                         if row["frame"] == "2245" and
+                         row["pc"] == "017882"]
+    require([row["value_before"] for row in child_allocations] ==
+            ["40", "3f", "3e", "3d"],
+            "Coffee Shop obstacle child allocation order drift")
+    damage = [row for row in writes if row["frame"] == "2804" and
+              row["pc"] in {"01d590", "01d598", "01d4aa"}]
+    require([row["pc"] for row in damage] ==
+            ["01d590", "01d598", "01d4aa", "01d4aa"] and
+            damage[0]["health_before"] == "0" and
+            damage[1]["health_before"] == "-25" and
+            damage[2]["health_before"] == "-1" and
+            damage[2]["a1"] == "ffb380" and
+            damage[2]["a3"] == "11af76",
+            "Coffee Shop obstacle damage transition drift")
+    require(int(baseline_result["obstacle_transition_suppressed_writes"]) == 0 and
+            int(mutant_result["obstacle_transition_suppressed_writes"]) == 18 and
+            int(baseline_result["final_route"]) == 2 and
+            int(mutant_result["final_route"]) == 4 and
+            identity_a["coffee_shop_scene_actors.tsv"] !=
+            identity_mutant["coffee_shop_scene_actors.tsv"] and
+            identity_a["coffee_shop_scene_frames.tsv"] !=
+            identity_mutant["coffee_shop_scene_frames.tsv"] and
+            identity_a["dispatches.tsv"] != identity_mutant["dispatches.tsv"],
+            "Coffee Shop obstacle transition suppression did not discriminate")
+    scene_record = program[0x15C168:0x15C178]
+    require(scene_record.hex() == "02b00463014300040a000000000e0000",
+            "Coffee Shop obstacle scene record drift")
+    return {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "capture_identity": {
+            "completion_a": identity_a, "completion_b": identity_b,
+            "byte_identical": True, "transition_suppression": identity_mutant,
+        },
+        "source_scene_record": {
+            "address": "0x15c168", "bytes": scene_record.hex(),
+            "sha256": hashlib.sha256(scene_record).hexdigest(),
+            "camera_threshold_u16": 688, "x_s16": 1123,
+            "y_s16": 323, "record_type_u16": 4,
+            "class_u8": 10, "facing_u8": 0,
+            "field_0c_u8": 0, "field_0e_u8": 14,
+        },
+        "spawn": {
+            "source_routine": "0x01bece..0x01bf4e",
+            "source_routine_sha256": hashlib.sha256(
+                opcodes[0x01BECE:0x01BF4E]).hexdigest(),
+            "guard": "nonnegative record threshold 688 <= unsigned camera bound A5+0x278, route/lane record filters pass, and the record-20 pool allocation succeeds",
+            "writer_pcs": ["0x01bf1e", "0x01bf22", "0x01bf28",
+                           "0x01bf2e", "0x01bf34", "0x01bf3a",
+                           "0x01bf40"],
+            "source_frame": 2245, "first_visible_frame": 2246,
+            "slot": "0xffb380", "scheduler": "record type 20 at 0x01bc38",
+        },
+        "initializer": {
+            "dispatch_entry": "0x06de92",
+            "source_routine": "0x06de92..0x06e136",
+            "source_routine_sha256": hashlib.sha256(
+                opcodes[0x06DE92:0x06E136]).hexdigest(),
+            "guard": "unsigned record-36 free count at 0xffee8f >= 4",
+            "initial_free_count_u8": 64,
+            "writes": {
+                "state_u16": "0x0200", "table_set": "0x06e210",
+                "object_priority_u16": "0x8000", "field64_u8": "0x1d",
+                "z_s16": "copy y_s16", "health_s16": 0,
+                "substate_u16": 0, "facing_u8": 0,
+            },
+            "child_allocation": {
+                "record_type_u8": 36, "class_u8": 5,
+                "count": 4, "variant_order_u8": [3, 2, 1, 0],
+                "source_slots_in_allocation_order":
+                    ["0xffe240", "0xffe200", "0xffe1c0", "0xffe180"],
+                "parent_backlink_field": "child+0x26:u16",
+                "parent_child_array": "parent+0x78..0x7e:u16",
+                "free_count_before_after": [64, 60],
+            },
+            "animation_selector_u8": 0,
+            "animation_record": "0x06e136",
+        },
+        "state_program": {
+            "state_dispatch_table": "0x06de9e offsets for 0x0000,0x0200,0x0400,0x0600",
+            "state_0200": {
+                "calls_in_order": ["0x016536 animation", "0x01d87a collision",
+                                   "0x06b2e2 class body", "0x0167ac submit"],
+                "damage_guard": "current player attack record 0x11af76 subtracts 25 from signed health 0, clamps to -1, and writer 0x01d4aa sets state/substate 0x0400/0x0000",
+                "player_trigger": {"source_slot": "0xff8380",
+                                   "state_u16": "0x0200",
+                                   "substate_u16": "0x0802",
+                                   "animation_record": "0x15fd40",
+                                   "attack_record": "0x11af76",
+                                   "button1_button2_edge_frame": 2790,
+                                   "edge_to_damage_ticks_u8": 14,
+                                   "x_s16": 1091, "z_s16": 320,
+                                   "damage_s16": 25},
+                "source_frame": 2804,
+            },
+            "state_0400": {
+                "entry": "increment low state byte to 0x0402, set timer high byte to 8, bind selector 1 record 0x06e14a, and submit",
+                "timer_high_byte_u8": 8,
+                "timer_guard": "decrement high byte of actor+0x2a while nonzero; after zero require negative animation branch",
+                "next_state": "0x0404",
+            },
+            "state_0404": {
+                "initialization": "selectors 2 and 3 seed two alternating animation/position records plus signed velocity and acceleration fields",
+                "position_select": "(u8(A5+0x19)+D7)&1 selects the first or second record",
+                "arithmetic": [
+                    "when flag bit0 is clear: fp60 += s16(field30)<<8; fp68 += s16(field34)<<8; field34 += s16(field3c)",
+                    "when flag bit1 is clear: fp64 += s16(field32)<<8; fp6c += s16(field36)<<8; field36 += s16(field3e)",
+                    "set flag bit0 when u16(fp68.high) < u16(parent reference field18); set bit1 by the same guard for fp6c",
+                ],
+                "initial_fields_s16": {"field30": 1280, "field34": 1536,
+                                       "field38": 0, "field3c": -128,
+                                       "field32": 1024, "field36": 1280,
+                                       "field3a": 0, "field3e": -128},
+                "facing_rule": "when facing is zero negate field30, field38, field32, and field3a",
+                "completion_guard": "both flag bits set",
+                "next_state": "0x0604",
+            },
+            "state_0604": {"release": "0x017706 fixed-pool release"},
+        },
+        "collision_damage": {
+            "player_attack_record": {
+                "address": "0x11af76", "x_center_s8": 0,
+                "y_center_s8": 48, "x_half_u8": 88, "y_half_u8": 48,
+                "z_center_s8": 0, "z_half_u8": 40,
+                "hit_value_u8": 3, "knockback_mode_s8": 1,
+                "damage_s16": 25,
+            },
+            "obstacle_hurt_record": {
+                "address": "0x06e21c", "x_center_s8": 0,
+                "y_center_s8": 64, "x_half_u8": 16, "y_half_u8": 64,
+                "z_center_s8": 0, "z_half_u8": 6,
+            },
+            "overlap": "strict per-axis rectangle overlap using the sum of player-attack and obstacle-hurt half extents",
+            "health_arithmetic": "s16(0-25)=-25, then source KO clamp writes -1",
+            "state_writer": "0x01d4aa writes 0x0400:0x0000",
+        },
+        "presentation": {
+            "selector_table": "0x06e12c", "records": [animation_record(a)
+                for a in (0x06E136, 0x06E14A, 0x06E15A,
+                          0x06E16E, 0x06E182)],
+            "observed_records": sorted({f"0x{row['animation_record']}"
+                                        for row in obstacle}),
+        },
+        "child_presentation": {
+            "class_u8": 5, "record_type_u8": 36,
+            "dispatch_entry": "0x09bb66",
+            "dispatch_table": {
+                "address": "0x09bb72", "offsets_u16": [8, 48, 82, 82],
+                "state_targets": ["0x09bb7a", "0x09bba2",
+                                  "0x09bbc4", "0x09bbc4"],
+                "source_sha256": hashlib.sha256(
+                    opcodes[0x09BB66:0x09BBE4]).hexdigest(),
+            },
+            "variant_sequences": {
+                "0": [animation_record(a) for a in
+                      range(0x09BBF0, 0x09BC40, 0x10)],
+                "1": [animation_record(a) for a in
+                      range(0x09BC44, 0x09BCC4, 0x10)],
+                "2": [animation_record(a) for a in
+                      range(0x09BCC8, 0x09BD28, 0x10)],
+                "3": [animation_record(a) for a in
+                      range(0x09BD2C, 0x09BD8C, 0x10)],
+            },
+            "release_record": animation_record(0x09BD90),
+            "state_program": {
+                "state_0000": {
+                    "routine": "0x09bb7a..0x09bba2",
+                    "writes": ["state += 2", "object_priority=0x8000",
+                               "x=parent.x", "y=parent.y"],
+                    "variant_selector": "child+0x03:u8",
+                    "animation_entry": "0x016518",
+                },
+                "state_0200": {
+                    "routine": "0x09bba2..0x09bbc4",
+                    "guard": "u8(parent+0x04) >= 4",
+                    "guard_false": "advance current animation at 0x016536",
+                    "guard_true": "state += 2 and bind selector 4 release record at 0x016518",
+                },
+                "state_0400": {
+                    "routine": "0x09bbc4..0x09bbe4",
+                    "guard": "current animation branch is negative",
+                    "writes": "scan four parent+0x78..0x7e u16 child slots and clear the matching child pointer",
+                    "release": "0x01788c fixed-pool release",
+                },
+                "state_0600_alias": "dispatch offset aliases state 0x0400 target 0x09bbc4",
+            },
+        },
+        "lifetimes": {
+            "parent": {"source_slot": "0xffb380", "first_frame": 2246,
+                       "last_frame": 2848, "rows": 603},
+            "children": {"first_frame": 2246, "last_frame": 2806,
+                         "count": 4, "rows": 2244},
+        },
+        "transition_suppression": {
+            "writer_pc": "0x01d4aa", "suppressed_writes": 18,
+            "baseline_final_route": 2, "mutant_final_route": 4,
+            "actor_population_difference": True,
+            "route_difference": True, "audio_difference": True,
+            "rng_difference": True,
+        },
+        "fixed_frame_substitute_forbidden": True,
+    }
 
 
 def compact_runs(samples: list[dict[str, str]]) -> list[dict[str, object]]:
@@ -669,6 +940,7 @@ def build_report() -> dict[str, object]:
     camera = camera_authority(route, base_samples, base_camera, opcodes)
     obstacle_contract = obstacle_implementation_contract(
         program, opcodes, corrective_resolves)
+    obstacle_lifecycle = coffee_shop_obstacle_lifecycle(opcodes, program)
     camera_contract = camera_implementation_contract(
         corrective_samples, corrective_bounds, opcodes)
     counterfactual = next(item for item in route["counterfactual_authority_coverage"]
@@ -754,6 +1026,7 @@ def build_report() -> dict[str, object]:
             "accepted_oracle08_removal_control": True,
             "shared_player_enemy_rectangle_rejected": True,
             "implementation_contract": obstacle_contract,
+            "lifecycle_contract": obstacle_lifecycle,
         },
         "camera": {**camera, "implementation_contract": camera_contract},
         "counterfactuals": {
@@ -911,6 +1184,48 @@ def validate(report: dict[str, object]) -> None:
             obstacle_contract["minimum_penetration"]["axis_guard"] ==
             "resolve z only when unsigned z_penetration < unsigned x_penetration; otherwise resolve x",
             "obstacle implementation contract drift")
+    lifecycle = obstacle["lifecycle_contract"]
+    require(lifecycle["classification"] ==
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            lifecycle["capture_identity"]["byte_identical"] is True and
+            lifecycle["source_scene_record"]["bytes"] ==
+            "02b00463014300040a000000000e0000" and
+            lifecycle["source_scene_record"]["camera_threshold_u16"] == 688 and
+            lifecycle["spawn"]["guard"].startswith(
+                "nonnegative record threshold 688") and
+            lifecycle["initializer"]["guard"] ==
+            "unsigned record-36 free count at 0xffee8f >= 4" and
+            lifecycle["initializer"]["child_allocation"]["variant_order_u8"] ==
+            [3, 2, 1, 0] and
+            [len(lifecycle["child_presentation"]["variant_sequences"][str(i)])
+             for i in range(4)] == [5, 8, 6, 6] and
+            lifecycle["child_presentation"]["release_record"][
+                "animation_record"] == "0x09bd90" and
+            lifecycle["child_presentation"]["dispatch_table"][
+                "offsets_u16"] == [8, 48, 82, 82] and
+            lifecycle["child_presentation"]["state_program"]["state_0200"][
+                "guard"] == "u8(parent+0x04) >= 4" and
+            lifecycle["state_program"]["state_0200"]["source_frame"] == 2804 and
+            lifecycle["state_program"]["state_0200"]["player_trigger"][
+                "damage_s16"] == 25 and
+            lifecycle["state_program"]["state_0200"]["player_trigger"][
+                "edge_to_damage_ticks_u8"] == 14 and
+            lifecycle["state_program"]["state_0400"][
+                "timer_high_byte_u8"] == 8 and
+            lifecycle["state_program"]["state_0404"]["completion_guard"] ==
+            "both flag bits set" and
+            lifecycle["collision_damage"]["player_attack_record"][
+                "damage_s16"] == 25 and
+            lifecycle["collision_damage"]["obstacle_hurt_record"][
+                "x_half_u8"] == 16 and
+            lifecycle["lifetimes"]["parent"] == {
+                "source_slot": "0xffb380", "first_frame": 2246,
+                "last_frame": 2848, "rows": 603} and
+            lifecycle["lifetimes"]["children"]["count"] == 4 and
+            lifecycle["transition_suppression"]["suppressed_writes"] == 18 and
+            lifecycle["transition_suppression"]["mutant_final_route"] == 4 and
+            lifecycle["fixed_frame_substitute_forbidden"] is True,
+            "obstacle lifecycle contract drift")
     camera = report["camera"]
     require(camera["classification"] == "SOURCE_CLOSED" and
             camera["primary_writer"] == "0x0b0706" and

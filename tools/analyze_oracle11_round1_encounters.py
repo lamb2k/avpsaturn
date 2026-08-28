@@ -28,6 +28,8 @@ COFFEE_SHOP_SCENE_B = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs7b"
 ROUTE = ROOT / "data/oracle10_round1_route.json"
 ENEMIES = ROOT / "data/oracle11_round1_enemy_archetypes.json"
 AUXILIARY = ROOT / "data/oracle11_round1_auxiliary_authority.json"
+RNG = ROOT / "data/oracle11_round1_rng.json"
+BOSS = ROOT / "data/oracle11_round1_boss_orchestration.json"
 OPCODES = ROOT / ".deps/mame/actorprobe/decrypted_opcodes_2m.bin"
 OUT = ROOT / "data/oracle11_round1_encounter_route_authority.json"
 ORACLE10_EVENTS = (ROOT / ".deps/mame/oracle10_round1_system_census_e" /
@@ -49,6 +51,7 @@ COFFEE_SHOP_SCENE_FILES = ("coffee_shop_scene_actors.tsv",
                            "coffee_shop_scene_health_writes.tsv",
                            "coffee_shop_type4_class03.tsv",
                            "progression_class1f_action4_timers.tsv",
+                           "progression_lifecycle_writes.tsv",
                            "progression_result.tsv", "dispatches.tsv",
                            "samples.tsv", "score_writes.tsv")
 ROUTE_EDGES = (
@@ -142,6 +145,22 @@ def coffee_shop_scene_census() -> dict[str, object]:
             "Coffee Shop complete fixed-pool captures differ")
     enemies = json.loads(ENEMIES.read_text(encoding="utf-8"))
     auxiliary = json.loads(AUXILIARY.read_text(encoding="utf-8"))
+    rng = json.loads(RNG.read_text(encoding="utf-8"))
+    boss = json.loads(BOSS.read_text(encoding="utf-8"))
+    transient_groups = rng["owner_partition"]["auxiliary_type16_20_24"][
+        "transient_child_groups"]
+    require(rng["status"] == "SOURCE_CLOSED" and
+            [(item["type"], item["class"], item["classification"])
+             for item in transient_groups] ==
+            [(24, "0x47", "SOURCE_CLOSED"),
+             (24, "0x25", "SOURCE_CLOSED"),
+             (24, "0x4d", "SOURCE_CLOSED"),
+             (20, "0x05", "SOURCE_CLOSED")],
+            "accepted transient child ownership drift")
+    require(boss["status"] == "SOURCE_CLOSED" and
+            boss["controller_contract"]["type"] == 32 and
+            boss["controller_contract"]["class"] == "0x02",
+            "accepted Round 1 controller ownership drift")
     source_contracts = {
         (int(item["type"]), int(item["class"], 16)):
             f"data/oracle11_round1_enemy_archetypes.json#/archetypes/{index}"
@@ -167,9 +186,30 @@ def coffee_shop_scene_census() -> dict[str, object]:
         "data/oracle11_predator_route_ownership.json#/"
         "health_pickup")
     source_contracts[(32, 0x01)] = "#/first_entry_body/controller"
+    source_contracts[(32, 0x02)] = (
+        "data/oracle11_round1_boss_orchestration.json#/controller_contract")
     source_contracts[(24, 0x44)] = \
         ("data/oracle11_round1_auxiliary_authority.json#/"
          "first_segment_dependencies/class_0x44_type24_command_guard_owner")
+    source_contracts[(24, 0x47)] = (
+        "data/oracle11_round1_rng.json#/owner_partition/"
+        "auxiliary_type16_20_24/transient_child_groups/0")
+    source_contracts[(24, 0x4d)] = (
+        "data/oracle11_round1_rng.json#/owner_partition/"
+        "auxiliary_type16_20_24/transient_child_groups/2")
+    source_contracts[(20, 0x05)] = (
+        "data/oracle11_round1_rng.json#/owner_partition/"
+        "auxiliary_type16_20_24/transient_child_groups/3")
+    for index, item in enumerate(
+            auxiliary["coffee_shop_type36_presentation"]["classes"]):
+        source_contracts[(36, int(item["class"], 16))] = (
+            "data/oracle11_round1_auxiliary_authority.json#/"
+            f"coffee_shop_type36_presentation/classes/{index}")
+    for index, item in enumerate(
+            auxiliary["coffee_shop_scene_component_identities"]["components"]):
+        source_contracts[(int(item["type"]), int(item["class"], 16))] = (
+            "data/oracle11_round1_auxiliary_authority.json#/"
+            f"coffee_shop_scene_component_identities/components/{index}")
 
     active: dict[tuple[str, str], dict[str, object]] = {}
     lifetimes: list[dict[str, object]] = []
@@ -264,7 +304,7 @@ def coffee_shop_scene_census() -> dict[str, object]:
     blocked = [item for item in pair_inventory
                if item["source_classification"] != "SOURCE_CLOSED"]
     require(len(lifetimes) == 747 and len(pair_inventory) == 38 and
-            len(blocked) == 17,
+            len(blocked) == 0,
             "Coffee Shop full-pool lifetime inventory drift")
     audio_events = []
     for row in rows(COFFEE_SHOP_SCENE_A / "dispatches.tsv"):
@@ -709,6 +749,13 @@ def build_report() -> dict[str, object]:
                               if row["pc"] == "061152"]
     lifecycle_release_mutant_rows = [row for row in lifecycle_suppressed_writes
                                      if row["pc"] == "061152"]
+    coffee_shop_lifecycle_writes = list(rows(
+        COFFEE_SHOP_SCENE_A / "progression_lifecycle_writes.tsv"))
+    coffee_shop_progress_rows = [row for row in coffee_shop_lifecycle_writes
+                                 if row["pc"] == "061070"]
+    coffee_shop_progress_frames = [
+        2363, 2805, 2830, 2832, 3830, 3891, 4130, 4216, 4239, 4395,
+        4396, 4409, 4575, 4576, 4755, 4756, 4757, 4935, 4936, 5150]
     lifecycle_base_result = next(rows(
         PROGRESSION_LIFECYCLE_A / "progression_result.tsv"))
     lifecycle_suppress_result = next(rows(
@@ -730,6 +777,21 @@ def build_report() -> dict[str, object]:
             int(lifecycle_suppress_result["aux_spawn_transactions"]) == 0 and
             int(lifecycle_suppress_result["lifecycle_suppressed_writes"]) == 12,
             "class-0x1f lifecycle release control drift")
+    require(len(coffee_shop_progress_rows) == 20 and
+            [int(row["frame"]) for row in coffee_shop_progress_rows] ==
+                coffee_shop_progress_frames and
+            all(row["address"] == "ff1a1a" and
+                row["owner_active"] == "2" and
+                row["owner_class"] == "1f" and
+                row["owner_type"] == "12" and
+                int(row["owner_state"]) == 0x0402 and
+                int(row["owner_substate"]) == 0 and
+                int(row["owner_health"]) == -1 and
+                int(row["progress_before"]) == index and
+                int(row["data"], 16) == index + 1 and
+                row["suppressed"] == "0"
+                for index, row in enumerate(coffee_shop_progress_rows)),
+            "class-0x1f KO progress authority drift")
 
     def transaction(frame: int, pc: str) -> dict[str, str]:
         matches = [row for row in progression_transactions
@@ -1005,6 +1067,48 @@ def build_report() -> dict[str, object]:
                 "controller_substate_u16": int(first_active_write["c_substate"]),
             },
         },
+        "progress_increment_boundary": {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "scope": ("type-12/class-0x1f KO state 0x0402:0000 owns the "
+                      "Coffee Shop encounter progress increment"),
+            "capture_identity": {
+                "completion_a": progression_lifecycle_identity(
+                    COFFEE_SHOP_SCENE_A),
+                "completion_b": progression_lifecycle_identity(
+                    COFFEE_SHOP_SCENE_B),
+                "byte_identical": True,
+            },
+            "writer_pc": "0x061070",
+            "source_window": {
+                "first": "0x061060", "last_exclusive": "0x061078",
+                "sha256": hashlib.sha256(image[0x61060:0x61078]).hexdigest(),
+            },
+            "field_types": {
+                "progress": "u16", "actor_state": "u16",
+                "actor_substate": "u16", "actor_health": "s16",
+            },
+            "transition_guard": {
+                "record_type_u8": 12, "class_u8": "0x1f",
+                "state_u16": 0x0402, "substate_u16": 0,
+                "health_s16": -1,
+            },
+            "write": "progress_u16 += 1",
+            "increment_u16": 1,
+            "scheduler_order": ("class-0x1f KO transition writes progress "
+                                "before later recurring-controller reads"),
+            "observed_transactions": [
+                {"frame": int(row["frame"]), "slot": f"0x{row['a6']}",
+                 "progress_before_u16": int(row["progress_before"]),
+                 "progress_after_u16": int(row["data"], 16)}
+                for row in coffee_shop_progress_rows
+            ],
+            "mutation_control": {
+                "kind": "native semantic-edge suppression",
+                "rule": ("suppress only the KO-owned increment; reject when "
+                         "Coffee Shop progress and recurring spawn diverge"),
+                "fixed_frame_substitute": False,
+            },
+        },
         "lifecycle_release_boundary": {
             "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
             "scope": ("type-12/class-0x1f state 0x0600:0000 living-count "
@@ -1039,9 +1143,8 @@ def build_report() -> dict[str, object]:
                 "mutant_main_aux_spawns": [0, 0],
                 "fixed_frame_substitute": False,
             },
-            "implementation_blocker": ("the accepted SPEC does not yet bind "
-                "the post-intro 0x0200:0000 action transitions that cause each "
-                "initial actor to enter 0x0600; do not synthesize those exits"),
+            "implementation_dependency": ("accepted class-0x1f first-segment "
+                "action execution and HIT/KO contracts own entry into 0x0600"),
         },
         "primary_writer": {
             "routine": "0x028a12..0x028ab2", "writer_pc": "0x028a3e",
@@ -1275,13 +1378,13 @@ def validate(report: dict[str, object]) -> None:
             scene["source_frame_range"] == [1972, 5566] and
             scene["counts"] == {"actor_lifetimes": 747,
                                 "class_type_pairs": 38,
-                                "source_closed_pairs": 21,
-                                "blocked_missing_source_evidence_pairs": 17,
+                                "source_closed_pairs": 38,
+                                "blocked_missing_source_evidence_pairs": 0,
                                 "audio_events": 279,
                                 "health_writes": 149,
                                 "damage_writes": 30} and
             len(scene["actor_lifetimes"]) == 747 and
-            len(scene["blocked_class_type_pairs"]) == 17 and
+            len(scene["blocked_class_type_pairs"]) == 0 and
             len(scene["audio_events"]) == 279 and
             len(scene["health_writes"]) == 149 and
             sum(item["damage_writer"] for item in
@@ -1399,6 +1502,24 @@ def validate(report: dict[str, object]) -> None:
                 "x_s16": 976, "y_s16": 344, "z_s16": 344,
                 "selector83_u8": 0} and
             progression["auxiliary_writer"]["rng_calls"] == 0 and
+            progression["progress_increment_boundary"]["writer_pc"] ==
+                "0x061070" and
+            progression["progress_increment_boundary"]["transition_guard"] == {
+                "record_type_u8": 12, "class_u8": "0x1f",
+                "state_u16": 0x0402, "substate_u16": 0,
+                "health_s16": -1} and
+            progression["progress_increment_boundary"]["increment_u16"] == 1 and
+            progression["progress_increment_boundary"]
+                ["capture_identity"]["byte_identical"] is True and
+            len(progression["progress_increment_boundary"]
+                ["observed_transactions"]) == 20 and
+            progression["progress_increment_boundary"]
+                ["observed_transactions"][-1] == {
+                    "frame": 5150, "slot": "0xff9c40",
+                    "progress_before_u16": 19,
+                    "progress_after_u16": 20} and
+            progression["progress_increment_boundary"]
+                ["mutation_control"]["fixed_frame_substitute"] is False and
             progression["lifecycle_release_boundary"]["writer_pc"] ==
                 "0x061152" and
             progression["lifecycle_release_boundary"]
@@ -1501,6 +1622,10 @@ def mutation_self_test(report: dict[str, object]) -> None:
     wrong_lifecycle_writer["first_segment_recurring_spawn"] \
         ["lifecycle_release_boundary"]["writer_pc"] = "0x061150"
     mutations.append(wrong_lifecycle_writer)
+    wrong_progress_increment = copy.deepcopy(report)
+    wrong_progress_increment["first_segment_recurring_spawn"] \
+        ["progress_increment_boundary"]["increment_u16"] = 2
+    mutations.append(wrong_progress_increment)
     for mutant in mutations:
         try:
             validate(mutant)

@@ -131,6 +131,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/player/weapon_projectile_resource", "Button1/B1+B2 source guards own allocation, resource debit/recharge, collision, removal, and presentation continuity",
           ["input.new_edges:u16", "player.resource:s16", "target.pointer:u32"], ["player.state:u16", "player.resource:s16", "projectile.record", "player.animation:u32"],
           "/weapon_projectile_resource/counterfactuals", "projectile, target, or resource suppression changes the causal route"),
+        f("player.special_scene_effects", "predator-warrior-player-authority", "guarded_actor_program", True,
+          "player", "/weapon_projectile_resource/special_implementation_contract", "0x01a7e6 guard, 0x01a89a action writer, character-0 dispatcher 0x023132 and type-24 class-0x4b/class-0x3d writers",
+          "/authority_data/player/weapon_projectile_resource/special_implementation_contract", "the exact current/previous B1/B2/B3 guard enters character-0 action 0x0800; source animation events own class-0x4b and class-0x3d allocation, selector 11 contact, audio and six-health completion cost",
+          ["input.current:u8", "input.previous:u8", "player.state:u16", "player.action:u16", "player.health:s16", "player.contact:u8", "type24.free_count:u8"], ["player.action:u16", "player.animation:u32", "player.health:s16", "type24.class4b", "type24.class3d", "audio.command:u16"],
+          "/weapon_projectile_resource/special_implementation_contract/mutation_controls", "wrong character routine, guard, state, selector, child class, health cost or fixed-frame completion is rejected"),
         f("player.hit_ko_continue_respawn", "predator-warrior-player-authority", "state_table", True,
           "player", "/hit_ko_failure_continue_respawn", "0x022f98 HIT/KO bodies and 0x00e8a4 continue controller",
           "/authority_data/player/hit_ko_failure_continue_respawn", "signed health selects HIT or KO; source countdown and credited input guards own continue and return to control",
@@ -161,6 +166,12 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/navigation/obstacle_response/implementation_contract", "source player point overlaps the selected obstacle attack box",
           ["player.x:s16", "player.z:s16", "obstacle.position:s16", "obstacle.attack_box"], ["player.position:s16", "player.velocity:s16", "player.contact_flags:u8"],
           "/obstacle_response/implementation_contract/dynamic_control", "obstacle-box or axis mutation changes the measured x=1091 response"),
+        f("navigation.coffee_shop_obstacle_lifecycle", "round1-navigation-terrain-camera", "guarded_actor_program", True,
+          "navigation", "/obstacle_response/lifecycle_contract", "0x01bece scene-record spawn, 0x06de92 class body, and 0x01d4aa damage transition",
+          "/authority_data/navigation/obstacle_response/lifecycle_contract", "camera threshold, fixed-pool availability, current damage, animation and physics guards own spawn through release",
+          ["camera.bound_x:u16", "record36.free_count:u8", "obstacle.state:u16", "obstacle.health:s16", "player.attack_record:u32"],
+          ["obstacle.record", "record36.children", "obstacle.state:u16", "obstacle.position:s32", "pool.free_count:u8"],
+          "/obstacle_response/lifecycle_contract/transition_suppression", "suppressing the exact damage-state writer keeps the obstacle and changes actor, route, audio and RNG chronology"),
         f("camera.route_lock_unlock", "round1-navigation-terrain-camera", "route_table", True,
           "navigation", "/camera/implementation_contract", "0x0b04bc initialization, 0x0b0680/0x0b0786 target arithmetic, and 0x028910 Coffee Shop guard",
           "/authority_data/navigation/camera/implementation_contract", "eligible player extrema move the target inside route bounds; the entry controller owns lock and unlock guards",
@@ -196,6 +207,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/auxiliary/archetypes", "current class/state owns lifecycle, presentation, collision, player effect, and RNG consumption",
           ["actor.class:s8", "actor.state:u16", "player.position:s16"], ["actor.state:u16", "actor.active:u8", "player.health:s16", "player.resource:s16"],
           "/archetypes/0/counterfactual", "corrected class/type suppression removes actors and changes the causal state"),
+        f("auxiliary.coffee_shop_class47_presentation", "pickups-equipment-weapons-projectiles-hazards-destructibles", "guarded_presentation_actor_program", True,
+          "auxiliary", "/first_segment_dependencies/class_0x47_type24_class02_child_presentation", "0x06b61a class-0x02 caller, 0x08eb1c four-child allocator and 0x08eb86 class-0x47 state dispatch",
+          "/authority_data/auxiliary/first_segment_dependencies/class_0x47_type24_class02_child_presentation", "class-0x02 state 0x0400 allocates four source-owned presentation children; each consumes seven RNG calls and moves until the dual unsigned landing guard releases it",
+          ["owner.state:u16", "owner.position:s16", "owner.direction:u8", "rng.seed:u16", "type24.free_count:u8", "frame.parity:u8"], ["type24.child[4]", "child.position:s32", "child.animation:u32", "rng.seed:u16", "type24.free_count:u8"],
+          "/first_segment_dependencies/class_0x47_type24_class02_child_presentation/mutation_controls", "spawn, RNG, selector, motion, direction, terminal-guard or release mutation changes the captured class-0x47 population and trajectory"),
         f("route.first_entry_body", "encounters-waves-scripted-triggers", "entry_spawn_and_guard_table", True,
           "route", "/first_entry_body", "0x028874 ten-row spawn table and 0x0214dc player entry-script decoder",
           "/authority_data/route/first_entry_body", "active class-0x01/type-32 controller dispatches the ten-row table; the signed player animation terminator clears the selected g8236 bit before the exact route guard advances state",
@@ -212,9 +228,9 @@ def build_fields() -> list[dict[str, object]]:
           ["route.state:s16", "encounter.controller", "pool.free_count:u8"], ["enemy.record", "pool.free_count:u8"],
           "/counterfactuals", "class removal and offense suppression discriminate spawn ownership"),
         f("route.first_segment_recurring_spawn", "encounters-waves-scripted-triggers", "guarded_spawn_program", True,
-          "route", "/first_segment_recurring_spawn", "0x0287fc controller initializer, 0x0288ba intro-gate transition, 0x0288e2 current guard, 0x028a12 primary writer and 0x028b5a auxiliary writer",
-          "/authority_data/route/first_segment_recurring_spawn", "source controller initialization, class-0x44 intro-gate release, countdown/progress guards, phase counters and successful record-12 allocation own recurring class-0x1f spawns",
-          ["route.state:s16", "controller.state_substate:u16", "controller.timer40:u16", "controller.timer42:u16", "controller.limit:u16", "intro_gate.u8", "phase.u8", "camera.position:s16", "rng.seed:u16", "pool.free_count:u8"], ["controller.state_substate:u16", "controller.timers:u16", "enemy.record", "living_enemy_count:u16", "controller.index:u16", "rng.seed:u16", "pool.free_count:u8"],
+          "route", "/first_segment_recurring_spawn", "0x0287fc controller initializer, 0x0288ba intro-gate transition, 0x0288e2 current guard, 0x028a12 primary writer, 0x028b5a auxiliary writer and class-0x1f KO progress writer 0x061070",
+          "/authority_data/route/first_segment_recurring_spawn", "source controller initialization, class-0x44 intro-gate release, class-0x1f KO progress, countdown/progress guards, phase counters and successful record-12 allocation own recurring class-0x1f spawns",
+          ["route.state:s16", "controller.state_substate:u16", "controller.timer40:u16", "controller.timer42:u16", "controller.limit:u16", "intro_gate.u8", "phase.u8", "class1f.state_substate:u16", "class1f.health:s16", "progress:u16", "camera.position:s16", "rng.seed:u16", "pool.free_count:u8"], ["controller.state_substate:u16", "controller.timers:u16", "progress:u16", "enemy.record", "living_enemy_count:u16", "controller.index:u16", "rng.seed:u16", "pool.free_count:u8"],
           "/first_segment_recurring_spawn/intro_gate_suppression_control", "suppressing only the class-0x44 writer leaves the controller at 0x0202 with timer 60 and prevents primary or auxiliary recurring spawns; fixed-frame advancement is rejected"),
         f("boss.phases_spawns", "round1-boss", "boss_phase_table", True,
           "boss", "/controller_contract", "class-0x02 type-32 controller, 11 phases, eight boss-room spawns",
@@ -226,6 +242,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/boss/boss_clear_guard", "defeated boss death tail and controller countdown zero permit the exact clear write",
           ["boss.state:u16", "boss.health:s16", "boss.controller_countdown:u16"], ["boss.controller_state:u16", "route.clear:u8"],
           "/counterfactuals/suppress_exact_clear_writer", "suppressing only the clear writer holds the route in Round 1"),
+        f("rng.coffee_shop_stage_setup", "rng-consumption", "guarded_rng_transaction", True,
+          "rng", "/owner_partition/global_route_and_controller/groups/0/coffee_shop_entry_transaction", "0x017a1e stage-row selection, 0x017ac6..0x017b74 signed stage arithmetic and 0x017af0 shared RNG call",
+          "/authority_data/rng/owner_partition/global_route_and_controller/groups/0/coffee_shop_entry_transaction", "the source type-0x1c Coffee Shop row guard consumes exactly one RNG value and clamps the signed stage parameter before the ten class-0x1f initializers",
+          ["route.state:s16", "player.variant:u16", "stage.record_type:u8", "stage.selectors:u8/u16", "stage.bounds:s16", "rng.seed:u16"], ["stage.parameter:s16", "rng.seed:u16"],
+          "/owner_partition/global_route_and_controller/groups/0/coffee_shop_entry_transaction/suppression_control", "suppressing only the two RNG seed writes shifts every initial class-0x1f seed and changes the downstream route projection"),
         f("rng.shared_recurrence_order", "rng-consumption", "u16_recurrence", False,
           "rng", "/algorithm", "0x017c5e recurrence; 2,280 ordered Round 1 calls",
           "/authority_data/rng", "each accepted owner calls the shared recurrence at its exact scheduler position",
@@ -278,7 +299,10 @@ def build_coffee_shop_scene_manifest(source: dict[str, dict]) -> dict[str, objec
     census = copy.deepcopy(source["route"]["coffee_shop_scene_census"])
     native_pairs = {
         (4, 0), (4, 4), (12, 0x1f), (20, 0x09), (20, 0x0a),
-        (24, 0x44), (24, 0x4e), (32, 0x01),
+        (20, 0x01), (20, 0x02),
+        (24, 0x10), (24, 0x3d), (24, 0x44), (24, 0x45), (24, 0x47),
+        (24, 0x49), (24, 0x4b), (24, 0x4e),
+        (32, 0x01), (36, 0x05),
     }
     implementation_blockers = {
         (0, 0): "complete scene player state/animation and current "
@@ -487,6 +511,8 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                         "archetypes": copy.deepcopy(source["enemies"]["archetypes"])},
             "auxiliary": {"archetypes": copy.deepcopy(source["auxiliary"]["archetypes"]),
                           "first_segment_dependencies": copy.deepcopy(source["auxiliary"]["first_segment_dependencies"]),
+                          "coffee_shop_type36_presentation": copy.deepcopy(source["auxiliary"]["coffee_shop_type36_presentation"]),
+                          "coffee_shop_scene_component_identities": copy.deepcopy(source["auxiliary"]["coffee_shop_scene_component_identities"]),
                           "player_side_contract": copy.deepcopy(source["auxiliary"]["player_side_contract"]),
                           "navigation_body_geometry_contract": copy.deepcopy(source["auxiliary"]["navigation_body_geometry_contract"])},
             "route": {key: copy.deepcopy(source["route"][key]) for key in
@@ -626,7 +652,7 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                  if item["type"] == 12 and item["class"] == "0x1f")
                  ["classification"] == "NATIVE_IMPLEMENTED" and
             sum(scene["classification_counts"].values()) == len(scene_items) and
-            len(scene["blocked_class_type_pairs"]) == 30 and
+            len(scene["blocked_class_type_pairs"]) == 21 and
             scene["acceptance_gate"] == {
                 "source_actor_lifetimes": 747,
                 "source_class_type_pairs": 38,
@@ -746,18 +772,39 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class1f_actions["movement_tables"][1]["vectors"][8] ==
                 {"direction_u8": 8, "x_delta_s16": 2048,
                  "y_delta_s16": 0} and
-            class1f_actions["action_programs"]["source_bounds"] == {
-                "x_max_u16": 0x05f0,
-                "camera_relative_bias_u16": 0x0070,
-                "camera_relative_span_u16": 0x0260,
-                "failure_outer_state_u16": 0x0600,
-                "comparison": "unsigned word"} and
+            class1f_actions["action_programs"]["source_bounds"]
+                ["activation_field_u8"] == "actor+0x01" and
+            class1f_actions["action_programs"]["source_bounds"]
+                ["latched_field_u8"] == "actor+0xa2" and
+            class1f_actions["action_programs"]["source_bounds"]
+                ["camera_operand_u16"] == "0xff8278" and
+            class1f_actions["action_programs"]["source_bounds"]
+                ["phase_guard_field_u8"] == "0xff8019" and
+            class1f_actions["action_programs"]["source_bounds"]
+                ["x_max_u16"] == 0x05f0 and
+            class1f_actions["action_programs"]["source_bounds"]
+                ["camera_relative_bias_u16"] == 0x0070 and
+            class1f_actions["action_programs"]["source_bounds"]
+                ["camera_relative_span_u16"] == 0x0260 and
+            class1f_actions["action_programs"]["source_bounds"]
+                ["failure_outer_state_u16"] == 0x0600 and
+            class1f_actions["action_programs"]
+                ["animation_movement_helper_0x0165c4"]
+                ["source_body_sha256"] ==
+                "b35c9aaf0a5328ff35e6ccb5c9d278fef7f898201fc6e005e69d11bd566a970b" and
+            class1f_actions["action_programs"]
+                ["animation_movement_helper_0x0165c4"]
+                ["movement_cadence"] ==
+                "only on timer expiry after binding the next animation record" and
+            class1f_actions["action_programs"]
+                ["animation_movement_helper_0x0165c4"]
+                ["movement_record"] == "newly bound next animation record" and
             class1f_actions["action_programs"]["direction_helper_0x061032"]
                 ["upper_directions_by_a5_u8"] == [0x16, 0x0a] and
             class1f_actions["action_programs"]["direction_helper_0x061032"]
                 ["lower_directions_by_a5_u8"] == [0x1a, 0x06] and
             class1f_actions["action_programs"]["action_0x0e"]
-                ["x_velocity_table_s32_16_16"] ==
+                ["z_velocity_table_s32_16_16"] ==
                 [-0x00010000, -0x00014000, -0x00018000, -0x00020000] and
             class1f_actions["action_programs"]["action_0x04"]
                 ["selector_groups_u16"] ==

@@ -133,6 +133,26 @@ while time.time() < deadline:
 else:
     failed_asset_pointer = mcp.u32(syms["failed_asset"])
     failed_asset_name = ""
+    invalid_tile_slots = []
+    timeout_tile_pool_used = min(mcp.u32(syms["tile_pool_used"]), 218)
+    for timeout_tile_index in range(timeout_tile_pool_used):
+        timeout_sprite_id = mcp.u32(
+            syms["tile_pool_sprite"] + timeout_tile_index * 4)
+        timeout_definition = mcp.read(
+            syms["__jo_sprite_def"] + timeout_sprite_id * 8, 8)
+        timeout_picture = mcp.read(
+            syms["__jo_sprite_pic"] + timeout_sprite_id * 8, 8)
+        timeout_width = int.from_bytes(timeout_definition[0:2], "big")
+        timeout_height = int.from_bytes(timeout_definition[2:4], "big")
+        timeout_color_mode = int.from_bytes(timeout_picture[2:4], "big")
+        if (timeout_width, timeout_height, timeout_color_mode) != (16, 16, 3):
+            invalid_tile_slots.append({
+                "cache_index": timeout_tile_index,
+                "sprite_id": timeout_sprite_id,
+                "width": timeout_width,
+                "height": timeout_height,
+                "color_mode": timeout_color_mode,
+            })
     if failed_asset_pointer != 0:
         failed_asset_name = mcp.read(failed_asset_pointer, 64).split(b"\0", 1)[0].decode(
             "ascii", errors="replace"
@@ -148,6 +168,27 @@ else:
         "slice_ready": mcp.u32(syms["avsp_diag_slice_ready"]),
         "frame": mcp.u32(syms["avsp_diag_live_frame"]),
         "sample_count": mcp.u32(syms["avsp_diag_live_sample_count"]),
+        "startup_source_frame":
+            mcp.u32(syms["avsp_diag_round1_startup_source_frame"]),
+        "startup_trace_count":
+            mcp.u32(syms["avsp_diag_round1_startup_trace_count"]),
+        "round1_route_state":
+            mcp.u32(syms["avsp_diag_round1_route_state"]),
+        "tile_pool_used": mcp.u32(syms["tile_pool_used"]),
+        "invalid_tile_slots": invalid_tile_slots[:8],
+        "composite_sprite_count":
+            mcp.u32(syms["round1_composite_sprite_count"]),
+        "jo_sprite_id": mcp.u32(syms["__jo_sprite_id"]),
+        "tile_unique_peak":
+            mcp.u32(syms["avsp_diag_round1_native_tile_unique_peak"]),
+        "tile_unique_peak_frame":
+            mcp.u32(syms["avsp_diag_round1_native_tile_unique_peak_frame"]),
+        "tile_pin_exhaustions":
+            mcp.u32(syms["avsp_diag_round1_native_tile_pin_exhaustions"]),
+        "tile_replace_calls":
+            mcp.u32(syms["avsp_diag_round1_native_tile_replace_calls"]),
+        "tile_replace_returns":
+            mcp.u32(syms["avsp_diag_round1_native_tile_replace_returns"]),
         "encounter_state": mcp.u32(syms["avsp_diag_live_encounter_state"]),
         "player_x": signed(mcp, syms["avsp_diag_live_player_x"]),
         "player_health": signed(mcp, syms["avsp_diag_live_player_health"]),
@@ -233,7 +274,7 @@ count = signed(mcp,syms["avsp_diag_live_sample_count"])
 if count < 1 or count > 600:
     raise RuntimeError(f"invalid live sample count: {count}")
 sample_base = mcp.u32(syms["avsp_diag_live_samples"])
-expected_sample_base = 0x22600000 + 0x81000 + 0x48000 + 0x6000
+expected_sample_base = 0x22600000 + 0x81000 + 0x48000 + 0x18000
 if sample_base != expected_sample_base:
     raise RuntimeError(
         f"live diagnostic cart pointer drift: {sample_base:#x} != "

@@ -405,7 +405,6 @@
           "active_before": 1,
           "frame": 3522
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -415,7 +414,8 @@
         "id": "coffee-shop-actor-003",
         "last_frame": 3521,
         "pool": "record20",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_scene_component_identities/components/0",
         "source_slot": "0x00ffb580",
         "spawn_edge": {
           "active_after": 1,
@@ -473,7 +473,6 @@
           "active_before": 1,
           "frame": 5551
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -483,7 +482,8 @@
         "id": "coffee-shop-actor-004",
         "last_frame": 5550,
         "pool": "record20",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_scene_component_identities/components/1",
         "source_slot": "0x00ffb600",
         "spawn_edge": {
           "active_after": 1,
@@ -583,7 +583,6 @@
           "active_before": 1,
           "frame": 5551
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -593,7 +592,8 @@
         "id": "coffee-shop-actor-006",
         "last_frame": 5550,
         "pool": "record24",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_scene_component_identities/components/4",
         "source_slot": "0x00ffc600",
         "spawn_edge": {
           "active_after": 1,
@@ -2139,7 +2139,6 @@
           "active_before": 1,
           "frame": 5551
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0,
           1
@@ -2150,7 +2149,8 @@
         "id": "coffee-shop-actor-018",
         "last_frame": 5550,
         "pool": "record28",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_scene_component_identities/components/6",
         "source_slot": "0x00ffce00",
         "spawn_edge": {
           "active_after": 1,
@@ -2190,7 +2190,6 @@
           "active_before": 1,
           "frame": 5518
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -2200,7 +2199,8 @@
         "id": "coffee-shop-actor-019",
         "last_frame": 5517,
         "pool": "record20",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_scene_component_identities/components/0",
         "source_slot": "0x00ffb400",
         "spawn_edge": {
           "active_after": 1,
@@ -2331,7 +2331,6 @@
           "active_before": 1,
           "frame": 2807
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -2341,7 +2340,8 @@
         "id": "coffee-shop-actor-021",
         "last_frame": 2806,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/2",
         "source_slot": "0x00ffe180",
         "spawn_edge": {
           "active_after": 1,
@@ -2391,7 +2391,6 @@
           "active_before": 1,
           "frame": 2807
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -2401,7 +2400,8 @@
         "id": "coffee-shop-actor-022",
         "last_frame": 2806,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/2",
         "source_slot": "0x00ffe1c0",
         "spawn_edge": {
           "active_after": 1,
@@ -2449,7 +2449,6 @@
           "active_before": 1,
           "frame": 2807
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -2459,7 +2458,8 @@
         "id": "coffee-shop-actor-023",
         "last_frame": 2806,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/2",
         "source_slot": "0x00ffe200",
         "spawn_edge": {
           "active_after": 1,
@@ -2507,7 +2507,6 @@
           "active_before": 1,
           "frame": 2807
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -2517,7 +2516,8 @@
         "id": "coffee-shop-actor-024",
         "last_frame": 2806,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/2",
         "source_slot": "0x00ffe240",
         "spawn_edge": {
           "active_after": 1,
@@ -4320,7 +4320,6 @@
           "active_before": 1,
           "frame": 2269
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -4330,7 +4329,8 @@
         "id": "coffee-shop-actor-055",
         "last_frame": 2268,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/1",
         "source_slot": "0x00ffe140",
         "spawn_edge": {
           "active_after": 1,
@@ -5898,7 +5898,6 @@
           "active_before": 1,
           "frame": 2357
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -5908,7 +5907,8 @@
         "id": "coffee-shop-actor-080",
         "last_frame": 2356,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/1",
         "source_slot": "0x00ffe140",
         "spawn_edge": {
           "active_after": 1,
@@ -6564,7 +6564,6 @@
           "active_before": 1,
           "frame": 2398
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -6574,7 +6573,8 @@
         "id": "coffee-shop-actor-093",
         "last_frame": 2397,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe140",
         "spawn_edge": {
           "active_after": 1,
@@ -6685,7 +6685,6 @@
           "active_before": 1,
           "frame": 2401
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -6695,7 +6694,8 @@
         "id": "coffee-shop-actor-095",
         "last_frame": 2400,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe100",
         "spawn_edge": {
           "active_after": 1,
@@ -6889,7 +6889,6 @@
           "active_before": 1,
           "frame": 2412
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -6899,7 +6898,8 @@
         "id": "coffee-shop-actor-098",
         "last_frame": 2411,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe0c0",
         "spawn_edge": {
           "active_after": 1,
@@ -6949,7 +6949,6 @@
           "active_before": 1,
           "frame": 2415
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -6959,7 +6958,8 @@
         "id": "coffee-shop-actor-099",
         "last_frame": 2414,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe080",
         "spawn_edge": {
           "active_after": 1,
@@ -7081,7 +7081,6 @@
           "active_before": 1,
           "frame": 2418
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -7091,7 +7090,8 @@
         "id": "coffee-shop-actor-101",
         "last_frame": 2417,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -7272,7 +7272,6 @@
           "active_before": 1,
           "frame": 2432
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -7282,7 +7281,8 @@
         "id": "coffee-shop-actor-104",
         "last_frame": 2431,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe000",
         "spawn_edge": {
           "active_after": 1,
@@ -7333,7 +7333,6 @@
           "active_before": 1,
           "frame": 2447
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -7343,7 +7342,8 @@
         "id": "coffee-shop-actor-105",
         "last_frame": 2446,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/1",
         "source_slot": "0x00ffe000",
         "spawn_edge": {
           "active_after": 1,
@@ -7393,7 +7393,6 @@
           "active_before": 1,
           "frame": 2468
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -7403,7 +7402,8 @@
         "id": "coffee-shop-actor-106",
         "last_frame": 2467,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -7856,7 +7856,6 @@
           "active_before": 1,
           "frame": 2482
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -7866,7 +7865,8 @@
         "id": "coffee-shop-actor-115",
         "last_frame": 2481,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe000",
         "spawn_edge": {
           "active_after": 1,
@@ -7916,7 +7916,6 @@
           "active_before": 1,
           "frame": 2482
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -7926,7 +7925,8 @@
         "id": "coffee-shop-actor-116",
         "last_frame": 2481,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe080",
         "spawn_edge": {
           "active_after": 1,
@@ -8312,7 +8312,6 @@
           "active_before": 1,
           "frame": 2496
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -8322,7 +8321,8 @@
         "id": "coffee-shop-actor-124",
         "last_frame": 2495,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe0c0",
         "spawn_edge": {
           "active_after": 1,
@@ -9422,7 +9422,6 @@
           "active_before": 1,
           "frame": 5551
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -9432,7 +9431,8 @@
         "id": "coffee-shop-actor-138",
         "last_frame": 5550,
         "pool": "record20",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_scene_component_identities/components/1",
         "source_slot": "0x00ffb300",
         "spawn_edge": {
           "active_after": 1,
@@ -9474,7 +9474,6 @@
           "active_before": 1,
           "frame": 5551
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -9484,7 +9483,8 @@
         "id": "coffee-shop-actor-139",
         "last_frame": 5550,
         "pool": "record20",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_scene_component_identities/components/2",
         "source_slot": "0x00ffb100",
         "spawn_edge": {
           "active_after": 1,
@@ -9522,7 +9522,6 @@
           "active_before": 1,
           "frame": 5551
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -9532,7 +9531,8 @@
         "id": "coffee-shop-actor-140",
         "last_frame": 5550,
         "pool": "record20",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_rng.json#/owner_partition/auxiliary_type16_20_24/transient_child_groups/3",
         "source_slot": "0x00ffb180",
         "spawn_edge": {
           "active_after": 1,
@@ -9646,7 +9646,6 @@
           "active_before": 1,
           "frame": 3932
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0,
           1
@@ -9657,7 +9656,8 @@
         "id": "coffee-shop-actor-142",
         "last_frame": 3931,
         "pool": "record20",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_rng.json#/owner_partition/auxiliary_type16_20_24/transient_child_groups/3",
         "source_slot": "0x00ffb280",
         "spawn_edge": {
           "active_after": 1,
@@ -10276,7 +10276,6 @@
           "active_before": 1,
           "frame": 2855
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -10286,7 +10285,8 @@
         "id": "coffee-shop-actor-151",
         "last_frame": 2854,
         "pool": "record24",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_rng.json#/owner_partition/auxiliary_type16_20_24/transient_child_groups/0",
         "source_slot": "0x00ffbd80",
         "spawn_edge": {
           "active_after": 1,
@@ -10329,7 +10329,6 @@
           "active_before": 1,
           "frame": 2858
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -10339,7 +10338,8 @@
         "id": "coffee-shop-actor-152",
         "last_frame": 2857,
         "pool": "record24",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_rng.json#/owner_partition/auxiliary_type16_20_24/transient_child_groups/0",
         "source_slot": "0x00ffc180",
         "spawn_edge": {
           "active_after": 1,
@@ -10382,7 +10382,6 @@
           "active_before": 1,
           "frame": 2853
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -10392,7 +10391,8 @@
         "id": "coffee-shop-actor-153",
         "last_frame": 2852,
         "pool": "record24",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_rng.json#/owner_partition/auxiliary_type16_20_24/transient_child_groups/0",
         "source_slot": "0x00ffc200",
         "spawn_edge": {
           "active_after": 1,
@@ -10434,7 +10434,6 @@
           "active_before": 1,
           "frame": 2855
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -10444,7 +10443,8 @@
         "id": "coffee-shop-actor-154",
         "last_frame": 2854,
         "pool": "record24",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_rng.json#/owner_partition/auxiliary_type16_20_24/transient_child_groups/0",
         "source_slot": "0x00ffc380",
         "spawn_edge": {
           "active_after": 1,
@@ -10488,7 +10488,6 @@
           "active_before": 1,
           "frame": 5551
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0,
           1
@@ -10499,7 +10498,8 @@
         "id": "coffee-shop-actor-155",
         "last_frame": 5550,
         "pool": "record28",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_scene_component_identities/components/7",
         "source_slot": "0x00ffcd80",
         "spawn_edge": {
           "active_after": 1,
@@ -10558,7 +10558,6 @@
           "active_before": 1,
           "frame": 2917
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -10568,7 +10567,8 @@
         "id": "coffee-shop-actor-156",
         "last_frame": 2916,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe0c0",
         "spawn_edge": {
           "active_after": 1,
@@ -12054,7 +12054,6 @@
           "active_before": 1,
           "frame": 2942
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -12064,7 +12063,8 @@
         "id": "coffee-shop-actor-181",
         "last_frame": 2941,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe240",
         "spawn_edge": {
           "active_after": 1,
@@ -12230,7 +12230,6 @@
           "active_before": 1,
           "frame": 2944
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -12240,7 +12239,8 @@
         "id": "coffee-shop-actor-184",
         "last_frame": 2943,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe200",
         "spawn_edge": {
           "active_after": 1,
@@ -12710,7 +12710,6 @@
           "active_before": 1,
           "frame": 2876
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -12720,7 +12719,8 @@
         "id": "coffee-shop-actor-192",
         "last_frame": 2875,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe1c0",
         "spawn_edge": {
           "active_after": 1,
@@ -12861,7 +12861,6 @@
           "active_before": 1,
           "frame": 2890
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -12871,7 +12870,8 @@
         "id": "coffee-shop-actor-194",
         "last_frame": 2889,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe180",
         "spawn_edge": {
           "active_after": 1,
@@ -12921,7 +12921,6 @@
           "active_before": 1,
           "frame": 2901
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -12931,7 +12930,8 @@
         "id": "coffee-shop-actor-195",
         "last_frame": 2900,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe080",
         "spawn_edge": {
           "active_after": 1,
@@ -12981,7 +12981,6 @@
           "active_before": 1,
           "frame": 2903
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -12991,7 +12990,8 @@
         "id": "coffee-shop-actor-196",
         "last_frame": 2902,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe000",
         "spawn_edge": {
           "active_after": 1,
@@ -13041,7 +13041,6 @@
           "active_before": 1,
           "frame": 2915
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -13051,7 +13050,8 @@
         "id": "coffee-shop-actor-197",
         "last_frame": 2914,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe1c0",
         "spawn_edge": {
           "active_after": 1,
@@ -13101,7 +13101,6 @@
           "active_before": 1,
           "frame": 2917
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -13111,7 +13110,8 @@
         "id": "coffee-shop-actor-198",
         "last_frame": 2916,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -13162,7 +13162,6 @@
           "active_before": 1,
           "frame": 2897
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -13172,7 +13171,8 @@
         "id": "coffee-shop-actor-199",
         "last_frame": 2896,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/1",
         "source_slot": "0x00ffe100",
         "spawn_edge": {
           "active_after": 1,
@@ -14543,7 +14543,6 @@
           "active_before": 1,
           "frame": 2942
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -14553,7 +14552,8 @@
         "id": "coffee-shop-actor-220",
         "last_frame": 2941,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/1",
         "source_slot": "0x00ffe0c0",
         "spawn_edge": {
           "active_after": 1,
@@ -16559,7 +16559,6 @@
           "active_before": 1,
           "frame": 3347
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -16569,7 +16568,8 @@
         "id": "coffee-shop-actor-250",
         "last_frame": 3346,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/1",
         "source_slot": "0x00ffe200",
         "spawn_edge": {
           "active_after": 1,
@@ -17533,7 +17533,6 @@
           "active_before": 1,
           "frame": 3392
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -17543,7 +17542,8 @@
         "id": "coffee-shop-actor-267",
         "last_frame": 3391,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/1",
         "source_slot": "0x00ffe200",
         "spawn_edge": {
           "active_after": 1,
@@ -19725,7 +19725,6 @@
           "active_before": 1,
           "frame": 3842
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -19735,7 +19734,8 @@
         "id": "coffee-shop-actor-302",
         "last_frame": 3841,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/1",
         "source_slot": "0x00ffe200",
         "spawn_edge": {
           "active_after": 1,
@@ -21006,7 +21006,6 @@
           "active_before": 1,
           "frame": 5551
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -21016,7 +21015,8 @@
         "id": "coffee-shop-actor-321",
         "last_frame": 5550,
         "pool": "record28",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_scene_component_identities/components/8",
         "source_slot": "0x00ffcd00",
         "spawn_edge": {
           "active_after": 1,
@@ -21071,7 +21071,6 @@
           "active_before": 1,
           "frame": 4003
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -21081,7 +21080,8 @@
         "id": "coffee-shop-actor-322",
         "last_frame": 4002,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe200",
         "spawn_edge": {
           "active_after": 1,
@@ -21611,7 +21611,6 @@
           "active_before": 1,
           "frame": 3935
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -21621,7 +21620,8 @@
         "id": "coffee-shop-actor-331",
         "last_frame": 3934,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe240",
         "spawn_edge": {
           "active_after": 1,
@@ -22511,7 +22511,6 @@
           "active_before": 1,
           "frame": 3949
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -22521,7 +22520,8 @@
         "id": "coffee-shop-actor-346",
         "last_frame": 3948,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe0c0",
         "spawn_edge": {
           "active_after": 1,
@@ -23177,7 +23177,6 @@
           "active_before": 1,
           "frame": 3962
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -23187,7 +23186,8 @@
         "id": "coffee-shop-actor-357",
         "last_frame": 3961,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -23237,7 +23237,6 @@
           "active_before": 1,
           "frame": 3976
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -23247,7 +23246,8 @@
         "id": "coffee-shop-actor-358",
         "last_frame": 3975,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe240",
         "spawn_edge": {
           "active_after": 1,
@@ -23298,7 +23298,6 @@
           "active_before": 1,
           "frame": 3977
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -23308,7 +23307,8 @@
         "id": "coffee-shop-actor-359",
         "last_frame": 3976,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/1",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -24802,7 +24802,6 @@
           "active_before": 1,
           "frame": 4064
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -24812,7 +24811,8 @@
         "id": "coffee-shop-actor-382",
         "last_frame": 4063,
         "pool": "record24",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_scene_component_identities/components/5",
         "source_slot": "0x00ffc000",
         "spawn_edge": {
           "active_after": 1,
@@ -24924,7 +24924,6 @@
           "active_before": 1,
           "frame": 4067
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -24934,7 +24933,8 @@
         "id": "coffee-shop-actor-384",
         "last_frame": 4066,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/1",
         "source_slot": "0x00ffe200",
         "spawn_edge": {
           "active_after": 1,
@@ -25493,7 +25493,6 @@
           "active_before": 1,
           "frame": 4101
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -25503,7 +25502,8 @@
         "id": "coffee-shop-actor-394",
         "last_frame": 4100,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -25829,7 +25829,6 @@
           "active_before": 1,
           "frame": 4115
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -25839,7 +25838,8 @@
         "id": "coffee-shop-actor-400",
         "last_frame": 4114,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe200",
         "spawn_edge": {
           "active_after": 1,
@@ -26245,7 +26245,6 @@
           "active_before": 1,
           "frame": 4142
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -26255,7 +26254,8 @@
         "id": "coffee-shop-actor-406",
         "last_frame": 4141,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/1",
         "source_slot": "0x00ffe200",
         "spawn_edge": {
           "active_after": 1,
@@ -26935,7 +26935,6 @@
           "active_before": 1,
           "frame": 4235
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -26945,7 +26944,8 @@
         "id": "coffee-shop-actor-416",
         "last_frame": 4234,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe200",
         "spawn_edge": {
           "active_after": 1,
@@ -26995,7 +26995,6 @@
           "active_before": 1,
           "frame": 4249
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -27005,7 +27004,8 @@
         "id": "coffee-shop-actor-417",
         "last_frame": 4248,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -27254,7 +27254,6 @@
           "active_before": 1,
           "frame": 4328
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -27264,7 +27263,8 @@
         "id": "coffee-shop-actor-421",
         "last_frame": 4327,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe240",
         "spawn_edge": {
           "active_after": 1,
@@ -28696,7 +28696,6 @@
           "active_before": 1,
           "frame": 4351
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -28706,7 +28705,8 @@
         "id": "coffee-shop-actor-445",
         "last_frame": 4350,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe200",
         "spawn_edge": {
           "active_after": 1,
@@ -29356,7 +29356,6 @@
           "active_before": 1,
           "frame": 4287
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -29366,7 +29365,8 @@
         "id": "coffee-shop-actor-456",
         "last_frame": 4286,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -29416,7 +29416,6 @@
           "active_before": 1,
           "frame": 4301
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -29426,7 +29425,8 @@
         "id": "coffee-shop-actor-457",
         "last_frame": 4300,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe0c0",
         "spawn_edge": {
           "active_after": 1,
@@ -29542,7 +29542,6 @@
           "active_before": 1,
           "frame": 4310
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -29552,7 +29551,8 @@
         "id": "coffee-shop-actor-459",
         "last_frame": 4309,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe1c0",
         "spawn_edge": {
           "active_after": 1,
@@ -29845,7 +29845,6 @@
           "active_before": 1,
           "frame": 4324
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -29855,7 +29854,8 @@
         "id": "coffee-shop-actor-462",
         "last_frame": 4323,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -30617,7 +30617,6 @@
           "active_before": 1,
           "frame": 4507
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -30627,7 +30626,8 @@
         "id": "coffee-shop-actor-473",
         "last_frame": 4506,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe200",
         "spawn_edge": {
           "active_after": 1,
@@ -30674,7 +30674,6 @@
           "active_before": 1,
           "frame": 4508
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -30684,7 +30683,8 @@
         "id": "coffee-shop-actor-474",
         "last_frame": 4507,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe240",
         "spawn_edge": {
           "active_after": 1,
@@ -31510,7 +31510,6 @@
           "active_before": 1,
           "frame": 4521
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -31520,7 +31519,8 @@
         "id": "coffee-shop-actor-488",
         "last_frame": 4520,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -32776,7 +32776,6 @@
           "active_before": 1,
           "frame": 4466
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -32786,7 +32785,8 @@
         "id": "coffee-shop-actor-509",
         "last_frame": 4465,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe1c0",
         "spawn_edge": {
           "active_after": 1,
@@ -32836,7 +32836,6 @@
           "active_before": 1,
           "frame": 4467
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -32846,7 +32845,8 @@
         "id": "coffee-shop-actor-510",
         "last_frame": 4466,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe0c0",
         "spawn_edge": {
           "active_after": 1,
@@ -32896,7 +32896,6 @@
           "active_before": 1,
           "frame": 4480
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -32906,7 +32905,8 @@
         "id": "coffee-shop-actor-511",
         "last_frame": 4479,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe000",
         "spawn_edge": {
           "active_after": 1,
@@ -32956,7 +32956,6 @@
           "active_before": 1,
           "frame": 4480
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -32966,7 +32965,8 @@
         "id": "coffee-shop-actor-512",
         "last_frame": 4479,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe080",
         "spawn_edge": {
           "active_after": 1,
@@ -33016,7 +33016,6 @@
           "active_before": 1,
           "frame": 4481
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -33026,7 +33025,8 @@
         "id": "coffee-shop-actor-513",
         "last_frame": 4480,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe100",
         "spawn_edge": {
           "active_after": 1,
@@ -33076,7 +33076,6 @@
           "active_before": 1,
           "frame": 4494
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -33086,7 +33085,8 @@
         "id": "coffee-shop-actor-514",
         "last_frame": 4493,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe180",
         "spawn_edge": {
           "active_after": 1,
@@ -34028,7 +34028,6 @@
           "active_before": 1,
           "frame": 4687
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -34038,7 +34037,8 @@
         "id": "coffee-shop-actor-527",
         "last_frame": 4686,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -34085,7 +34085,6 @@
           "active_before": 1,
           "frame": 4688
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -34095,7 +34094,8 @@
         "id": "coffee-shop-actor-528",
         "last_frame": 4687,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe240",
         "spawn_edge": {
           "active_after": 1,
@@ -36071,7 +36071,6 @@
           "active_before": 1,
           "frame": 4646
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -36081,7 +36080,8 @@
         "id": "coffee-shop-actor-561",
         "last_frame": 4645,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe200",
         "spawn_edge": {
           "active_after": 1,
@@ -36131,7 +36131,6 @@
           "active_before": 1,
           "frame": 4647
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -36141,7 +36140,8 @@
         "id": "coffee-shop-actor-562",
         "last_frame": 4646,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe180",
         "spawn_edge": {
           "active_after": 1,
@@ -36191,7 +36191,6 @@
           "active_before": 1,
           "frame": 4660
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -36201,7 +36200,8 @@
         "id": "coffee-shop-actor-563",
         "last_frame": 4659,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe100",
         "spawn_edge": {
           "active_after": 1,
@@ -36251,7 +36251,6 @@
           "active_before": 1,
           "frame": 4661
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -36261,7 +36260,8 @@
         "id": "coffee-shop-actor-564",
         "last_frame": 4660,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe080",
         "spawn_edge": {
           "active_after": 1,
@@ -36418,7 +36418,6 @@
           "active_before": 1,
           "frame": 4667
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -36428,7 +36427,8 @@
         "id": "coffee-shop-actor-566",
         "last_frame": 4666,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/1",
         "source_slot": "0x00ffe180",
         "spawn_edge": {
           "active_after": 1,
@@ -37492,7 +37492,6 @@
           "active_before": 1,
           "frame": 4710
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -37502,7 +37501,8 @@
         "id": "coffee-shop-actor-584",
         "last_frame": 4709,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/1",
         "source_slot": "0x00ffe240",
         "spawn_edge": {
           "active_after": 1,
@@ -38505,7 +38505,6 @@
           "active_before": 1,
           "frame": 4867
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -38515,7 +38514,8 @@
         "id": "coffee-shop-actor-601",
         "last_frame": 4866,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe240",
         "spawn_edge": {
           "active_after": 1,
@@ -38621,7 +38621,6 @@
           "active_before": 1,
           "frame": 4868
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -38631,7 +38630,8 @@
         "id": "coffee-shop-actor-603",
         "last_frame": 4867,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -38738,7 +38738,6 @@
           "active_before": 1,
           "frame": 4869
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -38748,7 +38747,8 @@
         "id": "coffee-shop-actor-605",
         "last_frame": 4868,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe180",
         "spawn_edge": {
           "active_after": 1,
@@ -40753,7 +40753,6 @@
           "active_before": 1,
           "frame": 4826
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -40763,7 +40762,8 @@
         "id": "coffee-shop-actor-638",
         "last_frame": 4825,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe080",
         "spawn_edge": {
           "active_after": 1,
@@ -40813,7 +40813,6 @@
           "active_before": 1,
           "frame": 4827
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -40823,7 +40822,8 @@
         "id": "coffee-shop-actor-639",
         "last_frame": 4826,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe100",
         "spawn_edge": {
           "active_after": 1,
@@ -40873,7 +40873,6 @@
           "active_before": 1,
           "frame": 4828
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -40883,7 +40882,8 @@
         "id": "coffee-shop-actor-640",
         "last_frame": 4827,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe200",
         "spawn_edge": {
           "active_after": 1,
@@ -40933,7 +40933,6 @@
           "active_before": 1,
           "frame": 4840
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -40943,7 +40942,8 @@
         "id": "coffee-shop-actor-641",
         "last_frame": 4839,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe000",
         "spawn_edge": {
           "active_after": 1,
@@ -40993,7 +40993,6 @@
           "active_before": 1,
           "frame": 4841
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -41003,7 +41002,8 @@
         "id": "coffee-shop-actor-642",
         "last_frame": 4840,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe0c0",
         "spawn_edge": {
           "active_after": 1,
@@ -41119,7 +41119,6 @@
           "active_before": 1,
           "frame": 4842
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -41129,7 +41128,8 @@
         "id": "coffee-shop-actor-644",
         "last_frame": 4841,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe1c0",
         "spawn_edge": {
           "active_after": 1,
@@ -41891,7 +41891,6 @@
           "active_before": 1,
           "frame": 5047
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -41901,7 +41900,8 @@
         "id": "coffee-shop-actor-655",
         "last_frame": 5046,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe180",
         "spawn_edge": {
           "active_after": 1,
@@ -41948,7 +41948,6 @@
           "active_before": 1,
           "frame": 5048
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -41958,7 +41957,8 @@
         "id": "coffee-shop-actor-656",
         "last_frame": 5047,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/3",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -43934,7 +43934,6 @@
           "active_before": 1,
           "frame": 5006
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -43944,7 +43943,8 @@
         "id": "coffee-shop-actor-689",
         "last_frame": 5005,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe240",
         "spawn_edge": {
           "active_after": 1,
@@ -43994,7 +43994,6 @@
           "active_before": 1,
           "frame": 5007
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -44004,7 +44003,8 @@
         "id": "coffee-shop-actor-690",
         "last_frame": 5006,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe1c0",
         "spawn_edge": {
           "active_after": 1,
@@ -44054,7 +44054,6 @@
           "active_before": 1,
           "frame": 5020
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -44064,7 +44063,8 @@
         "id": "coffee-shop-actor-691",
         "last_frame": 5019,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe0c0",
         "spawn_edge": {
           "active_after": 1,
@@ -44114,7 +44114,6 @@
           "active_before": 1,
           "frame": 5021
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -44124,7 +44123,8 @@
         "id": "coffee-shop-actor-692",
         "last_frame": 5020,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe000",
         "spawn_edge": {
           "active_after": 1,
@@ -44742,7 +44742,6 @@
           "active_before": 1,
           "frame": 5117
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -44752,7 +44751,8 @@
         "id": "coffee-shop-actor-701",
         "last_frame": 5116,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/1",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -45646,7 +45646,6 @@
           "active_before": 1,
           "frame": 5162
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -45656,7 +45655,8 @@
         "id": "coffee-shop-actor-717",
         "last_frame": 5161,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/1",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -46356,7 +46356,6 @@
           "active_before": 1,
           "frame": 5255
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -46366,7 +46365,8 @@
         "id": "coffee-shop-actor-728",
         "last_frame": 5254,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe040",
         "spawn_edge": {
           "active_after": 1,
@@ -46416,7 +46416,6 @@
           "active_before": 1,
           "frame": 5269
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -46426,7 +46425,8 @@
         "id": "coffee-shop-actor-729",
         "last_frame": 5268,
         "pool": "record36",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_type36_presentation/classes/0",
         "source_slot": "0x00ffe180",
         "spawn_edge": {
           "active_after": 1,
@@ -47236,7 +47236,6 @@
           "active_before": 1,
           "frame": 5567
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           1
         ],
@@ -47246,7 +47245,8 @@
         "id": "coffee-shop-actor-743",
         "last_frame": 5566,
         "pool": "record24",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_scene_component_identities/components/3",
         "source_slot": "0x00ffc500",
         "spawn_edge": {
           "active_after": 1,
@@ -47284,7 +47284,6 @@
           "active_before": 1,
           "frame": 5567
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -47294,7 +47293,8 @@
         "id": "coffee-shop-actor-744",
         "last_frame": 5566,
         "pool": "record24",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_auxiliary_authority.json#/coffee_shop_scene_component_identities/components/4",
         "source_slot": "0x00ffc580",
         "spawn_edge": {
           "active_after": 1,
@@ -47332,7 +47332,6 @@
           "active_before": 1,
           "frame": 5567
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -47342,7 +47341,8 @@
         "id": "coffee-shop-actor-745",
         "last_frame": 5566,
         "pool": "record24",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_rng.json#/owner_partition/auxiliary_type16_20_24/transient_child_groups/2",
         "source_slot": "0x00ffc600",
         "spawn_edge": {
           "active_after": 1,
@@ -47380,7 +47380,6 @@
           "active_before": 1,
           "frame": 5567
         },
-        "exact_blocker": "no accepted full actor state/lifecycle/presentation/collision contract for this source-observed class/type pair",
         "facings": [
           0
         ],
@@ -47390,7 +47389,8 @@
         "id": "coffee-shop-actor-746",
         "last_frame": 5566,
         "pool": "record32",
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
+        "source_contract": "data/oracle11_round1_boss_orchestration.json#/controller_contract",
         "source_slot": "0x00ffd180",
         "spawn_edge": {
           "active_after": 1,
@@ -55511,110 +55511,7 @@
         "writer_pc": "0x00193c"
       }
     ],
-    "blocked_class_type_pairs": [
-      {
-        "class": "0x01",
-        "lifetime_count": 2,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 20
-      },
-      {
-        "class": "0x02",
-        "lifetime_count": 2,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 20
-      },
-      {
-        "class": "0x05",
-        "lifetime_count": 2,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 20
-      },
-      {
-        "class": "0x0f",
-        "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 20
-      },
-      {
-        "class": "0x05",
-        "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 24
-      },
-      {
-        "class": "0x0a",
-        "lifetime_count": 2,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 24
-      },
-      {
-        "class": "0x20",
-        "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 24
-      },
-      {
-        "class": "0x47",
-        "lifetime_count": 4,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 24
-      },
-      {
-        "class": "0x4d",
-        "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 24
-      },
-      {
-        "class": "0x00",
-        "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 28
-      },
-      {
-        "class": "0x0c",
-        "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 28
-      },
-      {
-        "class": "0x0e",
-        "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 28
-      },
-      {
-        "class": "0x02",
-        "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 32
-      },
-      {
-        "class": "0x03",
-        "lifetime_count": 50,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 36
-      },
-      {
-        "class": "0x04",
-        "lifetime_count": 15,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 36
-      },
-      {
-        "class": "0x05",
-        "lifetime_count": 4,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 36
-      },
-      {
-        "class": "0x0e",
-        "lifetime_count": 16,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
-        "type": 36
-      }
-    ],
+    "blocked_class_type_pairs": [],
     "capture_identity": {
       "byte_identical": true,
       "completion_a": {
@@ -55624,6 +55521,7 @@
         "coffee_shop_type4_class03.tsv": "39df9cfddb1dd7032825fbc99cb334017e01d0522c2fe9aeb91678c4eb452df1",
         "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
         "progression_class1f_action4_timers.tsv": "749bd0e8680ff18369a0e7d00d4c9a948b1ac9137fa61b17f6a9b6896b8b3c8e",
+        "progression_lifecycle_writes.tsv": "bafce924823779cf6ca1e58f5b251c9eaa773f73a3e1eeb2a849e3270d090e11",
         "progression_result.tsv": "37da1237eb183b8a44e4351b6f2961c68cb0d53e454be90ac973d9913b8faf05",
         "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611",
         "score_writes.tsv": "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327"
@@ -55635,6 +55533,7 @@
         "coffee_shop_type4_class03.tsv": "39df9cfddb1dd7032825fbc99cb334017e01d0522c2fe9aeb91678c4eb452df1",
         "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
         "progression_class1f_action4_timers.tsv": "749bd0e8680ff18369a0e7d00d4c9a948b1ac9137fa61b17f6a9b6896b8b3c8e",
+        "progression_lifecycle_writes.tsv": "bafce924823779cf6ca1e58f5b251c9eaa773f73a3e1eeb2a849e3270d090e11",
         "progression_result.tsv": "37da1237eb183b8a44e4351b6f2961c68cb0d53e454be90ac973d9913b8faf05",
         "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611",
         "score_writes.tsv": "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327"
@@ -55686,19 +55585,19 @@
       {
         "class": "0x01",
         "lifetime_count": 2,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 20
       },
       {
         "class": "0x02",
         "lifetime_count": 2,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 20
       },
       {
         "class": "0x05",
         "lifetime_count": 2,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 20
       },
       {
@@ -55728,19 +55627,19 @@
       {
         "class": "0x0f",
         "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 20
       },
       {
         "class": "0x05",
         "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 24
       },
       {
         "class": "0x0a",
         "lifetime_count": 2,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 24
       },
       {
@@ -55752,7 +55651,7 @@
       {
         "class": "0x20",
         "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 24
       },
       {
@@ -55782,7 +55681,7 @@
       {
         "class": "0x47",
         "lifetime_count": 4,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 24
       },
       {
@@ -55800,7 +55699,7 @@
       {
         "class": "0x4d",
         "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 24
       },
       {
@@ -55812,7 +55711,7 @@
       {
         "class": "0x00",
         "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 28
       },
       {
@@ -55824,13 +55723,13 @@
       {
         "class": "0x0c",
         "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 28
       },
       {
         "class": "0x0e",
         "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 28
       },
       {
@@ -55842,42 +55741,42 @@
       {
         "class": "0x02",
         "lifetime_count": 1,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 32
       },
       {
         "class": "0x03",
         "lifetime_count": 50,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 36
       },
       {
         "class": "0x04",
         "lifetime_count": 15,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 36
       },
       {
         "class": "0x05",
         "lifetime_count": 4,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 36
       },
       {
         "class": "0x0e",
         "lifetime_count": 16,
-        "source_classification": "BLOCKED_MISSING_SOURCE_EVIDENCE",
+        "source_classification": "SOURCE_CLOSED",
         "type": 36
       }
     ],
     "counts": {
       "actor_lifetimes": 747,
       "audio_events": 279,
-      "blocked_missing_source_evidence_pairs": 17,
+      "blocked_missing_source_evidence_pairs": 0,
       "class_type_pairs": 38,
       "damage_writes": 30,
       "health_writes": 149,
-      "source_closed_pairs": 21
+      "source_closed_pairs": 38
     },
     "declared_scene_segments": [
       {
@@ -60741,7 +60640,7 @@
         "0xffa300",
         "0xffa3c0"
       ],
-      "implementation_blocker": "the accepted SPEC does not yet bind the post-intro 0x0200:0000 action transitions that cause each initial actor to enter 0x0600; do not synthesize those exits",
+      "implementation_dependency": "accepted class-0x1f first-segment action execution and HIT/KO contracts own entry into 0x0600",
       "observed_release_transactions": 22,
       "release_routine": "0x0176b4",
       "scope": "type-12/class-0x1f state 0x0600:0000 living-count decrement and fixed-pool release",
@@ -61143,6 +61042,176 @@
         }
       ],
       "writer_pc": "0x028a3e"
+    },
+    "progress_increment_boundary": {
+      "capture_identity": {
+        "byte_identical": true,
+        "completion_a": {
+          "files": {
+            "progression_controller.tsv": "0ed5a95ce86fca539bc84c09aa1af24cb5c383e14b7d042f291bb70a1191612b",
+            "progression_lifecycle_writes.tsv": "bafce924823779cf6ca1e58f5b251c9eaa773f73a3e1eeb2a849e3270d090e11",
+            "progression_result.tsv": "37da1237eb183b8a44e4351b6f2961c68cb0d53e454be90ac973d9913b8faf05"
+          }
+        },
+        "completion_b": {
+          "files": {
+            "progression_controller.tsv": "0ed5a95ce86fca539bc84c09aa1af24cb5c383e14b7d042f291bb70a1191612b",
+            "progression_lifecycle_writes.tsv": "bafce924823779cf6ca1e58f5b251c9eaa773f73a3e1eeb2a849e3270d090e11",
+            "progression_result.tsv": "37da1237eb183b8a44e4351b6f2961c68cb0d53e454be90ac973d9913b8faf05"
+          }
+        }
+      },
+      "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+      "field_types": {
+        "actor_health": "s16",
+        "actor_state": "u16",
+        "actor_substate": "u16",
+        "progress": "u16"
+      },
+      "increment_u16": 1,
+      "mutation_control": {
+        "fixed_frame_substitute": false,
+        "kind": "native semantic-edge suppression",
+        "rule": "suppress only the KO-owned increment; reject when Coffee Shop progress and recurring spawn diverge"
+      },
+      "observed_transactions": [
+        {
+          "frame": 2363,
+          "progress_after_u16": 1,
+          "progress_before_u16": 0,
+          "slot": "0xffa3c0"
+        },
+        {
+          "frame": 2805,
+          "progress_after_u16": 2,
+          "progress_before_u16": 1,
+          "slot": "0xffa240"
+        },
+        {
+          "frame": 2830,
+          "progress_after_u16": 3,
+          "progress_before_u16": 2,
+          "slot": "0xff9dc0"
+        },
+        {
+          "frame": 2832,
+          "progress_after_u16": 4,
+          "progress_before_u16": 3,
+          "slot": "0xffa0c0"
+        },
+        {
+          "frame": 3830,
+          "progress_after_u16": 5,
+          "progress_before_u16": 4,
+          "slot": "0xffa000"
+        },
+        {
+          "frame": 3891,
+          "progress_after_u16": 6,
+          "progress_before_u16": 5,
+          "slot": "0xff9e80"
+        },
+        {
+          "frame": 4130,
+          "progress_after_u16": 7,
+          "progress_before_u16": 6,
+          "slot": "0xffa3c0"
+        },
+        {
+          "frame": 4216,
+          "progress_after_u16": 8,
+          "progress_before_u16": 7,
+          "slot": "0xff9dc0"
+        },
+        {
+          "frame": 4239,
+          "progress_after_u16": 9,
+          "progress_before_u16": 8,
+          "slot": "0xffa000"
+        },
+        {
+          "frame": 4395,
+          "progress_after_u16": 10,
+          "progress_before_u16": 9,
+          "slot": "0xff9c40"
+        },
+        {
+          "frame": 4396,
+          "progress_after_u16": 11,
+          "progress_before_u16": 10,
+          "slot": "0xff9e80"
+        },
+        {
+          "frame": 4409,
+          "progress_after_u16": 12,
+          "progress_before_u16": 11,
+          "slot": "0xffa240"
+        },
+        {
+          "frame": 4575,
+          "progress_after_u16": 13,
+          "progress_before_u16": 12,
+          "slot": "0xff9dc0"
+        },
+        {
+          "frame": 4576,
+          "progress_after_u16": 14,
+          "progress_before_u16": 13,
+          "slot": "0xffa0c0"
+        },
+        {
+          "frame": 4755,
+          "progress_after_u16": 15,
+          "progress_before_u16": 14,
+          "slot": "0xff9c40"
+        },
+        {
+          "frame": 4756,
+          "progress_after_u16": 16,
+          "progress_before_u16": 15,
+          "slot": "0xff9e80"
+        },
+        {
+          "frame": 4757,
+          "progress_after_u16": 17,
+          "progress_before_u16": 16,
+          "slot": "0xffa3c0"
+        },
+        {
+          "frame": 4935,
+          "progress_after_u16": 18,
+          "progress_before_u16": 17,
+          "slot": "0xff9dc0"
+        },
+        {
+          "frame": 4936,
+          "progress_after_u16": 19,
+          "progress_before_u16": 18,
+          "slot": "0xffa0c0"
+        },
+        {
+          "frame": 5150,
+          "progress_after_u16": 20,
+          "progress_before_u16": 19,
+          "slot": "0xff9c40"
+        }
+      ],
+      "scheduler_order": "class-0x1f KO transition writes progress before later recurring-controller reads",
+      "scope": "type-12/class-0x1f KO state 0x0402:0000 owns the Coffee Shop encounter progress increment",
+      "source_window": {
+        "first": "0x061060",
+        "last_exclusive": "0x061078",
+        "sha256": "db7d6fdc395bed4d71d630af49575117128e8a8b700a639aaad126b08332205e"
+      },
+      "transition_guard": {
+        "class_u8": "0x1f",
+        "health_s16": -1,
+        "record_type_u8": 12,
+        "state_u16": 1026,
+        "substate_u16": 0
+      },
+      "write": "progress_u16 += 1",
+      "writer_pc": "0x061070"
     },
     "scheduler": {
       "controller_class_u8": "0x01",

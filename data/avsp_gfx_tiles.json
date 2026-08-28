@@ -1,8 +1,8 @@
 {
  "archive": {
-  "bytes": 509092,
+  "bytes": 509356,
   "file": "build/avsp_cd/SPR4/TILES.BIN",
-  "sha256": "be2190395592c2e4f0961e046ad881c5f13356f478411bb9a231734aa730464c"
+  "sha256": "41676564779663248dac1fb2471bb2c075e07430e81501d79cc15b58174682d0"
  },
  "classification": "tile archive manifest - no ROM bytes",
  "facing_union": true,
@@ -28,14 +28,219 @@
   "source": ".deps/mame/enemy_actions/palette_05140.tsv"
  },
  "presentation_residency": {
+  "between_frame_composite_replacement_allowed": true,
   "child_tiles_at_peak": 55,
-  "composite_tile_threshold": 32,
+  "composite_tile_threshold": 14,
   "configured_composite_max_texture_bytes": 11648,
   "configured_composite_slots": 21,
   "configured_composite_texture_budget": 126592,
+  "first_segment_composite_dimension_slot_peaks": [
+   {
+    "height": 64,
+    "slots": 1,
+    "width": 64
+   },
+   {
+    "height": 80,
+    "slots": 1,
+    "width": 64
+   },
+   {
+    "height": 96,
+    "slots": 2,
+    "width": 64
+   },
+   {
+    "height": 160,
+    "slots": 1,
+    "width": 64
+   },
+   {
+    "height": 48,
+    "slots": 5,
+    "width": 80
+   },
+   {
+    "height": 64,
+    "slots": 2,
+    "width": 80
+   },
+   {
+    "height": 80,
+    "slots": 1,
+    "width": 80
+   },
+   {
+    "height": 96,
+    "slots": 2,
+    "width": 80
+   },
+   {
+    "height": 48,
+    "slots": 2,
+    "width": 96
+   },
+   {
+    "height": 64,
+    "slots": 2,
+    "width": 96
+   },
+   {
+    "height": 96,
+    "slots": 3,
+    "width": 96
+   },
+   {
+    "height": 224,
+    "slots": 1,
+    "width": 96
+   },
+   {
+    "height": 48,
+    "slots": 2,
+    "width": 112
+   },
+   {
+    "height": 64,
+    "slots": 1,
+    "width": 112
+   },
+   {
+    "height": 208,
+    "slots": 1,
+    "width": 112
+   },
+   {
+    "height": 32,
+    "slots": 3,
+    "width": 128
+   },
+   {
+    "height": 48,
+    "slots": 5,
+    "width": 128
+   },
+   {
+    "height": 64,
+    "slots": 2,
+    "width": 128
+   },
+   {
+    "height": 32,
+    "slots": 2,
+    "width": 144
+   },
+   {
+    "height": 48,
+    "slots": 2,
+    "width": 144
+   }
+  ],
+  "first_segment_composite_dimension_slots": 41,
+  "first_segment_composite_dimensions": [
+   [
+    64,
+    64
+   ],
+   [
+    64,
+    80
+   ],
+   [
+    64,
+    96
+   ],
+   [
+    64,
+    160
+   ],
+   [
+    80,
+    48
+   ],
+   [
+    80,
+    64
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    80,
+    96
+   ],
+   [
+    96,
+    48
+   ],
+   [
+    96,
+    64
+   ],
+   [
+    96,
+    96
+   ],
+   [
+    96,
+    224
+   ],
+   [
+    112,
+    48
+   ],
+   [
+    112,
+    64
+   ],
+   [
+    112,
+    208
+   ],
+   [
+    128,
+    32
+   ],
+   [
+    128,
+    48
+   ],
+   [
+    128,
+    64
+   ],
+   [
+    144,
+    32
+   ],
+   [
+    144,
+    48
+   ]
+  ],
+  "first_segment_composite_frame_peak_bytes": 37248,
+  "first_segment_composite_frame_peak_entries": 11,
+  "first_segment_composite_frame_peak_frame": 2355,
   "first_segment_composite_max_texture_bytes": 11648,
-  "first_segment_composite_texture_bytes": 126592,
-  "first_segment_composite_unique_entries": 21,
+  "first_segment_composite_ranked_slot_bytes": 51712,
+  "first_segment_composite_ranked_slot_capacities": [
+   11648,
+   10752,
+   4608,
+   4608,
+   3840,
+   3456,
+   3200,
+   3072,
+   2560,
+   2048,
+   1920
+  ],
+  "first_segment_composite_texture_bytes": 542976,
+  "first_segment_composite_unique_entries": 177,
+  "first_segment_peak_noncomposite_frame": 2745,
+  "first_segment_peak_noncomposite_tiles": 158,
   "max_tiles_per_impact": 0,
   "max_tiles_per_projectile": 55,
   "mid_frame_lru_replacement_allowed": false,
@@ -43,6 +248,12 @@
   "per_tile_scanout_requirement": 653,
   "projectile_simultaneous_bound": 6,
   "retained_tile_sprite_pool": 218,
+  "scene_composite_child_peak_bytes": 7040,
+  "scene_composite_child_peak_entries": 1,
+  "scene_composite_player_peak_bytes": 3968,
+  "scene_composite_player_peak_entries": 2,
+  "scene_composite_required_bytes": 90880,
+  "scene_composite_required_slots": 18,
   "source_capture": ".deps/mame/full_route",
   "source_frame_range": [
    2074,
@@ -53,10 +264,10 @@
   "source_peak_object_entries": 37,
   "source_peak_unique_tiles": 374,
   "spec02_composite_max_texture_bytes": 11648,
-  "spec02_composite_texture_bytes": 117376,
-  "spec02_composite_unique_entries": 19,
+  "spec02_composite_texture_bytes": 419712,
+  "spec02_composite_unique_entries": 129,
   "startup_peak_noncomposite_frame": 2208,
-  "startup_peak_noncomposite_tiles": 162,
+  "startup_peak_noncomposite_tiles": 69,
   "startup_source_frame_range": [
    2074,
    2253
@@ -72,8 +283,8 @@
    "frames_sampled": 201
   },
   "spec02_round1_native_presentations": {
-   "decoded_variants": 265,
-   "fixture_sha256": "45c2f8c90b2388f3990b32d9ce93552185138bc6396d26cd532caa117b60a388",
+   "decoded_variants": 267,
+   "fixture_sha256": "22751a3f77db2f6df5eaeb5c420f2adf45d133fc075efdaabd430232b641b91d",
    "palette_banks": [
     "0x00",
     "0x05",
@@ -88,15 +299,15 @@
     "0x1D",
     "0x1E"
    ],
-   "tiles_added": 1600,
-   "unique_assemblies": 120
+   "tiles_added": 1602,
+   "unique_assemblies": 121
   }
  },
  "sample_stride": 1,
  "schema": 1,
  "scope": "street",
  "tile_bytes": 128,
- "tile_count": 3853,
+ "tile_count": 3855,
  "tile_region_budget_bytes": 528384,
- "tile_region_budget_used_pct": 96.35
+ "tile_region_budget_used_pct": 96.4
 }

@@ -123,9 +123,9 @@
           "calls": 28,
           "class": "0x47",
           "classification": "SOURCE_CLOSED",
-          "owner": "Predator Warrior special-action child presentation actor",
+          "owner": "Coffee Shop class-0x02 damageable-prop child presentation actor",
           "semantic_name": "UNKNOWN",
-          "source_contract": "data/oracle11_predator_weapon_projectile_resource.json",
+          "source_contract": "data/oracle11_round1_auxiliary_authority.json#/first_segment_dependencies/class_0x47_type24_class02_child_presentation",
           "type": 24
         },
         {
@@ -183,6 +183,68 @@
           ],
           "calls": 3,
           "classification": "SOURCE_CLOSED",
+          "coffee_shop_entry_transaction": {
+            "arithmetic": [
+              "write stage parameter 14 from the selected type-0x1c stage row",
+              "population selector 25 is >=22, so signed add -8 produces 6",
+              "signed variant table adjustment at 0x017b88 index 0 adds 0",
+              "one source RNG call maps 0x8def to 0xa998 and returns 0x98",
+              "(return&0x3e)=0x18 selects signed word 0 from 0x017b98",
+              "signed post-selector table adjustment at 0x017c58 index 3 adds 0",
+              "clamp signed result 6 to the inclusive 8..16 stage bounds, producing 8"
+            ],
+            "capture_identity": {
+              "byte_identical": true,
+              "files": {
+                "coffee_shop_stage_setup.tsv": "bdb725859cc14eb330255bec01ea214908bf426938a5dec51e3223e2ac99e461",
+                "coffee_shop_stage_setup_writes.tsv": "76993f138d29fa211e585822435aa6ec6d7f36401c16e62feaa678d3b8ab3832"
+              },
+              "suppression_result_sha256": "82c58d8029209e6c7448214f839b8099232a92408573449870328a9d17c4d185",
+              "suppression_rng_sha256": "c39d96e21b967601d4375361d6bfc16f96c824d2bfe7657ddabeba331d3c5bfe"
+            },
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "guard": {
+              "player_variant_u16": 1,
+              "route_state_s16": 2,
+              "stage_record_pointer": "0x0011759a",
+              "stage_record_type_u8": "0x1c"
+            },
+            "reads": {
+              "lower_bound": "0xff821c:s16=8",
+              "player_variant": "0xff8218:u16",
+              "population_selector": "D1:u16=25",
+              "post_selector": "0xff820e:u8=3",
+              "rng_seed": "0xff81a8:u16=0x8def",
+              "upper_bound": "0xff821a:s16=16",
+              "variant_selector": "0xff81cf:u8=0"
+            },
+            "scheduler_position": "before the ten record-12/class-0x1f initializer calls at source frame 2073",
+            "source_frame": 2072,
+            "suppression_control": {
+              "baseline_first_class1f_seed": "0xa998",
+              "baseline_seed_before_tenth_class1f": "0x16b7",
+              "downstream_route_projection_differs": true,
+              "fixed_frame_substitution_rejected": true,
+              "suppressed_first_class1f_seed": "0x8def",
+              "suppressed_seed_before_tenth_class1f": "0x07a1",
+              "suppressed_writer_pcs": [
+                "0x017c70",
+                "0x017c72"
+              ]
+            },
+            "writes": {
+              "rng_seed_u16": "0xa998",
+              "stage_parameter_s16": 8,
+              "writer_sequence": [
+                "0x017ab4",
+                "0x017ade",
+                "0x017af2",
+                "0x017b08",
+                "0x017b1c",
+                "0x017b74"
+              ]
+            }
+          },
           "effect": "D0&0x3e indexes 0x017b98 and adjusts the source stage parameter",
           "frames": [
             2072,

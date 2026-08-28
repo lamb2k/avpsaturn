@@ -18,6 +18,9 @@ OPCODES = ROOT / ".deps/mame/actorprobe/decrypted_opcodes_2m.bin"
 ROUTE = ROOT / "data/oracle10_round1_route.json"
 ENEMIES = ROOT / "data/oracle11_round1_enemy_archetypes.json"
 AUXILIARY = ROOT / "data/oracle11_round1_auxiliary_authority.json"
+COFFEE_STAGE_A = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs13a"
+COFFEE_STAGE_B = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs13b"
+COFFEE_STAGE_SUPPRESS = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs10s"
 OUT = ROOT / "data/oracle11_round1_rng.json"
 FILES = ("route_samples.tsv", "route_writes.tsv", "route_writer_summary.tsv",
          "lifecycle_writes.tsv", "route_rng.tsv", "samples.tsv", "dispatches.tsv",
@@ -128,6 +131,39 @@ def build_report() -> dict[str, object]:
                               "type24-class4d": 11, "type20-class05": 1},
             "transient auxiliary RNG partition drift")
 
+    coffee_stage_files = ("coffee_shop_stage_setup.tsv",
+                          "coffee_shop_stage_setup_writes.tsv")
+    coffee_stage_hashes_a = {
+        name: digest(COFFEE_STAGE_A / name) for name in coffee_stage_files}
+    coffee_stage_hashes_b = {
+        name: digest(COFFEE_STAGE_B / name) for name in coffee_stage_files}
+    require(coffee_stage_hashes_a == coffee_stage_hashes_b,
+            "Coffee Shop stage-setup captures differ")
+    coffee_stage_writes = rows(
+        COFFEE_STAGE_A / "coffee_shop_stage_setup_writes.tsv")
+    require([(row["frame"], row["pc"], row["stage_parameter_before"],
+              row["data"], row["rng"]) for row in coffee_stage_writes] == [
+        ("2072", "017ab4", "0000", "0000000e", "8def"),
+        ("2072", "017ade", "000e", "00000006", "8def"),
+        ("2072", "017af2", "0006", "00000006", "8def"),
+        ("2072", "017b08", "0006", "00000006", "a998"),
+        ("2072", "017b1c", "0006", "00000006", "a998"),
+        ("2072", "017b74", "0006", "00000008", "a998"),
+    ], "Coffee Shop stage-parameter transaction drift")
+    coffee_stage_rng = rows(COFFEE_STAGE_A / "coffee_shop_rng_calls.tsv")
+    coffee_stage_rng_suppress = rows(
+        COFFEE_STAGE_SUPPRESS / "coffee_shop_rng_calls.tsv")
+    baseline_initial = [row["rng_before"] for row in coffee_stage_rng[:11]]
+    suppressed_initial = [row["rng_before"]
+                          for row in coffee_stage_rng_suppress[:11]]
+    require(baseline_initial == ["8def", "a998", "fc94", "f589", "e069",
+                                 "a10a", "e3ed", "ab98", "029a", "07a1",
+                                 "16b7"] and
+            suppressed_initial == ["8def", "8def", "a998", "fc94", "f589",
+                                   "e069", "a10a", "e3ed", "ab98", "029a",
+                                   "07a1"],
+            "Coffee Shop stage RNG suppression control drift")
+
     global_counts = Counter(row["pc"] for row in global_rows)
     require(global_counts == {"017af6": 3, "028a60": 32,
                               "00a5de": 2, "00a5f0": 2},
@@ -140,7 +176,59 @@ def build_report() -> dict[str, object]:
                    "player-variant guards, then 0x017a1e selects the stage row"),
          "reads": ["0xff8218:u16", "stage table 0x00117560", "0xff81a8:u16"],
          "writes": ["0xff81ea:s16 stage parameter", "0xff81a8:u16 RNG state"],
-         "effect": "D0&0x3e indexes 0x017b98 and adjusts the source stage parameter"},
+         "effect": "D0&0x3e indexes 0x017b98 and adjusts the source stage parameter",
+         "coffee_shop_entry_transaction": {
+             "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+             "capture_identity": {
+                 "byte_identical": True,
+                 "files": coffee_stage_hashes_a,
+                 "suppression_rng_sha256": digest(
+                     COFFEE_STAGE_SUPPRESS / "coffee_shop_rng_calls.tsv"),
+                 "suppression_result_sha256": digest(
+                     COFFEE_STAGE_SUPPRESS / "progression_result.tsv"),
+             },
+             "source_frame": 2072,
+             "scheduler_position": "before the ten record-12/class-0x1f initializer calls at source frame 2073",
+             "guard": {
+                 "route_state_s16": 2,
+                 "player_variant_u16": 1,
+                 "stage_record_type_u8": "0x1c",
+                 "stage_record_pointer": "0x0011759a",
+             },
+             "reads": {
+                 "player_variant": "0xff8218:u16",
+                 "population_selector": "D1:u16=25",
+                 "variant_selector": "0xff81cf:u8=0",
+                 "post_selector": "0xff820e:u8=3",
+                 "lower_bound": "0xff821c:s16=8",
+                 "upper_bound": "0xff821a:s16=16",
+                 "rng_seed": "0xff81a8:u16=0x8def",
+             },
+             "arithmetic": [
+                 "write stage parameter 14 from the selected type-0x1c stage row",
+                 "population selector 25 is >=22, so signed add -8 produces 6",
+                 "signed variant table adjustment at 0x017b88 index 0 adds 0",
+                 "one source RNG call maps 0x8def to 0xa998 and returns 0x98",
+                 "(return&0x3e)=0x18 selects signed word 0 from 0x017b98",
+                 "signed post-selector table adjustment at 0x017c58 index 3 adds 0",
+                 "clamp signed result 6 to the inclusive 8..16 stage bounds, producing 8",
+             ],
+             "writes": {
+                 "stage_parameter_s16": 8,
+                 "rng_seed_u16": "0xa998",
+                 "writer_sequence": ["0x017ab4", "0x017ade", "0x017af2",
+                                     "0x017b08", "0x017b1c", "0x017b74"],
+             },
+             "suppression_control": {
+                 "suppressed_writer_pcs": ["0x017c70", "0x017c72"],
+                 "baseline_first_class1f_seed": "0xa998",
+                 "suppressed_first_class1f_seed": "0x8def",
+                 "baseline_seed_before_tenth_class1f": "0x16b7",
+                 "suppressed_seed_before_tenth_class1f": "0x07a1",
+                 "downstream_route_projection_differs": True,
+                 "fixed_frame_substitution_rejected": True,
+             },
+         }},
         {"owner": "encounter controller class-0x1f spawn initialization", "calls": 32,
          "first_frame": 2510, "last_frame": 5062, "call_pc": "0x028a5a",
          "return_pc": "0x028a60", "caller_chain": ["0x0288fa", "0x028860", "0x01bde6"],
@@ -216,8 +304,8 @@ def build_report() -> dict[str, object]:
                     {"class": "0x47", "type": 24, "calls": 28,
                      "caller_pcs": ["0x08ebd6", "0x08ebe8", "0x08ebfa",
                                     "0x08ec0c", "0x08ec1e", "0x08ed38"],
-                     "owner": "Predator Warrior special-action child presentation actor",
-                     "source_contract": "data/oracle11_predator_weapon_projectile_resource.json",
+                     "owner": "Coffee Shop class-0x02 damageable-prop child presentation actor",
+                     "source_contract": "data/oracle11_round1_auxiliary_authority.json#/first_segment_dependencies/class_0x47_type24_class02_child_presentation",
                      "semantic_name": "UNKNOWN", "classification": "SOURCE_CLOSED"},
                     {"class": "0x25", "type": 24, "calls": 20,
                      "caller_pcs": ["0x081ab2", "0x081ae2"],
@@ -283,6 +371,16 @@ def validate(report: dict[str, object]) -> None:
     require(owners["orphan_calls"] == 0 and
             len(owners["global_route_and_controller"]["groups"]) == 3,
             "RNG orphan/global group drift")
+    coffee = owners["global_route_and_controller"]["groups"][0][
+        "coffee_shop_entry_transaction"]
+    require(coffee["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            coffee["capture_identity"]["byte_identical"] is True and
+            coffee["writes"]["stage_parameter_s16"] == 8 and
+            coffee["writes"]["rng_seed_u16"] == "0xa998" and
+            coffee["suppression_control"][
+                "downstream_route_projection_differs"] is True,
+            "Coffee Shop stage RNG implementation boundary incomplete")
     require(report["counterfactuals"]["freeze_rng"]["completed_round1"] is False,
             "frozen RNG fabricated completion")
     require(all(value == 0 for key, value in report["coverage"].items()

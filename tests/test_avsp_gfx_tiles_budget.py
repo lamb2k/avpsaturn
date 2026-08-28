@@ -245,21 +245,37 @@ def main() -> int:
         residency["max_tiles_per_projectile"] != 55 or
         residency["max_tiles_per_impact"] != 0 or
         residency["per_tile_scanout_requirement"] != 653 or
-        residency["composite_tile_threshold"] != 32 or
-        residency["spec02_composite_unique_entries"] != 19 or
-        residency["spec02_composite_texture_bytes"] != 117376 or
+        residency["composite_tile_threshold"] != 14 or
+        residency["spec02_composite_unique_entries"] != 129 or
+        residency["spec02_composite_texture_bytes"] != 419712 or
         residency["spec02_composite_max_texture_bytes"] != 11648 or
-        residency["first_segment_composite_unique_entries"] != 21 or
-        residency["first_segment_composite_texture_bytes"] != 126592 or
+        residency["first_segment_composite_unique_entries"] != 177 or
+        residency["first_segment_composite_texture_bytes"] != 542976 or
         residency["first_segment_composite_max_texture_bytes"] != 11648 or
+        residency["first_segment_composite_frame_peak_entries"] != 11 or
+        residency["first_segment_composite_frame_peak_bytes"] != 37248 or
+        residency["first_segment_composite_frame_peak_frame"] != 2355 or
+        residency["first_segment_composite_ranked_slot_capacities"] !=
+            [11648, 10752, 4608, 4608, 3840, 3456, 3200, 3072,
+             2560, 2048, 1920] or
+        residency["first_segment_composite_ranked_slot_bytes"] != 51712 or
+        residency["first_segment_peak_noncomposite_tiles"] != 158 or
+        residency["first_segment_peak_noncomposite_frame"] != 2745 or
+        residency["scene_composite_player_peak_entries"] != 2 or
+        residency["scene_composite_player_peak_bytes"] != 3968 or
+        residency["scene_composite_child_peak_entries"] != 1 or
+        residency["scene_composite_child_peak_bytes"] != 7040 or
+        residency["scene_composite_required_slots"] != 18 or
+        residency["scene_composite_required_bytes"] != 90880 or
         residency["configured_composite_slots"] != 21 or
         residency["configured_composite_texture_budget"] != 126592 or
         residency["configured_composite_max_texture_bytes"] != 11648 or
         residency["startup_source_frame_range"] != [2074, 2253] or
-        residency["startup_peak_noncomposite_tiles"] != 162 or
+        residency["startup_peak_noncomposite_tiles"] != 69 or
         residency["startup_peak_noncomposite_frame"] != 2208 or
         residency["retained_tile_sprite_pool"] != 218 or
-        residency["mid_frame_lru_replacement_allowed"] is not False):
+        residency["mid_frame_lru_replacement_allowed"] is not False or
+        residency["between_frame_composite_replacement_allowed"] is not True):
         print("FAIL: first-segment presentation residency drifted")
         return 1
     makefile = (ROOT / "makefile").read_text(encoding="utf-8")

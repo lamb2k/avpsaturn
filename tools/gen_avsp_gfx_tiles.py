@@ -238,6 +238,107 @@ def measure_first_segment_composites(rom: Rom, results,
     }
 
 
+def measure_first_segment_composite_frame_peak(rom: Rom,
+                                                threshold: int) -> dict:
+    """Measure recyclable composite slots for the source Coffee Shop cast."""
+    route = RouteState(FIRST_SEGMENT_SOURCE)
+    peak_entries = 0
+    peak_bytes = 0
+    peak_frame = 0
+    dimensions = set()
+    dimension_slot_peaks = {}
+    ranked_slot_capacities = []
+    try:
+        for frame in route.frames():
+            number = frame["frame"]
+            if number < FIRST_SEGMENT_FIRST_FRAME:
+                continue
+            if number >= FIRST_SEGMENT_LAST_EXCLUSIVE:
+                break
+            work = route.current["workram"]
+            presentations = []
+            for base, stride, capacity in SOURCE_POOL_LAYOUTS:
+                for index in range(capacity):
+                    offset = base + index * stride
+                    if (work[offset] != 1 or
+                        (work[offset + 8], work[offset + 2]) not in
+                            NATIVE_INITIAL_FAMILIES):
+                        continue
+                    animation = int.from_bytes(
+                        work[offset + 0x1C:offset + 0x20], "big")
+                    assembly = rom.u32(animation + 4) if animation else 0
+                    if assembly == 0 or rom.u16(assembly) == 0x0008:
+                        continue
+                    presentations.append({
+                        "kind": "first-segment-source",
+                        "animation_record": animation,
+                        "assembly": assembly,
+                        "facing": work[offset + 0x0F],
+                        "coordinate_mode": work[offset + 0x0D],
+                        "palette": work[offset + 0x0E],
+                        "object_or": int.from_bytes(
+                            work[offset + 0x2E:offset + 0x30], "big"),
+                    })
+            frame_entries = set()
+            if presentations:
+                decoded = decode_spec02_presentations(rom, presentations)
+                for _kind, _assembly, _facing, flat in decoded:
+                    for word in range(0, len(flat), 4):
+                        _x, y, code, attr = flat[word:word + 4]
+                        nx = ((attr >> 8) & 0xF) + 1
+                        ny = ((attr >> 12) & 0xF) + 1
+                        if nx * ny > threshold:
+                            frame_entries.add((y & 0x6000, code,
+                                               attr & 0xFFE0))
+                            dimensions.add((nx * 16, ny * 16))
+            frame_bytes = sum(
+                ((((attr >> 8) & 0xF) + 1) *
+                  (((attr >> 12) & 0xF) + 1) * TILE_BYTES)
+                for _y_bits, _code, attr in frame_entries)
+            frame_sizes = sorted((
+                ((((attr >> 8) & 0xF) + 1) *
+                  (((attr >> 12) & 0xF) + 1) * TILE_BYTES)
+                for _y_bits, _code, attr in frame_entries), reverse=True)
+            while len(ranked_slot_capacities) < len(frame_sizes):
+                ranked_slot_capacities.append(0)
+            for slot, size in enumerate(frame_sizes):
+                ranked_slot_capacities[slot] = max(
+                    ranked_slot_capacities[slot], size)
+            frame_dimension_counts = {}
+            for _y_bits, _code, attr in frame_entries:
+                dimension = (((attr >> 8) & 0xF) + 1,
+                             ((attr >> 12) & 0xF) + 1)
+                frame_dimension_counts[dimension] = (
+                    frame_dimension_counts.get(dimension, 0) + 1)
+            for dimension, count in frame_dimension_counts.items():
+                dimension_slot_peaks[dimension] = max(
+                    count, dimension_slot_peaks.get(dimension, 0))
+            if (len(frame_entries), frame_bytes) > (peak_entries, peak_bytes):
+                peak_entries = len(frame_entries)
+                peak_bytes = frame_bytes
+                peak_frame = number
+    finally:
+        route.close()
+    return {
+        "first_segment_composite_frame_peak_entries": peak_entries,
+        "first_segment_composite_frame_peak_bytes": peak_bytes,
+        "first_segment_composite_frame_peak_frame": peak_frame,
+        "first_segment_composite_dimensions": [
+            [width, height] for width, height in sorted(dimensions)
+        ],
+        "first_segment_composite_dimension_slot_peaks": [
+            {"width": nx * 16, "height": ny * 16, "slots": count}
+            for (nx, ny), count in sorted(dimension_slot_peaks.items())
+        ],
+        "first_segment_composite_dimension_slots":
+            sum(dimension_slot_peaks.values()),
+        "first_segment_composite_ranked_slot_capacities":
+            ranked_slot_capacities,
+        "first_segment_composite_ranked_slot_bytes":
+            sum(ranked_slot_capacities),
+    }
+
+
 def measure_first_segment_presentation_peak(rom: Rom) -> dict[str, int]:
     """Measure the exact live-tile union for the native initial families."""
     route = RouteState(FIRST_SEGMENT_SOURCE)
@@ -359,6 +460,66 @@ def measure_startup_noncomposite_peak(rom: Rom, threshold: int) -> dict:
                                          STARTUP_RESIDENCY_LAST_EXCLUSIVE - 1],
         "startup_peak_noncomposite_tiles": peak_tiles,
         "startup_peak_noncomposite_frame": peak_frame,
+    }
+
+
+def measure_first_segment_noncomposite_peak(rom: Rom,
+                                             threshold: int) -> dict:
+    """Measure the complete Coffee Shop per-frame tile-cache requirement."""
+    route = RouteState(FIRST_SEGMENT_SOURCE)
+    peak_tiles = 0
+    peak_frame = 0
+    try:
+        for frame in route.frames():
+            number = frame["frame"]
+            if number < FIRST_SEGMENT_FIRST_FRAME:
+                continue
+            if number >= FIRST_SEGMENT_LAST_EXCLUSIVE:
+                break
+            work = route.current["workram"]
+            presentations = []
+            for base, stride, capacity in SOURCE_POOL_LAYOUTS:
+                for index in range(capacity):
+                    offset = base + index * stride
+                    if (work[offset] != 1 or
+                        (work[offset + 8], work[offset + 2]) not in
+                            NATIVE_INITIAL_FAMILIES):
+                        continue
+                    animation = int.from_bytes(
+                        work[offset + 0x1C:offset + 0x20], "big")
+                    assembly = rom.u32(animation + 4) if animation else 0
+                    if assembly == 0 or rom.u16(assembly) == 0x0008:
+                        continue
+                    presentations.append({
+                        "kind": "first-segment-source",
+                        "animation_record": animation,
+                        "assembly": assembly,
+                        "facing": work[offset + 0x0F],
+                        "coordinate_mode": work[offset + 0x0D],
+                        "palette": work[offset + 0x0E],
+                        "object_or": int.from_bytes(
+                            work[offset + 0x2E:offset + 0x30], "big"),
+                    })
+            tiles: set[int] = set()
+            if presentations:
+                decoded = decode_spec02_presentations(rom, presentations)
+                for _kind, _assembly, _facing, flat in decoded:
+                    for word in range(0, len(flat), 4):
+                        _x, y, code, attr = flat[word:word + 4]
+                        nx = ((attr >> 8) & 0xF) + 1
+                        ny = ((attr >> 12) & 0xF) + 1
+                        if nx * ny <= threshold:
+                            tiles |= entry_tile_codes_exact(code, y, attr)
+            if len(tiles) > peak_tiles:
+                peak_tiles = len(tiles)
+                peak_frame = number
+    finally:
+        route.close()
+    if peak_tiles == 0:
+        raise SystemExit("first-segment non-composite peak was not measured")
+    return {
+        "first_segment_peak_noncomposite_tiles": peak_tiles,
+        "first_segment_peak_noncomposite_frame": peak_frame,
     }
 
 
@@ -611,7 +772,12 @@ def main() -> int:
                                                composite_threshold)
         first_segment_composite = measure_first_segment_composites(
             rom, spec_results, composite_threshold)
+        first_segment_composite_peak = (
+            measure_first_segment_composite_frame_peak(
+                rom, composite_threshold))
         startup_residency = measure_startup_noncomposite_peak(
+            rom, composite_threshold)
+        first_segment_noncomposite = measure_first_segment_noncomposite_peak(
             rom, composite_threshold)
         configured_tiles = read_tile_sprite_pool()
         configured_composites = read_main_define(
@@ -620,6 +786,38 @@ def main() -> int:
             "AVSP_COMPOSITE_TEXTURE_BUDGET")
         composite_max = read_main_define(
             "AVSP_COMPOSITE_MAX_TEXTURE_BYTES")
+        child_composite_entries = 0
+        child_composite_bytes = 0
+        player_composite_entries = 0
+        player_composite_bytes = 0
+        for kind, _assembly, _facing, flat in spec_results:
+            sizes = []
+            for index in range(0, len(flat), 4):
+                attr = flat[index + 3]
+                nx = ((attr >> 8) & 0xF) + 1
+                ny = ((attr >> 12) & 0xF) + 1
+                if nx * ny > composite_threshold:
+                    sizes.append(nx * ny * TILE_BYTES)
+            if kind == "projectile-child":
+                child_composite_entries = max(child_composite_entries,
+                                              len(sizes))
+                child_composite_bytes = max(child_composite_bytes,
+                                            sum(sizes))
+            elif kind.startswith("player-"):
+                player_composite_entries = max(player_composite_entries,
+                                               len(sizes))
+                player_composite_bytes = max(player_composite_bytes,
+                                             sum(sizes))
+        composite_required_slots = (
+            first_segment_composite_peak[
+                "first_segment_composite_frame_peak_entries"] +
+            child_count * child_composite_entries +
+            player_composite_entries)
+        composite_required_bytes = (
+            first_segment_composite_peak[
+                "first_segment_composite_ranked_slot_bytes"] +
+            child_count * child_composite_bytes +
+            player_composite_bytes)
         presentation_residency.update({
             "source_capture": str(FIRST_SEGMENT_SOURCE.relative_to(ROOT))
                 .replace("\\", "/"),
@@ -638,23 +836,35 @@ def main() -> int:
             "composite_tile_threshold": composite_threshold,
             **composite,
             **first_segment_composite,
+            **first_segment_composite_peak,
             **startup_residency,
+            **first_segment_noncomposite,
+            "scene_composite_required_slots": composite_required_slots,
+            "scene_composite_required_bytes": composite_required_bytes,
+            "scene_composite_player_peak_entries": player_composite_entries,
+            "scene_composite_player_peak_bytes": player_composite_bytes,
+            "scene_composite_child_peak_entries": child_composite_entries,
+            "scene_composite_child_peak_bytes": child_composite_bytes,
             "mid_frame_lru_replacement_allowed": False,
+            "between_frame_composite_replacement_allowed": True,
         })
         if configured_tiles < startup_residency[
                 "startup_peak_noncomposite_tiles"]:
             raise SystemExit(
                 "REFUSING to build: retained tile pool cannot hold the "
                 "accepted startup non-composite peak")
-        if (configured_composites < first_segment_composite[
-                "first_segment_composite_unique_entries"] or
-            composite_budget < first_segment_composite[
-                "first_segment_composite_texture_bytes"] or
+        if configured_tiles < first_segment_noncomposite[
+                "first_segment_peak_noncomposite_tiles"]:
+            raise SystemExit(
+                "REFUSING to build: retained tile pool cannot hold the "
+                "complete Coffee Shop non-composite peak")
+        if (configured_composites < composite_required_slots or
+            composite_budget < composite_required_bytes or
             composite_max < first_segment_composite[
                 "first_segment_composite_max_texture_bytes"]):
             raise SystemExit(
-                "REFUSING to build: native object-entry composite budget "
-                "cannot hold the accepted SPEC-02 presentation union")
+                "REFUSING to build: recyclable native object-entry composite "
+                "budget cannot hold the Coffee Shop frame peak")
         palette_path = pick_palette_frame()
         scope = args.scope
         facing_union = True

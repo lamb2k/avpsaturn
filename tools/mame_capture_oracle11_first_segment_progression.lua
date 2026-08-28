@@ -1,0 +1,1076 @@
+-- Bounded ORACLE-11 corrective capture for the first recurring Round 1
+-- class-0x1f spawn.  This records the controller/initializer transaction
+-- around source writer 0x028a3e without widening the route census.
+local machine = manager.machine
+local maincpu = machine.devices[":maincpu"]
+local program = maincpu.spaces["program"]
+local opcodes = maincpu.spaces["opcodes"]
+local root = assert(os.getenv("AVSP_ORACLE11_PROGRESSION_ROOT"))
+local suppress_spawn = os.getenv("AVSP_ORACLE11_PROGRESSION_SUPPRESS_SPAWN") == "1"
+local suppress_guard = os.getenv("AVSP_ORACLE11_PROGRESSION_SUPPRESS_GUARD") == "1"
+local capture_lifecycle = os.getenv("AVSP_ORACLE11_PROGRESSION_LIFECYCLE") == "1"
+local suppress_lifecycle = os.getenv("AVSP_ORACLE11_PROGRESSION_SUPPRESS_LIFECYCLE") == "1"
+local capture_scene = os.getenv("AVSP_ORACLE11_COFFEE_SHOP_SCENE") == "1"
+local suppress_action4_timer =
+    os.getenv("AVSP_ORACLE11_SUPPRESS_ACTION4_TIMER") == "1"
+local suppress_coffee_stage_rng =
+    os.getenv("AVSP_ORACLE11_SUPPRESS_COFFEE_STAGE_RNG") == "1"
+local capture_last_frame = capture_scene and 5566 or 4100
+local suppress_transition_pc = tonumber(
+    os.getenv("AVSP_ORACLE11_PROGRESSION_SUPPRESS_TRANSITION_PC") or "", 16)
+local suppress_type4_class03_pc = tonumber(
+    os.getenv("AVSP_ORACLE11_SUPPRESS_TYPE4_CLASS03_PC") or "", 16)
+local suppress_type36_pc = tonumber(
+    os.getenv("AVSP_ORACLE11_SUPPRESS_TYPE36_PC") or "", 16)
+local suppress_type36_pc2 = tonumber(
+    os.getenv("AVSP_ORACLE11_SUPPRESS_TYPE36_PC2") or "", 16)
+local suppress_type36_class = tonumber(
+    os.getenv("AVSP_ORACLE11_SUPPRESS_TYPE36_CLASS") or "", 16)
+local suppress_scene_pair_type = tonumber(
+    os.getenv("AVSP_ORACLE11_SUPPRESS_SCENE_PAIR_TYPE") or "")
+local suppress_scene_pair_class = tonumber(
+    os.getenv("AVSP_ORACLE11_SUPPRESS_SCENE_PAIR_CLASS") or "", 16)
+local suppress_obstacle_transition =
+    os.getenv("AVSP_ORACLE11_SUPPRESS_OBSTACLE_TRANSITION") == "1"
+local frame = 0
+local controller = 0xffd180
+local global = 0xff8000
+local pool, stride, count = 0xff9580, 0xc0, 57
+local pool24, stride24, count24 = 0xffb680, 0x80, 32
+local target_pcs = {
+    [0x0288e2] = true, [0x0288f6] = true, [0x028a12] = true,
+    [0x028a1c] = true, [0x028a20] = true, [0x028a2c] = true,
+    [0x028a36] = true, [0x028a3a] = true, [0x028a5a] = true,
+    [0x028ab2] = true, [0x028b5a] = true, [0x028b6e] = true,
+    [0x028b76] = true,
+}
+local transactions = assert(io.open(root .. "/progression_transactions.tsv", "w"))
+local snapshots = assert(io.open(root .. "/progression_snapshots.tsv", "w"))
+local writes = assert(io.open(root .. "/progression_writes.tsv", "w"))
+local global_writes = assert(io.open(root .. "/progression_global_writes.tsv", "w"))
+local controller_samples = assert(io.open(root .. "/progression_controller.tsv", "w"))
+local lifecycle_writes = assert(io.open(root .. "/progression_lifecycle_writes.tsv", "w"))
+local class1f_transitions = assert(io.open(
+    root .. "/progression_class1f_transitions.tsv", "w"))
+local action4_timers = assert(io.open(
+    root .. "/progression_class1f_action4_timers.tsv", "w"))
+local scene_actors = assert(io.open(
+    root .. "/coffee_shop_scene_actors.tsv", "w"))
+local scene_frames = assert(io.open(
+    root .. "/coffee_shop_scene_frames.tsv", "w"))
+local scene_health_writes = assert(io.open(
+    root .. "/coffee_shop_scene_health_writes.tsv", "w"))
+local type4_class03 = assert(io.open(
+    root .. "/coffee_shop_type4_class03.tsv", "w"))
+local scene_rng_calls = assert(io.open(
+    root .. "/coffee_shop_rng_calls.tsv", "w"))
+local stage_setup = assert(io.open(
+    root .. "/coffee_shop_stage_setup.tsv", "w"))
+local stage_setup_writes = assert(io.open(
+    root .. "/coffee_shop_stage_setup_writes.tsv", "w"))
+local class1f_bounds = assert(io.open(
+    root .. "/coffee_shop_class1f_source_bounds.tsv", "w"))
+local type36_writes = assert(io.open(
+    root .. "/coffee_shop_type36_writes.tsv", "w"))
+local pair_suppression = assert(io.open(
+    root .. "/coffee_shop_pair_suppression.tsv", "w"))
+local component20_writes = assert(io.open(
+    root .. "/coffee_shop_component20_writes.tsv", "w"))
+local component20_dispatch = assert(io.open(
+    root .. "/coffee_shop_component20_dispatch.tsv", "w"))
+local component20_collision = assert(io.open(
+    root .. "/coffee_shop_component20_collision.tsv", "w"))
+local component20_global = assert(io.open(
+    root .. "/coffee_shop_component20_global.tsv", "w"))
+local obstacle_trace = assert(io.open(
+    root .. "/coffee_shop_obstacle_trace.tsv", "w"))
+local obstacle_writes = assert(io.open(
+    root .. "/coffee_shop_obstacle_writes.tsv", "w"))
+local obstacle_guard = assert(io.open(
+    root .. "/coffee_shop_obstacle_guard.tsv", "w"))
+local type16_collision = assert(io.open(
+    root .. "/coffee_shop_type16_class06_collision.tsv", "w"))
+local result = assert(io.open(root .. "/progression_result.tsv", "w"))
+transactions:write("frame\tpc\ta4\ta6\tg8019\tliving\tprogress\tc_state\tc_substate\tc_timer40\tc_timer42\tc_limit4a\tc_index10\tc_phase2e\tc_local2c\tcamera_x\tcamera_z\trng\td0\td1\td2\tactor_active\tactor_class\tactor_type\tactor_state\tactor_substate\tactor_x\tactor_y\tactor_z\tactor_variant\tactor_timer\tactor_selector83\n")
+snapshots:write("frame\tslot\tactive\tclass\ttype\tstate\tsubstate\tfacing\tx\ty\tz\tvariant\ttimer\tselector83\thealth\tanim\n")
+writes:write("frame\tslot\tinner\tpc\ta6\told32\tdata\tmask\tg8019\tliving\tprogress\tc_state\tc_substate\tc_timer40\tc_limit4a\tc_index10\tcamera_x\tcamera_z\trng\tsuppressed\n")
+global_writes:write("frame\taddress\tpc\ta6\towner_active\towner_class\towner_type\towner_state\towner_substate\told32\tdata\tmask\tguard1a11\tc_state\tc_timer42\tg8019\tsuppressed\n")
+controller_samples:write("frame\tactive\tclass\ttype\tstate\tsubstate\tindex10\ttimer40\ttimer42\tfield44\tfield46\tfield48\tlimit4a\tlocal2c\tphase2e\tguard1a11\tg8019\tliving\tprogress\tcamera_x\tcamera_z\n")
+lifecycle_writes:write("frame\taddress\tpc\ta6\towner_active\towner_class\towner_type\towner_state\towner_substate\towner_x\towner_y\towner_z\towner_health\towner_anim\tliving_before\tprogress_before\tdata\tmask\tsuppressed\n")
+class1f_transitions:write("frame\tslot\tinner\tpc\ta6\tactive\tclass\ttype\tstate_before\tsubstate_before\tfacing\tx\ty\tz\thealth\tanim\ttimer2a\tfield01\tfield0a\tfield24\tfield2b\tfield5c\tfield6e\tfield85\tfield96\tfielda2\tfielda3\tfielda4\tfielda5\tfielda6\tfieldac\tfieldad\tfieldae\tfieldaa\tfieldb0\tfield0c\tg8209\tg9a10\tg9a1c\tliving\tprogress\tp_state\tp_substate\tp_facing\tp_x\tp_y\tp_z\tp_health\tp_anim\tp_hurt\tp_attack\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\tdata\tmask\tsuppressed\n")
+action4_timers:write("frame\tevent\tpc\tslot\tstate\tsubstate\tstage_parameter\trng\td0\ttimer2a\tdata\tmask\tsuppressed\n")
+scene_actors:write("frame\tpool\tpool_index\tslot\tactive\ttype\tclass\tvariant\tstate\tsubstate\tfacing\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\thealth\thurt_selector\tattack_selector\n")
+scene_frames:write("frame\troute_state\tentry_controller_state\tentry_controller_substate\tentry_controller_timer40\tentry_controller_timer42\tliving_enemy_count\tencounter_progress\tplayer_active\tplayer_state\tplayer_substate\tplayer_facing\tplayer_x_fp\tplayer_y_fp\tplayer_z\tplayer_health\tcamera_x\tcamera_z\tcamera_target_x\trng\n")
+scene_health_writes:write("frame\ttarget_pool\ttarget_slot\tpc\tattacker\tdefender\tattack_record\tstate\tsubstate\thealth_before\thealth_after\tmask\tdamage_writer\n")
+type4_class03:write("frame\tevent\tpc\tslot\tinner\ta6\ta4\tactive\tclass\ttype\tstate\tsubstate\tfacing\tx_fp\ty_fp\tz\towner_word\towner_slot\tmotion_table\tanimation_record\tcollision_table\thealth\tfield05\tfield0c\tfield19\ttimer2a\ttimer2b\tfield5c\tfield65\td0\td1\td2\td3\tdata\tmask\tsuppressed\n")
+scene_rng_calls:write("frame\tentry_pc\treturn_pc\ta6\tactive\tclass\ttype\tstate\tsubstate\trng_before\n")
+stage_setup:write("frame\tevent\tpc\tsp\ta0\ta1\ta2\ta3\ta4\ta5\ta6\td0\td1\td2\td3\troute\tplayer_variant\tstage_parameter\trng\tstage_row_bytes\trandom_table_bytes\tsource_window_bytes\topcode_window_bytes\tsuppressed\n")
+stage_setup_writes:write("frame\tpc\taddress\tstage_parameter_before\tdata\tmask\trng\n")
+class1f_bounds:write("frame\tpc\ta5\ta6\tslot\tstate\tsubstate\tactor_x_u16\toperand_address\toperand_u16\td0_u16\tfield01\tfield19\tfielda2\topcode_window_bytes\n")
+type36_writes:write("frame\tslot\tinner\tpc\ta6\tparent_active\tparent_class\tparent_type\tparent_state\tparent_substate\tparent_animation_record\treturn0\troute\tactive\tclass\ttype\tstate\tsubstate\tvariant\tanimation_record\tanimation_timer\tanimation_branch\tdata\tmask\tsuppressed\n")
+pair_suppression:write("frame\tpool\tslot\ttype\tclass\tstate\tsubstate\tanimation_record\troute\tplayer_state\tplayer_substate\tplayer_health\tcamera_x\tcamera_z\trng\n")
+component20_writes:write("frame\tpc\tslot\tinner\ta1\ta3\ta4\ta6\tactive\tclass\ttype\tstate\tsubstate\tvariant\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\tfield42\tfield4c\tfield66\tliving\tprogress\troute\tcamera_x\trng\tdata\tmask\n")
+component20_dispatch:write("frame\tpc\treturn_pc\tslot\ta4\ta6\tactive\tclass\ttype\tstate\tsubstate\tvariant\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\tfield42\tfield4c\tfield66\tliving\tprogress\tglobal1c\troute\tcamera_x\trng\td0\td1\td4\td5\n")
+component20_collision:write("frame\tpc\ta0\ta1\ta2\ta3\ta4\ta5\ta6\td0\td1\td2\td3\td4\td5\td6\td7\tstate\tsubstate\tanimation_record\thurt_selector\tattack_selector\thealth\n")
+component20_global:write("frame\tpc\toffset\ta1\ta3\ta4\ta6\told\tdata\tmask\tliving\tprogress\tglobal1c\troute\tcamera_x\n")
+obstacle_trace:write("frame\tpc\tstate\tsubstate\tactive\tclass\ttype\tfacing\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\tfield06\tfield0c\tfield18\tfield24\tfield2a\tfield2e\tfield30\tfield32\tfield34\tfield36\tfield38\tfield3a\tfield3c\tfield3e\tfield40\tfield42\tfield4f\tfield50\tfield58\tfield60\tfield64\tfield68\tfield6c\tchild0\tchild1\tchild2\tchild3\tguard_ffee8f\troute\trng\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\n")
+obstacle_writes:write("frame\tpc\tinner\tstate\tsubstate\tactive\tclass\ttype\tanimation_record\tanimation_timer\tanimation_branch\thealth_before\tguard_ffee8f\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\tdata\tmask\tsuppressed\n")
+obstacle_guard:write("frame\tpc\tvalue_before\tdata\tmask\troute\tstate\tsubstate\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\ta6\n")
+type16_collision:write("frame\tpc\ta0\ta1\ta2\ta3\ta4\ta5\ta6\td0\td1\td2\td3\td4\td5\td6\td7\tattacker_state\tattacker_substate\tattacker_animation_record\tattacker_table\tdefender_state\tdefender_substate\tdefender_animation_record\tdefender_table\tattack_record\n")
+result:write("spawn_suppression\tguard_suppression\tmain_spawn_transactions\taux_spawn_transactions\tsuppressed_writes\tlifecycle_suppressed_writes\taction4_timer_events\taction4_timer_suppressed_writes\ttype4_class03_suppressed_writes\tcoffee_stage_rng_suppressed_writes\ttype36_suppressed_writes\tscene_pair_suppressed_actors\tobstacle_transition_suppressed_writes\tfinal_route\n")
+
+local function u8(a) return program:read_u8(a) end
+local function u16(a) return program:read_u16(a) end
+local function u32(a) return program:read_u32(a) end
+local function s16(v) return v >= 0x8000 and v - 0x10000 or v end
+local main_spawns, aux_spawns, suppressed_writes = 0, 0, 0
+local lifecycle_suppressed_writes = 0
+local action4_timer_events, action4_timer_suppressed_writes = 0, 0
+local type4_class03_suppressed_writes = 0
+local coffee_stage_rng_suppressed_writes = 0
+local type36_suppressed_writes = 0
+local scene_pair_suppressed_actors = 0
+local obstacle_transition_suppressed_writes = 0
+
+local function hex_bytes(first, count)
+    local parts = {}
+    for i = 0, count - 1 do
+        parts[#parts + 1] = string.format("%02x", u8(first + i))
+    end
+    return table.concat(parts)
+end
+
+local function hex_opcode_bytes(first, count)
+    local parts = {}
+    for i = 0, count - 1 do
+        parts[#parts + 1] = string.format("%02x", opcodes:read_u8(first + i))
+    end
+    return table.concat(parts)
+end
+
+local stage_opcode_window = hex_opcode_bytes(0x017ac6, 0xc0)
+local class1f_bounds_opcode_window = hex_opcode_bytes(0x060c2e, 0x3a)
+
+local function emit_class1f_bounds(pc)
+    if not capture_scene or frame < 2280 or frame > 2400 then return end
+    local a5 = maincpu.state["A5"].value & 0xffffff
+    local a6 = maincpu.state["A6"].value & 0xffffff
+    if a6 < pool or a6 >= pool + count * stride or
+            ((a6 - pool) % stride) ~= 0 or u8(a6 + 2) ~= 0x1f or
+            u8(a6 + 8) ~= 12 or u16(a6 + 4) ~= 0x0200 or
+            (u16(a6 + 6) >> 8) ~= 0x16 then return end
+    class1f_bounds:write(string.format(
+        "%d\t%06x\t%06x\t%06x\t%06x\t%04x\t%04x\t%04x\t%06x\t%04x\t%04x\t%02x\t%02x\t%02x\t%s\n",
+        frame, pc, a5, a6, a6, u16(a6 + 4), u16(a6 + 6),
+        u16(a6 + 0x10), (a5 + 0x278) & 0xffffff,
+        u16((a5 + 0x278) & 0xffffff),
+        maincpu.state["D0"].value & 0xffff, u8(a6 + 1),
+        u8(a5 + 0x19), u8(a6 + 0xa2), class1f_bounds_opcode_window))
+end
+
+local class1f_bounds_pcs = {
+    0x060c2e, 0x060c34, 0x060c3e, 0x060c4a, 0x060c52,
+    0x060c56, 0x060c5a, 0x060c5e, 0x060c62, 0x060c66,
+    0x060c68, 0x060c70, 0x0608a2,
+}
+oracle11_class1f_bounds_pc_taps = {}
+for _, pc in ipairs(class1f_bounds_pcs) do
+    oracle11_class1f_bounds_pc_taps[#oracle11_class1f_bounds_pc_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_class1f_bounds_%06x", pc),
+        function() emit_class1f_bounds(pc) end)
+end
+
+local function emit_stage_setup(event, pc, suppressed)
+    if not capture_scene or frame < 2068 or frame > 2076 then return end
+    stage_setup:write(string.format(
+        "%d\t%s\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%08x\t%08x\t%08x\t%08x\t%04x\t%04x\t%04x\t%04x\t%s\t%s\t%s\t%s\t%d\n",
+        frame, event, pc, maincpu.state["SP"].value & 0xffffff,
+        maincpu.state["A0"].value & 0xffffff,
+        maincpu.state["A1"].value & 0xffffff,
+        maincpu.state["A2"].value & 0xffffff,
+        maincpu.state["A3"].value & 0xffffff,
+        maincpu.state["A4"].value & 0xffffff,
+        maincpu.state["A5"].value & 0xffffff,
+        maincpu.state["A6"].value & 0xffffff,
+        maincpu.state["D0"].value & 0xffffffff,
+        maincpu.state["D1"].value & 0xffffffff,
+        maincpu.state["D2"].value & 0xffffffff,
+        maincpu.state["D3"].value & 0xffffffff,
+        u16(global + 8), u16(0xff8218), u16(0xff81ea), u16(0xff81a8),
+        hex_bytes(0x117560, 64), hex_bytes(0x017b98, 64),
+        hex_bytes(0x017ac6, 0xc0), stage_opcode_window,
+        suppressed and 1 or 0))
+end
+
+oracle11_stage_parameter_write = program:install_write_tap(
+    0xff81ea, 0xff81eb, "oracle11_stage_parameter_write",
+    function(offset, data, mask)
+        if not capture_scene or frame < 2068 or frame > 2076 then return end
+        stage_setup_writes:write(string.format(
+            "%d\t%06x\t%06x\t%04x\t%08x\t%08x\t%04x\n",
+            frame, maincpu.state["PC"].value & 0xffffff, offset,
+            u16(0xff81ea), data & 0xffffffff, mask & 0xffffffff,
+            u16(0xff81a8)))
+    end)
+
+local stage_setup_pcs = {
+    0x017a1e, 0x017ac6, 0x017ade, 0x017af0, 0x017af2, 0x017af6,
+    0x017b08, 0x017b1c, 0x017b26, 0x017b32, 0x017b3e, 0x017b4a,
+    0x017b56, 0x017b62, 0x017b74, 0x017b78,
+}
+oracle11_stage_setup_pc_taps = {}
+for _, pc in ipairs(stage_setup_pcs) do
+    oracle11_stage_setup_pc_taps[#oracle11_stage_setup_pc_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_stage_setup_%06x", pc),
+        function() emit_stage_setup("pc", pc, false) end)
+end
+
+oracle11_stage_setup_rng_write = program:install_write_tap(
+    0xff81a8, 0xff81a9, "oracle11_stage_setup_rng_write",
+    function(offset, data, mask)
+        local pc = maincpu.state["PC"].value & 0xffffff
+        local a6 = maincpu.state["A6"].value & 0xffffff
+        if not capture_scene or frame ~= 2072 or a6 ~= 0xff1812 or
+                (pc ~= 0x017c70 and pc ~= 0x017c72) then return end
+        local suppressed = suppress_coffee_stage_rng
+        emit_stage_setup("rng_write", pc, suppressed)
+        if suppressed then
+            coffee_stage_rng_suppressed_writes =
+                coffee_stage_rng_suppressed_writes + 1
+            return u16(0xff81a8)
+        end
+    end)
+
+oracle11_scene_rng_tap = opcodes:install_read_tap(
+    0x017c5e, 0x017c5f, "oracle11_scene_rng_entry",
+    function()
+        if not capture_scene or frame < 1972 or
+                frame > capture_last_frame then return end
+        local a6 = maincpu.state["A6"].value & 0xffffff
+        local sp = maincpu.state["SP"].value & 0xffffff
+        local actor = a6 >= 0xff8000 and a6 <= 0xffff00
+        scene_rng_calls:write(string.format(
+            "%d\t017c5e\t%06x\t%06x\t%d\t%02x\t%d\t%04x\t%04x\t%04x\n",
+            frame, u32(sp) & 0xffffff, a6,
+            actor and u8(a6) or 0, actor and u8(a6 + 2) or 0,
+            actor and u8(a6 + 8) or 0, actor and u16(a6 + 4) or 0,
+            actor and u16(a6 + 6) or 0, u16(0xff81a8)))
+    end)
+
+local scene_pools = {
+    -- Exact pool layouts from the source initializer 0x01729e..0x0174a4.
+    -- Keep the auxiliary record-24 region distinct from the primary pool: it
+    -- has separate storage and free-list ownership even though +0x08 is 24.
+    {name = "record4", base = 0xff8680, stride = 0x80, count = 24, type = 4},
+    {name = "record8", base = 0xff9280, stride = 0xc0, count = 4, type = 8},
+    {name = "record12", base = 0xff9580, stride = 0xc0, count = 20, type = 12,
+        has_health = true, has_collision_selectors = true},
+    {name = "record16", base = 0xffa480, stride = 0x80, count = 20, type = 16},
+    {name = "record20", base = 0xffae80, stride = 0x80, count = 16, type = 20},
+    {name = "record24", base = 0xffb680, stride = 0x80, count = 32, type = 24},
+    {name = "record28", base = 0xffc680, stride = 0x80, count = 16, type = 28},
+    {name = "record32", base = 0xffce80, stride = 0x100, count = 4, type = 32},
+    {name = "record36", base = 0xffd280, stride = 0x40, count = 64, type = 36},
+    {name = "record24_aux", base = 0xffe280, stride = 0x80, count = 16,
+        type = 24},
+}
+
+local component20_slots = {
+    [0xffb300] = true, [0xffb400] = true,
+    [0xffb580] = true, [0xffb600] = true,
+}
+
+local function emit_component20_dispatch(pc)
+    if not capture_scene or frame < 1972 or frame > capture_last_frame then
+        return
+    end
+    local a6 = maincpu.state["A6"].value & 0xffffff
+    if not component20_slots[a6] then return end
+    local sp = maincpu.state["SP"].value & 0xffffff
+    component20_dispatch:write(string.format(
+        "%d\t%06x\t%06x\t%06x\t%06x\t%06x\t%d\t%02x\t%d\t%04x\t%04x\t%02x\t%08x\t%08x\t%d\t%08x\t%04x\t%d\t%04x\t%02x\t%02x\t%02x\t%d\t%d\t%d\t%d\t%d\t%04x\t%08x\t%08x\t%08x\t%08x\n",
+        frame, pc, u32(sp) & 0xffffff, a6,
+        maincpu.state["A4"].value & 0xffffff, a6,
+        u8(a6), u8(a6 + 2), u8(a6 + 8), u16(a6 + 4),
+        u16(a6 + 6), u8(a6 + 3), u32(a6 + 0x10), u32(a6 + 0x14),
+        s16(u16(a6 + 0x18)), u32(a6 + 0x1c), u16(a6 + 0x0a),
+        s16(u16(a6 + 0x24)), u16(a6 + 0x2a), u8(a6 + 0x42),
+        u8(a6 + 0x4c), u8(a6 + 0x66), u16(0xff1a18),
+        u16(0xff1a1a), u16(0xff1a1c), u16(global + 8), s16(u16(global + 0x278)),
+        u16(0xff81a8), maincpu.state["D0"].value & 0xffffffff,
+        maincpu.state["D1"].value & 0xffffffff,
+        maincpu.state["D4"].value & 0xffffffff,
+        maincpu.state["D5"].value & 0xffffffff))
+end
+
+local component20_pcs = {
+    0x06b2fa, 0x06b30e, 0x06b358, 0x06b374, 0x06b38a,
+    0x06b39a, 0x06b3c0, 0x06b3ea, 0x06b3f2, 0x06b42e,
+    0x06b434, 0x06b44c, 0x06b534, 0x06b548, 0x06b588,
+    0x06b5aa, 0x06b5ca, 0x06b624, 0x06b62a, 0x06b644,
+    0x06b652,
+}
+oracle11_component20_pc_taps = {}
+for _, pc in ipairs(component20_pcs) do
+    oracle11_component20_pc_taps[#oracle11_component20_pc_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_component20_%06x", pc),
+        function() emit_component20_dispatch(pc) end)
+end
+
+local function emit_component20_collision(pc)
+    if not capture_scene or frame < 2700 or frame > 2850 then return end
+    local a6 = maincpu.state["A6"].value & 0xffffff
+    local a1 = maincpu.state["A1"].value & 0xffffff
+    if a6 ~= 0xffb300 and a1 ~= 0xffb300 then return end
+    component20_collision:write(string.format(
+        "%d\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%08x\t%08x\t%08x\t%08x\t%08x\t%08x\t%08x\t%08x\t%04x\t%04x\t%08x\t%02x\t%02x\t%d\n",
+        frame, pc,
+        maincpu.state["A0"].value & 0xffffff,
+        maincpu.state["A1"].value & 0xffffff,
+        maincpu.state["A2"].value & 0xffffff,
+        maincpu.state["A3"].value & 0xffffff,
+        maincpu.state["A4"].value & 0xffffff,
+        maincpu.state["A5"].value & 0xffffff, a6,
+        maincpu.state["D0"].value & 0xffffffff,
+        maincpu.state["D1"].value & 0xffffffff,
+        maincpu.state["D2"].value & 0xffffffff,
+        maincpu.state["D3"].value & 0xffffffff,
+        maincpu.state["D4"].value & 0xffffffff,
+        maincpu.state["D5"].value & 0xffffffff,
+        maincpu.state["D6"].value & 0xffffffff,
+        maincpu.state["D7"].value & 0xffffffff,
+        u16(a6 + 4), u16(a6 + 6), u32(a6 + 0x1c),
+        u8(a6 + 0xa5), u8(a6 + 0xa6), s16(u16(a6 + 0x40))))
+end
+
+oracle11_component20_collision_pc_taps = {}
+for _, pc in ipairs({0x01d87a, 0x01d4aa, 0x01d590, 0x01d598}) do
+    oracle11_component20_collision_pc_taps[
+        #oracle11_component20_collision_pc_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_component20_collision_%06x", pc),
+        function() emit_component20_collision(pc) end)
+end
+
+local function emit_type16_collision(pc)
+    if not capture_scene or frame < 3200 or frame > 3900 then return end
+    local a1 = maincpu.state["A1"].value & 0xffffff
+    local a3 = maincpu.state["A3"].value & 0xffffff
+    local a6 = maincpu.state["A6"].value & 0xffffff
+    if u8(a6 + 8) ~= 16 or u8(a6 + 2) ~= 0x06 or a1 ~= 0xff8380 then
+        return
+    end
+    type16_collision:write(string.format(
+        "%d\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%08x\t%08x\t%08x\t%08x\t%08x\t%08x\t%08x\t%08x\t%04x\t%04x\t%08x\t%08x\t%04x\t%04x\t%08x\t%08x\t%08x\n",
+        frame, pc,
+        maincpu.state["A0"].value & 0xffffff, a1,
+        maincpu.state["A2"].value & 0xffffff, a3,
+        maincpu.state["A4"].value & 0xffffff,
+        maincpu.state["A5"].value & 0xffffff, a6,
+        maincpu.state["D0"].value & 0xffffffff,
+        maincpu.state["D1"].value & 0xffffffff,
+        maincpu.state["D2"].value & 0xffffffff,
+        maincpu.state["D3"].value & 0xffffffff,
+        maincpu.state["D4"].value & 0xffffffff,
+        maincpu.state["D5"].value & 0xffffffff,
+        maincpu.state["D6"].value & 0xffffffff,
+        maincpu.state["D7"].value & 0xffffffff,
+        u16(a6 + 4), u16(a6 + 6), u32(a6 + 0x1c), u32(a6 + 0x50),
+        u16(a1 + 4), u16(a1 + 6), u32(a1 + 0x1c), u32(a1 + 0x50), a3))
+end
+
+oracle11_type16_collision_pc_taps = {}
+for _, pc in ipairs({0x01d4aa, 0x01d590, 0x01d598, 0x01d5ee}) do
+    oracle11_type16_collision_pc_taps[
+        #oracle11_type16_collision_pc_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_type16_collision_%06x", pc),
+        function() emit_type16_collision(pc) end)
+end
+oracle11_type16_collision_damage_range_tap = opcodes:install_read_tap(
+    0x01d5d0, 0x01d601, "oracle11_type16_collision_damage_range",
+    function()
+        emit_type16_collision(maincpu.state["PC"].value & 0xffffff)
+    end)
+
+oracle11_component20_global_write_tap = program:install_write_tap(
+    0xff1a1c, 0xff1a1d, "oracle11_component20_global_writes",
+    function(offset, data, mask)
+        if not capture_scene or frame < 1972 or frame > capture_last_frame then
+            return
+        end
+        component20_global:write(string.format(
+            "%d\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%04x\t%08x\t%08x\t%d\t%d\t%d\t%d\t%d\n",
+            frame, maincpu.state["PC"].value & 0xffffff, offset,
+            maincpu.state["A1"].value & 0xffffff,
+            maincpu.state["A3"].value & 0xffffff,
+            maincpu.state["A4"].value & 0xffffff,
+            maincpu.state["A6"].value & 0xffffff,
+            u16(0xff1a1c), data & 0xffffffff, mask & 0xffffffff,
+            u16(0xff1a18), u16(0xff1a1a), u16(0xff1a1c),
+            u16(global + 8), s16(u16(global + 0x278))))
+    end)
+
+oracle11_component20_write_tap = program:install_write_tap(
+    0xffb300, 0xffb67f, "oracle11_component20_writes",
+    function(offset, data, mask)
+        if not capture_scene or frame < 1972 or frame > capture_last_frame then
+            return
+        end
+        local slot = offset - ((offset - 0xffae80) % 0x80)
+        if not component20_slots[slot] then return end
+        local a4 = maincpu.state["A4"].value & 0xffffff
+        local a6 = maincpu.state["A6"].value & 0xffffff
+        component20_writes:write(string.format(
+            "%d\t%06x\t%06x\t%02x\t%06x\t%06x\t%06x\t%06x\t%d\t%02x\t%d\t%04x\t%04x\t%02x\t%08x\t%08x\t%d\t%08x\t%04x\t%d\t%04x\t%02x\t%02x\t%02x\t%d\t%d\t%d\t%d\t%04x\t%08x\t%08x\n",
+            frame, maincpu.state["PC"].value & 0xffffff, slot,
+            offset - slot, maincpu.state["A1"].value & 0xffffff,
+            maincpu.state["A3"].value & 0xffffff, a4, a6,
+            u8(slot), u8(slot + 2),
+            u8(slot + 8), u16(slot + 4), u16(slot + 6), u8(slot + 3),
+            u32(slot + 0x10), u32(slot + 0x14), s16(u16(slot + 0x18)),
+            u32(slot + 0x1c), u16(slot + 0x0a), s16(u16(slot + 0x24)),
+            u16(slot + 0x2a), u8(slot + 0x42), u8(slot + 0x4c),
+            u8(slot + 0x66), u16(0xff1a18), u16(0xff1a1a),
+            u16(global + 8), s16(u16(global + 0x278)), u16(0xff81a8),
+            data & 0xffffffff, mask & 0xffffffff))
+    end)
+
+local function suppress_selected_scene_pair()
+    if not capture_scene or suppress_scene_pair_type == nil or
+            suppress_scene_pair_class == nil or frame < 1972 or
+            frame > capture_last_frame then return end
+    for _, pool_spec in ipairs(scene_pools) do
+        if pool_spec.type == suppress_scene_pair_type then
+            for index = 0, pool_spec.count - 1 do
+                local slot = pool_spec.base + index * pool_spec.stride
+                if u8(slot) ~= 0 and u8(slot + 2) == suppress_scene_pair_class and
+                        u8(slot + 8) == suppress_scene_pair_type then
+                    pair_suppression:write(string.format(
+                        "%d\t%s\t%06x\t%d\t%02x\t%04x\t%04x\t%08x\t%d\t%04x\t%04x\t%d\t%d\t%d\t%04x\n",
+                        frame, pool_spec.name, slot, suppress_scene_pair_type,
+                        suppress_scene_pair_class, u16(slot + 4),
+                        u16(slot + 6), u32(slot + 0x1c), u16(global + 8),
+                        u16(0xff8384), u16(0xff8386),
+                        s16(u16(0xff83c0)), s16(u16(global + 0x278)),
+                        s16(u16(global + 0x27c)), u16(0xff81a8)))
+                    program:write_u8(slot, 0)
+                    scene_pair_suppressed_actors =
+                        scene_pair_suppressed_actors + 1
+                end
+            end
+        end
+    end
+end
+
+local record4_base, record4_stride, record4_count = 0xff8680, 0x80, 24
+
+local function emit_type4_class03_event(event, pc, slot, inner, data, mask,
+        suppressed)
+    local owner_word = u16(slot + 0x28)
+    local owner_slot = owner_word >= 0x8000 and (0xff0000 | owner_word) or
+        owner_word
+    type4_class03:write(string.format(
+        "%d\t%s\t%06x\t%06x\t%02x\t%06x\t%06x\t%d\t%02x\t%d\t%04x\t%04x\t%d\t%08x\t%08x\t%d\t%04x\t%06x\t%08x\t%08x\t%08x\t%d\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%08x\t%08x\t%08x\t%08x\t%08x\t%08x\t%d\n",
+        frame, event, pc, slot, inner,
+        maincpu.state["A6"].value & 0xffffff,
+        maincpu.state["A4"].value & 0xffffff,
+        u8(slot), u8(slot + 2), u8(slot + 8), u16(slot + 4),
+        u16(slot + 6), u8(slot + 0x0f), u32(slot + 0x10),
+        u32(slot + 0x14), s16(u16(slot + 0x18)), owner_word, owner_slot,
+        u32(slot + 0x20), u32(slot + 0x1c), u32(slot + 0x50),
+        s16(u16(slot + 0x40)), u8(slot + 5), u8(slot + 0x0c),
+        u8(slot + 0x19), u8(slot + 0x2a), u8(slot + 0x2b),
+        u8(slot + 0x5c), u8(slot + 0x65),
+        maincpu.state["D0"].value & 0xffffffff,
+        maincpu.state["D1"].value & 0xffffffff,
+        maincpu.state["D2"].value & 0xffffffff,
+        maincpu.state["D3"].value & 0xffffffff,
+        data & 0xffffffff, mask & 0xffffffff, suppressed and 1 or 0))
+end
+
+local function class1f_actor_at_a6()
+    local a6 = maincpu.state["A6"].value & 0xffffff
+    if a6 < pool or a6 >= pool + count * stride or
+            ((a6 - pool) % stride) ~= 0 then return nil end
+    if u8(a6) == 0 or u8(a6 + 2) ~= 0x1f or u8(a6 + 8) ~= 12 then
+        return nil
+    end
+    return a6
+end
+
+local function emit_action4_timer_event(event, pc)
+    if not capture_scene or frame < 1972 or frame > capture_last_frame then
+        return
+    end
+    local slot = class1f_actor_at_a6()
+    if slot == nil or u16(slot + 4) ~= 0x0200 or
+            (u16(slot + 6) >> 8) ~= 0x04 then return end
+    action4_timers:write(string.format(
+        "%d\t%s\t%06x\t%06x\t%04x\t%04x\t%04x\t%04x\t%08x\t%04x\t00000000\t00000000\t0\n",
+        frame, event, pc, slot, u16(slot + 4), u16(slot + 6),
+        u16(0xff81ea), u16(0xff81a8),
+        maincpu.state["D0"].value & 0xffffffff, u16(slot + 0x2a)))
+    action4_timer_events = action4_timer_events + 1
+end
+
+local function emit_transaction(pc)
+    if frame < 1972 or frame > capture_last_frame then return end
+    local a4 = maincpu.state["A4"].value & 0xffffff
+    local a6 = maincpu.state["A6"].value & 0xffffff
+    local actor_ok = a4 >= pool and a4 < pool + count * stride and
+        ((a4 - pool) % stride) == 0
+    local b = actor_ok and a4 or pool
+    transactions:write(string.format(
+        "%d\t%06x\t%06x\t%06x\t%02x\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%02x\t%02x\t%d\t%d\t%04x\t%08x\t%08x\t%08x\t%d\t%02x\t%d\t%d\t%d\t%d\t%d\t%d\t%02x\t%d\t%02x\n",
+        frame, pc, a4, a6, u8(global + 0x19), u16(0xff1a18), u16(0xff1a1a),
+        u16(controller + 4), u16(controller + 6), u16(controller + 0x40),
+        u16(controller + 0x42), u16(controller + 0x4a),
+        u16(controller + 0x10), u8(controller + 0x2e),
+        u8(controller + 0x2c), s16(u16(global + 0x278)),
+        s16(u16(global + 0x27c)), u16(0xff81a8),
+        maincpu.state["D0"].value & 0xffffffff,
+        maincpu.state["D1"].value & 0xffffffff,
+        maincpu.state["D2"].value & 0xffffffff,
+        actor_ok and u8(b) or 0, actor_ok and u8(b + 2) or 0,
+        actor_ok and u8(b + 8) or 0, actor_ok and u16(b + 4) or 0,
+        actor_ok and u16(b + 6) or 0, actor_ok and s16(u16(b + 0x10)) or 0,
+        actor_ok and s16(u16(b + 0x14)) or 0,
+        actor_ok and s16(u16(b + 0x18)) or 0,
+        actor_ok and u8(b + 3) or 0, actor_ok and u16(b + 0x2a) or 0,
+        actor_ok and u8(b + 0x83) or 0))
+    if pc == 0x028a3a then main_spawns = main_spawns + 1 end
+    if pc == 0x028b76 then aux_spawns = aux_spawns + 1 end
+end
+
+oracle11_action4_timer_pc_taps = {
+    opcodes:install_read_tap(0x0bc416, 0x0bc417,
+        "oracle11_action4_timer_entry",
+        function() emit_action4_timer_event("entry", 0x0bc416) end),
+    opcodes:install_read_tap(0x0bc420, 0x0bc421,
+        "oracle11_action4_timer_rng_masked",
+        function() emit_action4_timer_event("rng_masked", 0x0bc420) end),
+    opcodes:install_read_tap(0x0bc424, 0x0bc425,
+        "oracle11_action4_timer_stage_read",
+        function() emit_action4_timer_event("stage_read", 0x0bc424) end),
+    opcodes:install_read_tap(0x0bc434, 0x0bc435,
+        "oracle11_action4_timer_table_lookup",
+        function() emit_action4_timer_event("table_lookup", 0x0bc434) end),
+    opcodes:install_read_tap(0x0bc438, 0x0bc439,
+        "oracle11_action4_timer_result",
+        function() emit_action4_timer_event("result", 0x0bc438) end),
+    opcodes:install_read_tap(0x060940, 0x060941,
+        "oracle11_action4_timer_caller_write",
+        function() emit_action4_timer_event("caller_write", 0x060940) end),
+    opcodes:install_read_tap(0x060944, 0x060945,
+        "oracle11_action4_timer_caller_after_write",
+        function() emit_action4_timer_event("caller_after_write", 0x060944) end),
+}
+
+oracle11_action4_timer_write = program:install_write_tap(
+    pool, pool + count * stride - 1, "oracle11_action4_timer_write",
+    function(offset, data, mask)
+        if not capture_scene or frame < 1972 or frame > capture_last_frame then
+            return
+        end
+        local pc = maincpu.state["PC"].value & 0xffffff
+        local relative = offset - pool
+        local slot = pool + math.floor(relative / stride) * stride
+        local inner = relative % stride
+        if inner < 0x28 or inner > 0x2b or u8(slot + 2) ~= 0x1f or
+                u8(slot + 8) ~= 12 or u16(slot + 4) ~= 0x0200 or
+                (u16(slot + 6) >> 8) ~= 0x04 then return end
+        local suppressed = suppress_action4_timer and pc == 0x060944
+        action4_timers:write(string.format(
+            "%d\twrite\t%06x\t%06x\t%04x\t%04x\t%04x\t%04x\t%08x\t%04x\t%08x\t%08x\t%d\n",
+            frame, pc, slot, u16(slot + 4), u16(slot + 6),
+            u16(0xff81ea), u16(0xff81a8),
+            maincpu.state["D0"].value & 0xffffffff, u16(slot + 0x2a),
+            data & 0xffffffff, mask & 0xffffffff,
+            suppressed and 1 or 0))
+        action4_timer_events = action4_timer_events + 1
+        if suppressed then
+            action4_timer_suppressed_writes =
+                action4_timer_suppressed_writes + 1
+            return u32(offset & 0xfffffc)
+        end
+    end)
+
+local type4_class03_pcs = {
+    0x030382, 0x030396, 0x030416, 0x03042e, 0x030456, 0x030466,
+    0x030482, 0x0304ae, 0x0304ea, 0x0304f0, 0x0304f6, 0x030510,
+    0x030556, 0x03057a, 0x03058a, 0x030594, 0x0305a4, 0x0305b4,
+    0x0305c6, 0x0305ce, 0x03062c, 0x030632,
+}
+oracle11_type4_class03_pc_taps = {}
+local function install_type4_class03_pc_tap(pc)
+    return opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_type4_class03_%06x", pc), function()
+            if not capture_scene or frame < 4650 or frame > 4750 then return end
+            local a6 = maincpu.state["A6"].value & 0xffffff
+            if a6 < record4_base or
+                    a6 >= record4_base + record4_count * record4_stride or
+                    ((a6 - record4_base) % record4_stride) ~= 0 then return end
+            if u8(a6 + 2) ~= 3 and a6 ~= 0xff8700 then return end
+            emit_type4_class03_event("pc", pc, a6, 0, 0, 0, false)
+        end)
+end
+for _, pc in ipairs(type4_class03_pcs) do
+    oracle11_type4_class03_pc_taps[#oracle11_type4_class03_pc_taps + 1] =
+        install_type4_class03_pc_tap(pc)
+end
+
+oracle11_type4_class03_writes = program:install_write_tap(
+    record4_base, record4_base + record4_count * record4_stride - 1,
+    "oracle11_type4_class03_writes", function(offset, data, mask)
+        if not capture_scene or frame < 4650 or frame > 4750 then return end
+        local relative = offset - record4_base
+        local slot = record4_base +
+            math.floor(relative / record4_stride) * record4_stride
+        local inner = relative % record4_stride
+        if slot ~= 0xff8700 and u8(slot + 2) ~= 3 then return end
+        local pc = maincpu.state["PC"].value & 0xffffff
+        local suppressed = suppress_type4_class03_pc ~= nil and
+            pc == suppress_type4_class03_pc and slot == 0xff8700 and
+            inner <= 3
+        emit_type4_class03_event("write", pc, slot, inner, data, mask,
+            suppressed)
+        if suppressed then
+            type4_class03_suppressed_writes =
+                type4_class03_suppressed_writes + 1
+            return u32(offset & 0xfffffc)
+        end
+    end)
+
+oracle11_type36_writes = program:install_write_tap(
+    0xffd280, 0xffe27f, "oracle11_type36_writes",
+    function(offset, data, mask)
+        if not capture_scene or frame < 1972 or frame > capture_last_frame then
+            return
+        end
+        local relative = offset - 0xffd280
+        local slot = 0xffd280 + math.floor(relative / 0x40) * 0x40
+        local inner = relative % 0x40
+        local pc = maincpu.state["PC"].value & 0xffffff
+        local suppressed = suppress_type36_pc ~= nil and
+            suppress_type36_class ~= nil and
+            (pc == suppress_type36_pc or pc == suppress_type36_pc2) and
+            (u8(slot + 2) == suppress_type36_class or
+             (inner <= 2 and inner + 3 >= 2))
+        local parent = maincpu.state["A6"].value & 0xffffff
+        local sp = maincpu.state["SP"].value & 0xffffff
+        type36_writes:write(string.format(
+            "%d\t%06x\t%02x\t%06x\t%06x\t%d\t%02x\t%d\t%04x\t%04x\t%08x\t%06x\t%d\t%d\t%02x\t%d\t%04x\t%04x\t%02x\t%08x\t%04x\t%d\t%08x\t%08x\t%d\n",
+            frame, slot, inner, pc, parent, u8(parent), u8(parent + 2),
+            u8(parent + 8), u16(parent + 4), u16(parent + 6),
+            u32(parent + 0x1c), u32(sp) & 0xffffff, u16(global + 8), u8(slot),
+            u8(slot + 2), u8(slot + 8), u16(slot + 4), u16(slot + 6),
+            u8(slot + 3), u32(slot + 0x1c), u16(slot + 0x0a),
+            s16(u16(slot + 0x24)), data & 0xffffffff,
+            mask & 0xffffffff, suppressed and 1 or 0))
+        if suppressed then
+            type36_suppressed_writes = type36_suppressed_writes + 1
+            return u32(offset & 0xfffffc)
+        end
+    end)
+
+local obstacle_slot = 0xffb380
+local function emit_obstacle_trace(pc)
+    if not capture_scene or frame < 1972 or frame > capture_last_frame or
+            (maincpu.state["A6"].value & 0xffffff) ~= obstacle_slot then
+        return
+    end
+    obstacle_trace:write(string.format(
+        "%d\t%06x\t%04x\t%04x\t%d\t%02x\t%d\t%d\t%08x\t%08x\t%d\t%08x\t%04x\t%d\t%02x\t%02x\t%04x\t%04x\t%04x\t%04x\t%04x\t%04x\t%04x\t%04x\t%04x\t%04x\t%04x\t%04x\t%04x\t%04x\t%02x\t%08x\t%08x\t%08x\t%08x\t%08x\t%08x\t%04x\t%04x\t%04x\t%04x\t%02x\t%d\t%04x\t%08x\t%08x\t%08x\t%08x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\n",
+        frame, pc, u16(obstacle_slot + 4), u16(obstacle_slot + 6),
+        u8(obstacle_slot), u8(obstacle_slot + 2), u8(obstacle_slot + 8),
+        u8(obstacle_slot + 0x0f), u32(obstacle_slot + 0x10),
+        u32(obstacle_slot + 0x14), s16(u16(obstacle_slot + 0x18)),
+        u32(obstacle_slot + 0x1c), u16(obstacle_slot + 0x0a),
+        s16(u16(obstacle_slot + 0x24)), u8(obstacle_slot + 6),
+        u8(obstacle_slot + 0x0c), u16(obstacle_slot + 0x18),
+        u16(obstacle_slot + 0x24), u16(obstacle_slot + 0x2a),
+        u16(obstacle_slot + 0x2e), u16(obstacle_slot + 0x30),
+        u16(obstacle_slot + 0x32), u16(obstacle_slot + 0x34),
+        u16(obstacle_slot + 0x36), u16(obstacle_slot + 0x38),
+        u16(obstacle_slot + 0x3a), u16(obstacle_slot + 0x3c),
+        u16(obstacle_slot + 0x3e), u16(obstacle_slot + 0x40),
+        u16(obstacle_slot + 0x42), u8(obstacle_slot + 0x4f),
+        u32(obstacle_slot + 0x50), u32(obstacle_slot + 0x58),
+        u32(obstacle_slot + 0x60), u32(obstacle_slot + 0x64),
+        u32(obstacle_slot + 0x68), u32(obstacle_slot + 0x6c),
+        u16(obstacle_slot + 0x78), u16(obstacle_slot + 0x7a),
+        u16(obstacle_slot + 0x7c), u16(obstacle_slot + 0x7e),
+        u8(0xffee8f),
+        u16(global + 8), u16(0xff81a8),
+        maincpu.state["D0"].value & 0xffffffff,
+        maincpu.state["D1"].value & 0xffffffff,
+        maincpu.state["D2"].value & 0xffffffff,
+        maincpu.state["D3"].value & 0xffffffff,
+        maincpu.state["A0"].value & 0xffffff,
+        maincpu.state["A1"].value & 0xffffff,
+        maincpu.state["A2"].value & 0xffffff,
+        maincpu.state["A3"].value & 0xffffff,
+        maincpu.state["A4"].value & 0xffffff,
+        maincpu.state["A5"].value & 0xffffff))
+end
+
+local obstacle_pcs = {
+    0x06de92, 0x06dea6, 0x06deac, 0x06deb0, 0x06dee0, 0x06deea,
+    0x06df0a, 0x06df10, 0x06df16, 0x06df1c, 0x06df22, 0x06df34,
+    0x06df38, 0x06df3c, 0x06df42, 0x06df48, 0x06df5a, 0x06df66,
+    0x06df6c, 0x06df72, 0x06df78, 0x06df7c, 0x06df80, 0x06df84,
+    0x06df8a, 0x06df96, 0x06dfa0, 0x06dff0, 0x06dff4, 0x06dff8,
+    0x06e00a, 0x06e010, 0x06e040, 0x06e09a, 0x06e0b2, 0x06e0fe,
+    0x06e126, 0x06e12a, 0x01d458, 0x01d466, 0x01d46c, 0x01d472,
+    0x01d4aa, 0x01d590, 0x01d598,
+}
+oracle11_obstacle_pc_taps = {}
+for _, pc in ipairs(obstacle_pcs) do
+    oracle11_obstacle_pc_taps[#oracle11_obstacle_pc_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_obstacle_%06x", pc),
+        function() emit_obstacle_trace(pc) end)
+end
+
+oracle11_obstacle_writes = program:install_write_tap(
+    obstacle_slot, obstacle_slot + 0x7f, "oracle11_obstacle_writes",
+    function(offset, data, mask)
+        if not capture_scene or frame < 1972 or frame > capture_last_frame then
+            return
+        end
+        local pc = maincpu.state["PC"].value & 0xffffff
+        local suppressed = suppress_obstacle_transition and pc == 0x01d4aa and
+            offset <= obstacle_slot + 7 and offset + 3 >= obstacle_slot + 4
+        obstacle_writes:write(string.format(
+            "%d\t%06x\t%02x\t%04x\t%04x\t%d\t%02x\t%d\t%08x\t%04x\t%d\t%d\t%02x\t%08x\t%08x\t%08x\t%08x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%08x\t%08x\t%d\n",
+            frame, pc, offset - obstacle_slot, u16(obstacle_slot + 4),
+            u16(obstacle_slot + 6), u8(obstacle_slot),
+            u8(obstacle_slot + 2), u8(obstacle_slot + 8),
+            u32(obstacle_slot + 0x1c), u16(obstacle_slot + 0x0a),
+            s16(u16(obstacle_slot + 0x24)),
+            s16(u16(obstacle_slot + 0x40)), u8(0xffee8f),
+            maincpu.state["D0"].value & 0xffffffff,
+            maincpu.state["D1"].value & 0xffffffff,
+            maincpu.state["D2"].value & 0xffffffff,
+            maincpu.state["D3"].value & 0xffffffff,
+            maincpu.state["A0"].value & 0xffffff,
+            maincpu.state["A1"].value & 0xffffff,
+            maincpu.state["A2"].value & 0xffffff,
+            maincpu.state["A3"].value & 0xffffff,
+            maincpu.state["A4"].value & 0xffffff,
+            maincpu.state["A5"].value & 0xffffff,
+            data & 0xffffffff,
+            mask & 0xffffffff, suppressed and 1 or 0))
+        if suppressed then
+            obstacle_transition_suppressed_writes =
+                obstacle_transition_suppressed_writes + 1
+            return u32(offset & 0xfffffc)
+        end
+    end)
+
+oracle11_obstacle_guard_write = program:install_write_tap(
+    0xffee8e, 0xffee8f, "oracle11_obstacle_guard_write",
+    function(offset, data, mask)
+        if not capture_scene or frame < 1972 or frame > capture_last_frame then
+            return
+        end
+        obstacle_guard:write(string.format(
+            "%d\t%06x\t%02x\t%08x\t%08x\t%d\t%04x\t%04x\t%08x\t%08x\t%08x\t%08x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\n",
+            frame, maincpu.state["PC"].value & 0xffffff, u8(0xffee8f),
+            data & 0xffffffff, mask & 0xffffffff, u16(global + 8),
+            u16(obstacle_slot + 4), u16(obstacle_slot + 6),
+            maincpu.state["D0"].value & 0xffffffff,
+            maincpu.state["D1"].value & 0xffffffff,
+            maincpu.state["D2"].value & 0xffffffff,
+            maincpu.state["D3"].value & 0xffffffff,
+            maincpu.state["A0"].value & 0xffffff,
+            maincpu.state["A1"].value & 0xffffff,
+            maincpu.state["A2"].value & 0xffffff,
+            maincpu.state["A3"].value & 0xffffff,
+            maincpu.state["A4"].value & 0xffffff,
+            maincpu.state["A5"].value & 0xffffff,
+            maincpu.state["A6"].value & 0xffffff))
+    end)
+
+oracle11_progression_pc_taps = {}
+for pc in pairs(target_pcs) do
+    oracle11_progression_pc_taps[#oracle11_progression_pc_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_progression_%06x", pc),
+        function() emit_transaction(pc) end)
+end
+
+oracle11_progression_spawn_suppress = program:install_write_tap(
+    pool, pool + count * stride - 1, "oracle11_progression_spawn_suppress",
+    function(offset, data, mask)
+        if frame < 1972 or frame > capture_last_frame then return end
+        local pc = maincpu.state["PC"].value & 0xffffff
+        local relative = offset - pool
+        local slot = pool + math.floor(relative / stride) * stride
+        local inner = relative % stride
+        local owned = (pc >= 0x028a12 and pc <= 0x028ab2) or
+            (pc >= 0x028b5a and pc <= 0x028ba4) or
+            ((slot == 0xffa3c0 or slot == 0xffa000) and
+             pc >= 0x060532 and pc <= 0x061152)
+        if not owned then return end
+        local suppressed = suppress_spawn and pc == 0x028a3e and inner <= 1
+        writes:write(string.format(
+            "%d\t%06x\t%02x\t%06x\t%06x\t%08x\t%08x\t%08x\t%02x\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%04x\t%d\n",
+            frame, slot, inner, pc, maincpu.state["A6"].value & 0xffffff,
+            u32(offset & 0xfffffc), data & 0xffffffff, mask & 0xffffffff,
+            u8(global + 0x19), u16(0xff1a18), u16(0xff1a1a),
+            u16(controller + 4), u16(controller + 6),
+            u16(controller + 0x40), u16(controller + 0x4a),
+            u16(controller + 0x10),
+            s16(u16(global + 0x278)), s16(u16(global + 0x27c)),
+            u16(0xff81a8), suppressed and 1 or 0))
+        if suppressed then
+            suppressed_writes = suppressed_writes + 1
+            return u32(offset & 0xfffffc)
+        end
+    end)
+
+oracle11_progression_global_writes = program:install_write_tap(
+    0xff1a10, 0xff1a13, "oracle11_progression_global_writes",
+    function(offset, data, mask)
+        if frame < 1972 or frame > capture_last_frame then return end
+        local pc = maincpu.state["PC"].value & 0xffffff
+        local a6 = maincpu.state["A6"].value & 0xffffff
+        local owner_type = 0
+        if a6 >= pool and a6 < pool + count * stride and
+                ((a6 - pool) % stride) == 0 then
+            owner_type = 12
+        elseif a6 >= pool24 and a6 < pool24 + count24 * stride24 and
+                ((a6 - pool24) % stride24) == 0 then
+            owner_type = 24
+        end
+        local owner_ok = owner_type ~= 0
+        local suppressed = suppress_guard and pc == 0x08da38
+        global_writes:write(string.format(
+            "%d\t%06x\t%06x\t%06x\t%d\t%02x\t%d\t%d\t%d\t%08x\t%08x\t%08x\t%02x\t%d\t%d\t%02x\t%d\n",
+            frame, offset, pc, a6, owner_ok and u8(a6) or 0,
+            owner_ok and u8(a6 + 2) or 0, owner_type,
+            owner_ok and u16(a6 + 4) or 0, owner_ok and u16(a6 + 6) or 0,
+            u32(offset & 0xfffffc), data & 0xffffffff, mask & 0xffffffff,
+            u8(0xff1a11), u16(controller + 4), u16(controller + 0x42),
+            u8(global + 0x19), suppressed and 1 or 0))
+        if suppressed then return (data | mask) & 0xffffffff end
+    end)
+
+oracle11_progression_lifecycle_writes = program:install_write_tap(
+    0xff1a18, 0xff1a1b, "oracle11_progression_lifecycle_writes",
+    function(offset, data, mask)
+        if not capture_lifecycle or frame < 1972 or frame > capture_last_frame then return end
+        local pc = maincpu.state["PC"].value & 0xffffff
+        local a6 = maincpu.state["A6"].value & 0xffffff
+        local owner_ok = a6 >= pool and a6 < pool + count * stride and
+            ((a6 - pool) % stride) == 0
+        local suppressed = suppress_lifecycle and pc == 0x061152 and
+            offset <= 0xff1a19 and u16(0xff1a18) ~= 0
+        lifecycle_writes:write(string.format(
+            "%d\t%06x\t%06x\t%06x\t%d\t%02x\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%08x\t%d\t%d\t%08x\t%08x\t%d\n",
+            frame, offset, pc, a6, owner_ok and u8(a6) or 0,
+            owner_ok and u8(a6 + 2) or 0, owner_ok and u8(a6 + 8) or 0,
+            owner_ok and u16(a6 + 4) or 0,
+            owner_ok and u16(a6 + 6) or 0,
+            owner_ok and s16(u16(a6 + 0x10)) or 0,
+            owner_ok and s16(u16(a6 + 0x14)) or 0,
+            owner_ok and s16(u16(a6 + 0x18)) or 0,
+            owner_ok and s16(u16(a6 + 0x40)) or 0,
+            owner_ok and u32(a6 + 0x1c) or 0,
+            u16(0xff1a18), u16(0xff1a1a), data & 0xffffffff,
+            mask & 0xffffffff, suppressed and 1 or 0))
+        if suppressed then
+            lifecycle_suppressed_writes = lifecycle_suppressed_writes + 1
+            return u16(0xff1a18)
+        end
+    end)
+
+oracle11_progression_class1f_transition_writes = program:install_write_tap(
+    pool, pool + count * stride - 1,
+    "oracle11_progression_class1f_transition_writes",
+    function(offset, data, mask)
+        if not capture_lifecycle or frame < 2070 or frame > 2700 then return end
+        local relative = offset - pool
+        local slot = pool + math.floor(relative / stride) * stride
+        local inner = relative % stride
+        if inner > 7 or inner + 3 < 4 then return end
+        local pc = maincpu.state["PC"].value & 0xffffff
+        local a6 = maincpu.state["A6"].value & 0xffffff
+        if u8(slot + 2) ~= 0x1f or u8(slot + 8) ~= 12 then return end
+        local suppressed = suppress_transition_pc ~= nil and
+            pc == suppress_transition_pc
+        class1f_transitions:write(string.format(
+            "%d\t%06x\t%02x\t%06x\t%06x\t%d\t%02x\t%d\t%04x\t%04x\t%d\t%d\t%d\t%d\t%d\t%08x\t%04x\t%02x\t%04x\t%04x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%04x\t%02x\t%02x\t%02x\t%02x\t%04x\t%d\t%d\t%04x\t%04x\t%d\t%d\t%d\t%d\t%d\t%08x\t%d\t%d\t%08x\t%08x\t%08x\t%08x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%08x\t%08x\t%d\n",
+            frame, slot, inner, pc, a6, u8(slot), u8(slot + 2),
+            u8(slot + 8), u16(slot + 4), u16(slot + 6),
+            u8(slot + 0x0f), s16(u16(slot + 0x10)),
+            s16(u16(slot + 0x14)), s16(u16(slot + 0x18)),
+            s16(u16(slot + 0x40)), u32(slot + 0x1c),
+            u16(slot + 0x2a), u8(slot + 0x01), u16(slot + 0x0a),
+            u16(slot + 0x24), u8(slot + 0x2b), u8(slot + 0x5c),
+            u8(slot + 0x6e), u8(slot + 0x85), u8(slot + 0x96),
+            u8(slot + 0xa2), u8(slot + 0xa3), u8(slot + 0xa4),
+            u8(slot + 0xa5), u8(slot + 0xa6), u8(slot + 0xac),
+            u8(slot + 0xad), u8(slot + 0xae), u16(slot + 0xaa),
+            u8(slot + 0xb0), u8(slot + 0x0c), u8(0xff8209),
+            u8(0xff9a10), u16(0xff9a1c), u16(0xff1a18),
+            u16(0xff1a1a), u16(0xff8384), u16(0xff8386),
+            u8(0xff838f), s16(u16(0xff8390)), s16(u16(0xff8394)),
+            s16(u16(0xff8398)), s16(u16(0xff83c0)),
+            u32(0xff839c), u8(0xff8425), u8(0xff8426),
+            maincpu.state["D0"].value & 0xffffffff,
+            maincpu.state["D1"].value & 0xffffffff,
+            maincpu.state["D2"].value & 0xffffffff,
+            maincpu.state["D3"].value & 0xffffffff,
+            maincpu.state["A0"].value & 0xffffff,
+            maincpu.state["A1"].value & 0xffffff,
+            maincpu.state["A2"].value & 0xffffff,
+            maincpu.state["A3"].value & 0xffffff,
+            maincpu.state["A4"].value & 0xffffff,
+            maincpu.state["A5"].value & 0xffffff,
+            data & 0xffffffff, mask & 0xffffffff, suppressed and 1 or 0))
+        if suppressed then return u32(offset & 0xfffffc) end
+    end)
+
+local function emit_slot(slot)
+    snapshots:write(string.format(
+        "%d\t%06x\t%d\t%02x\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%02x\t%d\t%02x\t%d\t%08x\n",
+        frame, slot, u8(slot), u8(slot + 2), u8(slot + 8),
+        u16(slot + 4), u16(slot + 6), u8(slot + 0x0f),
+        s16(u16(slot + 0x10)), s16(u16(slot + 0x14)),
+        s16(u16(slot + 0x18)), u8(slot + 3), u16(slot + 0x2a),
+        u8(slot + 0x83), s16(u16(slot + 0x40)), u32(slot + 0x1c)))
+end
+
+local function emit_scene_actor(pool_spec, index)
+    local slot = pool_spec.base + index * pool_spec.stride
+    if u8(slot) == 0 then return end
+    local health = pool_spec.has_health and
+        tostring(s16(u16(slot + 0x40))) or "na"
+    local hurt_selector = pool_spec.has_collision_selectors and
+        string.format("%02x", u8(slot + 0xa5)) or "na"
+    local attack_selector = pool_spec.has_collision_selectors and
+        string.format("%02x", u8(slot + 0xa6)) or "na"
+    scene_actors:write(string.format(
+        "%d\t%s\t%d\t%06x\t%d\t%d\t%02x\t%02x\t%04x\t%04x\t%d\t%08x\t%08x\t%d\t%08x\t%04x\t%d\t%04x\t%s\t%s\t%s\n",
+        frame, pool_spec.name, index, slot, u8(slot), u8(slot + 8),
+        u8(slot + 2), u8(slot + 3), u16(slot + 4), u16(slot + 6),
+        u8(slot + 0x0f), u32(slot + 0x10), u32(slot + 0x14),
+        s16(u16(slot + 0x18)), u32(slot + 0x1c), u16(slot + 0x0a),
+        s16(u16(slot + 0x24)), u16(slot + 0x2a),
+        health, hurt_selector, attack_selector))
+end
+
+local function install_scene_health_tap(first, last, stride_value, pool_name)
+    return program:install_write_tap(first, last,
+        "oracle11_scene_health_" .. pool_name,
+        function(offset, data, mask)
+            if not capture_scene or frame < 1972 or
+                    frame > capture_last_frame then return end
+            local relative = offset - first
+            local slot = first + math.floor(relative / stride_value) * stride_value
+            local inner = relative % stride_value
+            if inner < 0x40 or inner > 0x41 then return end
+            local pc = maincpu.state["PC"].value & 0xffffff
+            scene_health_writes:write(string.format(
+                "%d\t%s\t%06x\t%06x\t%06x\t%06x\t%06x\t%04x\t%04x\t%04x\t%04x\t%08x\t%d\n",
+                frame, pool_name, slot, pc,
+                maincpu.state["A6"].value & 0xffffff,
+                maincpu.state["A1"].value & 0xffffff,
+                maincpu.state["A3"].value & 0xffffff,
+                u16(slot + 4), u16(slot + 6), u16(slot + 0x40),
+                data & 0xffff, mask & 0xffffffff,
+                (pc == 0x01d590 or pc == 0x01d5ee) and 1 or 0))
+            if pc == 0x01d5ee then emit_type16_collision(pc) end
+        end)
+end
+
+oracle11_scene_health_taps = {
+    install_scene_health_tap(0xff8380, 0xff847f, 0x100, "player"),
+    install_scene_health_tap(0xff9580, 0xffa47f, 0xc0, "record12"),
+    install_scene_health_tap(0xffae80, 0xffb67f, 0x80, "record20"),
+}
+
+oracle11_progression_frame = emu.add_machine_frame_notifier(function()
+    frame = frame + 1
+    suppress_selected_scene_pair()
+    if frame >= 1972 and frame <= capture_last_frame then
+        controller_samples:write(string.format(
+            "%d\t%d\t%02x\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%02x\t%02x\t%02x\t%02x\t%d\t%d\t%d\t%d\n",
+            frame, u8(controller), u8(controller + 2), u8(controller + 8),
+            u16(controller + 4), u16(controller + 6), u16(controller + 0x10),
+            u16(controller + 0x40), u16(controller + 0x42),
+            u16(controller + 0x44), u16(controller + 0x46),
+            u16(controller + 0x48), u16(controller + 0x4a),
+            u8(controller + 0x2c), u8(controller + 0x2e),
+            u8(0xff1a11), u8(global + 0x19), u16(0xff1a18), u16(0xff1a1a),
+            s16(u16(global + 0x278)), s16(u16(global + 0x27c))))
+    end
+    if (frame >= 2505 and frame <= 2515) or
+        (frame >= 3978 and frame <= 3988) then
+        emit_slot(0xffa3c0)
+        emit_slot(0xffa000)
+    end
+    if capture_lifecycle and frame >= 2300 and frame <= 2610 then
+        for slot = 0xff9d00, 0xffa3c0, stride do emit_slot(slot) end
+    end
+    if capture_scene and frame >= 1972 and frame <= capture_last_frame then
+        scene_frames:write(string.format(
+            "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%08x\t%08x\t%d\t%d\t%d\t%d\t%d\t%04x\n",
+            frame, u16(global + 8), u16(controller + 4),
+            u16(controller + 6), u16(controller + 0x40),
+            u16(controller + 0x42), u16(0xff1a18), u16(0xff1a1a),
+            u8(0xff8380), u16(0xff8384), u16(0xff8386),
+            u8(0xff838f), u32(0xff8390), u32(0xff8394),
+            s16(u16(0xff8398)), s16(u16(0xff83c0)),
+            s16(u16(global + 0x278)), s16(u16(global + 0x27c)),
+            s16(u16(global + 0x32)), u16(0xff81a8)))
+        if u8(0xff8380) ~= 0 then
+            scene_actors:write(string.format(
+                "%d\tplayer\t0\tff8380\t%d\t0\t%02x\t00\t%04x\t%04x\t%d\t%08x\t%08x\t%d\t%08x\t%04x\t%d\t%04x\t%d\t%02x\t%02x\n",
+                frame, u8(0xff8380), u8(0xff8382), u16(0xff8384),
+                u16(0xff8386), u8(0xff838f), u32(0xff8390),
+                u32(0xff8394), s16(u16(0xff8398)), u32(0xff839c),
+                u16(0xff838a), s16(u16(0xff83a4)), u16(0xff83aa),
+                s16(u16(0xff83c0)), u8(0xff83a5), u8(0xff83a6)))
+        end
+        for _, pool_spec in ipairs(scene_pools) do
+            for index = 0, pool_spec.count - 1 do
+                emit_scene_actor(pool_spec, index)
+            end
+        end
+    end
+    if frame == capture_last_frame then
+        result:write(table.concat({suppress_spawn and 1 or 0,
+            suppress_guard and 1 or 0, main_spawns,
+            aux_spawns, suppressed_writes, lifecycle_suppressed_writes,
+            action4_timer_events, action4_timer_suppressed_writes,
+            type4_class03_suppressed_writes,
+            coffee_stage_rng_suppressed_writes,
+            type36_suppressed_writes,
+            scene_pair_suppressed_actors,
+            obstacle_transition_suppressed_writes,
+            u8(global + 9)}, "\t") .. "\n")
+        transactions:close(); snapshots:close(); writes:close(); global_writes:close()
+        controller_samples:close(); lifecycle_writes:close()
+        class1f_transitions:close(); action4_timers:close()
+        scene_actors:close(); scene_frames:close()
+        scene_health_writes:close(); type4_class03:close()
+        scene_rng_calls:close(); stage_setup:close(); stage_setup_writes:close()
+        class1f_bounds:close(); type36_writes:close()
+        pair_suppression:close(); obstacle_trace:close(); obstacle_writes:close()
+        component20_writes:close(); component20_dispatch:close()
+        component20_collision:close()
+        component20_global:close()
+        obstacle_guard:close()
+        type16_collision:close()
+        result:close()
+    end
+end)
+
+dofile("tools/mame_capture_oracle11_player_audio.lua")

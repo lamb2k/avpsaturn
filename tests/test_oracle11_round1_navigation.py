@@ -102,6 +102,34 @@ mutant["obstacle_response"]["implementation_contract"]["minimum_penetration"]["a
 reject(mutant, "minimum-penetration axis branch replaced")
 
 mutant = copy.deepcopy(report)
+mutant["obstacle_response"]["lifecycle_contract"]["source_scene_record"]["camera_threshold_u16"] = 689
+reject(mutant, "Coffee Shop obstacle spawn threshold changed")
+
+mutant = copy.deepcopy(report)
+mutant["obstacle_response"]["lifecycle_contract"]["initializer"]["child_allocation"]["variant_order_u8"] = [0, 1, 2, 3]
+reject(mutant, "Coffee Shop obstacle child allocation order changed")
+
+mutant = copy.deepcopy(report)
+mutant["obstacle_response"]["lifecycle_contract"]["state_program"]["state_0404"]["completion_guard"] = "fixed frame"
+reject(mutant, "Coffee Shop obstacle completion guard replaced")
+
+mutant = copy.deepcopy(report)
+mutant["obstacle_response"]["lifecycle_contract"]["transition_suppression"]["suppressed_writes"] = 0
+reject(mutant, "Coffee Shop obstacle suppression control removed")
+
+mutant = copy.deepcopy(report)
+mutant["obstacle_response"]["lifecycle_contract"]["child_presentation"]["dispatch_table"]["offsets_u16"][1] = 50
+reject(mutant, "Coffee Shop obstacle child dispatch changed")
+
+mutant = copy.deepcopy(report)
+mutant["obstacle_response"]["lifecycle_contract"]["child_presentation"]["state_program"]["state_0200"]["guard"] = "fixed frame"
+reject(mutant, "Coffee Shop obstacle child parent-state guard replaced")
+
+mutant = copy.deepcopy(report)
+mutant["obstacle_response"]["lifecycle_contract"]["state_program"]["state_0200"]["player_trigger"]["edge_to_damage_ticks_u8"] = 13
+reject(mutant, "Coffee Shop obstacle special contact timing changed")
+
+mutant = copy.deepcopy(report)
 record = next(item for item in mutant["terrain_resolver"]["records"]
               if item["address"] == "0x0b218e")
 record["decoded_six_fields"]["z_parameter_s8"] = -8
@@ -129,4 +157,4 @@ mutant = copy.deepcopy(report)
 mutant["camera"]["implementation_contract"]["world_to_plane_order"]["raw_pattern_name_offset_forbidden"] = False
 reject(mutant, "raw camera coordinate submitted as plane offset")
 
-print("ORACLE-11 Round 1 navigation tests: PASS (23 mutations rejected)")
+print("ORACLE-11 Round 1 navigation tests: PASS (30 mutations rejected)")

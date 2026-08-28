@@ -31,6 +31,8 @@ FIRST_SEGMENT_ACTION_SUPPRESS = ROOT / ".deps" / "mame" / "oracle11_progression_
 COFFEE_SHOP_SCENE_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs3a"
 COFFEE_SHOP_SCENE_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs3b"
 COFFEE_SHOP_SCENE_TIMER_SUPPRESS = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs3s"
+COFFEE_SHOP_BOUNDS_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs14a"
+COFFEE_SHOP_BOUNDS_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs14b"
 OUT = ROOT / "data" / "oracle11_round1_enemy_archetypes.json"
 FILES = ("enemy_samples.tsv", "enemy_entries.tsv", "enemy_writes.tsv",
          "enemy_rng.tsv", "player_damage.tsv", "samples.tsv", "dispatches.tsv",
@@ -202,6 +204,24 @@ def class1f_first_segment_action_contract(program: bytes,
                         for name in COFFEE_SHOP_SCENE_FILES}
     require(scene_identity_a == scene_identity_b,
             "Coffee Shop full-pool scene captures differ")
+    bounds_name = "coffee_shop_class1f_source_bounds.tsv"
+    bounds_identity_a = digest(COFFEE_SHOP_BOUNDS_A / bounds_name)
+    bounds_identity_b = digest(COFFEE_SHOP_BOUNDS_B / bounds_name)
+    require(bounds_identity_a == bounds_identity_b,
+            "Coffee Shop class-0x1f bounds captures differ")
+    bounds_rows = rows(COFFEE_SHOP_BOUNDS_A / bounds_name)
+    first_a000 = [row for row in bounds_rows
+                  if row["slot"] == "ffa000" and row["frame"] == "2310"]
+    require([row["pc"] for row in first_a000] ==
+                ["060c2e", "060c34", "060c3e", "060c70"] and
+            all(row["actor_x_u16"] == "0258" and
+                row["operand_address"] == "ff8278" and
+                row["operand_u16"] == "02d0" and
+                row["field01"] == "00" and row["fielda2"] == "00"
+                for row in first_a000) and
+            all(row["opcode_window_bytes"] ==
+                opcodes[0x060C2E:0x060C68].hex() for row in first_a000),
+            "Coffee Shop class-0x1f source-bounds operand/guard drift")
     baseline = rows(FIRST_SEGMENT_ACTION_A /
                     "progression_class1f_transitions.tsv")
     suppressed = rows(FIRST_SEGMENT_ACTION_SUPPRESS /
@@ -293,6 +313,9 @@ def class1f_first_segment_action_contract(program: bytes,
     require(opcodes[0x06084E:0x0608B0].hex() ==
             "4a2e00a266140c6e05f0001062464a2e0001672a1d7c000100a2082d000000196614302e0010906d0278064000700c400260622060086100060e6600064e610006a8610007a04eb9000165c43d6e001400184e751cbc00022d7c0600000000044e75",
             "class-0x1f action-2 body drift")
+    require(opcodes[0x0165C4:0x016620].hex() ==
+            "536e000a6654206e001c41e800104a6e00246a0220502d48001c3d50000a3d6800020024102e00250240003f672ce54841fa0b9220700000102e000c0240001fe54841f00000301848c0e180d1ae0010301048c0e180d1ae00144e75",
+            "class-0x1f animation/movement helper drift")
     jump_vectors = [int.from_bytes(opcodes[address:address + 4], "big",
                                   signed=True)
                     for address in range(0x060AC8, 0x060AD8, 4)]
@@ -376,7 +399,12 @@ def class1f_first_segment_action_contract(program: bytes,
                              "coffee_shop_scene_a": scene_identity_a,
                              "coffee_shop_scene_b": scene_identity_b,
                              "coffee_shop_scene_byte_identical": True,
-                             "action4_timer_suppression": scene_identity_s},
+                             "action4_timer_suppression": scene_identity_s,
+                             "source_bounds_a": {bounds_name:
+                                                  bounds_identity_a},
+                             "source_bounds_b": {bounds_name:
+                                                  bounds_identity_b},
+                             "source_bounds_byte_identical": True},
         "record_layout": {"state_inner_u16": "actor+0x04",
                           "action_substate_u16": "actor+0x06",
                           "facing_u8": "actor+0x0f",
@@ -436,11 +464,60 @@ def class1f_first_segment_action_contract(program: bytes,
         "attack_timer_table_u8": list(opcodes[0x060D3C:0x060D4C]),
         "action_programs": {
             "source_bounds": {
+                "entry_pc": "0x060c2e",
+                "activation_field_u8": "actor+0x01",
+                "latched_field_u8": "actor+0xa2",
+                "initial_branch_order": [
+                    "if actor+0xa2_u8 != 0 skip the x_max and activation tests",
+                    "compare actor+0x10_u16 to x_max_u16; unsigned above releases",
+                    "if actor+0x01_u8 == 0 pass without the camera-relative test",
+                    "otherwise write 1 to actor+0xa2_u8 and continue"],
+                "phase_guard_field_u8": "0xff8019",
+                "phase_guard_mask_u8": 1,
+                "phase_guard_zero_path": "camera-relative unsigned comparison",
+                "phase_guard_nonzero_path": "player proximity helper 0x060e94; nonzero enters 0x060ed8 rather than release",
+                "camera_operand_u16": "0xff8278",
                 "x_max_u16": 0x05f0,
                 "camera_relative_bias_u16": 0x0070,
                 "camera_relative_span_u16": 0x0260,
                 "failure_outer_state_u16": 0x0600,
-                "comparison": "unsigned word"},
+                "comparison": "unsigned word",
+                "coffee_shop_observation": {
+                    "source_frame": 2310,
+                    "source_slot": "0x00ffa000",
+                    "actor_x_u16": "0x0258",
+                    "camera_operand_u16": "0x02d0",
+                    "activation_field_u8": 0,
+                    "latched_field_u8": 0,
+                    "result": "pass after x_max; camera-relative test skipped"}},
+            "animation_movement_helper_0x0165c4": {
+                "entry_pc": "0x0165c4",
+                "source_window": source_window(opcodes, 0x0165C4),
+                "source_body_sha256":
+                    hashlib.sha256(opcodes[0x0165C4:0x016620]).hexdigest(),
+                "timer_field_u16": "actor+0x0a",
+                "record_field_u32": "actor+0x1c",
+                "branch_field_s16": "actor+0x24",
+                "direction_field_u8": "actor+0x0c",
+                "x_field_s32_16_16": "actor+0x10",
+                "y_field_s32_16_16": "actor+0x14",
+                "branch_order": [
+                    "decrement timer_u16 once",
+                    "if timer_u16 remains nonzero return without record advance or movement",
+                    "advance record pointer by 16 bytes",
+                    "if prior branch_s16 was negative replace the advanced pointer with its u32 jump target",
+                    "write the next record pointer, timer_u16, and branch_s16",
+                    "movement_table_u8 = low 6 bits of next record byte +3",
+                    "if movement_table_u8 is zero return",
+                    "direction_u8 = low 5 bits of actor+0x0c",
+                    "read signed x/y deltas from movement_table[direction_u8]",
+                    "add each signed delta shifted left 8 to actor x/y s32 16.16"],
+                "movement_cadence":
+                    "only on timer expiry after binding the next animation record",
+                "movement_record": "newly bound next animation record",
+                "movement_scale": "signed s16 << 8",
+                "return_path_without_movement":
+                    "timer remains nonzero or next record movement_table_u8 is zero"},
             "direction_helper_0x061032": {
                 "upper_lane_u16": 0x0140,
                 "lower_lane_u16": 0x00e8,
@@ -503,10 +580,14 @@ def class1f_first_segment_action_contract(program: bytes,
             "action_0x0e": {
                 "substates_u8": [0, 2, 4], "initial_selector_u8": 77,
                 "landing_selector_u8": 62,
-                "x_velocity_table_s32_16_16": jump_vectors,
+                "z_velocity_table_s32_16_16": jump_vectors,
                 "y_velocity_s32_16_16": 0x00038000,
                 "y_acceleration_s32_16_16": -0x00008000,
                 "initial_y_add_s16": 0x20,
+                "rng_index": "(rng_u16 & 0x000c) selects one signed 16.16 long",
+                "velocity_axis": "actor+0x18 signed 16.16 lane/z; actor+0x10 x is unchanged",
+                "airborne_step": "z_fp += z_velocity; y_fp += y_velocity; y_velocity += y_acceleration; continue while u16(z_high) < u16(y_high)",
+                "landing_writes": ["y_high = z_high", "coordinate_mode_u8 = 0", "substate_low_u8 += 2", "bind selector 62"],
                 "terminal_style85_u8": 1,
                 "terminal_next_action_u8": 0,
                 "rng_calls": 1},
@@ -570,7 +651,9 @@ def class1f_first_segment_action_contract(program: bytes,
                               "wrong action-4 stage parameter",
                               "wrong action-4 timer row",
                               "wrong action-4 RNG index",
-                              "suppressed action-4 timer write"],
+                              "suppressed action-4 timer write",
+                              "wrong source-bounds activation guard",
+                              "wrong animation movement cadence"],
     }
 
 
@@ -1320,18 +1403,43 @@ def validate(report: dict[str, object]) -> None:
                     actions["attack_timer_table_u8"] ==
                         [30, 30, 30, 30, 60, 60, 60, 60,
                          120, 120, 120, 120, 160, 160, 160, 160] and
-                    actions["action_programs"]["source_bounds"] == {
-                        "x_max_u16": 0x05f0,
-                        "camera_relative_bias_u16": 0x0070,
-                        "camera_relative_span_u16": 0x0260,
-                        "failure_outer_state_u16": 0x0600,
-                        "comparison": "unsigned word"} and
+                    actions["action_programs"]["source_bounds"]
+                        ["activation_field_u8"] == "actor+0x01" and
+                    actions["action_programs"]["source_bounds"]
+                        ["latched_field_u8"] == "actor+0xa2" and
+                    actions["action_programs"]["source_bounds"]
+                        ["camera_operand_u16"] == "0xff8278" and
+                    actions["action_programs"]["source_bounds"]
+                        ["phase_guard_field_u8"] == "0xff8019" and
+                    actions["action_programs"]["source_bounds"]
+                        ["x_max_u16"] == 0x05f0 and
+                    actions["action_programs"]["source_bounds"]
+                        ["camera_relative_bias_u16"] == 0x0070 and
+                    actions["action_programs"]["source_bounds"]
+                        ["camera_relative_span_u16"] == 0x0260 and
+                    actions["action_programs"]["source_bounds"]
+                        ["failure_outer_state_u16"] == 0x0600 and
+                    actions["action_programs"]["source_bounds"]
+                        ["coffee_shop_observation"]["result"] ==
+                            "pass after x_max; camera-relative test skipped" and
+                    actions["action_programs"]
+                        ["animation_movement_helper_0x0165c4"]
+                        ["source_body_sha256"] ==
+                            "b35c9aaf0a5328ff35e6ccb5c9d278fef7f898201fc6e005e69d11bd566a970b" and
+                    actions["action_programs"]
+                        ["animation_movement_helper_0x0165c4"]
+                        ["movement_cadence"] ==
+                            "only on timer expiry after binding the next animation record" and
+                    actions["action_programs"]
+                        ["animation_movement_helper_0x0165c4"]
+                        ["movement_record"] ==
+                            "newly bound next animation record" and
                     actions["action_programs"]["direction_helper_0x061032"]
                         ["upper_directions_by_a5_u8"] == [0x16, 0x0a] and
                     actions["action_programs"]["direction_helper_0x061032"]
                         ["lower_directions_by_a5_u8"] == [0x1a, 0x06] and
                     actions["action_programs"]["action_0x0e"]
-                        ["x_velocity_table_s32_16_16"] ==
+                        ["z_velocity_table_s32_16_16"] ==
                         [-0x00010000, -0x00014000,
                          -0x00018000, -0x00020000] and
                     actions["action_programs"]["action_0x04"]
@@ -1356,7 +1464,7 @@ def validate(report: dict[str, object]) -> None:
                         is False and
                     actions["suppression_control"]["action4_timer"]
                         ["suppressed_writes"] == 1 and
-                    len(actions["mutation_controls"]) == 15,
+                    len(actions["mutation_controls"]) == 17,
                     "0x1f: first-segment action execution contract drift")
     require(all(value == 0 for key, value in report["coverage"].items()
                 if key.startswith("orphan_")) and

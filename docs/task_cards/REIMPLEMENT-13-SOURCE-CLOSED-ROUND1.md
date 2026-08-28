@@ -255,11 +255,32 @@ corruption. The `WARRIOR` row is the P1 equipment meter; the separate
 union is now included in the Saturn emit/tile working set, with omission locked
 by a real mutation control.
 
-The next body is the first segment encounter-clear and dynamic route-progression
-boundary. Implement its source-owned post-clear guards and continued native
-authority from accepted SPEC-02. Retained code remains presentation-only. Do
-not leave the first segment until the complete interactive regression gate
-passes.
+The source scene-population gate is now active before encounter-clear or the
+next scene. Incremental commit `874ce2b3e0800554cc087d3b7fd40fb3d13de359`
+preserves the complete source census; it is evidence, not promotion of the
+runtime candidate. The focused class-`0x1f` type-`16`/class-`0x06` projectile
+body is source-bound through SPEC-02 and native C and rejects 150 real host
+mutations. It binds the exact fixed-pool allocation, three-row signed 16.16
+motion table, current attack record `0x03589e`, player hurt record `0x11ae8e`,
+17-point damage write, presentation records, lifetime and release rules.
+Fast, Oracle and LiveEncounter Target BUILD_ONLY pass. The SH-2 runtime is
+measured at `0x135e4` and guarded inside a policy-compliant `0x18000` cartridge
+arena with 19.3% headroom; the residency ledger and readback base are bound to
+that exact layout.
+
+Whole-scene parity remains open: 405 source lifetimes are missing, including
+all nine type-`16` lifetimes; 1,365 source spawn/despawn edges, 37 active states,
+94 collision/damage events, 3 route/camera events and 281 audio/load events
+remain unmapped or unowned. Zero retained gameplay authorities and zero unowned
+Saturn actors are preserved.
+
+The exact next body is the smallest source class-`0x1f` current-state action
+path that naturally enters inner state `0x08`, reaches action `0x0e02`, and
+drives the accepted type-`16` emitter. Source actor bytes `+4=0x02` and
+`+5=0x08` are represented by native combined state `0x0208`; do not treat it
+as a separate outer dispatch state and do not substitute a fixed frame. Rerun
+the whole Coffee Shop source/native census after the body and do not leave the
+scene until its zero-gap gate passes.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.

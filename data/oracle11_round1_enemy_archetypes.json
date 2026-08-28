@@ -27575,7 +27575,7 @@
         "writes": 153166
       },
       "current_state_implementation_contract": {
-        "accepted_encounter_authority_sha256": "b8409751044c87851285c490deb1c737f340a1ef13e673cf5e62e65fefd9782d",
+        "accepted_encounter_authority_sha256": "58105bf7cdf0cdb78f3304fea455014661e9a94322a2cc83c181c5bd4e416c3e",
         "accepted_oracle09_sha256": "a3027c3ffcd19af2656c515e0dfc0e9c56086b1bf3dd029e854d74be372c847f",
         "actions": {
           "above_lane_0x0600": {
@@ -34876,10 +34876,18 @@
             "y_delta_s32_16_16": -8192
           },
           "action_0x0e": {
+            "airborne_step": "z_fp += z_velocity; y_fp += y_velocity; y_velocity += y_acceleration; continue while u16(z_high) < u16(y_high)",
             "initial_selector_u8": 77,
             "initial_y_add_s16": 32,
             "landing_selector_u8": 62,
+            "landing_writes": [
+              "y_high = z_high",
+              "coordinate_mode_u8 = 0",
+              "substate_low_u8 += 2",
+              "bind selector 62"
+            ],
             "rng_calls": 1,
+            "rng_index": "(rng_u16 & 0x000c) selects one signed 16.16 long",
             "substates_u8": [
               0,
               2,
@@ -34887,14 +34895,15 @@
             ],
             "terminal_next_action_u8": 0,
             "terminal_style85_u8": 1,
-            "x_velocity_table_s32_16_16": [
+            "velocity_axis": "actor+0x18 signed 16.16 lane/z; actor+0x10 x is unchanged",
+            "y_acceleration_s32_16_16": -32768,
+            "y_velocity_s32_16_16": 229376,
+            "z_velocity_table_s32_16_16": [
               -65536,
               -81920,
               -98304,
               -131072
-            ],
-            "y_acceleration_s32_16_16": -32768,
-            "y_velocity_s32_16_16": 229376
+            ]
           },
           "action_0x16": {
             "actor_separation_helper": "0x060f36",
@@ -34955,6 +34964,37 @@
             "timer_field": "timer_aa_u8",
             "zero_next_action_u8": 0
           },
+          "animation_movement_helper_0x0165c4": {
+            "branch_field_s16": "actor+0x24",
+            "branch_order": [
+              "decrement timer_u16 once",
+              "if timer_u16 remains nonzero return without record advance or movement",
+              "advance record pointer by 16 bytes",
+              "if prior branch_s16 was negative replace the advanced pointer with its u32 jump target",
+              "write the next record pointer, timer_u16, and branch_s16",
+              "movement_table_u8 = low 6 bits of next record byte +3",
+              "if movement_table_u8 is zero return",
+              "direction_u8 = low 5 bits of actor+0x0c",
+              "read signed x/y deltas from movement_table[direction_u8]",
+              "add each signed delta shifted left 8 to actor x/y s32 16.16"
+            ],
+            "direction_field_u8": "actor+0x0c",
+            "entry_pc": "0x0165c4",
+            "movement_cadence": "only on timer expiry after binding the next animation record",
+            "movement_record": "newly bound next animation record",
+            "movement_scale": "signed s16 << 8",
+            "record_field_u32": "actor+0x1c",
+            "return_path_without_movement": "timer remains nonzero or next record movement_table_u8 is zero",
+            "source_body_sha256": "b35c9aaf0a5328ff35e6ccb5c9d278fef7f898201fc6e005e69d11bd566a970b",
+            "source_window": {
+              "first": "0x0165bc",
+              "last_exclusive": "0x0165d4",
+              "sha256": "c0bab97c09a8500d9d880cd4479b24993e30727fb3e38f0691e355d562edeec1"
+            },
+            "timer_field_u16": "actor+0x0a",
+            "x_field_s32_16_16": "actor+0x10",
+            "y_field_s32_16_16": "actor+0x14"
+          },
           "direction_helper_0x061032": {
             "lower_directions_by_a5_u8": [
               26,
@@ -34969,10 +35009,33 @@
             "upper_lane_u16": 320
           },
           "source_bounds": {
+            "activation_field_u8": "actor+0x01",
+            "camera_operand_u16": "0xff8278",
             "camera_relative_bias_u16": 112,
             "camera_relative_span_u16": 608,
+            "coffee_shop_observation": {
+              "activation_field_u8": 0,
+              "actor_x_u16": "0x0258",
+              "camera_operand_u16": "0x02d0",
+              "latched_field_u8": 0,
+              "result": "pass after x_max; camera-relative test skipped",
+              "source_frame": 2310,
+              "source_slot": "0x00ffa000"
+            },
             "comparison": "unsigned word",
+            "entry_pc": "0x060c2e",
             "failure_outer_state_u16": 1536,
+            "initial_branch_order": [
+              "if actor+0xa2_u8 != 0 skip the x_max and activation tests",
+              "compare actor+0x10_u16 to x_max_u16; unsigned above releases",
+              "if actor+0x01_u8 == 0 pass without the camera-relative test",
+              "otherwise write 1 to actor+0xa2_u8 and continue"
+            ],
+            "latched_field_u8": "actor+0xa2",
+            "phase_guard_field_u8": "0xff8019",
+            "phase_guard_mask_u8": 1,
+            "phase_guard_nonzero_path": "player proximity helper 0x060e94; nonzero enters 0x060ed8 rather than release",
+            "phase_guard_zero_path": "camera-relative unsigned comparison",
             "x_max_u16": 1520
           }
         },
@@ -36645,6 +36708,13 @@
             "progression_lifecycle_writes.tsv": "a2d67f9f98fa04e696a88bb123f9b7e904714ad95dc81b494242221ad5571e22",
             "progression_result.tsv": "533001de7932a568a1c69358c536866fa50d1a70e84c7062200c07c351c20efc"
           },
+          "source_bounds_a": {
+            "coffee_shop_class1f_source_bounds.tsv": "13d5f81aa9961ee077d1c15e198e1c878394268293cda21489124e548d74830f"
+          },
+          "source_bounds_b": {
+            "coffee_shop_class1f_source_bounds.tsv": "13d5f81aa9961ee077d1c15e198e1c878394268293cda21489124e548d74830f"
+          },
+          "source_bounds_byte_identical": true,
           "writer_0x0607e8_suppression": {
             "progression_class1f_transitions.tsv": "55ef4839bafb14c0167b14b2fefc0c8e7c0a1f6cfb9966426c57bd1b4312c3d5",
             "progression_lifecycle_writes.tsv": "1ad18b700552ebd130d04e92dd29796ee507314e113d259a01ece8c6b1a39907",
@@ -37315,7 +37385,9 @@
           "wrong action-4 stage parameter",
           "wrong action-4 timer row",
           "wrong action-4 RNG index",
-          "suppressed action-4 timer write"
+          "suppressed action-4 timer write",
+          "wrong source-bounds activation guard",
+          "wrong animation movement cadence"
         ],
         "observed_state_writer_counts": {
           "0176ba": 7,

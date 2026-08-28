@@ -41,6 +41,7 @@ for label,change in (
     ('intro-gate-owner',lambda x:x['first_segment_recurring_spawn']['controller_program']['intro_gate_transition']['gate_owner'].__setitem__('class_u8','0x1f')),
     ('intro-gate-suppression',lambda x:x['first_segment_recurring_spawn']['intro_gate_suppression_control'].__setitem__('suppressed_writer_count',0)),
     ('lifecycle-release-writer',lambda x:x['first_segment_recurring_spawn']['lifecycle_release_boundary'].__setitem__('writer_pc','0x061150')),
+    ('ko-progress-increment',lambda x:x['first_segment_recurring_spawn']['progress_increment_boundary'].__setitem__('increment_u16',2)),
     ('scene-lifetime-omission',lambda x:x['coffee_shop_scene_census']['actor_lifetimes'].pop()),
     ('scene-pool-omission',lambda x:x['coffee_shop_scene_census']['pool_scan'].pop()),
     ('scene-silent-unknown',lambda x:x['coffee_shop_scene_census']['negative_controls'].__setitem__('unknown_pair_silently_omitted',True)),

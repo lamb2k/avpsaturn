@@ -71,12 +71,14 @@ for label,mutate in [
     ('first-segment-movement',lambda x:x['movement_tables'][1]['vectors'][8].__setitem__('x_delta_s16',2047)),
     ('first-segment-timer-table',lambda x:x['attack_timer_table_u8'].__setitem__(0,29)),
     ('first-segment-source-bound',lambda x:x['action_programs']['source_bounds'].__setitem__('x_max_u16',0x05ef)),
+    ('first-segment-source-bound-activation',lambda x:x['action_programs']['source_bounds'].__setitem__('activation_field_u8','actor+0x02')),
+    ('first-segment-movement-cadence',lambda x:x['action_programs']['animation_movement_helper_0x0165c4'].__setitem__('movement_cadence','every scheduler frame')),
     ('first-segment-direction',lambda x:x['action_programs']['direction_helper_0x061032']['upper_directions_by_a5_u8'].__setitem__(0,0x15)),
-    ('first-segment-jump-vector',lambda x:x['action_programs']['action_0x0e']['x_velocity_table_s32_16_16'].__setitem__(0,-0x0000f000)),
+    ('first-segment-jump-vector',lambda x:x['action_programs']['action_0x0e']['z_velocity_table_s32_16_16'].__setitem__(0,-0x0000f000)),
     ('first-segment-attack-selector-group',lambda x:x['action_programs']['action_0x04']['selector_groups_u16'][2].__setitem__(0,44)),
     ('first-segment-loop-counter',lambda x:x['action_programs']['action_0x16'].__setitem__('loop_counter','timer')),
     ('first-segment-fixed-frame',lambda x:x['suppression_control'].__setitem__('fixed_frame_substitute',True)),
     ('first-segment-mutation-control',lambda x:x['mutation_controls'].pop()),
 ]:
     mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['first_segment_action_execution_contract'];mutate(target);reject(mutant,label)
-print('ORACLE-11 Round 1 enemy tests: PASS (51 mutations rejected)')
+print('ORACLE-11 Round 1 enemy tests: PASS (53 mutations rejected)')

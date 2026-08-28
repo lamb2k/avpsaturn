@@ -11,6 +11,15 @@ static int initialize_jump(AvspRound1Runtime *runtime,
         avsp_round1_step_player(runtime, mask, 0);
 }
 
+static int enter_button1(AvspRound1Runtime *runtime,
+                         unsigned short additional_mask)
+{
+    unsigned short mask = (unsigned short)(
+        AVSP_ROUND1_INPUT_BUTTON1 | additional_mask);
+    return avsp_round1_step_player(runtime, mask, 0) &&
+        avsp_round1_step_player(runtime, mask, 0);
+}
+
 static void stage_class1f_release(AvspRound1Runtime *runtime,
                                   int keep_index)
 {
@@ -103,23 +112,47 @@ int main(void)
         runtime.camera_scroll2_x != 576 ||
         runtime.camera_guard_countdown != 1200u ||
         runtime.pools[0].free_count != 10u ||
-        runtime.pools[2].free_count != 13u ||
-        runtime.pools[3].free_count != 2u ||
-        runtime.scheduler_frames != 171u ||
-        runtime.scheduler_dispatches != 2394u ||
+        runtime.pools[2].free_count != 12u ||
+        runtime.pools[3].free_count != 30u ||
+        runtime.scheduler_frames != 170u ||
+        runtime.scheduler_dispatches != 2550u ||
         runtime.class1f_initializations != 10u ||
         runtime.class1f_initial_rng_calls != 10u ||
         runtime.class09_initializations != 2u ||
         runtime.class09_rng_calls != 42u ||
-        runtime.rng_seed != 0x111cu ||
+        runtime.rng_seed != 0x334fu ||
+        runtime.source_stage_parameter != 8u ||
+        runtime.coffee_stage_setup_complete != 1u ||
+        runtime.coffee_stage_setup_calls != 1u ||
         !avsp_round1_entry_valid(&runtime))
+    {
+        fprintf(stderr, "entry final calls=%u route=%d state=%u spawn=%u dec=%u step=%u gates=%u/%u g8209=%u cursor=%08lx nav=%u/%d/%d cam=%d/%d/%d/%d/%d/%d/%d guard=%u free=%u/%u/%u sched=%lu/%lu init=%lu/%lu c09=%lu/%lu rng=%04x stage=%u stage_calls=%lu valid=%d\n",
+                calls, runtime.route_state, runtime.player.state,
+                runtime.entry.spawn_count, runtime.entry.timer_decrements,
+                runtime.entry.step_index, runtime.entry.gate8236,
+                runtime.entry.gate81af, runtime.entry.source_global_8209,
+                runtime.entry.script_cursor, runtime.navigation_bounds_active,
+                runtime.navigation_bound_x, runtime.navigation_bound_z,
+                runtime.camera_x_position, runtime.camera_x_target,
+                runtime.camera_x_lower, runtime.camera_x_upper,
+                runtime.camera_z_position, runtime.camera_z_lower,
+                runtime.camera_z_upper, runtime.camera_guard_countdown,
+                runtime.pools[0].free_count, runtime.pools[2].free_count,
+                runtime.pools[3].free_count, runtime.scheduler_frames,
+                runtime.scheduler_dispatches, runtime.class1f_initializations,
+                runtime.class1f_initial_rng_calls,
+                runtime.class09_initializations, runtime.class09_rng_calls,
+                runtime.rng_seed, runtime.source_stage_parameter,
+                runtime.coffee_stage_setup_calls,
+                avsp_round1_entry_valid(&runtime));
         return 5;
+    }
     if (runtime.pools[0].records[10].coordinate_mode != 1u ||
         runtime.pools[0].records[10].palette != 16u ||
         runtime.pools[0].records[10].facing != 1u ||
         runtime.pools[0].records[10].object_or != 0x8000u ||
-        runtime.pools[0].records[10].source_action_timer != 46u ||
-        runtime.pools[0].records[10].transition_timer != 46u ||
+        runtime.pools[0].records[10].source_action_timer != 47u ||
+        runtime.pools[0].records[10].transition_timer != 47u ||
         runtime.pools[0].records[10].source_flags != 0x0fu ||
         runtime.pools[0].records[11].coordinate_mode != 1u ||
         runtime.pools[0].records[11].palette != 17u ||
@@ -171,19 +204,32 @@ int main(void)
         !avsp_round1_entry_valid(&runtime))
         return 6;
     if (!avsp_round1_step_scheduler(&runtime) ||
-        runtime.scheduler_trace_count != 14u ||
-        runtime.scheduler_frames != 172u ||
-        runtime.scheduler_dispatches != 2408u ||
-        runtime.actor_handler_dispatches != 1720u ||
-        runtime.presentation_bindings != 1720u ||
-        runtime.state_context_bindings != 1720u ||
-        runtime.pools[0].records[10].assembly != 0x0012FA0CUL ||
+        runtime.scheduler_trace_count != 16u ||
+        runtime.scheduler_frames != 171u ||
+        runtime.scheduler_dispatches != 2566u ||
+        runtime.actor_handler_dispatches != 1710u ||
+        runtime.presentation_bindings != 1710u ||
+        runtime.state_context_bindings != 1710u ||
+        runtime.pools[0].records[10].assembly != 0x0012FA2AUL ||
         runtime.pools[0].records[10].hurt_selector != 2u ||
         runtime.pools[0].records[10].attack_selector != 0u ||
-        runtime.pools[0].records[16].assembly != 0x0012F9BCUL ||
+        runtime.pools[0].records[16].assembly != 0x0012F9E4UL ||
         runtime.pools[0].records[16].hurt_selector != 1u ||
         runtime.pools[0].records[10].dispatch_entry != 0x00060532UL)
+    {
+        fprintf(stderr,
+            "post-entry scheduler trace=%u frames=%lu dispatch=%lu handlers=%lu presentation=%lu context=%lu asm10=%08lx hurt10=%u attack10=%u asm16=%08lx hurt16=%u entry10=%08lx\n",
+            runtime.scheduler_trace_count, runtime.scheduler_frames,
+            runtime.scheduler_dispatches, runtime.actor_handler_dispatches,
+            runtime.presentation_bindings, runtime.state_context_bindings,
+            runtime.pools[0].records[10].assembly,
+            runtime.pools[0].records[10].hurt_selector,
+            runtime.pools[0].records[10].attack_selector,
+            runtime.pools[0].records[16].assembly,
+            runtime.pools[0].records[16].hurt_selector,
+            runtime.pools[0].records[10].dispatch_entry);
         return 7;
+    }
     for (calls = 0u; calls < 10u; ++calls)
     {
         if (runtime.scheduler_trace[calls].record_type != 12u ||
@@ -202,7 +248,7 @@ int main(void)
     runtime.pools[2].records[0].actor_class = 0x07;
     runtime.pools[2].records[0].type = 20u;
     runtime.pools[2].records[0].source_slot = 0x00ffae80UL;
-    runtime.pools[2].free_count = 12u;
+    runtime.pools[2].free_count = 11u;
     runtime.pools[3].records[0].active = 1u;
     runtime.pools[3].records[0].actor_class = 0x10;
     runtime.pools[3].records[0].type = 24u;
@@ -211,21 +257,40 @@ int main(void)
     runtime.pools[3].records[0].source_slot = 0x00ffb680UL;
     runtime.pools[3].free_count = 2u;
     if (!avsp_round1_step_scheduler(&runtime) ||
-        runtime.scheduler_trace_count != 17u ||
-        runtime.scheduler_frames != 173u ||
-        runtime.scheduler_dispatches != 2425u ||
-        runtime.actor_handler_dispatches != 1730u ||
-        runtime.presentation_bindings != 1730u ||
-        runtime.state_context_bindings != 1730u ||
+        runtime.scheduler_trace_count != 19u ||
+        runtime.scheduler_frames != 172u ||
+        runtime.scheduler_dispatches != 2585u ||
+        runtime.actor_handler_dispatches != 1720u ||
+        runtime.presentation_bindings != 1720u ||
+        runtime.state_context_bindings != 1720u ||
         runtime.scheduler_trace[10].record_type != 16u ||
         runtime.scheduler_trace[11].record_type != 20u ||
         runtime.scheduler_trace[12].record_type != 20u ||
-        runtime.scheduler_trace[15].record_type != 24u ||
-        runtime.scheduler_trace[16].actor_class != 0x44 ||
-        runtime.pools[0].records[10].scheduler_updates != 173u ||
-        runtime.pools[0].records[10].handler_updates != 173u ||
-        runtime.pools[0].records[10].state_handler_updates != 173u)
+        runtime.scheduler_trace[17].record_type != 24u ||
+        runtime.scheduler_trace[18].actor_class != 0x44 ||
+        runtime.pools[0].records[10].scheduler_updates != 172u ||
+        runtime.pools[0].records[10].handler_updates != 172u ||
+        runtime.pools[0].records[10].state_handler_updates != 172u)
+    {
+        fprintf(stderr,
+            "mixed scheduler ok=%u trace=%u frames=%lu dispatch=%lu handlers=%lu presentation=%lu context=%lu types=%u/%u/%u/%u class15=%u updates=%lu/%lu/%lu code=%u\n",
+            runtime.scheduler_failure_code == 0u,
+            runtime.scheduler_trace_count, runtime.scheduler_frames,
+            runtime.scheduler_dispatches, runtime.actor_handler_dispatches,
+            runtime.presentation_bindings, runtime.state_context_bindings,
+            runtime.scheduler_trace[10].record_type,
+            runtime.scheduler_trace[11].record_type,
+            runtime.scheduler_trace[12].record_type,
+            runtime.scheduler_trace[14].record_type,
+            runtime.scheduler_trace[15].actor_class,
+            runtime.pools[0].records[10].scheduler_updates,
+            runtime.pools[0].records[10].handler_updates,
+            runtime.pools[0].records[10].state_handler_updates,
+            runtime.scheduler_failure_code);
         return 9;
+    }
+    runtime.pools[3].records[0].active = 0u;
+    runtime.pools[3].free_count = 30u;
     first = &runtime.pools[0].records[19];
     last = &runtime.pools[0].records[10];
     if (first->source_slot != 0x00FFA3C0UL || first->x != 713 ||
@@ -234,7 +299,7 @@ int main(void)
         first->substate != 0x1404u || first->health != 87 ||
         last->source_slot != 0x00FF9D00UL || last->x != 632 ||
         last->z != 296 || last->variant != 6u ||
-        last->substate != 4096u || last->transition_timer != 44u)
+        last->substate != 4096u || last->transition_timer != 45u)
     {
         fprintf(stderr,
                 "class1f checkpoint first slot=%08lx x=%d z=%d variant=%u action=%u state=%04x substate=%04x health=%d last slot=%08lx x=%d z=%d variant=%u substate=%04x timer=%u\n",
@@ -299,6 +364,7 @@ int main(void)
         AvspRound1Runtime navigation_runtime = runtime;
         navigation_runtime.navigation_bound_x = 832;
         navigation_runtime.navigation_bound_z = 256;
+        navigation_runtime.camera_x_previous = 832;
         navigation_runtime.camera_x_position = 832;
         navigation_runtime.camera_x_target = 832;
         navigation_runtime.camera_x_lower = 832;
@@ -309,6 +375,8 @@ int main(void)
         navigation_runtime.camera_z_upper = 256;
         navigation_runtime.camera_scroll2_x = 768;
         navigation_runtime.camera_coffee_phase = 4u;
+        if (!avsp_round1_step_scheduler(&navigation_runtime))
+            return 76;
         navigation_runtime.player_action.x = 1092;
         navigation_runtime.player_action.lane = 323;
         navigation_runtime.player_action.x_numerator = 0;
@@ -324,6 +392,7 @@ int main(void)
         navigation_runtime = runtime;
         navigation_runtime.navigation_bound_x = 832;
         navigation_runtime.navigation_bound_z = 256;
+        navigation_runtime.camera_x_previous = 832;
         navigation_runtime.camera_x_position = 832;
         navigation_runtime.camera_x_target = 832;
         navigation_runtime.camera_x_lower = 832;
@@ -334,6 +403,8 @@ int main(void)
         navigation_runtime.camera_z_upper = 256;
         navigation_runtime.camera_scroll2_x = 768;
         navigation_runtime.camera_coffee_phase = 4u;
+        if (!avsp_round1_step_scheduler(&navigation_runtime))
+            return 77;
         navigation_runtime.player_action.x = 1093;
         navigation_runtime.player_action.lane = 319;
         navigation_runtime.player_action.x_numerator = 0;
@@ -438,7 +509,16 @@ int main(void)
             camera_runtime.camera_coffee_phase != 4u ||
             camera_runtime.camera_x_upper != 1008 ||
             camera_runtime.camera_unlocks != runtime.camera_unlocks + 1u)
+        {
+            fprintf(stderr, "camera locked=%u phase=%u upper=%d unlock=%lu base=%lu rng=%04x stage=%u failure=%lu\n",
+                    locked_steps, camera_runtime.camera_coffee_phase,
+                    camera_runtime.camera_x_upper,
+                    camera_runtime.camera_unlocks, runtime.camera_unlocks,
+                    camera_runtime.rng_seed,
+                    camera_runtime.source_stage_parameter,
+                    camera_runtime.failure_count);
             return 81;
+        }
     }
     {
         static const unsigned short masks[10] = {
@@ -585,8 +665,7 @@ int main(void)
         AvspRound1ActorCore *effect = &air_runtime.pools[3].records[29];
         if (!initialize_jump(&air_runtime, AVSP_PW_INPUT_UP) ||
             air_runtime.player_jump_phase != 0x0402u ||
-            !avsp_round1_step_player(&air_runtime,
-                AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_UP, 0) ||
+            !enter_button1(&air_runtime, AVSP_PW_INPUT_UP) ||
             air_runtime.player_jump_phase != 0x0406u ||
             air_runtime.player.source_action != 0x0406u ||
             air_runtime.player_jump_collision_selector != 9u ||
@@ -631,12 +710,13 @@ int main(void)
             projectile->attack_selector != 1u)
             return 95;
         if (!avsp_round1_step_scheduler(&air_runtime) ||
-            air_runtime.player_air_weapon_motion_updates != 1u ||
+            !avsp_round1_step_scheduler(&air_runtime) ||
+            air_runtime.player_air_weapon_motion_updates != 2u ||
             air_runtime.player_air_weapon_effect_requests != 1u ||
             air_runtime.player_air_weapon_effect_allocations != 1u ||
-            air_runtime.pools[3].free_count != 1u ||
+            air_runtime.pools[3].free_count != 29u ||
             effect->active != 1u || effect->actor_class != 0x49 ||
-            effect->variant != 1u || effect->state != 2u ||
+            effect->variant != 1u || effect->state != 0u ||
             effect->effect_timer != 8u ||
             effect->animation_record != projectile->animation_record ||
             effect->assembly != projectile->assembly)
@@ -655,7 +735,7 @@ int main(void)
             return 96;
         }
         if (!avsp_round1_step_scheduler(&air_runtime) ||
-            effect->state != 2u || effect->effect_timer != 7u ||
+            effect->state != 2u || effect->effect_timer != 8u ||
             air_runtime.player_air_weapon_effect_requests != 1u)
             return 97;
     }
@@ -665,8 +745,7 @@ int main(void)
         air_failure.player_weapon_allocations =
             AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY;
         if (!initialize_jump(&air_failure, AVSP_PW_INPUT_UP) ||
-            !avsp_round1_step_player(&air_failure,
-                AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_UP, 0) ||
+            !enter_button1(&air_failure, AVSP_PW_INPUT_UP) ||
             air_failure.player_jump_phase != 0x0406u ||
             air_failure.player_jump_presentation_selector != 18u ||
             air_failure.player_resource != 64u ||
@@ -739,6 +818,13 @@ int main(void)
         weapon_z = weapon_runtime.player.z;
         if (!avsp_round1_step_player(&weapon_runtime,
                 AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_RIGHT, 0) ||
+            weapon_runtime.player_weapon_active != 0u ||
+            weapon_runtime.player.x == weapon_x)
+            return 26;
+        weapon_x = weapon_runtime.player.x;
+        weapon_z = weapon_runtime.player.z;
+        if (!avsp_round1_step_player(&weapon_runtime,
+                AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_RIGHT, 0) ||
             weapon_runtime.player_weapon_active != 1u ||
             weapon_runtime.player_weapon_tick != 1u ||
             weapon_runtime.player.source_action != 0x0c00u ||
@@ -746,11 +832,11 @@ int main(void)
             weapon_runtime.player.animation_record != 0x0015f1f4UL ||
             weapon_runtime.player.assembly != 0x001626a4UL ||
             weapon_runtime.player_weapon_entries != 1u ||
-            weapon_runtime.player_weapon_attempts_total != 1u ||
-            weapon_runtime.player_weapon_allocations != 1u ||
-            weapon_runtime.player_weapon_resource_debits != 1u ||
-            weapon_runtime.player_resource != 24u ||
-            weapon_runtime.player_resource_recharge != 11u ||
+            weapon_runtime.player_weapon_attempts_total != 0u ||
+            weapon_runtime.player_weapon_allocations != 0u ||
+            weapon_runtime.player_weapon_resource_debits != 0u ||
+            weapon_runtime.player_resource != 64u ||
+            weapon_runtime.player_resource_recharge != 12u ||
             weapon_runtime.player_action.state != AVSP_PW_STATE_CONTROL ||
             weapon_runtime.player_weapon_interruptions != 0u ||
             weapon_runtime.player.x != weapon_x ||
@@ -759,7 +845,13 @@ int main(void)
         if (!avsp_round1_step_player(&weapon_runtime, 0u, 0) ||
             weapon_runtime.player.source_action != 0x0c02u ||
             weapon_runtime.player.animation_record != 0x0015e540UL ||
-            weapon_runtime.player.assembly != 0x00161772UL)
+            weapon_runtime.player.assembly != 0x00161772UL ||
+            weapon_runtime.player_weapon_resource_debits != 1u ||
+            weapon_runtime.player_resource != 24u ||
+            weapon_runtime.player_weapon_allocations != 0u ||
+            !avsp_round1_step_player(&weapon_runtime, 0u, 0) ||
+            weapon_runtime.player_weapon_attempts_total != 1u ||
+            weapon_runtime.player_weapon_allocations != 1u)
             return 27;
         while (weapon_runtime.player_weapon_active)
             if (!avsp_round1_step_player(&weapon_runtime, 0u, 0))
@@ -769,12 +861,23 @@ int main(void)
             weapon_runtime.player.source_action != 0u ||
             weapon_runtime.player_weapon_completions != 1u ||
             weapon_runtime.player_weapon_allocations != 1u ||
-            weapon_runtime.player_resource != 29u ||
+            weapon_runtime.player_resource != 28u ||
             !avsp_round1_step_player(&weapon_runtime, 0u, 0) ||
             weapon_runtime.player.source_action != 2u ||
             weapon_runtime.player.animation_record != 0x0015f1f4UL ||
             weapon_runtime.player.assembly != 0x001626a4UL)
+        {
+            fprintf(stderr,
+                "weapon completion tick=%u cleanup=%u action=%04x completions=%lu allocations=%lu resource=%u next_action=%04x\n",
+                weapon_runtime.player_weapon_tick,
+                weapon_runtime.player_weapon_cleanup_pending,
+                weapon_runtime.player.source_action,
+                weapon_runtime.player_weapon_completions,
+                weapon_runtime.player_weapon_allocations,
+                weapon_runtime.player_resource,
+                weapon_runtime.player.source_action);
             return 29;
+        }
         if (weapon_runtime.player_weapon_projectile_free_count != 23u ||
             weapon_runtime.player_weapon_projectiles[0].actor_class != 0 ||
             weapon_runtime.player_weapon_projectiles[0].source_slot !=
@@ -785,15 +888,13 @@ int main(void)
             weapon_runtime.player_weapon_projectiles[0].state != 0u ||
             weapon_runtime.player_weapon_projectiles[0].
                 parent_presentation_selector != 0u ||
-            weapon_runtime.player_weapon_projectiles[0].angle !=
-                (weapon_runtime.player_weapon_projectiles[0].facing ?
-                    17u : 47u) ||
+            weapon_runtime.player_weapon_projectiles[0].angle < 17u ||
+            weapon_runtime.player_weapon_projectiles[0].angle > 47u ||
             weapon_runtime.player_weapon_projectiles[0].x_fp !=
                 (long)weapon_runtime.player_weapon_projectiles[0].x * 65536L)
             return 32;
         weapon_runtime.player_resource = 24u;
-        if (!avsp_round1_step_player(&weapon_runtime,
-                AVSP_ROUND1_INPUT_BUTTON1, 0) ||
+        if (!enter_button1(&weapon_runtime, 0u) ||
             weapon_runtime.player.source_action != 0x1a00u ||
             weapon_runtime.player_weapon_empty != 1u ||
             weapon_runtime.player_weapon_empty_auxiliary_requests != 1u ||
@@ -818,10 +919,11 @@ int main(void)
         weapon_runtime.player_weapon_projectile_free_count = 0u;
         weapon_runtime.player_weapon_allocations =
             AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY;
-        if (!avsp_round1_step_player(&weapon_runtime,
-                AVSP_ROUND1_INPUT_BUTTON1, 0) ||
+        if (!enter_button1(&weapon_runtime, 0u) ||
             weapon_runtime.player.source_action != 0x0c00u ||
             weapon_runtime.player_weapon_empty != 0u ||
+            !avsp_round1_step_player(&weapon_runtime, 0u, 0) ||
+            !avsp_round1_step_player(&weapon_runtime, 0u, 0) ||
             weapon_runtime.player_weapon_allocation_failures != 1u ||
             weapon_runtime.player_weapon_allocations !=
                 AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY ||
@@ -859,11 +961,10 @@ int main(void)
         stage_class1f_release(&effect_runtime, -1);
         effect_runtime.player_resource = 0u;
         effect_runtime.player_resource_depleted = 1u;
-        if (!avsp_round1_step_player(&effect_runtime,
-                AVSP_ROUND1_INPUT_BUTTON1, 0) ||
+        if (!enter_button1(&effect_runtime, 0u) ||
             effect_runtime.player_weapon_empty_auxiliary_requests != 1u ||
             effect_runtime.player_weapon_empty_auxiliary_allocations != 1u ||
-            effect_runtime.pools[3].free_count != 1u)
+            effect_runtime.pools[3].free_count != 29u)
         {
             fprintf(stderr,
                     "empty effect start requests=%lu allocations=%lu pool3=%u failures=%lu player-valid=%d pool0=%u\n",
@@ -952,13 +1053,14 @@ int main(void)
             !avsp_round1_step_scheduler(&effect_runtime) ||
             effect->state != 4u ||
             !avsp_round1_step_scheduler(&effect_runtime) ||
-            effect_runtime.pools[3].free_count != 2u ||
+            effect_runtime.pools[3].free_count != 30u ||
             effect_runtime.player_weapon_empty_auxiliary_releases != 1u)
             return 48;
     }
     {
         AvspRound1Runtime projectile_runtime;
         AvspRound1ActorCore *target;
+        AvspRound1ActorCore *impact;
         AvspRound1WeaponProjectileAllocation *projectile;
         AvspRound1WeaponProjectileAllocation *child;
         unsigned int entry_calls = 0u;
@@ -989,11 +1091,12 @@ int main(void)
         target->hurt_selector = 0u;
         target->facing = 0u;
         target->x = (short)(projectile_runtime.player.x +
-            (projectile_runtime.player.facing ? 5 : -5));
+            (projectile_runtime.player.facing ? -5 : 5));
         target->y = (short)(projectile_runtime.player.y + 78);
         target->z = (short)(projectile_runtime.player.z - 1);
-        if (!avsp_round1_step_player(&projectile_runtime,
-                AVSP_ROUND1_INPUT_BUTTON1, 0))
+        if (!enter_button1(&projectile_runtime, 0u) ||
+            !avsp_round1_step_player(&projectile_runtime, 0u, 0) ||
+            !avsp_round1_step_player(&projectile_runtime, 0u, 0))
             return 51;
         projectile = &projectile_runtime.player_weapon_projectiles[0];
         if (!avsp_round1_step_scheduler(&projectile_runtime) ||
@@ -1001,7 +1104,7 @@ int main(void)
             projectile->actor_class != 0 ||
             projectile->attack_selector != 1u || target->health != -1 ||
             projectile->x != (short)(projectile_runtime.player.x +
-                (projectile->facing ? 5 : -5)) ||
+                (projectile->facing ? -5 : 5)) ||
             projectile->y != (short)(projectile_runtime.player.y + 86) ||
             projectile->z != (short)(projectile_runtime.player.z - 1) ||
             projectile->coordinate_mode != 0u ||
@@ -1046,17 +1149,19 @@ int main(void)
         if (!avsp_round1_step_scheduler(&projectile_runtime) ||
             projectile->collision_result != -1 || target->health != -1 ||
             target->state != 0x0402u || target->substate != 0x0000u ||
-            target->source_action_timer != 140u ||
+            target->source_action_timer != 141u ||
             projectile_runtime.player_weapon_projectile_collision_writes != 1u ||
             projectile_runtime.player_weapon_projectile_damage_writes != 1u ||
             projectile_runtime.first_encounter.ko_events != 1u)
         {
-            fprintf(stderr, "parent delayed collision p=%d/%d/%d target=%d/%d/%d health=%d substate=%04x result=%d state=%u counts=%lu/%lu code=%u failures=%lu\n",
+            fprintf(stderr, "parent delayed collision p=%d/%d/%d target=%d/%d/%d health=%d target-state=%04x/%04x timer=%u result=%d projectile-state=%u counts=%lu/%lu ko=%lu code=%u failures=%lu\n",
                 projectile->x, projectile->y, projectile->z,
                 target->x, target->y, target->z, target->health,
-                target->substate, projectile->collision_result, projectile->state,
+                target->state, target->substate, target->source_action_timer,
+                projectile->collision_result, projectile->state,
                 projectile_runtime.player_weapon_projectile_collision_writes,
                 projectile_runtime.player_weapon_projectile_damage_writes,
+                projectile_runtime.first_encounter.ko_events,
                 projectile_runtime.scheduler_failure_code,
                 projectile_runtime.failure_count);
             return 52;
@@ -1084,19 +1189,63 @@ int main(void)
         if (!avsp_round1_step_scheduler(&projectile_runtime) ||
             target->health != 32 || target->state != 0x0202u ||
             target->substate != 0x0002u ||
-            target->source_action_timer != 38u ||
+            target->source_action_timer != 39u ||
             child->collision_result != -1 ||
             projectile_runtime.player_weapon_projectile_damage_writes != 2u ||
             projectile_runtime.first_encounter.hit_events != 1u)
         {
             fprintf(stderr,
-                    "child collision failed code=%u slot=%04x health=%d substate=%04x result=%d writes=%lu failures=%lu\n",
+                    "child collision failed code=%u slot=%04x health=%d state=%04x/%04x timer=%u result=%d writes=%lu hits=%lu impact=%lu/%lu failures=%lu\n",
                     projectile_runtime.scheduler_failure_code,
                     projectile_runtime.scheduler_failure_source_slot,
-                    target->health, target->substate,
+                    target->health, target->state, target->substate,
+                    target->source_action_timer,
                     child->collision_result,
                     projectile_runtime.player_weapon_projectile_damage_writes,
+                    projectile_runtime.first_encounter.hit_events,
+                    projectile_runtime.class4e_variant1_allocation_requests,
+                    projectile_runtime.class4e_variant1_allocations,
                     projectile_runtime.failure_count);
+            return 55;
+        }
+        {
+            AvspRound1Runtime child_release_runtime = projectile_runtime;
+            AvspRound1WeaponProjectileAllocation *release_child =
+                &child_release_runtime.player_weapon_projectiles[1];
+            unsigned char release_free_before =
+                child_release_runtime.player_weapon_projectile_free_count;
+            unsigned long release_count_before =
+                child_release_runtime.player_weapon_projectile_releases;
+            release_child->state = 4u;
+            if (!avsp_round1_step_scheduler(&child_release_runtime) ||
+                release_child->active ||
+                child_release_runtime.player_weapon_projectile_free_count !=
+                    (unsigned char)(release_free_before + 1u) ||
+                child_release_runtime.player_weapon_projectile_releases !=
+                    release_count_before + 1u)
+                return 55;
+        }
+        impact = &projectile_runtime.pools[3].records[29];
+        if (!avsp_round1_is_weapon_impact_actor(impact) ||
+            impact->source_slot != 0x00ffc500UL ||
+            impact->state != 0u || impact->variant != 1u ||
+            impact->facing != child->facing ||
+            impact->x != 939 || impact->y != 337 || impact->z != 318 ||
+            projectile_runtime.class4e_variant1_allocation_requests != 1u ||
+            projectile_runtime.class4e_variant1_allocations != 1u ||
+            projectile_runtime.class4e_variant1_allocation_failures != 0u)
+        {
+            fprintf(stderr,
+                "variant1 impact active=%u class=%d variant=%u state=%04x slot=%08lx facing=%u child=%u xyz=%d/%d/%d expected=%d/%d/%d ownership=%d requests=%lu allocations=%lu failures=%lu\n",
+                impact->active, impact->actor_class, impact->variant,
+                impact->state, impact->source_slot, impact->facing,
+                child->facing, impact->x, impact->y, impact->z,
+                (short)(child->x - 6), (short)(child->y + 31),
+                (short)(child->z - 1),
+                avsp_round1_is_weapon_impact_actor(impact),
+                projectile_runtime.class4e_variant1_allocation_requests,
+                projectile_runtime.class4e_variant1_allocations,
+                projectile_runtime.class4e_variant1_allocation_failures);
             return 55;
         }
         target->hurt_selector = 0u;
@@ -1104,6 +1253,7 @@ int main(void)
         target->substate = 0u;
         projectile_runtime.first_encounter.source_living_count = 1u;
         for (entry_calls = 0u; entry_calls < 4u; ++entry_calls)
+        {
             if (!avsp_round1_step_scheduler(&projectile_runtime))
             {
                 fprintf(stderr,
@@ -1113,6 +1263,13 @@ int main(void)
                         projectile_runtime.failure_count);
                 return 55;
             }
+            if (entry_calls == 0u &&
+                (impact->state != 0x0200u ||
+                 impact->animation_record != 0x00092914UL ||
+                 impact->assembly != 0x00092c04UL ||
+                 projectile_runtime.class4e_variant1_initializations != 1u))
+                return 55;
+        }
         if (projectile_runtime.player_weapon_allocations != 2u ||
             !avsp_round1_step_scheduler(&projectile_runtime) ||
             projectile_runtime.player_weapon_allocations != 3u)
@@ -1165,7 +1322,7 @@ int main(void)
         if (transition_runtime.class1f_initializations != 10u ||
             transition_runtime.class1f_initial_rng_calls != 10u ||
             transition_runtime.class09_rng_calls != 42u ||
-            transition_runtime.rng_seed != 0x111cu)
+            transition_runtime.rng_seed != 0x334fu)
             return 62;
         effect_a = &transition_runtime.pools[3].records[28];
         effect_b = &transition_runtime.pools[3].records[29];
@@ -1187,16 +1344,27 @@ int main(void)
                         transition_runtime.failure_count);
                 return 63;
             }
-            if (tick == 6u &&
+            if (tick == 8u &&
                 (transition_runtime.class09_rng_calls != 44u ||
-                 transition_runtime.rng_seed != 0x99e8u))
+                 transition_runtime.rng_seed != 0xcdb5u))
+            {
+                fprintf(stderr, "transition tick8 c09rng=%lu seed=%04x\n",
+                    transition_runtime.class09_rng_calls,
+                    transition_runtime.rng_seed);
                 return 64;
+            }
             if (tick == 1u &&
                 (transition_runtime.entry_controller.state != 0x0202u ||
                  transition_runtime.first_encounter.source_intro_gate !=
                     0xffu ||
                  transition_runtime.first_encounter.source_intro_timer != 60u))
+            {
+                fprintf(stderr, "transition tick1 controller=%04x gate=%u timer=%u\n",
+                    transition_runtime.entry_controller.state,
+                    transition_runtime.first_encounter.source_intro_gate,
+                    transition_runtime.first_encounter.source_intro_timer);
                 return 64;
+            }
             if (tick == 12u &&
                 (transition_runtime.class1f_effect_requests != 2u ||
                  transition_runtime.class1f_effect_allocations != 2u ||
@@ -1204,7 +1372,7 @@ int main(void)
                  transition_runtime.class4e_rng_calls != 2u ||
                  transition_runtime.class1f_audio_events != 1u ||
                  transition_runtime.class1f_audio_command != 0x0118u ||
-                 transition_runtime.pools[3].free_count != 0u ||
+                 transition_runtime.pools[3].free_count != 28u ||
                  effect_a->x != 840 || effect_a->y != 432 ||
                  effect_b->x != 812 || effect_b->y != 388 ||
                  guard->state != 0x0400u))
@@ -1212,15 +1380,32 @@ int main(void)
             if (tick == 13u &&
                 (transition_runtime.class44_guard_clears != 1u ||
                  transition_runtime.class1f_effect_guard != 0u ||
-                 guard->substate != 0x0402u || guard->effect_timer != 3u))
+                 guard->state != 0x0402u || guard->substate != 0u ||
+                 guard->effect_timer != 3u))
                 return 66;
             if (tick == 16u &&
                 (transition_runtime.first_encounter.source_intro_gate != 0u ||
                  transition_runtime.entry_controller.state != 0x0202u ||
-                 transition_runtime.first_encounter.source_intro_timer != 60u))
+                 transition_runtime.first_encounter.source_intro_timer != 60u ||
+                 transition_runtime.class45_allocations != 28u ||
+                 transition_runtime.pools[3].free_count != 0u ||
+                 !transition_runtime.pools[3].records[0].active ||
+                 transition_runtime.pools[3].records[0].actor_class != 0x45 ||
+                 transition_runtime.pools[3].records[0].state != 0u ||
+                 transition_runtime.pools[3].records[0].x != 840 ||
+                 transition_runtime.pools[3].records[0].y != 360 ||
+                 transition_runtime.pools[3].records[0].z != 295))
                 return 66;
             if (tick == 17u &&
-                transition_runtime.first_encounter.source_intro_timer != 59u)
+                (transition_runtime.first_encounter.source_intro_timer != 59u ||
+                 transition_runtime.class45_initializations != 28u ||
+                 transition_runtime.class45_rng_calls != 196u ||
+                 transition_runtime.pools[3].records[0].state != 0x0200u ||
+                 transition_runtime.pools[3].records[0].x != 805 ||
+                 transition_runtime.pools[3].records[0].y != 307 ||
+                 transition_runtime.pools[3].records[0].facing != 3u ||
+                 transition_runtime.pools[3].records[0].animation_record !=
+                    0x0008df18UL))
                 return 66;
             if (tick == 18u &&
                 (transition_runtime.class1f_audio_events != 2u ||
@@ -1247,7 +1432,8 @@ int main(void)
         if (transition_runtime.class1f_transition_completions != 10u ||
             transition_runtime.class1f_audio_events != 2u ||
             transition_runtime.class4e_releases != 2u ||
-            transition_runtime.pools[3].free_count != 2u ||
+            transition_runtime.class45_releases != 28u ||
+            transition_runtime.pools[3].free_count != 30u ||
             transition_runtime.player_weapon_projectile_collision_writes != 0u ||
             transition_runtime.player_weapon_projectile_damage_writes != 0u ||
             transition_runtime.failure_count != 0u ||
@@ -1293,7 +1479,7 @@ int main(void)
                 return 69;
             }
         if (transition_runtime.class1f_action_dispatches == 0u ||
-            transition_runtime.class1f_action_releases == 0u)
+            transition_runtime.class1f_action_releases != 0u)
             return 69;
         if (transition_runtime.first_encounter.dynamic_spawned ||
             transition_runtime.first_encounter.actor_source_slot != 0u)
@@ -1493,25 +1679,41 @@ int main(void)
             if (!avsp_round1_step_scheduler(&encounter_runtime) ||
                 encounter_runtime.pools[0].free_count != free_before ||
                 !encounter_runtime.first_encounter.source_blocked_by_living_count)
+            {
+                fprintf(stderr, "encounter blocked gate free=%u/%u blocked=%u fail=%lu rng=%04x\n",
+                        encounter_runtime.pools[0].free_count, free_before,
+                        encounter_runtime.first_encounter.source_blocked_by_living_count,
+                        encounter_runtime.failure_count,
+                        encounter_runtime.rng_seed);
                 return 81;
+            }
         }
-        /* Exercise the accepted 0x028a3e current-state spawn edge without
-           inventing production lifecycle releases that are not implemented
-           yet: this is the source-supported pre-writer state from the
-           bounded counterfactual fixture. */
         {
             AvspRound1Pool *pool = &encounter_runtime.pools[0];
-            unsigned int free_index;
-            if (pool->records[14].active || pool->free_count == 0u)
+            AvspRound1ActorCore *bounded = &pool->records[14];
+            unsigned char free_before = pool->free_count;
+            if (!bounded->active ||
+                (unsigned short)bounded->source_slot != 0xa000u)
                 return 81;
-            for (free_index = 0u; free_index < pool->free_count; ++free_index)
-                if (pool->free_stack[free_index] == 0xa000u)
-                    break;
-            if (free_index == pool->free_count)
+            bounded->state = 0x0600u;
+            bounded->substate = 0u;
+            bounded->health = -1;
+            if (!avsp_round1_step_scheduler(&encounter_runtime) ||
+                bounded->active || pool->free_count != free_before + 1u ||
+                pool->free_stack[pool->free_count - 1u] != 0xa000u)
                 return 81;
-            pool->free_stack[free_index] =
-                pool->free_stack[pool->free_count - 1u];
-            pool->free_stack[pool->free_count - 1u] = 0xa000u;
+        }
+        /* Exercise the accepted 0x028a3e current-state spawn edge through the
+           current source LIFO.  Do not force the historical 0xa000 harness
+           slot: the corrected source RNG keeps that initial actor alive. */
+        {
+            AvspRound1Pool *pool = &encounter_runtime.pools[0];
+            if (pool->free_count == 0u)
+            {
+                fprintf(stderr, "encounter source LIFO empty rng=%04x\n",
+                        encounter_runtime.rng_seed);
+                return 81;
+            }
         }
         encounter_runtime.first_encounter.source_living_count = 7u;
         encounter_runtime.first_encounter.source_progress = 0u;
@@ -1529,7 +1731,14 @@ int main(void)
         while (!encounter_runtime.first_encounter.initialized && tick < 300u)
         {
             if (!avsp_round1_step_scheduler(&encounter_runtime))
+            {
+                fprintf(stderr, "encounter init scheduler tick=%u code=%u slot=%04x fail=%lu rng=%04x\n",
+                        tick, encounter_runtime.scheduler_failure_code,
+                        encounter_runtime.scheduler_failure_source_slot,
+                        encounter_runtime.failure_count,
+                        encounter_runtime.rng_seed);
                 return 81;
+            }
             ++tick;
         }
         if (!encounter_runtime.first_encounter.initialized ||
@@ -1539,7 +1748,27 @@ int main(void)
             encounter_runtime.first_encounter.presentation.lane != 343 ||
             encounter_runtime.first_encounter.presentation.animation_record == 0UL ||
             encounter_runtime.first_encounter.presentation.assembly == 0UL)
+        {
+            fprintf(stderr, "encounter init=%u state=%u slot=%04x pos=%d/%d anim=%08lx asm=%08lx tick=%u rng=%04x controller=%04x timer=%u phase=%u living=%u progress=%u free=%u dynamic=%u fail=%lu code=%u\n",
+                    encounter_runtime.first_encounter.initialized,
+                    encounter_runtime.first_encounter.encounter_state,
+                    (unsigned short)encounter_runtime.first_encounter.actor_source_slot,
+                    encounter_runtime.first_encounter.presentation.x,
+                    encounter_runtime.first_encounter.presentation.lane,
+                    encounter_runtime.first_encounter.presentation.animation_record,
+                    encounter_runtime.first_encounter.presentation.assembly,
+                    tick, encounter_runtime.rng_seed,
+                    encounter_runtime.entry_controller.state,
+                    encounter_runtime.first_encounter.source_spawn_timer,
+                    encounter_runtime.first_encounter.source_phase_counter,
+                    encounter_runtime.first_encounter.source_living_count,
+                    encounter_runtime.first_encounter.source_progress,
+                    encounter_runtime.pools[0].free_count,
+                    encounter_runtime.first_encounter.dynamic_spawned,
+                    encounter_runtime.failure_count,
+                    encounter_runtime.scheduler_failure_code);
             return 82;
+        }
         {
             unsigned long dispatches_before =
                 encounter_runtime.class1f_action_dispatches;
@@ -1648,6 +1877,522 @@ int main(void)
                 (unsigned char)(free_before + 1u) ||
             collision_runtime.class1f_action_releases == 0u)
             return 89;
+    }
+    {
+        AvspRound1Runtime component_runtime;
+        AvspRound1ActorCore *class01;
+        AvspRound1ActorCore *class02;
+        AvspRound1ActorCore *jump_actor;
+        unsigned int tick = 0u;
+        unsigned char free_before;
+        unsigned short living_before;
+        unsigned short jump_rng_before;
+        unsigned char jump_rng_high;
+        unsigned char jump_rng_low;
+        unsigned char jump_rng_index;
+        long jump_expected_velocity;
+        unsigned int free_index;
+        avsp_round1_init(&component_runtime);
+        if (!avsp_round1_begin_first_entry(&component_runtime))
+            return 96;
+        while (!component_runtime.entry.control_enabled && tick < 1000u)
+        {
+            if (!avsp_round1_step_first_entry(&component_runtime))
+                return 96;
+            if (component_runtime.entry.spawned &&
+                !avsp_round1_step_scheduler(&component_runtime))
+                return 96;
+            ++tick;
+        }
+        class01 = &component_runtime.pools[2].records[14];
+        class02 = &component_runtime.pools[2].records[15];
+        if (component_runtime.coffee_scene_record_cursor != 2u ||
+            component_runtime.coffee_scene_spawns != 2u ||
+            !class01->active || class01->actor_class != 0x01 ||
+            class01->source_slot != 0x00ffb580UL ||
+            class01->state != 0x0202u || class01->active != 2u ||
+            class01->transition_timer != 72u ||
+            class01->animation_record != 0x0006b45aUL ||
+            !class02->active || class02->actor_class != 0x02 ||
+            class02->source_slot != 0x00ffb600UL ||
+            class02->state != 0x0200u || class02->source_a4 != 5u ||
+            class02->animation_record != 0x0006b66cUL)
+        {
+            fprintf(stderr, "component entry cursor=%u spawns=%lu c01=%u/%d/%08lx/%04x/%u/%08lx c02=%u/%d/%08lx/%04x/%u/%08lx\n",
+                component_runtime.coffee_scene_record_cursor,
+                component_runtime.coffee_scene_spawns,
+                class01->active, class01->actor_class,
+                class01->source_slot, class01->state,
+                class01->transition_timer, class01->animation_record,
+                class02->active, class02->actor_class,
+                class02->source_slot, class02->state,
+                class02->source_a4, class02->animation_record);
+            return 97;
+        }
+        component_runtime.camera_x_position = 672;
+        if (!avsp_round1_step_scheduler(&component_runtime) ||
+            component_runtime.coffee_scene_record_cursor != 3u ||
+            component_runtime.pools[2].records[11].actor_class != 0x01 ||
+            component_runtime.pools[2].records[11].variant != 1u ||
+            component_runtime.pools[2].records[11].source_slot !=
+                0x00ffb400UL)
+            return 97;
+        component_runtime.camera_x_position = 736;
+        if (!avsp_round1_step_scheduler(&component_runtime) ||
+            component_runtime.coffee_scene_record_cursor != 4u ||
+            component_runtime.pools[2].records[9].actor_class != 0x02 ||
+            component_runtime.pools[2].records[9].source_slot !=
+                0x00ffb300UL)
+            return 97;
+        class01->state = 0x0204u;
+        class01->animation_index = 2u;
+        class01->animation_branch = (short)0x8000u;
+        free_before = component_runtime.pools[0].free_count;
+        living_before = component_runtime.first_encounter.source_living_count;
+        if (!avsp_round1_step_scheduler(&component_runtime) ||
+            class01->state != 0x0206u ||
+            component_runtime.pools[0].free_count !=
+                (unsigned char)(free_before - 1u) ||
+            component_runtime.first_encounter.source_living_count !=
+                (unsigned short)(living_before + 1u) ||
+            component_runtime.class01_spawn_allocations != 1u ||
+            component_runtime.class01_effect_requests != 8u ||
+            component_runtime.class01_audio_events != 1u ||
+            component_runtime.class01_audio_command != 0x006du)
+            return 98;
+        jump_actor = &component_runtime.pools[0].records[9];
+        free_index = 0u;
+        for (tick = 0u; tick < component_runtime.pools[0].capacity; ++tick)
+        {
+            if (tick == 9u)
+                continue;
+            component_runtime.pools[0].records[tick].active = 0u;
+            component_runtime.pools[0].free_stack[free_index++] =
+                (unsigned short)(component_runtime.pools[0].source_base +
+                    tick * component_runtime.pools[0].stride);
+        }
+        component_runtime.pools[0].free_count = (unsigned char)free_index;
+        component_runtime.first_encounter.source_living_count = 1u;
+        jump_actor->state = 0x0200u;
+        jump_actor->substate = 0x0e00u;
+        jump_actor->source_action = 0x0e00u;
+        jump_actor->source_action_initialized = 1u;
+        jump_actor->handler_updates = 1u;
+        jump_actor->x = 1000;
+        jump_actor->y = 300;
+        jump_actor->z = 300;
+        jump_actor->source_x_fp = 1000L * 65536L;
+        jump_actor->source_y_fp = 300L * 65536L;
+        jump_actor->source_z_fp = 300L * 65536L;
+        for (tick = 0u; tick < component_runtime.pools[3].capacity; ++tick)
+            if (component_runtime.pools[3].records[tick].actor_class == 0x4e)
+                component_runtime.pools[3].records[tick].active = 0u;
+        jump_rng_before = component_runtime.rng_seed;
+        jump_rng_high = (unsigned char)(((unsigned long)jump_rng_before *
+            3UL & 0xffffUL) >> 8);
+        jump_rng_low = (unsigned char)((jump_rng_before & 0x00ffu) +
+                                       jump_rng_high);
+        jump_rng_index = (unsigned char)((jump_rng_low & 0x0cu) >> 2);
+        jump_expected_velocity = jump_rng_index == 0u ? -65536L :
+            (jump_rng_index == 1u ? -81920L :
+             (jump_rng_index == 2u ? -98304L : -131072L));
+        if (!avsp_round1_step_scheduler(&component_runtime) ||
+            jump_actor->substate != 0x0e02u || jump_actor->x != 1000 ||
+            jump_actor->y != 332 || jump_actor->z != 300 ||
+            jump_actor->source_z_velocity != jump_expected_velocity ||
+            component_runtime.class1f_action0e_rng_calls != 1u)
+        {
+            fprintf(stderr, "action0e entry state=%04x/%04x xyz=%d/%d/%d zvel=%ld rng=%lu code=%u\n",
+                jump_actor->state, jump_actor->substate, jump_actor->x,
+                jump_actor->y, jump_actor->z,
+                jump_actor->source_z_velocity,
+                component_runtime.class1f_action0e_rng_calls,
+                component_runtime.scheduler_failure_code);
+            return 98;
+        }
+        for (tick = 0u; tick < 64u && jump_actor->substate != 0u; ++tick)
+            if (!avsp_round1_step_scheduler(&component_runtime))
+            {
+                fprintf(stderr, "action0e scheduler tick=%u state=%04x/%04x anim=%08lx timer=%u branch=%d code=%u slot=%04x failures=%lu\n",
+                    tick, jump_actor->state, jump_actor->substate,
+                    jump_actor->animation_record,
+                    jump_actor->animation_timer,
+                    jump_actor->animation_branch,
+                    component_runtime.scheduler_failure_code,
+                    component_runtime.scheduler_failure_source_slot,
+                    component_runtime.failure_count);
+                return 98;
+            }
+        if (jump_actor->substate != 0u || jump_actor->x != 1000 ||
+            jump_actor->z >= 300 || jump_actor->y != jump_actor->z ||
+            jump_actor->coordinate_mode != 0u ||
+            jump_actor->source_style85 != 1u)
+        {
+            fprintf(stderr, "action0e exit tick=%u state=%04x/%04x xyz=%d/%d/%d mode=%u style=%u code=%u\n",
+                tick, jump_actor->state, jump_actor->substate,
+                jump_actor->x, jump_actor->y, jump_actor->z,
+                jump_actor->coordinate_mode, jump_actor->source_style85,
+                component_runtime.scheduler_failure_code);
+            return 98;
+        }
+        jump_actor->state = 0x0200u;
+        jump_actor->substate = 0x0200u;
+        jump_actor->source_action = 0x0200u;
+        jump_actor->source_action_initialized = 1u;
+        jump_actor->source_a2 = 0u;
+        jump_actor->source_field01 = 0u;
+        jump_actor->x = 1000;
+        component_runtime.camera_x_position = 0;
+        if (!avsp_round1_step_scheduler(&component_runtime) ||
+            jump_actor->state == 0x0600u || jump_actor->source_a2 != 0u)
+            return 98;
+        class02 = &component_runtime.pools[2].records[9];
+        component_runtime.camera_x_position = 832;
+        component_runtime.player_action.x = 1091;
+        component_runtime.player_action.lane = 320;
+        component_runtime.player_action.height = 0;
+        component_runtime.player_special_attack_active = 1u;
+        component_runtime.player_special_attack_contact_ready = 1u;
+        if (!avsp_round1_step_scheduler(&component_runtime) ||
+            class02->health != -1 || class02->state != 0x0400u ||
+            component_runtime.class02_damage_writes != 1u)
+        {
+            fprintf(stderr, "class02 damage health=%d state=%04x writes=%lu tests=%lu flags=%u special=%u code=%u\n",
+                class02->health, class02->state,
+                component_runtime.class02_damage_writes,
+                component_runtime.class02_collision_tests,
+                class02->source_flags,
+                component_runtime.player_special_attack_contact_ready,
+                component_runtime.scheduler_failure_code);
+            return 99;
+        }
+        for (tick = 0u; tick < component_runtime.pools[2].capacity; ++tick)
+            if (tick != 9u)
+                component_runtime.pools[2].records[tick].active = 0u;
+        for (tick = 0u; tick < component_runtime.pools[3].capacity; ++tick)
+            component_runtime.pools[3].records[tick].active = 0u;
+        component_runtime.pools[3].free_stack[0] = 0xbd80u;
+        component_runtime.pools[3].free_stack[1] = 0xc180u;
+        component_runtime.pools[3].free_stack[2] = 0xc200u;
+        component_runtime.pools[3].free_stack[3] = 0xc380u;
+        component_runtime.pools[3].free_count = 4u;
+        component_runtime.rng_seed = 0x327fu;
+        component_runtime.frame = 2805u;
+        if (!avsp_round1_step_scheduler(&component_runtime) ||
+            class02->state != 0x0200u || class02->source_a4 != 4u ||
+            class02->animation_record != 0x0006b680UL ||
+            component_runtime.class02_effect_requests != 4u ||
+            component_runtime.class02_audio_events != 1u ||
+            component_runtime.class02_audio_command != 0x0077u ||
+            component_runtime.class47_spawn_requests != 4u ||
+            component_runtime.class47_allocations != 4u ||
+            component_runtime.class47_allocation_failures != 0u ||
+            component_runtime.class47_initializations != 4u ||
+            component_runtime.class47_rng_calls != 28u ||
+            component_runtime.pools[3].records[14].active != 2u ||
+            component_runtime.pools[3].records[14].actor_class != 0x47 ||
+            component_runtime.pools[3].records[14].state != 0x0200u ||
+            component_runtime.pools[3].records[14].x != 1150 ||
+            component_runtime.pools[3].records[14].y != 438 ||
+            component_runtime.pools[3].records[14].z != 335 ||
+            component_runtime.pools[3].records[14].animation_record !=
+                0x0008ee88UL)
+        {
+            fprintf(stderr, "class02 reaction state=%04x effects=%u record=%08lx requests=%lu audio=%lu/%04x class47=%lu/%lu/%lu init=%lu rng=%lu first=%u/%d/%04x/%d/%d/%d/%08lx code=%u\n",
+                class02->state, class02->source_a4,
+                class02->animation_record,
+                component_runtime.class02_effect_requests,
+                component_runtime.class02_audio_events,
+                component_runtime.class02_audio_command,
+                component_runtime.class47_spawn_requests,
+                component_runtime.class47_allocations,
+                component_runtime.class47_allocation_failures,
+                component_runtime.class47_initializations,
+                component_runtime.class47_rng_calls,
+                component_runtime.pools[3].records[14].active,
+                component_runtime.pools[3].records[14].actor_class,
+                component_runtime.pools[3].records[14].state,
+                component_runtime.pools[3].records[14].x,
+                component_runtime.pools[3].records[14].y,
+                component_runtime.pools[3].records[14].z,
+                component_runtime.pools[3].records[14].animation_record,
+                component_runtime.scheduler_failure_code);
+            return 99;
+        }
+        class02->health = 63;
+        class02->state = 0x0200u;
+        class02->source_player_guard = 0u;
+        component_runtime.player_special_attack_contact_ready = 1u;
+        if (!avsp_round1_step_scheduler(&component_runtime) ||
+            class02->health != 38 || class02->state != 0x0400u ||
+            component_runtime.class02_damage_writes != 2u)
+            return 99;
+    }
+    {
+        AvspRound1Runtime type16_runtime;
+        AvspRound1ActorCore *parent;
+        AvspRound1ActorCore *projectile;
+        unsigned int entry_ticks = 0u;
+        avsp_round1_init(&type16_runtime);
+        if (!avsp_round1_begin_first_entry(&type16_runtime))
+            return 100;
+        while (!type16_runtime.entry.control_enabled && entry_ticks < 1000u)
+        {
+            if (!avsp_round1_step_first_entry(&type16_runtime) ||
+                (type16_runtime.entry.spawned &&
+                 !avsp_round1_step_scheduler(&type16_runtime)))
+                return 101;
+            ++entry_ticks;
+        }
+        parent = &type16_runtime.pools[0].records[19];
+        parent->state = 0x0208u;
+        parent->substate = 0x0e02u;
+        parent->source_action = 0x0e02u;
+        parent->source_projectile_enable = 1u;
+        parent->animation_record = 0x0012e580UL;
+        parent->animation_timer = 1u;
+        parent->animation_branch = 1;
+        parent->animation_index = 3u;
+        parent->facing = 1u;
+        parent->x = 1022;
+        parent->y = 320;
+        parent->z = 320;
+        if (!avsp_round1_step_scheduler(&type16_runtime) ||
+            type16_runtime.type16_spawn_requests != 1u ||
+            type16_runtime.type16_allocations != 1u ||
+            type16_runtime.pools[1].free_count != 19u)
+            return 102;
+        projectile = &type16_runtime.pools[1].records[19];
+        if (!projectile->active || projectile->type != 16u ||
+            projectile->actor_class != 0x06 ||
+            projectile->source_slot != 0x00ffae00UL ||
+            projectile->state != 0x0200u || projectile->substate != 0u ||
+            projectile->facing != 1u || projectile->variant != 0u ||
+            projectile->x != 1081 || projectile->y != 384 ||
+            projectile->z != 320 ||
+            projectile->coordinate_mode != 1u ||
+            projectile->object_or != 0x8000u ||
+            projectile->source_x_velocity != 0x00080000L ||
+            projectile->source_x_acceleration != -0x00002000L ||
+            projectile->source_y_velocity != 0x00040000L ||
+            projectile->source_y_acceleration != -0x00004000L ||
+            projectile->animation_record != 0x000355dcUL ||
+            projectile->assembly != 0x0003570cUL ||
+            projectile->attack_selector != 1u ||
+            parent->animation_record != 0x0012e590UL ||
+            parent->animation_timer != 4u)
+            return 103;
+
+        parent->source_projectile_enable = 0u;
+        stage_class1f_release(&type16_runtime, -1);
+        if (!avsp_round1_step_scheduler(&type16_runtime))
+            return 107;
+        projectile->state = 0x0200u;
+        projectile->health = 0;
+        projectile->x = 800;
+        projectile->y = 400;
+        projectile->z = 320;
+        projectile->source_x_fp = 800L * 65536L;
+        projectile->source_y_fp = 400L * 65536L;
+        projectile->source_z_fp = 320L * 65536L;
+        projectile->source_x_velocity = 0L;
+        projectile->source_x_acceleration = 0L;
+        projectile->source_y_velocity = 0L;
+        projectile->source_y_acceleration = 0L;
+        projectile->source_z_velocity = 0L;
+        projectile->animation_index = 3u;
+        projectile->animation_record = 0x0003560cUL;
+        projectile->assembly = 0x00035736UL;
+        projectile->animation_timer = 3u;
+        projectile->animation_branch = -32768;
+        projectile->attack_selector = 1u;
+        type16_runtime.player.x = 800;
+        type16_runtime.player.y = 355;
+        type16_runtime.player.z = 320;
+        type16_runtime.player.health = 95;
+        type16_runtime.player_action.x = 800;
+        type16_runtime.player_action.lane = 320;
+        type16_runtime.player_action.health = 95;
+        type16_runtime.first_encounter.pending_player_damage = 0u;
+        if (!avsp_round1_step_scheduler(&type16_runtime) ||
+            projectile->health != -1 ||
+            type16_runtime.first_encounter.pending_player_damage != 17u ||
+            type16_runtime.type16_collision_writes != 1u ||
+            type16_runtime.type16_damage_writes != 1u)
+        {
+            fprintf(stderr,
+                "type16 collision health=%d pending=%u writes=%lu/%lu position=%d/%d/%d player=%d/%d/%d selector=%u state=%04x code=%u failure=%lu\n",
+                projectile->health,
+                type16_runtime.first_encounter.pending_player_damage,
+                type16_runtime.type16_collision_writes,
+                type16_runtime.type16_damage_writes,
+                projectile->x, projectile->y, projectile->z,
+                type16_runtime.player.x, type16_runtime.player.y,
+                type16_runtime.player.z, projectile->attack_selector,
+                projectile->state,
+                type16_runtime.scheduler_failure_code,
+                type16_runtime.failure_count);
+            return 104;
+        }
+        if (!avsp_round1_step_player(&type16_runtime, 0u, 0) ||
+            type16_runtime.player.health != 78 ||
+            type16_runtime.player_action.health != 78 ||
+            type16_runtime.first_encounter.player_damage_events != 1u)
+        {
+            fprintf(stderr,
+                "type16 damage health=%d/%d pending=%u damage=%u events=%lu state=%04x/%04x failures=%lu\n",
+                type16_runtime.player.health,
+                type16_runtime.player_action.health,
+                type16_runtime.first_encounter.pending_player_damage,
+                type16_runtime.first_encounter.player_damage,
+                type16_runtime.first_encounter.player_damage_events,
+                type16_runtime.player.state,
+                type16_runtime.player.substate,
+                type16_runtime.failure_count);
+            return 105;
+        }
+        if (!avsp_round1_step_scheduler(&type16_runtime) ||
+            projectile->state != 0x0600u ||
+            !avsp_round1_step_scheduler(&type16_runtime) ||
+            projectile->active != 0u ||
+            type16_runtime.type16_releases != 1u ||
+            type16_runtime.pools[1].free_count != 20u)
+            return 106;
+    }
+    {
+        AvspRound1Runtime scene_runtime;
+        unsigned int source_frame;
+        avsp_round1_init(&scene_runtime);
+        if (!avsp_round1_begin_first_entry(&scene_runtime))
+            return 90;
+        if (avsp_round1_coffee_shop_source_input(2600u) !=
+                AVSP_PW_INPUT_RIGHT ||
+            avsp_round1_coffee_shop_source_input(2790u) !=
+                (AVSP_PW_INPUT_RIGHT | AVSP_ROUND1_INPUT_BUTTON1 |
+                 AVSP_PW_INPUT_ATTACK))
+            return 91;
+        for (source_frame = 2040u; source_frame <= 5566u; ++source_frame)
+        {
+            unsigned short input =
+                avsp_round1_coffee_shop_source_input(
+                    (unsigned short)source_frame);
+            scene_runtime.frame = source_frame - 2040u;
+            if (scene_runtime.frame >= 32u &&
+                scene_runtime.route_state != 4 &&
+                !avsp_round1_step_first_entry(&scene_runtime))
+            {
+                fprintf(stderr,
+                    "Coffee Shop entry validation failed source=%u route=%d player=%04x/%04x action=%u failures=%lu fallback=%lu\n",
+                    source_frame, scene_runtime.route_state,
+                    scene_runtime.player.state, scene_runtime.player.substate,
+                    scene_runtime.player_action.state,
+                    scene_runtime.failure_count, scene_runtime.fallback_count);
+                return 92;
+            }
+            if (scene_runtime.route_state == 4 &&
+                !avsp_round1_step_player(&scene_runtime, input, 0))
+            {
+                fprintf(stderr,
+                    "Coffee Shop player failed source=%u input=%04x core=%04x/%04x action=%u weapon=%u cleanup=%u recovery=%u return=%u jump=%u jump_cleanup=%u jump_latch=%u stop=%u player_cleanup=%u locomotion=%u source_action=%u position=%d/%d action_position=%d/%d health=%d/%d resource=%u recharge=%u weapon_counts=%lu/%lu alloc=%lu release=%lu free=%u air=%lu empty=%lu/%lu/%lu\n",
+                    source_frame, input, scene_runtime.player.state,
+                    scene_runtime.player.substate,
+                    scene_runtime.player_action.state,
+                    scene_runtime.player_weapon_active,
+                    scene_runtime.player_weapon_cleanup_pending,
+                    scene_runtime.player_weapon_recovery_pending,
+                    scene_runtime.player_weapon_return_pending,
+                    scene_runtime.player_jump_active,
+                    scene_runtime.player_jump_cleanup_pending,
+                    scene_runtime.player_jump_airborne_latch,
+                    scene_runtime.player_stop_ticks,
+                    scene_runtime.player_cleanup_pending,
+                    scene_runtime.player_locomotion_action,
+                    scene_runtime.player.source_action,
+                    scene_runtime.player.x, scene_runtime.player.z,
+                    scene_runtime.player_action.x,
+                    scene_runtime.player_action.lane,
+                    scene_runtime.player.health,
+                    scene_runtime.player_action.health,
+                    scene_runtime.player_resource,
+                    scene_runtime.player_resource_recharge,
+                    scene_runtime.player_weapon_entries,
+                    scene_runtime.player_weapon_completions,
+                    scene_runtime.player_weapon_allocations,
+                    scene_runtime.player_weapon_projectile_releases,
+                    scene_runtime.player_weapon_projectile_free_count,
+                    scene_runtime.player_air_weapon_entries,
+                    scene_runtime.player_weapon_empty_auxiliary_requests,
+                    scene_runtime.player_weapon_empty_auxiliary_allocations,
+                    scene_runtime.player_weapon_empty_auxiliary_allocation_failures);
+                fprintf(stderr,
+                    "Coffee Shop camera=%d/%d target=%d/%d scroll2=%d bounds=%d/%d active=%u lower=%d/%d upper=%d/%d terminal=%u control=%u gate=%u decrements=%u step=%u failures=%lu\n",
+                    scene_runtime.camera_x_position,
+                    scene_runtime.camera_z_position,
+                    scene_runtime.camera_x_target,
+                    scene_runtime.camera_z_target,
+                    scene_runtime.camera_scroll2_x,
+                    scene_runtime.navigation_bound_x,
+                    scene_runtime.navigation_bound_z,
+                    scene_runtime.navigation_bounds_active,
+                    scene_runtime.camera_x_lower,
+                    scene_runtime.camera_z_lower,
+                    scene_runtime.camera_x_upper,
+                    scene_runtime.camera_z_upper,
+                    scene_runtime.entry.terminal_seen,
+                    scene_runtime.entry.control_enabled,
+                    scene_runtime.entry.gate8236,
+                    scene_runtime.entry.timer_decrements,
+                    scene_runtime.entry.step_index,
+                    scene_runtime.failure_count);
+                fprintf(stderr,
+                    "Coffee Shop pool0 free=%u source_living=%u class1f_releases=%lu controller=%04x progress=%u timer=%u\n",
+                    scene_runtime.pools[0].free_count,
+                    scene_runtime.first_encounter.source_living_count,
+                    scene_runtime.class1f_action_releases,
+                    scene_runtime.entry_controller.state,
+                    scene_runtime.first_encounter.source_progress,
+                    scene_runtime.first_encounter.source_spawn_timer);
+                fprintf(stderr,
+                    "Coffee Shop debits=%lu entries_plus_air=%lu empty_release=%lu air_effect=%lu/%lu/%lu/%lu completions=%lu entries=%lu jump_counts=%lu/%lu/%lu canaries=%08lx/%08lx\n",
+                    scene_runtime.player_weapon_resource_debits,
+                    scene_runtime.player_weapon_entries +
+                        scene_runtime.player_air_weapon_entries,
+                    scene_runtime.player_weapon_empty_auxiliary_releases,
+                    scene_runtime.player_air_weapon_effect_requests,
+                    scene_runtime.player_air_weapon_effect_allocations,
+                    scene_runtime.player_air_weapon_effect_allocation_failures,
+                    scene_runtime.player_air_weapon_effect_releases,
+                    scene_runtime.player_weapon_completions,
+                    scene_runtime.player_weapon_entries,
+                    scene_runtime.player_jump_entries,
+                    scene_runtime.player_jump_completions,
+                    scene_runtime.player_jump_interruptions,
+                    scene_runtime.head_canary,
+                    scene_runtime.tail_canary);
+                return 93;
+            }
+            if (scene_runtime.entry.spawned)
+            {
+                if (!avsp_round1_step_scheduler(&scene_runtime))
+                    return 94;
+            }
+        }
+        if (!scene_runtime.first_encounter.initialized)
+        {
+            fprintf(stderr,
+                "Coffee Shop ledger did not reach encounter: route=%d living=%u free=%u progress=%u timer=%u controller=%04x blocked=%u releases=%lu contacts=%lu ko=%lu\n",
+                scene_runtime.route_state,
+                scene_runtime.first_encounter.source_living_count,
+                scene_runtime.pools[0].free_count,
+                scene_runtime.first_encounter.source_progress,
+                scene_runtime.first_encounter.source_spawn_timer,
+                scene_runtime.entry_controller.state,
+                scene_runtime.first_encounter.source_blocked_by_living_count,
+                scene_runtime.class1f_action_releases,
+                scene_runtime.first_encounter.player_contacts,
+                scene_runtime.first_encounter.ko_events);
+            return 95;
+        }
     }
     runtime.entry.gate8236 = 1u;
     if (avsp_round1_entry_valid(&runtime))

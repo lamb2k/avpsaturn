@@ -6,20 +6,20 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "b1613ab1bbd777abbcbeae7c5521463171c5cc1ad4b12367248a436acbb563af"
+    "d494222be45663bd3a72ef7c5b5d8fa5f84ed4adaa048ecb2cd1dc1bf2042061"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
 #define AVSP_ROUND1_INITIAL_RNG 0x8DEFu
 #define AVSP_ROUND1_PLAYER_HEALTH 101
-#define AVSP_ROUND1_POOL_COUNT 4
-#define AVSP_ROUND1_MAX_POOL_CAPACITY 32
+#define AVSP_ROUND1_POOL_COUNT 6
+#define AVSP_ROUND1_MAX_POOL_CAPACITY 64
 #define AVSP_ROUND1_FIRST_SPAWN_COUNT 10
 #define AVSP_ROUND1_ENTRY_PROGRAM_BYTES 26
 #define AVSP_ROUND1_ENTRY_STEP_COUNT 8
-#define AVSP_ROUND1_SCHEDULER_POOL_COUNT 4
+#define AVSP_ROUND1_SCHEDULER_POOL_COUNT 6
 #define AVSP_ROUND1_REQUIRED_DISPATCH_COUNT 16
-#define AVSP_ROUND1_SCHEDULER_TRACE_CAPACITY 78
+#define AVSP_ROUND1_SCHEDULER_TRACE_CAPACITY 192
 #define AVSP_ROUND1_PLAYER_ENTRY_STATE 2048u
 #define AVSP_ROUND1_PLAYER_CONTROL_STATE 512u
 #define AVSP_ROUND1_PLAYER_MELEE_COUNT 4u
@@ -29,10 +29,15 @@
 #define AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_MAX_RECORDS 8u
 #define AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT 20u
 #define AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT 18u
+#define AVSP_ROUND1_PLAYER_SPECIAL_PRESENTATION_COUNT 17u
+#define AVSP_ROUND1_CLASS4B_PRESENTATION_COUNT 32u
+#define AVSP_ROUND1_CLASS3D_PRESENTATION_COUNT 9u
+#define AVSP_ROUND1_CLASS3D_OFFSET_COUNT 16u
 #define AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY 24u
-#define AVSP_ROUND1_WEAPON_PARENT_PRESENTATION_COUNT 7u
+#define AVSP_ROUND1_WEAPON_PARENT_PRESENTATION_COUNT 8u
 #define AVSP_ROUND1_WEAPON_PARENT_SELECTOR_COUNT 6u
-#define AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT 3u
+#define AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT 31u
+#define AVSP_ROUND1_WEAPON_TARGET_DISTANCE_COUNT 16u
 #define AVSP_ROUND1_WEAPON_PARENT_LOW_MOTION_COUNT 16u
 #define AVSP_ROUND1_WEAPON_PARENT_HIGH_MOTION_COUNT 13u
 #define AVSP_ROUND1_AIR_WEAPON_SELECTOR_COUNT 7u
@@ -75,7 +80,23 @@
 #define AVSP_ROUND1_CLASS09_SEQUENCE_RECORDS 2u
 #define AVSP_ROUND1_CLASS4E_JITTER_COUNT 8u
 #define AVSP_ROUND1_CLASS4E_PRESENTATION_COUNT 5u
+#define AVSP_ROUND1_CLASS4E_VARIANT1_PRESENTATION_COUNT 3u
 #define AVSP_ROUND1_CLASS44_PRESENTATION_COUNT 2u
+#define AVSP_ROUND1_CLASS45_SCENE_ACTOR_COUNT 28u
+#define AVSP_ROUND1_CLASS45_SELECTOR_COUNT 32u
+#define AVSP_ROUND1_CLASS45_PRESENTATION_COUNT 5u
+#define AVSP_ROUND1_CLASS45_MOTION_COUNT 8u
+#define AVSP_ROUND1_CLASS45_SPAWN_GROUP_COUNT 3u
+#define AVSP_ROUND1_CLASS47_SCENE_ACTOR_COUNT 4u
+#define AVSP_ROUND1_CLASS47_SELECTOR_COUNT 32u
+#define AVSP_ROUND1_CLASS47_PRESENTATION_COUNT 9u
+#define AVSP_ROUND1_CLASS47_MOTION_COUNT 8u
+#define AVSP_ROUND1_TYPE16_MOTION_COUNT 3u
+#define AVSP_ROUND1_TYPE16_PARENT_PRESENTATION_COUNT 11u
+#define AVSP_ROUND1_TYPE16_PRESENTATION_COUNT 11u
+#define AVSP_ROUND1_COFFEE_SCENE_RECORD_COUNT 4u
+#define AVSP_ROUND1_CLASS01_PRESENTATION_COUNT 3u
+#define AVSP_ROUND1_CLASS02_PRESENTATION_COUNT 2u
 #define AVSP_ROUND1_TERRAIN_RECORD_COUNT 7u
 #define AVSP_ROUND1_TERRAIN_GRID_X_MIN 640
 #define AVSP_ROUND1_TERRAIN_GRID_X_MAX 1360
@@ -114,6 +135,28 @@ typedef struct
 
 typedef struct
 {
+    short route_state;
+    unsigned short player_variant;
+    unsigned char stage_record_type;
+    short stage_row_value;
+    unsigned short population_selector;
+    unsigned short population_mid_threshold;
+    unsigned short population_high_threshold;
+    short population_mid_adjustment;
+    short population_high_adjustment;
+    signed char variant_adjustment;
+    unsigned char random_masked_index;
+    short random_adjustment;
+    signed char post_adjustment;
+    short lower_bound;
+    short upper_bound;
+    unsigned short rng_before;
+    unsigned short rng_after;
+    short stage_parameter_after;
+} AvspRound1CoffeeStageSetupSpec;
+
+typedef struct
+{
     short x;
     short y;
     short z;
@@ -129,6 +172,24 @@ typedef struct
     unsigned char hurt_selector;
     unsigned char attack_selector;
 } AvspRound1AnimationStateSpec;
+
+typedef struct
+{
+    unsigned short entry_action;
+    unsigned short startup_action;
+    unsigned short active_action;
+    unsigned short cleanup_action;
+    unsigned short return_action;
+    unsigned char presentation_selector;
+    unsigned char contact_attack_selector;
+    unsigned char health_cost;
+    unsigned char class4b_record_type;
+    signed char class4b_class;
+    unsigned char class3d_record_type;
+    signed char class3d_class;
+    unsigned short audio_command_0;
+    unsigned short audio_command_1;
+} AvspRound1PlayerSpecialSpec;
 
 typedef struct
 {
@@ -158,6 +219,65 @@ typedef struct
     unsigned char hit_value;
     unsigned char damage_selector;
 } AvspRound1CollisionBoxSpec;
+
+typedef struct
+{
+    unsigned long scene_record;
+    unsigned long source_slot;
+    unsigned short source_frame;
+    unsigned short camera_threshold;
+    short x;
+    short y;
+    unsigned short allocator;
+    signed char actor_class;
+    unsigned char variant;
+    signed char guard_0a;
+    unsigned char guard_0b;
+    unsigned char facing;
+    unsigned char field_0d;
+    unsigned short timer;
+} AvspRound1CoffeeSceneRecordSpec;
+
+typedef struct
+{
+    unsigned long dispatch;
+    unsigned long animation_table;
+    unsigned short timer_variant0;
+    unsigned short timer_variant1;
+    unsigned short respawn_timer;
+    unsigned short camera_activation_distance;
+    unsigned short camera_release_distance;
+    unsigned char initial_remaining_spawns;
+    unsigned char maximum_living;
+    signed char spawned_class;
+    unsigned char spawned_variant;
+    unsigned short initial_audio_command;
+    unsigned short variant_audio_command;
+} AvspRound1Class01Spec;
+
+typedef struct
+{
+    unsigned long dispatch;
+    unsigned long animation_table;
+    unsigned long attack_record;
+    unsigned long hurt_record;
+    unsigned short camera_bounds_bias;
+    unsigned short camera_bounds_span;
+    unsigned char initial_effect_count;
+    unsigned char child_record_type;
+    signed char child_class;
+    unsigned char child_variant;
+    short child_x_add;
+    short child_y_add;
+    short child_z_add;
+    short damage;
+    short ko_clamp;
+    unsigned short audio_command;
+    unsigned char reaction_direction_less;
+    unsigned char reaction_direction_greater_equal;
+    AvspRound1CollisionBoxSpec attack_box;
+    AvspRound1CollisionBoxSpec hurt_box;
+} AvspRound1Class02Spec;
 
 typedef struct
 {
@@ -252,9 +372,16 @@ typedef struct
     long source_x_fp;
     long source_y_fp;
     long source_z_fp;
+    long source_aux_fp;
     long source_x_velocity;
+    long source_x_acceleration;
+    long source_z_velocity;
     long source_y_velocity;
     long source_y_acceleration;
+    long source_primary_x_fp;
+    long source_primary_y_fp;
+    long source_alternate_x_fp;
+    long source_alternate_y_fp;
     unsigned short source_target_low;
     unsigned short source_bound_b2;
     unsigned char source_direction;
@@ -270,8 +397,21 @@ typedef struct
     unsigned char source_action_group_cursor;
     unsigned char source_player_guard;
     unsigned char source_action_initialized;
+    unsigned char source_dynamic_spawn;
+    unsigned char source_projectile_enable;
+    unsigned char source_motion_flags;
+    short source_motion_fields[8];
+    unsigned short source_children[4];
+    unsigned char source_field01;
+    unsigned char source_a2;
     unsigned char source_movement_table;
     unsigned long source_next_animation_record;
+    unsigned long source_primary_animation_record;
+    unsigned long source_primary_assembly;
+    unsigned long source_alternate_animation_record;
+    unsigned long source_alternate_assembly;
+    unsigned short source_alternate_animation_timer;
+    short source_alternate_animation_branch;
     unsigned long dispatch_entry;
     unsigned long scheduler_updates;
     unsigned long handler_updates;
@@ -387,11 +527,14 @@ typedef struct
     unsigned char turn_selectors[2];
     unsigned char idle_selectors[2];
     unsigned char movement_selector_bases[2];
-    long jump_x_velocity[4];
+    long jump_z_velocity[4];
     long jump_y_velocity;
     long jump_y_acceleration;
     short jump_initial_y_add;
     long fall_y_delta;
+    unsigned char jump_initial_selector;
+    unsigned char jump_landing_selector;
+    unsigned char jump_terminal_style;
     unsigned short action4_random_groups[
         AVSP_ROUND1_CLASS1F_ACTION4_RANDOM_GROUP_COUNT];
     unsigned short action4_group_first[
@@ -439,7 +582,18 @@ typedef struct
     signed char intro_gate_owner_class;
     unsigned char intro_gate_owner_type;
     unsigned short intro_gate_owner_state;
+    unsigned short progress_ko_state;
+    unsigned short progress_ko_substate;
+    short progress_ko_health;
+    unsigned short progress_increment;
 } AvspRound1RecurringSpawnSpec;
+
+typedef struct
+{
+    unsigned short first_source_frame;
+    unsigned short last_source_frame;
+    unsigned short input_mask;
+} AvspRound1SceneInputRun;
 
 typedef struct
 {
@@ -464,6 +618,14 @@ typedef struct
 typedef struct
 {
     unsigned long source_slot;
+    unsigned short seed_before;
+    unsigned short seed_after;
+    unsigned char table_index;
+} AvspRound1Class4eRngSpec;
+
+typedef struct
+{
+    unsigned long source_slot;
     short x;
     short y;
     short z;
@@ -475,6 +637,67 @@ typedef struct
     unsigned char facing;
     unsigned short object_or;
 } AvspRound1Class44GuardSpec;
+
+typedef struct
+{
+    short primary_x_velocity;
+    short primary_y_velocity;
+    short primary_y_acceleration;
+    short alternate_x_velocity;
+    short alternate_y_velocity;
+    short alternate_y_acceleration;
+} AvspRound1Class45MotionSpec;
+
+typedef struct
+{
+    unsigned short attempts;
+    short x_offset;
+    short y_offset;
+    short z_offset;
+} AvspRound1Class45SpawnGroupSpec;
+
+typedef struct
+{
+    long x_velocity;
+    long x_acceleration;
+    long y_velocity;
+    long y_acceleration;
+    long z_velocity;
+} AvspRound1Type16MotionSpec;
+
+typedef struct
+{
+    unsigned long dispatch;
+    unsigned long spawn_routine;
+    unsigned long allocator;
+    unsigned long release_routine;
+    unsigned long collision_table;
+    unsigned long attack_record;
+    unsigned long player_table;
+    unsigned long player_hurt_record;
+    short spawn_x_offset;
+    short spawn_y_offset;
+    unsigned short camera_bias;
+    unsigned short camera_limit;
+    short damage;
+    unsigned char record_type;
+    signed char actor_class;
+    unsigned char attack_selector;
+    unsigned char hit_value;
+    AvspRound1CollisionBoxSpec attack_box;
+    AvspRound1CollisionBoxSpec player_hurt_box;
+} AvspRound1Type16Spec;
+
+typedef struct
+{
+    signed char actor_class;
+    unsigned char variant;
+    unsigned char child_count;
+    unsigned char rng_calls_per_actor;
+    short y_offset;
+    short z_offset;
+    unsigned long dispatch;
+} AvspRound1Class47Spec;
 
 typedef struct
 {
@@ -546,6 +769,50 @@ typedef struct
     unsigned char attack_selector;
     AvspRound1CollisionBoxSpec attack_box;
 } AvspRound1ObstacleSpec;
+
+#define AVSP_ROUND1_OBSTACLE_CHILD_VARIANTS 4u
+#define AVSP_ROUND1_OBSTACLE_CHILD_RECORD_MAX 8u
+#define AVSP_ROUND1_OBSTACLE_PARENT_RECORD_COUNT 5u
+
+typedef struct
+{
+    unsigned char record_count;
+    AvspRound1AnimationStateSpec records[
+        AVSP_ROUND1_OBSTACLE_CHILD_RECORD_MAX];
+} AvspRound1ObstacleChildSequenceSpec;
+
+typedef struct
+{
+    unsigned long scene_record;
+    unsigned long source_slot;
+    unsigned long dispatch_entry;
+    unsigned long player_attack_record;
+    unsigned short camera_threshold;
+    short x;
+    short y;
+    short z;
+    short initial_health;
+    unsigned short active_state;
+    unsigned short break_state;
+    unsigned short break_timer_state;
+    unsigned short physics_state;
+    unsigned short release_state;
+    unsigned short object_priority;
+    unsigned char field64;
+    unsigned char child_record_type;
+    signed char child_class;
+    unsigned char child_count;
+    unsigned char child_variant_order[
+        AVSP_ROUND1_OBSTACLE_CHILD_VARIANTS];
+    unsigned char break_timer;
+    unsigned char damage;
+    unsigned char special_edge_to_damage_ticks;
+    unsigned char player_attack_hit_value;
+    signed char player_attack_knockback;
+    AvspRound1CollisionBoxSpec player_attack_box;
+    AvspRound1CollisionBoxSpec obstacle_hurt_box;
+    short physics_fields[8];
+} AvspRound1ObstacleLifecycleSpec;
 
 typedef struct
 {
@@ -734,6 +1001,7 @@ typedef struct
 typedef struct
 {
     unsigned char started;
+    unsigned char dependencies_seeded;
     unsigned char spawned;
     unsigned char terminal_seen;
     unsigned char control_enabled;
@@ -875,16 +1143,61 @@ typedef struct
     unsigned long class1f_action_movement_steps;
     unsigned long class1f_action_releases;
     unsigned short source_stage_parameter;
+    unsigned short player_variant;
+    unsigned char source_stage_record_type;
+    unsigned char coffee_stage_setup_complete;
+    unsigned long coffee_stage_setup_calls;
     unsigned long class1f_action4_rng_calls;
     unsigned long class1f_action4_timer_rng_calls;
+    unsigned long class1f_action0e_rng_calls;
     AvspRound1FirstEncounterRuntime first_encounter;
     unsigned long class09_initializations;
     unsigned long class09_rng_calls;
     unsigned long class4e_initializations;
     unsigned long class4e_rng_calls;
     unsigned long class4e_releases;
+    unsigned char class4e_impact_suppressed;
+    unsigned long class4e_variant1_allocation_requests;
+    unsigned long class4e_variant1_allocations;
+    unsigned long class4e_variant1_allocation_failures;
+    unsigned long class4e_variant1_initializations;
+    unsigned long class4e_variant1_releases;
     unsigned long class44_guard_updates;
     unsigned long class44_guard_clears;
+    unsigned long class45_spawn_attempts;
+    unsigned long class45_allocations;
+    unsigned long class45_initializations;
+    unsigned long class45_rng_calls;
+    unsigned long class45_state_transitions;
+    unsigned long class45_releases;
+    unsigned char coffee_scene_record_cursor;
+    unsigned char coffee_scene_active_flag;
+    unsigned long coffee_scene_spawn_attempts;
+    unsigned long coffee_scene_spawns;
+    unsigned long class01_initializations;
+    unsigned long class01_spawn_requests;
+    unsigned long class01_spawn_allocations;
+    unsigned long class01_spawn_allocation_failures;
+    unsigned long class01_effect_requests;
+    unsigned long class01_audio_events;
+    unsigned short class01_audio_command;
+    unsigned long class01_state_transitions;
+    unsigned long class01_releases;
+    unsigned long class02_initializations;
+    unsigned long class02_collision_tests;
+    unsigned long class02_damage_writes;
+    unsigned long class02_effect_requests;
+    unsigned long class02_audio_events;
+    unsigned short class02_audio_command;
+    unsigned long class02_state_transitions;
+    unsigned long class02_releases;
+    unsigned long class47_spawn_requests;
+    unsigned long class47_allocations;
+    unsigned long class47_allocation_failures;
+    unsigned long class47_initializations;
+    unsigned long class47_rng_calls;
+    unsigned long class47_state_transitions;
+    unsigned long class47_releases;
     unsigned char navigation_bounds_active;
     short navigation_bound_x;
     short navigation_bound_z;
@@ -892,6 +1205,45 @@ typedef struct
     unsigned long navigation_clamps;
     unsigned long navigation_obstacle_tests;
     unsigned long navigation_obstacle_responses;
+    unsigned char coffee_shop_obstacle_spawned;
+    unsigned char coffee_shop_obstacle_released;
+    unsigned long coffee_shop_obstacle_spawn_attempts;
+    unsigned long coffee_shop_obstacle_spawns;
+    unsigned long coffee_shop_obstacle_child_allocations;
+    unsigned long coffee_shop_obstacle_damage_events;
+    unsigned long coffee_shop_obstacle_state_transitions;
+    unsigned long coffee_shop_obstacle_releases;
+    unsigned long coffee_shop_obstacle_child_updates;
+    unsigned long coffee_shop_obstacle_child_releases;
+    unsigned char player_special_attack_active;
+    unsigned char player_special_attack_previous_pressed;
+    unsigned char player_special_attack_contact_ready;
+    unsigned char player_special_attack_elapsed;
+    unsigned char player_special_input_pipeline;
+    unsigned char player_special_previous_buttons;
+    unsigned char player_special_animation_index;
+    unsigned char player_special_class4b_event_latch;
+    unsigned char player_special_owner_contact;
+    unsigned short player_special_phase;
+    unsigned short player_special_animation_timer;
+    short player_special_animation_branch;
+    unsigned short player_special_class4b_source_slot;
+    unsigned long player_special_attack_entries;
+    unsigned long player_special_attack_contacts;
+    unsigned long player_special_completions;
+    unsigned long player_special_health_debits;
+    unsigned long player_special_audio_events;
+    unsigned short player_special_audio_command;
+    unsigned long class4b_allocation_requests;
+    unsigned long class4b_allocations;
+    unsigned long class4b_allocation_failures;
+    unsigned long class4b_initializations;
+    unsigned long class4b_releases;
+    unsigned long class3d_allocation_requests;
+    unsigned long class3d_allocations;
+    unsigned long class3d_allocation_failures;
+    unsigned long class3d_initializations;
+    unsigned long class3d_releases;
     unsigned long navigation_terrain_tests;
     unsigned long navigation_terrain_responses;
     unsigned long navigation_terrain_retries;
@@ -957,6 +1309,7 @@ typedef struct
     unsigned char player_weapon_cadence;
     signed char player_weapon_attempts;
     unsigned char player_weapon_empty_timer;
+    unsigned char player_weapon_input_pipeline;
     unsigned char player_weapon_previous_pressed;
     unsigned char player_weapon_cleanup_pending;
     unsigned char player_weapon_return_pending;
@@ -986,6 +1339,12 @@ typedef struct
     unsigned long player_weapon_empty_auxiliary_presentation_bindings;
     unsigned long player_weapon_projectile_initializations;
     unsigned long player_weapon_projectile_scheduler_updates;
+    unsigned long type16_spawn_requests;
+    unsigned long type16_allocations;
+    unsigned long type16_movement_steps;
+    unsigned long type16_collision_writes;
+    unsigned long type16_damage_writes;
+    unsigned long type16_releases;
     unsigned long player_weapon_projectile_motion_updates;
     unsigned long player_weapon_projectile_collision_writes;
     unsigned long player_weapon_projectile_damage_writes;
@@ -1036,6 +1395,8 @@ int avsp_round1_is_weapon_child_projectile(
     const AvspRound1WeaponProjectileAllocation *projectile);
 int avsp_round1_player_native_presentation_active(
     const AvspRound1Runtime *runtime);
+unsigned short avsp_round1_coffee_shop_source_input(
+    unsigned short source_frame);
 int avsp_round1_entry_valid(const AvspRound1Runtime *runtime);
 int avsp_round1_canaries_ok(const AvspRound1Runtime *runtime);
 

@@ -54,12 +54,20 @@ def validate(data):
     contract = data["implementation_contract"]
     assert contract["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
     assert contract["source_input"]["button1_mask"] == "0x0010"
+    assert contract["source_input"]["native_input_pipeline_updates_u8"] == 1
+    assert contract["source_input"]["coffee_shop_control"] == {
+        "physical_edge_frame": 2250,
+        "action_entry_visible_frame": 2252,
+        "parent_first_visible_frame": 2254,
+    }
     action = contract["sufficient_action"]
     assert action["cleanup_tick"] == 19 and action["return_tick"] == 20
     assert action["resource_capacity_u8"] == 64
     assert action["resource_debit_u8"] == 40
     assert action["recharge_countdown_after_entry_u8"] == 12
     assert action["player_position_and_facing_latched"] is True
+    assert action["resource_debit_tick"] == 1
+    assert action["parent_allocation_tick"] == 2
     assert action["rng_calls"] == []
     timeline = action["presentation_timeline"]
     assert len(timeline) == 20
@@ -81,7 +89,10 @@ def validate(data):
     assert init["motion_table_u32"] == "0x001fb7c0"
     assert init["collision_table_u32"] == "0x0002fc3c"
     assert init["object_or_u16"] == "0x8000"
-    assert len(init["presentation_records"]) == 7
+    assert len(init["presentation_records"]) == 8
+    assert init["presentation_records"][-1]["animation_record"] == "0x0002fbb8"
+    assert init["presentation_records"][-1]["branch_s16"] < 0
+    assert "negate x only when facing is nonzero" in init["position_rule"]
     active = parent["active_state"]
     assert active["angle_u8_route_values"] == {
         "cold_run_1": [17], "facing_reversed": [47],
@@ -91,8 +102,19 @@ def validate(data):
     assert len(active["high_nibble_motion_pointer_u32"]) == 13
     assert active["low_nibble_motion_pointer_u32"][1] == "0x001fa7c0"
     assert active["high_nibble_motion_pointer_u32"][2] == "0x001fb7c0"
+    assert sorted(map(int, active["route_motion_vectors_s16"]["low"])) == \
+        list(range(17, 48))
     assert len(active["route_motion_vectors_s16"]["low"]["17"]) == 16
     assert len(active["route_motion_vectors_s16"]["high"]["47"]) == 13
+    assert active["coffee_shop_route_angles_u8"] == [17, 21, 42, 45, 46]
+    assert active["base_motion_vectors_s16"]["45"] == [-489, -169]
+    target = active["target_selection"]
+    assert target["entry"] == "0x0241f0"
+    assert target["distance_thresholds_u16"] == [
+        0, 13, 16, 22, 30, 38, 48, 58, 70, 88, 103, 123, 153,
+        192, 251, 352]
+    assert target["presentation_selectors_u8"] == \
+        [7, 7, 7, 7, 6, 6, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4]
     emitter = parent["child_emitter_state"]
     assert emitter["initial_child_count_u8"] == 5
     assert emitter["cadence_reload_u8"] == 6
@@ -100,6 +122,9 @@ def validate(data):
     assert emitter["child_spawn_source_frames"] == [4445, 4451, 4457, 4463, 4469]
     assert [row["variant_u8"] for row in emitter["normal_rows"]] == [0, 0, 0, 0, 1]
     assert [row["variant_u8"] for row in emitter["collision_rows"]] == [2, 2, 2, 2, 1]
+    assert emitter["position_rule"] == (
+        "child x uses parent x plus facing-adjusted row x; child y and z "
+        "both use parent z plus their signed row field")
     parent_box = parent["collision_table"]
     assert parent_box["table"] == "0x0002fc3c"
     assert parent_box["attack_entries"][1]["damage_selector_u8"] == 25
@@ -133,6 +158,45 @@ def validate(data):
         "0x0015fcfc"}
     assert contract["empty_effect_variant1_contract"]["class"] == "0x10"
     assert contract["implementation_blocker"] is None
+    special = data["special_implementation_contract"]
+    assert special["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+    assert special["spec_executable"] is True
+    assert special["source_input"]["guard_routine"] == "0x01a7e6"
+    assert special["source_input"]["action_writer"] == "0x01a89a"
+    assert special["source_input"]["physical_combo_frame"] == 2790
+    assert special["source_input"]["visible_action_entry_frame"] == 2792
+    assert special["state_dispatch"]["entry"] == "0x023132"
+    assert special["state_dispatch"]["handlers"] == {
+        "0x00": "0x02314e", "0x02": "0x0231a4",
+        "0x04": "0x023202"}
+    assert special["state_dispatch"]["route_state_sequence_u16"] == \
+        [0x0800, 0x0802, 0x0804]
+    assert special["initialization"]["presentation_selector_u8"] == 47
+    assert len(special["initialization"]["presentation_records"]) == 17
+    assert [row["visible_duration_u16"] for row in
+            special["initialization"]["visible_presentation_runs"]] == \
+        [4, 4, 3, 1, 5, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 16, 1]
+    assert special["initialization"]["presentation_records"][4][
+        "attack_selector_u8"] == 11
+    assert special["active_state"]["class4b_allocation_writer"] == \
+        "0x0231c2..0x0231f2"
+    assert special["active_state"]["class4b_class_u8"] == "0x4b"
+    assert special["active_state"]["class3d_allocation_writer"] == \
+        "0x023220..0x023246"
+    assert special["active_state"]["class3d_class_u8"] == "0x3d"
+    assert special["active_state"]["source_contact_frame"] == 2804
+    assert special["active_state"]["source_audio_commands"] == \
+        ["0x0091", "0x0096"]
+    assert special["completion"]["health_cost_s16"] == 6
+    assert special["completion"]["cleanup_frame"] == 2869
+    assert special["completion"]["return_locomotion_frame"] == 2870
+    assert special["capture_identity"]["independent_captures"] == 2
+    assert special["capture_identity"]["byte_identical"] is True
+    assert special["fixed_frame_substitute_forbidden"] is True
+    assert data["special_causal_trace"]["player_routine"] == "0x023132"
+    assert "0x024f04" in data["special_causal_trace"]["correction"]
+    assert data["special_causal_trace"]["actors"] == \
+        ["type24 class0x4b", "type24 class0x3d"]
     assert data["mutation_controls"]["wrong_character_rejected"] is True
     assert data["mutation_controls"]["count"] == 13
     assert len(data["counterfactuals"]) == 13
@@ -164,14 +228,30 @@ for path, value, label in [
     (("implementation_contract", "record4_parent_class0", "dispatch"), "0x030d34", "Major dispatcher"),
     (("implementation_contract", "record4_parent_class0", "state_sequence_u8"), [0, 2, 4, 6, 8], "invented parent state"),
     (("implementation_contract", "record4_parent_class0", "active_state", "angle_u8_route_values", "cold_run_1"), [16], "wrong target angle"),
+    (("implementation_contract", "record4_parent_class0", "active_state", "target_selection", "distance_thresholds_u16", 13), 191, "wrong target threshold"),
+    (("implementation_contract", "record4_parent_class0", "active_state", "base_motion_vectors_s16", "45", 0), -488, "wrong shared base motion"),
+    (("implementation_contract", "record4_parent_class0", "initialization", "presentation_records", 7, "animation_record"), "0x0002fba8", "missing terminal presentation"),
+    (("implementation_contract", "source_input", "native_input_pipeline_updates_u8"), 0, "missing source input pipeline"),
+    (("implementation_contract", "sufficient_action", "parent_allocation_tick"), 0, "premature parent allocation"),
     (("implementation_contract", "record4_parent_class0", "child_emitter_state", "cadence_reload_u8"), 5, "wrong child cadence"),
     (("implementation_contract", "record4_parent_class0", "child_emitter_state", "normal_rows", 4, "variant_u8"), 0, "wrong terminal child variant"),
+    (("implementation_contract", "record4_parent_class0", "child_emitter_state", "position_rule"), "child y uses parent y", "wrong child coordinate base"),
     (("implementation_contract", "record4_parent_class0", "collision_table", "table"), "0x0003136a", "Major collision table"),
     (("implementation_contract", "record4_child_class4", "class_u8"), 5, "wrong child class"),
     (("implementation_contract", "record4_child_class4", "initialization", "variant_offsets_u16", 1), 285, "wrong child presentation offset"),
     (("implementation_contract", "record4_child_class4", "collision_table", "attack_entries", 1, "damage_selector_u8"), 6, "Major damage selector"),
     (("implementation_contract", "current_state_collision_damage", "parent_contact", "damage_u8"), 24, "Major damage"),
     (("implementation_contract", "empty_fallback", "presentation_timeline", 1, "animation_record"), "0x001645d4", "Major empty pose"),
+    (("special_implementation_contract", "source_input", "guard_routine"), "0x024f04", "wrong special guard owner"),
+    (("special_implementation_contract", "state_dispatch", "entry"), "0x024f04", "wrong special dispatcher"),
+    (("special_implementation_contract", "state_dispatch", "route_state_sequence_u16"), [0x0800, 0x0802], "missing special active state"),
+    (("special_implementation_contract", "initialization", "presentation_selector_u8"), 42, "wrong special selector"),
+    (("special_implementation_contract", "initialization", "presentation_records", 4, "attack_selector_u8"), 0, "missing special attack selector"),
+    (("special_implementation_contract", "initialization", "visible_presentation_runs", 4, "visible_duration_u16"), 3, "wrong special visible cadence"),
+    (("special_implementation_contract", "active_state", "class4b_class_u8"), "0x20", "wrong special presentation child"),
+    (("special_implementation_contract", "active_state", "class3d_class_u8"), "0x47", "wrong special emitted effect"),
+    (("special_implementation_contract", "completion", "health_cost_s16"), 5, "wrong special health cost"),
+    (("special_implementation_contract", "fixed_frame_substitute_forbidden"), False, "special fixed-frame substitute"),
     (("mutation_controls", "wrong_character_rejected"), False, "identity rejection disabled"),
 ]:
     mutant = copy.deepcopy(data)
@@ -180,4 +260,4 @@ for path, value, label in [
         cursor = cursor[key]
     cursor[path[-1]] = value
     reject(mutant, label)
-print("ORACLE-11 corrected Predator Button1 tests: PASS (21 mutations rejected)")
+print("ORACLE-11 corrected Predator Button1 tests: PASS (37 mutations rejected)")
