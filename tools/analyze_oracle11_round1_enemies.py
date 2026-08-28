@@ -293,6 +293,9 @@ def class1f_inner8_action_contract(program: bytes,
     record_addresses = sorted({int(row["animation_record"], 16)
                                for row in inner_actor_rows
                                if int(row["animation_record"], 16) != 0})
+    record_addresses = sorted(set(record_addresses) |
+        set(range(0x12E65C, 0x12E69C, 0x10)) |
+        set(range(0x12D50C, 0x12D58C, 0x10)))
     records = []
     for address in record_addresses:
         record = animation_record(program, address)
@@ -455,12 +458,29 @@ def class1f_inner8_action_contract(program: bytes,
             "0x04": {"entry": "0x040c7c", "role": "source movement sequence and terminal chooser"},
             "0x06": {"entry": "0x040cfe", "role": "turn animation; terminal clears action"},
             "0x08": {"entry": "0x040d0e", "role": "style transition animation"},
+            "0x0a": {"entry": "0x040d72", "role": "style-one transition animation"},
             "0x0e": {"entry": "0x040e84", "role": "motion program and type-16 parent sequence"},
             "0x10": {"entry": "0x0412a8", "role": "target-seeking movement and transition to 0x0e"},
         },
         "observed_path_program": {
             "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
             "source_slot": "0x00ffa3c0",
+            "source_tables": {
+                "action0_style_bits_u16": "0x6db6",
+                "action4_choice_bits_u16": "0xf555",
+                "field88_by_rng_low_nibble_u8": list(program[0x0425CE:0x0425DE]),
+                "wander_quadrant_delta_by_rng_low_nibble_u8":
+                    list(program[0x041C26:0x041C36]),
+                "wander_target_offsets_s16": [
+                    int.from_bytes(program[address:address + 2], "big", signed=True)
+                    for address in range(0x041D08, 0x041D10, 2)],
+                "wander_direction_delta_same_style_u8":
+                    list(program[0x041D10:0x041D30]),
+                "wander_direction_delta_other_style_u8":
+                    list(program[0x041D30:0x041D50]),
+                "direction_axis_equal_u8": list(program[0x016480:0x016484]),
+                "direction_octant_base_u8": list(program[0x01650C:0x01652C]),
+            },
             "normal_action_0x16_entry": {
                 "terminal_guard": "animation_branch_s16 < 0 && animation_timer_u16 == 1 && predecrement loop_counter_u8 == 0",
                 "target_side_guard": "one-player target x is on the non-facing side",
@@ -483,7 +503,8 @@ def class1f_inner8_action_contract(program: bytes,
                 "gameplay_guard": "global one-player gameplay target-present byte is nonzero",
                 "first_rng": "result_u16 & 15 indexes bitset 0x6db6; selected style is compared to style85_u8",
                 "style_mismatch": {"style85_zero": {"action_u8": 10,
-                                                       "record": "0x0012e65c"},
+                                                       "record": "0x0012e65c",
+                                                       "terminal_follow_record": "0x0012d50c"},
                                    "style85_one": {"action_u8": 8,
                                                       "record": "0x0012d628"}},
                 "style_match": {"action_u8": 4,
@@ -1931,7 +1952,7 @@ def validate(report: dict[str, object]) -> None:
                         "0x040bbe" and
                     len(inner8["observed_action_runs"]) == 12 and
                     len(inner8["rng_calls"]) == 13 and
-                    len(inner8["animation_records"]) == 42 and
+                    len(inner8["animation_records"]) == 54 and
                     all("next_animation_record" in row for row in
                         inner8["animation_records"]) and
                     inner8["animation_records"][0]
@@ -1952,6 +1973,17 @@ def validate(report: dict[str, object]) -> None:
                             "frame_3004_style_match": 4,
                             "frame_3061_style_mismatch": 1,
                             "frame_3282_style_mismatch": 1} and
+                    inner8["observed_path_program"]["source_tables"]
+                        ["field88_by_rng_low_nibble_u8"] ==
+                        [1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2] and
+                    len(inner8["observed_path_program"]["source_tables"]
+                        ["wander_direction_delta_same_style_u8"]) == 32 and
+                    len(inner8["observed_path_program"]["source_tables"]
+                        ["direction_octant_base_u8"]) == 32 and
+                    inner8["observed_path_program"]["source_tables"]
+                        ["direction_axis_equal_u8"] == [59, 156, 89, 84] and
+                    inner8["observed_path_program"]["source_tables"]
+                        ["direction_octant_base_u8"][0] == 220 and
                     inner8["observed_path_program"]["action_0x04"]
                         ["captured_terminals"]["frame_3134"] ==
                         "field88 zero, RNG bit set, source table zero, action 0x10" and

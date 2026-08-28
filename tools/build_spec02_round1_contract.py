@@ -860,8 +860,8 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             inner8["dispatch"]["scheduler_position"] ==
                 "type-12 ascending fixed-pool source slot" and
             list(inner8["route_reachable_action_handlers"]) ==
-                ["0x00", "0x04", "0x06", "0x08", "0x0e", "0x10"] and
-            len(inner8["animation_records"]) == 42 and
+                ["0x00", "0x04", "0x06", "0x08", "0x0a", "0x0e", "0x10"] and
+            len(inner8["animation_records"]) == 54 and
             all("next_animation_record" in row for row in
                 inner8["animation_records"]) and
             inner8["animation_records"][0]
@@ -881,6 +881,17 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             inner8["type16_emission"]["fixed_frame_spawn_forbidden"] is True and
             inner8["observed_path_program"]["action_0x00"]
                 ["captured_rng_call_counts"]["frame_3004_style_match"] == 4 and
+            inner8["observed_path_program"]["source_tables"]
+                ["field88_by_rng_low_nibble_u8"] ==
+                [1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2] and
+            len(inner8["observed_path_program"]["source_tables"]
+                ["wander_direction_delta_same_style_u8"]) == 32 and
+            len(inner8["observed_path_program"]["source_tables"]
+                ["direction_octant_base_u8"]) == 32 and
+            inner8["observed_path_program"]["source_tables"]
+                ["direction_axis_equal_u8"] == [59, 156, 89, 84] and
+            inner8["observed_path_program"]["source_tables"]
+                ["direction_octant_base_u8"][0] == 220 and
             inner8["observed_path_program"]["action_0x04"]
                 ["captured_terminals"]["frame_3134"] ==
                 "field88 zero, RNG bit set, source table zero, action 0x10" and

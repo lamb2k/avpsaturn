@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "d494222be45663bd3a72ef7c5b5d8fa5f84ed4adaa048ecb2cd1dc1bf2042061"
+EXPECTED = "89c1033994f56773123f3f3b1cdaa041db7a71cc4df623e646afe13ffa7fbd54"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -69,6 +69,13 @@ run(source, header, True)
 if "--baseline-only" in sys.argv:
     print("REIMPLEMENT-13 focused baseline: PASS")
     raise SystemExit(0)
+inner8_mutations = {
+    "(actor->state == 0x0200u &&\n                      (actor->substate == 0x1000u ||",
+    "actor->state = 0x0208u;\n    actor->substate = 0x0600u;",
+    "if ((random & 3u) != 0u)",
+    "actor->source_motion_fields[0] = 8;\n        actor->source_action_timer =",
+    "actor->source_x_fp += actor->source_x_velocity;",
+}
 for before, after in (
     ("runtime->route_state = AVSP_ROUND1_ROUTE_ENTRY_STATE;", "runtime->route_state = 4;"),
     ("{20u, 20u, 16u, 32u, 16u, 64u}",
@@ -237,9 +244,24 @@ for before, after in (
      "actor->type == 16u && actor->actor_class == 0x05"),
     ("if (projectile->health < 0)\n        {\n            projectile->state = 0x0600u;",
      "if (projectile->health < 0)\n        {\n            projectile->state = 0x0400u;"),
+    ("(actor->state == 0x0200u &&\n                      (actor->substate == 0x1000u ||",
+     "((actor->substate == 0x1000u ||"),
+    ("actor->state = 0x0208u;\n    actor->substate = 0x0600u;",
+     "actor->state = 0x0200u;\n    actor->substate = 0x0600u;"),
+    ("if ((random & 3u) != 0u)",
+     "if ((random & 3u) != 3u)"),
+    ("actor->source_motion_fields[0] = 8;\n        actor->source_action_timer =",
+     "actor->source_motion_fields[0] = 6;\n        actor->source_action_timer ="),
+    ("actor->source_x_fp += actor->source_x_velocity;",
+     "actor->source_x_fp += 0;"),
 ):
+    if "--inner8-only" in sys.argv and before not in inner8_mutations:
+        continue
     assert before in source, before
     run(source.replace(before, after), header, False, before)
+if "--inner8-only" in sys.argv:
+    print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (5 real mutations)")
+    raise SystemExit(0)
 for before, after in (
     ("{ 0xffa3c0u, 12u, 656, 312, 312,", "{ 0xffa3c0u, 12u, 657, 312, 312,"),
     ("{ AVSP_ROUND1_ENTRY_DWELL, 0x00u, 0u, 60u,", "{ AVSP_ROUND1_ENTRY_DWELL, 0x00u, 0u, 59u,"),
@@ -373,4 +395,4 @@ for before, after in (
                                  "--", "bash", "-lc", command],
                                 capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (150 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (154 real mutations)")

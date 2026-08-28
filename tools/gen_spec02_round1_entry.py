@@ -95,6 +95,12 @@ def build() -> str:
     class1f_current_reaction = class1f_current_damage[
         "accepted_port_v2_reaction_mapping"]
     class1f_actions = class1f["first_segment_action_execution_contract"]
+    class1f_inner8 = class1f_actions["inner_state_0x08_program"]
+    class1f_inner8_records = class1f_inner8["animation_records"]
+    class1f_inner8_movement_tables = class1f_inner8["movement"]["tables"]
+    class1f_inner8_path = class1f_inner8["observed_path_program"]
+    class1f_inner8_tables = class1f_inner8_path["source_tables"]
+    class1f_inner8_motion = class1f_inner8["action_0x0e_motion"]
     action_variants = class1f_actions["initializer"]["variants"]
     action_targets = class1f_actions["current_dispatch"]["action_targets"]
     action_selectors = class1f_actions["animation_selector_table"]["selectors"]
@@ -354,6 +360,27 @@ def build() -> str:
         class1f_actions["suppression_control"]["suppressed_writes"] != 179 or
         class1f_actions["suppression_control"]["fixed_frame_substitute"] is not False):
         raise ValueError("SPEC-02 class-0x1f first-segment action drift")
+    if (class1f_inner8["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        len(class1f_inner8_records) != 54 or
+        len(class1f_inner8_movement_tables) != 8 or
+        [row["table_index_u8"] for row in class1f_inner8_movement_tables] !=
+            [4, 11, 12, 15, 18, 19, 23, 25] or
+        class1f_inner8["entry_transition"]["timer_u16"] != 600 or
+        class1f_inner8_path["action_0x00"]["captured_rng_call_counts"] != {
+            "frame_3004_style_match": 4,
+            "frame_3061_style_mismatch": 1,
+            "frame_3282_style_mismatch": 1} or
+        class1f_inner8_path["action_0x10"]["overlap_transition"]
+            ["writer"] != "0x04130e" or
+        class1f_inner8_motion["motion_selector_u16"] != 24 or
+        class1f_inner8_tables["field88_by_rng_low_nibble_u8"] !=
+            [1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2] or
+        len(class1f_inner8_tables["wander_direction_delta_same_style_u8"]) != 32 or
+        len(class1f_inner8_tables["direction_octant_base_u8"]) != 32 or
+        class1f_inner8_path["fixed_frame_or_authored_transition_forbidden"]
+            is not True):
+        raise ValueError("SPEC-02 class-0x1f inner-state 0x08 drift")
     if (recurring["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         recurring_initializer["limit_table_u16"] != [0, 35, 55, 70] or
@@ -1169,6 +1196,63 @@ def build() -> str:
         lines.append("    { %du, { %s } }," % (
             table["table_index_u8"], vectors))
     lines.extend([
+        "};", "",
+        "static const AvspRound1Class1fActionRecordSpec avsp_round1_class1f_inner8_records[AVSP_ROUND1_CLASS1F_INNER8_RECORD_COUNT] =",
+        "{",
+    ])
+    for row in class1f_inner8_records:
+        lines.append(
+            "    { %sUL, %sUL, %sUL, %du, %d, %du, %du, %du }," % (
+                row["animation_record"], row["next_animation_record"],
+                row["assembly"], row["timer_u16"], row["branch_s16"],
+                row["hurt_selector_u8"], row["attack_selector_u8"],
+                row["movement_table_index_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Class1fMovementTableSpec avsp_round1_class1f_inner8_movement_tables[AVSP_ROUND1_CLASS1F_INNER8_MOVEMENT_TABLE_COUNT] =",
+        "{",
+    ])
+    for table in class1f_inner8_movement_tables:
+        vectors = ", ".join("{ %d, %d }" % (
+            row["x_delta_s16"], row["y_delta_s16"])
+            for row in table["vectors"])
+        lines.append("    { %du, { %s } }," % (
+            table["table_index_u8"], vectors))
+    action0e_phase2 = class1f_inner8_motion["phase_2_terminal"]
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Class1fInner8ProgramSpec avsp_round1_class1f_inner8_program =",
+        "{",
+        "    0x%04Xu," % (int(class1f_inner8_path["source_slot"], 16) & 0xffff),
+        "    %du, %su, %su," % (
+            class1f_inner8["entry_transition"]["timer_u16"],
+            class1f_inner8_tables["action0_style_bits_u16"],
+            class1f_inner8_tables["action4_choice_bits_u16"]),
+        "    { " + ", ".join(f"{value}u" for value in
+            class1f_inner8_tables["field88_by_rng_low_nibble_u8"]) + " },",
+        "    { " + ", ".join(f"{value}u" for value in
+            class1f_inner8_tables["wander_quadrant_delta_by_rng_low_nibble_u8"]) + " },",
+        "    { " + ", ".join(str(value) for value in
+            class1f_inner8_tables["wander_target_offsets_s16"]) + " },",
+        "    { " + ", ".join(f"{value}u" for value in
+            class1f_inner8_tables["wander_direction_delta_same_style_u8"]) + " },",
+        "    { " + ", ".join(f"{value}u" for value in
+            class1f_inner8_tables["wander_direction_delta_other_style_u8"]) + " },",
+        "    { " + ", ".join(f"{value}u" for value in
+            class1f_inner8_tables["direction_axis_equal_u8"]) + " },",
+        "    { " + ", ".join(f"{value}u" for value in
+            class1f_inner8_tables["direction_octant_base_u8"]) + " },",
+        "    0x0012D5E4UL, 0x0012D488UL, 0x0012D404UL, 0x0012D628UL,",
+        "    0x0012E65CUL, 0x0012D50CUL, 0x0012E604UL, 0x0012E638UL, 0x0012E550UL,",
+        "    96u, 12u, 16u, 12u, %du, %du," % (
+            class1f_inner8_path["action_0x0e"]["terminal_delay_u8"],
+            class1f_inner8_motion["motion_selector_u16"]),
+        "    { %dL, %dL }, %dL, %dL, %dL" % (
+            action0e_phase2["x_velocity_by_facing_s32_16_16"][0],
+            action0e_phase2["x_velocity_by_facing_s32_16_16"][1],
+            action0e_phase2["x_acceleration_s32_16_16"],
+            action0e_phase2["y_velocity_s32_16_16"],
+            action0e_phase2["y_acceleration_s32_16_16"]),
         "};", "",
         "static const unsigned char avsp_round1_class1f_attack_timers[AVSP_ROUND1_CLASS1F_ATTACK_TIMER_COUNT] =",
         "{",

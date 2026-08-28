@@ -96,8 +96,8 @@ assert inner8["capture_identity"]["byte_identical"] is True
 assert inner8["entry_transition"]["writer_pc"] == "0x0610c8"
 assert inner8["entry_transition"]["timer_u16"] == 600
 assert list(inner8["route_reachable_action_handlers"]) == [
-    "0x00", "0x04", "0x06", "0x08", "0x0e", "0x10"]
-assert len(inner8["animation_records"]) == 42
+    "0x00", "0x04", "0x06", "0x08", "0x0a", "0x0e", "0x10"]
+assert len(inner8["animation_records"]) == 54
 assert [row["table_index_u8"] for row in inner8["movement"]["tables"]] == [
     4, 11, 12, 15, 18, 19, 23, 25]
 assert len(inner8["rng_calls"]) == 13

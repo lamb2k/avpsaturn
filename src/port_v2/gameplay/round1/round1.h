@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "d494222be45663bd3a72ef7c5b5d8fa5f84ed4adaa048ecb2cd1dc1bf2042061"
+    "89c1033994f56773123f3f3b1cdaa041db7a71cc4df623e646afe13ffa7fbd54"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -74,6 +74,8 @@
 #define AVSP_ROUND1_CLASS1F_ACTION4_TIMER_ROW_COUNT 5u
 #define AVSP_ROUND1_CLASS1F_MOVEMENT_TABLE_COUNT 2u
 #define AVSP_ROUND1_CLASS1F_MOVEMENT_DIRECTION_COUNT 32u
+#define AVSP_ROUND1_CLASS1F_INNER8_RECORD_COUNT 54u
+#define AVSP_ROUND1_CLASS1F_INNER8_MOVEMENT_TABLE_COUNT 8u
 #define AVSP_ROUND1_CLASS1F_ATTACK_TIMER_COUNT 16u
 #define AVSP_ROUND1_CLASS09_INITIAL_ACTOR_COUNT 2u
 #define AVSP_ROUND1_CLASS09_SEQUENCE_COUNT 5u
@@ -509,6 +511,40 @@ typedef struct
     AvspRound1Class1fMovementVectorSpec vectors[
         AVSP_ROUND1_CLASS1F_MOVEMENT_DIRECTION_COUNT];
 } AvspRound1Class1fMovementTableSpec;
+
+typedef struct
+{
+    unsigned short captured_source_slot_low;
+    unsigned short inner_timer;
+    unsigned short action0_style_bits;
+    unsigned short action4_choice_bits;
+    unsigned char field88_table[16];
+    unsigned char wander_quadrant_delta[16];
+    short wander_target_offsets[4];
+    unsigned char wander_direction_delta_same_style[32];
+    unsigned char wander_direction_delta_other_style[32];
+    unsigned char direction_axis_equal[4];
+    unsigned char direction_octant_base[32];
+    unsigned long turn_record;
+    unsigned long style_one_record;
+    unsigned long style_zero_record;
+    unsigned long idle_record;
+    unsigned long mismatch_zero_record;
+    unsigned long mismatch_zero_follow_record;
+    unsigned long motion_record;
+    unsigned long airborne_record;
+    unsigned long parent_record;
+    unsigned short target_x_span;
+    unsigned short target_z_span;
+    unsigned short attack_x_span;
+    unsigned short attack_z_span;
+    unsigned char terminal_delay;
+    unsigned char motion_selector;
+    long x_velocity_by_facing[2];
+    long x_acceleration;
+    long y_velocity;
+    long y_acceleration;
+} AvspRound1Class1fInner8ProgramSpec;
 
 typedef struct
 {

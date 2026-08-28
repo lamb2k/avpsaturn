@@ -621,6 +621,30 @@ avsp_round1_find_class1f_movement_table(unsigned char table_index)
     return 0;
 }
 
+static const AvspRound1Class1fActionRecordSpec *
+avsp_round1_find_class1f_inner8_record(unsigned long address)
+{
+    unsigned int index;
+    for (index = 0u; index < AVSP_ROUND1_CLASS1F_INNER8_RECORD_COUNT;
+         ++index)
+        if (avsp_round1_class1f_inner8_records[index].animation_record ==
+                address)
+            return &avsp_round1_class1f_inner8_records[index];
+    return 0;
+}
+
+static const AvspRound1Class1fMovementTableSpec *
+avsp_round1_find_class1f_inner8_movement_table(unsigned char table_index)
+{
+    unsigned int index;
+    for (index = 0u;
+         index < AVSP_ROUND1_CLASS1F_INNER8_MOVEMENT_TABLE_COUNT; ++index)
+        if (avsp_round1_class1f_inner8_movement_tables[index].table_index ==
+                table_index)
+            return &avsp_round1_class1f_inner8_movement_tables[index];
+    return 0;
+}
+
 static void avsp_round1_bind_class1f_action_record(
     AvspRound1ActorCore *actor,
     const AvspRound1Class1fActionRecordSpec *record)
@@ -633,6 +657,53 @@ static void avsp_round1_bind_class1f_action_record(
     actor->hurt_selector = record->hurt_selector;
     actor->attack_selector = record->attack_selector;
     actor->source_movement_table = record->movement_table;
+}
+
+static int avsp_round1_bind_class1f_inner8_record(
+    AvspRound1ActorCore *actor, unsigned long address)
+{
+    const AvspRound1Class1fActionRecordSpec *record =
+        avsp_round1_find_class1f_inner8_record(address);
+    if (record == 0)
+        return 0;
+    avsp_round1_bind_class1f_action_record(actor, record);
+    return 1;
+}
+
+static int avsp_round1_step_class1f_inner8_animation(
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor,
+    int apply_movement)
+{
+    const AvspRound1Class1fActionRecordSpec *next;
+    if (actor->animation_timer == 0u)
+        return 0;
+    --actor->animation_timer;
+    ++runtime->class1f_action_animation_steps;
+    if (actor->animation_timer != 0u)
+        return 1;
+    next = avsp_round1_find_class1f_inner8_record(
+        actor->source_next_animation_record);
+    if (next == 0)
+        return 0;
+    avsp_round1_bind_class1f_action_record(actor, next);
+    if (apply_movement && actor->source_movement_table != 0u)
+    {
+        const AvspRound1Class1fMovementTableSpec *table =
+            avsp_round1_find_class1f_inner8_movement_table(
+                actor->source_movement_table);
+        const AvspRound1Class1fMovementVectorSpec *vector;
+        if (table == 0 || actor->source_direction >=
+                AVSP_ROUND1_CLASS1F_MOVEMENT_DIRECTION_COUNT)
+            return 0;
+        vector = &table->vectors[actor->source_direction];
+        actor->source_x_fp += (long)vector->x_delta * 256L;
+        actor->source_y_fp += (long)vector->y_delta * 256L;
+        actor->x = avsp_round1_fixed_high_word(actor->source_x_fp);
+        actor->y = avsp_round1_fixed_high_word(actor->source_y_fp);
+        actor->z = actor->y;
+        ++runtime->class1f_action_movement_steps;
+    }
+    return 1;
 }
 
 static int avsp_round1_bind_class1f_action_selector(
@@ -1125,6 +1196,390 @@ static int avsp_round1_step_class1f_action4(
     return 0;
 }
 
+static unsigned char avsp_round1_class1f_inner8_direction(
+    const AvspRound1ActorCore *actor, short target_x, short target_z)
+{
+    unsigned short dx;
+    unsigned short dz;
+    unsigned short larger;
+    unsigned short smaller;
+    unsigned short accumulator;
+    unsigned char d6 = 0u;
+    unsigned char carry;
+    unsigned char ratio = 0u;
+    unsigned char base;
+    unsigned char table_index;
+    unsigned int iterations;
+    dz = (unsigned short)((unsigned short)(target_z + 64) -
+                          (unsigned short)(actor->y + 64));
+    if (dz == 0u)
+        return (short)(target_x - actor->x) < 0 ? 24u : 8u;
+    carry = (unsigned char)((dz & 0x8000u) != 0u);
+    dz = (unsigned short)(dz << 1);
+    d6 = (unsigned char)(carry << 7);
+    if ((d6 & 0x80u) != 0u)
+        dz = (unsigned short)(0u - dz);
+    dx = (unsigned short)((unsigned short)(target_x + 0x1000) -
+                          (unsigned short)(actor->x + 0x1000));
+    if (dx == 0u)
+        return (unsigned char)(d6 >> 3);
+    carry = (unsigned char)((unsigned short)(target_x + 0x1000) <
+                            (unsigned short)(actor->x + 0x1000));
+    d6 = (unsigned char)((carry << 7) | (d6 >> 1));
+    if ((d6 & 0x80u) != 0u)
+        dx = (unsigned short)(0u - dx);
+    if (dz == dx)
+    {
+        table_index = (unsigned char)(((d6 << 2) | (d6 >> 6)) & 3u);
+        return avsp_round1_class1f_inner8_program.direction_axis_equal[
+            table_index];
+    }
+    carry = (unsigned char)(dz < dx);
+    if (!carry)
+    {
+        larger = dz;
+        smaller = dx;
+    }
+    else
+    {
+        larger = dx;
+        smaller = dz;
+    }
+    d6 = (unsigned char)((carry << 7) | (d6 >> 1));
+    larger = (unsigned short)(larger << 1);
+    accumulator = (unsigned short)(smaller << 4);
+    for (iterations = 0u; iterations < 8u; ++iterations)
+    {
+        if (accumulator < larger)
+            break;
+        accumulator = (unsigned short)(accumulator - larger);
+        ++ratio;
+    }
+    table_index = (unsigned char)(((d6 << 3) | (d6 >> 5)) & 7u);
+    base = avsp_round1_class1f_inner8_program.direction_octant_base[
+        table_index];
+    if ((base & 1u) == 0u)
+        base = (unsigned char)(base + ratio + 1u);
+    else
+    {
+        base = (unsigned char)(base & 0xfeu);
+        if (ratio != 0u)
+            ++ratio;
+        base = (unsigned char)(base - ratio);
+    }
+    return (unsigned char)((base & 0x3fu) >> 1);
+}
+
+static int avsp_round1_class1f_inner8_wander(
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
+{
+    unsigned char random;
+    unsigned char offset_index;
+    unsigned char direction_delta;
+    short target_x;
+    short target_z;
+    if (actor->source_player_guard != 0u)
+        actor->source_player_guard = 0u;
+    if (actor->source_action_group_cursor == 0u)
+    {
+        (void)avsp_round1_source_rng(runtime);
+        if ((signed char)actor->source_action_group < 0)
+            return 0;
+        offset_index = (unsigned char)(actor->source_action_group & 6u);
+    }
+    else
+        offset_index = (unsigned char)(actor->source_action_group & 6u);
+    actor->source_action_group_cursor = (unsigned char)(
+        actor->source_action_group_cursor + 1u);
+    if (actor->source_action_group_cursor >= 15u)
+        actor->source_action_group_cursor = 0u;
+    target_x = (short)(runtime->player_action.x +
+        avsp_round1_class1f_inner8_program.wander_target_offsets[
+            offset_index >> 1]);
+    target_z = (short)(runtime->player_action.lane + 48);
+    actor->source_direction = avsp_round1_class1f_inner8_direction(
+        actor, target_x, target_z);
+    random = avsp_round1_source_rng(runtime);
+    if ((actor->source_action_group >> 1) == actor->source_a3)
+        direction_delta = avsp_round1_class1f_inner8_program.
+            wander_direction_delta_same_style[random & 0x1fu];
+    else
+        direction_delta = avsp_round1_class1f_inner8_program.
+            wander_direction_delta_other_style[random & 0x1fu];
+    actor->source_direction = (unsigned char)(
+        (actor->source_direction - direction_delta) & 0x1fu);
+    actor->source_player_guard = 1u;
+    return 1;
+}
+
+static int avsp_round1_class1f_inner8_bind_movement(
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
+{
+    unsigned long record = actor->source_style85 ?
+        avsp_round1_class1f_inner8_program.style_one_record :
+        avsp_round1_class1f_inner8_program.style_zero_record;
+    if (!avsp_round1_class1f_inner8_wander(runtime, actor))
+        return 0;
+    actor->source_primary_animation_record = record;
+    return avsp_round1_bind_class1f_inner8_record(actor, record);
+}
+
+static int avsp_round1_class1f_inner8_player_near(
+    const AvspRound1Runtime *runtime, const AvspRound1ActorCore *actor,
+    unsigned short x_span, unsigned short z_span)
+{
+    short dx = (short)(runtime->player_action.x - actor->x);
+    short dz = (short)(runtime->player_action.lane - actor->z);
+    unsigned short abs_x = (unsigned short)(dx < 0 ? -dx : dx);
+    unsigned short abs_z = (unsigned short)(dz < 0 ? -dz : dz);
+    return abs_x <= x_span && abs_z <= z_span;
+}
+
+static int avsp_round1_class1f_enter_inner8(
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
+{
+    unsigned char random;
+    unsigned char target_side;
+    if (actor->animation_branch >= 0 || actor->animation_timer != 1u ||
+        actor->source_b0 != 0u)
+        return 0;
+    target_side = runtime->player_action.x < actor->x ? 0u : 1u;
+    if (target_side == actor->facing || actor->source_motion_flags != 0u)
+        return 0;
+    actor->source_motion_flags = 1u;
+    random = avsp_round1_source_rng(runtime);
+    if ((random & 3u) != 0u)
+        return 0;
+    actor->source_motion_fields[2] = 1;
+    actor->transition_timer =
+        avsp_round1_class1f_inner8_program.inner_timer;
+    actor->source_target_low = 0x8380u;
+    actor->facing ^= 1u;
+    actor->state = 0x0208u;
+    actor->substate = 0x0600u;
+    actor->source_action = actor->substate;
+    actor->source_motion_fields[0] = 0;
+    if (!avsp_round1_bind_class1f_inner8_record(actor,
+            avsp_round1_class1f_inner8_program.turn_record))
+        return -1;
+    return 1;
+}
+
+static int avsp_round1_step_class1f_inner8(
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
+{
+    unsigned char action = (unsigned char)(actor->substate >> 8);
+    unsigned char random;
+    unsigned char selected_style;
+    unsigned char target_side;
+    if (actor->transition_timer != 0u)
+        --actor->transition_timer;
+    if (action == 0u)
+    {
+        if (runtime->route_state == 0)
+            return 0;
+        random = avsp_round1_source_rng(runtime);
+        selected_style = (unsigned char)((
+            avsp_round1_class1f_inner8_program.action0_style_bits >>
+            (random & 15u)) & 1u);
+        if (selected_style != actor->source_style85)
+        {
+            if (actor->source_style85 != 0u)
+            {
+                actor->substate = 0x0800u;
+                actor->source_action = actor->substate;
+                return avsp_round1_bind_class1f_inner8_record(actor,
+                    avsp_round1_class1f_inner8_program.idle_record);
+            }
+            actor->substate = 0x0a00u;
+            actor->source_action = actor->substate;
+            return avsp_round1_bind_class1f_inner8_record(actor,
+                avsp_round1_class1f_inner8_program.mismatch_zero_record);
+        }
+        random = avsp_round1_source_rng(runtime);
+        actor->source_motion_fields[3] = avsp_round1_class1f_inner8_program.
+            field88_table[random & 15u];
+        actor->substate = 0x0400u;
+        actor->source_action = actor->substate;
+        actor->source_action_group_cursor = 0u;
+        return avsp_round1_class1f_inner8_bind_movement(runtime, actor);
+    }
+    if (action == 0x06u)
+    {
+        if (actor->animation_branch < 0)
+        {
+            actor->substate = 0u;
+            actor->source_action = 0u;
+            return 1;
+        }
+        return avsp_round1_step_class1f_inner8_animation(runtime, actor, 0);
+    }
+    if (action == 0x08u)
+    {
+        if (actor->animation_branch < 0)
+        {
+            actor->source_style85 = 0u;
+            actor->substate = 0x0400u;
+            actor->source_action = actor->substate;
+            random = avsp_round1_source_rng(runtime);
+            actor->source_motion_fields[3] = avsp_round1_class1f_inner8_program.
+                field88_table[random & 15u];
+            actor->source_action_group_cursor = 0u;
+            return avsp_round1_class1f_inner8_bind_movement(runtime, actor);
+        }
+        return avsp_round1_step_class1f_inner8_animation(runtime, actor, 0);
+    }
+    if (action == 0x0au)
+    {
+        if (actor->animation_branch < 0)
+        {
+            actor->source_style85 = 1u;
+            actor->substate = 0x0400u;
+            actor->source_action = actor->substate;
+            random = avsp_round1_source_rng(runtime);
+            actor->source_motion_fields[3] = avsp_round1_class1f_inner8_program.
+                field88_table[random & 15u];
+            actor->source_action_group_cursor = 0u;
+            if (!avsp_round1_class1f_inner8_wander(runtime, actor))
+                return 0;
+            actor->source_primary_animation_record =
+                avsp_round1_class1f_inner8_program.
+                    mismatch_zero_follow_record;
+            return avsp_round1_bind_class1f_inner8_record(actor,
+                actor->source_primary_animation_record);
+        }
+        return avsp_round1_step_class1f_inner8_animation(runtime, actor, 0);
+    }
+    if (action == 0x04u)
+    {
+        if (actor->animation_branch < 0)
+        {
+            target_side = runtime->player_action.x < actor->x ? 0u : 1u;
+            if (target_side != actor->facing)
+            {
+                actor->facing ^= 1u;
+                actor->substate = 0x0600u;
+                actor->source_action = actor->substate;
+                return avsp_round1_bind_class1f_inner8_record(actor,
+                    avsp_round1_class1f_inner8_program.turn_record);
+            }
+            if (actor->source_motion_fields[3] != 0)
+                --actor->source_motion_fields[3];
+            if (actor->source_motion_fields[3] != 0)
+                return avsp_round1_bind_class1f_inner8_record(actor,
+                    actor->source_primary_animation_record);
+            random = avsp_round1_source_rng(runtime);
+            if (((avsp_round1_class1f_inner8_program.action4_choice_bits >>
+                    (random & 15u)) & 1u) != 0u)
+            {
+                actor->substate = 0x1000u;
+                actor->source_action = actor->substate;
+                actor->effect_timer = 240u;
+                actor->source_action_timer = 4u;
+                actor->source_action_group_cursor = 0u;
+                return avsp_round1_class1f_inner8_bind_movement(runtime,
+                                                                 actor);
+            }
+            actor->substate = 0u;
+            actor->source_action = 0u;
+            return 1;
+        }
+        return avsp_round1_step_class1f_inner8_animation(runtime, actor, 1);
+    }
+    if (action == 0x10u)
+    {
+        if (avsp_round1_class1f_inner8_player_near(runtime, actor,
+                avsp_round1_class1f_inner8_program.attack_x_span,
+                avsp_round1_class1f_inner8_program.attack_z_span))
+        {
+            actor->substate = 0x0e00u;
+            actor->source_action = actor->substate;
+            actor->source_motion_fields[0] = 0;
+            return 1;
+        }
+        if (actor->effect_timer != 0u)
+            --actor->effect_timer;
+        if (actor->source_action_timer != 0u)
+            --actor->source_action_timer;
+        if (actor->source_action_timer == 0u)
+        {
+            actor->source_action_timer = 4u;
+            actor->source_action_group_cursor = 0u;
+            if (!avsp_round1_class1f_inner8_wander(runtime, actor))
+                return 0;
+        }
+        return avsp_round1_step_class1f_inner8_animation(runtime, actor, 1);
+    }
+    if (action == 0x0eu)
+    {
+        if (actor->source_motion_fields[0] == 0)
+        {
+            (void)avsp_round1_source_rng(runtime);
+            actor->source_motion_fields[1] =
+                avsp_round1_class1f_inner8_program.motion_selector;
+            actor->source_motion_fields[0] = 2;
+            actor->substate = 0x0e02u;
+            actor->source_action = actor->substate;
+            actor->source_style85 = 0u;
+            return avsp_round1_bind_class1f_inner8_record(actor,
+                avsp_round1_class1f_inner8_program.motion_record);
+        }
+        if (actor->source_motion_fields[0] == 2)
+        {
+            if (actor->animation_branch < 0)
+            {
+                actor->source_x_velocity =
+                    avsp_round1_class1f_inner8_program.
+                        x_velocity_by_facing[actor->facing ? 1u : 0u];
+                actor->source_x_acceleration =
+                    avsp_round1_class1f_inner8_program.x_acceleration;
+                actor->source_y_velocity =
+                    avsp_round1_class1f_inner8_program.y_velocity;
+                actor->source_y_acceleration =
+                    avsp_round1_class1f_inner8_program.y_acceleration;
+                actor->source_airborne = 1u;
+                actor->source_motion_fields[0] = 4;
+                return avsp_round1_bind_class1f_inner8_record(actor,
+                    avsp_round1_class1f_inner8_program.airborne_record);
+            }
+            return avsp_round1_step_class1f_inner8_animation(runtime,
+                                                              actor, 0);
+        }
+        if (actor->source_motion_fields[0] == 4)
+        {
+            actor->source_x_fp += actor->source_x_velocity;
+            actor->source_x_velocity += actor->source_x_acceleration;
+            actor->source_y_fp += actor->source_y_velocity;
+            actor->source_y_velocity += actor->source_y_acceleration;
+            actor->x = avsp_round1_fixed_high_word(actor->source_x_fp);
+            actor->y = avsp_round1_fixed_high_word(actor->source_y_fp);
+            if ((unsigned short)actor->z < (unsigned short)actor->y)
+                return avsp_round1_step_class1f_inner8_animation(runtime,
+                                                                  actor, 0);
+            actor->y = actor->z;
+            actor->source_y_fp = actor->source_z_fp;
+            actor->source_airborne = 0u;
+            actor->source_motion_fields[0] = 6;
+            actor->source_projectile_enable = 1u;
+            return avsp_round1_bind_class1f_inner8_record(actor,
+                avsp_round1_class1f_inner8_program.parent_record);
+        }
+        if (actor->source_motion_fields[0] == 8)
+        {
+            if (actor->source_action_timer != 0u)
+                --actor->source_action_timer;
+            if (actor->source_action_timer == 0u)
+            {
+                actor->substate = 0u;
+                actor->source_action = 0u;
+            }
+            return 1;
+        }
+        return 0;
+    }
+    return 0;
+}
+
 static int avsp_round1_type16_parent_record_index(unsigned long record)
 {
     unsigned int index;
@@ -1191,9 +1646,10 @@ static int avsp_round1_step_class1f_type16_emitter(
         return -1;
     if (record->branch < 0)
     {
-        actor->substate = 0x0400u;
-        actor->source_action = actor->substate;
         actor->source_projectile_enable = 0u;
+        actor->source_motion_fields[0] = 8;
+        actor->source_action_timer =
+            avsp_round1_class1f_inner8_program.terminal_delay;
         return 1;
     }
     ++current;
@@ -1420,6 +1876,8 @@ static int avsp_round1_step_class1f_source_action(
             return 0;
         return 3;
     }
+    if (actor->state == 0x0208u)
+        return avsp_round1_step_class1f_inner8(runtime, actor);
     if (actor->state != 0x0200u)
         return 0;
     action = (unsigned char)(actor->substate >> 8);
@@ -1550,6 +2008,7 @@ static int avsp_round1_step_class1f_source_action(
     }
     if (action == 0x16u)
     {
+        int inner8_result;
         unsigned short random;
         unsigned char relation;
         if (!avsp_round1_class1f_source_bounds(runtime, actor))
@@ -1567,6 +2026,9 @@ static int avsp_round1_step_class1f_source_action(
             --actor->source_b0;
         if (actor->source_b0 != 0u)
             return 1;
+        inner8_result = avsp_round1_class1f_enter_inner8(runtime, actor);
+        if (inner8_result != 0)
+            return inner8_result > 0 ? 1 : 0;
         relation = actor->x < runtime->player_action.x ? 1u : 0u;
         if (relation != actor->source_a5 && actor->source_a6 == 0u)
             return 1;
@@ -6286,10 +6748,12 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
                       (actor->substate == 0x1000u ||
                        actor->substate == 0x1200u ||
                        actor->substate == 0x1400u)) ||
-                     ((actor->substate == 0x1000u ||
+                     (actor->state == 0x0200u &&
+                      (actor->substate == 0x1000u ||
                        actor->substate == 0x1200u) &&
                       actor->transition_timer != 0u) ||
-                     (initial_air_transition != 0 &&
+                     (actor->state == 0x0200u &&
+                      initial_air_transition != 0 &&
                       (actor->substate == 0x1400u ||
                        actor->substate == 0x1402u ||
                        actor->substate == 0x1404u ||

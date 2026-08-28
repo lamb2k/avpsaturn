@@ -1509,7 +1509,17 @@ int main(void)
             transition_runtime.class44_guard_clears != 1u ||
             transition_runtime.failure_count != 0u ||
             transition_runtime.fallback_count != 0u)
+        {
+            fprintf(stderr,
+                "transition tail completions=%lu audio=%lu class4e=%lu guard=%lu failures=%lu fallback=%lu\n",
+                transition_runtime.class1f_transition_completions,
+                transition_runtime.class1f_audio_events,
+                transition_runtime.class4e_releases,
+                transition_runtime.class44_guard_clears,
+                transition_runtime.failure_count,
+                transition_runtime.fallback_count);
             return 71;
+        }
     }
     {
         AvspRound1Runtime integrated_runtime;
@@ -2260,8 +2270,100 @@ int main(void)
             return 106;
     }
     {
+        AvspRound1Runtime inner_runtime;
+        AvspRound1ActorCore *parent;
+        unsigned int entry_ticks = 0u;
+        unsigned int ticks = 0u;
+        avsp_round1_init(&inner_runtime);
+        if (!avsp_round1_begin_first_entry(&inner_runtime))
+            return 109;
+        while (!inner_runtime.entry.control_enabled && entry_ticks < 1000u)
+        {
+            if (!avsp_round1_step_first_entry(&inner_runtime) ||
+                (inner_runtime.entry.spawned &&
+                 !avsp_round1_step_scheduler(&inner_runtime)))
+                return 109;
+            ++entry_ticks;
+        }
+        stage_class1f_release(&inner_runtime, 19);
+        if (!avsp_round1_step_scheduler(&inner_runtime))
+            return 109;
+        parent = &inner_runtime.pools[0].records[19];
+        parent->state = 0x0200u;
+        parent->substate = 0x1600u;
+        parent->source_action = 0x1600u;
+        parent->source_b0 = 1u;
+        parent->source_motion_flags = 0u;
+        parent->facing = 1u;
+        parent->x = 1226;
+        parent->y = 247;
+        parent->z = 247;
+        parent->source_x_fp = 1226L * 65536L;
+        parent->source_y_fp = 247L * 65536L;
+        parent->source_z_fp = 247L * 65536L;
+        parent->animation_record = 0x0012ec44UL;
+        parent->animation_timer = 2u;
+        parent->animation_branch = -32768;
+        inner_runtime.player_action.x = 1064;
+        inner_runtime.player_action.lane = 320;
+        inner_runtime.rng_seed = 0x44eau;
+        if (!avsp_round1_step_scheduler(&inner_runtime) ||
+            parent->state != 0x0208u || parent->substate != 0x0600u ||
+            parent->facing != 0u || parent->transition_timer != 600u ||
+            parent->source_motion_flags != 1u ||
+            parent->source_motion_fields[2] != 1 ||
+            parent->source_target_low != 0x8380u ||
+            inner_runtime.rng_seed != 0xceb8u)
+            return 109;
+        parent->state = 0x0208u;
+        parent->substate = 0x0e00u;
+        parent->source_action = 0x0e00u;
+        parent->source_motion_fields[0] = 0;
+        parent->source_projectile_enable = 0u;
+        parent->facing = 1u;
+        parent->x = 1064;
+        parent->y = 320;
+        parent->z = 320;
+        parent->source_x_fp = 1064L * 65536L;
+        parent->source_y_fp = 320L * 65536L;
+        parent->source_z_fp = 320L * 65536L;
+        inner_runtime.rng_seed = 0xb069u;
+        while (inner_runtime.type16_spawn_requests < 3u && ticks < 300u)
+        {
+            if (!avsp_round1_step_scheduler(&inner_runtime))
+                return 109;
+            ++ticks;
+        }
+        while (parent->source_motion_fields[0] != 8 && ticks < 400u)
+        {
+            if (!avsp_round1_step_scheduler(&inner_runtime))
+                return 109;
+            ++ticks;
+        }
+        if (inner_runtime.rng_seed != 0xec32u ||
+            inner_runtime.type16_spawn_requests != 3u ||
+            inner_runtime.type16_allocations != 3u ||
+            parent->source_motion_fields[0] != 8 ||
+            parent->x == 1064 ||
+            parent->source_projectile_enable != 0u)
+        {
+            fprintf(stderr,
+                "inner8 motion seed=%04x type16=%lu/%lu phase=%d x=%d emit=%u ticks=%u\n",
+                inner_runtime.rng_seed,
+                inner_runtime.type16_spawn_requests,
+                inner_runtime.type16_allocations,
+                parent->source_motion_fields[0],
+                parent->x,
+                parent->source_projectile_enable,
+                ticks);
+            return 109;
+        }
+    }
+    {
         AvspRound1Runtime scene_runtime;
         unsigned int source_frame;
+        unsigned int actor_index;
+        int inner8_seen = 0;
         avsp_round1_init(&scene_runtime);
         if (!avsp_round1_begin_first_entry(&scene_runtime))
             return 90;
@@ -2374,7 +2476,27 @@ int main(void)
             if (scene_runtime.entry.spawned)
             {
                 if (!avsp_round1_step_scheduler(&scene_runtime))
+                {
+                    fprintf(stderr,
+                        "Coffee Shop scheduler failure code=%u slot=%04x state=%04x substate=%04x record=%08lx frame=%lu\n",
+                        scene_runtime.scheduler_failure_code,
+                        scene_runtime.scheduler_failure_source_slot,
+                        scene_runtime.scheduler_failure_state,
+                        scene_runtime.scheduler_failure_substate,
+                        scene_runtime.scheduler_failure_animation_record,
+                        scene_runtime.scheduler_frames);
                     return 94;
+                }
+                for (actor_index = 0u;
+                     actor_index < scene_runtime.pools[0].capacity;
+                     ++actor_index)
+                {
+                    const AvspRound1ActorCore *actor =
+                        &scene_runtime.pools[0].records[actor_index];
+                    if (actor->active && actor->actor_class == 0x1f &&
+                        actor->state == 0x0208u)
+                        inner8_seen = 1;
+                }
             }
         }
         if (!scene_runtime.first_encounter.initialized)
@@ -2392,6 +2514,13 @@ int main(void)
                 scene_runtime.first_encounter.player_contacts,
                 scene_runtime.first_encounter.ko_events);
             return 95;
+        }
+        if (!inner8_seen)
+        {
+            fprintf(stderr,
+                "Coffee Shop inner8 source state was never observed type16=%lu\n",
+                scene_runtime.type16_spawn_requests);
+            return 108;
         }
     }
     runtime.entry.gate8236 = 1u;

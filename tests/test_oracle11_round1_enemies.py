@@ -93,6 +93,8 @@ for label,mutate in [
     ('inner8-action4-terminal',lambda x:x['observed_path_program']['action_0x04']['captured_terminals'].__setitem__('frame_3134','fixed frame')),
     ('inner8-action10-writer',lambda x:x['observed_path_program']['action_0x10']['overlap_transition'].__setitem__('writer','0x041310')),
     ('inner8-motion-selector',lambda x:x['observed_path_program']['action_0x0e']['captured_selection'].__setitem__('motion_selector_96_u16',22)),
+    ('inner8-field88-table',lambda x:x['observed_path_program']['source_tables']['field88_by_rng_low_nibble_u8'].__setitem__(0,2)),
+    ('inner8-direction-table',lambda x:x['observed_path_program']['source_tables']['direction_octant_base_u8'].__setitem__(0,0)),
 ]:
     mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['first_segment_action_execution_contract']['inner_state_0x08_program'];mutate(target);reject(mutant,label)
-print('ORACLE-11 Round 1 enemy tests: PASS (64 mutations rejected)')
+print('ORACLE-11 Round 1 enemy tests: PASS (66 mutations rejected)')

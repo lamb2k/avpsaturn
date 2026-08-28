@@ -263,6 +263,11 @@ def load_spec02_round1_presentations():
     class4e = dependencies["class_0x4e_type24_variant4_effect"]
     add_records("class4e-initial", class4e["animation_records"],
                 (0,), (2,), 0x8000)
+    add_records(
+        "class4e-variant1-collision-impact",
+        class4e["variant1_collision_effect"]["active_state"][
+            "animation_records"],
+        (0, 1), (2,), 0x8000)
     class44 = dependencies["class_0x44_type24_command_guard_owner"]
     class44_actor = class44["state0_presentation_actor"]
     add_records("class44-initial", class44["animation_records"],
