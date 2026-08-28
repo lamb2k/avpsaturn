@@ -51,8 +51,26 @@ def check(budget: dict) -> list[str]:
     if cart["strips_file_bytes"] is not None and cart["strips_carve_bytes"]:
         if cart["strips_carve_headroom"] < 0:
             errors.append("cartridge: strips exceed their carve")
+    if cart["round1_runtime_headroom_bytes"] != \
+            cart["round1_runtime_carve_bytes"] - \
+            cart["round1_runtime_measured_bytes"]:
+        errors.append("cartridge: Round 1 runtime headroom does not recompute")
+    if cart["live_diagnostic_headroom_bytes"] != \
+            cart["live_diagnostic_carve_bytes"] - \
+            cart["live_diagnostic_measured_bytes"]:
+        errors.append("cartridge: live diagnostic headroom does not recompute")
+    if cart["round1_runtime_headroom_bytes"] < 0 or \
+            cart["live_diagnostic_headroom_bytes"] < 0:
+        errors.append("cartridge: fixed Round 1 arena over capacity")
+    if cart["round1_runtime_measured_bytes"] * 100 > \
+            cart["round1_runtime_carve_bytes"] * 85 or \
+            cart["live_diagnostic_measured_bytes"] * 100 > \
+            cart["live_diagnostic_carve_bytes"] * 85:
+        errors.append("cartridge: fixed Round 1 arena below 15 percent headroom")
     if cart["jo_zone_bytes"] != cart["dram1_bytes"] - \
-            cart["tile_carve_bytes"] - cart["strips_carve_bytes"]:
+            cart["tile_carve_bytes"] - cart["strips_carve_bytes"] - \
+            cart["round1_runtime_carve_bytes"] - \
+            cart["live_diagnostic_carve_bytes"]:
         errors.append("cartridge: jo zone does not recompute")
 
     vdp2 = budget["vdp2"]

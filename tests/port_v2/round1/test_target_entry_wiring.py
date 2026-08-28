@@ -7,11 +7,20 @@ MAIN = (ROOT / "main.c").read_text()
 
 REQUIRED = (
     '#include "src/port_v2/gameplay/round1/round1.h"',
-    "#define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x3000",
+    "#define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x6000",
+    "#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x4874",
+    "#define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000",
+    "#define AVSP_LIVE_DIAG_RECORD_BYTES 156",
     "#define round1_runtime (*AVSP_ROUND1_RUNTIME_BASE)",
     "sizeof(AvspRound1Runtime) <= AVSP_ROUND1_RUNTIME_REGION_BYTES ? 1 : -1",
-    "AVSP_STRIPS_REGION_BYTES +\n                               AVSP_ROUND1_RUNTIME_REGION_BYTES",
+    "sizeof(AvspRound1Runtime) == AVSP_ROUND1_RUNTIME_MEASURED_BYTES ? 1 : -1",
+    "sizeof(LiveEncounterDiagSample) * AVSP_LIVE_DIAG_SAMPLES <=",
+    "sizeof(LiveEncounterDiagSample) == AVSP_LIVE_DIAG_RECORD_BYTES ? 1 : -1",
+    "AVSP_LIVE_DIAG_REGION_BYTES <=\n        AVSP_CART_DRAM1_BYTES",
+    "volatile LiveEncounterDiagSample *avsp_diag_live_samples =",
+    "AVSP_ROUND1_RUNTIME_REGION_BYTES +\n                               AVSP_LIVE_DIAG_REGION_BYTES",
     "AVSP_STRIPS_REGION_BYTES -\n                               AVSP_ROUND1_RUNTIME_REGION_BYTES",
+    "AVSP_ROUND1_RUNTIME_REGION_BYTES -\n                               AVSP_LIVE_DIAG_REGION_BYTES",
     "static unsigned long round1_native_capture_frame;",
     "#define AVSP_LIVE_DIAG_SAMPLES 575",
     "avsp_round1_init(&round1_runtime);",
@@ -21,7 +30,7 @@ REQUIRED = (
     "avsp_round1_step_player(&round1_runtime, round1_player_mask, 0)",
     "avsp_round1_step_scheduler(&round1_runtime)",
     "avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);",
-    "AVSP_ROUND1_SPEC02_SHA256[0] == 'a'",
+    "AVSP_ROUND1_SPEC02_SHA256[0] == 'b'",
     "AVSP_ROUND1_SPEC02_SHA256[63] == 'f'",
     "avsp_diag_round1_route_state = round1_runtime.route_state;",
     "avsp_diag_round1_rng_seed = round1_runtime.rng_seed;",
@@ -145,7 +154,7 @@ def accepts(body):
     return all(token in body for token in REQUIRED)
 
 assert accepts(MAIN)
-for token in REQUIRED[2:]:
+for token in REQUIRED[1:]:
     assert not accepts(MAIN.replace(token, "/* suppressed Round 1 binding */"))
 assert "avsp_frontend_draw_round1_text(&frontend_runtime);" in MAIN
 assert "round1_runtime.frame < AVSP_FRONTEND_R1TEXT_CLEAR_FRAME" in MAIN

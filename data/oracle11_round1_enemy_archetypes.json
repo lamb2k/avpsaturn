@@ -27575,7 +27575,7 @@
         "writes": 153166
       },
       "current_state_implementation_contract": {
-        "accepted_encounter_authority_sha256": "d7e59a13d6a2692b10924df04095c7e479663db5186707be9db41c9880ca2a30",
+        "accepted_encounter_authority_sha256": "b8409751044c87851285c490deb1c737f340a1ef13e673cf5e62e65fefd9782d",
         "accepted_oracle09_sha256": "a3027c3ffcd19af2656c515e0dfc0e9c56086b1bf3dd029e854d74be372c847f",
         "actions": {
           "above_lane_0x0600": {
@@ -27743,6 +27743,20 @@
         },
         "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
         "damage_hit_ko_removal": {
+          "accepted_port_v2_reaction_mapping": {
+            "contract": "tests/port_v2/combat/hit_ko/approved_contract.json",
+            "contract_sha256": "6adf803d6be237de652d35e4227f50b759d9ba7d6e75b7bc1c13ea1dcabea61a",
+            "hit_entry_action_substate_u16": 2,
+            "hit_entry_outer_state_u16": 514,
+            "ko_entry_action_substate_u16": 0,
+            "ko_entry_outer_state_u16": 1026,
+            "native_action_substate_source_field": "adapter.actor.action -> actor+0x06:u16",
+            "native_animation_record_source_field": "adapter.actor.anim_record -> actor+0x1c:u32",
+            "native_animation_timer_source_field": "adapter.actor.anim_timer -> actor+0x0a:u16",
+            "native_outer_state_source_field": "adapter.actor.sub_state -> actor+0x04:u16",
+            "rule": "the accepted adapter owns intermediate HIT/KO writes; native fixed-pool release may consume outer 0x0600 only after the KO timer and adapter sequence complete",
+            "terminal_release_outer_state_u16": 1536
+          },
           "damage_by_player_selector_s16": [
             8,
             8,
@@ -27797,6 +27811,8 @@
           "wrong damage",
           "wrong HIT duration",
           "wrong KO duration",
+          "wrong reaction field mapping",
+          "immediate KO release",
           "presentation-owned removal",
           "retained encounter gameplay step"
         ],
@@ -34521,6 +34537,2896 @@
         0,
         1
       ],
+      "first_segment_action_execution_contract": {
+        "action_programs": {
+          "action_0x00": {
+            "idle_selectors_by_a3_u8": [
+              36,
+              52
+            ],
+            "movement_action_u8": 22,
+            "movement_loops_u8": 2,
+            "movement_selector_addend": "a4_u8",
+            "movement_selector_base_by_style_u8": [
+              68,
+              72
+            ],
+            "near_player_x_bias_u16": 32,
+            "near_player_x_span_u16": 64,
+            "near_player_z_bias_u16": 12,
+            "near_player_z_span_u16": 24,
+            "turn_selectors_by_style_u8": [
+              34,
+              35
+            ]
+          },
+          "action_0x02": {
+            "actor_separation_helper": "0x060f36",
+            "animation_movement_helper": "0x0165c4",
+            "copy_y_high_word_to_z": true,
+            "direction_helper": "0x061032",
+            "source_bounds": true
+          },
+          "action_0x04": {
+            "coffee_shop_observation": {
+              "rng_index_u8": 1,
+              "rng_seed_after_u16": "0x5cc1",
+              "rng_seed_before_u16": "0xc965",
+              "source_frame": 2797,
+              "source_slot": "0x00ffa240",
+              "stage_offset_u8": 32,
+              "stage_parameter_u16": 9,
+              "timer_result_u8": 6,
+              "writer_pc": "0x060944"
+            },
+            "group_offsets_u16": [
+              12,
+              16,
+              20,
+              30
+            ],
+            "rng_group_mask_u16": 62,
+            "rng_group_table_u16": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "selector_groups_u16": [
+              [
+                55
+              ],
+              [
+                56
+              ],
+              [
+                43,
+                43,
+                43,
+                55
+              ],
+              [
+                43,
+                43,
+                56
+              ]
+            ],
+            "substates_u8": [
+              0,
+              2,
+              4,
+              6,
+              8
+            ],
+            "terminal_actions": {
+              "phase_0_player_guard_clear": "next action 0",
+              "phase_6": "next phase 0",
+              "phase_8": "next action 0 and style85_u8=0"
+            },
+            "timer_helper": "0x0bc416",
+            "timer_rng_calls": 1,
+            "timer_rng_mask_u16": 31,
+            "timer_rows_u8": [
+              [
+                8,
+                8,
+                8,
+                8,
+                10,
+                10,
+                10,
+                10,
+                12,
+                12,
+                12,
+                12,
+                16,
+                16,
+                16,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30,
+                31,
+                32
+              ],
+              [
+                6,
+                6,
+                6,
+                6,
+                6,
+                6,
+                6,
+                6,
+                7,
+                7,
+                7,
+                7,
+                8,
+                8,
+                8,
+                8,
+                9,
+                9,
+                9,
+                9,
+                10,
+                10,
+                10,
+                10,
+                11,
+                11,
+                11,
+                11,
+                12,
+                14,
+                16,
+                18
+              ],
+              [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                4,
+                4,
+                4,
+                4,
+                6,
+                8,
+                10,
+                16
+              ],
+              [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                4,
+                4,
+                4,
+                6,
+                8,
+                12
+              ],
+              [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                2,
+                2,
+                2,
+                3,
+                5,
+                8
+              ]
+            ],
+            "timer_stage_offset_table_address": "0x0bc53a",
+            "timer_stage_offsets_u8": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              32,
+              32,
+              32,
+              32,
+              32,
+              32,
+              32,
+              32,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              96,
+              96,
+              96,
+              96,
+              96,
+              128,
+              128,
+              128,
+              128,
+              128,
+              128,
+              128,
+              128
+            ],
+            "timer_stage_parameter_field": "0xff81ea:u16",
+            "timer_table_address": "0x0bc55a"
+          },
+          "action_0x0c": {
+            "initial_selector_u8": 35,
+            "middle_selector_u8": 36,
+            "substates_u8": [
+              0,
+              2,
+              4
+            ],
+            "terminal_next_action_u8": 0,
+            "y_delta_s32_16_16": -8192
+          },
+          "action_0x0e": {
+            "initial_selector_u8": 77,
+            "initial_y_add_s16": 32,
+            "landing_selector_u8": 62,
+            "rng_calls": 1,
+            "substates_u8": [
+              0,
+              2,
+              4
+            ],
+            "terminal_next_action_u8": 0,
+            "terminal_style85_u8": 1,
+            "x_velocity_table_s32_16_16": [
+              -65536,
+              -81920,
+              -98304,
+              -131072
+            ],
+            "y_acceleration_s32_16_16": -32768,
+            "y_velocity_s32_16_16": 229376
+          },
+          "action_0x16": {
+            "actor_separation_helper": "0x060f36",
+            "animation_movement_helper": "0x0165c4",
+            "attack_action_u8": 24,
+            "attack_selectors_by_style_u8": [
+              0,
+              1
+            ],
+            "copy_y_high_word_to_z": true,
+            "direction_helper": "0x061032",
+            "loop_counter": "b0_u8",
+            "loop_guard": "animation_branch_s16 < 0 and animation_timer_u16 == 1",
+            "rng_mask_branch_u16": 3,
+            "rng_mask_timer_u16": 15,
+            "source_bounds": true,
+            "target_compare_helper": "0x060cd2"
+          },
+          "action_0x18": {
+            "decrement": 1,
+            "nonzero_helper": "0x016536",
+            "timer_field": "action_timer_u8",
+            "zero_next_action_u8": 0
+          },
+          "action_0x1a": {
+            "next_action_u8": 24,
+            "selectors_by_style_u8": [
+              0,
+              1
+            ],
+            "terminal_guard": "animation_branch_s16 < 0"
+          },
+          "action_0x1c": {
+            "animation_movement_helper": "0x0165c4",
+            "copy_y_high_word_to_z": true,
+            "next_action_u8": 30,
+            "selectors_by_style_u8": [
+              0,
+              1
+            ],
+            "source_bounds": true,
+            "terminal_guard": "animation_branch_s16 < 0 and animation_timer_u16 == 1 and bound_b2_u16 <= x_high_word_u16"
+          },
+          "action_0x1e": {
+            "animation_helper": "0x016536"
+          },
+          "actions_0x06_0x08_0x0a": {
+            "next_action_u8": 0,
+            "style85_result_by_action": {
+              "0x06": 0,
+              "0x08": 1,
+              "0x0a": "unchanged"
+            },
+            "terminal_guard": "animation_branch_s16 < 0"
+          },
+          "actions_0x10_0x12": {
+            "decrement": 1,
+            "timer_field": "timer_aa_u8",
+            "zero_next_action_u8": 0
+          },
+          "direction_helper_0x061032": {
+            "lower_directions_by_a5_u8": [
+              26,
+              6
+            ],
+            "lower_lane_u16": 232,
+            "middle_band_preserves_direction": true,
+            "upper_directions_by_a5_u8": [
+              22,
+              10
+            ],
+            "upper_lane_u16": 320
+          },
+          "source_bounds": {
+            "camera_relative_bias_u16": 112,
+            "camera_relative_span_u16": 608,
+            "comparison": "unsigned word",
+            "failure_outer_state_u16": 1536,
+            "x_max_u16": 1520
+          }
+        },
+        "animation_selector_table": {
+          "address": "0x12d152",
+          "selectors": [
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012e8a8",
+                  "assembly": "0x0012f994",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e8b8",
+                  "record_sha256": "4878fc426df34aafa95222bd157261988a4e022d0e0d5c1952520a0e687e099d",
+                  "timer_u16": 9
+                },
+                {
+                  "animation_record": "0x0012e8b8",
+                  "assembly": "0x0012f9bc",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e8c8",
+                  "record_sha256": "c4670630d0c8684d0dfaa520e4bd0e0b2b4784f0a1cd844b5ad1584ef8aa15da",
+                  "timer_u16": 9
+                },
+                {
+                  "animation_record": "0x0012e8c8",
+                  "assembly": "0x0012f9e4",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e8d8",
+                  "record_sha256": "46771582ed2f16f4869a6df8ac12f938610bebcd6bd917d067283d19870c01b0",
+                  "timer_u16": 9
+                },
+                {
+                  "animation_record": "0x0012e8d8",
+                  "assembly": "0x0012f9bc",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e8a8",
+                  "record_sha256": "77c5a6e93018a6790459157a3f16e4c0a420658b1a591b50ed6a1558643ead72",
+                  "timer_u16": 9
+                }
+              ],
+              "selector_u8": 0,
+              "start_animation_record": "0x0012e8a8",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012e8ec",
+                  "assembly": "0x0012f5de",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e8fc",
+                  "record_sha256": "fcfb86f0585f33c718f086cfa68cdb307e7a8af5a8b1011525ac78353c76d883",
+                  "timer_u16": 9
+                },
+                {
+                  "animation_record": "0x0012e8fc",
+                  "assembly": "0x0012fa0c",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e90c",
+                  "record_sha256": "497e26122b4a6a717f407f4a16b5bd1ab657d6ceccb483128614a8aa56905b50",
+                  "timer_u16": 9
+                },
+                {
+                  "animation_record": "0x0012e90c",
+                  "assembly": "0x0012fa2a",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e91c",
+                  "record_sha256": "b3fda47757d3a55b27840323f4715e4f355ab32a57808515aec430dafb459762",
+                  "timer_u16": 9
+                },
+                {
+                  "animation_record": "0x0012e91c",
+                  "assembly": "0x0012fa0c",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e8ec",
+                  "record_sha256": "33142ec3f7787a40fca903f90d7337454e5d211b8a06d66519ad575f9755fcb4",
+                  "timer_u16": 9
+                }
+              ],
+              "selector_u8": 1,
+              "start_animation_record": "0x0012e8ec",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012d590",
+                  "assembly": "0x0012fa48",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d5a0",
+                  "record_sha256": "f96d922d21f7662533b3040301d66837bdcba8fa15aaf9b0daf4f79d97a067f1",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0012d5a0",
+                  "assembly": "0x0012fa7a",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d5b0",
+                  "record_sha256": "192008347dbf7ac6672f08b942c10d7c04e63dcf4eda4b58aa2bab681b339f8f",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0012d5b0",
+                  "assembly": "0x0012faa2",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d5c0",
+                  "record_sha256": "7e96035e495fa39101316e589430d2390b28a6e2c8a37b28a89b20d839fbf8a2",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0012d5c0",
+                  "assembly": "0x0012fac0",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d5d0",
+                  "record_sha256": "abd796c0643594159b8af88525bfd7946359ad71c4efda482e55aba82ca0e291",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0012d5d0",
+                  "assembly": "0x0012f5ac",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d5d0",
+                  "record_sha256": "e3437da5183f897afb442819d327715a34e6a552c2499f68b4ab0e33f8089865",
+                  "timer_u16": 4
+                }
+              ],
+              "selector_u8": 34,
+              "start_animation_record": "0x0012d590",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012d5e4",
+                  "assembly": "0x0012fae8",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 3,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d5f4",
+                  "record_sha256": "c0743d426fc810a628e1eff4e18f1ee8e19d5e75d9bf602864f3230a20503a7c",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0012d5f4",
+                  "assembly": "0x0012fb10",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 3,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d604",
+                  "record_sha256": "95228d3d9abe3d262f68e9c0d1d6c8ff4ade0d55fe4e47c65cd57138158f07c9",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0012d604",
+                  "assembly": "0x0012fb38",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d614",
+                  "record_sha256": "1ee88df209d1157711c265cb9b298ea4b26347546be33dd9b5205cc59075074b",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0012d614",
+                  "assembly": "0x0012f5de",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d614",
+                  "record_sha256": "09ab43b9eae524c2d45aa99c926e2b06e68e595701856252e501135b42f2b123",
+                  "timer_u16": 4
+                }
+              ],
+              "selector_u8": 35,
+              "start_animation_record": "0x0012d5e4",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012d628",
+                  "assembly": "0x0012f5de",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d638",
+                  "record_sha256": "afaeaf74f4c0fc24701135b1375bef6ede18fe1dcd4559916ee818199162ea66",
+                  "timer_u16": 6
+                },
+                {
+                  "animation_record": "0x0012d638",
+                  "assembly": "0x0012f930",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 4,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d648",
+                  "record_sha256": "820cbedaba911bbb968811125a26c39de9e9c9b8e6cf62d942c480912e09e5fc",
+                  "timer_u16": 7
+                },
+                {
+                  "animation_record": "0x0012d648",
+                  "assembly": "0x0012f712",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d658",
+                  "record_sha256": "d1f6995e0e6bd109c69429d2e02c836f9d47ff1c52361a28db0f02bab1477c10",
+                  "timer_u16": 7
+                },
+                {
+                  "animation_record": "0x0012d658",
+                  "assembly": "0x0012fd0a",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d668",
+                  "record_sha256": "ad703f976335a66d77a1e3a637e9d791782d7686b9608b09f884a4188e662179",
+                  "timer_u16": 6
+                },
+                {
+                  "animation_record": "0x0012d668",
+                  "assembly": "0x0012f5ac",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d678",
+                  "record_sha256": "b36f6afd71e0d3b40377c21f55d104a10348204624be386cc037919a25eef5b1",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012d678",
+                  "assembly": "0x0012f5ac",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d678",
+                  "record_sha256": "e3437da5183f897afb442819d327715a34e6a552c2499f68b4ab0e33f8089865",
+                  "timer_u16": 4
+                }
+              ],
+              "selector_u8": 36,
+              "start_animation_record": "0x0012d628",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012d890",
+                  "assembly": "0x0012fe9e",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d8a0",
+                  "record_sha256": "c76ab46cdaa6d8256da122840df9b4f9e40bd9653742927165e366123b54a42b",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012d8a0",
+                  "assembly": "0x0012febc",
+                  "attack_selector_u8": 1,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d8b0",
+                  "record_sha256": "5cf921125b5aec03c32bf78d2aab71e38543fb3a77c344a639b80e734eace9a8",
+                  "timer_u16": 1
+                },
+                {
+                  "animation_record": "0x0012d8b0",
+                  "assembly": "0x0012febc",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d8c0",
+                  "record_sha256": "7926c990baade9b98b433af94e2f843300f801b6bccb2b9ac1f4c952c2224450",
+                  "timer_u16": 9
+                },
+                {
+                  "animation_record": "0x0012d8c0",
+                  "assembly": "0x0012fef4",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d8d0",
+                  "record_sha256": "7358e361524979b73efc5f8cf92d26c4cf370ec8ba6d7719af63e830d77e2c93",
+                  "timer_u16": 10
+                },
+                {
+                  "animation_record": "0x0012d8d0",
+                  "assembly": "0x0012ff22",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d8e0",
+                  "record_sha256": "37adbe873d96096c515e8b60c9dce63307bf19ba1d86e169008b8ecf9d47b219",
+                  "timer_u16": 16
+                },
+                {
+                  "animation_record": "0x0012d8e0",
+                  "assembly": "0x0012f5ac",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012d8e0",
+                  "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+                  "timer_u16": 8
+                }
+              ],
+              "selector_u8": 43,
+              "start_animation_record": "0x0012d890",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012e65c",
+                  "assembly": "0x0012f712",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e66c",
+                  "record_sha256": "5c8061ac95964b5d62ab61fc927cd82ad7661da2295b64ae0b55c336a129db19",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e66c",
+                  "assembly": "0x0012f930",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 4,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e67c",
+                  "record_sha256": "371422b81d607fab28e311f0a0ed197dec7dd8264e8e10df8334274f38a84816",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e67c",
+                  "assembly": "0x0012f5de",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e68c",
+                  "record_sha256": "a0de20e9075e39f4be2af9a0f0f7d6dfd8fec51494aedc94ba9cb7a59552e775",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0012e68c",
+                  "assembly": "0x0012f5de",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e68c",
+                  "record_sha256": "b0b826483693bfa990426869cd1920515ed0bf4f387b1f7d6b5db6aca71d36ef",
+                  "timer_u16": 6
+                }
+              ],
+              "selector_u8": 52,
+              "start_animation_record": "0x0012e65c",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012e38c",
+                  "assembly": "0x0013065e",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e39c",
+                  "record_sha256": "588ace00fe2d24f9f3c0158ad2f83eb165d41ebc752d7a4eabc45a76382930a7",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e39c",
+                  "assembly": "0x0013067c",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e3ac",
+                  "record_sha256": "2783bca076ca9a4ad856ce88c7c8c13a19af3a3791858797bd37fdb6cb8d2499",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e3ac",
+                  "assembly": "0x0013069a",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e3bc",
+                  "record_sha256": "0e43e556da8df4f323027bfae4bdd3726217e6fc489dd0b1d957fefece9b5881",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e3bc",
+                  "assembly": "0x001306b8",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e3cc",
+                  "record_sha256": "72f6c258a9cf4fdfe39d8f52fda0fed23e807f2a4576bfd807a4f2cc7fde25d6",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e3cc",
+                  "assembly": "0x001306d6",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e3dc",
+                  "record_sha256": "f935e2c6872edb60d61a98ffb1ab6c0493042af2ff01000e6cebba827a8860c7",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e3dc",
+                  "assembly": "0x001306f4",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e3ec",
+                  "record_sha256": "56fc537a3e37ad0aa6a4312ca13f2decc29f451396f9fb7b90d85adc433a5675",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e3ec",
+                  "assembly": "0x00130712",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e3fc",
+                  "record_sha256": "1a5c6d70258f43224f86068fe9dd003094c3a64982c23a01d59b4b8d26546e76",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e3fc",
+                  "assembly": "0x00130730",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e3fc",
+                  "record_sha256": "e088b490eb0035f2f31589fc5a7084d291ab2c79cb94b8a2bbfd1fabb143e895",
+                  "timer_u16": 8
+                }
+              ],
+              "selector_u8": 53,
+              "start_animation_record": "0x0012e38c",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012e410",
+                  "assembly": "0x0013074e",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e420",
+                  "record_sha256": "861e9d0cf6619104ff138dfbdae5c9f03bdfac67d7353eae4c1afda80a3a9f13",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e420",
+                  "assembly": "0x0013076c",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e430",
+                  "record_sha256": "bee195672507e356f69b7426a0f7a1d0e22a684bfe3f917e63939bb8ce509a20",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e430",
+                  "assembly": "0x0013078a",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e440",
+                  "record_sha256": "ad271bf722669543f5bba20988fd904aab53c103e57a5e6bce7ca89c30f62da4",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e440",
+                  "assembly": "0x001307a8",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e450",
+                  "record_sha256": "10cc81e03a1372273dba256c97f36cd2fcf7303fdff95affeb362683b1a77778",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e450",
+                  "assembly": "0x001307c6",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e460",
+                  "record_sha256": "12884f5bb3bb44e3dcda341bbe0adbfc157c96bcf5f74932dbd5095e1893d325",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e460",
+                  "assembly": "0x001307e4",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e470",
+                  "record_sha256": "fc38181688ebd2f470b0e3ebf1e09a8840d39e1205ed7c5c16d969fcfe0e3856",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e470",
+                  "assembly": "0x00130802",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e480",
+                  "record_sha256": "4ff078c9adc265e7b9e44cdfc3ce0ffc9216fc5eedcbb78e20ccb5cae1d00c6c",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e480",
+                  "assembly": "0x00130820",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e490",
+                  "record_sha256": "3dc6716cc9ab95eff5a4051d402637e8d9b1224460c012cb04592b75ef5f2653",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e490",
+                  "assembly": "0x0013083e",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e4a0",
+                  "record_sha256": "b2a3196082355672d75e30672f6f567299cf1b8f18458bca58922447acbcb955",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e4a0",
+                  "assembly": "0x00130866",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e410",
+                  "record_sha256": "6dff3c03b3947387f043fae0ae983aa825736acda259a50130c41705e2dda0c6",
+                  "timer_u16": 8
+                }
+              ],
+              "selector_u8": 54,
+              "start_animation_record": "0x0012e410",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012da70",
+                  "assembly": "0x0012fe9e",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012da80",
+                  "record_sha256": "c76ab46cdaa6d8256da122840df9b4f9e40bd9653742927165e366123b54a42b",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012da80",
+                  "assembly": "0x0012febc",
+                  "attack_selector_u8": 5,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012da90",
+                  "record_sha256": "7acbe702698ce3703d013ddb51f04163348a8ff1143b298586241ceda04a9df0",
+                  "timer_u16": 1
+                },
+                {
+                  "animation_record": "0x0012da90",
+                  "assembly": "0x0012febc",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012daa0",
+                  "record_sha256": "7926c990baade9b98b433af94e2f843300f801b6bccb2b9ac1f4c952c2224450",
+                  "timer_u16": 9
+                },
+                {
+                  "animation_record": "0x0012daa0",
+                  "assembly": "0x0012fef4",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012dab0",
+                  "record_sha256": "7358e361524979b73efc5f8cf92d26c4cf370ec8ba6d7719af63e830d77e2c93",
+                  "timer_u16": 10
+                },
+                {
+                  "animation_record": "0x0012dab0",
+                  "assembly": "0x0012ff22",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012dac0",
+                  "record_sha256": "37adbe873d96096c515e8b60c9dce63307bf19ba1d86e169008b8ecf9d47b219",
+                  "timer_u16": 16
+                },
+                {
+                  "animation_record": "0x0012dac0",
+                  "assembly": "0x0012f5ac",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012dac0",
+                  "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+                  "timer_u16": 8
+                }
+              ],
+              "selector_u8": 55,
+              "start_animation_record": "0x0012da70",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012dad4",
+                  "assembly": "0x0012ff4a",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012dae4",
+                  "record_sha256": "540851a5069b5ba9e8fadc52bc3052bd870ec179311a1e4c6467666f0058f9e2",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012dae4",
+                  "assembly": "0x0012ff9a",
+                  "attack_selector_u8": 6,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012daf4",
+                  "record_sha256": "6398c5ad031bf4b1aea975367e3939e2b081d813bf84e5999c6ce8355c93f352",
+                  "timer_u16": 1
+                },
+                {
+                  "animation_record": "0x0012daf4",
+                  "assembly": "0x0012ff9a",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012db04",
+                  "record_sha256": "e3eecf9e58f1d601e95e3d42096179bab2a818cf3d93a75ea7b2d75642238076",
+                  "timer_u16": 9
+                },
+                {
+                  "animation_record": "0x0012db04",
+                  "assembly": "0x0012ffd8",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012db14",
+                  "record_sha256": "b1719b0307afe63a9beb87790837a7f0d274f66117994a1f9fb70b9688b5bbcf",
+                  "timer_u16": 10
+                },
+                {
+                  "animation_record": "0x0012db14",
+                  "assembly": "0x0013000a",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012db24",
+                  "record_sha256": "2992abbac3d6e90cb775cd59932e3f6509fddf7e2321ffab4c28898e76241657",
+                  "timer_u16": 16
+                },
+                {
+                  "animation_record": "0x0012db24",
+                  "assembly": "0x0012f5ac",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012db24",
+                  "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+                  "timer_u16": 8
+                }
+              ],
+              "selector_u8": 56,
+              "start_animation_record": "0x0012dad4",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012e944",
+                  "assembly": "0x0012f5de",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 1,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 1,
+                  "next_animation_record": "0x0012e954",
+                  "record_sha256": "587dfc9fd0f287f7cb6cb1a44d4923e3f8ecb4acd48c6e6cbfa3972721ffa3c2",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012e954",
+                  "assembly": "0x0012fce2",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 10,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e964",
+                  "record_sha256": "e0e510efc0a5db5b75320e43455e03dc9655b88c781f1785cb17565e763c0e67",
+                  "timer_u16": 5
+                },
+                {
+                  "animation_record": "0x0012e964",
+                  "assembly": "0x0012fce2",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 10,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e964",
+                  "record_sha256": "0ab8a95debcc4ab010b903ad2f32a1b6d30821eddecb378c4929a04b573f91f0",
+                  "timer_u16": 8
+                }
+              ],
+              "selector_u8": 60,
+              "start_animation_record": "0x0012e944",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012e9cc",
+                  "assembly": "0x0012fc92",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 11,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e9dc",
+                  "record_sha256": "2a114e0613150943166f6ef81ec96ec2fd0937d1fd5f397fc903f6de654af114",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0012e9dc",
+                  "assembly": "0x0012f5fc",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012e9dc",
+                  "record_sha256": "de7ed2177c484c38f50a6e21c715c8db380d9d80ee2614a147f79e87f84edca9",
+                  "timer_u16": 4095
+                }
+              ],
+              "selector_u8": 62,
+              "start_animation_record": "0x0012e9cc",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012e708",
+                  "assembly": "0x0012f638",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e718",
+                  "record_sha256": "930fc8e74119cd107eb3d855b14b397b7e88ac0ffb288ad8902279744a2353f7",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012e718",
+                  "assembly": "0x0012f670",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e728",
+                  "record_sha256": "8e81e51888886d0e1f7358b0950f8ae744f542d5aac4c4950bdba2a9945e623b",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012e728",
+                  "assembly": "0x0012f6a8",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e738",
+                  "record_sha256": "45fd77e5f290e151ad372dca0dcd20332814b59bfb6a8f021e4783190ce78251",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012e738",
+                  "assembly": "0x0012f6da",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e748",
+                  "record_sha256": "11fb1a58ee3bba0a3fec037828bdb7de35c4755519facd811db987d7afa84f00",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012e748",
+                  "assembly": "0x0012f712",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e758",
+                  "record_sha256": "c15c563aca7def3eb10009ed28a1cf9ed8a591ad22aaad6bfb965da6e82020f9",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012e758",
+                  "assembly": "0x0012f72a",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e768",
+                  "record_sha256": "a84c8f4661444bbd2c35f5a2efa56dd5026c4f66b92dc4fddc1330f1d4955dbf",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012e768",
+                  "assembly": "0x0012f762",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e778",
+                  "record_sha256": "bdb18ab87a3e5d294a65ab3994446729df0d7c8ca3309ae97ba35a0756f0a4d2",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012e778",
+                  "assembly": "0x0012f794",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32760,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e708",
+                  "record_sha256": "eead1782cea16e8a86693488397573435ad9ae589204da670f02c0d35842709a",
+                  "timer_u16": 2
+                }
+              ],
+              "selector_u8": 68,
+              "start_animation_record": "0x0012e708",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012eafc",
+                  "assembly": "0x0012f638",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb0c",
+                  "record_sha256": "c721cef8d2e4aa5c3c47b957a1ad617292805398fde4930ddc981a9bf03bef05",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb0c",
+                  "assembly": "0x0012f670",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb1c",
+                  "record_sha256": "4a2fa07b499374e24167b2de478f0be99eb9f71c904e5852a6868ace9d2ad0fc",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb1c",
+                  "assembly": "0x0012f6a8",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb2c",
+                  "record_sha256": "3fb86e8358daacedd90a58bae3957613195c557ab73ca811995f7eea696338e8",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb2c",
+                  "assembly": "0x0012f6da",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb3c",
+                  "record_sha256": "0cfa4faeebde507af1fa940b9af5d61e67d3f3fcf18974dacde3d043bafbca0d",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb3c",
+                  "assembly": "0x0012f712",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb4c",
+                  "record_sha256": "83334c372695cabc1ab8a58d766808f251b5b3ac17e8eedf0b4fd02ee3e9ad19",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb4c",
+                  "assembly": "0x0012f72a",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb5c",
+                  "record_sha256": "39aaabfadfe793ecc1860f53015c5cc9851bdbc73d8bd14719bf304e87a6666c",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb5c",
+                  "assembly": "0x0012f762",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb6c",
+                  "record_sha256": "1d0db850e9176517ae31add0c4121ee5b980fbbc146b054cf17eafb657bea6b2",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb6c",
+                  "assembly": "0x0012f794",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32760,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eafc",
+                  "record_sha256": "2b54a1b7cf1833492cf096ee91a9044d96dc901de8d73dd2c2492b815426c5a8",
+                  "timer_u16": 3
+                }
+              ],
+              "selector_u8": 69,
+              "start_animation_record": "0x0012eafc",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012eafc",
+                  "assembly": "0x0012f638",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb0c",
+                  "record_sha256": "c721cef8d2e4aa5c3c47b957a1ad617292805398fde4930ddc981a9bf03bef05",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb0c",
+                  "assembly": "0x0012f670",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb1c",
+                  "record_sha256": "4a2fa07b499374e24167b2de478f0be99eb9f71c904e5852a6868ace9d2ad0fc",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb1c",
+                  "assembly": "0x0012f6a8",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb2c",
+                  "record_sha256": "3fb86e8358daacedd90a58bae3957613195c557ab73ca811995f7eea696338e8",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb2c",
+                  "assembly": "0x0012f6da",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb3c",
+                  "record_sha256": "0cfa4faeebde507af1fa940b9af5d61e67d3f3fcf18974dacde3d043bafbca0d",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb3c",
+                  "assembly": "0x0012f712",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb4c",
+                  "record_sha256": "83334c372695cabc1ab8a58d766808f251b5b3ac17e8eedf0b4fd02ee3e9ad19",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb4c",
+                  "assembly": "0x0012f72a",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb5c",
+                  "record_sha256": "39aaabfadfe793ecc1860f53015c5cc9851bdbc73d8bd14719bf304e87a6666c",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb5c",
+                  "assembly": "0x0012f762",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb6c",
+                  "record_sha256": "1d0db850e9176517ae31add0c4121ee5b980fbbc146b054cf17eafb657bea6b2",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb6c",
+                  "assembly": "0x0012f794",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32760,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eafc",
+                  "record_sha256": "2b54a1b7cf1833492cf096ee91a9044d96dc901de8d73dd2c2492b815426c5a8",
+                  "timer_u16": 3
+                }
+              ],
+              "selector_u8": 70,
+              "start_animation_record": "0x0012eafc",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012eafc",
+                  "assembly": "0x0012f638",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb0c",
+                  "record_sha256": "c721cef8d2e4aa5c3c47b957a1ad617292805398fde4930ddc981a9bf03bef05",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb0c",
+                  "assembly": "0x0012f670",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb1c",
+                  "record_sha256": "4a2fa07b499374e24167b2de478f0be99eb9f71c904e5852a6868ace9d2ad0fc",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb1c",
+                  "assembly": "0x0012f6a8",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb2c",
+                  "record_sha256": "3fb86e8358daacedd90a58bae3957613195c557ab73ca811995f7eea696338e8",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb2c",
+                  "assembly": "0x0012f6da",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb3c",
+                  "record_sha256": "0cfa4faeebde507af1fa940b9af5d61e67d3f3fcf18974dacde3d043bafbca0d",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb3c",
+                  "assembly": "0x0012f712",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb4c",
+                  "record_sha256": "83334c372695cabc1ab8a58d766808f251b5b3ac17e8eedf0b4fd02ee3e9ad19",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb4c",
+                  "assembly": "0x0012f72a",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb5c",
+                  "record_sha256": "39aaabfadfe793ecc1860f53015c5cc9851bdbc73d8bd14719bf304e87a6666c",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb5c",
+                  "assembly": "0x0012f762",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eb6c",
+                  "record_sha256": "1d0db850e9176517ae31add0c4121ee5b980fbbc146b054cf17eafb657bea6b2",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012eb6c",
+                  "assembly": "0x0012f794",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32760,
+                  "hurt_selector_u8": 1,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eafc",
+                  "record_sha256": "2b54a1b7cf1833492cf096ee91a9044d96dc901de8d73dd2c2492b815426c5a8",
+                  "timer_u16": 3
+                }
+              ],
+              "selector_u8": 71,
+              "start_animation_record": "0x0012eafc",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012e78c",
+                  "assembly": "0x0012f7cc",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e79c",
+                  "record_sha256": "cedb68f1b2b0948658eb71c576dc111f07ab8462b0b46d5b9c5cee10fbb800ef",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012e79c",
+                  "assembly": "0x0012f7e4",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e7ac",
+                  "record_sha256": "81334ef16a9dc8be71d93db4c211d40f3529fcdaac4341766d23a74fcd1be074",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012e7ac",
+                  "assembly": "0x0012f7fc",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e7bc",
+                  "record_sha256": "26042c8c7b83e0abac6f68fefccacc0599e28d9b062264fef37a3d0a4bbdcd20",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012e7bc",
+                  "assembly": "0x0012f814",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e7cc",
+                  "record_sha256": "995b55779c7d71f11a8c014402018247196d3afd3166588ea77873978dbf6857",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012e7cc",
+                  "assembly": "0x0012f82c",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e7dc",
+                  "record_sha256": "665e5c8d1ced48cb342750ea1c002c9d0a5929c9ff4476c9136083f2ab38a196",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012e7dc",
+                  "assembly": "0x0012f85e",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e7ec",
+                  "record_sha256": "c61661cb607b429c0ce90e8a7118a7393f15a86761307b4f33f4232f5bc46094",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012e7ec",
+                  "assembly": "0x0012f890",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e7fc",
+                  "record_sha256": "2a1c00e6ea21e7484a12923cc1fc252e55acde6ec80fae2ec669956ded6590e8",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012e7fc",
+                  "assembly": "0x0012f8b8",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32760,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012e78c",
+                  "record_sha256": "50676c678203b609b70da5b8ef16b26acc48ea777ea920400edb4b461eb1090a",
+                  "timer_u16": 2
+                }
+              ],
+              "selector_u8": 72,
+              "start_animation_record": "0x0012e78c",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012ec04",
+                  "assembly": "0x0012f7cc",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012ec14",
+                  "record_sha256": "cedb68f1b2b0948658eb71c576dc111f07ab8462b0b46d5b9c5cee10fbb800ef",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012ec14",
+                  "assembly": "0x0012f7e4",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012ec24",
+                  "record_sha256": "b09da558f00555b52b7e6751133331898e814264d3888bc9bfac74b3196610a0",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012ec24",
+                  "assembly": "0x0012f7fc",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012ec34",
+                  "record_sha256": "26042c8c7b83e0abac6f68fefccacc0599e28d9b062264fef37a3d0a4bbdcd20",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012ec34",
+                  "assembly": "0x0012f814",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012ec44",
+                  "record_sha256": "6a87c25376d3cfdf0745b3e575385841335a0eda058a0d254d4e399b64424a09",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012ec44",
+                  "assembly": "0x0012f82c",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012ec54",
+                  "record_sha256": "665e5c8d1ced48cb342750ea1c002c9d0a5929c9ff4476c9136083f2ab38a196",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012ec54",
+                  "assembly": "0x0012f85e",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012ec64",
+                  "record_sha256": "c9d06e96fcaa5883f2893046eaa0e50feec165671f1b84f12b11eeada41e0b8a",
+                  "timer_u16": 3
+                },
+                {
+                  "animation_record": "0x0012ec64",
+                  "assembly": "0x0012f890",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012ec74",
+                  "record_sha256": "2a1c00e6ea21e7484a12923cc1fc252e55acde6ec80fae2ec669956ded6590e8",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012ec74",
+                  "assembly": "0x0012f8b8",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32760,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012ec04",
+                  "record_sha256": "6ec04cfd0f156ff86d535c115bfad714e3a11ad872f4728b85062895d43febac",
+                  "timer_u16": 3
+                }
+              ],
+              "selector_u8": 73,
+              "start_animation_record": "0x0012ec04",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012ec88",
+                  "assembly": "0x0012f7cc",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012ec98",
+                  "record_sha256": "b135ec590ca7dd530fcb71da879afccb2fb0278bc6ffb2b1e7cbd3739815375f",
+                  "timer_u16": 6
+                },
+                {
+                  "animation_record": "0x0012ec98",
+                  "assembly": "0x0012f7e4",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012eca8",
+                  "record_sha256": "35729a4462477b827611143947e86de66113085d2e428431f4eed5aa00583b73",
+                  "timer_u16": 7
+                },
+                {
+                  "animation_record": "0x0012eca8",
+                  "assembly": "0x0012f7fc",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012ecb8",
+                  "record_sha256": "b077f5d05df9d2afc72769820437c55ccd42e64a8e748ae1c93a2881658b10d1",
+                  "timer_u16": 6
+                },
+                {
+                  "animation_record": "0x0012ecb8",
+                  "assembly": "0x0012f814",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012ecc8",
+                  "record_sha256": "b3cf3b48e7e78736356242db840f4feacf22d4a48d925e460dcc70d85616a684",
+                  "timer_u16": 7
+                },
+                {
+                  "animation_record": "0x0012ecc8",
+                  "assembly": "0x0012f82c",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012ecd8",
+                  "record_sha256": "243f6036c7681fb25ca679ee156aa7a30d0874512eb82a8bb60a480a7e163bdc",
+                  "timer_u16": 6
+                },
+                {
+                  "animation_record": "0x0012ecd8",
+                  "assembly": "0x0012f85e",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012ece8",
+                  "record_sha256": "a3c39d0047af2073d801025b5ed2a54be07b51a4c3d9a54c261a1bf4e531c0be",
+                  "timer_u16": 7
+                },
+                {
+                  "animation_record": "0x0012ece8",
+                  "assembly": "0x0012f890",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 8,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012ecf8",
+                  "record_sha256": "c7ed284bc8fdfec49f0d040cb11f1c822dd9737f5784cefaf94dbb56b143d2c6",
+                  "timer_u16": 6
+                },
+                {
+                  "animation_record": "0x0012ecf8",
+                  "assembly": "0x0012f8b8",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32760,
+                  "hurt_selector_u8": 2,
+                  "movement_table_index_u8": 8,
+                  "next_animation_record": "0x0012ec88",
+                  "record_sha256": "71d5df050559bd2628ca028dee80becfe50b0b28895d967bcea9f825beb0c5f8",
+                  "timer_u16": 7
+                }
+              ],
+              "selector_u8": 74,
+              "start_animation_record": "0x0012ec88",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012ea24",
+                  "assembly": "0x0012fb60",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012ea34",
+                  "record_sha256": "52b53fbc96c8ccdf707b44b258f5579e6cdb955ebdf0922457cfda762953e623",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012ea34",
+                  "assembly": "0x0012fbfc",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012ea44",
+                  "record_sha256": "7893bab76263d8eab8988b4dc1508276b02ea6d5a6f7aab0c594dc54767680ec",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012ea44",
+                  "assembly": "0x0012fc74",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012ea54",
+                  "record_sha256": "8eb3873972a7db8fa64047a68af27ebecc25de503fc9ddbdead09142a1c86e0a",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012ea54",
+                  "assembly": "0x0012fc24",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012ea64",
+                  "record_sha256": "d854743ff0a24d72a255d813ce492c795b26ad0e594e1f2f0c4bfdf0182738b8",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012ea64",
+                  "assembly": "0x0012fb98",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012ea64",
+                  "record_sha256": "74aec07993d71dc956837dae73f27ac0778b9b71131341f55385e76eda13dc6d",
+                  "timer_u16": 4095
+                }
+              ],
+              "selector_u8": 76,
+              "start_animation_record": "0x0012ea24",
+              "terminal": "source pointer loop"
+            },
+            {
+              "records": [
+                {
+                  "animation_record": "0x0012e9f0",
+                  "assembly": "0x0012fc74",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012ea00",
+                  "record_sha256": "486c39e920f284ecbfeddbd5e24ef6022e78f0756c6797ee21fbf8adea5ee076",
+                  "timer_u16": 10
+                },
+                {
+                  "animation_record": "0x0012ea00",
+                  "assembly": "0x0012fc24",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012ea10",
+                  "record_sha256": "557317c0c300c0a9ba6226ccb7f5a4e4e1d4383138940f849f86cbc069eec965",
+                  "timer_u16": 8
+                },
+                {
+                  "animation_record": "0x0012ea10",
+                  "assembly": "0x0012fb98",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 0,
+                  "movement_table_index_u8": 0,
+                  "next_animation_record": "0x0012ea10",
+                  "record_sha256": "a4453643561721387ad2a06d8f879960797bb4cd2fbee04d273d08bc224848fb",
+                  "timer_u16": 4095
+                }
+              ],
+              "selector_u8": 77,
+              "start_animation_record": "0x0012e9f0",
+              "terminal": "source pointer loop"
+            }
+          ]
+        },
+        "attack_timer_table_u8": [
+          30,
+          30,
+          30,
+          30,
+          60,
+          60,
+          60,
+          60,
+          120,
+          120,
+          120,
+          120,
+          160,
+          160,
+          160,
+          160
+        ],
+        "capture_identity": {
+          "action4_timer_suppression": {
+            "coffee_shop_scene_actors.tsv": "ae6307766e05b72b771bf65d4f411c5d61eede9870575808b91728f7282de1a5",
+            "coffee_shop_scene_frames.tsv": "5d1aab92f7cce67f90513b2be3df5798342cba04ffdc218258aeda2c002aae1d",
+            "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+            "progression_class1f_action4_timers.tsv": "0c01132696e2f82f8bdd787e927c2a04791d31b1f1e404583ec79bbf37ea9d1d",
+            "progression_result.tsv": "4a3f685091804ea7acfe1bdceb8ac88fe4b4b28c8dbe2bef5377ab9170e3560b",
+            "samples.tsv": "3c586c580a88078c8118842f2c1cc08213727974ff2c45264bdcf8375250467b",
+            "score_writes.tsv": "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327"
+          },
+          "byte_identical": true,
+          "coffee_shop_scene_a": {
+            "coffee_shop_scene_actors.tsv": "26baba55abefb656d9bf680cb15fa589cf36fd01e30e08b6bff8314ad53e4b25",
+            "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+            "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+            "progression_class1f_action4_timers.tsv": "749bd0e8680ff18369a0e7d00d4c9a948b1ac9137fa61b17f6a9b6896b8b3c8e",
+            "progression_result.tsv": "56f80bd3b938058b18c42a6193e86624b2de0d48b44d8cd966435ba9b3a647da",
+            "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611",
+            "score_writes.tsv": "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327"
+          },
+          "coffee_shop_scene_b": {
+            "coffee_shop_scene_actors.tsv": "26baba55abefb656d9bf680cb15fa589cf36fd01e30e08b6bff8314ad53e4b25",
+            "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+            "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+            "progression_class1f_action4_timers.tsv": "749bd0e8680ff18369a0e7d00d4c9a948b1ac9137fa61b17f6a9b6896b8b3c8e",
+            "progression_result.tsv": "56f80bd3b938058b18c42a6193e86624b2de0d48b44d8cd966435ba9b3a647da",
+            "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611",
+            "score_writes.tsv": "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327"
+          },
+          "coffee_shop_scene_byte_identical": true,
+          "completion_a": {
+            "progression_class1f_transitions.tsv": "2ea14b063b91f9460190f973ff8c3460b93a427e6870ae02ad3b9a8d5a68a256",
+            "progression_lifecycle_writes.tsv": "a2d67f9f98fa04e696a88bb123f9b7e904714ad95dc81b494242221ad5571e22",
+            "progression_result.tsv": "533001de7932a568a1c69358c536866fa50d1a70e84c7062200c07c351c20efc"
+          },
+          "completion_b": {
+            "progression_class1f_transitions.tsv": "2ea14b063b91f9460190f973ff8c3460b93a427e6870ae02ad3b9a8d5a68a256",
+            "progression_lifecycle_writes.tsv": "a2d67f9f98fa04e696a88bb123f9b7e904714ad95dc81b494242221ad5571e22",
+            "progression_result.tsv": "533001de7932a568a1c69358c536866fa50d1a70e84c7062200c07c351c20efc"
+          },
+          "writer_0x0607e8_suppression": {
+            "progression_class1f_transitions.tsv": "55ef4839bafb14c0167b14b2fefc0c8e7c0a1f6cfb9966426c57bd1b4312c3d5",
+            "progression_lifecycle_writes.tsv": "1ad18b700552ebd130d04e92dd29796ee507314e113d259a01ece8c6b1a39907",
+            "progression_result.tsv": "c389f0356003f5a08b6983c85cbd30fdc2d7d44e031b68c8a3828508ae565d72"
+          }
+        },
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "current_dispatch": {
+          "action_0_branch_order": [
+            "if s16(0xff9a1c)==0 enter source special state 0x0a",
+            "if an active P1 is within x [-32,+32] and z [-12,+12] and P1+0x96==0 enter action 0x04",
+            "if a5_u8 != facing_u8 enter action 0x0a and toggle facing",
+            "if a3_u8 == style85_u8 enter action 0x02; a6_u8!=0 promotes it to action 0x16 and b0_u8=2",
+            "otherwise a3_u8!=0 enters action 0x08; zero enters action 0x06"
+          ],
+          "action_table": "0x060798",
+          "action_targets": [
+            {
+              "action_u8": 0,
+              "target": "0x0607b8"
+            },
+            {
+              "action_u8": 2,
+              "target": "0x06084e"
+            },
+            {
+              "action_u8": 4,
+              "target": "0x0608b0"
+            },
+            {
+              "action_u8": 6,
+              "target": "0x0609f6"
+            },
+            {
+              "action_u8": 8,
+              "target": "0x060a08"
+            },
+            {
+              "action_u8": 10,
+              "target": "0x060a1c"
+            },
+            {
+              "action_u8": 12,
+              "target": "0x060a2a"
+            },
+            {
+              "action_u8": 14,
+              "target": "0x060a86"
+            },
+            {
+              "action_u8": 16,
+              "target": "0x060b1a"
+            },
+            {
+              "action_u8": 18,
+              "target": "0x060b28"
+            },
+            {
+              "action_u8": 20,
+              "target": "0x060b36"
+            },
+            {
+              "action_u8": 22,
+              "target": "0x060c2e"
+            },
+            {
+              "action_u8": 24,
+              "target": "0x060d6a"
+            },
+            {
+              "action_u8": 26,
+              "target": "0x060d7e"
+            },
+            {
+              "action_u8": 28,
+              "target": "0x060d88"
+            },
+            {
+              "action_u8": 30,
+              "target": "0x060de0"
+            }
+          ],
+          "entry": "0x060772",
+          "movement_action_0x16_order": [
+            "enforce x/camera visibility guard and release through outer state 0x0600 when outside",
+            "apply source actor-separation helper 0x060f36",
+            "derive direction_u8 at actor+0x0c through 0x061032",
+            "advance animation and movement through 0x0165c4",
+            "copy y high word to z",
+            "on negative animation branch with timer_u16==1 decrement b0_u8",
+            "when b0_u8 reaches zero evaluate target-side guard, then consume exactly one RNG call for branch selection or attack timing"
+          ],
+          "release_guard": "outer state 0x0600:0000 decrements living_enemy_count_u16 then tail-calls 0x0176b4",
+          "required_state_contexts": [
+            "0x0200:0000",
+            "0x0200:0200",
+            "0x0200:0400",
+            "0x0200:0402",
+            "0x0200:0404",
+            "0x0200:0406",
+            "0x0200:0408",
+            "0x0200:0600",
+            "0x0200:0800",
+            "0x0200:0a00",
+            "0x0200:0c00",
+            "0x0200:0c02",
+            "0x0200:0c04",
+            "0x0200:0e00",
+            "0x0200:0e02",
+            "0x0200:0e04",
+            "0x0200:1000",
+            "0x0200:1200",
+            "0x0200:1400",
+            "0x0200:1402",
+            "0x0200:1404",
+            "0x0200:1406",
+            "0x0200:1408",
+            "0x0200:1600",
+            "0x0200:1800",
+            "0x0200:1a00",
+            "0x0200:1c00",
+            "0x0200:1e00"
+          ],
+          "source_windows": {
+            "0x0607b8": {
+              "first": "0x0607b0",
+              "last_exclusive": "0x0607c8",
+              "sha256": "bb75e1ff151c59547d4680c0c0a7756c112e687486ddb131ba90ec1ef6b9106b"
+            },
+            "0x06084e": {
+              "first": "0x060846",
+              "last_exclusive": "0x06085e",
+              "sha256": "b88b847e996a922a088246f87c5a58e3ec655890d9e3037249d7a32a179e248b"
+            },
+            "0x0608b0": {
+              "first": "0x0608a8",
+              "last_exclusive": "0x0608c0",
+              "sha256": "31d5a335fd8ab539f92663763754373abfc745a2becd145d26518aca4893e1d7"
+            },
+            "0x0609f6": {
+              "first": "0x0609ee",
+              "last_exclusive": "0x060a06",
+              "sha256": "10d9a0a8df699002b9aa53fd044effdc82298e7b2bacf27a26dcb6ca0e6f93cd"
+            },
+            "0x060a08": {
+              "first": "0x060a00",
+              "last_exclusive": "0x060a18",
+              "sha256": "7059c7fdb43937443a1c68f5aabcf18582b2a829a6e09a2adea0d2b2102f7365"
+            },
+            "0x060a1c": {
+              "first": "0x060a14",
+              "last_exclusive": "0x060a2c",
+              "sha256": "dd24f91652808fef77c1de0c3642c7203bbe1311cfe5d8cc88e5bf44421818ea"
+            },
+            "0x060a2a": {
+              "first": "0x060a22",
+              "last_exclusive": "0x060a3a",
+              "sha256": "e9b3800db53d213f7758b5dd95414fb0ac81f893b8196ab884d7c17d1ba0aea0"
+            },
+            "0x060a86": {
+              "first": "0x060a7e",
+              "last_exclusive": "0x060a96",
+              "sha256": "ee1d51a27831c43c508b974936fbb68d2e01540d6dd6f753aa977cf6380b3b25"
+            },
+            "0x060b1a": {
+              "first": "0x060b12",
+              "last_exclusive": "0x060b2a",
+              "sha256": "23b4b9c7063c2fb306ebafaa2d6b0507a48a77b26e61cf25e47bc76b43852061"
+            },
+            "0x060b28": {
+              "first": "0x060b20",
+              "last_exclusive": "0x060b38",
+              "sha256": "bd2e37999858ad0341836b7c5996f339530826c9974af90aef93d088b520e2c9"
+            },
+            "0x060b36": {
+              "first": "0x060b2e",
+              "last_exclusive": "0x060b46",
+              "sha256": "87134cd2b0a287e6c652bf4d137e6c1bb15d08d952d043ad3ced8e823063e868"
+            },
+            "0x060c2e": {
+              "first": "0x060c26",
+              "last_exclusive": "0x060c3e",
+              "sha256": "f9834a4f4ef14676a86233a83dec3a58a32d3afc8a72a845563215b910d497f4"
+            },
+            "0x060d6a": {
+              "first": "0x060d62",
+              "last_exclusive": "0x060d7a",
+              "sha256": "57e3103cc3f1cf99550dbf80c6e2bd4209e18afcfa2fcc9c369cc38be699ce85"
+            },
+            "0x060d7e": {
+              "first": "0x060d76",
+              "last_exclusive": "0x060d8e",
+              "sha256": "fb4e05d0affcf774593b65c0e112d157ac094bd22fecbba491521ae84905dae8"
+            },
+            "0x060d88": {
+              "first": "0x060d80",
+              "last_exclusive": "0x060d98",
+              "sha256": "325f50c08e9cfe7a03c45e861385ecaabb8fdc7c8c85d22ed35bc60d7d6690f3"
+            },
+            "0x060de0": {
+              "first": "0x060dd8",
+              "last_exclusive": "0x060df0",
+              "sha256": "82d745a606ceb062102f157697752952591e0f7f3dd4b259432acdbbbd198396"
+            }
+          }
+        },
+        "initializer": {
+          "entry": "0x060546",
+          "rng_calls_per_actor": 1,
+          "rng_entry": "0x017c5e",
+          "source_window": {
+            "first": "0x06053e",
+            "last_exclusive": "0x060556",
+            "sha256": "76fca8e947ab4d3765628dd11cae861e53eed6ee68fca528815c2ad3c927866b"
+          },
+          "variant_dispatch_table": "0x060606",
+          "variants": [
+            {
+              "variant_u8": 0,
+              "writes": {
+                "a4_u8": 2,
+                "a5_u8": 0
+              }
+            },
+            {
+              "variant_u8": 1,
+              "writes": {
+                "a4_u8": 2,
+                "a5_u8": 0,
+                "action_u8": 12
+              }
+            },
+            {
+              "variant_u8": 2,
+              "writes": {
+                "a4_u8": 2,
+                "a5_u8": 0,
+                "action_u8": 14,
+                "airborne_u8": 1
+              }
+            },
+            {
+              "variant_u8": 3,
+              "writes": {
+                "a4_u8": 1,
+                "a5_u8": 1,
+                "a6_u8": 1,
+                "style85_u8": 1
+              }
+            },
+            {
+              "variant_u8": 4,
+              "writes": {
+                "a4_u8": 1,
+                "a5_u8": 1,
+                "a6_u8": 1,
+                "action_u8": 12
+              }
+            },
+            {
+              "variant_u8": 5,
+              "writes": {
+                "a4_u8": 1,
+                "a5_u8": 1,
+                "a6_u8": 1,
+                "action_u8": 14,
+                "airborne_u8": 1
+              }
+            },
+            {
+              "variant_u8": 6,
+              "writes": {
+                "a4_u8": 1,
+                "a5_u8": 1,
+                "a6_u8": 1,
+                "action_u8": 16,
+                "animation_selector_u8": 1,
+                "style85_u8": 1,
+                "timer_aa_u8": 216
+              }
+            },
+            {
+              "variant_u8": 7,
+              "writes": {
+                "a4_u8": 1,
+                "a5_u8": 1,
+                "a6_u8": 1,
+                "action_u8": 18,
+                "animation_selector_u8": 0,
+                "style85_u8": 0,
+                "timer_aa_u8": 216
+              }
+            },
+            {
+              "variant_u8": 8,
+              "writes": {
+                "a4_u8": 1,
+                "a5_u8": 1,
+                "a6_u8": 1,
+                "action_u8": 20,
+                "animation_selector_u8": 1,
+                "style85_u8": 1,
+                "timer_aa_u8": "entry_delay_u8"
+              }
+            },
+            {
+              "variant_u8": 9,
+              "writes": {
+                "a4_u8": 1,
+                "a5_u8": 1,
+                "a6_u8": 1,
+                "action_u8": 28,
+                "animation_selector_rule": "0x44/0x48 plus a4_u8",
+                "bound_b2_u16": "0x0420 + (rng&0x007f)",
+                "style85_u8": "rng_bit2"
+              }
+            }
+          ]
+        },
+        "movement_tables": [
+          {
+            "fixed_point_scale": "signed s16 << 8",
+            "source_address": "0x1f8240",
+            "table_index_u8": 1,
+            "vectors": [
+              {
+                "direction_u8": 0,
+                "x_delta_s16": 0,
+                "y_delta_s16": 128
+              },
+              {
+                "direction_u8": 1,
+                "x_delta_s16": 49,
+                "y_delta_s16": 125
+              },
+              {
+                "direction_u8": 2,
+                "x_delta_s16": 97,
+                "y_delta_s16": 118
+              },
+              {
+                "direction_u8": 3,
+                "x_delta_s16": 142,
+                "y_delta_s16": 106
+              },
+              {
+                "direction_u8": 4,
+                "x_delta_s16": 180,
+                "y_delta_s16": 90
+              },
+              {
+                "direction_u8": 5,
+                "x_delta_s16": 212,
+                "y_delta_s16": 71
+              },
+              {
+                "direction_u8": 6,
+                "x_delta_s16": 236,
+                "y_delta_s16": 48
+              },
+              {
+                "direction_u8": 7,
+                "x_delta_s16": 250,
+                "y_delta_s16": 24
+              },
+              {
+                "direction_u8": 8,
+                "x_delta_s16": 256,
+                "y_delta_s16": 0
+              },
+              {
+                "direction_u8": 9,
+                "x_delta_s16": 250,
+                "y_delta_s16": -24
+              },
+              {
+                "direction_u8": 10,
+                "x_delta_s16": 236,
+                "y_delta_s16": -48
+              },
+              {
+                "direction_u8": 11,
+                "x_delta_s16": 212,
+                "y_delta_s16": -71
+              },
+              {
+                "direction_u8": 12,
+                "x_delta_s16": 180,
+                "y_delta_s16": -90
+              },
+              {
+                "direction_u8": 13,
+                "x_delta_s16": 142,
+                "y_delta_s16": -106
+              },
+              {
+                "direction_u8": 14,
+                "x_delta_s16": 97,
+                "y_delta_s16": -118
+              },
+              {
+                "direction_u8": 15,
+                "x_delta_s16": 49,
+                "y_delta_s16": -125
+              },
+              {
+                "direction_u8": 16,
+                "x_delta_s16": 0,
+                "y_delta_s16": -128
+              },
+              {
+                "direction_u8": 17,
+                "x_delta_s16": -49,
+                "y_delta_s16": -125
+              },
+              {
+                "direction_u8": 18,
+                "x_delta_s16": -97,
+                "y_delta_s16": -118
+              },
+              {
+                "direction_u8": 19,
+                "x_delta_s16": -142,
+                "y_delta_s16": -106
+              },
+              {
+                "direction_u8": 20,
+                "x_delta_s16": -180,
+                "y_delta_s16": -90
+              },
+              {
+                "direction_u8": 21,
+                "x_delta_s16": -212,
+                "y_delta_s16": -71
+              },
+              {
+                "direction_u8": 22,
+                "x_delta_s16": -236,
+                "y_delta_s16": -48
+              },
+              {
+                "direction_u8": 23,
+                "x_delta_s16": -250,
+                "y_delta_s16": -24
+              },
+              {
+                "direction_u8": 24,
+                "x_delta_s16": -256,
+                "y_delta_s16": 0
+              },
+              {
+                "direction_u8": 25,
+                "x_delta_s16": -250,
+                "y_delta_s16": 24
+              },
+              {
+                "direction_u8": 26,
+                "x_delta_s16": -236,
+                "y_delta_s16": 48
+              },
+              {
+                "direction_u8": 27,
+                "x_delta_s16": -212,
+                "y_delta_s16": 71
+              },
+              {
+                "direction_u8": 28,
+                "x_delta_s16": -180,
+                "y_delta_s16": 90
+              },
+              {
+                "direction_u8": 29,
+                "x_delta_s16": -142,
+                "y_delta_s16": 106
+              },
+              {
+                "direction_u8": 30,
+                "x_delta_s16": -97,
+                "y_delta_s16": 118
+              },
+              {
+                "direction_u8": 31,
+                "x_delta_s16": -49,
+                "y_delta_s16": 125
+              }
+            ]
+          },
+          {
+            "fixed_point_scale": "signed s16 << 8",
+            "source_address": "0x1f89c0",
+            "table_index_u8": 8,
+            "vectors": [
+              {
+                "direction_u8": 0,
+                "x_delta_s16": 0,
+                "y_delta_s16": 1024
+              },
+              {
+                "direction_u8": 1,
+                "x_delta_s16": 399,
+                "y_delta_s16": 1003
+              },
+              {
+                "direction_u8": 2,
+                "x_delta_s16": 782,
+                "y_delta_s16": 945
+              },
+              {
+                "direction_u8": 3,
+                "x_delta_s16": 1136,
+                "y_delta_s16": 850
+              },
+              {
+                "direction_u8": 4,
+                "x_delta_s16": 1447,
+                "y_delta_s16": 723
+              },
+              {
+                "direction_u8": 5,
+                "x_delta_s16": 1701,
+                "y_delta_s16": 568
+              },
+              {
+                "direction_u8": 6,
+                "x_delta_s16": 1890,
+                "y_delta_s16": 391
+              },
+              {
+                "direction_u8": 7,
+                "x_delta_s16": 2007,
+                "y_delta_s16": 199
+              },
+              {
+                "direction_u8": 8,
+                "x_delta_s16": 2048,
+                "y_delta_s16": 0
+              },
+              {
+                "direction_u8": 9,
+                "x_delta_s16": 2007,
+                "y_delta_s16": -199
+              },
+              {
+                "direction_u8": 10,
+                "x_delta_s16": 1890,
+                "y_delta_s16": -391
+              },
+              {
+                "direction_u8": 11,
+                "x_delta_s16": 1701,
+                "y_delta_s16": -568
+              },
+              {
+                "direction_u8": 12,
+                "x_delta_s16": 1447,
+                "y_delta_s16": -723
+              },
+              {
+                "direction_u8": 13,
+                "x_delta_s16": 1136,
+                "y_delta_s16": -850
+              },
+              {
+                "direction_u8": 14,
+                "x_delta_s16": 782,
+                "y_delta_s16": -945
+              },
+              {
+                "direction_u8": 15,
+                "x_delta_s16": 399,
+                "y_delta_s16": -1003
+              },
+              {
+                "direction_u8": 16,
+                "x_delta_s16": 0,
+                "y_delta_s16": -1024
+              },
+              {
+                "direction_u8": 17,
+                "x_delta_s16": -399,
+                "y_delta_s16": -1003
+              },
+              {
+                "direction_u8": 18,
+                "x_delta_s16": -782,
+                "y_delta_s16": -945
+              },
+              {
+                "direction_u8": 19,
+                "x_delta_s16": -1136,
+                "y_delta_s16": -850
+              },
+              {
+                "direction_u8": 20,
+                "x_delta_s16": -1447,
+                "y_delta_s16": -723
+              },
+              {
+                "direction_u8": 21,
+                "x_delta_s16": -1701,
+                "y_delta_s16": -568
+              },
+              {
+                "direction_u8": 22,
+                "x_delta_s16": -1890,
+                "y_delta_s16": -391
+              },
+              {
+                "direction_u8": 23,
+                "x_delta_s16": -2007,
+                "y_delta_s16": -199
+              },
+              {
+                "direction_u8": 24,
+                "x_delta_s16": -2048,
+                "y_delta_s16": 0
+              },
+              {
+                "direction_u8": 25,
+                "x_delta_s16": -2007,
+                "y_delta_s16": 199
+              },
+              {
+                "direction_u8": 26,
+                "x_delta_s16": -1890,
+                "y_delta_s16": 391
+              },
+              {
+                "direction_u8": 27,
+                "x_delta_s16": -1701,
+                "y_delta_s16": 568
+              },
+              {
+                "direction_u8": 28,
+                "x_delta_s16": -1447,
+                "y_delta_s16": 723
+              },
+              {
+                "direction_u8": 29,
+                "x_delta_s16": -1136,
+                "y_delta_s16": 850
+              },
+              {
+                "direction_u8": 30,
+                "x_delta_s16": -782,
+                "y_delta_s16": 945
+              },
+              {
+                "direction_u8": 31,
+                "x_delta_s16": -399,
+                "y_delta_s16": 1003
+              }
+            ]
+          }
+        ],
+        "mutation_controls": [
+          "wrong variant initializer",
+          "wrong action target",
+          "wrong action-0 branch order",
+          "wrong selector start",
+          "wrong record timer",
+          "wrong record branch",
+          "wrong movement table",
+          "wrong movement scale",
+          "wrong attack timer table",
+          "fixed-frame release",
+          "single synthetic current actor",
+          "wrong action-4 stage parameter",
+          "wrong action-4 timer row",
+          "wrong action-4 RNG index",
+          "suppressed action-4 timer write"
+        ],
+        "observed_state_writer_counts": {
+          "0176ba": 7,
+          "01d4aa": 10,
+          "01d4ba": 8,
+          "01e88e": 4,
+          "01e9da": 4,
+          "01e9de": 4,
+          "01eb06": 4,
+          "01eb80": 4,
+          "01ec1c": 4,
+          "01ec9c": 4,
+          "01edce": 4,
+          "01eff2": 4,
+          "01eff8": 4,
+          "01f256": 1,
+          "01f34e": 2,
+          "01f382": 1,
+          "01f3f4": 1,
+          "01f47a": 1,
+          "01f4f6": 1,
+          "01f4fa": 1,
+          "028a8a": 2,
+          "028b88": 2,
+          "06055a": 15,
+          "0605f2": 15,
+          "060688": 2,
+          "0606a2": 1,
+          "0606b6": 3,
+          "0606e0": 4,
+          "060708": 3,
+          "0607e8": 32,
+          "0607ee": 32,
+          "0607f8": 30,
+          "060816": 2,
+          "06081c": 2,
+          "060834": 4,
+          "06083a": 4,
+          "060844": 3,
+          "06084a": 3,
+          "0608ae": 12,
+          "060a04": 3,
+          "060a16": 3,
+          "060a2a": 2,
+          "060a42": 2,
+          "060a66": 1,
+          "060a9e": 1,
+          "060b0a": 1,
+          "060b14": 1,
+          "060b28": 3,
+          "060b36": 4,
+          "060b64": 3,
+          "060b7c": 3,
+          "060bfc": 3,
+          "060c18": 3,
+          "060c2e": 3,
+          "060cd2": 3,
+          "060d0c": 2,
+          "060d2a": 17,
+          "060d30": 17,
+          "060d52": 3,
+          "060d58": 3,
+          "060d7e": 11,
+          "06b41a": 1
+        },
+        "record_layout": {
+          "action_substate_u16": "actor+0x06",
+          "action_timer_u8": "actor+0x2a",
+          "animation_branch_s16": "actor+0x24",
+          "animation_record_u32": "actor+0x1c",
+          "animation_timer_u16": "actor+0x0a",
+          "facing_u8": "actor+0x0f",
+          "health_s16": "actor+0x40",
+          "state_inner_u16": "actor+0x04",
+          "target_low_word_u16": "actor+0x28",
+          "x_fp_s32_16_16": "actor+0x10",
+          "y_fp_s32_16_16": "actor+0x14",
+          "z_s16": "actor+0x18"
+        },
+        "scope": "all route-reachable class-0x1f action dispatch required by the first Round 1 segment",
+        "suppression_control": {
+          "action4_timer": {
+            "audio_dispatch_unchanged": true,
+            "baseline_timer_u8": 6,
+            "first_difference_frame": 2798,
+            "first_difference_slot": "0x00ffa240",
+            "mutant_timer_u8": 0,
+            "route_exit_unchanged": true,
+            "score_unchanged": true,
+            "suppressed_writes": 1,
+            "writer_pc": "0x060944"
+          },
+          "baseline_final_route": 4,
+          "baseline_lifecycle_releases": 22,
+          "baseline_main_aux_spawns": [
+            15,
+            3
+          ],
+          "baseline_transition_rows": 337,
+          "fixed_frame_substitute": false,
+          "mutant_final_route": 4,
+          "mutant_lifecycle_releases": 23,
+          "mutant_main_aux_spawns": [
+            16,
+            3
+          ],
+          "mutant_transition_rows": 627,
+          "suppressed_writes": 179,
+          "writer_pc": "0x0607e8"
+        }
+      },
       "initial_transition_contract": {
         "accepted_audio_evidence_sha256": "50f48bf1dd2cbc5007108a12674af5d531add385886b7debcbe51cbf47fea06f",
         "actors": [

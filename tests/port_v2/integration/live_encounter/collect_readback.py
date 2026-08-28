@@ -232,7 +232,13 @@ texture_integrity = {
 count = signed(mcp,syms["avsp_diag_live_sample_count"])
 if count < 1 or count > 600:
     raise RuntimeError(f"invalid live sample count: {count}")
-all_samples = read_samples(mcp, syms["avsp_diag_live_samples"], count)
+sample_base = mcp.u32(syms["avsp_diag_live_samples"])
+expected_sample_base = 0x22600000 + 0x81000 + 0x48000 + 0x6000
+if sample_base != expected_sample_base:
+    raise RuntimeError(
+        f"live diagnostic cart pointer drift: {sample_base:#x} != "
+        f"{expected_sample_base:#x}")
+all_samples = read_samples(mcp, sample_base, count)
 mapping = {"runtime_ready":"avsp_diag_runtime_ready", "interface_version":"avsp_diag_live_interface_version",
            "contract_flags":"avsp_diag_live_contract_flags", "frame_stage":"avsp_diag_live_frame_stage",
            "frame":"avsp_diag_live_frame", "hit_events":"avsp_diag_live_hit_events",

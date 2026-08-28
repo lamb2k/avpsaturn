@@ -25,6 +25,12 @@ AUDIO = ROOT / "data" / "oracle11_global_audio_trigger_owners.json"
 HIT_KO_CONTRACT = ROOT / "tests" / "port_v2" / "combat" / "hit_ko" / "approved_contract.json"
 OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
 PROGRAM = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_program_2m.bin"
+FIRST_SEGMENT_ACTION_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_t2a"
+FIRST_SEGMENT_ACTION_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_t2b"
+FIRST_SEGMENT_ACTION_SUPPRESS = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_t2s"
+COFFEE_SHOP_SCENE_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs3a"
+COFFEE_SHOP_SCENE_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs3b"
+COFFEE_SHOP_SCENE_TIMER_SUPPRESS = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs3s"
 OUT = ROOT / "data" / "oracle11_round1_enemy_archetypes.json"
 FILES = ("enemy_samples.tsv", "enemy_entries.tsv", "enemy_writes.tsv",
          "enemy_rng.tsv", "player_damage.tsv", "samples.tsv", "dispatches.tsv",
@@ -45,6 +51,17 @@ CLASS1F_HIT_KO_RECORDS = (
     0x12DD50, 0x12D2F8, 0x12E214, 0x12E224,
     0x12E234, 0x12E244, 0x12E254, 0x12E268,
 )
+FIRST_SEGMENT_ACTION_FILES = (
+    "progression_class1f_transitions.tsv", "progression_lifecycle_writes.tsv",
+    "progression_result.tsv",
+)
+COFFEE_SHOP_SCENE_FILES = (
+    "coffee_shop_scene_actors.tsv", "coffee_shop_scene_frames.tsv",
+    "progression_class1f_action4_timers.tsv", "progression_result.tsv",
+    "dispatches.tsv", "samples.tsv", "score_writes.tsv",
+)
+CLASS1F_ROUTE_SELECTORS = (0, 1, 34, 35, 36, 43, 52, 53, 54, 55, 56, 60, 62,
+                            68, 69, 70, 71, 72, 73, 74, 76, 77)
 
 
 def require(condition: bool, message: str) -> None:
@@ -137,6 +154,423 @@ def animation_record(program: bytes, address: int) -> dict[str, object]:
         "assembly": f"0x{int.from_bytes(record[4:8], 'big'):08x}",
         "hurt_selector_u8": record[8], "attack_selector_u8": record[9],
         "record_sha256": hashlib.sha256(record).hexdigest(),
+    }
+
+
+def class1f_selector_sequence(program: bytes, selector: int) -> dict[str, object]:
+    table = 0x12D152
+    offset = int.from_bytes(program[table + selector * 2:
+                                    table + selector * 2 + 2], "big",
+                            signed=True)
+    address = table + offset
+    seen: set[int] = set()
+    records = []
+    for _ in range(64):
+        require(address not in seen, f"selector {selector}: premature loop")
+        seen.add(address)
+        record = animation_record(program, address)
+        record["movement_table_index_u8"] = program[address + 3] & 0x3f
+        branch = record["branch_s16"]
+        next_address = (int.from_bytes(program[address + 16:address + 20],
+                                       "big") if branch < 0 else address + 16)
+        record["next_animation_record"] = f"0x{next_address:08x}"
+        records.append(record)
+        if next_address in seen:
+            return {"selector_u8": selector,
+                    "start_animation_record": f"0x{records[0]['animation_record'][2:]}",
+                    "terminal": "source pointer loop",
+                    "records": records}
+        address = next_address
+    raise ValueError(f"selector {selector}: animation chain did not close")
+
+
+def class1f_first_segment_action_contract(program: bytes,
+                                           opcodes: bytes) -> dict[str, object]:
+    def capture_identity(path: Path) -> dict[str, str]:
+        return {name: digest(path / name) for name in FIRST_SEGMENT_ACTION_FILES}
+
+    identity_a = capture_identity(FIRST_SEGMENT_ACTION_A)
+    identity_b = capture_identity(FIRST_SEGMENT_ACTION_B)
+    identity_s = capture_identity(FIRST_SEGMENT_ACTION_SUPPRESS)
+    require(identity_a == identity_b,
+            "class-0x1f first-segment action captures differ")
+    scene_identity_a = {name: digest(COFFEE_SHOP_SCENE_A / name)
+                        for name in COFFEE_SHOP_SCENE_FILES}
+    scene_identity_b = {name: digest(COFFEE_SHOP_SCENE_B / name)
+                        for name in COFFEE_SHOP_SCENE_FILES}
+    scene_identity_s = {name: digest(COFFEE_SHOP_SCENE_TIMER_SUPPRESS / name)
+                        for name in COFFEE_SHOP_SCENE_FILES}
+    require(scene_identity_a == scene_identity_b,
+            "Coffee Shop full-pool scene captures differ")
+    baseline = rows(FIRST_SEGMENT_ACTION_A /
+                    "progression_class1f_transitions.tsv")
+    suppressed = rows(FIRST_SEGMENT_ACTION_SUPPRESS /
+                      "progression_class1f_transitions.tsv")
+    lifecycle = rows(FIRST_SEGMENT_ACTION_A /
+                     "progression_lifecycle_writes.tsv")
+    lifecycle_s = rows(FIRST_SEGMENT_ACTION_SUPPRESS /
+                       "progression_lifecycle_writes.tsv")
+    result = rows(FIRST_SEGMENT_ACTION_A / "progression_result.tsv")[0]
+    result_s = rows(FIRST_SEGMENT_ACTION_SUPPRESS /
+                    "progression_result.tsv")[0]
+    require(len(baseline) == 337 and len(suppressed) == 627 and
+            sum(row["suppressed"] == "1" for row in suppressed) == 179 and
+            sum(row["pc"] == "061152" for row in lifecycle) == 22 and
+            sum(row["pc"] == "061152" for row in lifecycle_s) == 23 and
+            [int(result[key]) for key in
+             ("main_spawn_transactions", "aux_spawn_transactions",
+              "final_route")] == [15, 3, 4] and
+            [int(result_s[key]) for key in
+             ("main_spawn_transactions", "aux_spawn_transactions",
+              "final_route")] == [16, 3, 4],
+            "class-0x1f first-segment transition suppression drift")
+
+    variants = [
+        {"variant_u8": 0, "writes": {"a5_u8": 0, "a4_u8": 2}},
+        {"variant_u8": 1, "writes": {"a5_u8": 0, "a4_u8": 2,
+                                      "action_u8": 0x0c}},
+        {"variant_u8": 2, "writes": {"a5_u8": 0, "a4_u8": 2,
+                                      "action_u8": 0x0e, "airborne_u8": 1}},
+        {"variant_u8": 3, "writes": {"a5_u8": 1, "a6_u8": 1,
+                                      "a4_u8": 1, "style85_u8": 1}},
+        {"variant_u8": 4, "writes": {"a5_u8": 1, "a6_u8": 1,
+                                      "a4_u8": 1, "action_u8": 0x0c}},
+        {"variant_u8": 5, "writes": {"a5_u8": 1, "a6_u8": 1,
+                                      "a4_u8": 1, "action_u8": 0x0e,
+                                      "airborne_u8": 1}},
+        {"variant_u8": 6, "writes": {"a5_u8": 1, "action_u8": 0x10,
+                                      "timer_aa_u8": 216, "a6_u8": 1,
+                                      "a4_u8": 1, "style85_u8": 1,
+                                      "animation_selector_u8": 1}},
+        {"variant_u8": 7, "writes": {"a5_u8": 1, "action_u8": 0x12,
+                                      "timer_aa_u8": 216, "a6_u8": 1,
+                                      "a4_u8": 1, "style85_u8": 0,
+                                      "animation_selector_u8": 0}},
+        {"variant_u8": 8, "writes": {"a5_u8": 1, "action_u8": 0x14,
+                                      "timer_aa_u8": "entry_delay_u8",
+                                      "a6_u8": 1, "a4_u8": 1,
+                                      "style85_u8": 1,
+                                      "animation_selector_u8": 1}},
+        {"variant_u8": 9, "writes": {"a5_u8": 1, "action_u8": 0x1c,
+                                      "bound_b2_u16": "0x0420 + (rng&0x007f)",
+                                      "a6_u8": 1, "a4_u8": 1,
+                                      "style85_u8": "rng_bit2",
+                                      "animation_selector_rule":
+                                          "0x44/0x48 plus a4_u8"}},
+    ]
+    action_targets = [0x0607B8, 0x06084E, 0x0608B0, 0x0609F6,
+                      0x060A08, 0x060A1C, 0x060A2A, 0x060A86,
+                      0x060B1A, 0x060B28, 0x060B36, 0x060C2E,
+                      0x060D6A, 0x060D7E, 0x060D88, 0x060DE0]
+    sequences = [class1f_selector_sequence(program, selector)
+                 for selector in CLASS1F_ROUTE_SELECTORS]
+    movement_ids = sorted({record["movement_table_index_u8"]
+                           for sequence in sequences
+                           for record in sequence["records"] if
+                           record["movement_table_index_u8"] != 0})
+    movement_tables = []
+    for table_id in movement_ids:
+        pointer = int.from_bytes(program[0x17188 + table_id * 4:
+                                         0x1718C + table_id * 4], "big")
+        vectors = []
+        for direction in range(32):
+            first = pointer + direction * 4
+            vectors.append({
+                "direction_u8": direction,
+                "x_delta_s16": int.from_bytes(program[first:first + 2],
+                                                "big", signed=True),
+                "y_delta_s16": int.from_bytes(program[first + 2:first + 4],
+                                                "big", signed=True),
+            })
+        movement_tables.append({"table_index_u8": table_id,
+                                "source_address": f"0x{pointer:06x}",
+                                "fixed_point_scale": "signed s16 << 8",
+                                "vectors": vectors})
+    writer_counts = Counter(row["pc"] for row in baseline)
+    require(opcodes[0x06083A:0x06084E].hex() ==
+            "600008fe1d7c00080006422e00077034600008ee",
+            "class-0x1f action-0 selector body drift")
+    require(opcodes[0x06084E:0x0608B0].hex() ==
+            "4a2e00a266140c6e05f0001062464a2e0001672a1d7c000100a2082d000000196614302e0010906d0278064000700c400260622060086100060e6600064e610006a8610007a04eb9000165c43d6e001400184e751cbc00022d7c0600000000044e75",
+            "class-0x1f action-2 body drift")
+    jump_vectors = [int.from_bytes(opcodes[address:address + 4], "big",
+                                  signed=True)
+                    for address in range(0x060AC8, 0x060AD8, 4)]
+    require(jump_vectors == [-0x00010000, -0x00014000,
+                             -0x00018000, -0x00020000],
+            "class-0x1f action-0x0e jump table drift")
+    action4_random_groups = [int.from_bytes(opcodes[address:address + 2],
+                                             "big")
+                             for address in range(0x0608F0, 0x060930, 2)]
+    action4_group_offsets = [int.from_bytes(program[0x06099C + index:
+                                                     0x06099E + index], "big")
+                             for index in range(0, 8, 2)]
+    action4_selector_groups = []
+    for offset in action4_group_offsets:
+        address = 0x06099C + offset
+        selectors = []
+        while True:
+            value = int.from_bytes(program[address:address + 2], "big")
+            address += 2
+            if value == 0xffff:
+                break
+            selectors.append(value)
+        action4_selector_groups.append(selectors)
+    require(action4_random_groups ==
+                [0] * 6 + [2] * 6 + [4] * 12 + [6] * 8 and
+            action4_group_offsets == [12, 16, 20, 30] and
+            action4_selector_groups == [[55], [56], [43, 43, 43, 55],
+                                        [43, 43, 56]],
+            "class-0x1f action-0x04 selector program drift")
+    stage_offsets = list(program[0x0BC53A:0x0BC55A])
+    timer_rows = [list(program[0x0BC55A + offset:
+                               0x0BC55A + offset + 32])
+                  for offset in sorted(set(stage_offsets))]
+    timer_baseline = rows(COFFEE_SHOP_SCENE_A /
+                          "progression_class1f_action4_timers.tsv")
+    timer_mutant = rows(COFFEE_SHOP_SCENE_TIMER_SUPPRESS /
+                        "progression_class1f_action4_timers.tsv")
+    timer_events = [row["event"] for row in timer_baseline]
+    caller = next(row for row in timer_baseline
+                  if row["event"] == "caller_write")
+    timer_write = next(row for row in timer_baseline
+                       if row["event"] == "write" and row["pc"] == "060944")
+    suppressed_write = next(row for row in timer_mutant
+                            if row["event"] == "write" and
+                            row["pc"] == "060944")
+    baseline_scene_rows = rows(COFFEE_SHOP_SCENE_A /
+                               "coffee_shop_scene_actors.tsv")
+    mutant_scene_rows = rows(COFFEE_SHOP_SCENE_TIMER_SUPPRESS /
+                             "coffee_shop_scene_actors.tsv")
+    first_scene_difference = next(
+        (index, before, after) for index, (before, after) in
+        enumerate(zip(baseline_scene_rows, mutant_scene_rows))
+        if before != after)
+    require(stage_offsets ==
+                [0] * 5 + [32] * 8 + [64] * 6 + [96] * 5 + [128] * 8 and
+            len(timer_rows) == 5 and all(len(row) == 32 for row in timer_rows) and
+            timer_events[:8] == ["entry", "rng_masked", "stage_read",
+                                 "table_lookup", "result", "caller_write",
+                                 "caller_after_write", "write"] and
+            caller["frame"] == "2797" and caller["slot"] == "ffa240" and
+            caller["stage_parameter"] == "0009" and caller["rng"] == "5cc1" and
+            int(caller["d0"], 16) == 6 and timer_write["data"] == "00000606" and
+            suppressed_write["suppressed"] == "1" and
+            scene_identity_a["score_writes.tsv"] ==
+                scene_identity_s["score_writes.tsv"] and
+            scene_identity_a["dispatches.tsv"] ==
+                scene_identity_s["dispatches.tsv"] and
+            first_scene_difference[1]["frame"] == "2798" and
+            first_scene_difference[1]["slot"] == "ffa240" and
+            first_scene_difference[1]["action_timer"] == "0600" and
+            first_scene_difference[2]["action_timer"] == "0000",
+            "class-0x1f action-0x04 timer capture drift")
+    return {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "scope": ("all route-reachable class-0x1f action dispatch required "
+                  "by the first Round 1 segment"),
+        "capture_identity": {"completion_a": identity_a,
+                             "completion_b": identity_b,
+                             "byte_identical": True,
+                             "writer_0x0607e8_suppression": identity_s,
+                             "coffee_shop_scene_a": scene_identity_a,
+                             "coffee_shop_scene_b": scene_identity_b,
+                             "coffee_shop_scene_byte_identical": True,
+                             "action4_timer_suppression": scene_identity_s},
+        "record_layout": {"state_inner_u16": "actor+0x04",
+                          "action_substate_u16": "actor+0x06",
+                          "facing_u8": "actor+0x0f",
+                          "x_fp_s32_16_16": "actor+0x10",
+                          "y_fp_s32_16_16": "actor+0x14",
+                          "z_s16": "actor+0x18",
+                          "animation_timer_u16": "actor+0x0a",
+                          "animation_record_u32": "actor+0x1c",
+                          "animation_branch_s16": "actor+0x24",
+                          "target_low_word_u16": "actor+0x28",
+                          "action_timer_u8": "actor+0x2a",
+                          "health_s16": "actor+0x40"},
+        "initializer": {"entry": "0x060546", "rng_entry": "0x017c5e",
+                        "rng_calls_per_actor": 1,
+                        "variant_dispatch_table": "0x060606",
+                        "variants": variants,
+                        "source_window": source_window(opcodes, 0x060546)},
+        "current_dispatch": {
+            "entry": "0x060772", "action_table": "0x060798",
+            "action_targets": [{"action_u8": index * 2,
+                                "target": f"0x{target:06x}"}
+                               for index, target in enumerate(action_targets)],
+            "action_0_branch_order": [
+                "if s16(0xff9a1c)==0 enter source special state 0x0a",
+                "if an active P1 is within x [-32,+32] and z [-12,+12] and P1+0x96==0 enter action 0x04",
+                "if a5_u8 != facing_u8 enter action 0x0a and toggle facing",
+                "if a3_u8 == style85_u8 enter action 0x02; a6_u8!=0 promotes it to action 0x16 and b0_u8=2",
+                "otherwise a3_u8!=0 enters action 0x08; zero enters action 0x06"],
+            "movement_action_0x16_order": [
+                "enforce x/camera visibility guard and release through outer state 0x0600 when outside",
+                "apply source actor-separation helper 0x060f36",
+                "derive direction_u8 at actor+0x0c through 0x061032",
+                "advance animation and movement through 0x0165c4",
+                "copy y high word to z",
+                "on negative animation branch with timer_u16==1 decrement b0_u8",
+                "when b0_u8 reaches zero evaluate target-side guard, then consume exactly one RNG call for branch selection or attack timing"],
+            "release_guard": ("outer state 0x0600:0000 decrements "
+                              "living_enemy_count_u16 then tail-calls 0x0176b4"),
+            "required_state_contexts": [
+                "0x0200:0000", "0x0200:0200", "0x0200:0400",
+                "0x0200:0402", "0x0200:0404", "0x0200:0406",
+                "0x0200:0408", "0x0200:0600", "0x0200:0800",
+                "0x0200:0a00", "0x0200:0c00", "0x0200:0c02",
+                "0x0200:0c04", "0x0200:0e00", "0x0200:0e02",
+                "0x0200:0e04", "0x0200:1000", "0x0200:1200",
+                "0x0200:1400", "0x0200:1402", "0x0200:1404",
+                "0x0200:1406", "0x0200:1408", "0x0200:1600",
+                "0x0200:1800", "0x0200:1a00", "0x0200:1c00",
+                "0x0200:1e00"],
+            "source_windows": {f"0x{target:06x}":
+                               source_window(opcodes, target)
+                               for target in action_targets},
+        },
+        "animation_selector_table": {"address": "0x12d152",
+                                     "selectors": sequences},
+        "movement_tables": movement_tables,
+        "attack_timer_table_u8": list(opcodes[0x060D3C:0x060D4C]),
+        "action_programs": {
+            "source_bounds": {
+                "x_max_u16": 0x05f0,
+                "camera_relative_bias_u16": 0x0070,
+                "camera_relative_span_u16": 0x0260,
+                "failure_outer_state_u16": 0x0600,
+                "comparison": "unsigned word"},
+            "direction_helper_0x061032": {
+                "upper_lane_u16": 0x0140,
+                "lower_lane_u16": 0x00e8,
+                "upper_directions_by_a5_u8": [0x16, 0x0a],
+                "lower_directions_by_a5_u8": [0x1a, 0x06],
+                "middle_band_preserves_direction": True},
+            "action_0x00": {
+                "near_player_x_bias_u16": 0x20,
+                "near_player_x_span_u16": 0x40,
+                "near_player_z_bias_u16": 0x0c,
+                "near_player_z_span_u16": 0x18,
+                "turn_selectors_by_style_u8": [34, 35],
+                "idle_selectors_by_a3_u8": [36, 52],
+                "movement_selector_base_by_style_u8": [0x44, 0x48],
+                "movement_selector_addend": "a4_u8",
+                "movement_action_u8": 0x16,
+                "movement_loops_u8": 2},
+            "action_0x02": {
+                "source_bounds": True, "actor_separation_helper": "0x060f36",
+                "direction_helper": "0x061032",
+                "animation_movement_helper": "0x0165c4",
+                "copy_y_high_word_to_z": True},
+            "action_0x04": {
+                "substates_u8": [0, 2, 4, 6, 8],
+                "rng_group_mask_u16": 0x003e,
+                "rng_group_table_u16": action4_random_groups,
+                "group_offsets_u16": action4_group_offsets,
+                "selector_groups_u16": action4_selector_groups,
+                "timer_helper": "0x0bc416",
+                "timer_stage_parameter_field": "0xff81ea:u16",
+                "timer_stage_offset_table_address": "0x0bc53a",
+                "timer_stage_offsets_u8": stage_offsets,
+                "timer_table_address": "0x0bc55a",
+                "timer_rows_u8": timer_rows,
+                "timer_rng_mask_u16": 0x001f,
+                "timer_rng_calls": 1,
+                "coffee_shop_observation": {
+                    "source_frame": 2797,
+                    "source_slot": "0x00ffa240",
+                    "stage_parameter_u16": 9,
+                    "stage_offset_u8": 32,
+                    "rng_seed_before_u16": "0xc965",
+                    "rng_seed_after_u16": "0x5cc1",
+                    "rng_index_u8": 1,
+                    "timer_result_u8": 6,
+                    "writer_pc": "0x060944"},
+                "terminal_actions": {
+                    "phase_0_player_guard_clear": "next action 0",
+                    "phase_6": "next phase 0",
+                    "phase_8": "next action 0 and style85_u8=0"}},
+            "actions_0x06_0x08_0x0a": {
+                "terminal_guard": "animation_branch_s16 < 0",
+                "next_action_u8": 0,
+                "style85_result_by_action": {"0x06": 0, "0x08": 1,
+                                               "0x0a": "unchanged"}},
+            "action_0x0c": {
+                "substates_u8": [0, 2, 4], "initial_selector_u8": 35,
+                "middle_selector_u8": 36, "y_delta_s32_16_16": -0x2000,
+                "terminal_next_action_u8": 0},
+            "action_0x0e": {
+                "substates_u8": [0, 2, 4], "initial_selector_u8": 77,
+                "landing_selector_u8": 62,
+                "x_velocity_table_s32_16_16": jump_vectors,
+                "y_velocity_s32_16_16": 0x00038000,
+                "y_acceleration_s32_16_16": -0x00008000,
+                "initial_y_add_s16": 0x20,
+                "terminal_style85_u8": 1,
+                "terminal_next_action_u8": 0,
+                "rng_calls": 1},
+            "actions_0x10_0x12": {
+                "timer_field": "timer_aa_u8",
+                "decrement": 1, "zero_next_action_u8": 0},
+            "action_0x16": {
+                "source_bounds": True, "actor_separation_helper": "0x060f36",
+                "direction_helper": "0x061032",
+                "animation_movement_helper": "0x0165c4",
+                "copy_y_high_word_to_z": True,
+                "loop_guard": "animation_branch_s16 < 0 and animation_timer_u16 == 1",
+                "loop_counter": "b0_u8", "target_compare_helper": "0x060cd2",
+                "rng_mask_branch_u16": 3, "rng_mask_timer_u16": 15,
+                "attack_action_u8": 0x18,
+                "attack_selectors_by_style_u8": [0, 1]},
+            "action_0x18": {
+                "timer_field": "action_timer_u8", "decrement": 1,
+                "nonzero_helper": "0x016536", "zero_next_action_u8": 0},
+            "action_0x1a": {
+                "terminal_guard": "animation_branch_s16 < 0",
+                "next_action_u8": 0x18,
+                "selectors_by_style_u8": [0, 1]},
+            "action_0x1c": {
+                "source_bounds": True,
+                "animation_movement_helper": "0x0165c4",
+                "copy_y_high_word_to_z": True,
+                "terminal_guard": "animation_branch_s16 < 0 and animation_timer_u16 == 1 and bound_b2_u16 <= x_high_word_u16",
+                "next_action_u8": 0x1e,
+                "selectors_by_style_u8": [0, 1]},
+            "action_0x1e": {"animation_helper": "0x016536"},
+        },
+        "observed_state_writer_counts": dict(sorted(writer_counts.items())),
+        "suppression_control": {
+            "writer_pc": "0x0607e8", "suppressed_writes": 179,
+            "baseline_transition_rows": 337,
+            "mutant_transition_rows": 627,
+            "baseline_lifecycle_releases": 22,
+            "mutant_lifecycle_releases": 23,
+            "baseline_main_aux_spawns": [15, 3],
+            "mutant_main_aux_spawns": [16, 3],
+            "baseline_final_route": 4, "mutant_final_route": 4,
+            "fixed_frame_substitute": False,
+            "action4_timer": {
+                "writer_pc": "0x060944",
+                "suppressed_writes": 1,
+                "baseline_timer_u8": 6,
+                "mutant_timer_u8": 0,
+                "first_difference_frame": 2798,
+                "first_difference_slot": "0x00ffa240",
+                "score_unchanged": True,
+                "audio_dispatch_unchanged": True,
+                "route_exit_unchanged": True},
+        },
+        "mutation_controls": ["wrong variant initializer", "wrong action target",
+                              "wrong action-0 branch order", "wrong selector start",
+                              "wrong record timer", "wrong record branch",
+                              "wrong movement table", "wrong movement scale",
+                              "wrong attack timer table", "fixed-frame release",
+                              "single synthetic current actor",
+                              "wrong action-4 stage parameter",
+                              "wrong action-4 timer row",
+                              "wrong action-4 RNG index",
+                              "suppressed action-4 timer write"],
     }
 
 
@@ -517,6 +951,20 @@ def class1f_current_state_contract(oracle09: dict[str, object],
             "health_s16": True, "hit_state_u16": 0x0400,
             "hit_ticks_u16": 39, "ko_state_u16": 0x0600,
             "ko_ticks_u16": 141,
+            "accepted_port_v2_reaction_mapping": {
+                "contract": HIT_KO_CONTRACT.relative_to(ROOT).as_posix(),
+                "contract_sha256": digest(HIT_KO_CONTRACT),
+                "native_outer_state_source_field": "adapter.actor.sub_state -> actor+0x04:u16",
+                "native_action_substate_source_field": "adapter.actor.action -> actor+0x06:u16",
+                "native_animation_record_source_field": "adapter.actor.anim_record -> actor+0x1c:u32",
+                "native_animation_timer_source_field": "adapter.actor.anim_timer -> actor+0x0a:u16",
+                "hit_entry_outer_state_u16": 0x0202,
+                "hit_entry_action_substate_u16": 0x0002,
+                "ko_entry_outer_state_u16": 0x0402,
+                "ko_entry_action_substate_u16": 0x0000,
+                "terminal_release_outer_state_u16": 0x0600,
+                "rule": "the accepted adapter owns intermediate HIT/KO writes; native fixed-pool release may consume outer 0x0600 only after the KO timer and adapter sequence complete",
+            },
             "removal_guard": "KO presentation completes and source release 0x0176b4 executes",
             "release_order": "type-12 LIFO fixed-pool release",
             "presentation_owned_removal_forbidden": True,
@@ -527,6 +975,7 @@ def class1f_current_state_contract(oracle09: dict[str, object],
             "wrong RNG algorithm", "wrong RNG consumption order", "wrong attack timer",
             "wrong contact tick", "wrong contact x guard", "wrong lane guard",
             "wrong damage", "wrong HIT duration", "wrong KO duration",
+            "wrong reaction field mapping", "immediate KO release",
             "presentation-owned removal", "retained encounter gameplay step"],
     }
 
@@ -655,6 +1104,8 @@ def build_report() -> dict[str, object]:
                 initial_class1f_transition_contract(samples, rng, opcodes, program)
             reports[-1]["current_state_implementation_contract"] = \
                 class1f_current_state_contract(oracle09, opcodes)
+            reports[-1]["first_segment_action_execution_contract"] = \
+                class1f_first_segment_action_contract(program, opcodes)
             reports[-1]["presentation_and_collision"][
                 "accepted_hit_ko_records"] = hit_ko_presentation
 
@@ -824,8 +1275,89 @@ def validate(report: dict[str, object]) -> None:
                     current["actions"]["attack_0x1800"]["damage_s16"] == 8 and
                     current["damage_hit_ko_removal"]["hit_ticks_u16"] == 39 and
                     current["damage_hit_ko_removal"]["ko_ticks_u16"] == 141 and
-                    len(current["mutation_controls"]) == 19,
+                    current["damage_hit_ko_removal"]
+                        ["accepted_port_v2_reaction_mapping"]
+                        ["hit_entry_outer_state_u16"] == 0x0202 and
+                    current["damage_hit_ko_removal"]
+                        ["accepted_port_v2_reaction_mapping"]
+                        ["ko_entry_outer_state_u16"] == 0x0402 and
+                    current["damage_hit_ko_removal"]
+                        ["accepted_port_v2_reaction_mapping"]
+                        ["terminal_release_outer_state_u16"] == 0x0600 and
+                    len(current["mutation_controls"]) == 21,
                     "0x1f: current-state implementation contract drift")
+            actions = item["first_segment_action_execution_contract"]
+            require(actions["classification"] ==
+                        "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+                    actions["capture_identity"]["byte_identical"] is True and
+                    len(actions["initializer"]["variants"]) == 10 and
+                    actions["initializer"]["variants"][8]["writes"]
+                        ["timer_aa_u8"] == "entry_delay_u8" and
+                    [row["action_u8"] for row in
+                     actions["current_dispatch"]["action_targets"]] ==
+                        list(range(0, 0x20, 2)) and
+                    actions["current_dispatch"]["action_targets"][11]
+                        ["target"] == "0x060c2e" and
+                    actions["current_dispatch"]["required_state_contexts"] == [
+                        "0x0200:0000", "0x0200:0200", "0x0200:0400",
+                        "0x0200:0402", "0x0200:0404", "0x0200:0406",
+                        "0x0200:0408", "0x0200:0600", "0x0200:0800",
+                        "0x0200:0a00", "0x0200:0c00", "0x0200:0c02",
+                        "0x0200:0c04", "0x0200:0e00", "0x0200:0e02",
+                        "0x0200:0e04", "0x0200:1000", "0x0200:1200",
+                        "0x0200:1400", "0x0200:1402", "0x0200:1404",
+                        "0x0200:1406", "0x0200:1408", "0x0200:1600",
+                        "0x0200:1800", "0x0200:1a00", "0x0200:1c00",
+                        "0x0200:1e00"] and
+                    [row["selector_u8"] for row in
+                     actions["animation_selector_table"]["selectors"]] ==
+                        list(CLASS1F_ROUTE_SELECTORS) and
+                    [row["table_index_u8"] for row in
+                     actions["movement_tables"]] == [1, 8] and
+                    actions["movement_tables"][1]["vectors"][8] == {
+                        "direction_u8": 8, "x_delta_s16": 2048,
+                        "y_delta_s16": 0} and
+                    actions["attack_timer_table_u8"] ==
+                        [30, 30, 30, 30, 60, 60, 60, 60,
+                         120, 120, 120, 120, 160, 160, 160, 160] and
+                    actions["action_programs"]["source_bounds"] == {
+                        "x_max_u16": 0x05f0,
+                        "camera_relative_bias_u16": 0x0070,
+                        "camera_relative_span_u16": 0x0260,
+                        "failure_outer_state_u16": 0x0600,
+                        "comparison": "unsigned word"} and
+                    actions["action_programs"]["direction_helper_0x061032"]
+                        ["upper_directions_by_a5_u8"] == [0x16, 0x0a] and
+                    actions["action_programs"]["direction_helper_0x061032"]
+                        ["lower_directions_by_a5_u8"] == [0x1a, 0x06] and
+                    actions["action_programs"]["action_0x0e"]
+                        ["x_velocity_table_s32_16_16"] ==
+                        [-0x00010000, -0x00014000,
+                         -0x00018000, -0x00020000] and
+                    actions["action_programs"]["action_0x04"]
+                        ["selector_groups_u16"] ==
+                        [[55], [56], [43, 43, 43, 55], [43, 43, 56]] and
+                    actions["action_programs"]["action_0x04"]
+                        ["coffee_shop_observation"]["timer_result_u8"] == 6 and
+                    actions["action_programs"]["action_0x04"]
+                        ["timer_stage_offsets_u8"] ==
+                        [0] * 5 + [32] * 8 + [64] * 6 +
+                        [96] * 5 + [128] * 8 and
+                    actions["action_programs"]["action_0x16"]
+                        ["loop_counter"] == "b0_u8" and
+                    actions["suppression_control"]["writer_pc"] ==
+                        "0x0607e8" and
+                    actions["suppression_control"]["suppressed_writes"] == 179 and
+                    actions["suppression_control"]["baseline_main_aux_spawns"] ==
+                        [15, 3] and
+                    actions["suppression_control"]["mutant_main_aux_spawns"] ==
+                        [16, 3] and
+                    actions["suppression_control"]["fixed_frame_substitute"]
+                        is False and
+                    actions["suppression_control"]["action4_timer"]
+                        ["suppressed_writes"] == 1 and
+                    len(actions["mutation_controls"]) == 15,
+                    "0x1f: first-segment action execution contract drift")
     require(all(value == 0 for key, value in report["coverage"].items()
                 if key.startswith("orphan_")) and
             report["coverage"]["required_class_type_pairs"] == 4 and

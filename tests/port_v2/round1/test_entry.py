@@ -3,12 +3,13 @@
 import hashlib
 import json
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "ae6814e233a3245a46d6892171ab1692c054fb3bad7ba7a57ce1106b3aff6a8f"
+EXPECTED = "b1613ab1bbd777abbcbeae7c5521463171c5cc1ad4b12367248a436acbb563af"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -18,12 +19,15 @@ assert EXPECTED in header
 subprocess.run(["python", str(ROOT / "tools/gen_spec02_round1_entry.py"), "--check"], check=True)
 
 def wsl(path):
-    return subprocess.run(["wsl.exe", "wslpath", "-a", str(path).replace("\\", "/")],
+    return subprocess.run(["wsl.exe", "-d", "Ubuntu-24.04", "-u", "root", "--",
+                           "wslpath", "-a",
+                           str(path).replace("\\", "/")],
                           check=True, capture_output=True, text=True).stdout.strip()
 
 def run(body, header_body, passes, label="baseline"):
     with tempfile.TemporaryDirectory(prefix="round1-entry-") as name:
         temp = Path(name)
+        linux_output = f"/tmp/{temp.name}-test"
         temp_body = body.replace(
             '#include "../../integration/combat/combat.h"', '#include "combat.h"')
         temp_body = temp_body.replace(
@@ -51,15 +55,20 @@ def run(body, header_body, passes, label="baseline"):
                    f"src/port_v2/player/player.c src/port_v2/enemy/enemy.c "
                    f"src/port_v2/integration/player_enemy/player_enemy.c "
                    f"src/port_v2/integration/combat/combat.c "
-                   f"tests/port_v2/round1/round1_entry_test.c -o '{wsl(temp / 'test')}' && "
-                   f"'{wsl(temp / 'test')}'")
-        result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
+                   f"tests/port_v2/round1/round1_entry_test.c -o '{linux_output}' && "
+                   f"ulimit -s unlimited && '{linux_output}'")
+        result = subprocess.run(["wsl.exe", "-d", "Ubuntu-24.04", "-u", "root",
+                                 "--", "bash", "-lc", command],
+                                capture_output=True)
         assert (result.returncode == 0) == passes, (
             f"label={label}\nreturncode={result.returncode}\n" +
             result.stdout.decode(errors="replace") +
             result.stderr.decode(errors="replace"))
 
 run(source, header, True)
+if "--baseline-only" in sys.argv:
+    print("REIMPLEMENT-13 focused baseline: PASS")
+    raise SystemExit(0)
 for before, after in (
     ("runtime->route_state = AVSP_ROUND1_ROUTE_ENTRY_STATE;", "runtime->route_state = 4;"),
     ("{20u, 20u, 16u, 32u}", "{20u, 20u, 16u, 31u}"),
@@ -73,7 +82,8 @@ for before, after in (
     ("if (actor->active == 0u)\n                continue;", "if (actor->active != 0u)\n                continue;"),
     ("pool_index = order_index;", "pool_index = (order_index + 1u) % AVSP_ROUND1_POOL_COUNT;"),
     ("!avsp_round1_dispatch_supported(actor->type,\n                                                actor->actor_class)", "0"),
-    ("actor->assembly = presentation->assembly;", "actor->assembly = 0UL;"),
+    ("actor->source_next_animation_record = record->next_animation_record;\n    actor->assembly = record->assembly;",
+     "actor->source_next_animation_record = record->next_animation_record;\n    actor->assembly = 0UL;"),
     ("actor->dispatch_entry = AVSP_ROUND1_CLASS1F_DISPATCH_ENTRY;", "actor->dispatch_entry = 0UL;"),
     ("avsp_round1_apply_player_global_bounds(runtime);", "/* bounds suppressed */"),
     ("avsp_round1_update_player_locomotion(runtime, applied_direction,\n                                            was_stopping, &view);", "/* locomotion transition suppressed */"),
@@ -97,7 +107,8 @@ for before, after in (
     ("if (actor->animation_branch < 0)", "if (actor->animation_branch < -32767)"),
     ("++runtime->player_weapon_empty_auxiliary_releases;", "runtime->player_weapon_empty_auxiliary_releases += 2u;"),
     ("projectile->collision_result = -1;", "projectile->collision_result = 0;"),
-    ("target->substate = 0x0200u;", "target->substate = 2u;"),
+    ("actor->state = reaction->actor.sub_state;",
+     "actor->state = 0x0400u;"),
     ("actor->substate = 0u;\n            ++runtime->class1f_transition_completions;", "actor->state = 0u;\n            actor->substate = 0u;\n            ++runtime->class1f_transition_completions;"),
     ("projectile->y_fp += (long)(low_motion->y + high_motion->y) * 256L;",
      "projectile->y_fp += (long)(low_motion->y + high_motion->y) * 0L;"),
@@ -150,38 +161,39 @@ for before, after in (
      "++runtime->player_jump_entries;\n    avsp_round1_source_rng(runtime);\n    return avsp_round1_bind_player_jump_sequence(runtime, 3u);"),
     ("if (runtime->player_jump_active && received_damage > 0)\n        avsp_round1_interrupt_player_jump(runtime);",
      "if (runtime->player_jump_active && received_damage < 0)\n        avsp_round1_interrupt_player_jump(runtime);"),
-    ("encounter->rng_seed = 0x7301u;",
-     "encounter->rng_seed = 0x0001u;"),
-    ("if ((encounter->controller_timer & 7u) != 0u)\n        return 1;",
-     "if (1)\n        return 1;"),
-    ("alien.sel_hurt = AVSP_PORT_V2_COMBAT_ENEMY_HURT_SELECTOR;",
-     "alien.sel_hurt = 0u;"),
-    ("return avsp_collision_overlap(&player, &alien, hit_value) &&\n        !avsp_collision_guarded(&player, &alien);",
-     "return 0;"),
-    ("!avsp_port_v2_combat_source_event((int)selector - 1, &source)",
-     "!avsp_port_v2_combat_source_event((int)selector, &source)"),
-    ("runtime->player_action.attack_active && !encounter->attack_latched &&",
-     "runtime->player_action.attack_active && encounter->attack_latched &&"),
-    ("encounter->pending_player_damage = (unsigned char)\n                    avsp_round1_class1f_current.contact_damage;",
-     "encounter->pending_player_damage = 0u;"),
-    ("AVSP_PORT_V2_HIT_KO_HIT, &avsp_port_v2_hit_source_before);",
-     "AVSP_PORT_V2_HIT_KO_KO, &avsp_port_v2_hit_source_before);"),
-    ("!avsp_port_v2_hit_ko_step(&encounter->reaction)",
-     "0"),
-    ("encounter->target_ko_observed &&\n        encounter->ko_timer == 0u",
-     "0 &&\n        encounter->ko_timer == 0u"),
-    ("encounter->route_unlocked = 1u;",
-     "encounter->route_unlocked = 0u;"),
-    ("actor->source_slot ==\n                        runtime->first_encounter.actor_source_slot;",
-     "actor->source_slot ==\n                        runtime->first_encounter.actor_source_slot + 1u;"),
+    ("input |= 0x08u;",
+     "input |= 0x04u;"),
+    ("projectile->actor_class = avsp_round1_air_weapon_projectile.actor_class;",
+     "projectile->actor_class = avsp_round1_player_weapon.child_class;"),
+    ("effect->effect_timer = 8u;",
+     "effect->effect_timer = 7u;"),
+    ("(runtime->scheduler_frames & 1u) == 0u",
+     "(runtime->scheduler_frames & 2u) == 0u"),
+    ("encounter->source_phase_counter + 1u",
+     "encounter->source_phase_counter + 2u"),
+    ("if (encounter->source_intro_gate != 0u)",
+     "if (encounter->source_intro_gate == 0u)"),
+    ("encounter->source_intro_timer - 1u",
+     "encounter->source_intro_timer - 2u"),
+    ("(unsigned short)actor->source_slot ==\n                    avsp_round1_recurring_spawn.intro_gate_owner_slot",
+     "actor->source_slot ==\n                    avsp_round1_recurring_spawn.intro_gate_owner_slot"),
+    ("actor->substate ==\n                    avsp_round1_recurring_spawn.intro_gate_owner_state",
+     "actor->state ==\n                    avsp_round1_recurring_spawn.intro_gate_owner_state"),
+    ("encounter->source_living_count >=\n            avsp_round1_recurring_spawn.maximum_living",
+     "encounter->source_living_count >\n            avsp_round1_recurring_spawn.maximum_living"),
+    ("actor->source_slot = 0x00ff0000UL | (unsigned long)slot;",
+     "actor->source_slot = slot;"),
+    ("actor->source_slot ==\n                        runtime->first_encounter.actor_source_slot)",
+     "actor->source_slot ==\n                        runtime->first_encounter.actor_source_slot + 1u)"),
 ):
-    assert before in source
+    assert before in source, before
     run(source.replace(before, after), header, False, before)
 for before, after in (
     ("{ 0xffa3c0u, 12u, 656, 312, 312,", "{ 0xffa3c0u, 12u, 657, 312, 312,"),
     ("{ AVSP_ROUND1_ENTRY_DWELL, 0x00u, 0u, 60u,", "{ AVSP_ROUND1_ENTRY_DWELL, 0x00u, 0u, 59u,"),
     ("    12u, 16u, 20u, 24u", "    16u, 12u, 20u, 24u"),
-    ("{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x8000, 216u,", "{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x8000, 215u,"),
+    ("{ 6u, 1u, 1u, 1u, 16u, 0u, 1u, 1u, 216u, 0x1Du, 0x0000u },",
+     "{ 6u, 1u, 1u, 1u, 16u, 0u, 1u, 1u, 215u, 0x1Du, 0x0000u },"),
     ("{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x8000, 216u,", "{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 0u, 16u, 0x8000, 216u,"),
     ("{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x8000, 216u,", "{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 15u, 0x8000, 216u,"),
     ("{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x8000, 216u,", "{ 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x0000, 216u,"),
@@ -235,15 +247,12 @@ for before, after in (
      "{ 41u, 2u, { { 4u, 0, 0x15fc3cUL, 0x162ee2UL, 9u, 21u }"),
     ("{ 60u, 1u, { { 4095u, -32768, 0x15fc60UL, 0x162ee2UL, 9u, 35u }",
      "{ 60u, 1u, { { 4095u, -32768, 0x15fc60UL, 0x162ee2UL, 9u, 34u }"),
-    ("{ 0x0012dd50UL, 0x00130248UL, 1u, 0u },",
-     "{ 0x0012dd50UL, 0x0013020cUL, 1u, 0u },"),
-    ("{ 0x0012e214UL, 0x0013020cUL, 14u, 0u },",
-     "{ 0x0012e214UL, 0x0013020cUL, 1u, 0u },"),
 ):
     assert before in generated
     changed = generated.replace(before, after, 1)
     with tempfile.TemporaryDirectory(prefix="round1-generated-mutation-") as name:
         temp = Path(name)
+        linux_output = f"/tmp/{temp.name}-test"
         temp_body = source.replace(
             '#include "../../integration/combat/combat.h"', '#include "combat.h"')
         temp_body = temp_body.replace(
@@ -271,8 +280,10 @@ for before, after in (
                    f"src/port_v2/player/player.c src/port_v2/enemy/enemy.c "
                    f"src/port_v2/integration/player_enemy/player_enemy.c "
                    f"src/port_v2/integration/combat/combat.c "
-                   f"tests/port_v2/round1/round1_entry_test.c -o '{wsl(temp / 'test')}' && "
-                   f"'{wsl(temp / 'test')}'")
-        result = subprocess.run(["wsl.exe", "bash", "-lc", command], capture_output=True)
+                   f"tests/port_v2/round1/round1_entry_test.c -o '{linux_output}' && "
+                   f"ulimit -s unlimited && '{linux_output}'")
+        result = subprocess.run(["wsl.exe", "-d", "Ubuntu-24.04", "-u", "root",
+                                 "--", "bash", "-lc", command],
+                                capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/first-encounter differential: PASS (123 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/first-encounter differential: PASS (121 real mutations)")

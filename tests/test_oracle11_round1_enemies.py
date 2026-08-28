@@ -59,8 +59,24 @@ for label,mutate in [
     ('current-damage',lambda x:x['actions']['attack_0x1800'].__setitem__('damage_s16',7)),
     ('current-hit-timer',lambda x:x['damage_hit_ko_removal'].__setitem__('hit_ticks_u16',38)),
     ('current-ko-timer',lambda x:x['damage_hit_ko_removal'].__setitem__('ko_ticks_u16',140)),
+    ('current-reaction-map',lambda x:x['damage_hit_ko_removal']['accepted_port_v2_reaction_mapping'].__setitem__('hit_entry_outer_state_u16',0x0400)),
     ('current-retained-authority',lambda x:x['authority_boundary'].__setitem__('retained_gameplay_authority_forbidden',False)),
     ('current-mutation-control',lambda x:x['mutation_controls'].pop()),
 ]:
     mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['current_state_implementation_contract'];mutate(target);reject(mutant,label)
-print('ORACLE-11 Round 1 enemy tests: PASS (38 mutations rejected)')
+for label,mutate in [
+    ('first-segment-action-writer',lambda x:x['suppression_control'].__setitem__('writer_pc','0x0607ee')),
+    ('first-segment-action-target',lambda x:x['current_dispatch']['action_targets'][11].__setitem__('target','0x060c30')),
+    ('first-segment-selector',lambda x:x['animation_selector_table']['selectors'][0].__setitem__('selector_u8',1)),
+    ('first-segment-movement',lambda x:x['movement_tables'][1]['vectors'][8].__setitem__('x_delta_s16',2047)),
+    ('first-segment-timer-table',lambda x:x['attack_timer_table_u8'].__setitem__(0,29)),
+    ('first-segment-source-bound',lambda x:x['action_programs']['source_bounds'].__setitem__('x_max_u16',0x05ef)),
+    ('first-segment-direction',lambda x:x['action_programs']['direction_helper_0x061032']['upper_directions_by_a5_u8'].__setitem__(0,0x15)),
+    ('first-segment-jump-vector',lambda x:x['action_programs']['action_0x0e']['x_velocity_table_s32_16_16'].__setitem__(0,-0x0000f000)),
+    ('first-segment-attack-selector-group',lambda x:x['action_programs']['action_0x04']['selector_groups_u16'][2].__setitem__(0,44)),
+    ('first-segment-loop-counter',lambda x:x['action_programs']['action_0x16'].__setitem__('loop_counter','timer')),
+    ('first-segment-fixed-frame',lambda x:x['suppression_control'].__setitem__('fixed_frame_substitute',True)),
+    ('first-segment-mutation-control',lambda x:x['mutation_controls'].pop()),
+]:
+    mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['first_segment_action_execution_contract'];mutate(target);reject(mutant,label)
+print('ORACLE-11 Round 1 enemy tests: PASS (51 mutations rejected)')

@@ -16,7 +16,18 @@ RAW_B = ROOT / ".deps/mame/oracle11_round1_route_b"
 ENTRY_A = ROOT / ".deps/mame/oracle11_round1_entry_a6"
 ENTRY_B = ROOT / ".deps/mame/oracle11_round1_entry_b6"
 ENTRY_SUPPRESS = ROOT / ".deps/mame/oracle11_round1_entry_suppress6"
+PROGRESSION_A = ROOT / ".deps/mame/oracle11_progression_owner3_a"
+PROGRESSION_B = ROOT / ".deps/mame/oracle11_progression_owner3_b"
+PROGRESSION_SUPPRESS = ROOT / ".deps/mame/oracle11_progression_owner3_s"
+PROGRESSION_GUARD_SUPPRESS = ROOT / ".deps/mame/oracle11_progression_owner3_g"
+PROGRESSION_LIFECYCLE_A = ROOT / ".deps/mame/oracle11_progression_lifecycle_a"
+PROGRESSION_LIFECYCLE_B = ROOT / ".deps/mame/oracle11_progression_lifecycle_b"
+PROGRESSION_LIFECYCLE_SUPPRESS = ROOT / ".deps/mame/oracle11_progression_lifecycle_s2"
+COFFEE_SHOP_SCENE_A = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs7a"
+COFFEE_SHOP_SCENE_B = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs7b"
 ROUTE = ROOT / "data/oracle10_round1_route.json"
+ENEMIES = ROOT / "data/oracle11_round1_enemy_archetypes.json"
+AUXILIARY = ROOT / "data/oracle11_round1_auxiliary_authority.json"
 OPCODES = ROOT / ".deps/mame/actorprobe/decrypted_opcodes_2m.bin"
 OUT = ROOT / "data/oracle11_round1_encounter_route_authority.json"
 ORACLE10_EVENTS = (ROOT / ".deps/mame/oracle10_round1_system_census_e" /
@@ -26,6 +37,20 @@ FILES = ("route_samples.tsv", "route_writes.tsv", "route_writer_summary.tsv",
          "dispatches.tsv", "projectiles.tsv", "score_writes.tsv", "result.tsv")
 ENTRY_FILES = ("entry_samples.tsv", "entry_actors.tsv", "entry_writes.tsv",
                "entry_calls.tsv", "entry_player_writes.tsv", "entry_script.tsv")
+PROGRESSION_FILES = ("progression_transactions.tsv", "progression_snapshots.tsv",
+                     "progression_writes.tsv", "progression_global_writes.tsv",
+                     "progression_controller.tsv",
+                     "progression_result.tsv")
+PROGRESSION_LIFECYCLE_FILES = ("progression_controller.tsv",
+                               "progression_lifecycle_writes.tsv",
+                               "progression_result.tsv")
+COFFEE_SHOP_SCENE_FILES = ("coffee_shop_scene_actors.tsv",
+                           "coffee_shop_scene_frames.tsv",
+                           "coffee_shop_scene_health_writes.tsv",
+                           "coffee_shop_type4_class03.tsv",
+                           "progression_class1f_action4_timers.tsv",
+                           "progression_result.tsv", "dispatches.tsv",
+                           "samples.tsv", "score_writes.tsv")
 ROUTE_EDGES = (
     (2237, "00c170", 4, "(u8(g8236) & u8(g81af)) == 0"),
     (5452, "008418", 6, "u8(g81f3) != 0"),
@@ -71,6 +96,11 @@ def canonical(value: object) -> bytes:
     return json.dumps(value, sort_keys=True, indent=2).encode("ascii") + b"\n"
 
 
+def s16_from_hex(value: str) -> int:
+    raw = int(value, 16)
+    return raw - 0x10000 if raw >= 0x8000 else raw
+
+
 def identity(path: Path) -> dict[str, object]:
     manifest = json.loads((path / "input_manifest.json").read_text(encoding="utf-8-sig"))
     require(manifest["authority_family"] == "encounters-waves-scripted-triggers",
@@ -88,10 +118,256 @@ def entry_identity(path: Path) -> dict[str, object]:
     return {"files": {name: digest(path / name) for name in ENTRY_FILES}}
 
 
+def progression_identity(path: Path) -> dict[str, object]:
+    return {"files": {name: digest(path / name) for name in PROGRESSION_FILES}}
+
+
+def progression_lifecycle_identity(path: Path) -> dict[str, object]:
+    return {"files": {name: digest(path / name)
+                      for name in PROGRESSION_LIFECYCLE_FILES}}
+
+
 def window(image: bytes, pc: int, before: int = 16, after: int = 32) -> dict[str, object]:
     first, last = max(0, pc-before), min(len(image), pc+after)
     return {"first": f"0x{first:06x}", "last_exclusive": f"0x{last:06x}",
             "sha256": hashlib.sha256(image[first:last]).hexdigest()}
+
+
+def coffee_shop_scene_census() -> dict[str, object]:
+    identity_a = {name: digest(COFFEE_SHOP_SCENE_A / name)
+                  for name in COFFEE_SHOP_SCENE_FILES}
+    identity_b = {name: digest(COFFEE_SHOP_SCENE_B / name)
+                  for name in COFFEE_SHOP_SCENE_FILES}
+    require(identity_a == identity_b,
+            "Coffee Shop complete fixed-pool captures differ")
+    enemies = json.loads(ENEMIES.read_text(encoding="utf-8"))
+    auxiliary = json.loads(AUXILIARY.read_text(encoding="utf-8"))
+    source_contracts = {
+        (int(item["type"]), int(item["class"], 16)):
+            f"data/oracle11_round1_enemy_archetypes.json#/archetypes/{index}"
+        for index, item in enumerate(enemies["archetypes"])
+    }
+    source_contracts.update({
+        (int(item["type"]), int(item["class"], 16)):
+            f"data/oracle11_round1_auxiliary_authority.json#/archetypes/{index}"
+        for index, item in enumerate(auxiliary["archetypes"])
+    })
+    source_contracts[(0, 0)] = \
+        "data/oracle11_predator_warrior_authority.json#/"
+    source_contracts[(4, 0)] = (
+        "data/oracle11_predator_weapon_projectile_resource.json#/"
+        "implementation_contract/record4_parent_class0")
+    source_contracts[(4, 4)] = (
+        "data/oracle11_predator_weapon_projectile_resource.json#/"
+        "implementation_contract/record4_child_class4")
+    source_contracts[(4, 3)] = (
+        "data/oracle11_predator_air_authority.json#/airborne_actions/"
+        "button1/record4_class03")
+    source_contracts[(28, 0x0a)] = (
+        "data/oracle11_predator_route_ownership.json#/"
+        "health_pickup")
+    source_contracts[(32, 0x01)] = "#/first_entry_body/controller"
+    source_contracts[(24, 0x44)] = \
+        ("data/oracle11_round1_auxiliary_authority.json#/"
+         "first_segment_dependencies/class_0x44_type24_command_guard_owner")
+
+    active: dict[tuple[str, str], dict[str, object]] = {}
+    lifetimes: list[dict[str, object]] = []
+
+    def finish(lifetime: dict[str, object]) -> None:
+        pair = (int(lifetime["type"]), int(str(lifetime["class"]), 16))
+        contract = source_contracts.get(pair)
+        lifetime["states"] = sorted(lifetime["states"])
+        lifetime["facings"] = sorted(lifetime["facings"])
+        lifetime["animation_records"] = sorted(lifetime["animation_records"])
+        lifetime["attack_selectors"] = sorted(lifetime["attack_selectors"])
+        lifetime["hurt_selectors"] = sorted(lifetime["hurt_selectors"])
+        lifetime["spawn_edge"] = {"frame": lifetime["first_frame"],
+                                    "active_before": 0, "active_after": 1}
+        lifetime["despawn_edge"] = {"frame": lifetime["last_frame"] + 1,
+                                      "active_before": 1,
+                                      "active_after": 0}
+        if contract is None:
+            lifetime["source_classification"] = \
+                "BLOCKED_MISSING_SOURCE_EVIDENCE"
+            lifetime["exact_blocker"] = (
+                "no accepted full actor state/lifecycle/presentation/collision "
+                "contract for this source-observed class/type pair")
+        else:
+            lifetime["source_classification"] = "SOURCE_CLOSED"
+            lifetime["source_contract"] = contract
+        lifetimes.append(lifetime)
+
+    for row in rows(COFFEE_SHOP_SCENE_A / "coffee_shop_scene_actors.tsv"):
+        frame = int(row["frame"])
+        key = (row["pool"], row["slot"])
+        identity = (row["type"], row["class"])
+        current = active.get(key)
+        if (current is None or frame != current["last_frame"] + 1 or
+                identity != current["identity"]):
+            if current is not None:
+                finish(current)
+            current = {
+                "id": "", "pool": row["pool"],
+                "source_slot": f"0x00{row['slot']}",
+                "type": int(row["type"]), "class": f"0x{row['class']}",
+                "identity": identity, "first_frame": frame,
+                "last_frame": frame, "states": set(), "facings": set(),
+                "animation_records": set(), "attack_selectors": set(),
+                "hurt_selectors": set(),
+                "x_fp_range_s32_16_16": [int(row["x_fp"], 16),
+                                           int(row["x_fp"], 16)],
+                "y_fp_range_s32_16_16": [int(row["y_fp"], 16),
+                                           int(row["y_fp"], 16)],
+                "z_range_s16": [int(row["z"]), int(row["z"])],
+                "health_range_s16": (None if row["health"] == "na" else
+                                       [int(row["health"]),
+                                        int(row["health"])]),
+            }
+            active[key] = current
+        current["last_frame"] = frame
+        current["states"].add((int(row["state"], 16),
+                                int(row["substate"], 16)))
+        current["facings"].add(int(row["facing"]))
+        current["animation_records"].add(f"0x{int(row['animation_record'], 16):08x}")
+        if row["attack_selector"] != "na":
+            current["attack_selectors"].add(int(row["attack_selector"], 16))
+        if row["hurt_selector"] != "na":
+            current["hurt_selectors"].add(int(row["hurt_selector"], 16))
+        for field, value in (("x_fp_range_s32_16_16", int(row["x_fp"], 16)),
+                             ("y_fp_range_s32_16_16", int(row["y_fp"], 16)),
+                             ("z_range_s16", int(row["z"]))):
+            current[field][0] = min(current[field][0], value)
+            current[field][1] = max(current[field][1], value)
+        if row["health"] != "na":
+            value = int(row["health"])
+            current["health_range_s16"][0] = min(
+                current["health_range_s16"][0], value)
+            current["health_range_s16"][1] = max(
+                current["health_range_s16"][1], value)
+    for current in active.values():
+        finish(current)
+    lifetimes.sort(key=lambda item: (item["first_frame"], item["pool"],
+                                     item["source_slot"]))
+    for index, lifetime in enumerate(lifetimes):
+        lifetime["id"] = f"coffee-shop-actor-{index:03d}"
+        del lifetime["identity"]
+    pair_counts = Counter((item["type"], item["class"])
+                          for item in lifetimes)
+    pair_inventory = [{"type": pair[0], "class": pair[1],
+                       "lifetime_count": count,
+                       "source_classification":
+                           ("SOURCE_CLOSED" if (pair[0], int(pair[1], 16)) in
+                            source_contracts else
+                            "BLOCKED_MISSING_SOURCE_EVIDENCE")}
+                      for pair, count in sorted(pair_counts.items())]
+    blocked = [item for item in pair_inventory
+               if item["source_classification"] != "SOURCE_CLOSED"]
+    require(len(lifetimes) == 747 and len(pair_inventory) == 38 and
+            len(blocked) == 17,
+            "Coffee Shop full-pool lifetime inventory drift")
+    audio_events = []
+    for row in rows(COFFEE_SHOP_SCENE_A / "dispatches.tsv"):
+        audio_events.append({
+            "frame": int(row["frame"]),
+            "sequence": int(row["sequence"]),
+            "queue_address": f"0x{row['queue_address']}",
+            "writer_pc": f"0x{row['write_pc']}",
+            "capture_pc": f"0x{row['capture_pc']}",
+            "shared_dispatch": f"0x{row['shared_dispatch']}",
+            "origin_a6": f"0x{row['a6']}",
+            "caller_chain": [f"0x{row[key]}" for key in
+                             ("return0", "return1", "return2")],
+            "arguments_u32": [f"0x{int(row[key], 16):08x}" for key in
+                              ("d1", "d2", "d3")],
+            "command_u16": f"0x{int(row['command'], 16):04x}",
+            "origin": {"active_u8": int(row["origin_active"]),
+                       "class_u8": f"0x{int(row['origin_class'], 16):02x}",
+                       "type_u8": int(row["origin_type"]),
+                       "state_u16": int(row["origin_state"]),
+                       "phase_u16": int(row["origin_phase"])},
+            "source_classification": "SOURCE_CLOSED",
+            "source_contract":
+                "data/oracle11_global_audio_trigger_owners.json#/trigger_groups",
+        })
+    health_writes = []
+    for row in rows(COFFEE_SHOP_SCENE_A /
+                    "coffee_shop_scene_health_writes.tsv"):
+        health_writes.append({
+            "frame": int(row["frame"]),
+            "target_pool": row["target_pool"],
+            "target_slot": f"0x{row['target_slot']}",
+            "writer_pc": f"0x{row['pc']}",
+            "attacker": f"0x{row['attacker']}",
+            "defender": f"0x{row['defender']}",
+            "attack_record": f"0x{row['attack_record']}",
+            "state_u16": f"0x{row['state']}",
+            "substate_u16": f"0x{row['substate']}",
+            "health_before_s16": s16_from_hex(row["health_before"]),
+            "health_after_s16": s16_from_hex(row["health_after"]),
+            "damage_writer": row["damage_writer"] == "1",
+            "source_classification": "SOURCE_CLOSED",
+            "source_contract":
+                "data/oracle11_round1_writer_reconciliation.json#/writers",
+        })
+    return {
+        "scope": "source Coffee Shop entry through exit stabilization",
+        "source_frame_range": [1972, 5566],
+        "declared_scene_segments": [
+            {"id": "round1-title", "source_frame_range": [1972, 2073]},
+            {"id": "round1-street-gameplay",
+             "source_frame_range": [2074, 5542]},
+            {"id": "coffee-shop-exit-stabilization",
+             "source_frame_range": [5543, 5566]}],
+        "capture_identity": {"completion_a": identity_a,
+                             "completion_b": identity_b,
+                             "byte_identical": True},
+        "pool_scan": [
+            {"pool": "player", "base": "0xff8380", "stride": 0,
+             "capacity": 1},
+            {"pool": "record4", "base": "0xff8680", "stride": 128,
+             "capacity": 24, "record_type": 4},
+            {"pool": "record8", "base": "0xff9280", "stride": 192,
+             "capacity": 4, "record_type": 8},
+            {"pool": "record12", "base": "0xff9580", "stride": 192,
+             "capacity": 20},
+            {"pool": "record16", "base": "0xffa480", "stride": 128,
+             "capacity": 20},
+            {"pool": "record20", "base": "0xffae80", "stride": 128,
+             "capacity": 16},
+            {"pool": "record24", "base": "0xffb680", "stride": 128,
+             "capacity": 32},
+            {"pool": "record28", "base": "0xffc680", "stride": 128,
+             "capacity": 16, "record_type": 28},
+            {"pool": "record32", "base": "0xffce80", "stride": 256,
+             "capacity": 4, "record_type": 32},
+            {"pool": "record36", "base": "0xffd280", "stride": 64,
+             "capacity": 64, "record_type": 36},
+            {"pool": "record24_aux", "base": "0xffe280", "stride": 128,
+             "capacity": 16, "record_type": 24}],
+        "pool_layout_source": {
+            "initializer": "0x01729e..0x0174a4",
+            "sha256": hashlib.sha256(
+                OPCODES.read_bytes()[0x01729e:0x0174a4]).hexdigest(),
+            "inactive_in_capture": ["record8", "record24_aux"]},
+        "actor_lifetimes": lifetimes,
+        "class_type_inventory": pair_inventory,
+        "blocked_class_type_pairs": blocked,
+        "audio_events": audio_events,
+        "health_writes": health_writes,
+        "counts": {"actor_lifetimes": len(lifetimes),
+                   "class_type_pairs": len(pair_inventory),
+                   "source_closed_pairs": len(pair_inventory) - len(blocked),
+                   "blocked_missing_source_evidence_pairs": len(blocked),
+                   "audio_events": len(audio_events),
+                   "health_writes": len(health_writes),
+                   "damage_writes": sum(item["damage_writer"]
+                                        for item in health_writes)},
+        "negative_controls": {
+            "half_stride_aliases_admitted": False,
+            "inactive_slots_admitted": False,
+            "unknown_pair_silently_omitted": False},
+    }
 
 
 def build_report() -> dict[str, object]:
@@ -100,6 +376,21 @@ def build_report() -> dict[str, object]:
     entry_a, entry_b = entry_identity(ENTRY_A), entry_identity(ENTRY_B)
     require(entry_a["files"] == entry_b["files"],
             "entry correction captures differ")
+    progression_a = progression_identity(PROGRESSION_A)
+    progression_b = progression_identity(PROGRESSION_B)
+    progression_suppress = progression_identity(PROGRESSION_SUPPRESS)
+    progression_guard_suppress = progression_identity(PROGRESSION_GUARD_SUPPRESS)
+    require(progression_a["files"] == progression_b["files"],
+            "first-segment progression captures differ")
+    progression_lifecycle_a = progression_lifecycle_identity(
+        PROGRESSION_LIFECYCLE_A)
+    progression_lifecycle_b = progression_lifecycle_identity(
+        PROGRESSION_LIFECYCLE_B)
+    progression_lifecycle_suppress = progression_lifecycle_identity(
+        PROGRESSION_LIFECYCLE_SUPPRESS)
+    require(progression_lifecycle_a["files"] ==
+            progression_lifecycle_b["files"],
+            "first-segment lifecycle captures differ")
     final = next(rows(RAW_A / "result.tsv"))
     require(int(final["final_route"]) == 4, "route capture did not reach Round 2")
     route = json.loads(ROUTE.read_text(encoding="utf-8"))
@@ -394,6 +685,492 @@ def build_report() -> dict[str, object]:
         },
     }
 
+    progression_transactions = list(rows(
+        PROGRESSION_A / "progression_transactions.tsv"))
+    progression_writes = list(rows(PROGRESSION_A / "progression_writes.tsv"))
+    progression_global_writes = list(rows(
+        PROGRESSION_A / "progression_global_writes.tsv"))
+    progression_controller = {int(row["frame"]): row for row in rows(
+        PROGRESSION_A / "progression_controller.tsv")}
+    guard_mutant_global_writes = list(rows(
+        PROGRESSION_GUARD_SUPPRESS / "progression_global_writes.tsv"))
+    guard_mutant_controller = {int(row["frame"]): row for row in rows(
+        PROGRESSION_GUARD_SUPPRESS / "progression_controller.tsv")}
+    progression_snapshots = list(rows(
+        PROGRESSION_A / "progression_snapshots.tsv"))
+    suppressed_snapshots = list(rows(
+        PROGRESSION_SUPPRESS / "progression_snapshots.tsv"))
+    lifecycle_writes = list(rows(
+        PROGRESSION_LIFECYCLE_A / "progression_lifecycle_writes.tsv"))
+    lifecycle_suppressed_writes = list(rows(
+        PROGRESSION_LIFECYCLE_SUPPRESS /
+        "progression_lifecycle_writes.tsv"))
+    lifecycle_release_rows = [row for row in lifecycle_writes
+                              if row["pc"] == "061152"]
+    lifecycle_release_mutant_rows = [row for row in lifecycle_suppressed_writes
+                                     if row["pc"] == "061152"]
+    lifecycle_base_result = next(rows(
+        PROGRESSION_LIFECYCLE_A / "progression_result.tsv"))
+    lifecycle_suppress_result = next(rows(
+        PROGRESSION_LIFECYCLE_SUPPRESS / "progression_result.tsv"))
+    require(len(lifecycle_release_rows) == 22 and
+            len(lifecycle_release_mutant_rows) == 12 and
+            all(row["owner_active"] == "2" and
+                row["owner_class"] == "1f" and
+                row["owner_type"] == "12" and
+                int(row["owner_state"]) == 0x0600 and
+                int(row["owner_substate"]) == 0 and
+                row["suppressed"] == "0"
+                for row in lifecycle_release_rows) and
+            all(row["suppressed"] == "1"
+                for row in lifecycle_release_mutant_rows) and
+            int(lifecycle_base_result["main_spawn_transactions"]) == 15 and
+            int(lifecycle_base_result["aux_spawn_transactions"]) == 3 and
+            int(lifecycle_suppress_result["main_spawn_transactions"]) == 0 and
+            int(lifecycle_suppress_result["aux_spawn_transactions"]) == 0 and
+            int(lifecycle_suppress_result["lifecycle_suppressed_writes"]) == 12,
+            "class-0x1f lifecycle release control drift")
+
+    def transaction(frame: int, pc: str) -> dict[str, str]:
+        matches = [row for row in progression_transactions
+                   if int(row["frame"]) == frame and row["pc"] == pc]
+        require(len(matches) == 1,
+                f"progression transaction drift at {frame}/0x{pc}")
+        return matches[0]
+
+    def snapshot(values: list[dict[str, str]], frame: int,
+                 slot: str) -> dict[str, str]:
+        matches = [row for row in values if int(row["frame"]) == frame and
+                   row["slot"] == slot]
+        require(len(matches) == 1,
+                f"progression snapshot drift at {frame}/0x{slot}")
+        return matches[0]
+
+    first_writes = [row for row in progression_writes
+                    if int(row["frame"]) == 2510 and
+                    row["slot"] == "ffa3c0" and row["pc"].startswith("028a")]
+    later_writes = [row for row in progression_writes
+                    if int(row["frame"]) == 3982 and
+                    row["slot"] == "ffa000" and row["pc"].startswith("028a")]
+    main_writer_order = [row["pc"] for row in first_writes]
+    require(main_writer_order == [
+        "028a3e", "028a42", "028a48", "028a50", "028a54", "028a5a",
+        "028a8a", "028a96", "028a9a", "028a9e", "028aa6"],
+        "first recurring spawn write order drift")
+    first_post_init = snapshot(progression_snapshots, 2511, "ffa3c0")
+    first_post_dispatch = snapshot(progression_snapshots, 2512, "ffa3c0")
+    later_post_init = snapshot(progression_snapshots, 3983, "ffa000")
+    later_post_dispatch = snapshot(progression_snapshots, 3984, "ffa000")
+    suppressed_first = snapshot(suppressed_snapshots, 2511, "ffa3c0")
+    suppressed_later = snapshot(suppressed_snapshots, 3983, "ffa000")
+    base_result = next(rows(PROGRESSION_A / "progression_result.tsv"))
+    suppress_result = next(rows(
+        PROGRESSION_SUPPRESS / "progression_result.tsv"))
+    guard_suppress_result = next(rows(
+        PROGRESSION_GUARD_SUPPRESS / "progression_result.tsv"))
+    first_active_write = first_writes[0]
+    first_write_by_pc = {row["pc"]: row for row in first_writes}
+    later_write_by_pc = {row["pc"]: row for row in later_writes}
+    first_rng_write = next(row for row in first_writes
+                           if row["pc"] == "028a8a")
+    later_active_write = next(row for row in later_writes
+                              if row["pc"] == "028a3e")
+    later_rng_write = next(row for row in later_writes
+                           if row["pc"] == "028a8a")
+    require(first_active_write["g8019"] == "c0" and
+            int(first_active_write["living"]) == 8 and
+            int(first_active_write["progress"]) == 1 and
+            int(first_active_write["c_state"]) == 0x0204 and
+            int(first_active_write["c_substate"]) == 0 and
+            int(first_active_write["c_timer40"]) == 3706 and
+            int(first_active_write["c_limit4a"]) == 35 and
+            int(first_active_write["c_index10"]) == 9 and
+            int(first_active_write["camera_x"]) == 720 and
+            int(first_active_write["camera_z"]) == 256 and
+            first_active_write["rng"] == "d21c",
+            "first recurring spawn guard operands drift")
+    require(first_active_write["slot"] == "ffa3c0" and
+            later_active_write["slot"] == "ffa000" and
+            (int(first_write_by_pc["028a50"]["data"], 16) & 0xffff) == 672 and
+            (int(first_write_by_pc["028a96"]["data"], 16) & 0xffff) == 328 and
+            (int(first_write_by_pc["028a9a"]["data"], 16) & 0xffff) == 328 and
+            (int(first_write_by_pc["028a8a"]["data"], 16) & 0xff) == 3 and
+            (int(first_write_by_pc["028aa6"]["data"], 16) & 0xff) == 1 and
+            first_rng_write["rng"] == "7692" and
+            (int(later_write_by_pc["028a50"]["data"], 16) & 0xffff) == 960 and
+            (int(later_write_by_pc["028a96"]["data"], 16) & 0xffff) == 343 and
+            (int(later_write_by_pc["028a9a"]["data"], 16) & 0xffff) == 343 and
+            (int(later_write_by_pc["028a8a"]["data"], 16) & 0xff) == 3 and
+            (int(later_write_by_pc["028aa6"]["data"], 16) & 0xff) == 1 and
+            later_rng_write["rng"] == "4ffd",
+            "recurring spawn initializer result drift")
+    require(int(first_post_init["active"]) == 1 and
+            int(first_post_init["state"]) == 0x0200 and
+            int(first_post_init["substate"]) == 0 and
+            int(first_post_init["health"]) == 87 and
+            int(first_post_dispatch["substate"]) == 0x1600 and
+            int(later_post_init["active"]) == 1 and
+            int(later_post_dispatch["substate"]) == 0x1600 and
+            int(suppressed_first["active"]) == 0 and
+            int(suppressed_first["state"]) == 0 and
+            int(suppressed_later["active"]) == 0 and
+            int(suppress_result["suppressed_writes"]) == 8 and
+            int(base_result["suppressed_writes"]) == 0,
+            "recurring spawn suppression did not discriminate scheduler state")
+
+    guard_clear = [row for row in progression_global_writes
+                   if row["pc"] == "08da38"]
+    guard_clear_mutant = [row for row in guard_mutant_global_writes
+                          if row["pc"] == "08da38"]
+    require(len(guard_clear) == 1 and len(guard_clear_mutant) == 1 and
+            guard_clear[0]["frame"] == "2253" and
+            guard_clear[0]["a6"] == "ffc580" and
+            guard_clear[0]["owner_active"] == "1" and
+            guard_clear[0]["owner_class"] == "44" and
+            guard_clear[0]["owner_type"] == "24" and
+            int(guard_clear[0]["owner_state"]) == 0x0404 and
+            guard_clear[0]["guard1a11"] == "ff" and
+            guard_clear[0]["suppressed"] == "0" and
+            guard_clear_mutant[0]["suppressed"] == "1" and
+            progression_controller[2073]["state"] == "512" and
+            progression_controller[2073]["timer40"] == "3900" and
+            progression_controller[2073]["timer42"] == "60" and
+            progression_controller[2073]["field46"] == "1200" and
+            progression_controller[2073]["field48"] == "2100" and
+            progression_controller[2073]["limit4a"] == "35" and
+            progression_controller[2073]["index10"] == "9" and
+            progression_controller[2074]["state"] == "514" and
+            progression_controller[2253]["guard1a11"] == "ff" and
+            progression_controller[2254]["guard1a11"] == "00" and
+            progression_controller[2255]["timer42"] == "59" and
+            progression_controller[2316]["state"] == "514" and
+            progression_controller[2316]["timer42"] == "0" and
+            progression_controller[2317]["state"] == "516" and
+            progression_controller[2317]["timer42"] == "65535" and
+            guard_mutant_controller[4100]["state"] == "514" and
+            guard_mutant_controller[4100]["timer42"] == "60" and
+            guard_mutant_controller[4100]["guard1a11"] == "ff" and
+            int(guard_suppress_result["main_spawn_transactions"]) == 0 and
+            int(guard_suppress_result["aux_spawn_transactions"]) == 0,
+            "controller initialization/gate transition control drift")
+
+    lane_offsets = [int.from_bytes(image[offset:offset + 2], "big", signed=True)
+                    for offset in range(0x28ab4, 0x28ac0, 2)]
+    selector_cycle = list(image[0x28ac0:0x28aca])
+    lane_bucket_table = list(image[0x28aca:0x28b0a])
+    variant_table = list(image[0x28afa:0x28b5a])
+    require(lane_offsets == [24, 40, 56, 72, 88, 104] and
+            selector_cycle == [0, 1, 1, 1, 0, 1, 0, 1, 1, 1] and
+            len(lane_bucket_table) == 64 and len(variant_table) == 96,
+            "recurring spawn source table drift")
+    phase_points = []
+    for phase_frame, before, after in (
+            (1972, 0xa2, 0xa3), (2237, 0xb0, 0xb1),
+            (2238, 0xb1, 0xb2), (2510, 0xbf, 0xc0)):
+        matches = [row for row in writes_by_frame[phase_frame]
+                   if row["address"] == "ff8018" and row["pc"] == "00809a"]
+        require(len(matches) == 1 and
+                (int(samples[phase_frame]["g8018"], 16) & 0xff) == before and
+                (int(matches[0]["data"], 16) & 0xff) == after,
+                f"source phase update drift at {phase_frame}")
+        phase_points.append({"frame": phase_frame, "before_u8": before,
+                             "after_u8": after})
+    first_segment_recurring_spawn = {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "scope": ("first-segment recurring type-12/class-0x1f source writers "
+                  "0x028a3e and 0x028b7e"),
+        "capture_identity": {
+            "completion_a": progression_a, "completion_b": progression_b,
+            "byte_identical": True, "suppression": progression_suppress,
+            "guard_suppression": progression_guard_suppress,
+        },
+        "scheduler": {
+            "controller_slot": "0xffd180", "controller_type_u8": 32,
+            "controller_class_u8": "0x01",
+            "controller_dispatch": "0x0288e2..0x0288fa",
+            "controller_precedes_type12_scheduler": True,
+            "new_record_initializes_in_same_scheduler_frame": True,
+            "next_current_state_dispatch_occurs_next_scheduler_frame": True,
+        },
+        "controller_program": {
+            "field_types": {
+                "state_substate": "u16 big-endian state/substate word",
+                "spawn_index": "u16", "spawn_timer": "u16",
+                "entry_gate_timer": "u16", "field_0x46": "u16",
+                "field_0x48": "u16", "spawn_limit": "u16",
+                "local_0x2c": "u8", "phase_0x2e": "u8",
+                "intro_gate": "u8",
+            },
+            "initializer": {
+                "routine": "0x0287fc..0x02884a",
+                "source_window": {
+                    "first": "0x0287fc", "last_exclusive": "0x02884c",
+                    "sha256": hashlib.sha256(image[0x287fc:0x2884c]).hexdigest(),
+                },
+                "write_order": [
+                    "state high byte += 2 -> 0x0200",
+                    "camera bound 0xff829e:u16 = 0x0280",
+                    "living_enemy_count 0xff1a18:u16 = 0",
+                    "progress 0xff1a1a:u16 = 0",
+                    "field 0xff1a1c:u16 = 1",
+                    "controller+0x42:u16 = 60",
+                    "controller+0x46:u16 = 1200",
+                    "controller+0x48:u16 = 2100",
+                    "controller+0x40:u16 = 3900",
+                    "controller+0x2e:u8 = 0",
+                    "controller+0x2c:u8 = 0",
+                    "controller+0x06:u8 = 0",
+                    "controller+0x10:u16 = 9",
+                    "controller+0x4a:u16 = limit_table[u8(0xff820e)]",
+                ],
+                "limit_table_u16": [0, 35, 55, 70],
+                "observed_after": {"frame": 2073, "state_u16": 0x0200,
+                                   "timer40_u16": 3900, "timer42_u16": 60,
+                                   "field46_u16": 1200, "field48_u16": 2100,
+                                   "limit_u16": 35, "index_u16": 9,
+                                   "camera_bound_u16": 640},
+                "rng_calls": 0,
+            },
+            "initial_spawn_transition": {
+                "routine": "0x028854..0x0288b8",
+                "guard": "state 0x0200/substate 0 dispatch",
+                "writes": ["substate low byte += 2 -> 0x0202",
+                           "execute ten-row source spawn table"],
+                "observed_after": {"frame": 2074, "state_u16": 0x0202,
+                                   "living_enemy_count_u16": 10},
+                "rng_calls": 0,
+            },
+            "intro_gate_transition": {
+                "routine": "0x0288ba..0x0288e0",
+                "branch_order": [
+                    "require u8(0xff1a11) == 0",
+                    "predecrement controller+0x42:u16",
+                    "return while signed timer result >= 0",
+                    "substate low byte += 2 -> 0x0204",
+                    "write camera target 0xff829a:u16 = 0x00d0",
+                    "when camera_x_s16 <= 0x02d0 call 0x028a06",
+                ],
+                "write_values": {"source_camera_target_u16": 208,
+                                 "camera_x_call_threshold_s16": 720,
+                                 "conditional_phase_0x2e_u8": 1,
+                                 "conditional_local_0x2c_u8": 0},
+                "gate_owner": {
+                    "record": "0xffc580", "record_type_u8": 24,
+                    "class_u8": "0x44", "state_u16": 0x0404,
+                    "writer_instruction": "0x08da32",
+                    "writer_successor_pc": "0x08da38",
+                    "effect": "u8(0xff1a11) = 0",
+                    "source_contract": ("accepted auxiliary first-segment "
+                                        "class-0x44 command-guard owner"),
+                },
+                "observed": {
+                    "gate_clear_frame": 2253,
+                    "first_decremented_sample": {"frame": 2255,
+                                                 "timer42_u16": 59},
+                    "last_wait_sample": {"frame": 2316,
+                                         "state_u16": 0x0202,
+                                         "timer42_u16": 0},
+                    "first_current_sample": {"frame": 2317,
+                                             "state_u16": 0x0204,
+                                             "timer42_u16": 0xffff},
+                },
+                "rng_calls": 0,
+            },
+        },
+        "phase_counter": {
+            "field": "0xff8019:u8", "stable_entry_value_u8": 0xa2,
+            "writer_pc": "0x00809a", "writer_routine": "0x00808e..0x00809a",
+            "guard": "increment only when u8(0xff81a6) == 0",
+            "arithmetic": "u8 wrapping add 1",
+            "scheduler_order": "source phase update precedes the encounter controller",
+            "source_window": {
+                "first": "0x00808e", "last_exclusive": "0x00809e",
+                "sha256": hashlib.sha256(image[0x808e:0x809e]).hexdigest(),
+            },
+            "observed_updates": phase_points,
+            "video_frame_number_is_not_an_input": True,
+        },
+        "controller_guard": {
+            "branch_order": [
+                "require u16(0xff1a1a) < controller+0x4a:u16",
+                "decrement controller+0x40:u16 and require signed result >= 0",
+                "call primary recurring spawn body 0x028a12",
+            ],
+            "first_operands": {
+                "progress_u16": int(first_active_write["progress"]),
+                "limit_u16": int(first_active_write["c_limit4a"]),
+                "timer_before_u16": int(first_active_write["c_timer40"]) + 1,
+                "timer_after_u16": int(first_active_write["c_timer40"]),
+                "controller_state_u16": int(first_active_write["c_state"]),
+                "controller_substate_u16": int(first_active_write["c_substate"]),
+            },
+        },
+        "lifecycle_release_boundary": {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "scope": ("type-12/class-0x1f state 0x0600:0000 living-count "
+                      "decrement and fixed-pool release"),
+            "capture_identity": {
+                "completion_a": progression_lifecycle_a,
+                "completion_b": progression_lifecycle_b,
+                "byte_identical": True,
+                "suppression": progression_lifecycle_suppress,
+            },
+            "writer_pc": "0x061152",
+            "writer_instruction_pc": "0x06114c",
+            "release_routine": "0x0176b4",
+            "source_window": {
+                "first": "0x061146", "last_exclusive": "0x061158",
+                "sha256": hashlib.sha256(image[0x61146:0x61158]).hexdigest(),
+            },
+            "field_types": {"living_enemy_count": "u16",
+                            "actor_state": "u16",
+                            "actor_substate": "u16"},
+            "transition_guard": ("class-0x1f outer state 0x0600 reaches "
+                                 "0x06114c; substate is 0x0000"),
+            "write_order": ["living_enemy_count_u16 -= 1",
+                            "tail-call type-12 release 0x0176b4"],
+            "observed_release_transactions": 22,
+            "first_four_release_frames": [2415, 2471, 2493, 2508],
+            "first_four_slots": ["0xffa180", "0xff9d00",
+                                 "0xffa300", "0xffa3c0"],
+            "suppression_control": {
+                "suppressed_release_writes": 12,
+                "baseline_main_aux_spawns": [15, 3],
+                "mutant_main_aux_spawns": [0, 0],
+                "fixed_frame_substitute": False,
+            },
+            "implementation_blocker": ("the accepted SPEC does not yet bind "
+                "the post-intro 0x0200:0000 action transitions that cause each "
+                "initial actor to enter 0x0600; do not synthesize those exits"),
+        },
+        "primary_writer": {
+            "routine": "0x028a12..0x028ab2", "writer_pc": "0x028a3e",
+            "source_window": {
+                "first": "0x028a12", "last_exclusive": "0x028ab4",
+                "sha256": hashlib.sha256(image[0x28a12:0x28ab4]).hexdigest(),
+            },
+            "guard_branch_order": [
+                "require living_enemy_count_u16 at 0xff1a18 < 8",
+                "run auxiliary writer body before the primary phase guard",
+                "require (u8(0xff8019) & 7) == 0",
+                "require type-12 allocator 0x01769e succeeds",
+            ],
+            "guard_values": {"living_limit_u16": 8,
+                             "phase_mask_u8": 7},
+            "position_values": {"x_camera_offset_s16": -48,
+                                "lane_base_s16": 208,
+                                "lane_band_mask_u16": 0x00f0},
+            "field_types": {
+                "phase": "u8", "living_enemy_count": "u16",
+                "camera_x": "s16", "camera_z": "s16",
+                "active": "u8", "class": "u8", "variant": "u8",
+                "state": "u16", "substate": "u16", "x": "s16",
+                "y": "s16", "z": "s16", "timer": "u16",
+                "selector83": "u8", "rng_seed": "u16",
+            },
+            "write_order": [
+                {"writer_pc": "0x028a3a", "effect": "living_enemy_count_u16 += 1"},
+                {"writer_pc": "0x028a3e", "effect": "active_u8 += 1"},
+                {"writer_pc": "0x028a42", "effect": "class_u8 = 0x1f"},
+                {"writer_pc": "0x028a48", "effect": "x_s16 = camera_x_s16"},
+                {"writer_pc": "0x028a50", "effect": "x_s16 -= 48"},
+                {"writer_pc": "0x028a54", "effect": "y_s16 = camera_z_s16"},
+                {"writer_pc": "0x028a5a", "effect": "z_s16 = camera_z_s16"},
+                {"writer_pc": "0x028a8a", "effect": "variant_u8 = variant_table[(lane_bucket << 4) + rng_high_nibble]"},
+                {"writer_pc": "0x028a96", "effect": "y_s16 += lane_offset_table[lane_bucket]"},
+                {"writer_pc": "0x028a9a", "effect": "z_s16 += lane_offset_table[lane_bucket]"},
+                {"writer_pc": "0x028a9e", "effect": "timer_u16 = 0"},
+                {"writer_pc": "0x028aa6", "effect": "selector83_u8 = selector_cycle[controller_index_u16]"},
+                {"writer_pc": "0x028aaa/0x028ab2", "effect": "controller_index_u16 decrements; wrap negative to 9"},
+            ],
+            "rng": {
+                "entry": "0x017c5e", "calls": 1,
+                "order": "after active/class/base position; before variant/lane/selector writes",
+                "low_nibble": "rng_result_u16 & 0x000f",
+                "high_nibble": "(rng_result_u16 >> 4) & 0x000f",
+            },
+            "lane_bucket": "lane_bucket_table[((camera_z_s16 - 208) & 0x00f0) + rng_low_nibble]",
+            "tables": {
+                "lane_offsets_s16": lane_offsets,
+                "selector_cycle_u8": selector_cycle,
+                "lane_bucket_u8": lane_bucket_table,
+                "variant_u8": variant_table,
+                "sha256": hashlib.sha256(image[0x28ab4:0x28b5a]).hexdigest(),
+                "lane_bucket_variant_overlap": ("lane-bucket indices 48..63 read "
+                                                "0x028afa..0x028b09, the first "
+                                                "16 variant-table bytes"),
+            },
+            "observed_transactions": [
+                {"frame": 2510, "slot": "0xffa3c0", "phase_u8": "0xc0",
+                 "living_before_u16": 7, "camera_x_s16": 720,
+                 "camera_z_s16": 256, "rng_before_u16": "0xd21c",
+                 "rng_after_u16": "0x7692", "x_s16": 672,
+                 "y_s16": 328, "z_s16": 328, "variant_u8": 3,
+                 "selector83_u8": 1},
+                {"frame": 3982, "slot": "0xffa000", "phase_u8": "0x80",
+                 "living_before_u16": 7, "camera_x_s16": 1008,
+                 "camera_z_s16": 255, "rng_before_u16": "0x6fae",
+                 "rng_after_u16": "0x4ffd", "x_s16": 960,
+                 "y_s16": 343, "z_s16": 343, "variant_u8": 3,
+                 "selector83_u8": 1},
+            ],
+            "post_allocation_dispatch": {
+                "same_frame": {"state_u16": 0x0200, "substate_u16": 0,
+                               "facing_u8": 1, "health_s16": 87,
+                               "animation_record": "0x0012ddb0"},
+                "next_frame": {"state_u16": 0x0200,
+                               "substate_u16": 0x1600,
+                               "animation_record": "0x0012ec04"},
+            },
+        },
+        "auxiliary_writer": {
+            "routine": "0x028b5a..0x028ba4", "writer_pc": "0x028b7e",
+            "source_window": {
+                "first": "0x028b5a", "last_exclusive": "0x028ba6",
+                "sha256": hashlib.sha256(image[0x28b5a:0x28ba6]).hexdigest(),
+            },
+            "guard_branch_order": [
+                "require camera_x_s16 < 0x03f0",
+                "require ((u8(0xff8019) + 3) & 0x1f) == 0",
+                "require type-12 allocator 0x01769e succeeds",
+            ],
+            "guard_values": {"camera_x_limit_s16": 1008,
+                             "phase_add_u8": 3,
+                             "phase_mask_u8": 31},
+            "rng_calls": 0,
+            "write_values": {"class_u8": 0x1f, "variant_u8": 4,
+                             "timer_u16": 0, "x_s16": 976,
+                             "y_s16": 344, "z_s16": 344,
+                             "selector83_u8": 0},
+            "write_order": [
+                "living_enemy_count_u16 += 1", "active_u8 += 1",
+                "class_u8 = 0x1f", "variant_u8 = 4", "timer_u16 = 0",
+                "x_s16 = 976", "y_s16 = 344", "z_s16 = 344",
+                "selector83_u8 = 0",
+            ],
+        },
+        "suppression_control": {
+            "mutation": "retain old active byte only at writer 0x028a3e",
+            "suppressed_writer_count": int(suppress_result["suppressed_writes"]),
+            "baseline_first_actor": "active=1 state=0x0200 health=87",
+            "mutant_first_actor": "active=0 state=0 health=-1",
+            "baseline_later_actor": "active=1 state=0x0200 health=87",
+            "mutant_later_actor": "active=0 state=0",
+            "fixed_frame_substitute": False,
+        },
+        "intro_gate_suppression_control": {
+            "mutation": ("retain the old 0xff1a11 byte only at source writer "
+                         "successor 0x08da38"),
+            "suppressed_writer_count": 1,
+            "mutant_at_frame_4100": {"state_u16": 0x0202,
+                                     "timer42_u16": 60,
+                                     "intro_gate_u8": 0xff,
+                                     "main_spawn_transactions": 0,
+                                     "aux_spawn_transactions": 0},
+            "fixed_frame_substitute": False,
+        },
+    }
+
     controls = route["targeted_counterfactuals"]
     counterfactuals = {name: {
         "status": controls[name]["status"],
@@ -404,6 +1181,7 @@ def build_report() -> dict[str, object]:
                    "suppress_warehouse_offense", "remove_class_1f", "remove_class_00")}
     require(all(value["status"] == "PASS" and value["first_semantic_difference"]
                 for value in counterfactuals.values()), "encounter controls drift")
+    coffee_shop_scene = coffee_shop_scene_census()
 
     report = {
         "schema": "oracle11-round1-encounter-route-authority-v1",
@@ -423,6 +1201,8 @@ def build_report() -> dict[str, object]:
         "route_entry": {"frame": 1972, "state": 2,
                         "classification": "SOURCE_CLOSED_STABLE_ENTRY"},
         "first_entry_body": first_entry_body,
+        "first_segment_recurring_spawn": first_segment_recurring_spawn,
+        "coffee_shop_scene_census": coffee_shop_scene,
         "route_state_edges": edge_rows,
         "route_writer_transactions": writer_transactions,
         "enemy_spawns": enemy_spawns,
@@ -490,6 +1270,33 @@ def validate(report: dict[str, object]) -> None:
     require(len(report["enemy_spawns"]) == 56 and
             all(item["writer_pc"][2:] in SPAWN_GUARDS and item["transition_guard"]
                 for item in report["enemy_spawns"]), "unclosed encounter spawn")
+    scene = report["coffee_shop_scene_census"]
+    require(scene["capture_identity"]["byte_identical"] is True and
+            scene["source_frame_range"] == [1972, 5566] and
+            scene["counts"] == {"actor_lifetimes": 747,
+                                "class_type_pairs": 38,
+                                "source_closed_pairs": 21,
+                                "blocked_missing_source_evidence_pairs": 17,
+                                "audio_events": 279,
+                                "health_writes": 149,
+                                "damage_writes": 30} and
+            len(scene["actor_lifetimes"]) == 747 and
+            len(scene["blocked_class_type_pairs"]) == 17 and
+            len(scene["audio_events"]) == 279 and
+            len(scene["health_writes"]) == 149 and
+            sum(item["damage_writer"] for item in
+                scene["health_writes"]) == 30 and
+            len(scene["pool_scan"]) == 11 and
+            scene["pool_layout_source"]["inactive_in_capture"] ==
+                ["record8", "record24_aux"] and
+            all(item["source_classification"] in
+                ("SOURCE_CLOSED", "BLOCKED_MISSING_SOURCE_EVIDENCE")
+                for item in scene["actor_lifetimes"]) and
+            scene["negative_controls"] == {
+                "half_stride_aliases_admitted": False,
+                "inactive_slots_admitted": False,
+                "unknown_pair_silently_omitted": False},
+            "Coffee Shop scene census drift")
     first_entry = report["first_entry_body"]
     require(first_entry["classification"] == "SOURCE_CLOSED" and
             first_entry["capture_identity"]["byte_identical"] is True and
@@ -511,6 +1318,114 @@ def validate(report: dict[str, object]) -> None:
             first_entry["suppression_control"]["baseline_route_at_2238"] == 4 and
             first_entry["suppression_control"]["mutant_route_at_2300"] == 2,
             "entry executable boundary is not source closed")
+    progression = report["first_segment_recurring_spawn"]
+    require(progression["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            progression["capture_identity"]["byte_identical"] is True and
+            progression["scheduler"]
+                ["controller_precedes_type12_scheduler"] is True and
+            progression["phase_counter"]["stable_entry_value_u8"] == 0xa2 and
+            progression["phase_counter"]["writer_pc"] == "0x00809a" and
+            progression["phase_counter"]["observed_updates"][-1] == {
+                "frame": 2510, "before_u8": 0xbf, "after_u8": 0xc0} and
+            progression["phase_counter"]
+                ["video_frame_number_is_not_an_input"] is True and
+            progression["controller_program"]["initializer"]
+                ["limit_table_u16"] == [0, 35, 55, 70] and
+            progression["controller_program"]["initializer"]
+                ["observed_after"]["state_u16"] == 0x0200 and
+            progression["controller_program"]["initializer"]
+                ["observed_after"]["camera_bound_u16"] == 640 and
+            progression["controller_program"]["initial_spawn_transition"]
+                ["observed_after"] == {"frame": 2074,
+                                        "state_u16": 0x0202,
+                                        "living_enemy_count_u16": 10} and
+            progression["controller_program"]["intro_gate_transition"]
+                ["gate_owner"]["class_u8"] == "0x44" and
+            progression["controller_program"]["intro_gate_transition"]
+                ["gate_owner"]["writer_successor_pc"] == "0x08da38" and
+            progression["controller_program"]["intro_gate_transition"]
+                ["write_values"] == {
+                    "source_camera_target_u16": 208,
+                    "camera_x_call_threshold_s16": 720,
+                    "conditional_phase_0x2e_u8": 1,
+                    "conditional_local_0x2c_u8": 0} and
+            progression["controller_program"]["intro_gate_transition"]
+                ["observed"]["first_current_sample"]["state_u16"] == 0x0204 and
+            progression["controller_guard"]["first_operands"] == {
+                "progress_u16": 1, "limit_u16": 35,
+                "timer_before_u16": 3707, "timer_after_u16": 3706,
+                "controller_state_u16": 0x0204,
+                "controller_substate_u16": 0,
+            } and
+            progression["primary_writer"]["writer_pc"] == "0x028a3e" and
+            progression["primary_writer"]["guard_values"] == {
+                "living_limit_u16": 8, "phase_mask_u8": 7} and
+            progression["primary_writer"]["position_values"] == {
+                "x_camera_offset_s16": -48, "lane_base_s16": 208,
+                "lane_band_mask_u16": 0x00f0} and
+            [(row["writer_pc"], row["effect"]) for row in
+             progression["primary_writer"]["write_order"][:12]] == [
+                ("0x028a3a", "living_enemy_count_u16 += 1"),
+                ("0x028a3e", "active_u8 += 1"),
+                ("0x028a42", "class_u8 = 0x1f"),
+                ("0x028a48", "x_s16 = camera_x_s16"),
+                ("0x028a50", "x_s16 -= 48"),
+                ("0x028a54", "y_s16 = camera_z_s16"),
+                ("0x028a5a", "z_s16 = camera_z_s16"),
+                ("0x028a8a", "variant_u8 = variant_table[(lane_bucket << 4) + rng_high_nibble]"),
+                ("0x028a96", "y_s16 += lane_offset_table[lane_bucket]"),
+                ("0x028a9a", "z_s16 += lane_offset_table[lane_bucket]"),
+                ("0x028a9e", "timer_u16 = 0"),
+                ("0x028aa6", "selector83_u8 = selector_cycle[controller_index_u16]")]
+            and
+            progression["primary_writer"]["rng"]["calls"] == 1 and
+            progression["primary_writer"]["tables"]["lane_offsets_s16"] ==
+                [24, 40, 56, 72, 88, 104] and
+            progression["primary_writer"]["observed_transactions"][0]
+                ["x_s16"] == 672 and
+            progression["primary_writer"]["observed_transactions"][1]
+                ["x_s16"] == 960 and
+            progression["primary_writer"]["post_allocation_dispatch"]
+                ["same_frame"]["state_u16"] == 0x0200 and
+            progression["primary_writer"]["post_allocation_dispatch"]
+                ["next_frame"]["substate_u16"] == 0x1600 and
+            progression["auxiliary_writer"]["writer_pc"] == "0x028b7e" and
+            progression["auxiliary_writer"]["guard_values"] == {
+                "camera_x_limit_s16": 1008, "phase_add_u8": 3,
+                "phase_mask_u8": 31} and
+            progression["auxiliary_writer"]["write_values"] == {
+                "class_u8": 0x1f, "variant_u8": 4, "timer_u16": 0,
+                "x_s16": 976, "y_s16": 344, "z_s16": 344,
+                "selector83_u8": 0} and
+            progression["auxiliary_writer"]["rng_calls"] == 0 and
+            progression["lifecycle_release_boundary"]["writer_pc"] ==
+                "0x061152" and
+            progression["lifecycle_release_boundary"]
+                ["writer_instruction_pc"] == "0x06114c" and
+            progression["lifecycle_release_boundary"]["release_routine"] ==
+                "0x0176b4" and
+            progression["lifecycle_release_boundary"]
+                ["observed_release_transactions"] == 22 and
+            progression["lifecycle_release_boundary"]
+                ["suppression_control"]["suppressed_release_writes"] == 12 and
+            progression["lifecycle_release_boundary"]
+                ["suppression_control"]["baseline_main_aux_spawns"] == [15, 3] and
+            progression["lifecycle_release_boundary"]
+                ["suppression_control"]["mutant_main_aux_spawns"] == [0, 0] and
+            progression["lifecycle_release_boundary"]
+                ["suppression_control"]["fixed_frame_substitute"] is False and
+            progression["suppression_control"]["suppressed_writer_count"] == 8 and
+            progression["suppression_control"]["fixed_frame_substitute"] is False and
+            progression["intro_gate_suppression_control"]
+                ["suppressed_writer_count"] == 1 and
+            progression["intro_gate_suppression_control"]
+                ["mutant_at_frame_4100"]["state_u16"] == 0x0202 and
+            progression["intro_gate_suppression_control"]
+                ["mutant_at_frame_4100"]["main_spawn_transactions"] == 0 and
+            progression["intro_gate_suppression_control"]
+                ["fixed_frame_substitute"] is False,
+            "first-segment recurring spawn boundary is not executable")
     require(report["negative_controls"] == {
         "presentation_signature_can_advance_gameplay": False,
         "fixed_frame_can_spawn_or_clear": False,
@@ -550,6 +1465,42 @@ def mutation_self_test(report: dict[str, object]) -> None:
     fixed_frame = copy.deepcopy(report)
     fixed_frame["first_entry_body"]["suppression_control"]["fixed_frame_substitute"] = True
     mutations.append(fixed_frame)
+    wrong_progression_guard = copy.deepcopy(report)
+    wrong_progression_guard["first_segment_recurring_spawn"]["controller_guard"] \
+        ["first_operands"]["timer_after_u16"] = 3705
+    mutations.append(wrong_progression_guard)
+    wrong_progression_phase = copy.deepcopy(report)
+    wrong_progression_phase["first_segment_recurring_spawn"]["phase_counter"] \
+        ["writer_pc"] = "0x000e86"
+    mutations.append(wrong_progression_phase)
+    wrong_progression_write = copy.deepcopy(report)
+    wrong_progression_write["first_segment_recurring_spawn"]["primary_writer"] \
+        ["write_order"][3]["effect"] = "x_s16 = fixed_frame_position"
+    mutations.append(wrong_progression_write)
+    wrong_progression_rng = copy.deepcopy(report)
+    wrong_progression_rng["first_segment_recurring_spawn"]["primary_writer"] \
+        ["rng"]["calls"] = 0
+    mutations.append(wrong_progression_rng)
+    wrong_progression_suppression = copy.deepcopy(report)
+    wrong_progression_suppression["first_segment_recurring_spawn"] \
+        ["suppression_control"]["suppressed_writer_count"] = 0
+    mutations.append(wrong_progression_suppression)
+    wrong_controller_init = copy.deepcopy(report)
+    wrong_controller_init["first_segment_recurring_spawn"]["controller_program"] \
+        ["initializer"]["limit_table_u16"][1] = 34
+    mutations.append(wrong_controller_init)
+    wrong_intro_owner = copy.deepcopy(report)
+    wrong_intro_owner["first_segment_recurring_spawn"]["controller_program"] \
+        ["intro_gate_transition"]["gate_owner"]["class_u8"] = "0x1f"
+    mutations.append(wrong_intro_owner)
+    wrong_intro_suppression = copy.deepcopy(report)
+    wrong_intro_suppression["first_segment_recurring_spawn"] \
+        ["intro_gate_suppression_control"]["suppressed_writer_count"] = 0
+    mutations.append(wrong_intro_suppression)
+    wrong_lifecycle_writer = copy.deepcopy(report)
+    wrong_lifecycle_writer["first_segment_recurring_spawn"] \
+        ["lifecycle_release_boundary"]["writer_pc"] = "0x061150"
+    mutations.append(wrong_lifecycle_writer)
     for mutant in mutations:
         try:
             validate(mutant)

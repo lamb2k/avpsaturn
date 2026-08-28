@@ -46,6 +46,42 @@ mutant["airborne_actions"]["button1"]["writer"] = "0x02385e"
 reject(mutant, "wrong airborne Button1 writer")
 
 mutant = copy.deepcopy(report)
+mutant["airborne_actions"]["button1"]["record4_class03"]["class_u8"] = 0
+reject(mutant, "airborne Button1 class-3 actor replaced")
+
+mutant = copy.deepcopy(report)
+mutant["airborne_actions"]["button1"]["record4_class03"][
+    "player_phase_0x0406"]["presentation_records"][4]["branch_s16"] = -32768
+reject(mutant, "airborne Button1 terminal animation branch guessed")
+
+mutant = copy.deepcopy(report)
+mutant["airborne_actions"]["button1"]["record4_class03"]["active_state"][
+    "substate_2"]["reload_u8"] = 3
+reject(mutant, "airborne Button1 direction timer guessed")
+
+mutant = copy.deepcopy(report)
+mutant["airborne_actions"]["button1"]["record4_class03"]["active_state"][
+    "low_nibble_motion_tables_s16"]["1"] = \
+        mutant["airborne_actions"]["button1"]["record4_class03"][
+            "active_state"]["low_nibble_motion_tables_s16"]["1"][:16]
+reject(mutant, "airborne Button1 motion table truncated to one quadrant")
+
+mutant = copy.deepcopy(report)
+mutant["airborne_actions"]["button1"]["record4_class03"]["active_state"][
+    "high_nibble_motion_tables_s16"]["12"][63][1] += 1
+reject(mutant, "airborne Button1 direction-63 motion vector guessed")
+
+mutant = copy.deepcopy(report)
+mutant["airborne_actions"]["button1"]["record4_class03"]["effect_allocation"][
+    "audio_command"] = "0x0008"
+reject(mutant, "record36 effect helper mislabeled as audio")
+
+mutant = copy.deepcopy(report)
+mutant["airborne_actions"]["button1"]["record4_class03"]["effect_allocation"][
+    "record_type_u8"] = 36
+reject(mutant, "class-3 trail effect assigned to wrong fixed pool")
+
+mutant = copy.deepcopy(report)
 mutant["airborne_actions"]["rng_consumption"] = "one selector call"
 reject(mutant, "air action RNG introduced")
 
@@ -134,4 +170,4 @@ reject(mutant, "Button3 RNG invented")
 rebuilt = oracle11.build_report()
 assert oracle11.canonical(rebuilt) == ARTIFACT.read_bytes(), \
     "derived air authority report drift"
-print("ORACLE-11 player air authority tests: PASS (22 mutations rejected)")
+print("ORACLE-11 player air authority tests: PASS (25 mutations rejected)")

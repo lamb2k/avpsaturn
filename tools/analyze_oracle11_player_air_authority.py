@@ -13,9 +13,13 @@ RAW = ROOT / ".deps" / "mame" / "oracle11_player_air_b"
 RAW_DOWN = ROOT / ".deps" / "mame" / "oracle11_player_air_c"
 RAW_GUN = ROOT / ".deps" / "mame" / "oracle11_player_air_d"
 RAW_NATURAL = ROOT / ".deps" / "mame" / "oracle11_player_jump_a"
+SCENE_A = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs7a"
+SCENE_B = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs7b"
+SCENE_SUPPRESS = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs7s"
 OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
 PROGRAM = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_program_2m.bin"
 WEAPON = ROOT / "data" / "oracle11_predator_weapon_projectile_resource.json"
+AUXILIARY = ROOT / "data" / "oracle11_round1_auxiliary_authority.json"
 OUT = ROOT / "data" / "oracle11_predator_air_authority.json"
 ROUTE_RUNS = {
     "baseline-completions": ROOT / ".deps" / "mame" /
@@ -53,6 +57,9 @@ AIR_RECORDS = {
     0x15F45C: (0x162BAA, 18, 0), 0x15FC3C: (0x162EE2, 9, 22),
     0x15FC4C: (0x162EE2, 9, 23), 0x15FC60: (0x162EE2, 9, 35),
     0x15FCE8: (0x16212C, 7, 0),
+    0x15E9D8: (0x161DFC, 1, 0), 0x15E9E8: (0x161F10, 1, 0),
+    0x15E9F8: (0x162036, 1, 0), 0x15EA08: (0x161F10, 1, 0),
+    0x15EA18: (0x161DFC, 1, 0),
 }
 AIR_SELECTOR_RECORDS = {
     3: [0x15F2CC, 0x15F2DC],
@@ -134,6 +141,16 @@ def record_identity(program: bytes, address: int) -> dict[str, object]:
             "hurt_selector_u8": actual[1], "attack_selector_u8": actual[2]}
 
 
+def projectile_record_identity(program: bytes, address: int) -> dict[str, object]:
+    raw = program[address:address + 16]
+    return {"animation_record": f"0x{address:08x}",
+            "timer_u16": int.from_bytes(raw[0:2], "big"),
+            "branch_s16": int.from_bytes(raw[2:4], "big", signed=True),
+            "assembly": f"0x{int.from_bytes(raw[4:8], 'big'):08x}",
+            "hurt_selector_u8": raw[8], "attack_selector_u8": raw[9],
+            "record_sha256": hashlib.sha256(raw).hexdigest()}
+
+
 def selector_sequences(program: bytes) -> dict[str, object]:
     base = 0x15E240
     result = {}
@@ -177,6 +194,95 @@ def manifest_identity(root: Path) -> dict[str, object]:
                     f"{root.name}/{variant['name']}/{filename}: identity drift")
     return {"manifest_sha256": digest(manifest_path),
             "variant_names": [item["name"] for item in manifest["variants"]]}
+
+
+def motion_tables(program: bytes, pointer_base: int,
+                  count: int) -> dict[str, list[list[int]]]:
+    result: dict[str, list[list[int]]] = {}
+    for index in range(1, count):
+        address = u32be(program, pointer_base + index * 4)
+        require(0x1FA7C0 <= address <= 0x1FC1C0,
+                "record4 class-3 motion pointer drift")
+        # 0x030556 indexes these tables with the complete u8 direction after
+        # the class-0x03 allocator constrains it to 0x00..0x3f.  Each source
+        # table is therefore 0x100 bytes: 64 signed (x, y) vector pairs.  The
+        # earlier 16-row extraction silently omitted three quadrants and was
+        # not implementation-executable.
+        result[str(index)] = [
+            [int.from_bytes(program[address + row * 4:
+                                    address + row * 4 + 2], "big", signed=True),
+             int.from_bytes(program[address + row * 4 + 2:
+                                    address + row * 4 + 4], "big", signed=True)]
+            for row in range(64)
+        ]
+    return result
+
+
+def type4_class03_capture_contract() -> dict[str, object]:
+    files = ("coffee_shop_type4_class03.tsv", "coffee_shop_scene_actors.tsv",
+             "coffee_shop_scene_frames.tsv", "coffee_shop_scene_health_writes.tsv",
+             "dispatches.tsv", "samples.tsv", "score_writes.tsv",
+             "progression_result.tsv")
+    identity_a = {name: digest(SCENE_A / name) for name in files}
+    identity_b = {name: digest(SCENE_B / name) for name in files}
+    require(identity_a == identity_b,
+            "record4 class-3 independent Coffee Shop captures differ")
+    baseline_actors = rows(SCENE_A / "coffee_shop_scene_actors.tsv")
+    mutant_actors = rows(SCENE_SUPPRESS / "coffee_shop_scene_actors.tsv")
+    class03 = [row for row in baseline_actors
+               if row["pool"] == "record4" and row["class"] == "03"]
+    class03_mutant = [row for row in mutant_actors
+                      if row["pool"] == "record4" and row["class"] == "03"]
+    require(len(class03) == 19 and not class03_mutant and
+            [int(row["frame"]) for row in class03] == list(range(4697, 4716)),
+            "record4 class-3 Coffee Shop lifetime drift")
+    result = rows(SCENE_SUPPRESS / "progression_result.tsv")
+    require(len(result) == 1 and
+            int(result[0]["type4_class03_suppressed_writes"]) == 1,
+            "record4 class-3 suppression writer drift")
+    require(digest(SCENE_A / "coffee_shop_scene_frames.tsv") ==
+            digest(SCENE_SUPPRESS / "coffee_shop_scene_frames.tsv") and
+            digest(SCENE_A / "samples.tsv") ==
+            digest(SCENE_SUPPRESS / "samples.tsv") and
+            digest(SCENE_A / "score_writes.tsv") ==
+            digest(SCENE_SUPPRESS / "score_writes.tsv"),
+            "record4 class-3 suppression changed player/route/score projection")
+    baseline_commands = [(row["command"], row["return0"], row["return1"],
+                          row["return2"])
+                         for row in rows(SCENE_A / "dispatches.tsv")]
+    mutant_commands = [(row["command"], row["return0"], row["return1"],
+                        row["return2"])
+                       for row in rows(SCENE_SUPPRESS / "dispatches.tsv")]
+    require([row[0] for row in baseline_commands] ==
+            [row[0] for row in mutant_commands],
+            "record4 class-3 suppression changed logical audio command order")
+    writes = rows(SCENE_A / "coffee_shop_type4_class03.tsv")
+    require(any(row["event"] == "write" and row["pc"] == "02387e" and
+                row["slot"] == "ff8700" for row in writes) and
+            any(row["event"] == "write" and row["pc"] == "01775a" and
+                row["slot"] == "ff8700" for row in writes),
+            "record4 class-3 allocation/release provenance drift")
+    return {
+        "independent_baseline_a": identity_a,
+        "independent_baseline_b": identity_b,
+        "suppression": {name: digest(SCENE_SUPPRESS / name) for name in files},
+        "lifetime": {"source_slot": "0xff8700", "first_frame": 4697,
+                     "last_frame": 4715, "states_u16": [0x0200, 0x0202,
+                                                          0x0204, 0x0600],
+                     "owner": "player 0xff8380",
+                     "owner_action_u16": "0x0402 -> 0x0406"},
+        "suppression_control": {
+            "writer": "0x02387e", "suppressed_writes": 1,
+            "class03_actor_rows": {"baseline": 19, "mutant": 0},
+            "player_route_samples_identical": True,
+            "score_writes_identical": True,
+            "logical_audio_command_order_identical": True,
+            "downstream_pool_effect": ("the intentionally free record-4 slot "
+                "changes later allocator slot identities and shifts two later "
+                "actor-origin command frames; it is not presentation-only"),
+            "fixed_frame_substitute": False,
+        },
+    }
 
 
 def phases(path: Path) -> set[int]:
@@ -337,6 +443,205 @@ def build_report() -> dict[str, object]:
             "Button3 presentation actor field drift")
 
     weapon = json.loads(WEAPON.read_text(encoding="ascii"))
+    auxiliary = json.loads(AUXILIARY.read_text(encoding="ascii"))
+    class49 = next(row for row in auxiliary["archetypes"]
+                   if row["class"] == "0x49")
+    require(class49["classification"] == "SOURCE_CLOSED" and
+            class49["type"] == 24 and
+            class49["dispatch_entry"] == "0x08f080",
+            "record24 class-0x49 accepted auxiliary authority drift")
+    class03_capture = type4_class03_capture_contract()
+    class03_offsets = [
+        [int.from_bytes(opcodes[0x0303FA + index * 4:
+                                0x0303FC + index * 4], "big", signed=True),
+         int.from_bytes(opcodes[0x0303FC + index * 4:
+                                0x0303FE + index * 4], "big", signed=True)]
+        for index in range(7)
+    ]
+    require(class03_offsets == [[5, 86], [-35, 76], [-6, 90],
+                                [-6, 53], [8, 49], [20, 55], [-14, 70]],
+            "record4 class-3 owner-selector offsets drift")
+    class03_child_rows = [
+        {"x_s16": int.from_bytes(program[0x030638 + index * 8:
+                                         0x03063A + index * 8], "big", signed=True),
+         "y_s16": int.from_bytes(program[0x03063A + index * 8:
+                                         0x03063C + index * 8], "big", signed=True),
+         "z_s16": int.from_bytes(program[0x03063C + index * 8:
+                                         0x03063E + index * 8], "big", signed=True),
+         "variant_u8": program[0x03063E + index * 8]}
+        for index in range(5)
+    ]
+    class03_collision_child_rows = [
+        {"x_s16": int.from_bytes(program[0x030660 + index * 8:
+                                         0x030662 + index * 8], "big", signed=True),
+         "y_s16": int.from_bytes(program[0x030662 + index * 8:
+                                         0x030664 + index * 8], "big", signed=True),
+         "z_s16": int.from_bytes(program[0x030664 + index * 8:
+                                         0x030666 + index * 8], "big", signed=True),
+         "variant_u8": program[0x030666 + index * 8]}
+        for index in range(5)
+    ]
+    require(class03_child_rows == [
+        {"x_s16": 32, "y_s16": -16, "z_s16": -16, "variant_u8": 0},
+        {"x_s16": -48, "y_s16": -8, "z_s16": -8, "variant_u8": 0},
+        {"x_s16": -32, "y_s16": 16, "z_s16": 16, "variant_u8": 0},
+        {"x_s16": 48, "y_s16": 8, "z_s16": 8, "variant_u8": 0},
+        {"x_s16": 0, "y_s16": 0, "z_s16": 0, "variant_u8": 1}],
+        "record4 class-3 normal child table drift")
+    require(class03_collision_child_rows == [
+        {"x_s16": 64, "y_s16": -16, "z_s16": -16, "variant_u8": 2},
+        {"x_s16": 48, "y_s16": 16, "z_s16": 16, "variant_u8": 2},
+        {"x_s16": 32, "y_s16": -8, "z_s16": -8, "variant_u8": 2},
+        {"x_s16": 16, "y_s16": 8, "z_s16": 8, "variant_u8": 2},
+        {"x_s16": 0, "y_s16": 0, "z_s16": 0, "variant_u8": 1}],
+        "record4 class-3 collision child table drift")
+    class03_contract = {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "spec_executable": True,
+        "record_type_u8": 4, "class_u8": 3,
+        "dispatch": "0x030382", "allocator": "0x01773e",
+        "state_sequence_u8": [0, 2, 4, 6],
+        "allocation": {
+            "owner_action_guard": ("player state 0x0200 action 0x0402; "
+                "airborne Button1 edge/resource helper 0x0241f0 accepts"),
+            "writer_window": "0x023858..0x023902",
+            "active_writer": "0x02387e",
+            "writes": {"active_increment_u8": 1, "class_u8": 3,
+                       "variant_u8": 0,
+                       "position": "copy player x/y/z high words",
+                       "facing_u8": "copy player +0x0f",
+                       "owner_pointer_u16": "player low word",
+                       "owner_presentation_selector_u8": "copy player +0xd1 to actor +0x65",
+                       "field_0x26_u16": "copy D5 from accepted 0x0241f0 helper"},
+            "direction_branch_order": ["any direction", "up", "down",
+                                       "horizontal", "facing sign transform"],
+            "direction_u8": {"neutral": 31, "up": 3, "down": 31,
+                             "horizontal": 16,
+                             "facing_zero_transform": "(-value) & 0x3f"},
+            "player_phase_after_entry_u16": "0x0406",
+            "player_collision_selector_u8": 9,
+            "allocation_failure": "player phase/presentation continues; no class-3 actor",
+        },
+        "player_phase_0x0406": {
+            "entry": "0x023858",
+            "motion_routine": "0x01a8e6",
+            "motion_rule": "same signed 16.16 velocity and acceleration update as phase 0x0402",
+            "landing_guard": "unsigned carry clear from world z versus world y enters 0x023630",
+            "landing_phase_u16": "0x0404",
+            "landing_presentation_selector_u8": 10,
+            "presentation_selector_u8": 18,
+            "presentation_table": "0x0015e32c",
+            "presentation_records": [record_identity(program, address)
+                for address in (0x15E9D8, 0x15E9E8, 0x15E9F8,
+                                0x15EA08, 0x15EA18)],
+            "capture_projection": {
+                "first_frame": 4697, "last_frame": 4721,
+                "record_sequence": ["0x15e9d8", "0x15e9e8", "0x15e9f8",
+                                    "0x15ea08", "0x15ea18"],
+                "landing_frame": 4722,
+            },
+        },
+        "initialization": {
+            "entry": "0x030396", "next_state_u8": 2,
+            "motion_table_u32": "0x001fb9c0",
+            "collision_table_u32": "0x0002fc3c",
+            "object_or_u16": "0x8000", "health_s16": 0,
+            "active_collision_u8": 1,
+            "owner_selector": "u8(owner+0x24) & 0x7f",
+            "selector_offsets_s16": class03_offsets,
+            "position_rule": ("add selected signed x/y offsets; negate x "
+                "when facing is zero; decrement z high word by one"),
+            "presentation_records": [projectile_record_identity(program, address)
+                for address in range(0x02FB48, 0x02FBC8, 0x10)],
+        },
+        "active_state": {
+            "entry": "0x030416", "substate_dispatch_u8": [0, 2, 4],
+            "substate_0": {
+                "transition_guard": ("direction is 0x10/0x30, or "
+                    "u8(direction-0x10) >= 0x20, or "
+                    "u16(y_high-z_high) >= 0x009c"),
+                "transition_writes": {"substate_increment_u8": 2,
+                                      "motion_progress_u8": 0,
+                                      "direction_timer_u8": 1},
+                "update_order": ["transition guard", "shared 16.16 motion",
+                    "phase-bit-0 clear allocates record24 class0x49 variant1",
+                    "visibility"],
+            },
+            "substate_2": {
+                "timer": "predecrement +0x2b; nonzero skips direction step",
+                "reload_u8": 2,
+                "direction_step": ("low nibble zero increments substate to 4; "
+                    "otherwise add +1 when bit4 clear or -1 when bit4 set"),
+            },
+            "substate_4_guards_in_order": [
+                "health_s16 < 0 -> state 4 and global effect flag",
+                "u16(x_high-camera_x+0x50) > 0x0220 -> state 6",
+                "u16(y_high-camera_z+0x80) > 0x0240 -> state 6",
+                "u16(y_high) < u16(z_high) -> state 4 and global effect flag"],
+            "substate_4_update_order": ["shared 16.16 motion",
+                "shared animation", "high-nibble table contribution",
+                "low-nibble table contribution", "motion progress += 5 capped at 0xc0",
+                "phase-bit-0 clear allocates record24 class0x49 variant1",
+                "visibility"],
+            "motion_arithmetic": ("select signed s16 (x,y) by direction_u8; "
+                "sign-extend, shift left 8, add to 16.16 x/y"),
+            "direction_index_range_u8": [0, 63],
+            "vectors_per_motion_table": 64,
+            "low_nibble_motion_tables_s16": motion_tables(program, 0x030688, 16),
+            "high_nibble_motion_tables_s16": motion_tables(program, 0x0306C8, 13),
+        },
+        "collision": weapon["implementation_contract"]
+            ["record4_parent_class0"]["collision_table"],
+        "collision_state": {
+            "guard": "signed health below zero or unsigned y below z",
+            "next_state_u8": 4, "global_effect_flag_writer": "0x030582"},
+        "child_emitter_state": {
+            "entry": "0x030594", "initial_child_count_u8": 5,
+            "initial_cadence_u8": 1, "cadence_reload_u8": 4,
+            "allocator": "0x01773e", "child_class_u8": 4,
+            "row_index": "predecremented child count 4..0",
+            "normal_rows": class03_child_rows,
+            "collision_rows": class03_collision_child_rows,
+            "row_table_guard": "health_s16 < 0 selects collision rows",
+            "x_sign_rule": "negate row x when parent facing is zero",
+            "terminal_guard": "signed predecremented child count < 0 increments state to 6",
+        },
+        "effect_allocation": {
+            "guard": "global phase byte +0x19 bit0 is clear",
+            "caller": "0x030476 or 0x030504", "helper": "0x08f100",
+            "record_type_u8": 24, "class_u8": 0x49, "variant_u8": 1,
+            "timer_u8": 8,
+            "writes": "copy parent x/y/z, facing and animation record; timer receives D6",
+            "audio_command": None,
+            "accepted_auxiliary_contract": {
+                "artifact": "data/oracle11_round1_auxiliary_authority.json",
+                "artifact_sha256": digest(AUXILIARY),
+                "dispatch": class49["dispatch_entry"],
+                "state_sequence_u8": [0, 2, 4],
+                "state0": {"next_state_u8": 2,
+                    "object_or_u16": "0x8000", "field_0x09_u8": 0,
+                    "collision_pointer_u32": "0x00000000"},
+                "state2": {
+                    "timer_guard": "predecrement timer_u8; zero releases in the same dispatch",
+                    "variant_guard": "nonzero variant adds signed global +0x2c0 to x high word",
+                    "update_order": ["timer", "optional x delta", "visibility"]},
+                "state4": {"release": "0x0177f0"},
+                "presentation_records": class49[
+                    "presentation_and_collision"]["records"],
+                "rng_calls": 0},
+        },
+        "release_state": {"entry": "0x030632", "release": "0x017754"},
+        "scheduler": "record type 4 in ascending slot order before record type 8",
+        "rng_calls": [],
+        "capture_projection": class03_capture["lifetime"],
+        "suppression_control": class03_capture["suppression_control"],
+        "mutation_controls": ["reject class or owner mutation",
+            "reject direction/facing mapping mutation", "reject state/substate guard mutation",
+            "reject signedness or bound mutation", "reject motion table/value/order mutation",
+            "reject collision table mutation", "reject child cadence/row mutation",
+            "reject record36 effect identity mutation", "reject release or scheduler mutation",
+            "reject fixed-frame actor creation"],
+    }
     report = {
         "schema": "oracle11-predator-air-authority-v1",
         "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE",
@@ -367,6 +672,10 @@ def build_report() -> dict[str, object]:
                 opcodes, 0x02370C, 0x023858),
             "airborne_button1_spawn_branch": source_window(
                 opcodes, 0x023858, 0x023926),
+            "record4_class03_dispatch_and_states": source_window(
+                opcodes, 0x030382, 0x030638),
+            "record4_class03_motion_and_child_tables": source_window(
+                program, 0x030638, 0x030708),
             "fixed_point_air_motion": source_window(
                 opcodes, 0x01A8E6, 0x01A932),
             "button2_edge_guard": source_window(
@@ -376,6 +685,7 @@ def build_report() -> dict[str, object]:
             "interruption_reset": source_window(
                 opcodes, 0x01A96E, 0x01AA5E),
             "capture_manifests": identities,
+            "coffee_shop_class03_capture": class03_capture,
         },
         "state_dispatch": {
             f"0x{state:02x}": f"0x{pc:06x}"
@@ -537,6 +847,7 @@ def build_report() -> dict[str, object]:
                 "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
                 "resource_artifact_sha256": digest(WEAPON),
                 "resource_status": weapon["status"],
+                "record4_class03": class03_contract,
             },
             "button2": {
                 "guard": "0x01a6c4 new Button2 edge",
@@ -614,6 +925,56 @@ def validate(report: dict[str, object]) -> None:
             report["airborne_actions"]["button1"]["writer"] == "0x023860" and
             report["airborne_actions"]["button2"]["writer"] == "0x02367c",
             "air phase writer identity drift")
+    class03 = report["airborne_actions"]["button1"]["record4_class03"]
+    require(class03["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            class03["spec_executable"] is True and
+            class03["record_type_u8"] == 4 and class03["class_u8"] == 3 and
+            class03["dispatch"] == "0x030382" and
+            class03["state_sequence_u8"] == [0, 2, 4, 6] and
+            class03["allocation"]["active_writer"] == "0x02387e" and
+            class03["player_phase_0x0406"]["presentation_selector_u8"] == 18 and
+            class03["player_phase_0x0406"]["landing_phase_u16"] == "0x0404" and
+            [row["record"] for row in
+                class03["player_phase_0x0406"]["presentation_records"]] ==
+                ["0x15e9d8", "0x15e9e8", "0x15e9f8", "0x15ea08", "0x15ea18"] and
+            class03["player_phase_0x0406"]["presentation_records"] ==
+                [record_identity(PROGRAM.read_bytes(), address) for address in
+                    (0x15E9D8, 0x15E9E8, 0x15E9F8, 0x15EA08, 0x15EA18)] and
+            class03["initialization"]["collision_table_u32"] ==
+                "0x0002fc3c" and
+            len(class03["initialization"]["presentation_records"]) == 8 and
+            class03["initialization"]["presentation_records"][-1][
+                "branch_s16"] == -32768 and
+            class03["active_state"]["substate_2"]["reload_u8"] == 2 and
+            len(class03["active_state"]["low_nibble_motion_tables_s16"]) == 15 and
+            len(class03["active_state"]["high_nibble_motion_tables_s16"]) == 12 and
+            class03["active_state"]["direction_index_range_u8"] == [0, 63] and
+            class03["active_state"]["vectors_per_motion_table"] == 64 and
+            all(len(rows) == 64 for rows in
+                class03["active_state"]["low_nibble_motion_tables_s16"].values()) and
+            all(len(rows) == 64 for rows in
+                class03["active_state"]["high_nibble_motion_tables_s16"].values()) and
+            class03["active_state"]["low_nibble_motion_tables_s16"] ==
+                motion_tables(PROGRAM.read_bytes(), 0x030688, 16) and
+            class03["active_state"]["high_nibble_motion_tables_s16"] ==
+                motion_tables(PROGRAM.read_bytes(), 0x0306C8, 13) and
+            class03["child_emitter_state"]["cadence_reload_u8"] == 4 and
+            len(class03["child_emitter_state"]["normal_rows"]) == 5 and
+            len(class03["child_emitter_state"]["collision_rows"]) == 5 and
+            class03["effect_allocation"]["record_type_u8"] == 24 and
+            class03["effect_allocation"]["class_u8"] == 0x49 and
+            class03["effect_allocation"]["variant_u8"] == 1 and
+            class03["effect_allocation"]["timer_u8"] == 8 and
+            class03["effect_allocation"]["accepted_auxiliary_contract"][
+                "dispatch"] == "0x08f080" and
+            class03["effect_allocation"]["audio_command"] is None and
+            class03["suppression_control"]["suppressed_writes"] == 1 and
+            class03["suppression_control"]["class03_actor_rows"] ==
+                {"baseline": 19, "mutant": 0} and
+            class03["rng_calls"] == [] and
+            len(class03["mutation_controls"]) == 10,
+            "record4 class-3 implementation contract drift")
     require(report["directional_actions"]["rng_consumption"] == "none" and
             report["airborne_actions"]["rng_consumption"].startswith("none") and
             report["interruption"]["rng_consumption"] == "none",

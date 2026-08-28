@@ -77,6 +77,12 @@ def parse_carves() -> dict:
     dram1 = const("AVSP_CART_DRAM1_BYTES")
     tiles = const("AVSP_TILE_REGION_BYTES")
     strips = const("AVSP_STRIPS_REGION_BYTES")
+    round1_runtime = const("AVSP_ROUND1_RUNTIME_REGION_BYTES")
+    round1_runtime_measured = const("AVSP_ROUND1_RUNTIME_MEASURED_BYTES")
+    live_diagnostics = const("AVSP_LIVE_DIAG_REGION_BYTES")
+    live_diagnostic_record = const("AVSP_LIVE_DIAG_RECORD_BYTES")
+    live_diagnostic_samples = const("AVSP_LIVE_DIAG_SAMPLES")
+    live_diagnostic_measured = live_diagnostic_record * live_diagnostic_samples
     tile_file = ROOT / "build" / "avsp_cd" / "SPR4" / "TILES.BIN"
     strip_file = ROOT / "build" / "rp4_fixture" / "STRIPS.BIN"
     tile_bytes = tile_file.stat().st_size if tile_file.exists() else None
@@ -91,11 +97,21 @@ def parse_carves() -> dict:
         "strips_file_bytes": strip_bytes,
         "strips_carve_headroom": (strips - strip_bytes)
         if (strips and strip_bytes is not None) else None,
-        "jo_zone_bytes": dram1 - tiles - strips,
+        "round1_runtime_carve_bytes": round1_runtime,
+        "round1_runtime_measured_bytes": round1_runtime_measured,
+        "round1_runtime_headroom_bytes": (round1_runtime -
+                                           round1_runtime_measured),
+        "live_diagnostic_carve_bytes": live_diagnostics,
+        "live_diagnostic_measured_bytes": live_diagnostic_measured,
+        "live_diagnostic_headroom_bytes": (live_diagnostics -
+                                            live_diagnostic_measured),
+        "jo_zone_bytes": (dram1 - tiles - strips - round1_runtime -
+                          live_diagnostics),
         "status": "MEASURED",
         "note": "strips carve exists only in the street-test profile; the "
-                "jo zone figure above applies to that profile, other "
-                "profiles get dram1 - tile_carve",
+                "Round 1 runtime carve exists only in the live-encounter "
+                "profile; the jo zone figure above applies when both are "
+                "active, while other profiles omit the inactive carves",
     }
 
 

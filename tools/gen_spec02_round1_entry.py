@@ -54,6 +54,31 @@ def build() -> str:
     class1f_current_spawn = class1f_current["spawn"]
     class1f_current_actions = class1f_current["actions"]
     class1f_current_damage = class1f_current["damage_hit_ko_removal"]
+    class1f_current_reaction = class1f_current_damage[
+        "accepted_port_v2_reaction_mapping"]
+    class1f_actions = class1f["first_segment_action_execution_contract"]
+    action_variants = class1f_actions["initializer"]["variants"]
+    action_targets = class1f_actions["current_dispatch"]["action_targets"]
+    action_selectors = class1f_actions["animation_selector_table"]["selectors"]
+    action_records = [record for sequence in action_selectors
+                      for record in sequence["records"]]
+    action_movement_tables = class1f_actions["movement_tables"]
+    action_attack_timers = class1f_actions["attack_timer_table_u8"]
+    action_programs = class1f_actions["action_programs"]
+    action_bounds = action_programs["source_bounds"]
+    action_direction = action_programs["direction_helper_0x061032"]
+    action_zero = action_programs["action_0x00"]
+    action_fall = action_programs["action_0x0c"]
+    action_jump = action_programs["action_0x0e"]
+    action_attack = action_programs["action_0x04"]
+    recurring = fixtures["authority_data"]["route"][
+        "first_segment_recurring_spawn"]
+    recurring_controller = recurring["controller_program"]
+    recurring_initializer = recurring_controller["initializer"]
+    recurring_gate = recurring_controller["intro_gate_transition"]
+    recurring_primary = recurring["primary_writer"]
+    recurring_auxiliary = recurring["auxiliary_writer"]
+    recurring_tables = recurring_primary["tables"]
     class1f_initial_actors = class1f_initial["actors"]
     class1f_initialization = class1f_initial["initialization"]
     class1f_sequences = class1f_initial["animation_sequences"]
@@ -64,8 +89,11 @@ def build() -> str:
     class09 = auxiliary_dependencies["class_0x09_type20_rng_owner"]
     class4e = auxiliary_dependencies["class_0x4e_type24_variant4_effect"]
     class44 = auxiliary_dependencies["class_0x44_type24_command_guard_owner"]
-    state_contexts = [tuple(int(part, 16) for part in context.split(":"))
-                      for context in class1f["state_phase_contexts"]]
+    state_contexts = sorted(set(
+        tuple(int(part, 16) for part in context.split(":"))
+        for context in (class1f["state_phase_contexts"] +
+                        class1f_actions["current_dispatch"]
+                            ["required_state_contexts"])))
     navigation = fixtures["authority_data"]["navigation"]
     global_bounds = navigation["global_bounds"]
     terrain = navigation["terrain_resolver"]["implementation_contract"]
@@ -97,6 +125,9 @@ def build() -> str:
     jump_vectors = jump["vector_table"]
     jump_down_vectors = jump["down_vector_table"]
     jump_sequences = jump["presentation_selector_sequences"]
+    air_class03 = fixtures["authority_data"]["player"][
+        "directional_airborne_interruption"]["airborne_actions"]["button1"][
+            "record4_class03"]
     weapon = fixtures["authority_data"]["player"][
         "weapon_projectile_resource"]["implementation_contract"]
     weapon_states = weapon["state_dispatch"]
@@ -177,8 +208,93 @@ def build() -> str:
         class1f_current_damage["damage_by_player_selector_s16"] !=
             [8, 8, 10, 12] or
         class1f_current_damage["hit_ticks_u16"] != 39 or
-        class1f_current_damage["ko_ticks_u16"] != 141):
+        class1f_current_damage["ko_ticks_u16"] != 141 or
+        class1f_current_reaction["hit_entry_outer_state_u16"] != 0x0202 or
+        class1f_current_reaction["hit_entry_action_substate_u16"] != 0x0002 or
+        class1f_current_reaction["ko_entry_outer_state_u16"] != 0x0402 or
+        class1f_current_reaction["ko_entry_action_substate_u16"] != 0x0000 or
+        class1f_current_reaction["terminal_release_outer_state_u16"] != 0x0600):
         raise ValueError("SPEC-02 class-0x1f current-state drift")
+    if (class1f_actions["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class1f_actions["capture_identity"]["byte_identical"] is not True or
+        len(action_variants) != 10 or
+        [row["action_u8"] for row in action_targets] != list(range(0, 32, 2)) or
+        action_targets[11]["target"] != "0x060c2e" or
+        [row["selector_u8"] for row in action_selectors] !=
+            [0, 1, 34, 35, 36, 43, 52, 53, 54, 55, 56, 60, 62, 68, 69, 70,
+             71, 72, 73, 74, 76, 77] or
+        len(action_records) != 132 or
+        [row["table_index_u8"] for row in action_movement_tables] != [1, 8] or
+        any(len(row["vectors"]) != 32 for row in action_movement_tables) or
+        action_movement_tables[1]["vectors"][8] != {
+            "direction_u8": 8, "x_delta_s16": 2048,
+            "y_delta_s16": 0} or
+        action_bounds != {
+            "x_max_u16": 0x05f0,
+            "camera_relative_bias_u16": 0x0070,
+            "camera_relative_span_u16": 0x0260,
+            "failure_outer_state_u16": 0x0600,
+            "comparison": "unsigned word"} or
+        action_direction["upper_directions_by_a5_u8"] != [0x16, 0x0a] or
+        action_direction["lower_directions_by_a5_u8"] != [0x1a, 0x06] or
+        action_jump["x_velocity_table_s32_16_16"] !=
+            [-0x00010000, -0x00014000, -0x00018000, -0x00020000] or
+        action_attack["selector_groups_u16"] !=
+            [[55], [56], [43, 43, 43, 55], [43, 43, 56]] or
+        action_attack_timers != [30] * 4 + [60] * 4 + [120] * 4 + [160] * 4 or
+        class1f_actions["suppression_control"]["writer_pc"] != "0x0607e8" or
+        class1f_actions["suppression_control"]["suppressed_writes"] != 179 or
+        class1f_actions["suppression_control"]["fixed_frame_substitute"] is not False):
+        raise ValueError("SPEC-02 class-0x1f first-segment action drift")
+    if (recurring["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        recurring_initializer["limit_table_u16"] != [0, 35, 55, 70] or
+        recurring_initializer["observed_after"] != {
+            "frame": 2073, "state_u16": 0x0200,
+            "timer40_u16": 3900, "timer42_u16": 60,
+            "field46_u16": 1200, "field48_u16": 2100,
+            "limit_u16": 35, "index_u16": 9,
+            "camera_bound_u16": 640} or
+        recurring_controller["initial_spawn_transition"]["observed_after"] != {
+            "frame": 2074, "living_enemy_count_u16": 10,
+            "state_u16": 0x0202} or
+        recurring_gate["gate_owner"]["record"] != "0xffc580" or
+        recurring_gate["gate_owner"]["record_type_u8"] != 24 or
+        recurring_gate["gate_owner"]["class_u8"] != "0x44" or
+        recurring_gate["gate_owner"]["state_u16"] != 0x0404 or
+        recurring_gate["gate_owner"]["writer_successor_pc"] != "0x08da38" or
+        recurring_gate["write_values"] != {
+            "source_camera_target_u16": 208,
+            "camera_x_call_threshold_s16": 720,
+            "conditional_phase_0x2e_u8": 1,
+            "conditional_local_0x2c_u8": 0} or
+        recurring["intro_gate_suppression_control"]["mutant_at_frame_4100"] != {
+            "state_u16": 0x0202, "timer42_u16": 60,
+            "intro_gate_u8": 0xff, "main_spawn_transactions": 0,
+            "aux_spawn_transactions": 0} or
+        recurring_primary["guard_branch_order"][0] !=
+            "require living_enemy_count_u16 at 0xff1a18 < 8" or
+        recurring_primary["guard_values"] != {
+            "living_limit_u16": 8, "phase_mask_u8": 7} or
+        recurring_primary["position_values"] != {
+            "x_camera_offset_s16": -48, "lane_base_s16": 208,
+            "lane_band_mask_u16": 0x00f0} or
+        recurring_primary["rng"]["calls"] != 1 or
+        recurring_tables["lane_offsets_s16"] != [24, 40, 56, 72, 88, 104] or
+        recurring_tables["selector_cycle_u8"] != [0, 1, 1, 1, 0, 1, 0, 1, 1, 1] or
+        len(recurring_tables["lane_bucket_u8"]) != 64 or
+        recurring_tables["lane_bucket_u8"][48:] != [3] * 16 or
+        len(recurring_tables["variant_u8"]) != 96 or
+        recurring_auxiliary["guard_values"] != {
+            "camera_x_limit_s16": 1008, "phase_add_u8": 3,
+            "phase_mask_u8": 31} or
+        recurring_auxiliary["write_values"] != {
+            "class_u8": 0x1f, "variant_u8": 4, "timer_u16": 0,
+            "x_s16": 976, "y_s16": 344, "z_s16": 344,
+            "selector83_u8": 0} or
+        recurring_auxiliary["rng_calls"] != 0):
+        raise ValueError("SPEC-02 first-segment recurring spawn drift")
     if (auxiliary_dependencies["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         len(class09["source_slots"]) != 2 or
@@ -404,6 +520,18 @@ def build() -> str:
     parent_motion_high = parent_active["route_motion_vectors_s16"]["high"]
     parent_child_rows = parent_emitter["normal_rows"]
     parent_collision_child_rows = parent_emitter["collision_rows"]
+    air_class03_init = air_class03["initialization"]
+    air_class03_active = air_class03["active_state"]
+    air_class03_emitter = air_class03["child_emitter_state"]
+    air_class03_player_phase = air_class03["player_phase_0x0406"]
+    air_class03_offsets = air_class03_init["selector_offsets_s16"]
+    air_class03_presentations = air_class03_init["presentation_records"]
+    air_class03_motion_low = air_class03_active[
+        "low_nibble_motion_tables_s16"]
+    air_class03_motion_high = air_class03_active[
+        "high_nibble_motion_tables_s16"]
+    air_class03_child_rows = air_class03_emitter["normal_rows"]
+    air_class03_collision_child_rows = air_class03_emitter["collision_rows"]
     child_init = weapon_child["initialization"]
     child_sequences = child_init["variant_presentation_sequences"]
     parent_boxes = weapon_parent["collision_table"]
@@ -427,6 +555,29 @@ def build() -> str:
         len(empty_effect_offsets) != 4 or
         len(empty_effect_records) != 10):
         raise ValueError("SPEC-02 corrected projectile/effect cardinality drift")
+    if (air_class03["spec_executable"] is not True or
+        air_class03["record_type_u8"] != 4 or
+        air_class03["class_u8"] != 3 or
+        air_class03["dispatch"] != "0x030382" or
+        air_class03["state_sequence_u8"] != [0, 2, 4, 6] or
+        air_class03_active["direction_index_range_u8"] != [0, 63] or
+        air_class03_active["vectors_per_motion_table"] != 64 or
+        sorted(map(int, air_class03_motion_low)) != list(range(1, 16)) or
+        sorted(map(int, air_class03_motion_high)) != list(range(1, 13)) or
+        any(len(rows) != 64 for rows in air_class03_motion_low.values()) or
+        any(len(rows) != 64 for rows in air_class03_motion_high.values()) or
+        len(air_class03_offsets) != 7 or
+        len(air_class03_presentations) != 8 or
+        len(air_class03_child_rows) != 5 or
+        len(air_class03_collision_child_rows) != 5 or
+        air_class03_player_phase["presentation_selector_u8"] != 18 or
+        len(air_class03_player_phase["presentation_records"]) != 5 or
+        air_class03_emitter["cadence_reload_u8"] != 4 or
+        air_class03["effect_allocation"]["record_type_u8"] != 24 or
+        air_class03["effect_allocation"]["variant_u8"] != 1 or
+        air_class03["effect_allocation"]["timer_u8"] != 8 or
+        air_class03["effect_allocation"]["audio_command"] is not None):
+        raise ValueError("SPEC-02 airborne Button1 class-3 contract drift")
     if (parent_init["object_or_u16"] != "0x8000" or
         child_init["object_or_u16"] != "0x8000" or
         parent_emitter["initial_cadence_u8"] != 1 or
@@ -562,6 +713,70 @@ def build() -> str:
         "    { " + ", ".join(f"{value}u" for value in
             class1f_current_damage["damage_by_player_selector_s16"]) + " },",
         "};", "",
+        "static const AvspRound1RecurringSpawnSpec avsp_round1_recurring_spawn =",
+        "{",
+        "    0x0200u, 0x0202u, 0x0204u,",
+        "    %du, %du, %du, %du, %du, %du, %d, %du," % (
+            recurring_initializer["observed_after"]["timer40_u16"],
+            recurring_initializer["observed_after"]["timer42_u16"],
+            recurring_initializer["observed_after"]["field46_u16"],
+            recurring_initializer["observed_after"]["field48_u16"],
+            recurring_initializer["observed_after"]["camera_bound_u16"],
+            recurring_gate["write_values"]["source_camera_target_u16"],
+            recurring_gate["write_values"]["camera_x_call_threshold_s16"],
+            recurring_initializer["observed_after"]["index_u16"]),
+        "    { " + ", ".join(f"{value}u" for value in
+            recurring_initializer["limit_table_u16"]) + " },",
+        "    0x%02Xu, %du, %du, %du, %du," % (
+            recurring["phase_counter"]["stable_entry_value_u8"],
+            recurring_primary["guard_values"]["living_limit_u16"],
+            recurring_primary["guard_values"]["phase_mask_u8"],
+            recurring_auxiliary["guard_values"]["phase_add_u8"],
+            recurring_auxiliary["guard_values"]["phase_mask_u8"]),
+        "    %d, %d, %d, %d, %d, %du, %du," % (
+            recurring_primary["position_values"]["x_camera_offset_s16"],
+            recurring_auxiliary["guard_values"]["camera_x_limit_s16"],
+            recurring_auxiliary["write_values"]["x_s16"],
+            recurring_auxiliary["write_values"]["y_s16"],
+            recurring_auxiliary["write_values"]["z_s16"],
+            recurring_auxiliary["write_values"]["variant_u8"],
+            recurring_auxiliary["write_values"]["selector83_u8"]),
+        "    %du, %du, 0x%04Xu, 0x%02X, %du, 0x%04Xu" % (
+            recurring_gate["write_values"]["conditional_phase_0x2e_u8"],
+            recurring_gate["write_values"]["conditional_local_0x2c_u8"],
+            int(recurring_gate["gate_owner"]["record"], 16) & 0xffff,
+            int(recurring_gate["gate_owner"]["class_u8"], 16),
+            recurring_gate["gate_owner"]["record_type_u8"],
+            recurring_gate["gate_owner"]["state_u16"]),
+        "};", "",
+        "static const short avsp_round1_recurring_lane_offsets[AVSP_ROUND1_RECURRING_LANE_OFFSET_COUNT] =",
+        "{",
+        "    " + ", ".join(str(value) for value in
+            recurring_tables["lane_offsets_s16"]),
+        "};", "",
+        "static const unsigned char avsp_round1_recurring_selector_cycle[AVSP_ROUND1_RECURRING_SELECTOR_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in
+            recurring_tables["selector_cycle_u8"]),
+        "};", "",
+        "static const unsigned char avsp_round1_recurring_lane_buckets[AVSP_ROUND1_RECURRING_LANE_BUCKET_COUNT] =",
+        "{",
+    ])
+    for offset in range(0, len(recurring_tables["lane_bucket_u8"]), 16):
+        chunk = recurring_tables["lane_bucket_u8"][offset:offset + 16]
+        lines.append("    " + ", ".join(f"{value}u" for value in chunk) +
+                     ("," if offset + 16 < len(recurring_tables["lane_bucket_u8"]) else ""))
+    lines.extend([
+        "};", "",
+        "static const unsigned char avsp_round1_recurring_variants[AVSP_ROUND1_RECURRING_VARIANT_COUNT] =",
+        "{",
+    ])
+    for offset in range(0, len(recurring_tables["variant_u8"]), 16):
+        chunk = recurring_tables["variant_u8"][offset:offset + 16]
+        lines.append("    " + ", ".join(f"{value}u" for value in chunk) +
+                     ("," if offset + 16 < len(recurring_tables["variant_u8"]) else ""))
+    lines.extend([
+        "};", "",
         "static const unsigned long avsp_round1_class1f_approach_records[AVSP_ROUND1_CLASS1F_APPROACH_RECORD_COUNT] =",
         "{",
         "    " + ", ".join(f"{row['animation_record']}UL" for row in
@@ -571,6 +786,135 @@ def build() -> str:
         "{",
         "    " + ", ".join(f"{row['animation_record']}UL" for row in
             attack_current["records"]),
+        "};", "",
+        "static const AvspRound1Class1fActionTargetSpec avsp_round1_class1f_action_targets[AVSP_ROUND1_CLASS1F_ACTION_TARGET_COUNT] =",
+        "{",
+    ])
+    for row in action_targets:
+        lines.append("    { %du, %sUL }," % (
+            row["action_u8"], row["target"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Class1fActionVariantSpec avsp_round1_class1f_action_variants[AVSP_ROUND1_CLASS1F_ACTION_VARIANT_COUNT] =",
+        "{",
+    ])
+    for row in action_variants:
+        writes = row["writes"]
+        flags = 0
+        if "action_u8" in writes:
+            flags |= 0x01
+        if "airborne_u8" in writes:
+            flags |= 0x02
+        if "style85_u8" in writes:
+            flags |= 0x04
+        if "animation_selector_u8" in writes:
+            flags |= 0x08
+        if writes.get("timer_aa_u8") == 216:
+            flags |= 0x10
+        elif writes.get("timer_aa_u8") == "entry_delay_u8":
+            flags |= 0x20
+        if "animation_selector_rule" in writes:
+            flags |= 0x40
+        if "bound_b2_u16" in writes:
+            flags |= 0x80
+        style = writes.get("style85_u8", 0)
+        if not isinstance(style, int):
+            style = 0
+        lines.append(
+            "    { %du, %du, %du, %du, %du, %du, %du, %du, %du, 0x%02Xu, 0x%04Xu }," % (
+                row["variant_u8"], writes.get("a4_u8", 0),
+                writes.get("a5_u8", 0), writes.get("a6_u8", 0),
+                writes.get("action_u8", 0), writes.get("airborne_u8", 0),
+                style, writes.get("animation_selector_u8", 0),
+                writes.get("timer_aa_u8", 0)
+                    if isinstance(writes.get("timer_aa_u8", 0), int) else 0,
+                flags, 0x0420 if "bound_b2_u16" in writes else 0))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Class1fActionSelectorSpec avsp_round1_class1f_action_selectors[AVSP_ROUND1_CLASS1F_ACTION_SELECTOR_COUNT] =",
+        "{",
+    ])
+    first_record = 0
+    for sequence in action_selectors:
+        lines.append("    { %du, %du, %du }," % (
+            sequence["selector_u8"], first_record, len(sequence["records"])))
+        first_record += len(sequence["records"])
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Class1fActionRecordSpec avsp_round1_class1f_action_records[AVSP_ROUND1_CLASS1F_ACTION_RECORD_COUNT] =",
+        "{",
+    ])
+    for row in action_records:
+        lines.append(
+            "    { %sUL, %sUL, %sUL, %du, %d, %du, %du, %du }," % (
+                row["animation_record"], row["next_animation_record"],
+                row["assembly"], row["timer_u16"], row["branch_s16"],
+                row["hurt_selector_u8"], row["attack_selector_u8"],
+                row["movement_table_index_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Class1fMovementTableSpec avsp_round1_class1f_movement_tables[AVSP_ROUND1_CLASS1F_MOVEMENT_TABLE_COUNT] =",
+        "{",
+    ])
+    for table in action_movement_tables:
+        vectors = ", ".join("{ %d, %d }" % (
+            row["x_delta_s16"], row["y_delta_s16"])
+            for row in table["vectors"])
+        lines.append("    { %du, { %s } }," % (
+            table["table_index_u8"], vectors))
+    lines.extend([
+        "};", "",
+        "static const unsigned char avsp_round1_class1f_attack_timers[AVSP_ROUND1_CLASS1F_ATTACK_TIMER_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in action_attack_timers),
+        "};", "",
+        "static const AvspRound1Class1fActionProgramSpec avsp_round1_class1f_action_program =",
+        "{",
+        "    0x%04Xu, 0x%04Xu, 0x%04Xu, 0x%04Xu," % (
+            action_bounds["x_max_u16"],
+            action_bounds["camera_relative_bias_u16"],
+            action_bounds["camera_relative_span_u16"],
+            action_bounds["failure_outer_state_u16"]),
+        "    0x%04Xu, 0x%04Xu, { 0x%02Xu, 0x%02Xu }, { 0x%02Xu, 0x%02Xu }," % (
+            action_direction["upper_lane_u16"],
+            action_direction["lower_lane_u16"],
+            action_direction["upper_directions_by_a5_u8"][0],
+            action_direction["upper_directions_by_a5_u8"][1],
+            action_direction["lower_directions_by_a5_u8"][0],
+            action_direction["lower_directions_by_a5_u8"][1]),
+        "    0x%04Xu, 0x%04Xu, 0x%04Xu, 0x%04Xu," % (
+            action_zero["near_player_x_bias_u16"],
+            action_zero["near_player_x_span_u16"],
+            action_zero["near_player_z_bias_u16"],
+            action_zero["near_player_z_span_u16"]),
+        "    { %du, %du }, { %du, %du }, { 0x%02Xu, 0x%02Xu }," % (
+            action_zero["turn_selectors_by_style_u8"][0],
+            action_zero["turn_selectors_by_style_u8"][1],
+            action_zero["idle_selectors_by_a3_u8"][0],
+            action_zero["idle_selectors_by_a3_u8"][1],
+            action_zero["movement_selector_base_by_style_u8"][0],
+            action_zero["movement_selector_base_by_style_u8"][1]),
+        "    { " + ", ".join("%dL" % value for value in
+            action_jump["x_velocity_table_s32_16_16"]) + " },",
+        "    %dL, %dL, %d, %dL," % (
+            action_jump["y_velocity_s32_16_16"],
+            action_jump["y_acceleration_s32_16_16"],
+            action_jump["initial_y_add_s16"],
+            action_fall["y_delta_s32_16_16"]),
+        "    { " + ", ".join(f"{value}u" for value in
+            action_attack["rng_group_table_u16"]) + " },",
+        "    { 0u, 1u, 2u, 6u },",
+        "    { 1u, 1u, 4u, 3u },",
+        "    { " + ", ".join(f"{value}u" for group in
+            action_attack["selector_groups_u16"] for value in group) + " },",
+        "    { " + ", ".join(f"{value}u" for value in
+            action_attack["timer_stage_offsets_u8"]) + " },",
+        "    {",
+    ])
+    for row in action_attack["timer_rows_u8"]:
+        lines.append("        { " + ", ".join(f"{value}u" for value in row) + " },")
+    lines.extend([
+        "    }",
         "};", "",
         "static const AvspRound1Class1fInitialSpec avsp_round1_class1f_initial_actors[AVSP_ROUND1_CLASS1F_INITIAL_ACTOR_COUNT] =",
         "{",
@@ -913,6 +1257,92 @@ def build() -> str:
                          for row in parent_motion_high[str(angle)])
         lines.append("    { " + rows + " },")
     lines.extend([
+        "};", "",
+        "static const AvspRound1VecS16 avsp_round1_air_weapon_selector_offsets[AVSP_ROUND1_AIR_WEAPON_SELECTOR_COUNT] =",
+        "{",
+    ])
+    for x, y in air_class03_offsets:
+        lines.append(f"    {{ {x}, {y} }},")
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_air_weapon_presentations[AVSP_ROUND1_AIR_WEAPON_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in air_class03_presentations:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1PlayerJumpSequenceSpec avsp_round1_air_weapon_player_sequence =",
+        "{",
+        "    18u, AVSP_ROUND1_AIR_WEAPON_PLAYER_PRESENTATION_COUNT,",
+        "    {",
+    ])
+    rendered_air_player = []
+    for row in air_class03_player_phase["presentation_records"]:
+        rendered_air_player.append("        { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    while len(rendered_air_player) < 8:
+        rendered_air_player.append(
+            "        { 0u, 0, 0UL, 0UL, 0u, 0u },")
+    lines.extend(rendered_air_player)
+    lines.extend([
+        "    }",
+        "};", "",
+        "static const AvspRound1VecS16 avsp_round1_air_weapon_motion_low[AVSP_ROUND1_AIR_WEAPON_LOW_TABLE_COUNT][AVSP_ROUND1_AIR_WEAPON_DIRECTION_COUNT] =",
+        "{",
+    ])
+    for magnitude in range(16):
+        rows = [[0, 0]] * 64 if magnitude == 0 else \
+            air_class03_motion_low[str(magnitude)]
+        lines.append("    { " + ", ".join(
+            "{ %d, %d }" % tuple(row) for row in rows) + " },")
+    lines.extend([
+        "};", "",
+        "static const AvspRound1VecS16 avsp_round1_air_weapon_motion_high[AVSP_ROUND1_AIR_WEAPON_HIGH_TABLE_COUNT][AVSP_ROUND1_AIR_WEAPON_DIRECTION_COUNT] =",
+        "{",
+    ])
+    for magnitude in range(13):
+        rows = [[0, 0]] * 64 if magnitude == 0 else \
+            air_class03_motion_high[str(magnitude)]
+        lines.append("    { " + ", ".join(
+            "{ %d, %d }" % tuple(row) for row in rows) + " },")
+    lines.extend([
+        "};", "",
+        "static const AvspRound1WeaponChildSpawnSpec avsp_round1_air_weapon_child_spawn_normal[AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT] =",
+        "{",
+    ])
+    for row in air_class03_child_rows:
+        lines.append("    { %d, %d, %d, %du }," % (
+            row["x_s16"], row["y_s16"], row["z_s16"], row["variant_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1WeaponChildSpawnSpec avsp_round1_air_weapon_child_spawn_collision[AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT] =",
+        "{",
+    ])
+    for row in air_class03_collision_child_rows:
+        lines.append("    { %d, %d, %d, %du }," % (
+            row["x_s16"], row["y_s16"], row["z_s16"], row["variant_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AirWeaponProjectileSpec avsp_round1_air_weapon_projectile =",
+        "{",
+        f"    {air_class03['class_u8']}, 0u, 2u, 4u, 6u,",
+        f"    {air_class03['allocation']['player_collision_selector_u8']}u,",
+        f"    {air_class03_emitter['initial_child_count_u8']}u,",
+        f"    {air_class03_emitter['initial_cadence_u8']}u,",
+        f"    {air_class03_emitter['cadence_reload_u8']}u,",
+        f"    {air_class03_active['substate_2']['reload_u8']}u,",
+        "    5u, 0xc0u, 0x8000u,",
+        f"    {air_class03['dispatch']}UL,",
+        f"    {air_class03_init['collision_table_u32']}UL,",
+        f"    {air_class03['effect_allocation']['record_type_u8']}u,",
+        f"    {air_class03['effect_allocation']['class_u8']}u,",
+        f"    {air_class03['effect_allocation']['variant_u8']}u",
         "};", "",
         "static const AvspRound1WeaponChildSpawnSpec avsp_round1_weapon_child_spawn_normal[AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT] =",
         "{",

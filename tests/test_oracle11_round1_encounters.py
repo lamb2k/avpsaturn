@@ -32,6 +32,18 @@ for label,change in (
     ('entry-gate',lambda x:x['first_entry_body']['player_entry_script'].__setitem__('gate_writer_pc','0x0abdd2')),
     ('entry-timer',lambda x:x['first_entry_body']['player_entry_script']['timer_semantics']['loads'].__setitem__(0,59)),
     ('entry-fixed-frame',lambda x:x['first_entry_body']['suppression_control'].__setitem__('fixed_frame_substitute',True)),
+    ('progression-guard',lambda x:x['first_segment_recurring_spawn']['controller_guard']['first_operands'].__setitem__('timer_after_u16',3705)),
+    ('progression-phase',lambda x:x['first_segment_recurring_spawn']['phase_counter'].__setitem__('writer_pc','0x000e86')),
+    ('progression-write',lambda x:x['first_segment_recurring_spawn']['primary_writer']['write_order'][3].__setitem__('effect','x_s16 = fixed_frame_position')),
+    ('progression-rng',lambda x:x['first_segment_recurring_spawn']['primary_writer']['rng'].__setitem__('calls',0)),
+    ('progression-suppression',lambda x:x['first_segment_recurring_spawn']['suppression_control'].__setitem__('suppressed_writer_count',0)),
+    ('controller-init',lambda x:x['first_segment_recurring_spawn']['controller_program']['initializer']['limit_table_u16'].__setitem__(1,34)),
+    ('intro-gate-owner',lambda x:x['first_segment_recurring_spawn']['controller_program']['intro_gate_transition']['gate_owner'].__setitem__('class_u8','0x1f')),
+    ('intro-gate-suppression',lambda x:x['first_segment_recurring_spawn']['intro_gate_suppression_control'].__setitem__('suppressed_writer_count',0)),
+    ('lifecycle-release-writer',lambda x:x['first_segment_recurring_spawn']['lifecycle_release_boundary'].__setitem__('writer_pc','0x061150')),
+    ('scene-lifetime-omission',lambda x:x['coffee_shop_scene_census']['actor_lifetimes'].pop()),
+    ('scene-pool-omission',lambda x:x['coffee_shop_scene_census']['pool_scan'].pop()),
+    ('scene-silent-unknown',lambda x:x['coffee_shop_scene_census']['negative_controls'].__setitem__('unknown_pair_silently_omitted',True)),
 ):
     mutant=copy.deepcopy(report);change(mutant);reject(mutant,label)
-print('ORACLE-11 encounter/route authority tests: PASS (13 mutations rejected)')
+print('ORACLE-11 encounter/route authority tests: PASS (25 mutations rejected)')

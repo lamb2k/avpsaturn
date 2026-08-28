@@ -118,12 +118,18 @@
 /* The source-closed Round 1 actor pools are persistent gameplay state, not
  * transient diagnostic storage. Reserve one aligned block immediately after
  * the existing tile/strip carve so debug and release use the same 4 MB-cart
- * ownership without consuming Saturn work RAM. */
+ * ownership without consuming Saturn work RAM. The SH-2 runtime measures
+ * 0x4874 bytes at this checkpoint; the 0x6000 carve preserves 0x178c bytes
+ * (24.5 percent) of headroom inside the fixed arena. */
 #ifdef AVSP_LIVE_ENCOUNTER
-#define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x3000
+#define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x6000
+#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x4874
+#define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000
+#define AVSP_LIVE_DIAG_RECORD_BYTES 156
 #define AVSP_ROUND1_RUNTIME_BASE ((AvspRound1Runtime *)(AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES + AVSP_STRIPS_REGION_BYTES))
 #else
 #define AVSP_ROUND1_RUNTIME_REGION_BYTES 0
+#define AVSP_LIVE_DIAG_REGION_BYTES 0
 #endif
 
 #ifdef AVSP_STREET_TEST
@@ -566,10 +572,27 @@ static AvspLiveEncounterFrame live_encounter_frame;
 #define round1_runtime (*AVSP_ROUND1_RUNTIME_BASE)
 typedef char AvspRound1RuntimeFitsReservedCartRegion[
     sizeof(AvspRound1Runtime) <= AVSP_ROUND1_RUNTIME_REGION_BYTES ? 1 : -1];
+typedef char AvspRound1RuntimeSizeMatchesMeasuredTarget[
+    sizeof(AvspRound1Runtime) == AVSP_ROUND1_RUNTIME_MEASURED_BYTES ? 1 : -1];
+typedef char AvspLiveDiagnosticSamplesFitReservedCartRegion[
+    sizeof(LiveEncounterDiagSample) * AVSP_LIVE_DIAG_SAMPLES <=
+            AVSP_LIVE_DIAG_REGION_BYTES
+        ? 1
+        : -1];
+typedef char AvspLiveDiagnosticRecordSizeMatchesMeasuredTarget[
+    sizeof(LiveEncounterDiagSample) == AVSP_LIVE_DIAG_RECORD_BYTES ? 1 : -1];
+typedef char AvspRound1ReservedCarvesFitCartDram1[
+    AVSP_TILE_REGION_BYTES + AVSP_STRIPS_REGION_BYTES +
+            AVSP_ROUND1_RUNTIME_REGION_BYTES + AVSP_LIVE_DIAG_REGION_BYTES <=
+        AVSP_CART_DRAM1_BYTES
+        ? 1
+        : -1];
 static int round1_retained_initialized;
 static int round1_cdda_started;
-volatile LiveEncounterDiagSample avsp_diag_live_samples[
-    AVSP_LIVE_DIAG_SAMPLES];
+volatile LiveEncounterDiagSample *avsp_diag_live_samples =
+    (volatile LiveEncounterDiagSample *)(
+        AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES +
+        AVSP_STRIPS_REGION_BYTES + AVSP_ROUND1_RUNTIME_REGION_BYTES);
 volatile int avsp_diag_live_sample_count;
 volatile int avsp_diag_live_interface_version;
 volatile int avsp_diag_live_contract_flags;
@@ -8140,7 +8163,7 @@ static void live_encounter_publish(void)
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
         sizeof(AVSP_ROUND1_SPEC02_SHA256) == 65u &&
-        AVSP_ROUND1_SPEC02_SHA256[0] == 'a' &&
+        AVSP_ROUND1_SPEC02_SHA256[0] == 'b' &&
         AVSP_ROUND1_SPEC02_SHA256[63] == 'f';
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
@@ -9453,10 +9476,12 @@ void jo_main(void)
            archive and stay outside the allocator. */
         jo_add_memory_zone(AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES +
                                AVSP_STRIPS_REGION_BYTES +
-                               AVSP_ROUND1_RUNTIME_REGION_BYTES,
+                               AVSP_ROUND1_RUNTIME_REGION_BYTES +
+                               AVSP_LIVE_DIAG_REGION_BYTES,
                            AVSP_CART_DRAM1_BYTES - AVSP_TILE_REGION_BYTES -
                                AVSP_STRIPS_REGION_BYTES -
-                               AVSP_ROUND1_RUNTIME_REGION_BYTES);
+                               AVSP_ROUND1_RUNTIME_REGION_BYTES -
+                               AVSP_LIVE_DIAG_REGION_BYTES);
     }
 #ifndef AVSP_PROBE3
     set_actor_palette();

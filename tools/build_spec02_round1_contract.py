@@ -41,6 +41,11 @@ ORACLE_KEYS = {
     "boss", "handoff", "rng", "audio_transport", "audio_handlers",
     "audio_triggers", "loads", "writers",
 }
+SCENE_CLASSIFICATIONS = {
+    "NATIVE_IMPLEMENTED", "SOURCE_BOUND_PRESENTATION_ONLY",
+    "NOT_REQUIRED_FOR_THIS_SCENE", "BLOCKED_MISSING_SPEC",
+    "BLOCKED_MISSING_SOURCE_EVIDENCE",
+}
 
 
 def require(condition: bool, message: str) -> None:
@@ -116,6 +121,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/player/directional_airborne_interruption", "source input edge and current air phase select directional, Button1, Button2, landing, or HIT cancellation",
           ["input.current:u16", "input.new_edges:u16", "player.state:u16", "player.height:s32"], ["player.state:u16", "player.velocity:s32", "player.animation:u32", "player.facing:u8"],
           "/directional_airborne_interruption/counterfactuals", "phase or interruption mutation changes a targeted air route"),
+        f("player.airborne_button1_projectile", "predator-warrior-player-authority", "guarded_actor_program", True,
+          "player", "/directional_airborne_interruption/airborne_actions/button1/record4_class03", "0x023858 player allocation and 0x030382 record-type-4 class-3 state machine",
+          "/authority_data/player/directional_airborne_interruption/airborne_actions/button1/record4_class03", "accepted airborne Button1 edge/resource guard allocates the class-3 actor; current state/substate, collision and bounds own motion, children, effects and release",
+          ["player.state:u16", "input.current:u8", "player.resource:s16", "actor.state:u16", "actor.position:s32", "actor.health:s16", "camera.position:s16"], ["player.state:u16", "actor.record", "actor.position:s32", "actor.collision", "record4.child", "record36.effect", "pool.free_count:u8"],
+          "/directional_airborne_interruption/airborne_actions/button1/record4_class03/suppression_control", "suppressing only source writer 0x02387e removes the actor lifetime and changes later fixed-pool allocation identity without changing player/route/score projection"),
         f("player.weapon_projectile_resources", "predator-warrior-player-authority", "state_record", True,
           "player", "/weapon_projectile_resource", "0x021eac Button1 weapon body and record-type-4 projectile allocation",
           "/authority_data/player/weapon_projectile_resource", "Button1/B1+B2 source guards own allocation, resource debit/recharge, collision, removal, and presentation continuity",
@@ -171,6 +181,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/enemies/archetypes/3/current_state_implementation_contract", "native fixed-pool state, controller guards, current collision and signed health own the bounded first encounter",
           ["enemy.state:u16", "enemy.substate:u16", "enemy.position:s16", "enemy.timer:u16", "player.position:s16", "player.attack_selector:u8", "rng.seed:u16", "pool.free_count:u8"], ["enemy.record", "enemy.position:s16", "enemy.facing:u8", "enemy.animation:u32", "enemy.health:s16", "player.health:s16", "pool.free_count:u8", "encounter.state:u8"],
           "/archetypes/3/current_state_implementation_contract/mutation_controls", "spawn, movement, facing, RNG, contact, damage, reaction, removal or retained-authority mutation changes the bounded first-encounter trace"),
+        f("enemy.class1f_first_segment_actions", "round1-enemy-archetypes", "guarded_actor_program", True,
+          "enemies", "/archetypes/3/first_segment_action_execution_contract", "0x060546 initializer, 0x060772/0x060798 current-action dispatch, and 0x0165c4 animation/movement interpreter",
+          "/authority_data/enemies/archetypes/3/first_segment_action_execution_contract", "each active fixed-pool class-0x1f record executes its source variant, action/substate, animation record, movement vector, collision, release and RNG guards in scheduler order",
+          ["enemy.variant:u8", "enemy.state:u16", "enemy.action:u16", "enemy.facing:u8", "enemy.position:s32", "enemy.animation_record:u32", "enemy.animation_timer:u16", "enemy.animation_branch:s16", "player.position:s32", "route.globals", "rng.seed:u16"], ["enemy.state:u16", "enemy.action:u16", "enemy.facing:u8", "enemy.position:s32", "enemy.animation_record:u32", "enemy.collision_selectors:u8", "enemy.health:s16", "pool.free_count:u8", "living_enemy_count:u16", "rng.seed:u16"],
+          "/archetypes/3/first_segment_action_execution_contract/mutation_controls", "variant, action target, branch order, selector, record, movement, timer, release, RNG or single-synthetic-actor substitution changes the causal first-segment trace"),
         f("enemy.presentation_collision_hitko", "round1-enemy-archetypes", "presentation_collision_table", True,
           "enemies", "/archetypes", "per-class writer windows, animation records, assemblies, selectors, damage and HIT/KO transitions",
           "/authority_data/enemies/archetypes", "current state/phase owns presentation and collision selectors; signed health owns HIT/KO",
@@ -196,6 +211,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/route/enemy_spawns", "source table/controller guard and successful record-12 allocation own each spawn",
           ["route.state:s16", "encounter.controller", "pool.free_count:u8"], ["enemy.record", "pool.free_count:u8"],
           "/counterfactuals", "class removal and offense suppression discriminate spawn ownership"),
+        f("route.first_segment_recurring_spawn", "encounters-waves-scripted-triggers", "guarded_spawn_program", True,
+          "route", "/first_segment_recurring_spawn", "0x0287fc controller initializer, 0x0288ba intro-gate transition, 0x0288e2 current guard, 0x028a12 primary writer and 0x028b5a auxiliary writer",
+          "/authority_data/route/first_segment_recurring_spawn", "source controller initialization, class-0x44 intro-gate release, countdown/progress guards, phase counters and successful record-12 allocation own recurring class-0x1f spawns",
+          ["route.state:s16", "controller.state_substate:u16", "controller.timer40:u16", "controller.timer42:u16", "controller.limit:u16", "intro_gate.u8", "phase.u8", "camera.position:s16", "rng.seed:u16", "pool.free_count:u8"], ["controller.state_substate:u16", "controller.timers:u16", "enemy.record", "living_enemy_count:u16", "controller.index:u16", "rng.seed:u16", "pool.free_count:u8"],
+          "/first_segment_recurring_spawn/intro_gate_suppression_control", "suppressing only the class-0x44 writer leaves the controller at 0x0202 with timer 60 and prevents primary or auxiliary recurring spawns; fixed-frame advancement is rejected"),
         f("boss.phases_spawns", "round1-boss", "boss_phase_table", True,
           "boss", "/controller_contract", "class-0x02 type-32 controller, 11 phases, eight boss-room spawns",
           "/authority_data/boss", "controller state/phase and source countdown guards own boss spawns and phase transitions",
@@ -254,6 +274,196 @@ def build_fields() -> list[dict[str, object]]:
     ]
 
 
+def build_coffee_shop_scene_manifest(source: dict[str, dict]) -> dict[str, object]:
+    census = copy.deepcopy(source["route"]["coffee_shop_scene_census"])
+    native_pairs = {
+        (4, 0), (4, 4), (12, 0x1f), (20, 0x09), (20, 0x0a),
+        (24, 0x44), (24, 0x4e), (32, 0x01),
+    }
+    implementation_blockers = {
+        (0, 0): "complete scene player state/animation and current "
+                "collision/damage/HIT/KO/exit binding is not yet present",
+        (4, 0x03): "class-0x03 airborne Button1 has a focused native subset "
+                   "but lacks the complete scene collision/impact/effect/"
+                   "release differential",
+    }
+
+    def actor_classification(item: dict[str, object]) -> str:
+        if item["source_classification"] == "BLOCKED_MISSING_SOURCE_EVIDENCE":
+            return "BLOCKED_MISSING_SOURCE_EVIDENCE"
+        pair = (int(item["type"]), int(str(item["class"]), 16))
+        return ("NATIVE_IMPLEMENTED" if pair in native_pairs else
+                "BLOCKED_MISSING_SPEC")
+
+    for item in census["actor_lifetimes"]:
+        item["classification"] = actor_classification(item)
+        pair = (int(item["type"]), int(str(item["class"]), 16))
+        if pair in implementation_blockers:
+            item["exact_blocker"] = implementation_blockers[pair]
+        item["assembly_and_behavior_binding"] = item.get(
+            "source_contract", item.get("exact_blocker"))
+    for item in census["class_type_inventory"]:
+        item["classification"] = actor_classification(item)
+        pair = (int(item["type"]), int(str(item["class"]), 16))
+        if pair in implementation_blockers:
+            item["exact_blocker"] = implementation_blockers[pair]
+    for item in census["audio_events"]:
+        item["classification"] = "BLOCKED_MISSING_SPEC"
+    class1f_lifetimes = [
+        item for item in census["actor_lifetimes"]
+        if int(item["type"]) == 12 and int(str(item["class"]), 16) == 0x1f]
+
+    def class1f_health_write(item: dict[str, object]) -> bool:
+        if item["target_pool"] != "record12":
+            return False
+        frame = int(item["frame"])
+        slot = int(str(item["target_slot"]), 16)
+        return any(int(str(actor["source_slot"]), 16) == slot and
+                   int(actor["first_frame"]) <= frame <= int(actor["last_frame"])
+                   for actor in class1f_lifetimes)
+
+    for item in census["health_writes"]:
+        item["classification"] = (
+            "NATIVE_IMPLEMENTED" if class1f_health_write(item) and
+            item["writer_pc"] in {"0x0605aa", "0x0172ba", "0x01d590",
+                                  "0x01d598"}
+            else "BLOCKED_MISSING_SPEC")
+
+    route_edges = []
+    for item in source["route"]["route_state_edges"]:
+        if item["write_frame"] > 5566:
+            continue
+        edge = copy.deepcopy(item)
+        edge["classification"] = (
+            "NATIVE_IMPLEMENTED" if edge["write_frame"] == 2237 else
+            "BLOCKED_MISSING_SPEC")
+        route_edges.append(edge)
+
+    loads = []
+    for item in source["loads"]["boundaries"]:
+        if int(item["visible_boundary_frame"]) > 5566:
+            continue
+        boundary = copy.deepcopy(item)
+        boundary["classification"] = "BLOCKED_MISSING_SPEC"
+        loads.append(boundary)
+
+    camera_runs = []
+    for item in source["navigation"]["camera"]["camera_lock_and_unlock_runs"]:
+        if item["first_frame"] > 5566 or item["last_frame"] < 1972:
+            continue
+        run = copy.deepcopy(item)
+        run["classification"] = "NATIVE_IMPLEMENTED"
+        camera_runs.append(run)
+
+    required_terrain = set(source["navigation"]["terrain_resolver"]
+                           ["implementation_contract"]
+                           ["first_segment_geometry_universe"]
+                           ["selectors_u8"])
+    terrain_records = []
+    implementation_records = source["navigation"]["terrain_resolver"][
+        "implementation_contract"]["implementation_records"]
+    for item in implementation_records:
+        if item["selector_u8"] not in required_terrain:
+            continue
+        record = copy.deepcopy(item)
+        record["classification"] = "NATIVE_IMPLEMENTED"
+        terrain_records.append(record)
+
+    systems = [
+        {"id": "coffee-shop-entry-controller",
+         "classification": "NATIVE_IMPLEMENTED",
+         "source_contract":
+             "authority_data.route.first_entry_body"},
+        {"id": "coffee-shop-player",
+         "classification": "BLOCKED_MISSING_SPEC",
+         "source_contract": "authority_data.player",
+         "exact_blocker": "complete scene state/animation and current "
+             "collision/damage/HIT/KO/exit binding is not yet present in the "
+             "implementation fixture"},
+        {"id": "coffee-shop-obstacle",
+         "classification": "NATIVE_IMPLEMENTED",
+         "source_contract":
+             "authority_data.navigation.obstacle_response.implementation_contract"},
+        {"id": "coffee-shop-terrain",
+         "classification": "NATIVE_IMPLEMENTED",
+         "source_contract":
+             "authority_data.navigation.terrain_resolver.implementation_contract"},
+        {"id": "coffee-shop-camera",
+         "classification": "NATIVE_IMPLEMENTED",
+         "source_contract":
+             "authority_data.navigation.camera.implementation_contract"},
+        {"id": "coffee-shop-class03-air-weapon",
+         "classification": "BLOCKED_MISSING_SPEC",
+         "source_contract": "authority_data.player.directional_airborne_"
+             "interruption.airborne_actions.button1.record4_class03",
+         "exact_blocker": implementation_blockers[(4, 0x03)]},
+        {"id": "coffee-shop-class1f-current-authority",
+         "classification": "NATIVE_IMPLEMENTED",
+         "source_contract": "authority_data.enemies.archetypes[class=0x1f]."
+             "current_state_implementation_contract + "
+             "first_segment_action_execution_contract"},
+        {"id": "coffee-shop-current-collision-damage",
+         "classification": "BLOCKED_MISSING_SPEC",
+         "source_contract": "coffee_shop.health_writes",
+         "implemented_subset": "class-0x1f initialization, player melee/"
+             "projectile damage, signed KO clamp, HIT/KO, and fixed-pool release",
+         "exact_blocker": "player health and non-class-0x1f health writers "
+             "remain without a complete native Coffee Shop scene differential"},
+        {"id": "coffee-shop-audio",
+         "classification": "BLOCKED_MISSING_SPEC",
+         "source_contract": "coffee_shop.audio_events"},
+        {"id": "coffee-shop-exit-loads",
+         "classification": "BLOCKED_MISSING_SPEC",
+         "source_contract": "authority_data.loading.boundaries"},
+        {"id": "coffee-shop-encounter-clear-and-exit",
+         "classification": "BLOCKED_MISSING_SPEC",
+         "source_contract": "authority_data.route.route_state_edges"},
+    ]
+    all_items = (census["actor_lifetimes"] + census["audio_events"] +
+                 census["health_writes"] + route_edges + loads + camera_runs +
+                 terrain_records + systems)
+    counts = {name: sum(item["classification"] == name for item in all_items)
+              for name in sorted(SCENE_CLASSIFICATIONS)}
+    blocked_pairs = [item for item in census["class_type_inventory"]
+                     if item["classification"].startswith("BLOCKED_")]
+    return {
+        "schema": "spec02-coffee-shop-scene-manifest-v1",
+        "scope": census["scope"],
+        "source_frame_range": census["source_frame_range"],
+        "capture_identity": census["capture_identity"],
+        "pool_scan": census["pool_scan"],
+        "pool_layout_source": census["pool_layout_source"],
+        "actor_lifetimes": census["actor_lifetimes"],
+        "class_type_inventory": census["class_type_inventory"],
+        "audio_events": census["audio_events"],
+        "health_writes": census["health_writes"],
+        "route_edges": route_edges,
+        "load_boundaries": loads,
+        "navigation": {
+            "obstacle": dict(copy.deepcopy(source["navigation"]
+                                  ["obstacle_response"]
+                                  ["implementation_contract"]),
+                             classification="NATIVE_IMPLEMENTED"),
+            "terrain_records": terrain_records,
+            "camera_runs": camera_runs,
+        },
+        "systems": systems,
+        "classification_counts": counts,
+        "blocked_class_type_pairs": blocked_pairs,
+        "acceptance_gate": {
+            "source_actor_lifetimes": 747,
+            "source_class_type_pairs": 38,
+            "source_audio_events": 279,
+            "source_health_writes": 149,
+            "source_damage_writes": 30,
+            "missing_or_extra_entities_allowed": False,
+            "silent_omission_allowed": False,
+            "scene_differential_pass": False,
+            "ready": False,
+        },
+    }
+
+
 def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
     player = source["player"]
     fixtures = {
@@ -281,7 +491,8 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                           "navigation_body_geometry_contract": copy.deepcopy(source["auxiliary"]["navigation_body_geometry_contract"])},
             "route": {key: copy.deepcopy(source["route"][key]) for key in
                       ("route_entry", "first_entry_body", "data_contract", "segment_bindings",
-                       "route_state_edges", "enemy_spawns")},
+                       "route_state_edges", "enemy_spawns",
+                       "first_segment_recurring_spawn")},
             "boss": {key: copy.deepcopy(source["boss"][key]) for key in
                      ("boss_actor_contract", "controller_contract", "boss_room_spawns",
                       "boss_defeat_bridge", "boss_clear_guard", "rng")},
@@ -310,6 +521,8 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
         "forbidden_runtime_inputs": ["raw traces", "disassembly notes", "68000 bytecode",
                                      "fixed-frame fallback", "presentation-owned gameplay"],
     }
+    fixtures["scene_manifests"] = {
+        "coffee_shop": build_coffee_shop_scene_manifest(source)}
     return fixtures
 
 
@@ -327,6 +540,17 @@ def build_artifacts() -> tuple[dict[str, object], dict[str, object]]:
     source_hashes = {key: {"artifact": path, "sha256": digest(ROOT / path)}
                      for key, path in SOURCES.items()}
     fields = build_fields()
+    fields.append(field(
+        "scene.coffee_shop_manifest", "encounters-waves-scripted-triggers",
+        "scene_manifest", True, "route", "/coffee_shop_scene_census",
+        "source frames 1972..5566 across all initialized actor pools",
+        "/scene_manifests/coffee_shop",
+        "every source-observed Coffee Shop entity and event has exactly one explicit implementation-readiness classification",
+        ["all source actor pools", "route.state", "camera.state",
+         "audio.command_queue", "health writers"],
+        ["native scene actor/state/event projection"],
+        "/coffee_shop_scene_census/negative_controls",
+        "omitting a pool, actor lifetime, command, health write, or blocker fails the scene manifest"))
     for item in fields:
         item["source"]["evidence_hash"] = source_hashes[
             next(k for k, v in SOURCES.items() if v == item["source"]["artifact"])
@@ -375,6 +599,45 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
     require(fixtures["classification"] == "GENERATED_ONLY_FROM_ACCEPTED_ORACLE_AND_PORT_V2" and
             fixtures["optional_unknowns"]["required_for_round1"] is False,
             "fixture scope drift")
+    scene = fixtures["scene_manifests"]["coffee_shop"]
+    scene_items = (scene["actor_lifetimes"] + scene["audio_events"] +
+                   scene["health_writes"] + scene["route_edges"] +
+                   scene["load_boundaries"] + scene["navigation"]["camera_runs"] +
+                   scene["navigation"]["terrain_records"] + scene["systems"])
+    require(scene["schema"] == "spec02-coffee-shop-scene-manifest-v1" and
+            scene["source_frame_range"] == [1972, 5566] and
+            scene["capture_identity"]["byte_identical"] is True and
+            len(scene["pool_scan"]) == 11 and
+            len(scene["actor_lifetimes"]) == 747 and
+            len(scene["class_type_inventory"]) == 38 and
+            len(scene["audio_events"]) == 279 and
+            len(scene["health_writes"]) == 149 and
+            sum(item["damage_writer"] for item in
+                scene["health_writes"]) == 30 and
+            len(scene["route_edges"]) == 4 and
+            len(scene["load_boundaries"]) == 2 and
+            len(scene["navigation"]["camera_runs"]) == 7 and
+            len(scene["navigation"]["terrain_records"]) == 3 and
+            all(item["classification"] in SCENE_CLASSIFICATIONS
+                for item in scene_items) and
+            all(item["classification"] in SCENE_CLASSIFICATIONS
+                for item in scene["class_type_inventory"]) and
+            next(item for item in scene["class_type_inventory"]
+                 if item["type"] == 12 and item["class"] == "0x1f")
+                 ["classification"] == "NATIVE_IMPLEMENTED" and
+            sum(scene["classification_counts"].values()) == len(scene_items) and
+            len(scene["blocked_class_type_pairs"]) == 30 and
+            scene["acceptance_gate"] == {
+                "source_actor_lifetimes": 747,
+                "source_class_type_pairs": 38,
+                "source_audio_events": 279,
+                "source_health_writes": 149,
+                "source_damage_writes": 30,
+                "missing_or_extra_entities_allowed": False,
+                "silent_omission_allowed": False,
+                "scene_differential_pass": False,
+                "ready": False},
+            "Coffee Shop scene manifest incomplete or falsely accepted")
     button3 = fixtures["authority_data"]["player"][
         "directional_airborne_interruption"]["directional_actions"][
             "implementation_contract"]
@@ -396,6 +659,40 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             button3["presentation_actor_fields"]["object_or_u16"] == "0x8000" and
             button3["rng_calls"] == [],
             "Button3 implementation fixture incomplete or drifted")
+    class03 = fixtures["authority_data"]["player"][
+        "directional_airborne_interruption"]["airborne_actions"]["button1"][
+            "record4_class03"]
+    require(class03["spec_executable"] is True and
+            class03["record_type_u8"] == 4 and class03["class_u8"] == 3 and
+            class03["dispatch"] == "0x030382" and
+            class03["state_sequence_u8"] == [0, 2, 4, 6] and
+            class03["allocation"]["active_writer"] == "0x02387e" and
+            class03["player_phase_0x0406"]["presentation_selector_u8"] == 18 and
+            len(class03["player_phase_0x0406"]["presentation_records"]) == 5 and
+            class03["initialization"]["collision_table_u32"] ==
+                "0x0002fc3c" and
+            len(class03["initialization"]["presentation_records"]) == 8 and
+            class03["initialization"]["presentation_records"][-1][
+                "branch_s16"] == -32768 and
+            len(class03["active_state"]["low_nibble_motion_tables_s16"]) == 15 and
+            len(class03["active_state"]["high_nibble_motion_tables_s16"]) == 12 and
+            class03["active_state"]["direction_index_range_u8"] == [0, 63] and
+            class03["active_state"]["vectors_per_motion_table"] == 64 and
+            all(len(rows) == 64 for rows in
+                class03["active_state"]["low_nibble_motion_tables_s16"].values()) and
+            all(len(rows) == 64 for rows in
+                class03["active_state"]["high_nibble_motion_tables_s16"].values()) and
+            class03["child_emitter_state"]["cadence_reload_u8"] == 4 and
+            class03["effect_allocation"]["record_type_u8"] == 24 and
+            class03["effect_allocation"]["class_u8"] == 0x49 and
+            class03["effect_allocation"]["variant_u8"] == 1 and
+            class03["effect_allocation"]["timer_u8"] == 8 and
+            class03["effect_allocation"]["accepted_auxiliary_contract"][
+                "dispatch"] == "0x08f080" and
+            class03["effect_allocation"]["audio_command"] is None and
+            class03["suppression_control"]["suppressed_writes"] == 1 and
+            class03["rng_calls"] == [],
+            "airborne Button1 class-3 implementation fixture drift")
     class1f = next(item for item in
                    fixtures["authority_data"]["enemies"]["archetypes"]
                    if item["class"] == "0x1f")
@@ -419,6 +716,89 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class1f["presentation_and_collision"]["accepted_hit_ko_records"]
                 ["fixed_frame_presentation_forbidden"] is True,
             "class-0x1f HIT/KO presentation fixture incomplete or drifted")
+    class1f_actions = class1f["first_segment_action_execution_contract"]
+    require(class1f_actions["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            class1f_actions["capture_identity"]["byte_identical"] is True and
+            len(class1f_actions["initializer"]["variants"]) == 10 and
+            [row["action_u8"] for row in
+             class1f_actions["current_dispatch"]["action_targets"]] ==
+                list(range(0, 32, 2)) and
+            class1f_actions["current_dispatch"]["action_targets"][11] ==
+                {"action_u8": 22, "target": "0x060c2e"} and
+            class1f_actions["current_dispatch"]["required_state_contexts"] ==
+                ["0x0200:0000", "0x0200:0200", "0x0200:0400",
+                 "0x0200:0402", "0x0200:0404", "0x0200:0406",
+                 "0x0200:0408", "0x0200:0600", "0x0200:0800",
+                 "0x0200:0a00", "0x0200:0c00", "0x0200:0c02",
+                 "0x0200:0c04", "0x0200:0e00", "0x0200:0e02",
+                 "0x0200:0e04", "0x0200:1000", "0x0200:1200",
+                 "0x0200:1400", "0x0200:1402", "0x0200:1404",
+                 "0x0200:1406", "0x0200:1408", "0x0200:1600",
+                 "0x0200:1800", "0x0200:1a00", "0x0200:1c00",
+                 "0x0200:1e00"] and
+            [row["selector_u8"] for row in
+             class1f_actions["animation_selector_table"]["selectors"]] ==
+                [0, 1, 34, 35, 36, 43, 52, 53, 54, 55, 56, 60, 62, 68, 69, 70,
+                 71, 72, 73, 74, 76, 77] and
+            [row["table_index_u8"] for row in
+             class1f_actions["movement_tables"]] == [1, 8] and
+            class1f_actions["movement_tables"][1]["vectors"][8] ==
+                {"direction_u8": 8, "x_delta_s16": 2048,
+                 "y_delta_s16": 0} and
+            class1f_actions["action_programs"]["source_bounds"] == {
+                "x_max_u16": 0x05f0,
+                "camera_relative_bias_u16": 0x0070,
+                "camera_relative_span_u16": 0x0260,
+                "failure_outer_state_u16": 0x0600,
+                "comparison": "unsigned word"} and
+            class1f_actions["action_programs"]["direction_helper_0x061032"]
+                ["upper_directions_by_a5_u8"] == [0x16, 0x0a] and
+            class1f_actions["action_programs"]["direction_helper_0x061032"]
+                ["lower_directions_by_a5_u8"] == [0x1a, 0x06] and
+            class1f_actions["action_programs"]["action_0x0e"]
+                ["x_velocity_table_s32_16_16"] ==
+                [-0x00010000, -0x00014000, -0x00018000, -0x00020000] and
+            class1f_actions["action_programs"]["action_0x04"]
+                ["selector_groups_u16"] ==
+                [[55], [56], [43, 43, 43, 55], [43, 43, 56]] and
+            class1f_actions["action_programs"]["action_0x04"]
+                ["timer_stage_parameter_field"] == "0xff81ea:u16" and
+            class1f_actions["action_programs"]["action_0x04"]
+                ["timer_stage_offsets_u8"] ==
+                [0] * 5 + [32] * 8 + [64] * 6 + [96] * 5 + [128] * 8 and
+            len(class1f_actions["action_programs"]["action_0x04"]
+                ["timer_rows_u8"]) == 5 and
+            all(len(row) == 32 for row in
+                class1f_actions["action_programs"]["action_0x04"]
+                ["timer_rows_u8"]) and
+            class1f_actions["action_programs"]["action_0x04"]
+                ["coffee_shop_observation"]["timer_result_u8"] == 6 and
+            class1f_actions["attack_timer_table_u8"] ==
+                [30] * 4 + [60] * 4 + [120] * 4 + [160] * 4 and
+            {key: class1f_actions["suppression_control"][key] for key in (
+                "writer_pc", "suppressed_writes", "baseline_transition_rows",
+                "mutant_transition_rows", "baseline_lifecycle_releases",
+                "mutant_lifecycle_releases", "baseline_main_aux_spawns",
+                "mutant_main_aux_spawns", "baseline_final_route",
+                "mutant_final_route", "fixed_frame_substitute")} == {
+                    "writer_pc": "0x0607e8", "suppressed_writes": 179,
+                    "baseline_transition_rows": 337,
+                    "mutant_transition_rows": 627,
+                    "baseline_lifecycle_releases": 22,
+                    "mutant_lifecycle_releases": 23,
+                    "baseline_main_aux_spawns": [15, 3],
+                    "mutant_main_aux_spawns": [16, 3],
+                    "baseline_final_route": 4, "mutant_final_route": 4,
+                    "fixed_frame_substitute": False} and
+            class1f_actions["suppression_control"]["action4_timer"] == {
+                "writer_pc": "0x060944", "suppressed_writes": 1,
+                "baseline_timer_u8": 6, "mutant_timer_u8": 0,
+                "first_difference_frame": 2798,
+                "first_difference_slot": "0x00ffa240",
+                "score_unchanged": True, "audio_dispatch_unchanged": True,
+                "route_exit_unchanged": True},
+            "class-0x1f first-segment action fixture incomplete or drifted")
     ids = set()
     families = set()
     required = {"id", "authority_family", "classification", "type", "signed",

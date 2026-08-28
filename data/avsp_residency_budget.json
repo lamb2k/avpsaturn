@@ -1,15 +1,21 @@
 {
  "cartridge": {
   "dram1_bytes": 2097152,
-  "jo_zone_bytes": 1273856,
-  "note": "strips carve exists only in the street-test profile; the jo zone figure above applies to that profile, other profiles get dram1 - tile_carve",
+  "jo_zone_bytes": 1142784,
+  "live_diagnostic_carve_bytes": 106496,
+  "live_diagnostic_headroom_bytes": 16796,
+  "live_diagnostic_measured_bytes": 89700,
+  "note": "strips carve exists only in the street-test profile; the Round 1 runtime carve exists only in the live-encounter profile; the jo zone figure above applies when both are active, while other profiles omit the inactive carves",
+  "round1_runtime_carve_bytes": 24576,
+  "round1_runtime_headroom_bytes": 6028,
+  "round1_runtime_measured_bytes": 18548,
   "status": "MEASURED",
   "strips_carve_bytes": 294912,
   "strips_carve_headroom": 25258,
   "strips_file_bytes": 269654,
-  "tile_archive_bytes": 501536,
+  "tile_archive_bytes": 509092,
   "tile_carve_bytes": 528384,
-  "tile_carve_headroom": 26848
+  "tile_carve_headroom": 19292
  },
  "classification": "pessimistic residency ledger; sizes, addresses and counts only",
  "cram": {
@@ -61,11 +67,11 @@
    "1": 2,
    "2": 446
   },
-  "headroom_bytes": 22752,
+  "headroom_bytes": 15196,
   "live_command_sample": 449,
   "note": "command sample from one paused street frame; a route-wide command high-water is a GAP until a soak instrument runs",
   "status": "MEASURED",
-  "texture_archive_bytes": 501536
+  "texture_archive_bytes": 509092
  },
  "vdp2": {
   "capacity_bytes": 524288,
@@ -104,6 +110,13 @@
    "headroom_bytes": 2016,
    "limit": "0x060c0000",
    "profile": "debug-frontend-test",
+   "status": "MEASURED"
+  },
+  "debug-live-encounter": {
+   "bend": "0x060af600",
+   "headroom_bytes": 68096,
+   "limit": "0x060c0000",
+   "profile": "debug-live-encounter",
    "status": "MEASURED"
   },
   "debug-normal-release": {
