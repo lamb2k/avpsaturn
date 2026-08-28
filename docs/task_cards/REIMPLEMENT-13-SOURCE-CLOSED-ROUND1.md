@@ -268,19 +268,31 @@ measured at `0x135e4` and guarded inside a policy-compliant `0x18000` cartridge
 arena with 19.3% headroom; the residency ledger and readback base are bound to
 that exact layout.
 
-Whole-scene parity remains open: 405 source lifetimes are missing, including
-all nine type-`16` lifetimes; 1,365 source spawn/despawn edges, 37 active states,
+Whole-scene parity remains open: 404 source lifetimes are missing, including
+all nine type-`16` lifetimes; 1,356 source spawn/despawn edges, 39 active states,
 94 collision/damage events, 3 route/camera events and 281 audio/load events
 remain unmapped or unowned. Zero retained gameplay authorities and zero unowned
 Saturn actors are preserved.
 
-The exact next body is the smallest source class-`0x1f` current-state action
-path that naturally enters inner state `0x08`, reaches action `0x0e02`, and
-drives the accepted type-`16` emitter. Source actor bytes `+4=0x02` and
-`+5=0x08` are represented by native combined state `0x0208`; do not treat it
-as a separate outer dispatch state and do not substitute a fixed frame. Rerun
-the whole Coffee Shop source/native census after the body and do not leave the
-scene until its zero-gap gate passes.
+Incremental checkpoint `a6f434539b98369c10c0b4e65125d9683a95a7ec`
+implements the accepted class-`0x1f` inner state `0x0208` program: actions
+`0x00/04/06/08/0a/0e/10`, 54 source animation records, eight movement tables,
+target-side/facing branches, source RNG order, movement, and type-`16` parent
+emission. The focused host differential and 154 real mutations, Fast, Oracle,
+and release Target pass. A stale SPEC fingerprint sentinel and omitted
+class-`0x4e` variant-1 impact presentation residency were found by Emulator and
+corrected from the accepted fixture; the rerun records zero decode, fallback,
+failure, or canary errors.
+
+Paired Emulator acceptance remains blocked, not rebaselined. The old 575-sample
+choreography begins after native recurring-encounter initialization, which now
+occurs 182 scheduler ticks later and therefore sees a different prefix of the
+source input ledger. The exact next body is to locate the first source/native
+outer class-`0x1f` route/RNG/target-side/lifecycle or recurring-controller timing
+divergence. Preserve the inner program, make all nine source type-`16` lifetimes
+occur naturally, rerun the whole census, then regenerate paired evidence from
+the source-owned chronology. Do not leave Coffee Shop until its zero-gap gate
+passes.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.
