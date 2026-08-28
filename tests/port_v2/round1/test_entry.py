@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "89c1033994f56773123f3f3b1cdaa041db7a71cc4df623e646afe13ffa7fbd54"
+EXPECTED = "8b01ba4f8de6a6e0cdc5927cd9e0cde8d0ec23e1795c46b09202571e6bf0f6b7"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -132,6 +132,10 @@ for before, after in (
     ("transition->y_acceleration = -0x00005000L;", "transition->y_acceleration = 0x00005000L;"),
     ("actor->effect_timer = 42u;", "actor->effect_timer = 41u;"),
     ("runtime->class1f_effect_guard = 0u;", "runtime->class1f_effect_guard = 1u;"),
+    ("actor->hurt_selector = actor->source_a5;",
+     "actor->hurt_selector = 0u;"),
+    ("actor->attack_selector = actor->source_a6;",
+     "actor->attack_selector = 0u;"),
     ("slot == 0xc600u", "slot == 0xc580u"),
     ("AVSP_ROUND1_CLASS45_SCENE_ACTOR_COUNT - 1u -\n                allocation_index",
      "allocation_index"),
@@ -395,4 +399,4 @@ for before, after in (
                                  "--", "bash", "-lc", command],
                                 capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (154 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (156 real mutations)")

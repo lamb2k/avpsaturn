@@ -277,6 +277,10 @@ def build() -> str:
             [16, 17, 17, 18, 17, 16, 18, 17, 19, 19] or
         [row["object_or_u16"] for row in class1f_initial_actors] !=
             ["0x8000"] * 10 or
+        [row["hurt_selector_u8"] for row in class1f_initial_actors] !=
+            [1] * 10 or
+        [row["attack_selector_u8"] for row in class1f_initial_actors] !=
+            [1] * 10 or
         class1f_initialization["rng_calls"] != 10 or
         class1f_initialization["rng_seed_after_each_source_slot"][-1] !=
             "0x16b7" or
@@ -1328,12 +1332,13 @@ def build() -> str:
                         ((writes["actor+0x85_u8"] & 1) << 3))
         timer = 216 if phase in (0x1000, 0x1200) else row["entry_delay_u8"]
         lines.append(
-            "    { %sUL, 0x%04Xu, 0x%04Xu, %d, %d, %d, %du, %du, %du, %s, %du, 0x%02Xu, %du }," % (
+            "    { %sUL, 0x%04Xu, 0x%04Xu, %d, %d, %d, %du, %du, %du, %s, %du, 0x%02Xu, %du, %du, %du }," % (
                 row["source_slot"], row["state_u16"], phase,
                 row["x_s16"], row["y_s16"], row["z_s16"],
                 row["facing_u8"], row["coordinate_mode_u8"],
                 row["palette_u8"], row["object_or_u16"], timer, source_flags,
-                initializer["animation_selector_u8"]))
+                initializer["animation_selector_u8"], row["hurt_selector_u8"],
+                row["attack_selector_u8"]))
     terminal_policies = {0: "AVSP_ROUND1_ANIMATION_TERMINAL_LOOP_FIRST",
                          1: "AVSP_ROUND1_ANIMATION_TERMINAL_LOOP_FIRST",
                          52: "AVSP_ROUND1_ANIMATION_TERMINAL_SELF_LOOP",

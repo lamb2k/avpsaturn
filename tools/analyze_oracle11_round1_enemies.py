@@ -1191,13 +1191,16 @@ def initial_class1f_presentation_fields(
                 u16(0x04) == 0x0200 and u16(0x06) == phase and
                 u16(0x10) == x and u16(0x14) == yz and u16(0x18) == yz and
                 u8(0x0D) == 1 and u8(0x0E) == palette and
-                u8(0x0F) == 1 and u16(0x2E) == 0x8000,
+                u8(0x0F) == 1 and u16(0x2E) == 0x8000 and
+                u8(0xA5) == 1 and u8(0xA6) == 1,
                 f"class-0x1f presentation fields drift at {slot}")
         result[slot] = {
             "source_frame": 2092,
             "coordinate_mode_u8": u8(0x0D),
             "palette_u8": u8(0x0E),
             "object_or_u16": f"0x{u16(0x2E):04x}",
+            "hurt_selector_u8": u8(0xA5),
+            "attack_selector_u8": u8(0xA6),
             "source_record_sha256": hashlib.sha256(raw).hexdigest(),
         }
     return result
@@ -1232,6 +1235,8 @@ def initial_class1f_transition_contract(samples: list[dict[str, str]],
                        "coordinate_mode_u8": fields["coordinate_mode_u8"],
                        "palette_u8": fields["palette_u8"],
                        "object_or_u16": fields["object_or_u16"],
+                       "hurt_selector_u8": fields["hurt_selector_u8"],
+                       "attack_selector_u8": fields["attack_selector_u8"],
                        "presentation_source_frame": fields["source_frame"],
                        "presentation_source_record_sha256":
                            fields["source_record_sha256"]})
@@ -1768,6 +1773,10 @@ def validate(report: dict[str, object]) -> None:
                         [16, 17, 17, 18, 17, 16, 18, 17, 19, 19] and
                     [actor["object_or_u16"] for actor in contract["actors"]] ==
                         ["0x8000"] * 10 and
+                    [actor["hurt_selector_u8"] for actor in
+                     contract["actors"]] == [1] * 10 and
+                    [actor["attack_selector_u8"] for actor in
+                     contract["actors"]] == [1] * 10 and
                     all(actor["presentation_source_frame"] == 2092 and
                         len(actor["presentation_source_record_sha256"]) == 64
                         for actor in contract["actors"]) and

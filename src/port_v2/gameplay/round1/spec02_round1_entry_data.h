@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=89c1033994f56773123f3f3b1cdaa041db7a71cc4df623e646afe13ffa7fbd54 */
-/* fixtures_sha256=5707141a7fc79f1a1bfbbd7cb257bbd343ce30592a79c15cb3b770a89333baa8 */
+/* contract_sha256=8b01ba4f8de6a6e0cdc5927cd9e0cde8d0ec23e1795c46b09202571e6bf0f6b7 */
+/* fixtures_sha256=ff5745e12cdcd9f16d78f1e6ddd4ec437c16fbb75d6111533a2ac5aa20e9e947 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -706,16 +706,16 @@ static const AvspRound1Class1fActionProgramSpec avsp_round1_class1f_action_progr
 
 static const AvspRound1Class1fInitialSpec avsp_round1_class1f_initial_actors[AVSP_ROUND1_CLASS1F_INITIAL_ACTOR_COUNT] =
 {
-    { 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x8000, 216u, 0x0Fu, 1u },
-    { 0x00ff9dc0UL, 0x0200u, 0x1000u, 616, 304, 304, 1u, 1u, 17u, 0x8000, 216u, 0x0Fu, 1u },
-    { 0x00ff9e80UL, 0x0200u, 0x1000u, 640, 256, 256, 1u, 1u, 17u, 0x8000, 216u, 0x0Fu, 1u },
-    { 0x00ff9f40UL, 0x0200u, 0x1200u, 696, 264, 264, 1u, 1u, 18u, 0x8000, 216u, 0x07u, 0u },
-    { 0x00ffa000UL, 0x0200u, 0x1200u, 600, 300, 300, 1u, 1u, 17u, 0x8000, 216u, 0x07u, 0u },
-    { 0x00ffa0c0UL, 0x0200u, 0x1200u, 648, 280, 280, 1u, 1u, 16u, 0x8000, 216u, 0x07u, 0u },
-    { 0x00ffa180UL, 0x0200u, 0x1200u, 640, 320, 320, 1u, 1u, 18u, 0x8000, 216u, 0x07u, 0u },
-    { 0x00ffa240UL, 0x0200u, 0x1400u, 744, 280, 280, 1u, 1u, 17u, 0x8000, 9u, 0x0Fu, 1u },
-    { 0x00ffa300UL, 0x0200u, 0x1400u, 704, 296, 296, 1u, 1u, 19u, 0x8000, 3u, 0x0Fu, 1u },
-    { 0x00ffa3c0UL, 0x0200u, 0x1400u, 656, 312, 312, 1u, 1u, 19u, 0x8000, 16u, 0x0Fu, 1u },
+    { 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x8000, 216u, 0x0Fu, 1u, 1u, 1u },
+    { 0x00ff9dc0UL, 0x0200u, 0x1000u, 616, 304, 304, 1u, 1u, 17u, 0x8000, 216u, 0x0Fu, 1u, 1u, 1u },
+    { 0x00ff9e80UL, 0x0200u, 0x1000u, 640, 256, 256, 1u, 1u, 17u, 0x8000, 216u, 0x0Fu, 1u, 1u, 1u },
+    { 0x00ff9f40UL, 0x0200u, 0x1200u, 696, 264, 264, 1u, 1u, 18u, 0x8000, 216u, 0x07u, 0u, 1u, 1u },
+    { 0x00ffa000UL, 0x0200u, 0x1200u, 600, 300, 300, 1u, 1u, 17u, 0x8000, 216u, 0x07u, 0u, 1u, 1u },
+    { 0x00ffa0c0UL, 0x0200u, 0x1200u, 648, 280, 280, 1u, 1u, 16u, 0x8000, 216u, 0x07u, 0u, 1u, 1u },
+    { 0x00ffa180UL, 0x0200u, 0x1200u, 640, 320, 320, 1u, 1u, 18u, 0x8000, 216u, 0x07u, 0u, 1u, 1u },
+    { 0x00ffa240UL, 0x0200u, 0x1400u, 744, 280, 280, 1u, 1u, 17u, 0x8000, 9u, 0x0Fu, 1u, 1u, 1u },
+    { 0x00ffa300UL, 0x0200u, 0x1400u, 704, 296, 296, 1u, 1u, 19u, 0x8000, 3u, 0x0Fu, 1u, 1u, 1u },
+    { 0x00ffa3c0UL, 0x0200u, 0x1400u, 656, 312, 312, 1u, 1u, 19u, 0x8000, 16u, 0x0Fu, 1u, 1u, 1u },
 };
 
 static const AvspRound1AnimationSequenceSpec avsp_round1_class1f_initial_sequences[AVSP_ROUND1_CLASS1F_INITIAL_SEQUENCE_COUNT] =

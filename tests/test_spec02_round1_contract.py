@@ -60,6 +60,8 @@ assert [row["entry_delay_u8"] for row in initial["actors"][-3:]] == [9, 3, 16]
 assert [row["coordinate_mode_u8"] for row in initial["actors"]] == [1] * 10
 assert [row["palette_u8"] for row in initial["actors"]] == [16, 17, 17, 18, 17, 16, 18, 17, 19, 19]
 assert [row["object_or_u16"] for row in initial["actors"]] == ["0x8000"] * 10
+assert [row["hurt_selector_u8"] for row in initial["actors"]] == [1] * 10
+assert [row["attack_selector_u8"] for row in initial["actors"]] == [1] * 10
 assert [row["selector_u8"] for row in initial["animation_sequences"]] == [0, 1, 52, 60, 62, 76]
 current = class1f["current_state_implementation_contract"]
 assert current["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"

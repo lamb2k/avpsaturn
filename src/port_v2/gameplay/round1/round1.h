@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "89c1033994f56773123f3f3b1cdaa041db7a71cc4df623e646afe13ffa7fbd54"
+    "8b01ba4f8de6a6e0cdc5927cd9e0cde8d0ec23e1795c46b09202571e6bf0f6b7"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -435,6 +435,8 @@ typedef struct
     unsigned short transition_timer_initial;
     unsigned char source_flags;
     unsigned char animation_selector;
+    unsigned char hurt_selector;
+    unsigned char attack_selector;
 } AvspRound1Class1fInitialSpec;
 
 typedef struct

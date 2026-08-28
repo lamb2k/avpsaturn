@@ -211,8 +211,8 @@ int main(void)
         runtime.presentation_bindings != 1710u ||
         runtime.state_context_bindings != 1710u ||
         runtime.pools[0].records[10].assembly != 0x0012FA2AUL ||
-        runtime.pools[0].records[10].hurt_selector != 2u ||
-        runtime.pools[0].records[10].attack_selector != 0u ||
+        runtime.pools[0].records[10].hurt_selector != 1u ||
+        runtime.pools[0].records[10].attack_selector != 1u ||
         runtime.pools[0].records[16].assembly != 0x0012F9E4UL ||
         runtime.pools[0].records[16].hurt_selector != 1u ||
         runtime.pools[0].records[10].dispatch_entry != 0x00060532UL)
@@ -1230,7 +1230,7 @@ int main(void)
             impact->source_slot != 0x00ffc500UL ||
             impact->state != 0u || impact->variant != 1u ||
             impact->facing != child->facing ||
-            impact->x != 939 || impact->y != 337 || impact->z != 318 ||
+            impact->x != 940 || impact->y != 350 || impact->z != 318 ||
             projectile_runtime.class4e_variant1_allocation_requests != 1u ||
             projectile_runtime.class4e_variant1_allocations != 1u ||
             projectile_runtime.class4e_variant1_allocation_failures != 0u)
@@ -1240,7 +1240,7 @@ int main(void)
                 impact->active, impact->actor_class, impact->variant,
                 impact->state, impact->source_slot, impact->facing,
                 child->facing, impact->x, impact->y, impact->z,
-                (short)(child->x - 6), (short)(child->y + 31),
+                (short)(child->x + 6), (short)(child->y + 31),
                 (short)(child->z - 1),
                 avsp_round1_is_weapon_impact_actor(impact),
                 projectile_runtime.class4e_variant1_allocation_requests,

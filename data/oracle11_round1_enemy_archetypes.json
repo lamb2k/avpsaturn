@@ -40564,9 +40564,11 @@
         "accepted_audio_evidence_sha256": "50f48bf1dd2cbc5007108a12674af5d531add385886b7debcbe51cbf47fea06f",
         "actors": [
           {
+            "attack_selector_u8": 1,
             "coordinate_mode_u8": 1,
             "entry_delay_u8": 0,
             "facing_u8": 1,
+            "hurt_selector_u8": 1,
             "object_or_u16": "0x8000",
             "palette_u8": 16,
             "presentation_source_frame": 2092,
@@ -40579,9 +40581,11 @@
             "z_s16": 296
           },
           {
+            "attack_selector_u8": 1,
             "coordinate_mode_u8": 1,
             "entry_delay_u8": 0,
             "facing_u8": 1,
+            "hurt_selector_u8": 1,
             "object_or_u16": "0x8000",
             "palette_u8": 17,
             "presentation_source_frame": 2092,
@@ -40594,9 +40598,11 @@
             "z_s16": 304
           },
           {
+            "attack_selector_u8": 1,
             "coordinate_mode_u8": 1,
             "entry_delay_u8": 0,
             "facing_u8": 1,
+            "hurt_selector_u8": 1,
             "object_or_u16": "0x8000",
             "palette_u8": 17,
             "presentation_source_frame": 2092,
@@ -40609,9 +40615,11 @@
             "z_s16": 256
           },
           {
+            "attack_selector_u8": 1,
             "coordinate_mode_u8": 1,
             "entry_delay_u8": 0,
             "facing_u8": 1,
+            "hurt_selector_u8": 1,
             "object_or_u16": "0x8000",
             "palette_u8": 18,
             "presentation_source_frame": 2092,
@@ -40624,9 +40632,11 @@
             "z_s16": 264
           },
           {
+            "attack_selector_u8": 1,
             "coordinate_mode_u8": 1,
             "entry_delay_u8": 0,
             "facing_u8": 1,
+            "hurt_selector_u8": 1,
             "object_or_u16": "0x8000",
             "palette_u8": 17,
             "presentation_source_frame": 2092,
@@ -40639,9 +40649,11 @@
             "z_s16": 300
           },
           {
+            "attack_selector_u8": 1,
             "coordinate_mode_u8": 1,
             "entry_delay_u8": 0,
             "facing_u8": 1,
+            "hurt_selector_u8": 1,
             "object_or_u16": "0x8000",
             "palette_u8": 16,
             "presentation_source_frame": 2092,
@@ -40654,9 +40666,11 @@
             "z_s16": 280
           },
           {
+            "attack_selector_u8": 1,
             "coordinate_mode_u8": 1,
             "entry_delay_u8": 0,
             "facing_u8": 1,
+            "hurt_selector_u8": 1,
             "object_or_u16": "0x8000",
             "palette_u8": 18,
             "presentation_source_frame": 2092,
@@ -40669,9 +40683,11 @@
             "z_s16": 320
           },
           {
+            "attack_selector_u8": 1,
             "coordinate_mode_u8": 1,
             "entry_delay_u8": 9,
             "facing_u8": 1,
+            "hurt_selector_u8": 1,
             "object_or_u16": "0x8000",
             "palette_u8": 17,
             "presentation_source_frame": 2092,
@@ -40684,9 +40700,11 @@
             "z_s16": 280
           },
           {
+            "attack_selector_u8": 1,
             "coordinate_mode_u8": 1,
             "entry_delay_u8": 3,
             "facing_u8": 1,
+            "hurt_selector_u8": 1,
             "object_or_u16": "0x8000",
             "palette_u8": 19,
             "presentation_source_frame": 2092,
@@ -40699,9 +40717,11 @@
             "z_s16": 296
           },
           {
+            "attack_selector_u8": 1,
             "coordinate_mode_u8": 1,
             "entry_delay_u8": 16,
             "facing_u8": 1,
+            "hurt_selector_u8": 1,
             "object_or_u16": "0x8000",
             "palette_u8": 19,
             "presentation_source_frame": 2092,

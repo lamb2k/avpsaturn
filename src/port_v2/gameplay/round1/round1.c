@@ -654,8 +654,6 @@ static void avsp_round1_bind_class1f_action_record(
     actor->assembly = record->assembly;
     actor->animation_timer = record->timer;
     actor->animation_branch = record->branch;
-    actor->hurt_selector = record->hurt_selector;
-    actor->attack_selector = record->attack_selector;
     actor->source_movement_table = record->movement_table;
 }
 
@@ -3559,10 +3557,14 @@ static int avsp_round1_bind_class1f_sequence(AvspRound1ActorCore *actor,
 {
     const AvspRound1AnimationSequenceSpec *sequence =
         avsp_round1_find_initial_class1f_sequence(selector);
+    unsigned char hurt_selector = actor->hurt_selector;
+    unsigned char attack_selector = actor->attack_selector;
     if (sequence == 0 || sequence->record_count == 0u)
         return 0;
     actor->animation_index = 0u;
     avsp_round1_bind_animation_state(actor, &sequence->records[0]);
+    actor->hurt_selector = hurt_selector;
+    actor->attack_selector = attack_selector;
     return 1;
 }
 
@@ -3572,6 +3574,8 @@ static int avsp_round1_step_class1f_animation(AvspRound1ActorCore *actor,
     const AvspRound1AnimationSequenceSpec *sequence =
         avsp_round1_find_initial_class1f_sequence(selector);
     unsigned char next;
+    unsigned char hurt_selector = actor->hurt_selector;
+    unsigned char attack_selector = actor->attack_selector;
     if (sequence == 0 || actor->animation_index >= sequence->record_count ||
         actor->animation_timer == 0u)
         return 0;
@@ -3594,6 +3598,8 @@ static int avsp_round1_step_class1f_animation(AvspRound1ActorCore *actor,
         return 0;
     actor->animation_index = next;
     avsp_round1_bind_animation_state(actor, &sequence->records[next]);
+    actor->hurt_selector = hurt_selector;
+    actor->attack_selector = attack_selector;
     return 1;
 }
 
@@ -3666,6 +3672,8 @@ static int avsp_round1_initialize_class1f(AvspRound1Runtime *runtime,
         actor->palette = spec->palette;
         actor->object_or = spec->object_or;
         actor->transition_timer = spec->transition_timer_initial;
+        actor->hurt_selector = spec->hurt_selector;
+        actor->attack_selector = spec->attack_selector;
         if (!avsp_round1_bind_class1f_sequence(actor,
                                                spec->animation_selector))
             return 0;
@@ -6818,12 +6826,10 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
                             actor->animation_record);
                     presentation = avsp_round1_find_class1f_presentation(
                         actor->animation_record);
+                    actor->hurt_selector = actor->source_a5;
+                    actor->attack_selector = actor->source_a6;
                     if (action_record == 0 && presentation != 0)
-                    {
                         actor->assembly = presentation->assembly;
-                        actor->hurt_selector = presentation->hurt_selector;
-                        actor->attack_selector = presentation->attack_selector;
-                    }
                     if (action_record == 0 && presentation == 0)
                     {
                         runtime->scheduler_failure_code = 10u;

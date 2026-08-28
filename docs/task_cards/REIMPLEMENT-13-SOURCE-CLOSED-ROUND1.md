@@ -268,8 +268,8 @@ measured at `0x135e4` and guarded inside a policy-compliant `0x18000` cartridge
 arena with 19.3% headroom; the residency ledger and readback base are bound to
 that exact layout.
 
-Whole-scene parity remains open: 404 source lifetimes are missing, including
-all nine type-`16` lifetimes; 1,356 source spawn/despawn edges, 39 active states,
+Whole-scene parity remains open: 399 source lifetimes are missing; 1,376 source
+spawn/despawn edges, 40 active states,
 94 collision/damage events, 3 route/camera events and 281 audio/load events
 remain unmapped or unowned. Zero retained gameplay authorities and zero unowned
 Saturn actors are preserved.
@@ -284,15 +284,21 @@ class-`0x4e` variant-1 impact presentation residency were found by Emulator and
 corrected from the accepted fixture; the rerun records zero decode, fallback,
 failure, or canary errors.
 
+The next bounded correction binds class-`0x1f` live collision selectors to the
+source actor `+0xa5/+0xa6` fields instead of presentation-record selector bytes.
+Its focused Oracle/SPEC checks, 156 real host mutations, Fast, Oracle, and release
+Target pass; five additional source lifetimes now match naturally.
+
 Paired Emulator acceptance remains blocked, not rebaselined. The old 575-sample
 choreography begins after native recurring-encounter initialization, which now
 occurs 182 scheduler ticks later and therefore sees a different prefix of the
-source input ledger. The exact next body is to locate the first source/native
-outer class-`0x1f` route/RNG/target-side/lifecycle or recurring-controller timing
-divergence. Preserve the inner program, make all nine source type-`16` lifetimes
-occur naturally, rerun the whole census, then regenerate paired evidence from
-the source-owned chronology. Do not leave Coffee Shop until its zero-gap gate
-passes.
+source input ledger. The first remaining actor divergence is now exact: at source
+frame 2288 native record-type-`4` child collision damages class-`0x1f` slot
+`0x00ffa180`, while the source first writes that damage at frame 2306 from slot
+`0x00ff8880` using attack record `0x030cd2`, then allocates the class-`0x4e`
+variant-1 impact at frame 2307. The exact next body is the accepted record-type-`4`
+before-type-`12` scheduler/current-state collision chronology. Do not guess a
+variant suppression. Do not leave Coffee Shop until its zero-gap gate passes.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.

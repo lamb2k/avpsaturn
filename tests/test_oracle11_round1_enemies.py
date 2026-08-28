@@ -39,6 +39,8 @@ for label,mutate in [
     ('presentation-mode',lambda x:x['actors'][0].__setitem__('coordinate_mode_u8',0)),
     ('presentation-palette',lambda x:x['actors'][0].__setitem__('palette_u8',0)),
     ('presentation-object-priority',lambda x:x['actors'][0].__setitem__('object_or_u16','0x0000')),
+    ('initial-hurt-selector',lambda x:x['actors'][0].__setitem__('hurt_selector_u8',2)),
+    ('initial-attack-selector',lambda x:x['actors'][0].__setitem__('attack_selector_u8',0)),
     ('initial-rng',lambda x:x['initialization']['rng_seed_after_each_source_slot'].__setitem__(-1,'0x0000')),
     ('fixed-frame-init',lambda x:x['initialization'].__setitem__('fixed_frame_initialization_forbidden',False)),
     ('post-clear-main-state',lambda x:x['phase_0x1000_and_0x1200'].__setitem__('next_state_substate','0x0000:0000')),
