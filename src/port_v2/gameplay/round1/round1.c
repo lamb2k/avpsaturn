@@ -3003,11 +3003,11 @@ static void avsp_round1_bind_player_weapon_frame(
     const AvspRound1PlayerWeaponFrameSpec *frame)
 {
     runtime->player.source_action = frame->action;
-    runtime->player.substate = frame->substate;
+    runtime->player.substate = frame->action;
     runtime->player.animation_record = frame->animation_record;
     runtime->player.assembly = frame->assembly;
-    runtime->player.hurt_selector = frame->hurt_selector;
-    runtime->player.attack_selector = frame->attack_selector;
+    runtime->player.hurt_selector = 0u;
+    runtime->player.attack_selector = 0u;
     runtime->player_locomotion_action = frame->action;
     ++runtime->player_weapon_presentation_bindings;
 }
@@ -3034,6 +3034,7 @@ static int avsp_round1_allocate_player_weapon_projectile(
     memset(projectile, 0, sizeof(*projectile));
     projectile->collision_identity =
         avsp_round1_next_collision_identity(runtime);
+    projectile->collision_registration_pending = 1u;
     projectile->active = 1u;
     projectile->actor_class = avsp_round1_player_weapon.parent_class;
     projectile->variant = 0u;
@@ -3202,6 +3203,7 @@ static int avsp_round1_allocate_player_air_weapon_projectile(
     memset(projectile, 0, sizeof(*projectile));
     projectile->collision_identity =
         avsp_round1_next_collision_identity(runtime);
+    projectile->collision_registration_pending = 1u;
     projectile->active = 1u;
     projectile->actor_class = avsp_round1_air_weapon_projectile.actor_class;
     projectile->variant = 0u;
@@ -3281,6 +3283,7 @@ static void avsp_round1_refresh_collision_registration(
             &runtime->player_weapon_projectiles[index];
         projectile->collision_registered = (unsigned char)(
             projectile->active == 1u &&
+            projectile->collision_registration_pending == 0u &&
             avsp_round1_collision_visibility(runtime, projectile->x,
                                                projectile->y));
     }
@@ -5446,6 +5449,7 @@ static int avsp_round1_allocate_weapon_child(
     child = &runtime->player_weapon_projectiles[index];
     memset(child, 0, sizeof(*child));
     child->collision_identity = avsp_round1_next_collision_identity(runtime);
+    child->collision_registration_pending = 1u;
     x_offset = parent->facing == 0u ? (short)-row->x : row->x;
     child->active = 1u;
     child->actor_class = avsp_round1_player_weapon.child_class;
@@ -5890,6 +5894,8 @@ static int avsp_round1_step_weapon_projectile(
                                                                  index);
         else
         {
+            if (projectile->substate == 0u)
+                projectile->substate = 2u;
             if (projectile->child_cadence > 0u)
                 --projectile->child_cadence;
             if (projectile->child_cadence == 0u)
@@ -6034,13 +6040,31 @@ static int avsp_round1_projectile_collision_pass(
     for (index = 0u; index < runtime->pools[0].capacity; ++index)
     {
         AvspRound1ActorCore *target = &runtime->pools[0].records[index];
+        const AvspRound1PresentationSpec *target_presentation;
+        unsigned char current_hurt_selector;
         short health;
         signed char latch_index = projectile->collision_latch_index;
         if (target->active != 1u || target->actor_class != 0x1f ||
             target->source_field01 != 1u ||
             target->source_collision_guard6d >= 4u ||
             target->source_collision_suppress70 != 0u ||
-            target->hurt_selector == 0u || target->health < 0)
+            target->health < 0)
+            continue;
+        target_presentation = avsp_round1_find_class1f_presentation(
+            target->animation_record);
+        if (target->animation_record == 0u)
+            continue;
+        if (target_presentation == 0)
+        {
+            runtime->scheduler_failure_source_slot = target->source_slot;
+            runtime->scheduler_failure_state = target->state;
+            runtime->scheduler_failure_substate = target->substate;
+            runtime->scheduler_failure_animation_record =
+                target->animation_record;
+            return 0;
+        }
+        current_hurt_selector = target_presentation->hurt_selector;
+        if (current_hurt_selector == 0u)
             continue;
         if (latch_index >= 0)
         {
@@ -6053,7 +6077,7 @@ static int avsp_round1_projectile_collision_pass(
                 continue;
         }
         if (!avsp_collision_hurt_box(0x00130ac8UL,
-                                     target->hurt_selector, &hurt))
+                                     current_hurt_selector, &hurt))
             return 0;
         memset(&defender, 0, sizeof(defender));
         defender.world_x = (unsigned short)target->x;
@@ -7018,8 +7042,11 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
                         actor->animation_record);
                     actor->hurt_selector = actor->source_a5;
                     actor->attack_selector = actor->source_a6;
-                    if (action_record == 0 && presentation != 0)
-                        actor->assembly = presentation->assembly;
+                    if (presentation != 0)
+                    {
+                        if (action_record == 0)
+                            actor->assembly = presentation->assembly;
+                    }
                     if (action_record == 0 && presentation == 0)
                     {
                         runtime->scheduler_failure_code = 10u;
@@ -7083,6 +7110,11 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
     avsp_round1_refresh_collision_registration(runtime);
     if (!avsp_round1_step_record4_collision(runtime))
         return 0;
+    for (slot_index = 0u;
+         slot_index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY; ++slot_index)
+        if (runtime->player_weapon_projectiles[slot_index].active)
+            runtime->player_weapon_projectiles[slot_index]
+                .collision_registration_pending = 0u;
     runtime->scheduler_order_hash = hash;
     ++runtime->scheduler_frames;
     return 1;
@@ -7662,7 +7694,8 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
             &avsp_round1_player_weapon_return_frame);
     else if (!weapon_owned)
     {
-        runtime->player.substate = view.source_substate;
+        runtime->player.substate = (unsigned short)(
+            runtime->player_locomotion_action & 0x00ffu);
         runtime->player.source_action = runtime->player_locomotion_action;
         runtime->player.animation_record = view.animation_record;
         runtime->player.assembly = view.assembly;
@@ -7774,11 +7807,11 @@ static int avsp_round1_player_weapon_runtime_valid(
                 runtime->player_weapon_tick - 1u];
         }
         if (runtime->player.source_action != frame->action ||
-            runtime->player.substate != frame->substate ||
+            runtime->player.substate != frame->action ||
             runtime->player.animation_record != frame->animation_record ||
             runtime->player.assembly != frame->assembly ||
-            runtime->player.hurt_selector != frame->hurt_selector ||
-            runtime->player.attack_selector != frame->attack_selector)
+            runtime->player.hurt_selector != 0u ||
+            runtime->player.attack_selector != 0u)
             return 0;
     }
     else if (runtime->player_weapon_cleanup_pending)
@@ -7793,11 +7826,11 @@ static int avsp_round1_player_weapon_runtime_valid(
     {
         frame = &avsp_round1_player_weapon_return_frame;
         if (runtime->player.source_action != frame->action ||
-            runtime->player.substate != frame->substate ||
+            runtime->player.substate != frame->action ||
             runtime->player.animation_record != frame->animation_record ||
             runtime->player.assembly != frame->assembly ||
-            runtime->player.hurt_selector != frame->hurt_selector ||
-            runtime->player.attack_selector != frame->attack_selector ||
+            runtime->player.hurt_selector != 0u ||
+            runtime->player.attack_selector != 0u ||
             runtime->player_locomotion_action != frame->action)
             return 0;
     }

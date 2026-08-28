@@ -495,18 +495,245 @@ def build_coffee_shop_scene_manifest(source: dict[str, dict]) -> dict[str, objec
 
 def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
     player = source["player"]
+    player_authority = {key: copy.deepcopy(player[key]) for key in (
+        "source_identity", "locomotion_neutral_facing",
+        "route_reachable_melee_actions", "normal_jump_air_landing",
+        "directional_airborne_interruption", "weapon_projectile_resource",
+        "hit_ko_failure_continue_respawn",
+        "route_pickup_resource_audio_load_ownership",
+        "player_origin_gameplay_audio")}
+    player_authority["locomotion_neutral_facing"][
+        "actor_state_projection"] = {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "spec_executable": True,
+            "control_state_u16": "0x0200",
+            "action_projection": [
+                {"source_action_u16": "0x0200", "substate_u16": "0x0000",
+                 "meaning": "cleanup"},
+                {"source_action_u16": "0x0202", "substate_u16": "0x0002",
+                 "meaning": "walk or idle locomotion dispatch"},
+                {"source_action_u16": "0x0204", "substate_u16": "0x0004",
+                 "meaning": "directional release stop"},
+            ],
+            "projection_rule": (
+                "while locomotion owns the player, actor state remains 0x0200 "
+                "and actor substate receives the low byte of the source action"
+            ),
+            "visible_samples": [
+                {"source_frame_u16": 2238, "state_u16": "0x0200",
+                 "substate_u16": "0x0000"},
+                {"source_frame_u16": 2239, "state_u16": "0x0200",
+                 "substate_u16": "0x0002"},
+            ],
+            "evidence": {
+                "coffee_shop_scene_actors_sha256": source["route"]
+                    ["coffee_shop_scene_census"]["capture_identity"]
+                    ["completion_a"]["coffee_shop_scene_actors.tsv"],
+                "locomotion_source_contract":
+                    "data/oracle11_predator_warrior_authority.json#/locomotion_neutral_facing/release_transition",
+            },
+            "mutation_control": {
+                "mutation": "write the complete 0x0200 source action prefix into actor substate",
+                "rejected_source_frame_u16": 2239,
+                "rejected_substate_u16": "0x0200",
+                "fixed_frame_substitute": False,
+            },
+        }
+    weapon_projection = player_authority["weapon_projectile_resource"][
+        "implementation_contract"]
+    weapon_projection["player_actor_projection"] = {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "spec_executable": True,
+        "rule": (
+            "player actor state remains 0x0200; player actor substate receives "
+            "the complete source action word while Button1 owns the action, "
+            "then receives 0x0000 cleanup and 0x0002 return locomotion"
+        ),
+        "selector_ownership": (
+            "player actor +0xa5/+0xa6 remain zero in the Coffee Shop scene; "
+            "animation-record hurt/attack selector bytes remain presentation "
+            "and collision metadata and are not copied into those actor fields"
+        ),
+        "visible_runs": [
+            {"first_frame_u16": 2252, "last_frame_u16": 2252,
+             "state_u16": "0x0200", "substate_u16": "0x0c00",
+             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+            {"first_frame_u16": 2253, "last_frame_u16": 2255,
+             "state_u16": "0x0200", "substate_u16": "0x0c02",
+             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+            {"first_frame_u16": 2256, "last_frame_u16": 2272,
+             "state_u16": "0x0200", "substate_u16": "0x0c04",
+             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+            {"first_frame_u16": 2273, "last_frame_u16": 2273,
+             "state_u16": "0x0200", "substate_u16": "0x0000",
+             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+            {"first_frame_u16": 2274, "last_frame_u16": 2274,
+             "state_u16": "0x0200", "substate_u16": "0x0002",
+             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+        ],
+        "evidence": {
+            "coffee_shop_scene_actors_sha256": source["route"]
+                ["coffee_shop_scene_census"]["capture_identity"]
+                ["completion_a"]["coffee_shop_scene_actors.tsv"],
+            "button1_source_contract":
+                "data/oracle11_predator_weapon_projectile_resource.json#/implementation_contract/sufficient_action",
+        },
+        "mutation_control": {
+            "mutations_rejected": [
+                "copy only the source inner-state byte into actor substate",
+                "copy animation-record selector metadata into player actor +0xa5/+0xa6",
+            ],
+            "first_rejected_frame_u16": 2252,
+            "fixed_frame_substitute": False,
+        },
+    }
+    weapon_projection["record4_parent_class0"]["child_emitter_state"][
+        "state_projection"] = {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "spec_executable": True,
+            "field_mapping": {
+                "source_state_u16": "(state_u8 << 8) | inner_state_u8",
+                "source_substate_u16": "0x0000",
+            },
+            "coffee_shop_first_parent": [
+                {"first_frame_u16": 2287, "last_frame_u16": 2287,
+                 "state_u8": 4, "inner_state_u8": 0,
+                 "source_state_u16": "0x0400"},
+                {"first_frame_u16": 2288, "last_frame_u16": 2317,
+                 "state_u8": 4, "inner_state_u8": 2,
+                 "source_state_u16": "0x0402"},
+                {"first_frame_u16": 2318, "last_frame_u16": 2318,
+                 "state_u8": 6, "inner_state_u8": 2,
+                 "source_state_u16": "0x0602"},
+            ],
+            "emitter_entry_order": [
+                "write inner state 2",
+                "decrement the existing initial child cadence",
+                "allocate the first child when cadence reaches zero",
+            ],
+            "first_child_visible_frame_u16": 2288,
+            "evidence": {
+                "coffee_shop_scene_actors_sha256": source["route"]
+                    ["coffee_shop_scene_census"]["capture_identity"]
+                    ["completion_a"]["coffee_shop_scene_actors.tsv"],
+                "parent_source_contract":
+                    "data/oracle11_predator_weapon_projectile_resource.json#/implementation_contract/record4_parent_class0/child_emitter_state",
+            },
+            "mutation_control": {
+                "mutations_rejected": [
+                    "omit the inner-state-2 transition",
+                    "delay child allocation while changing inner state",
+                    "project inner state into source actor +0x06 substate",
+                ],
+                "first_rejected_frame_u16": 2288,
+                "fixed_frame_substitute": False,
+            },
+        }
+    registration = weapon_projection["current_state_collision_damage"][
+        "registration_and_pair_eligibility"]
+    registration["new_allocation_registration_boundary"] = {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "spec_executable": True,
+        "rule": (
+            "a record-4 actor allocated and initialized during the current "
+            "record-4 scan receives its collision identity immediately but "
+            "cannot enter the record-4 attacker list until the next source "
+            "scheduler invocation"
+        ),
+        "coffee_shop_slot_0xff8880": {
+            "identity_assignment_frame_u16": 2305,
+            "collision_identity_u8": 42,
+            "allocation_visible_frame_u16": 2306,
+            "attacker_list_absent_frame_u16": 2305,
+            "attacker_list_present_frame_u16": 2306,
+            "source_contact_frame_u16": 2306,
+            "source_target_slot": "0xffa180",
+            "source_attack_record": "0x030cd2",
+        },
+        "attacker_lists": [
+            {"source_frame_u16": 2305,
+             "slots": ["0xff8700", "0xff8800"]},
+            {"source_frame_u16": 2306,
+             "slots": ["0xff8700", "0xff8800", "0xff8880"]},
+        ],
+        "evidence": {
+            "collision_lists_sha256": player[
+                "weapon_projectile_resource"]["provenance"]
+                ["collision_registration_evidence"]
+                ["coffee_shop_collision_lists.tsv"],
+            "collision_identity_assignments_sha256": player[
+                "weapon_projectile_resource"]["provenance"]
+                ["collision_registration_evidence"]
+                ["coffee_shop_collision_identity_assignments.tsv"],
+            "scene_health_writes_sha256": player[
+                "weapon_projectile_resource"]["provenance"]
+                ["collision_registration_evidence"]
+                ["coffee_shop_scene_health_writes.tsv"],
+        },
+        "mutation_control": {
+            "mutation": "register a newly initialized record-4 actor in the same scheduler invocation",
+            "rejected_effect": (
+                "premature frame-2305 collision damages slot 0xff9d00 and "
+                "creates a second frame-2306 target write"
+            ),
+            "first_rejected_visible_frame_u16": 2306,
+            "fixed_frame_substitute": False,
+        },
+    }
+    route = {key: copy.deepcopy(source["route"][key]) for key in
+             ("route_entry", "first_entry_body", "data_contract", "segment_bindings",
+              "route_state_edges", "enemy_spawns",
+              "first_segment_recurring_spawn")}
+    route["first_entry_body"]["route4_player_activation_order"] = {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "spec_executable": True,
+        "route_writer": {
+            "field": "0xff8008:s16",
+            "value_s16": 4,
+            "writer_pc": "0x00c170",
+            "write_frame_u16": 2237,
+            "visible_sample_frame_u16": 2238,
+        },
+        "visible_player_sample": {
+            "source_frame_u16": 2238,
+            "state_u16": "0x0200",
+            "substate_u16": "0x0000",
+        },
+        "scheduler_rule": (
+            "sample route-state player eligibility at the start of each source "
+            "scheduler invocation; a route 2-to-4 write by the entry controller "
+            "does not dispatch the player during that same invocation"
+        ),
+        "scheduler_order": [
+            "entry-controller using current route state",
+            "player only when route state was 4 at invocation start",
+            "fixed actor pools in accepted scheduler order",
+        ],
+        "evidence": {
+            "entry_samples_sha256": source["route"]["first_entry_body"]
+                ["capture_identity"]["completion_a"]["files"]
+                ["entry_samples.tsv"],
+            "route_edge_source_contract":
+                "data/oracle11_round1_encounter_route_authority.json#/route_state_edges/0",
+            "player_entry_source_contract":
+                "data/oracle11_round1_encounter_route_authority.json#/first_entry_body/player_entry_script",
+        },
+        "mutation_control": {
+            "mutation": "dispatch player after observing the same-invocation route 4 write",
+            "rejected_visible_sample": {
+                "source_frame_u16": 2238,
+                "state_u16": "0x0800",
+                "substate_u16": "0x0200",
+            },
+            "fixed_frame_substitute": False,
+        },
+    }
     fixtures = {
         "schema": "spec02-round1-generated-fixtures-v1",
         "task": "SPEC-02-ROUND1-EXECUTABLE-CONTRACT",
         "classification": "GENERATED_ONLY_FROM_ACCEPTED_ORACLE_AND_PORT_V2",
         "authority_data": {
-            "player": {key: copy.deepcopy(player[key]) for key in (
-                "source_identity", "locomotion_neutral_facing",
-                "route_reachable_melee_actions", "normal_jump_air_landing",
-                "directional_airborne_interruption", "weapon_projectile_resource",
-                "hit_ko_failure_continue_respawn",
-                "route_pickup_resource_audio_load_ownership",
-                "player_origin_gameplay_audio")},
+            "player": player_authority,
             "scheduler": {key: copy.deepcopy(source["scheduler"][key]) for key in
                           ("source_identity", "frame_scheduler", "pools")},
             "navigation": {key: copy.deepcopy(source["navigation"][key]) for key in
@@ -520,10 +747,7 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                           "coffee_shop_scene_component_identities": copy.deepcopy(source["auxiliary"]["coffee_shop_scene_component_identities"]),
                           "player_side_contract": copy.deepcopy(source["auxiliary"]["player_side_contract"]),
                           "navigation_body_geometry_contract": copy.deepcopy(source["auxiliary"]["navigation_body_geometry_contract"])},
-            "route": {key: copy.deepcopy(source["route"][key]) for key in
-                      ("route_entry", "first_entry_body", "data_contract", "segment_bindings",
-                       "route_state_edges", "enemy_spawns",
-                       "first_segment_recurring_spawn")},
+            "route": route,
             "boss": {key: copy.deepcopy(source["boss"][key]) for key in
                      ("boss_actor_contract", "controller_contract", "boss_room_spawns",
                       "boss_defeat_bridge", "boss_clear_guard", "rng")},
@@ -642,6 +866,22 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             fixtures["optional_unknowns"]["required_for_round1"] is False,
             "fixture scope drift")
     scene = fixtures["scene_manifests"]["coffee_shop"]
+    activation = fixtures["authority_data"]["route"]["first_entry_body"][
+        "route4_player_activation_order"]
+    require(activation["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            activation["spec_executable"] is True and
+            activation["route_writer"] == {
+                "field": "0xff8008:s16", "value_s16": 4,
+                "writer_pc": "0x00c170", "write_frame_u16": 2237,
+                "visible_sample_frame_u16": 2238} and
+            activation["visible_player_sample"] == {
+                "source_frame_u16": 2238, "state_u16": "0x0200",
+                "substate_u16": "0x0000"} and
+            activation["mutation_control"]["rejected_visible_sample"]
+                ["substate_u16"] == "0x0200" and
+            activation["mutation_control"]["fixed_frame_substitute"] is False,
+            "route-4 player activation ordering fixture drift")
     cadence = fixtures["authority_data"]["route"][
         "first_segment_recurring_spawn"]["source_update_cadence"]
     require(cadence["classification"] ==
@@ -766,6 +1006,10 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
         "0x0012e254": ("0x00130294", 0, 0),
         "0x0012e268": ("0x00130346", 0, 0),
     }
+    expected_first_button1_targets = {
+        "0x0012eb5c": ("0x0012f762", 1, 0),
+        "0x0012ec74": ("0x0012f8b8", 2, 0),
+    }
     require(all(address in class1f_records and
                 (class1f_records[address]["assembly"],
                  class1f_records[address]["hurt_selector"],
@@ -774,6 +1018,12 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class1f["presentation_and_collision"]["accepted_hit_ko_records"]
                 ["fixed_frame_presentation_forbidden"] is True,
             "class-0x1f HIT/KO presentation fixture incomplete or drifted")
+    require(all(address in class1f_records and
+                (class1f_records[address]["assembly"],
+                 class1f_records[address]["hurt_selector"],
+                 class1f_records[address]["attack_selector"]) == fields
+                for address, fields in expected_first_button1_targets.items()),
+            "class-0x1f first Button1 target selectors incomplete or drifted")
     class1f_actions = class1f["first_segment_action_execution_contract"]
     require(class1f_actions["classification"] ==
                 "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and

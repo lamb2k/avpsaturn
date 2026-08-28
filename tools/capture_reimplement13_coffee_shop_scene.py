@@ -291,7 +291,8 @@ def collision_chronology(source: dict[str, object],
         item["attack_record"] == "0x030cd2" and item["damage_writer"])
     by_key = {(int(row["frame"]), row["source_slot"]): row
               for row in native_rows}
-    projectile = by_key[(2306, "00ff8880")]
+    projectile_before = by_key[(2306, "00ff8880")]
+    projectile_after = by_key[(2307, "00ff8880")]
     target_before = by_key[(2306, "00ffa180")]
     target_after = by_key[(2307, "00ffa180")]
     impact_allocated = by_key[(2307, "00ffbd80")]
@@ -320,14 +321,20 @@ def collision_chronology(source: dict[str, object],
         },
         "native_damage_transaction": {
             "scheduler_source_frame": 2306,
-            "attacker_slot": "0x" + projectile["source_slot"],
-            "attack_table_base": "0x" + projectile["attack_table"],
-            "attack_record": "0x" + projectile["current_attack_record"],
-            "collision_result_s16": int(projectile["collision_result"]),
-            "collision_identity_u8": int(projectile["collision_identity"]),
+            "transaction_visible_frame": 2307,
+            "attacker_slot": "0x" + projectile_after["source_slot"],
+            "attack_table_base": "0x" + projectile_after["attack_table"],
+            "attack_record": "0x" + projectile_after[
+                "current_attack_record"],
+            "collision_result_before_scheduler_s16": int(
+                projectile_before["collision_result"]),
+            "collision_result_s16": int(projectile_after[
+                "collision_result"]),
+            "collision_identity_u8": int(projectile_after[
+                "collision_identity"]),
             "collision_registered_u8": int(
-                projectile["collision_registered"]),
-            "projectile_health_s16": int(projectile["health"]),
+                projectile_after["collision_registered"]),
+            "projectile_health_s16": int(projectile_after["health"]),
             "target_health_during_source_frame_s16": int(
                 target_before["health"]),
             "target_health_next_visible_frame_s16": int(
@@ -395,9 +402,11 @@ def validate_report(report: dict[str, object]) -> None:
                 "writer_pc": "0x01d590"},
             "native_damage_transaction": {
                 "scheduler_source_frame": 2306,
+                "transaction_visible_frame": 2307,
                 "attacker_slot": "0x00ff8880",
                 "attack_table_base": "0x00030cb6",
                 "attack_record": "0x00030cd2",
+                "collision_result_before_scheduler_s16": 0,
                 "collision_result_s16": -1,
                 "collision_identity_u8": 42,
                 "collision_registered_u8": 1,

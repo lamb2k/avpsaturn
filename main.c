@@ -8203,8 +8203,8 @@ static void live_encounter_publish(void)
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
         sizeof(AVSP_ROUND1_SPEC02_SHA256) == 65u &&
-        AVSP_ROUND1_SPEC02_SHA256[0] == '3' &&
-        AVSP_ROUND1_SPEC02_SHA256[63] == 'f';
+        AVSP_ROUND1_SPEC02_SHA256[0] == '5' &&
+        AVSP_ROUND1_SPEC02_SHA256[63] == '3';
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
     avsp_diag_round1_rng_seed = round1_runtime.rng_seed;
@@ -8390,6 +8390,7 @@ static void live_encounter_frame_callback(void)
     AvspPortV2CddaAudioOps cdda_operations;
     AvspPortV2HudRenderOps hud_operations;
     int round1_route_before;
+    int round1_player_authority_enabled_at_tick_start;
     int retained_stepped = 0;
     int native_encounter_visible = 0;
     int source_frame;
@@ -8426,6 +8427,8 @@ static void live_encounter_frame_callback(void)
     round1_route_before = round1_runtime.route_state;
     for (source_tick = 0u; source_tick < source_updates; ++source_tick)
     {
+        round1_player_authority_enabled_at_tick_start =
+            round1_runtime.route_state == 4;
         if (round1_runtime.entry.started &&
             round1_runtime.route_state != 4 &&
             !avsp_round1_step_first_entry(&round1_runtime))
@@ -8434,7 +8437,7 @@ static void live_encounter_frame_callback(void)
             runtime_ready = 0;
             return;
         }
-        if (round1_runtime.route_state == 4 &&
+        if (round1_player_authority_enabled_at_tick_start &&
             !avsp_round1_step_player(&round1_runtime, round1_player_mask, 0))
         {
             avsp_diag_live_frame_stage = -9;

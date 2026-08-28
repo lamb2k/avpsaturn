@@ -38,12 +38,12 @@ static void emit_projectile(unsigned int frame,
     unsigned short source_state;
     if (actor->active == 0u)
         return;
-    source_state = actor->state == 0u ? 0u :
-        (unsigned short)(actor->state << 8);
+    source_state = actor->state == 0u ? 0u : (unsigned short)(
+        ((unsigned short)actor->state << 8) | actor->substate);
     printf("%u\trecord4\t00ff%04x\t4\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t0\t%u\t%d\t%d\t0\t0\t0\t0\t0\t0\t0\t%u\t%08lx\t%08lx\t%d\t%u\t%u\n",
            frame, actor->source_slot,
            (unsigned int)(unsigned char)actor->actor_class,
-           (unsigned int)source_state, (unsigned int)actor->substate,
+           (unsigned int)source_state, 0u,
            actor->x_fp, actor->y_fp, actor->z, actor->facing,
            actor->animation_record, actor->assembly, actor->health,
            actor->attack_selector, (short)(actor->x_fp >> 16),
@@ -59,6 +59,7 @@ int main(void)
     AvspRound1Runtime runtime;
     unsigned int source_frame;
     unsigned int index;
+    int player_authority_enabled_at_tick_start;
     avsp_round1_init(&runtime);
     puts("frame\tpool\tsource_slot\ttype\tclass\tstate\tsubstate\tx_fp\ty_fp\tz\tfacing\tanimation_record\tassembly\thealth\thurt_selector\tattack_selector\tx\ty\tsource_a3\tsource_a4\tsource_a5\tsource_a6\tsource_style85\tsource_b0\tsource_direction\tanimation_timer\tattack_table\tcurrent_attack_record\tcollision_result\tcollision_identity\tcollision_registered");
     for (source_frame = 1972u; source_frame <= 5566u; ++source_frame)
@@ -109,10 +110,11 @@ int main(void)
                  (unsigned short)source_frame);
              ++tick)
         {
+            player_authority_enabled_at_tick_start = runtime.route_state == 4;
             if (runtime.entry.started && runtime.route_state != 4 &&
                 !avsp_round1_step_first_entry(&runtime))
                 return 3;
-            if (runtime.route_state == 4 &&
+            if (player_authority_enabled_at_tick_start &&
                 !avsp_round1_step_player(&runtime, input, 0))
                 return 4;
             if (runtime.entry.dependencies_seeded &&

@@ -200,7 +200,7 @@ int main(void)
         !avsp_round1_step_player(&runtime, 0u, 0) ||
         runtime.player.x <= 944 || runtime.player.z != 320 ||
         runtime.player.facing != 1u || runtime.player_controller_updates != 5u ||
-        runtime.player.substate != 512u ||
+        runtime.player.substate != 2u ||
         !avsp_round1_entry_valid(&runtime))
         return 6;
     if (!avsp_round1_step_scheduler(&runtime) ||
@@ -813,14 +813,14 @@ int main(void)
             !avsp_round1_step_player(&weapon_runtime,
                 AVSP_PW_INPUT_RIGHT, 0) ||
             weapon_runtime.player.x == runtime.player.x)
-            return 26;
+            return 116;
         weapon_x = weapon_runtime.player.x;
         weapon_z = weapon_runtime.player.z;
         if (!avsp_round1_step_player(&weapon_runtime,
                 AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_RIGHT, 0) ||
             weapon_runtime.player_weapon_active != 0u ||
             weapon_runtime.player.x == weapon_x)
-            return 26;
+            return 117;
         weapon_x = weapon_runtime.player.x;
         weapon_z = weapon_runtime.player.z;
         if (!avsp_round1_step_player(&weapon_runtime,
@@ -828,7 +828,7 @@ int main(void)
             weapon_runtime.player_weapon_active != 1u ||
             weapon_runtime.player_weapon_tick != 1u ||
             weapon_runtime.player.source_action != 0x0c00u ||
-            weapon_runtime.player.substate != 0u ||
+            weapon_runtime.player.substate != 0x0c00u ||
             weapon_runtime.player.animation_record != 0x0015f1f4UL ||
             weapon_runtime.player.assembly != 0x001626a4UL ||
             weapon_runtime.player_weapon_entries != 1u ||
@@ -841,7 +841,27 @@ int main(void)
             weapon_runtime.player_weapon_interruptions != 0u ||
             weapon_runtime.player.x != weapon_x ||
             weapon_runtime.player.z != weapon_z)
-            return 26;
+        {
+            fprintf(stderr,
+                "Button1 entry mismatch active=%u tick=%u action=%04x substate=%04x animation=%08lx assembly=%08lx entries=%lu attempts=%lu allocations=%lu debits=%lu resource=%u recharge=%u player_state=%u interruptions=%lu position=%d/%d expected=%d/%d\n",
+                weapon_runtime.player_weapon_active,
+                weapon_runtime.player_weapon_tick,
+                weapon_runtime.player.source_action,
+                weapon_runtime.player.substate,
+                weapon_runtime.player.animation_record,
+                weapon_runtime.player.assembly,
+                weapon_runtime.player_weapon_entries,
+                weapon_runtime.player_weapon_attempts_total,
+                weapon_runtime.player_weapon_allocations,
+                weapon_runtime.player_weapon_resource_debits,
+                weapon_runtime.player_resource,
+                weapon_runtime.player_resource_recharge,
+                weapon_runtime.player_action.state,
+                weapon_runtime.player_weapon_interruptions,
+                weapon_runtime.player.x, weapon_runtime.player.z,
+                weapon_x, weapon_z);
+            return 118;
+        }
         if (!avsp_round1_step_player(&weapon_runtime, 0u, 0) ||
             weapon_runtime.player.source_action != 0x0c02u ||
             weapon_runtime.player.animation_record != 0x0015e540UL ||
@@ -1323,6 +1343,8 @@ int main(void)
         target->source_action = 0u;
         target->source_action_timer = 0u;
         target->hurt_selector = 1u;
+        target->animation_record = 0x0012eb5cUL;
+        target->assembly = 0x0012f762UL;
         target->x = child->x;
         target->y = (short)(child->y + 10);
         target->z = child->z;
@@ -1373,7 +1395,7 @@ int main(void)
             impact->source_slot != 0x00ffc500UL ||
             impact->state != 0u || impact->variant != 1u ||
             impact->facing != child->facing ||
-            impact->x != 940 || impact->y != 350 || impact->z != 318 ||
+            impact->x != 939 || impact->y != 337 || impact->z != 318 ||
             projectile_runtime.class4e_variant1_allocation_requests != 1u ||
             projectile_runtime.class4e_variant1_allocations != 1u ||
             projectile_runtime.class4e_variant1_allocation_failures != 0u)
@@ -1383,8 +1405,7 @@ int main(void)
                 impact->active, impact->actor_class, impact->variant,
                 impact->state, impact->source_slot, impact->facing,
                 child->facing, impact->x, impact->y, impact->z,
-                (short)(child->x + 6), (short)(child->y + 31),
-                (short)(child->z - 1),
+                939, 337, 318,
                 avsp_round1_is_weapon_impact_actor(impact),
                 projectile_runtime.class4e_variant1_allocation_requests,
                 projectile_runtime.class4e_variant1_allocations,
@@ -2528,6 +2549,7 @@ int main(void)
         unsigned int source_frame;
         unsigned int actor_index;
         unsigned int source_tick;
+        int player_authority_enabled_at_tick_start;
         int inner8_seen = 0;
         avsp_round1_init(&scene_runtime);
         if (!avsp_round1_begin_first_entry(&scene_runtime))
@@ -2556,17 +2578,21 @@ int main(void)
             for (source_tick = 1u; source_tick < source_updates;
                  ++source_tick)
             {
+                player_authority_enabled_at_tick_start =
+                    scene_runtime.route_state == 4;
                 if (scene_runtime.frame >= 32u &&
                     scene_runtime.route_state != 4 &&
                     !avsp_round1_step_first_entry(&scene_runtime))
                     return 110;
-                if (scene_runtime.route_state == 4 &&
+                if (player_authority_enabled_at_tick_start &&
                     !avsp_round1_step_player(&scene_runtime, input, 0))
                     return 111;
                 if (scene_runtime.entry.spawned &&
                     !avsp_round1_step_scheduler(&scene_runtime))
                     return 112;
             }
+            player_authority_enabled_at_tick_start =
+                scene_runtime.route_state == 4;
             if (source_updates != 0u && scene_runtime.frame >= 32u &&
                 scene_runtime.route_state != 4 &&
                 !avsp_round1_step_first_entry(&scene_runtime))
@@ -2579,7 +2605,8 @@ int main(void)
                     scene_runtime.failure_count, scene_runtime.fallback_count);
                 return 92;
             }
-            if (source_updates != 0u && scene_runtime.route_state == 4 &&
+            if (source_updates != 0u &&
+                player_authority_enabled_at_tick_start &&
                 !avsp_round1_step_player(&scene_runtime, input, 0))
             {
                 fprintf(stderr,

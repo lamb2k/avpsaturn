@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "324a180639bba1001ce1242bd2d613ec21ea1dbe4f6d718ae2c154ca3c093fff"
+    "5195d46ad6f81dd346fa6e8f1239904713c44d741c5963c92615a1be513a75d3"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -984,6 +984,7 @@ typedef struct
     unsigned long assembly;
     unsigned char active_collision;
     unsigned char collision_registered;
+    unsigned char collision_registration_pending;
     signed char collision_latch_index;
     unsigned char collision_identity;
     unsigned char owner_offset_selector;

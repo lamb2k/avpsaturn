@@ -312,12 +312,35 @@ remain zero. The edge count rises 15 because net missing lifetimes reduce the
 missing-edge term by 24 while corrected source-aligned lifetime splits expose 39
 additional boundary mismatches.
 
-The earliest remaining complete-scene divergence is player slot `0x00ff8380` at
-the frame-2238 route-4 handoff: source substate `0x0000`, native `0x0200`. Bind
-that transition next from accepted evidence and rerun the whole census. The next
-projectile-family divergence is slot `0x00ff8680` state source `0x0402` versus
-native `0x0400` at frame 2288. Do not leave Coffee Shop until its zero-gap gate
-passes.
+A corrective implementation-readiness pass closes the underlying first-contact
+ordering that the earlier counters did not distinguish. Route-4 player eligibility
+is sampled at scheduler-invocation entry; player locomotion/Button1 and record-type
+`4` state projection match source actor records; newly allocated record-type `4`
+actors enter collision registration on the next source scheduler invocation; and
+class-`0x1f` collision boxes come from the current animation record without
+overwriting actor `+0xa5/+0xa6`. The source/native prefix is empty of divergences
+through frame 2287, frame 2288 remains damage-free, and source scheduler frame
+2306 damages only `0x00ffa180` from 87 to 56 with `0x030cd2`; class-`0x4e` is
+allocated naturally and visible at frame 2307. Focused SPEC/native/Target/scene
+controls reject 89/161/119/8 real mutations. Fast, Oracle, and the normal
+interactive LiveEncounter Target pass. Commit-bound paired Emulator and refreshed
+WGC are the remaining evidence for this corrective checkpoint.
+
+The refreshed whole-scene gate is 413 missing source lifetimes, 1,382 unmapped
+spawn/despawn edges, 30 unsupported states, 94 collision/damage, 3 route/camera,
+and 281 audio/load gaps; unowned Saturn actors, unidentified source pairs, and
+retained gameplay authorities remain zero. Against `e24686b`, unsupported states
+improve by seven and spawn/despawn by nine. Missing lifetime matches rise by 26
+because the corrected damage target changes downstream reaction/lifecycle identity;
+this is exposed work, not acceptance.
+
+After commit-bound Emulator/WGC evidence, the earliest remaining complete-scene
+divergence is slot `0x00ffa180` at visible frame 2307. Source has the frame-2306
+health/state write but retains substate `0x0000` and animation `0x0012eb5c` until
+its next record-type-12 update; native prematurely exposes HIT substate `0x0002`
+and animation `0x0012dd50`. Bind that reaction/presentation scheduler boundary
+without changing the accepted damage or impact. Do not leave Coffee Shop until
+its zero-gap gate passes.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.

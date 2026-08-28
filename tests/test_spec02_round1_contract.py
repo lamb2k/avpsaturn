@@ -27,6 +27,14 @@ assert parent["collision_table"]["table"] == "0x0002fc3c"
 assert child["collision_table"]["table"] == "0x00030cb6"
 assert parent["child_emitter_state"]["spawn_ticks_from_parent_state4"] == [
     1, 7, 13, 19, 25]
+parent_state = parent["child_emitter_state"]["state_projection"]
+assert parent_state["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+assert parent_state["spec_executable"] is True
+assert [row["source_state_u16"] for row in
+        parent_state["coffee_shop_first_parent"]] == [
+            "0x0400", "0x0402", "0x0602"]
+assert parent_state["first_child_visible_frame_u16"] == 2288
+assert parent_state["mutation_control"]["first_rejected_frame_u16"] == 2288
 assert [len(child["initialization"]["variant_presentation_sequences"][str(i)])
         for i in range(3)] == [17, 10, 16]
 damage = weapon["current_state_collision_damage"]
@@ -34,6 +42,24 @@ assert damage["parent_contact"]["damage_u8"] == 127
 assert damage["child_contact"]["damage_u8"] == 31
 registration = damage["registration_and_pair_eligibility"]
 assert registration["spec_executable"] is True
+registration_boundary = registration["new_allocation_registration_boundary"]
+assert registration_boundary["classification"] == \
+    "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+assert registration_boundary["spec_executable"] is True
+assert registration_boundary["coffee_shop_slot_0xff8880"] == {
+    "identity_assignment_frame_u16": 2305,
+    "collision_identity_u8": 42,
+    "allocation_visible_frame_u16": 2306,
+    "attacker_list_absent_frame_u16": 2305,
+    "attacker_list_present_frame_u16": 2306,
+    "source_contact_frame_u16": 2306,
+    "source_target_slot": "0xffa180",
+    "source_attack_record": "0x030cd2"}
+assert [row["slots"] for row in registration_boundary["attacker_lists"]] == [
+    ["0xff8700", "0xff8800"],
+    ["0xff8700", "0xff8800", "0xff8880"]]
+assert registration_boundary["mutation_control"][
+    "first_rejected_visible_frame_u16"] == 2306
 assert registration["visibility"]["x_guard"] == \
     "u16(actor_x - camera_x + 0x0040) <= 0x0200"
 assert registration["visibility"]["y_guard"] == \
@@ -47,6 +73,19 @@ assert registration["coffee_shop_projection"]["first_registered_frame"] == 2296
 assert registration["coffee_shop_projection"]["first_contact_frame"] == 2306
 assert registration["mutation_control"]["target_first_contact_frame_after"] == 2311
 assert weapon["empty_effect_variant1_contract"]["spec_executable"] is True
+weapon_actor = weapon["player_actor_projection"]
+assert weapon_actor["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+assert weapon_actor["spec_executable"] is True
+assert [(row["first_frame_u16"], row["last_frame_u16"],
+         row["substate_u16"])
+        for row in weapon_actor["visible_runs"]] == [
+            (2252, 2252, "0x0c00"), (2253, 2255, "0x0c02"),
+            (2256, 2272, "0x0c04"), (2273, 2273, "0x0000"),
+            (2274, 2274, "0x0002")]
+assert all(row["hurt_selector_u8"] == 0 and
+           row["attack_selector_u8"] == 0
+           for row in weapon_actor["visible_runs"])
+assert weapon_actor["mutation_control"]["first_rejected_frame_u16"] == 2252
 assert weapon["empty_effect_variant1_contract"]["initialization"][
     "presentation_actor_fields"] == {
         "coordinate_mode_u8": 0, "palette_u8": 0, "facing_u8": 0,
@@ -68,6 +107,8 @@ assert (class1f_records["0x0012e214"]["assembly"],
         class1f_records["0x0012e214"]["hurt_selector"],
         class1f_records["0x0012e214"]["attack_selector"]) == \
        ("0x0013020c", 14, 0)
+assert (class1f_records["0x0012eb5c"]["hurt_selector"],
+        class1f_records["0x0012ec74"]["hurt_selector"]) == (1, 2)
 initial = class1f["initial_transition_contract"]
 assert initial["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
 assert [row["entry_delay_u8"] for row in initial["actors"][-3:]] == [9, 3, 16]
@@ -132,6 +173,31 @@ assert inner8["observed_path_program"]["action_0x10"][
 assert inner8["observed_path_program"]["action_0x0e"][
     "captured_selection"]["motion_selector_96_u16"] == 24
 progression = fixtures["authority_data"]["route"]["first_segment_recurring_spawn"]
+activation = fixtures["authority_data"]["route"]["first_entry_body"][
+    "route4_player_activation_order"]
+assert activation["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+assert activation["spec_executable"] is True
+assert activation["route_writer"]["write_frame_u16"] == 2237
+assert activation["route_writer"]["visible_sample_frame_u16"] == 2238
+assert activation["visible_player_sample"] == {
+    "source_frame_u16": 2238, "state_u16": "0x0200",
+    "substate_u16": "0x0000"}
+assert activation["mutation_control"]["rejected_visible_sample"][
+    "substate_u16"] == "0x0200"
+assert activation["mutation_control"]["fixed_frame_substitute"] is False
+projection = fixtures["authority_data"]["player"][
+    "locomotion_neutral_facing"]["actor_state_projection"]
+assert projection["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+assert projection["spec_executable"] is True
+assert projection["control_state_u16"] == "0x0200"
+assert [(row["source_action_u16"], row["substate_u16"])
+        for row in projection["action_projection"]] == [
+            ("0x0200", "0x0000"), ("0x0202", "0x0002"),
+            ("0x0204", "0x0004")]
+assert projection["visible_samples"][-1] == {
+    "source_frame_u16": 2239, "state_u16": "0x0200",
+    "substate_u16": "0x0002"}
+assert projection["mutation_control"]["rejected_substate_u16"] == "0x0200"
 assert progression["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
 assert progression["controller_program"]["initializer"]["limit_table_u16"] == [0, 35, 55, 70]
 assert progression["controller_program"]["initializer"]["observed_after"]["state_u16"] == 0x0200
@@ -299,6 +365,7 @@ f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["observed_path_program"]["action_0x0e"]["captured_selection"]["motion_selector_96_u16"] = 22; mutations.append((contract, f, "class1f inner8 motion-selector mutation"))
 f = copy.deepcopy(fixtures); next(row for row in next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["presentation_and_collision"]["records"] if row["animation_record"] == "0x0012dd50")["assembly"] = "0x0013020c"; mutations.append((contract, f, "class1f HIT presentation mutation"))
 f = copy.deepcopy(fixtures); next(row for row in next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["presentation_and_collision"]["records"] if row["animation_record"] == "0x0012e214")["hurt_selector"] = 1; mutations.append((contract, f, "class1f KO selector mutation"))
+f = copy.deepcopy(fixtures); next(row for row in next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["presentation_and_collision"]["records"] if row["animation_record"] == "0x0012ec74")["hurt_selector"] = 1; mutations.append((contract, f, "class1f first Button1 target selector mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["controller_program"]["initializer"]["limit_table_u16"][1] = 34; mutations.append((contract, f, "encounter controller limit-table mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["controller_program"]["intro_gate_transition"]["gate_owner"]["writer_successor_pc"] = "0x08da22"; mutations.append((contract, f, "encounter intro-gate writer mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["intro_gate_suppression_control"]["mutant_at_frame_4100"]["main_spawn_transactions"] = 1; mutations.append((contract, f, "encounter intro-gate suppression mutation"))
