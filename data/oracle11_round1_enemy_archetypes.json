@@ -37081,6 +37081,7 @@
               "branch_s16": 12,
               "hurt_selector_u8": 1,
               "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012d414",
               "record_sha256": "2261b213952198733862067047a3eae938bb6de41ae684444d7f2d4a1d08f688",
               "timer_u16": 6
             },
@@ -37091,6 +37092,7 @@
               "branch_s16": 15,
               "hurt_selector_u8": 1,
               "movement_table_index_u8": 15,
+              "next_animation_record": "0x0012d424",
               "record_sha256": "26f5f3c3a720474eecfb1fa49cba20928751f97b60decabf4879928daa887c13",
               "timer_u16": 6
             },
@@ -37101,6 +37103,7 @@
               "branch_s16": 12,
               "hurt_selector_u8": 1,
               "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012d434",
               "record_sha256": "1ab9037adea3d245e77e62ec522e7158e72f261f0b06f1267be112fc3a6f8a0e",
               "timer_u16": 6
             },
@@ -37111,6 +37114,7 @@
               "branch_s16": 15,
               "hurt_selector_u8": 1,
               "movement_table_index_u8": 15,
+              "next_animation_record": "0x0012d444",
               "record_sha256": "b9151feea7e7a1aa8a9911b37718b4539530f75854b5bfb031d879b05d3fb114",
               "timer_u16": 6
             },
@@ -37121,6 +37125,7 @@
               "branch_s16": 12,
               "hurt_selector_u8": 1,
               "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012d454",
               "record_sha256": "9d20b8e8b25df42e91a892e0960694a8a65665b1a5f74c693734ab3f023f9861",
               "timer_u16": 6
             },
@@ -37131,6 +37136,7 @@
               "branch_s16": 12,
               "hurt_selector_u8": 1,
               "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012d464",
               "record_sha256": "fea52bfe67be4fff4b593098f43a44bfbe749e7011447e4be96a59927ea06b3f",
               "timer_u16": 6
             },
@@ -37141,6 +37147,7 @@
               "branch_s16": 12,
               "hurt_selector_u8": 1,
               "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012d474",
               "record_sha256": "9bd22554bcf8d4b4a5fffbab418249912f52997faf6fa82f23cc2f98cf7b8049",
               "timer_u16": 6
             },
@@ -37151,6 +37158,7 @@
               "branch_s16": -32750,
               "hurt_selector_u8": 1,
               "movement_table_index_u8": 18,
+              "next_animation_record": "0x0012d404",
               "record_sha256": "8e0b1e3970023b2a28031dbcdd368dce8a0dd994b7dbcec8e73ff70c4cddd76c",
               "timer_u16": 6
             },
@@ -37161,6 +37169,7 @@
               "branch_s16": 19,
               "hurt_selector_u8": 2,
               "movement_table_index_u8": 19,
+              "next_animation_record": "0x0012d498",
               "record_sha256": "a5627473209ba0d17b78e0d5e427dc213f5376a6bbc742b9b423f73ac9a22e5c",
               "timer_u16": 6
             },
@@ -37171,6 +37180,7 @@
               "branch_s16": 267,
               "hurt_selector_u8": 2,
               "movement_table_index_u8": 11,
+              "next_animation_record": "0x0012d4a8",
               "record_sha256": "cc41047434a20352bb733c9b8a7198c02ebd10e880eba7ecdf61c4a5192baf66",
               "timer_u16": 6
             },
@@ -37181,6 +37191,7 @@
               "branch_s16": 527,
               "hurt_selector_u8": 2,
               "movement_table_index_u8": 15,
+              "next_animation_record": "0x0012d4b8",
               "record_sha256": "601300c9948e7d20f28999c8715afad16f9fa7dd539bfed25a74cf650acf637d",
               "timer_u16": 6
             },
@@ -37191,6 +37202,7 @@
               "branch_s16": 793,
               "hurt_selector_u8": 2,
               "movement_table_index_u8": 25,
+              "next_animation_record": "0x0012d4c8",
               "record_sha256": "0b91b6e10f79411a09e85c871b92ef1f28437de45f0ae60e8beea9209ae59067",
               "timer_u16": 6
             },
@@ -37201,6 +37213,7 @@
               "branch_s16": 1047,
               "hurt_selector_u8": 2,
               "movement_table_index_u8": 23,
+              "next_animation_record": "0x0012d4d8",
               "record_sha256": "b56cb19cd02f906620d3f3d4dc8f9346aab3aee18a52b6f962df02225ac01e52",
               "timer_u16": 6
             },
@@ -37211,6 +37224,7 @@
               "branch_s16": 1292,
               "hurt_selector_u8": 2,
               "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012d4e8",
               "record_sha256": "7559b78f3f70330daf0975c7deeae62b440ff79e24b7cb6224930cf23efe5a74",
               "timer_u16": 6
             },
@@ -37221,6 +37235,7 @@
               "branch_s16": 1540,
               "hurt_selector_u8": 2,
               "movement_table_index_u8": 4,
+              "next_animation_record": "0x0012d4f8",
               "record_sha256": "c79053e67d24e91c54fd8b52f8b29684b792f1ad4c80bee2466e9b2e1c1f06b6",
               "timer_u16": 6
             },
@@ -37231,6 +37246,7 @@
               "branch_s16": -30958,
               "hurt_selector_u8": 2,
               "movement_table_index_u8": 18,
+              "next_animation_record": "0x0012d488",
               "record_sha256": "32da52eedb3b2bc4f9fcc3260b6100932661e8f364ba9fa0f2fd9a18d6e3a3a5",
               "timer_u16": 6
             },
@@ -37241,6 +37257,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 3,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d5f4",
               "record_sha256": "c0743d426fc810a628e1eff4e18f1ee8e19d5e75d9bf602864f3230a20503a7c",
               "timer_u16": 4
             },
@@ -37251,6 +37268,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 3,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d604",
               "record_sha256": "95228d3d9abe3d262f68e9c0d1d6c8ff4ade0d55fe4e47c65cd57138158f07c9",
               "timer_u16": 4
             },
@@ -37261,6 +37279,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 2,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d614",
               "record_sha256": "1ee88df209d1157711c265cb9b298ea4b26347546be33dd9b5205cc59075074b",
               "timer_u16": 4
             },
@@ -37271,6 +37290,7 @@
               "branch_s16": -32768,
               "hurt_selector_u8": 2,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d614",
               "record_sha256": "09ab43b9eae524c2d45aa99c926e2b06e68e595701856252e501135b42f2b123",
               "timer_u16": 4
             },
@@ -37281,6 +37301,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 2,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d638",
               "record_sha256": "afaeaf74f4c0fc24701135b1375bef6ede18fe1dcd4559916ee818199162ea66",
               "timer_u16": 6
             },
@@ -37291,6 +37312,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 4,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d648",
               "record_sha256": "820cbedaba911bbb968811125a26c39de9e9c9b8e6cf62d942c480912e09e5fc",
               "timer_u16": 7
             },
@@ -37301,6 +37323,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 1,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d658",
               "record_sha256": "d1f6995e0e6bd109c69429d2e02c836f9d47ff1c52361a28db0f02bab1477c10",
               "timer_u16": 7
             },
@@ -37311,6 +37334,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 1,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d668",
               "record_sha256": "ad703f976335a66d77a1e3a637e9d791782d7686b9608b09f884a4188e662179",
               "timer_u16": 6
             },
@@ -37321,6 +37345,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 1,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d678",
               "record_sha256": "b36f6afd71e0d3b40377c21f55d104a10348204624be386cc037919a25eef5b1",
               "timer_u16": 3
             },
@@ -37331,6 +37356,7 @@
               "branch_s16": -32768,
               "hurt_selector_u8": 1,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d678",
               "record_sha256": "e3437da5183f897afb442819d327715a34e6a552c2499f68b4ab0e33f8089865",
               "timer_u16": 4
             },
@@ -37341,6 +37367,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 4,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012e560",
               "record_sha256": "28791c4a39b5f1e482bd94103a75af89dc589b419da3a3f858958d2944ae0092",
               "timer_u16": 6
             },
@@ -37351,6 +37378,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 5,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012e570",
               "record_sha256": "08743c6942725b94107c36d6a5ffb1ab6a72de0c9e05d14fd6e5fd577668971c",
               "timer_u16": 7
             },
@@ -37361,6 +37389,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 1,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012e580",
               "record_sha256": "753a59c73b9e586c410b6582ad9c9ccaf6ae3f88419a427f27896c7a379bf8e6",
               "timer_u16": 6
             },
@@ -37371,6 +37400,7 @@
               "branch_s16": 1,
               "hurt_selector_u8": 8,
               "movement_table_index_u8": 1,
+              "next_animation_record": "0x0012e590",
               "record_sha256": "b27f51256b5ab5197d90f86d304a016536b7158352828a414d6a52c6fc9cb521",
               "timer_u16": 1
             },
@@ -37381,6 +37411,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 8,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012e5a0",
               "record_sha256": "accd96e9b1be6a98b15c489a539d88bffd7099df186c1bbbbe9cb2472400baff",
               "timer_u16": 4
             },
@@ -37391,6 +37422,7 @@
               "branch_s16": 2,
               "hurt_selector_u8": 8,
               "movement_table_index_u8": 2,
+              "next_animation_record": "0x0012e5b0",
               "record_sha256": "e22363ce2eb182f85a789d2e9d024a3267f96c120bc5ced7ae60cc1a94c85d3e",
               "timer_u16": 1
             },
@@ -37401,6 +37433,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 8,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012e5c0",
               "record_sha256": "accd96e9b1be6a98b15c489a539d88bffd7099df186c1bbbbe9cb2472400baff",
               "timer_u16": 4
             },
@@ -37411,6 +37444,7 @@
               "branch_s16": 3,
               "hurt_selector_u8": 8,
               "movement_table_index_u8": 3,
+              "next_animation_record": "0x0012e5d0",
               "record_sha256": "42c59b4f9f01d1438814e6a67b9ff200cb93c02ee94702cd109f98983684d6a0",
               "timer_u16": 1
             },
@@ -37421,6 +37455,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 8,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012e5e0",
               "record_sha256": "accd96e9b1be6a98b15c489a539d88bffd7099df186c1bbbbe9cb2472400baff",
               "timer_u16": 4
             },
@@ -37431,6 +37466,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 1,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012e5f0",
               "record_sha256": "0056801c4bd45464cd78fd7877ee5b7bf53159768a03eb15a5ad43375e8465f3",
               "timer_u16": 6
             },
@@ -37441,6 +37477,7 @@
               "branch_s16": -32768,
               "hurt_selector_u8": 1,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012e5f0",
               "record_sha256": "63f4bcbfac25ab7197562bed7ed0d779e52d0f5aee24474fb7d8d7b4f019c937",
               "timer_u16": 7
             },
@@ -37451,6 +37488,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 4,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012e614",
               "record_sha256": "28791c4a39b5f1e482bd94103a75af89dc589b419da3a3f858958d2944ae0092",
               "timer_u16": 6
             },
@@ -37461,6 +37499,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 10,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012e624",
               "record_sha256": "e0e510efc0a5db5b75320e43455e03dc9655b88c781f1785cb17565e763c0e67",
               "timer_u16": 5
             },
@@ -37471,6 +37510,7 @@
               "branch_s16": -32768,
               "hurt_selector_u8": 10,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012e624",
               "record_sha256": "0ab8a95debcc4ab010b903ad2f32a1b6d30821eddecb378c4929a04b573f91f0",
               "timer_u16": 8
             },
@@ -37481,6 +37521,7 @@
               "branch_s16": 0,
               "hurt_selector_u8": 10,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012e648",
               "record_sha256": "e5fe30903885f13e8374b6431c0f441c57cf275d7285764c9d49a1c125ddb8db",
               "timer_u16": 4
             },
@@ -37491,6 +37532,7 @@
               "branch_s16": -32768,
               "hurt_selector_u8": 10,
               "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012e638",
               "record_sha256": "7cba67cb51aa2aa36b098ee0c227de304a37520b65857904ce43965fd7963115",
               "timer_u16": 4
             }
@@ -37498,7 +37540,7 @@
           "capture_identity": {
             "byte_identical": true,
             "completion_a": {
-              "coffee_shop_class1f_inner8_entries.tsv": "6c90fb0f9a25e67284ce7c8d31fa09cccf35457188f1d05c6de27a945b1957e0",
+              "coffee_shop_class1f_inner8_entries.tsv": "3b33c51d0fd14da7c6a0dbb106b9ea2613f47cc57d4610e371633443024596f9",
               "coffee_shop_class1f_inner8_writes.tsv": "95872ca262fc61bcbc02fc34f2fe00dfacb4977308f97f0bcaf3d88f487411e4",
               "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
               "coffee_shop_scene_actors.tsv": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
@@ -37507,7 +37549,7 @@
               "projectiles.tsv": "323f89b97c779375272bcaf0bdfc337f3bd3601435607d7ee5804d38bf8443fa"
             },
             "completion_b": {
-              "coffee_shop_class1f_inner8_entries.tsv": "6c90fb0f9a25e67284ce7c8d31fa09cccf35457188f1d05c6de27a945b1957e0",
+              "coffee_shop_class1f_inner8_entries.tsv": "3b33c51d0fd14da7c6a0dbb106b9ea2613f47cc57d4610e371633443024596f9",
               "coffee_shop_class1f_inner8_writes.tsv": "95872ca262fc61bcbc02fc34f2fe00dfacb4977308f97f0bcaf3d88f487411e4",
               "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
               "coffee_shop_scene_actors.tsv": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
@@ -39072,6 +39114,559 @@
               "state_inner_u16": "0x0208"
             }
           ],
+          "observed_path_program": {
+            "action_0x00": {
+              "captured_rng_call_counts": {
+                "frame_3004_style_match": 4,
+                "frame_3061_style_mismatch": 1,
+                "frame_3282_style_mismatch": 1
+              },
+              "first_rng": "result_u16 & 15 indexes bitset 0x6db6; selected style is compared to style85_u8",
+              "gameplay_guard": "global one-player gameplay target-present byte is nonzero",
+              "style_match": {
+                "action_u8": 4,
+                "helper": "0x041c36 consumes two further RNG calls and 0x0419a4 binds the facing/style movement chain",
+                "second_rng": "result_u16 & 15 indexes source table 0x0425ce into field88_u8",
+                "style85_one_record": "0x0012d488",
+                "style85_zero_record": "0x0012d404"
+              },
+              "style_mismatch": {
+                "style85_one": {
+                  "action_u8": 8,
+                  "record": "0x0012d628"
+                },
+                "style85_zero": {
+                  "action_u8": 10,
+                  "record": "0x0012e65c"
+                }
+              }
+            },
+            "action_0x04": {
+              "captured_terminals": {
+                "frame_3047": "action 0x06 after target-side result",
+                "frame_3134": "field88 zero, RNG bit set, source table zero, action 0x10"
+              },
+              "movement_helper": "0x016644",
+              "record_chains": {
+                "style85_one": [
+                  "0x0012d488",
+                  "0x0012d498",
+                  "0x0012d4a8",
+                  "0x0012d4b8",
+                  "0x0012d4c8",
+                  "0x0012d4d8",
+                  "0x0012d4e8",
+                  "0x0012d4f8"
+                ],
+                "style85_zero": [
+                  "0x0012d404",
+                  "0x0012d414",
+                  "0x0012d424",
+                  "0x0012d434",
+                  "0x0012d444",
+                  "0x0012d454",
+                  "0x0012d464",
+                  "0x0012d474"
+                ]
+              },
+              "terminal_order": [
+                "0x041db8 tests each active player in source order for unsigned x +/-96 and z +/-12 proximity",
+                "0x041b26 counts active players on each x side and compares the result with facing_u8",
+                "a nonzero side result enters action 0x06, flips facing, and binds the turn chain",
+                "otherwise predecrement field88_u8; nonzero rebinds the facing/style movement chain",
+                "on zero consume one RNG and test (result_u16 & 15) in bitset 0xf555",
+                "a set bit enters source action-0x02 allocator path 0x041966; a zero table result enters action 0x10",
+                "otherwise exact player-relative x/z guards either enter action 0x02 or clear action"
+              ]
+            },
+            "action_0x06": {
+              "next_action_u8": 0,
+              "record_chain": [
+                "0x0012d5e4",
+                "0x0012d5f4",
+                "0x0012d604",
+                "0x0012d614"
+              ],
+              "rng_calls": 0,
+              "terminal_guard": "animation_branch_s16 < 0"
+            },
+            "action_0x08": {
+              "post_terminal": "consume one field88 RNG plus two 0x041c36 helper RNG calls and bind style85-zero movement chain",
+              "record_chain": [
+                "0x0012d628",
+                "0x0012d638",
+                "0x0012d648",
+                "0x0012d658",
+                "0x0012d668",
+                "0x0012d678"
+              ],
+              "terminal_guard": "animation_branch_s16 < 0",
+              "writes": {
+                "action_phase_u8": 0,
+                "action_u8": 4,
+                "style85_u8": 0
+              }
+            },
+            "action_0x0e": {
+              "airborne_loop_records": [
+                "0x0012e638",
+                "0x0012e648"
+              ],
+              "captured_selection": {
+                "absolute_target_x_distance_u16": 120,
+                "distance_bank": "0x0423a0 (96 < distance <= 128)",
+                "field80_u16": 18,
+                "motion_selector_96_u16": 24,
+                "rng_masked_index_u16": 58
+              },
+              "landing_parent_record": "0x0012e550",
+              "parent_record_chain": [
+                "0x0012e550",
+                "0x0012e560",
+                "0x0012e570",
+                "0x0012e580",
+                "0x0012e590",
+                "0x0012e5a0",
+                "0x0012e5b0",
+                "0x0012e5c0",
+                "0x0012e5d0",
+                "0x0012e5e0",
+                "0x0012e5f0"
+              ],
+              "phase0_guard": "action_phase_u8 == 0",
+              "phase0_rng_calls": 1,
+              "pre_motion_record_chain": [
+                "0x0012e604",
+                "0x0012e614",
+                "0x0012e624"
+              ],
+              "terminal_action_u8": 0,
+              "terminal_delay_u8": 8,
+              "type16_event_records": {
+                "0x0012e580": 1,
+                "0x0012e5a0": 2,
+                "0x0012e5c0": 3
+              }
+            },
+            "action_0x10": {
+              "overlap_transition": {
+                "action_phase_u8": 0,
+                "action_u8": 14,
+                "guard": "0x041bee returns nonzero",
+                "writer": "0x04130e"
+              },
+              "per_update_order": [
+                "0x041db8 target proximity",
+                "predecrement field84_u8",
+                "predecrement action_timer_u8 and reload 4 on zero",
+                "0x041b26 target-side test",
+                "0x041bee exact target x +/-16 and z +/-12 overlap",
+                "0x016644 movement step"
+              ],
+              "record_chain": [
+                "0x0012d404",
+                "0x0012d414",
+                "0x0012d424",
+                "0x0012d434",
+                "0x0012d444",
+                "0x0012d454",
+                "0x0012d464",
+                "0x0012d474"
+              ]
+            },
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "fixed_frame_or_authored_transition_forbidden": true,
+            "helper_path_edges": [
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3004
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3004
+              },
+              {
+                "pc": "0x040bea",
+                "source_frame": 3004
+              },
+              {
+                "pc": "0x041c36",
+                "source_frame": 3004
+              },
+              {
+                "pc": "0x0419a4",
+                "source_frame": 3004
+              },
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3047
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3047
+              },
+              {
+                "pc": "0x040c7c",
+                "source_frame": 3047
+              },
+              {
+                "pc": "0x041db8",
+                "source_frame": 3047
+              },
+              {
+                "pc": "0x041dfe",
+                "source_frame": 3047
+              },
+              {
+                "pc": "0x041b26",
+                "source_frame": 3047
+              },
+              {
+                "pc": "0x041b74",
+                "source_frame": 3047
+              },
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3061
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3061
+              },
+              {
+                "pc": "0x040bea",
+                "source_frame": 3061
+              },
+              {
+                "pc": "0x041b92",
+                "source_frame": 3061
+              },
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3091
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3091
+              },
+              {
+                "pc": "0x040d0e",
+                "source_frame": 3091
+              },
+              {
+                "pc": "0x041c36",
+                "source_frame": 3091
+              },
+              {
+                "pc": "0x0419a4",
+                "source_frame": 3091
+              },
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3134
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3134
+              },
+              {
+                "pc": "0x040c7c",
+                "source_frame": 3134
+              },
+              {
+                "pc": "0x041db8",
+                "source_frame": 3134
+              },
+              {
+                "pc": "0x041dfe",
+                "source_frame": 3134
+              },
+              {
+                "pc": "0x041b26",
+                "source_frame": 3134
+              },
+              {
+                "pc": "0x040c9c",
+                "source_frame": 3134
+              },
+              {
+                "pc": "0x041966",
+                "source_frame": 3134
+              },
+              {
+                "pc": "0x041db8",
+                "source_frame": 3134
+              },
+              {
+                "pc": "0x0419a4",
+                "source_frame": 3134
+              },
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3177
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3177
+              },
+              {
+                "pc": "0x0412a8",
+                "source_frame": 3177
+              },
+              {
+                "pc": "0x0412bc",
+                "source_frame": 3177
+              },
+              {
+                "pc": "0x041db8",
+                "source_frame": 3177
+              },
+              {
+                "pc": "0x041dfe",
+                "source_frame": 3177
+              },
+              {
+                "pc": "0x041b26",
+                "source_frame": 3177
+              },
+              {
+                "pc": "0x041308",
+                "source_frame": 3177
+              },
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3178
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3178
+              },
+              {
+                "pc": "0x040e84",
+                "source_frame": 3178
+              },
+              {
+                "pc": "0x040e9c",
+                "source_frame": 3178
+              },
+              {
+                "pc": "0x0411c4",
+                "source_frame": 3178
+              },
+              {
+                "pc": "0x0411da",
+                "source_frame": 3178
+              },
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3190
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3190
+              },
+              {
+                "pc": "0x040e84",
+                "source_frame": 3190
+              },
+              {
+                "pc": "0x0411c4",
+                "source_frame": 3190
+              },
+              {
+                "pc": "0x0411f0",
+                "source_frame": 3190
+              },
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3191
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3191
+              },
+              {
+                "pc": "0x040e84",
+                "source_frame": 3191
+              },
+              {
+                "pc": "0x0411c4",
+                "source_frame": 3191
+              },
+              {
+                "pc": "0x041236",
+                "source_frame": 3191
+              },
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3233
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3233
+              },
+              {
+                "pc": "0x040e84",
+                "source_frame": 3233
+              },
+              {
+                "pc": "0x0411c4",
+                "source_frame": 3233
+              },
+              {
+                "pc": "0x04127c",
+                "source_frame": 3233
+              },
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3252
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3252
+              },
+              {
+                "pc": "0x040e84",
+                "source_frame": 3252
+              },
+              {
+                "pc": "0x0411c4",
+                "source_frame": 3252
+              },
+              {
+                "pc": "0x04127c",
+                "source_frame": 3252
+              },
+              {
+                "pc": "0x0413d2",
+                "source_frame": 3252
+              },
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3257
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3257
+              },
+              {
+                "pc": "0x040e84",
+                "source_frame": 3257
+              },
+              {
+                "pc": "0x0411c4",
+                "source_frame": 3257
+              },
+              {
+                "pc": "0x04127c",
+                "source_frame": 3257
+              },
+              {
+                "pc": "0x0413d2",
+                "source_frame": 3257
+              },
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3262
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3262
+              },
+              {
+                "pc": "0x040e84",
+                "source_frame": 3262
+              },
+              {
+                "pc": "0x0411c4",
+                "source_frame": 3262
+              },
+              {
+                "pc": "0x04127c",
+                "source_frame": 3262
+              },
+              {
+                "pc": "0x0413d2",
+                "source_frame": 3262
+              },
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3273
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3273
+              },
+              {
+                "pc": "0x040e84",
+                "source_frame": 3273
+              },
+              {
+                "pc": "0x0411c4",
+                "source_frame": 3273
+              },
+              {
+                "pc": "0x04127c",
+                "source_frame": 3273
+              },
+              {
+                "pc": "0x04129e",
+                "source_frame": 3273
+              },
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3281
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3281
+              },
+              {
+                "pc": "0x040e84",
+                "source_frame": 3281
+              },
+              {
+                "pc": "0x0411c4",
+                "source_frame": 3281
+              },
+              {
+                "pc": "0x04129e",
+                "source_frame": 3281
+              },
+              {
+                "pc": "0x0610f6",
+                "source_frame": 3282
+              },
+              {
+                "pc": "0x040bbe",
+                "source_frame": 3282
+              },
+              {
+                "pc": "0x040bea",
+                "source_frame": 3282
+              },
+              {
+                "pc": "0x041ba2",
+                "source_frame": 3282
+              }
+            ],
+            "normal_action_0x16_entry": {
+              "rng_guard": "exactly one RNG call; (result_u16 & 3) == 0",
+              "target_side_guard": "one-player target x is on the non-facing side",
+              "terminal_guard": "animation_branch_s16 < 0 && animation_timer_u16 == 1 && predecrement loop_counter_u8 == 0",
+              "transition_latch_guard": "transition_latch_u8 == 0",
+              "writes": {
+                "action_phase_u8": 0,
+                "action_u8": 6,
+                "facing_rule": "flip through 0x060810 before binding 0x0012d5e4",
+                "inner_state_u8": 8,
+                "inner_timer_u16": 600,
+                "special_latch_u8": 1,
+                "target_low_word_u16": "0x8380"
+              }
+            },
+            "source_slot": "0x00ffa3c0"
+          },
           "record_layout": {
             "action_phase_u8": "actor+0x07",
             "action_timer_u8": "actor+0x2a",

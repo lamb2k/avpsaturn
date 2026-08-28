@@ -88,6 +88,11 @@ for label,mutate in [
     ('inner8-motion-sign',lambda x:x['action_0x0e_motion']['phase_2_terminal'].__setitem__('y_acceleration_s32_16_16',38400)),
     ('inner8-fixed-frame',lambda x:x['type16_emission'].__setitem__('fixed_frame_spawn_forbidden',False)),
     ('inner8-suppression',lambda x:x['mutation_control'].__setitem__('mutant_type16_spawn_frames',[3253])),
+    ('inner8-record-next',lambda x:x['animation_records'][0].__setitem__('next_animation_record','0x0012d424')),
+    ('inner8-action0-rng',lambda x:x['observed_path_program']['action_0x00']['captured_rng_call_counts'].__setitem__('frame_3004_style_match',3)),
+    ('inner8-action4-terminal',lambda x:x['observed_path_program']['action_0x04']['captured_terminals'].__setitem__('frame_3134','fixed frame')),
+    ('inner8-action10-writer',lambda x:x['observed_path_program']['action_0x10']['overlap_transition'].__setitem__('writer','0x041310')),
+    ('inner8-motion-selector',lambda x:x['observed_path_program']['action_0x0e']['captured_selection'].__setitem__('motion_selector_96_u16',22)),
 ]:
     mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['first_segment_action_execution_contract']['inner_state_0x08_program'];mutate(target);reject(mutant,label)
-print('ORACLE-11 Round 1 enemy tests: PASS (59 mutations rejected)')
+print('ORACLE-11 Round 1 enemy tests: PASS (64 mutations rejected)')

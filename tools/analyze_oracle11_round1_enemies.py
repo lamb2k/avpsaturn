@@ -33,8 +33,8 @@ COFFEE_SHOP_SCENE_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_
 COFFEE_SHOP_SCENE_TIMER_SUPPRESS = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs3s"
 COFFEE_SHOP_BOUNDS_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs14a"
 COFFEE_SHOP_BOUNDS_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs14b"
-CLASS1F_INNER8_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs30a"
-CLASS1F_INNER8_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs30b"
+CLASS1F_INNER8_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs31a"
+CLASS1F_INNER8_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs31b"
 CLASS1F_INNER8_SUPPRESS = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs30s"
 OUT = ROOT / "data" / "oracle11_round1_enemy_archetypes.json"
 FILES = ("enemy_samples.tsv", "enemy_entries.tsv", "enemy_writes.tsv",
@@ -297,6 +297,7 @@ def class1f_inner8_action_contract(program: bytes,
     for address in record_addresses:
         record = animation_record(program, address)
         record["movement_table_index_u8"] = program[address + 3] & 0x3f
+        record["next_animation_record"] = f"0x{(int.from_bytes(program[address + 16:address + 20], 'big') if record['branch_s16'] < 0 else address + 16):08x}"
         records.append(record)
     movement_ids = sorted({record["movement_table_index_u8"]
                            for record in records
@@ -349,6 +350,26 @@ def class1f_inner8_action_contract(program: bytes,
                         "0x040e84", "0x0412a8", "0x0413d2"}
     require(required_entries <= observed_entries,
             "class-0x1f inner-state handler coverage drift")
+    helper_path = [(int(row["frame"]), f"0x{row['pc']}") for row in entries
+                   if int(row["frame"]) in
+                   {3004, 3047, 3061, 3091, 3134, 3177, 3178, 3190,
+                    3191, 3233, 3252, 3257, 3262, 3273, 3281, 3282}]
+    required_helper_edges = {
+        (3004, "0x041c36"), (3004, "0x0419a4"),
+        (3047, "0x041db8"), (3047, "0x041b26"),
+        (3047, "0x041b74"), (3061, "0x041b92"),
+        (3091, "0x041c36"), (3091, "0x0419a4"),
+        (3134, "0x040c9c"), (3134, "0x041966"),
+        (3177, "0x0412bc"), (3177, "0x041308"),
+        (3178, "0x040e9c"), (3178, "0x0411da"),
+        (3190, "0x0411f0"), (3191, "0x041236"),
+        (3233, "0x04127c"), (3252, "0x0413d2"),
+        (3257, "0x0413d2"), (3262, "0x0413d2"),
+        (3273, "0x04129e"), (3281, "0x04129e"),
+        (3282, "0x041ba2"),
+    }
+    require(required_helper_edges <= set(helper_path),
+            "class-0x1f inner-state helper path drift")
     require(hashlib.sha256(opcodes[0x061096:0x0610D4]).hexdigest() ==
             "4166d4ea3ccdd2817792336e255006733cfda6a9eb61fd48ef20bec184264a5b",
             "class-0x1f inner-state transition body drift")
@@ -436,6 +457,110 @@ def class1f_inner8_action_contract(program: bytes,
             "0x08": {"entry": "0x040d0e", "role": "style transition animation"},
             "0x0e": {"entry": "0x040e84", "role": "motion program and type-16 parent sequence"},
             "0x10": {"entry": "0x0412a8", "role": "target-seeking movement and transition to 0x0e"},
+        },
+        "observed_path_program": {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "source_slot": "0x00ffa3c0",
+            "normal_action_0x16_entry": {
+                "terminal_guard": "animation_branch_s16 < 0 && animation_timer_u16 == 1 && predecrement loop_counter_u8 == 0",
+                "target_side_guard": "one-player target x is on the non-facing side",
+                "transition_latch_guard": "transition_latch_u8 == 0",
+                "rng_guard": "exactly one RNG call; (result_u16 & 3) == 0",
+                "writes": {"inner_state_u8": 8, "action_u8": 6,
+                           "action_phase_u8": 0, "inner_timer_u16": 600,
+                           "special_latch_u8": 1,
+                           "target_low_word_u16": "0x8380",
+                           "facing_rule": "flip through 0x060810 before binding 0x0012d5e4"},
+            },
+            "action_0x06": {
+                "record_chain": ["0x0012d5e4", "0x0012d5f4",
+                                 "0x0012d604", "0x0012d614"],
+                "terminal_guard": "animation_branch_s16 < 0",
+                "next_action_u8": 0,
+                "rng_calls": 0,
+            },
+            "action_0x00": {
+                "gameplay_guard": "global one-player gameplay target-present byte is nonzero",
+                "first_rng": "result_u16 & 15 indexes bitset 0x6db6; selected style is compared to style85_u8",
+                "style_mismatch": {"style85_zero": {"action_u8": 10,
+                                                       "record": "0x0012e65c"},
+                                   "style85_one": {"action_u8": 8,
+                                                      "record": "0x0012d628"}},
+                "style_match": {"action_u8": 4,
+                                "second_rng": "result_u16 & 15 indexes source table 0x0425ce into field88_u8",
+                                "helper": "0x041c36 consumes two further RNG calls and 0x0419a4 binds the facing/style movement chain",
+                                "style85_zero_record": "0x0012d404",
+                                "style85_one_record": "0x0012d488"},
+                "captured_rng_call_counts": {"frame_3004_style_match": 4,
+                                               "frame_3061_style_mismatch": 1,
+                                               "frame_3282_style_mismatch": 1},
+            },
+            "action_0x04": {
+                "movement_helper": "0x016644",
+                "record_chains": {
+                    "style85_zero": [f"0x{address:08x}" for address in
+                                      range(0x12D404, 0x12D475, 0x10)],
+                    "style85_one": [f"0x{address:08x}" for address in
+                                     range(0x12D488, 0x12D4F9, 0x10)],
+                },
+                "terminal_order": [
+                    "0x041db8 tests each active player in source order for unsigned x +/-96 and z +/-12 proximity",
+                    "0x041b26 counts active players on each x side and compares the result with facing_u8",
+                    "a nonzero side result enters action 0x06, flips facing, and binds the turn chain",
+                    "otherwise predecrement field88_u8; nonzero rebinds the facing/style movement chain",
+                    "on zero consume one RNG and test (result_u16 & 15) in bitset 0xf555",
+                    "a set bit enters source action-0x02 allocator path 0x041966; a zero table result enters action 0x10",
+                    "otherwise exact player-relative x/z guards either enter action 0x02 or clear action",
+                ],
+                "captured_terminals": {"frame_3047": "action 0x06 after target-side result",
+                                       "frame_3134": "field88 zero, RNG bit set, source table zero, action 0x10"},
+            },
+            "action_0x08": {
+                "record_chain": ["0x0012d628", "0x0012d638",
+                                 "0x0012d648", "0x0012d658",
+                                 "0x0012d668", "0x0012d678"],
+                "terminal_guard": "animation_branch_s16 < 0",
+                "writes": {"action_u8": 4, "action_phase_u8": 0,
+                           "style85_u8": 0},
+                "post_terminal": "consume one field88 RNG plus two 0x041c36 helper RNG calls and bind style85-zero movement chain",
+            },
+            "action_0x10": {
+                "record_chain": [f"0x{address:08x}" for address in
+                                 range(0x12D404, 0x12D475, 0x10)],
+                "per_update_order": ["0x041db8 target proximity",
+                                     "predecrement field84_u8",
+                                     "predecrement action_timer_u8 and reload 4 on zero",
+                                     "0x041b26 target-side test",
+                                     "0x041bee exact target x +/-16 and z +/-12 overlap",
+                                     "0x016644 movement step"],
+                "overlap_transition": {"action_u8": 14,
+                                       "action_phase_u8": 0,
+                                       "guard": "0x041bee returns nonzero",
+                                       "writer": "0x04130e"},
+            },
+            "action_0x0e": {
+                "phase0_guard": "action_phase_u8 == 0",
+                "phase0_rng_calls": 1,
+                "captured_selection": {"absolute_target_x_distance_u16": 120,
+                                       "distance_bank": "0x0423a0 (96 < distance <= 128)",
+                                       "rng_masked_index_u16": 58,
+                                       "field80_u16": 18,
+                                       "motion_selector_96_u16": 24},
+                "pre_motion_record_chain": ["0x0012e604", "0x0012e614",
+                                            "0x0012e624"],
+                "airborne_loop_records": ["0x0012e638", "0x0012e648"],
+                "landing_parent_record": "0x0012e550",
+                "parent_record_chain": [f"0x{address:08x}" for address in
+                                        range(0x12E550, 0x12E5F1, 0x10)],
+                "type16_event_records": {"0x0012e580": 1,
+                                         "0x0012e5a0": 2,
+                                         "0x0012e5c0": 3},
+                "terminal_delay_u8": 8,
+                "terminal_action_u8": 0,
+            },
+            "fixed_frame_or_authored_transition_forbidden": True,
+            "helper_path_edges": [{"source_frame": frame, "pc": pc}
+                                  for frame, pc in helper_path],
         },
         "observed_action_runs": action_runs,
         "rng_calls": rng_calls,
@@ -1807,6 +1932,10 @@ def validate(report: dict[str, object]) -> None:
                     len(inner8["observed_action_runs"]) == 12 and
                     len(inner8["rng_calls"]) == 13 and
                     len(inner8["animation_records"]) == 42 and
+                    all("next_animation_record" in row for row in
+                        inner8["animation_records"]) and
+                    inner8["animation_records"][0]
+                        ["next_animation_record"] == "0x0012d414" and
                     [row["table_index_u8"] for row in
                      inner8["movement"]["tables"]] ==
                         [4, 11, 12, 15, 18, 19, 23, 25] and
@@ -1818,6 +1947,20 @@ def validate(report: dict[str, object]) -> None:
                         [3253, 3258, 3263] and
                     inner8["type16_emission"]["fixed_frame_spawn_forbidden"]
                         is True and
+                    inner8["observed_path_program"]["action_0x00"]
+                        ["captured_rng_call_counts"] == {
+                            "frame_3004_style_match": 4,
+                            "frame_3061_style_mismatch": 1,
+                            "frame_3282_style_mismatch": 1} and
+                    inner8["observed_path_program"]["action_0x04"]
+                        ["captured_terminals"]["frame_3134"] ==
+                        "field88 zero, RNG bit set, source table zero, action 0x10" and
+                    inner8["observed_path_program"]["action_0x10"]
+                        ["overlap_transition"]["writer"] == "0x04130e" and
+                    inner8["observed_path_program"]["action_0x0e"]
+                        ["captured_selection"]["motion_selector_96_u16"] == 24 and
+                    inner8["observed_path_program"]
+                        ["fixed_frame_or_authored_transition_forbidden"] is True and
                     inner8["mutation_control"]["suppressed_writer"] ==
                         "0x0610c8" and
                     inner8["mutation_control"]["suppressed_writes"] == 3 and
