@@ -197,6 +197,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/enemies/archetypes/3/first_segment_action_execution_contract", "each active fixed-pool class-0x1f record executes its source variant, action/substate, animation record, movement vector, collision, release and RNG guards in scheduler order",
           ["enemy.variant:u8", "enemy.state:u16", "enemy.action:u16", "enemy.facing:u8", "enemy.position:s32", "enemy.animation_record:u32", "enemy.animation_timer:u16", "enemy.animation_branch:s16", "player.position:s32", "route.globals", "rng.seed:u16"], ["enemy.state:u16", "enemy.action:u16", "enemy.facing:u8", "enemy.position:s32", "enemy.animation_record:u32", "enemy.collision_selectors:u8", "enemy.health:s16", "pool.free_count:u8", "living_enemy_count:u16", "rng.seed:u16"],
           "/archetypes/3/first_segment_action_execution_contract/mutation_controls", "variant, action target, branch order, selector, record, movement, timer, release, RNG or single-synthetic-actor substitution changes the causal first-segment trace"),
+        f("enemy.class1f_inner_state_0x08", "round1-enemy-archetypes", "guarded_actor_program", True,
+          "enemies", "/archetypes/3/first_segment_action_execution_contract/inner_state_0x08_program", "0x061096 transition, 0x0610f6/0x040bbe inner dispatch, 0x016644 movement, 0x0411c4 motion, and 0x0413d2 type-16 emission",
+          "/authority_data/enemies/archetypes/3/first_segment_action_execution_contract/inner_state_0x08_program", "the action-0x16 terminal, target-side, latch, RNG and facing guards enter inner state 0x08; scheduler-owned action, animation and motion guards alone advance it and positive animation events alone emit type-16 actors",
+          ["enemy.outer_state:u8", "enemy.inner_state:u8", "enemy.action:u8", "enemy.action_phase:u8", "enemy.inner_timer:u16", "enemy.animation_timer:u16", "enemy.animation_branch:s16", "enemy.animation_record:u32", "enemy.direction:u8", "enemy.facing:u8", "enemy.position:s32", "enemy.velocity:s32", "enemy.target:u16", "enemy.latches:u8", "player.position:s32", "route.gameplay_gate:s16", "route.interruption:u8", "rng.seed:u16", "type16.free_count:u8"], ["enemy.inner_state:u8", "enemy.action:u8", "enemy.action_phase:u8", "enemy.inner_timer:u16", "enemy.action_timer:u8", "enemy.position:s32", "enemy.velocity:s32", "enemy.facing:u8", "enemy.animation_record:u32", "enemy.animation_timer:u16", "enemy.animation_branch:s16", "enemy.collision_selectors:u8", "enemy.latches:u8", "rng.seed:u16", "type16.actor_record"],
+          "/archetypes/3/first_segment_action_execution_contract/inner_state_0x08_program/mutation_control", "suppressing the exact inner-state writer removes every inner-0x08 context and its three animation-event-owned type-16 spawns; fixed-frame or authored emission is rejected"),
         f("enemy.presentation_collision_hitko", "round1-enemy-archetypes", "presentation_collision_table", True,
           "enemies", "/archetypes", "per-class writer windows, animation records, assemblies, selectors, damage and HIT/KO transitions",
           "/authority_data/enemies/archetypes", "current state/phase owns presentation and collision selectors; signed health owns HIT/KO",
@@ -846,6 +851,39 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                 "score_unchanged": True, "audio_dispatch_unchanged": True,
                 "route_exit_unchanged": True},
             "class-0x1f first-segment action fixture incomplete or drifted")
+    inner8 = class1f_actions["inner_state_0x08_program"]
+    require(inner8["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            inner8["capture_identity"]["byte_identical"] is True and
+            inner8["entry_transition"]["writer_pc"] == "0x0610c8" and
+            inner8["entry_transition"]["timer_u16"] == 600 and
+            inner8["dispatch"]["scheduler_position"] ==
+                "type-12 ascending fixed-pool source slot" and
+            list(inner8["route_reachable_action_handlers"]) ==
+                ["0x00", "0x04", "0x06", "0x08", "0x0e", "0x10"] and
+            len(inner8["animation_records"]) == 42 and
+            [row["table_index_u8"] for row in
+             inner8["movement"]["tables"]] ==
+                [4, 11, 12, 15, 18, 19, 23, 25] and
+            len(inner8["rng_calls"]) == 13 and
+            inner8["action_0x0e_motion"]["phase_2_terminal"]
+                ["x_velocity_by_facing_s32_16_16"] == [65536, -65536] and
+            inner8["action_0x0e_motion"]["phase_2_terminal"]
+                ["y_velocity_s32_16_16"] == 786432 and
+            inner8["action_0x0e_motion"]["phase_2_terminal"]
+                ["y_acceleration_s32_16_16"] == -38400 and
+            inner8["type16_emission"]["observed_source_spawn_frames"] ==
+                [3253, 3258, 3263] and
+            inner8["type16_emission"]["fixed_frame_spawn_forbidden"] is True and
+            inner8["mutation_control"] == {
+                "baseline_inner8_present": True,
+                "baseline_type16_spawn_frames": [3253, 3258, 3263],
+                "fixed_frame_or_authored_type16_spawn_rejected": True,
+                "mutant_inner8_present": False,
+                "mutant_type16_spawn_frames": [],
+                "suppressed_writer": "0x0610c8",
+                "suppressed_writes": 3},
+            "class-0x1f inner-state-0x08 fixture incomplete or drifted")
     ids = set()
     families = set()
     required = {"id", "authority_family", "classification", "type", "signed",

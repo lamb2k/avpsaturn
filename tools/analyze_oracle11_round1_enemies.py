@@ -33,6 +33,9 @@ COFFEE_SHOP_SCENE_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_
 COFFEE_SHOP_SCENE_TIMER_SUPPRESS = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs3s"
 COFFEE_SHOP_BOUNDS_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs14a"
 COFFEE_SHOP_BOUNDS_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs14b"
+CLASS1F_INNER8_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs30a"
+CLASS1F_INNER8_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs30b"
+CLASS1F_INNER8_SUPPRESS = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs30s"
 OUT = ROOT / "data" / "oracle11_round1_enemy_archetypes.json"
 FILES = ("enemy_samples.tsv", "enemy_entries.tsv", "enemy_writes.tsv",
          "enemy_rng.tsv", "player_damage.tsv", "samples.tsv", "dispatches.tsv",
@@ -64,6 +67,15 @@ COFFEE_SHOP_SCENE_FILES = (
 )
 CLASS1F_ROUTE_SELECTORS = (0, 1, 34, 35, 36, 43, 52, 53, 54, 55, 56, 60, 62,
                             68, 69, 70, 71, 72, 73, 74, 76, 77)
+CLASS1F_INNER8_FILES = (
+    "coffee_shop_class1f_inner8_entries.tsv",
+    "coffee_shop_class1f_inner8_writes.tsv",
+    "coffee_shop_scene_actors.tsv",
+    "coffee_shop_rng_calls.tsv",
+    "progression_class1f_transitions.tsv",
+    "progression_result.tsv",
+    "projectiles.tsv",
+)
 
 
 def require(condition: bool, message: str) -> None:
@@ -184,6 +196,320 @@ def class1f_selector_sequence(program: bytes, selector: int) -> dict[str, object
                     "records": records}
         address = next_address
     raise ValueError(f"selector {selector}: animation chain did not close")
+
+
+def class1f_inner8_action_contract(program: bytes,
+                                    opcodes: bytes) -> dict[str, object]:
+    """Close the bounded inner-state 0x08 path that owns type-16 fire."""
+    def capture_identity(path: Path) -> dict[str, str]:
+        return {name: digest(path / name) for name in CLASS1F_INNER8_FILES}
+
+    identity_a = capture_identity(CLASS1F_INNER8_A)
+    identity_b = capture_identity(CLASS1F_INNER8_B)
+    identity_s = capture_identity(CLASS1F_INNER8_SUPPRESS)
+    require(identity_a == identity_b,
+            "class-0x1f inner-state-0x08 captures differ")
+
+    transition_a = rows(CLASS1F_INNER8_A /
+                        "progression_class1f_transitions.tsv")
+    transition_s = rows(CLASS1F_INNER8_SUPPRESS /
+                        "progression_class1f_transitions.tsv")
+    writer_a = [row for row in transition_a if row["pc"] == "0610c8"]
+    writer_s = [row for row in transition_s if row["pc"] == "0610c8"]
+    require(len(writer_a) == 6 and writer_a[0]["frame"] == "2990" and
+            writer_a[0]["slot"] == "ffa3c0" and
+            writer_a[0]["state_before"] == "0200" and
+            writer_a[0]["substate_before"] == "0a00" and
+            len(writer_s) == 3 and
+            all(row["suppressed"] == "1" for row in writer_s),
+            "class-0x1f inner-state writer suppression drift")
+
+    scene_a = rows(CLASS1F_INNER8_A / "coffee_shop_scene_actors.tsv")
+    scene_s = rows(CLASS1F_INNER8_SUPPRESS /
+                   "coffee_shop_scene_actors.tsv")
+    actor_path = [row for row in scene_a if row["slot"] == "ffa3c0" and
+                  2990 <= int(row["frame"]) <= 3282]
+    require(len(actor_path) == 293, "class-0x1f inner-state path span drift")
+
+    action_runs = []
+    start = actor_path[0]
+    prior = start
+    for row in actor_path[1:] + [None]:
+        if row is None or (row["state"], row["substate"]) != (
+                prior["state"], prior["substate"]):
+            action_runs.append({
+                "first_source_frame": int(start["frame"]),
+                "last_source_frame": int(prior["frame"]),
+                "state_inner_u16": f"0x{start['state']}",
+                "action_substate_u16": f"0x{start['substate']}",
+                "facing_u8": int(start["facing"]),
+                "start_x_fp_s32_16_16": f"0x{int(start['x_fp'], 16):08x}",
+                "end_x_fp_s32_16_16": f"0x{int(prior['x_fp'], 16):08x}",
+                "start_z_s16": int(start["z"]),
+                "end_z_s16": int(prior["z"]),
+            })
+            if row is None:
+                break
+            start = row
+        prior = row
+    expected_runs = [
+        (0x0200, 0x1600, 2990, 2990),
+        (0x0208, 0x0600, 2991, 3003),
+        (0x0208, 0x0000, 3004, 3004),
+        (0x0208, 0x0400, 3005, 3047),
+        (0x0208, 0x0600, 3048, 3060),
+        (0x0208, 0x0000, 3061, 3061),
+        (0x0208, 0x0800, 3062, 3091),
+        (0x0208, 0x0400, 3092, 3134),
+        (0x0208, 0x1000, 3135, 3177),
+        (0x0208, 0x0e00, 3178, 3178),
+        (0x0208, 0x0e02, 3179, 3281),
+        (0x0208, 0x0000, 3282, 3282),
+    ]
+    require([(int(run["state_inner_u16"], 16),
+              int(run["action_substate_u16"], 16),
+              run["first_source_frame"], run["last_source_frame"])
+             for run in action_runs] == expected_runs,
+            "class-0x1f inner-state action sequence drift")
+
+    rng_rows = [row for row in rows(CLASS1F_INNER8_A /
+                                    "coffee_shop_rng_calls.tsv")
+                if row["a6"] == "ffa3c0" and
+                2990 <= int(row["frame"]) <= 3282]
+    require([int(row["frame"]) for row in rng_rows] ==
+            [2990, 3004, 3004, 3004, 3004, 3061, 3091, 3091,
+             3134, 3134, 3134, 3178, 3282],
+            "class-0x1f inner-state RNG order drift")
+    rng_calls = []
+    for row in rng_rows:
+        before = int(row["rng_before"], 16)
+        high = ((before * 3) & 0xffff) >> 8
+        low = ((before & 0xff) + high) & 0xff
+        rng_calls.append({"source_frame": int(row["frame"]),
+                          "seed_before_u16": f"0x{before:04x}",
+                          "seed_after_u16": f"0x{(high << 8) | low:04x}"})
+
+    inner_actor_rows = [row for row in actor_path if row["state"] == "0208"]
+    record_addresses = sorted({int(row["animation_record"], 16)
+                               for row in inner_actor_rows
+                               if int(row["animation_record"], 16) != 0})
+    records = []
+    for address in record_addresses:
+        record = animation_record(program, address)
+        record["movement_table_index_u8"] = program[address + 3] & 0x3f
+        records.append(record)
+    movement_ids = sorted({record["movement_table_index_u8"]
+                           for record in records
+                           if 0 < record["movement_table_index_u8"] < 32 and
+                           int(record["animation_record"], 16) < 0x12E550})
+    movement_tables = []
+    for table_id in movement_ids:
+        pointer = int.from_bytes(program[0x17188 + table_id * 4:
+                                         0x1718C + table_id * 4], "big")
+        vectors = []
+        for direction in range(32):
+            first = pointer + direction * 4
+            vectors.append({
+                "direction_u8": direction,
+                "x_delta_s16": int.from_bytes(program[first:first + 2],
+                                                "big", signed=True),
+                "y_delta_s16": int.from_bytes(program[first + 2:first + 4],
+                                                "big", signed=True),
+            })
+        movement_tables.append({"table_index_u8": table_id,
+                                "source_address": f"0x{pointer:06x}",
+                                "fixed_point_scale": "signed s16 << 8",
+                                "vectors": vectors})
+
+    def type16_lifetimes(capture: list[dict[str, str]], last_frame: int) -> list[int]:
+        active_by_slot: dict[str, int] = defaultdict(int)
+        frames = []
+        for row in capture:
+            if int(row["frame"]) > last_frame:
+                break
+            active = int(row["active"])
+            if (active and not active_by_slot[row["slot"]] and
+                    row["type"] == "16" and row["class"] == "06"):
+                frames.append(int(row["frame"]))
+            active_by_slot[row["slot"]] = active
+        return frames
+
+    type16_a = type16_lifetimes(scene_a, 3282)
+    type16_s = type16_lifetimes(scene_s, 3282)
+    suppressed_inner = [row for row in scene_s if row["state"] == "0208"]
+    require(type16_a == [3253, 3258, 3263] and type16_s == [] and
+            suppressed_inner == [],
+            "class-0x1f inner-state/type-16 suppression did not discriminate")
+
+    entries = rows(CLASS1F_INNER8_A /
+                   "coffee_shop_class1f_inner8_entries.tsv")
+    observed_entries = {f"0x{row['pc']}" for row in entries}
+    required_entries = {"0x060c9a", "0x061096", "0x0610f6", "0x040bbe",
+                        "0x040bea", "0x040c7c", "0x040cfe", "0x040d0e",
+                        "0x040e84", "0x0412a8", "0x0413d2"}
+    require(required_entries <= observed_entries,
+            "class-0x1f inner-state handler coverage drift")
+    require(hashlib.sha256(opcodes[0x061096:0x0610D4]).hexdigest() ==
+            "4166d4ea3ccdd2817792336e255006733cfda6a9eb61fd48ef20bec184264a5b",
+            "class-0x1f inner-state transition body drift")
+    require(hashlib.sha256(opcodes[0x0411C4:0x0412A8]).hexdigest() ==
+            "6c9e597051e535c767a24697913a3b019ef38726aaf5c85152595161f61e12e9",
+            "class-0x1f inner-state motion program drift")
+
+    return {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "scope": ("route-reachable current-state inner byte 0x08 program "
+                  "through action 0x0e02 type-16 emission"),
+        "capture_identity": {
+            "completion_a": identity_a,
+            "completion_b": identity_b,
+            "byte_identical": True,
+            "writer_0x0610c8_suppression": identity_s,
+        },
+        "record_layout": {
+            "outer_state_u8": "actor+0x04",
+            "inner_state_u8": "actor+0x05",
+            "action_u8": "actor+0x06",
+            "action_phase_u8": "actor+0x07",
+            "animation_timer_u16": "actor+0x0a",
+            "direction_u8": "actor+0x0c low 5 bits",
+            "facing_u8": "actor+0x0f",
+            "x_fp_s32_16_16": "actor+0x10",
+            "y_fp_s32_16_16": "actor+0x14",
+            "z_s16": "actor+0x18",
+            "animation_record_u32": "actor+0x1c",
+            "animation_branch_s16": "actor+0x24",
+            "target_low_word_u16": "actor+0x28",
+            "action_timer_u8": "actor+0x2a",
+            "x_velocity_s32_16_16": "actor+0x30",
+            "y_velocity_s32_16_16": "actor+0x34",
+            "x_acceleration_s32_16_16": "actor+0x38",
+            "y_acceleration_s32_16_16": "actor+0x3c",
+            "motion_phase_u16": "actor+0x98",
+            "inner_timer_u16": "actor+0xa8",
+            "special_latch_u8": "actor+0xad",
+            "transition_latch_u8": "actor+0xae",
+            "loop_counter_u8": "actor+0xb0",
+        },
+        "entry_transition": {
+            "source_action": "normal action 0x16",
+            "guard_order": [
+                "animation branch is negative and animation timer_u16 equals 1",
+                "decrement loop_counter_u8; continue until it becomes zero",
+                "target-side helper 0x060cd2 returns nonzero",
+                "transition_latch_u8 is zero, then write it to one",
+                "consume exactly one RNG call and require (rng_low_u16 & 3)==0",
+                "write special_latch_u8=1 and inner_timer_u16=600",
+                "select active P1 through 0x017020 and store its low-word pointer",
+                "target-side helper 0x060f22 returns nonzero, so 0x060810 flips facing and binds the turn record",
+                "write inner_state_u8=8, action_u8=6, action_phase_u8=0",
+            ],
+            "writer_pc": "0x0610c8",
+            "action_writer_pc": "0x0610ce",
+            "phase_writer_pc": "0x0610d4",
+            "timer_u16": 600,
+            "initial_selector_u8": 35,
+            "source_window": {"first": "0x061096", "last_exclusive": "0x0610d4",
+                              "sha256": hashlib.sha256(
+                                  opcodes[0x061096:0x0610D4]).hexdigest()},
+        },
+        "dispatch": {
+            "outer_current_entry": "0x06075a",
+            "inner_table": "0x060766",
+            "inner_0x08_entry": "0x0610f6",
+            "class_specific_dispatch": "0x040bbe",
+            "class_specific_action_table": "0x040bd2",
+            "scheduler_position": "type-12 ascending fixed-pool source slot",
+            "per_update_order": [
+                "if route gameplay gate is zero, clear inner state and return to normal action dispatch",
+                "decrement inner_timer_u16; on signed underflow return to normal only when action_u8 is zero",
+                "step shared animation ownership through 0x041d6c",
+                "consume hitstop byte actor+0x2c before action dispatch",
+                "if route interruption byte a5+0x1f3 is set, dispatch interruption 0x060de6",
+                "otherwise dispatch class-specific action through 0x040bbe",
+            ],
+        },
+        "route_reachable_action_handlers": {
+            "0x00": {"entry": "0x040bea", "role": "target/style/RNG chooser"},
+            "0x04": {"entry": "0x040c7c", "role": "source movement sequence and terminal chooser"},
+            "0x06": {"entry": "0x040cfe", "role": "turn animation; terminal clears action"},
+            "0x08": {"entry": "0x040d0e", "role": "style transition animation"},
+            "0x0e": {"entry": "0x040e84", "role": "motion program and type-16 parent sequence"},
+            "0x10": {"entry": "0x0412a8", "role": "target-seeking movement and transition to 0x0e"},
+        },
+        "observed_action_runs": action_runs,
+        "rng_calls": rng_calls,
+        "animation_records": records,
+        "movement": {
+            "helper": "0x016644",
+            "branch_order": [
+                "decrement animation timer_u16 once",
+                "on zero advance the 16-byte animation record, following its pointer when prior branch_s16 is negative",
+                "bind timer, branch, assembly, hurt selector, and attack selector from the new record",
+                "movement table is low six bits of new record byte 3",
+                "index the signed x/y pair by low five direction bits",
+                "add each signed s16 delta shifted left 8 to x/y 16.16",
+                "copy y high word to z after movement",
+            ],
+            "tables": movement_tables,
+            "source_window": {"first": "0x016644", "last_exclusive": "0x0166aa",
+                              "sha256": hashlib.sha256(
+                                  opcodes[0x016644:0x0166AA]).hexdigest()},
+        },
+        "action_0x0e_motion": {
+            "motion_dispatch_entry": "0x0411c4",
+            "motion_selector_u16": 0x18,
+            "phases_u16": [0, 2, 4, 6, 8],
+            "phase_0": "increment phase; if style85 is set clear it and bind source selector 0x3c, otherwise bind 0x54",
+            "phase_2_terminal": {
+                "guard": "animation_branch_s16 < 0",
+                "next_phase_u16": 4,
+                "x_velocity_by_facing_s32_16_16": [65536, -65536],
+                "x_acceleration_s32_16_16": 0,
+                "y_velocity_s32_16_16": 786432,
+                "y_acceleration_s32_16_16": -38400,
+                "airborne_u8": 1,
+                "next_selector_u8": 0x55,
+            },
+            "phase_4_arithmetic": [
+                "x_fp += x_velocity; x_velocity += x_acceleration",
+                "y_fp += y_velocity; y_velocity += y_acceleration",
+                "continue while unsigned z_s16 < unsigned y_high_s16",
+                "on landing clear airborne, increment phase to 6, bind selector 0x53",
+            ],
+            "phase_6": "step animation; each positive actor+0x25 event calls 0x0413d2; terminal increments phase and writes action_timer_u8=8",
+            "phase_8": "decrement action_timer_u8; zero branches to 0x040efe and clears action when actor+0x6e is zero",
+            "source_window": {"first": "0x0411c4", "last_exclusive": "0x0412a8",
+                              "sha256": hashlib.sha256(
+                                  opcodes[0x0411C4:0x0412A8]).hexdigest()},
+        },
+        "type16_emission": {
+            "helper": "0x0413d2",
+            "event_field": "positive animation branch byte actor+0x25",
+            "observed_source_spawn_frames": type16_a,
+            "owner_state_substate": "0x0208:0x0e02",
+            "fixed_frame_spawn_forbidden": True,
+            "implementation_contract": "type16_projectile_implementation_contract",
+        },
+        "mutation_control": {
+            "suppressed_writer": "0x0610c8",
+            "suppressed_writes": len(writer_s),
+            "baseline_inner8_present": True,
+            "mutant_inner8_present": False,
+            "baseline_type16_spawn_frames": type16_a,
+            "mutant_type16_spawn_frames": type16_s,
+            "fixed_frame_or_authored_type16_spawn_rejected": True,
+        },
+        "collision_damage_ownership": {
+            "parent_action_collision": "presentation selectors are data only; parent action does not fabricate contact or damage",
+            "projectile_collision": "delegated only to accepted type16_projectile_implementation_contract current-state collision writer",
+        },
+        "route_interaction": {
+            "gameplay_gate": "s16(a5-0x65e4) must remain nonzero",
+            "interruption_guard": "actor scheduler interruption byte a5+0x1f3 diverts before class-specific dispatch",
+            "timeout": "inner_timer_u16 is decremented in scheduler order and returns to normal only after signed underflow under the source guard",
+        },
+    }
 
 
 def class1f_first_segment_action_contract(program: bytes,
@@ -458,6 +784,8 @@ def class1f_first_segment_action_contract(program: bytes,
                                source_window(opcodes, target)
                                for target in action_targets},
         },
+        "inner_state_0x08_program":
+            class1f_inner8_action_contract(program, opcodes),
         "animation_selector_table": {"address": "0x12d152",
                                      "selectors": sequences},
         "movement_tables": movement_tables,
@@ -1466,6 +1794,36 @@ def validate(report: dict[str, object]) -> None:
                         ["suppressed_writes"] == 1 and
                     len(actions["mutation_controls"]) == 17,
                     "0x1f: first-segment action execution contract drift")
+            inner8 = actions["inner_state_0x08_program"]
+            require(inner8["classification"] ==
+                        "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+                    inner8["capture_identity"]["byte_identical"] is True and
+                    inner8["entry_transition"]["writer_pc"] == "0x0610c8" and
+                    inner8["entry_transition"]["timer_u16"] == 600 and
+                    inner8["entry_transition"]["initial_selector_u8"] == 35 and
+                    inner8["dispatch"]["inner_0x08_entry"] == "0x0610f6" and
+                    inner8["dispatch"]["class_specific_dispatch"] ==
+                        "0x040bbe" and
+                    len(inner8["observed_action_runs"]) == 12 and
+                    len(inner8["rng_calls"]) == 13 and
+                    len(inner8["animation_records"]) == 42 and
+                    [row["table_index_u8"] for row in
+                     inner8["movement"]["tables"]] ==
+                        [4, 11, 12, 15, 18, 19, 23, 25] and
+                    inner8["action_0x0e_motion"]["phase_2_terminal"]
+                        ["x_velocity_by_facing_s32_16_16"] == [65536, -65536] and
+                    inner8["action_0x0e_motion"]["phase_2_terminal"]
+                        ["y_acceleration_s32_16_16"] == -38400 and
+                    inner8["type16_emission"]["observed_source_spawn_frames"] ==
+                        [3253, 3258, 3263] and
+                    inner8["type16_emission"]["fixed_frame_spawn_forbidden"]
+                        is True and
+                    inner8["mutation_control"]["suppressed_writer"] ==
+                        "0x0610c8" and
+                    inner8["mutation_control"]["suppressed_writes"] == 3 and
+                    inner8["mutation_control"]["mutant_inner8_present"] is False and
+                    inner8["mutation_control"]["mutant_type16_spawn_frames"] == [],
+                    "0x1f: inner-state-0x08 implementation contract drift")
     require(all(value == 0 for key, value in report["coverage"].items()
                 if key.startswith("orphan_")) and
             report["coverage"]["required_class_type_pairs"] == 4 and

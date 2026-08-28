@@ -90,6 +90,10 @@ local obstacle_guard = assert(io.open(
     root .. "/coffee_shop_obstacle_guard.tsv", "w"))
 local type16_collision = assert(io.open(
     root .. "/coffee_shop_type16_class06_collision.tsv", "w"))
+local class1f_inner8_entries = assert(io.open(
+    root .. "/coffee_shop_class1f_inner8_entries.tsv", "w"))
+local class1f_inner8_writes = assert(io.open(
+    root .. "/coffee_shop_class1f_inner8_writes.tsv", "w"))
 local result = assert(io.open(root .. "/progression_result.tsv", "w"))
 transactions:write("frame\tpc\ta4\ta6\tg8019\tliving\tprogress\tc_state\tc_substate\tc_timer40\tc_timer42\tc_limit4a\tc_index10\tc_phase2e\tc_local2c\tcamera_x\tcamera_z\trng\td0\td1\td2\tactor_active\tactor_class\tactor_type\tactor_state\tactor_substate\tactor_x\tactor_y\tactor_z\tactor_variant\tactor_timer\tactor_selector83\n")
 snapshots:write("frame\tslot\tactive\tclass\ttype\tstate\tsubstate\tfacing\tx\ty\tz\tvariant\ttimer\tselector83\thealth\tanim\n")
@@ -117,6 +121,8 @@ obstacle_trace:write("frame\tpc\tstate\tsubstate\tactive\tclass\ttype\tfacing\tx
 obstacle_writes:write("frame\tpc\tinner\tstate\tsubstate\tactive\tclass\ttype\tanimation_record\tanimation_timer\tanimation_branch\thealth_before\tguard_ffee8f\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\tdata\tmask\tsuppressed\n")
 obstacle_guard:write("frame\tpc\tvalue_before\tdata\tmask\troute\tstate\tsubstate\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\ta6\n")
 type16_collision:write("frame\tpc\ta0\ta1\ta2\ta3\ta4\ta5\ta6\td0\td1\td2\td3\td4\td5\td6\td7\tattacker_state\tattacker_substate\tattacker_animation_record\tattacker_table\tdefender_state\tdefender_substate\tdefender_animation_record\tdefender_table\tattack_record\n")
+class1f_inner8_entries:write("frame\tpc\tslot\tstate\tsubstate\tfacing\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\tfield85\tfielda3\tfielda4\tfielda5\tfielda6\tfieldac\tfieldad\tfieldae\tfielda8\tfieldb0\trng\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\n")
+class1f_inner8_writes:write("frame\tpc\tslot\tinner\tstate\tsubstate\tfacing\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\tfield85\tfielda3\tfielda4\tfielda5\tfielda6\tfieldac\tfieldad\tfieldae\tfielda8\tfieldb0\trng\told32\tdata\tmask\n")
 result:write("spawn_suppression\tguard_suppression\tmain_spawn_transactions\taux_spawn_transactions\tsuppressed_writes\tlifecycle_suppressed_writes\taction4_timer_events\taction4_timer_suppressed_writes\ttype4_class03_suppressed_writes\tcoffee_stage_rng_suppressed_writes\ttype36_suppressed_writes\tscene_pair_suppressed_actors\tobstacle_transition_suppressed_writes\tfinal_route\n")
 
 local function u8(a) return program:read_u8(a) end
@@ -890,11 +896,71 @@ oracle11_progression_lifecycle_writes = program:install_write_tap(
         end
     end)
 
+local function emit_class1f_inner8_entry(pc)
+    if not capture_scene or frame < 2980 or frame > 3300 then return end
+    local slot = maincpu.state["A6"].value & 0xffffff
+    if slot ~= 0xffa3c0 or u8(slot) == 0 or u8(slot + 2) ~= 0x1f or
+            u8(slot + 8) ~= 12 then return end
+    class1f_inner8_entries:write(string.format(
+        "%d\t%06x\t%06x\t%04x\t%04x\t%d\t%08x\t%08x\t%d\t%08x\t%04x\t%d\t%04x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%04x\t%02x\t%04x\t%08x\t%08x\t%08x\t%08x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\n",
+        frame, pc, slot, u16(slot + 4), u16(slot + 6), u8(slot + 0x0f),
+        u32(slot + 0x10), u32(slot + 0x14), s16(u16(slot + 0x18)),
+        u32(slot + 0x1c), u16(slot + 0x0a), s16(u16(slot + 0x24)),
+        u16(slot + 0x2a), u8(slot + 0x85), u8(slot + 0xa3),
+        u8(slot + 0xa4), u8(slot + 0xa5), u8(slot + 0xa6),
+        u8(slot + 0xac), u8(slot + 0xad), u8(slot + 0xae),
+        u16(slot + 0xa8), u8(slot + 0xb0), u16(0xff81a8),
+        maincpu.state["D0"].value & 0xffffffff,
+        maincpu.state["D1"].value & 0xffffffff,
+        maincpu.state["D2"].value & 0xffffffff,
+        maincpu.state["D3"].value & 0xffffffff,
+        maincpu.state["A0"].value & 0xffffff,
+        maincpu.state["A1"].value & 0xffffff,
+        maincpu.state["A2"].value & 0xffffff,
+        maincpu.state["A3"].value & 0xffffff,
+        maincpu.state["A4"].value & 0xffffff,
+        maincpu.state["A5"].value & 0xffffff))
+end
+
+oracle11_class1f_inner8_pc_taps = {}
+for _, pc in ipairs({
+        0x060c9a, 0x061096, 0x0610f6, 0x040bbe, 0x040bea,
+        0x040c7c, 0x040cfe, 0x040d0e, 0x040e84, 0x0412a8,
+        0x0413d2}) do
+    oracle11_class1f_inner8_pc_taps[
+        #oracle11_class1f_inner8_pc_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_class1f_inner8_%06x", pc),
+        function() emit_class1f_inner8_entry(pc) end)
+end
+
+oracle11_class1f_inner8_write_tap = program:install_write_tap(
+    0xffa3c0, 0xffa47f, "oracle11_class1f_inner8_writes",
+    function(offset, data, mask)
+        if not capture_scene or frame < 2980 or frame > 3300 then return end
+        local slot = 0xffa3c0
+        local pc = maincpu.state["PC"].value & 0xffffff
+        if u8(slot) == 0 or u8(slot + 2) ~= 0x1f or u8(slot + 8) ~= 12 or
+                (u16(slot + 4) ~= 0x0208 and
+                 (pc < 0x060c9a or pc > 0x0610d4)) then return end
+        class1f_inner8_writes:write(string.format(
+            "%d\t%06x\t%06x\t%02x\t%04x\t%04x\t%d\t%08x\t%08x\t%d\t%08x\t%04x\t%d\t%04x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%04x\t%02x\t%04x\t%08x\t%08x\t%08x\n",
+            frame, pc, slot, offset - slot, u16(slot + 4),
+            u16(slot + 6), u8(slot + 0x0f), u32(slot + 0x10),
+            u32(slot + 0x14), s16(u16(slot + 0x18)), u32(slot + 0x1c),
+            u16(slot + 0x0a), s16(u16(slot + 0x24)), u16(slot + 0x2a),
+            u8(slot + 0x85), u8(slot + 0xa3), u8(slot + 0xa4),
+            u8(slot + 0xa5), u8(slot + 0xa6), u8(slot + 0xac),
+            u8(slot + 0xad), u8(slot + 0xae), u16(slot + 0xa8),
+            u8(slot + 0xb0), u16(0xff81a8), u32(offset & 0xfffffc),
+            data & 0xffffffff, mask & 0xffffffff))
+    end)
+
 oracle11_progression_class1f_transition_writes = program:install_write_tap(
     pool, pool + count * stride - 1,
     "oracle11_progression_class1f_transition_writes",
     function(offset, data, mask)
-        if not capture_lifecycle or frame < 2070 or frame > 2700 then return end
+        if not capture_lifecycle or frame < 2070 or frame > capture_last_frame then return end
         local relative = offset - pool
         local slot = pool + math.floor(relative / stride) * stride
         local inner = relative % stride
@@ -1069,6 +1135,8 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         component20_global:close()
         obstacle_guard:close()
         type16_collision:close()
+        class1f_inner8_entries:close()
+        class1f_inner8_writes:close()
         result:close()
     end
 end)

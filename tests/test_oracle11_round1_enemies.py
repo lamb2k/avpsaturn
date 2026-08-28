@@ -81,4 +81,13 @@ for label,mutate in [
     ('first-segment-mutation-control',lambda x:x['mutation_controls'].pop()),
 ]:
     mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['first_segment_action_execution_contract'];mutate(target);reject(mutant,label)
-print('ORACLE-11 Round 1 enemy tests: PASS (53 mutations rejected)')
+for label,mutate in [
+    ('inner8-writer',lambda x:x['entry_transition'].__setitem__('writer_pc','0x0610ce')),
+    ('inner8-timer',lambda x:x['entry_transition'].__setitem__('timer_u16',599)),
+    ('inner8-movement-table',lambda x:x['movement']['tables'][0].__setitem__('table_index_u8',5)),
+    ('inner8-motion-sign',lambda x:x['action_0x0e_motion']['phase_2_terminal'].__setitem__('y_acceleration_s32_16_16',38400)),
+    ('inner8-fixed-frame',lambda x:x['type16_emission'].__setitem__('fixed_frame_spawn_forbidden',False)),
+    ('inner8-suppression',lambda x:x['mutation_control'].__setitem__('mutant_type16_spawn_frames',[3253])),
+]:
+    mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['first_segment_action_execution_contract']['inner_state_0x08_program'];mutate(target);reject(mutant,label)
+print('ORACLE-11 Round 1 enemy tests: PASS (59 mutations rejected)')
