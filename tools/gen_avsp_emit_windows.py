@@ -178,6 +178,13 @@ def load_spec02_round1_presentations():
                 (0, 1), (jump_actor["coordinate_mode_u8"],),
                 int(jump_actor["object_or_u16"], 16),
                 (jump_actor["palette_u8"],))
+    special = authority["player"]["weapon_projectile_resource"][
+        "special_implementation_contract"]
+    add_records("player-button1-button2-special",
+                special["initialization"]["presentation_records"],
+                (0, 1), (jump_actor["coordinate_mode_u8"],),
+                int(jump_actor["object_or_u16"], 16),
+                (jump_actor["palette_u8"],))
     empty_effect = weapon["empty_effect_variant1_contract"]
     empty_actor = empty_effect["initialization"][
         "presentation_actor_fields"]

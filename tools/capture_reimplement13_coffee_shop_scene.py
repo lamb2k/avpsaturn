@@ -145,6 +145,7 @@ NATIVE_OWNERS = {
     (4, "0x03"): "player airborne Button1 record4 actor",
     (4, "0x04"): "player weapon record4 child",
     (12, "0x1f"): "native class-0x1f fixed-pool dispatcher",
+    (16, "0x06"): "native class-0x1f type-16 projectile dispatcher",
     (20, "0x09"): "native class-0x09 presentation dispatcher",
     (20, "0x01"): "native class-0x01 scene spawn controller",
     (20, "0x02"): "native class-0x02 damageable scene prop controller",
@@ -278,6 +279,80 @@ def source_native_divergences(
                                                item["source_slot"]))
 
 
+def collision_chronology(source: dict[str, object],
+                         native_rows: list[dict[str, str]],
+                         divergences: list[dict[str, object]]) -> \
+        dict[str, object]:
+    """Bind the first source Button1 contact to the native scheduler result."""
+    source_write = next(
+        item for item in source["health_writes"]
+        if item["frame"] == 2306 and item["attacker"] == "0xff8880" and
+        item["defender"] == "0xffa180" and
+        item["attack_record"] == "0x030cd2" and item["damage_writer"])
+    by_key = {(int(row["frame"]), row["source_slot"]): row
+              for row in native_rows}
+    projectile = by_key[(2306, "00ff8880")]
+    target_before = by_key[(2306, "00ffa180")]
+    target_after = by_key[(2307, "00ffa180")]
+    impact_allocated = by_key[(2307, "00ffbd80")]
+    impact_initialized = by_key[(2308, "00ffbd80")]
+    prefix_slots = {
+        "0x00ff8680", "0x00ff8700", "0x00ff8780", "0x00ff8800",
+        "0x00ff8880", "0x00ff8900", "0x00ffa180"}
+    early = [item for item in divergences
+             if item["source_slot"] in prefix_slots and item["frame"] < 2288]
+    prior_target_health = {
+        int(row["health"]) for row in native_rows
+        if row["source_slot"] == "00ffa180" and
+        2074 <= int(row["frame"]) <= 2306}
+    return {
+        "source_scheduler_order": ["record4", "record12", "collision"],
+        "source_native_prefix_equal_through_frame": 2287,
+        "prefix_divergences": early,
+        "source_damage_write": {
+            "frame": source_write["frame"],
+            "attacker": source_write["attacker"],
+            "defender": source_write["defender"],
+            "attack_record": source_write["attack_record"],
+            "health_before_s16": source_write["health_before_s16"],
+            "health_after_s16": source_write["health_after_s16"],
+            "writer_pc": source_write["writer_pc"],
+        },
+        "native_damage_transaction": {
+            "scheduler_source_frame": 2306,
+            "attacker_slot": "0x" + projectile["source_slot"],
+            "attack_table_base": "0x" + projectile["attack_table"],
+            "attack_record": "0x" + projectile["current_attack_record"],
+            "collision_result_s16": int(projectile["collision_result"]),
+            "collision_identity_u8": int(projectile["collision_identity"]),
+            "collision_registered_u8": int(
+                projectile["collision_registered"]),
+            "projectile_health_s16": int(projectile["health"]),
+            "target_health_during_source_frame_s16": int(
+                target_before["health"]),
+            "target_health_next_visible_frame_s16": int(
+                target_after["health"]),
+            "target_state_next_visible_frame": "0x" +
+                target_after["state"],
+            "target_slot": "0x" + target_after["source_slot"],
+            "prior_target_health_values_s16": sorted(prior_target_health),
+        },
+        "native_impact_transaction": {
+            "allocation_visible_frame": 2307,
+            "slot": "0x" + impact_allocated["source_slot"],
+            "type_u8": int(impact_allocated["type"]),
+            "class_u8": int(impact_allocated["class"], 16),
+            "state_at_allocation": "0x" + impact_allocated["state"],
+            "initialization_visible_frame": 2308,
+            "state_after_initialization": "0x" +
+                impact_initialized["state"],
+            "animation_record": "0x" +
+                impact_initialized["animation_record"],
+            "assembly": "0x" + impact_initialized["assembly"],
+        },
+    }
+
+
 def validate_report(report: dict[str, object]) -> None:
     gate_names = {
         "source_actor_population_missing_on_saturn",
@@ -308,6 +383,39 @@ def validate_report(report: dict[str, object]) -> None:
            item["native_owner"] is None
            for item in report["scene_component_map"]):
         raise ValueError("Coffee Shop implemented source component has no owner")
+    chronology = report["native_capture"]["first_button1_collision"]
+    if chronology != {
+            "source_scheduler_order": ["record4", "record12", "collision"],
+            "source_native_prefix_equal_through_frame": 2287,
+            "prefix_divergences": [],
+            "source_damage_write": {
+                "frame": 2306, "attacker": "0xff8880",
+                "defender": "0xffa180", "attack_record": "0x030cd2",
+                "health_before_s16": 87, "health_after_s16": 56,
+                "writer_pc": "0x01d590"},
+            "native_damage_transaction": {
+                "scheduler_source_frame": 2306,
+                "attacker_slot": "0x00ff8880",
+                "attack_table_base": "0x00030cb6",
+                "attack_record": "0x00030cd2",
+                "collision_result_s16": -1,
+                "collision_identity_u8": 42,
+                "collision_registered_u8": 1,
+                "projectile_health_s16": -1,
+                "target_health_during_source_frame_s16": 87,
+                "target_health_next_visible_frame_s16": 56,
+                "target_state_next_visible_frame": "0x0202",
+                "target_slot": "0x00ffa180",
+                "prior_target_health_values_s16": [87]},
+            "native_impact_transaction": {
+                "allocation_visible_frame": 2307,
+                "slot": "0x00ffbd80", "type_u8": 24,
+                "class_u8": 78, "state_at_allocation": "0x0000",
+                "initialization_visible_frame": 2308,
+                "state_after_initialization": "0x0200",
+                "animation_record": "0x00092914",
+                "assembly": "0x00092c04"}}:
+        raise ValueError("Coffee Shop first Button1 collision chronology drift")
     all_zero = all(value == 0 for value in report["gaps"].values())
     if report["acceptance"] != {"all_zero": all_zero, "ready": all_zero}:
         raise ValueError("Coffee Shop scene accepted before the zero-gap gate")
@@ -358,6 +466,7 @@ def main() -> None:
                                        "type": item["type"],
                                        "class": item["class"],
                                        "states": unsupported})
+    divergences = source_native_divergences(source_rows, rows)
     report = {
         "schema": "reimplement13-coffee-shop-scene-parity-v1",
         "source_manifest": FIXTURES.relative_to(ROOT).as_posix() +
@@ -387,14 +496,15 @@ def main() -> None:
                                        "00ff8680", "00ff8700", "00ff8780",
                                        "00ff8800", "00ff8880", "00ff8900",
                                        "00ffa180", "00ffbd80"}),
-                               "class1f_first_movement": compact_window(
-                                   rows, 2208, 2280, {"00ffa240"})}},
+                                "class1f_first_movement": compact_window(
+                                    rows, 2208, 2280, {"00ffa240"})},
+                           "first_button1_collision": collision_chronology(
+                               source, rows, divergences)},
         "source_capture": {
             "actor_rows": len(source_rows),
             "actor_sha256": source_actor_sha256,
         },
-        "source_native_first_divergence_by_slot":
-            source_native_divergences(source_rows, rows),
+        "source_native_first_divergence_by_slot": divergences,
         "actor_lifetime_timeline": {
             "source": [dict(source_lifetime_summary(item),
                             native_owner=native_owner(item),

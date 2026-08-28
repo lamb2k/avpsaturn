@@ -32,6 +32,10 @@ local suppress_scene_pair_class = tonumber(
     os.getenv("AVSP_ORACLE11_SUPPRESS_SCENE_PAIR_CLASS") or "", 16)
 local suppress_obstacle_transition =
     os.getenv("AVSP_ORACLE11_SUPPRESS_OBSTACLE_TRANSITION") == "1"
+local capture_collision_guard =
+    os.getenv("AVSP_ORACLE11_COLLISION_GUARD_CAPTURE") == "1"
+local mutate_collision_guard =
+    os.getenv("AVSP_ORACLE11_COLLISION_GUARD_MUTATE") == "1"
 local frame = 0
 local controller = 0xffd180
 local global = 0xff8000
@@ -94,6 +98,20 @@ local class1f_inner8_entries = assert(io.open(
     root .. "/coffee_shop_class1f_inner8_entries.tsv", "w"))
 local class1f_inner8_writes = assert(io.open(
     root .. "/coffee_shop_class1f_inner8_writes.tsv", "w"))
+local collision_guard = assert(io.open(
+    root .. "/coffee_shop_record4_collision_guard.tsv", "w"))
+local collision_guard_writes = assert(io.open(
+    root .. "/coffee_shop_record12_guard6d_writes.tsv", "w"))
+local collision_lists = assert(io.open(
+    root .. "/coffee_shop_collision_lists.tsv", "w"))
+local collision_list_writes = assert(io.open(
+    root .. "/coffee_shop_collision_list_writes.tsv", "w"))
+local collision_actor_flags = assert(io.open(
+    root .. "/coffee_shop_collision_actor_flags.tsv", "w"))
+local collision_identity_writes = assert(io.open(
+    root .. "/coffee_shop_record4_collision_identity_writes.tsv", "w"))
+local collision_identity_assignments = assert(io.open(
+    root .. "/coffee_shop_collision_identity_assignments.tsv", "w"))
 local result = assert(io.open(root .. "/progression_result.tsv", "w"))
 transactions:write("frame\tpc\ta4\ta6\tg8019\tliving\tprogress\tc_state\tc_substate\tc_timer40\tc_timer42\tc_limit4a\tc_index10\tc_phase2e\tc_local2c\tcamera_x\tcamera_z\trng\td0\td1\td2\tactor_active\tactor_class\tactor_type\tactor_state\tactor_substate\tactor_x\tactor_y\tactor_z\tactor_variant\tactor_timer\tactor_selector83\n")
 snapshots:write("frame\tslot\tactive\tclass\ttype\tstate\tsubstate\tfacing\tx\ty\tz\tvariant\ttimer\tselector83\thealth\tanim\n")
@@ -123,6 +141,13 @@ obstacle_guard:write("frame\tpc\tvalue_before\tdata\tmask\troute\tstate\tsubstat
 type16_collision:write("frame\tpc\ta0\ta1\ta2\ta3\ta4\ta5\ta6\td0\td1\td2\td3\td4\td5\td6\td7\tattacker_state\tattacker_substate\tattacker_animation_record\tattacker_table\tdefender_state\tdefender_substate\tdefender_animation_record\tdefender_table\tattack_record\n")
 class1f_inner8_entries:write("frame\tpc\tslot\tstate\tsubstate\tfacing\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\tfield85\tfielda3\tfielda4\tfielda5\tfielda6\tfieldac\tfieldad\tfieldae\tfielda8\tfieldb0\trng\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\n")
 class1f_inner8_writes:write("frame\tpc\tslot\tinner\tstate\tsubstate\tfacing\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\tfield85\tfielda3\tfielda4\tfielda5\tfielda6\tfieldac\tfieldad\tfieldae\tfielda8\tfieldb0\trng\told32\tdata\tmask\n")
+collision_guard:write("frame\tevent\tpc\tattacker\tattacker_active\tattacker_class\tattacker_state\tattacker_substate\tattacker_x_fp\tattacker_y_fp\tattacker_z\tattacker_anim\tattacker_attack_selector\tattacker_latch_index65\tattacker_id67\tdefender\tdefender_active\tdefender_class\tdefender_state\tdefender_substate\tdefender_x_fp\tdefender_y_fp\tdefender_z\tdefender_anim\tdefender_hurt_selector\tdefender_guard6d\tdefender_latch_value\tdefender_suppress70\tdefender_health\tmutated\n")
+collision_guard_writes:write("frame\tpc\tslot\tinner\tstate\tsubstate\tguard6d_before\tdata\tmask\n")
+collision_lists:write("frame\tpc\tattacker_count\tattacker_slots\tdefender_count\tdefender_slots\n")
+collision_list_writes:write("frame\tpc\taddress\ta6\tactive\tfield01\tfield47\tfield48\tanimation_record\treturn0\treturn1\treturn2\tdata\tmask\tsuppressed\n")
+collision_actor_flags:write("frame\tpc\tslot\tinner\tactive\tfield01\tstate\tsubstate\tx_fp\ty_fp\tz\tcamera_x\tcamera_z\tdata\tmask\tsuppressed\n")
+collision_identity_writes:write("frame\tpc\tslot\tinner\tactive\tclass\tstate\tsubstate\tlatch_index65_before\tattacker_id67_before\tdata\tmask\n")
+collision_identity_assignments:write("frame\tevent\tpc\tslot\tactive\tclass\ttype\tstate\tsubstate\tattacker_id67\tglobal_id820b\n")
 result:write("spawn_suppression\tguard_suppression\tmain_spawn_transactions\taux_spawn_transactions\tsuppressed_writes\tlifecycle_suppressed_writes\taction4_timer_events\taction4_timer_suppressed_writes\ttype4_class03_suppressed_writes\tcoffee_stage_rng_suppressed_writes\ttype36_suppressed_writes\tscene_pair_suppressed_actors\tobstacle_transition_suppressed_writes\tfinal_route\n")
 
 local function u8(a) return program:read_u8(a) end
@@ -1066,6 +1091,206 @@ oracle11_scene_health_taps = {
     install_scene_health_tap(0xffae80, 0xffb67f, 0x80, "record20"),
 }
 
+local function emit_collision_guard(event, pc, guard_value, mutated)
+    if not capture_collision_guard or frame < 1972 or
+            frame > capture_last_frame then return end
+    local attacker = maincpu.state["A6"].value & 0xffffff
+    local defender = maincpu.state["A1"].value & 0xffffff
+    local attacker_anim
+    local defender_anim
+    local latch_index
+    local latch_value
+    if attacker < 0xff8680 or attacker >= 0xff9280 or
+            defender < 0xff9580 or defender >= 0xffa480 then return end
+    attacker_anim = u32(attacker + 0x1c)
+    defender_anim = u32(defender + 0x1c)
+    latch_index = u8(attacker + 0x65)
+    latch_value = latch_index < 0x80 and
+        u8(defender + 0x68 + latch_index) or 0xff
+    collision_guard:write(string.format(
+        "%d\t%s\t%06x\t%06x\t%d\t%02x\t%04x\t%04x\t%08x\t%08x\t%d\t%08x\t%02x\t%02x\t%02x\t%06x\t%d\t%02x\t%04x\t%04x\t%08x\t%08x\t%d\t%08x\t%02x\t%02x\t%02x\t%02x\t%d\t%d\n",
+        frame, event, pc, attacker, u8(attacker), u8(attacker + 2),
+        u16(attacker + 4), u16(attacker + 6), u32(attacker + 0x10),
+        u32(attacker + 0x14), s16(u16(attacker + 0x18)), attacker_anim,
+        attacker_anim ~= 0 and u8(attacker_anim + 9) or 0,
+        latch_index, u8(attacker + 0x67), defender, u8(defender),
+        u8(defender + 2), u16(defender + 4), u16(defender + 6),
+        u32(defender + 0x10), u32(defender + 0x14),
+        s16(u16(defender + 0x18)), defender_anim,
+        defender_anim ~= 0 and u8(defender_anim + 8) or 0, guard_value,
+        latch_value, u8(defender + 0x70),
+        s16(u16(defender + 0x40)), mutated and 1 or 0))
+end
+
+oracle11_collision_guard_read = program:install_read_tap(
+    0xffa1ec, 0xffa1ef, "oracle11_collision_guard_read",
+    function(offset, data, mask)
+        local pc = maincpu.state["PC"].value & 0xffffff
+        if pc ~= 0x01cbfc or offset ~= 0xffa1ed then return data end
+        emit_collision_guard("guard_read", pc, data & 0xff, false)
+        return data
+    end)
+
+oracle11_collision_guard_pass = opcodes:install_read_tap(
+    0x01cc06, 0x01cc07, "oracle11_collision_guard_pass",
+    function()
+        emit_collision_guard("guard_pass", 0x01cc06,
+            u8((maincpu.state["A1"].value & 0xffffff) + 0x6d), false)
+    end)
+
+oracle11_collision_routine_entry = opcodes:install_read_tap(
+    0x01d116, 0x01d117, "oracle11_collision_routine_entry",
+    function()
+        emit_collision_guard("collision_entry", 0x01d116,
+            u8((maincpu.state["A1"].value & 0xffffff) + 0x6d), false)
+    end)
+
+oracle11_collision_overlap_entry = opcodes:install_read_tap(
+    0x01d17e, 0x01d17f, "oracle11_collision_overlap_entry",
+    function()
+        emit_collision_guard("overlap_entry", 0x01d17e,
+            u8((maincpu.state["A1"].value & 0xffffff) + 0x6d), false)
+    end)
+
+oracle11_collision_guard_contact = opcodes:install_read_tap(
+    0x01cc0e, 0x01cc0f, "oracle11_collision_guard_contact",
+    function()
+        emit_collision_guard("collision_true", 0x01cc0e,
+            u8((maincpu.state["A1"].value & 0xffffff) + 0x6d), false)
+    end)
+
+oracle11_collision_guard_writes = program:install_write_tap(
+    0xff9580, 0xffa47f, "oracle11_collision_guard_writes",
+    function(offset, data, mask)
+        if not capture_collision_guard or frame < 1972 or
+                frame > capture_last_frame then return end
+        local relative = offset - 0xff9580
+        local slot = 0xff9580 + math.floor(relative / 0xc0) * 0xc0
+        local inner = relative % 0xc0
+        if inner > 0x6d or inner + 3 < 0x6d then return end
+        collision_guard_writes:write(string.format(
+            "%d\t%06x\t%06x\t%02x\t%04x\t%04x\t%02x\t%08x\t%08x\n",
+            frame, maincpu.state["PC"].value & 0xffffff, slot, inner,
+            u16(slot + 4), u16(slot + 6), u8(slot + 0x6d),
+            data & 0xffffffff, mask & 0xffffffff))
+    end)
+
+local function collision_slot_list(count_address, list_end)
+    local values = {}
+    local count_value = u8(count_address)
+    local index
+    for index = 1, count_value do
+        values[#values + 1] = string.format("ff%04x",
+            u16(list_end - index * 2))
+    end
+    return count_value, table.concat(values, ",")
+end
+
+oracle11_collision_list_entry = opcodes:install_read_tap(
+    0x01cbcc, 0x01cbcd, "oracle11_collision_list_entry",
+    function()
+        if not capture_collision_guard or frame < 1972 or
+                frame > capture_last_frame then return end
+        local attacker_count, attacker_slots =
+            collision_slot_list(0xffee7d, 0xfff072)
+        local defender_count, defender_slots =
+            collision_slot_list(0xffee81, 0xfff0a2)
+        collision_lists:write(string.format(
+            "%d\t01cbcc\t%d\t%s\t%d\t%s\n", frame,
+            attacker_count, attacker_slots, defender_count, defender_slots))
+    end)
+
+oracle11_collision_list_writes = program:install_write_tap(
+    0xffee7c, 0xfff0a3, "oracle11_collision_list_writes",
+    function(offset, data, mask)
+        if not capture_collision_guard or frame < 2280 or frame > 2310 then
+            return
+        end
+        if (offset > 0xffee83 and offset < 0xfff040) or
+                offset > 0xfff0a3 then return end
+        local sr = maincpu.state["SR"].value & 0xffff
+        local sp = (sr & 0x2000) ~= 0 and
+            (maincpu.state["SP"].value & 0xffffff) or
+            (maincpu.state["USP"].value & 0xffffff)
+        local a6 = maincpu.state["A6"].value & 0xffffff
+        local pc = maincpu.state["PC"].value & 0xffffff
+        local suppressed = mutate_collision_guard and a6 == 0xffa180 and
+            pc == 0x01686c
+        collision_list_writes:write(string.format(
+            "%d\t%06x\t%06x\t%06x\t%d\t%02x\t%02x\t%02x\t%08x\t%06x\t%06x\t%06x\t%08x\t%08x\t%d\n", frame,
+            pc, offset,
+            a6, u8(a6), u8(a6 + 1), u8(a6 + 0x47), u8(a6 + 0x48),
+            u32(a6 + 0x1c), u32(sp) & 0xffffff,
+            u32(sp + 4) & 0xffffff, u32(sp + 8) & 0xffffff,
+            data & 0xffffffff, mask & 0xffffffff,
+            suppressed and 1 or 0))
+        if suppressed then return 0x0000a240 end
+    end)
+
+oracle11_collision_actor_flags = program:install_write_tap(
+    0xffa180, 0xffa23f, "oracle11_collision_actor_flags",
+    function(offset, data, mask)
+        if not capture_collision_guard or frame < 2280 or frame > 2310 then
+            return
+        end
+        local inner = offset - 0xffa180
+        local pc = maincpu.state["PC"].value & 0xffffff
+        local field01_write = inner <= 1 and inner + 3 >= 1
+        if not field01_write and
+                not (inner <= 0x70 and inner + 3 >= 0x68) then return end
+        local suppressed = false
+        collision_actor_flags:write(string.format(
+            "%d\t%06x\tffa180\t%02x\t%d\t%02x\t%04x\t%04x\t%08x\t%08x\t%d\t%d\t%d\t%08x\t%08x\t%d\n",
+            frame, pc, inner, u8(0xffa180), u8(0xffa181),
+            u16(0xffa184), u16(0xffa186), u32(0xffa190),
+            u32(0xffa194), s16(u16(0xffa198)),
+            s16(u16(global + 0x278)), s16(u16(global + 0x27c)),
+            data & 0xffffffff, mask & 0xffffffff,
+            suppressed and 1 or 0))
+        if suppressed then return u32(offset & 0xfffffc) end
+    end)
+
+oracle11_collision_identity_writes = program:install_write_tap(
+    0xff8680, 0xff927f, "oracle11_collision_identity_writes",
+    function(offset, data, mask)
+        if not capture_collision_guard or frame < 1972 or
+                frame > capture_last_frame then return end
+        local relative = offset - 0xff8680
+        local slot = 0xff8680 + math.floor(relative / 0x80) * 0x80
+        local inner = relative % 0x80
+        if not ((inner <= 0x65 and inner + 3 >= 0x65) or
+                (inner <= 0x67 and inner + 3 >= 0x67)) then return end
+        collision_identity_writes:write(string.format(
+            "%d\t%06x\t%06x\t%02x\t%d\t%02x\t%04x\t%04x\t%02x\t%02x\t%08x\t%08x\n",
+            frame, maincpu.state["PC"].value & 0xffffff, slot, inner,
+            u8(slot), u8(slot + 2), u16(slot + 4), u16(slot + 6),
+            u8(slot + 0x65), u8(slot + 0x67),
+            data & 0xffffffff, mask & 0xffffffff))
+    end)
+
+local function emit_collision_identity_assignment(event, pc)
+    if not capture_collision_guard or frame < 1972 or
+            frame > capture_last_frame then return end
+    local actor = maincpu.state["A6"].value & 0xffffff
+    collision_identity_assignments:write(string.format(
+        "%d\t%s\t%06x\t%06x\t%d\t%02x\t%02x\t%04x\t%04x\t%02x\t%02x\n",
+        frame, event, pc, actor, u8(actor), u8(actor + 2),
+        u8(actor + 8), u16(actor + 4), u16(actor + 6),
+        u8(actor + 0x67), u8(global + 0x20b)))
+end
+
+oracle11_collision_identity_assignment_entry = opcodes:install_read_tap(
+    0x01d768, 0x01d769, "oracle11_collision_identity_assignment_entry",
+    function()
+        emit_collision_identity_assignment("entry", 0x01d768)
+    end)
+
+oracle11_collision_identity_assignment_exit = opcodes:install_read_tap(
+    0x01d778, 0x01d779, "oracle11_collision_identity_assignment_exit",
+    function()
+        emit_collision_identity_assignment("exit", 0x01d778)
+    end)
+
 oracle11_progression_frame = emu.add_machine_frame_notifier(function()
     frame = frame + 1
     suppress_selected_scene_pair()
@@ -1141,6 +1366,13 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         type16_collision:close()
         class1f_inner8_entries:close()
         class1f_inner8_writes:close()
+        collision_guard:close()
+        collision_guard_writes:close()
+        collision_lists:close()
+        collision_list_writes:close()
+        collision_actor_flags:close()
+        collision_identity_writes:close()
+        collision_identity_assignments:close()
         result:close()
     end
 end)

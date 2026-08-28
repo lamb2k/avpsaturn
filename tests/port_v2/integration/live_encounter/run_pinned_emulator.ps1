@@ -2,7 +2,8 @@
 param(
     [Parameter(Mandatory=$true)][ValidateSet(1,2)][int]$Run,
     [string]$EmulatorPath,
-    [ValidateRange(30,600)][int]$TimeoutSeconds=180
+    [ValidateRange(30,600)][int]$TimeoutSeconds=180,
+    [switch]$CoffeeShopScene
 )
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '..\..\..\..')).Path
@@ -25,7 +26,10 @@ while ((Get-Date) -lt $deadline) {
 }
 if (-not $player) { throw 'Pinned Yaba did not create a new process.' }
 try {
-    & $python -3 -B (Join-Path $PSScriptRoot 'collect_readback.py') --run $Run --emulator-pid $player.Id --timeout $TimeoutSeconds
+    $collectorArgs=@('-3','-B',(Join-Path $PSScriptRoot 'collect_readback.py'),
+        '--run',$Run,'--emulator-pid',$player.Id,'--timeout',$TimeoutSeconds)
+    if ($CoffeeShopScene) { $collectorArgs += '--coffee-shop-scene' }
+    & $python @collectorArgs
     if ($LASTEXITCODE -ne 0) { throw 'INTEGRATE-04A emulator readback failed.' }
 }
 finally { if (-not $player.HasExited) { Stop-Process -Id $player.Id; $player.WaitForExit(10000) } }

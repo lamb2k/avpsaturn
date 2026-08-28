@@ -99,13 +99,12 @@
    needs more PCM moved to phase-boundary loads first (S3 enabler,
    tracked in the handoff), not a bigger carve alone. */
 /* Widened from 0x40000 for the RP4 street archive and to the smallest aligned
- * carve that co-resides the corrected SPEC-02 Predator parent/child
- * presentation union (501,536 bytes) followed by the accepted combat overlay
- * (24,236 bytes): 525,772 bytes total, 2,612 bytes of headroom. Scene loading
- * boundaries are the residency lever: the carve holds one scene-scope
- * archive at a time and is reloaded during transitions, when data-track
- * reads are legal. */
-#define AVSP_TILE_REGION_BYTES 0x81000
+ * carve that co-resides the complete SPEC-02 Coffee Shop presentation union
+ * (535,756 bytes) followed by the accepted combat overlay (16,712 bytes):
+ * 552,468 bytes total, 492 bytes of headroom. Scene loading boundaries are
+ * the residency lever: the carve holds one scene-scope archive at a time and
+ * is reloaded during transitions, when data-track reads are legal. */
+#define AVSP_TILE_REGION_BYTES 0x87000
 
 /* RP4 street test: the interval strip bundle is staged after the tile
  * carve, outside the allocator, only in that build profile. */
@@ -119,11 +118,11 @@
  * transient diagnostic storage. Reserve one aligned block immediately after
  * the existing tile/strip carve so debug and release use the same 4 MB-cart
  * ownership without consuming Saturn work RAM. The SH-2 runtime measures
- * 0x135e4 bytes with all six source pools; the 0x18000 carve preserves 0x4a1c
- * bytes (19.3 percent) of headroom inside the fixed arena. */
+ * 0x14860 bytes with all six source pools; the 0x19000 carve preserves 0x47a0
+ * bytes (17.9 percent) of headroom inside the fixed arena. */
 #ifdef AVSP_LIVE_ENCOUNTER
-#define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x18000
-#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x135E4
+#define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000
+#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x14860
 #define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000
 #define AVSP_LIVE_DIAG_RECORD_BYTES 156
 #define AVSP_ROUND1_RUNTIME_BASE ((AvspRound1Runtime *)(AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES + AVSP_STRIPS_REGION_BYTES))
@@ -508,7 +507,7 @@ volatile int avsp_diag_slice_enemy_tile_identity;
 #define AVSP_LIVE_DIAG_SAMPLES 575
 #define AVSP_ROUND1_STARTUP_TRACE_SAMPLES 16
 #define AVSP_ROUND1_DIAGNOSTIC_SOURCE_BASE_FRAME 2040
-#define AVSP_ROUND1_NATIVE_ENTRY_STEP_FRAME 28
+#define AVSP_ROUND1_NATIVE_ENTRY_STEP_FRAME 32
 typedef struct
 {
     int frame;
@@ -783,14 +782,6 @@ volatile int avsp_diag_round1_startup_first_pcm_frame;
 volatile int avsp_diag_round1_startup_first_pcm_trigger;
 volatile int avsp_diag_round1_startup_first_pcm_cue;
 volatile int avsp_diag_round1_startup_source_frame;
-#ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
-static int live_autotest_phase;
-static int live_autotest_release;
-static int live_autotest_live_volley_done;
-static int live_autotest_post_clear_volley_done;
-static int live_autotest_empty_done;
-static int live_autotest_jump_done;
-#endif
 static unsigned long round1_native_capture_frame;
 #endif
 
@@ -7389,77 +7380,6 @@ static unsigned short live_encounter_real_input(void)
     return mask;
 }
 
-#ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
-static int live_encounter_near_target(void)
-{
-    int dx = round1_runtime.first_encounter.presentation.x -
-        round1_runtime.player_action.x;
-    int dz = round1_runtime.first_encounter.presentation.lane -
-        round1_runtime.player_action.lane;
-    if (dx < 0) dx = -dx;
-    if (dz < 0) dz = -dz;
-    return dx <= 52 && dz <= 6;
-}
-
-static unsigned short live_encounter_autotest_input(void)
-{
-    unsigned short mask = 0u;
-    if (live_autotest_release)
-    {
-        live_autotest_release = 0;
-        return 0u;
-    }
-    if (round1_runtime.first_encounter.route_unlocked)
-        return AVSP_PW_INPUT_RIGHT;
-    if (round1_runtime.first_encounter.ko_events > 0UL)
-        return 0u;
-    if (live_autotest_phase == 0)
-    {
-        if (round1_runtime.first_encounter.encounter_state ==
-            AVSP_ROUND1_FIRST_ENCOUNTER_WAIT_ENTRY)
-            return AVSP_PW_INPUT_RIGHT;
-        live_autotest_phase = 1;
-    }
-    if (live_autotest_phase == 1)
-    {
-        if (round1_runtime.first_encounter.alien_contacts == 0UL) return 0u;
-        live_autotest_phase = 2;
-    }
-    if (live_autotest_phase == 2)
-    {
-        if (round1_runtime.player_action.x > 914)
-            return AVSP_PW_INPUT_LEFT;
-        if (avsp_pw_can_control(&round1_runtime.player_action))
-        {
-            live_autotest_phase = 3;
-            live_autotest_release = 1;
-            return AVSP_PW_INPUT_ATTACK;
-        }
-        return 0u;
-    }
-    if (round1_runtime.player_action.state != AVSP_PW_STATE_CONTROL)
-        return 0u;
-    if (round1_runtime.player_action.x <
-        round1_runtime.first_encounter.presentation.x - 42)
-        mask |= AVSP_PW_INPUT_RIGHT;
-    else if (round1_runtime.player_action.x >
-             round1_runtime.first_encounter.presentation.x + 42)
-        mask |= AVSP_PW_INPUT_LEFT;
-    if (round1_runtime.player_action.lane <
-        round1_runtime.first_encounter.presentation.lane - 4)
-        mask |= AVSP_PW_INPUT_UP;
-    else if (round1_runtime.player_action.lane >
-             round1_runtime.first_encounter.presentation.lane + 4)
-        mask |= AVSP_PW_INPUT_DOWN;
-    if (live_encounter_near_target())
-    {
-        live_autotest_release = 1;
-        return AVSP_PW_INPUT_ATTACK;
-    }
-    return mask;
-}
-#endif
-
 static void live_encounter_identity(void)
 {
     AvspPortV2SliceActorIdentity *player =
@@ -8083,7 +8003,9 @@ static void live_encounter_publish(void)
         sample->round1_player_controller_updates =
             (int)round1_runtime.player_controller_updates;
         sample->round1_scheduler_frames =
-            (int)round1_runtime.scheduler_frames;
+            (int)((round1_runtime.scheduler_frames & 0x0000ffffUL) |
+                  (((AVSP_ROUND1_DIAGNOSTIC_SOURCE_BASE_FRAME +
+                     round1_runtime.frame + 1UL) & 0x0000ffffUL) << 16));
         sample->round1_scheduler_dispatches =
             (int)round1_runtime.scheduler_dispatches;
         sample->round1_scheduler_trace_count =
@@ -8281,8 +8203,8 @@ static void live_encounter_publish(void)
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
         sizeof(AVSP_ROUND1_SPEC02_SHA256) == 65u &&
-        AVSP_ROUND1_SPEC02_SHA256[0] == '8' &&
-        AVSP_ROUND1_SPEC02_SHA256[63] == '4';
+        AVSP_ROUND1_SPEC02_SHA256[0] == '3' &&
+        AVSP_ROUND1_SPEC02_SHA256[63] == 'f';
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
     avsp_diag_round1_rng_seed = round1_runtime.rng_seed;
@@ -8471,6 +8393,8 @@ static void live_encounter_frame_callback(void)
     int retained_stepped = 0;
     int native_encounter_visible = 0;
     int source_frame;
+    unsigned int source_updates;
+    unsigned int source_tick;
     if (!runtime_ready)
     {
         if (avsp_diag_live_frame_stage == 0)
@@ -8479,14 +8403,63 @@ static void live_encounter_frame_callback(void)
     }
     avsp_diag_live_frame_stage = 1;
     street_test_frame();
-    round1_route_before = round1_runtime.route_state;
-    if (round1_runtime.frame >= AVSP_ROUND1_NATIVE_ENTRY_STEP_FRAME &&
-        round1_runtime.route_state != 4 &&
-        !avsp_round1_step_first_entry(&round1_runtime))
+    source_frame = AVSP_ROUND1_DIAGNOSTIC_SOURCE_BASE_FRAME +
+        (int)round1_runtime.frame;
+    source_updates = avsp_round1_coffee_shop_source_updates(
+        (unsigned short)source_frame);
+    if (!round1_runtime.entry.started &&
+        round1_runtime.frame == AVSP_ROUND1_NATIVE_ENTRY_STEP_FRAME &&
+        !avsp_round1_begin_first_entry(&round1_runtime))
     {
         avsp_diag_live_frame_stage = -8;
         runtime_ready = 0;
         return;
+    }
+    memset(&input, 0, sizeof(input));
+#ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
+    input.player_mask = avsp_round1_coffee_shop_source_input(
+        (unsigned short)source_frame);
+#else
+    input.player_mask = live_encounter_real_input();
+#endif
+    round1_player_mask = input.player_mask;
+    round1_route_before = round1_runtime.route_state;
+    for (source_tick = 0u; source_tick < source_updates; ++source_tick)
+    {
+        if (round1_runtime.entry.started &&
+            round1_runtime.route_state != 4 &&
+            !avsp_round1_step_first_entry(&round1_runtime))
+        {
+            avsp_diag_live_frame_stage = -8;
+            runtime_ready = 0;
+            return;
+        }
+        if (round1_runtime.route_state == 4 &&
+            !avsp_round1_step_player(&round1_runtime, round1_player_mask, 0))
+        {
+            avsp_diag_live_frame_stage = -9;
+            runtime_ready = 0;
+            return;
+        }
+        if (round1_runtime.entry.dependencies_seeded &&
+            !avsp_round1_step_scheduler(&round1_runtime))
+        {
+            avsp_diag_round1_scheduler_failure_code =
+                round1_runtime.scheduler_failure_code;
+            avsp_diag_round1_scheduler_failure_source_slot =
+                round1_runtime.scheduler_failure_source_slot;
+            avsp_diag_round1_scheduler_failure_state =
+                round1_runtime.scheduler_failure_state;
+            avsp_diag_round1_scheduler_failure_substate =
+                round1_runtime.scheduler_failure_substate;
+            avsp_diag_round1_scheduler_failure_animation_record =
+                round1_runtime.scheduler_failure_animation_record;
+            avsp_diag_round1_failure_count =
+                (int)round1_runtime.failure_count;
+            avsp_diag_live_frame_stage = -10;
+            runtime_ready = 0;
+            return;
+        }
     }
     if (round1_route_before != 4 && round1_runtime.route_state == 4)
     {
@@ -8495,134 +8468,6 @@ static void live_encounter_frame_callback(void)
         live_encounter_runtime.player.lane = round1_runtime.player.z;
         round1_retained_initialized = 1;
         ++avsp_diag_round1_startup_retained_initializations;
-    }
-    memset(&input, 0, sizeof(input));
-#ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
-    if (round1_runtime.route_state == 4)
-        input.player_mask = round1_runtime.first_encounter.initialized ?
-            live_encounter_autotest_input() :
-            avsp_round1_coffee_shop_source_input((unsigned short)(
-                AVSP_ROUND1_DIAGNOSTIC_SOURCE_BASE_FRAME +
-                round1_runtime.frame));
-#else
-    input.player_mask = live_encounter_real_input();
-#endif
-    round1_player_mask = input.player_mask;
-#ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
-    if (round1_runtime.route_state == 4 &&
-        round1_runtime.first_encounter.initialized &&
-        round1_runtime.player_controller_updates < 15u)
-        round1_player_mask =
-            round1_runtime.player_controller_updates != 2u ?
-            AVSP_PW_INPUT_RIGHT : 0u;
-    else if (round1_runtime.route_state == 4 &&
-             round1_runtime.first_encounter.initialized)
-    {
-        round1_player_mask = (unsigned short)(round1_player_mask &
-            (unsigned short)~(AVSP_ROUND1_INPUT_BUTTON1 |
-                              AVSP_ROUND1_INPUT_BUTTON3));
-        if (!live_autotest_live_volley_done &&
-            round1_runtime.first_encounter.encounter_state ==
-                AVSP_ROUND1_FIRST_ENCOUNTER_ACTIVE &&
-            round1_runtime.first_encounter.presentation.x >=
-                round1_runtime.player_action.x + 80 &&
-            round1_runtime.first_encounter.presentation.x <=
-                round1_runtime.player_action.x + 180 &&
-            round1_runtime.first_encounter.presentation.lane >=
-                round1_runtime.player_action.lane - 6 &&
-            round1_runtime.first_encounter.presentation.lane <=
-                round1_runtime.player_action.lane + 6 &&
-            round1_runtime.first_encounter.pending_player_damage == 0u &&
-            round1_runtime.first_encounter.hit_events == 0UL &&
-            round1_runtime.player_action.state == AVSP_PW_STATE_CONTROL &&
-            round1_runtime.player_action.facing == 1u &&
-            !round1_runtime.player_weapon_active)
-        {
-            round1_player_mask = (unsigned short)(round1_player_mask &
-                (unsigned short)~(AVSP_PW_INPUT_LEFT | AVSP_PW_INPUT_RIGHT |
-                                  AVSP_PW_INPUT_UP | AVSP_PW_INPUT_DOWN |
-                                  AVSP_PW_INPUT_ATTACK));
-            round1_player_mask |= AVSP_ROUND1_INPUT_BUTTON1;
-            live_autotest_live_volley_done = 1;
-        }
-        else if (live_autotest_live_volley_done &&
-                 !live_autotest_empty_done &&
-                 round1_runtime.first_encounter.route_unlocked &&
-                 round1_runtime.player_weapon_completions >= 1UL &&
-                 round1_runtime.pools[3].free_count == 2u &&
-                 round1_runtime.player_action.state == AVSP_PW_STATE_CONTROL &&
-                 !round1_runtime.player_weapon_active)
-        {
-            round1_runtime.player_resource = 0u;
-            round1_runtime.player_resource_recharge = 12u;
-            round1_runtime.player_resource_depleted = 1u;
-            round1_player_mask = (unsigned short)(round1_player_mask &
-                (unsigned short)~(AVSP_PW_INPUT_LEFT | AVSP_PW_INPUT_RIGHT |
-                                  AVSP_PW_INPUT_UP | AVSP_PW_INPUT_DOWN |
-                                  AVSP_PW_INPUT_ATTACK));
-            round1_player_mask |= AVSP_ROUND1_INPUT_BUTTON1;
-            live_autotest_empty_done = 1;
-        }
-        else if (!live_autotest_jump_done &&
-                 round1_runtime.first_encounter.ko_events > 0UL &&
-                 round1_runtime.player_action.state == AVSP_PW_STATE_CONTROL &&
-                 !round1_runtime.player_weapon_active)
-        {
-            round1_player_mask = (unsigned short)(round1_player_mask &
-                (unsigned short)~(AVSP_PW_INPUT_LEFT | AVSP_PW_INPUT_RIGHT |
-                                  AVSP_PW_INPUT_UP | AVSP_PW_INPUT_DOWN |
-                                  AVSP_PW_INPUT_ATTACK));
-            round1_player_mask |= AVSP_ROUND1_INPUT_BUTTON3;
-            live_autotest_jump_done = 1;
-        }
-        else if (round1_runtime.first_encounter.route_unlocked &&
-                 live_autotest_live_volley_done &&
-                 !live_autotest_empty_done &&
-                 !live_autotest_post_clear_volley_done &&
-                 round1_runtime.player_action.state == AVSP_PW_STATE_CONTROL &&
-                 !round1_runtime.player_weapon_active)
-        {
-            round1_player_mask = (unsigned short)(round1_player_mask &
-                (unsigned short)~(AVSP_PW_INPUT_LEFT | AVSP_PW_INPUT_RIGHT |
-                                  AVSP_PW_INPUT_UP | AVSP_PW_INPUT_DOWN |
-                                  AVSP_PW_INPUT_ATTACK));
-            round1_player_mask |= AVSP_ROUND1_INPUT_BUTTON1;
-            live_autotest_post_clear_volley_done = 1;
-        }
-        if ((round1_player_mask & AVSP_ROUND1_INPUT_BUTTON3) != 0u ||
-            round1_runtime.player_jump_active)
-            round1_player_mask = (unsigned short)(round1_player_mask &
-                (unsigned short)~(AVSP_PW_INPUT_LEFT |
-                                  AVSP_PW_INPUT_RIGHT |
-                                  AVSP_PW_INPUT_UP |
-                                  AVSP_PW_INPUT_DOWN));
-    }
-#endif
-    if (round1_runtime.route_state == 4 &&
-        !avsp_round1_step_player(&round1_runtime, round1_player_mask, 0))
-    {
-        avsp_diag_live_frame_stage = -9;
-        runtime_ready = 0;
-        return;
-    }
-    if (round1_runtime.entry.dependencies_seeded &&
-        !avsp_round1_step_scheduler(&round1_runtime))
-    {
-        avsp_diag_round1_scheduler_failure_code =
-            round1_runtime.scheduler_failure_code;
-        avsp_diag_round1_scheduler_failure_source_slot =
-            round1_runtime.scheduler_failure_source_slot;
-        avsp_diag_round1_scheduler_failure_state =
-            round1_runtime.scheduler_failure_state;
-        avsp_diag_round1_scheduler_failure_substate =
-            round1_runtime.scheduler_failure_substate;
-        avsp_diag_round1_scheduler_failure_animation_record =
-            round1_runtime.scheduler_failure_animation_record;
-        avsp_diag_round1_failure_count =
-            (int)round1_runtime.failure_count;
-        avsp_diag_live_frame_stage = -10;
-        runtime_ready = 0;
-        return;
     }
     if (round1_runtime.route_state == 4 &&
         round1_runtime.first_encounter.initialized)
@@ -8640,8 +8485,6 @@ static void live_encounter_frame_callback(void)
         round1_build_startup_slice_frame();
     round1_apply_native_player_and_hud(native_encounter_visible);
     avsp_diag_live_frame_stage = 3;
-    source_frame = AVSP_ROUND1_DIAGNOSTIC_SOURCE_BASE_FRAME +
-        (int)round1_runtime.frame;
     if (!live_encounter_audio_step(source_frame))
     {
         ++live_encounter_runtime.failures;
@@ -8703,8 +8546,12 @@ static void live_encounter_frame_callback(void)
     }
     avsp_diag_live_frame_stage = 7;
     round1_record_startup_chronology(retained_stepped);
-    if (round1_runtime.first_encounter.initialized)
-        live_encounter_publish();
+    if (!round1_runtime.first_encounter.initialized)
+    {
+        live_encounter_frame.frame = round1_native_capture_frame++;
+        live_encounter_frame.input_mask = round1_player_mask;
+    }
+    live_encounter_publish();
     ++round1_runtime.frame;
     avsp_diag_runtime_ready = runtime_ready;
 }
@@ -9692,18 +9539,9 @@ void jo_main(void)
     avsp_diag_live_pcm_retriggers = 0;
     avsp_diag_live_contract_flags =
         (int)avsp_live_encounter_contract_flags();
-#ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
-    live_autotest_phase = 0;
-    live_autotest_release = 0;
-    live_autotest_live_volley_done = 0;
-    live_autotest_post_clear_volley_done = 0;
-    live_autotest_empty_done = 0;
-    live_autotest_jump_done = 0;
-#endif
     avsp_diag_live_physical_saturn = 0;
     runtime_ready = runtime_ready && avsp_diag_live_contract_flags == 127 &&
-        avsp_round1_entry_valid(&round1_runtime) &&
-        avsp_round1_begin_first_entry(&round1_runtime);
+        avsp_round1_entry_valid(&round1_runtime);
 #endif
     if (!runtime_ready) failed_asset = "PLAYABLE SLICE FAILED";
     JO_UNUSED_ARG(index);

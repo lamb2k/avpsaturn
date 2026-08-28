@@ -289,16 +289,35 @@ source actor `+0xa5/+0xa6` fields instead of presentation-record selector bytes.
 Its focused Oracle/SPEC checks, 156 real host mutations, Fast, Oracle, and release
 Target pass; five additional source lifetimes now match naturally.
 
-Paired Emulator acceptance remains blocked, not rebaselined. The old 575-sample
-choreography begins after native recurring-encounter initialization, which now
-occurs 182 scheduler ticks later and therefore sees a different prefix of the
-source input ledger. The first remaining actor divergence is now exact: at source
-frame 2288 native record-type-`4` child collision damages class-`0x1f` slot
-`0x00ffa180`, while the source first writes that damage at frame 2306 from slot
-`0x00ff8880` using attack record `0x030cd2`, then allocates the class-`0x4e`
-variant-1 impact at frame 2307. The exact next body is the accepted record-type-`4`
-before-type-`12` scheduler/current-state collision chronology. Do not guess a
-variant suppression. Do not leave Coffee Shop until its zero-gap gate passes.
+The first projectile collision chronology is now source-correct. Native startup
+begins at the accepted source frame 2072, each exceptional source update executes
+entry, player, and scheduler in source order, and collision runs after record-type
+`4` and record-type `12`. The exact parent/child prefix is preserved through
+frame 2287; frame 2288 has zero damage; slot `0x00ff8880` writes damage at frame
+2306 using current attack record `0x030cd2`; and class-`0x4e` allocates naturally
+at frame 2307. No projectile variant is suppressed, no authored delay is used,
+and the source input ledger is unchanged. Two pinned Emulator runs have identical
+575-sample semantic ledgers at normalized ISO
+`5cfc6e4e38a1052ed8fb684911826dc17747bd818e429dfc7f206036bf8f86cd`.
+Fast, Oracle, Target, 161 real native mutations, 119 Target suppressions, eight
+scene-census mutations, and four paired-emulator chronology mutations pass.
+
+Real Windows Graphics Capture at source frames 2306/2307/2308 directly verifies
+Predator Warrior identity and staff continuity, natural impact presentation,
+P1-only HUD, coherent Coffee Shop planes, and unchanged palette/priority. The
+whole-scene gate remains open at 387 missing source lifetimes, 1,391 unmapped
+spawn/despawn edges, 37 unsupported states, 94 collision/damage, 3 route/camera,
+and 281 audio/load gaps; unowned Saturn actors and retained gameplay authorities
+remain zero. The edge count rises 15 because net missing lifetimes reduce the
+missing-edge term by 24 while corrected source-aligned lifetime splits expose 39
+additional boundary mismatches.
+
+The earliest remaining complete-scene divergence is player slot `0x00ff8380` at
+the frame-2238 route-4 handoff: source substate `0x0000`, native `0x0200`. Bind
+that transition next from accepted evidence and rerun the whole census. The next
+projectile-family divergence is slot `0x00ff8680` state source `0x0402` versus
+native `0x0400` at frame 2288. Do not leave Coffee Shop until its zero-gap gate
+passes.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.

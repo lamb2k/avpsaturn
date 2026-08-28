@@ -582,6 +582,17 @@ def build_artifacts() -> tuple[dict[str, object], dict[str, object]]:
         ["native scene actor/state/event projection"],
         "/coffee_shop_scene_census/negative_controls",
         "omitting a pool, actor lifetime, command, health write, or blocker fails the scene manifest"))
+    fields.append(field(
+        "scheduler.coffee_shop_source_update_cadence", "actor-scheduler-lifecycle",
+        "source_frame_update_count", False, "route",
+        "/first_segment_recurring_spawn/source_update_cadence",
+        "accepted byte-identical recurring-controller transactions at 0x0288e2 for slot 0xffd180",
+        "/authority_data/route/first_segment_recurring_spawn/source_update_cadence",
+        "one full native gameplay update per captured controller invocation; zero preserves prior gameplay state",
+        ["diagnostic source frame:u16"],
+        ["entry/player/actor scheduler update count:u8"],
+        "/first_segment_recurring_spawn/source_update_cadence/mutation_control",
+        "changing an exceptional cadence count changes controller timer, state, and spawn chronology"))
     for item in fields:
         item["source"]["evidence_hash"] = source_hashes[
             next(k for k, v in SOURCES.items() if v == item["source"]["artifact"])
@@ -631,6 +642,22 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             fixtures["optional_unknowns"]["required_for_round1"] is False,
             "fixture scope drift")
     scene = fixtures["scene_manifests"]["coffee_shop"]
+    cadence = fixtures["authority_data"]["route"][
+        "first_segment_recurring_spawn"]["source_update_cadence"]
+    require(cadence["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            cadence["default_updates_per_source_frame_u8"] == 1 and
+            cadence["exceptions"] == [
+                {"source_frame_u16": 2075, "updates_u8": 3},
+                {"source_frame_u16": 2165, "updates_u8": 4},
+                {"source_frame_u16": 2260, "updates_u8": 0},
+                {"source_frame_u16": 2265, "updates_u8": 0}] and
+            cadence["source_capture"]["sha256"] ==
+                source["route"]["first_segment_recurring_spawn"]
+                ["capture_identity"]["completion_a"]["files"]
+                ["progression_transactions.tsv"] and
+            cadence["spec_executable"] is True,
+            "Coffee Shop source update cadence fixture drift")
     scene_items = (scene["actor_lifetimes"] + scene["audio_events"] +
                    scene["health_writes"] + scene["route_edges"] +
                    scene["load_boundaries"] + scene["navigation"]["camera_runs"] +

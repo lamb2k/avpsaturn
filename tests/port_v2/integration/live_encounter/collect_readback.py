@@ -93,6 +93,9 @@ def read_samples(mcp, base, count):
         decoded["round1_camera_phase"] = (camera_state >> 19) & 0x0f
         decoded["round1_camera_locks"] = (camera_state >> 23) & 0x0f
         decoded["round1_camera_unlocks"] = (camera_state >> 27) & 0x0f
+        scheduler_state = decoded["round1_scheduler_frames"] & 0xffffffff
+        decoded["round1_source_frame"] = (scheduler_state >> 16) & 0xffff
+        decoded["round1_scheduler_frames"] = scheduler_state & 0xffff
         result.append(decoded)
     return result
 
@@ -100,6 +103,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--run", type=int, choices=(1,2), required=True)
 parser.add_argument("--emulator-pid", type=int, required=True)
 parser.add_argument("--timeout", type=float, default=180.0)
+parser.add_argument("--coffee-shop-scene", action="store_true")
 args = parser.parse_args()
 inventory = json.loads((HERE / "inventory.json").read_text())
 build = json.loads((ROOT / inventory["build_root"] / f"run-{args.run}/build.json").read_text())
@@ -274,7 +278,7 @@ count = signed(mcp,syms["avsp_diag_live_sample_count"])
 if count < 1 or count > 600:
     raise RuntimeError(f"invalid live sample count: {count}")
 sample_base = mcp.u32(syms["avsp_diag_live_samples"])
-expected_sample_base = 0x22600000 + 0x81000 + 0x48000 + 0x18000
+expected_sample_base = 0x22600000 + 0x87000 + 0x48000 + 0x19000
 if sample_base != expected_sample_base:
     raise RuntimeError(
         f"live diagnostic cart pointer drift: {sample_base:#x} != "
@@ -581,7 +585,91 @@ for key in ("player_health", "player_state", "player_facing",
     state[key] = current_sample[key]
 samples = [sample for sample in all_samples
            if sample["frame"] <= EVIDENCE_LAST_FRAME]
-if not (state["runtime_ready"] == state["canaries_ok"] == 1 and
+if args.coffee_shop_scene:
+    if (len(samples) != EVIDENCE_LAST_FRAME + 1 or
+            any(sample["frame"] != index
+                for index, sample in enumerate(samples))):
+        raise RuntimeError("Coffee Shop synchronized ledger is incomplete")
+    input_header = (ROOT / "src/port_v2/gameplay/round1/"
+                    "spec02_round1_entry_data.h").read_text(encoding="ascii")
+    input_body = input_header.split(
+        "avsp_round1_coffee_shop_input_runs", 1)[1].split(
+            "avsp_round1_coffee_shop_update_cadence", 1)[0]
+    input_runs = [tuple(int(value, 0) for value in match)
+                  for match in __import__("re").findall(
+                      r"\{\s*(\d+)u,\s*(\d+)u,\s*(0x[0-9a-fA-F]+)u\s*\}",
+                      input_body)]
+    if not input_runs:
+        raise RuntimeError("Coffee Shop source input fixture is empty")
+    for sample in samples:
+        source_frame = sample["round1_source_frame"]
+        input_source_frame = source_frame - 1
+        expected_input = next(
+            (mask for first, last, mask in input_runs
+             if first <= input_source_frame <= last), 0)
+        if sample["input_mask"] != expected_input:
+            raise RuntimeError(
+                "Coffee Shop source input drift at source frame %d: %04x != %04x"
+                % (input_source_frame, sample["input_mask"], expected_input))
+    by_source_frame = {sample["round1_source_frame"]: sample
+                       for sample in samples}
+    required_source_frames = (2287, 2288, 2305, 2306, 2307)
+    if any(frame not in by_source_frame for frame in required_source_frames):
+        raise RuntimeError(
+            "Coffee Shop source-frame window absent: %s"
+            % [frame for frame in required_source_frames
+               if frame not in by_source_frame])
+    def damage_at(frame):
+        return by_source_frame[frame]["round1_native_projectile_damage_writes"]
+    def collision_at(frame):
+        return by_source_frame[frame][
+            "round1_native_projectile_collision_writes"]
+    def class4e_at(frame):
+        return ((by_source_frame[frame]["round1_auxiliary_state"] &
+                 0xffffffff) >> 12) & 0x0f
+    if (damage_at(2288) != damage_at(2287) or
+            collision_at(2288) != collision_at(2287)):
+        raise RuntimeError("premature source-frame-2288 projectile contact")
+    if not (damage_at(2305) == 0 and damage_at(2306) == 1 and
+            collision_at(2305) == 0 and collision_at(2306) == 1):
+        ordered_source_frames = sorted(by_source_frame)
+        first_damage_rise = next((frame for prior, frame in zip(
+            ordered_source_frames, ordered_source_frames[1:])
+            if damage_at(frame) > damage_at(prior)), None)
+        first_collision_rise = next((frame for prior, frame in zip(
+            ordered_source_frames, ordered_source_frames[1:])
+            if collision_at(frame) > collision_at(prior)), None)
+        raise RuntimeError(
+            "source-frame-2306 collision/damage chronology drift: "
+            "collision=%s damage=%s first_collision=%s first_damage=%s" %
+            ([collision_at(2305), collision_at(2306)],
+             [damage_at(2305), damage_at(2306)], first_collision_rise,
+             first_damage_rise))
+    if class4e_at(2307) != class4e_at(2306) + 1:
+        raise RuntimeError(
+            "source-frame-2307 class-0x4e impact chronology drift: "
+            f"{[class4e_at(2306), class4e_at(2307)]}")
+    if not (state["runtime_ready"] == state["canaries_ok"] == 1 and
+            state["round1_spec_bound"] == state["round1_entry_valid"] ==
+            state["round1_canaries_ok"] == 1 and
+            state["interface_version"] == 2 and
+            state["contract_flags"] == 127 and
+            state["round1_route_state"] == 4 and
+            state["round1_fallback_count"] == 0 and
+            state["round1_failure_count"] == 0 and
+            state["round1_scheduler_failure_code"] == 0 and
+            state["round1_native_presentation_decode_failures"] == 0 and
+            state["round1_native_tile_pin_exhaustions"] == 0 and
+            state["round1_native_tile_unique_overflow"] == 0 and
+            state["round1_weapon_forbidden_actor_active"] == 0 and
+            state["round1_weapon_forbidden_render_seen"] == 0 and
+            state["round1_native_weapon_forbidden_identity"] == 0 and
+            state["internal_failures"] == state["pcm_retriggers"] == 0 and
+            state["failures"] == state["fallback_count"] ==
+            state["physical_saturn"] == 0):
+        raise RuntimeError(f"Coffee Shop source-ledger state failed: {state}")
+if not args.coffee_shop_scene and not (
+        state["runtime_ready"] == state["canaries_ok"] == 1 and
         state["interface_version"] == 2 and state["contract_flags"] == 127 and
         1 <= state["frame_stage"] <= 7 and
         state["hit_events"] == 3 and state["ko_events"] == 1 and
@@ -589,11 +677,13 @@ if not (state["runtime_ready"] == state["canaries_ok"] == 1 and
         state["internal_failures"] == 0 and state["pcm_retriggers"] == 0 and
         state["failures"] == state["fallback_count"] ==
         state["physical_saturn"] == 0): raise RuntimeError(f"live state failed: {state}")
-if not (state["alien_health"] == -1 and state["alien_state"] == 0 and
+if not args.coffee_shop_scene and not (
+        state["alien_health"] == -1 and state["alien_state"] == 0 and
         state["alien_action"] == 0 and state["alien_animation_record"] == 0 and
         state["alien_assembly"] == 0):
     raise RuntimeError(f"released class-0x1f presentation remained live: {state}")
-if not (state["round1_spec_bound"] == state["round1_entry_valid"] ==
+if not args.coffee_shop_scene and not (
+        state["round1_spec_bound"] == state["round1_entry_valid"] ==
         state["round1_canaries_ok"] == 1 and
         state["round1_route_state"] == 4 and state["round1_rng_seed"] == 0x82fd and
         state["round1_player_health"] == 93 and
@@ -826,5 +916,16 @@ report={"schema":1,"task_id":inventory["task_id"],"card_profile":inventory["card
         "emulator":{"identity":"Yaba Sanshiro 1.20.37-2986eb","evidence_tier":"ONE_EMULATOR",
         "process_id":process["pid"],"executable_sha256":sha(executable),"settings_sha256":sha(settings),
         "command_line":process["command_line"]},"physical_saturn":"UNRUN","result":"PASS"}
-output=run_root/"readback.json"; output.write_text(json.dumps(report,indent=2,sort_keys=True)+"\n",encoding="ascii")
+if args.coffee_shop_scene:
+    report["evidence_mode"] = "COFFEE_SHOP_SOURCE_LEDGER"
+    report["source_chronology"] = {
+        "source_frame_2288_damage_writes": damage_at(2288),
+        "source_frame_2305_damage_writes": damage_at(2305),
+        "source_frame_2306_damage_writes": damage_at(2306),
+        "source_frame_2306_collision_writes": collision_at(2306),
+        "source_frame_2307_class4e_initializations": class4e_at(2307),
+    }
+output=run_root/("coffee-shop-readback.json" if args.coffee_shop_scene
+                 else "readback.json")
+output.write_text(json.dumps(report,indent=2,sort_keys=True)+"\n",encoding="ascii")
 print(f"recorded {output.relative_to(ROOT)}")

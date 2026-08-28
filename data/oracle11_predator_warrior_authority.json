@@ -7558,7 +7558,7 @@
           }
         },
         "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
-        "resource_artifact_sha256": "ff7d3e47738e072718a004d0e1d457d3e7eb27fdb0895b60bdfb38e074142a8e",
+        "resource_artifact_sha256": "dc6d76c084c86974cf9a0499f98b75b04d31ed18094f1420580e252640813c86",
         "resource_status": "SOURCE_CLOSED",
         "spawn_branch": "0x023858",
         "writer": "0x023860"
@@ -16782,6 +16782,10 @@
         "result": "attacker +0x5e mutation changes the exact source damage lookup"
       },
       {
+        "class": "collision_registration",
+        "result": "redirecting only target 0xffa180 out of the source record12 defender list preserves the actor/route prefix and shifts its first projectile damage from frame 2306 to 2311"
+      },
+      {
         "class": "resource_empty",
         "result": "0x1a00/0x1a02 and class-0x10 effect; no record-4 damaging family"
       }
@@ -16818,6 +16822,164 @@
           "attacker": "0xff8680",
           "damage_u8": 127,
           "frame": 4424
+        },
+        "registration_and_pair_eligibility": {
+          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+          "coffee_shop_projection": {
+            "absent_through_frame": 2295,
+            "contact_attacker": "0xff8880",
+            "contact_identity_u8": 42,
+            "first_contact_frame": 2306,
+            "first_registered_frame": 2296,
+            "health_s16": [
+              87,
+              56
+            ],
+            "target_slot": "0xffa180"
+          },
+          "contact_writes": {
+            "damage": "0x01d504 applies current attack-record damage before HIT/KO ownership",
+            "latch": "defender+0x68[attacker+0x65] = attacker+0x67 when index is nonnegative",
+            "projectile": "scheduler writes attacker health -1 and actor+0x6e = 1 after a true pair result"
+          },
+          "identity_writer": {
+            "assignments": [
+              {
+                "frame": 2253,
+                "identity_u8": 38,
+                "slot": "0xff8680"
+              },
+              {
+                "frame": 2287,
+                "identity_u8": 39,
+                "slot": "0xff8700"
+              },
+              {
+                "frame": 2293,
+                "identity_u8": 40,
+                "slot": "0xff8780"
+              },
+              {
+                "frame": 2299,
+                "identity_u8": 41,
+                "slot": "0xff8800"
+              },
+              {
+                "frame": 2305,
+                "identity_u8": 42,
+                "slot": "0xff8880"
+              },
+              {
+                "frame": 2311,
+                "identity_u8": 43,
+                "slot": "0xff8900"
+              }
+            ],
+            "coffee_shop_counter_before_parent_u8": 37,
+            "entry": "0x01d768",
+            "rule": "clear actor+0x6e; preincrement global+0x020b:u8 until nonzero; copy to actor+0x67:u8"
+          },
+          "mutation_control": {
+            "actor_and_route_projection_unchanged_through_frame": 2305,
+            "frames": [
+              2296,
+              2310
+            ],
+            "kind": "redirect only target 0xffa180 record12 list writes to 0xffa240",
+            "list_count_unchanged_u8": 7,
+            "suppressed_writes": 15,
+            "target_first_contact_frame_after": 2311,
+            "target_first_contact_frame_before": 2306,
+            "writer": "0x01686c"
+          },
+          "pair_guards": [
+            "defender+0x6d:u8 < 4 in scheduler",
+            "defender+0x00:u8 == 1",
+            "defender+0x70:u8 == 0",
+            "if attacker+0x65:s8 >= 0 then defender+0x68[index] != attacker+0x67",
+            "attacker animation record byte +9 attack selector != 0",
+            "defender animation record byte +8 hurt selector != 0",
+            "current attack and hurt boxes overlap"
+          ],
+          "registration": {
+            "record12": {
+              "count": "global+0x6e81:u8",
+              "guard": "actor+0x00:u8 == 1 after visibility pass",
+              "list_pointer": "global+0x6e5a:u16",
+              "writer": "0x016864..0x01686e"
+            },
+            "record4": {
+              "count": "global+0x6e7d:u8",
+              "guard": "actor+0x00:u8 == 1 after visibility pass",
+              "list_pointer": "global+0x6e52:u16",
+              "writer": "0x01681e..0x016828"
+            }
+          },
+          "rng_calls": [],
+          "source_blocks": {
+            "collision_identity_writer": {
+              "bytes": 18,
+              "end_exclusive": "0x01d77a",
+              "sha256": "e5f448807f0e11b08cc678e0213afa3f82003795683e163d8435f502ceb01d1d",
+              "start": "0x01d768"
+            },
+            "pair_eligibility_and_contact": {
+              "bytes": 226,
+              "end_exclusive": "0x01d1f8",
+              "sha256": "f2962af63a4ca69458080f8cd9b34bcd25cd1bdcb67c9e60f3ccc0e91d2f324b",
+              "start": "0x01d116"
+            },
+            "record12_registration": {
+              "bytes": 56,
+              "end_exclusive": "0x016896",
+              "sha256": "9b41b4c5be93a30d201b032f61f34ed500d66b4192b004260483632f6e06b1f8",
+              "start": "0x01685e"
+            },
+            "record4_record12_scheduler": {
+              "bytes": 114,
+              "end_exclusive": "0x01cc3e",
+              "sha256": "66c326c22bc1e9caa800473c359048fb218015653c5b650deefa8b84cb3e1be4",
+              "start": "0x01cbcc"
+            },
+            "record4_registration": {
+              "bytes": 24,
+              "end_exclusive": "0x016830",
+              "sha256": "7b1206038c839f795f7d22da3f86c6e88b3269e04c583e0a1bb9e0eaa3f6a0e7",
+              "start": "0x016818"
+            },
+            "visibility_and_dispatch": {
+              "bytes": 108,
+              "end_exclusive": "0x016818",
+              "sha256": "00d929e11447427f9f167a9af81148a1d348a0ef1b97072d39c5e13afe903fdc",
+              "start": "0x0167ac"
+            }
+          },
+          "spec_executable": true,
+          "types_and_signedness": {
+            "actor_active": "actor+0x00:u8",
+            "attacker_identity": "attacker+0x67:u8 nonzero wrapping sequence",
+            "attacker_latch_index": "attacker+0x65:s8 branch then u8 index",
+            "camera_x": "global+0x0278:u16 wrap arithmetic",
+            "camera_z": "global+0x027c:u16 wrap arithmetic",
+            "defender_guard": "defender+0x6d:u8",
+            "defender_latches": "defender+0x68:u8[8]",
+            "defender_suppress": "defender+0x70:u8",
+            "visibility_flag": "actor+0x01:u8",
+            "world_x_high": "actor+0x10:u16 wrap arithmetic",
+            "world_y_high": "actor+0x14:u16 wrap arithmetic"
+          },
+          "visibility": {
+            "fail_write": "actor+0x01:u8 = 0 at 0x0167e6",
+            "pass_write": "actor+0x01:u8 = 1 at 0x0167d0",
+            "update_order": [
+              "actor state/action/movement/animation",
+              "visibility guard and actor+0x01 write",
+              "record-type collision-list registration",
+              "record4-v-record12 collision scheduler"
+            ],
+            "x_guard": "u16(actor_x - camera_x + 0x0040) <= 0x0200",
+            "y_guard": "u16(actor_y - camera_z + 0x0020) <= 0x0140"
+          }
         },
         "scheduler": "0x01cbcc record-type-4 attackers against record-type-12 defenders"
       },
@@ -22484,7 +22646,7 @@
     },
     "mutation_controls": {
       "all_downstream_effects_asserted": true,
-      "count": 13,
+      "count": 14,
       "no_fixed_frame_result": true,
       "no_visible_weapon_inference_from_0xad": true,
       "wrong_character_rejected": true
@@ -22493,6 +22655,19 @@
     "provenance": {
       "capture_manifest_sha256": "61322d76027d491c50680357985d18b6814b464e33c05a9e7a17e5c9b1c0fc02",
       "capture_script_sha256": "9a473c4d3ac0c71e68dc581b0f613b19516915b6ada766170803ca4d3c77b3a0",
+      "collision_registration_capture_script_sha256": "a107ad05a2f858642f25f8922ad32c0b4cca624db99e200568d054b282fe2752",
+      "collision_registration_evidence": {
+        "coffee_shop_collision_actor_flags.tsv": "49ed048a0a11cbee06823cef07a9ec29c1034f66849b5734a581819fb7184e79",
+        "coffee_shop_collision_identity_assignments.tsv": "41dfc90ad89a4c523cc4ec6dcf87afc104695b35682764902dd031f2f205bb60",
+        "coffee_shop_collision_list_writes.tsv": "476c1881d3a053298b0e6ea6e382fbdda2d22f8eea60c956c15ae2d3594e79d7",
+        "coffee_shop_collision_lists.tsv": "3adcf4c32c9fa63c88e1a6efbd83dbe22f2158e13c1154e5b7d0843ceb4adbd8",
+        "coffee_shop_record12_guard6d_writes.tsv": "d5d56d93df9509eb91c9e98c097f2998e8e4d77d09346b71df5783322f209228",
+        "coffee_shop_record4_collision_guard.tsv": "bac31abc7df02503c5e825019f3b37ec7b6681a475efe5ca8198110004c80323",
+        "coffee_shop_record4_collision_identity_writes.tsv": "3e2b4d542547f4f8e6de4ee0ca0b351d52fbf627edc0ae2e6f063651b00a27d5",
+        "coffee_shop_scene_actors.tsv": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+        "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+        "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b"
+      },
       "mame": {
         "sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
         "version": "0.289 (mame0289)"

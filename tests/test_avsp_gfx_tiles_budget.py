@@ -107,6 +107,22 @@ def button1_projectile_union_is_complete(presentations, fixture):
     return actual == expected
 
 
+def button1_button2_special_union_is_complete(presentations, fixture):
+    special = fixture["authority_data"]["player"][
+        "weapon_projectile_resource"]["special_implementation_contract"]
+    expected = {
+        (int(record["assembly"], 16), facing)
+        for record in special["initialization"]["presentation_records"]
+        for facing in (0, 1)
+    }
+    actual = {
+        (item["assembly"], item["facing"])
+        for item in presentations
+        if item["kind"] == "player-button1-button2-special"
+    }
+    return actual == expected
+
+
 def empty_effect_union_is_complete(presentations, fixture):
     effect = fixture["authority_data"]["player"][
         "weapon_projectile_resource"]["implementation_contract"][
@@ -179,6 +195,9 @@ def main() -> int:
     if not button1_projectile_union_is_complete(presentations, fixture):
         print("FAIL: Button1 projectile presentation union is incomplete")
         return 1
+    if not button1_button2_special_union_is_complete(presentations, fixture):
+        print("FAIL: Button1/Button2 special presentation union is incomplete")
+        return 1
     if not empty_effect_union_is_complete(presentations, fixture):
         print("FAIL: class-0x10 source presentation union is incomplete")
         return 1
@@ -206,6 +225,8 @@ def main() -> int:
             ("player-button1-empty", button1_presentation_union_is_complete),
             ("projectile-parent", button1_projectile_union_is_complete),
             ("projectile-child", button1_projectile_union_is_complete),
+            ("player-button1-button2-special",
+             button1_button2_special_union_is_complete),
             ("class10-empty-effect", empty_effect_union_is_complete),
             ("class1f-current", class1f_current_union_is_complete)):
         indexes = [index for index, item in enumerate(presentations)
@@ -232,9 +253,9 @@ def main() -> int:
     residency = before_manifest["presentation_residency"]
     native_presentations = before_manifest["routes"].get(
         "spec02_round1_native_presentations", {})
-    if (native_presentations.get("decoded_variants") != 271 or
-        native_presentations.get("unique_assemblies") != 123 or
-        native_presentations.get("tiles_added") != 1610):
+    if (native_presentations.get("decoded_variants") != 289 or
+        native_presentations.get("unique_assemblies") != 131 or
+        native_presentations.get("tiles_added") != 1802):
         print("FAIL: SPEC-02 native presentation union drifted")
         return 1
     if (residency["source_peak_unique_tiles"] != 374 or
@@ -246,11 +267,11 @@ def main() -> int:
         residency["max_tiles_per_impact"] != 0 or
         residency["per_tile_scanout_requirement"] != 653 or
         residency["composite_tile_threshold"] != 14 or
-        residency["spec02_composite_unique_entries"] != 129 or
-        residency["spec02_composite_texture_bytes"] != 419712 or
+        residency["spec02_composite_unique_entries"] != 143 or
+        residency["spec02_composite_texture_bytes"] != 455808 or
         residency["spec02_composite_max_texture_bytes"] != 11648 or
-        residency["first_segment_composite_unique_entries"] != 177 or
-        residency["first_segment_composite_texture_bytes"] != 542976 or
+        residency["first_segment_composite_unique_entries"] != 191 or
+        residency["first_segment_composite_texture_bytes"] != 579072 or
         residency["first_segment_composite_max_texture_bytes"] != 11648 or
         residency["first_segment_composite_frame_peak_entries"] != 11 or
         residency["first_segment_composite_frame_peak_bytes"] != 37248 or

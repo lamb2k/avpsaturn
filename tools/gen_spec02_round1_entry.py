@@ -119,6 +119,8 @@ def build() -> str:
     action_attack = action_programs["action_0x04"]
     recurring = fixtures["authority_data"]["route"][
         "first_segment_recurring_spawn"]
+    source_update_cadence = recurring["source_update_cadence"]
+    source_update_exceptions = source_update_cadence["exceptions"]
     recurring_controller = recurring["controller_program"]
     recurring_initializer = recurring_controller["initializer"]
     recurring_gate = recurring_controller["intro_gate_transition"]
@@ -227,6 +229,8 @@ def build() -> str:
     weapon_parent = weapon["record4_parent_class0"]
     weapon_child = weapon["record4_child_class4"]
     weapon_damage = weapon["current_state_collision_damage"]
+    weapon_collision_registration = weapon_damage[
+        "registration_and_pair_eligibility"]
     weapon_empty_effect = weapon["empty_effect_variant1_contract"]
     weapon_frames = weapon_action["presentation_timeline"]
     empty_frames = weapon_empty["presentation_timeline"]
@@ -321,6 +325,15 @@ def build() -> str:
         class1f_current_reaction["ko_entry_action_substate_u16"] != 0x0000 or
         class1f_current_reaction["terminal_release_outer_state_u16"] != 0x0600):
         raise ValueError("SPEC-02 class-0x1f current-state drift")
+    if (source_update_cadence["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        source_update_cadence["default_updates_per_source_frame_u8"] != 1 or
+        [(row["source_frame_u16"], row["updates_u8"])
+         for row in source_update_exceptions] !=
+            [(2075, 3), (2165, 4), (2260, 0), (2265, 0)] or
+        source_update_cadence["fixed_frame_gameplay_transition_forbidden"]
+            is not True):
+        raise ValueError("SPEC-02 Coffee Shop source update cadence drift")
     if (class1f_actions["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         class1f_actions["capture_identity"]["byte_identical"] is not True or
@@ -831,6 +844,14 @@ def build() -> str:
         raise ValueError("SPEC-02 airborne Button1 class-3 contract drift")
     if (parent_init["object_or_u16"] != "0x8000" or
         child_init["object_or_u16"] != "0x8000" or
+        parent_boxes["attack_relative_s16"] != 12 or
+        child_boxes["attack_relative_s16"] != 12 or
+        [int(row["address"], 16) for row in parent_attack_boxes] !=
+            [int(parent_boxes["table"], 16) + 12 + index * 16
+             for index in range(len(parent_attack_boxes))] or
+        [int(row["address"], 16) for row in child_attack_boxes] !=
+            [int(child_boxes["table"], 16) + 12 + index * 16
+             for index in range(len(child_attack_boxes))] or
         parent_emitter["initial_cadence_u8"] != 1 or
         parent_emitter["cadence_reload_u8"] != 6 or
         parent_emitter["initial_child_count_u8"] != 5 or
@@ -840,6 +861,42 @@ def build() -> str:
         weapon_damage["child_contact"]["attack_selector_u8"] != 14 or
         weapon_damage["child_contact"]["damage_u8"] != 31):
         raise ValueError("SPEC-02 corrected projectile collision/damage drift")
+    if (weapon_collision_registration["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        weapon_collision_registration["spec_executable"] is not True or
+        weapon_collision_registration["visibility"]["x_guard"] !=
+            "u16(actor_x - camera_x + 0x0040) <= 0x0200" or
+        weapon_collision_registration["visibility"]["y_guard"] !=
+            "u16(actor_y - camera_z + 0x0020) <= 0x0140" or
+        weapon_collision_registration["visibility"]["update_order"] != [
+            "actor state/action/movement/animation",
+            "visibility guard and actor+0x01 write",
+            "record-type collision-list registration",
+            "record4-v-record12 collision scheduler"] or
+        weapon_collision_registration["registration"]["record4"][
+            "writer"] != "0x01681e..0x016828" or
+        weapon_collision_registration["registration"]["record12"][
+            "writer"] != "0x016864..0x01686e" or
+        weapon_collision_registration["identity_writer"][
+            "coffee_shop_counter_before_parent_u8"] != 0x25 or
+        [row["identity_u8"] for row in
+         weapon_collision_registration["identity_writer"]["assignments"]] !=
+            [0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b] or
+        weapon_collision_registration["types_and_signedness"][
+            "defender_latches"] != "defender+0x68:u8[8]" or
+        weapon_collision_registration["pair_guards"][0:3] != [
+            "defender+0x6d:u8 < 4 in scheduler",
+            "defender+0x00:u8 == 1",
+            "defender+0x70:u8 == 0"] or
+        weapon_collision_registration["coffee_shop_projection"][
+            "first_registered_frame"] != 2296 or
+        weapon_collision_registration["coffee_shop_projection"][
+            "first_contact_frame"] != 2306 or
+        weapon_collision_registration["mutation_control"][
+            "target_first_contact_frame_after"] != 2311 or
+        weapon_collision_registration["mutation_control"][
+            "suppressed_writes"] != 15):
+        raise ValueError("SPEC-02 collision registration/eligibility drift")
     if ([row["tick"] for row in weapon_frames] != list(range(20)) or
         [row["tick"] for row in empty_frames] != list(range(18)) or
         weapon_frames[0]["action_u16"] != 0x0c00 or
@@ -2099,6 +2156,8 @@ def build() -> str:
         f"    {weapon_parent['dispatch']}UL, {weapon_child['dispatch']}UL,",
         f"    {weapon_parent['collision_table']['table']}UL,",
         f"    {weapon_child['collision_table']['table']}UL,",
+        f"    {parent_boxes['attack_relative_s16']},",
+        f"    {child_boxes['attack_relative_s16']}, 16u,",
         f"    {weapon_damage['parent_contact']['damage_u8']}u,",
         f"    {weapon_damage['child_contact']['damage_u8']}u",
         "};", "",
@@ -2202,6 +2261,20 @@ def build() -> str:
             hurt_box["x_center_s8"], hurt_box["y_center_s8"],
             hurt_box["x_half_u8"], hurt_box["y_half_u8"],
             hurt_box["z_center_s8"], hurt_box["z_half_u8"]),
+        "};", "",
+        "/* Source-display cadence derived from the accepted recurring-controller",
+        " * transaction ledger. This is diagnostic replay timing, not a gameplay",
+        " * transition trigger. */",
+        "#define AVSP_ROUND1_COFFEE_SHOP_DEFAULT_SOURCE_UPDATES %su" %
+            source_update_cadence["default_updates_per_source_frame_u8"],
+        f"#define AVSP_ROUND1_COFFEE_SHOP_UPDATE_CADENCE_COUNT {len(source_update_exceptions)}",
+        "static const AvspRound1SceneUpdateCadence avsp_round1_coffee_shop_update_cadence[AVSP_ROUND1_COFFEE_SHOP_UPDATE_CADENCE_COUNT] =",
+        "{",
+    ])
+    for row in source_update_exceptions:
+        lines.append("    { %su, %su }," % (
+            row["source_frame_u16"], row["updates_u8"]))
+    lines.extend([
         "};", "",
         "/* Diagnostic-only replay of the accepted ORACLE-10 Coffee Shop",
         " * controller ledger. Native gameplay remains controller-driven;",

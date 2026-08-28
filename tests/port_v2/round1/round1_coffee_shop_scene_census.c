@@ -2,17 +2,6 @@
 
 #include "round1.h"
 
-static unsigned int source_capture_ticks(unsigned int frame)
-{
-    if (frame == 2075u)
-        return 3u;
-    if (frame == 2165u)
-        return 4u;
-    if (frame == 2260u || frame == 2265u)
-        return 0u;
-    return 1u;
-}
-
 static void emit_actor(unsigned int frame, const char *pool,
                        const AvspRound1ActorCore *actor)
 {
@@ -31,7 +20,7 @@ static void emit_actor(unsigned int frame, const char *pool,
     if (actor->type == 24u && actor->actor_class == 0x10 &&
         source_state != 0u && source_state <= 6u)
         source_state = (unsigned short)(source_state << 8);
-    printf("%u\t%s\t%08lx\t%u\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t%u\t%u\t%d\t%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\n",
+    printf("%u\t%s\t%08lx\t%u\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t%u\t%u\t%d\t%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t0\t0\t0\t0\n",
            frame, pool, actor->source_slot, actor->type,
            (unsigned int)(unsigned char)actor->actor_class,
            source_state, actor->substate, x_fp, y_fp, actor->z,
@@ -51,14 +40,18 @@ static void emit_projectile(unsigned int frame,
         return;
     source_state = actor->state == 0u ? 0u :
         (unsigned short)(actor->state << 8);
-    printf("%u\trecord4\t00ff%04x\t4\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t0\t%u\t%d\t%d\t0\t0\t0\t0\t0\t0\t0\t%u\n",
+    printf("%u\trecord4\t00ff%04x\t4\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t0\t%u\t%d\t%d\t0\t0\t0\t0\t0\t0\t0\t%u\t%08lx\t%08lx\t%d\t%u\t%u\n",
            frame, actor->source_slot,
            (unsigned int)(unsigned char)actor->actor_class,
            (unsigned int)source_state, (unsigned int)actor->substate,
            actor->x_fp, actor->y_fp, actor->z, actor->facing,
            actor->animation_record, actor->assembly, actor->health,
            actor->attack_selector, (short)(actor->x_fp >> 16),
-           (short)(actor->y_fp >> 16), actor->animation_timer);
+           (short)(actor->y_fp >> 16), actor->animation_timer,
+           actor->attack_table,
+           avsp_round1_weapon_current_attack_record(actor),
+           actor->collision_result,
+           actor->collision_identity, actor->collision_registered);
 }
 
 int main(void)
@@ -67,7 +60,7 @@ int main(void)
     unsigned int source_frame;
     unsigned int index;
     avsp_round1_init(&runtime);
-    puts("frame\tpool\tsource_slot\ttype\tclass\tstate\tsubstate\tx_fp\ty_fp\tz\tfacing\tanimation_record\tassembly\thealth\thurt_selector\tattack_selector\tx\ty\tsource_a3\tsource_a4\tsource_a5\tsource_a6\tsource_style85\tsource_b0\tsource_direction\tanimation_timer");
+    puts("frame\tpool\tsource_slot\ttype\tclass\tstate\tsubstate\tx_fp\ty_fp\tz\tfacing\tanimation_record\tassembly\thealth\thurt_selector\tattack_selector\tx\ty\tsource_a3\tsource_a4\tsource_a5\tsource_a6\tsource_style85\tsource_b0\tsource_direction\tanimation_timer\tattack_table\tcurrent_attack_record\tcollision_result\tcollision_identity\tcollision_registered");
     for (source_frame = 1972u; source_frame <= 5566u; ++source_frame)
     {
         unsigned short input = avsp_round1_coffee_shop_source_input(
@@ -111,7 +104,10 @@ int main(void)
                     runtime.player_special_owner_contact,
                     runtime.player_special_attack_entries);
         runtime.frame = source_frame >= 2040u ? source_frame - 2040u : 0u;
-        for (tick = 0u; tick < source_capture_ticks(source_frame); ++tick)
+        for (tick = 0u;
+             tick < avsp_round1_coffee_shop_source_updates(
+                 (unsigned short)source_frame);
+             ++tick)
         {
             if (runtime.entry.started && runtime.route_state != 4 &&
                 !avsp_round1_step_first_entry(&runtime))

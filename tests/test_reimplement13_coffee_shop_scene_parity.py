@@ -40,6 +40,14 @@ mutations.append(("native owner count drift", item))
 item = copy.deepcopy(BASE)
 item["missing_source_lifetime_ids"].pop()
 mutations.append(("missing lifetime omission", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["first_button1_collision"][
+    "native_damage_transaction"]["attack_record"] = "0x00030cb6"
+mutations.append(("first collision attack record substitution", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["first_button1_collision"][
+    "native_impact_transaction"]["allocation_visible_frame"] = 2308
+mutations.append(("first impact allocation delay", item))
 
 for label, mutant in mutations:
     try:

@@ -151,6 +151,61 @@ def validate(data):
         "attack_record": "0x00030cd2", "attack_selector_u8": 14,
         "attacker": "0xff8700", "damage_u8": 31, "frame": 4427,
     }
+    registration = damage["registration_and_pair_eligibility"]
+    assert registration["classification"] == \
+        "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+    assert registration["spec_executable"] is True
+    assert registration["visibility"] == {
+        "fail_write": "actor+0x01:u8 = 0 at 0x0167e6",
+        "pass_write": "actor+0x01:u8 = 1 at 0x0167d0",
+        "update_order": [
+            "actor state/action/movement/animation",
+            "visibility guard and actor+0x01 write",
+            "record-type collision-list registration",
+            "record4-v-record12 collision scheduler",
+        ],
+        "x_guard": "u16(actor_x - camera_x + 0x0040) <= 0x0200",
+        "y_guard": "u16(actor_y - camera_z + 0x0020) <= 0x0140",
+    }
+    assert registration["registration"]["record4"]["writer"] == \
+        "0x01681e..0x016828"
+    assert registration["registration"]["record12"]["writer"] == \
+        "0x016864..0x01686e"
+    assert registration["identity_writer"][
+        "coffee_shop_counter_before_parent_u8"] == 0x25
+    assert [row["identity_u8"] for row in
+            registration["identity_writer"]["assignments"]] == \
+        [0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b]
+    assert registration["types_and_signedness"]["defender_latches"] == \
+        "defender+0x68:u8[8]"
+    assert registration["pair_guards"] == [
+        "defender+0x6d:u8 < 4 in scheduler",
+        "defender+0x00:u8 == 1",
+        "defender+0x70:u8 == 0",
+        "if attacker+0x65:s8 >= 0 then defender+0x68[index] != attacker+0x67",
+        "attacker animation record byte +9 attack selector != 0",
+        "defender animation record byte +8 hurt selector != 0",
+        "current attack and hurt boxes overlap",
+    ]
+    assert registration["coffee_shop_projection"] == {
+        "absent_through_frame": 2295,
+        "contact_attacker": "0xff8880",
+        "contact_identity_u8": 0x2a,
+        "first_contact_frame": 2306,
+        "first_registered_frame": 2296,
+        "health_s16": [87, 56],
+        "target_slot": "0xffa180",
+    }
+    assert registration["mutation_control"] == {
+        "actor_and_route_projection_unchanged_through_frame": 2305,
+        "frames": [2296, 2310],
+        "kind": "redirect only target 0xffa180 record12 list writes to 0xffa240",
+        "list_count_unchanged_u8": 7,
+        "suppressed_writes": 15,
+        "target_first_contact_frame_after": 2311,
+        "target_first_contact_frame_before": 2306,
+        "writer": "0x01686c",
+    }
     empty = contract["empty_fallback"]
     assert empty["cleanup_tick"] == 17 and empty["return_tick"] == 18
     assert empty["damaging_record4_count"] == 0
@@ -198,8 +253,8 @@ def validate(data):
     assert data["special_causal_trace"]["actors"] == \
         ["type24 class0x4b", "type24 class0x3d"]
     assert data["mutation_controls"]["wrong_character_rejected"] is True
-    assert data["mutation_controls"]["count"] == 13
-    assert len(data["counterfactuals"]) == 13
+    assert data["mutation_controls"]["count"] == 14
+    assert len(data["counterfactuals"]) == 14
     assert data["physical_saturn"] == "UNRUN"
     assert data["saturn_emulator"] == "UNRUN"
 
@@ -241,6 +296,11 @@ for path, value, label in [
     (("implementation_contract", "record4_child_class4", "initialization", "variant_offsets_u16", 1), 285, "wrong child presentation offset"),
     (("implementation_contract", "record4_child_class4", "collision_table", "attack_entries", 1, "damage_selector_u8"), 6, "Major damage selector"),
     (("implementation_contract", "current_state_collision_damage", "parent_contact", "damage_u8"), 24, "Major damage"),
+    (("implementation_contract", "current_state_collision_damage", "registration_and_pair_eligibility", "visibility", "x_guard"), "u16(actor_x - camera_x + 0x0020) <= 0x0200", "wrong collision visibility bias"),
+    (("implementation_contract", "current_state_collision_damage", "registration_and_pair_eligibility", "registration", "record12", "writer"), "0x016864..0x01686a", "wrong defender registration writer"),
+    (("implementation_contract", "current_state_collision_damage", "registration_and_pair_eligibility", "identity_writer", "coffee_shop_counter_before_parent_u8"), 0x24, "wrong collision identity seed"),
+    (("implementation_contract", "current_state_collision_damage", "registration_and_pair_eligibility", "pair_guards", 2), "no per-attacker latch", "missing projectile latch guard"),
+    (("implementation_contract", "current_state_collision_damage", "registration_and_pair_eligibility", "mutation_control", "target_first_contact_frame_after"), 2306, "nondiscriminating registration mutation"),
     (("implementation_contract", "empty_fallback", "presentation_timeline", 1, "animation_record"), "0x001645d4", "Major empty pose"),
     (("special_implementation_contract", "source_input", "guard_routine"), "0x024f04", "wrong special guard owner"),
     (("special_implementation_contract", "state_dispatch", "entry"), "0x024f04", "wrong special dispatcher"),
@@ -260,4 +320,4 @@ for path, value, label in [
         cursor = cursor[key]
     cursor[path[-1]] = value
     reject(mutant, label)
-print("ORACLE-11 corrected Predator Button1 tests: PASS (37 mutations rejected)")
+print("ORACLE-11 corrected Predator Button1 tests: PASS (42 mutations rejected)")

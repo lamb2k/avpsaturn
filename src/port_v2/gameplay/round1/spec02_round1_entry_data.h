@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=8b01ba4f8de6a6e0cdc5927cd9e0cde8d0ec23e1795c46b09202571e6bf0f6b7 */
-/* fixtures_sha256=ff5745e12cdcd9f16d78f1e6ddd4ec437c16fbb75d6111533a2ac5aa20e9e947 */
+/* contract_sha256=324a180639bba1001ce1242bd2d613ec21ea1dbe4f6d718ae2c154ca3c093fff */
+/* fixtures_sha256=c5928f5e6b03468d59ccad1f60cba92b8504ec2422fd1811c30849f20ffbe778 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -1528,6 +1528,8 @@ static const AvspRound1WeaponProjectileSpec avsp_round1_weapon_projectile =
     0x02f870UL, 0x0306feUL,
     0x0002fc3cUL,
     0x00030cb6UL,
+    12,
+    12, 16u,
     127u,
     31u
 };
@@ -1601,6 +1603,19 @@ static const AvspRound1Class02Spec avsp_round1_class02 =
     16u, 0x01A0u, 5u, 28u, 0x05, 1u, 8, 64, -8, 25, -1, 0x0077u, 1u, 0u,
     { 0, 48, 88u, 48u, 0, 40u, 1, 3u, 0u },
     { 8, 64, 8u, 32u, -4, 4u, 0, 0u, 0u }
+};
+
+/* Source-display cadence derived from the accepted recurring-controller
+ * transaction ledger. This is diagnostic replay timing, not a gameplay
+ * transition trigger. */
+#define AVSP_ROUND1_COFFEE_SHOP_DEFAULT_SOURCE_UPDATES 1u
+#define AVSP_ROUND1_COFFEE_SHOP_UPDATE_CADENCE_COUNT 4
+static const AvspRound1SceneUpdateCadence avsp_round1_coffee_shop_update_cadence[AVSP_ROUND1_COFFEE_SHOP_UPDATE_CADENCE_COUNT] =
+{
+    { 2075u, 3u },
+    { 2165u, 4u },
+    { 2260u, 0u },
+    { 2265u, 0u },
 };
 
 /* Diagnostic-only replay of the accepted ORACLE-10 Coffee Shop

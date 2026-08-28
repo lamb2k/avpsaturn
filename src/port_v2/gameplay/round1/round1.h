@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "8b01ba4f8de6a6e0cdc5927cd9e0cde8d0ec23e1795c46b09202571e6bf0f6b7"
+    "324a180639bba1001ce1242bd2d613ec21ea1dbe4f6d718ae2c154ca3c093fff"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -315,6 +315,9 @@ typedef struct
     unsigned long child_dispatch;
     unsigned long parent_attack_table;
     unsigned long child_attack_table;
+    short parent_attack_relative;
+    short child_attack_relative;
+    unsigned short attack_record_stride;
     unsigned char parent_damage;
     unsigned char child_damage;
 } AvspRound1WeaponProjectileSpec;
@@ -405,6 +408,9 @@ typedef struct
     short source_motion_fields[8];
     unsigned short source_children[4];
     unsigned char source_field01;
+    unsigned char source_collision_guard6d;
+    unsigned char source_collision_latches[8];
+    unsigned char source_collision_suppress70;
     unsigned char source_a2;
     unsigned char source_movement_table;
     unsigned long source_next_animation_record;
@@ -632,6 +638,12 @@ typedef struct
     unsigned short last_source_frame;
     unsigned short input_mask;
 } AvspRound1SceneInputRun;
+
+typedef struct
+{
+    unsigned short source_frame;
+    unsigned char updates;
+} AvspRound1SceneUpdateCadence;
 
 typedef struct
 {
@@ -971,6 +983,9 @@ typedef struct
     unsigned long animation_record;
     unsigned long assembly;
     unsigned char active_collision;
+    unsigned char collision_registered;
+    signed char collision_latch_index;
+    unsigned char collision_identity;
     unsigned char owner_offset_selector;
     unsigned char parent_presentation_selector;
     unsigned char presentation_index;
@@ -1147,6 +1162,7 @@ typedef struct
     unsigned long head_canary;
     short route_state;
     unsigned short rng_seed;
+    unsigned char collision_identity_counter;
     AvspRound1ActorCore player;
     AvspPwRuntime player_action;
     AvspRound1ActorCore entry_controller;
@@ -1431,9 +1447,13 @@ int avsp_round1_is_weapon_parent_projectile(
     const AvspRound1WeaponProjectileAllocation *projectile);
 int avsp_round1_is_weapon_child_projectile(
     const AvspRound1WeaponProjectileAllocation *projectile);
+unsigned long avsp_round1_weapon_current_attack_record(
+    const AvspRound1WeaponProjectileAllocation *projectile);
 int avsp_round1_player_native_presentation_active(
     const AvspRound1Runtime *runtime);
 unsigned short avsp_round1_coffee_shop_source_input(
+    unsigned short source_frame);
+unsigned int avsp_round1_coffee_shop_source_updates(
     unsigned short source_frame);
 int avsp_round1_entry_valid(const AvspRound1Runtime *runtime);
 int avsp_round1_canaries_ok(const AvspRound1Runtime *runtime);

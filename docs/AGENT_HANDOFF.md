@@ -24,24 +24,32 @@ inner-action checkpoint; `d04a65a2253175c6e820140feefc35419e2cca07`
 remains the latest fully accepted runtime. Type-`16`/class-`0x06`, inner state
 `0x0208`, its source RNG/actions, and class-`0x4e` impact presentation are bound.
 
-The next bounded correction binds live collision selectors to source actor fields
-`+0xa5/+0xa6`; presentation changes no longer replace gameplay collision state.
-Oracle/SPEC checks, 156 mutations, Fast, Oracle, and release Target pass, closing
-five source lifetimes naturally.
+The record-type-`4` before record-type-`12` scheduler/current-state collision
+chronology is now corrected without suppressing a projectile variant or adding an
+authored delay. The exact parent/child prefix is preserved through source frame
+2287, frame 2288 has no damage, slot `0x00ff8880` writes the source frame-2306
+damage using current attack record `0x030cd2`, and class-`0x4e` allocates naturally
+at frame 2307. Two pinned Emulator runs have byte-identical 575-sample semantic
+ledgers at normalized ISO
+`5cfc6e4e38a1052ed8fb684911826dc17747bd818e429dfc7f206036bf8f86cd`.
+Fast, Oracle, Target, 161 native mutations, 119 Target suppressions, and focused
+scene/emulator mutations pass.
 
-The scene is not accepted: gaps are lifetimes 399, spawn/despawn 1,376, states 40,
+Direct Windows Graphics Capture at source frames 2306, 2307, and 2308 preserves
+Predator Warrior and staff identity, P1-only HUD, both Coffee Shop planes,
+palette, priority, and native impact presentation. The `WARRIOR` row is inside
+the 176-pixel P1 texture; the top-right P2 texture is absent.
+
+The scene is not accepted: gaps are lifetimes 387, spawn/despawn 1,391, states 37,
 collision/damage 94, route/camera 3, audio/load 281; unowned Saturn actors and
-retained gameplay authorities are zero. The first remaining source/native actor
-divergence is frame 2288: native record-type-`4` child collision damages slot
-`0x00ffa180` before the source, whose first matching damage write is frame 2306.
-
-The prior pinned Emulator run clears fallback/failure/canary/decode gates but its
-575-sample choreography remains blocked by source/native chronology. Do not relabel
-the counters or weaken/rebaseline that evidence gate.
+retained gameplay authorities remain zero. Spawn/despawn rises by 15 because 12
+net source lifetimes moved out of the missing bucket (-24 edges) while stricter
+source-aligned split/merge boundaries exposed 39 additional edge mismatches.
 
 ## Exact next experiment
-Bind the accepted record-type-`4`-before-type-`12` scheduler and current-state
-collision chronology. Preserve the exact parent/child trajectory through frame
-2287, reject the premature frame-2288 damage, and reproduce the source frame-2306
-attack-record `0x030cd2` damage write and frame-2307 class-`0x4e` impact naturally.
-Then rerun the full scene census. Never suppress a projectile variant by guess.
+Continue from the earliest remaining complete-scene divergence: player slot
+`0x00ff8380` has source substate `0x0000` versus native `0x0200` at the route-4
+handoff visible on frame 2238. Bind that transition from accepted SPEC/Oracle
+evidence, then rerun the whole census. Within the projectile family, the next
+divergence is parent slot `0x00ff8680` state `0x0400` versus source `0x0402` at
+frame 2288. Do not guess either transition.

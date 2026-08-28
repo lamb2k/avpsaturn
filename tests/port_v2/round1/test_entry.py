@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "8b01ba4f8de6a6e0cdc5927cd9e0cde8d0ec23e1795c46b09202571e6bf0f6b7"
+EXPECTED = "324a180639bba1001ce1242bd2d613ec21ea1dbe4f6d718ae2c154ca3c093fff"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -208,6 +208,7 @@ for before, after in (
      "(runtime->scheduler_frames & 2u) == 0u"),
     ("encounter->source_phase_counter + 1u",
      "encounter->source_phase_counter + 2u"),
+    ("return entry->updates;", "return 1u;"),
     ("if (encounter->source_intro_gate != 0u)",
      "if (encounter->source_intro_gate == 0u)"),
     ("encounter->source_intro_timer - 1u",
@@ -228,6 +229,16 @@ for before, after in (
      "actor->substate = 0x0402u;"),
     ("child->y = (short)(parent->z + row->y);",
      "child->y = (short)(parent->y + row->y);"),
+    ("runtime->collision_identity_counter = 0x25u;",
+     "runtime->collision_identity_counter = 0x24u;"),
+    ("(unsigned short)x - (unsigned short)runtime->camera_x_position +\n        0x0040u);",
+     "(unsigned short)x - (unsigned short)runtime->camera_x_position +\n        0x0020u);"),
+    ("!projectile->active_collision || !projectile->collision_registered ||",
+     "!projectile->active_collision ||"),
+    ("target->source_field01 != 1u ||",
+     "target->source_field01 == 2u ||"),
+    ("if (target->source_collision_latches[\n                    (unsigned char)latch_index] ==\n                    projectile->collision_identity)\n                continue;",
+     "if (0)\n                continue;"),
     ("if (projectile->actor_class == avsp_round1_weapon_projectile.child_class)\n            return avsp_round1_release_player_weapon_projectile(runtime,\n                                                                 index);",
      "if (projectile->actor_class == avsp_round1_weapon_projectile.child_class)\n            projectile->state = avsp_round1_weapon_projectile.release_state;"),
     ("weapon_pressed = runtime->player_weapon_input_pipeline;",
@@ -249,7 +260,7 @@ for before, after in (
     ("if (projectile->health < 0)\n        {\n            projectile->state = 0x0600u;",
      "if (projectile->health < 0)\n        {\n            projectile->state = 0x0400u;"),
     ("(actor->state == 0x0200u &&\n                      (actor->substate == 0x1000u ||",
-     "((actor->substate == 0x1000u ||"),
+     "(actor->state == 0x0208u &&\n                      (actor->substate == 0x1000u ||"),
     ("actor->state = 0x0208u;\n    actor->substate = 0x0600u;",
      "actor->state = 0x0200u;\n    actor->substate = 0x0600u;"),
     ("if ((random & 3u) != 0u)",
@@ -399,4 +410,4 @@ for before, after in (
                                  "--", "bash", "-lc", command],
                                 capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (156 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (161 real mutations)")

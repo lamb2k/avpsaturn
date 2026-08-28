@@ -727,6 +727,20 @@ def build_report() -> dict[str, object]:
 
     progression_transactions = list(rows(
         PROGRESSION_A / "progression_transactions.tsv"))
+    controller_update_counts = Counter(
+        int(row["frame"]) for row in progression_transactions
+        if row["pc"] == "0288e2" and row["a6"] == "ffd180")
+    controller_update_exceptions = {
+        2075: 3,
+        2165: 4,
+        2260: 0,
+        2265: 0,
+    }
+    require(
+        all(controller_update_counts[frame] ==
+            controller_update_exceptions.get(frame, 1)
+            for frame in range(2074, 4100)),
+        "Coffee Shop source controller update cadence drift")
     progression_writes = list(rows(PROGRESSION_A / "progression_writes.tsv"))
     progression_global_writes = list(rows(
         PROGRESSION_A / "progression_global_writes.tsv"))
@@ -953,6 +967,38 @@ def build_report() -> dict[str, object]:
             "controller_precedes_type12_scheduler": True,
             "new_record_initializes_in_same_scheduler_frame": True,
             "next_current_state_dispatch_occurs_next_scheduler_frame": True,
+        },
+        "source_update_cadence": {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "source_capture": {
+                "file": "progression_transactions.tsv",
+                "sha256": progression_a["files"]
+                    ["progression_transactions.tsv"],
+                "controller_entry_pc": "0x0288e2",
+                "controller_slot": "0xffd180",
+                "source_frame_range_inclusive": [2074, 4099],
+            },
+            "default_updates_per_source_frame_u8": 1,
+            "exceptions": [
+                {"source_frame_u16": frame,
+                 "updates_u8": controller_update_exceptions[frame]}
+                for frame in sorted(controller_update_exceptions)
+            ],
+            "scheduler_rule": (
+                "execute the native entry/player/actor scheduler once per "
+                "captured source controller invocation; zero means preserve "
+                "the prior gameplay state for that displayed source frame"),
+            "reads": ["diagnostic source frame:u16"],
+            "writes": ["entry/player/actor scheduler update count:u8"],
+            "rng_calls": "exactly those consumed by the selected number of full scheduler updates",
+            "fixed_frame_gameplay_transition_forbidden": True,
+            "mutation_control": {
+                "kind": "cadence table entry mutation",
+                "effect": (
+                    "changing any exceptional update count changes the "
+                    "recurring controller timer/state/spawn chronology"),
+            },
+            "spec_executable": True,
         },
         "controller_program": {
             "field_types": {
@@ -1427,6 +1473,15 @@ def validate(report: dict[str, object]) -> None:
             progression["capture_identity"]["byte_identical"] is True and
             progression["scheduler"]
                 ["controller_precedes_type12_scheduler"] is True and
+            progression["source_update_cadence"]
+                ["default_updates_per_source_frame_u8"] == 1 and
+            progression["source_update_cadence"]["exceptions"] == [
+                {"source_frame_u16": 2075, "updates_u8": 3},
+                {"source_frame_u16": 2165, "updates_u8": 4},
+                {"source_frame_u16": 2260, "updates_u8": 0},
+                {"source_frame_u16": 2265, "updates_u8": 0}] and
+            progression["source_update_cadence"]
+                ["fixed_frame_gameplay_transition_forbidden"] is True and
             progression["phase_counter"]["stable_entry_value_u8"] == 0xa2 and
             progression["phase_counter"]["writer_pc"] == "0x00809a" and
             progression["phase_counter"]["observed_updates"][-1] == {
@@ -1594,6 +1649,10 @@ def mutation_self_test(report: dict[str, object]) -> None:
     wrong_progression_phase["first_segment_recurring_spawn"]["phase_counter"] \
         ["writer_pc"] = "0x000e86"
     mutations.append(wrong_progression_phase)
+    wrong_progression_cadence = copy.deepcopy(report)
+    wrong_progression_cadence["first_segment_recurring_spawn"] \
+        ["source_update_cadence"]["exceptions"][0]["updates_u8"] = 1
+    mutations.append(wrong_progression_cadence)
     wrong_progression_write = copy.deepcopy(report)
     wrong_progression_write["first_segment_recurring_spawn"]["primary_writer"] \
         ["write_order"][3]["effect"] = "x_s16 = fixed_frame_position"

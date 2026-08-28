@@ -27575,7 +27575,7 @@
         "writes": 153166
       },
       "current_state_implementation_contract": {
-        "accepted_encounter_authority_sha256": "58105bf7cdf0cdb78f3304fea455014661e9a94322a2cc83c181c5bd4e416c3e",
+        "accepted_encounter_authority_sha256": "3c683987aae9c42de548d201fd8d5b1a42e53a72c84ae9924158d92095adbc01",
         "accepted_oracle09_sha256": "a3027c3ffcd19af2656c515e0dfc0e9c56086b1bf3dd029e854d74be372c847f",
         "actions": {
           "above_lane_0x0600": {

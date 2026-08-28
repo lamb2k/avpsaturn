@@ -12,8 +12,9 @@ Measures, from the current build products and tracked manifests:
   archive/fixture file sizes that live in them;
 - VDP2 character/pattern usage of the street scene from the tracked RP4
   manifest against the 512 KiB VDP2 VRAM;
-- VDP1 texture demand (tile archive) and live command counts from the RP4
-  live readback against 512 KiB VDP1 VRAM and the command budget;
+- VDP1 resident texture budget (the archive is cartridge source data for the
+  bounded tile/composite caches) and live command counts from the RP4
+  live readback against 512 KiB VDP1 VRAM;
 - CRAM ownership from the live readback colour-RAM offsets;
 - SCSP PCM members staged into the ISO against the 512 KiB sound RAM,
   with the phase-load model recorded (the full sum exceeds sound RAM by
@@ -143,17 +144,28 @@ def vdp1_usage() -> dict:
     classes = {int(k): v for k, v in live["vdp1_command_classes"].items()}
     commands = sum(classes.values())
     tile_file = ROOT / "build" / "avsp_cd" / "SPR4" / "TILES.BIN"
-    textures = tile_file.stat().st_size if tile_file.exists() else None
+    archive_bytes = tile_file.stat().st_size if tile_file.exists() else None
+    source = (ROOT / "main.c").read_text(errors="replace")
+    budget_match = re.search(
+        r"#define AVSP_VDP1_TEXTURE_BUDGET (0x[0-9A-Fa-f]+|\d+)",
+        source)
+    assert budget_match, "AVSP_VDP1_TEXTURE_BUDGET"
+    resident_budget = int(budget_match.group(1), 0)
     return {
         "live_command_sample": commands,
         "command_classes": classes,
-        "texture_archive_bytes": textures,
+        "texture_archive_bytes": archive_bytes,
+        "texture_archive_residency": "CARTRIDGE_SOURCE_NOT_VDP1_RESIDENT",
+        "resident_texture_budget_bytes": resident_budget,
         "capacity_bytes": VDP1_VRAM_BYTES,
-        "headroom_bytes": (VDP1_VRAM_BYTES - textures)
-        if textures is not None else None,
+        "headroom_bytes": VDP1_VRAM_BYTES - resident_budget,
         "status": "MEASURED",
-        "note": "command sample from one paused street frame; a route-wide "
-                "command high-water is a GAP until a soak instrument runs",
+        "note": "TILES.BIN remains in cartridge DRAM and is copied through "
+                "the bounded 218-tile LRU plus 21 composite slots; counting "
+                "the archive container itself as VDP1 residency is invalid. "
+                "Command sample is from one paused street frame; a "
+                "route-wide command high-water is a GAP until a soak "
+                "instrument runs",
     }
 
 

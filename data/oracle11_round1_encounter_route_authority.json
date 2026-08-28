@@ -61223,6 +61223,52 @@
       "next_current_state_dispatch_occurs_next_scheduler_frame": true
     },
     "scope": "first-segment recurring type-12/class-0x1f source writers 0x028a3e and 0x028b7e",
+    "source_update_cadence": {
+      "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+      "default_updates_per_source_frame_u8": 1,
+      "exceptions": [
+        {
+          "source_frame_u16": 2075,
+          "updates_u8": 3
+        },
+        {
+          "source_frame_u16": 2165,
+          "updates_u8": 4
+        },
+        {
+          "source_frame_u16": 2260,
+          "updates_u8": 0
+        },
+        {
+          "source_frame_u16": 2265,
+          "updates_u8": 0
+        }
+      ],
+      "fixed_frame_gameplay_transition_forbidden": true,
+      "mutation_control": {
+        "effect": "changing any exceptional update count changes the recurring controller timer/state/spawn chronology",
+        "kind": "cadence table entry mutation"
+      },
+      "reads": [
+        "diagnostic source frame:u16"
+      ],
+      "rng_calls": "exactly those consumed by the selected number of full scheduler updates",
+      "scheduler_rule": "execute the native entry/player/actor scheduler once per captured source controller invocation; zero means preserve the prior gameplay state for that displayed source frame",
+      "source_capture": {
+        "controller_entry_pc": "0x0288e2",
+        "controller_slot": "0xffd180",
+        "file": "progression_transactions.tsv",
+        "sha256": "e49fc2517bbca6ee72daa23b68548f4569531a04c301307226c87ced359c8d1c",
+        "source_frame_range_inclusive": [
+          2074,
+          4099
+        ]
+      },
+      "spec_executable": true,
+      "writes": [
+        "entry/player/actor scheduler update count:u8"
+      ]
+    },
     "suppression_control": {
       "baseline_first_actor": "active=1 state=0x0200 health=87",
       "baseline_later_actor": "active=1 state=0x0200 health=87",

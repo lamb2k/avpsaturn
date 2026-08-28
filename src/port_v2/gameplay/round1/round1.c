@@ -19,6 +19,8 @@ static void avsp_round1_bind_animation_state(
     AvspRound1ActorCore *actor, const AvspRound1AnimationStateSpec *record);
 static unsigned char avsp_round1_source_rng(AvspRound1Runtime *runtime);
 static short avsp_round1_fixed_high_word(long value);
+static unsigned char avsp_round1_next_collision_identity(
+    AvspRound1Runtime *runtime);
 static unsigned char avsp_round1_player_weapon_target_angle(
     const AvspRound1Runtime *runtime);
 
@@ -36,6 +38,21 @@ unsigned short avsp_round1_coffee_shop_source_input(
             return run->input_mask;
     }
     return 0u;
+}
+
+unsigned int avsp_round1_coffee_shop_source_updates(
+    unsigned short source_frame)
+{
+    unsigned int index;
+    for (index = 0u; index < AVSP_ROUND1_COFFEE_SHOP_UPDATE_CADENCE_COUNT;
+         ++index)
+    {
+        const AvspRound1SceneUpdateCadence *entry =
+            &avsp_round1_coffee_shop_update_cadence[index];
+        if (source_frame == entry->source_frame)
+            return entry->updates;
+    }
+    return AVSP_ROUND1_COFFEE_SHOP_DEFAULT_SOURCE_UPDATES;
 }
 
 static int avsp_round1_pool_metadata_valid(const AvspRound1Pool *pool,
@@ -2905,6 +2922,9 @@ static int avsp_round1_player_weapon_contract_valid(void)
         avsp_round1_weapon_projectile.object_or != 0x8000u ||
         avsp_round1_weapon_projectile.parent_dispatch != 0x02f870UL ||
         avsp_round1_weapon_projectile.child_dispatch != 0x0306feUL ||
+        avsp_round1_weapon_projectile.parent_attack_relative != 12 ||
+        avsp_round1_weapon_projectile.child_attack_relative != 12 ||
+        avsp_round1_weapon_projectile.attack_record_stride != 16u ||
         avsp_round1_weapon_projectile.child_count != 5u ||
         avsp_round1_weapon_projectile.child_cadence_initial != 1u ||
         avsp_round1_weapon_projectile.child_cadence_reload != 6u ||
@@ -3012,6 +3032,8 @@ static int avsp_round1_allocate_player_weapon_projectile(
     }
     projectile = &runtime->player_weapon_projectiles[index];
     memset(projectile, 0, sizeof(*projectile));
+    projectile->collision_identity =
+        avsp_round1_next_collision_identity(runtime);
     projectile->active = 1u;
     projectile->actor_class = avsp_round1_player_weapon.parent_class;
     projectile->variant = 0u;
@@ -3178,6 +3200,8 @@ static int avsp_round1_allocate_player_air_weapon_projectile(
         return 0;
     projectile = &runtime->player_weapon_projectiles[index];
     memset(projectile, 0, sizeof(*projectile));
+    projectile->collision_identity =
+        avsp_round1_next_collision_identity(runtime);
     projectile->active = 1u;
     projectile->actor_class = avsp_round1_air_weapon_projectile.actor_class;
     projectile->variant = 0u;
@@ -3218,6 +3242,57 @@ static short avsp_round1_fixed_high_word(long value)
     if (value >= 0L)
         return (short)(value / 65536L);
     return (short)-(((-value) + 65535L) / 65536L);
+}
+
+static unsigned char avsp_round1_next_collision_identity(
+    AvspRound1Runtime *runtime)
+{
+    do
+    {
+        runtime->collision_identity_counter = (unsigned char)(
+            runtime->collision_identity_counter + 1u);
+    }
+    while (runtime->collision_identity_counter == 0u);
+    return runtime->collision_identity_counter;
+}
+
+static unsigned char avsp_round1_collision_visibility(
+    const AvspRound1Runtime *runtime, short x, short y)
+{
+    unsigned short x_relative = (unsigned short)(
+        (unsigned short)x - (unsigned short)runtime->camera_x_position +
+        0x0040u);
+    unsigned short y_relative = (unsigned short)(
+        (unsigned short)y - (unsigned short)runtime->camera_z_position +
+        0x0020u);
+    return (unsigned char)(x_relative <= 0x0200u &&
+                           y_relative <= 0x0140u);
+}
+
+static void avsp_round1_refresh_collision_registration(
+    AvspRound1Runtime *runtime)
+{
+    unsigned int index;
+    AvspRound1Pool *defenders = &runtime->pools[0];
+    for (index = 0u; index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY;
+         ++index)
+    {
+        AvspRound1WeaponProjectileAllocation *projectile =
+            &runtime->player_weapon_projectiles[index];
+        projectile->collision_registered = (unsigned char)(
+            projectile->active == 1u &&
+            avsp_round1_collision_visibility(runtime, projectile->x,
+                                               projectile->y));
+    }
+    for (index = 0u; index < defenders->capacity; ++index)
+    {
+        AvspRound1ActorCore *actor = &defenders->records[index];
+        if (actor->actor_class != 0x1f)
+            continue;
+        actor->source_field01 = (unsigned char)(
+            actor->active == 1u &&
+            avsp_round1_collision_visibility(runtime, actor->x, actor->y));
+    }
 }
 
 static unsigned char avsp_round1_source_rng(AvspRound1Runtime *runtime)
@@ -5302,6 +5377,21 @@ static void avsp_round1_bind_projectile_animation(
     projectile->attack_selector = record->attack_selector;
 }
 
+unsigned long avsp_round1_weapon_current_attack_record(
+    const AvspRound1WeaponProjectileAllocation *projectile)
+{
+    short attack_relative;
+    if (projectile == 0 || projectile->attack_selector == 0u)
+        return 0UL;
+    attack_relative = projectile->actor_class ==
+            avsp_round1_weapon_projectile.child_class ?
+        avsp_round1_weapon_projectile.child_attack_relative :
+        avsp_round1_weapon_projectile.parent_attack_relative;
+    return projectile->attack_table + (unsigned long)attack_relative +
+        (unsigned long)projectile->attack_selector *
+            avsp_round1_weapon_projectile.attack_record_stride;
+}
+
 static int avsp_round1_weapon_angle_index(unsigned char angle,
                                           unsigned int *angle_index)
 {
@@ -5355,6 +5445,7 @@ static int avsp_round1_allocate_weapon_child(
         return 0;
     child = &runtime->player_weapon_projectiles[index];
     memset(child, 0, sizeof(*child));
+    child->collision_identity = avsp_round1_next_collision_identity(runtime);
     x_offset = parent->facing == 0u ? (short)-row->x : row->x;
     child->active = 1u;
     child->actor_class = avsp_round1_player_weapon.child_class;
@@ -5894,19 +5985,32 @@ static int avsp_round1_projectile_collision_pass(
     AvspActor attacker;
     AvspActor defender;
     unsigned int index;
+    unsigned int attack_index;
     unsigned char damage;
+    unsigned long current_attack_record;
     const AvspRound1CollisionBoxSpec *box;
     if (projectile->state != avsp_round1_weapon_projectile.active_state ||
-        !projectile->active_collision || projectile->attack_selector == 0u ||
+        !projectile->active_collision || !projectile->collision_registered ||
+        projectile->attack_selector == 0u ||
         projectile->attack_selector >=
             AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT)
         return 1;
+    current_attack_record = avsp_round1_weapon_current_attack_record(projectile);
+    if (current_attack_record == 0UL)
+        return 1;
+    attack_index = (unsigned int)((current_attack_record -
+        projectile->attack_table -
+        (unsigned long)(projectile->actor_class ==
+            avsp_round1_weapon_projectile.child_class ?
+            avsp_round1_weapon_projectile.child_attack_relative :
+            avsp_round1_weapon_projectile.parent_attack_relative)) /
+        avsp_round1_weapon_projectile.attack_record_stride);
     box = (projectile->actor_class ==
             avsp_round1_weapon_projectile.parent_class ||
            projectile->actor_class ==
             avsp_round1_air_weapon_projectile.actor_class) ?
-        &avsp_round1_weapon_parent_attack_boxes[projectile->attack_selector] :
-        &avsp_round1_weapon_child_attack_boxes[projectile->attack_selector];
+        &avsp_round1_weapon_parent_attack_boxes[attack_index] :
+        &avsp_round1_weapon_child_attack_boxes[attack_index];
     damage = (projectile->actor_class ==
             avsp_round1_weapon_projectile.parent_class ||
               projectile->actor_class ==
@@ -5931,9 +6035,23 @@ static int avsp_round1_projectile_collision_pass(
     {
         AvspRound1ActorCore *target = &runtime->pools[0].records[index];
         short health;
-        if (!target->active || target->actor_class != 0x1f ||
+        signed char latch_index = projectile->collision_latch_index;
+        if (target->active != 1u || target->actor_class != 0x1f ||
+            target->source_field01 != 1u ||
+            target->source_collision_guard6d >= 4u ||
+            target->source_collision_suppress70 != 0u ||
             target->hurt_selector == 0u || target->health < 0)
             continue;
+        if (latch_index >= 0)
+        {
+            if ((unsigned char)latch_index >=
+                    sizeof(target->source_collision_latches))
+                return 0;
+            if (target->source_collision_latches[
+                    (unsigned char)latch_index] ==
+                    projectile->collision_identity)
+                continue;
+        }
         if (!avsp_collision_hurt_box(0x00130ac8UL,
                                      target->hurt_selector, &hurt))
             return 0;
@@ -5945,10 +6063,11 @@ static int avsp_round1_projectile_collision_pass(
         if (!avsp_collision_overlap_boxes(&attacker, &attack, &defender,
                                           &hurt, 0))
             continue;
+        if (latch_index >= 0)
+            target->source_collision_latches[(unsigned char)latch_index] =
+                projectile->collision_identity;
         projectile->collision_result = -1;
-        if (projectile->actor_class ==
-            avsp_round1_air_weapon_projectile.actor_class)
-            projectile->health = -1;
+        projectile->health = -1;
         ++runtime->player_weapon_projectile_collision_writes;
         health = (short)(target->health - (short)damage);
         target->health = health < 0 ? -1 : health;
@@ -5963,6 +6082,75 @@ static int avsp_round1_projectile_collision_pass(
                 runtime, projectile, target, box, &hurt))
             return 0;
         return 1;
+    }
+    return 1;
+}
+
+static int avsp_round1_step_record4_pool(AvspRound1Runtime *runtime,
+                                          unsigned long *hash)
+{
+    unsigned int slot_index;
+    for (slot_index = 0u;
+         slot_index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY; ++slot_index)
+    {
+        AvspRound1WeaponProjectileAllocation *projectile =
+            &runtime->player_weapon_projectiles[slot_index];
+        AvspRound1SchedulerVisit *visit;
+        if (!projectile->active)
+            continue;
+        if ((projectile->actor_class !=
+                avsp_round1_player_weapon.parent_class &&
+             projectile->actor_class !=
+                avsp_round1_air_weapon_projectile.actor_class &&
+             projectile->actor_class !=
+                avsp_round1_player_weapon.child_class) ||
+            projectile->source_slot != (unsigned short)(
+                avsp_round1_player_weapon.projectile_source_base +
+                slot_index * avsp_round1_player_weapon.projectile_stride) ||
+            runtime->scheduler_trace_count >=
+                AVSP_ROUND1_SCHEDULER_TRACE_CAPACITY)
+        {
+            runtime->scheduler_failure_code = 1u;
+            ++runtime->failure_count;
+            return 0;
+        }
+        visit = &runtime->scheduler_trace[runtime->scheduler_trace_count++];
+        visit->record_type = 4u;
+        visit->actor_class = projectile->actor_class;
+        visit->pool_slot = (unsigned short)slot_index;
+        visit->source_slot = projectile->source_slot;
+        *hash = avsp_round1_scheduler_hash_byte(*hash, 4u);
+        *hash = avsp_round1_scheduler_hash_byte(*hash,
+            (unsigned char)projectile->actor_class);
+        *hash = avsp_round1_scheduler_hash_byte(*hash,
+            (unsigned char)slot_index);
+        ++runtime->player_weapon_projectile_scheduler_updates;
+        ++runtime->scheduler_dispatches;
+        if (!avsp_round1_step_weapon_projectile(runtime, slot_index))
+        {
+            runtime->scheduler_failure_code = 2u;
+            ++runtime->failure_count;
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static int avsp_round1_step_record4_collision(AvspRound1Runtime *runtime)
+{
+    unsigned int slot_index;
+    for (slot_index = 0u;
+         slot_index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY; ++slot_index)
+    {
+        AvspRound1WeaponProjectileAllocation *projectile =
+            &runtime->player_weapon_projectiles[slot_index];
+        if (projectile->active &&
+            !avsp_round1_projectile_collision_pass(runtime, projectile))
+        {
+            runtime->scheduler_failure_code = 3u;
+            ++runtime->failure_count;
+            return 0;
+        }
     }
     return 1;
 }
@@ -6493,6 +6681,8 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
         ++runtime->failure_count;
         return 0;
     }
+    if (!avsp_round1_step_record4_pool(runtime, &hash))
+        return 0;
     for (order_index = 0u; order_index < AVSP_ROUND1_SCHEDULER_POOL_COUNT;
          ++order_index)
     {
@@ -6890,56 +7080,9 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
             ++runtime->scheduler_dispatches;
         }
     }
-    for (slot_index = 0u;
-         slot_index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY; ++slot_index)
-    {
-        AvspRound1WeaponProjectileAllocation *projectile =
-            &runtime->player_weapon_projectiles[slot_index];
-        AvspRound1SchedulerVisit *visit;
-        if (!projectile->active)
-            continue;
-        if ((projectile->actor_class !=
-                avsp_round1_player_weapon.parent_class &&
-             projectile->actor_class !=
-                avsp_round1_air_weapon_projectile.actor_class &&
-             projectile->actor_class !=
-                avsp_round1_player_weapon.child_class) ||
-            projectile->source_slot != (unsigned short)(
-                avsp_round1_player_weapon.projectile_source_base +
-                slot_index * avsp_round1_player_weapon.projectile_stride) ||
-            runtime->scheduler_trace_count >=
-                AVSP_ROUND1_SCHEDULER_TRACE_CAPACITY)
-        {
-            runtime->scheduler_failure_code = 1u;
-            ++runtime->failure_count;
-            return 0;
-        }
-        visit = &runtime->scheduler_trace[runtime->scheduler_trace_count++];
-        visit->record_type = 4u;
-        visit->actor_class = projectile->actor_class;
-        visit->pool_slot = (unsigned short)slot_index;
-        visit->source_slot = projectile->source_slot;
-        hash = avsp_round1_scheduler_hash_byte(hash, 4u);
-        hash = avsp_round1_scheduler_hash_byte(hash,
-            (unsigned char)projectile->actor_class);
-        hash = avsp_round1_scheduler_hash_byte(hash,
-            (unsigned char)slot_index);
-        ++runtime->player_weapon_projectile_scheduler_updates;
-        ++runtime->scheduler_dispatches;
-        if (!avsp_round1_step_weapon_projectile(runtime, slot_index))
-        {
-            runtime->scheduler_failure_code = 2u;
-            ++runtime->failure_count;
-            return 0;
-        }
-        if (projectile->active &&
-            !avsp_round1_projectile_collision_pass(runtime, projectile))
-        {
-            runtime->scheduler_failure_code = 3u;
-            ++runtime->failure_count;
-            return 0;
-        }
-    }
+    avsp_round1_refresh_collision_registration(runtime);
+    if (!avsp_round1_step_record4_collision(runtime))
+        return 0;
     runtime->scheduler_order_hash = hash;
     ++runtime->scheduler_frames;
     return 1;
@@ -7028,6 +7171,7 @@ void avsp_round1_init(AvspRound1Runtime *runtime)
     runtime->tail_canary = AVSP_ROUND1_CANARY_TAIL;
     runtime->route_state = AVSP_ROUND1_ROUTE_ENTRY_STATE;
     runtime->rng_seed = AVSP_ROUND1_INITIAL_RNG;
+    runtime->collision_identity_counter = 0x25u;
     runtime->player_variant = 1u;
     runtime->source_stage_record_type = 0x1cu;
     runtime->player.active = 1u;

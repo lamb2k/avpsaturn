@@ -32,6 +32,20 @@ assert [len(child["initialization"]["variant_presentation_sequences"][str(i)])
 damage = weapon["current_state_collision_damage"]
 assert damage["parent_contact"]["damage_u8"] == 127
 assert damage["child_contact"]["damage_u8"] == 31
+registration = damage["registration_and_pair_eligibility"]
+assert registration["spec_executable"] is True
+assert registration["visibility"]["x_guard"] == \
+    "u16(actor_x - camera_x + 0x0040) <= 0x0200"
+assert registration["visibility"]["y_guard"] == \
+    "u16(actor_y - camera_z + 0x0020) <= 0x0140"
+assert registration["identity_writer"][
+    "coffee_shop_counter_before_parent_u8"] == 0x25
+assert [row["identity_u8"] for row in
+        registration["identity_writer"]["assignments"]] == \
+    [0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b]
+assert registration["coffee_shop_projection"]["first_registered_frame"] == 2296
+assert registration["coffee_shop_projection"]["first_contact_frame"] == 2306
+assert registration["mutation_control"]["target_first_contact_frame_after"] == 2311
 assert weapon["empty_effect_variant1_contract"]["spec_executable"] is True
 assert weapon["empty_effect_variant1_contract"]["initialization"][
     "presentation_actor_fields"] == {
@@ -245,6 +259,9 @@ f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_re
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["empty_effect_variant1_contract"]["variant"] = 0; mutations.append((contract, f, "empty effect variant mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["empty_effect_variant1_contract"]["initialization"]["presentation_actor_fields"]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "empty effect priority mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["current_state_collision_damage"]["child_contact"]["damage_u8"] = 30; mutations.append((contract, f, "projectile damage lookup mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["current_state_collision_damage"]["registration_and_pair_eligibility"]["visibility"]["x_guard"] = "u16(actor_x - camera_x + 0x0020) <= 0x0200"; mutations.append((contract, f, "projectile collision registration bias mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["current_state_collision_damage"]["registration_and_pair_eligibility"]["identity_writer"]["coffee_shop_counter_before_parent_u8"] = 0x24; mutations.append((contract, f, "projectile collision identity seed mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["current_state_collision_damage"]["registration_and_pair_eligibility"]["mutation_control"]["target_first_contact_frame_after"] = 2306; mutations.append((contract, f, "projectile collision registration control mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_parent_class0"]["initialization"]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "projectile presentation object priority mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_child_class4"]["class_u8"] = 5; mutations.append((contract, f, "projectile child class mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["phase_0x1400"]["substates"][1]["writes"]["x_velocity_s32_16_16"] = 0x20000; mutations.append((contract, f, "class1f transition motion mutation"))
@@ -287,6 +304,7 @@ f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurri
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["intro_gate_suppression_control"]["mutant_at_frame_4100"]["main_spawn_transactions"] = 1; mutations.append((contract, f, "encounter intro-gate suppression mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["primary_writer"]["rng"]["calls"] = 0; mutations.append((contract, f, "encounter recurring RNG mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["progress_increment_boundary"]["increment_u16"] = 2; mutations.append((contract, f, "encounter KO progress mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["source_update_cadence"]["exceptions"][0]["updates_u8"] = 1; mutations.append((contract, f, "Coffee Shop scheduler cadence mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x09_type20_rng_owner"]["selector_table_u16"][0] = 1; mutations.append((contract, f, "class09 RNG selector mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["allocation_pop_order"].reverse(); mutations.append((contract, f, "class4e allocation-order mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant1_collision_effect"]["allocation"]["scheduler_guard"] = "projectile first"; mutations.append((contract, f, "class4e variant1 scheduler mutation"))

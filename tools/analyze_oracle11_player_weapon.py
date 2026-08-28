@@ -20,6 +20,9 @@ PROGRAM = ROOT / ".deps/mame/actorprobe/decrypted_program_2m.bin"
 AUTH = ROOT / "data/oracle11_predator_warrior_authority.json"
 OUT = ROOT / "data/oracle11_predator_weapon_projectile_resource.json"
 COFFEE = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs21a"
+COLLISION_A = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs32a"
+COLLISION_B = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs32b"
+COLLISION_S = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs32s"
 AIR_SPECIAL_A = ROOT / ".deps/mame/oracle11_player_air_a/air_special_combo"
 AIR_SPECIAL_B = ROOT / ".deps/mame/oracle11_player_air_b/air_special_combo"
 ORACLE07 = ROOT / "data/oracle07_predator_warrior_action_graph_equipment.json"
@@ -33,6 +36,18 @@ VARIANTS = (
 FILES = (
     "samples.tsv", "writes.tsv", "actors.tsv", "qsound.tsv", "damage.tsv",
     "impact_audio.tsv", "objects.tsv", "character_samples.tsv",
+)
+COLLISION_FILES = (
+    "coffee_shop_record4_collision_guard.tsv",
+    "coffee_shop_record12_guard6d_writes.tsv",
+    "coffee_shop_collision_lists.tsv",
+    "coffee_shop_collision_list_writes.tsv",
+    "coffee_shop_collision_actor_flags.tsv",
+    "coffee_shop_record4_collision_identity_writes.tsv",
+    "coffee_shop_collision_identity_assignments.tsv",
+    "coffee_shop_scene_health_writes.tsv",
+    "coffee_shop_scene_actors.tsv",
+    "coffee_shop_scene_frames.tsv",
 )
 
 
@@ -389,6 +404,94 @@ require(coffee_input[2249] == 0 and coffee_input[2250] == 8 and
         coffee_player[2251] == 2 and coffee_player[2252] == 0x0c00 and
         coffee_parent_projection[0]["first_visible_frame"] == 2254,
         "Coffee Shop Button1 input/action/allocation chronology drift")
+
+for filename in COLLISION_FILES:
+    require(digest(COLLISION_A / filename) == digest(COLLISION_B / filename),
+            f"Coffee Shop collision registration A/B mismatch: {filename}")
+collision_lists = rows(COLLISION_A / "coffee_shop_collision_lists.tsv")
+collision_lists_s = rows(COLLISION_S / "coffee_shop_collision_lists.tsv")
+collision_guard = rows(
+    COLLISION_A / "coffee_shop_record4_collision_guard.tsv")
+collision_health = rows(
+    COLLISION_A / "coffee_shop_scene_health_writes.tsv")
+collision_health_s = rows(
+    COLLISION_S / "coffee_shop_scene_health_writes.tsv")
+identity_assignments = rows(
+    COLLISION_A / "coffee_shop_collision_identity_assignments.tsv")
+suppressed_list_writes = [
+    row for row in rows(
+        COLLISION_S / "coffee_shop_collision_list_writes.tsv")
+    if row["suppressed"] == "1"]
+
+def collision_rows_at(source_rows, frame):
+    return [row for row in source_rows if int(row["frame"]) == frame]
+
+require(all("ffa180" not in row["defender_slots"]
+            for row in collision_rows_at(collision_lists, 2295)),
+        "Coffee Shop target registered before source visibility pass")
+require(all("ffa180" in row["defender_slots"]
+            for row in collision_rows_at(collision_lists, 2296)),
+        "Coffee Shop target registration frame drift")
+require(all("ffa180" not in row["defender_slots"]
+            for row in collision_rows_at(collision_lists_s, 2306)),
+        "defender-list suppression did not remove the target")
+require(len(suppressed_list_writes) == 15 and
+        {row["a6"] for row in suppressed_list_writes} == {"ffa180"} and
+        {row["pc"] for row in suppressed_list_writes} == {"01686c"} and
+        [int(row["frame"]) for row in suppressed_list_writes] ==
+            list(range(2296, 2311)),
+        "defender-list suppression transaction drift")
+target_health = [row for row in collision_health
+                 if row["target_slot"] == "ffa180" and
+                 row["damage_writer"] == "1"]
+target_health_s = [row for row in collision_health_s
+                   if row["target_slot"] == "ffa180" and
+                   row["damage_writer"] == "1"]
+require(target_health and
+        (target_health[0]["frame"], target_health[0]["attacker"],
+         target_health[0]["attack_record"], target_health[0]["health_before"],
+         target_health[0]["health_after"]) ==
+        ("2306", "ff8880", "030cd2", "0057", "0038"),
+        "registered source projectile contact drift")
+require(target_health_s and
+        (target_health_s[0]["frame"], target_health_s[0]["attacker"],
+         target_health_s[0]["attack_record"],
+         target_health_s[0]["health_before"], target_health_s[0]["health_after"]) ==
+        ("2311", "ff8880", "030ce2", "0057", "0038"),
+        "defender-list suppression did not shift the causal contact")
+for filename in ("coffee_shop_scene_actors.tsv",
+                 "coffee_shop_scene_frames.tsv"):
+    baseline_prefix = [row for row in rows(COLLISION_A / filename)
+                       if int(row["frame"]) <= 2305]
+    mutant_prefix = [row for row in rows(COLLISION_S / filename)
+                     if int(row["frame"]) <= 2305]
+    require(baseline_prefix == mutant_prefix,
+            f"collision-list suppression changed pre-contact {filename}")
+identity_projection = [
+    row for row in identity_assignments
+    if row["event"] == "exit" and 2253 <= int(row["frame"]) <= 2311]
+require([(int(row["frame"]), row["slot"], int(row["global_id820b"], 16))
+         for row in identity_projection] == [
+             (2253, "ff8680", 0x26), (2287, "ff8700", 0x27),
+             (2293, "ff8780", 0x28), (2299, "ff8800", 0x29),
+             (2305, "ff8880", 0x2a), (2311, "ff8900", 0x2b)],
+        "record-4 collision identity sequence drift")
+identity_entries = [
+    row for row in identity_assignments
+    if row["event"] == "entry" and 2253 <= int(row["frame"]) <= 2311]
+require([int(row["global_id820b"], 16) for row in identity_entries] ==
+        [0x25, 0x26, 0x27, 0x28, 0x29, 0x2a],
+        "record-4 collision identity preincrement drift")
+source_contact = next(row for row in collision_guard
+                      if row["event"] == "collision_true" and
+                      row["frame"] == "2306" and
+                      row["defender"] == "ffa180")
+require((source_contact["attacker"], source_contact["attacker_latch_index65"],
+         source_contact["attacker_id67"], source_contact["defender_guard6d"],
+         source_contact["defender_latch_value"],
+         source_contact["defender_suppress70"]) ==
+        ("ff8880", "00", "2a", "00", "2a", "00"),
+        "record-4 collision pair guard/latch drift")
 child_variant_offsets = [
     int.from_bytes(program[0x030784 + index * 2:0x030786 + index * 2], "big")
     for index in range(3)
@@ -739,6 +842,101 @@ implementation_contract = {
     "current_state_collision_damage": {
         "scheduler": "0x01cbcc record-type-4 attackers against record-type-12 defenders",
         "damage_routine": "0x01d504",
+        "registration_and_pair_eligibility": {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "spec_executable": True,
+            "source_blocks": {
+                "visibility_and_dispatch": window(opcodes, 0x0167ac, 0x016818),
+                "record4_registration": window(opcodes, 0x016818, 0x016830),
+                "record12_registration": window(opcodes, 0x01685e, 0x016896),
+                "record4_record12_scheduler": window(opcodes, 0x01cbcc, 0x01cc3e),
+                "pair_eligibility_and_contact": window(opcodes, 0x01d116, 0x01d1f8),
+                "collision_identity_writer": window(opcodes, 0x01d768, 0x01d77a),
+            },
+            "types_and_signedness": {
+                "actor_active": "actor+0x00:u8",
+                "visibility_flag": "actor+0x01:u8",
+                "world_x_high": "actor+0x10:u16 wrap arithmetic",
+                "world_y_high": "actor+0x14:u16 wrap arithmetic",
+                "camera_x": "global+0x0278:u16 wrap arithmetic",
+                "camera_z": "global+0x027c:u16 wrap arithmetic",
+                "defender_guard": "defender+0x6d:u8",
+                "attacker_latch_index": "attacker+0x65:s8 branch then u8 index",
+                "attacker_identity": "attacker+0x67:u8 nonzero wrapping sequence",
+                "defender_latches": "defender+0x68:u8[8]",
+                "defender_suppress": "defender+0x70:u8",
+            },
+            "visibility": {
+                "x_guard": "u16(actor_x - camera_x + 0x0040) <= 0x0200",
+                "y_guard": "u16(actor_y - camera_z + 0x0020) <= 0x0140",
+                "pass_write": "actor+0x01:u8 = 1 at 0x0167d0",
+                "fail_write": "actor+0x01:u8 = 0 at 0x0167e6",
+                "update_order": [
+                    "actor state/action/movement/animation",
+                    "visibility guard and actor+0x01 write",
+                    "record-type collision-list registration",
+                    "record4-v-record12 collision scheduler",
+                ],
+            },
+            "registration": {
+                "record4": {
+                    "guard": "actor+0x00:u8 == 1 after visibility pass",
+                    "writer": "0x01681e..0x016828",
+                    "list_pointer": "global+0x6e52:u16",
+                    "count": "global+0x6e7d:u8",
+                },
+                "record12": {
+                    "guard": "actor+0x00:u8 == 1 after visibility pass",
+                    "writer": "0x016864..0x01686e",
+                    "list_pointer": "global+0x6e5a:u16",
+                    "count": "global+0x6e81:u8",
+                },
+            },
+            "identity_writer": {
+                "entry": "0x01d768",
+                "rule": "clear actor+0x6e; preincrement global+0x020b:u8 until nonzero; copy to actor+0x67:u8",
+                "coffee_shop_counter_before_parent_u8": 0x25,
+                "assignments": [
+                    {"frame": int(row["frame"]), "slot": "0x" + row["slot"],
+                     "identity_u8": int(row["global_id820b"], 16)}
+                    for row in identity_projection
+                ],
+            },
+            "pair_guards": [
+                "defender+0x6d:u8 < 4 in scheduler",
+                "defender+0x00:u8 == 1",
+                "defender+0x70:u8 == 0",
+                "if attacker+0x65:s8 >= 0 then defender+0x68[index] != attacker+0x67",
+                "attacker animation record byte +9 attack selector != 0",
+                "defender animation record byte +8 hurt selector != 0",
+                "current attack and hurt boxes overlap",
+            ],
+            "contact_writes": {
+                "latch": "defender+0x68[attacker+0x65] = attacker+0x67 when index is nonnegative",
+                "projectile": "scheduler writes attacker health -1 and actor+0x6e = 1 after a true pair result",
+                "damage": "0x01d504 applies current attack-record damage before HIT/KO ownership",
+            },
+            "coffee_shop_projection": {
+                "target_slot": "0xffa180",
+                "absent_through_frame": 2295,
+                "first_registered_frame": 2296,
+                "first_contact_frame": 2306,
+                "contact_attacker": "0xff8880",
+                "contact_identity_u8": 0x2a,
+                "health_s16": [87, 56],
+            },
+            "mutation_control": {
+                "kind": "redirect only target 0xffa180 record12 list writes to 0xffa240",
+                "writer": "0x01686c",
+                "suppressed_writes": len(suppressed_list_writes),
+                "frames": [2296, 2310],
+                "list_count_unchanged_u8": 7,
+                "target_first_contact_frame_before": 2306,
+                "target_first_contact_frame_after": 2311,
+                "actor_and_route_projection_unchanged_through_frame": 2305,
+            },
+            "rng_calls": [],
+        },
         "parent_contact": {
             "frame": 4424, "attacker": "0xff8680",
             "attack_record": "0x0002fc58", "attack_selector_u8": 25,
@@ -841,10 +1039,11 @@ report = {
         {"class": "target_inside_outside", "result": "target selector produces source angle 35 under the bounded target route"},
         {"class": "target_removed", "result": "no authored fixed-frame damage result"},
         {"class": "damage_attacker_class", "result": "attacker +0x5e mutation changes the exact source damage lookup"},
+        {"class": "collision_registration", "result": "redirecting only target 0xffa180 out of the source record12 defender list preserves the actor/route prefix and shifts its first projectile damage from frame 2306 to 2311"},
         {"class": "resource_empty", "result": "0x1a00/0x1a02 and class-0x10 effect; no record-4 damaging family"},
     ],
     "mutation_controls": {
-        "count": 13, "all_downstream_effects_asserted": True,
+        "count": 14, "all_downstream_effects_asserted": True,
         "no_fixed_frame_result": True,
         "no_visible_weapon_inference_from_0xad": True,
         "wrong_character_rejected": True,
@@ -853,6 +1052,12 @@ report = {
         "capture_manifest_sha256": digest(RAW / "input_manifest.json"),
         "rejected_capture_manifest_sha256": digest(REJECTED / "input_manifest.json"),
         "capture_script_sha256": digest(ROOT / "tools/mame_capture_oracle11_player_weapon.lua"),
+        "collision_registration_capture_script_sha256": digest(
+            ROOT / "tools/mame_capture_oracle11_first_segment_progression.lua"),
+        "collision_registration_evidence": {
+            filename: digest(COLLISION_A / filename)
+            for filename in COLLISION_FILES
+        },
         "mame": manifest["mame"],
         "nvram_baseline_sha256": manifest["nvram_baseline_sha256"],
     },
