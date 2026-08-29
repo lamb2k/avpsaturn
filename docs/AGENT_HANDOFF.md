@@ -35,5 +35,55 @@ Incremental checkpoint `c584e416ac25d4e579e8c66a4059304a7e947b6c` closes record-
 
 Window-only WGC frames 2434..2500 pass direct inspection. Cadence sheet `06c40976bceb749c62d62a1a05b2dbc0d193c4d25fdf8271eaee5db95ac2d937` and clip `624c3dc4ece7c881f49422cea59e8dd84b98c541116168728f781c9cfea7e1ef` preserve Predator/staff identity, coherent projectile/effect movement, P1-only HUD/equipment, and both Coffee Shop planes, palette, and priority. Scene gaps improve from `305 / 1,285 / 3 / 94 / 3 / 281` to `305 / 1,272 / 3 / 94 / 3 / 281`; no category increases. Unowned Saturn actors, unidentified source pairs, and retained gameplay authorities remain zero. `d04a65a2253175c6e820140feefc35419e2cca07` intentionally remains the last fully accepted candidate until the zero-gap scene gate passes.
 
+The slot-`0x00ff9d00` HIT-return and bounds boundary is now source-bound at
+incremental checkpoint `a54b4567c87bbed611b1aeb675df2aa9b4bc3ca0`. The complete
+normal-return tail clears actor `+0x85`; the subsequent `0x060c2e` bounds
+routine reads the scheduler-entry phase bit before the recurring controller
+advances it. Odd phase uses the `0x060e94` player-proximity path and continues
+when the player is not near; even phase performs the source unsigned
+camera-relative test. Native now preserves action `0x16` through visible frames
+2469 and 2470 and enters release state `0x0600` at frame 2471 exactly as the
+source does. The accepted frame-2287/2306/2307 chronology and all 67 exact
+record-type-`4` rows remain unchanged.
+
+SPEC-02 is
+`41791464584f88d98b550c73c763fcdbd13c5e2a0d7750d2b975e11e9e49a287`;
+fixture is
+`fd643801590a2bab1094f84b5fd658cd7d11753d5527f77b758bc76efa433149`.
+Fast, Oracle, 115 SPEC mutations, 82 Oracle-enemy mutations, 181 native
+mutations, 15 scene mutations, 123 Target suppressions, both LiveEncounter
+Target profiles, and two commit-bound byte-identical 575-sample Emulator
+ledgers pass. Normalized ISO is
+`4f36929763215ac62cef93297412e06afeb46cbedcf4b8465d3e166aef8c5a2f`;
+sample payload is
+`0384c57f25723a4e411f1a13db2c3b45b45020099aaf36af904a87e5a73c85f9`.
+
+Fresh window-only Windows Graphics Capture covers visible frames 2468..2472.
+Cadence sheet
+`f7eafa69d9d87682a4e97a8bf228522256a09f1f309fdc3070f53668ea2cb837`
+and clip
+`9ceefe633829db7f20eeb1cf6b2092d400f1a9b74bf23782d72cafd4ebd0ec98`
+pass direct inspection: Predator/staff identity is stable, the source-held
+class-`0x1f` pose and release are coherent, the P1-only HUD/equipment row is
+intact, and both Coffee Shop planes, palette, and priority remain correct.
+
+Whole-scene gaps change from `305 / 1,272 / 3 / 94 / 3 / 281` to
+`319 / 1,274 / 3 / 94 / 3 / 281`. Actor-lifetime gaps increase by 14 because
+the corrected class-`0x1f` phase/release chronology invalidates 47 downstream
+false lifetime matches while resolving 33 real mismatches. Spawn/despawn gaps
+increase by two from the same fixed-pool lifecycle churn. Active-state,
+collision/damage, route/camera, and audio/load gaps do not increase. Unowned
+Saturn actors, unidentified source pairs, and retained gameplay authorities
+remain zero; the complete Coffee Shop gate remains open.
+
 ## Exact next experiment
-Bind the next earliest causal scene divergence at record-type `12`, class `0x1f`, slot `0x00ff9d00`, visible frame 2447. Source substate `0x0800` and animation `0x0012e65c` differ from native substate `0x1600` and animation `0x0012ec04`; native enters state `0x0600` at frame 2448 while source remains `0x0200`. Recover the accepted current-state branch, guard, presentation, and scheduler ordering from SPEC-02; amend only the existing fixture if an implementation-required field is absent. Do not fit the frame or disturb the exact record-type-`4` trajectory, frame-2287/2306/2307 chronology, class-`0x1f` retry/recovery cadence, or current player, visual, HUD, audio, collision, and population locks.
+Bind the next earliest causal scene divergence at visible frame 2511.
+Record-type `20`, class `0x09`, slots `0x00ffb480` and `0x00ffb500` remain on
+source animation `0x0006dbda` while native advances to `0x0006dbfe` and
+`0x0006dc22`; record-type `32`, class `0x01`, entry-controller x is source `8`
+versus native `9` on the same frame. Recover the accepted counter, guard,
+presentation cadence, and scheduler order from SPEC-02 and determine whether
+the two discrepancies share one source writer. Do not fit the frame or disturb
+the exact frame-2287/2306/2307 chronology, record-type-`4` trajectory,
+class-`0x1f` phase-return cadence, or current player, visual, HUD, audio,
+collision, and population locks.

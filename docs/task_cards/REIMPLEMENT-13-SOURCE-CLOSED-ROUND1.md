@@ -756,14 +756,54 @@ state, collision/damage, route/camera, and audio/load respectively. No category
 increases. Unowned Saturn actors, unidentified source pairs, and retained
 gameplay authorities remain zero; the complete Coffee Shop gate remains open.
 
-The next earliest causal divergence is record-type `12`, class `0x1f`, slot
-`0x00ff9d00` at visible frame 2447. Source substate `0x0800` and animation
-`0x0012e65c` differ from native substate `0x1600` and animation `0x0012ec04`;
-native then enters state `0x0600` at frame 2448 while source remains `0x0200`.
-Bind the accepted current-state class-`0x1f` branch, guard, presentation, and
-scheduler ordering. Do not fit the frame or disturb the exact record-type-`4`
-trajectory, frame-2287/2306/2307 chronology, class-`0x1f` retry/recovery
-cadence, or current player, visual, HUD, audio, collision, and population locks.
+Incremental checkpoint `a54b4567c87bbed611b1aeb675df2aa9b4bc3ca0`
+closes the slot-`0x00ff9d00` HIT-return and source-bounds phase boundary. The
+accepted common return tail clears actor `+0x85`; routine `0x060c2e` then reads
+the scheduler-entry phase bit before the recurring controller advances it.
+Odd phase uses player-proximity helper `0x060e94` and continues when the player
+is not near; even phase performs the unsigned camera-relative test. Native now
+preserves action `0x16` through visible frames 2469 and 2470 and enters release
+state `0x0600` at frame 2471 exactly as the source does. The exact
+frame-2287/2306/2307 collision chronology and all 67 record-type-`4` rows stay
+locked.
+
+SPEC-02 contract is
+`41791464584f88d98b550c73c763fcdbd13c5e2a0d7750d2b975e11e9e49a287`;
+fixture is
+`fd643801590a2bab1094f84b5fd658cd7d11753d5527f77b758bc76efa433149`.
+Fast, Oracle, 115 SPEC mutations, 82 Oracle-enemy mutations, 181 native
+mutations, 15 scene mutations, 123 Target suppressions, both LiveEncounter
+Target profiles, and two commit-bound byte-identical 575-sample Emulator
+ledgers pass. Normalized ISO is
+`4f36929763215ac62cef93297412e06afeb46cbedcf4b8465d3e166aef8c5a2f`;
+canonical sample payload is
+`0384c57f25723a4e411f1a13db2c3b45b45020099aaf36af904a87e5a73c85f9`.
+
+Fresh window-only WGC covers visible frames 2468..2472. Cadence sheet
+`f7eafa69d9d87682a4e97a8bf228522256a09f1f309fdc3070f53668ea2cb837`
+and clip
+`9ceefe633829db7f20eeb1cf6b2092d400f1a9b74bf23782d72cafd4ebd0ec98`
+pass direct inspection with stable Predator/staff identity, coherent
+class-`0x1f` held pose and release, P1-only HUD/equipment, and coherent Coffee
+Shop planes, palette, and priority.
+
+Whole-scene gaps change from `305 / 1,272 / 3 / 94 / 3 / 281` to
+`319 / 1,274 / 3 / 94 / 3 / 281`. The actor-lifetime count rises by 14 because
+the exact phase chronology invalidates 47 downstream false lifetime matches
+while resolving 33 genuine mismatches; spawn/despawn rises by two from the same
+downstream pool churn. Active-state, collision/damage, route/camera, and
+audio/load categories do not increase. Unowned Saturn actors, unidentified
+source pairs, and retained gameplay authorities remain zero. The complete
+Coffee Shop scene gate remains open.
+
+The next earliest causal divergence is visible frame 2511. Record-type `20`,
+class `0x09`, slots `0x00ffb480` and `0x00ffb500` remain on source animation
+`0x0006dbda` while native advances to `0x0006dbfe` and `0x0006dc22`;
+record-type `32`, class `0x01`, entry-controller x is source `8` versus native
+`9` on the same frame. Recover the accepted counter, guard, presentation
+cadence, and scheduler order and determine whether both discrepancies share one
+source writer. Do not fit the frame or disturb any accepted chronology or
+presentation lock.
 
 ## Next eligible cards
 
