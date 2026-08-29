@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "639c9580ecb3c63b76c1caf54bcf148ecab441d7b30388153d1b506782e587fc"
+EXPECTED = "e274c965def3371d131d13ae7617d97586415ce0934fb3a4378495b39de87f29"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -141,6 +141,12 @@ for before, after in (
      "allocation_index"),
     ("runtime->class45_rng_calls += 7u;",
      "runtime->class45_rng_calls += 6u;"),
+    ("if (!avsp_round1_spawn_class43_population(runtime, actor))",
+     "if (1)"),
+    ("runtime->class43_rng_calls +=\n            avsp_round1_class43.rng_calls_per_actor;",
+     "runtime->class43_rng_calls += 6u;"),
+    ("random & (actor->variant == 0u ? 0x1fu : 0x07u)",
+     "random & 0x07u"),
     ("avsp_round1_spawn_class47_group(runtime, actor);",
      "/* class-0x47 spawn suppressed */"),
     ("runtime->class47_rng_calls +=\n            avsp_round1_class47.rng_calls_per_actor;",
@@ -349,10 +355,10 @@ for before, after in (
      "0x47, 0u, 3u, 7u, 80, -1, 0x08eb86UL"),
     ("0x47, 0u, 4u, 7u, 80, -1, 0x08eb86UL",
      "0x47, 0u, 4u, 7u, 79, -1, 0x08eb86UL"),
+    ("0x43, 0u, 2u, 4u, 7u, 80, -1, 0x08ce44UL",
+     "0x43, 0u, 1u, 4u, 7u, 80, -1, 0x08ce44UL"),
     ("0u, 1u, 2u, 3u, 4u, 5u, 6u, 0u, 1u, 2u, 3u, 4u, 5u, 6u, 0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u, 8u, 7u, 8u, 7u, 8u, 0u, 1u, 2u, 3u, 4u",
      "0u, 1u, 2u, 3u, 4u, 5u, 6u, 0u, 1u, 2u, 3u, 3u, 5u, 6u, 0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u, 8u, 7u, 8u, 7u, 8u, 0u, 1u, 2u, 3u, 4u"),
-    ("{ 512, 1792, -96, 384, 1280, -96 },",
-     "{ 0, 1792, -96, 384, 1280, -96 },"),
     ("0x0077u, 1u, 0u,",
      "0x0077u, 0u, 0u,"),
     ("{ -65536L, -81920L, -98304L, -131072L },",
@@ -412,4 +418,4 @@ for before, after in (
                                  "--", "bash", "-lc", command],
                                 capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (162 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (165 real mutations)")

@@ -1695,6 +1695,8 @@ int main(void)
         AvspRound1ActorCore *effect_a;
         AvspRound1ActorCore *effect_b;
         AvspRound1ActorCore *guard;
+        AvspRound1Runtime class43_tail_runtime;
+        unsigned int class43_tail_ticks;
         avsp_round1_init(&transition_runtime);
         if (!avsp_round1_begin_first_entry(&transition_runtime))
             return 61;
@@ -1820,13 +1822,25 @@ int main(void)
             transition_runtime.class1f_audio_events != 2u ||
             transition_runtime.class4e_releases != 2u ||
             transition_runtime.class45_releases != 28u ||
-            transition_runtime.pools[3].free_count != 30u ||
+            transition_runtime.class43_spawn_requests != 8u ||
+            transition_runtime.class43_allocations != 8u ||
+            transition_runtime.class43_allocation_failures != 0u ||
+            transition_runtime.class43_initializations != 8u ||
+            transition_runtime.class43_rng_calls != 56u ||
+            transition_runtime.pools[3].free_count != 22u ||
+            transition_runtime.pools[3].records[0].actor_class != 0x43 ||
+            transition_runtime.pools[3].records[0].state != 0x0202u ||
+            transition_runtime.pools[3].records[0].x != 771 ||
+            transition_runtime.pools[3].records[0].y != 332 ||
+            transition_runtime.pools[3].records[0].z != 335 ||
+            transition_runtime.pools[3].records[0].animation_record !=
+                0x0008d31aUL ||
             transition_runtime.player_weapon_projectile_collision_writes != 0u ||
             transition_runtime.player_weapon_projectile_damage_writes != 0u ||
             transition_runtime.failure_count != 0u ||
             transition_runtime.fallback_count != 0u)
         {
-            fprintf(stderr, "transition summary completions=%lu audio=%lu releases=%lu pool24=%u collisions=%lu damage=%lu failures=%lu fallback=%lu first=%u/%u/%lu\n",
+            fprintf(stderr, "transition summary completions=%lu audio=%lu releases=%lu pool24=%u collisions=%lu damage=%lu failures=%lu fallback=%lu first=%u/%u/%lu class43first=%d/%04x/%d/%d/%d/%08lx\n",
                 transition_runtime.class1f_transition_completions,
                 transition_runtime.class1f_audio_events,
                 transition_runtime.class4e_releases,
@@ -1837,7 +1851,31 @@ int main(void)
                 transition_runtime.fallback_count,
                 transition_runtime.first_encounter.initialized,
                 transition_runtime.first_encounter.encounter_state,
-                transition_runtime.first_encounter.scheduler_updates);
+                transition_runtime.first_encounter.scheduler_updates,
+                transition_runtime.pools[3].records[0].actor_class,
+                transition_runtime.pools[3].records[0].state,
+                transition_runtime.pools[3].records[0].x,
+                transition_runtime.pools[3].records[0].y,
+                transition_runtime.pools[3].records[0].z,
+                transition_runtime.pools[3].records[0].animation_record);
+            return 68;
+        }
+        class43_tail_runtime = transition_runtime;
+        for (class43_tail_ticks = 0u;
+             class43_tail_runtime.pools[3].records[0].active &&
+             class43_tail_ticks < 40u; ++class43_tail_ticks)
+            if (!avsp_round1_step_scheduler(&class43_tail_runtime))
+                return 68;
+        if (class43_tail_ticks != 10u ||
+            class43_tail_runtime.pools[3].records[0].active)
+        {
+            fprintf(stderr,
+                "class43 tail ticks=%u active=%u state=%04x releases=%lu code=%u\n",
+                class43_tail_ticks,
+                class43_tail_runtime.pools[3].records[0].active,
+                class43_tail_runtime.pools[3].records[0].state,
+                class43_tail_runtime.class43_releases,
+                class43_tail_runtime.scheduler_failure_code);
             return 68;
         }
         for (tick = 10u; tick < 20u; ++tick)
@@ -2681,6 +2719,33 @@ int main(void)
             }
             ++entry_ticks;
         }
+        for (ticks = 0u; ticks < inner_runtime.pools[2].capacity; ++ticks)
+        {
+            AvspRound1ActorCore *scene_actor =
+                &inner_runtime.pools[2].records[ticks];
+            if (scene_actor->active && scene_actor->actor_class == 0x01)
+            {
+                scene_actor->active = 0u;
+                inner_runtime.pools[2].free_stack[
+                    inner_runtime.pools[2].free_count++] =
+                    (unsigned short)(scene_actor->source_slot & 0xffffu);
+            }
+        }
+        inner_runtime.coffee_scene_record_cursor =
+            AVSP_ROUND1_COFFEE_SCENE_RECORD_COUNT;
+        for (ticks = 0u; ticks < inner_runtime.pools[3].capacity; ++ticks)
+        {
+            AvspRound1ActorCore *scene_actor =
+                &inner_runtime.pools[3].records[ticks];
+            if (scene_actor->active && scene_actor->actor_class == 0x43)
+            {
+                scene_actor->active = 0u;
+                inner_runtime.pools[3].free_stack[
+                    inner_runtime.pools[3].free_count++] =
+                    (unsigned short)(scene_actor->source_slot & 0xffffu);
+            }
+        }
+        ticks = 0u;
         stage_class1f_release(&inner_runtime, 19);
         if (!avsp_round1_step_scheduler(&inner_runtime))
             return 109;
@@ -2748,7 +2813,7 @@ int main(void)
                 return 109;
             ++ticks;
         }
-        if (inner_runtime.rng_seed != 0xec32u ||
+        if (inner_runtime.rng_seed != 0x51ccu ||
             inner_runtime.type16_spawn_requests != 3u ||
             inner_runtime.type16_allocations != 3u ||
             parent->source_motion_fields[0] != 8 ||
@@ -2756,14 +2821,17 @@ int main(void)
             parent->source_projectile_enable != 0u)
         {
             fprintf(stderr,
-                "inner8 motion seed=%04x type16=%lu/%lu phase=%d x=%d emit=%u ticks=%u\n",
+                "inner8 motion seed=%04x type16=%lu/%lu phase=%d x=%d emit=%u ticks=%u class43=%lu/%lu c01=%lu\n",
                 inner_runtime.rng_seed,
                 inner_runtime.type16_spawn_requests,
                 inner_runtime.type16_allocations,
                 parent->source_motion_fields[0],
                 parent->x,
                 parent->source_projectile_enable,
-                ticks);
+                ticks,
+                inner_runtime.class43_allocations,
+                inner_runtime.class43_rng_calls,
+                inner_runtime.class01_spawn_allocations);
             return 109;
         }
     }

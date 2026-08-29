@@ -87,7 +87,8 @@ int main(void)
             emit_projectile(source_frame,
                             &runtime.player_weapon_projectiles[index]);
         if (source_frame == 2072u || source_frame == 2073u ||
-            (source_frame >= 2249u && source_frame <= 2294u))
+            (source_frame >= 2249u && source_frame <= 2294u) ||
+            (source_frame >= 2329u && source_frame <= 2330u))
             fprintf(stderr, "rng_checkpoint frame=%u seed=%04x\n",
                     source_frame, runtime.rng_seed);
         if ((input & (AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_ATTACK |

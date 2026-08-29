@@ -83,6 +83,8 @@ static int avsp_round1_pool_active_free_valid(const AvspRound1Pool *pool)
              !(pool->record_type == 36u && actor->active == 2u) &&
              !(pool->record_type == 20u && actor->actor_class == 0x01 &&
                actor->active == 2u) &&
+             !(pool->record_type == 24u && actor->actor_class == 0x43 &&
+               actor->active == 2u) &&
              !(pool->record_type == 24u && actor->actor_class == 0x47 &&
                actor->active == 2u)) ||
             actor->type != pool->record_type ||
@@ -323,6 +325,8 @@ static int avsp_round1_dispatch_supported(unsigned char record_type,
                                            signed char actor_class)
 {
     unsigned int index;
+    if (record_type == 24u && actor_class == 0x43)
+        return 1;
     if (record_type == 24u && actor_class == 0x44)
         return 1;
     if (record_type == 24u && actor_class == 0x47)
@@ -2280,6 +2284,8 @@ static int avsp_round1_step_class1f_source_action(
         if (!avsp_round1_seed_class1f_action_fields(runtime, actor,
                 runtime->rng_seed, (unsigned char)actor->source_action, 1))
             return 0;
+        actor->hurt_selector = actor->source_a5;
+        actor->attack_selector = actor->source_a6;
         return 3;
     }
     if (actor->state == 0x0208u)
@@ -4438,6 +4444,246 @@ static int avsp_round1_step_class4e(AvspRound1Runtime *runtime,
     return 0;
 }
 
+static unsigned int avsp_round1_class43_record_index(
+    unsigned long animation_record)
+{
+    unsigned int index;
+    for (index = 0u; index < AVSP_ROUND1_CLASS43_PRESENTATION_COUNT; ++index)
+        if (avsp_round1_class43_records[index].animation_record ==
+            animation_record)
+            return index;
+    return AVSP_ROUND1_CLASS43_PRESENTATION_COUNT;
+}
+
+static int avsp_round1_bind_class43_channel(AvspRound1ActorCore *actor,
+                                            unsigned char selector,
+                                            int alternate)
+{
+    unsigned int index;
+    const AvspRound1AnimationStateSpec *record;
+    if (selector >= AVSP_ROUND1_CLASS43_SEQUENCE_COUNT)
+        return 0;
+    index = avsp_round1_class43_sequence_offsets[selector];
+    if (index >= AVSP_ROUND1_CLASS43_PRESENTATION_COUNT)
+        return 0;
+    record = &avsp_round1_class43_records[index];
+    if (alternate)
+    {
+        actor->source_a4 = selector;
+        actor->source_alternate_animation_record = record->animation_record;
+        actor->source_alternate_assembly = record->assembly;
+        actor->source_alternate_animation_timer = record->timer;
+        actor->source_alternate_animation_branch = record->branch;
+    }
+    else
+    {
+        actor->source_a3 = selector;
+        actor->source_primary_animation_record = record->animation_record;
+        actor->source_primary_assembly = record->assembly;
+        actor->source_primary_animation_timer = record->timer;
+        actor->source_primary_animation_branch = record->branch;
+    }
+    return 1;
+}
+
+static int avsp_round1_advance_class43_channel(
+    AvspRound1ActorCore *actor, int alternate)
+{
+    unsigned short *timer = alternate ?
+        &actor->source_alternate_animation_timer :
+        &actor->source_primary_animation_timer;
+    short *branch = alternate ?
+        &actor->source_alternate_animation_branch :
+        &actor->source_primary_animation_branch;
+    unsigned long current = alternate ?
+        actor->source_alternate_animation_record :
+        actor->source_primary_animation_record;
+    unsigned char selector = alternate ? actor->source_a4 : actor->source_a3;
+    unsigned int index;
+    const AvspRound1AnimationStateSpec *record;
+    if (*timer == 0u)
+        return 0;
+    --*timer;
+    if (*timer != 0u)
+        return 1;
+    if (*branch < 0)
+        return avsp_round1_bind_class43_channel(actor, selector, alternate);
+    index = avsp_round1_class43_record_index(current);
+    if (index + 1u >= AVSP_ROUND1_CLASS43_PRESENTATION_COUNT)
+        return 0;
+    record = &avsp_round1_class43_records[index + 1u];
+    if (alternate)
+    {
+        actor->source_alternate_animation_record = record->animation_record;
+        actor->source_alternate_assembly = record->assembly;
+        actor->source_alternate_animation_timer = record->timer;
+        actor->source_alternate_animation_branch = record->branch;
+    }
+    else
+    {
+        actor->source_primary_animation_record = record->animation_record;
+        actor->source_primary_assembly = record->assembly;
+        actor->source_primary_animation_timer = record->timer;
+        actor->source_primary_animation_branch = record->branch;
+    }
+    return 1;
+}
+
+static int avsp_round1_step_class43(AvspRound1Runtime *runtime,
+                                    AvspRound1Pool *pool,
+                                    AvspRound1ActorCore *actor,
+                                    unsigned int slot_index)
+{
+    unsigned short phase = actor->state & 0xff00u;
+    unsigned char landed = (unsigned char)(actor->state & 0x00ffu);
+    if (phase == 0u)
+    {
+        const AvspRound1Class45MotionSpec *motion;
+        unsigned char random;
+        unsigned char selector;
+        unsigned int motion_index;
+        actor->state = 0x0200u;
+        actor->object_or = 0x8000u;
+        random = avsp_round1_source_rng(runtime);
+        selector = avsp_round1_class43_animation_selectors[
+            random & (actor->variant == 0u ? 0x1fu : 0x07u)];
+        if (!avsp_round1_bind_class43_channel(actor, selector, 1))
+            return 0;
+        random = avsp_round1_source_rng(runtime);
+        selector = avsp_round1_class43_animation_selectors[
+            random & (actor->variant == 0u ? 0x1fu : 0x07u)];
+        if (!avsp_round1_bind_class43_channel(actor, selector, 0))
+            return 0;
+        random = avsp_round1_source_rng(runtime);
+        actor->source_primary_x_fp +=
+            (long)((short)((random & 0x1fu) - 0x10u)) * 65536L;
+        random = avsp_round1_source_rng(runtime);
+        actor->source_primary_y_fp +=
+            (long)((short)((random & 0x1fu) - 0x10u)) * 65536L;
+        random = avsp_round1_source_rng(runtime);
+        actor->source_alternate_x_fp +=
+            (long)((short)((random & 0x1fu) - 0x10u)) * 65536L;
+        random = avsp_round1_source_rng(runtime);
+        actor->source_alternate_y_fp +=
+            (long)((short)((random & 0x1fu) - 0x10u)) * 65536L;
+        random = avsp_round1_source_rng(runtime);
+        motion_index = (unsigned int)((random & 0x70u) >> 4);
+        motion = &avsp_round1_class43_motion[motion_index];
+        actor->source_motion_fields[0] = motion->primary_x_velocity;
+        actor->source_motion_fields[1] = motion->alternate_x_velocity;
+        actor->source_motion_fields[2] = motion->primary_y_velocity;
+        actor->source_motion_fields[3] = motion->alternate_y_velocity;
+        actor->source_motion_fields[4] = motion->primary_y_acceleration;
+        actor->source_motion_fields[5] = motion->alternate_y_acceleration;
+        if (actor->source_facing_selector == 0u)
+        {
+            actor->source_motion_fields[0] =
+                (short)-actor->source_motion_fields[0];
+            actor->source_motion_fields[1] =
+                (short)-actor->source_motion_fields[1];
+        }
+        runtime->class43_rng_calls +=
+            avsp_round1_class43.rng_calls_per_actor;
+        ++runtime->class43_initializations;
+        if (((unsigned long)runtime->frame +
+             (pool->capacity - 1u - slot_index)) % 2u != 0u)
+        {
+            actor->source_x_fp = actor->source_alternate_x_fp;
+            actor->source_y_fp = actor->source_alternate_y_fp;
+            actor->animation_record =
+                actor->source_alternate_animation_record;
+            actor->assembly = actor->source_alternate_assembly;
+            actor->animation_timer =
+                actor->source_alternate_animation_timer;
+            actor->animation_branch =
+                actor->source_alternate_animation_branch;
+        }
+        else
+        {
+            actor->source_x_fp = actor->source_primary_x_fp;
+            actor->source_y_fp = actor->source_primary_y_fp;
+            actor->animation_record = actor->source_primary_animation_record;
+            actor->assembly = actor->source_primary_assembly;
+            actor->animation_timer = actor->source_primary_animation_timer;
+            actor->animation_branch = actor->source_primary_animation_branch;
+        }
+        actor->x = avsp_round1_fixed_high_word(actor->source_x_fp);
+        actor->y = avsp_round1_fixed_high_word(actor->source_y_fp);
+        return 1;
+    }
+    if (phase == 0x0200u)
+    {
+        if ((landed & 1u) == 0u)
+        {
+            actor->source_primary_x_fp +=
+                (long)actor->source_motion_fields[0] * 256L;
+            actor->source_primary_y_fp +=
+                (long)actor->source_motion_fields[2] * 256L;
+            actor->source_motion_fields[2] = (short)(
+                actor->source_motion_fields[2] +
+                actor->source_motion_fields[4]);
+        }
+        if ((landed & 2u) == 0u)
+        {
+            actor->source_alternate_x_fp +=
+                (long)actor->source_motion_fields[1] * 256L;
+            actor->source_alternate_y_fp +=
+                (long)actor->source_motion_fields[3] * 256L;
+            actor->source_motion_fields[3] = (short)(
+                actor->source_motion_fields[3] +
+                actor->source_motion_fields[5]);
+        }
+        if (!avsp_round1_advance_class43_channel(actor, 0) ||
+            !avsp_round1_advance_class43_channel(actor, 1))
+            return 0;
+        if ((unsigned short)avsp_round1_fixed_high_word(
+                actor->source_primary_y_fp) < (unsigned short)actor->z)
+            landed |= 1u;
+        if ((unsigned short)avsp_round1_fixed_high_word(
+                actor->source_alternate_y_fp) < (unsigned short)actor->z)
+            landed |= 2u;
+        actor->state = (unsigned short)(0x0200u | landed);
+        if (landed == 3u)
+        {
+            actor->state = 0x0403u;
+            ++runtime->class43_state_transitions;
+        }
+        if (((unsigned long)runtime->frame +
+             (pool->capacity - 1u - slot_index)) % 2u != 0u)
+        {
+            actor->source_x_fp = actor->source_alternate_x_fp;
+            actor->source_y_fp = actor->source_alternate_y_fp;
+            actor->animation_record =
+                actor->source_alternate_animation_record;
+            actor->assembly = actor->source_alternate_assembly;
+            actor->animation_timer =
+                actor->source_alternate_animation_timer;
+            actor->animation_branch =
+                actor->source_alternate_animation_branch;
+        }
+        else
+        {
+            actor->source_x_fp = actor->source_primary_x_fp;
+            actor->source_y_fp = actor->source_primary_y_fp;
+            actor->animation_record = actor->source_primary_animation_record;
+            actor->assembly = actor->source_primary_assembly;
+            actor->animation_timer = actor->source_primary_animation_timer;
+            actor->animation_branch = actor->source_primary_animation_branch;
+        }
+        actor->x = avsp_round1_fixed_high_word(actor->source_x_fp);
+        actor->y = avsp_round1_fixed_high_word(actor->source_y_fp);
+        return 1;
+    }
+    if (phase == 0x0400u)
+    {
+        if (!avsp_round1_release_pool_actor(pool, actor))
+            return 0;
+        ++runtime->class43_releases;
+        return 1;
+    }
+    return 0;
+}
+
 static unsigned int avsp_round1_class45_record_index(unsigned char selector)
 {
     if (selector <= 1u)
@@ -4873,6 +5119,47 @@ static int avsp_round1_step_class3d(AvspRound1Runtime *runtime,
     return 0;
 }
 
+static int avsp_round1_spawn_class43_population(
+    AvspRound1Runtime *runtime, const AvspRound1ActorCore *owner)
+{
+    unsigned int group;
+    for (group = 0u; group < avsp_round1_class43.group_count; ++group)
+    {
+        unsigned int index;
+        for (index = 0u; index < avsp_round1_class43.actors_per_group;
+             ++index)
+        {
+            AvspRound1ActorCore *actor;
+            ++runtime->class43_spawn_requests;
+            actor = avsp_round1_allocate_pool_actor(runtime, 3u);
+            if (actor == 0)
+            {
+                ++runtime->class43_allocation_failures;
+                break;
+            }
+            actor->active = 2u;
+            actor->actor_class = avsp_round1_class43.actor_class;
+            actor->variant = avsp_round1_class43.variant;
+            actor->state = 0u;
+            actor->substate = 0u;
+            actor->facing = 0u;
+            actor->source_facing_selector = owner->source_facing_selector;
+            actor->x = owner->x;
+            actor->y = (short)(owner->y + avsp_round1_class43.y_offset);
+            actor->z = (short)(owner->z + avsp_round1_class43.z_offset);
+            actor->source_primary_x_fp = (long)actor->x * 65536L;
+            actor->source_primary_y_fp = (long)actor->y * 65536L;
+            actor->source_alternate_x_fp = actor->source_primary_x_fp;
+            actor->source_alternate_y_fp = actor->source_primary_y_fp;
+            actor->source_x_fp = actor->source_primary_x_fp;
+            actor->source_y_fp = actor->source_primary_y_fp;
+            actor->dispatch_entry = avsp_round1_class43.dispatch;
+            ++runtime->class43_allocations;
+        }
+    }
+    return runtime->class43_allocation_failures == 0u;
+}
+
 static void avsp_round1_spawn_class47_group(AvspRound1Runtime *runtime,
                                             const AvspRound1ActorCore *owner)
 {
@@ -5248,6 +5535,8 @@ static int avsp_round1_step_class01(AvspRound1Runtime *runtime,
         actor->state = 0x0206u;
         ++runtime->class01_state_transitions;
         if (!avsp_round1_spawn_class01_enemy(runtime, actor))
+            return 0;
+        if (!avsp_round1_spawn_class43_population(runtime, actor))
             return 0;
         runtime->class01_effect_requests += 8u;
         runtime->class01_audio_command = actor->variant == 0u ?
@@ -6432,6 +6721,7 @@ static int avsp_round1_projectile_collision_pass(
     {
         AvspRound1ActorCore *target = &runtime->pools[0].records[index];
         const AvspRound1PresentationSpec *target_presentation;
+        const AvspRound1Class1fActionRecordSpec *target_action_record;
         unsigned char current_hurt_selector;
         short health;
         signed char latch_index = projectile->collision_latch_index;
@@ -6443,9 +6733,11 @@ static int avsp_round1_projectile_collision_pass(
             continue;
         target_presentation = avsp_round1_find_class1f_presentation(
             target->animation_record);
+        target_action_record = avsp_round1_find_class1f_action_record(
+            target->animation_record);
         if (target->animation_record == 0u)
             continue;
-        if (target_presentation == 0)
+        if (target_presentation == 0 && target_action_record == 0)
         {
             runtime->scheduler_failure_source_slot = target->source_slot;
             runtime->scheduler_failure_state = target->state;
@@ -6454,7 +6746,9 @@ static int avsp_round1_projectile_collision_pass(
                 target->animation_record;
             return 0;
         }
-        current_hurt_selector = target_presentation->hurt_selector;
+        current_hurt_selector = target_action_record != 0 ?
+            target_action_record->hurt_selector :
+            target_presentation->hurt_selector;
         if (current_hurt_selector == 0u)
             continue;
         if (latch_index >= 0)
@@ -7271,6 +7565,22 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
                         &runtime->pools[pool_index], actor))
                 {
                     runtime->scheduler_failure_code = 7u;
+                    ++runtime->failure_count;
+                    return 0;
+                }
+                continue;
+            }
+            if (actor->type == 24u && actor->actor_class == 0x43)
+            {
+                ++actor->scheduler_updates;
+                ++runtime->scheduler_dispatches;
+                if (!avsp_round1_step_class43(runtime,
+                        &runtime->pools[pool_index], actor, slot_index))
+                {
+                    runtime->scheduler_failure_code = 34u;
+                    runtime->scheduler_failure_source_slot =
+                        actor->source_slot;
+                    runtime->scheduler_failure_state = actor->state;
                     ++runtime->failure_count;
                     return 0;
                 }

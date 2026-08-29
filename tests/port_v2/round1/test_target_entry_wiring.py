@@ -8,7 +8,7 @@ MAIN = (ROOT / "main.c").read_text()
 REQUIRED = (
     '#include "src/port_v2/gameplay/round1/round1.h"',
     "#define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000",
-    "#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x14860",
+    "#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x1487c",
     "#define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000",
     "#define AVSP_LIVE_DIAG_RECORD_BYTES 156",
     "#define round1_runtime (*AVSP_ROUND1_RUNTIME_BASE)",

@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "639c9580ecb3c63b76c1caf54bcf148ecab441d7b30388153d1b506782e587fc"
+    "e274c965def3371d131d13ae7617d97586415ce0934fb3a4378495b39de87f29"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -88,6 +88,10 @@
 #define AVSP_ROUND1_CLASS4E_PRESENTATION_COUNT 5u
 #define AVSP_ROUND1_CLASS4E_VARIANT1_PRESENTATION_COUNT 3u
 #define AVSP_ROUND1_CLASS44_PRESENTATION_COUNT 2u
+#define AVSP_ROUND1_CLASS43_SELECTOR_COUNT 32u
+#define AVSP_ROUND1_CLASS43_SEQUENCE_COUNT 16u
+#define AVSP_ROUND1_CLASS43_PRESENTATION_COUNT 70u
+#define AVSP_ROUND1_CLASS43_MOTION_COUNT 8u
 #define AVSP_ROUND1_CLASS45_SCENE_ACTOR_COUNT 28u
 #define AVSP_ROUND1_CLASS45_SELECTOR_COUNT 32u
 #define AVSP_ROUND1_CLASS45_PRESENTATION_COUNT 5u
@@ -329,6 +333,18 @@ typedef struct
 typedef struct
 {
     signed char actor_class;
+    unsigned char variant;
+    unsigned char group_count;
+    unsigned char actors_per_group;
+    unsigned char rng_calls_per_actor;
+    short y_offset;
+    short z_offset;
+    unsigned long dispatch;
+} AvspRound1Class43Spec;
+
+typedef struct
+{
+    signed char actor_class;
     unsigned char initial_state;
     unsigned char active_state;
     unsigned char emitter_state;
@@ -440,6 +456,12 @@ typedef struct
 #define source_prior_health source_motion_fields[3]
 #define source_hit_recovery_active source_motion_fields[4]
 #define source_hit_action_timer transition_timer
+
+/* Class-0x43 uses two presentation channels but has no child actors and only
+ * six motion words. Keep its primary-channel timer/branch in phase-exclusive
+ * fixed-pool scratch instead of adding four bytes to every actor record. */
+#define source_primary_animation_timer source_children[0]
+#define source_primary_animation_branch source_motion_fields[6]
 
 typedef struct
 {
@@ -1296,6 +1318,13 @@ typedef struct
     unsigned long class4e_variant1_releases;
     unsigned long class44_guard_updates;
     unsigned long class44_guard_clears;
+    unsigned long class43_spawn_requests;
+    unsigned long class43_allocations;
+    unsigned long class43_allocation_failures;
+    unsigned long class43_initializations;
+    unsigned long class43_rng_calls;
+    unsigned long class43_state_transitions;
+    unsigned long class43_releases;
     unsigned long class45_spawn_attempts;
     unsigned long class45_allocations;
     unsigned long class45_initializations;

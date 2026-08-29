@@ -168,6 +168,8 @@ def build() -> str:
     class4e_variant1 = class4e["variant1_collision_effect"]
     class4e_rng = class4e["seed_transaction_by_scheduler_slot"]
     class44 = auxiliary_dependencies["class_0x44_type24_command_guard_owner"]
+    class43 = auxiliary_dependencies[
+        "class_0x43_type24_class01_scene_population"]
     class45 = auxiliary_dependencies["class_0x45_type24_scene_population"]
     class47 = auxiliary_dependencies[
         "class_0x47_type24_class02_child_presentation"]
@@ -1822,6 +1824,54 @@ def build() -> str:
             row["timer_u16"], row["branch_s16"], row["animation_record"],
             row["assembly"], row["hurt_selector_u8"],
             row["attack_selector_u8"]))
+    class43_sequences = class43["state0"]["animation_sequences"]
+    class43_sequence_offsets = []
+    class43_records = []
+    for sequence in class43_sequences:
+        class43_sequence_offsets.append(len(class43_records))
+        class43_records.extend(sequence["records"])
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Class43Spec avsp_round1_class43 =",
+        "{",
+        "    %s, %du, %du, %du, %du, %d, %d, %sUL" % (
+            class43["class_u8"], class43["variant_u8"],
+            class43["spawn_owner"]["groups_u8"],
+            class43["spawn_owner"]["attempts_per_group_u8"],
+            class43["rng_calls_per_actor_u8"], 80, -1,
+            class43["dispatch"]),
+        "};", "",
+        "static const unsigned char avsp_round1_class43_animation_selectors[AVSP_ROUND1_CLASS43_SELECTOR_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in
+                              class43["state0"]["animation_selector_table_u8"]),
+        "};", "",
+        "static const unsigned char avsp_round1_class43_sequence_offsets[AVSP_ROUND1_CLASS43_SEQUENCE_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{value}u" for value in
+                              class43_sequence_offsets),
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class43_records[AVSP_ROUND1_CLASS43_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class43_records:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Class45MotionSpec avsp_round1_class43_motion[AVSP_ROUND1_CLASS43_MOTION_COUNT] =",
+        "{",
+    ])
+    for row in class43["state0"]["motion_table"]:
+        lines.append("    { %d, %d, %d, %d, %d, %d }," % (
+            row["primary_x_velocity_s16"],
+            row["primary_y_velocity_s16"],
+            row["primary_y_acceleration_s16"],
+            row["alternate_x_velocity_s16"],
+            row["alternate_y_velocity_s16"],
+            row["alternate_y_acceleration_s16"]))
     lines.extend([
         "};", "",
         "static const unsigned long avsp_round1_class45_source_slots[AVSP_ROUND1_CLASS45_SCENE_ACTOR_COUNT] =",

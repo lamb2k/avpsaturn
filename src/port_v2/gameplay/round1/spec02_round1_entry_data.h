@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=639c9580ecb3c63b76c1caf54bcf148ecab441d7b30388153d1b506782e587fc */
-/* fixtures_sha256=c00987b4c1d5e0623de7cb5c79e84a0cd4ab25021b895c8ea2650f6c27378dec */
+/* contract_sha256=e274c965def3371d131d13ae7617d97586415ce0934fb3a4378495b39de87f29 */
+/* fixtures_sha256=baf1583903dbb5138b945f5cba993cd250756867c43faea86ab1548f9b0c7c62 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -893,6 +893,107 @@ static const AvspRound1AnimationStateSpec avsp_round1_class44_records[AVSP_ROUND
 {
     { 4095u, -32768, 0x0008daf2UL, 0x0008db2eUL, 0u, 0u },
     { 4095u, -32768, 0x0008db1aUL, 0x0008db6aUL, 0u, 0u },
+};
+
+static const AvspRound1Class43Spec avsp_round1_class43 =
+{
+    0x43, 0u, 2u, 4u, 7u, 80, -1, 0x08ce44UL
+};
+
+static const unsigned char avsp_round1_class43_animation_selectors[AVSP_ROUND1_CLASS43_SELECTOR_COUNT] =
+{
+    5u, 6u, 7u, 15u, 5u, 6u, 7u, 15u, 0u, 1u, 2u, 3u, 4u, 8u, 9u, 10u, 11u, 12u, 13u, 14u, 0u, 1u, 2u, 3u, 4u, 8u, 9u, 10u, 11u, 12u, 13u, 14u
+};
+
+static const unsigned char avsp_round1_class43_sequence_offsets[AVSP_ROUND1_CLASS43_SEQUENCE_COUNT] =
+{
+    0u, 6u, 12u, 18u, 24u, 30u, 36u, 40u, 44u, 48u, 56u, 64u, 66u, 67u, 68u, 69u
+};
+
+static const AvspRound1AnimationStateSpec avsp_round1_class43_records[AVSP_ROUND1_CLASS43_PRESENTATION_COUNT] =
+{
+    { 4u, 0, 0x0008d14aUL, 0x0008d5eaUL, 0u, 0u },
+    { 4u, 0, 0x0008d15aUL, 0x0008d5f8UL, 0u, 0u },
+    { 4u, 0, 0x0008d16aUL, 0x0008d606UL, 0u, 0u },
+    { 4u, 0, 0x0008d17aUL, 0x0008d614UL, 0u, 0u },
+    { 4u, 0, 0x0008d18aUL, 0x0008d622UL, 0u, 0u },
+    { 4u, -32768, 0x0008d19aUL, 0x0008d630UL, 0u, 0u },
+    { 4u, 0, 0x0008d1aeUL, 0x0008d63eUL, 0u, 0u },
+    { 4u, 0, 0x0008d1beUL, 0x0008d64cUL, 0u, 0u },
+    { 4u, 0, 0x0008d1ceUL, 0x0008d65aUL, 0u, 0u },
+    { 4u, 0, 0x0008d1deUL, 0x0008d668UL, 0u, 0u },
+    { 4u, 0, 0x0008d1eeUL, 0x0008d676UL, 0u, 0u },
+    { 4u, -32768, 0x0008d1feUL, 0x0008d684UL, 0u, 0u },
+    { 4u, 0, 0x0008d212UL, 0x0008d692UL, 0u, 0u },
+    { 4u, 0, 0x0008d222UL, 0x0008d6a0UL, 0u, 0u },
+    { 4u, 0, 0x0008d232UL, 0x0008d6aeUL, 0u, 0u },
+    { 4u, 0, 0x0008d242UL, 0x0008d6bcUL, 0u, 0u },
+    { 4u, 0, 0x0008d252UL, 0x0008d6caUL, 0u, 0u },
+    { 4u, -32768, 0x0008d262UL, 0x0008d6d8UL, 0u, 0u },
+    { 4u, 0, 0x0008d276UL, 0x0008d6e6UL, 0u, 0u },
+    { 4u, 0, 0x0008d286UL, 0x0008d6f4UL, 0u, 0u },
+    { 4u, 0, 0x0008d296UL, 0x0008d702UL, 0u, 0u },
+    { 4u, 0, 0x0008d2a6UL, 0x0008d710UL, 0u, 0u },
+    { 4u, 0, 0x0008d2b6UL, 0x0008d71eUL, 0u, 0u },
+    { 4u, -32768, 0x0008d2c6UL, 0x0008d72cUL, 0u, 0u },
+    { 4u, 0, 0x0008d2daUL, 0x0008d73aUL, 0u, 0u },
+    { 4u, 0, 0x0008d2eaUL, 0x0008d748UL, 0u, 0u },
+    { 4u, 0, 0x0008d2faUL, 0x0008d756UL, 0u, 0u },
+    { 4u, 0, 0x0008d30aUL, 0x0008d764UL, 0u, 0u },
+    { 4u, 0, 0x0008d31aUL, 0x0008d772UL, 0u, 0u },
+    { 4u, -32768, 0x0008d32aUL, 0x0008d780UL, 0u, 0u },
+    { 4u, 0, 0x0008d33eUL, 0x0008d78eUL, 0u, 0u },
+    { 4u, 0, 0x0008d34eUL, 0x0008d79cUL, 0u, 0u },
+    { 4u, 0, 0x0008d35eUL, 0x0008d7aaUL, 0u, 0u },
+    { 4u, 0, 0x0008d36eUL, 0x0008d7b8UL, 0u, 0u },
+    { 4u, 0, 0x0008d37eUL, 0x0008d7c6UL, 0u, 0u },
+    { 4u, -32768, 0x0008d38eUL, 0x0008d7d4UL, 0u, 0u },
+    { 4u, 0, 0x0008d3a2UL, 0x0008d7e2UL, 0u, 0u },
+    { 4u, 0, 0x0008d3b2UL, 0x0008d7f0UL, 0u, 0u },
+    { 4u, 0, 0x0008d3c2UL, 0x0008d7feUL, 0u, 0u },
+    { 4u, -32768, 0x0008d3d2UL, 0x0008d80cUL, 0u, 0u },
+    { 4u, 0, 0x0008d3e6UL, 0x0008d81aUL, 0u, 0u },
+    { 4u, 0, 0x0008d3f6UL, 0x0008d828UL, 0u, 0u },
+    { 4u, 0, 0x0008d406UL, 0x0008d836UL, 0u, 0u },
+    { 4u, -32768, 0x0008d416UL, 0x0008d844UL, 0u, 0u },
+    { 4u, 0, 0x0008d42aUL, 0x0008d852UL, 0u, 0u },
+    { 4u, 0, 0x0008d43aUL, 0x0008d860UL, 0u, 0u },
+    { 4u, 0, 0x0008d44aUL, 0x0008d86eUL, 0u, 0u },
+    { 4u, -32768, 0x0008d45aUL, 0x0008d87cUL, 0u, 0u },
+    { 4u, 0, 0x0008d46eUL, 0x0008d88aUL, 0u, 0u },
+    { 4u, 0, 0x0008d47eUL, 0x0008d898UL, 0u, 0u },
+    { 4u, 0, 0x0008d48eUL, 0x0008d8a6UL, 0u, 0u },
+    { 4u, 0, 0x0008d49eUL, 0x0008d8d0UL, 0u, 0u },
+    { 4u, 0, 0x0008d4aeUL, 0x0008d8c2UL, 0u, 0u },
+    { 4u, 0, 0x0008d4beUL, 0x0008d8b4UL, 0u, 0u },
+    { 4u, 0, 0x0008d4ceUL, 0x0008d8a6UL, 0u, 0u },
+    { 4u, -32768, 0x0008d4deUL, 0x0008d8deUL, 0u, 0u },
+    { 4u, 0, 0x0008d4f2UL, 0x0008d8ecUL, 0u, 0u },
+    { 4u, 0, 0x0008d502UL, 0x0008d8faUL, 0u, 0u },
+    { 4u, 0, 0x0008d512UL, 0x0008d908UL, 0u, 0u },
+    { 4u, 0, 0x0008d522UL, 0x0008d932UL, 0u, 0u },
+    { 4u, 0, 0x0008d532UL, 0x0008d924UL, 0u, 0u },
+    { 4u, 0, 0x0008d542UL, 0x0008d940UL, 0u, 0u },
+    { 4u, 0, 0x0008d552UL, 0x0008d908UL, 0u, 0u },
+    { 4u, -32768, 0x0008d562UL, 0x0008d916UL, 0u, 0u },
+    { 4u, 0, 0x0008d576UL, 0x0008d94eUL, 0u, 0u },
+    { 4u, -32768, 0x0008d586UL, 0x0008d95cUL, 0u, 0u },
+    { 4095u, -32768, 0x0008d59aUL, 0x0008d96aUL, 0u, 0u },
+    { 4095u, -32768, 0x0008d5aeUL, 0x0008d978UL, 0u, 0u },
+    { 4095u, -32768, 0x0008d5c2UL, 0x0008d986UL, 0u, 0u },
+    { 4095u, -32768, 0x0008d5d6UL, 0x0008d994UL, 0u, 0u },
+};
+
+static const AvspRound1Class45MotionSpec avsp_round1_class43_motion[AVSP_ROUND1_CLASS43_MOTION_COUNT] =
+{
+    { 0, 2048, -96, 896, 1792, -96 },
+    { 256, 1920, -96, 640, 1536, -96 },
+    { 512, 1792, -96, 384, 1280, -96 },
+    { 768, 1664, -96, 128, 1024, -96 },
+    { 128, 1536, -96, 768, 2048, -96 },
+    { 384, 1408, -96, 512, 2304, -96 },
+    { 640, 1280, -96, 256, 2560, -96 },
+    { 896, 1152, -96, 0, 2816, -96 },
 };
 
 static const unsigned long avsp_round1_class45_source_slots[AVSP_ROUND1_CLASS45_SCENE_ACTOR_COUNT] =

@@ -152,6 +152,7 @@ NATIVE_OWNERS = {
     (20, "0x0a"): "Coffee Shop obstacle lifecycle",
     (24, "0x10"): "player empty-resource effect dispatcher",
     (24, "0x44"): "Coffee Shop command-guard presentation dispatcher",
+    (24, "0x43"): "native class-0x01 scene presentation population",
     (24, "0x45"): "Coffee Shop class-0x45 presentation population",
     (24, "0x47"): "native class-0x02 child presentation dispatcher",
     (24, "0x49"): "native airborne Button1 effect dispatcher",
