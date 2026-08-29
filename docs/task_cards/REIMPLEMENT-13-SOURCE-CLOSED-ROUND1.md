@@ -560,6 +560,55 @@ differs from native `0x0006dc46`. Bind its accepted transition predicate,
 timer/animation guard, RNG ordering, and scheduler position. Do not fit the
 frame or rebaseline input, and preserve all current first-segment locks.
 
+The projectile-parent population boundary is now source-bound. Routine
+`0x02f94c` calls allocator `0x08f0c6` through dispatcher `0x08f080`; the
+source guard is global phase byte `+0x19` bit 0 clear. Native record-type-4
+execution now allocates type-24/class-`0x49`/variant-0 effects before
+record-type-12 collision, preserves source LIFO pool ownership, and implements
+the state-0 fallthrough into state-2 timer decrement. The exact phase
+projection derives from the accepted Coffee Shop scheduler cadence, not an
+authored frame delay. Variant-10 class-`0x4e` impact and attack record
+`0x030cd2` remain source-bound.
+
+Checkpoint `cc33807babf536c4f42bf204038091427c391a89` is pushed and
+remote-equal. SPEC-02 contract
+`bd838608397cbb895bc093163d2bd8de7d413ab2799a30f9419cd547002abf82`
+and fixture
+`d546a87696ec80e317325412398fc8f5455bf55536c60d3625baba630e19ff93`
+bind the implementation. Fast, Oracle, 109 SPEC mutations, 178 native
+mutations, 123 Target suppressions, LiveEncounterBench Target, and two
+byte-identical 575-sample Coffee Shop Emulator ledgers pass. The paired ISO is
+`8edf2901ddfa53c448678c91e839ee684fc04db46badf9b4bed3b878f10db2b8`;
+the canonical sample payload is
+`d204f743e1916c25b87900fd9aa573f40d36af60371dab884ff8bec125bd2a40`.
+The target-only stale SPEC fingerprint found during paired Emulator was
+corrected, and Target wiring now derives the expected fingerprint from the
+current contract so future drift is rejected.
+
+Fresh window-only WGC covers every frame 2280..2310. Cadence sheet
+`dc162f011463e9f3f46847c939754265e42474fdb66800a1af35cb87f1e203b1`
+and clip
+`b2695152db316962ac45c3ca5ab9f9742eb3b933eb23e5e536167e8613ac535c`
+pass direct inspection: Predator/staff identity, source scene population,
+P1-only gameplay ownership, both Coffee Shop planes, palette/priority, no
+frame-2288 damage, frame-2306 damage, and the natural frame-2307 impact remain
+coherent. The measured `0x8d000` presentation carve contains the 559,252-byte
+base archive and 16,712-byte combat overlay with 1,572 bytes headroom; live pin
+exhaustion and overflow remain zero.
+
+The scene gate improves from `392 / 1,360 / 30 / 94 / 3 / 281` to
+`335 / 1,293 / 3 / 94 / 3 / 281` for source lifetimes, spawn/despawn, active
+states, collision/damage, route/camera, and audio/load respectively. No
+category increases. Unowned Saturn actors, unidentified source pairs, and
+retained gameplay authorities remain zero. The gate is still open.
+
+The next earliest causal scene divergence is record-type `4`, class `0x04`,
+slot `0x00ff8800` at visible frame 2371: source animation record `0x0003088c`
+is active while native remains zero. Bind the accepted child presentation and
+lifecycle transition, including its state guard, scheduler position, and pool
+ownership. Do not fit the frame, rebaseline input, or disturb the exact
+frame-2287/2306/2307 chronology.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
