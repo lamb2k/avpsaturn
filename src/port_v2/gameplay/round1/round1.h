@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "8b1acb140fcc9dc88b4f04b350eeef0e97178ba763554426ac6d1d4a77ddc8c8"
+    "bd838608397cbb895bc093163d2bd8de7d413ab2799a30f9419cd547002abf82"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -1091,6 +1091,17 @@ typedef struct
 
 typedef struct
 {
+    unsigned long dispatch_entry;
+    unsigned char record_type;
+    signed char actor_class;
+    unsigned char variant;
+    unsigned char timer;
+    unsigned char phase_mask;
+    unsigned char phase_expected;
+} AvspRound1PlayerWeaponEffectSpec;
+
+typedef struct
+{
     unsigned char active;
     signed char actor_class;
     unsigned char variant;
@@ -1347,6 +1358,11 @@ typedef struct
     unsigned long class4e_variant1_allocation_failures;
     unsigned long class4e_variant1_initializations;
     unsigned long class4e_variant1_releases;
+    unsigned long class4e_variant10_allocation_requests;
+    unsigned long class4e_variant10_allocations;
+    unsigned long class4e_variant10_allocation_failures;
+    unsigned long class4e_variant10_initializations;
+    unsigned long class4e_variant10_releases;
     unsigned long class44_guard_updates;
     unsigned long class44_guard_clears;
     unsigned long class43_spawn_requests;
@@ -1551,6 +1567,10 @@ typedef struct
     unsigned long player_air_weapon_effect_allocations;
     unsigned long player_air_weapon_effect_allocation_failures;
     unsigned long player_air_weapon_effect_releases;
+    unsigned long player_weapon_parent_effect_requests;
+    unsigned long player_weapon_parent_effect_allocations;
+    unsigned long player_weapon_parent_effect_allocation_failures;
+    unsigned long player_weapon_parent_effect_releases;
     unsigned long player_weapon_impact_requests;
     unsigned long player_weapon_impact_allocations;
     unsigned long player_weapon_impact_allocation_failures;

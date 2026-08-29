@@ -7174,6 +7174,7 @@
                 "address": "0x0002fc48",
                 "damage_selector_u8": 0,
                 "hit_value_u8": 0,
+                "impact_variant_u8": 0,
                 "knockback_mode_s8": 0,
                 "record_sha256": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
                 "x_center_s8": 0,
@@ -7187,6 +7188,7 @@
                 "address": "0x0002fc58",
                 "damage_selector_u8": 25,
                 "hit_value_u8": 8,
+                "impact_variant_u8": 10,
                 "knockback_mode_s8": 0,
                 "record_sha256": "e95eb0889e2fab5f083a14f9618a561d95df248176622b9b1329c04f7aa0def1",
                 "x_center_s8": 0,
@@ -7200,6 +7202,7 @@
                 "address": "0x0002fc68",
                 "damage_selector_u8": 130,
                 "hit_value_u8": 57,
+                "impact_variant_u8": 138,
                 "knockback_mode_s8": -125,
                 "record_sha256": "684280a0034f146b19f5b453b8733aaae93f7ad5979fb9927ea728413e7b9a84",
                 "x_center_s8": 70,
@@ -7235,7 +7238,7 @@
           "effect_allocation": {
             "accepted_auxiliary_contract": {
               "artifact": "data/oracle11_round1_auxiliary_authority.json",
-              "artifact_sha256": "fb2748ebbf57b986e281477450e189c9d6ef808be9e74db72948f33856dec194",
+              "artifact_sha256": "739965098d3e3b863ac7b4e4496d9160bc55db1db9bca03f70e6b9732c0633d4",
               "dispatch": "0x08f080",
               "presentation_records": [
                 {
@@ -7558,7 +7561,7 @@
           }
         },
         "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
-        "resource_artifact_sha256": "ed2d0e0a89c16e4306410b5b7741db469252d122293d3d62d5f00bf930c096d4",
+        "resource_artifact_sha256": "1d42913809fb8f18747e9194f827e837f3b38fdea1eb5dbbfe091c7102b01341",
         "resource_status": "SOURCE_CLOSED",
         "spawn_branch": "0x023858",
         "writer": "0x023860"
@@ -22244,6 +22247,1403 @@
           "table": "0x0002fc3c"
         },
         "dispatch": "0x02f870",
+        "effect_allocation": {
+          "allocation_failure_rule": "projectile continues; omit only this presentation actor",
+          "audio_commands": [],
+          "caller": "0x02f94c sets D6=8 then calls 0x08f0c6",
+          "class_u8": 73,
+          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+          "fixed_frame_substitute_forbidden": true,
+          "guard": "global phase byte +0x19 bit0 is clear",
+          "helper": "0x08f0c6",
+          "mutation_controls": [
+            "phase-bit guard",
+            "variant",
+            "timer",
+            "allocation",
+            "presentation copy",
+            "state dispatch",
+            "fixed-pool release"
+          ],
+          "native_phase_projection": {
+            "counter": "scheduler_frames before the record-4 update",
+            "expected_u8": 1,
+            "mask_u8": 1,
+            "proof": "accepted Coffee Shop update cadence maps the first two visible lifetimes to source frames 2262 and 2264 from pre-update scheduler counts 193 and 195"
+          },
+          "pool_allocator": "0x0177da",
+          "presentation_records": [
+            {
+              "animation_record": "0x0002fb48",
+              "assembly": "0x0002fbcc",
+              "attack_selector": 1,
+              "classification": "SOURCE_CLOSED",
+              "hurt_selector": 0,
+              "record_sha256": "2fd0c3b9f5cb7e854f9c0694bfc323b9cc7e751507c79f78e5a77b7f42e7d595"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "assembly": "0x0002fbda",
+              "attack_selector": 1,
+              "classification": "SOURCE_CLOSED",
+              "hurt_selector": 0,
+              "record_sha256": "b34ed3d121ef5fa4db9cccb97ebe79f6ff31645c87341a8fc23bc4ff561c2acd"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "assembly": "0x0002fbe8",
+              "attack_selector": 1,
+              "classification": "SOURCE_CLOSED",
+              "hurt_selector": 0,
+              "record_sha256": "dfe3bb1d7736e0e0fc12066b5d2289d2707c762f2b06236c8fb5670b4db902c5"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "assembly": "0x0002fbf6",
+              "attack_selector": 1,
+              "classification": "SOURCE_CLOSED",
+              "hurt_selector": 0,
+              "record_sha256": "cf6d88288ab3c0b9b85022ca7df9089e7e1b589be452687f06fc2c6782686d0a"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "assembly": "0x0002fc04",
+              "attack_selector": 1,
+              "classification": "SOURCE_CLOSED",
+              "hurt_selector": 0,
+              "record_sha256": "57b8d3400d8aa18ce78783ec1bfd71119a4dd7065d83fb1c3a3630c4e18d3fc5"
+            },
+            {
+              "animation_record": "0x0002fb98",
+              "assembly": "0x0002fc12",
+              "attack_selector": 1,
+              "classification": "SOURCE_CLOSED",
+              "hurt_selector": 0,
+              "record_sha256": "af1c58579336d990327a4243fee29ea09563c2ac0520287494b1c47d2e57f438"
+            },
+            {
+              "animation_record": "0x0002fba8",
+              "assembly": "0x0002fc20",
+              "attack_selector": 1,
+              "classification": "SOURCE_CLOSED",
+              "hurt_selector": 0,
+              "record_sha256": "8c4fae16d1775afbf5b41e8e2f2d77c3b18357112d60cd46d9d6b1d9e04eb75a"
+            },
+            {
+              "animation_record": "0x0002fbb8",
+              "assembly": "0x0002fc2e",
+              "attack_selector": 1,
+              "classification": "SOURCE_CLOSED",
+              "hurt_selector": 0,
+              "record_sha256": "c3ee90cb08a344db7a3f2a7473f3013b5785246eff5b0b3f8512d8b80b108c23"
+            }
+          ],
+          "record_type_u8": 24,
+          "retained_gameplay_authority": false,
+          "rng_calls": [],
+          "scene_actor_rows_u16": 793,
+          "scene_lifetime_count_u16": 113,
+          "scene_lifetimes": [
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 2262,
+              "first_position_s16": [
+                925,
+                397,
+                319
+              ],
+              "last_frame": 2269,
+              "source_slot": "0x00ffc500"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 2264,
+              "first_position_s16": [
+                914,
+                394,
+                319
+              ],
+              "last_frame": 2271,
+              "source_slot": "0x00ffc480"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 2271,
+              "first_position_s16": [
+                870,
+                378,
+                319
+              ],
+              "last_frame": 2277,
+              "source_slot": "0x00ffc500"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 2273,
+              "first_position_s16": [
+                851,
+                372,
+                319
+              ],
+              "last_frame": 2279,
+              "source_slot": "0x00ffc480"
+            },
+            {
+              "animation_record": "0x0002fb98",
+              "first_frame": 2279,
+              "first_position_s16": [
+                784,
+                348,
+                319
+              ],
+              "last_frame": 2285,
+              "source_slot": "0x00ffc500"
+            },
+            {
+              "animation_record": "0x0002fba8",
+              "first_frame": 2281,
+              "first_position_s16": [
+                757,
+                339,
+                319
+              ],
+              "last_frame": 2287,
+              "source_slot": "0x00ffc480"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 2345,
+              "first_position_s16": [
+                947,
+                404,
+                319
+              ],
+              "last_frame": 2351,
+              "source_slot": "0x00ffc280"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 2347,
+              "first_position_s16": [
+                942,
+                401,
+                319
+              ],
+              "last_frame": 2353,
+              "source_slot": "0x00ffbf80"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 2349,
+              "first_position_s16": [
+                936,
+                396,
+                319
+              ],
+              "last_frame": 2355,
+              "source_slot": "0x00ffc400"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 2351,
+              "first_position_s16": [
+                928,
+                390,
+                319
+              ],
+              "last_frame": 2357,
+              "source_slot": "0x00ffc000"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 2353,
+              "first_position_s16": [
+                919,
+                383,
+                319
+              ],
+              "last_frame": 2359,
+              "source_slot": "0x00ffc280"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 2355,
+              "first_position_s16": [
+                907,
+                374,
+                319
+              ],
+              "last_frame": 2361,
+              "source_slot": "0x00ffbf80"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 2357,
+              "first_position_s16": [
+                895,
+                364,
+                319
+              ],
+              "last_frame": 2363,
+              "source_slot": "0x00ffc400"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 2359,
+              "first_position_s16": [
+                880,
+                353,
+                319
+              ],
+              "last_frame": 2365,
+              "source_slot": "0x00ffc000"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 2361,
+              "first_position_s16": [
+                864,
+                341,
+                319
+              ],
+              "last_frame": 2367,
+              "source_slot": "0x00ffc280"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 2363,
+              "first_position_s16": [
+                846,
+                327,
+                319
+              ],
+              "last_frame": 2369,
+              "source_slot": "0x00ffbf80"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 2435,
+              "first_position_s16": [
+                947,
+                406,
+                319
+              ],
+              "last_frame": 2441,
+              "source_slot": "0x00ffc300"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 2437,
+              "first_position_s16": [
+                941,
+                405,
+                319
+              ],
+              "last_frame": 2443,
+              "source_slot": "0x00ffb900"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 2439,
+              "first_position_s16": [
+                934,
+                403,
+                319
+              ],
+              "last_frame": 2445,
+              "source_slot": "0x00ffbf00"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 2441,
+              "first_position_s16": [
+                925,
+                401,
+                319
+              ],
+              "last_frame": 2447,
+              "source_slot": "0x00ffbb00"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 2443,
+              "first_position_s16": [
+                913,
+                398,
+                319
+              ],
+              "last_frame": 2449,
+              "source_slot": "0x00ffc300"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 2445,
+              "first_position_s16": [
+                900,
+                395,
+                319
+              ],
+              "last_frame": 2451,
+              "source_slot": "0x00ffb900"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 2447,
+              "first_position_s16": [
+                885,
+                392,
+                319
+              ],
+              "last_frame": 2453,
+              "source_slot": "0x00ffbf00"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 2449,
+              "first_position_s16": [
+                868,
+                388,
+                319
+              ],
+              "last_frame": 2455,
+              "source_slot": "0x00ffbb00"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 2451,
+              "first_position_s16": [
+                849,
+                384,
+                319
+              ],
+              "last_frame": 2457,
+              "source_slot": "0x00ffc300"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 2453,
+              "first_position_s16": [
+                828,
+                379,
+                319
+              ],
+              "last_frame": 2459,
+              "source_slot": "0x00ffb900"
+            },
+            {
+              "animation_record": "0x0002fb98",
+              "first_frame": 2455,
+              "first_position_s16": [
+                805,
+                374,
+                319
+              ],
+              "last_frame": 2461,
+              "source_slot": "0x00ffbf00"
+            },
+            {
+              "animation_record": "0x0002fb98",
+              "first_frame": 2457,
+              "first_position_s16": [
+                780,
+                368,
+                319
+              ],
+              "last_frame": 2463,
+              "source_slot": "0x00ffbb00"
+            },
+            {
+              "animation_record": "0x0002fba8",
+              "first_frame": 2459,
+              "first_position_s16": [
+                753,
+                362,
+                319
+              ],
+              "last_frame": 2465,
+              "source_slot": "0x00ffc300"
+            },
+            {
+              "animation_record": "0x0002fba8",
+              "first_frame": 2461,
+              "first_position_s16": [
+                725,
+                355,
+                319
+              ],
+              "last_frame": 2467,
+              "source_slot": "0x00ffb900"
+            },
+            {
+              "animation_record": "0x0002fbb8",
+              "first_frame": 2463,
+              "first_position_s16": [
+                698,
+                349,
+                319
+              ],
+              "last_frame": 2469,
+              "source_slot": "0x00ffbf00"
+            },
+            {
+              "animation_record": "0x0002fbb8",
+              "first_frame": 2465,
+              "first_position_s16": [
+                670,
+                343,
+                319
+              ],
+              "last_frame": 2471,
+              "source_slot": "0x00ffbb00"
+            },
+            {
+              "animation_record": "0x0002fba8",
+              "first_frame": 2467,
+              "first_position_s16": [
+                643,
+                337,
+                319
+              ],
+              "last_frame": 2473,
+              "source_slot": "0x00ffc300"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 2885,
+              "first_position_s16": [
+                1115,
+                406,
+                319
+              ],
+              "last_frame": 2891,
+              "source_slot": "0x00ffc180"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 2887,
+              "first_position_s16": [
+                1120,
+                405,
+                319
+              ],
+              "last_frame": 2893,
+              "source_slot": "0x00ffbe00"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 2889,
+              "first_position_s16": [
+                1128,
+                405,
+                319
+              ],
+              "last_frame": 2895,
+              "source_slot": "0x00ffc080"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 2891,
+              "first_position_s16": [
+                1137,
+                404,
+                319
+              ],
+              "last_frame": 2897,
+              "source_slot": "0x00ffb680"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 2893,
+              "first_position_s16": [
+                1149,
+                402,
+                319
+              ],
+              "last_frame": 2899,
+              "source_slot": "0x00ffc180"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 2895,
+              "first_position_s16": [
+                1162,
+                401,
+                319
+              ],
+              "last_frame": 2901,
+              "source_slot": "0x00ffbe00"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 2897,
+              "first_position_s16": [
+                1178,
+                399,
+                319
+              ],
+              "last_frame": 2903,
+              "source_slot": "0x00ffc080"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 2899,
+              "first_position_s16": [
+                1195,
+                397,
+                319
+              ],
+              "last_frame": 2905,
+              "source_slot": "0x00ffb680"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 2901,
+              "first_position_s16": [
+                1214,
+                395,
+                319
+              ],
+              "last_frame": 2907,
+              "source_slot": "0x00ffc180"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 2903,
+              "first_position_s16": [
+                1236,
+                393,
+                319
+              ],
+              "last_frame": 2909,
+              "source_slot": "0x00ffbe00"
+            },
+            {
+              "animation_record": "0x0002fb98",
+              "first_frame": 2905,
+              "first_position_s16": [
+                1259,
+                390,
+                319
+              ],
+              "last_frame": 2911,
+              "source_slot": "0x00ffc080"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 2931,
+              "first_position_s16": [
+                1174,
+                405,
+                319
+              ],
+              "last_frame": 2937,
+              "source_slot": "0x00ffb680"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 2933,
+              "first_position_s16": [
+                1180,
+                404,
+                319
+              ],
+              "last_frame": 2939,
+              "source_slot": "0x00ffc080"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 2935,
+              "first_position_s16": [
+                1189,
+                403,
+                319
+              ],
+              "last_frame": 2941,
+              "source_slot": "0x00ffbe00"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 2937,
+              "first_position_s16": [
+                1199,
+                402,
+                319
+              ],
+              "last_frame": 2943,
+              "source_slot": "0x00ffc180"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 2939,
+              "first_position_s16": [
+                1211,
+                401,
+                319
+              ],
+              "last_frame": 2945,
+              "source_slot": "0x00ffb680"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 2941,
+              "first_position_s16": [
+                1226,
+                399,
+                319
+              ],
+              "last_frame": 2947,
+              "source_slot": "0x00ffc080"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 2943,
+              "first_position_s16": [
+                1242,
+                397,
+                319
+              ],
+              "last_frame": 2949,
+              "source_slot": "0x00ffbe00"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 2945,
+              "first_position_s16": [
+                1261,
+                395,
+                319
+              ],
+              "last_frame": 2951,
+              "source_slot": "0x00ffc180"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 2947,
+              "first_position_s16": [
+                1281,
+                393,
+                319
+              ],
+              "last_frame": 2953,
+              "source_slot": "0x00ffb680"
+            },
+            {
+              "animation_record": "0x0002fb98",
+              "first_frame": 2949,
+              "first_position_s16": [
+                1303,
+                391,
+                319
+              ],
+              "last_frame": 2955,
+              "source_slot": "0x00ffc080"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 3335,
+              "first_position_s16": [
+                1180,
+                405,
+                319
+              ],
+              "last_frame": 3341,
+              "source_slot": "0x00ffc080"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 3337,
+              "first_position_s16": [
+                1186,
+                405,
+                319
+              ],
+              "last_frame": 3343,
+              "source_slot": "0x00ffb680"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 3339,
+              "first_position_s16": [
+                1193,
+                404,
+                319
+              ],
+              "last_frame": 3345,
+              "source_slot": "0x00ffc180"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 3341,
+              "first_position_s16": [
+                1203,
+                403,
+                319
+              ],
+              "last_frame": 3347,
+              "source_slot": "0x00ffbe00"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 3343,
+              "first_position_s16": [
+                1214,
+                402,
+                319
+              ],
+              "last_frame": 3349,
+              "source_slot": "0x00ffc080"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 3345,
+              "first_position_s16": [
+                1228,
+                400,
+                319
+              ],
+              "last_frame": 3351,
+              "source_slot": "0x00ffb680"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 3347,
+              "first_position_s16": [
+                1243,
+                398,
+                319
+              ],
+              "last_frame": 3353,
+              "source_slot": "0x00ffc180"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 3349,
+              "first_position_s16": [
+                1261,
+                396,
+                319
+              ],
+              "last_frame": 3355,
+              "source_slot": "0x00ffbe00"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 3351,
+              "first_position_s16": [
+                1280,
+                394,
+                319
+              ],
+              "last_frame": 3357,
+              "source_slot": "0x00ffc080"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 3353,
+              "first_position_s16": [
+                1301,
+                392,
+                319
+              ],
+              "last_frame": 3359,
+              "source_slot": "0x00ffb680"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 3381,
+              "first_position_s16": [
+                1184,
+                405,
+                319
+              ],
+              "last_frame": 3387,
+              "source_slot": "0x00ffb680"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 3383,
+              "first_position_s16": [
+                1190,
+                404,
+                319
+              ],
+              "last_frame": 3389,
+              "source_slot": "0x00ffc080"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 3385,
+              "first_position_s16": [
+                1199,
+                403,
+                319
+              ],
+              "last_frame": 3391,
+              "source_slot": "0x00ffbe00"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 3387,
+              "first_position_s16": [
+                1209,
+                402,
+                319
+              ],
+              "last_frame": 3393,
+              "source_slot": "0x00ffc180"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 3389,
+              "first_position_s16": [
+                1222,
+                401,
+                319
+              ],
+              "last_frame": 3395,
+              "source_slot": "0x00ffb680"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 3391,
+              "first_position_s16": [
+                1236,
+                399,
+                319
+              ],
+              "last_frame": 3397,
+              "source_slot": "0x00ffc080"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 3393,
+              "first_position_s16": [
+                1253,
+                397,
+                319
+              ],
+              "last_frame": 3399,
+              "source_slot": "0x00ffbe00"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 3395,
+              "first_position_s16": [
+                1271,
+                395,
+                319
+              ],
+              "last_frame": 3401,
+              "source_slot": "0x00ffc180"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 3397,
+              "first_position_s16": [
+                1291,
+                393,
+                319
+              ],
+              "last_frame": 3403,
+              "source_slot": "0x00ffb680"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 3965,
+              "first_position_s16": [
+                1357,
+                405,
+                318
+              ],
+              "last_frame": 3971,
+              "source_slot": "0x00ffb800"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 3967,
+              "first_position_s16": [
+                1363,
+                404,
+                318
+              ],
+              "last_frame": 3973,
+              "source_slot": "0x00ffc000"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 3969,
+              "first_position_s16": [
+                1370,
+                403,
+                318
+              ],
+              "last_frame": 3975,
+              "source_slot": "0x00ffbd80"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 3971,
+              "first_position_s16": [
+                1380,
+                402,
+                318
+              ],
+              "last_frame": 3977,
+              "source_slot": "0x00ffc200"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 3973,
+              "first_position_s16": [
+                1391,
+                401,
+                318
+              ],
+              "last_frame": 3979,
+              "source_slot": "0x00ffb800"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 3975,
+              "first_position_s16": [
+                1404,
+                399,
+                318
+              ],
+              "last_frame": 3981,
+              "source_slot": "0x00ffc000"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 3977,
+              "first_position_s16": [
+                1420,
+                398,
+                318
+              ],
+              "last_frame": 3983,
+              "source_slot": "0x00ffbd80"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 3979,
+              "first_position_s16": [
+                1437,
+                396,
+                318
+              ],
+              "last_frame": 3985,
+              "source_slot": "0x00ffc200"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 3981,
+              "first_position_s16": [
+                1457,
+                394,
+                318
+              ],
+              "last_frame": 3987,
+              "source_slot": "0x00ffb800"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 3983,
+              "first_position_s16": [
+                1478,
+                391,
+                318
+              ],
+              "last_frame": 3989,
+              "source_slot": "0x00ffc000"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 4055,
+              "first_position_s16": [
+                1357,
+                405,
+                318
+              ],
+              "last_frame": 4061,
+              "source_slot": "0x00ffb800"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 4057,
+              "first_position_s16": [
+                1363,
+                405,
+                318
+              ],
+              "last_frame": 4063,
+              "source_slot": "0x00ffc400"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 4059,
+              "first_position_s16": [
+                1370,
+                404,
+                318
+              ],
+              "last_frame": 4065,
+              "source_slot": "0x00ffc200"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 4061,
+              "first_position_s16": [
+                1380,
+                403,
+                318
+              ],
+              "last_frame": 4067,
+              "source_slot": "0x00ffbd80"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 4063,
+              "first_position_s16": [
+                1391,
+                401,
+                318
+              ],
+              "last_frame": 4069,
+              "source_slot": "0x00ffb800"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 4065,
+              "first_position_s16": [
+                1404,
+                400,
+                318
+              ],
+              "last_frame": 4071,
+              "source_slot": "0x00ffc400"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 4067,
+              "first_position_s16": [
+                1420,
+                398,
+                318
+              ],
+              "last_frame": 4073,
+              "source_slot": "0x00ffc200"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 4069,
+              "first_position_s16": [
+                1437,
+                396,
+                318
+              ],
+              "last_frame": 4075,
+              "source_slot": "0x00ffbd80"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 4071,
+              "first_position_s16": [
+                1457,
+                394,
+                318
+              ],
+              "last_frame": 4077,
+              "source_slot": "0x00ffb800"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 4073,
+              "first_position_s16": [
+                1478,
+                392,
+                318
+              ],
+              "last_frame": 4079,
+              "source_slot": "0x00ffc400"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 4655,
+              "first_position_s16": [
+                1357,
+                404,
+                318
+              ],
+              "last_frame": 4661,
+              "source_slot": "0x00ffc280"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 4657,
+              "first_position_s16": [
+                1363,
+                404,
+                318
+              ],
+              "last_frame": 4663,
+              "source_slot": "0x00ffba00"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 4659,
+              "first_position_s16": [
+                1370,
+                403,
+                318
+              ],
+              "last_frame": 4665,
+              "source_slot": "0x00ffba80"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 4661,
+              "first_position_s16": [
+                1379,
+                402,
+                318
+              ],
+              "last_frame": 4667,
+              "source_slot": "0x00ffbb00"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 4663,
+              "first_position_s16": [
+                1391,
+                401,
+                318
+              ],
+              "last_frame": 4669,
+              "source_slot": "0x00ffc280"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 4665,
+              "first_position_s16": [
+                1404,
+                399,
+                318
+              ],
+              "last_frame": 4671,
+              "source_slot": "0x00ffba00"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 4667,
+              "first_position_s16": [
+                1420,
+                397,
+                318
+              ],
+              "last_frame": 4673,
+              "source_slot": "0x00ffba80"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 4669,
+              "first_position_s16": [
+                1437,
+                396,
+                318
+              ],
+              "last_frame": 4675,
+              "source_slot": "0x00ffbb00"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 4671,
+              "first_position_s16": [
+                1456,
+                393,
+                318
+              ],
+              "last_frame": 4677,
+              "source_slot": "0x00ffc280"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 4673,
+              "first_position_s16": [
+                1478,
+                391,
+                318
+              ],
+              "last_frame": 4679,
+              "source_slot": "0x00ffba00"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 5105,
+              "first_position_s16": [
+                1357,
+                405,
+                318
+              ],
+              "last_frame": 5111,
+              "source_slot": "0x00ffc100"
+            },
+            {
+              "animation_record": "0x0002fb48",
+              "first_frame": 5107,
+              "first_position_s16": [
+                1363,
+                404,
+                318
+              ],
+              "last_frame": 5113,
+              "source_slot": "0x00ffba80"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 5109,
+              "first_position_s16": [
+                1370,
+                403,
+                318
+              ],
+              "last_frame": 5115,
+              "source_slot": "0x00ffc000"
+            },
+            {
+              "animation_record": "0x0002fb58",
+              "first_frame": 5111,
+              "first_position_s16": [
+                1380,
+                402,
+                318
+              ],
+              "last_frame": 5117,
+              "source_slot": "0x00ffc080"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 5113,
+              "first_position_s16": [
+                1391,
+                401,
+                318
+              ],
+              "last_frame": 5119,
+              "source_slot": "0x00ffc100"
+            },
+            {
+              "animation_record": "0x0002fb68",
+              "first_frame": 5115,
+              "first_position_s16": [
+                1405,
+                399,
+                318
+              ],
+              "last_frame": 5121,
+              "source_slot": "0x00ffba80"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 5117,
+              "first_position_s16": [
+                1420,
+                398,
+                318
+              ],
+              "last_frame": 5123,
+              "source_slot": "0x00ffc000"
+            },
+            {
+              "animation_record": "0x0002fb78",
+              "first_frame": 5119,
+              "first_position_s16": [
+                1437,
+                396,
+                318
+              ],
+              "last_frame": 5125,
+              "source_slot": "0x00ffc080"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 5121,
+              "first_position_s16": [
+                1457,
+                393,
+                318
+              ],
+              "last_frame": 5127,
+              "source_slot": "0x00ffc100"
+            },
+            {
+              "animation_record": "0x0002fb88",
+              "first_frame": 5123,
+              "first_position_s16": [
+                1478,
+                391,
+                318
+              ],
+              "last_frame": 5129,
+              "source_slot": "0x00ffba80"
+            }
+          ],
+          "source_bodies": {
+            "caller": {
+              "bytes": 16,
+              "end_exclusive": "0x02f95c",
+              "sha256": "4719abf5f3c11b6e2cdf070816cc02c197ae17da7dc7adb4147afc8184cec71f",
+              "start": "0x02f94c"
+            },
+            "dispatch": {
+              "bytes": 70,
+              "end_exclusive": "0x08f0c6",
+              "sha256": "d203bd2e9eee27d86710f5739ea407438103dcdef5fa7063e53b844ba20ecbb6",
+              "start": "0x08f080"
+            },
+            "helper": {
+              "bytes": 58,
+              "end_exclusive": "0x08f100",
+              "sha256": "b032bd477a87ebd0eea3f9a70c7ad913418d786f25960e6cc2da03587c87c269",
+              "start": "0x08f0c6"
+            }
+          },
+          "state0": {
+            "collision_pointer_u32": "0x00000000",
+            "falls_through_to_state2": true,
+            "field_0x09_u8": 0,
+            "next_state_u8": 2,
+            "object_or_u16": "0x8000"
+          },
+          "state2": {
+            "timer_guard": "predecrement timer_u8; zero releases in the same dispatch",
+            "update_order": [
+              "timer",
+              "variant guard",
+              "visibility"
+            ],
+            "variant0_movement": "x/y/z unchanged"
+          },
+          "state4": {
+            "release": "0x0177f0"
+          },
+          "state_sequence_u8": [
+            0,
+            2,
+            4
+          ],
+          "timer_u8": 8,
+          "variant_u8": 0,
+          "writes": [
+            "active += 1",
+            "class = 0x49",
+            "variant = 0",
+            "copy parent x/y/z",
+            "copy parent facing",
+            "copy parent animation record",
+            "timer = D6"
+          ]
+        },
         "initialization": {
           "active_collision_u8": 1,
           "collision_result_s16": 0,

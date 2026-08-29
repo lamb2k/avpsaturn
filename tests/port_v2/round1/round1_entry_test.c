@@ -717,7 +717,7 @@ int main(void)
             air_runtime.pools[3].free_count != 29u ||
             effect->active != 1u || effect->actor_class != 0x49 ||
             effect->variant != 1u || effect->state != 2u ||
-            effect->effect_timer != 8u ||
+            effect->effect_timer != 7u ||
             effect->animation_record != projectile->animation_record ||
             effect->assembly != projectile->assembly)
         {
@@ -735,7 +735,7 @@ int main(void)
             return 96;
         }
         if (!avsp_round1_step_scheduler(&air_runtime) ||
-            effect->state != 2u || effect->effect_timer != 7u ||
+            effect->state != 2u || effect->effect_timer != 6u ||
             air_runtime.player_air_weapon_effect_requests != 1u)
             return 97;
     }
@@ -1085,6 +1085,13 @@ int main(void)
         AvspRound1WeaponProjectileAllocation *projectile;
         AvspRound1WeaponProjectileAllocation *child;
         unsigned int entry_calls = 0u;
+        unsigned int impact_index;
+        unsigned int free_stack_index;
+        unsigned short impact_source_slot;
+        unsigned long expected_impact_animation = 0x0008df2cUL;
+        unsigned long expected_impact_assembly = 0x0008df96UL;
+        unsigned short expected_impact_timer = 4045u;
+        short expected_impact_branch = -32768;
         short parent_spawn_x;
         short parent_spawn_y;
         avsp_round1_init(&projectile_runtime);
@@ -1189,6 +1196,22 @@ int main(void)
                 projectile_runtime.failure_count);
             return 52;
         }
+        impact = 0;
+        for (impact_index = 0u;
+             impact_index < projectile_runtime.pools[3].capacity;
+             ++impact_index)
+            if (projectile_runtime.pools[3].records[impact_index].active &&
+                projectile_runtime.pools[3].records[impact_index].actor_class ==
+                    0x4e &&
+                projectile_runtime.pools[3].records[impact_index].variant ==
+                    10u)
+                impact = &projectile_runtime.pools[3].records[impact_index];
+        if (!avsp_round1_is_weapon_impact_actor(impact) ||
+            impact->variant != 10u || impact->state != 0u ||
+            projectile_runtime.class4e_variant10_allocation_requests != 1u ||
+            projectile_runtime.class4e_variant10_allocations != 1u ||
+            projectile_runtime.class4e_variant10_allocation_failures != 0u)
+            return 52;
         if (!avsp_round1_step_scheduler(&projectile_runtime) ||
             projectile->state != 4u || target->state != 0x0402u ||
             target->substate != 0x0000u ||
@@ -1368,11 +1391,48 @@ int main(void)
         target->y = (short)(child->y + 10);
         target->z = child->z;
         projectile->active_collision = 0u;
-        projectile_runtime.pools[3].records[29].animation_record =
-            0x0008df2cUL;
-        projectile_runtime.pools[3].records[29].assembly = 0x0008df96UL;
-        projectile_runtime.pools[3].records[29].animation_timer = 4045u;
-        projectile_runtime.pools[3].records[29].animation_branch = -32768;
+        if (projectile_runtime.pools[3].free_count == 0u)
+            return 55;
+        for (free_stack_index = 0u;
+             free_stack_index < projectile_runtime.pools[3].free_count;
+             ++free_stack_index)
+        {
+            impact_source_slot = projectile_runtime.pools[3].free_stack[
+                free_stack_index];
+            if (impact_source_slot < projectile_runtime.pools[3].source_base ||
+                ((unsigned int)impact_source_slot -
+                    projectile_runtime.pools[3].source_base) %
+                    projectile_runtime.pools[3].stride != 0u)
+                return 55;
+            impact_index = ((unsigned int)impact_source_slot -
+                projectile_runtime.pools[3].source_base) /
+                projectile_runtime.pools[3].stride;
+            if (impact_index >= projectile_runtime.pools[3].capacity)
+                return 55;
+            projectile_runtime.pools[3].records[impact_index]
+                .animation_record = 0x0008df2cUL;
+            projectile_runtime.pools[3].records[impact_index].assembly =
+                0x0008df96UL;
+            projectile_runtime.pools[3].records[impact_index]
+                .animation_timer = 4045u;
+            projectile_runtime.pools[3].records[impact_index]
+                .animation_branch = -32768;
+        }
+        for (free_stack_index = 0u;
+             free_stack_index < projectile_runtime.pools[3].capacity;
+             ++free_stack_index)
+        {
+            AvspRound1ActorCore *releasing =
+                &projectile_runtime.pools[3].records[free_stack_index];
+            if (releasing->active && releasing->actor_class == 0x49 &&
+                releasing->effect_timer == 1u)
+            {
+                expected_impact_animation = releasing->animation_record;
+                expected_impact_assembly = releasing->assembly;
+                expected_impact_timer = releasing->animation_timer;
+                expected_impact_branch = releasing->animation_branch;
+            }
+        }
         if (!avsp_round1_step_scheduler(&projectile_runtime) ||
             target->health != 32 || target->state != 0x0202u ||
             target->substate != 0x0000u ||
@@ -1736,14 +1796,28 @@ int main(void)
                     release_count_before + 1u)
                 return 55;
         }
-        impact = &projectile_runtime.pools[3].records[29];
+        impact = 0;
+        for (impact_index = 0u;
+             impact_index < projectile_runtime.pools[3].capacity;
+             ++impact_index)
+            if (projectile_runtime.pools[3].records[impact_index].active &&
+                projectile_runtime.pools[3].records[impact_index].actor_class ==
+                    0x4e &&
+                projectile_runtime.pools[3].records[impact_index].variant ==
+                    1u)
+            {
+                impact = &projectile_runtime.pools[3].records[impact_index];
+                break;
+            }
+        if (impact == 0)
+            return 55;
         if (!avsp_round1_is_weapon_impact_actor(impact) ||
-            impact->source_slot != 0x00ffc500UL ||
+            impact->source_slot != 0x00ffb680UL + impact_index * 128UL ||
             impact->state != 0u || impact->variant != 1u ||
-            impact->animation_record != 0x0008df2cUL ||
-            impact->assembly != 0x0008df96UL ||
-            impact->animation_timer != 4045u ||
-            impact->animation_branch != -32768 ||
+            impact->animation_record != expected_impact_animation ||
+            impact->assembly != expected_impact_assembly ||
+            impact->animation_timer != expected_impact_timer ||
+            impact->animation_branch != expected_impact_branch ||
             impact->facing != child->facing ||
             impact->x != 939 || impact->y != 337 || impact->z != 318 ||
             projectile_runtime.class4e_variant1_allocation_requests != 1u ||
@@ -1751,11 +1825,13 @@ int main(void)
             projectile_runtime.class4e_variant1_allocation_failures != 0u)
         {
             fprintf(stderr,
-                "variant1 impact active=%u class=%d variant=%u state=%04x slot=%08lx facing=%u child=%u xyz=%d/%d/%d expected=%d/%d/%d ownership=%d requests=%lu allocations=%lu failures=%lu\n",
+                "variant1 impact active=%u class=%d variant=%u state=%04x slot=%08lx facing=%u child=%u xyz=%d/%d/%d expected=%d/%d/%d animation=%08lx/%08lx timer=%u branch=%d ownership=%d requests=%lu allocations=%lu failures=%lu\n",
                 impact->active, impact->actor_class, impact->variant,
                 impact->state, impact->source_slot, impact->facing,
                 child->facing, impact->x, impact->y, impact->z,
                 939, 337, 318,
+                impact->animation_record, impact->assembly,
+                impact->animation_timer, impact->animation_branch,
                 avsp_round1_is_weapon_impact_actor(impact),
                 projectile_runtime.class4e_variant1_allocation_requests,
                 projectile_runtime.class4e_variant1_allocations,

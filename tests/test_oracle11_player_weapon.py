@@ -143,6 +143,15 @@ def validate(data):
     assert emitter["position_rule"] == (
         "child x uses parent x plus facing-adjusted row x; child y and z "
         "both use parent z plus their signed row field")
+    effect = parent["effect_allocation"]
+    assert effect["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+    assert effect["guard"] == "global phase byte +0x19 bit0 is clear"
+    assert effect["native_phase_projection"]["mask_u8"] == 1
+    assert effect["native_phase_projection"]["expected_u8"] == 1
+    assert effect["timer_u8"] == 8
+    assert effect["state0"]["falls_through_to_state2"] is True
+    assert effect["scene_actor_rows_u16"] == 793
+    assert effect["scene_lifetime_count_u16"] == 113
     parent_box = parent["collision_table"]
     assert parent_box["table"] == "0x0002fc3c"
     assert parent_box["attack_entries"][1]["damage_selector_u8"] == 25
@@ -310,6 +319,8 @@ for path, value, label in [
     (("implementation_contract", "record4_parent_class0", "child_emitter_state", "cadence_reload_u8"), 5, "wrong child cadence"),
     (("implementation_contract", "record4_parent_class0", "child_emitter_state", "normal_rows", 4, "variant_u8"), 0, "wrong terminal child variant"),
     (("implementation_contract", "record4_parent_class0", "child_emitter_state", "position_rule"), "child y uses parent y", "wrong child coordinate base"),
+    (("implementation_contract", "record4_parent_class0", "effect_allocation", "native_phase_projection", "expected_u8"), 0, "wrong parent effect phase"),
+    (("implementation_contract", "record4_parent_class0", "effect_allocation", "state0", "falls_through_to_state2"), False, "parent effect state0 early return"),
     (("implementation_contract", "record4_parent_class0", "collision_table", "table"), "0x0003136a", "Major collision table"),
     (("implementation_contract", "record4_child_class4", "class_u8"), 5, "wrong child class"),
     (("implementation_contract", "record4_child_class4", "initialization", "variant_offsets_u16", 1), 285, "wrong child presentation offset"),
@@ -339,4 +350,4 @@ for path, value, label in [
         cursor = cursor[key]
     cursor[path[-1]] = value
     reject(mutant, label)
-print("ORACLE-11 corrected Predator Button1 tests: PASS (43 mutations rejected)")
+print("ORACLE-11 corrected Predator Button1 tests: PASS (45 mutations rejected)")

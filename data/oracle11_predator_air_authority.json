@@ -7152,6 +7152,7 @@
               "address": "0x0002fc48",
               "damage_selector_u8": 0,
               "hit_value_u8": 0,
+              "impact_variant_u8": 0,
               "knockback_mode_s8": 0,
               "record_sha256": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
               "x_center_s8": 0,
@@ -7165,6 +7166,7 @@
               "address": "0x0002fc58",
               "damage_selector_u8": 25,
               "hit_value_u8": 8,
+              "impact_variant_u8": 10,
               "knockback_mode_s8": 0,
               "record_sha256": "e95eb0889e2fab5f083a14f9618a561d95df248176622b9b1329c04f7aa0def1",
               "x_center_s8": 0,
@@ -7178,6 +7180,7 @@
               "address": "0x0002fc68",
               "damage_selector_u8": 130,
               "hit_value_u8": 57,
+              "impact_variant_u8": 138,
               "knockback_mode_s8": -125,
               "record_sha256": "684280a0034f146b19f5b453b8733aaae93f7ad5979fb9927ea728413e7b9a84",
               "x_center_s8": 70,
@@ -7213,7 +7216,7 @@
         "effect_allocation": {
           "accepted_auxiliary_contract": {
             "artifact": "data/oracle11_round1_auxiliary_authority.json",
-            "artifact_sha256": "fb2748ebbf57b986e281477450e189c9d6ef808be9e74db72948f33856dec194",
+            "artifact_sha256": "739965098d3e3b863ac7b4e4496d9160bc55db1db9bca03f70e6b9732c0633d4",
             "dispatch": "0x08f080",
             "presentation_records": [
               {
@@ -7536,7 +7539,7 @@
         }
       },
       "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
-      "resource_artifact_sha256": "ed2d0e0a89c16e4306410b5b7741db469252d122293d3d62d5f00bf930c096d4",
+      "resource_artifact_sha256": "1d42913809fb8f18747e9194f827e837f3b38fdea1eb5dbbfe091c7102b01341",
       "resource_status": "SOURCE_CLOSED",
       "spawn_branch": "0x023858",
       "writer": "0x023860"

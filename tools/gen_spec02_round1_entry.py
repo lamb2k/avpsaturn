@@ -960,6 +960,7 @@ def build() -> str:
     parent_active = weapon_parent["active_state"]
     parent_target = parent_active["target_selection"]
     parent_emitter = weapon_parent["child_emitter_state"]
+    parent_effect = weapon_parent["effect_allocation"]
     parent_presentations = parent_init["presentation_records"]
     parent_selector_offsets = parent_init["selector_offsets_s16"]
     parent_route_angles = sorted(
@@ -1009,6 +1010,23 @@ def build() -> str:
             for angle in parent_route_angles) or
         len(parent_child_rows) != 5 or
         len(parent_collision_child_rows) != 5 or
+        parent_effect["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        parent_effect["helper"] != "0x08f0c6" or
+        parent_effect["record_type_u8"] != 24 or
+        parent_effect["class_u8"] != 0x49 or
+        parent_effect["variant_u8"] != 0 or
+        parent_effect["timer_u8"] != 8 or
+        parent_effect["state0"].get("falls_through_to_state2") is not True or
+        parent_effect["native_phase_projection"] != {
+            "counter": "scheduler_frames before the record-4 update",
+            "mask_u8": 1, "expected_u8": 1,
+            "proof": "accepted Coffee Shop update cadence maps the first two visible lifetimes to source frames 2262 and 2264 from pre-update scheduler counts 193 and 195",
+        } or
+        parent_effect["scene_actor_rows_u16"] != 793 or
+        parent_effect["scene_lifetime_count_u16"] != 113 or
+        parent_effect["rng_calls"] != [] or
+        parent_effect["fixed_frame_substitute_forbidden"] is not True or
         [len(child_sequences[str(index)]) for index in range(3)] !=
             [17, 10, 16] or
         len(parent_attack_boxes) != 3 or len(child_attack_boxes) != 3 or
@@ -2581,6 +2599,14 @@ def build() -> str:
         lines.append("    { %du, { %s } }," % (
             len(records), ", ".join(rendered)))
     lines.extend([
+        "};", "",
+        "static const AvspRound1PlayerWeaponEffectSpec avsp_round1_parent_weapon_effect =",
+        "{",
+        "    0x08F080UL, %du, 0x%02X, %du, %du, %du, %du" % (
+            parent_effect["record_type_u8"], parent_effect["class_u8"],
+            parent_effect["variant_u8"], parent_effect["timer_u8"],
+            parent_effect["native_phase_projection"]["mask_u8"],
+            parent_effect["native_phase_projection"]["expected_u8"]),
         "};", "",
         "static const AvspRound1WeaponProjectileSpec avsp_round1_weapon_projectile =",
         "{",

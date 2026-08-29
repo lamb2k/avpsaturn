@@ -3502,8 +3502,17 @@ static int avsp_round1_player_weapon_contract_valid(void)
         avsp_round1_weapon_projectile.child_count != 5u ||
         avsp_round1_weapon_projectile.child_cadence_initial != 1u ||
         avsp_round1_weapon_projectile.child_cadence_reload != 6u ||
+        avsp_round1_parent_weapon_effect.dispatch_entry != 0x08f080UL ||
+        avsp_round1_parent_weapon_effect.record_type != 24u ||
+        avsp_round1_parent_weapon_effect.actor_class != 0x49 ||
+        avsp_round1_parent_weapon_effect.variant != 0u ||
+        avsp_round1_parent_weapon_effect.timer != 8u ||
+        avsp_round1_parent_weapon_effect.phase_mask != 1u ||
+        avsp_round1_parent_weapon_effect.phase_expected != 1u ||
         avsp_round1_weapon_parent_attack_boxes[1].damage_selector != 25u ||
+        avsp_round1_weapon_parent_impact_variants[1] != 10u ||
         avsp_round1_weapon_child_attack_boxes[1].damage_selector != 14u ||
+        avsp_round1_weapon_child_impact_variants[1] != 1u ||
         avsp_round1_weapon_projectile.parent_damage != 127u ||
         avsp_round1_weapon_projectile.child_damage != 31u ||
         avsp_round1_air_weapon_projectile.actor_class != 3 ||
@@ -4538,7 +4547,8 @@ static int avsp_round1_step_class4e(AvspRound1Runtime *runtime,
 {
     unsigned int presentation_count;
     const AvspRound1AnimationStateSpec *presentation_records;
-    if (actor->variant != 1u && actor->variant != 4u)
+    if (actor->variant != 1u && actor->variant != 4u &&
+        actor->variant != 10u)
         return 0;
     if (actor->state == 0u)
     {
@@ -4583,12 +4593,16 @@ static int avsp_round1_step_class4e(AvspRound1Runtime *runtime,
         actor->animation_index = 0u;
         presentation_records = actor->variant == 1u ?
             avsp_round1_class4e_variant1_records :
-            avsp_round1_class4e_records;
+            actor->variant == 10u ?
+                avsp_round1_class4e_variant10_records :
+                avsp_round1_class4e_records;
         avsp_round1_bind_animation_state(actor, &presentation_records[0]);
         ++runtime->class4e_initializations;
         ++runtime->class4e_rng_calls;
         if (actor->variant == 1u)
             ++runtime->class4e_variant1_initializations;
+        else if (actor->variant == 10u)
+            ++runtime->class4e_variant10_initializations;
         return 1;
     }
     if (actor->state == 0x0200u)
@@ -4605,10 +4619,14 @@ static int avsp_round1_step_class4e(AvspRound1Runtime *runtime,
         {
             presentation_count = actor->variant == 1u ?
                 AVSP_ROUND1_CLASS4E_VARIANT1_PRESENTATION_COUNT :
-                AVSP_ROUND1_CLASS4E_PRESENTATION_COUNT;
+                actor->variant == 10u ?
+                    AVSP_ROUND1_CLASS4E_VARIANT10_PRESENTATION_COUNT :
+                    AVSP_ROUND1_CLASS4E_PRESENTATION_COUNT;
             presentation_records = actor->variant == 1u ?
                 avsp_round1_class4e_variant1_records :
-                avsp_round1_class4e_records;
+                actor->variant == 10u ?
+                    avsp_round1_class4e_variant10_records :
+                    avsp_round1_class4e_records;
             if (actor->animation_index + 1u >= presentation_count)
                 return 0;
             ++actor->animation_index;
@@ -4625,6 +4643,8 @@ static int avsp_round1_step_class4e(AvspRound1Runtime *runtime,
         ++runtime->class4e_releases;
         if (variant == 1u)
             ++runtime->class4e_variant1_releases;
+        else if (variant == 10u)
+            ++runtime->class4e_variant10_releases;
         return 1;
     }
     return 0;
@@ -6338,21 +6358,27 @@ static int avsp_round1_allocate_weapon_child(
     return 1;
 }
 
-static int avsp_round1_allocate_air_weapon_effect(
+static int avsp_round1_allocate_weapon_effect(
     AvspRound1Runtime *runtime,
-    const AvspRound1WeaponProjectileAllocation *projectile)
+    const AvspRound1WeaponProjectileAllocation *projectile,
+    unsigned char variant)
 {
     AvspRound1ActorCore *effect;
-    ++runtime->player_air_weapon_effect_requests;
+    if (variant == avsp_round1_parent_weapon_effect.variant)
+        ++runtime->player_weapon_parent_effect_requests;
+    else
+        ++runtime->player_air_weapon_effect_requests;
     effect = avsp_round1_allocate_pool_actor(runtime, 3u);
     if (effect == 0)
     {
-        ++runtime->player_air_weapon_effect_allocation_failures;
+        if (variant == avsp_round1_parent_weapon_effect.variant)
+            ++runtime->player_weapon_parent_effect_allocation_failures;
+        else
+            ++runtime->player_air_weapon_effect_allocation_failures;
         return 1;
     }
-    effect->actor_class = (signed char)
-        avsp_round1_air_weapon_projectile.effect_class;
-    effect->variant = avsp_round1_air_weapon_projectile.effect_variant;
+    effect->actor_class = avsp_round1_parent_weapon_effect.actor_class;
+    effect->variant = variant;
     effect->state = 0u;
     effect->x = projectile->x;
     effect->y = projectile->y;
@@ -6360,9 +6386,12 @@ static int avsp_round1_allocate_air_weapon_effect(
     effect->facing = projectile->facing;
     effect->animation_record = projectile->animation_record;
     effect->assembly = projectile->assembly;
-    effect->effect_timer = 8u;
-    effect->dispatch_entry = 0x0008f080UL;
-    ++runtime->player_air_weapon_effect_allocations;
+    effect->effect_timer = avsp_round1_parent_weapon_effect.timer;
+    effect->dispatch_entry = avsp_round1_parent_weapon_effect.dispatch_entry;
+    if (variant == avsp_round1_parent_weapon_effect.variant)
+        ++runtime->player_weapon_parent_effect_allocations;
+    else
+        ++runtime->player_air_weapon_effect_allocations;
     return 1;
 }
 
@@ -6377,7 +6406,6 @@ static int avsp_round1_step_air_weapon_effect(
         effect->source_flags = 0u;
         effect->hurt_selector = 0u;
         effect->attack_selector = 0u;
-        return 1;
     }
     if (effect->state == 2u)
     {
@@ -6386,9 +6414,13 @@ static int avsp_round1_step_air_weapon_effect(
         --effect->effect_timer;
         if (effect->effect_timer == 0u)
         {
+            unsigned char variant = effect->variant;
             if (!avsp_round1_release_pool_actor(pool, effect))
                 return 0;
-            ++runtime->player_air_weapon_effect_releases;
+            if (variant == avsp_round1_parent_weapon_effect.variant)
+                ++runtime->player_weapon_parent_effect_releases;
+            else
+                ++runtime->player_air_weapon_effect_releases;
             return 1;
         }
         if (effect->variant != 0u)
@@ -6564,7 +6596,8 @@ static int avsp_round1_step_air_weapon_projectile(
         }
         ++runtime->player_air_weapon_motion_updates;
         if ((runtime->scheduler_frames & 1u) == 0u &&
-            !avsp_round1_allocate_air_weapon_effect(runtime, projectile))
+            !avsp_round1_allocate_weapon_effect(runtime, projectile,
+                avsp_round1_air_weapon_projectile.effect_variant))
             return 0;
         return 1;
     }
@@ -6747,6 +6780,12 @@ static int avsp_round1_step_weapon_projectile(
                 avsp_round1_bind_projectile_animation(projectile);
             }
         }
+        if ((runtime->scheduler_frames &
+                avsp_round1_parent_weapon_effect.phase_mask) ==
+                avsp_round1_parent_weapon_effect.phase_expected &&
+            !avsp_round1_allocate_weapon_effect(runtime, projectile,
+                avsp_round1_parent_weapon_effect.variant))
+            return 0;
         return 1;
     }
     if (projectile->state == avsp_round1_weapon_projectile.emitter_state)
@@ -6796,12 +6835,13 @@ static short avsp_round1_source_midpoint(short first, short second)
     return (short)(first + half);
 }
 
-static int avsp_round1_spawn_class4e_variant1_impact(
+static int avsp_round1_spawn_class4e_impact(
     AvspRound1Runtime *runtime,
     const AvspRound1WeaponProjectileAllocation *projectile,
     const AvspRound1ActorCore *target,
     const AvspRound1CollisionBoxSpec *attack_box,
-    const AvspBox *hurt_box)
+    const AvspBox *hurt_box,
+    unsigned char variant)
 {
     AvspRound1ActorCore *impact;
     short depth_delta;
@@ -6809,18 +6849,24 @@ static int avsp_round1_spawn_class4e_variant1_impact(
     short target_x;
     short attack_y;
     short target_y;
-    signed char mode = attack_box->knockback_mode;
-    unsigned char variant = (unsigned char)(mode < 0 ? -mode : mode);
-    if (projectile->actor_class != avsp_round1_player_weapon.child_class ||
-        variant != 1u)
+    if (!((projectile->actor_class ==
+                avsp_round1_player_weapon.child_class && variant == 1u) ||
+          (projectile->actor_class ==
+                avsp_round1_player_weapon.parent_class && variant == 10u)))
         return 1;
-    ++runtime->class4e_variant1_allocation_requests;
+    if (variant == 1u)
+        ++runtime->class4e_variant1_allocation_requests;
+    else
+        ++runtime->class4e_variant10_allocation_requests;
     if (runtime->class4e_impact_suppressed)
         return 1;
     impact = avsp_round1_allocate_pool_actor_preserve_presentation(runtime, 3u);
     if (impact == 0)
     {
-        ++runtime->class4e_variant1_allocation_failures;
+        if (variant == 1u)
+            ++runtime->class4e_variant1_allocation_failures;
+        else
+            ++runtime->class4e_variant10_allocation_failures;
         return 1;
     }
     depth_delta = (short)(
@@ -6844,7 +6890,10 @@ static int avsp_round1_spawn_class4e_variant1_impact(
     impact->y = avsp_round1_source_midpoint(attack_y, target_y);
     impact->z = (short)(target->z - 1);
     impact->dispatch_entry = 0x000927f6UL;
-    ++runtime->class4e_variant1_allocations;
+    if (variant == 1u)
+        ++runtime->class4e_variant1_allocations;
+    else
+        ++runtime->class4e_variant10_allocations;
     return 1;
 }
 
@@ -6859,6 +6908,7 @@ static int avsp_round1_projectile_collision_pass(
     unsigned int index;
     unsigned int attack_index;
     unsigned char damage;
+    unsigned char impact_variant;
     unsigned long current_attack_record;
     const AvspRound1CollisionBoxSpec *box;
     if (projectile->state != avsp_round1_weapon_projectile.active_state ||
@@ -6883,6 +6933,12 @@ static int avsp_round1_projectile_collision_pass(
             avsp_round1_air_weapon_projectile.actor_class) ?
         &avsp_round1_weapon_parent_attack_boxes[attack_index] :
         &avsp_round1_weapon_child_attack_boxes[attack_index];
+    impact_variant = (projectile->actor_class ==
+            avsp_round1_weapon_projectile.parent_class) ?
+        avsp_round1_weapon_parent_impact_variants[attack_index] :
+        projectile->actor_class ==
+            avsp_round1_weapon_projectile.child_class ?
+        avsp_round1_weapon_child_impact_variants[attack_index] : 0u;
     damage = (projectile->actor_class ==
             avsp_round1_weapon_projectile.parent_class ||
               projectile->actor_class ==
@@ -6975,8 +7031,8 @@ static int avsp_round1_projectile_collision_pass(
         avsp_round1_class1f_queue_projectile_reaction(
             runtime, target, target->health < 0,
             target->source_prior_health);
-        if (!avsp_round1_spawn_class4e_variant1_impact(
-                runtime, projectile, target, box, &hurt))
+        if (!avsp_round1_spawn_class4e_impact(
+                runtime, projectile, target, box, &hurt, impact_variant))
             return 0;
         return 1;
     }
@@ -7139,7 +7195,8 @@ static int avsp_round1_step_empty_effect(AvspRound1Runtime *runtime,
 int avsp_round1_is_weapon_impact_actor(const AvspRound1ActorCore *actor)
 {
     return actor != 0 && actor->active && actor->type == 24u &&
-        actor->actor_class == 0x4e && actor->variant == 1u;
+        actor->actor_class == 0x4e &&
+        (actor->variant == 1u || actor->variant == 10u);
 }
 
 int avsp_round1_is_weapon_parent_projectile(
@@ -8656,6 +8713,11 @@ static int avsp_round1_player_weapon_runtime_valid(
             runtime->player_air_weapon_effect_allocation_failures ||
         runtime->player_air_weapon_effect_releases >
             runtime->player_air_weapon_effect_allocations ||
+        runtime->player_weapon_parent_effect_requests !=
+            runtime->player_weapon_parent_effect_allocations +
+            runtime->player_weapon_parent_effect_allocation_failures ||
+        runtime->player_weapon_parent_effect_releases >
+            runtime->player_weapon_parent_effect_allocations ||
         runtime->player_weapon_completions > runtime->player_weapon_entries)
         return 0;
     for (index = 0u; index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY; ++index)

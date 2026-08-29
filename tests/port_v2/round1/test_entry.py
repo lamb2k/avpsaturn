@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "8b1acb140fcc9dc88b4f04b350eeef0e97178ba763554426ac6d1d4a77ddc8c8"
+EXPECTED = "bd838608397cbb895bc093163d2bd8de7d413ab2799a30f9419cd547002abf82"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -129,6 +129,8 @@ for before, after in (
     ("if (actor->animation_branch < 0)", "if (actor->animation_branch < -32767)"),
     ("++runtime->player_weapon_empty_auxiliary_releases;", "runtime->player_weapon_empty_auxiliary_releases += 2u;"),
     ("projectile->collision_result = -1;", "projectile->collision_result = 0;"),
+    ("avsp_round1_weapon_parent_impact_variants[attack_index] :",
+     "0u :"),
     ("actor->state = reaction->actor.sub_state;",
      "actor->state = 0x0400u;"),
     ("actor->substate = 0u;\n            ++runtime->class1f_transition_completions;", "actor->state = 0u;\n            actor->substate = 0u;\n            ++runtime->class1f_transition_completions;"),
@@ -217,7 +219,7 @@ for before, after in (
      "input |= 0x04u;"),
     ("projectile->actor_class = avsp_round1_air_weapon_projectile.actor_class;",
      "projectile->actor_class = avsp_round1_player_weapon.child_class;"),
-    ("effect->effect_timer = 8u;",
+    ("effect->effect_timer = avsp_round1_parent_weapon_effect.timer;",
      "effect->effect_timer = 7u;"),
     ("(runtime->scheduler_frames & 1u) == 0u",
      "(runtime->scheduler_frames & 2u) == 0u"),
@@ -296,6 +298,8 @@ for before, after in (
      "actor->source_hit_action_timer =\n                avsp_round1_class1f_source_ko.landing_hold_timer;"),
     ("runtime->first_encounter.source_progress = (unsigned short)(\n        runtime->first_encounter.source_progress +\n        avsp_round1_recurring_spawn.progress_increment);",
      "runtime->first_encounter.source_progress = (unsigned short)(\n        runtime->first_encounter.source_progress + 0u);"),
+    ("effect->attack_selector = 0u;\n    }\n    if (effect->state == 2u)",
+     "effect->attack_selector = 0u;\n        return 1;\n    }\n    if (effect->state == 2u)"),
 ):
     if "--inner8-only" in sys.argv and before not in inner8_mutations:
         continue
@@ -409,6 +413,12 @@ for before, after in (
      "    { 524287L, -8192L, 262144L, -16384L, 0L },"),
     ("    { 1u, 1, 0x0012e580UL, 0x00130946UL, 8u, 0u },",
      "    { 1u, 0, 0x0012e580UL, 0x00130946UL, 8u, 0u },"),
+    ("    0u, 10u, 138u",
+     "    0u, 1u, 138u"),
+    ("    0x08F080UL, 24u, 0x49, 0u, 8u, 1u, 1u",
+     "    0x08F080UL, 24u, 0x49, 0u, 8u, 1u, 0u"),
+    ("    0x08F080UL, 24u, 0x49, 0u, 8u, 1u, 1u",
+     "    0x08F080UL, 24u, 0x49, 0u, 7u, 1u, 1u"),
 ):
     assert before in generated
     changed = generated.replace(before, after, 1)
@@ -448,4 +458,4 @@ for before, after in (
                                  "--", "bash", "-lc", command],
                                 capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (173 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (178 real mutations)")

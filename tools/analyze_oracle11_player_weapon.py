@@ -26,6 +26,7 @@ COLLISION_S = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs32s"
 AIR_SPECIAL_A = ROOT / ".deps/mame/oracle11_player_air_a/air_special_combo"
 AIR_SPECIAL_B = ROOT / ".deps/mame/oracle11_player_air_b/air_special_combo"
 ORACLE07 = ROOT / "data/oracle07_predator_warrior_action_graph_equipment.json"
+AUXILIARY = ROOT / "data/oracle11_round1_auxiliary_authority.json"
 FULL_ROUTE = ROOT / ".deps/mame/full_route"
 VARIANTS = (
     "cold_run_1", "cold_run_2", "resource_empty", "b1_held",
@@ -451,6 +452,90 @@ require(coffee_input[2249] == 0 and coffee_input[2250] == 8 and
         coffee_player[2251] == 2 and coffee_player[2252] == 0x0c00 and
         coffee_parent_projection[0]["first_visible_frame"] == 2254,
         "Coffee Shop Button1 input/action/allocation chronology drift")
+auxiliary = json.loads(AUXILIARY.read_text(encoding="ascii"))
+class49 = next(row for row in auxiliary["archetypes"]
+               if row["type"] == 24 and row["class"] == "0x49")
+require(class49["classification"] == "SOURCE_CLOSED" and
+        class49["dispatch_entry"] == "0x08f080" and
+        class49["rng"]["calls"] == 0 and
+        len(class49["presentation_and_collision"]["records"]) == 8,
+        "accepted class-0x49 source authority drift")
+class49_variant0_rows = [row for row in coffee_actors
+                         if row["type"] == "24" and
+                         row["class"] == "49" and
+                         row["variant"] == "00"]
+class49_variant0_lifetimes = []
+active_class49_variant0 = {}
+for row in class49_variant0_rows:
+    frame = int(row["frame"])
+    slot = row["slot"]
+    prior = active_class49_variant0.get(slot)
+    if prior is None or frame != prior["last_frame"] + 1:
+        prior = {
+            "source_slot": "0x00ff" + slot[2:],
+            "first_frame": frame, "last_frame": frame,
+            "animation_record": "0x" + row["animation_record"],
+            "first_position_s16": [int(row["x_fp"], 16) >> 16,
+                                     int(row["y_fp"], 16) >> 16,
+                                     int(row["z"])],
+        }
+        class49_variant0_lifetimes.append(prior)
+        active_class49_variant0[slot] = prior
+    else:
+        prior["last_frame"] = frame
+require(len(class49_variant0_rows) == 793 and
+        len(class49_variant0_lifetimes) == 113 and
+        class49_variant0_lifetimes[:2] == [
+            {"source_slot": "0x00ffc500", "first_frame": 2262,
+             "last_frame": 2269, "animation_record": "0x0002fb58",
+             "first_position_s16": [925, 397, 319]},
+            {"source_slot": "0x00ffc480", "first_frame": 2264,
+             "last_frame": 2271, "animation_record": "0x0002fb68",
+             "first_position_s16": [914, 394, 319]}],
+        "Coffee Shop parent class-0x49 population drift")
+parent_class49_effect = {
+    "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+    "guard": "global phase byte +0x19 bit0 is clear",
+    "native_phase_projection": {
+        "counter": "scheduler_frames before the record-4 update",
+        "mask_u8": 1, "expected_u8": 1,
+        "proof": "accepted Coffee Shop update cadence maps the first two visible lifetimes to source frames 2262 and 2264 from pre-update scheduler counts 193 and 195",
+    },
+    "caller": "0x02f94c sets D6=8 then calls 0x08f0c6",
+    "helper": "0x08f0c6", "pool_allocator": "0x0177da",
+    "record_type_u8": 24, "class_u8": 0x49, "variant_u8": 0,
+    "timer_u8": 8,
+    "writes": ["active += 1", "class = 0x49", "variant = 0",
+               "copy parent x/y/z", "copy parent facing",
+               "copy parent animation record", "timer = D6"],
+    "allocation_failure_rule":
+        "projectile continues; omit only this presentation actor",
+    "state_sequence_u8": [0, 2, 4],
+    "state0": {"next_state_u8": 2, "object_or_u16": "0x8000",
+               "field_0x09_u8": 0,
+               "collision_pointer_u32": "0x00000000",
+               "falls_through_to_state2": True},
+    "state2": {"timer_guard":
+               "predecrement timer_u8; zero releases in the same dispatch",
+               "variant0_movement": "x/y/z unchanged",
+               "update_order": ["timer", "variant guard", "visibility"]},
+    "state4": {"release": "0x0177f0"},
+    "presentation_records": class49["presentation_and_collision"]["records"],
+    "scene_actor_rows_u16": len(class49_variant0_rows),
+    "scene_lifetime_count_u16": len(class49_variant0_lifetimes),
+    "scene_lifetimes": class49_variant0_lifetimes,
+    "rng_calls": [], "audio_commands": [],
+    "source_bodies": {
+        "caller": window(opcodes, 0x02F94C, 0x02F95C),
+        "helper": window(opcodes, 0x08F0C6, 0x08F100),
+        "dispatch": window(opcodes, 0x08F080, 0x08F0C6),
+    },
+    "mutation_controls": ["phase-bit guard", "variant", "timer",
+                          "allocation", "presentation copy",
+                          "state dispatch", "fixed-pool release"],
+    "fixed_frame_substitute_forbidden": True,
+    "retained_gameplay_authority": False,
+}
 
 for filename in COLLISION_FILES:
     require(digest(COLLISION_A / filename) == digest(COLLISION_B / filename),
@@ -870,6 +955,7 @@ implementation_contract = {
             "x_sign_rule": "negate row x when parent facing is zero",
             "position_rule": "child x uses parent x plus facing-adjusted row x; child y and z both use parent z plus their signed row field",
         },
+        "effect_allocation": parent_class49_effect,
         "release_state": {"entry": "0x02fa7a", "release": "0x017754"},
         "collision_table": parent_collision,
         "capture_projection": {

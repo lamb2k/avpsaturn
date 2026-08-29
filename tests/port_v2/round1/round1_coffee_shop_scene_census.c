@@ -17,7 +17,8 @@ static void emit_actor(unsigned int frame, const char *pool,
         actor->source_y_fp != 0L ? actor->source_y_fp :
         (long)actor->y * 65536L;
     source_state = actor->state;
-    if (actor->type == 24u && actor->actor_class == 0x10 &&
+    if (actor->type == 24u &&
+        (actor->actor_class == 0x10 || actor->actor_class == 0x49) &&
         source_state != 0u && source_state <= 6u)
         source_state = (unsigned short)(source_state << 8);
     printf("%u\t%s\t%08lx\t%u\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t%u\t%u\t%d\t%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t0\t0\t0\t0\n",
@@ -88,9 +89,12 @@ int main(void)
                             &runtime.player_weapon_projectiles[index]);
         if (source_frame == 2072u || source_frame == 2073u ||
             (source_frame >= 2249u && source_frame <= 2294u) ||
+            (source_frame >= 2348u && source_frame <= 2376u) ||
             (source_frame >= 2329u && source_frame <= 2330u))
-            fprintf(stderr, "rng_checkpoint frame=%u seed=%04x\n",
-                    source_frame, runtime.rng_seed);
+            fprintf(stderr,
+                    "rng_checkpoint frame=%u seed=%04x scheduler=%lu\n",
+                    source_frame, runtime.rng_seed,
+                    runtime.scheduler_frames);
         if ((input & (AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_ATTACK |
                       AVSP_ROUND1_INPUT_BUTTON3)) != 0u ||
             runtime.player_special_attack_active)

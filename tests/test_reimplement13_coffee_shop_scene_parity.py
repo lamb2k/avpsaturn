@@ -14,7 +14,10 @@ MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 ARTIFACT = ROOT / "data" / "reimplement13_coffee_shop_scene_parity.json"
 BASE_BYTES = ARTIFACT.read_bytes()
-assert len(BASE_BYTES) < 1_500_000, "Coffee Shop manifest is not compact"
+# A complete native lifetime row is retained as each missing source body is
+# implemented.  Keep the one-line manifest bounded without penalizing real
+# population parity growth.
+assert len(BASE_BYTES) < 1_600_000, "Coffee Shop manifest is not compact"
 assert BASE_BYTES.count(b"\n") == 1, "Coffee Shop manifest lost compact encoding"
 BASE = json.loads(BASE_BYTES)
 

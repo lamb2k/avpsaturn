@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """Mutation controls for the target-visible Round 1 entry wiring."""
+import hashlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 MAIN = (ROOT / "main.c").read_text()
+SPEC_SHA256 = hashlib.sha256(
+    (ROOT / "data/spec02_round1_executable_contract.json").read_bytes()
+).hexdigest()
 
 REQUIRED = (
     '#include "src/port_v2/gameplay/round1/round1.h"',
     "#define AVSP_TILE_REGION_BYTES 0x8D000",
     "#define AVSP_TILE_FRAME_UNIQUE_LIMIT 8192",
     "#define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000",
-    "#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x1487c",
+    "#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x148a0",
     "(actor->type == 24u && actor->actor_class == 0x43)",
     "(unsigned short)actor->y <= (unsigned short)actor->z",
     "#define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000",
@@ -35,7 +39,7 @@ REQUIRED = (
     "avsp_round1_step_scheduler(&round1_runtime)",
     "avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);",
     "strcmp(AVSP_ROUND1_SPEC02_SHA256,",
-    '"79c5fd6a775a3b68d2b0145fed60acd16e2f0668356c48f7ff20fad2a6844625") ==',
+    f'"{SPEC_SHA256}") ==',
     "avsp_diag_round1_route_state = round1_runtime.route_state;",
     "avsp_diag_round1_rng_seed = round1_runtime.rng_seed;",
     "avsp_diag_round1_canaries_ok = avsp_round1_canaries_ok(&round1_runtime);",
