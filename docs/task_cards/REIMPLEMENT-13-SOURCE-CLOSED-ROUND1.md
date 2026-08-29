@@ -680,17 +680,47 @@ Coffee Shop planes, palette, and priority. Scene gaps improve from
 actors, unidentified source pairs, and retained gameplay authorities remain
 zero. The complete scene gate remains open.
 
-The next earliest causal divergence is record-type `12`, class `0x1f`, slot
-`0x00ffa300` at visible frame 2410. Source is substate `0x1a00`, facing `0`,
-attack selector `2`, and animation `0x0012d5e4`; native remains substate
-`0x0000`, facing `1`, selector `3`, and animation `0x0012e8fc`. Native x first
-diverges at frame 2413 and state later diverges at frame 2436. Bind the accepted
-transition predicate, RNG consumption, state/substate guard, facing,
-animation/assembly write, and scheduler ordering. Do not fit the frame or
-rebaseline input. Preserve the exact frame-2377..2379 RNG correction, deferred
-record-type-4 collision registration, frame-2287/2306/2307 chronology, and all
-current player, class-`0x1f`, visual, HUD, audio, collision, and population
-locks.
+Incremental checkpoint `e0f3403a9db49e7e9d8f33931255df7cf8e408cc`
+closes the complete slot-`0x00ffa300` action-`0x16` retry and recovery cadence.
+The accepted frame-2409 latch (`+0xae = 1`, `+0xa6 = 2`) skips the inner-`0x08`
+entry RNG branch, consumes exactly one `0x017c5e` result
+`0x4bdf -> 0xe3c2`, indexes timer `30`, enters action `0x1a`, toggles facing,
+and binds record `0x0012d5e4` for visible frame 2410. Action `0x1a` preserves
+that timer when entering `0x18`. The source HIT terminal record
+`0x0012ded8` remains visible for its complete source frame before normal return.
+SPEC-02 contract is
+`9a65b6d082e477898aa966ae06984b5d4807f2db7ddbdfb3d5552bc0c5ad2d56`;
+fixture is
+`f129e65004dcdd8da240ce7533318c1d6511b41f3df1aa5eecd1a3a19899c759`.
+Fast, Oracle, both Target profiles, 113 SPEC mutations, 82 Oracle-enemy
+mutations, 181 native mutations, twelve scene mutations, and two commit-bound
+575-sample Emulator ledgers pass. The paired normalized ISO is
+`ef5791f9254915d9cf2b878740e4b6b86a99d157c4f48b1227d0382f501e6816`;
+canonical sample payload is
+`a955f984a172c595f0ee788593cdd0e3113ab51b34d8978df4a749ad9a88a8e4`.
+
+Fresh window-only WGC covers every visible frame 2408..2425. Cadence sheet
+`a137ce6039b62620de494ee8db645404d5e71a5aa5451aea5fb5653ac28d7de6`
+and clip
+`d7493bf51d125852300863ddd8ed99f2e37513ce3f4f8add9f5cf72a5bc3ac6d`
+pass direct inspection: Predator/staff identity is stable, the alien transition
+and return have no stale pose, the `WARRIOR` row remains the P1 equipment meter,
+no active P2 panel appears, and both Coffee Shop planes, palette, and priority
+remain coherent. Scene gaps improve from
+`316 / 1,293 / 3 / 94 / 3 / 281` to
+`305 / 1,285 / 3 / 94 / 3 / 281`; no category increases. Unowned Saturn
+actors, unidentified source pairs, and retained gameplay authorities remain
+zero. The complete scene gate remains open.
+
+The next earliest causal divergence is record-type `4`, class `0x00`, slot
+`0x00ff8680` at visible frame 2435. Source y is `406` while native is `405`;
+x first differs at frame 2441 (`925` versus `924`), and state/animation first
+differ at frame 2466. The simultaneous class-`0x4e` child at `0x00ffc300`
+shares the initial one-pixel trajectory drift. Bind the accepted parent/child
+fixed-point movement, projection/rounding, spawn origin, and scheduler order;
+do not fit a frame, add an authored offset, or rebaseline input. Preserve the
+exact frame-2287/2306/2307 chronology, the class-`0x1f` retry/recovery cadence,
+and all current player, visual, HUD, audio, collision, and population locks.
 
 ## Next eligible cards
 
