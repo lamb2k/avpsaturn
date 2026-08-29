@@ -27771,7 +27771,173 @@
           "player_attack_guard": "current player attack selector overlaps current enemy hurt selector and guarded collision latch is clear",
           "presentation_owned_removal_forbidden": true,
           "release_order": "type-12 LIFO fixed-pool release",
-          "removal_guard": "KO presentation completes and source release 0x0176b4 executes"
+          "removal_guard": "KO presentation completes and source release 0x0176b4 executes",
+          "source_hit_entry_program": {
+            "capture_identity": {
+              "byte_identical": true,
+              "capture_script_sha256": "f74622f143ccfbcb999d648eadd58a57c038ac8c742c21e2470067398cd5cb6e",
+              "completion_a": {
+                "coffee_shop_class1f_hit.tsv": "f7175724f56ed086fd0aa909ea15ba18f08d29ddbd6386db3a7acaad64e9c597",
+                "coffee_shop_class1f_hit_writes.tsv": "3f24fe7813dcc6c5884b5e2777fc2b126ceb0e7c430e095d182e3d971f47c019",
+                "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                "coffee_shop_scene_actors.tsv": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+                "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+                "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+                "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+                "progression_result.tsv": "89e5ff6a76246c2eac618cc64c29c4c2956b51e82c7344239867986d3bee1c8e",
+                "projectiles.tsv": "323f89b97c779375272bcaf0bdfc337f3bd3601435607d7ee5804d38bf8443fa",
+                "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611",
+                "score_writes.tsv": "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327"
+              },
+              "completion_b": {
+                "coffee_shop_class1f_hit.tsv": "f7175724f56ed086fd0aa909ea15ba18f08d29ddbd6386db3a7acaad64e9c597",
+                "coffee_shop_class1f_hit_writes.tsv": "3f24fe7813dcc6c5884b5e2777fc2b126ceb0e7c430e095d182e3d971f47c019",
+                "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                "coffee_shop_scene_actors.tsv": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+                "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+                "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+                "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+                "progression_result.tsv": "89e5ff6a76246c2eac618cc64c29c4c2956b51e82c7344239867986d3bee1c8e",
+                "projectiles.tsv": "323f89b97c779375272bcaf0bdfc337f3bd3601435607d7ee5804d38bf8443fa",
+                "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611",
+                "score_writes.tsv": "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327"
+              },
+              "reaction_selector_table_mutation": {
+                "coffee_shop_class1f_hit.tsv": "f81e905a27660a44906386e06a220fc852f24670009f88addcfe4e09b83326d1",
+                "coffee_shop_class1f_hit_writes.tsv": "2ae5450e0b21737c78c657a23b93b09a8e346a92fdca901d2fbe565e36c193ba",
+                "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                "coffee_shop_scene_actors.tsv": "b822c57804d7407094013bf988d55b576219482ea8bd81c4baf5e4d677438f66",
+                "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+                "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+                "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+                "progression_result.tsv": "390590b47c6cb8acb4a398bc61ab72685463a163f37b5605a779e807947590cf",
+                "projectiles.tsv": "323f89b97c779375272bcaf0bdfc337f3bd3601435607d7ee5804d38bf8443fa",
+                "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611",
+                "score_writes.tsv": "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327"
+              }
+            },
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "dispatch_chain": [
+              "0x060532 class dispatch",
+              "0x06075a state 0x02",
+              "0x06105a shared HIT tail",
+              "0x01e868 common HIT"
+            ],
+            "entry_guard": {
+              "action_byte_actor_06_u8": 0,
+              "action_phase_actor_07_u8": 0,
+              "health_s16": 56,
+              "hit_kind_actor_49_u8": 21,
+              "inner_state_byte_actor_05_u8": 2,
+              "outer_state_byte_actor_04_u8": 2,
+              "prior_health_s16": 87,
+              "recovery_timer_actor_2c_u8": 8
+            },
+            "entry_writes_in_order": [
+              "actor+0x07:u8 += 2",
+              "actor+0x2a:u8 = 4",
+              "actor+0x42:s16 = actor+0x40:s16",
+              "actor+0x0f:u8 &= 1",
+              "actor+0x4d:u8 = table_0x01f866[2 * actor+0x49].reaction_selector",
+              "actor+0x46:u8 = table_0x01f866[2 * actor+0x49].hit_mode",
+              "bind reaction selector through 0x01f6c6 then 0x016518"
+            ],
+            "mutation_control": {
+              "baseline_animation_record": "0x0012e04c",
+              "fixed_frame_or_generic_reaction_rejected": true,
+              "kind": "mutate only source reaction-table selector 0x36 to 0x00",
+              "mutant_animation_record": "0x0012dc50",
+              "mutations": 2,
+              "unchanged": [
+                "health writes",
+                "route state",
+                "RNG",
+                "audio dispatch",
+                "score writes",
+                "projectiles"
+              ]
+            },
+            "reaction_record": {
+              "animation_record": "0x0012e04c",
+              "assembly": "0x001308a6",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "778e82c50f8c0e5d4f6b559e4d17e8269ff18e5c5100121eea49a6bd51a87e06",
+              "timer_u16": 1
+            },
+            "reaction_table": {
+              "base": "0x01f866",
+              "entry_address": "0x01f890",
+              "hit_mode_actor_46_u8": 2,
+              "index_rule": "2 * actor+0x49:u8",
+              "observed_index_u8": 21,
+              "reaction_selector_actor_4d_u8": 54
+            },
+            "recovery": {
+              "captured_values_before_decrement": [
+                8,
+                7,
+                6,
+                5,
+                4,
+                3,
+                2,
+                1,
+                0
+              ],
+              "entry": "0x01e9ce",
+              "next_action_phase_source_frame": 2317,
+              "next_action_phase_u16": 512,
+              "rule": "decrement once per scheduler update; nonnegative retains action phase 0x0002; negative increments actor+0x06:u8 by 2 and clears actor+0x07:u8 and actor+0x2c:u8",
+              "timer": "actor+0x2c:u8"
+            },
+            "rng_calls": [],
+            "scope": "Coffee Shop class-0x1f projectile HIT entry and recovery guard",
+            "score_correction": "0x0abdd2 remains packed-BCD score authority and is not audio authority",
+            "source_blocks": {
+              "animation_bind": {
+                "first": "0x016518",
+                "last_exclusive": "0x0165c4",
+                "sha256": "bb5e8d016c2584344d1afef9f098eac57cb6e21c94062bba451d35b6b7490c0d"
+              },
+              "class_dispatch": {
+                "first": "0x060532",
+                "last_exclusive": "0x060546",
+                "sha256": "5aa69340fe59e413c2b4f4cf86df701533637b64f6596b4049ff035ee57323b5"
+              },
+              "common_hit_entry": {
+                "first": "0x01e868",
+                "last_exclusive": "0x01ea4c",
+                "sha256": "5ba3dc71e1d316cf40768cecd720136d2593ab91cbd4bd78ace1265b72e0c287"
+              },
+              "reaction_selector": {
+                "first": "0x01f6c6",
+                "last_exclusive": "0x01f722",
+                "sha256": "50f674b4b055b3b23fef213b9bb7ecac3ba196e7860db02af828759178d004c7"
+              },
+              "shared_hit_tail": {
+                "first": "0x06105a",
+                "last_exclusive": "0x061060",
+                "sha256": "e4271d1d7fd566c2ef4264ba36988f80a4bd525ff2e62b32ab6f1ff2dc0fd7e7"
+              },
+              "state_dispatch": {
+                "first": "0x06075a",
+                "last_exclusive": "0x060772",
+                "sha256": "93f286c13361e84edb0fdd292d98335a3bb8b4190cae33ce34dcbd2f6ff16528"
+              }
+            },
+            "visible_result": {
+              "action_phase_u16": 2,
+              "animation_record": "0x0012e04c",
+              "assembly": "0x001308a6",
+              "facing_u8": 1,
+              "health_s16": 56,
+              "slot": "0x00ffa180",
+              "source_frame": 2308,
+              "state_u16": 514
+            }
+          }
         },
         "dispatch": {
           "entry": "0x060532",

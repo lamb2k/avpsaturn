@@ -62,6 +62,11 @@ for label,mutate in [
     ('current-hit-timer',lambda x:x['damage_hit_ko_removal'].__setitem__('hit_ticks_u16',38)),
     ('current-ko-timer',lambda x:x['damage_hit_ko_removal'].__setitem__('ko_ticks_u16',140)),
     ('current-reaction-map',lambda x:x['damage_hit_ko_removal']['accepted_port_v2_reaction_mapping'].__setitem__('hit_entry_outer_state_u16',0x0400)),
+    ('source-hit-selector',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['reaction_table'].__setitem__('reaction_selector_actor_4d_u8',0)),
+    ('source-hit-record',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['visible_result'].__setitem__('animation_record','0x0012dc50')),
+    ('source-hit-recovery',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['recovery']['captured_values_before_decrement'].__setitem__(0,7)),
+    ('source-hit-mutation',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['mutation_control'].__setitem__('mutations',0)),
+    ('source-hit-score-audio-correction',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program'].__setitem__('score_correction','audio')), 
     ('current-retained-authority',lambda x:x['authority_boundary'].__setitem__('retained_gameplay_authority_forbidden',False)),
     ('current-mutation-control',lambda x:x['mutation_controls'].pop()),
 ]:
@@ -99,4 +104,4 @@ for label,mutate in [
     ('inner8-direction-table',lambda x:x['observed_path_program']['source_tables']['direction_octant_base_u8'].__setitem__(0,0)),
 ]:
     mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['first_segment_action_execution_contract']['inner_state_0x08_program'];mutate(target);reject(mutant,label)
-print('ORACLE-11 Round 1 enemy tests: PASS (66 mutations rejected)')
+print('ORACLE-11 Round 1 enemy tests: PASS (71 mutations rejected)')

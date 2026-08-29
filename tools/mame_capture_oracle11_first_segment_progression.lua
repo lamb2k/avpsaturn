@@ -36,6 +36,10 @@ local capture_collision_guard =
     os.getenv("AVSP_ORACLE11_COLLISION_GUARD_CAPTURE") == "1"
 local mutate_collision_guard =
     os.getenv("AVSP_ORACLE11_COLLISION_GUARD_MUTATE") == "1"
+local capture_class1f_hit =
+    os.getenv("AVSP_ORACLE11_CLASS1F_HIT_CAPTURE") == "1"
+local mutate_class1f_hit_selector =
+    os.getenv("AVSP_ORACLE11_MUTATE_CLASS1F_HIT_SELECTOR") == "1"
 local frame = 0
 local controller = 0xffd180
 local global = 0xff8000
@@ -112,6 +116,10 @@ local collision_identity_writes = assert(io.open(
     root .. "/coffee_shop_record4_collision_identity_writes.tsv", "w"))
 local collision_identity_assignments = assert(io.open(
     root .. "/coffee_shop_collision_identity_assignments.tsv", "w"))
+local class1f_hit = assert(io.open(
+    root .. "/coffee_shop_class1f_hit.tsv", "w"))
+local class1f_hit_writes = assert(io.open(
+    root .. "/coffee_shop_class1f_hit_writes.tsv", "w"))
 local result = assert(io.open(root .. "/progression_result.tsv", "w"))
 transactions:write("frame\tpc\ta4\ta6\tg8019\tliving\tprogress\tc_state\tc_substate\tc_timer40\tc_timer42\tc_limit4a\tc_index10\tc_phase2e\tc_local2c\tcamera_x\tcamera_z\trng\td0\td1\td2\tactor_active\tactor_class\tactor_type\tactor_state\tactor_substate\tactor_x\tactor_y\tactor_z\tactor_variant\tactor_timer\tactor_selector83\n")
 snapshots:write("frame\tslot\tactive\tclass\ttype\tstate\tsubstate\tfacing\tx\ty\tz\tvariant\ttimer\tselector83\thealth\tanim\n")
@@ -148,7 +156,9 @@ collision_list_writes:write("frame\tpc\taddress\ta6\tactive\tfield01\tfield47\tf
 collision_actor_flags:write("frame\tpc\tslot\tinner\tactive\tfield01\tstate\tsubstate\tx_fp\ty_fp\tz\tcamera_x\tcamera_z\tdata\tmask\tsuppressed\n")
 collision_identity_writes:write("frame\tpc\tslot\tinner\tactive\tclass\tstate\tsubstate\tlatch_index65_before\tattacker_id67_before\tdata\tmask\n")
 collision_identity_assignments:write("frame\tevent\tpc\tslot\tactive\tclass\ttype\tstate\tsubstate\tattacker_id67\tglobal_id820b\n")
-result:write("spawn_suppression\tguard_suppression\tmain_spawn_transactions\taux_spawn_transactions\tsuppressed_writes\tlifecycle_suppressed_writes\taction4_timer_events\taction4_timer_suppressed_writes\ttype4_class03_suppressed_writes\tcoffee_stage_rng_suppressed_writes\ttype36_suppressed_writes\tscene_pair_suppressed_actors\tobstacle_transition_suppressed_writes\tfinal_route\n")
+class1f_hit:write("frame\tpc\tslot\tstate\tsubstate\tfacing\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\trecovery_timer2c\thealth\tprior_health\thit_mode46\thit_kind49\treaction_selector4d\tscore_arg4e\treaction_facing4f\tairborne5c\tlatch_index65\tmotion_index6c\thit_count6d\tinterrupt73\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\n")
+class1f_hit_writes:write("frame\tpc\tslot\tinner\tstate\tsubstate\tanimation_record\taction_timer\trecovery_timer2c\thealth\tprior_health\thit_mode46\thit_kind49\treaction_selector4d\treaction_facing4f\tairborne5c\tmotion_index6c\thit_count6d\tinterrupt73\told32\tdata\tmask\tsuppressed\n")
+result:write("spawn_suppression\tguard_suppression\tmain_spawn_transactions\taux_spawn_transactions\tsuppressed_writes\tlifecycle_suppressed_writes\taction4_timer_events\taction4_timer_suppressed_writes\ttype4_class03_suppressed_writes\tcoffee_stage_rng_suppressed_writes\ttype36_suppressed_writes\tscene_pair_suppressed_actors\tobstacle_transition_suppressed_writes\tclass1f_hit_selector_mutations\tfinal_route\n")
 
 local function u8(a) return program:read_u8(a) end
 local function u16(a) return program:read_u16(a) end
@@ -162,6 +172,7 @@ local coffee_stage_rng_suppressed_writes = 0
 local type36_suppressed_writes = 0
 local scene_pair_suppressed_actors = 0
 local obstacle_transition_suppressed_writes = 0
+local class1f_hit_selector_mutations = 0
 
 local function hex_bytes(first, count)
     local parts = {}
@@ -1291,6 +1302,79 @@ oracle11_collision_identity_assignment_exit = opcodes:install_read_tap(
         emit_collision_identity_assignment("exit", 0x01d778)
     end)
 
+local function emit_class1f_hit(pc)
+    if not capture_class1f_hit or frame < 2304 or frame > 2320 then return end
+    local slot = maincpu.state["A6"].value & 0xffffff
+    if slot ~= 0xffa180 or u8(slot) == 0 or u8(slot + 2) ~= 0x1f or
+            u8(slot + 8) ~= 12 then return end
+    class1f_hit:write(string.format(
+        "%d\t%06x\t%06x\t%04x\t%04x\t%d\t%08x\t%04x\t%d\t%04x\t%02x\t%d\t%d\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%08x\t%08x\t%08x\t%08x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\n",
+        frame, pc, slot, u16(slot + 4), u16(slot + 6), u8(slot + 0x0f),
+        u32(slot + 0x1c), u16(slot + 0x0a), s16(u16(slot + 0x24)),
+        u16(slot + 0x2a), u8(slot + 0x2c), s16(u16(slot + 0x40)),
+        s16(u16(slot + 0x42)), u8(slot + 0x46), u8(slot + 0x49),
+        u8(slot + 0x4d), u8(slot + 0x4e), u8(slot + 0x4f),
+        u8(slot + 0x5c), u8(slot + 0x65), u8(slot + 0x6c),
+        u8(slot + 0x6d), u8(slot + 0x73),
+        maincpu.state["D0"].value & 0xffffffff,
+        maincpu.state["D1"].value & 0xffffffff,
+        maincpu.state["D2"].value & 0xffffffff,
+        maincpu.state["D3"].value & 0xffffffff,
+        maincpu.state["A0"].value & 0xffffff,
+        maincpu.state["A1"].value & 0xffffff,
+        maincpu.state["A2"].value & 0xffffff,
+        maincpu.state["A3"].value & 0xffffff,
+        maincpu.state["A4"].value & 0xffffff,
+        maincpu.state["A5"].value & 0xffffff))
+end
+
+oracle11_class1f_hit_pc_taps = {}
+for _, pc in ipairs({
+        0x060532, 0x06075a, 0x06105a, 0x01e868, 0x01e878,
+        0x01e888, 0x01e8cc, 0x01e8dc, 0x01e8e0, 0x01e8e6,
+        0x01e8fe, 0x01e904, 0x01e90c, 0x01e920, 0x01e92c,
+        0x01e970, 0x01e974, 0x01e9ce, 0x01ea4c, 0x01ea54,
+        0x01ea6c, 0x01eae4, 0x01ee7c, 0x01ef80, 0x01f0ca,
+        0x01f6c6, 0x01f70a, 0x01f71c, 0x016518}) do
+    oracle11_class1f_hit_pc_taps[#oracle11_class1f_hit_pc_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_class1f_hit_%06x", pc),
+        function() emit_class1f_hit(pc) end)
+end
+
+oracle11_class1f_hit_write_tap = program:install_write_tap(
+    0xffa180, 0xffa23f, "oracle11_class1f_hit_writes",
+    function(offset, data, mask)
+        if not capture_class1f_hit or frame < 2304 or frame > 2320 then return end
+        local slot = 0xffa180
+        if u8(slot) == 0 or u8(slot + 2) ~= 0x1f or u8(slot + 8) ~= 12 then
+            return
+        end
+        local pc = maincpu.state["PC"].value & 0xffffff
+        local inner = offset - slot
+        class1f_hit_writes:write(string.format(
+            "%d\t%06x\t%06x\t%02x\t%04x\t%04x\t%08x\t%04x\t%02x\t%d\t%d\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%08x\t%08x\t%08x\t%d\n",
+            frame, pc, slot, inner, u16(slot + 4), u16(slot + 6),
+            u32(slot + 0x1c), u16(slot + 0x2a), u8(slot + 0x2c),
+            s16(u16(slot + 0x40)), s16(u16(slot + 0x42)),
+            u8(slot + 0x46), u8(slot + 0x49), u8(slot + 0x4d),
+            u8(slot + 0x4f), u8(slot + 0x5c), u8(slot + 0x6c),
+            u8(slot + 0x6d), u8(slot + 0x73), u32(offset & 0xfffffc),
+            data & 0xffffffff, mask & 0xffffffff, 0))
+    end)
+
+oracle11_class1f_hit_selector_table_tap = program:install_read_tap(
+    0x01f890, 0x01f891, "oracle11_class1f_hit_selector_table",
+    function(offset, data, mask)
+        if not capture_class1f_hit or not mutate_class1f_hit_selector or
+                frame < 2304 or frame > 2320 or
+                (maincpu.state["A6"].value & 0xffffff) ~= 0xffa180 then
+            return data
+        end
+        class1f_hit_selector_mutations = class1f_hit_selector_mutations + 1
+        return data & 0x00ff
+    end)
+
 oracle11_progression_frame = emu.add_machine_frame_notifier(function()
     frame = frame + 1
     suppress_selected_scene_pair()
@@ -1350,6 +1434,7 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
             type36_suppressed_writes,
             scene_pair_suppressed_actors,
             obstacle_transition_suppressed_writes,
+            class1f_hit_selector_mutations,
             u8(global + 9)}, "\t") .. "\n")
         transactions:close(); snapshots:close(); writes:close(); global_writes:close()
         controller_samples:close(); lifecycle_writes:close()
@@ -1373,6 +1458,8 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         collision_actor_flags:close()
         collision_identity_writes:close()
         collision_identity_assignments:close()
+        class1f_hit:close()
+        class1f_hit_writes:close()
         result:close()
     end
 end)

@@ -36,6 +36,9 @@ COFFEE_SHOP_BOUNDS_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle
 CLASS1F_INNER8_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs31a"
 CLASS1F_INNER8_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs31b"
 CLASS1F_INNER8_SUPPRESS = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs30s"
+CLASS1F_HIT_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs33e"
+CLASS1F_HIT_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs33f"
+CLASS1F_HIT_MUTANT = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs33m3"
 OUT = ROOT / "data" / "oracle11_round1_enemy_archetypes.json"
 FILES = ("enemy_samples.tsv", "enemy_entries.tsv", "enemy_writes.tsv",
          "enemy_rng.tsv", "player_damage.tsv", "samples.tsv", "dispatches.tsv",
@@ -75,6 +78,16 @@ CLASS1F_INNER8_FILES = (
     "progression_class1f_transitions.tsv",
     "progression_result.tsv",
     "projectiles.tsv",
+)
+CLASS1F_HIT_FILES = (
+    "coffee_shop_class1f_hit.tsv",
+    "coffee_shop_class1f_hit_writes.tsv",
+    "coffee_shop_scene_actors.tsv",
+    "coffee_shop_scene_frames.tsv",
+    "coffee_shop_scene_health_writes.tsv",
+    "coffee_shop_rng_calls.tsv",
+    "dispatches.tsv", "samples.tsv", "score_writes.tsv", "projectiles.tsv",
+    "progression_result.tsv",
 )
 
 
@@ -1383,7 +1396,171 @@ def initial_class1f_transition_contract(samples: list[dict[str, str]],
     }
 
 
+def class1f_hit_entry_contract(program: bytes,
+                               opcodes: bytes) -> dict[str, object]:
+    baseline_identity = {name: digest(CLASS1F_HIT_A / name)
+                         for name in CLASS1F_HIT_FILES}
+    repeat_identity = {name: digest(CLASS1F_HIT_B / name)
+                       for name in CLASS1F_HIT_FILES}
+    mutant_identity = {name: digest(CLASS1F_HIT_MUTANT / name)
+                       for name in CLASS1F_HIT_FILES}
+    require(baseline_identity == repeat_identity,
+            "class-0x1f HIT entry captures differ")
+
+    trace = rows(CLASS1F_HIT_A / "coffee_shop_class1f_hit.tsv")
+    mutant_trace = rows(CLASS1F_HIT_MUTANT /
+                        "coffee_shop_class1f_hit.tsv")
+    actors = rows(CLASS1F_HIT_A / "coffee_shop_scene_actors.tsv")
+    mutant_actors = rows(CLASS1F_HIT_MUTANT /
+                         "coffee_shop_scene_actors.tsv")
+    result = rows(CLASS1F_HIT_A / "progression_result.tsv")[0]
+    mutant_result = rows(CLASS1F_HIT_MUTANT / "progression_result.tsv")[0]
+
+    def trace_row(source: list[dict[str, str]], frame: str,
+                  pc: str) -> dict[str, str]:
+        return next(row for row in source
+                    if row["frame"] == frame and row["pc"] == pc)
+
+    before = trace_row(trace, "2307", "01e888")
+    bound = trace_row(trace, "2307", "01e8fe")
+    mutant_bound = trace_row(mutant_trace, "2307", "01e8fe")
+    visible = next(row for row in actors if row["frame"] == "2308" and
+                   row["slot"] == "ffa180")
+    mutant_visible = next(row for row in mutant_actors
+                          if row["frame"] == "2308" and
+                          row["slot"] == "ffa180")
+    recovery = [trace_row(trace, str(frame), "01e9ce")
+                for frame in range(2308, 2317)]
+    next_phase = trace_row(trace, "2317", "01ea4c")
+    class1f_rng = [row for row in rows(
+        CLASS1F_HIT_A / "coffee_shop_rng_calls.tsv")
+        if 2306 <= int(row["frame"]) <= 2317 and
+        row["a6"] == "ffa180"]
+
+    require(before["state"] == "0202" and before["substate"] == "0000" and
+            before["animation_record"] == "0012eb5c" and
+            before["recovery_timer2c"] == "08" and
+            before["health"] == "56" and before["prior_health"] == "87" and
+            bound["state"] == "0202" and bound["substate"] == "0002" and
+            bound["animation_record"] == "0012e04c" and
+            bound["animation_timer"] == "0001" and
+            bound["animation_branch"] == "0" and
+            bound["action_timer"] == "0400" and
+            bound["recovery_timer2c"] == "08" and
+            bound["health"] == "56" and bound["prior_health"] == "56" and
+            bound["hit_mode46"] == "02" and bound["hit_kind49"] == "15" and
+            bound["reaction_selector4d"] == "36" and
+            visible["state"] == "0202" and visible["substate"] == "0002" and
+            visible["animation_record"] == "0012e04c" and
+            [row["recovery_timer2c"] for row in recovery] ==
+                ["08", "07", "06", "05", "04", "03", "02", "01", "00"] and
+            next_phase["substate"] == "0200" and not class1f_rng,
+            "class-0x1f HIT entry source chronology drift")
+
+    reaction = animation_record(program, 0x12E04C)
+    mutant_reaction = animation_record(program, 0x12DC50)
+    require(reaction["assembly"] == "0x001308a6" and
+            reaction["timer_u16"] == 1 and reaction["branch_s16"] == 0 and
+            reaction["hurt_selector_u8"] == 0 and
+            reaction["attack_selector_u8"] == 0 and
+            program[0x1F890:0x1F892] == bytes((0x36, 0x02)) and
+            int(mutant_result["class1f_hit_selector_mutations"]) == 2 and
+            int(result["class1f_hit_selector_mutations"]) == 0 and
+            mutant_bound["reaction_selector4d"] == "00" and
+            mutant_bound["animation_record"] == "0012dc50" and
+            mutant_visible["animation_record"] == "0012dc50" and
+            mutant_reaction["assembly"] != reaction["assembly"],
+            "class-0x1f HIT reaction-selector mutation did not discriminate")
+    for filename in ("coffee_shop_scene_frames.tsv",
+                     "coffee_shop_scene_health_writes.tsv",
+                     "coffee_shop_rng_calls.tsv", "dispatches.tsv",
+                     "samples.tsv", "score_writes.tsv", "projectiles.tsv"):
+        require(baseline_identity[filename] == mutant_identity[filename],
+                f"class-0x1f HIT mutation changed unrelated {filename}")
+
+    return {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "scope": "Coffee Shop class-0x1f projectile HIT entry and recovery guard",
+        "capture_identity": {
+            "completion_a": baseline_identity,
+            "completion_b": repeat_identity,
+            "byte_identical": True,
+            "reaction_selector_table_mutation": mutant_identity,
+            "capture_script_sha256": digest(
+                ROOT / "tools/mame_capture_oracle11_first_segment_progression.lua"),
+        },
+        "dispatch_chain": ["0x060532 class dispatch", "0x06075a state 0x02",
+                           "0x06105a shared HIT tail", "0x01e868 common HIT"],
+        "entry_guard": {
+            "outer_state_byte_actor_04_u8": 2,
+            "inner_state_byte_actor_05_u8": 2,
+            "action_byte_actor_06_u8": 0,
+            "action_phase_actor_07_u8": 0,
+            "health_s16": 56,
+            "prior_health_s16": 87,
+            "hit_kind_actor_49_u8": 0x15,
+            "recovery_timer_actor_2c_u8": 8,
+        },
+        "entry_writes_in_order": [
+            "actor+0x07:u8 += 2",
+            "actor+0x2a:u8 = 4",
+            "actor+0x42:s16 = actor+0x40:s16",
+            "actor+0x0f:u8 &= 1",
+            "actor+0x4d:u8 = table_0x01f866[2 * actor+0x49].reaction_selector",
+            "actor+0x46:u8 = table_0x01f866[2 * actor+0x49].hit_mode",
+            "bind reaction selector through 0x01f6c6 then 0x016518",
+        ],
+        "reaction_table": {
+            "base": "0x01f866", "index_rule": "2 * actor+0x49:u8",
+            "observed_index_u8": 0x15, "entry_address": "0x01f890",
+            "reaction_selector_actor_4d_u8": 0x36,
+            "hit_mode_actor_46_u8": 2,
+        },
+        "reaction_record": reaction,
+        "visible_result": {
+            "source_frame": 2308, "slot": "0x00ffa180",
+            "state_u16": 0x0202, "action_phase_u16": 0x0002,
+            "facing_u8": 1, "health_s16": 56,
+            "animation_record": "0x0012e04c",
+            "assembly": "0x001308a6",
+        },
+        "recovery": {
+            "entry": "0x01e9ce", "timer": "actor+0x2c:u8",
+            "rule": "decrement once per scheduler update; nonnegative retains action phase 0x0002; negative increments actor+0x06:u8 by 2 and clears actor+0x07:u8 and actor+0x2c:u8",
+            "captured_values_before_decrement": [8, 7, 6, 5, 4, 3, 2, 1, 0],
+            "next_action_phase_u16": 0x0200,
+            "next_action_phase_source_frame": 2317,
+        },
+        "rng_calls": [],
+        "source_blocks": {
+            "class_dispatch": {"first": "0x060532", "last_exclusive": "0x060546",
+                               "sha256": hashlib.sha256(opcodes[0x060532:0x060546]).hexdigest()},
+            "state_dispatch": {"first": "0x06075a", "last_exclusive": "0x060772",
+                               "sha256": hashlib.sha256(opcodes[0x06075A:0x060772]).hexdigest()},
+            "shared_hit_tail": {"first": "0x06105a", "last_exclusive": "0x061060",
+                                 "sha256": hashlib.sha256(opcodes[0x06105A:0x061060]).hexdigest()},
+            "common_hit_entry": {"first": "0x01e868", "last_exclusive": "0x01ea4c",
+                                 "sha256": hashlib.sha256(opcodes[0x01E868:0x01EA4C]).hexdigest()},
+            "reaction_selector": {"first": "0x01f6c6", "last_exclusive": "0x01f722",
+                                  "sha256": hashlib.sha256(opcodes[0x01F6C6:0x01F722]).hexdigest()},
+            "animation_bind": {"first": "0x016518", "last_exclusive": "0x0165c4",
+                               "sha256": hashlib.sha256(opcodes[0x016518:0x0165C4]).hexdigest()},
+        },
+        "mutation_control": {
+            "kind": "mutate only source reaction-table selector 0x36 to 0x00",
+            "mutations": 2,
+            "baseline_animation_record": "0x0012e04c",
+            "mutant_animation_record": "0x0012dc50",
+            "unchanged": ["health writes", "route state", "RNG", "audio dispatch",
+                          "score writes", "projectiles"],
+            "fixed_frame_or_generic_reaction_rejected": True,
+        },
+        "score_correction": "0x0abdd2 remains packed-BCD score authority and is not audio authority",
+    }
+
+
 def class1f_current_state_contract(oracle09: dict[str, object],
+                                   program: bytes,
                                    opcodes: bytes) -> dict[str, object]:
     """Project the accepted bounded street-alien evidence into native fields."""
     state = oracle09["bounded_state_contract"]
@@ -1530,6 +1707,8 @@ def class1f_current_state_contract(oracle09: dict[str, object],
             "removal_guard": "KO presentation completes and source release 0x0176b4 executes",
             "release_order": "type-12 LIFO fixed-pool release",
             "presentation_owned_removal_forbidden": True,
+            "source_hit_entry_program":
+                class1f_hit_entry_contract(program, opcodes),
         },
         "mutation_controls": ["wrong first dynamic slot", "fixed-frame spawn",
             "missing living-count guard", "wrong spawn reload", "shadow actor position",
@@ -1665,7 +1844,7 @@ def build_report() -> dict[str, object]:
             reports[-1]["initial_transition_contract"] = \
                 initial_class1f_transition_contract(samples, rng, opcodes, program)
             reports[-1]["current_state_implementation_contract"] = \
-                class1f_current_state_contract(oracle09, opcodes)
+                class1f_current_state_contract(oracle09, program, opcodes)
             reports[-1]["first_segment_action_execution_contract"] = \
                 class1f_first_segment_action_contract(program, opcodes)
             reports[-1]["presentation_and_collision"][
@@ -1814,6 +1993,7 @@ def validate(report: dict[str, object]) -> None:
                     len(contract["mutation_controls"]) == 12,
                     "0x1f: initial transition implementation contract drift")
             current = item["current_state_implementation_contract"]
+            hit_entry = current["damage_hit_ko_removal"]["source_hit_entry_program"]
             require(current["classification"] ==
                         "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
                     current["accepted_oracle09_sha256"] == digest(ORACLE09) and
@@ -1850,6 +2030,25 @@ def validate(report: dict[str, object]) -> None:
                     current["damage_hit_ko_removal"]
                         ["accepted_port_v2_reaction_mapping"]
                         ["terminal_release_outer_state_u16"] == 0x0600 and
+                    hit_entry["classification"] ==
+                        "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+                    hit_entry["capture_identity"]["byte_identical"] is True and
+                    hit_entry["entry_guard"]["recovery_timer_actor_2c_u8"] == 8 and
+                    hit_entry["reaction_table"]
+                        ["reaction_selector_actor_4d_u8"] == 0x36 and
+                    hit_entry["reaction_table"]["hit_mode_actor_46_u8"] == 2 and
+                    hit_entry["visible_result"]["source_frame"] == 2308 and
+                    hit_entry["visible_result"]["animation_record"] ==
+                        "0x0012e04c" and
+                    hit_entry["visible_result"]["assembly"] == "0x001308a6" and
+                    hit_entry["recovery"]["captured_values_before_decrement"] ==
+                        [8, 7, 6, 5, 4, 3, 2, 1, 0] and
+                    hit_entry["recovery"]["next_action_phase_u16"] == 0x0200 and
+                    hit_entry["rng_calls"] == [] and
+                    hit_entry["mutation_control"]["mutations"] == 2 and
+                    hit_entry["mutation_control"]["mutant_animation_record"] ==
+                        "0x0012dc50" and
+                    hit_entry["score_correction"].startswith("0x0abdd2 remains") and
                     len(current["mutation_controls"]) == 21,
                     "0x1f: current-state implementation contract drift")
             actions = item["first_segment_action_execution_contract"]
