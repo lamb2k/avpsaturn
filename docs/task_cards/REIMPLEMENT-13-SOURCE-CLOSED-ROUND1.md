@@ -340,13 +340,25 @@ improve by seven and spawn/despawn by nine. Missing lifetime matches rise by 26
 because the corrected damage target changes downstream reaction/lifecycle identity;
 this is exposed work, not acceptance.
 
+The collision-to-reaction scheduler boundary is now source-correct. Collision
+writes the outer HIT state at source scheduler frame 2306 but does not bind the
+reaction presentation early; visible frame 2307 retains substate `0x0000` and
+animation `0x0012eb5c`, with the natural class-`0x4e` impact unchanged. Fast,
+Oracle, LiveEncounter Target, two byte-identical 575-sample Emulator runs, and
+real window-only frames 2280..2310 pass. The before/after scene gaps are
+unchanged at 413 missing lifetimes, 1,382 spawn/despawn edges, 30 unsupported
+states, 94 collision/damage, 3 route/camera and 281 audio/load events; unowned
+Saturn actors, unidentified source pairs and retained gameplay authorities are
+zero.
+
 The earliest remaining complete-scene divergence is slot `0x00ffa180` at visible
-frame 2307. Source has the frame-2306
-health/state write but retains substate `0x0000` and animation `0x0012eb5c` until
-its next record-type-12 update; native prematurely exposes HIT substate `0x0002`
-and animation `0x0012dd50`. Bind that reaction/presentation scheduler boundary
-without changing the accepted damage or impact. Do not leave Coffee Shop until
-its zero-gap gate passes.
+frame 2308. Source enters `0x0202:0x0002` with class-`0x1f` animation
+`0x0012e04c`; native enters the same state/substate with generic Port V2 HIT
+animation `0x0012dd50`. Bind the source class-`0x1f` HIT action/presentation
+program from accepted Oracle/SPEC evidence, using the smallest bounded Oracle
+follow-up only if its implementation rules are absent. Do not implement from
+the observational frame trajectory, and do not leave Coffee Shop until its
+zero-gap gate passes.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.
