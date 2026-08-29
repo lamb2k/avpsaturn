@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "19b8d2c3b19e45cbbe66d2ef6e9deaf5b367cf4ff923bb2ce14eded7441a0dea"
+    "16165c7835be54b6bfb2390cf572079e0844b12d23072ed3db8bc92a607ae98b"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -79,6 +79,7 @@
 #define AVSP_ROUND1_CLASS1F_ATTACK_TIMER_COUNT 16u
 #define AVSP_ROUND1_CLASS1F_SOURCE_HIT_PHASE_COUNT 6u
 #define AVSP_ROUND1_CLASS1F_SOURCE_HIT_RNG_TIMER_COUNT 16u
+#define AVSP_ROUND1_CLASS1F_SOURCE_HIT_REACTION_RECORD_COUNT 6u
 #define AVSP_ROUND1_CLASS1F_SOURCE_HIT_TERMINAL_RECORD_COUNT 11u
 #define AVSP_ROUND1_CLASS09_INITIAL_ACTOR_COUNT 2u
 #define AVSP_ROUND1_CLASS09_SEQUENCE_COUNT 5u
@@ -492,12 +493,12 @@ typedef struct
     unsigned char hurt_selector;
     unsigned char attack_selector;
     unsigned short phases[AVSP_ROUND1_CLASS1F_SOURCE_HIT_PHASE_COUNT];
-    long launch_x_velocity;
-    long launch_x_acceleration;
+    long launch_x_velocity_before_facing;
+    long launch_x_acceleration_before_facing;
     long launch_y_velocity;
     long launch_y_acceleration;
-    long bounce_x_velocity;
-    long bounce_x_acceleration;
+    long bounce_x_velocity_before_facing;
+    long bounce_x_acceleration_before_facing;
     long bounce_y_velocity;
     long bounce_y_acceleration;
     unsigned char landing_hold_timer;
@@ -511,12 +512,30 @@ typedef struct
     unsigned char rng_hit_count;
     unsigned char rng_timer_row[AVSP_ROUND1_CLASS1F_SOURCE_HIT_RNG_TIMER_COUNT];
     unsigned char rng_selected_timer;
+    unsigned short global_pause_guard_zero;
+    unsigned char reaction_record_count;
+    AvspRound1AnimationStateSpec reaction_records[
+        AVSP_ROUND1_CLASS1F_SOURCE_HIT_REACTION_RECORD_COUNT];
+    AvspRound1AnimationStateSpec landing_hold_record;
+    AvspRound1AnimationStateSpec bounce_record;
+    AvspRound1AnimationStateSpec rng_hold_record;
     unsigned char terminal_record_count;
     AvspRound1AnimationStateSpec terminal_records[
         AVSP_ROUND1_CLASS1F_SOURCE_HIT_TERMINAL_RECORD_COUNT];
     unsigned short normal_return_state;
     unsigned short normal_return_substate;
     unsigned short class1f_resume_substate;
+    unsigned char resume_style85;
+    unsigned char resume_a3;
+    unsigned char resume_a4;
+    unsigned char resume_a5;
+    unsigned char resume_a6;
+    unsigned char resume_b0;
+    unsigned char resume_facing;
+    short resume_actor_x;
+    short resume_actor_z;
+    short resume_player_x;
+    short resume_player_z;
 } AvspRound1Class1fSourceHitSpec;
 
 typedef struct
@@ -1250,6 +1269,7 @@ typedef struct
     unsigned long class1f_action_movement_steps;
     unsigned long class1f_action_releases;
     unsigned short source_stage_parameter;
+    unsigned short source_global_hit_pause;
     unsigned short player_variant;
     unsigned char source_stage_record_type;
     unsigned char coffee_stage_setup_complete;

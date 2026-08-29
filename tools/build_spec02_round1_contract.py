@@ -1118,8 +1118,31 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class1f_hit["source_hit_program"]
                 ["phase_0x020a_terminal_animation"]["records"][-1]
                 ["animation_record"] == "0x0012ded8" and
+            class1f_hit["source_hit_program"]["animation_sequences"]
+                ["reaction_0x36"]["records"][0]["animation_record"] ==
+                "0x0012e04c" and
+            class1f_hit["source_hit_program"]["selector_context_rule"]
+                ["generic_action_selector_0x36_record"] == "0x0012e410" and
+            class1f_hit["source_hit_program"]["selector_context_rule"]
+                ["generic_action_selector_binding_forbidden"] is True and
             class1f_hit["source_hit_program"]["normal_return"]
                 ["class1f_resume_at_2414"] == "0x0200:1600" and
+            class1f_hit["source_hit_program"]["normal_return"]
+                ["preserved_resume_fields"] == {
+                    "source_frame": 2413,
+                    "dispatch_pc": "0x0607e8",
+                    "actor_85_style_u8": 0,
+                    "actor_a3_u8": 0,
+                    "actor_a4_u8": 1,
+                    "actor_a5_u8": 1,
+                    "actor_a6_u8": 1,
+                    "actor_b0_u8": 2,
+                    "facing_u8": 1,
+                    "actor_x_s16": 582,
+                    "actor_z_s16": 310,
+                    "player_x_s16": 944,
+                    "player_z_s16": 320,
+                } and
             class1f_hit["rng"]["calls"] == 1 and
             class1f_hit["rng"]["seed_before_u16"] == 0xEDD9 and
             class1f_hit["rng"]["seed_after_u16"] == 0xC9A2 and

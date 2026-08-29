@@ -108,6 +108,19 @@ def build() -> str:
         "phase_0x0208_rng_hold"]
     class1f_source_hit_terminal = class1f_source_hit_program[
         "phase_0x020a_terminal_animation"]
+    class1f_source_hit_sequences = class1f_source_hit_program[
+        "animation_sequences"]
+    class1f_source_hit_return = class1f_source_hit_program["normal_return"]
+    class1f_source_hit_resume = class1f_source_hit_return[
+        "preserved_resume_fields"]
+    class1f_source_hit_reaction_records = class1f_source_hit_sequences[
+        "reaction_0x36"]["records"]
+    class1f_source_hit_landing_record = class1f_source_hit_sequences[
+        "landing_0x37"]["records"][0]
+    class1f_source_hit_bounce_record = class1f_source_hit_sequences[
+        "bounce_0x38"]["records"][0]
+    class1f_source_hit_rng_hold_record = class1f_source_hit_sequences[
+        "rng_hold_0x39"]["records"][0]
     class1f_source_hit_rng = class1f_source_hit["rng"]
     class1f_actions = class1f["first_segment_action_execution_contract"]
     class1f_inner8 = class1f_actions["inner_state_0x08_program"]
@@ -374,6 +387,34 @@ def build() -> str:
         len(class1f_source_hit_terminal["records"]) != 11 or
         class1f_source_hit_terminal["records"][-1]["animation_record"] !=
             "0x0012ded8" or
+        len(class1f_source_hit_reaction_records) != 6 or
+        class1f_source_hit_reaction_records[0]["animation_record"] !=
+            "0x0012e04c" or
+        class1f_source_hit_reaction_records[-1]["next_animation_record"] !=
+            "0x0012e04c" or
+        class1f_source_hit_landing_record["animation_record"] !=
+            "0x0012ddb0" or
+        class1f_source_hit_bounce_record["animation_record"] !=
+            "0x0012dd9c" or
+        class1f_source_hit_program["selector_context_rule"]
+            ["generic_action_selector_0x36_record"] != "0x0012e410" or
+        class1f_source_hit_program["selector_context_rule"]
+            ["generic_action_selector_binding_forbidden"] is not True or
+        class1f_source_hit_resume != {
+            "source_frame": 2413,
+            "dispatch_pc": "0x0607e8",
+            "actor_85_style_u8": 0,
+            "actor_a3_u8": 0,
+            "actor_a4_u8": 1,
+            "actor_a5_u8": 1,
+            "actor_a6_u8": 1,
+            "actor_b0_u8": 2,
+            "facing_u8": 1,
+            "actor_x_s16": 582,
+            "actor_z_s16": 310,
+            "player_x_s16": 944,
+            "player_z_s16": 320,
+        } or
         class1f_source_hit_rng["seed_before_u16"] != 0xEDD9 or
         class1f_source_hit_rng["seed_after_u16"] != 0xC9A2 or
         class1f_source_hit_rng["result_low_nibble_u8"] != 2 or
@@ -1205,17 +1246,20 @@ def build() -> str:
             class1f_source_hit["action_dispatch"]
                 ["required_action_phases_u16"]) + " },",
         "    %dL, %dL, %dL, %dL," % tuple(
-            class1f_source_hit_launch["observed_written_motion"][key]
-            for key in ("x_velocity_s32_16_16",
-                        "x_acceleration_s32_16_16",
+            class1f_source_hit_launch["motion"][key]
+            for key in ("x_velocity_s32_16_16_before_facing",
+                        "x_acceleration_s32_16_16_before_facing",
                         "y_velocity_s32_16_16",
                         "y_acceleration_s32_16_16")),
-        "    %dL, %dL, %dL, %dL," % tuple(
-            class1f_source_hit_bounce["observed_motion_after_facing"][key]
-            for key in ("x_velocity_s32_16_16",
-                        "x_acceleration_s32_16_16",
-                        "y_velocity_s32_16_16",
-                        "y_acceleration_s32_16_16")),
+        "    %dL, %dL, %dL, %dL," % (
+            -class1f_source_hit_bounce["observed_motion_after_facing"]
+                ["x_velocity_s32_16_16"],
+            -class1f_source_hit_bounce["observed_motion_after_facing"]
+                ["x_acceleration_s32_16_16"],
+            class1f_source_hit_bounce["observed_motion_after_facing"]
+                ["y_velocity_s32_16_16"],
+            class1f_source_hit_bounce["observed_motion_after_facing"]
+                ["y_acceleration_s32_16_16"]),
         "    %du, 0x%02Xu, 0x%02Xu, 0x%02Xu, 0x%02Xu," % (
             class1f_source_hit_landing_hold
                 ["captured_values_before_decrement"][0],
@@ -1230,9 +1274,30 @@ def build() -> str:
             class1f_source_hit_rng["hit_count_actor_6d_u8"]),
         "    { " + ", ".join(f"{value}u" for value in
             class1f_source_hit_rng["timer_table_row_u8"]) + " },",
-        "    %du, %du," % (
+        "    %du, 0u, %du," % (
             class1f_source_hit_rng["selected_timer_u8"],
-            len(class1f_source_hit_terminal["records"])),
+            len(class1f_source_hit_reaction_records)),
+        "    {",
+    ])
+    for record in class1f_source_hit_reaction_records:
+        lines.append(
+            "        { %du, %d, %sUL, %sUL, %du, %du }," % (
+                record["timer_u16"], record["branch_s16"],
+                record["animation_record"], record["assembly"],
+                record["hurt_selector_u8"], record["attack_selector_u8"]))
+    lines.extend([
+        "    },",
+    ])
+    for record in (class1f_source_hit_landing_record,
+                   class1f_source_hit_bounce_record,
+                   class1f_source_hit_rng_hold_record):
+        lines.append(
+            "    { %du, %d, %sUL, %sUL, %du, %du }," % (
+                record["timer_u16"], record["branch_s16"],
+                record["animation_record"], record["assembly"],
+                record["hurt_selector_u8"], record["attack_selector_u8"]))
+    lines.extend([
+        "    %du," % len(class1f_source_hit_terminal["records"]),
         "    {",
     ])
     for record in class1f_source_hit_terminal["records"]:
@@ -1244,6 +1309,19 @@ def build() -> str:
     lines.extend([
         "    },",
         "    0x0200u, 0x0000u, 0x1600u,",
+        "    %du, %du, %du, %du, %du, %du, %du," % (
+            class1f_source_hit_resume["actor_85_style_u8"],
+            class1f_source_hit_resume["actor_a3_u8"],
+            class1f_source_hit_resume["actor_a4_u8"],
+            class1f_source_hit_resume["actor_a5_u8"],
+            class1f_source_hit_resume["actor_a6_u8"],
+            class1f_source_hit_resume["actor_b0_u8"],
+            class1f_source_hit_resume["facing_u8"]),
+        "    %d, %d, %d, %d," % (
+            class1f_source_hit_resume["actor_x_s16"],
+            class1f_source_hit_resume["actor_z_s16"],
+            class1f_source_hit_resume["player_x_s16"],
+            class1f_source_hit_resume["player_z_s16"]),
         "};", "",
         "static const AvspRound1RecurringSpawnSpec avsp_round1_recurring_spawn =",
         "{",
