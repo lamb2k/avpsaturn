@@ -411,6 +411,37 @@ frame 2317. Source is substate `0x0200`, animation `0x0012e04c`, and position
 `(684,310)`; native is substate `0x0202`, animation `0x0012e05c`, and position
 `(682,322)`. Bind the exact accepted HIT transition/timer/branch/movement program
 without fitting the observed trajectory or adding authored timing.
+
+The class-`0x1f` recovery-to-launch scheduler boundary is now source-correct.
+Accepted Oracle evidence proves that the recovery transition reaches substate
+`0x0200`, animation `0x0012e04c`, and fixed-point position
+`0x02ac4c00/0x0136d600` at visible frame 2317, then returns before the action
+dispatcher. The following scheduler visit performs the launch and exposes
+substate `0x0202`, animation `0x0012e05c`, and position
+`0x02aa8c00/0x01425600` at frame 2318. The existing SPEC fixture now binds this
+boundary and rejects same-visit launch as a real mutation.
+
+Checkpoint `40d653e076ca9632964fae9dbf5f03e148548b04` is pushed and remote-equal.
+Fast, Oracle, both LiveEncounter Target profiles, 102 SPEC mutations, 162 native
+mutations, 119 Target suppressions, eight scene mutations, and paired Coffee
+Shop Emulator pass. The paired ledgers are byte-identical at normalized ISO
+`eb8ba9d6cc3e73d8cca8de0734d58b6662389cbc74f92598eccb7b4668bdf224`.
+Fresh window-only WGC covers every source-visible frame 2280..2310; cadence
+sheet `82fb9fed7b16671ddcb77ae10734bc864998770d6ad0c503470e49005e65b8e6`
+and clip `792664b5e3a20dbb88a28d9c8de2f2188db70a053d23c6796147cace4bdbd2f4`
+pass direct inspection. Predator identity, staff continuity, the natural
+frame-2307 impact, P1-only HUD, both planes, palette and priority remain intact.
+
+The before/after scene gaps are 404 / 1,379 / 30 / 94 / 3 / 281 and
+404 / 1,377 / 30 / 94 / 3 / 281 for source lifetimes, spawn/despawn edges,
+active states, collision/damage, route/camera and audio/load respectively.
+Spawn/despawn improves by two; no category increases. Unowned Saturn actors,
+unidentified source pairs and retained gameplay authorities remain zero.
+
+The next earliest causal divergence is the dynamically allocated class-`0x1f`
+slot `0x00ff9c40` at visible frame 2330: source hurt/attack selectors are `1/1`
+while native remains `0/0`. Bind the accepted dynamic-spawn initializer and its
+ordering; do not fit the observed frame or copy selectors from another actor.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.
