@@ -323,8 +323,14 @@ through frame 2287, frame 2288 remains damage-free, and source scheduler frame
 2306 damages only `0x00ffa180` from 87 to 56 with `0x030cd2`; class-`0x4e` is
 allocated naturally and visible at frame 2307. Focused SPEC/native/Target/scene
 controls reject 89/161/119/8 real mutations. Fast, Oracle, and the normal
-interactive LiveEncounter Target pass. Commit-bound paired Emulator and refreshed
-WGC are the remaining evidence for this corrective checkpoint.
+interactive LiveEncounter Target pass. Corrective commits `51a2e6032b088276b13aa4889626b2e817a0821f`
+and `f4f4e339977f1eb39d60a478558672a87cdc77f4` are pushed and remote-equal.
+Two commit-bound pinned Emulator runs have identical 575-sample ledgers at ISO
+`c6a467bfe9453dd81c6383ae2992865b18017f334ca694107ee30053d4b9f2d3`, and four
+chronology mutations reject. Window-only Windows Graphics Capture covers every
+source-visible frame 2280..2310; direct inspection passes Predator identity,
+staff continuity, natural projectile/impact presentation, P1-only HUD, both
+Coffee Shop planes, palette and priority.
 
 The refreshed whole-scene gate is 413 missing source lifetimes, 1,382 unmapped
 spawn/despawn edges, 30 unsupported states, 94 collision/damage, 3 route/camera,
@@ -334,8 +340,8 @@ improve by seven and spawn/despawn by nine. Missing lifetime matches rise by 26
 because the corrected damage target changes downstream reaction/lifecycle identity;
 this is exposed work, not acceptance.
 
-After commit-bound Emulator/WGC evidence, the earliest remaining complete-scene
-divergence is slot `0x00ffa180` at visible frame 2307. Source has the frame-2306
+The earliest remaining complete-scene divergence is slot `0x00ffa180` at visible
+frame 2307. Source has the frame-2306
 health/state write but retains substate `0x0000` and animation `0x0012eb5c` until
 its next record-type-12 update; native prematurely exposes HIT substate `0x0002`
 and animation `0x0012dd50`. Bind that reaction/presentation scheduler boundary
