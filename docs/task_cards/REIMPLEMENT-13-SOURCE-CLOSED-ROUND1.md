@@ -525,6 +525,11 @@ and fixture
 `2a94f940406212a2d0c22267c686faa1a8f440d465800abf82606d07d5cb1cce`
 bind the implementation.
 
+Checkpoint `d5bf091a014c8624c00111919a6c8efa69fe16ba` is pushed and
+remote-equal. It is an incremental Coffee Shop evidence checkpoint, not
+candidate promotion; the existing candidate pointer remains unchanged until
+the complete zero-gap scene gate passes.
+
 Fast, Oracle, 105 SPEC mutations, 173 native mutations, 123 Target
 suppressions, LiveEncounterBench Target, and two byte-identical 575-sample
 Coffee Shop Emulator ledgers pass. The normalized ISO is
