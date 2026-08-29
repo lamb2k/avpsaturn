@@ -381,12 +381,36 @@ actors, unidentified source pairs, and retained gameplay authorities remain
 zero. Missing lifetimes improve by nine and spawn/despawn by three; no gap
 category increases.
 
-The next earliest causal divergence is class-`0x4e` slot `0x00ffbd80` at visible
-frame 2307. Source presents variant 1 immediately with animation `0x0008df2c`;
-native allocation is visible in frame 2307 with animation zero and initializes
-one frame later as `0x00092914`. Bind the accepted class-`0x4e` variant-1
-allocation/presentation transaction without authored timing or a generic-effect
-substitution, then rerun the complete scene gate.
+The class-`0x4e` fixed-slot reuse boundary is now source-correct. Visible frame
+2307 retains the released class-`0x45` presentation (`0x0008df2c` /
+`0x0008df96`, timer 4045, branch -32768), then the class-`0x4e` state-0 scheduler
+visit binds `0x00092914` / `0x00092c04` for visible frame 2308. The sparse
+decoder admits this accepted record for both source-reachable facings while all
+`*-window` entries remain excluded from tile-content generation. The street tile
+archive is unchanged.
+
+Checkpoints `d27c2eef36a43a8bd1ff3c8cb061cbafe73dda62` and
+`ee03bf4e5d2782ae6e2dff4005379f425c8b432e` are pushed and remote-equal. Fast,
+Oracle, LiveEncounter Target, 101 SPEC mutations, 162 native mutations, 119
+Target suppressions, eight scene mutations, and paired Coffee Shop Emulator
+pass. Both Emulator ledgers are byte-identical at normalized ISO
+`9d89bf114d80e354878fff2d7d35e7f8214dc4df0917d8ec328a235c38a0fa93`;
+presentation decode failures are zero. Real window-only WGC covers source-visible
+frames 2280..2310 with cadence sheet
+`82fb9fed7b16671ddcb77ae10734bc864998770d6ad0c503470e49005e65b8e6`.
+Direct inspection preserves Predator/staff identity, natural impact, P1-only
+HUD, both planes, palette and priority.
+
+The before/after scene gaps are unchanged at 404 missing lifetimes, 1,379
+spawn/despawn edges, 30 states, 94 collision/damage events, 3 route/camera
+events, and 281 audio/load events. Unowned Saturn actors, unidentified source
+pairs, and retained gameplay authorities remain zero.
+
+The next earliest causal divergence is class-`0x1f` slot `0x00ffa180` at visible
+frame 2317. Source is substate `0x0200`, animation `0x0012e04c`, and position
+`(684,310)`; native is substate `0x0202`, animation `0x0012e05c`, and position
+`(682,322)`. Bind the exact accepted HIT transition/timer/branch/movement program
+without fitting the observed trajectory or adding authored timing.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.
