@@ -149,6 +149,15 @@ assert current["spawn"]["bounded_current_state_dynamic"]["writer_pc"] == "0x028a
 assert current["actions"]["approach_0x1600"]["x_delta_s16"] == 111
 assert current["actions"]["attack_0x1800"]["contact_offsets_u16"] == [48, 119]
 assert current["damage_hit_ko_removal"]["damage_by_player_selector_s16"] == [8, 8, 10, 12]
+hit_entry = current["damage_hit_ko_removal"]["source_hit_entry_program"]
+assert hit_entry["capture_identity"]["byte_identical"] is True
+assert hit_entry["entry_guard"]["recovery_timer_actor_2c_u8"] == 8
+assert hit_entry["reaction_table"]["reaction_selector_actor_4d_u8"] == 0x36
+assert hit_entry["reaction_table"]["hit_mode_actor_46_u8"] == 2
+assert hit_entry["visible_result"]["animation_record"] == "0x0012e04c"
+assert hit_entry["visible_result"]["assembly"] == "0x001308a6"
+assert hit_entry["recovery"]["captured_values_before_decrement"] == [8, 7, 6, 5, 4, 3, 2, 1, 0]
+assert hit_entry["mutation_control"]["mutant_animation_record"] == "0x0012dc50"
 actions = class1f["first_segment_action_execution_contract"]
 assert actions["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
 assert actions["capture_identity"]["byte_identical"] is True
@@ -361,6 +370,9 @@ f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["actions"]["attack_0x1800"]["contact_offsets_u16"][0] = 47; mutations.append((contract, f, "class1f current contact mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["ko_ticks_u16"] = 140; mutations.append((contract, f, "class1f current KO mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["accepted_port_v2_reaction_mapping"]["hit_entry_outer_state_u16"] = 0x0400; mutations.append((contract, f, "class1f reaction mapping mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_hit_entry_program"]["reaction_table"]["reaction_selector_actor_4d_u8"] = 0; mutations.append((contract, f, "class1f source HIT selector mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_hit_entry_program"]["visible_result"]["animation_record"] = "0x0012dc50"; mutations.append((contract, f, "class1f source HIT record mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_hit_entry_program"]["recovery"]["captured_values_before_decrement"][0] = 7; mutations.append((contract, f, "class1f source HIT recovery mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["initializer"]["variants"][6]["writes"]["action_u8"] = 18; mutations.append((contract, f, "class1f action variant mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["current_dispatch"]["action_targets"][11]["target"] = "0x060c30"; mutations.append((contract, f, "class1f action target mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["animation_selector_table"]["selectors"][2]["selector_u8"] = 33; mutations.append((contract, f, "class1f action selector mutation"))

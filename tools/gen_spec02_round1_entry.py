@@ -94,6 +94,7 @@ def build() -> str:
     class1f_current_damage = class1f_current["damage_hit_ko_removal"]
     class1f_current_reaction = class1f_current_damage[
         "accepted_port_v2_reaction_mapping"]
+    class1f_source_hit = class1f_current_damage["source_hit_entry_program"]
     class1f_actions = class1f["first_segment_action_execution_contract"]
     class1f_inner8 = class1f_actions["inner_state_0x08_program"]
     class1f_inner8_records = class1f_inner8["animation_records"]
@@ -323,7 +324,22 @@ def build() -> str:
         class1f_current_reaction["hit_entry_action_substate_u16"] != 0x0002 or
         class1f_current_reaction["ko_entry_outer_state_u16"] != 0x0402 or
         class1f_current_reaction["ko_entry_action_substate_u16"] != 0x0000 or
-        class1f_current_reaction["terminal_release_outer_state_u16"] != 0x0600):
+        class1f_current_reaction["terminal_release_outer_state_u16"] != 0x0600 or
+        class1f_source_hit["entry_guard"]["hit_kind_actor_49_u8"] != 0x15 or
+        class1f_source_hit["entry_guard"]["recovery_timer_actor_2c_u8"] != 8 or
+        class1f_source_hit["reaction_table"]
+            ["reaction_selector_actor_4d_u8"] != 0x36 or
+        class1f_source_hit["reaction_table"]["hit_mode_actor_46_u8"] != 2 or
+        class1f_source_hit["reaction_record"]["animation_record"] !=
+            "0x0012e04c" or
+        class1f_source_hit["reaction_record"]["assembly"] != "0x001308a6" or
+        class1f_source_hit["reaction_record"]["hurt_selector_u8"] != 0 or
+        class1f_source_hit["reaction_record"]["attack_selector_u8"] != 0 or
+        class1f_source_hit["visible_result"]["state_u16"] != 0x0202 or
+        class1f_source_hit["visible_result"]["action_phase_u16"] != 0x0002 or
+        class1f_source_hit["recovery"]["next_action_phase_u16"] != 0x0200 or
+        class1f_source_hit["entry_writes_in_order"][1] !=
+            "actor+0x2a:u8 = 4"):
         raise ValueError("SPEC-02 class-0x1f current-state drift")
     if (source_update_cadence["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
@@ -1125,6 +1141,24 @@ def build() -> str:
             class1f_current_damage["ko_ticks_u16"]),
         "    { " + ", ".join(f"{value}u" for value in
             class1f_current_damage["damage_by_player_selector_s16"]) + " },",
+        "};", "",
+        "static const AvspRound1Class1fSourceHitSpec avsp_round1_class1f_source_hit =",
+        "{",
+        "    0x%04Xu, 0x%04Xu, 0x%04Xu, %sUL, %sUL," % (
+            class1f_source_hit["visible_result"]["state_u16"],
+            class1f_source_hit["visible_result"]["action_phase_u16"],
+            class1f_source_hit["recovery"]["next_action_phase_u16"],
+            class1f_source_hit["reaction_record"]["animation_record"],
+            class1f_source_hit["reaction_record"]["assembly"]),
+        "    0x%02Xu, %du, 0x%02Xu, %du, 4u, %du, %du," % (
+            class1f_source_hit["reaction_table"]
+                ["reaction_selector_actor_4d_u8"],
+            class1f_source_hit["reaction_table"]["hit_mode_actor_46_u8"],
+            class1f_source_hit["entry_guard"]["hit_kind_actor_49_u8"],
+            class1f_source_hit["entry_guard"]
+                ["recovery_timer_actor_2c_u8"],
+            class1f_source_hit["reaction_record"]["hurt_selector_u8"],
+            class1f_source_hit["reaction_record"]["attack_selector_u8"]),
         "};", "",
         "static const AvspRound1RecurringSpawnSpec avsp_round1_recurring_spawn =",
         "{",

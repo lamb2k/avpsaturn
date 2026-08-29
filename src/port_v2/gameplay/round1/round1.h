@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "372bd2c920ebcd76e501b8aafc745db368223a32c3915ebf1625a05a499a49c8"
+    "81ceb5b0bdee99f65e5e40c5978230bdea4010d163564d6e83a505f6fd329e55"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -467,6 +467,22 @@ typedef struct
     unsigned short ko_ticks;
     unsigned short player_damage[AVSP_ROUND1_PLAYER_MELEE_COUNT];
 } AvspRound1Class1fCurrentSpec;
+
+typedef struct
+{
+    unsigned short state;
+    unsigned short entry_action_phase;
+    unsigned short next_action_phase;
+    unsigned long animation_record;
+    unsigned long assembly;
+    unsigned char reaction_selector;
+    unsigned char hit_mode;
+    unsigned char hit_kind;
+    unsigned char recovery_timer;
+    unsigned char action_timer;
+    unsigned char hurt_selector;
+    unsigned char attack_selector;
+} AvspRound1Class1fSourceHitSpec;
 
 typedef struct
 {

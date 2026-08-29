@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=372bd2c920ebcd76e501b8aafc745db368223a32c3915ebf1625a05a499a49c8 */
-/* fixtures_sha256=22a04c36cf5b1637aad58bdb0f91c1c4ce4c061b59517daa8321c2b7f03a60f1 */
+/* contract_sha256=81ceb5b0bdee99f65e5e40c5978230bdea4010d163564d6e83a505f6fd329e55 */
+/* fixtures_sha256=8da6d445b72a8669cf0052b7a767ab8b4ba5c31b5ff17679055e507a4baba271 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -336,6 +336,12 @@ static const AvspRound1Class1fCurrentSpec avsp_round1_class1f_current =
 {
     0x00ffb580UL, 0xffa000UL, 20u, 0x01, 960, 343, 343, 87, 111, -23, 38u, 120u, 48u, 119u, 8u, 39u, 141u,
     { 8u, 8u, 10u, 12u },
+};
+
+static const AvspRound1Class1fSourceHitSpec avsp_round1_class1f_source_hit =
+{
+    0x0202u, 0x0002u, 0x0200u, 0x0012e04cUL, 0x001308a6UL,
+    0x36u, 2u, 0x15u, 8u, 4u, 0u, 0u,
 };
 
 static const AvspRound1RecurringSpawnSpec avsp_round1_recurring_spawn =

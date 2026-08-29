@@ -1075,6 +1075,38 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                  class1f_records[address]["attack_selector"]) == fields
                 for address, fields in expected_first_button1_targets.items()),
             "class-0x1f first Button1 target selectors incomplete or drifted")
+    class1f_hit = class1f["current_state_implementation_contract"][
+        "damage_hit_ko_removal"]["source_hit_entry_program"]
+    require(class1f_hit["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            class1f_hit["capture_identity"]["byte_identical"] is True and
+            class1f_hit["entry_guard"]["recovery_timer_actor_2c_u8"] == 8 and
+            class1f_hit["reaction_table"]
+                ["reaction_selector_actor_4d_u8"] == 0x36 and
+            class1f_hit["reaction_table"]["hit_mode_actor_46_u8"] == 2 and
+            class1f_hit["reaction_record"]["animation_record"] ==
+                "0x0012e04c" and
+            class1f_hit["reaction_record"]["assembly"] == "0x001308a6" and
+            class1f_hit["visible_result"] == {
+                "action_phase_u16": 2,
+                "animation_record": "0x0012e04c",
+                "assembly": "0x001308a6",
+                "facing_u8": 1,
+                "health_s16": 56,
+                "slot": "0x00ffa180",
+                "source_frame": 2308,
+                "state_u16": 514,
+            } and
+            class1f_hit["recovery"]["captured_values_before_decrement"] ==
+                [8, 7, 6, 5, 4, 3, 2, 1, 0] and
+            class1f_hit["recovery"]["next_action_phase_u16"] == 0x0200 and
+            class1f_hit["rng_calls"] == [] and
+            class1f_hit["mutation_control"]["mutations"] == 2 and
+            class1f_hit["mutation_control"]["mutant_animation_record"] ==
+                "0x0012dc50" and
+            class1f_hit["mutation_control"]
+                ["fixed_frame_or_generic_reaction_rejected"] is True,
+            "class-0x1f source HIT entry fixture incomplete or drifted")
     class1f_actions = class1f["first_segment_action_execution_contract"]
     require(class1f_actions["classification"] ==
                 "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and

@@ -66,7 +66,7 @@ for label,mutate in [
     ('source-hit-record',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['visible_result'].__setitem__('animation_record','0x0012dc50')),
     ('source-hit-recovery',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['recovery']['captured_values_before_decrement'].__setitem__(0,7)),
     ('source-hit-mutation',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['mutation_control'].__setitem__('mutations',0)),
-    ('source-hit-score-audio-correction',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program'].__setitem__('score_correction','audio')), 
+    ('source-hit-score-audio-correction',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program'].__setitem__('score_correction','audio')),
     ('current-retained-authority',lambda x:x['authority_boundary'].__setitem__('retained_gameplay_authority_forbidden',False)),
     ('current-mutation-control',lambda x:x['mutation_controls'].pop()),
 ]:
